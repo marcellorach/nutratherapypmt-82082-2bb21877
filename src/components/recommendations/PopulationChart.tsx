@@ -112,8 +112,8 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-2 border rounded shadow-sm">
-          <p className="text-sm font-medium">{label}</p>
+        <div className="bg-white p-2 border rounded shadow-sm max-w-[200px]">
+          <p className="text-sm font-medium truncate">{label}</p>
           <div className="space-y-1 mt-1">
             <p className="text-xs flex items-center">
               <span className="w-3 h-3 inline-block bg-[#9b87f5] mr-1 rounded-sm"></span> 

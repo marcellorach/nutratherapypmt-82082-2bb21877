@@ -75,8 +75,8 @@ const RaceComparisonChart: React.FC<RaceComparisonChartProps> = ({
       const isCurrent = payload[0].payload.isCurrent;
       
       return (
-        <div className={`${isCurrent ? 'bg-blue-50' : 'bg-white'} p-3 border rounded shadow-sm`}>
-          <p className={`text-sm font-medium ${isCurrent ? 'text-blue-700' : 'text-gray-700'}`}>
+        <div className={`${isCurrent ? 'bg-blue-50' : 'bg-white'} p-3 border rounded shadow-sm max-w-[180px]`}>
+          <p className={`text-sm font-medium ${isCurrent ? 'text-blue-700' : 'text-gray-700'} truncate`}>
             {label} {isCurrent ? '(Raça atual)' : ''}
           </p>
           <div className="space-y-2 mt-2">
@@ -116,7 +116,7 @@ const RaceComparisonChart: React.FC<RaceComparisonChartProps> = ({
           <YAxis 
             type="category" 
             dataKey="name" 
-            width={120}
+            width={110}
             tick={({ x, y, payload }) => {
               const isCurrent = data.find(d => d.name === payload.value)?.isCurrent;
               return (
@@ -129,7 +129,9 @@ const RaceComparisonChart: React.FC<RaceComparisonChartProps> = ({
                   fontWeight={isCurrent ? "600" : "normal"}
                   fontSize={12}
                 >
-                  {payload.value}
+                  {payload.value.length > 15 
+                    ? payload.value.substring(0, 15) + '...' 
+                    : payload.value}
                 </text>
               );
             }}
