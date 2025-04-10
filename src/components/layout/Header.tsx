@@ -7,22 +7,22 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const Header: React.FC = () => {
   return (
-    <header className="w-full bg-black text-white p-4 border-b border-white/10">
+    <header className="w-full bg-white text-gray-800 p-4 border-b border-gray-200 shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-xl font-semibold flex items-center gap-2">
-          <div className="p-1.5 rounded-full border border-[#7E57C2]">
-            <PawPrint size={24} className="text-[#7E57C2]" />
+          <div className="p-1.5 rounded-full border border-gray-400">
+            <PawPrint size={24} className="text-gray-800" />
           </div>
-          <span className="font-bold text-white">
-            NutraTherapy <span className="text-[#7E57C2]">PET</span>
+          <span className="font-bold text-gray-800">
+            NutraTherapy <span className="text-gray-600">PET</span>
           </span>
         </Link>
         
         <nav className="hidden md:flex gap-6">
-          <Link to="/veterinario" className="text-white hover:text-[#7E57C2] transition-colors">
+          <Link to="/veterinario" className="text-gray-700 hover:text-gray-900 transition-colors">
             Veterinário
           </Link>
-          <Link to="/tutor" className="text-white hover:text-[#FF719A] transition-colors">
+          <Link to="/tutor" className="text-gray-700 hover:text-gray-900 transition-colors">
             Tutor
           </Link>
         </nav>
@@ -33,12 +33,12 @@ const Header: React.FC = () => {
               <TooltipTrigger asChild>
                 <Link 
                   to="/administrador" 
-                  className="text-gray-400 hover:text-[#7E57C2] transition-colors mr-4"
+                  className="text-gray-500 hover:text-gray-700 transition-colors mr-4"
                 >
                   <UserCog size={20} />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs bg-black border border-white/20 text-white">
+              <TooltipContent className="max-w-xs bg-white border border-gray-200 text-gray-800">
                 <p>Gerencie o banco de dados de nutracêuticos, prompts da IA, correlações clínicas e atualize estudos científicos.</p>
               </TooltipContent>
             </Tooltip>
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
           
           <Button 
             variant="outline" 
-            className="text-white border border-white/30 hover:bg-white/5 hover:border-[#7E57C2] hover:text-[#7E57C2]"
+            className="text-gray-800 border border-gray-300 hover:bg-gray-100 hover:border-gray-400"
           >
             <User size={18} className="mr-1" />
             Login
