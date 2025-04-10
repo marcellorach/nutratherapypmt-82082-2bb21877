@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle2, Clock, Info, ShoppingCart } from "lucide-react";
-import { owners, pets, treatmentPlans, nutraceuticals } from '@/data/mockData';
+import { owners, pets, treatmentPlans, nutraceuticals } from '@/data'; // Corrigindo a importação
 
 const TutorPage: React.FC = () => {
   // Simulando um tutor logado

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, PawPrint, Stethoscope, Beaker } from "lucide-react";
 import Layout from '@/components/layout/Layout';
 import { Link } from 'react-router-dom';
-import { generateRandomData } from '@/data/mockData';
+import { generateRandomData } from '@/data'; // Corrigindo a importação
 
 const Index = () => {
   return (
