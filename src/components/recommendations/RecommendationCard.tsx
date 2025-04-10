@@ -1,19 +1,53 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Recommendation, Nutraceutical } from '@/types';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, X, Edit2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
   nutraceutical: Nutraceutical;
 }
 
+interface ActiveIngredientTag {
+  name: string;
+  quantity: string;
+}
+
 const RecommendationCard: React.FC<RecommendationCardProps> = ({ 
   recommendation, 
   nutraceutical 
 }) => {
+  // Preparar os ingredientes ativos como tags
+  const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>(
+    nutraceutical.activeIngredients.map(ingredient => ({
+      name: ingredient,
+      quantity: '10mg' // Quantidade padrão para exemplo
+    }))
+  );
+
+  // Função para remover um ingrediente
+  const removeIngredient = (index: number) => {
+    const updatedIngredients = [...ingredients];
+    updatedIngredients.splice(index, 1);
+    setIngredients(updatedIngredients);
+  };
+
+  // Função para editar a quantidade de um ingrediente
+  const editIngredientQuantity = (index: number) => {
+    const newQuantity = prompt('Digite a nova quantidade:', ingredients[index].quantity);
+    if (newQuantity) {
+      const updatedIngredients = [...ingredients];
+      updatedIngredients[index] = {
+        ...updatedIngredients[index],
+        quantity: newQuantity
+      };
+      setIngredients(updatedIngredients);
+    }
+  };
+
   const getPriorityColor = (priority: number) => {
     switch(priority) {
       case 1: return "bg-red-500";
@@ -26,6 +60,11 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary">
       <CardHeader className="pb-2">
+        {/* Condição movida para o topo */}
+        <div className="bg-slate-50 -mx-6 -mt-6 px-6 py-2 border-b mb-4">
+          <p className="font-medium text-sm">Condição: {nutraceutical.condition}</p>
+        </div>
+        
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-medium">{nutraceutical.name}</CardTitle>
           <Badge className={`${getPriorityColor(recommendation.priority)}`}>
@@ -41,9 +80,38 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <p className="text-sm">{recommendation.reason}</p>
         </div>
         
+        {/* Princípios ativos como tags */}
         <div>
-          <p className="text-sm font-medium">Princípios ativos:</p>
-          <p className="text-sm">{nutraceutical.activeIngredients.join(', ')}</p>
+          <p className="text-sm font-medium mb-2">Princípios ativos:</p>
+          <div className="flex flex-wrap gap-2">
+            {ingredients.map((ingredient, index) => (
+              <Badge 
+                key={index} 
+                variant="outline" 
+                className="py-1 pl-2 pr-1 flex items-center gap-1 bg-slate-50"
+              >
+                <span>{ingredient.name} ({ingredient.quantity})</span>
+                <div className="flex">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 p-0.5 hover:bg-slate-200" 
+                    onClick={() => editIngredientQuantity(index)}
+                  >
+                    <Edit2 size={14} className="text-blue-500" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 p-0.5 hover:bg-slate-200" 
+                    onClick={() => removeIngredient(index)}
+                  >
+                    <X size={14} className="text-red-500" />
+                  </Button>
+                </div>
+              </Badge>
+            ))}
+          </div>
         </div>
         
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -97,9 +165,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       
       <CardFooter className="pt-2 flex justify-between text-xs text-gray-500 border-t">
         <div>Início: {recommendation.startDate}</div>
-        <div>
-          Condição: {nutraceutical.condition}
-        </div>
       </CardFooter>
     </Card>
   );
