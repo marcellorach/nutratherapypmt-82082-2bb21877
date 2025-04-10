@@ -1,4 +1,3 @@
-
 export interface Pet {
   id: string;
   name: string;
@@ -7,6 +6,11 @@ export interface Pet {
   age: number;
   weight: number;
   ownerId: string;
+  imageUrl?: string;
+  chipNumber?: string;
+  petLovePlan?: string;
+  veterinarianId?: string;
+  veterinarianName?: string;
 }
 
 export interface Owner {

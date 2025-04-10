@@ -1,4 +1,3 @@
-
 import { Pet, Owner, ExamResult, Nutraceutical, Recommendation, TreatmentPlan } from "../types";
 
 // Mock Owners
@@ -26,7 +25,12 @@ export const pets: Pet[] = [
     breed: "Labrador",
     age: 5,
     weight: 25,
-    ownerId: "own1"
+    ownerId: "own1",
+    imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2274&q=80",
+    chipNumber: "BR12345678",
+    petLovePlan: "Premium",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves"
   },
   {
     id: "pet2",
@@ -35,7 +39,12 @@ export const pets: Pet[] = [
     breed: "Poodle",
     age: 3,
     weight: 8,
-    ownerId: "own2"
+    ownerId: "own2",
+    imageUrl: "https://images.unsplash.com/photo-1594922009922-d1665a492c40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+    chipNumber: "BR87654321",
+    petLovePlan: "Básico",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves"
   },
   {
     id: "pet3",
@@ -44,7 +53,12 @@ export const pets: Pet[] = [
     breed: "Siamês",
     age: 7,
     weight: 4.5,
-    ownerId: "own1"
+    ownerId: "own1",
+    imageUrl: "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    chipNumber: "BR45678912",
+    petLovePlan: "Completo",
+    veterinarianId: "vet2",
+    veterinarianName: "Dra. Ana Santos"
   }
 ];
 
