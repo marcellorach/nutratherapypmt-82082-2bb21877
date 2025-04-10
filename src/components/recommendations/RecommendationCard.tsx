@@ -33,13 +33,21 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const [efficacyScore, setEfficacyScore] = useState(nutraceutical.scientificEvidence.efficacyScore);
   const [sustainabilityScore, setSustainabilityScore] = useState(nutraceutical.scientificEvidence.sustainabilityScore);
   
+  // Gerar quantidades variadas para cada ingrediente
+  const generateVariedQuantity = (index: number) => {
+    // Criar quantidades que variam entre 8mg e 22mg para parecer mais natural
+    const baseQuantities = [12, 15, 8, 18, 22, 10, 14];
+    const quantity = baseQuantities[index % baseQuantities.length];
+    return `${quantity}mg`;
+  };
+  
   // Preparar os ingredientes ativos como tags com eficácia base
   const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>(
-    nutraceutical.activeIngredients.map(ingredient => ({
+    nutraceutical.activeIngredients.map((ingredient, index) => ({
       name: ingredient,
-      quantity: '10mg', // Quantidade padrão para exemplo
+      quantity: generateVariedQuantity(index), // Quantidade variada para cada ingrediente
       removed: false,
-      efficacy: nutraceutical.scientificEvidence.efficacyScore / 5 // Convertendo de 0-5 para 0-1
+      efficacy: 1.0 // Iniciar todos com eficácia 1.0
     }))
   );
 
@@ -140,24 +148,47 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       return;
     }
     
-    // Calcular média de eficácia dos ingredientes ativos
-    const ingredientEfficacyAvg = activeIngredients.reduce((sum, ing) => sum + ing.efficacy, 0) / activeIngredients.length;
+    // Calcular média ponderada de eficácia dos ingredientes ativos
+    // Dar mais peso aos ingredientes com maior eficácia
+    let totalEfficacyWeight = 0;
+    let weightedEfficacySum = 0;
     
-    // Calcular média de quantidade relativa (assumindo que o padrão é 10mg)
+    activeIngredients.forEach(ing => {
+      const weight = ing.efficacy * ing.efficacy; // Peso quadrático para efeito não linear
+      weightedEfficacySum += ing.efficacy * weight;
+      totalEfficacyWeight += weight;
+    });
+    
+    const ingredientEfficacyAvg = weightedEfficacySum / totalEfficacyWeight;
+    
+    // Calcular média de quantidade relativa com efeito não linear
+    const getQuantityEffect = (quantityStr: string) => {
+      const match = quantityStr.match(/(\d+)/);
+      if (!match) return 1;
+      
+      const quantity = parseInt(match[1]);
+      // Efeito não linear da quantidade: incremento maior em doses maiores
+      return Math.pow(quantity / 25, 1.5);
+    };
+    
     const quantityAvg = activeIngredients.reduce((sum, ing) => {
-      const match = ing.quantity.match(/(\d+)/);
-      return sum + (match ? parseInt(match[1]) / 10 : 1);
+      return sum + getQuantityEffect(ing.quantity);
     }, 0) / activeIngredients.length;
     
-    // Eficácia final é uma mistura da eficácia base, média dos ingredientes e quantidade média
-    const finalEfficacy = (nutraceutical.scientificEvidence.efficacyScore * 0.4) + 
-                         (ingredientEfficacyAvg * 0.4 * 5) + 
-                         (quantityAvg * 0.2 * 2);
+    // Calculo de eficácia final com ponderação não linear
+    const baseEfficacy = nutraceutical.scientificEvidence.efficacyScore;
+    const ingredientFactor = Math.pow(ingredientEfficacyAvg, 1.2);
+    const quantityFactor = Math.pow(quantityAvg, 1.1);
+    
+    // Eficácia final é uma mistura não linear de fatores
+    const finalEfficacy = (baseEfficacy * 0.3) + 
+                         (ingredientFactor * 0.5) + 
+                         (quantityFactor * 0.2 * 3);
     
     // Sustentação usa fórmula similar mas com menos peso na quantidade
-    const finalSustainability = (nutraceutical.scientificEvidence.sustainabilityScore * 0.5) + 
-                               (ingredientEfficacyAvg * 0.3 * 5) + 
-                               (quantityAvg * 0.2 * 2);
+    const finalSustainability = (nutraceutical.scientificEvidence.sustainabilityScore * 0.4) + 
+                               (ingredientFactor * 0.4) + 
+                               (quantityFactor * 0.2 * 2);
     
     // Limitar entre 1 e 5
     setEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));

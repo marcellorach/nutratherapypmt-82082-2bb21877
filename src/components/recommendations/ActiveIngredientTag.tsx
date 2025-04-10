@@ -30,7 +30,9 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
   onEfficacyChange,
   onQuantityChange
 }) => {
-  const [sliderValue, setSliderValue] = useState([efficacy * 10]);
+  // Iniciar o slider em posição diferente para cada ingrediente usando o índice
+  const initialSlider = 10 + ((originalIndex % 3) * 10); // Posições diferentes: 10, 20, 30
+  const [sliderValue, setSliderValue] = useState([initialSlider]);
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   
   // Extrair o valor numérico e a unidade do formato "10mg"
@@ -43,21 +45,49 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
     }
   }, [quantity]);
 
+  // Calcular a eficácia não linearmente com base no valor do slider
+  // Fórmula não linear: eficácia = 1 + (slider/100)^2 * 2
+  const calculateEfficacy = (sliderVal: number) => {
+    const baseEfficacy = 1;
+    const maxIncrease = 2; // Máximo incremento de eficácia
+    const nonLinearFactor = Math.pow(sliderVal / 100, 2) * maxIncrease;
+    return Math.min(baseEfficacy + nonLinearFactor, 5); // Limitar ao máximo de 5
+  };
+
   const handleSliderChange = (value: number[]) => {
     setSliderValue(value);
-    const efficacyValue = value[0] / 10;
-    onEfficacyChange(originalIndex, efficacyValue);
+    const sliderVal = value[0];
     
-    // Calcular nova quantidade baseada no valor do slider (5 a 50mg)
+    // Calcular nova eficácia usando fórmula não linear
+    const newEfficacy = calculateEfficacy(sliderVal);
+    onEfficacyChange(originalIndex, newEfficacy);
+    
+    // Calcular nova quantidade (5 a 50mg) baseada no valor do slider
     const match = currentQuantity.match(/(\d+)(\w+)/);
     if (match) {
       const unit = match[2];
-      const newQuantityValue = Math.round(5 + (value[0] / 50) * 45); // 5mg a 50mg
+      const newQuantityValue = Math.round(5 + (sliderVal / 100) * 45); // 5mg a 50mg
       const newQuantity = `${newQuantityValue}${unit}`;
       setCurrentQuantity(newQuantity);
       onQuantityChange(originalIndex, newQuantity);
     }
   };
+
+  useEffect(() => {
+    // Aplicar valor de eficácia inicial (1) mas manter posição do slider variada
+    const initialEfficacy = calculateEfficacy(initialSlider);
+    onEfficacyChange(originalIndex, initialEfficacy);
+    
+    // Também atualizar a quantidade correspondente ao slider inicial
+    const match = quantity.match(/(\d+)(\w+)/);
+    if (match) {
+      const unit = match[2];
+      const newQuantityValue = Math.round(5 + (initialSlider / 100) * 45);
+      const newQuantity = `${newQuantityValue}${unit}`;
+      setCurrentQuantity(newQuantity);
+      onQuantityChange(originalIndex, newQuantity);
+    }
+  }, []);
 
   return (
     <Badge 
@@ -126,10 +156,10 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
         </div>
         
         <div className="mt-2 px-1 w-full flex items-center gap-2">
-          <span className="text-xs text-gray-500 min-w-14">Eficácia: {(sliderValue[0]/10).toFixed(1)}</span>
+          <span className="text-xs text-gray-500 min-w-14">Eficácia: {calculateEfficacy(sliderValue[0]).toFixed(1)}</span>
           <Slider
             value={sliderValue}
-            max={50}
+            max={100}
             step={1}
             className="w-full max-w-32"
             onValueChange={handleSliderChange}
