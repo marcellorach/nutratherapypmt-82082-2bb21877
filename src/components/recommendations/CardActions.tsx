@@ -34,7 +34,7 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
     toast({
       title: "Recomendação aprovada",
       description: `${nutraceutical.name} foi aprovado para o tratamento.`,
-      variant: "success",
+      variant: "default", // Corrigido de "success" para "default"
     });
   };
 
