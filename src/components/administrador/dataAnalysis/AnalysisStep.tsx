@@ -2,21 +2,74 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Brain, Bot, MessageSquare, CheckCircle, Play, Pause, RefreshCw, Shield, FileSearch, Database, BarChart3, Search, Filter, Network, RectangleHorizontal, Link2, GitCompare } from "lucide-react";
+import { Brain, Bot, MessageSquare, CheckCircle, Play, Pause, RefreshCw, Shield, FileSearch, Database, BarChart3, Search, Filter, Network, RectangleHorizontal, Link2, GitCompare, Zap } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import './agentAnimation.css';
 
-// Definição dos agentes do sistema
+// Definição dos agentes do sistema com seus modelos
 const agents = [
-  { id: 'supervisor', name: 'Agente Supervisor', color: 'bg-blue-100 border-blue-300', icon: Shield, description: 'Coordena todos os agentes e garante a coerência da análise' },
-  { id: 'data', name: 'Agente de Dados', color: 'bg-emerald-100 border-emerald-300', icon: Database, description: 'Processa e normaliza dados brutos de pets' },
-  { id: 'pattern', name: 'Agente de Padrões', color: 'bg-amber-100 border-amber-300', icon: Search, description: 'Identifica padrões estatísticos nos dados de saúde' },
-  { id: 'correlation', name: 'Agente de Correlação', color: 'bg-purple-100 border-purple-300', icon: GitCompare, description: 'Analisa relações entre condições e tratamentos' },
-  { id: 'recommendation', name: 'Agente de Recomendação', color: 'bg-rose-100 border-rose-300', icon: FileSearch, description: 'Gera recomendações de nutracêuticos' },
-  { id: 'viz', name: 'Agente de Visualização', color: 'bg-cyan-100 border-cyan-300', icon: BarChart3, description: 'Prepara visualizações e insights para relatórios' },
+  { 
+    id: 'supervisor', 
+    name: 'Agente Supervisor', 
+    model: 'GPT-4o',
+    color: 'bg-blue-100 border-blue-300', 
+    icon: Shield, 
+    description: 'Coordena todos os agentes e garante a coerência da análise'
+  },
+  { 
+    id: 'data', 
+    name: 'Agente de Dados', 
+    model: 'Llama-3-70B',
+    color: 'bg-emerald-100 border-emerald-300', 
+    icon: Database, 
+    description: 'Processa e normaliza dados brutos de pets' 
+  },
+  { 
+    id: 'pattern', 
+    name: 'Agente de Padrões', 
+    model: 'Claude-3 Opus',
+    color: 'bg-amber-100 border-amber-300', 
+    icon: Search, 
+    description: 'Identifica padrões estatísticos nos dados de saúde' 
+  },
+  { 
+    id: 'correlation', 
+    name: 'Agente de Correlação', 
+    model: 'Mistral Large',
+    color: 'bg-purple-100 border-purple-300', 
+    icon: GitCompare, 
+    description: 'Analisa relações entre condições e tratamentos' 
+  },
+  { 
+    id: 'recommendation', 
+    name: 'Agente de Recomendação', 
+    model: 'GPT-4-Turbo',
+    color: 'bg-rose-100 border-rose-300', 
+    icon: FileSearch, 
+    description: 'Gera recomendações de nutracêuticos' 
+  },
+  { 
+    id: 'viz', 
+    name: 'Agente de Visualização', 
+    model: 'Gemini Pro',
+    color: 'bg-cyan-100 border-cyan-300', 
+    icon: BarChart3, 
+    description: 'Prepara visualizações e insights para relatórios' 
+  },
 ];
+
+// Posições de cada agente no fluxo
+const agentPositions = {
+  'supervisor': { x: 50, y: 8 },
+  'data': { x: 50, y: 28 },
+  'pattern': { x: 25, y: 40 },
+  'correlation': { x: 50, y: 52 },
+  'recommendation': { x: 25, y: 64 },
+  'viz': { x: 75, y: 76 },
+};
 
 // Interface para mensagens dos agentes
 interface AgentMessage {
@@ -30,6 +83,15 @@ interface AgentConnection {
   from: string;
   to: string;
   active: boolean;
+  animating: boolean;
+}
+
+// Interface para transferência de dados na animação
+interface DataPacket {
+  fromId: string;
+  toId: string;
+  startTime: number;
+  duration: number;
 }
 
 const AnalysisStep: React.FC = () => {
@@ -40,34 +102,70 @@ const AnalysisStep: React.FC = () => {
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [connections, setConnections] = useState<AgentConnection[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [dataPackets, setDataPackets] = useState<DataPacket[]>([]);
   const flowContainerRef = useRef<HTMLDivElement>(null);
+  const animationTimersRef = useRef<NodeJS.Timeout[]>([]);
   
   // Criação das conexões iniciais entre os agentes
   useEffect(() => {
     const initialConnections: AgentConnection[] = [
-      { from: 'supervisor', to: 'data', active: false },
-      { from: 'supervisor', to: 'pattern', active: false },
-      { from: 'supervisor', to: 'correlation', active: false },
-      { from: 'supervisor', to: 'recommendation', active: false },
-      { from: 'supervisor', to: 'viz', active: false },
-      { from: 'data', to: 'pattern', active: false },
-      { from: 'pattern', to: 'correlation', active: false },
-      { from: 'correlation', to: 'recommendation', active: false },
-      { from: 'recommendation', to: 'viz', active: false },
+      { from: 'supervisor', to: 'data', active: false, animating: false },
+      { from: 'supervisor', to: 'pattern', active: false, animating: false },
+      { from: 'supervisor', to: 'correlation', active: false, animating: false },
+      { from: 'supervisor', to: 'recommendation', active: false, animating: false },
+      { from: 'supervisor', to: 'viz', active: false, animating: false },
+      { from: 'data', to: 'pattern', active: false, animating: false },
+      { from: 'pattern', to: 'correlation', active: false, animating: false },
+      { from: 'correlation', to: 'recommendation', active: false, animating: false },
+      { from: 'recommendation', to: 'viz', active: false, animating: false },
     ];
     
     setConnections(initialConnections);
   }, []);
   
-  // Função para ativar uma conexão entre agentes
+  // Limpeza dos temporizadores ao desmontar o componente
+  useEffect(() => {
+    return () => {
+      animationTimersRef.current.forEach(timer => clearTimeout(timer));
+    };
+  }, []);
+  
+  // Função para ativar uma conexão entre agentes com animação
   const activateConnection = (fromId: string, toId: string) => {
+    // Primeiro ativa a conexão
     setConnections(prev => 
       prev.map(conn => 
         conn.from === fromId && conn.to === toId
-          ? { ...conn, active: true }
+          ? { ...conn, active: true, animating: true }
           : conn
       )
     );
+    
+    // Adiciona um pacote de dados para animação
+    const newPacket: DataPacket = {
+      fromId,
+      toId,
+      startTime: Date.now(),
+      duration: 2000, // duração da animação em ms
+    };
+    
+    setDataPackets(prev => [...prev, newPacket]);
+    
+    // Desliga a animação após a duração
+    const timer = setTimeout(() => {
+      setConnections(prev => 
+        prev.map(conn => 
+          conn.from === fromId && conn.to === toId
+            ? { ...conn, animating: false }
+            : conn
+        )
+      );
+      
+      // Remove o pacote após a animação
+      setDataPackets(prev => prev.filter(p => !(p.fromId === fromId && p.toId === toId)));
+    }, 2000);
+    
+    animationTimersRef.current.push(timer);
   };
   
   // Função para adicionar mensagem de um agente
@@ -87,40 +185,54 @@ const AnalysisStep: React.FC = () => {
       return;
     }
     
+    // Limpar quaisquer temporizadores existentes
+    animationTimersRef.current.forEach(timer => clearTimeout(timer));
+    animationTimersRef.current = [];
+    
     setAnalyzing(true);
     setProgress(0);
     setStep('processing');
     setMessages([]);
     setActiveAgent(null);
+    setDataPackets([]);
     
     // Reset das conexões
-    setConnections(prev => prev.map(conn => ({ ...conn, active: false })));
+    setConnections(prev => prev.map(conn => ({ ...conn, active: false, animating: false })));
     
-    const totalSteps = 22;
+    const totalTime = 90000; // 1.5 minutos = 90 segundos = 90000ms
+    const totalSteps = 30; // Aumentamos o número de etapas para ter mais interações
     let currentStep = 0;
     
     // Sequência de mensagens e ativações que compõem o fluxo da análise
     const analysisFlow = [
       { delay: 1000, action: () => addAgentMessage('supervisor', 'Iniciando análise de dados de pets. Preparando agentes...') },
       { delay: 1500, action: () => addAgentMessage('data', 'Conectando ao banco de dados. Preparando carregamento de 2.341 registros.') },
-      { delay: 2000, action: () => activateConnection('supervisor', 'data') },
-      { delay: 2000, action: () => addAgentMessage('data', 'Extraindo informações de raças, idades, pesos e condições clínicas...') },
-      { delay: 2500, action: () => addAgentMessage('data', 'Normalizando dados de 1.876 exames laboratoriais...') },
-      { delay: 1800, action: () => addAgentMessage('pattern', 'Recebendo dados normalizados. Iniciando análise estatística...') },
+      { delay: 1800, action: () => activateConnection('supervisor', 'data') },
+      { delay: 2000, action: () => addAgentMessage('supervisor', 'Distribuindo tarefas para agentes especializados...') },
+      { delay: 1500, action: () => activateConnection('supervisor', 'pattern') },
+      { delay: 1000, action: () => addAgentMessage('data', 'Extraindo informações de raças, idades, pesos e condições clínicas...') },
+      { delay: 2200, action: () => addAgentMessage('data', 'Normalizando dados de 1.876 exames laboratoriais com Llama-3-70B...') },
+      { delay: 2000, action: () => activateConnection('supervisor', 'correlation') },
+      { delay: 1800, action: () => addAgentMessage('pattern', 'Recebendo dados normalizados. Iniciando análise estatística com Claude-3 Opus...') },
       { delay: 1500, action: () => activateConnection('data', 'pattern') },
       { delay: 2000, action: () => addAgentMessage('pattern', 'Identificando clusters de condições de saúde por faixa etária e raça...') },
+      { delay: 1800, action: () => addAgentMessage('correlation', 'Preparando matriz de correlação com modelo Mistral Large...') },
       { delay: 2200, action: () => addAgentMessage('pattern', 'Detectados 7 padrões significativos de saúde em populações caninas e 5 em felinas.') },
+      { delay: 1500, action: () => activateConnection('supervisor', 'recommendation') },
       { delay: 1800, action: () => addAgentMessage('correlation', 'Analisando correlações entre condições identificadas e histórico de tratamentos...') },
       { delay: 1500, action: () => activateConnection('pattern', 'correlation') },
       { delay: 2500, action: () => addAgentMessage('correlation', 'Calculando taxas de eficácia para 142 tratamentos existentes...') },
+      { delay: 2000, action: () => activateConnection('supervisor', 'viz') },
       { delay: 2300, action: () => addAgentMessage('correlation', 'Identificando gaps nutricionais em 37% dos casos analisados.') },
-      { delay: 2000, action: () => addAgentMessage('recommendation', 'Processando dados correlacionados para gerar recomendações...') },
+      { delay: 2000, action: () => addAgentMessage('recommendation', 'Processando dados correlacionados com GPT-4-Turbo para gerar recomendações...') },
       { delay: 1500, action: () => activateConnection('correlation', 'recommendation') },
       { delay: 2500, action: () => addAgentMessage('recommendation', 'Consultando base de nutracêuticos e evidências científicas...') },
       { delay: 2200, action: () => addAgentMessage('recommendation', 'Gerando 843 recomendações personalizadas com base em perfis clínicos.') },
-      { delay: 2000, action: () => addAgentMessage('viz', 'Preparando visualizações e relatórios com base nas análises...') },
+      { delay: 1800, action: () => addAgentMessage('supervisor', 'Validando recomendações e preparando relatório final...') },
+      { delay: 2000, action: () => addAgentMessage('viz', 'Preparando visualizações e relatórios com modelo Gemini Pro...') },
       { delay: 1500, action: () => activateConnection('recommendation', 'viz') },
       { delay: 2500, action: () => addAgentMessage('viz', 'Criando gráficos de distribuição de condições e eficácia de tratamentos...') },
+      { delay: 2300, action: () => addAgentMessage('viz', 'Agrupando recomendações por categorias e gerando relatórios interativos.') },
       { delay: 2000, action: () => addAgentMessage('supervisor', 'Compilando resultados finais e preparando dashboard interativo...') },
       { delay: 2500, action: () => {
         setStep('completed');
@@ -135,7 +247,7 @@ const AnalysisStep: React.FC = () => {
       
       const { delay, action } = analysisFlow[stepIndex];
       
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (isPaused) {
           // Se pausado, parar a execução
           return;
@@ -143,10 +255,14 @@ const AnalysisStep: React.FC = () => {
         
         action();
         currentStep++;
-        setProgress(Math.min(100, (currentStep / totalSteps) * 100));
+        const elapsedTime = analysisFlow.slice(0, stepIndex + 1).reduce((sum, item) => sum + item.delay, 0);
+        const progressValue = Math.min(100, (elapsedTime / totalTime) * 100);
+        setProgress(progressValue);
         
         runAnalysis(stepIndex + 1);
       }, delay);
+      
+      animationTimersRef.current.push(timer);
     };
     
     runAnalysis(0);
@@ -160,120 +276,102 @@ const AnalysisStep: React.FC = () => {
   const renderAgents = () => {
     return (
       <div className="relative h-[400px] w-full bg-slate-50 rounded-lg border border-slate-200 p-4 overflow-hidden" ref={flowContainerRef}>
-        {/* Agente supervisor no topo */}
-        <div 
-          className={`absolute top-4 left-1/2 -translate-x-1/2 w-48 p-3 rounded-md border ${
-            activeAgent === 'supervisor' ? 'ring-2 ring-blue-500 shadow-lg' : ''
-          } bg-blue-100 border-blue-300 transition-all duration-300`}
-        >
-          <div className="flex items-center justify-center gap-2 font-medium text-sm">
-            <Shield className="h-4 w-4" />
-            <span>Agente Supervisor</span>
-          </div>
-        </div>
-        
-        {/* Agentes de primeira camada */}
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 w-full flex justify-center space-x-4">
-          <div 
-            className={`w-40 p-2 rounded-md border ${
-              activeAgent === 'data' ? 'ring-2 ring-emerald-500 shadow-lg' : ''
-            } bg-emerald-100 border-emerald-300 transition-all duration-300`}
-          >
-            <div className="flex items-center justify-center gap-2 font-medium text-sm">
-              <Database className="h-4 w-4" />
-              <span>Agente de Dados</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Agentes de segunda camada */}
-        <div className="absolute top-36 left-1/4 -translate-x-1/2 flex flex-col items-center">
-          <div 
-            className={`w-40 p-2 mb-4 rounded-md border ${
-              activeAgent === 'pattern' ? 'ring-2 ring-amber-500 shadow-lg' : ''
-            } bg-amber-100 border-amber-300 transition-all duration-300`}
-          >
-            <div className="flex items-center justify-center gap-2 font-medium text-sm">
-              <Search className="h-4 w-4" />
-              <span>Agente de Padrões</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Agentes de terceira camada */}
-        <div className="absolute top-48 left-1/2 -translate-x-1/2 flex flex-col items-center">
-          <div 
-            className={`w-40 p-2 mb-4 rounded-md border ${
-              activeAgent === 'correlation' ? 'ring-2 ring-purple-500 shadow-lg' : ''
-            } bg-purple-100 border-purple-300 transition-all duration-300`}
-          >
-            <div className="flex items-center justify-center gap-2 font-medium text-sm">
-              <GitCompare className="h-4 w-4" />
-              <span>Agente de Correlação</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Agentes de quarta camada */}
-        <div className="absolute bottom-36 left-1/4 -translate-x-1/2 flex flex-col items-center">
-          <div 
-            className={`w-40 p-2 mb-4 rounded-md border ${
-              activeAgent === 'recommendation' ? 'ring-2 ring-rose-500 shadow-lg' : ''
-            } bg-rose-100 border-rose-300 transition-all duration-300`}
-          >
-            <div className="flex items-center justify-center gap-2 font-medium text-sm">
-              <FileSearch className="h-4 w-4" />
-              <span>Agente de Recomendação</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Agentes de quinta camada */}
-        <div className="absolute bottom-24 left-3/4 -translate-x-1/2 flex flex-col items-center">
-          <div 
-            className={`w-40 p-2 rounded-md border ${
-              activeAgent === 'viz' ? 'ring-2 ring-cyan-500 shadow-lg' : ''
-            } bg-cyan-100 border-cyan-300 transition-all duration-300`}
-          >
-            <div className="flex items-center justify-center gap-2 font-medium text-sm">
-              <BarChart3 className="h-4 w-4" />
-              <span>Agente de Visualização</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Linhas de conexão entre agentes */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: -1 }}>
+        {/* SVG para desenhar as linhas de conexão */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none">
           {connections.map((conn, idx) => {
-            // Determinando a posição das conexões entre agentes
-            const positions: Record<string, {x: number, y: number}> = {
-              'supervisor': { x: 50, y: 8 },
-              'data': { x: 50, y: 28 },
-              'pattern': { x: 25, y: 40 },
-              'correlation': { x: 50, y: 52 },
-              'recommendation': { x: 25, y: 64 },
-              'viz': { x: 75, y: 76 },
-            };
-            
-            const fromPos = positions[conn.from];
-            const toPos = positions[conn.to];
+            const fromPos = agentPositions[conn.from];
+            const toPos = agentPositions[conn.to];
             
             if (!fromPos || !toPos) return null;
             
             return (
-              <line 
-                key={`${conn.from}-${conn.to}`}
-                x1={`${fromPos.x}%`}
-                y1={`${fromPos.y}%`}
-                x2={`${toPos.x}%`}
-                y2={`${toPos.y}%`}
-                stroke={conn.active ? '#10b981' : '#e2e8f0'}
-                strokeWidth={conn.active ? 2 : 1}
-                strokeDasharray={conn.active ? 'none' : '4 2'}
+              <g key={`${conn.from}-${conn.to}`}>
+                <line 
+                  x1={`${fromPos.x}%`}
+                  y1={`${fromPos.y}%`}
+                  x2={`${toPos.x}%`}
+                  y2={`${toPos.y}%`}
+                  stroke={conn.active ? '#10b981' : '#e2e8f0'}
+                  strokeWidth={conn.active ? 2 : 1}
+                  strokeDasharray={conn.active ? 'none' : '4 2'}
+                  className={conn.animating ? 'connection-path' : ''}
+                />
+                
+                {/* Adiciona seta na conexão */}
+                {conn.active && (
+                  <polygon 
+                    points="0,-3 6,0 0,3"
+                    fill="#10b981"
+                    transform={`translate(${toPos.x}%, ${toPos.y}%) rotate(${Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x) * (180 / Math.PI)})`}
+                    className={conn.animating ? 'connection-arrow' : ''}
+                  />
+                )}
+              </g>
+            );
+          })}
+          
+          {/* Animação de pacotes de dados */}
+          {dataPackets.map((packet, idx) => {
+            const fromPos = agentPositions[packet.fromId];
+            const toPos = agentPositions[packet.toId];
+            
+            if (!fromPos || !toPos) return null;
+            
+            return (
+              <circle
+                key={`packet-${idx}`}
+                cx="0"
+                cy="0"
+                r="4"
+                fill="#10b981"
+                className="data-packet"
+                style={{
+                  animation: `movePacket 2s linear forwards`,
+                  '--from-x': `${fromPos.x}%`,
+                  '--from-y': `${fromPos.y}%`,
+                  '--to-x': `${toPos.x}%`,
+                  '--to-y': `${toPos.y}%`,
+                } as React.CSSProperties}
               />
             );
           })}
         </svg>
+        
+        {/* Agentes */}
+        {agents.map((agent) => {
+          const position = agentPositions[agent.id];
+          if (!position) return null;
+          
+          const isActive = activeAgent === agent.id;
+          
+          return (
+            <div
+              key={agent.id}
+              className={`absolute p-3 rounded-md border transition-all duration-300 ${
+                isActive ? 'ring-2 shadow-lg scale-110 z-10' : ''
+              } ${agent.color} ${isActive ? `ring-${agent.color.split('-')[1]}-500` : ''}`}
+              style={{
+                left: `${position.x}%`,
+                top: `${position.y}%`,
+                transform: 'translate(-50%, -50%)',
+                width: '160px',
+              }}
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center justify-center gap-2 font-medium text-sm mb-1">
+                  <agent.icon className="h-4 w-4" />
+                  <span>{agent.name}</span>
+                </div>
+                <div className="text-xs bg-white bg-opacity-70 rounded-full px-2 py-0.5 font-mono">
+                  {agent.model}
+                </div>
+                {isActive && (
+                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -352,7 +450,10 @@ const AnalysisStep: React.FC = () => {
                   <div className={`p-1 rounded-md ${agent.color}`}>
                     <agent.icon className="h-4 w-4" />
                   </div>
-                  <span className="ml-2 text-xs font-medium">{agent.name}</span>
+                  <div className="ml-2">
+                    <div className="text-xs font-medium">{agent.name}</div>
+                    <div className="text-[10px] text-gray-500">{agent.model}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -390,7 +491,7 @@ const AnalysisStep: React.FC = () => {
               )
             ) : (
               <>
-                <Brain className="mr-2 h-4 w-4" />
+                <Zap className="mr-2 h-4 w-4" />
                 {step === 'completed' ? 'Executar Novamente' : 'Iniciar Análise Multi-Agente'}
               </>
             )}
