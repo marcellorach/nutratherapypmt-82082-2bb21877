@@ -10,15 +10,19 @@ const Header: React.FC = () => {
     <header className="w-full bg-black text-white p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-xl font-semibold flex items-center gap-2">
-          <PawPrint size={24} />
-          <span>NutraTherapy PET</span>
+          <div className="bg-gradient-to-r from-[#7E57C2] to-[#FF719A] p-1.5 rounded-full">
+            <PawPrint size={24} className="text-white" />
+          </div>
+          <span className="bg-gradient-to-r from-[#7E57C2] to-[#FF719A] bg-clip-text text-transparent font-bold">
+            NutraTherapy PET
+          </span>
         </Link>
         
         <nav className="hidden md:flex gap-6">
-          <Link to="/veterinario" className="text-white hover:text-gray-200 transition-colors">
+          <Link to="/veterinario" className="text-white hover:text-[#7E57C2] transition-colors">
             Veterinário
           </Link>
-          <Link to="/tutor" className="text-white hover:text-gray-200 transition-colors">
+          <Link to="/tutor" className="text-white hover:text-[#FF719A] transition-colors">
             Tutor
           </Link>
         </nav>
@@ -29,7 +33,7 @@ const Header: React.FC = () => {
               <TooltipTrigger asChild>
                 <Link 
                   to="/administrador" 
-                  className="text-gray-300 hover:text-white transition-colors mr-4"
+                  className="text-gray-300 hover:text-[#7E57C2] transition-colors mr-4"
                 >
                   <UserCog size={20} />
                 </Link>
@@ -40,7 +44,10 @@ const Header: React.FC = () => {
             </Tooltip>
           </TooltipProvider>
           
-          <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">
+          <Button 
+            variant="outline" 
+            className="text-white border-white hover:bg-gradient-to-r hover:from-[#7E57C2] hover:to-[#FF719A] hover:border-transparent"
+          >
             <User size={18} className="mr-1" />
             Login
           </Button>
