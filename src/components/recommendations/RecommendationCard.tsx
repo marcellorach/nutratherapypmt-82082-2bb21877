@@ -7,6 +7,7 @@ import IngredientsSection from './IngredientsSection';
 import RemovedIngredientsSection from './RemovedIngredientsSection';
 import BenefitsSection from './BenefitsSection';
 import ScientificEvidence from './ScientificEvidence';
+import CardActions from './CardActions';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -102,6 +103,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <BenefitsSection benefits={nutraceutical.benefits} />
 
         <ScientificEvidence nutraceutical={nutraceutical} />
+        
+        {/* Novos botões de ação */}
+        <CardActions 
+          recommendation={recommendation}
+          nutraceutical={nutraceutical}
+        />
       </CardContent>
       
       <CardFooter className="pt-2 flex flex-col text-xs text-gray-500 border-t">
