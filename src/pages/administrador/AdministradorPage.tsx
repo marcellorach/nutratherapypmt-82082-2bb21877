@@ -23,6 +23,14 @@ const AdministradorPage: React.FC = () => {
         return <VisualizationStep />;
       case "actions":
         return <ActionsStep />;
+      case "nutraceuticos":
+        return <NutraceuticosTab />;
+      case "estudos":
+        return <EstudosTab />;
+      case "prompts":
+        return <PromptsTab />;
+      case "analytics":
+        return <AnalyticsTab />;
       default:
         return null;
     }
