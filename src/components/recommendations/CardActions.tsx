@@ -58,7 +58,7 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
   return (
     <div className="grid grid-cols-2 gap-2 mt-3">
       <Button 
-        className={`flex items-center gap-1 ${isApproved ? "bg-green-500 hover:bg-green-600" : ""}`}
+        className={`flex items-center gap-1 border border-green-400 ${isApproved ? "bg-green-500 hover:bg-green-600" : ""}`}
         onClick={handleApprove}
         disabled={isApproved}
       >
@@ -66,27 +66,38 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         {isApproved ? "Aprovado" : "Aprovar"}
       </Button>
       
-      <Button variant="outline" className="flex items-center gap-1" onClick={() => setShowDetails(true)}>
+      <Button 
+        variant="outline" 
+        className="flex items-center gap-1 border border-amber-400" 
+        onClick={() => setShowDetails(true)}
+      >
         <Search size={16} />
         Verificar indicação
       </Button>
       
-      <Button variant="outline" className="flex items-center gap-1" onClick={() => setShowExams(true)}>
+      <Button 
+        variant="outline" 
+        className="flex items-center gap-1 border border-blue-400" 
+        onClick={() => setShowExams(true)}
+      >
         <FileText size={16} />
         Exames ({petExams.length})
       </Button>
       
-      <Button variant="outline" className="flex items-center gap-1" onClick={() => setShowAI(true)}>
-        <MessageSquare size={16} />
-        AI
+      <Button 
+        className="col-span-2 flex items-center justify-center gap-1 border border-purple-400 bg-slate-50 text-slate-800 h-12 hover:bg-purple-50" 
+        onClick={() => setShowAI(true)}
+      >
+        <MessageSquare size={18} />
+        Conversar com AI
       </Button>
       
       <Button 
         variant="outline" 
-        className="col-span-2 flex items-center justify-center gap-1 bg-slate-50" 
+        className="col-span-2 flex items-center justify-center gap-1 border border-cyan-400 bg-slate-50 h-9 text-sm" 
         onClick={() => setShowCompare(true)}
       >
-        <PieChart size={16} />
+        <PieChart size={14} />
         Comparar com população
       </Button>
 
@@ -136,7 +147,7 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
           
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowDetails(false)}>Fechar</Button>
-            <Button className="flex items-center gap-1" onClick={handleApprove}>
+            <Button className="flex items-center gap-1 border border-green-400" onClick={handleApprove}>
               <ThumbsUp size={16} />
               Aprovar recomendação
             </Button>
@@ -144,6 +155,7 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         </div>
       </MobileWrapper>
 
+      {/* O resto do código permanece inalterado */}
       {/* Modal de exames */}
       <MobileWrapper open={showExams} onOpenChange={setShowExams}>
         <div className="p-4">
