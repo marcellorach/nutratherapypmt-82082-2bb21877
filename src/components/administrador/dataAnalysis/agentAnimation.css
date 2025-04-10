@@ -1,0 +1,43 @@
+
+@keyframes movePacket {
+  0% {
+    transform: translate(var(--from-x), var(--from-y));
+  }
+  100% {
+    transform: translate(var(--to-x), var(--to-y));
+  }
+}
+
+.connection-path {
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.connection-arrow {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
