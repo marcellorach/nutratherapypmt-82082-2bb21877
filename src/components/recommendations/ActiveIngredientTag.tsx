@@ -156,7 +156,7 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
         </div>
         
         <div className="mt-2 px-1 w-full flex items-center gap-2">
-          <span className="text-xs text-gray-500 min-w-14">Eficácia: {calculateEfficacy(sliderValue[0]).toFixed(1)}</span>
+          <span className="text-xs text-gray-500 min-w-14">Range dose: {calculateEfficacy(sliderValue[0]).toFixed(1)}</span>
           <Slider
             value={sliderValue}
             max={100}
