@@ -14,9 +14,9 @@ const Index = () => {
           <div className="max-w-3xl mx-auto text-center">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <img 
-                src="/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png" 
+                src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png" 
                 alt="NutraTherapy" 
-                className="mx-auto h-24 mb-4" // Aumentei a altura do logo
+                className="mx-auto h-28 mb-4" 
               />
               <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl text-gray-600">
                 NutraTherapy
