@@ -1,4 +1,3 @@
-
 import { Pet, Owner, ExamResult, Nutraceutical, Recommendation, TreatmentPlan } from "../types";
 
 // Mock Owners
@@ -191,78 +190,200 @@ export const examResults: ExamResult[] = [
   }
 ];
 
-// Mock Nutraceuticals
+// Mock Nutraceuticals reformulados com princípios ativos
 export const nutraceuticals: Nutraceutical[] = [
   {
     id: "nut1",
-    name: "OmegaPet Plus",
-    description: "Suplemento rico em Ômega 3 e 6 para saúde da pele e pelagem.",
-    benefits: ["Melhora saúde da pele", "Reduz inflamação", "Fortalece sistema imunológico"],
-    dosage: "1ml por 5kg de peso corporal, diariamente",
-    contraindications: ["Alergia a peixes ou frutos do mar"],
+    name: "Ácidos graxos essenciais",
+    description: "Combinação de EPA e DHA para saúde dermatológica e redução de inflamação",
+    benefits: ["Melhora saúde da pele", "Reduz inflamação crônica", "Fortalece barreira cutânea"],
+    dosage: "20-40mg/kg de peso corporal/dia",
+    contraindications: ["Distúrbios de coagulação", "Pancreatite aguda"],
+    activeIngredients: ["Ácido eicosapentaenoico (EPA)", "Ácido docosa-hexaenoico (DHA)"],
+    condition: "Dermatite atópica canina",
     scientificEvidence: {
-      score: 4.5,
-      studies: ["Journal of Veterinary Medicine, 2023", "Pet Health Research, 2022"]
+      efficacyScore: 4.2,
+      sustainabilityScore: 3.8,
+      studies: [
+        {
+          title: "Long-chain omega-3 fatty acids and inflammatory dermatoses in dogs",
+          link: "https://doi.org/10.1111/j.1365-2885.2010.01226.x",
+          year: 2023
+        },
+        {
+          title: "Effects of dietary supplementation with fish oil on clinical manifestations of canine atopic dermatitis",
+          link: "https://doi.org/10.1111/j.1748-5827.2001.tb02492.x",
+          year: 2022
+        }
+      ]
     }
   },
   {
     id: "nut2",
-    name: "ArthriCare",
-    description: "Suplemento para saúde articular com glucosamina e condroitina.",
-    benefits: ["Melhora mobilidade", "Reduz dor articular", "Protege cartilagens"],
-    dosage: "1 tablete para cada 10kg de peso corporal, diariamente",
-    contraindications: ["Diabetes não controlada"],
+    name: "Glicosaminoglicanos e Condroitina",
+    description: "Complexo de suporte articular com propriedades condroprotetoras",
+    benefits: ["Estimula síntese de cartilagem", "Reduz degradação articular", "Melhora mobilidade"],
+    dosage: "15-30mg/kg de sulfato de condroitina e 10-15mg/kg de glucosamina diariamente",
+    contraindications: ["Insuficiência renal grave", "Coagulopatias"],
+    activeIngredients: ["Sulfato de glucosamina", "Sulfato de condroitina", "MSM (metilsulfonilmetano)"],
+    condition: "Osteoartrite canina",
     scientificEvidence: {
-      score: 4.2,
-      studies: ["Veterinary Orthopaedics International, 2024", "Animal Care Journal, 2023"]
+      efficacyScore: 3.9,
+      sustainabilityScore: 4.1,
+      studies: [
+        {
+          title: "Randomized, controlled trial of glucosamine/chondroitin for treating dogs with osteoarthritis",
+          link: "https://doi.org/10.2460/javma.2007.230.514",
+          year: 2024
+        },
+        {
+          title: "Evaluation of the effects of glycosaminoglycan polysulfate on progression of osteoarthritis in a canine model",
+          link: "https://doi.org/10.1111/j.1532-950X.1992.tb00086.x",
+          year: 2022
+        }
+      ]
     }
   },
   {
     id: "nut3",
-    name: "ImmunoVet",
-    description: "Complexo de vitaminas e minerais para fortalecimento imunológico.",
-    benefits: ["Fortalece sistema imunológico", "Aumenta energia", "Melhora qualidade de vida"],
-    dosage: "5ml diários para pets até 10kg, 10ml para pets acima de 10kg",
-    contraindications: ["Hipervitaminose prévia"],
+    name: "Complexo Imunomodulador",
+    description: "Blend de antioxidantes e prebióticos para equilíbrio imunológico",
+    benefits: ["Modula resposta imune", "Potencializa defesas naturais", "Reduz estresse oxidativo"],
+    dosage: "200-400mg/kg de peso/dia de extrato de equinácea e 10-20mg/kg de beta-glucanos",
+    contraindications: ["Doenças autoimunes não controladas", "Imunossupressão medicamentosa"],
+    activeIngredients: ["Equinácea purpurea", "Beta-glucanos", "Vitamina C", "Zinco quelado"],
+    condition: "Imunodeficiência e susceptibilidade a infecções",
     scientificEvidence: {
-      score: 3.8,
-      studies: ["Veterinary Immunology, 2022", "Prevention in Small Animals, 2023"]
+      efficacyScore: 3.6,
+      sustainabilityScore: 3.2,
+      studies: [
+        {
+          title: "Immunomodulatory effects of beta-glucan in canine leukocytes",
+          link: "https://doi.org/10.1016/j.vetimm.2015.06.003",
+          year: 2021
+        },
+        {
+          title: "Evaluation of Echinacea as an immunostimulatory agent in healthy dogs",
+          link: "https://doi.org/10.5326/JAAHA-MS-6942",
+          year: 2023
+        }
+      ]
     }
   },
   {
     id: "nut4",
-    name: "CardioForte",
-    description: "Suplemento para saúde cardiovascular com CoQ10 e taurina.",
-    benefits: ["Fortalece músculo cardíaco", "Melhora circulação", "Controla pressão arterial"],
-    dosage: "1 cápsula para cada 15kg de peso corporal, diariamente",
-    contraindications: ["Hipotensão severa", "Uso concomitante de anticoagulantes"],
+    name: "Formulação Cardioprotetora",
+    description: "Combinação de compostos para suporte da função cardíaca",
+    benefits: ["Suporte energético ao miocárdio", "Melhora contratilidade", "Regula pressão arterial"],
+    dosage: "30-50mg/kg/dia de L-carnitina e 1-2mg/kg/dia de coenzima Q10",
+    contraindications: ["Hipersensibilidade aos componentes", "Monitoramento em terapias com digitálicos"],
+    activeIngredients: ["L-carnitina", "Coenzima Q10", "Taurina", "Ácido alfa-lipoico"],
+    condition: "Cardiomiopatia dilatada e insuficiência cardíaca",
     scientificEvidence: {
-      score: 4.0,
-      studies: ["Cardiology in Small Animals, 2024", "Veterinary Heart Journal, 2023"]
+      efficacyScore: 4.3,
+      sustainabilityScore: 4.0,
+      studies: [
+        {
+          title: "Effects of coenzyme Q10 and taurine in canine dilated cardiomyopathy",
+          link: "https://doi.org/10.1111/jvim.15485",
+          year: 2022
+        },
+        {
+          title: "L-carnitine supplementation in canine cardiac patients: A systematic review",
+          link: "https://doi.org/10.1016/j.jvc.2019.05.006",
+          year: 2024
+        }
+      ]
     }
   },
   {
     id: "nut5",
-    name: "DentalFresh",
-    description: "Suplemento para saúde bucal e redução de tártaro.",
-    benefits: ["Reduz formação de placa bacteriana", "Combate mau hálito", "Fortalece gengivas"],
-    dosage: "Adicionar 5ml à água do pet diariamente",
-    contraindications: ["Alergias a extratos de menta"],
+    name: "Fitocomplexo Periodontal",
+    description: "Blend de extratos vegetais com ação antimicrobiana e anti-inflamatória para saúde bucal",
+    benefits: ["Reduz formação de biofilme", "Controla proliferação bacteriana", "Minimiza inflamação gengival"],
+    dosage: "Solução de 0.12% para aplicação diária ou adição de 2-5ml à água de bebida",
+    contraindications: ["Hipersensibilidade aos componentes botânicos"],
+    activeIngredients: ["Melaleuca alternifolia", "Sálvia officinalis", "Clorexidina em baixa concentração", "Zinco gluconato"],
+    condition: "Doença periodontal canina",
     scientificEvidence: {
-      score: 3.5,
-      studies: ["Journal of Veterinary Dentistry, 2023", "Oral Health in Animals, 2024"]
+      efficacyScore: 3.4,
+      sustainabilityScore: 3.7,
+      studies: [
+        {
+          title: "Clinical evaluation of herbal mouth rinses in controlling canine periodontal disease",
+          link: "https://doi.org/10.1111/jsap.13054",
+          year: 2021
+        },
+        {
+          title: "Effects of a botanical oral care gel on periodontal health indicators in dogs",
+          link: "https://doi.org/10.2460/javma.255.11.1278",
+          year: 2023
+        }
+      ]
+    }
+  },
+  {
+    id: "nut6",
+    name: "Suporte Hepatobiliar",
+    description: "Formulação hepatoprotetora com silimarina e aminoácidos essenciais",
+    benefits: ["Proteção hepatocelular", "Estimulação da regeneração hepática", "Suporte à desintoxicação"],
+    dosage: "15-20mg/kg/dia de silimarina, dividido em duas doses",
+    contraindications: ["Obstrução biliar completa", "Alergia a plantas da família Asteraceae"],
+    activeIngredients: ["Silimarina (Silybum marianum)", "S-adenosilmetionina (SAMe)", "N-acetilcisteína", "Fosfatidilcolina"],
+    condition: "Hepatopatias crônicas e agudas",
+    scientificEvidence: {
+      efficacyScore: 4.1,
+      sustainabilityScore: 3.9,
+      studies: [
+        {
+          title: "Clinical evaluation of silymarin in the treatment of canine hepatic lipidosis",
+          link: "https://doi.org/10.1111/jvim.15788",
+          year: 2023
+        },
+        {
+          title: "S-adenosylmethionine (SAMe) for the treatment of chronic hepatopathies in dogs: a systematic review",
+          link: "https://doi.org/10.1111/jsap.13268",
+          year: 2022
+        }
+      ]
+    }
+  },
+  {
+    id: "nut7",
+    name: "Complexo Neuroprotetor",
+    description: "Combinação de antioxidantes e ácidos graxos para função cognitiva",
+    benefits: ["Melhora função cognitiva", "Reduz estresse oxidativo cerebral", "Suporte à neurotransmissão"],
+    dosage: "20-40mg/kg/dia de extratos combinados, ajustável conforme peso e idade",
+    contraindications: ["Monitoramento em cães com epilepsia"],
+    activeIngredients: ["Ginkgo biloba", "Ácidos graxos ômega-3", "Fosfolipídeos", "Antioxidantes (vitamina E, selênio)"],
+    condition: "Disfunção cognitiva canina",
+    scientificEvidence: {
+      efficacyScore: 3.8,
+      sustainabilityScore: 3.5,
+      studies: [
+        {
+          title: "Effects of dietary supplementation with medium-chain TAG on canine cognitive dysfunction syndrome",
+          link: "https://doi.org/10.1017/S0007114510000097",
+          year: 2024
+        },
+        {
+          title: "Neuroprotective effects of antioxidant supplementation in aged dogs",
+          link: "https://doi.org/10.1111/jvim.16055",
+          year: 2022
+        }
+      ]
     }
   }
 ];
 
-// Mock Recommendations
+// Mock Recommendations - Atualizadas para usar os novos nutraceuticos
 export const recommendations: Recommendation[] = [
   {
     id: "rec1",
     petId: "pet1",
     nutraceuticalId: "nut1",
-    reason: "Pelagem ressecada e dermatite recorrente",
-    dosage: "5ml diários",
+    reason: "Dermatite atópica recorrente com ressecamento da pelagem",
+    dosage: "30mg/kg/dia (dividido em duas administrações)",
     duration: "3 meses",
     startDate: "2025-04-15",
     priority: 1
@@ -272,7 +393,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet1",
     nutraceuticalId: "nut3",
     reason: "Fortalecimento do sistema imunológico após infecção recente",
-    dosage: "10ml diários",
+    dosage: "300mg/kg/dia do complexo imunomodulador",
     duration: "2 meses",
     startDate: "2025-04-15",
     priority: 2
@@ -282,7 +403,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet2",
     nutraceuticalId: "nut2",
     reason: "Prevenção de problemas articulares comuns na raça",
-    dosage: "1 tablete diário",
+    dosage: "20mg/kg/dia de sulfato de condroitina e 15mg/kg/dia de glucosamina",
     duration: "Contínuo",
     startDate: "2025-04-10",
     priority: 1
@@ -292,7 +413,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet4",
     nutraceuticalId: "nut1",
     reason: "Melhoria da pelagem e prevenção de alergias sazonais",
-    dosage: "6ml diários",
+    dosage: "25mg/kg/dia de ácidos graxos essenciais",
     duration: "6 meses",
     startDate: "2025-03-22",
     priority: 2
@@ -302,7 +423,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet6",
     nutraceuticalId: "nut4",
     reason: "Prevenção de problemas cardíacos comuns em Beagles",
-    dosage: "1 cápsula diária",
+    dosage: "40mg/kg/dia de L-carnitina e 1.5mg/kg/dia de coenzima Q10",
     duration: "Contínuo",
     startDate: "2025-04-01",
     priority: 1
@@ -312,7 +433,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet7",
     nutraceuticalId: "nut5",
     reason: "Prevenção de tártaro e problemas periodontais",
-    dosage: "5ml na água diariamente",
+    dosage: "Solução 0.12% aplicada diariamente nas gengivas",
     duration: "Contínuo",
     startDate: "2025-03-15",
     priority: 3
@@ -322,7 +443,7 @@ export const recommendations: Recommendation[] = [
     petId: "pet8",
     nutraceuticalId: "nut2",
     reason: "Prevenção de problemas articulares devido ao peso",
-    dosage: "2 tabletes diários",
+    dosage: "25mg/kg/dia de sulfato de condroitina e 20mg/kg/dia de glucosamina",
     duration: "Contínuo",
     startDate: "2025-04-05",
     priority: 1
@@ -332,14 +453,34 @@ export const recommendations: Recommendation[] = [
     petId: "pet10",
     nutraceuticalId: "nut3",
     reason: "Fortalecimento imunológico preventivo",
-    dosage: "10ml diários",
+    dosage: "350mg/kg/dia de complexo imunomodulador",
     duration: "3 meses",
     startDate: "2025-04-12",
     priority: 2
+  },
+  {
+    id: "rec9",
+    petId: "pet6",
+    nutraceuticalId: "nut7",
+    reason: "Suporte cognitivo para envelhecimento saudável",
+    dosage: "30mg/kg/dia do complexo neuroprotetor",
+    duration: "Contínuo",
+    startDate: "2025-04-02",
+    priority: 2
+  },
+  {
+    id: "rec10",
+    petId: "pet1",
+    nutraceuticalId: "nut6",
+    reason: "Suporte hepático após tratamento medicamentoso prolongado",
+    dosage: "18mg/kg/dia de silimarina, dividido em duas doses",
+    duration: "45 dias",
+    startDate: "2025-04-20",
+    priority: 3
   }
 ];
 
-// Mock Treatment Plans - Agora com planos para a maioria dos pets, exceto um ou dois
+// Mock Treatment Plans - Atualizado para incluir as novas recomendações
 export const treatmentPlans: TreatmentPlan[] = [
   {
     id: "pln1",
@@ -351,8 +492,8 @@ export const treatmentPlans: TreatmentPlan[] = [
         id: "rec1",
         petId: "pet1",
         nutraceuticalId: "nut1",
-        reason: "Pelagem ressecada e dermatite recorrente",
-        dosage: "5ml diários",
+        reason: "Dermatite atópica recorrente com ressecamento da pelagem",
+        dosage: "30mg/kg/dia (dividido em duas administrações)",
         duration: "3 meses",
         startDate: "2025-04-15",
         priority: 1
@@ -362,13 +503,23 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet1",
         nutraceuticalId: "nut3",
         reason: "Fortalecimento do sistema imunológico após infecção recente",
-        dosage: "10ml diários",
+        dosage: "300mg/kg/dia do complexo imunomodulador",
         duration: "2 meses",
         startDate: "2025-04-15",
         priority: 2
+      },
+      {
+        id: "rec10",
+        petId: "pet1",
+        nutraceuticalId: "nut6",
+        reason: "Suporte hepático após tratamento medicamentoso prolongado",
+        dosage: "18mg/kg/dia de silimarina, dividido em duas doses",
+        duration: "45 dias",
+        startDate: "2025-04-20",
+        priority: 3
       }
     ],
-    notes: "Reavaliar após 1 mês para ajustes na dosagem se necessário."
+    notes: "Reavaliar após 1 mês para ajustes na dosagem se necessário. Monitorar enzimas hepáticas antes e após tratamento com silimarina."
   },
   {
     id: "pln2",
@@ -381,13 +532,13 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet2",
         nutraceuticalId: "nut2",
         reason: "Prevenção de problemas articulares comuns na raça",
-        dosage: "1 tablete diário",
+        dosage: "20mg/kg/dia de sulfato de condroitina e 15mg/kg/dia de glucosamina",
         duration: "Contínuo",
         startDate: "2025-04-10",
         priority: 1
       }
     ],
-    notes: "Monitorar mobilidade e disposição do animal."
+    notes: "Monitorar mobilidade e disposição do animal. Considerar adição de ácidos graxos essenciais em 3 meses."
   },
   {
     id: "pln3",
@@ -400,13 +551,13 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet4",
         nutraceuticalId: "nut1",
         reason: "Melhoria da pelagem e prevenção de alergias sazonais",
-        dosage: "6ml diários",
+        dosage: "25mg/kg/dia de ácidos graxos essenciais",
         duration: "6 meses",
         startDate: "2025-03-22",
         priority: 2
       }
     ],
-    notes: "Atentar para possíveis reações alérgicas nos primeiros dias."
+    notes: "Atentar para possíveis reações alérgicas nos primeiros dias. Avaliar qualidade da pelagem após 2 meses."
   },
   {
     id: "pln4",
@@ -419,13 +570,23 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet6",
         nutraceuticalId: "nut4",
         reason: "Prevenção de problemas cardíacos comuns em Beagles",
-        dosage: "1 cápsula diária",
+        dosage: "40mg/kg/dia de L-carnitina e 1.5mg/kg/dia de coenzima Q10",
         duration: "Contínuo",
         startDate: "2025-04-01",
         priority: 1
+      },
+      {
+        id: "rec9",
+        petId: "pet6",
+        nutraceuticalId: "nut7",
+        reason: "Suporte cognitivo para envelhecimento saudável",
+        dosage: "30mg/kg/dia do complexo neuroprotetor",
+        duration: "Contínuo",
+        startDate: "2025-04-02",
+        priority: 2
       }
     ],
-    notes: "Verificar frequência cardíaca mensalmente."
+    notes: "Verificar frequência cardíaca mensalmente. Avaliar responsividade e cognição a cada 3 meses."
   },
   {
     id: "pln5",
@@ -438,13 +599,13 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet7",
         nutraceuticalId: "nut5",
         reason: "Prevenção de tártaro e problemas periodontais",
-        dosage: "5ml na água diariamente",
+        dosage: "Solução 0.12% aplicada diariamente nas gengivas",
         duration: "Contínuo",
         startDate: "2025-03-15",
         priority: 3
       }
     ],
-    notes: "Avaliar condições bucais após 60 dias de uso."
+    notes: "Avaliar condições bucais após 60 dias de uso. Recomendar limpeza profissional se necessário."
   },
   {
     id: "pln6",
@@ -457,13 +618,13 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet8",
         nutraceuticalId: "nut2",
         reason: "Prevenção de problemas articulares devido ao peso",
-        dosage: "2 tabletes diários",
+        dosage: "25mg/kg/dia de sulfato de condroitina e 20mg/kg/dia de glucosamina",
         duration: "Contínuo",
         startDate: "2025-04-05",
         priority: 1
       }
     ],
-    notes: "Associar a recomendação com orientações de dieta e exercícios."
+    notes: "Associar a recomendação com orientações de dieta e exercícios. Monitorar peso mensalmente."
   },
   {
     id: "pln7",
@@ -476,13 +637,13 @@ export const treatmentPlans: TreatmentPlan[] = [
         petId: "pet10",
         nutraceuticalId: "nut3",
         reason: "Fortalecimento imunológico preventivo",
-        dosage: "10ml diários",
+        dosage: "350mg/kg/dia de complexo imunomodulador",
         duration: "3 meses",
         startDate: "2025-04-12",
         priority: 2
       }
     ],
-    notes: "Monitorar energia e disposição durante o tratamento."
+    notes: "Monitorar energia e disposição durante o tratamento. Realizar hemograma completo após 3 meses."
   }
 ];
 

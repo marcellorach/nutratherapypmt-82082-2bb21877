@@ -1,3 +1,4 @@
+
 export interface Pet {
   id: string;
   name: string;
@@ -37,9 +38,16 @@ export interface Nutraceutical {
   benefits: string[];
   dosage: string;
   contraindications: string[];
+  activeIngredients: string[];
+  condition: string;
   scientificEvidence: {
-    score: number;
-    studies: string[];
+    efficacyScore: number;
+    sustainabilityScore: number;
+    studies: Array<{
+      title: string;
+      link: string;
+      year: number;
+    }>;
   };
 }
 

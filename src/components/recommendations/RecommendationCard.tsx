@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Recommendation, Nutraceutical } from '@/types';
+import { ExternalLink } from 'lucide-react';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -34,10 +35,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <CardDescription>{nutraceutical.description}</CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         <div>
           <p className="text-sm font-medium">Motivo da recomendação:</p>
           <p className="text-sm">{recommendation.reason}</p>
+        </div>
+        
+        <div>
+          <p className="text-sm font-medium">Princípios ativos:</p>
+          <p className="text-sm">{nutraceutical.activeIngredients.join(', ')}</p>
         </div>
         
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -62,12 +68,37 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
           </ul>
         </div>
+
+        <div>
+          <p className="text-sm font-medium mb-1">Evidências científicas:</p>
+          <div className="flex gap-2 text-xs mb-2">
+            <Badge variant="outline" className="bg-slate-50">
+              Eficácia: {nutraceutical.scientificEvidence.efficacyScore}/5
+            </Badge>
+            <Badge variant="outline" className="bg-slate-50">
+              Sustentação: {nutraceutical.scientificEvidence.sustainabilityScore}/5
+            </Badge>
+          </div>
+          <div className="text-xs text-blue-600">
+            {nutraceutical.scientificEvidence.studies.slice(0, 1).map((study, index) => (
+              <div key={index} className="flex items-center gap-1 hover:underline cursor-pointer">
+                <ExternalLink size={12} />
+                <span>{study.title} ({study.year})</span>
+              </div>
+            ))}
+            {nutraceutical.scientificEvidence.studies.length > 1 && (
+              <p className="text-xs text-gray-500 mt-1">
+                + {nutraceutical.scientificEvidence.studies.length - 1} outro(s) estudo(s)
+              </p>
+            )}
+          </div>
+        </div>
       </CardContent>
       
-      <CardFooter className="pt-2 flex justify-between text-xs text-gray-500">
+      <CardFooter className="pt-2 flex justify-between text-xs text-gray-500 border-t">
         <div>Início: {recommendation.startDate}</div>
         <div>
-          Evidência científica: {nutraceutical.scientificEvidence.score}/5
+          Condição: {nutraceutical.condition}
         </div>
       </CardFooter>
     </Card>
