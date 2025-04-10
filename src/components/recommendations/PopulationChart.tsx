@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface PopulationChartProps {
   baseEfficacyScore: number;
@@ -40,56 +41,71 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
     const activeIngredients = ingredients.filter(i => !i.removed);
     
     if (activeIngredients.length === 0) {
-      setCalculatedEfficacyScore(baseEfficacyScore * 0.5); // Reduz a eficácia pela metade se todos os ingredientes foram removidos
+      setCalculatedEfficacyScore(baseEfficacyScore * 0.5);
       return;
     }
     
-    // Calcular média de eficácia dos ingredientes ativos
     const ingredientEfficacyAvg = activeIngredients.reduce((sum, ing) => sum + ing.efficacy, 0) / activeIngredients.length;
     
-    // Calcular média de quantidade relativa (assumindo que o padrão é 10mg)
     const quantityAvg = activeIngredients.reduce((sum, ing) => {
       if (!ing.quantity) return sum + 1;
       const match = ing.quantity.match(/(\d+)/);
       return sum + (match ? parseInt(match[1]) / 10 : 1);
     }, 0) / activeIngredients.length;
     
-    // Eficácia final é uma mistura da eficácia base, média dos ingredientes e quantidade média
     const finalEfficacy = (baseEfficacyScore * 0.4) + 
                          (ingredientEfficacyAvg * 0.4 * 5) + 
                          (quantityAvg * 0.2 * 2);
     
-    // Limitar entre 1 e 5
     setCalculatedEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));
   }, [baseEfficacyScore, ingredients]);
   
   // Gerar número aleatório de casos entre 1800 e 42000
   const totalCases = Math.floor(Math.random() * (42000 - 1800 + 1) + 1800);
   
-  // Dados simulados para comparação
-  const data = [
-    {
-      name: 'Alta eficácia (>80%)',
-      estudos: calculatedEfficacyScore >= 4 ? Math.round((calculatedEfficacyScore * 20)) : Math.round((calculatedEfficacyScore * 15)),
-      petlove: Math.min(95, Math.round((calculatedEfficacyScore * 20) * (1 + Math.random() * 0.3))),
-    },
-    {
-      name: 'Média eficácia (60-80%)',
-      estudos: calculatedEfficacyScore >= 3 ? Math.round((calculatedEfficacyScore * 15)) : Math.round((calculatedEfficacyScore * 10)),
-      petlove: Math.min(85, Math.round((calculatedEfficacyScore * 18) * (1 + Math.random() * 0.2))),
-    },
-    {
-      name: 'Baixa eficácia (<60%)',
-      estudos: Math.round((5 - calculatedEfficacyScore) * 10),
-      petlove: Math.round((5 - calculatedEfficacyScore) * 8),
-    },
-  ];
+  // Novo: gerar condições de saúde relacionadas ao tratamento principal
+  const generateHealthConditions = () => {
+    const mainCondition = condition;
+    const relatedConditions = {
+      "Dermatite atópica": ["Ressecamento da pele", "Alergia sazonal", "Prurido"],
+      "Problemas articulares": ["Artrite", "Displasia", "Dor crônica"],
+      "Sistema imunológico": ["Infecções recorrentes", "Alergias", "Baixa imunidade"],
+      "Problemas cardíacos": ["Arritmia", "Hipertensão", "Fadiga"],
+      "Problemas cognitivos": ["Desorientação", "Perda de memória", "Ansiedade"],
+      "Suporte hepático": ["Enzimas alteradas", "Metabolismo lento", "Toxicidade"]
+    };
+    
+    // Encontrar a categoria mais próxima
+    let category = Object.keys(relatedConditions).find(c => 
+      mainCondition.toLowerCase().includes(c.toLowerCase())
+    ) || Object.keys(relatedConditions)[0];
+    
+    return [
+      mainCondition,
+      ...relatedConditions[category as keyof typeof relatedConditions].slice(0, 2)
+    ];
+  };
+  
+  const healthConditions = generateHealthConditions();
+  
+  // Dados de eficácia por condição de saúde
+  const data = healthConditions.map(cond => {
+    // Variação da eficácia para diferentes condições
+    const variationFactor = cond === condition ? 1 : 0.7 + Math.random() * 0.4;
+    
+    return {
+      name: cond,
+      estudos: Math.round(calculatedEfficacyScore * 15 * variationFactor),
+      petlove: Math.min(95, Math.round(calculatedEfficacyScore * 18 * variationFactor * (1 + Math.random() * 0.2))),
+    };
+  });
 
-  // Gerar taxas de sucesso estratificadas
+  // Gerar taxas de sucesso estratificadas por categorias de eficácia
+  const efficacyRate = Math.min(100, Math.round(calculatedEfficacyScore * 20));
   const successRates = {
-    alta: Math.min(100, Math.round(70 + calculatedEfficacyScore * 5)),
-    media: Math.min(90, Math.round(55 + calculatedEfficacyScore * 5)),
-    baixa: Math.min(70, Math.round(40 + calculatedEfficacyScore * 4)),
+    eficaz: efficacyRate,
+    baixaEficacia: Math.min(100 - efficacyRate, Math.round(100 - efficacyRate - (5 - calculatedEfficacyScore) * 5)),
+    ineficaz: Math.max(0, 100 - efficacyRate - Math.min(100 - efficacyRate, Math.round(100 - efficacyRate - (5 - calculatedEfficacyScore) * 5))),
     tempoMedio: Math.max(5, Math.round(25 - calculatedEfficacyScore * 2)),
   };
 
@@ -165,19 +181,25 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-slate-50 p-3 rounded-md">
           <p className="text-xs text-gray-500">Taxa de sucesso</p>
-          <p className="text-xl font-bold text-green-600">{successRates.alta}%</p>
+          <p className="text-xl font-bold text-green-600">{successRates.eficaz}%</p>
           <div className="space-y-1 mt-1">
             <div className="flex justify-between text-xs">
-              <span>Alta eficácia:</span>
-              <span className="font-medium">{successRates.alta}%</span>
+              <span className="flex items-center">
+                <TrendingUp size={14} className="text-green-600 mr-1" /> Eficaz:
+              </span>
+              <span className="font-medium text-green-600">{successRates.eficaz}%</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span>Média eficácia:</span>
-              <span className="font-medium">{successRates.media}%</span>
+              <span className="flex items-center">
+                <Minus size={14} className="text-amber-600 mr-1" /> Baixa eficácia:
+              </span>
+              <span className="font-medium text-amber-600">{successRates.baixaEficacia}%</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span>Baixa eficácia:</span>
-              <span className="font-medium">{successRates.baixa}%</span>
+              <span className="flex items-center">
+                <TrendingDown size={14} className="text-red-600 mr-1" /> Ineficaz:
+              </span>
+              <span className="font-medium text-red-600">{successRates.ineficaz}%</span>
             </div>
           </div>
         </div>
