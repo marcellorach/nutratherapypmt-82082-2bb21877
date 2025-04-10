@@ -114,19 +114,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   className="py-1 pl-2 pr-1 flex items-center gap-1 bg-slate-50"
                 >
                   <div className="flex items-center gap-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-5 w-5 p-0.5 mr-1">
-                            <Info size={12} className="text-blue-500" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          Clique para mais informações
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-5 w-5 p-0.5 hover:bg-transparent">
