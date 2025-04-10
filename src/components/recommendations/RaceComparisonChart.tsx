@@ -99,19 +99,32 @@ const RaceComparisonChart: React.FC<RaceComparisonChartProps> = ({
   };
 
   return (
-    <div className="w-full h-60 bg-slate-50 p-3 rounded-md mt-2">
-      <h4 className="font-medium mb-2 text-sm">Comparativo por raças - {condition}</h4>
-      <ResponsiveContainer width="100%" height="90%">
+    <div className="w-full h-60 bg-slate-50 p-3 rounded-md">
+      <div className="mb-2 flex justify-between items-center">
+        <span className="text-sm font-medium">Comparativo por raças - {condition}</span>
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center">
+            <span className="w-3 h-3 inline-block bg-[#4caf50] mr-1 rounded-sm"></span>
+            <span>Taxa de eficácia</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 inline-block bg-[#ff9800] mr-1 rounded-sm"></span>
+            <span>Tempo (semanas)</span>
+          </div>
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height="85%">
         <BarChart
           data={data}
-          margin={{ top: 5, right: 5, left: 5, bottom: 20 }}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
           layout="vertical"
         >
           <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
           <XAxis 
             type="number" 
             domain={[0, 100]} 
-            tickFormatter={(value) => value === 0 ? '' : `${value}%`}
+            tickFormatter={(value) => value === 0 ? '' : `${value}`}
+            orientation="top"
           />
           <YAxis 
             type="category" 
@@ -137,7 +150,6 @@ const RaceComparisonChart: React.FC<RaceComparisonChartProps> = ({
             }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
           <Bar 
             name="Taxa de eficácia" 
             dataKey="eficacia" 

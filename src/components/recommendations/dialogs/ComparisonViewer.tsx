@@ -56,7 +56,7 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
   };
 
   return (
-    <ScrollArea className="max-h-[80vh]">
+    <ScrollArea className="h-full max-h-[70vh]">
       <div className="space-y-6 mb-6 p-1">
         <PopulationChart 
           baseEfficacyScore={baseEfficacyScore}
@@ -66,29 +66,17 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
         
         <div>
           <h4 className="font-medium mb-2">Comparação específica para raça: {currentRace}</h4>
-          <div className="bg-slate-50 p-3 rounded-md">
-            <p className="text-sm">
-              A eficácia em {nutraceuticalCondition} para {currentRace}s é {raceSpecificData.melhoria}% maior que a média da população geral.
-              Efeitos colaterais reportados são menos comuns ({raceSpecificData.racaEfeitosColaterais}% vs. {raceSpecificData.populacaoEfeitosColaterais}% na população geral).
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-green-50 p-2 rounded border border-green-100">
-                <p className="font-medium mb-1 text-green-800">Tempo médio para resultado</p>
-                <p>{raceSpecificData.atual.tempoMedio} semanas (população: {raceSpecificData.populacao.tempoMedio} semanas)</p>
-              </div>
-              <div className="bg-blue-50 p-2 rounded border border-blue-100">
-                <p className="font-medium mb-1 text-blue-800">Resposta positiva</p>
-                <p>{raceSpecificData.atual.taxaResposta}% (população: {raceSpecificData.populacao.taxaResposta}%)</p>
-              </div>
-            </div>
-          </div>
+          <p className="text-sm mb-3 bg-slate-50 p-3 rounded-md">
+            A eficácia em {nutraceuticalCondition} para {currentRace}s é {raceSpecificData.melhoria}% maior que a média da população geral.
+            Efeitos colaterais reportados são menos comuns ({raceSpecificData.racaEfeitosColaterais}% vs. {raceSpecificData.populacaoEfeitosColaterais}% na população geral).
+          </p>
+          
+          {/* Adicionando o gráfico de comparação por raça */}
+          <RaceComparisonChart 
+            currentRace={currentRace} 
+            condition={nutraceuticalCondition}
+          />
         </div>
-        
-        {/* Adicionando o novo gráfico de comparação por raça */}
-        <RaceComparisonChart 
-          currentRace={currentRace} 
-          condition={nutraceuticalCondition}
-        />
         
         <div>
           <h4 className="font-medium mb-2">Ajuste de dosagem recomendado</h4>

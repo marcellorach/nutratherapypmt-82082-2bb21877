@@ -26,13 +26,15 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="pb-2">
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 pb-4">{children}</div>
-          <DrawerFooter>
+          <div className="flex-1 overflow-auto">
+            <div className="px-4">{children}</div>
+          </div>
+          <DrawerFooter className="pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
           </DrawerFooter>
         </DrawerContent>
@@ -42,10 +44,12 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden">
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
-        <div className="overflow-y-auto pr-1">{children}</div>
+        <div className="overflow-auto flex-1 pr-1 max-h-[calc(85vh-120px)]">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
