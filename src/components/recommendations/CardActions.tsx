@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +25,6 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
   const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
-  // Encontrar exames para este pet
   const petExams = examResults.filter(exam => exam.petId === recommendation.petId);
   
   const handleApprove = () => {
@@ -34,11 +32,10 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
     toast({
       title: "Recomendação aprovada",
       description: `${nutraceutical.name} foi aprovado para o tratamento.`,
-      variant: "default", // Corrigido de "success" para "default"
+      variant: "default",
     });
   };
 
-  // Componente móvel vs desktop para dialogs
   const MobileWrapper = ({ open, onOpenChange, children }: { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode }) => {
     if (isMobile) {
       return (
@@ -101,7 +98,6 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         Comparar com população
       </Button>
 
-      {/* Modal de detalhes da indicação */}
       <MobileWrapper open={showDetails} onOpenChange={setShowDetails}>
         <div className="p-4">
           <div className="mb-6">
@@ -155,8 +151,6 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         </div>
       </MobileWrapper>
 
-      {/* O resto do código permanece inalterado */}
-      {/* Modal de exames */}
       <MobileWrapper open={showExams} onOpenChange={setShowExams}>
         <div className="p-4">
           <div className="mb-6">
@@ -203,7 +197,6 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         </div>
       </MobileWrapper>
 
-      {/* Modal do AI Chat */}
       <MobileWrapper open={showAI} onOpenChange={setShowAI}>
         <div className="p-4 h-[500px] flex flex-col">
           <div className="mb-4">
@@ -246,46 +239,18 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
         </div>
       </MobileWrapper>
 
-      {/* Modal de comparação com população */}
       <MobileWrapper open={showCompare} onOpenChange={setShowCompare}>
         <div className="p-4">
-          <div className="mb-6">
+          <div className="mb-4">
             <h3 className="text-xl font-bold mb-1">Comparação com população</h3>
             <p className="text-gray-600">Dados comparativos para {nutraceutical.name}</p>
           </div>
           
           <div className="space-y-6">
-            <div>
-              <h4 className="font-medium mb-3">Eficácia em casos semelhantes</h4>
-              <div className="bg-slate-50 p-4 rounded-md">
-                <PopulationChart 
-                  efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
-                  condition={nutraceutical.condition}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-medium mb-2">Estatísticas relevantes</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 p-3 rounded-md">
-                  <p className="text-xs text-gray-500">Taxa de sucesso</p>
-                  <p className="text-xl font-bold text-green-600">87%</p>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-md">
-                  <p className="text-xs text-gray-500">Tempo médio até resposta</p>
-                  <p className="text-xl font-bold">21 dias</p>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-md">
-                  <p className="text-xs text-gray-500">Casos com efeitos colaterais</p>
-                  <p className="text-xl font-bold text-amber-600">12%</p>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-md">
-                  <p className="text-xs text-gray-500">Pacientes da mesma raça</p>
-                  <p className="text-xl font-bold">143</p>
-                </div>
-              </div>
-            </div>
+            <PopulationChart 
+              efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
+              condition={nutraceutical.condition}
+            />
             
             <div>
               <h4 className="font-medium mb-2">Comparação específica para raça</h4>
