@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, PawPrint, Stethoscope, UserCog } from "lucide-react";
+import { ArrowRight, PawPrint, Stethoscope } from "lucide-react";
 import Layout from '@/components/layout/Layout';
 import { Link } from 'react-router-dom';
 import { generateRandomData } from '@/data/mockData';
@@ -49,24 +49,13 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              
-              <Link to="/administrador">
-                <Button 
-                  className="w-64 h-16 text-lg" 
-                  variant="secondary"
-                >
-                  <UserCog className="mr-2 h-6 w-6" />
-                  Área do Admin
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
       </div>
       
       <div className="py-16 container mx-auto">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-xl font-bold mb-4 flex items-center">
               <Stethoscope className="mr-2 h-5 w-5 text-primary" />
@@ -91,20 +80,6 @@ const Index = () => {
               visualize composição e posologia, aprove e acompanhe o progresso do seu pet.
             </p>
             <Link to="/tutor" className="text-primary hover:underline inline-flex items-center">
-              Saiba mais <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-4 flex items-center">
-              <UserCog className="mr-2 h-5 w-5 text-primary" />
-              Para Administradores
-            </h3>
-            <p className="mb-4">
-              Gerencie o banco de dados de nutracêuticos, prompts da IA,
-              correlações clínicas e atualize estudos científicos.
-            </p>
-            <Link to="/administrador" className="text-primary hover:underline inline-flex items-center">
               Saiba mais <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>

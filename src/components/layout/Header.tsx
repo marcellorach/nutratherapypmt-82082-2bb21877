@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { PawPrint, User, Settings } from "lucide-react";
+import { PawPrint, User, UserCog } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Header: React.FC = () => {
   return (
@@ -20,18 +21,28 @@ const Header: React.FC = () => {
           <Link to="/tutor" className="text-white hover:text-gray-200 transition-colors">
             Tutor
           </Link>
-          <Link to="/administrador" className="text-white hover:text-gray-200 transition-colors">
-            Administrador
-          </Link>
         </nav>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link 
+                  to="/administrador" 
+                  className="text-gray-300 hover:text-white transition-colors mr-4"
+                >
+                  <UserCog size={20} />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>Gerencie o banco de dados de nutracêuticos, prompts da IA, correlações clínicas e atualize estudos científicos.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">
             <User size={18} className="mr-1" />
             Login
-          </Button>
-          <Button variant="ghost" className="text-white">
-            <Settings size={18} />
           </Button>
         </div>
       </div>
