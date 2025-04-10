@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Info, Smartphone, Clock } from "lucide-react";
+import { User, Info, Smartphone, Clock, AlertTriangle } from "lucide-react";
 import { Pet } from '@/types';
 
 interface PetCardProps {
@@ -15,8 +15,18 @@ interface PetCardProps {
 
 const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
   // Fallbacks em caso de não haver dados
-  const petImage = pet.imageUrl || `/lovable-uploads/56284482-b2f9-4ef0-a5c8-6bd2afc82e04.png`;
-  const fallbackImage = pet.species === 'Cachorro' ? '🐕' : pet.species === 'Gato' ? '🐈' : '🐾';
+  const petImage = pet.imageUrl || `/lovable-uploads/11263f77-191e-4f66-bd55-da169a94c26f.png`;
+  const fallbackImage = '🐕';
+  
+  // Definir cores com base nos dias de revisão
+  const getReviewStatusColor = (days: number | undefined) => {
+    if (days === undefined) return '';
+    if (days >= 10) return 'bg-red-500';
+    if (days >= 7) return 'bg-amber-500';
+    return 'bg-gray-800';
+  };
+
+  const reviewStatusColor = getReviewStatusColor(pet.reviewDays);
   
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden">
@@ -36,12 +46,13 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
           </Badge>
         )}
         
-        {pet.reviewDays !== undefined && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 text-white py-1 px-2 flex items-center gap-1">
+        {pet.reviewDays !== undefined && pet.reviewDays > 0 && (
+          <div className={`absolute bottom-0 left-0 right-0 ${reviewStatusColor} text-white py-1 px-2 flex items-center gap-1`}>
+            {pet.reviewDays >= 7 && <AlertTriangle size={14} />}
             <Clock size={14} />
             <span className="text-xs">
-              {pet.reviewDays === 0 ? 'Aguardando revisão hoje' : 
-               `Aguardando sua revisão há ${pet.reviewDays} ${pet.reviewDays === 1 ? 'dia' : 'dias'}`}
+              {pet.reviewDays === 1 ? 'Aguardando sua revisão há 1 dia' : 
+               `Aguardando sua revisão há ${pet.reviewDays} dias`}
             </span>
           </div>
         )}

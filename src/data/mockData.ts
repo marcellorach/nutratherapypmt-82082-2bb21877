@@ -34,7 +34,7 @@ export const owners: Owner[] = [
   }
 ];
 
-// Mock Pets
+// Mock Pets - Apenas cães
 export const pets: Pet[] = [
   {
     id: "pet1",
@@ -64,21 +64,6 @@ export const pets: Pet[] = [
     petLovePlan: "Básico",
     veterinarianId: "vet1",
     veterinarianName: "Dr. Ricardo Alves",
-    reviewDays: 0
-  },
-  {
-    id: "pet3",
-    name: "Felix",
-    species: "Gato",
-    breed: "Siamês",
-    age: 7,
-    weight: 4.5,
-    ownerId: "own1",
-    imageUrl: "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    chipNumber: "BR45678912",
-    petLovePlan: "Completo",
-    veterinarianId: "vet1",
-    veterinarianName: "Dr. Ricardo Alves",
     reviewDays: 1
   },
   {
@@ -95,21 +80,6 @@ export const pets: Pet[] = [
     veterinarianId: "vet1",
     veterinarianName: "Dr. Ricardo Alves",
     reviewDays: 5
-  },
-  {
-    id: "pet5",
-    name: "Nina",
-    species: "Gato",
-    breed: "Persa",
-    age: 2,
-    weight: 3.5,
-    ownerId: "own4",
-    imageUrl: "https://images.unsplash.com/photo-1618189063538-57c32be35883?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    chipNumber: "BR23456789",
-    petLovePlan: "Básico",
-    veterinarianId: "vet1",
-    veterinarianName: "Dr. Ricardo Alves",
-    reviewDays: 3
   },
   {
     id: "pet6",
@@ -154,7 +124,37 @@ export const pets: Pet[] = [
     petLovePlan: "Básico",
     veterinarianId: "vet1",
     veterinarianName: "Dr. Ricardo Alves",
-    reviewDays: 0
+    reviewDays: 1
+  },
+  {
+    id: "pet9",
+    name: "Max",
+    species: "Cachorro",
+    breed: "Pastor Alemão",
+    age: 4,
+    weight: 32,
+    ownerId: "own2",
+    imageUrl: "https://images.unsplash.com/photo-1553882809-a4f57e59501d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2274&q=80",
+    chipNumber: "BR78901234",
+    petLovePlan: "Premium",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 3
+  },
+  {
+    id: "pet10",
+    name: "Billy",
+    species: "Cachorro",
+    breed: "Dálmata",
+    age: 2,
+    weight: 27,
+    ownerId: "own5",
+    imageUrl: "https://images.unsplash.com/photo-1597283712405-819a6027dcb4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
+    chipNumber: "BR89012345",
+    petLovePlan: "Completo",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 10
   }
 ];
 
