@@ -7,6 +7,7 @@ interface ActiveIngredientTag {
   name: string;
   quantity: string;
   removed?: boolean;
+  efficacy: number;
 }
 
 interface IngredientsSectionProps {
@@ -14,13 +15,15 @@ interface IngredientsSectionProps {
   nutraceutical: Nutraceutical;
   onEdit: (index: number) => void;
   onRemove: (index: number) => void;
+  onEfficacyChange: (index: number, value: number) => void;
 }
 
 const IngredientsSection: React.FC<IngredientsSectionProps> = ({
   ingredients,
   nutraceutical,
   onEdit,
-  onRemove
+  onRemove,
+  onEfficacyChange
 }) => {
   // Filtrar apenas ingredientes ativos (não removidos)
   const activeIngredients = ingredients.filter(ingredient => !ingredient.removed);
@@ -40,6 +43,8 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({
               nutraceutical={nutraceutical}
               onEdit={onEdit}
               onRemove={onRemove}
+              efficacy={ingredient.efficacy || nutraceutical.scientificEvidence.efficacyScore / 5}
+              onEfficacyChange={onEfficacyChange}
             />
           );
         })}

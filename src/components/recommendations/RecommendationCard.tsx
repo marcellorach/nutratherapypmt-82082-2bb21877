@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Recommendation, Nutraceutical } from '@/types';
 import CardHeader from './CardHeader';
@@ -8,28 +8,33 @@ import RemovedIngredientsSection from './RemovedIngredientsSection';
 import BenefitsSection from './BenefitsSection';
 import ScientificEvidence from './ScientificEvidence';
 import CardActions from './CardActions';
+import { useToast } from "@/hooks/use-toast";
+
+interface ActiveIngredientTag {
+  name: string;
+  quantity: string;
+  removed?: boolean;
+  efficacy: number;
+}
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
   nutraceutical: Nutraceutical;
 }
 
-interface ActiveIngredientTag {
-  name: string;
-  quantity: string;
-  removed?: boolean;
-}
-
 const RecommendationCard: React.FC<RecommendationCardProps> = ({ 
   recommendation, 
   nutraceutical 
 }) => {
-  // Preparar os ingredientes ativos como tags
+  const { toast } = useToast();
+  
+  // Preparar os ingredientes ativos como tags com eficácia base
   const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>(
     nutraceutical.activeIngredients.map(ingredient => ({
       name: ingredient,
       quantity: '10mg', // Quantidade padrão para exemplo
-      removed: false
+      removed: false,
+      efficacy: nutraceutical.scientificEvidence.efficacyScore / 5 // Convertendo de 0-5 para 0-1
     }))
   );
 
@@ -41,6 +46,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       removed: true
     };
     setIngredients(updatedIngredients);
+    
+    toast({
+      title: "Ingrediente removido",
+      description: `${updatedIngredients[index].name} foi removido da fórmula.`,
+      variant: "default",
+    });
   };
 
   // Função para restaurar um ingrediente
@@ -51,6 +62,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       removed: false
     };
     setIngredients(updatedIngredients);
+    
+    toast({
+      title: "Ingrediente restaurado",
+      description: `${updatedIngredients[index].name} foi adicionado novamente à fórmula.`,
+      variant: "default",
+    });
   };
 
   // Função para editar a quantidade de um ingrediente
@@ -63,7 +80,23 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         quantity: newQuantity
       };
       setIngredients(updatedIngredients);
+      
+      toast({
+        title: "Quantidade atualizada",
+        description: `${updatedIngredients[index].name} agora tem ${newQuantity}.`,
+        variant: "default",
+      });
     }
+  };
+  
+  // Função para atualizar a eficácia de um ingrediente
+  const updateIngredientEfficacy = (index: number, value: number) => {
+    const updatedIngredients = [...ingredients];
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      efficacy: value
+    };
+    setIngredients(updatedIngredients);
   };
   
   return (
@@ -87,6 +120,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           nutraceutical={nutraceutical}
           onEdit={editIngredientQuantity}
           onRemove={removeIngredient}
+          onEfficacyChange={updateIngredientEfficacy}
         />
         
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -108,6 +142,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <CardActions 
           recommendation={recommendation}
           nutraceutical={nutraceutical}
+          ingredients={ingredients}
+          onIngredientEfficacyChange={updateIngredientEfficacy}
         />
       </CardContent>
       

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -13,11 +13,46 @@ import {
 } from 'recharts';
 
 interface PopulationChartProps {
-  efficacyScore: number;
+  baseEfficacyScore: number;
   condition: string;
+  ingredients?: Array<{
+    name: string;
+    efficacy: number;
+    removed?: boolean;
+  }>;
 }
 
-const PopulationChart: React.FC<PopulationChartProps> = ({ efficacyScore, condition }) => {
+const PopulationChart: React.FC<PopulationChartProps> = ({ 
+  baseEfficacyScore, 
+  condition,
+  ingredients = []
+}) => {
+  const [calculatedEfficacyScore, setCalculatedEfficacyScore] = useState(baseEfficacyScore);
+  
+  // Calcular a eficácia com base nos ingredientes
+  useEffect(() => {
+    if (!ingredients || ingredients.length === 0) {
+      setCalculatedEfficacyScore(baseEfficacyScore);
+      return;
+    }
+
+    const activeIngredients = ingredients.filter(i => !i.removed);
+    
+    if (activeIngredients.length === 0) {
+      setCalculatedEfficacyScore(baseEfficacyScore * 0.5); // Reduz a eficácia pela metade se todos os ingredientes foram removidos
+      return;
+    }
+    
+    // Calcular média de eficácia dos ingredientes ativos
+    const ingredientEfficacyAvg = activeIngredients.reduce((sum, ing) => sum + ing.efficacy, 0) / activeIngredients.length;
+    
+    // Eficácia final é uma mistura da eficácia base e a média dos ingredientes
+    const finalEfficacy = (baseEfficacyScore * 0.6) + (ingredientEfficacyAvg * 0.4 * 5);
+    
+    // Limitar entre 1 e 5
+    setCalculatedEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));
+  }, [baseEfficacyScore, ingredients]);
+  
   // Gerar número aleatório de casos entre 1800 e 42000
   const totalCases = Math.floor(Math.random() * (42000 - 1800 + 1) + 1800);
   
@@ -25,27 +60,27 @@ const PopulationChart: React.FC<PopulationChartProps> = ({ efficacyScore, condit
   const data = [
     {
       name: 'Alta eficácia (>80%)',
-      estudos: efficacyScore >= 4 ? Math.round((efficacyScore * 20)) : Math.round((efficacyScore * 15)),
-      petlove: Math.min(95, Math.round((efficacyScore * 20) * (1 + Math.random() * 0.3))),
+      estudos: calculatedEfficacyScore >= 4 ? Math.round((calculatedEfficacyScore * 20)) : Math.round((calculatedEfficacyScore * 15)),
+      petlove: Math.min(95, Math.round((calculatedEfficacyScore * 20) * (1 + Math.random() * 0.3))),
     },
     {
       name: 'Média eficácia (60-80%)',
-      estudos: efficacyScore >= 3 ? Math.round((efficacyScore * 15)) : Math.round((efficacyScore * 10)),
-      petlove: Math.min(85, Math.round((efficacyScore * 18) * (1 + Math.random() * 0.2))),
+      estudos: calculatedEfficacyScore >= 3 ? Math.round((calculatedEfficacyScore * 15)) : Math.round((calculatedEfficacyScore * 10)),
+      petlove: Math.min(85, Math.round((calculatedEfficacyScore * 18) * (1 + Math.random() * 0.2))),
     },
     {
       name: 'Baixa eficácia (<60%)',
-      estudos: Math.round((5 - efficacyScore) * 10),
-      petlove: Math.round((5 - efficacyScore) * 8),
+      estudos: Math.round((5 - calculatedEfficacyScore) * 10),
+      petlove: Math.round((5 - calculatedEfficacyScore) * 8),
     },
   ];
 
   // Gerar taxas de sucesso estratificadas
   const successRates = {
-    alta: Math.min(100, Math.round(70 + efficacyScore * 5)),
-    media: Math.min(90, Math.round(55 + efficacyScore * 5)),
-    baixa: Math.min(70, Math.round(40 + efficacyScore * 4)),
-    tempoMedio: Math.round(25 - efficacyScore * 2),
+    alta: Math.min(100, Math.round(70 + calculatedEfficacyScore * 5)),
+    media: Math.min(90, Math.round(55 + calculatedEfficacyScore * 5)),
+    baixa: Math.min(70, Math.round(40 + calculatedEfficacyScore * 4)),
+    tempoMedio: Math.round(25 - calculatedEfficacyScore * 2),
   };
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {

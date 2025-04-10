@@ -1,29 +1,43 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Recommendation, Nutraceutical, ExamResult } from '@/types';
 import { Check, Search, FileText, MessageSquare, PieChart, ThumbsUp } from 'lucide-react';
 import { examResults } from '@/data';
 import { useToast } from "@/hooks/use-toast";
 import PopulationChart from './PopulationChart';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+interface ActiveIngredientType {
+  name: string;
+  quantity: string;
+  removed?: boolean;
+  efficacy: number;
+}
 
 interface CardActionsProps {
   recommendation: Recommendation;
   nutraceutical: Nutraceutical;
+  ingredients: ActiveIngredientType[];
+  onIngredientEfficacyChange: (index: number, value: number) => void;
 }
 
-const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical }) => {
+const CardActions: React.FC<CardActionsProps> = ({ 
+  recommendation, 
+  nutraceutical,
+  ingredients,
+  onIngredientEfficacyChange
+}) => {
   const [isApproved, setIsApproved] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showExams, setShowExams] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const { toast } = useToast();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useIsMobile();
 
   const petExams = examResults.filter(exam => exam.petId === recommendation.petId);
   
@@ -248,8 +262,9 @@ const CardActions: React.FC<CardActionsProps> = ({ recommendation, nutraceutical
           
           <div className="space-y-6">
             <PopulationChart 
-              efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
+              baseEfficacyScore={nutraceutical.scientificEvidence.efficacyScore}
               condition={nutraceutical.condition}
+              ingredients={ingredients}
             />
             
             <div>
