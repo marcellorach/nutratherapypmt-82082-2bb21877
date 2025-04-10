@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { PawPrint, User, UserCog, LogOut } from "lucide-react";
+import { User, UserCog, LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -11,12 +11,19 @@ const Header: React.FC = () => {
     <header className="w-full bg-white text-gray-800 p-4 border-b border-gray-200 shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-xl font-semibold flex items-center gap-2">
-          <div className="p-1.5 rounded-full border border-gray-400">
-            <PawPrint size={24} className="text-gray-800" />
+          <img 
+            src="/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png" 
+            alt="PetMoreTime NutraTherapy"
+            className="h-10"
+          />
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-800">
+              PetMoreTime <span className="text-gray-600">NutraTherapy</span>
+            </span>
+            <span className="text-xs text-gray-600 font-light">
+              Nutrição personalizada baseada em dados e IA
+            </span>
           </div>
-          <span className="font-bold text-gray-800">
-            NutraTherapy <span className="text-gray-600">PET</span>
-          </span>
         </Link>
         
         <nav className="hidden md:flex gap-6">

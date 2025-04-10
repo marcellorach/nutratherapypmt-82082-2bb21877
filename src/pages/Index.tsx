@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, PawPrint, Stethoscope, Beaker } from "lucide-react";
+import { ArrowRight, Stethoscope, Beaker } from "lucide-react";
 import Layout from '@/components/layout/Layout';
 import { Link } from 'react-router-dom';
-import { generateRandomData } from '@/data'; // Corrigindo a importação
+import { generateRandomData } from '@/data';
 
 const Index = () => {
   return (
@@ -13,12 +13,16 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-              <PawPrint className="mx-auto h-20 w-20 text-gray-800" />
-              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl text-gray-800">
-                NutraTherapy PET
+              <img 
+                src="/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png" 
+                alt="PetMoreTime NutraTherapy" 
+                className="mx-auto h-20 mb-4"
+              />
+              <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl text-gray-800">
+                PetMoreTime <span className="text-gray-600">NutraTherapy</span>
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                Nutrição personalizada e inteligente para a saúde e longevidade do seu pet
+                Nutrição personalizada baseada em dados e inteligência artificial para a saúde e longevidade do seu pet
               </p>
               
               <Button 
@@ -44,7 +48,11 @@ const Index = () => {
                   className="w-64 h-16 text-lg bg-white text-gray-800 border-2 border-gray-500 hover:bg-gray-100 transition-all" 
                   variant="outline"
                 >
-                  <PawPrint className="mr-2 h-6 w-6 text-gray-700" />
+                  <img 
+                    src="/lovable-uploads/154ca2f9-5d6b-4a91-a708-3c8bd2356c0d.png" 
+                    alt="Pata" 
+                    className="mr-2 h-6 w-6"
+                  />
                   Área do Tutor
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -73,7 +81,11 @@ const Index = () => {
           
           <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm transition-all hover:border-gray-400">
             <h3 className="text-xl font-bold mb-4 flex items-center text-gray-800">
-              <PawPrint className="mr-2 h-5 w-5 text-gray-700" />
+              <img 
+                src="/lovable-uploads/154ca2f9-5d6b-4a91-a708-3c8bd2356c0d.png" 
+                alt="Pata" 
+                className="mr-2 h-5 w-5"
+              />
               Para Tutores
             </h3>
             <p className="mb-4 text-gray-600">
@@ -90,7 +102,7 @@ const Index = () => {
       <div className="bg-gray-50 py-16 border-t border-gray-200">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Por que escolher NutraTherapy PET?</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Por que escolher PetMoreTime NutraTherapy?</h2>
             <p className="text-lg text-gray-600 mb-8">
               Nossa abordagem combina análise nutricional avançada, IA especializada e recomendações 
               personalizadas para promover a saúde e bem-estar do seu pet a longo prazo.
