@@ -4,11 +4,11 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, FileText, PieChart } from "lucide-react";
+import { Search, Plus, FileText, PieChart, Filter } from "lucide-react";
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import NutraceuticalEfficacy from '@/components/charts/NutraceuticalEfficacy';
 import PetCard from '@/components/pet/PetCard';
-import { pets, nutraceuticals } from '@/data/mockData';
+import { pets, nutraceuticals, generateRandomData } from '@/data/mockData';
 import { Pet } from '@/types';
 import RecommendationsList from './RecommendationsList';
 
@@ -32,6 +32,14 @@ const VeterinarioPage: React.FC = () => {
   const handleSelectPet = (pet: Pet) => {
     setSelectedPet(pet);
   };
+  
+  // Ordenar os pets por dias pendentes de revisão (prioridade mais alta primeiro)
+  const sortedPets = [...filteredPets].sort((a, b) => {
+    // Primeiro ordenar por dias de revisão
+    const daysA = a.reviewDays !== undefined ? a.reviewDays : 999;
+    const daysB = b.reviewDays !== undefined ? b.reviewDays : 999;
+    return daysA - daysB;
+  });
 
   return (
     <Layout>
@@ -69,8 +77,18 @@ const VeterinarioPage: React.FC = () => {
           </TabsList>
           
           <TabsContent value="pets" className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-gray-700">
+                {filteredPets.length} {filteredPets.length === 1 ? 'paciente encontrado' : 'pacientes encontrados'}
+              </p>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Filter size={16} />
+                Filtrar
+              </Button>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredPets.map((pet) => (
+              {sortedPets.map((pet) => (
                 <PetCard 
                   key={pet.id}
                   pet={pet}
@@ -84,6 +102,16 @@ const VeterinarioPage: React.FC = () => {
                   <p className="text-gray-500">Nenhum pet encontrado com esse termo.</p>
                 </div>
               )}
+            </div>
+            
+            <div className="flex justify-center mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => generateRandomData()}
+                className="text-gray-700"
+              >
+                Gerar dados aleatórios para exemplo
+              </Button>
             </div>
           </TabsContent>
           

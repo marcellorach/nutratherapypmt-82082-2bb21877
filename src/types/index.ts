@@ -11,6 +11,7 @@ export interface Pet {
   petLovePlan?: string;
   veterinarianId?: string;
   veterinarianName?: string;
+  reviewDays?: number;
 }
 
 export interface Owner {

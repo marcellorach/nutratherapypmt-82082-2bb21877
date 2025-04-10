@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Info, Smartphone } from "lucide-react";
+import { User, Info, Smartphone, Clock } from "lucide-react";
 import { Pet } from '@/types';
 
 interface PetCardProps {
@@ -34,6 +34,16 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
           <Badge className="absolute top-2 right-2 bg-white text-black border border-gray-300">
             Plano PetLove: {pet.petLovePlan}
           </Badge>
+        )}
+        
+        {pet.reviewDays !== undefined && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 text-white py-1 px-2 flex items-center gap-1">
+            <Clock size={14} />
+            <span className="text-xs">
+              {pet.reviewDays === 0 ? 'Aguardando revisão hoje' : 
+               `Aguardando sua revisão há ${pet.reviewDays} ${pet.reviewDays === 1 ? 'dia' : 'dias'}`}
+            </span>
+          </div>
         )}
       </div>
       

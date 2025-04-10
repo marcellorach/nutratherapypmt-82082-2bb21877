@@ -2,8 +2,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { PawPrint, User, UserCog } from "lucide-react";
+import { PawPrint, User, UserCog, LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header: React.FC = () => {
   return (
@@ -19,7 +20,7 @@ const Header: React.FC = () => {
         </Link>
         
         <nav className="hidden md:flex gap-6">
-          <Link to="/veterinario" className="text-gray-700 hover:text-gray-900 transition-colors">
+          <Link to="/veterinario" className="text-gray-700 hover:text-gray-900 transition-colors font-medium">
             Veterinário
           </Link>
           <Link to="/tutor" className="text-gray-700 hover:text-gray-900 transition-colors">
@@ -44,13 +45,23 @@ const Header: React.FC = () => {
             </Tooltip>
           </TooltipProvider>
           
-          <Button 
-            variant="outline" 
-            className="text-gray-800 border border-gray-300 hover:bg-gray-100 hover:border-gray-400"
-          >
-            <User size={18} className="mr-1" />
-            Login
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end">
+              <span className="font-medium text-sm">Dr. Ricardo Alves</span>
+              <span className="text-xs text-gray-500">CRV: 12345-MG</span>
+            </div>
+            <Avatar className="h-9 w-9 border border-gray-200">
+              <AvatarImage src="/lovable-uploads/56284482-b2f9-4ef0-a5c8-6bd2afc82e04.png" />
+              <AvatarFallback>RA</AvatarFallback>
+            </Avatar>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+            >
+              <LogOut size={18} />
+            </Button>
+          </div>
         </div>
       </div>
     </header>

@@ -13,6 +13,24 @@ export const owners: Owner[] = [
     name: "Maria Souza",
     email: "maria@email.com",
     phone: "(11) 88888-8888"
+  },
+  {
+    id: "own3",
+    name: "Pedro Santos",
+    email: "pedro@email.com",
+    phone: "(11) 77777-7777"
+  },
+  {
+    id: "own4",
+    name: "Ana Oliveira",
+    email: "ana@email.com",
+    phone: "(11) 66666-6666"
+  },
+  {
+    id: "own5",
+    name: "Carlos Mendes",
+    email: "carlos@email.com",
+    phone: "(11) 55555-5555"
   }
 ];
 
@@ -30,7 +48,8 @@ export const pets: Pet[] = [
     chipNumber: "BR12345678",
     petLovePlan: "Premium",
     veterinarianId: "vet1",
-    veterinarianName: "Dr. Ricardo Alves"
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 2
   },
   {
     id: "pet2",
@@ -44,7 +63,8 @@ export const pets: Pet[] = [
     chipNumber: "BR87654321",
     petLovePlan: "Básico",
     veterinarianId: "vet1",
-    veterinarianName: "Dr. Ricardo Alves"
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 0
   },
   {
     id: "pet3",
@@ -57,8 +77,84 @@ export const pets: Pet[] = [
     imageUrl: "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     chipNumber: "BR45678912",
     petLovePlan: "Completo",
-    veterinarianId: "vet2",
-    veterinarianName: "Dra. Ana Santos"
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 1
+  },
+  {
+    id: "pet4",
+    name: "Thor",
+    species: "Cachorro",
+    breed: "Golden Retriever",
+    age: 4,
+    weight: 28,
+    ownerId: "own3",
+    imageUrl: "https://images.unsplash.com/photo-1600077106724-946750eeaf3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80",
+    chipNumber: "BR98765432",
+    petLovePlan: "Premium",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 5
+  },
+  {
+    id: "pet5",
+    name: "Nina",
+    species: "Gato",
+    breed: "Persa",
+    age: 2,
+    weight: 3.5,
+    ownerId: "own4",
+    imageUrl: "https://images.unsplash.com/photo-1618189063538-57c32be35883?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    chipNumber: "BR23456789",
+    petLovePlan: "Básico",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 3
+  },
+  {
+    id: "pet6",
+    name: "Bidu",
+    species: "Cachorro",
+    breed: "Beagle",
+    age: 6,
+    weight: 12,
+    ownerId: "own5",
+    imageUrl: "https://images.unsplash.com/photo-1568572933382-74d440642117?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    chipNumber: "BR34567890",
+    petLovePlan: "Completo",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 7
+  },
+  {
+    id: "pet7",
+    name: "Mel",
+    species: "Cachorro",
+    breed: "Shih Tzu",
+    age: 2,
+    weight: 5.5,
+    ownerId: "own4",
+    imageUrl: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
+    chipNumber: "BR56789012",
+    petLovePlan: "Premium",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 4
+  },
+  {
+    id: "pet8",
+    name: "Tobby",
+    species: "Cachorro",
+    breed: "Bulldog",
+    age: 3,
+    weight: 22,
+    ownerId: "own3",
+    imageUrl: "https://images.unsplash.com/photo-1583511655826-05700d52f4d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1976&q=80",
+    chipNumber: "BR67890123",
+    petLovePlan: "Básico",
+    veterinarianId: "vet1",
+    veterinarianName: "Dr. Ricardo Alves",
+    reviewDays: 0
   }
 ];
 
