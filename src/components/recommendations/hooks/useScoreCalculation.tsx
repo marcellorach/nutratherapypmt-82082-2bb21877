@@ -46,20 +46,23 @@ export const useScoreCalculation = (nutraceutical: Nutraceutical) => {
       return sum + getQuantityEffect(ing.quantity);
     }, 0) / activeIngredients.length;
     
-    // Calculo de eficácia final com ponderação não linear
+    // Cálculo de eficácia final com ponderação não linear - aumenta com doses maiores
     const baseEfficacy = nutraceutical.scientificEvidence.efficacyScore;
     const ingredientFactor = Math.pow(ingredientEfficacyAvg, 1.2);
     const quantityFactor = Math.pow(quantityAvg, 1.1);
     
-    // Eficácia final é uma mistura não linear de fatores
+    // Eficácia final é uma mistura não linear de fatores - AUMENTA com dose maior
     const finalEfficacy = (baseEfficacy * 0.3) + 
                          (ingredientFactor * 0.5) + 
                          (quantityFactor * 0.2 * 3);
     
-    // Sustentação usa fórmula similar mas com menos peso na quantidade
+    // Sustentação DIMINUI ligeiramente com doses maiores
+    // Quanto maior a quantidade, menor a sustentação (relação inversa)
+    const sustainabilityDrop = quantityFactor * 0.05; // Pequena redução com base na quantidade
+    
     const finalSustainability = (nutraceutical.scientificEvidence.sustainabilityScore * 0.4) + 
-                               (ingredientFactor * 0.4) + 
-                               (quantityFactor * 0.2 * 2);
+                               (ingredientFactor * 0.4) - 
+                               sustainabilityDrop;
     
     // Limitar entre 1 e 5
     setEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));

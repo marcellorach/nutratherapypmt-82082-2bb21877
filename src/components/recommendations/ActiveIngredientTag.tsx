@@ -46,11 +46,12 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
   }, [quantity]);
 
   // Calcular a eficácia não linearmente com base no valor do slider
-  // Fórmula não linear: eficácia = 1 + (slider/100)^2 * 2
+  // Fórmula não linear: eficácia = 1 + (slider/100)^2 * 4
+  // Isso permitirá que a eficácia aumente mais rapidamente quando o slider for movido para direita
   const calculateEfficacy = (sliderVal: number) => {
     const baseEfficacy = 1;
-    const maxIncrease = 2; // Máximo incremento de eficácia
-    const nonLinearFactor = Math.pow(sliderVal / 100, 2) * maxIncrease;
+    const maxIncrease = 4; // Máximo incremento de eficácia
+    const nonLinearFactor = Math.pow(sliderVal / 100, 1.7) * maxIncrease;
     return Math.min(baseEfficacy + nonLinearFactor, 5); // Limitar ao máximo de 5
   };
 
