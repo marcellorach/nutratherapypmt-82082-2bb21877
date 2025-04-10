@@ -11,10 +11,10 @@ import { nutraceuticals } from '@/data/mockData';
 import NutraceuticalEfficacy from '@/components/charts/NutraceuticalEfficacy';
 
 const AdministradorPage: React.FC = () => {
-  // Dados para o gráfico
+  // Dados para o gráfico - Atualizando para usar efficacyScore em vez de score
   const efficacyData = nutraceuticals.map(item => ({
     name: item.name,
-    score: item.scientificEvidence.score,
+    score: item.scientificEvidence.efficacyScore,
     contraindications: item.contraindications.length
   }));
   
@@ -72,7 +72,7 @@ const AdministradorPage: React.FC = () => {
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                      <TableCell>{item.scientificEvidence.score}/5</TableCell>
+                      <TableCell>{item.scientificEvidence.efficacyScore}/5</TableCell>
                       <TableCell>{item.contraindications.length}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm">Editar</Button>
