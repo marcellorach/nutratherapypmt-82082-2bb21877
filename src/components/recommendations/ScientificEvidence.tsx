@@ -14,10 +14,10 @@ const ScientificEvidence: React.FC<ScientificEvidenceProps> = ({ nutraceutical }
       <p className="text-sm font-medium mb-1">Evidências científicas:</p>
       <div className="flex gap-2 text-xs mb-2">
         <Badge variant="outline" className="bg-slate-50">
-          Eficácia: {nutraceutical.scientificEvidence.efficacyScore}/5
+          Eficácia: {nutraceutical.scientificEvidence.efficacyScore.toFixed(1)}/5
         </Badge>
         <Badge variant="outline" className="bg-slate-50">
-          Sustentação: {nutraceutical.scientificEvidence.sustainabilityScore}/5
+          Sustentação: {nutraceutical.scientificEvidence.sustainabilityScore.toFixed(1)}/5
         </Badge>
       </div>
       <div className="text-xs text-blue-600">

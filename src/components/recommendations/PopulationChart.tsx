@@ -18,6 +18,7 @@ interface PopulationChartProps {
   ingredients?: Array<{
     name: string;
     efficacy: number;
+    quantity?: string;
     removed?: boolean;
   }>;
 }
@@ -46,8 +47,17 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
     // Calcular média de eficácia dos ingredientes ativos
     const ingredientEfficacyAvg = activeIngredients.reduce((sum, ing) => sum + ing.efficacy, 0) / activeIngredients.length;
     
-    // Eficácia final é uma mistura da eficácia base e a média dos ingredientes
-    const finalEfficacy = (baseEfficacyScore * 0.6) + (ingredientEfficacyAvg * 0.4 * 5);
+    // Calcular média de quantidade relativa (assumindo que o padrão é 10mg)
+    const quantityAvg = activeIngredients.reduce((sum, ing) => {
+      if (!ing.quantity) return sum + 1;
+      const match = ing.quantity.match(/(\d+)/);
+      return sum + (match ? parseInt(match[1]) / 10 : 1);
+    }, 0) / activeIngredients.length;
+    
+    // Eficácia final é uma mistura da eficácia base, média dos ingredientes e quantidade média
+    const finalEfficacy = (baseEfficacyScore * 0.4) + 
+                         (ingredientEfficacyAvg * 0.4 * 5) + 
+                         (quantityAvg * 0.2 * 2);
     
     // Limitar entre 1 e 5
     setCalculatedEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));
@@ -80,7 +90,7 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
     alta: Math.min(100, Math.round(70 + calculatedEfficacyScore * 5)),
     media: Math.min(90, Math.round(55 + calculatedEfficacyScore * 5)),
     baixa: Math.min(70, Math.round(40 + calculatedEfficacyScore * 4)),
-    tempoMedio: Math.round(25 - calculatedEfficacyScore * 2),
+    tempoMedio: Math.max(5, Math.round(25 - calculatedEfficacyScore * 2)),
   };
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -184,7 +194,7 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
       </div>
       
       <p className="text-xs text-center text-gray-500 mt-2">
-        Eficácia comparativa para {condition}
+        Eficácia comparativa para {condition} - Pontuação atual: {calculatedEfficacyScore.toFixed(1)}/5
       </p>
     </div>
   );

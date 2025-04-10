@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Edit2, X, Info } from 'lucide-react';
@@ -16,6 +16,7 @@ interface ActiveIngredientTagProps {
   onRemove: (index: number) => void;
   efficacy: number;
   onEfficacyChange: (index: number, value: number) => void;
+  onQuantityChange: (index: number, quantity: string) => void;
 }
 
 const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
@@ -26,13 +27,36 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
   onEdit,
   onRemove,
   efficacy,
-  onEfficacyChange
+  onEfficacyChange,
+  onQuantityChange
 }) => {
   const [sliderValue, setSliderValue] = useState([efficacy * 10]);
+  const [currentQuantity, setCurrentQuantity] = useState(quantity);
+  
+  // Extrair o valor numérico e a unidade do formato "10mg"
+  useEffect(() => {
+    const match = quantity.match(/(\d+)(\w+)/);
+    if (match) {
+      const value = parseInt(match[1]);
+      const unit = match[2];
+      setCurrentQuantity(`${value}${unit}`);
+    }
+  }, [quantity]);
 
   const handleSliderChange = (value: number[]) => {
     setSliderValue(value);
-    onEfficacyChange(originalIndex, value[0] / 10);
+    const efficacyValue = value[0] / 10;
+    onEfficacyChange(originalIndex, efficacyValue);
+    
+    // Calcular nova quantidade baseada no valor do slider (5 a 50mg)
+    const match = currentQuantity.match(/(\d+)(\w+)/);
+    if (match) {
+      const unit = match[2];
+      const newQuantityValue = Math.round(5 + (value[0] / 50) * 45); // 5mg a 50mg
+      const newQuantity = `${newQuantityValue}${unit}`;
+      setCurrentQuantity(newQuantity);
+      onQuantityChange(originalIndex, newQuantity);
+    }
   };
 
   return (
@@ -79,7 +103,7 @@ const ActiveIngredientTag: React.FC<ActiveIngredientTagProps> = ({
               </PopoverContent>
             </Popover>
             
-            <span>{name} ({quantity})</span>
+            <span>{name} ({currentQuantity})</span>
           </div>
           <div className="flex">
             <Button 

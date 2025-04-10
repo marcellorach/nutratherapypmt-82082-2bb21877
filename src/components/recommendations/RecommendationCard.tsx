@@ -9,6 +9,7 @@ import BenefitsSection from './BenefitsSection';
 import ScientificEvidence from './ScientificEvidence';
 import CardActions from './CardActions';
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface ActiveIngredientTag {
   name: string;
@@ -27,6 +28,10 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   nutraceutical 
 }) => {
   const { toast } = useToast();
+  
+  // Escores de eficácia e sustentação calculados
+  const [efficacyScore, setEfficacyScore] = useState(nutraceutical.scientificEvidence.efficacyScore);
+  const [sustainabilityScore, setSustainabilityScore] = useState(nutraceutical.scientificEvidence.sustainabilityScore);
   
   // Preparar os ingredientes ativos como tags com eficácia base
   const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>(
@@ -52,6 +57,9 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       description: `${updatedIngredients[index].name} foi removido da fórmula.`,
       variant: "default",
     });
+    
+    // Recalcular escores
+    recalculateScores(updatedIngredients);
   };
 
   // Função para restaurar um ingrediente
@@ -68,6 +76,9 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       description: `${updatedIngredients[index].name} foi adicionado novamente à fórmula.`,
       variant: "default",
     });
+    
+    // Recalcular escores
+    recalculateScores(updatedIngredients);
   };
 
   // Função para editar a quantidade de um ingrediente
@@ -86,7 +97,23 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         description: `${updatedIngredients[index].name} agora tem ${newQuantity}.`,
         variant: "default",
       });
+      
+      // Recalcular escores
+      recalculateScores(updatedIngredients);
     }
+  };
+  
+  // Função para atualizar a quantidade via slider
+  const updateIngredientQuantity = (index: number, newQuantity: string) => {
+    const updatedIngredients = [...ingredients];
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      quantity: newQuantity
+    };
+    setIngredients(updatedIngredients);
+    
+    // Recalcular escores
+    recalculateScores(updatedIngredients);
   };
   
   // Função para atualizar a eficácia de um ingrediente
@@ -97,7 +124,50 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       efficacy: value
     };
     setIngredients(updatedIngredients);
+    
+    // Recalcular escores
+    recalculateScores(updatedIngredients);
   };
+  
+  // Recalcular escores de eficácia e sustentação com base nos ingredientes
+  const recalculateScores = (updatedIngredients: ActiveIngredientTag[]) => {
+    const activeIngredients = updatedIngredients.filter(i => !i.removed);
+    
+    if (activeIngredients.length === 0) {
+      // Se todos os ingredientes foram removidos, reduzir os escores pela metade
+      setEfficacyScore(nutraceutical.scientificEvidence.efficacyScore * 0.5);
+      setSustainabilityScore(nutraceutical.scientificEvidence.sustainabilityScore * 0.5);
+      return;
+    }
+    
+    // Calcular média de eficácia dos ingredientes ativos
+    const ingredientEfficacyAvg = activeIngredients.reduce((sum, ing) => sum + ing.efficacy, 0) / activeIngredients.length;
+    
+    // Calcular média de quantidade relativa (assumindo que o padrão é 10mg)
+    const quantityAvg = activeIngredients.reduce((sum, ing) => {
+      const match = ing.quantity.match(/(\d+)/);
+      return sum + (match ? parseInt(match[1]) / 10 : 1);
+    }, 0) / activeIngredients.length;
+    
+    // Eficácia final é uma mistura da eficácia base, média dos ingredientes e quantidade média
+    const finalEfficacy = (nutraceutical.scientificEvidence.efficacyScore * 0.4) + 
+                         (ingredientEfficacyAvg * 0.4 * 5) + 
+                         (quantityAvg * 0.2 * 2);
+    
+    // Sustentação usa fórmula similar mas com menos peso na quantidade
+    const finalSustainability = (nutraceutical.scientificEvidence.sustainabilityScore * 0.5) + 
+                               (ingredientEfficacyAvg * 0.3 * 5) + 
+                               (quantityAvg * 0.2 * 2);
+    
+    // Limitar entre 1 e 5
+    setEfficacyScore(Math.min(5, Math.max(1, finalEfficacy)));
+    setSustainabilityScore(Math.min(5, Math.max(1, finalSustainability)));
+  };
+  
+  // Recalcular escores quando os ingredientes mudarem
+  useEffect(() => {
+    recalculateScores(ingredients);
+  }, []);
   
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary">
@@ -114,6 +184,16 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <p className="text-sm">{recommendation.reason}</p>
         </div>
         
+        {/* Escores de eficácia e sustentação calculados dinamicamente */}
+        <div className="flex gap-2 text-xs">
+          <Badge variant="outline" className="bg-slate-50">
+            Eficácia calculada: {efficacyScore.toFixed(1)}/5
+          </Badge>
+          <Badge variant="outline" className="bg-slate-50">
+            Sustentação calculada: {sustainabilityScore.toFixed(1)}/5
+          </Badge>
+        </div>
+        
         {/* Princípios ativos como tags */}
         <IngredientsSection 
           ingredients={ingredients}
@@ -121,6 +201,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           onEdit={editIngredientQuantity}
           onRemove={removeIngredient}
           onEfficacyChange={updateIngredientEfficacy}
+          onQuantityChange={updateIngredientQuantity}
         />
         
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -136,12 +217,26 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         
         <BenefitsSection benefits={nutraceutical.benefits} />
 
-        <ScientificEvidence nutraceutical={nutraceutical} />
+        <ScientificEvidence nutraceutical={{ 
+          ...nutraceutical, 
+          scientificEvidence: {
+            ...nutraceutical.scientificEvidence,
+            efficacyScore: efficacyScore,
+            sustainabilityScore: sustainabilityScore
+          }
+        }} />
         
-        {/* Novos botões de ação */}
+        {/* Botões de ação */}
         <CardActions 
           recommendation={recommendation}
-          nutraceutical={nutraceutical}
+          nutraceutical={{
+            ...nutraceutical,
+            scientificEvidence: {
+              ...nutraceutical.scientificEvidence,
+              efficacyScore: efficacyScore,
+              sustainabilityScore: sustainabilityScore
+            }
+          }}
           ingredients={ingredients}
           onIngredientEfficacyChange={updateIngredientEfficacy}
         />

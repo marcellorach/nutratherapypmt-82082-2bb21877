@@ -16,6 +16,7 @@ interface IngredientsSectionProps {
   onEdit: (index: number) => void;
   onRemove: (index: number) => void;
   onEfficacyChange: (index: number, value: number) => void;
+  onQuantityChange: (index: number, quantity: string) => void;
 }
 
 const IngredientsSection: React.FC<IngredientsSectionProps> = ({
@@ -23,7 +24,8 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({
   nutraceutical,
   onEdit,
   onRemove,
-  onEfficacyChange
+  onEfficacyChange,
+  onQuantityChange
 }) => {
   // Filtrar apenas ingredientes ativos (não removidos)
   const activeIngredients = ingredients.filter(ingredient => !ingredient.removed);
@@ -45,6 +47,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({
               onRemove={onRemove}
               efficacy={ingredient.efficacy || nutraceutical.scientificEvidence.efficacyScore / 5}
               onEfficacyChange={onEfficacyChange}
+              onQuantityChange={onQuantityChange}
             />
           );
         })}
