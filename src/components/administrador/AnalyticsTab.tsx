@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database } from "lucide-react";
 import NutraceuticalEfficacy from '@/components/charts/NutraceuticalEfficacy';
-import { nutraceuticals } from '@/data/mockData';
+import { nutraceuticals } from '@/data';
 
 const AnalyticsTab: React.FC = () => {
   // Dados para o gráfico

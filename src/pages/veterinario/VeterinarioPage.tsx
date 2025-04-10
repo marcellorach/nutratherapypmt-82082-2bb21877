@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Filter } from "lucide-react";
 import PetCard from '@/components/pet/PetCard';
-import { pets, generateRandomData } from '@/data/mockData';
+import { pets, generateRandomData } from '@/data';
 import { Pet } from '@/types';
 import RecommendationsList from './RecommendationsList';
 

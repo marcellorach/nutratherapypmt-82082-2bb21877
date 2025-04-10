@@ -2,7 +2,7 @@
 import React from 'react';
 import RecommendationCard from '@/components/recommendations/RecommendationCard';
 import { Pet } from '@/types';
-import { treatmentPlans, nutraceuticals } from '@/data/mockData';
+import { treatmentPlans, nutraceuticals } from '@/data';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, FilePlus } from 'lucide-react';
 
