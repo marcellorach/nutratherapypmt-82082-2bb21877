@@ -70,3 +70,8 @@ export interface TreatmentPlan {
   recommendations: Recommendation[];
   notes: string;
 }
+
+export interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}

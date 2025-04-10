@@ -1,20 +1,8 @@
-
-import { ExamResult, Nutraceutical, Pet, Recommendation } from '@/types';
+import { ExamResult, Nutraceutical, Pet, Recommendation, Message } from '@/types';
 
 // Chave da API OpenAI (em um ambiente de produção, isso estaria em variáveis de ambiente)
 const OPENAI_API_KEY = 'chave-simulada-da-openai-para-prototipo';
 const OPENAI_MODEL = 'gpt-4o-mini';
-
-// Tipos para o serviço OpenAI
-interface Message {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-interface AIResponse {
-  answer: string;
-  error?: string;
-}
 
 // Função auxiliar para preparar contexto
 const prepareVeterinaryContext = (
@@ -60,6 +48,12 @@ const prepareVeterinaryContext = (
   `;
 };
 
+// Interface para resposta da IA
+interface AIResponse {
+  answer: string;
+  error?: string;
+}
+
 // Função principal para consulta da IA
 export const askVeterinaryAI = async (
   question: string,
@@ -74,8 +68,7 @@ export const askVeterinaryAI = async (
     
     const messages: Message[] = [
       { role: 'system', content: systemContext },
-      ...conversationHistory,
-      { role: 'user', content: question }
+      ...conversationHistory
     ];
     
     // Simular chamada à API OpenAI para o protótipo

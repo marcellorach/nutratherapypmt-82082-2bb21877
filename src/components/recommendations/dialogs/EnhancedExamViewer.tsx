@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { ExamResult, Nutraceutical, Pet, Recommendation } from '@/types';
+import { ExamResult, Nutraceutical, Pet, Recommendation, Message } from '@/types';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +14,6 @@ interface EnhancedExamViewerProps {
   exams: ExamResult[];
   recommendation: Recommendation;
   nutraceutical: Nutraceutical;
-}
-
-interface Message {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
 }
 
 const EnhancedExamViewer: React.FC<EnhancedExamViewerProps> = ({ 
@@ -101,7 +95,7 @@ const EnhancedExamViewer: React.FC<EnhancedExamViewerProps> = ({
     // Adicionar pergunta ao histórico
     const updatedHistory = [
       ...conversationHistory,
-      { role: 'user', content: userQuestion }
+      { role: 'user' as const, content: userQuestion }
     ];
     setConversationHistory(updatedHistory);
     
@@ -118,13 +112,13 @@ const EnhancedExamViewer: React.FC<EnhancedExamViewerProps> = ({
       // Adicionar resposta ao histórico
       setConversationHistory([
         ...updatedHistory,
-        { role: 'assistant', content: response.answer }
+        { role: 'assistant' as const, content: response.answer }
       ]);
     } catch (error) {
       // Adicionar mensagem de erro ao histórico
       setConversationHistory([
         ...updatedHistory,
-        { role: 'assistant', content: 'Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.' }
+        { role: 'assistant' as const, content: 'Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.' }
       ]);
       console.error('Erro ao consultar IA:', error);
     } finally {
@@ -134,7 +128,6 @@ const EnhancedExamViewer: React.FC<EnhancedExamViewerProps> = ({
 
   // Gerar PDF com relatório de exames e recomendações
   const generatePDF = () => {
-    // Este é um placeholder para a funcionalidade real de geração de PDF
     alert("Relatório PDF seria gerado aqui em um ambiente de produção.");
   };
 
