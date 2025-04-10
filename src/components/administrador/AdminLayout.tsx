@@ -20,7 +20,7 @@ import {
   FileText, 
   Bot, 
   BarChart3, 
-  FileImport, 
+  Import, 
   Brain,
   LineChart, 
   Users,
@@ -82,7 +82,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
                   isActive={currentStep === "import"} 
                   onClick={() => handleStepClick("import")}
                 >
-                  <FileImport />
+                  <Import />
                   <span>Importar Dados</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

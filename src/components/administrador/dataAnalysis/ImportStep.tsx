@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { FileImport, Database, CheckCircle, X } from "lucide-react";
+import { Import, Database, CheckCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ImportStep: React.FC = () => {
@@ -111,7 +111,7 @@ const ImportStep: React.FC = () => {
               </span>
             ) : (
               <>
-                <FileImport className="mr-2 h-4 w-4" />
+                <Import className="mr-2 h-4 w-4" />
                 {status === 'success' ? 'Importar Novamente' : 'Iniciar Importação'}
               </>
             )}
