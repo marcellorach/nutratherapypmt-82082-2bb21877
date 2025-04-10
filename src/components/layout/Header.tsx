@@ -41,9 +41,10 @@ const Header: React.FC = () => {
               <TooltipTrigger asChild>
                 <Link 
                   to="/administrador" 
-                  className="text-gray-500 hover:text-gray-700 transition-colors mr-4"
+                  className="text-gray-500 hover:text-gray-700 transition-colors mr-4 flex items-center gap-1"
                 >
                   <UserCog size={20} />
+                  <span className="text-sm font-medium">Admin</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-white border border-gray-200 text-gray-800">
