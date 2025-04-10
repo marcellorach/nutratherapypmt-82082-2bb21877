@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Recommendation, Nutraceutical } from '@/types';
-import { Check, Search, PieChart, CheckCircle2 } from 'lucide-react';
+import { Recommendation, Nutraceutical, Pet } from '@/types';
+import { Check, Search, PieChart, CheckCircle2, FileText } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { examResults } from '@/data';
+import { examResults, pets } from '@/data';
 import ResponsiveDialog from './dialog-wrappers/ResponsiveDialog';
 import ComparisonViewer from './dialogs/ComparisonViewer';
 import IndicationDetailsViewer from './dialogs/IndicationDetailsViewer';
@@ -37,7 +37,12 @@ const CardActions: React.FC<CardActionsProps> = ({
   const [showCompare, setShowCompare] = useState(false);
   const { toast } = useToast();
 
+  // Buscar exames e pet relacionado
   const petExams = examResults.filter(exam => exam.petId === recommendation.petId);
+  const pet = pets.find(p => p.id === recommendation.petId) || null;
+  
+  // Verificar se há exames disponíveis para mostrar indicador visual
+  const hasExams = petExams.length > 0;
   
   return (
     <div className="grid grid-cols-2 gap-2 mt-3">
@@ -56,11 +61,19 @@ const CardActions: React.FC<CardActionsProps> = ({
       {/* Botão para Verificar Indicação (agora integra exames e IA) */}
       <Button 
         variant="outline" 
-        className="flex items-center gap-1 border border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100" 
+        className="flex items-center justify-center gap-1 border border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100" 
         onClick={() => setShowDetails(true)}
       >
-        <Search size={16} />
-        Verificar indicação
+        <FileText size={16} />
+        {hasExams && (
+          <span className="flex items-center">
+            Verificar
+            <span className="bg-amber-700 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center ml-1">
+              {petExams.length}
+            </span>
+          </span>
+        )}
+        {!hasExams && "Verificar indicação"}
       </Button>
       
       {/* Botão para Comparar com População */}
@@ -86,6 +99,7 @@ const CardActions: React.FC<CardActionsProps> = ({
           isApproved={isApproved}
           onApprove={onApprove}
           petExams={petExams}
+          pet={pet}
         />
       </ResponsiveDialog>
 
