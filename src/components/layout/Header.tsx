@@ -13,12 +13,12 @@ const Header: React.FC = () => {
         <Link to="/" className="text-xl font-semibold flex items-center gap-2">
           <img 
             src="/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png" 
-            alt="PetMoreTime NutraTherapy"
-            className="h-10"
+            alt="NutraTherapy"
+            className="h-14" // Aumentei a altura do logo
           />
           <div className="flex flex-col">
-            <span className="font-bold text-gray-800">
-              PetMoreTime <span className="text-gray-600">NutraTherapy</span>
+            <span className="font-bold text-gray-800 text-xl">
+              <span className="text-gray-600">NutraTherapy</span>
             </span>
             <span className="text-xs text-gray-600 font-light">
               Nutrição personalizada baseada em dados e IA

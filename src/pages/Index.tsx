@@ -15,11 +15,11 @@ const Index = () => {
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <img 
                 src="/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png" 
-                alt="PetMoreTime NutraTherapy" 
-                className="mx-auto h-20 mb-4"
+                alt="NutraTherapy" 
+                className="mx-auto h-24 mb-4" // Aumentei a altura do logo
               />
-              <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl text-gray-800">
-                PetMoreTime <span className="text-gray-600">NutraTherapy</span>
+              <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl text-gray-600">
+                NutraTherapy
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
                 Nutrição personalizada baseada em dados e inteligência artificial para a saúde e longevidade do seu pet
@@ -102,7 +102,7 @@ const Index = () => {
       <div className="bg-gray-50 py-16 border-t border-gray-200">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Por que escolher PetMoreTime NutraTherapy?</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Por que escolher NutraTherapy?</h2>
             <p className="text-lg text-gray-600 mb-8">
               Nossa abordagem combina análise nutricional avançada, IA especializada e recomendações 
               personalizadas para promover a saúde e bem-estar do seu pet a longo prazo.
