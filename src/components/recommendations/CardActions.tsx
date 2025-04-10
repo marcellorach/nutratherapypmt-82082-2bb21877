@@ -2,14 +2,12 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Recommendation, Nutraceutical } from '@/types';
-import { Check, Search, FileText, MessageSquare, PieChart, CheckCircle2 } from 'lucide-react';
+import { Check, Search, PieChart, CheckCircle2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { examResults } from '@/data';
 import ResponsiveDialog from './dialog-wrappers/ResponsiveDialog';
-import AIChat from './dialogs/AIChat';
-import ExamViewer from './dialogs/ExamViewer';
-import DetailViewer from './dialogs/DetailViewer';
 import ComparisonViewer from './dialogs/ComparisonViewer';
+import IndicationDetailsViewer from './dialogs/IndicationDetailsViewer';
 
 interface ActiveIngredientType {
   name: string;
@@ -36,8 +34,6 @@ const CardActions: React.FC<CardActionsProps> = ({
   onApprove
 }) => {
   const [showDetails, setShowDetails] = useState(false);
-  const [showExams, setShowExams] = useState(false);
-  const [showAI, setShowAI] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const { toast } = useToast();
 
@@ -57,7 +53,7 @@ const CardActions: React.FC<CardActionsProps> = ({
         {isApproved ? "Aprovado" : "Aprovar"}
       </Button>
       
-      {/* Botão para Verificar Indicação */}
+      {/* Botão para Verificar Indicação (agora integra exames e IA) */}
       <Button 
         variant="outline" 
         className="flex items-center gap-1 border border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100" 
@@ -65,25 +61,6 @@ const CardActions: React.FC<CardActionsProps> = ({
       >
         <Search size={16} />
         Verificar indicação
-      </Button>
-      
-      {/* Botão para Ver Exames */}
-      <Button 
-        variant="outline" 
-        className="flex items-center gap-1 border border-blue-400 bg-blue-50 text-blue-800 hover:bg-blue-100" 
-        onClick={() => setShowExams(true)}
-      >
-        <FileText size={16} />
-        Exames ({petExams.length})
-      </Button>
-      
-      {/* Botão para Conversar com IA */}
-      <Button 
-        className="col-span-2 flex items-center justify-center gap-1 border border-purple-400 bg-purple-50 text-purple-800 h-12 hover:bg-purple-100" 
-        onClick={() => setShowAI(true)}
-      >
-        <MessageSquare size={18} />
-        Conversar com AI
       </Button>
       
       {/* Botão para Comparar com População */}
@@ -103,35 +80,12 @@ const CardActions: React.FC<CardActionsProps> = ({
         title="Detalhes da indicação"
         description={`${nutraceutical.name} para ${nutraceutical.condition}`}
       >
-        <DetailViewer 
-          recommendation={recommendation} 
+        <IndicationDetailsViewer
+          recommendation={recommendation}
           nutraceutical={nutraceutical}
           isApproved={isApproved}
           onApprove={onApprove}
-        />
-      </ResponsiveDialog>
-
-      <ResponsiveDialog
-        open={showExams}
-        onOpenChange={setShowExams}
-        title="Exames do paciente"
-        description="Histórico de exames relacionados à condição"
-      >
-        <ExamViewer 
-          petExams={petExams} 
-          petId={recommendation.petId}
-        />
-      </ResponsiveDialog>
-
-      <ResponsiveDialog
-        open={showAI}
-        onOpenChange={setShowAI}
-        title="Assistente de IA"
-        description="Pergunte sobre esta recomendação"
-      >
-        <AIChat 
-          nutraceuticalName={nutraceutical.name} 
-          nutraceuticalCondition={nutraceutical.condition}
+          petExams={petExams}
         />
       </ResponsiveDialog>
 
