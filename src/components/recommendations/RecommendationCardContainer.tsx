@@ -9,8 +9,7 @@ import BenefitsSection from './BenefitsSection';
 import ScientificEvidence from './ScientificEvidence';
 import CardActions from './CardActions';
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Save, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useIngredients } from './hooks/useIngredients';
 import { useScoreCalculation } from './hooks/useScoreCalculation';
 import { usePersistence } from './hooks/usePersistence';
@@ -46,7 +45,6 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
     hasChanges,
     savedState,
     approveRecommendation,
-    saveChanges,
     checkForChanges
   } = usePersistence(recommendation, nutraceutical, ingredients, efficacyScore, sustainabilityScore);
 
@@ -77,26 +75,10 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
   
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary relative">
-      {hasChanges && (
-        <div className="absolute top-2 right-2 z-10">
-          <Button 
-            size="sm" 
-            onClick={saveChanges}
-            disabled={isSaving}
-            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Salvar alterações
-              </>
-            )}
-          </Button>
+      {isSaving && (
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-2 bg-green-100 text-green-700 py-1 px-3 rounded-md text-sm">
+          <Loader2 size={16} className="animate-spin" />
+          Salvando...
         </div>
       )}
       

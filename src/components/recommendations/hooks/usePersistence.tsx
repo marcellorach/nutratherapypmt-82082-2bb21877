@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Recommendation, Nutraceutical } from '@/types';
 import { useToast } from "@/hooks/use-toast";
 import { ActiveIngredientTag } from './useIngredients';
@@ -42,8 +42,9 @@ export const usePersistence = (
     
     const approvalChanged = isApproved !== savedState.approved;
     
-    setHasChanges(ingredientsChanged || scoreChanged || approvalChanged);
-    return ingredientsChanged || scoreChanged || approvalChanged;
+    const hasAnyChanges = ingredientsChanged || scoreChanged || approvalChanged;
+    setHasChanges(hasAnyChanges);
+    return hasAnyChanges;
   };
 
   // Salvar alterações
@@ -84,6 +85,17 @@ export const usePersistence = (
       variant: "default",
     });
   };
+  
+  // Salvar automaticamente quando houver mudanças
+  useEffect(() => {
+    if (hasChanges) {
+      const timer = setTimeout(() => {
+        saveChanges();
+      }, 1500); // Aguarda 1.5 segundos após a última alteração para salvar
+      
+      return () => clearTimeout(timer);
+    }
+  }, [ingredients, efficacyScore, sustainabilityScore, isApproved]);
   
   return {
     isSaving,
