@@ -1,16 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import RecommendationCard from '@/components/recommendations/RecommendationCard';
 import { Pet } from '@/types';
 import { treatmentPlans, nutraceuticals } from '@/data';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, FilePlus } from 'lucide-react';
+import { PlusCircle, FilePlus, Save } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 interface RecommendationsListProps {
   selectedPet: Pet | null;
 }
 
 const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }) => {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  
   // Se não houver pet selecionado, mostrar mensagem
   if (!selectedPet) {
     return (
@@ -38,6 +42,28 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
     );
   }
   
+  const handleSaveAllChanges = () => {
+    setIsSaving(true);
+    
+    // Simular salvamento com setTimeout
+    setTimeout(() => {
+      setIsSaving(false);
+      toast({
+        title: "Plano atualizado",
+        description: `Todas as alterações do plano de tratamento de ${selectedPet.name} foram salvas com sucesso.`,
+        variant: "default",
+      });
+    }, 1200);
+  };
+  
+  const handleGenerateReport = () => {
+    toast({
+      title: "Gerando relatório",
+      description: "O relatório do plano de tratamento está sendo preparado e será enviado por email.",
+      variant: "default",
+    });
+  };
+  
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -47,9 +73,22 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleGenerateReport}
+          >
             <FilePlus size={16} />
             Relatório
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 border-green-500 text-green-700 hover:bg-green-50"
+            onClick={handleSaveAllChanges}
+            disabled={isSaving}
+          >
+            <Save size={16} />
+            {isSaving ? "Salvando plano..." : "Salvar plano completo"}
           </Button>
           <Button className="flex items-center gap-2">
             <PlusCircle size={16} />

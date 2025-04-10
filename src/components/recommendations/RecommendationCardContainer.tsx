@@ -9,8 +9,11 @@ import BenefitsSection from './BenefitsSection';
 import ScientificEvidence from './ScientificEvidence';
 import CardActions from './CardActions';
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Save, Loader2 } from 'lucide-react';
 import { useIngredients } from './hooks/useIngredients';
 import { useScoreCalculation } from './hooks/useScoreCalculation';
+import { usePersistence } from './hooks/usePersistence';
 import RecommendationDetails from './RecommendationDetails';
 
 interface RecommendationCardProps {
@@ -36,6 +39,16 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
     sustainabilityScore,
     recalculateScores
   } = useScoreCalculation(nutraceutical);
+  
+  const {
+    isSaving,
+    isApproved,
+    hasChanges,
+    savedState,
+    approveRecommendation,
+    saveChanges,
+    checkForChanges
+  } = usePersistence(recommendation, nutraceutical, ingredients, efficacyScore, sustainabilityScore);
 
   // Atualizar escores sempre que os ingredientes mudarem
   useEffect(() => {
@@ -46,6 +59,11 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
   useEffect(() => {
     recalculateScores(ingredients);
   }, []);
+  
+  // Verificar por mudanças quando ingredientes ou escores mudarem
+  useEffect(() => {
+    checkForChanges(ingredients);
+  }, [ingredients, efficacyScore, sustainabilityScore, isApproved]);
   
   // Criar um objeto nutraceutical modificado com os escores atualizados
   const updatedNutraceutical: Nutraceutical = {
@@ -58,7 +76,30 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
   };
   
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary">
+    <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary relative">
+      {hasChanges && (
+        <div className="absolute top-2 right-2 z-10">
+          <Button 
+            size="sm" 
+            onClick={saveChanges}
+            disabled={isSaving}
+            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar alterações
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+      
       <CardHeader 
         title={nutraceutical.name}
         description={nutraceutical.description}
@@ -78,6 +119,12 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
             Sustentação calculada: {sustainabilityScore.toFixed(1)}/5
           </Badge>
         </div>
+        
+        {savedState.lastSaved && (
+          <div className="text-xs text-gray-500">
+            Última alteração: {savedState.lastSaved.toLocaleString('pt-BR')}
+          </div>
+        )}
         
         {/* Princípios ativos como tags */}
         <IngredientsSection 
@@ -110,6 +157,8 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
           nutraceutical={updatedNutraceutical}
           ingredients={ingredients}
           onIngredientEfficacyChange={updateIngredientEfficacy}
+          isApproved={isApproved}
+          onApprove={approveRecommendation}
         />
       </CardContent>
       

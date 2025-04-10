@@ -23,15 +23,18 @@ interface CardActionsProps {
   nutraceutical: Nutraceutical;
   ingredients: ActiveIngredientType[];
   onIngredientEfficacyChange: (index: number, value: number) => void;
+  isApproved: boolean;
+  onApprove: () => void;
 }
 
 const CardActions: React.FC<CardActionsProps> = ({ 
   recommendation, 
   nutraceutical,
   ingredients,
-  onIngredientEfficacyChange
+  onIngredientEfficacyChange,
+  isApproved,
+  onApprove
 }) => {
-  const [isApproved, setIsApproved] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showExams, setShowExams] = useState(false);
   const [showAI, setShowAI] = useState(false);
@@ -40,15 +43,6 @@ const CardActions: React.FC<CardActionsProps> = ({
 
   const petExams = examResults.filter(exam => exam.petId === recommendation.petId);
   
-  const handleApprove = () => {
-    setIsApproved(true);
-    toast({
-      title: "Recomendação aprovada",
-      description: `${nutraceutical.name} foi aprovado para o tratamento.`,
-      variant: "default",
-    });
-  };
-
   return (
     <div className="grid grid-cols-2 gap-2 mt-3">
       {/* Botões de Aprovação */}
@@ -56,7 +50,7 @@ const CardActions: React.FC<CardActionsProps> = ({
         className={`flex items-center gap-1 border ${isApproved 
           ? "bg-green-600 hover:bg-green-700 border-green-700" 
           : "border-green-400 bg-green-50 text-green-800 hover:bg-green-100"}`}
-        onClick={handleApprove}
+        onClick={onApprove}
         disabled={isApproved}
       >
         {isApproved ? <CheckCircle2 size={16} /> : <Check size={16} />}
@@ -113,7 +107,7 @@ const CardActions: React.FC<CardActionsProps> = ({
           recommendation={recommendation} 
           nutraceutical={nutraceutical}
           isApproved={isApproved}
-          onApprove={handleApprove}
+          onApprove={onApprove}
         />
       </ResponsiveDialog>
 
