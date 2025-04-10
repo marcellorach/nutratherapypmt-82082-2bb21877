@@ -1,3 +1,4 @@
+
 import { Pet, Owner, ExamResult, Nutraceutical, Recommendation, TreatmentPlan } from "../types";
 
 // Mock Owners
@@ -227,6 +228,30 @@ export const nutraceuticals: Nutraceutical[] = [
       score: 3.8,
       studies: ["Veterinary Immunology, 2022", "Prevention in Small Animals, 2023"]
     }
+  },
+  {
+    id: "nut4",
+    name: "CardioForte",
+    description: "Suplemento para saúde cardiovascular com CoQ10 e taurina.",
+    benefits: ["Fortalece músculo cardíaco", "Melhora circulação", "Controla pressão arterial"],
+    dosage: "1 cápsula para cada 15kg de peso corporal, diariamente",
+    contraindications: ["Hipotensão severa", "Uso concomitante de anticoagulantes"],
+    scientificEvidence: {
+      score: 4.0,
+      studies: ["Cardiology in Small Animals, 2024", "Veterinary Heart Journal, 2023"]
+    }
+  },
+  {
+    id: "nut5",
+    name: "DentalFresh",
+    description: "Suplemento para saúde bucal e redução de tártaro.",
+    benefits: ["Reduz formação de placa bacteriana", "Combate mau hálito", "Fortalece gengivas"],
+    dosage: "Adicionar 5ml à água do pet diariamente",
+    contraindications: ["Alergias a extratos de menta"],
+    scientificEvidence: {
+      score: 3.5,
+      studies: ["Journal of Veterinary Dentistry, 2023", "Oral Health in Animals, 2024"]
+    }
   }
 ];
 
@@ -261,10 +286,60 @@ export const recommendations: Recommendation[] = [
     duration: "Contínuo",
     startDate: "2025-04-10",
     priority: 1
+  },
+  {
+    id: "rec4",
+    petId: "pet4",
+    nutraceuticalId: "nut1",
+    reason: "Melhoria da pelagem e prevenção de alergias sazonais",
+    dosage: "6ml diários",
+    duration: "6 meses",
+    startDate: "2025-03-22",
+    priority: 2
+  },
+  {
+    id: "rec5",
+    petId: "pet6",
+    nutraceuticalId: "nut4",
+    reason: "Prevenção de problemas cardíacos comuns em Beagles",
+    dosage: "1 cápsula diária",
+    duration: "Contínuo",
+    startDate: "2025-04-01",
+    priority: 1
+  },
+  {
+    id: "rec6",
+    petId: "pet7",
+    nutraceuticalId: "nut5",
+    reason: "Prevenção de tártaro e problemas periodontais",
+    dosage: "5ml na água diariamente",
+    duration: "Contínuo",
+    startDate: "2025-03-15",
+    priority: 3
+  },
+  {
+    id: "rec7",
+    petId: "pet8",
+    nutraceuticalId: "nut2",
+    reason: "Prevenção de problemas articulares devido ao peso",
+    dosage: "2 tabletes diários",
+    duration: "Contínuo",
+    startDate: "2025-04-05",
+    priority: 1
+  },
+  {
+    id: "rec8",
+    petId: "pet10",
+    nutraceuticalId: "nut3",
+    reason: "Fortalecimento imunológico preventivo",
+    dosage: "10ml diários",
+    duration: "3 meses",
+    startDate: "2025-04-12",
+    priority: 2
   }
 ];
 
-// Mock Treatment Plans
+// Mock Treatment Plans - Agora com planos para a maioria dos pets, exceto um ou dois
 export const treatmentPlans: TreatmentPlan[] = [
   {
     id: "pln1",
@@ -313,6 +388,101 @@ export const treatmentPlans: TreatmentPlan[] = [
       }
     ],
     notes: "Monitorar mobilidade e disposição do animal."
+  },
+  {
+    id: "pln3",
+    petId: "pet4",
+    veterinarianId: "vet1",
+    createdAt: "2025-03-20",
+    recommendations: [
+      {
+        id: "rec4",
+        petId: "pet4",
+        nutraceuticalId: "nut1",
+        reason: "Melhoria da pelagem e prevenção de alergias sazonais",
+        dosage: "6ml diários",
+        duration: "6 meses",
+        startDate: "2025-03-22",
+        priority: 2
+      }
+    ],
+    notes: "Atentar para possíveis reações alérgicas nos primeiros dias."
+  },
+  {
+    id: "pln4",
+    petId: "pet6",
+    veterinarianId: "vet1",
+    createdAt: "2025-03-30",
+    recommendations: [
+      {
+        id: "rec5",
+        petId: "pet6",
+        nutraceuticalId: "nut4",
+        reason: "Prevenção de problemas cardíacos comuns em Beagles",
+        dosage: "1 cápsula diária",
+        duration: "Contínuo",
+        startDate: "2025-04-01",
+        priority: 1
+      }
+    ],
+    notes: "Verificar frequência cardíaca mensalmente."
+  },
+  {
+    id: "pln5",
+    petId: "pet7",
+    veterinarianId: "vet1",
+    createdAt: "2025-03-12",
+    recommendations: [
+      {
+        id: "rec6",
+        petId: "pet7",
+        nutraceuticalId: "nut5",
+        reason: "Prevenção de tártaro e problemas periodontais",
+        dosage: "5ml na água diariamente",
+        duration: "Contínuo",
+        startDate: "2025-03-15",
+        priority: 3
+      }
+    ],
+    notes: "Avaliar condições bucais após 60 dias de uso."
+  },
+  {
+    id: "pln6",
+    petId: "pet8",
+    veterinarianId: "vet1",
+    createdAt: "2025-04-03",
+    recommendations: [
+      {
+        id: "rec7",
+        petId: "pet8",
+        nutraceuticalId: "nut2",
+        reason: "Prevenção de problemas articulares devido ao peso",
+        dosage: "2 tabletes diários",
+        duration: "Contínuo",
+        startDate: "2025-04-05",
+        priority: 1
+      }
+    ],
+    notes: "Associar a recomendação com orientações de dieta e exercícios."
+  },
+  {
+    id: "pln7",
+    petId: "pet10",
+    veterinarianId: "vet1",
+    createdAt: "2025-04-10",
+    recommendations: [
+      {
+        id: "rec8",
+        petId: "pet10",
+        nutraceuticalId: "nut3",
+        reason: "Fortalecimento imunológico preventivo",
+        dosage: "10ml diários",
+        duration: "3 meses",
+        startDate: "2025-04-12",
+        priority: 2
+      }
+    ],
+    notes: "Monitorar energia e disposição durante o tratamento."
   }
 ];
 
