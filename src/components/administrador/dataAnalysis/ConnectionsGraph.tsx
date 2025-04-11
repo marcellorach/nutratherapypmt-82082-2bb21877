@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { AgentConnection, DataPacket } from './types';
+import "./agentAnimation.css";
 
 interface ConnectionsGraphProps {
   connections: AgentConnection[];
@@ -17,8 +18,10 @@ const ConnectionsGraph: React.FC<ConnectionsGraphProps> = ({ connections, dataPa
         
         if (!fromPos || !toPos) return null;
         
+        const connId = `${conn.from}-${conn.to}`;
+        
         return (
-          <g key={`${conn.from}-${conn.to}`}>
+          <g key={connId}>
             <line 
               x1={`${fromPos.x}%`}
               y1={`${fromPos.y}%`}
@@ -26,7 +29,7 @@ const ConnectionsGraph: React.FC<ConnectionsGraphProps> = ({ connections, dataPa
               y2={`${toPos.y}%`}
               stroke={conn.active ? '#10b981' : '#e2e8f0'}
               strokeWidth={conn.active ? 2 : 1}
-              strokeDasharray={conn.active ? 'none' : '4 2'}
+              strokeDasharray={conn.animating ? '4 2' : (conn.active ? 'none' : '4 2')}
               className={conn.animating ? 'connection-path' : ''}
             />
             
@@ -50,16 +53,18 @@ const ConnectionsGraph: React.FC<ConnectionsGraphProps> = ({ connections, dataPa
         
         if (!fromPos || !toPos) return null;
         
+        const packetId = `packet-${packet.fromId}-${packet.toId}-${idx}`;
+        
         return (
           <circle
-            key={`packet-${idx}`}
+            key={packetId}
             cx="0"
             cy="0"
             r="4"
             fill="#10b981"
             className="data-packet"
             style={{
-              animation: `movePacket 2s linear forwards`,
+              animation: `movePacket ${packet.duration / 1000}s linear forwards`,
               '--from-x': `${fromPos.x}%`,
               '--from-y': `${fromPos.y}%`,
               '--to-x': `${toPos.x}%`,

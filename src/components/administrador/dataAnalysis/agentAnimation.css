@@ -45,3 +45,20 @@
 .data-packet {
   filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.7));
 }
+
+/* Animação para agentes ativos */
+.agent-active {
+  animation: agentPulse 1.5s infinite;
+}
+
+@keyframes agentPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}

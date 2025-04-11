@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 export interface Agent {
   id: string;
   name: string;

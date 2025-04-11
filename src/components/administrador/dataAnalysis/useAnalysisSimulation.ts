@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { AgentConnection, AgentMessage, DataPacket, AnalysisStep } from './types';
-import { createInitialConnections } from './agentData';
+import { agents, createInitialConnections } from './agentData';
 
 type AnalysisFlowItem = {
   delay: number;
@@ -17,17 +17,34 @@ export const useAnalysisSimulation = () => {
   const [connections, setConnections] = useState<AgentConnection[]>(createInitialConnections());
   const [isPaused, setIsPaused] = useState(false);
   const [dataPackets, setDataPackets] = useState<DataPacket[]>([]);
-  const animationTimersRef = useRef<NodeJS.Timeout[]>([]);
+  
+  // Referência para armazenar todos os temporizadores
+  const animationTimersRef = useRef<number[]>([]);
+  const analysisRef = useRef<{
+    flowIndex: number;
+    isPaused: boolean;
+    totalTime: number;
+    startTime: number;
+    elapsedBeforePause: number;
+  }>({
+    flowIndex: 0,
+    isPaused: false,
+    totalTime: 90000, // 1.5 minutos
+    startTime: 0,
+    elapsedBeforePause: 0,
+  });
   
   // Limpeza dos temporizadores ao desmontar o componente
   useEffect(() => {
     return () => {
-      animationTimersRef.current.forEach(timer => clearTimeout(timer));
+      animationTimersRef.current.forEach(timer => window.clearTimeout(timer));
     };
   }, []);
   
   // Função para ativar uma conexão entre agentes com animação
   const activateConnection = (fromId: string, toId: string) => {
+    if (isPaused) return;
+    
     // Primeiro ativa a conexão
     setConnections(prev => 
       prev.map(conn => 
@@ -48,7 +65,7 @@ export const useAnalysisSimulation = () => {
     setDataPackets(prev => [...prev, newPacket]);
     
     // Desliga a animação após a duração
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setConnections(prev => 
         prev.map(conn => 
           conn.from === fromId && conn.to === toId
@@ -66,6 +83,8 @@ export const useAnalysisSimulation = () => {
   
   // Função para adicionar mensagem de um agente
   const addAgentMessage = (agentId: string, message: string) => {
+    if (isPaused) return;
+    
     setMessages(prev => [...prev, {
       agentId,
       message,
@@ -112,17 +131,64 @@ export const useAnalysisSimulation = () => {
     }}
   ];
   
+  // Atualizador de progresso
+  useEffect(() => {
+    if (!analyzing || isPaused || step !== 'processing') return;
+    
+    const progressInterval = window.setInterval(() => {
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - analysisRef.current.startTime + analysisRef.current.elapsedBeforePause;
+      const progressValue = Math.min(100, (elapsedTime / analysisRef.current.totalTime) * 100);
+      setProgress(progressValue);
+      
+      if (progressValue >= 100) {
+        window.clearInterval(progressInterval);
+      }
+    }, 100);
+    
+    return () => {
+      window.clearInterval(progressInterval);
+    };
+  }, [analyzing, isPaused, step]);
+  
+  // Executar um passo do fluxo de análise
+  const executeFlowStep = (index: number) => {
+    if (index >= analysisFlow.length || analysisRef.current.isPaused) return;
+    
+    const { delay, action } = analysisFlow[index];
+    
+    const timer = window.setTimeout(() => {
+      if (analysisRef.current.isPaused) return;
+      
+      action();
+      analysisRef.current.flowIndex = index + 1;
+      
+      if (index + 1 < analysisFlow.length) {
+        executeFlowStep(index + 1);
+      }
+    }, delay);
+    
+    animationTimersRef.current.push(timer);
+  };
+  
   // Simulação da análise
   const simulateAnalysis = () => {
+    // Se estiver pausado, continuar de onde parou
     if (isPaused) {
       setIsPaused(false);
+      analysisRef.current.isPaused = false;
+      analysisRef.current.startTime = Date.now();
+      
+      // Continuar do último passo
+      executeFlowStep(analysisRef.current.flowIndex);
       return;
     }
     
     // Limpar quaisquer temporizadores existentes
-    animationTimersRef.current.forEach(timer => clearTimeout(timer));
+    animationTimersRef.current.forEach(timer => window.clearTimeout(timer));
     animationTimersRef.current = [];
     
+    // Resetar estado
     setAnalyzing(true);
     setProgress(0);
     setStep('processing');
@@ -133,36 +199,27 @@ export const useAnalysisSimulation = () => {
     // Reset das conexões
     setConnections(prev => prev.map(conn => ({ ...conn, active: false, animating: false })));
     
-    const totalTime = 90000; // 1.5 minutos = 90 segundos = 90000ms
-    
-    // Execução da sequência de análise
-    const runAnalysis = (stepIndex: number) => {
-      if (stepIndex >= analysisFlow.length || step !== 'processing') return;
-      
-      const { delay, action } = analysisFlow[stepIndex];
-      
-      const timer = setTimeout(() => {
-        if (isPaused) {
-          // Se pausado, parar a execução
-          return;
-        }
-        
-        action();
-        const elapsedTime = analysisFlow.slice(0, stepIndex + 1).reduce((sum, item) => sum + item.delay, 0);
-        const progressValue = Math.min(100, (elapsedTime / totalTime) * 100);
-        setProgress(progressValue);
-        
-        runAnalysis(stepIndex + 1);
-      }, delay);
-      
-      animationTimersRef.current.push(timer);
+    // Inicializar o controlador de análise
+    analysisRef.current = {
+      flowIndex: 0,
+      isPaused: false,
+      totalTime: 90000, // 1.5 minutos
+      startTime: Date.now(),
+      elapsedBeforePause: 0
     };
     
-    runAnalysis(0);
+    // Iniciar a simulação
+    executeFlowStep(0);
   };
   
   const pauseAnalysis = () => {
     setIsPaused(true);
+    analysisRef.current.isPaused = true;
+    analysisRef.current.elapsedBeforePause += Date.now() - analysisRef.current.startTime;
+    
+    // Pausar todos os temporizadores ativos
+    animationTimersRef.current.forEach(timer => window.clearTimeout(timer));
+    animationTimersRef.current = [];
   };
   
   return {

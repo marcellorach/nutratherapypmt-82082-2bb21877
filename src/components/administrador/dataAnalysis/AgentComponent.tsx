@@ -14,7 +14,7 @@ const AgentComponent: React.FC<AgentComponentProps> = ({ agent, position, isActi
   return (
     <div
       className={`absolute p-3 rounded-md border transition-all duration-300 ${
-        isActive ? 'ring-2 shadow-lg scale-110 z-10' : ''
+        isActive ? 'agent-active ring-2 shadow-lg scale-110 z-10' : ''
       } ${agent.color} ${isActive ? `ring-${agent.color.split('-')[1]}-500` : ''}`}
       style={{
         left: `${position.x}%`,
