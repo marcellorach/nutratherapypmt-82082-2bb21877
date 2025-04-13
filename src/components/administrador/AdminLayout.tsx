@@ -30,7 +30,7 @@ import {
   BookOpen,
   Scan,
   Table,
-  Flask,
+  Beaker,
   Lightbulb,
   Microscope,
   Zap,
@@ -91,7 +91,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
                   isActive={currentStep === "nutraceuticos"} 
                   onClick={() => handleStepClick("nutraceuticos")}
                 >
-                  <Flask />
+                  <Beaker />
                   <span>Nutracêuticos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
