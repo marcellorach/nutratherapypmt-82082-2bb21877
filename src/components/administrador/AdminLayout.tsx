@@ -17,7 +17,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentStep, setCur
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-8rem)] w-full">
             <AdminSidebar currentStep={currentStep} setCurrentStep={setCurrentStep} />
-            <div className="flex-1 overflow-auto p-4 md:p-6">
+            <div className="flex-1 overflow-auto p-4 md:p-6 pl-4">
               {children}
             </div>
           </div>
