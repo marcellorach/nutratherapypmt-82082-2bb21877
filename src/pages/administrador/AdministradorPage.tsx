@@ -9,28 +9,49 @@ import NutraceuticosTab from '@/components/administrador/NutraceuticosTab';
 import EstudosTab from '@/components/administrador/EstudosTab';
 import PromptsTab from '@/components/administrador/PromptsTab';
 import AnalyticsTab from '@/components/administrador/AnalyticsTab';
+import RegrasClinicasTab from '@/components/administrador/RegrasClinicasTab';
+import FontesTab from '@/components/administrador/FontesTab';
+import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTab';
+import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("import");
   
   const renderContent = () => {
     switch (currentStep) {
-      case "import":
-        return <ImportStep />;
-      case "analysis":
-        return <AnalysisStep />;
-      case "visualization":
-        return <VisualizationStep />;
-      case "actions":
-        return <ActionsStep />;
+      // Base de Conhecimento
       case "nutraceuticos":
         return <NutraceuticosTab />;
       case "estudos":
         return <EstudosTab />;
+      case "regras":
+        return <RegrasClinicasTab />;
+
+      // Processamento de Dados
+      case "import":
+        return <ImportStep />;
+      case "fontes":
+        return <FontesTab />;
+      case "analysis":
+        return <AnalysisStep />;
+      case "visualization":
+        return <VisualizationStep />;
+
+      // Análise Preditiva
+      case "modelos":
+        return <ModelosPreditivosTab />;
+      case "custo-beneficio":
+        return <CustoBeneficioTab />;
+      case "relatorios":
+        return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
+
+      // Configuração
       case "prompts":
         return <PromptsTab />;
       case "analytics":
         return <AnalyticsTab />;
+      case "actions":
+        return <ActionsStep />;
       default:
         return null;
     }

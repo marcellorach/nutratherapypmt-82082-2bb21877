@@ -26,7 +26,15 @@ import {
   Users,
   Mail,
   Check,
-  Settings
+  Settings,
+  BookOpen,
+  Scan,
+  Table,
+  Flask,
+  Lightbulb,
+  Microscope,
+  Zap,
+  Gauge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -73,8 +81,45 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
       </SidebarHeader>
       
       <SidebarContent>
+        {/* Base de Conhecimento */}
         <SidebarGroup>
-          <SidebarGroupLabel>Análise de Dados</SidebarGroupLabel>
+          <SidebarGroupLabel>Base de Conhecimento</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "nutraceuticos"} 
+                  onClick={() => handleStepClick("nutraceuticos")}
+                >
+                  <Flask />
+                  <span>Nutracêuticos</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "estudos"} 
+                  onClick={() => handleStepClick("estudos")}
+                >
+                  <BookOpen />
+                  <span>Estudos Científicos</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "regras"} 
+                  onClick={() => handleStepClick("regras")}
+                >
+                  <Microscope />
+                  <span>Regras Clínicas</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Processamento de Dados */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Processamento de Dados</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -88,11 +133,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
+                  isActive={currentStep === "fontes"} 
+                  onClick={() => handleStepClick("fontes")}
+                >
+                  <Database />
+                  <span>Fontes de Dados</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
                   isActive={currentStep === "analysis"} 
                   onClick={() => handleStepClick("analysis")}
                 >
                   <Brain />
-                  <span>Análise de IA</span>
+                  <span>Simulação Multi-Agente</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -104,6 +158,69 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
                   <span>Visualização</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Análise Preditiva */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Análise Preditiva</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "modelos"} 
+                  onClick={() => handleStepClick("modelos")}
+                >
+                  <Lightbulb />
+                  <span>Modelos Preditivos</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "custo-beneficio"} 
+                  onClick={() => handleStepClick("custo-beneficio")}
+                >
+                  <Gauge />
+                  <span>Análise de ROI</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "relatorios"} 
+                  onClick={() => handleStepClick("relatorios")}
+                >
+                  <LineChart />
+                  <span>Relatórios</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Configuração */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Configuração</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "prompts"} 
+                  onClick={() => handleStepClick("prompts")}
+                >
+                  <Bot />
+                  <span>Prompts da IA</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={currentStep === "analytics"} 
+                  onClick={() => handleStepClick("analytics")}
+                >
+                  <Zap />
+                  <span>Analytics</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   isActive={currentStep === "actions"} 
@@ -111,38 +228,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
                 >
                   <Check />
                   <span>Ações em Massa</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel>Gerenciamento</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Database />
-                  <span>Nutracêuticos</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <FileText />
-                  <span>Estudos Científicos</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Bot />
-                  <span>Prompts da IA</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <LineChart />
-                  <span>Analytics</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
