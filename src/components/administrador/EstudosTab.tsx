@@ -1,15 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Microscope } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
+import { useToast } from "@/hooks/use-toast";
 
 const EstudosTab: React.FC = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
+  
+  const handleAddEstudo = () => {
+    setDialogOpen(true);
+  };
+  
+  const handleEstudoAdicionado = () => {
+    setDialogOpen(false);
+    toast({
+      title: "Estudo adicionado com sucesso",
+      description: "O estudo foi processado pela IA e está disponível no sistema.",
+    });
+  };
+  
   return (
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Estudos Científicos</h2>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={handleAddEstudo}>
           <Plus className="h-4 w-4" />
           Adicionar Estudo
         </Button>
@@ -70,13 +88,19 @@ const EstudosTab: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="border-dashed border-2 border-gray-300 bg-gray-50">
+        <Card className="border-dashed border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" onClick={handleAddEstudo}>
           <CardContent className="flex flex-col items-center justify-center h-full py-12">
             <Plus className="h-12 w-12 text-gray-400" />
             <p className="text-gray-500 mt-2">Adicionar novo estudo</p>
           </CardContent>
         </Card>
       </div>
+      
+      <AdicionarEstudoDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)}
+        onEstudoAdicionado={handleEstudoAdicionado}
+      />
     </>
   );
 };
