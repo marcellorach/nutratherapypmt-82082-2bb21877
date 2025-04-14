@@ -30,7 +30,8 @@ export const mockSugestoes: Sugestao[] = [
     ],
     raciocinio: "A análise longitudinal dos dados de saúde canina na plataforma revelou correlação significativa entre marcadores de estresse oxidativo elevados e o desenvolvimento de condições relacionadas à idade em cães de médio e grande porte. Em estudos de pesquisa recente em roedores, o resveratrol demonstrou capacidade de modular mecanismos similares aos observados em processos de envelhecimento canino.",
     status: "nova",
-    approvalChain: []
+    approvalChain: [],
+    origem: "ia"
   },
   {
     id: "2",
@@ -55,7 +56,8 @@ export const mockSugestoes: Sugestao[] = [
       { stage: 'scientific_committee', approved: true, date: '22/03/2025' },
       { stage: 'ethics_committee', approved: true, date: '28/03/2025' },
       { stage: 'direction', approved: true, date: '05/04/2025' },
-    ]
+    ],
+    origem: "comite_cientifico"
   },
   {
     id: "3",
@@ -80,6 +82,28 @@ export const mockSugestoes: Sugestao[] = [
       { stage: 'scientific_committee', approved: null, date: null },
       { stage: 'ethics_committee', approved: null, date: null },
       { stage: 'direction', approved: null, date: null },
-    ]
+    ],
+    origem: "externa"
+  },
+  {
+    id: "4",
+    titulo: "Ômega-3 de alta pureza para doença articular degenerativa",
+    confianca: 92,
+    baseado_em: [
+      "Revisão sistemática de estudos com suplementação de ômega-3",
+      "Dados de biomarcadores inflamatórios em pacientes da plataforma",
+      "Metanálise de resultados clínicos em cães com osteoartrite"
+    ],
+    populacao_sugerida: "Cães acima de 6 anos com sinais clínicos de artrose",
+    metodologia: "Estudo de coorte com duas concentrações (EPA 500mg e 1000mg) por 9 meses",
+    marcadores_sugeridos: [
+      "Biomarcadores inflamatórios sinoviais",
+      "Avaliação de mobilidade por acelerômetro",
+      "Escala de dor e qualidade de vida"
+    ],
+    raciocinio: "A análise dos dados clínicos de cães com doença articular degenerativa na plataforma demonstrou correlação significativa entre concentrações plasmáticas de EPA/DHA e redução de marcadores inflamatórios. Formulações de alta pureza podem fornecer resultados superiores com menor incidência de efeitos adversos gastrointestinais.",
+    status: "nova",
+    approvalChain: [],
+    origem: "ia"
   }
 ];

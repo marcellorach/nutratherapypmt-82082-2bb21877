@@ -15,6 +15,8 @@ export interface ApprovalStep {
   date: string | null;
 }
 
+export type OrigemSugestao = 'ia' | 'comite_cientifico' | 'externa';
+
 export interface Sugestao {
   id: string;
   titulo: string;
@@ -26,4 +28,5 @@ export interface Sugestao {
   raciocinio: string;
   status: 'nova' | 'aprovada' | 'rejeitada' | 'em_analise';
   approvalChain: ApprovalStep[];
+  origem: OrigemSugestao;
 }

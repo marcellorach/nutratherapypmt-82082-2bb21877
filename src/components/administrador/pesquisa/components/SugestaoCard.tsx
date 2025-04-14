@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -14,7 +14,10 @@ import {
   ChevronRight, 
   ThumbsUp, 
   ThumbsDown,
-  Briefcase
+  Briefcase,
+  Lightbulb,
+  Users,
+  User
 } from "lucide-react";
 import { Sugestao } from '../types/sugestoes';
 import { approvalStages } from '../data/sugestoesData';
@@ -47,31 +50,88 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
     }
   };
 
+  // Ícone e texto baseado na origem da sugestão
+  const getOrigemInfo = () => {
+    switch (sugestao.origem) {
+      case 'ia':
+        return {
+          icon: <Lightbulb className="h-5 w-5 text-amber-500" />,
+          text: "Sugestão da IA"
+        };
+      case 'comite_cientifico':
+        return {
+          icon: <Users className="h-5 w-5 text-indigo-500" />,
+          text: "Sugestão do Comitê Científico"
+        };
+      case 'externa':
+        return {
+          icon: <User className="h-5 w-5 text-emerald-500" />,
+          text: "Sugestão Externa"
+        };
+      default:
+        return {
+          icon: <Lightbulb className="h-5 w-5 text-gray-500" />,
+          text: "Origem desconhecida"
+        };
+    }
+  };
+
+  const origemInfo = getOrigemInfo();
+
   return (
-    <Card>
+    <Card className="shadow-md hover:shadow-lg transition-all border-t-4 border-t-slate-200">
       <CardHeader>
         <div className="flex justify-between">
-          <CardTitle className="text-md">{sugestao.titulo}</CardTitle>
+          <div className="flex items-start gap-2">
+            {origemInfo.icon}
+            <div>
+              <Badge variant="outline" className="mb-2 font-normal">
+                {origemInfo.text}
+              </Badge>
+              <CardTitle className="text-lg leading-tight">{sugestao.titulo}</CardTitle>
+            </div>
+          </div>
           {getStatusBadge()}
         </div>
         <CardDescription>
           Confiança da IA: <span className="font-medium">{sugestao.confianca}%</span>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-4 pt-0">
+        {/* Raciocínio sempre visível */}
+        <div>
+          <h4 className="text-sm font-medium mb-1">Raciocínio</h4>
+          <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
+        </div>
+
         <div>
           <h4 className="text-sm font-medium">População Sugerida</h4>
           <p className="text-sm text-muted-foreground">{sugestao.populacao_sugerida}</p>
         </div>
+        
+        {/* Metodologia sempre visível */}
+        <div>
+          <h4 className="text-sm font-medium">Metodologia Sugerida</h4>
+          <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
+        </div>
+        
+        {/* Baseado em - sempre visível */}
         <div>
           <h4 className="text-sm font-medium">Baseado em:</h4>
           <ul className="text-sm text-muted-foreground list-disc ml-5">
-            {sugestao.baseado_em.slice(0, 2).map((base, index) => (
+            {sugestao.baseado_em.map((base, index) => (
               <li key={index}>{base}</li>
             ))}
-            {sugestao.baseado_em.length > 2 && (
-              <li>+ {sugestao.baseado_em.length - 2} outras fontes</li>
-            )}
+          </ul>
+        </div>
+        
+        {/* Marcadores sugeridos - sempre visíveis */}
+        <div>
+          <h4 className="text-sm font-medium">Marcadores Sugeridos:</h4>
+          <ul className="text-sm text-muted-foreground list-disc ml-5">
+            {sugestao.marcadores_sugeridos.map((marcador, index) => (
+              <li key={index}>{marcador}</li>
+            ))}
           </ul>
         </div>
         
@@ -105,9 +165,9 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-between pt-0">
         <Button variant="outline" size="sm" onClick={onDetails}>
-          Ver detalhes
+          Ver detalhes completos
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
         {sugestao.status === 'nova' && (

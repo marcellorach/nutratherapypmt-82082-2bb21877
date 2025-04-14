@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Filter } from "lucide-react";
 import { useSugestoes } from './hooks/useSugestoes';
 import SugestaoCard from './components/SugestaoCard';
 import SugestaoDetailsDialog from './components/SugestaoDetailsDialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const SugestoesAITab: React.FC = () => {
   const {
@@ -23,18 +24,24 @@ const SugestoesAITab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sugestões de Pesquisa da IA</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Sugestões de Pesquisa</h2>
           <p className="text-muted-foreground">
             Avalie estudos científicos sugeridos com base em análise de dados e evidências.
           </p>
         </div>
-        <Button variant="outline" className="flex items-center">
-          <Sparkles className="mr-2 h-4 w-4" />
-          Solicitar novas sugestões
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex items-center">
+            <Filter className="mr-2 h-4 w-4" />
+            Filtrar
+          </Button>
+          <Button variant="outline" className="flex items-center">
+            <Sparkles className="mr-2 h-4 w-4" />
+            Solicitar novas sugestões
+          </Button>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {sugestoes.map(sugestao => (
           <SugestaoCard 
             key={sugestao.id} 

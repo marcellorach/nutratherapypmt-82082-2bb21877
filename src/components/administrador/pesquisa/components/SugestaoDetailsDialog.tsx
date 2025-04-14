@@ -19,10 +19,13 @@ import {
   Lightbulb,
   ThumbsUp, 
   ThumbsDown,
-  ChevronRight
+  ChevronRight,
+  Users,
+  User
 } from "lucide-react";
 import { Sugestao } from '../types/sugestoes';
 import ApprovalChain from './ApprovalChain';
+import { Badge } from "@/components/ui/badge";
 
 interface SugestaoDetailsDialogProps {
   open: boolean;
@@ -43,12 +46,45 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
 }) => {
   if (!sugestao) return null;
 
+  // Ícone e texto baseado na origem da sugestão
+  const getOrigemInfo = () => {
+    switch (sugestao.origem) {
+      case 'ia':
+        return {
+          icon: <Lightbulb className="h-5 w-5 text-amber-500" />,
+          text: "Sugestão da IA"
+        };
+      case 'comite_cientifico':
+        return {
+          icon: <Users className="h-5 w-5 text-indigo-500" />,
+          text: "Sugestão do Comitê Científico"
+        };
+      case 'externa':
+        return {
+          icon: <User className="h-5 w-5 text-emerald-500" />,
+          text: "Sugestão Externa"
+        };
+      default:
+        return {
+          icon: <Lightbulb className="h-5 w-5 text-gray-500" />,
+          text: "Origem desconhecida"
+        };
+    }
+  };
+
+  const origemInfo = getOrigemInfo();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+          <div className="flex items-center gap-2 mb-1">
+            {origemInfo.icon}
+            <Badge variant="outline">
+              {origemInfo.text}
+            </Badge>
+          </div>
+          <DialogTitle className="text-xl">
             {sugestao.titulo}
           </DialogTitle>
           <DialogDescription className="flex items-center">
@@ -59,40 +95,37 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
         <div className="space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-1">Raciocínio da IA</h4>
-            <p className="text-sm text-muted-foreground">{sugestao.raciocinio}</p>
+            <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
           </div>
           
           {/* Cadeia de aprovação */}
           <ApprovalChain approvalChain={sugestao.approvalChain} />
           
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="baseado">
-              <AccordionTrigger>Baseado em</AccordionTrigger>
-              <AccordionContent>
-                <ul className="text-sm text-muted-foreground list-disc ml-5">
-                  {sugestao.baseado_em.map((base, index) => (
-                    <li key={index}>{base}</li>
-                  ))}
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="metodologia">
-              <AccordionTrigger>Metodologia Sugerida</AccordionTrigger>
-              <AccordionContent>
-                <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="marcadores">
-              <AccordionTrigger>Marcadores Sugeridos</AccordionTrigger>
-              <AccordionContent>
-                <ul className="text-sm text-muted-foreground list-disc ml-5">
-                  {sugestao.marcadores_sugeridos.map((marcador, index) => (
-                    <li key={index}>{marcador}</li>
-                  ))}
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          {/* Todos os detalhes visíveis sem accordion */}
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-1">Baseado em</h4>
+              <ul className="text-sm text-muted-foreground list-disc ml-5">
+                {sugestao.baseado_em.map((base, index) => (
+                  <li key={index}>{base}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-1">Metodologia Sugerida</h4>
+              <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-1">Marcadores Sugeridos</h4>
+              <ul className="text-sm text-muted-foreground list-disc ml-5">
+                {sugestao.marcadores_sugeridos.map((marcador, index) => (
+                  <li key={index}>{marcador}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
         
         <DialogFooter>
