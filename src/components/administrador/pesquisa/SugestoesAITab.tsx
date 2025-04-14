@@ -15,7 +15,8 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogDescription
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { 
   Accordion, 
@@ -23,8 +24,26 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion";
-import { Sparkles, ChevronRight, ThumbsUp, ThumbsDown, Lightbulb } from "lucide-react";
+import { 
+  Sparkles, 
+  ChevronRight, 
+  ThumbsUp, 
+  ThumbsDown, 
+  Lightbulb,
+  UserCheck,
+  Users,
+  ShieldCheck,
+  Briefcase
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Definição dos estágios da cadeia de aprovação
+const approvalStages = [
+  { id: 'scientific_supervision', name: 'Supervisão Científica', icon: UserCheck, color: 'blue' },
+  { id: 'scientific_committee', name: 'Comitê Científico', icon: Users, color: 'indigo' },
+  { id: 'ethics_committee', name: 'Comitê Ético', icon: ShieldCheck, color: 'violet' },
+  { id: 'direction', name: 'Direção', icon: Briefcase, color: 'green' }
+];
 
 // Mock data para sugestões de pesquisa da IA
 const mockSugestoes = [
@@ -45,7 +64,8 @@ const mockSugestoes = [
       "Marcadores inflamatórios (IL-6, TNF-alpha)"
     ],
     raciocinio: "A análise longitudinal dos dados de saúde canina na plataforma revelou correlação significativa entre marcadores de estresse oxidativo elevados e o desenvolvimento de condições relacionadas à idade em cães de médio e grande porte. Em estudos de pesquisa recente em roedores, o resveratrol demonstrou capacidade de modular mecanismos similares aos observados em processos de envelhecimento canino.",
-    status: "nova"
+    status: "nova",
+    approvalChain: []
   },
   {
     id: "2",
@@ -64,7 +84,13 @@ const mockSugestoes = [
       "Avaliação radiográfica a cada 3 meses"
     ],
     raciocinio: "A análise de padrões nos dados clínicos da plataforma identificou que intervenções preventivas entre 10-24 meses de idade em raças predispostas à displasia demonstram maior eficácia que intervenções em fases tardias. O colágeno tipo II não-desnaturado tem demonstrado capacidade de modular respostas imunológicas associadas à degradação da cartilagem em estudos preliminares.",
-    status: "aprovada"
+    status: "aprovada",
+    approvalChain: [
+      { stage: 'scientific_supervision', approved: true, date: '15/03/2025' },
+      { stage: 'scientific_committee', approved: true, date: '22/03/2025' },
+      { stage: 'ethics_committee', approved: true, date: '28/03/2025' },
+      { stage: 'direction', approved: true, date: '05/04/2025' },
+    ]
   },
   {
     id: "3",
@@ -83,9 +109,78 @@ const mockSugestoes = [
       "Indicadores cognitivos padronizados"
     ],
     raciocinio: "A análise dos perfis de microbioma na plataforma demonstrou declínio progressivo da diversidade microbiana em cães acima de 9 anos, com correlação positiva com marcadores inflamatórios e alterações comportamentais. Estudos recentes sugerem que a modulação específica do microbioma com combinações prebióticas pode reverter parcialmente estas alterações.",
-    status: "em_analise"
+    status: "em_analise",
+    approvalChain: [
+      { stage: 'scientific_supervision', approved: true, date: '02/04/2025' },
+      { stage: 'scientific_committee', approved: null, date: null },
+      { stage: 'ethics_committee', approved: null, date: null },
+      { stage: 'direction', approved: null, date: null },
+    ]
   }
 ];
+
+// Componente para exibir a cadeia de aprovação
+const ApprovalChain: React.FC<{approvalChain: any[]}> = ({ approvalChain }) => {
+  // Se não tiver cadeia de aprovação, retorna null
+  if (!approvalChain || approvalChain.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4">
+      <h4 className="text-sm font-medium mb-2">Cadeia de Aprovação</h4>
+      <ul className="space-y-2">
+        {approvalStages.map((stage, index) => {
+          const approvalItem = approvalChain.find(item => item.stage === stage.id);
+          let status: 'pending' | 'approved' | 'current' = 'pending';
+          let statusText = 'Pendente';
+          let date = '';
+          
+          if (approvalItem) {
+            if (approvalItem.approved === true) {
+              status = 'approved';
+              statusText = 'Aprovado';
+              date = approvalItem.date;
+            } else if (approvalItem.approved === null) {
+              status = 'current';
+              statusText = 'Em análise';
+            }
+          }
+          
+          const StageIcon = stage.icon;
+          
+          return (
+            <li key={stage.id} className="flex items-center gap-2">
+              <div className={`
+                flex items-center justify-between w-full p-2 rounded-md
+                ${status === 'approved' ? 'bg-green-50' : 
+                  status === 'current' ? 'bg-amber-50' : 'bg-gray-50'}
+              `}>
+                <div className="flex items-center gap-2">
+                  <StageIcon className={`h-4 w-4 
+                    ${status === 'approved' ? 'text-green-500' : 
+                      status === 'current' ? 'text-amber-500' : 'text-gray-400'}
+                  `} />
+                  <span className="text-sm font-medium">{stage.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className={`
+                    ${status === 'approved' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 
+                      status === 'current' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 
+                      'bg-gray-100 text-gray-800 hover:bg-gray-200'}
+                  `}>
+                    {statusText}
+                  </Badge>
+                  {date && <span className="text-xs text-muted-foreground">{date}</span>}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+};
 
 // Componente para exibir uma sugestão de estudo
 const SugestaoCard: React.FC<{
@@ -136,6 +231,36 @@ const SugestaoCard: React.FC<{
             )}
           </ul>
         </div>
+        
+        {/* Mostrar a primeira etapa da aprovação que está pendente ou em análise */}
+        {sugestao.approvalChain && sugestao.approvalChain.length > 0 && (
+          <div className="mt-2">
+            {(() => {
+              const currentStageIndex = sugestao.approvalChain.findIndex(item => item.approved === null);
+              if (currentStageIndex !== -1) {
+                const currentStageId = sugestao.approvalChain[currentStageIndex].stage;
+                const stage = approvalStages.find(s => s.id === currentStageId);
+                if (stage) {
+                  const StageIcon = stage.icon;
+                  return (
+                    <div className="flex items-center text-amber-600 bg-amber-50 p-2 rounded-md">
+                      <StageIcon className="h-4 w-4 mr-2" />
+                      <span className="text-xs font-medium">Em análise: {stage.name}</span>
+                    </div>
+                  );
+                }
+              } else if (sugestao.status === 'aprovada') {
+                return (
+                  <div className="flex items-center text-green-600 bg-green-50 p-2 rounded-md">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    <span className="text-xs font-medium">Aprovada por todos os comitês</span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" size="sm" onClick={onDetails}>
@@ -176,12 +301,27 @@ const SugestoesAITab: React.FC = () => {
   const { toast } = useToast();
   
   const handleApprove = (id: string) => {
-    setSugestoes(sugestoes.map(s => 
-      s.id === id ? { ...s, status: 'aprovada' } : s
-    ));
+    setSugestoes(sugestoes.map(s => {
+      if (s.id === id) {
+        // Iniciar a cadeia de aprovação
+        const today = new Date();
+        const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+        return { 
+          ...s, 
+          status: 'em_analise',
+          approvalChain: approvalStages.map((stage, index) => ({
+            stage: stage.id,
+            approved: index === 0 ? true : null,
+            date: index === 0 ? formattedDate : null
+          }))
+        };
+      }
+      return s;
+    }));
+    
     toast({
-      title: "Sugestão aprovada",
-      description: "A sugestão foi enviada para planejamento de estudo.",
+      title: "Sugestão enviada para análise",
+      description: "A sugestão foi aprovada e enviada para a Supervisão Científica.",
     });
   };
   
@@ -198,6 +338,53 @@ const SugestoesAITab: React.FC = () => {
   const handleViewDetails = (sugestao: any) => {
     setSugestaoSelecionada(sugestao);
     setDialogOpen(true);
+  };
+
+  // Função para processar a próxima etapa da aprovação
+  const handleAdvanceApproval = (id: string) => {
+    setSugestoes(sugestoes.map(s => {
+      if (s.id === id) {
+        const approvalChain = [...s.approvalChain];
+        const currentStageIndex = approvalChain.findIndex(item => item.approved === null);
+        
+        if (currentStageIndex !== -1) {
+          const today = new Date();
+          const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+          
+          approvalChain[currentStageIndex].approved = true;
+          approvalChain[currentStageIndex].date = formattedDate;
+          
+          // Se for a última etapa, atualizar o status para aprovada
+          if (currentStageIndex === approvalChain.length - 1) {
+            return { ...s, status: 'aprovada', approvalChain };
+          }
+          
+          return { ...s, approvalChain };
+        }
+        return s;
+      }
+      return s;
+    }));
+    
+    const sugestao = sugestoes.find(s => s.id === id);
+    if (sugestao) {
+      const currentStageIndex = sugestao.approvalChain.findIndex(item => item.approved === null);
+      if (currentStageIndex !== -1) {
+        const nextStage = approvalStages[currentStageIndex];
+        
+        toast({
+          title: "Aprovação avançada",
+          description: `A sugestão foi aprovada pelo ${approvalStages[currentStageIndex].name} e avançou para a próxima etapa.`,
+        });
+      } else {
+        toast({
+          title: "Estudo aprovado!",
+          description: "Todas as etapas de aprovação foram concluídas. O estudo está aprovado para início.",
+        });
+      }
+    }
+    
+    setDialogOpen(false);
   };
 
   return (
@@ -229,7 +416,7 @@ const SugestoesAITab: React.FC = () => {
       
       {sugestaoSelecionada && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[700px]">
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
@@ -245,6 +432,9 @@ const SugestoesAITab: React.FC = () => {
                 <h4 className="text-sm font-medium mb-1">Raciocínio da IA</h4>
                 <p className="text-sm text-muted-foreground">{sugestaoSelecionada.raciocinio}</p>
               </div>
+              
+              {/* Cadeia de aprovação */}
+              <ApprovalChain approvalChain={sugestaoSelecionada.approvalChain} />
               
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="baseado">
@@ -276,31 +466,43 @@ const SugestoesAITab: React.FC = () => {
               </Accordion>
             </div>
             
-            {sugestaoSelecionada.status === 'nova' && (
-              <div className="flex justify-end gap-2 mt-4">
+            <DialogFooter>
+              {sugestaoSelecionada.status === 'nova' && (
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => {
+                      handleReject(sugestaoSelecionada.id);
+                      setDialogOpen(false);
+                    }}
+                  >
+                    <ThumbsDown className="mr-1 h-4 w-4" />
+                    Rejeitar
+                  </Button>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      handleApprove(sugestaoSelecionada.id);
+                      setDialogOpen(false);
+                    }}
+                  >
+                    <ThumbsUp className="mr-1 h-4 w-4" />
+                    Iniciar aprovação
+                  </Button>
+                </div>
+              )}
+              
+              {sugestaoSelecionada.status === 'em_analise' && (
                 <Button 
-                  variant="outline" 
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => {
-                    handleReject(sugestaoSelecionada.id);
-                    setDialogOpen(false);
-                  }}
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={() => handleAdvanceApproval(sugestaoSelecionada.id)}
                 >
-                  <ThumbsDown className="mr-1 h-4 w-4" />
-                  Rejeitar
+                  <ChevronRight className="mr-1 h-4 w-4" />
+                  Avançar para próxima etapa
                 </Button>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => {
-                    handleApprove(sugestaoSelecionada.id);
-                    setDialogOpen(false);
-                  }}
-                >
-                  <ThumbsUp className="mr-1 h-4 w-4" />
-                  Aprovar
-                </Button>
-              </div>
-            )}
+              )}
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
