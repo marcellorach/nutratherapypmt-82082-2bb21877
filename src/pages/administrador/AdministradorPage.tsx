@@ -15,6 +15,12 @@ import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTa
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
 
+// Importando os novos componentes de Pesquisa e Desenvolvimento
+import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
+import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
+import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
+import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
+
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("import");
   
@@ -37,6 +43,16 @@ const AdministradorPage: React.FC = () => {
         return <AnalysisStep />;
       case "visualization":
         return <VisualizationStep />;
+
+      // Pesquisa e Desenvolvimento
+      case "estudos-planejados":
+        return <EstudosPlanejadosTab />;
+      case "estudos-andamento":
+        return <EstudosAndamentoTab />;
+      case "estudos-concluidos":
+        return <EstudosConcluidosTab />;
+      case "sugestoes-ai":
+        return <SugestoesAITab />;
 
       // Análise Preditiva
       case "modelos":

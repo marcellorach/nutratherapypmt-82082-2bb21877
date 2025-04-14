@@ -10,6 +10,8 @@ import KnowledgeBaseGroup from './groups/KnowledgeBaseGroup';
 import DataProcessingGroup from './groups/DataProcessingGroup';
 import PredictiveAnalysisGroup from './groups/PredictiveAnalysisGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
+import ResearchGroup from './groups/ResearchGroup';
+import { Microscope } from "lucide-react";
 
 interface AdminSidebarGroupsProps {
   currentStep: string;
@@ -44,6 +46,22 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
             <DataProcessingGroup 
               currentStep={currentStep} 
               handleStepClick={handleStepClick} 
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {/* Pesquisa e Desenvolvimento */}
+      <SidebarGroup>
+        <SidebarGroupLabel>
+          <Microscope className="mr-2 h-4 w-4" />
+          Pesquisa e Desenvolvimento
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <ResearchGroup
+              currentStep={currentStep}
+              handleStepClick={handleStepClick}
             />
           </SidebarMenu>
         </SidebarGroupContent>
