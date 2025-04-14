@@ -228,7 +228,16 @@ const EstudosConcluidosTab: React.FC = () => {
               
               <TabsContent value="beneficios" className="space-y-6 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ChartContainer className="h-[300px]">
+                  <ChartContainer 
+                    className="h-[300px]" 
+                    config={{
+                      value: { color: "#0088FE" },
+                      redução: { color: "#0088FE" },
+                      melhora: { color: "#00C49F" },
+                      efeitos: { color: "#FFBB28" },
+                      qualidade: { color: "#FF8042" }
+                    }}
+                  >
                     <BarChart data={selectedEstudo.beneficios} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -243,7 +252,16 @@ const EstudosConcluidosTab: React.FC = () => {
                     </BarChart>
                   </ChartContainer>
                   
-                  <ChartContainer className="h-[300px]">
+                  <ChartContainer 
+                    className="h-[300px]" 
+                    config={{
+                      value: { color: "#0088FE" },
+                      redução: { color: "#0088FE" },
+                      melhora: { color: "#00C49F" },
+                      efeitos: { color: "#FFBB28" },
+                      qualidade: { color: "#FF8042" }
+                    }}
+                  >
                     <PieChart>
                       <Pie
                         data={selectedEstudo.beneficios}
