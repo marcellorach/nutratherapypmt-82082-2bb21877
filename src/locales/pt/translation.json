@@ -1,0 +1,100 @@
+
+{
+  "common": {
+    "madeWith": "Feito com",
+    "by": "por",
+    "home": "Início",
+    "veterinarian": "Veterinário",
+    "tutor": "Tutor",
+    "researchDev": "P&D",
+    "logout": "Sair",
+    "settings": "Configurações",
+    "generateRandomData": "Gerar dados aleatórios para exemplo",
+    "learnMore": "Saiba mais",
+    "startNow": "Comece agora",
+    "backToPatients": "Voltar para lista de pacientes"
+  },
+  "home": {
+    "title": "NutraTherapy",
+    "subtitle": "Nutrição personalizada e tratamento individualizado para mitigação de doenças degenerativas, baseado em pesquisa científica avançada",
+    "innovativeApproach": "Nossa abordagem inovadora",
+    "forVeterinarians": "Para Veterinários",
+    "forVeterinariansDesc": "Acesse dados clínicos, consulte a IA para recomendações personalizadas e visualize evidências científicas.",
+    "forTutors": "Para Tutores",
+    "forTutorsDesc": "Receba explicações simplificadas sobre recomendações e acompanhe o progresso do seu pet com tratamentos personalizados.",
+    "advancedRD": "P&D Avançada",
+    "advancedRDDesc": "Acesse nossa plataforma de pesquisa e desenvolvimento para gerenciar estudos científicos e nutracêuticos.",
+    "degenerativeDiseases": "Mitigação de doenças degenerativas",
+    "scientificResearch": "Pesquisa Científica",
+    "scientificResearchDesc": "Nossa plataforma integra resultados de estudos clínicos e pesquisas em nutracêuticos para criar tratamentos baseados em evidências científicas sólidas.",
+    "individualizedTreatment": "Tratamento Individualizado",
+    "individualizedTreatmentDesc": "Combinamos dados clínicos específicos de cada pet com modelos preditivos para criar planos de tratamento personalizados que maximizam resultados.",
+    "methodology": "Metodologia"
+  },
+  "navbar": {
+    "researchDev": "Área de P&D",
+    "platform": "Plataforma de pesquisa e desenvolvimento de nutracêuticos"
+  },
+  "veterinarian": {
+    "portal": "Portal do Veterinário",
+    "portalDesc": "Gerencie dados clínicos e obtenha recomendações personalizadas",
+    "searchPet": "Buscar pet...",
+    "newPet": "Novo Pet",
+    "patientsFound": "{{count}} pacientes encontrados",
+    "patient_one": "{{count}} paciente encontrado",
+    "patient_other": "{{count}} pacientes encontrados",
+    "filter": "Filtrar",
+    "treatmentPlan": "Plano de Tratamento:",
+    "createdOn": "Criado em:",
+    "veterinarianNotes": "Notas do Veterinário",
+    "report": "Relatório",
+    "savePlan": "Salvar plano completo",
+    "savingPlan": "Salvando plano...",
+    "newRecommendation": "Nova Recomendação",
+    "noPetSelected": "Nenhum pet selecionado",
+    "selectPetPrompt": "Selecione um pet na aba \"Pets\" para ver suas recomendações.",
+    "noPlanExists": "não possui recomendações",
+    "createPlanPrompt": "Crie um plano de tratamento para este pet."
+  },
+  "research": {
+    "tabs": {
+      "ongoing": "Em Andamento",
+      "completed": "Concluídos",
+      "planned": "Planejados"
+    },
+    "oraBiomedical": {
+      "title": "Ora Biomedical",
+      "description": "Análise automatizada de compostos geroprotetores em C. elegans usando sistemas robóticos",
+      "activePartnership": "Parceria Ativa",
+      "liveDashboard": "Dashboard ao vivo",
+      "newStudy": "Novo estudo",
+      "totalStudies": "Estudos Totais",
+      "analyzedCompounds": "Compostos Analisados",
+      "successRate": "Taxa de Sucesso",
+      "studiesSubtitle": "Ensaios em C. elegans",
+      "compoundsSubtitle": "Testados em robôs",
+      "successSubtitle": "Efeitos positivos detectados",
+      "lastDays": "+3 nos últimos 30 dias",
+      "ofPlanned": "Dos 500 planejados",
+      "positiveEffect": "45 compostos com efeito positivo",
+      "priority": {
+        "high": "Prioridade Alta",
+        "medium": "Prioridade Média",
+        "low": "Prioridade Baixa"
+      },
+      "status": {
+        "ongoing": "Em Andamento",
+        "completed": "Concluído",
+        "planned": "Planejado"
+      },
+      "investigator": "Investigador",
+      "compounds": "Compostos",
+      "period": "Período",
+      "progress": "Progresso",
+      "positiveResults": "Resultados positivos",
+      "rate": "Taxa",
+      "viewDetails": "Ver detalhes",
+      "alerts": "alertas"
+    }
+  }
+}

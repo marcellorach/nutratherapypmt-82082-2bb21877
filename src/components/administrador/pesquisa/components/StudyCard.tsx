@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Bot, Beaker, Microscope, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react";
 import { Study } from "../types/oraBiomedical";
+import { useTranslation } from 'react-i18next';
 
 interface StudyCardProps {
   study: Study;
 }
 
 const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
+  const { t, i18n } = useTranslation();
+
   const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
     switch (priority) {
       case 'high': return 'bg-red-50 text-red-600 border-red-200';
@@ -38,7 +41,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR').format(date);
+    return new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'pt-BR').format(date);
   };
   
   return (
@@ -50,17 +53,15 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
               <Badge variant="outline" className={getStatusColor(study.status)}>
                 <div className="flex items-center gap-1">
                   {getStatusIcon(study.status)}
-                  {study.status === 'ongoing' ? 'Em Andamento' : 
-                   study.status === 'completed' ? 'Concluído' : 'Planejado'}
+                  {t(`research.oraBiomedical.status.${study.status}`)}
                 </div>
               </Badge>
               <Badge variant="outline" className={getPriorityColor(study.priority)}>
-                Prioridade {study.priority === 'high' ? 'Alta' : 
-                           study.priority === 'medium' ? 'Média' : 'Baixa'}
+                {t(`research.oraBiomedical.priority.${study.priority}`)}
               </Badge>
               {study.alerts && (
                 <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
-                  <AlertTriangle className="h-3 w-3 mr-1" /> {study.alerts} alertas
+                  <AlertTriangle className="h-3 w-3 mr-1" /> {study.alerts} {t('research.oraBiomedical.alerts')}
                 </Badge>
               )}
             </div>
@@ -73,15 +74,15 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
       <CardContent>
         <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
           <div>
-            <p className="text-muted-foreground mb-1">Investigador</p>
+            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.investigator')}</p>
             <p className="font-medium">{study.primaryInvestigator}</p>
           </div>
           <div>
-            <p className="text-muted-foreground mb-1">Compostos</p>
+            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.compounds')}</p>
             <p className="font-medium">{study.compounds}</p>
           </div>
           <div>
-            <p className="text-muted-foreground mb-1">Período</p>
+            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.period')}</p>
             <p className="font-medium">
               {formatDate(study.startDate)}
               {study.endDate && ` - ${formatDate(study.endDate)}`}
@@ -92,14 +93,14 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
         {study.status !== 'planned' && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span>Progresso</span>
+              <span>{t('research.oraBiomedical.progress')}</span>
               <span className="font-medium">{study.progress}%</span>
             </div>
             <Progress value={study.progress} className="h-2" />
             {study.positiveResults !== undefined && (
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Resultados positivos: {study.positiveResults} compostos</span>
-                <span>Taxa: {((study.positiveResults / study.compounds) * 100).toFixed(1)}%</span>
+                <span>{t('research.oraBiomedical.positiveResults')}: {study.positiveResults} {t('research.oraBiomedical.compounds').toLowerCase()}</span>
+                <span>{t('research.oraBiomedical.rate')}: {((study.positiveResults / study.compounds) * 100).toFixed(1)}%</span>
               </div>
             )}
           </div>
@@ -107,7 +108,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
       </CardContent>
       <CardFooter className="pt-0">
         <Button variant="ghost" className="w-full flex justify-center items-center text-sm">
-          Ver detalhes <ChevronRight className="h-4 w-4 ml-1" />
+          {t('research.oraBiomedical.viewDetails')} <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </CardFooter>
     </Card>

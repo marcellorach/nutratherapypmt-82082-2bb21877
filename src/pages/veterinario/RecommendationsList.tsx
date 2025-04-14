@@ -6,6 +6,7 @@ import { treatmentPlans, nutraceuticals } from '@/data';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, FilePlus, Save } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 
 interface RecommendationsListProps {
   selectedPet: Pet | null;
@@ -14,13 +15,14 @@ interface RecommendationsListProps {
 const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }) => {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const { t } = useTranslation();
   
   // Se não houver pet selecionado, mostrar mensagem
   if (!selectedPet) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">Nenhum pet selecionado</h3>
-        <p className="text-gray-500 mb-6">Selecione um pet na aba "Pets" para ver suas recomendações.</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('veterinarian.noPetSelected')}</h3>
+        <p className="text-gray-500 mb-6">{t('veterinarian.selectPetPrompt')}</p>
       </div>
     );
   }
@@ -32,11 +34,11 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
   if (!petPlan) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">{selectedPet.name} não possui recomendações</h3>
-        <p className="text-gray-500 mb-6">Crie um plano de tratamento para este pet.</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{selectedPet.name} {t('veterinarian.noPlanExists')}</h3>
+        <p className="text-gray-500 mb-6">{t('veterinarian.createPlanPrompt')}</p>
         <Button className="flex items-center gap-2">
           <PlusCircle size={16} />
-          Criar novo plano de tratamento
+          {t('veterinarian.createPlanPrompt')}
         </Button>
       </div>
     );
@@ -68,8 +70,8 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold">Plano de Tratamento: {selectedPet.name}</h2>
-          <p className="text-gray-500">Criado em: {petPlan.createdAt}</p>
+          <h2 className="text-xl font-bold">{t('veterinarian.treatmentPlan')} {selectedPet.name}</h2>
+          <p className="text-gray-500">{t('veterinarian.createdOn')} {petPlan.createdAt}</p>
         </div>
         
         <div className="flex gap-2">
@@ -79,7 +81,7 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
             onClick={handleGenerateReport}
           >
             <FilePlus size={16} />
-            Relatório
+            {t('veterinarian.report')}
           </Button>
           <Button 
             variant="outline" 
@@ -88,18 +90,18 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
             disabled={isSaving}
           >
             <Save size={16} />
-            {isSaving ? "Salvando plano..." : "Salvar plano completo"}
+            {isSaving ? t('veterinarian.savingPlan') : t('veterinarian.savePlan')}
           </Button>
           <Button className="flex items-center gap-2">
             <PlusCircle size={16} />
-            Nova Recomendação
+            {t('veterinarian.newRecommendation')}
           </Button>
         </div>
       </div>
       
       {petPlan.notes && (
         <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6">
-          <h3 className="font-medium text-amber-800 mb-1">Notas do Veterinário</h3>
+          <h3 className="font-medium text-amber-800 mb-1">{t('veterinarian.veterinarianNotes')}</h3>
           <p className="text-amber-700">{petPlan.notes}</p>
         </div>
       )}

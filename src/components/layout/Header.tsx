@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { User, UserCog, LogOut, Microscope } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <header className="w-full bg-white text-gray-800 p-4 border-b border-gray-200 shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
@@ -21,17 +25,17 @@ const Header: React.FC = () => {
               <span className="text-gray-600">NutraTherapy</span>
             </span>
             <span className="text-xs text-gray-600 font-light">
-              Nutrição personalizada baseada em dados e IA
+              {t('home.subtitle')}
             </span>
           </div>
         </Link>
         
         <nav className="hidden md:flex gap-6">
           <Link to="/veterinario" className="text-gray-700 hover:text-gray-900 transition-colors font-medium">
-            Veterinário
+            {t('common.veterinarian')}
           </Link>
           <Link to="/tutor" className="text-gray-700 hover:text-gray-900 transition-colors">
-            Tutor
+            {t('common.tutor')}
           </Link>
         </nav>
         
@@ -44,14 +48,16 @@ const Header: React.FC = () => {
                   className="text-gray-500 hover:text-gray-700 transition-colors mr-4 flex items-center gap-1"
                 >
                   <Microscope size={20} />
-                  <span className="text-sm font-medium">P&D</span>
+                  <span className="text-sm font-medium">{t('common.researchDev')}</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-white border border-gray-200 text-gray-800">
-                <p>Acesse a plataforma de pesquisa e desenvolvimento de nutracêuticos.</p>
+                <p>{t('home.advancedRDDesc')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          
+          <LanguageSwitcher />
           
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end">

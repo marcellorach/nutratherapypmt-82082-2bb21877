@@ -1,0 +1,100 @@
+
+{
+  "common": {
+    "madeWith": "Made with",
+    "by": "by",
+    "home": "Home",
+    "veterinarian": "Veterinarian",
+    "tutor": "Tutor",
+    "researchDev": "R&D",
+    "logout": "Logout",
+    "settings": "Settings",
+    "generateRandomData": "Generate random data for example",
+    "learnMore": "Learn more",
+    "startNow": "Start now",
+    "backToPatients": "Back to patient list"
+  },
+  "home": {
+    "title": "NutraTherapy",
+    "subtitle": "Personalized nutrition and individualized treatment for mitigating degenerative diseases, based on advanced scientific research",
+    "innovativeApproach": "Our innovative approach",
+    "forVeterinarians": "For Veterinarians",
+    "forVeterinariansDesc": "Access clinical data, consult AI for personalized recommendations, and view scientific evidence.",
+    "forTutors": "For Tutors",
+    "forTutorsDesc": "Receive simplified explanations about recommendations and track your pet's progress with personalized treatments.",
+    "advancedRD": "Advanced R&D",
+    "advancedRDDesc": "Access our research and development platform to manage scientific studies and nutraceuticals.",
+    "degenerativeDiseases": "Mitigation of degenerative diseases",
+    "scientificResearch": "Scientific Research",
+    "scientificResearchDesc": "Our platform integrates clinical study results and nutraceutical research to create evidence-based treatments.",
+    "individualizedTreatment": "Individualized Treatment",
+    "individualizedTreatmentDesc": "We combine specific clinical data from each pet with predictive models to create personalized treatment plans that maximize results.",
+    "methodology": "Methodology"
+  },
+  "navbar": {
+    "researchDev": "R&D Area",
+    "platform": "Nutraceutical research and development platform"
+  },
+  "veterinarian": {
+    "portal": "Veterinarian Portal",
+    "portalDesc": "Manage clinical data and get personalized recommendations",
+    "searchPet": "Search pet...",
+    "newPet": "New Pet",
+    "patientsFound": "{{count}} patients found",
+    "patient_one": "{{count}} patient found",
+    "patient_other": "{{count}} patients found",
+    "filter": "Filter",
+    "treatmentPlan": "Treatment Plan:",
+    "createdOn": "Created on:",
+    "veterinarianNotes": "Veterinarian Notes",
+    "report": "Report",
+    "savePlan": "Save complete plan",
+    "savingPlan": "Saving plan...",
+    "newRecommendation": "New Recommendation",
+    "noPetSelected": "No pet selected",
+    "selectPetPrompt": "Select a pet in the \"Pets\" tab to see their recommendations.",
+    "noPlanExists": "doesn't have recommendations",
+    "createPlanPrompt": "Create a treatment plan for this pet."
+  },
+  "research": {
+    "tabs": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "planned": "Planned"
+    },
+    "oraBiomedical": {
+      "title": "Ora Biomedical",
+      "description": "Automated analysis of geroprotector compounds in C. elegans using robotic systems",
+      "activePartnership": "Active Partnership",
+      "liveDashboard": "Live Dashboard",
+      "newStudy": "New Study",
+      "totalStudies": "Total Studies",
+      "analyzedCompounds": "Analyzed Compounds",
+      "successRate": "Success Rate",
+      "studiesSubtitle": "C. elegans assays",
+      "compoundsSubtitle": "Tested in robots",
+      "successSubtitle": "Positive effects detected",
+      "lastDays": "+3 in the last 30 days",
+      "ofPlanned": "Of 500 planned",
+      "positiveEffect": "45 compounds with positive effect",
+      "priority": {
+        "high": "High Priority",
+        "medium": "Medium Priority",
+        "low": "Low Priority"
+      },
+      "status": {
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "planned": "Planned"
+      },
+      "investigator": "Investigator",
+      "compounds": "Compounds",
+      "period": "Period",
+      "progress": "Progress",
+      "positiveResults": "Positive results",
+      "rate": "Rate",
+      "viewDetails": "View details",
+      "alerts": "alerts"
+    }
+  }
+}

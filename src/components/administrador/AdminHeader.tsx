@@ -2,19 +2,22 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const AdminHeader: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
       <div>
-        <h1 className="text-3xl font-bold">Área de P&D</h1>
-        <p className="text-gray-600">Plataforma de pesquisa e desenvolvimento de nutracêuticos</p>
+        <h1 className="text-3xl font-bold">{t('navbar.researchDev')}</h1>
+        <p className="text-gray-600">{t('navbar.platform')}</p>
       </div>
       
       <div className="flex gap-2 mt-4 md:mt-0">
         <Button variant="outline">
           <Settings className="mr-2 h-4 w-4" />
-          Configurações
+          {t('common.settings')}
         </Button>
       </div>
     </div>

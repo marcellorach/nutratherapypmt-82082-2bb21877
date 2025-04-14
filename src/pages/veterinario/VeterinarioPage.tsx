@@ -8,11 +8,13 @@ import PetCard from '@/components/pet/PetCard';
 import { pets, generateRandomData } from '@/data';
 import { Pet } from '@/types';
 import RecommendationsList from './RecommendationsList';
+import { useTranslation } from 'react-i18next';
 
 const VeterinarioPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const { t } = useTranslation();
   
   // Filtrar apenas cães
   const allDogs = pets.filter(pet => pet.species === 'Cachorro');
@@ -45,8 +47,8 @@ const VeterinarioPage: React.FC = () => {
       <div className="container mx-auto py-6 px-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Portal do Veterinário</h1>
-            <p className="text-gray-600">Gerencie dados clínicos e obtenha recomendações personalizadas</p>
+            <h1 className="text-3xl font-bold">{t('veterinarian.portal')}</h1>
+            <p className="text-gray-600">{t('veterinarian.portalDesc')}</p>
           </div>
           
           {!showRecommendations && (
@@ -55,7 +57,7 @@ const VeterinarioPage: React.FC = () => {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Buscar pet..."
+                  placeholder={t('veterinarian.searchPet')}
                   className="w-64 pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -63,7 +65,7 @@ const VeterinarioPage: React.FC = () => {
               </div>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Novo Pet
+                {t('veterinarian.newPet')}
               </Button>
             </div>
           )}
@@ -76,7 +78,7 @@ const VeterinarioPage: React.FC = () => {
               onClick={handleBackToPets}
               className="mb-6"
             >
-              ← Voltar para lista de pacientes
+              ← {t('common.backToPatients')}
             </Button>
             <RecommendationsList selectedPet={selectedPet} />
           </>
@@ -84,11 +86,11 @@ const VeterinarioPage: React.FC = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
               <p className="text-gray-700">
-                {filteredPets.length} {filteredPets.length === 1 ? 'paciente encontrado' : 'pacientes encontrados'}
+                {t('veterinarian.patient', { count: filteredPets.length })}
               </p>
               <Button variant="outline" className="flex items-center gap-2">
                 <Filter size={16} />
-                Filtrar
+                {t('veterinarian.filter')}
               </Button>
             </div>
             
@@ -115,7 +117,7 @@ const VeterinarioPage: React.FC = () => {
                 onClick={() => generateRandomData()}
                 className="text-gray-700"
               >
-                Gerar dados aleatórios para exemplo
+                {t('common.generateRandomData')}
               </Button>
             </div>
           </div>
