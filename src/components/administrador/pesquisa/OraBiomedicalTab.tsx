@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Robot, Microscope, Flask, ChevronRight, Eye, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Bot, Microscope, Beaker, ChevronRight, Eye, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const OraBiomedicalTab: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>("ongoing");
@@ -125,7 +124,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
   
   const getStatusIcon = (status: 'ongoing' | 'completed' | 'planned') => {
     switch (status) {
-      case 'ongoing': return <Flask className="h-4 w-4 text-blue-600" />;
+      case 'ongoing': return <Beaker className="h-4 w-4 text-blue-600" />;
       case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
       case 'planned': return <Microscope className="h-4 w-4 text-purple-600" />;
     }
@@ -170,7 +169,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
             <CardTitle>{study.title}</CardTitle>
             <CardDescription className="mt-1">{study.description}</CardDescription>
           </div>
-          <Robot className="h-10 w-10 text-gray-300" />
+          <Bot className="h-10 w-10 text-gray-300" />
         </div>
       </CardHeader>
       <CardContent>

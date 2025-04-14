@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   SidebarMenuItem, 
@@ -10,7 +9,7 @@ import {
   ClipboardList, 
   CheckSquare,
   Beaker,
-  Robot
+  Bot
 } from "lucide-react";
 
 interface ResearchGroupProps {
@@ -74,7 +73,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
           onClick={() => handleStepClick("ora-biomedical")}
           tooltip="Ora Biomedical"
         >
-          <Robot className="h-4 w-4" />
+          <Bot className="h-4 w-4" />
           <span>Ora Biomedical</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
