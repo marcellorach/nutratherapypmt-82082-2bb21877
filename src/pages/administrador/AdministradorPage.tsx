@@ -13,6 +13,7 @@ import RegrasClinicasTab from '@/components/administrador/RegrasClinicasTab';
 import FontesTab from '@/components/administrador/FontesTab';
 import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTab';
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
+import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
 
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("import");
@@ -46,6 +47,8 @@ const AdministradorPage: React.FC = () => {
         return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
 
       // Configuração
+      case "config-ia":
+        return <ConfiguracoesIATab />;
       case "prompts":
         return <PromptsTab />;
       case "analytics":

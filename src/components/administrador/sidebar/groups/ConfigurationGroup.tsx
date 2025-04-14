@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Zap, Check } from "lucide-react";
+import { Bot, Zap, Check, Cpu } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface ConfigurationGroupProps {
@@ -14,6 +14,15 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
 }) => {
   return (
     <>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "config-ia"} 
+          onClick={() => handleStepClick("config-ia")}
+        >
+          <Cpu />
+          <span>Config. de IA</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "prompts"} 
