@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
@@ -13,9 +13,18 @@ import {
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
 
+  useEffect(() => {
+    // Ensure the language is set from localStorage on component mount
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      i18n.changeLanguage(savedLanguage);
+    }
+  }, [i18n]);
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
+    console.log(`Language changed to ${lng}`);
   };
 
   return (
