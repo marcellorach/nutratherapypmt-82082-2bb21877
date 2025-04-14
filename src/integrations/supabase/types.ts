@@ -54,6 +54,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_configurations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       global_tags: {
         Row: {
           category: string
