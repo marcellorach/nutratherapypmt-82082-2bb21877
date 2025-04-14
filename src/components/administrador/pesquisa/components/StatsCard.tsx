@@ -7,13 +7,18 @@ interface StatsCardProps {
   description: string;
   value: string | number;
   footer?: string;
+  icon?: React.ReactNode;
+  color?: string;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ title, description, value, footer }) => {
+const StatsCard: React.FC<StatsCardProps> = ({ title, description, value, footer, icon, color }) => {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">{title}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{title}</CardTitle>
+          {icon && <div className={`${color || 'text-purple-500'}`}>{icon}</div>}
+        </div>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="pb-2">

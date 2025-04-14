@@ -12,4 +12,6 @@ export interface Study {
   primaryInvestigator: string;
   priority: 'high' | 'medium' | 'low';
   alerts?: number;
+  category?: 'geroproptetor' | 'antiinflamatório' | 'neuroprotetor' | 'metabólico';
+  targetSpecies?: string[];
 }

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { User, UserCog, LogOut } from "lucide-react";
+import { User, UserCog, LogOut, Microscope } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -43,12 +43,12 @@ const Header: React.FC = () => {
                   to="/administrador" 
                   className="text-gray-500 hover:text-gray-700 transition-colors mr-4 flex items-center gap-1"
                 >
-                  <UserCog size={20} />
-                  <span className="text-sm font-medium">Admin</span>
+                  <Microscope size={20} />
+                  <span className="text-sm font-medium">P&D</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-white border border-gray-200 text-gray-800">
-                <p>Gerencie o banco de dados de nutracêuticos, prompts da IA, correlações clínicas e atualize estudos científicos.</p>
+                <p>Acesse a plataforma de pesquisa e desenvolvimento de nutracêuticos.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

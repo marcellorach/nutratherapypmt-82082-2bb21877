@@ -21,7 +21,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Admin Panel</h2>
+          <h2 className="text-lg font-semibold">Área de P&D</h2>
           <SidebarTrigger />
         </div>
       </SidebarHeader>

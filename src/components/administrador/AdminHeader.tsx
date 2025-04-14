@@ -7,8 +7,8 @@ const AdminHeader: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
       <div>
-        <h1 className="text-3xl font-bold">Painel de Administração</h1>
-        <p className="text-gray-600">Gerencie nutracêuticos, correlações e prompts da IA</p>
+        <h1 className="text-3xl font-bold">Área de P&D</h1>
+        <p className="text-gray-600">Plataforma de pesquisa e desenvolvimento de nutracêuticos</p>
       </div>
       
       <div className="flex gap-2 mt-4 md:mt-0">
