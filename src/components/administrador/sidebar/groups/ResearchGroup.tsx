@@ -9,7 +9,8 @@ import {
   FlaskConical, 
   ClipboardList, 
   CheckSquare,
-  Beaker
+  Beaker,
+  Robot
 } from "lucide-react";
 
 interface ResearchGroupProps {
@@ -60,10 +61,21 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "sugestoes-ai"}
           onClick={() => handleStepClick("sugestoes-ai")}
-          tooltip="Sugestões da IA"
+          tooltip="Proposições de Estudos"
         >
           <Beaker className="h-4 w-4" />
-          <span>Sugestões da IA</span>
+          <span>Proposições de Estudos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "ora-biomedical"}
+          onClick={() => handleStepClick("ora-biomedical")}
+          tooltip="Ora Biomedical"
+        >
+          <Robot className="h-4 w-4" />
+          <span>Ora Biomedical</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

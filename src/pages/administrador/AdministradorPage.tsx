@@ -15,11 +15,12 @@ import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTa
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
 
-// Importando os novos componentes de Pesquisa e Desenvolvimento
+// Importando os componentes de Pesquisa e Desenvolvimento
 import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
 import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
 import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
+import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
 
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("import");
@@ -53,6 +54,8 @@ const AdministradorPage: React.FC = () => {
         return <EstudosConcluidosTab />;
       case "sugestoes-ai":
         return <SugestoesAITab />;
+      case "ora-biomedical":
+        return <OraBiomedicalTab />;
 
       // Análise Preditiva
       case "modelos":

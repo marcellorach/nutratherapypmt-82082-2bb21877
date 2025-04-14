@@ -24,7 +24,7 @@ const SugestoesAITab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sugestões de Pesquisa</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Proposições de Estudos</h2>
           <p className="text-muted-foreground">
             Avalie estudos científicos sugeridos com base em análise de dados e evidências.
           </p>
@@ -36,7 +36,7 @@ const SugestoesAITab: React.FC = () => {
           </Button>
           <Button variant="outline" className="flex items-center">
             <Sparkles className="mr-2 h-4 w-4" />
-            Solicitar novas sugestões
+            Solicitar novas proposições
           </Button>
         </div>
       </div>
