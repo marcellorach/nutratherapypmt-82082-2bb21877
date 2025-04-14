@@ -18,7 +18,7 @@ export const useSugestoes = () => {
         const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
         return { 
           ...s, 
-          status: 'em_analise',
+          status: 'em_analise' as const,
           approvalChain: approvalStages.map((stage, index) => ({
             stage: stage.id,
             approved: index === 0 ? true : null,
@@ -37,7 +37,7 @@ export const useSugestoes = () => {
   
   const handleReject = (id: string) => {
     setSugestoes(sugestoes.map(s => 
-      s.id === id ? { ...s, status: 'rejeitada' } : s
+      s.id === id ? { ...s, status: 'rejeitada' as const } : s
     ));
     toast({
       title: "Sugestão rejeitada",
@@ -67,7 +67,7 @@ export const useSugestoes = () => {
             
             // Se for a última etapa, atualizar o status para aprovada
             if (currentStageIndex === approvalChain.length - 1) {
-              return { ...s, status: 'aprovada', approvalChain };
+              return { ...s, status: 'aprovada' as const, approvalChain };
             }
             
             return { ...s, approvalChain };
