@@ -1,6 +1,7 @@
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import translations
 import translationEN from './locales/en/translation.json';
@@ -23,6 +24,9 @@ i18n
     fallbackLng: 'pt',
     interpolation: {
       escapeValue: false // React already escapes by default
+    },
+    react: {
+      useSuspense: false // Disable suspense to prevent issues during loading
     }
   });
 
