@@ -12,13 +12,13 @@ const Header: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <header className="w-full bg-white text-gray-800 p-4 border-b border-gray-200 shadow-sm">
+    <header className="w-full bg-white text-gray-800 p-4 border-b border-gray-200 shadow-sm fixed top-0 left-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-xl font-semibold flex items-center gap-2">
           <img 
             src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png" 
             alt="NutraTherapy"
-            className="h-10" // Reduced logo height from h-16 to h-10 (approx 60% reduction)
+            className="h-5" // Further reduced logo height from h-10 to h-5 (50% reduction)
           />
           <div className="flex flex-col">
             <span className="font-bold text-gray-800 text-xl">
@@ -83,3 +83,4 @@ const Header: React.FC = () => {
 };
 
 export default Header;
+
