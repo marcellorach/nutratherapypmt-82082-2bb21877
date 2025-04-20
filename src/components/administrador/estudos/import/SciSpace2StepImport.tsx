@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, FileText } from "lucide-react";
+import { X, Database } from "lucide-react";
 
 const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
 const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
@@ -166,7 +166,7 @@ const SciSpace2StepImport: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           {/* QUADRADO META SUMÁRIO */}
           <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
-            <span className="font-medium mb-2">Meta Sumário</span>
+            <span className="font-semibold mb-2 text-sm">Meta Sumário</span>
             {!metaSummaryFile ? (
               <>
                 <input
@@ -189,9 +189,9 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
-                  <FileText className="text-muted-foreground mr-1 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{metaSummaryFile.name}</span>
-                  <span className={`${sizeColor(metaSummaryFile.size)} text-xs font-medium`}>
+                  <span className="truncate font-semibold">{metaSummaryFile.name}</span>
+                  <span className={`${sizeColor(metaSummaryFile.size)} flex items-center text-xs font-medium gap-1`}>
+                    <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(metaSummaryFile.size)}
                   </span>
                 </div>
@@ -203,7 +203,7 @@ const SciSpace2StepImport: React.FC = () => {
           </div>
           {/* QUADRADO BASE DE ESTUDOS */}
           <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
-            <span className="font-medium mb-2">Base de Estudos</span>
+            <span className="font-semibold mb-2 text-sm">Base de Estudos</span>
             {!baseStudiesFile ? (
               <>
                 <input
@@ -226,9 +226,9 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
-                  <FileText className="text-muted-foreground mr-1 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{baseStudiesFile.name}</span>
-                  <span className={`${sizeColor(baseStudiesFile.size)} text-xs font-medium`}>
+                  <span className="truncate font-semibold">{baseStudiesFile.name}</span>
+                  <span className={`${sizeColor(baseStudiesFile.size)} flex items-center text-xs font-medium gap-1`}>
+                    <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(baseStudiesFile.size)}
                   </span>
                 </div>
