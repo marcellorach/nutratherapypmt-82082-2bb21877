@@ -63,6 +63,9 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     }
   };
 
+  // Verificar se a chave inicial não está vazia
+  const hasInitialKey = initialKey.trim() !== "";
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -87,19 +90,23 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
         />
         <Button 
           type="submit" 
-          className="w-full"
+          className={`w-full ${hasInitialKey ? 'bg-black text-white' : ''}`}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              Salvando...
-            </>
-          ) : (
+          {hasInitialKey ? (
             <>
               <Check className="mr-2 h-4 w-4" />
               Salvar
             </>
+          ) : (
+            isLoading ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Salvar"
+            )
           )}
         </Button>
       </form>
