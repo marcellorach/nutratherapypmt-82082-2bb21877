@@ -10,7 +10,6 @@ const TableHeaderComponent: React.FC = () => {
         <TableHead>Prevenção</TableHead>
         <TableHead>Tratamento</TableHead>
         <TableHead>Suporte</TableHead>
-        <TableHead>Evidência</TableHead>
         <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
