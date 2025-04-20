@@ -15,7 +15,7 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
   const getTagColor = (score: number): string => {
     if (score >= 4) return "bg-green-200 hover:bg-green-300";
     if (score >= 3) return "bg-amber-200 hover:bg-amber-300";
-    if (score >= 2) return "bg-blue-200 hover:bg-blue-300";  // Updated 'Leve' color
+    if (score >= 2) return "bg-blue-200 hover:bg-blue-300";  // Cor para nível 'Leve'
     if (score >= 1) return "bg-orange-200 hover:bg-orange-300";
     return "bg-red-200 hover:bg-red-300";
   };
