@@ -2,12 +2,37 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Leaf } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
 import VisaoGeralTab from '../estudos/detalhes/tabs/VisaoGeralTab';
 import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
+import OutcomeTag from '../tags/OutcomeTag';
+
+const condicoesAnalisadas = [
+  {
+    nome: "Artrite Canina",
+    eficacia: 4.5,
+    evidencia: "Evidência de alta qualidade",
+    populacao: "Cães adultos e idosos",
+    dosagem: "10mg/kg/dia"
+  },
+  {
+    nome: "Osteoartrite",
+    eficacia: 4.2,
+    evidencia: "Evidência de boa qualidade",
+    populacao: "Cães de grande porte",
+    dosagem: "15mg/kg/dia"
+  },
+  {
+    nome: "Inflamação Articular",
+    eficacia: 3.8,
+    evidencia: "Evidência moderada",
+    populacao: "Todas as raças",
+    dosagem: "8mg/kg/dia"
+  }
+];
 
 interface EstudoDetailDialogProps {
   open: boolean;
