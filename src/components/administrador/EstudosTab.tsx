@@ -6,7 +6,7 @@ import { Plus, FileText, ClipboardCheck } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import { useToast } from "@/hooks/use-toast";
-import ApprovalChain from './pesquisa/components/ApprovalChain';
+import ApprovalStagesList from './pesquisa/components/ApprovalStagesList';
 
 const EstudosTab: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -72,7 +72,7 @@ const EstudosTab: React.FC = () => {
                   <CardDescription>Eficácia de glucosamina em cães idosos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <ApprovalChain 
+                  <ApprovalStagesList 
                     stages={[
                       { name: 'Análise Inicial', status: 'completed' },
                       { name: 'Revisão Técnica', status: 'in-progress' },
