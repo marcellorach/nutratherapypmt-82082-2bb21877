@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Flask, Activity, CheckCircle, ArrowRight } from "lucide-react";
+import { FileText, FlaskConical, Activity, CheckCircle, ArrowRight } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
 
 interface EstudoDetailDialogProps {
@@ -113,7 +112,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
           <TabsContent value="analysis" className="space-y-4">
             <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md text-sm">
               <p className="text-yellow-700 flex items-center">
-                <Flask className="h-4 w-4 mr-2" />
+                <FlaskConical className="h-4 w-4 mr-2" />
                 A análise da IA está processando o conteúdo completo do estudo
               </p>
             </div>

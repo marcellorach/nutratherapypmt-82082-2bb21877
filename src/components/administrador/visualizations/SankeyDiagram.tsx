@@ -61,7 +61,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
     const coloredLinks = data.links.map((link) => {
       return {
         ...link,
-        color: link.color || `rgba(${59, 130, 246}, 0.4)`, // Cor padrão azul transparente
+        color: link.color || `rgba(59, 130, 246, 0.4)`, // Cor padrão azul transparente
       };
     });
 

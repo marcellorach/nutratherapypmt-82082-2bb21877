@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileText, ClipboardCheck, ExternalLink, Filter } from "lucide-react";
+import { Plus, FileText, ClipboardCheck, ExternalLink, Filter, CheckCircle } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
@@ -11,7 +10,6 @@ import ApprovalStagesList from './pesquisa/components/ApprovalStagesList';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
-// Dados de exemplo para estudos
 const estudosExemplo = [
   {
     id: "1",
@@ -73,7 +71,6 @@ const EstudosTab: React.FC = () => {
   };
 
   const handleAdvanceApproval = (estudoId: string) => {
-    // Lógica para avançar estágio de aprovação
     toast({
       title: "Estágio avançado",
       description: "O estudo passou para o próximo estágio de aprovação.",
@@ -81,14 +78,12 @@ const EstudosTab: React.FC = () => {
     setDetailDialogOpen(false);
   };
 
-  // Filtrar estudos com base no termo de busca
   const filteredEstudos = estudosExemplo.filter(estudo => 
     estudo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     estudo.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     estudo.journal.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Agrupar estudos por status
   const novoEstudos = filteredEstudos.filter(estudo => estudo.status === "new");
   const emRevEstudos = filteredEstudos.filter(estudo => estudo.status === "in-review");
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.status === "approved");
@@ -124,7 +119,6 @@ const EstudosTab: React.FC = () => {
 
       <div className="flex flex-col space-y-6">
         <div className="grid grid-cols-3 gap-6">
-          {/* Coluna: Novos Estudos */}
           <div className="flex flex-col space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -163,7 +157,6 @@ const EstudosTab: React.FC = () => {
                   </Card>
                 ))}
                 
-                {/* Card para adicionar novo estudo */}
                 <Card 
                   className="border-dashed border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" 
                   onClick={handleAddEstudo}
@@ -177,7 +170,6 @@ const EstudosTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Coluna: Em Curadoria */}
           <div className="flex flex-col space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5" />
@@ -223,7 +215,6 @@ const EstudosTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Coluna: Aguardando Integração */}
           <div className="flex flex-col space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FileText className="h-5 w-5" />
