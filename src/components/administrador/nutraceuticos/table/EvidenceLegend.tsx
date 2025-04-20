@@ -3,29 +3,28 @@ import React from 'react';
 
 const EvidenceLegend: React.FC = () => {
   return (
-    <div className="flex items-center gap-4 text-sm mb-4 ml-4">
-      <span className="font-medium">Nível de Evidência/Eficiência:</span>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
+    <div className="flex flex-col space-y-2">
+      <span className="font-medium">Nível de Sustentação:</span>
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-red-200"></div>
-          <span>Sem evidência</span>
+          <span>Sem evidência (0/5)</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-orange-200"></div>
-          <span>Anedótica</span>
+          <span>Anedótica (1/5)</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-full bg-blue-200">
-            <span>Leve</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-blue-200"></div>
+          <span>Leve (2/5)</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-amber-200"></div>
-          <span>Moderada</span>
+          <span>Moderada (3/5)</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-green-200"></div>
-          <span>Alta</span>
+          <span>Alta (4-5/5)</span>
         </div>
       </div>
     </div>
