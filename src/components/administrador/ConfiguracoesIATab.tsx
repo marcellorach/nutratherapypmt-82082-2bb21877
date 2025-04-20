@@ -1,112 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { AlertCircle, Key, Shield, RefreshCw, Check } from "lucide-react";
+import { Shield, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface ApiKeyFormProps {
-  serviceName: string;
-  saveKey: (key: string) => Promise<void>;
-  initialKey?: string;
-  placeholder?: string;
-  isLoading: boolean;
-}
-
-const apiKeySchema = z.object({
-  apiKey: z.string().min(10, "A chave API deve ter pelo menos 10 caracteres")
-});
-
-const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ 
-  serviceName, 
-  saveKey, 
-  initialKey = "", 
-  placeholder = "sk-...",
-  isLoading 
-}) => {
-  const { toast } = useToast();
-  
-  const form = useForm<z.infer<typeof apiKeySchema>>({
-    resolver: zodResolver(apiKeySchema),
-    defaultValues: {
-      apiKey: initialKey,
-    },
-  });
-
-  useEffect(() => {
-    form.reset({ apiKey: initialKey });
-  }, [initialKey, form]);
-
-  const onSubmit = async (values: z.infer<typeof apiKeySchema>) => {
-    try {
-      await saveKey(values.apiKey);
-      toast({
-        title: "Chave salva com sucesso",
-        description: `A chave API para ${serviceName} foi atualizada.`,
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao salvar chave",
-        description: `Não foi possível salvar a chave: ${error.message}`,
-      });
-    }
-  };
-
-  const hasInitialKey = initialKey.trim() !== "";
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="apiKey"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Chave API para {serviceName}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder={placeholder}
-                  type="password"
-                  autoComplete="off"
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button 
-          type="submit" 
-          className={`w-full ${hasInitialKey ? 'bg-green-600 text-white' : ''}`}
-          disabled={isLoading}
-        >
-          {hasInitialKey ? (
-            "Chave API da OpenAI salva"
-          ) : (
-            isLoading ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              "Salvar"
-            )
-          )}
-        </Button>
-      </form>
-    </Form>
-  );
-};
+import ApiKeyForm from './configuracoes/ApiKeyForm';
+import ConsumoPainel from './configuracoes/ConsumoPainel';
+import ConfiguracoesAvisosIA from './configuracoes/ConfiguracoesAvisosIA';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -156,6 +58,24 @@ const ConfiguracoesIATab: React.FC = () => {
     fetchKeys();
   }, []);
 
+  const saveConfigToSupabase = async (key: string, value: string) => {
+    try {
+      const response = await supabase.functions.invoke('ai-config', {
+        method: 'POST',
+        body: { action: 'set', key, value }
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao salvar ${key}:`, error);
+      throw error;
+    }
+  };
+
   const saveOpenAIKey = async (key: string) => {
     setIsSaving(true);
     try {
@@ -189,24 +109,6 @@ const ConfiguracoesIATab: React.FC = () => {
     }
   };
 
-  const saveConfigToSupabase = async (key: string, value: string) => {
-    try {
-      const response = await supabase.functions.invoke('ai-config', {
-        method: 'POST',
-        body: { action: 'set', key, value }
-      });
-      
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      return response.data;
-    } catch (error) {
-      console.error(`Erro ao salvar ${key}:`, error);
-      throw error;
-    }
-  };
-
   return (
     <>
       <div className="mb-6">
@@ -214,20 +116,13 @@ const ConfiguracoesIATab: React.FC = () => {
         <p className="text-gray-500">Configuração de chaves API para os serviços de IA</p>
       </div>
 
-      <Alert className="mb-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Importante</AlertTitle>
-        <AlertDescription>
-          As chaves API são armazenadas de forma segura no Supabase e também mantidas localmente 
-          como fallback. Em um ambiente de produção, apenas o armazenamento seguro no servidor é utilizado.
-        </AlertDescription>
-      </Alert>
+      <ConfiguracoesAvisosIA />
       
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Key size={18} /> Chaves API
+              <Shield size={18} /> Chaves API
             </CardTitle>
             <CardDescription>
               Configure as chaves para cada serviço de IA que deseja utilizar
@@ -318,113 +213,6 @@ const ConfiguracoesIATab: React.FC = () => {
         <ConsumoPainel />
       </div>
     </>
-  );
-};
-
-const ConsumoPainel: React.FC = () => {
-  const [consumptionData, setConsumptionData] = useState({
-    totalUsage: 0,
-    monthlyUsage: 0,
-    dailyUsage: [0, 0.5, 1.2, 0.8, 1.5, 1.1, 0.9, 1.3, 0.6, 0.7, 1.0, 1.4, 0.5, 0.3, 0.8, 0.9, 1.1, 1.3, 1.2, 0.4, 0.9, 1.5, 0.8, 1.0, 1.2, 1.1, 0.7, 1.3, 0.5, 0.6],
-    modelUsage: [
-      { model: "gpt-4o", usage: 65 },
-      { model: "gpt-4o-mini", usage: 25 },
-      { model: "gpt-3.5-turbo", usage: 10 }
-    ]
-  });
-
-  const gerarDadosAleatorios = () => {
-    const totalUsage = Math.random() * 80 + 20;
-    const monthlyUsage = Math.random() * 40 + 10;
-    
-    const dailyUsage = Array.from({ length: 30 }, () => Math.random() * 2);
-    
-    const modelUsage = [
-      { model: "gpt-4o", usage: Math.floor(Math.random() * 70) + 30 },
-      { model: "gpt-4o-mini", usage: Math.floor(Math.random() * 30) + 10 },
-      { model: "gpt-3.5-turbo", usage: Math.floor(Math.random() * 20) + 5 }
-    ];
-    
-    setConsumptionData({
-      totalUsage,
-      monthlyUsage,
-      dailyUsage,
-      modelUsage
-    });
-  };
-
-  const renderBarChart = (data: number[]) => {
-    const max = Math.max(...data);
-    
-    return (
-      <div className="flex items-end h-40 gap-1">
-        {data.map((value, index) => (
-          <div
-            key={index}
-            className="bg-indigo-500 hover:bg-indigo-600 transition-all rounded-t w-full"
-            style={{
-              height: `${(value / max) * 100}%`,
-              minHeight: '4px'
-            }}
-            title={`Dia ${index + 1}: $${value.toFixed(2)}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Consumo da API OpenAI</CardTitle>
-          <CardDescription>Análise de custos e utilização por modelo</CardDescription>
-        </div>
-        <Button size="sm" onClick={gerarDadosAleatorios}>Gerar dados aleatórios</Button>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-500">Consumo Total</div>
-            <div className="text-2xl font-bold">${consumptionData.totalUsage.toFixed(2)}</div>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-500">Consumo do Mês Atual</div>
-            <div className="text-2xl font-bold">${consumptionData.monthlyUsage.toFixed(2)}</div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="font-medium mb-2">Consumo Diário (últimos 30 dias)</h3>
-          {renderBarChart(consumptionData.dailyUsage)}
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
-            <span>1</span>
-            <span>15</span>
-            <span>30</span>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="font-medium mb-2">Utilização por Modelo</h3>
-          <div className="space-y-3">
-            {consumptionData.modelUsage.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm">{item.model}</span>
-                  <span className="text-sm">{item.usage}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-indigo-600 h-2.5 rounded-full" 
-                    style={{ width: `${item.usage}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 
