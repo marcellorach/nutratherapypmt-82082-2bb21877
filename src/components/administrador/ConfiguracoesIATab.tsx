@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
         />
         <Button 
           type="submit" 
-          className={`w-full ${hasInitialKey ? 'bg-green-500 text-white' : ''}`}
+          className={`w-full ${hasInitialKey ? 'bg-green-600 text-white' : ''}`}
           disabled={isLoading}
         >
           {hasInitialKey ? (
