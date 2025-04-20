@@ -39,17 +39,25 @@ const DesignConventionsTab = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleInitiateApproval = async () => {
     try {
       toast({
-        title: "Convenções atualizadas",
-        description: "As novas convenções foram salvas com sucesso.",
+        title: "Solicitação enviada para aprovação",
+        description: "As alterações foram enviadas para revisão da equipe de supervisão.",
       });
       setIsEditDialogOpen(false);
+      
+      // Notificação adicional para mostrar o status do processo
+      setTimeout(() => {
+        toast({
+          title: "Status da aprovação",
+          description: "Sua solicitação está em análise. Você receberá uma notificação quando for aprovada.",
+        });
+      }, 1000);
     } catch (error) {
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar as alterações.",
+        title: "Erro ao enviar para aprovação",
+        description: "Não foi possível iniciar o processo de aprovação.",
         variant: "destructive",
       });
     }
@@ -133,7 +141,7 @@ const DesignConventionsTab = () => {
           <DialogHeader>
             <DialogTitle>Editar {editingSection}</DialogTitle>
             <DialogDescription>
-              Use o assistente de IA para ajudar nas alterações de design
+              Use o assistente de IA para ajudar nas alterações de design. As alterações passarão por aprovação antes de serem aplicadas.
             </DialogDescription>
           </DialogHeader>
           
@@ -160,8 +168,12 @@ const DesignConventionsTab = () => {
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleSave}>
-                  Salvar Alterações
+                <Button 
+                  onClick={handleInitiateApproval}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  Iniciar Aprovação
                 </Button>
               </div>
             </div>
