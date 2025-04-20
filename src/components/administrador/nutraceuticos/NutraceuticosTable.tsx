@@ -21,8 +21,6 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Composto químico</TableHead>
-            <TableHead>Origem</TableHead>
             <TableHead>Condição de Saúde</TableHead>
             <TableHead>Evidência</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -31,7 +29,7 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
         <TableBody>
           {nutraceuticals.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                 Nenhum nutracêutico encontrado com os filtros selecionados.
               </TableCell>
             </TableRow>
@@ -39,8 +37,6 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
             nutraceuticals.map((item) => (
               <TableRow key={item.id} className="hover:bg-gray-50">
                 <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="max-w-xs truncate">{item.chemicalCompound}</TableCell>
-                <TableCell className="max-w-xs truncate">{item.source}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="bg-slate-50">
                     {item.condition}
