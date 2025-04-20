@@ -8,6 +8,7 @@ import ActionsStep from '@/components/administrador/dataAnalysis/ActionsStep';
 import NutraceuticosTab from '@/components/administrador/NutraceuticosTab';
 import EstudosTab from '@/components/administrador/EstudosTab';
 import PromptsTab from '@/components/administrador/PromptsTab';
+import RelationsTab from '@/components/administrador/RelationsTab';
 import AnalyticsTab from '@/components/administrador/AnalyticsTab';
 import RegrasClinicasTab from '@/components/administrador/RegrasClinicasTab';
 import FontesTab from '@/components/administrador/FontesTab';
@@ -23,7 +24,7 @@ import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
 
 const AdministradorPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<string>("import");
+  const [currentStep, setCurrentStep] = useState<string>("estudos");
   
   const renderContent = () => {
     switch (currentStep) {
@@ -34,6 +35,8 @@ const AdministradorPage: React.FC = () => {
         return <EstudosTab />;
       case "regras":
         return <RegrasClinicasTab />;
+      case "relacoes":
+        return <RelationsTab />;
 
       // Processamento de Dados
       case "import":
@@ -75,7 +78,7 @@ const AdministradorPage: React.FC = () => {
       case "actions":
         return <ActionsStep />;
       default:
-        return null;
+        return <EstudosTab />;
     }
   };
   
