@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, BookOpen } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
 const AdminHeader: React.FC = () => {
@@ -15,6 +15,10 @@ const AdminHeader: React.FC = () => {
       </div>
       
       <div className="flex gap-2 mt-4 md:mt-0">
+        <Button variant="outline">
+          <BookOpen className="mr-2 h-4 w-4" />
+          Biblioteca Científica
+        </Button>
         <Button variant="outline">
           <Settings className="mr-2 h-4 w-4" />
           {t('common.settings')}
