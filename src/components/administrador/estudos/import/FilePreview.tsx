@@ -25,20 +25,22 @@ interface FilePreviewProps {
 
 const FilePreview: React.FC<FilePreviewProps> = ({ file, onRemove, label }) => (
   <div className="flex justify-between items-center w-full">
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[430px] truncate">
-      <span
-        className="truncate max-w-[60ch] font-normal"
-        title={file.name}
-        style={{ fontWeight: "normal" }}
-      >
+    <div className="flex flex-col gap-2 max-w-[80%]">
+      <div className="line-clamp-3 break-all font-normal" title={file.name}>
         {file.name}
-      </span>
+      </div>
       <span className={`${sizeColor(file.size)} flex items-center text-xs font-medium gap-1`}>
         <Database className="h-4 w-4 flex-shrink-0" />
         {formatFileSize(file.size)}
       </span>
     </div>
-    <Button size="icon" variant="ghost" onClick={onRemove} aria-label={`Remover ${label}`} className="ml-2 text-red-600 hover:text-red-700">
+    <Button 
+      size="icon" 
+      variant="ghost" 
+      onClick={onRemove} 
+      aria-label={`Remover ${label}`} 
+      className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+    >
       <X className="h-5 w-5" />
     </Button>
   </div>
