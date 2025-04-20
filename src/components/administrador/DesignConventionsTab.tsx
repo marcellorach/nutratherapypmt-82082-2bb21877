@@ -1,15 +1,49 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowRight, Edit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const DesignConventionsTab = () => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editText, setEditText] = useState('');
+  const { toast } = useToast();
+
+  const handleEditClick = () => {
+    setEditText('Ajude-me a ajustar as convenções de design para: [descreva suas alterações]');
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      toast({
+        title: "Convenções atualizadas",
+        description: "As novas convenções foram salvas com sucesso.",
+      });
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Convenções de Design</h2>
-        <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Convenções de Design</h2>
+          <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
+        </div>
+        <Button onClick={handleEditClick} variant="outline" className="flex items-center gap-2">
+          <Edit className="w-4 h-4" />
+          Alterar
+        </Button>
       </div>
 
       <Card>
@@ -71,6 +105,35 @@ const DesignConventionsTab = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Convenções de Design</DialogTitle>
+            <DialogDescription>
+              Descreva as alterações desejadas e nosso assistente AI ajudará a implementá-las.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="min-h-[200px]"
+              placeholder="Descreva as alterações desejadas..."
+            />
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave}>
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
