@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -14,7 +15,7 @@ import FontesTab from '@/components/administrador/FontesTab';
 import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTab';
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
-import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
+import EnginesConvencoesTab from '@/components/administrador/EnginesConvencoesTab';
 
 import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
 import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
@@ -67,8 +68,8 @@ const AdministradorPage: React.FC = () => {
         return <AnalyticsTab />;
       case "actions":
         return <ActionsStep />;
-      case "design-conventions":
-        return <DesignConventionsTab />;
+      case "engines-convencoes":
+        return <EnginesConvencoesTab />;
       default:
         return <EstudosTab />;
     }

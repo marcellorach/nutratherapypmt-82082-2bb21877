@@ -11,9 +11,17 @@ import { supabase } from "@/integrations/supabase/client";
 import ImportFilePreview from './ImportFilePreview';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import SciImportHistoryRow from './SciImportHistoryRow';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 
 const SCISPACE_LOGO_URL = "/lovable-uploads/8eed700f-39e7-4208-aeb1-664f3660af90.png";
-const SCISPACE_FORMATS_URL = "/lovable-uploads/d0b8670e-c0fc-4068-b3b2-2a859ea82023.png";
 
 interface ImportHistoryRow {
   id: string;
@@ -23,7 +31,39 @@ interface ImportHistoryRow {
   base_studies_filename: string;
   base_studies_storage_path: string;
   scispace_status: string | null;
+  consenso_name?: string;
 }
+
+// Mock de estudos brutos para demonstração
+const ESTUDOS_BRUTOS_MOCK = [
+  {
+    id: "1",
+    titulo: "Efeitos do Ômega 3 em Cães",
+    autores: "Silva, J.; Pereira, M.",
+    publicacao: "Journal of Canine Health",
+    ano: 2022,
+    status: "importado",
+    tags: ["ômega 3", "saúde cardiovascular"]
+  },
+  {
+    id: "2",
+    titulo: "Benefícios da Curcumina em Gatos Idosos",
+    autores: "Santos, F.; Oliveira, R.",
+    publicacao: "Feline Medicine Today",
+    ano: 2023,
+    status: "analisado",
+    tags: ["curcumina", "envelhecimento"]
+  },
+  {
+    id: "3",
+    titulo: "Sulforafano e Doenças Crônicas em Pets",
+    autores: "Martins, C.; Costa, A.",
+    publicacao: "Veterinary Nutrition Journal",
+    ano: 2023,
+    status: "novo",
+    tags: ["sulforafano", "doenças crônicas"]
+  }
+];
 
 const SciImportSection: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -31,6 +71,7 @@ const SciImportSection: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("file-upload");
   const [importHistory, setImportHistory] = useState<ImportHistoryRow[] | null>(null);
+  const [estudosBrutos, setEstudosBrutos] = useState<any[]>(ESTUDOS_BRUTOS_MOCK);
   const [historyLoading, setHistoryLoading] = useState(false);
   const { toast } = useToast();
 
@@ -77,13 +118,20 @@ const SciImportSection: React.FC = () => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
+  const handleSubmitNTAI = (item: any) => {
+    // Atualizar a lista após processamento simulado
+    setTimeout(() => {
+      refreshHistory();
+    }, 2000);
+  };
+
   useEffect(() => {
-    if (activeTab === "import-history") {
+    if (activeTab === "import-history" || activeTab === "estudos-brutos") {
       setHistoryLoading(true);
       // Busca os registros mais recentes primeiro
       supabase
         .from("scispace_imports")
-        .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status")
+        .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name")
         .order("imported_at", { ascending: false })
         .then(({ data, error }) => {
           if (error) {
@@ -105,12 +153,31 @@ const SciImportSection: React.FC = () => {
     setHistoryLoading(true);
     supabase
       .from("scispace_imports")
-      .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status")
+      .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name")
       .order("imported_at", { ascending: false })
       .then(({ data, error }) => {
         if (!error) setImportHistory(data || []);
         setHistoryLoading(false);
       });
+  };
+
+  const getTagBadge = (tag: string) => {
+    return (
+      <Badge key={tag} variant="outline" className="mr-1 bg-slate-100 text-slate-700">
+        {tag}
+      </Badge>
+    );
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'analisado':
+        return <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">Analisado</span>;
+      case 'novo':
+        return <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">Novo</span>;
+      default:
+        return <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">{status}</span>;
+    }
   };
 
   return (
@@ -132,7 +199,8 @@ const SciImportSection: React.FC = () => {
           <TabsList className="mb-4">
             <TabsTrigger value="file-upload">Upload de Arquivos</TabsTrigger>
             <TabsTrigger value="scispace-api">Importar Integrativa (SCISPACE)</TabsTrigger>
-            <TabsTrigger value="import-history">Histórico</TabsTrigger>
+            <TabsTrigger value="import-history">Histórico de Importações</TabsTrigger>
+            <TabsTrigger value="estudos-brutos">Base de Estudos Brutos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="file-upload" className="space-y-4">
@@ -215,6 +283,7 @@ const SciImportSection: React.FC = () => {
                           <th className="px-2 py-1">Data / Hora</th>
                           <th className="px-2 py-1">Meta Sumário</th>
                           <th className="px-2 py-1">Base Estudos</th>
+                          <th className="px-2 py-1">Consenso</th>
                           <th className="px-2 py-1">Status</th>
                           <th className="px-2 py-1">Ações</th>
                         </tr>
@@ -225,6 +294,7 @@ const SciImportSection: React.FC = () => {
                             key={item.id}
                             item={item}
                             onDeleted={refreshHistory}
+                            onSubmitNTAI={handleSubmitNTAI}
                           />
                         ))}
                       </tbody>
@@ -237,6 +307,65 @@ const SciImportSection: React.FC = () => {
                 )}
                 </>
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="estudos-brutos">
+            <div className="py-2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-medium">Base de Estudos Científicos Brutos</h3>
+                <Button variant="outline" size="sm">Atualizar Base</Button>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Autores</TableHead>
+                    <TableHead>Publicação</TableHead>
+                    <TableHead>Ano</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {estudosBrutos.map((estudo) => (
+                    <TableRow key={estudo.id}>
+                      <TableCell className="font-medium">{estudo.titulo}</TableCell>
+                      <TableCell>{estudo.autores}</TableCell>
+                      <TableCell>{estudo.publicacao}</TableCell>
+                      <TableCell>{estudo.ano}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {estudo.tags.map((tag: string) => getTagBadge(tag))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(estudo.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2 py-1 h-auto"
+                          >
+                            Visualizar
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2 py-1 h-auto"
+                          >
+                            Analisar
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
         </Tabs>

@@ -1,98 +1,159 @@
 
-import React from 'react';
-import { 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel,
-  SidebarMenu
-} from "@/components/ui/sidebar";
-import KnowledgeBaseGroup from './groups/KnowledgeBaseGroup';
-import DataProcessingGroup from './groups/DataProcessingGroup';
-import PredictiveAnalysisGroup from './groups/PredictiveAnalysisGroup';
-import ConfigurationGroup from './groups/ConfigurationGroup';
-import ResearchGroup from './groups/ResearchGroup';
-import { Microscope } from "lucide-react";
+import React from "react";
+import {
+  BookOpen,
+  Database,
+  BarChartBig,
+  PieChart,
+  FileSpreadsheet,
+  BookMarked,
+  BookCopy,
+  FlaskConical,
+  User,
+  Stethoscope,
+  Bot,
+  Braces,
+  LucideIcon,
+  Link,
+  Code2,
+  Settings,
+  FileCode,
+  FileJson,
+  LayoutDashboard,
+  Brain,
+  DollarSign,
+  PlaySquare,
+  LineChart,
+  Focus,
+  FastForward,
+  Rocket,
+  UsersRound,
+  PenTool,
+  BookOpenCheck,
+  Layers,
+} from "lucide-react";
+import KnowledgeBaseGroup from "./groups/KnowledgeBaseGroup";
+import DataProcessingGroup from "./groups/DataProcessingGroup";
+import PredictiveAnalysisGroup from "./groups/PredictiveAnalysisGroup";
+import ResearchGroup from "./groups/ResearchGroup";
+import ConfigurationGroup from "./groups/ConfigurationGroup";
+import { Accordion } from "@/components/ui/accordion";
+
+type GroupName = 
+  | "conhecimento" 
+  | "processamento-dados" 
+  | "analise-preditiva" 
+  | "pesquisa" 
+  | "configuracao";
+
+interface SidebarGroup {
+  name: GroupName;
+  title: string;
+  icon: LucideIcon;
+  items: {
+    id: string;
+    title: string;
+    icon?: LucideIcon;
+    beta?: boolean;
+  }[];
+}
 
 interface AdminSidebarGroupsProps {
   currentStep: string;
   setCurrentStep: (step: string) => void;
 }
 
-const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, setCurrentStep }) => {
-  const handleStepClick = (step: string) => {
-    setCurrentStep(step);
-  };
+const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({
+  currentStep,
+  setCurrentStep
+}) => {
+  const groups: SidebarGroup[] = [
+    {
+      name: "conhecimento",
+      title: "Base de Conhecimento",
+      icon: BookOpen,
+      items: [
+        { id: "nutraceuticos", title: "Nutracêuticos", icon: BookMarked },
+        { id: "estudos", title: "Estudos Científicos", icon: BookCopy },
+        { id: "regras", title: "Regras Clínicas", icon: Stethoscope },
+        { id: "relacoes", title: "Relações", icon: Link },
+        { id: "fontes", title: "Fontes Científicas", icon: BookOpenCheck },
+      ],
+    },
+    {
+      name: "processamento-dados",
+      title: "Processamento de Dados",
+      icon: Database,
+      items: [
+        { id: "import", title: "Importar Dados", icon: FileSpreadsheet },
+        { id: "analysis", title: "Análise", icon: BarChartBig },
+        { id: "visualization", title: "Visualização", icon: PieChart },
+        { id: "actions", title: "Ações", icon: FastForward },
+      ],
+    },
+    {
+      name: "analise-preditiva",
+      title: "Análise Preditiva",
+      icon: Brain,
+      items: [
+        { id: "modelos", title: "Modelos Preditivos", icon: Focus },
+        { id: "custo-beneficio", title: "Custo-Benefício", icon: DollarSign },
+        { id: "relatorios", title: "Relatórios", icon: LineChart, beta: true },
+      ],
+    },
+    {
+      name: "pesquisa",
+      title: "Pesquisa",
+      icon: FlaskConical,
+      items: [
+        { id: "estudos-planejados", title: "Estudos Planejados", icon: PlaySquare },
+        { id: "estudos-andamento", title: "Estudos em Andamento", icon: Rocket },
+        { id: "estudos-concluidos", title: "Estudos Concluídos", icon: UsersRound },
+        { id: "sugestoes-ai", title: "Sugestões da IA", icon: Bot },
+        { id: "ora-biomedical", title: "Conexão ORA Biomedical", icon: PenTool, beta: true },
+      ],
+    },
+    {
+      name: "configuracao",
+      title: "Configuração",
+      icon: Settings,
+      items: [
+        { id: "engines-convencoes", title: "Engines & Convenções", icon: Layers },
+        { id: "config-ia", title: "Configurações de IA", icon: Bot },
+        { id: "prompts", title: "Prompts", icon: Braces },
+        { id: "analytics", title: "Analytics", icon: LayoutDashboard },
+      ],
+    },
+  ];
 
   return (
-    <>
-      {/* Base de Conhecimento */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Base de Conhecimento</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <KnowledgeBaseGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      
-      {/* Processamento de Dados */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Processamento de Dados</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <DataProcessingGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      {/* Pesquisa e Desenvolvimento */}
-      <SidebarGroup>
-        <SidebarGroupLabel>
-          <Microscope className="mr-2 h-4 w-4" />
-          Pesquisa e Desenvolvimento
-        </SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <ResearchGroup
-              currentStep={currentStep}
-              handleStepClick={handleStepClick}
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      {/* Análise Preditiva */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Análise Preditiva</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <PredictiveAnalysisGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      
-      {/* Configuração */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Configuração</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <ConfigurationGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    </>
+    <Accordion type="multiple" defaultValue={["conhecimento"]} className="w-full">
+      <KnowledgeBaseGroup 
+        groupData={groups[0]} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep} 
+      />
+      <DataProcessingGroup 
+        groupData={groups[1]} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep} 
+      />
+      <PredictiveAnalysisGroup 
+        groupData={groups[2]} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep} 
+      />
+      <ResearchGroup 
+        groupData={groups[3]} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep} 
+      />
+      <ConfigurationGroup 
+        groupData={groups[4]} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep} 
+      />
+    </Accordion>
   );
 };
 

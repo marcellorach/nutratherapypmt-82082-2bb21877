@@ -8,6 +8,7 @@ interface SubmitImportButtonProps {
   disabled: boolean;
   loading: boolean;
   progress: number;
+  label?: string;
 }
 
 const SubmitImportButton: React.FC<SubmitImportButtonProps> = ({
@@ -15,19 +16,20 @@ const SubmitImportButton: React.FC<SubmitImportButtonProps> = ({
   disabled,
   loading,
   progress,
+  label = "Salvar Importação"
 }) => (
   <Button
     onClick={onClick}
-    disabled={disabled}
+    disabled={disabled || loading}
     className="w-full md:w-auto"
   >
     {loading ? (
-      <>
+      <div className="w-full">
         <span>Salvando...</span>
         <Progress value={progress} className="h-2 bg-gray-100 mt-2 w-full" />
-      </>
+      </div>
     ) : (
-      <>Salvar Importação</>
+      <>{label}</>
     )}
   </Button>
 );
