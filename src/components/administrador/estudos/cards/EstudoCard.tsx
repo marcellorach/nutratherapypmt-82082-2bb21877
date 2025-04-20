@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
@@ -89,8 +90,9 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 <Badge 
                   key={`pos-${idx}`}
                   variant="outline" 
-                  className="bg-green-50 text-green-700 border-green-200"
+                  className="bg-green-50 text-green-700 border-green-200 flex items-center"
                 >
+                  <ArrowUp className="w-3 h-3 mr-1" />
                   {interacao.nome} ({interacao.score.toFixed(1)})
                 </Badge>
               ))}
@@ -98,8 +100,9 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 <Badge 
                   key={`neg-${idx}`}
                   variant="outline" 
-                  className="bg-red-50 text-red-700 border-red-200"
+                  className="bg-red-50 text-red-700 border-red-200 flex items-center"
                 >
+                  <ArrowDown className="w-3 h-3 mr-1" />
                   {interacao.nome} ({interacao.score.toFixed(1)})
                 </Badge>
               ))}
@@ -114,8 +117,9 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 <Badge 
                   key={idx}
                   variant="outline" 
-                  className="bg-amber-50 text-amber-700 border-amber-200"
+                  className="bg-amber-50 text-amber-700 border-amber-200 flex items-center"
                 >
+                  <ArrowRight className="w-3 h-3 mr-1" />
                   {efeito.nome} ({efeito.score.toFixed(1)})
                 </Badge>
               ))}
@@ -137,3 +141,4 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 };
 
 export default EstudoCard;
+
