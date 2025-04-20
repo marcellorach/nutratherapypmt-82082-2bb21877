@@ -9,13 +9,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+// Alterando a definição da interface para aceitar o tipo string na propriedade status
+// e garantir que ela corresponda aos tipos retornados pela API do Supabase
 interface DesignConvention {
   id: string;
   section: string;
   content: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: string; // Alterado de 'pending' | 'approved' | 'rejected' para string
   created_at: string;
   updated_at: string;
+  approved_at: string | null;
+  approved_by: string | null;
+  created_by: string | null;
 }
 
 const DesignConventionsTab = () => {
