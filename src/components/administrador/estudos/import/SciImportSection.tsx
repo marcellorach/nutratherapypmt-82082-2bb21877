@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ interface ImportHistoryRow {
   base_studies_storage_path: string;
   scispace_status: string | null;
   consenso_name?: string;
+  consenso_comments?: string;
 }
 
 // Mock de estudos brutos para demonstração
@@ -131,7 +131,7 @@ const SciImportSection: React.FC = () => {
       // Busca os registros mais recentes primeiro
       supabase
         .from("scispace_imports")
-        .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name")
+        .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name, consenso_comments")
         .order("imported_at", { ascending: false })
         .then(({ data, error }) => {
           if (error) {
@@ -142,7 +142,7 @@ const SciImportSection: React.FC = () => {
             });
             setImportHistory([]);
           } else {
-            setImportHistory(data || []);
+            setImportHistory(data as ImportHistoryRow[] || []);
           }
           setHistoryLoading(false);
         });
@@ -153,10 +153,12 @@ const SciImportSection: React.FC = () => {
     setHistoryLoading(true);
     supabase
       .from("scispace_imports")
-      .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name")
+      .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status, consenso_name, consenso_comments")
       .order("imported_at", { ascending: false })
       .then(({ data, error }) => {
-        if (!error) setImportHistory(data || []);
+        if (!error) {
+          setImportHistory(data as ImportHistoryRow[] || []);
+        }
         setHistoryLoading(false);
       });
   };

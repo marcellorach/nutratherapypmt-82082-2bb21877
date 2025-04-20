@@ -32,21 +32,21 @@ import {
   BookOpenCheck,
   Layers,
 } from "lucide-react";
+import { Accordion } from "@/components/ui/accordion";
 import KnowledgeBaseGroup from "./groups/KnowledgeBaseGroup";
 import DataProcessingGroup from "./groups/DataProcessingGroup";
 import PredictiveAnalysisGroup from "./groups/PredictiveAnalysisGroup";
 import ResearchGroup from "./groups/ResearchGroup";
 import ConfigurationGroup from "./groups/ConfigurationGroup";
-import { Accordion } from "@/components/ui/accordion";
 
-type GroupName = 
+export type GroupName = 
   | "conhecimento" 
   | "processamento-dados" 
   | "analise-preditiva" 
   | "pesquisa" 
   | "configuracao";
 
-interface SidebarGroup {
+export interface SidebarGroup {
   name: GroupName;
   title: string;
   icon: LucideIcon;
@@ -129,27 +129,27 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({
   return (
     <Accordion type="multiple" defaultValue={["conhecimento"]} className="w-full">
       <KnowledgeBaseGroup 
-        groupData={groups[0]} 
+        group={groups[0]} 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
       />
       <DataProcessingGroup 
-        groupData={groups[1]} 
+        group={groups[1]} 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
       />
       <PredictiveAnalysisGroup 
-        groupData={groups[2]} 
+        group={groups[2]} 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
       />
       <ResearchGroup 
-        groupData={groups[3]} 
+        group={groups[3]} 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
       />
       <ConfigurationGroup 
-        groupData={groups[4]} 
+        group={groups[4]} 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
       />

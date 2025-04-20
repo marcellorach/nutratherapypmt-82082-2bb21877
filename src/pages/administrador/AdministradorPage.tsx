@@ -22,6 +22,7 @@ import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAnda
 import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
+import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
 
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("estudos");
@@ -69,7 +70,7 @@ const AdministradorPage: React.FC = () => {
       case "actions":
         return <ActionsStep />;
       case "engines-convencoes":
-        return <EnginesConvencoesTab />;
+        return <DesignConventionsTab />;
       default:
         return <EstudosTab />;
     }

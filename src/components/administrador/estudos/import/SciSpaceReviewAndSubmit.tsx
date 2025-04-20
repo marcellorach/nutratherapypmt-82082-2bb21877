@@ -2,6 +2,7 @@
 import React from "react";
 import FilePreview from "./FilePreview";
 import SubmitImportButton from "./SubmitImportButton";
+import ConsensoForm from "./ConsensoForm";
 
 interface SciSpaceReviewAndSubmitProps {
   metaSummaryFile: File | null;
@@ -11,6 +12,10 @@ interface SciSpaceReviewAndSubmitProps {
   canSubmit: boolean;
   onPrev: () => void;
   onSubmit: () => void;
+  consensoName: string;
+  setConsensoName: (value: string) => void;
+  comentarios: string;
+  setComentarios: (value: string) => void;
 }
 
 const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
@@ -20,10 +25,22 @@ const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
   progress,
   canSubmit,
   onPrev,
-  onSubmit
+  onSubmit,
+  consensoName,
+  setConsensoName,
+  comentarios,
+  setComentarios
 }) => {
   return (
     <div>
+      <ConsensoForm 
+        consensoName={consensoName}
+        setConsensoName={setConsensoName}
+        comentarios={comentarios}
+        setComentarios={setComentarios}
+        disabled={loading}
+      />
+      
       <div className="mb-6 grid md:grid-cols-2 gap-6">
         <FilePreview
           file={metaSummaryFile}
