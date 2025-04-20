@@ -41,11 +41,11 @@ export const ConventionCard = ({ convention, onEditClick }: ConventionCardProps)
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="mb-4 border border-gray-200 hover:shadow-md transition-shadow duration-300">
+      <CardHeader className="flex flex-row items-center justify-between bg-gray-50 border-b border-gray-100">
         <div>
-          <CardTitle>{convention.section}</CardTitle>
-          <CardDescription className="flex items-center gap-2">
+          <CardTitle className="text-lg font-medium text-gray-800">{convention.section}</CardTitle>
+          <CardDescription className="flex items-center gap-2 mt-1 text-sm">
             Última atualização: {new Date(convention.updated_at).toLocaleDateString()}
             {getStatusBadge(convention.status)}
           </CardDescription>
@@ -60,8 +60,8 @@ export const ConventionCard = ({ convention, onEditClick }: ConventionCardProps)
           Propor Alterações
         </Button>
       </CardHeader>
-      <CardContent>
-        <div className="whitespace-pre-wrap">{convention.content}</div>
+      <CardContent className="pt-4">
+        <div className="whitespace-pre-wrap text-gray-700">{convention.content}</div>
       </CardContent>
     </Card>
   );

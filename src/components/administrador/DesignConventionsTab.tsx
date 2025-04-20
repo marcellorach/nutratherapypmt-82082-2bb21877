@@ -6,7 +6,7 @@ import { ConventionCard } from './design/ConventionCard';
 import { EditDesignDialog } from './design/EditDesignDialog';
 import { DesignConvention } from '@/types/design';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 const DesignConventionsTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -18,20 +18,20 @@ const DesignConventionsTab = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Carrega os dados imediatamente ao montar o componente
-    loadExampleConventions();
+    // Carrega os dados de exemplo imediatamente ao montar o componente
+    loadConventions();
   }, []);
 
-  const loadExampleConventions = () => {
+  const loadConventions = () => {
     setIsLoading(true);
     
     try {
-      // Dados de exemplo pré-definidos para garantir que sempre existam dados
-      const exampleConventions: DesignConvention[] = [
+      // Dados de convenções pré-definidos para mostrar sempre
+      const predefinedConventions: DesignConvention[] = [
         {
           id: "1",
           section: "Cores Primárias",
-          content: "A paleta de cores primárias deve utilizar tons pastéis em vez de cores vivas. A cor principal do sistema será um azul acinzentado suave (#6E8BA6).",
+          content: "A paleta de cores primárias deve utilizar tons pastéis em vez de cores vivas. A cor principal do sistema será um azul acinzentado suave (#6E8BA6) com acentos em roxo (#9b87f5) e verde menta (#8FECC9).",
           status: "approved",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -42,29 +42,29 @@ const DesignConventionsTab = () => {
         {
           id: "2",
           section: "Tipografia",
-          content: "O sistema utilizará a fonte Montserrat para títulos e Inter para textos, ambas com pesos variados para criar hierarquia visual. Tamanhos devem seguir uma escala modular com razão 1.2.",
-          status: "pending",
+          content: "O sistema utilizará a fonte Montserrat para títulos e Inter para textos, ambas com pesos variados para criar hierarquia visual. Tamanhos devem seguir uma escala modular com razão 1.2.\n\nTítulos: Montserrat (600)\nSubtítulos: Montserrat (500)\nCorpo de texto: Inter (400)\nDestaques: Inter (500)",
+          status: "approved",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          approved_at: null,
-          approved_by: null,
+          approved_at: new Date().toISOString(),
+          approved_by: "Sistema",
           created_by: "Sistema"
         },
         {
           id: "3",
           section: "Iconografia",
-          content: "Ícones devem ser consistentes em estilo, utilizando linha fina (1.5px) e cantos arredondados. Todos os ícones devem ter o mesmo tamanho base de 24x24px.",
-          status: "rejected",
+          content: "Ícones devem ser consistentes em estilo, utilizando linha fina (1.5px) e cantos arredondados. Todos os ícones devem ter o mesmo tamanho base de 24x24px e usar a biblioteca Lucide React.\n\nCores de ícones devem corresponder ao contexto em que estão inseridos e manter contraste adequado para acessibilidade.",
+          status: "approved",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          approved_at: null,
-          approved_by: null,
+          approved_at: new Date().toISOString(),
+          approved_by: "Sistema",
           created_by: "Sistema"
         },
         {
           id: "4",
           section: "Espaçamento",
-          content: "O sistema seguirá uma grade de 8px para espaçamentos. Os componentes devem ter margens e preenchimentos que sejam múltiplos de 8px (8, 16, 24, 32, etc).",
+          content: "O sistema seguirá uma grade de 8px para espaçamentos. Os componentes devem ter margens e preenchimentos que sejam múltiplos de 8px (8, 16, 24, 32, etc).\n\nÁreas de conteúdo devem ter padding de 24px (3 unidades).\nEspaçamento entre elementos relacionados: 8px ou 16px.\nEspaçamento entre seções: 32px ou 48px.",
           status: "approved",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -75,25 +75,43 @@ const DesignConventionsTab = () => {
         {
           id: "5",
           section: "Elementos de Formulário",
-          content: "Campos de formulário devem ter altura consistente de 40px, com bordas arredondadas de 4px. Estados de foco, erro e desabilitado devem ser claramente indicados com cores e/ou ícones.",
-          status: "pending",
+          content: "Campos de formulário devem ter altura consistente de 40px, com bordas arredondadas de 4px. Estados de foco, erro e desabilitado devem ser claramente indicados com cores e/ou ícones.\n\nLabels devem estar acima dos campos.\nMensagens de erro devem aparecer abaixo dos campos em vermelho suave.\nCampos obrigatórios devem ser indicados com asterisco (*).",
+          status: "approved",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          approved_at: null,
-          approved_by: null,
+          approved_at: new Date().toISOString(),
+          approved_by: "Sistema",
+          created_by: "Sistema"
+        },
+        {
+          id: "6",
+          section: "Cartões e Containers",
+          content: "Containers devem utilizar sombras sutis para criar elevação, com raio de borda de 8px. A hierarquia de elevação deve ser consistente em toda a aplicação.\n\nSombra leve: 0 2px 4px rgba(0,0,0,0.05)\nSombra média: 0 4px 6px rgba(0,0,0,0.08)\nSombra elevada: 0 10px 15px rgba(0,0,0,0.1)",
+          status: "approved",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          approved_at: new Date().toISOString(),
+          approved_by: "Sistema",
+          created_by: "Sistema"
+        },
+        {
+          id: "7",
+          section: "Feedbacks Visuais",
+          content: "Utilize animações sutis para transições entre estados. Feedback visual deve ser imediato para ações do usuário.\n\nSuccesso: Verde (#4CAF50)\nAlerta: Amarelo (#FFC107)\nErro: Vermelho (#F44336)\nInformativo: Azul (#2196F3)",
+          status: "approved",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          approved_at: new Date().toISOString(),
+          approved_by: "Sistema",
           created_by: "Sistema"
         }
       ];
       
-      console.log("Carregando convenções de exemplo:", exampleConventions);
-      setConventions(exampleConventions);
+      console.log("Carregando convenções predefinidas:", predefinedConventions);
+      setConventions(predefinedConventions);
       
-      toast({
-        title: "Dados carregados",
-        description: "Convenções de design foram carregadas com sucesso.",
-      });
     } catch (error) {
-      console.error("Erro ao carregar convenções de exemplo:", error);
+      console.error("Erro ao carregar convenções:", error);
       toast({
         title: "Erro ao carregar dados",
         description: "Não foi possível carregar as convenções de design.",
@@ -104,6 +122,7 @@ const DesignConventionsTab = () => {
     }
   };
 
+  // Tenta buscar do Supabase, mas se falhar, usa os dados predefinidos
   const fetchConventions = async () => {
     setIsLoading(true);
     try {
@@ -119,17 +138,17 @@ const DesignConventionsTab = () => {
       if (data && data.length > 0) {
         setConventions(data);
       } else {
-        // Se não houver dados no Supabase, carregamos os dados de exemplo
-        loadExampleConventions();
+        // Se não houver dados no Supabase, carregamos os dados predefinidos
+        loadConventions();
       }
     } catch (error) {
       console.error("Error fetching conventions:", error);
       toast({
         title: "Erro ao carregar do banco",
-        description: "Carregando dados de exemplo localmente.",
+        description: "Carregando dados predefinidos localmente.",
         variant: "destructive"
       });
-      loadExampleConventions();
+      loadConventions();
     } finally {
       setIsLoading(false);
     }
@@ -235,7 +254,7 @@ const DesignConventionsTab = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Convenções de Design</h2>
+          <h2 className="text-2xl font-bold">Engines & Convenções</h2>
           <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
         </div>
         <Button 
@@ -252,14 +271,6 @@ const DesignConventionsTab = () => {
       ) : conventions.length === 0 ? (
         <div className="py-10 text-center border rounded-lg">
           <p className="text-gray-500 mb-4">Nenhuma convenção de design encontrada</p>
-          <Button 
-            onClick={loadExampleConventions}
-            variant="outline"
-            className="flex items-center gap-2 mx-auto"
-          >
-            <Sparkles className="w-4 h-4" />
-            Gerar Dados de Exemplo
-          </Button>
         </div>
       ) : (
         conventions.map((convention) => (
