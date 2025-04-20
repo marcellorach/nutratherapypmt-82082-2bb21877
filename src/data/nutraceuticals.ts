@@ -1,3 +1,4 @@
+
 import { Nutraceutical } from "../types";
 
 export const nutraceuticals: Nutraceutical[] = [
@@ -10,6 +11,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Distúrbios de coagulação", "Uso concomitante com anticoagulantes em altas doses"],
     source: "Óleo de peixe, especialmente peixes de águas frias e profundas",
     chemicalCompound: "C20H30O2 (ácido 5,8,11,14,17-eicosapentaenoico)",
+    condition: "Dermatite atópica canina", // Adicionada para compatibilidade
     preventionConditions: ["Doença cardiovascular", "Inflamação crônica"],
     treatmentConditions: ["Dermatite atópica canina", "Artrite"],
     supportConditions: ["Saúde cognitiva", "Função imune"],
@@ -40,6 +42,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Alergia a produtos marinhos"],
     source: "Algas marinhas, óleo de peixe, krill",
     chemicalCompound: "C22H32O2 (ácido 4,7,10,13,16,19-docosahexaenoico)",
+    condition: "Problemas de desenvolvimento neurológico", // Adicionada para compatibilidade
     preventionConditions: ["Saúde ocular"],
     treatmentConditions: ["Problemas de desenvolvimento neurológico"],
     supportConditions: ["Função cognitiva"],
@@ -70,6 +73,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Diabetes (monitoramento da glicemia)", "Insuficiência renal"],
     source: "Exoesqueleto de crustáceos, produção sintética",
     chemicalCompound: "C6H13NO5 (2-amino-2-desoxi-D-glucose)",
+    condition: "Osteoartrite canina", // Adicionada para compatibilidade
     preventionConditions: ["Problemas articulares"],
     treatmentConditions: ["Osteoartrite canina"],
     supportConditions: ["Mobilidade articular"],
@@ -100,6 +104,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Coagulopatias"],
     source: "Cartilagem de tubarão, bovina ou suína",
     chemicalCompound: "Polímero linear de N-acetilgalactosamina e ácido glucurônico sulfatado",
+    condition: "Osteoartrite canina", // Adicionada para compatibilidade
     preventionConditions: ["Degradação articular"],
     treatmentConditions: ["Osteoartrite canina"],
     supportConditions: ["Estrutura cartilaginosa"],
@@ -130,6 +135,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Doenças autoimunes", "Imunossupressão medicamentosa"],
     source: "Echinacea purpurea (planta)",
     chemicalCompound: "Alquilamidas, glicoproteínas, polissacarídeos e derivados do ácido cafeico",
+    condition: "Imunodeficiência", // Adicionada para compatibilidade
     preventionConditions: ["Infecções recorrentes"],
     treatmentConditions: ["Imunodeficiência"],
     supportConditions: ["Sistema imunológico"],
@@ -160,6 +166,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Hipotireoidismo não controlado (monitoramento)"],
     source: "Síntese endógena a partir de lisina e metionina, suplementação sintética",
     chemicalCompound: "C7H15NO3 (3-hidroxi-4-N-trimetilamino-butirato)",
+    condition: "Cardiomiopatia dilatada", // Adicionada para compatibilidade
     preventionConditions: ["Problemas cardíacos"],
     treatmentConditions: ["Cardiomiopatia dilatada"],
     supportConditions: ["Metabolismo energético"],
@@ -190,6 +197,7 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Alergia a plantas da família Asteraceae"],
     source: "Sementes de Silybum marianum (cardo mariano)",
     chemicalCompound: "Mistura de silibina, silicristina, silidianina e isosilibina",
+    condition: "Hepatopatias crônicas e agudas", // Adicionada para compatibilidade
     preventionConditions: ["Danos hepáticos"],
     treatmentConditions: ["Hepatopatias crônicas e agudas"],
     supportConditions: ["Função hepática"],

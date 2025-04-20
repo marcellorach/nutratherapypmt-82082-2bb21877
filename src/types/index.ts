@@ -40,6 +40,7 @@ export interface Nutraceutical {
   contraindications: string[];
   source: string;
   chemicalCompound: string;
+  condition: string; // Adicionada para compatibilidade com código existente
   preventionConditions: string[];
   treatmentConditions: string[];
   supportConditions: string[];
