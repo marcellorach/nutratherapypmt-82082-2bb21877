@@ -5,21 +5,8 @@ import { PlusCircle, Search, FileText, Filter, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { nutraceuticals } from '@/data';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
@@ -43,7 +30,8 @@ const NutraceuticosTab: React.FC = () => {
   const filteredNutraceuticals = nutraceuticals.filter(item => {
     const matchesSearch = 
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.chemicalCompound.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesEfficacy = 
       filterEfficacy === null || 
@@ -72,7 +60,7 @@ const NutraceuticosTab: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold">Catálogo de Nutracêuticos</h2>
-          <p className="text-gray-600">Gerenciamento de substâncias e suas evidências científicas</p>
+          <p className="text-gray-600">Gerenciamento de substâncias individuais e suas evidências científicas</p>
         </div>
         <Button className="flex items-center gap-2">
           <PlusCircle className="h-4 w-4" />
@@ -86,7 +74,7 @@ const NutraceuticosTab: React.FC = () => {
             <div className="relative w-full md:w-96">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input 
-                placeholder="Buscar nutracêutico..." 
+                placeholder="Buscar nutracêutico por nome ou composto..." 
                 className="pl-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -158,10 +146,10 @@ const NutraceuticosTab: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead>Composto químico</TableHead>
+                <TableHead>Origem</TableHead>
                 <TableHead>Condição de Saúde</TableHead>
                 <TableHead>Evidência</TableHead>
-                <TableHead className="text-center">Estudos</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -176,7 +164,8 @@ const NutraceuticosTab: React.FC = () => {
                 filteredNutraceuticals.map((item) => (
                   <TableRow key={item.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                    <TableCell className="max-w-xs truncate">{item.chemicalCompound}</TableCell>
+                    <TableCell className="max-w-xs truncate">{item.source}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-slate-50">
                         {item.condition}
@@ -200,9 +189,6 @@ const NutraceuticosTab: React.FC = () => {
                           ))}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {item.scientificEvidence.studies.length}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button 

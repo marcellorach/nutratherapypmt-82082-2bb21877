@@ -38,7 +38,8 @@ export interface Nutraceutical {
   benefits: string[];
   dosage: string;
   contraindications: string[];
-  activeIngredients: string[];
+  source: string; // Origem natural da substância
+  chemicalCompound: string; // Composto químico principal
   condition: string;
   scientificEvidence: {
     efficacyScore: number;
@@ -49,6 +50,16 @@ export interface Nutraceutical {
       year: number;
     }>;
   };
+}
+
+export interface Formulation {
+  id: string;
+  name: string;
+  description: string;
+  nutraceuticals: string[]; // IDs dos nutracêuticos que compõem a formulação
+  targetCondition: string;
+  dosage: string;
+  contraindications: string[];
 }
 
 export interface Recommendation {
