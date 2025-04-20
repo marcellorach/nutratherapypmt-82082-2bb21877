@@ -188,8 +188,8 @@ const SciSpace2StepImport: React.FC = () => {
               </>
             ) : (
               <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
-                  <span className="truncate font-semibold">{metaSummaryFile.name}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[300px] truncate">
+                  <span className="truncate max-w-[30ch]">{metaSummaryFile.name}</span>
                   <span className={`${sizeColor(metaSummaryFile.size)} flex items-center text-xs font-medium gap-1`}>
                     <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(metaSummaryFile.size)}
@@ -225,8 +225,8 @@ const SciSpace2StepImport: React.FC = () => {
               </>
             ) : (
               <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
-                  <span className="truncate font-semibold">{baseStudiesFile.name}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[300px] truncate">
+                  <span className="truncate max-w-[30ch]">{baseStudiesFile.name}</span>
                   <span className={`${sizeColor(baseStudiesFile.size)} flex items-center text-xs font-medium gap-1`}>
                     <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(baseStudiesFile.size)}
@@ -285,4 +285,3 @@ const SciSpace2StepImport: React.FC = () => {
 };
 
 export default SciSpace2StepImport;
-
