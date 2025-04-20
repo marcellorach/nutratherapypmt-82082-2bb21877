@@ -12,8 +12,6 @@ interface ImportFilePreviewProps {
 
 const ImportFilePreview: React.FC<ImportFilePreviewProps> = ({ file, onRemove, index }) => {
   const getFileTypeIcon = () => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    
     return <FileText className="h-4 w-4 text-blue-500 mr-2" />;
   };
   

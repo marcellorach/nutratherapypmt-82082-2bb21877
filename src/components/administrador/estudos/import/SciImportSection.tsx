@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileUpload, FileText, Download, FileInput } from "lucide-react";
+import { Upload, FileText, Download, File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import ImportFilePreview from './ImportFilePreview';
 
 const SciImportSection: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -81,7 +82,7 @@ const SciImportSection: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Button variant="outline" className="gap-2" asChild>
                 <label>
-                  <FileUpload className="h-4 w-4" />
+                  <Upload className="h-4 w-4" />
                   <span>Selecionar Arquivos</span>
                   <input 
                     type="file" 
@@ -122,22 +123,12 @@ const SciImportSection: React.FC = () => {
                   ) : (
                     <ul className="space-y-2">
                       {files.map((file, index) => (
-                        <li key={index} className="flex justify-between items-center py-1 text-sm">
-                          <div className="flex items-center">
-                            <FileText className="h-4 w-4 text-blue-500 mr-2" />
-                            <span>{file.name}</span>
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {file.type || file.name.split('.').pop()?.toUpperCase()}
-                            </Badge>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => removeFile(index)}
-                          >
-                            Remover
-                          </Button>
-                        </li>
+                        <ImportFilePreview 
+                          key={index}
+                          file={file}
+                          index={index}
+                          onRemove={() => removeFile(index)}
+                        />
                       ))}
                     </ul>
                   )}
@@ -148,7 +139,7 @@ const SciImportSection: React.FC = () => {
           
           <TabsContent value="scispace-api">
             <div className="text-center py-8 border border-dashed rounded-md">
-              <FileInput className="mx-auto h-12 w-12 text-gray-400" />
+              <File className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium">Integração com API SCISPACE</h3>
               <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
                 Configure sua API key do SCISPACE para importar estudos diretamente da plataforma.
