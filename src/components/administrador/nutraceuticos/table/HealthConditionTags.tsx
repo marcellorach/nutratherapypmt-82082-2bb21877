@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { NutraceuticalCondition } from "@/types";
@@ -21,8 +22,8 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
   };
 
   const getIconColor = (score: number): string => {
-    if (score > 3.7) return "text-green-600";
-    if (score > 2 && score <= 3.6) return "text-black/50";
+    if (score >= 3.7) return "text-green-600";
+    if (score > 2 && score < 3.7) return "text-black/50";
     return "text-red-600";
   };
 
