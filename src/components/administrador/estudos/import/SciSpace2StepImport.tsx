@@ -12,6 +12,19 @@ import { X } from "lucide-react";
 const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
 const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
 
+const formatFileSize = (size: number): string => {
+  if (size < 1024) return `${size} B`;
+  else if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  else return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+};
+
+const sizeColor = (size: number): string => {
+  if (size < 1024 * 50) return 'text-green-600';           // até 50KB verde
+  if (size < 1024 * 200) return 'text-yellow-600';         // até 200KB amarelo
+  if (size < 1024 * 1024) return 'text-orange-500';        // até 1MB laranja
+  return 'text-red-600';                                   // acima, vermelho
+};
+
 const SciSpace2StepImport: React.FC = () => {
   const [metaSummaryFile, setMetaSummaryFile] = useState<File | null>(null);
   const [baseStudiesFile, setBaseStudiesFile] = useState<File | null>(null);
@@ -174,10 +187,15 @@ const SciSpace2StepImport: React.FC = () => {
                 <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .pdf, .doc, .docx</span>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-sm truncate max-w-[180px]">{metaSummaryFile.name}</span>
-                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário">
-                  <X className="h-4 w-4" />
+              <div className="flex justify-between items-center w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
+                  <span className="truncate">{metaSummaryFile.name}</span>
+                  <span className={`${sizeColor(metaSummaryFile.size)} text-xs font-medium`}>
+                    {formatFileSize(metaSummaryFile.size)}
+                  </span>
+                </div>
+                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário" className="ml-2">
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
             )}
@@ -205,10 +223,15 @@ const SciSpace2StepImport: React.FC = () => {
                 <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .csv, .xls, .bib, .json</span>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-sm truncate max-w-[180px]">{baseStudiesFile.name}</span>
-                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos">
-                  <X className="h-4 w-4" />
+              <div className="flex justify-between items-center w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
+                  <span className="truncate">{baseStudiesFile.name}</span>
+                  <span className={`${sizeColor(baseStudiesFile.size)} text-xs font-medium`}>
+                    {formatFileSize(baseStudiesFile.size)}
+                  </span>
+                </div>
+                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos" className="ml-2">
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
             )}
@@ -260,3 +283,4 @@ const SciSpace2StepImport: React.FC = () => {
 };
 
 export default SciSpace2StepImport;
+
