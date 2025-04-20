@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,14 +17,14 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
       </DialogHeader>
       
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full justify-start">
+        <TabsList className="w-full grid grid-cols-4 mb-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="charts">Resultados</TabsTrigger>
           <TabsTrigger value="hypotheses">Hipóteses</TabsTrigger>
           <TabsTrigger value="previous">Estudos Anteriores</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4 mt-4">
+        <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4">
             <Card>
               <CardContent className="pt-6">
@@ -90,14 +89,14 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
           </div>
         </TabsContent>
 
-        <TabsContent value="charts" className="space-y-6 mt-4">
+        <TabsContent value="charts" className="space-y-6">
           <DetailedStudyCharts 
             isComplete={study.status === 'completed'} 
             interventionData={study.interventionData}
           />
         </TabsContent>
 
-        <TabsContent value="hypotheses" className="space-y-4 mt-4">
+        <TabsContent value="hypotheses" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">Hipóteses de Pesquisa</h3>
@@ -124,7 +123,7 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="previous" className="space-y-4 mt-4">
+        <TabsContent value="previous" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">Estudos Anteriores Relacionados</h3>
