@@ -1,20 +1,20 @@
 
 import React from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
-import { Nutraceutical } from "@/types";
+import { Nutraceutical, NutraceuticalCondition } from "@/types";
 import HealthConditionTags from './HealthConditionTags';
 
 interface NutraceuticalRowProps {
   nutraceutical: Nutraceutical;
-  onOpenDetails: (nutraceutical: Nutraceutical) => void;
-  onConditionClick: (condition: string) => void;
+  onConditionClick: (
+    nutraceutical: Nutraceutical, 
+    condition: NutraceuticalCondition, 
+    conditionType: 'prevention' | 'treatment' | 'support'
+  ) => void;
 }
 
 const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({ 
   nutraceutical, 
-  onOpenDetails,
   onConditionClick
 }) => {
   return (
@@ -23,31 +23,26 @@ const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({
       <TableCell>
         <HealthConditionTags 
           conditions={nutraceutical.preventionConditions}
-          onConditionClick={onConditionClick}
+          onConditionClick={(condition) => 
+            onConditionClick(nutraceutical, condition, 'prevention')
+          }
         />
       </TableCell>
       <TableCell>
         <HealthConditionTags 
           conditions={nutraceutical.treatmentConditions}
-          onConditionClick={onConditionClick}
+          onConditionClick={(condition) => 
+            onConditionClick(nutraceutical, condition, 'treatment')
+          }
         />
       </TableCell>
       <TableCell>
         <HealthConditionTags 
           conditions={nutraceutical.supportConditions}
-          onConditionClick={onConditionClick}
+          onConditionClick={(condition) => 
+            onConditionClick(nutraceutical, condition, 'support')
+          }
         />
-      </TableCell>
-      <TableCell className="text-right">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="hover:bg-gray-100"
-          onClick={() => onOpenDetails(nutraceutical)}
-        >
-          <FileText className="h-4 w-4 mr-1" />
-          Detalhes
-        </Button>
       </TableCell>
     </TableRow>
   );

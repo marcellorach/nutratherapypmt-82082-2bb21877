@@ -1,27 +1,34 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody } from "@/components/ui/table";
-import { Nutraceutical } from "@/types";
-import { toast } from "sonner";
+import { Nutraceutical, NutraceuticalCondition } from "@/types";
 import TableHeaderComponent from './table/TableHeaderComponent';
 import NutraceuticalRow from './table/NutraceuticalRow';
 import EmptyState from './table/EmptyState';
 import EvidenceLegend from './table/EvidenceLegend';
+import ConditionDetailDialog from '../dialogs/ConditionDetailDialog';
 
 interface NutraceuticosTableProps {
   nutraceuticals: Nutraceutical[];
-  onOpenDetails: (nutraceutical: Nutraceutical) => void;
 }
 
 export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ 
-  nutraceuticals,
-  onOpenDetails
+  nutraceuticals
 }) => {
-  const handleConditionClick = (condition: string) => {
-    // Por enquanto apenas mostra um toast, mas poderia navegar para uma página de detalhes
-    toast.info(`Detalhes da condição: ${condition}`, {
-      description: "Funcionalidade em desenvolvimento"
-    });
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<Nutraceutical | null>(null);
+  const [selectedCondition, setSelectedCondition] = useState<NutraceuticalCondition | null>(null);
+  const [conditionType, setConditionType] = useState<'prevention' | 'treatment' | 'support' | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleConditionClick = (
+    nutraceutical: Nutraceutical, 
+    condition: NutraceuticalCondition,
+    type: 'prevention' | 'treatment' | 'support'
+  ) => {
+    setSelectedNutraceutical(nutraceutical);
+    setSelectedCondition(condition);
+    setConditionType(type);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -38,7 +45,6 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
                 <NutraceuticalRow 
                   key={item.id}
                   nutraceutical={item}
-                  onOpenDetails={onOpenDetails}
                   onConditionClick={handleConditionClick}
                 />
               ))
@@ -46,6 +52,14 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
           </TableBody>
         </Table>
       </div>
+
+      <ConditionDetailDialog 
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        nutraceutical={selectedNutraceutical}
+        selectedCondition={selectedCondition}
+        conditionType={conditionType}
+      />
     </>
   );
 };

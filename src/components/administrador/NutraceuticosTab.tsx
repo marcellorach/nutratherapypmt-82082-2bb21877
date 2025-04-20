@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { nutraceuticals } from '@/data';
-import NutraceuticoDetailDialog from './dialogs/NutraceuticoDetailDialog';
 import { NutraceuticosHeader } from './nutraceuticos/NutraceuticosHeader';
 import { SearchFilters } from './nutraceuticos/SearchFilters';
 import { NutraceuticosTable } from './nutraceuticos/NutraceuticosTable';
@@ -9,8 +8,6 @@ import { Nutraceutical } from '@/types';
 
 const NutraceuticosTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedNutraceutical, setSelectedNutraceutical] = useState<Nutraceutical | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filterEfficacy, setFilterEfficacy] = useState<number | null>(null);
   const [filterCondition, setFilterCondition] = useState<string | null>(null);
 
@@ -31,11 +28,6 @@ const NutraceuticosTab: React.FC = () => {
     
     return matchesSearch && matchesEfficacy && matchesCondition;
   });
-
-  const handleOpenDetails = (nutraceutical: Nutraceutical) => {
-    setSelectedNutraceutical(nutraceutical);
-    setIsDialogOpen(true);
-  };
 
   const clearFilters = () => {
     setFilterEfficacy(null);
@@ -60,15 +52,8 @@ const NutraceuticosTab: React.FC = () => {
         
         <NutraceuticosTable 
           nutraceuticals={filteredNutraceuticals}
-          onOpenDetails={handleOpenDetails}
         />
       </div>
-      
-      <NutraceuticoDetailDialog 
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        nutraceutical={selectedNutraceutical}
-      />
     </>
   );
 };

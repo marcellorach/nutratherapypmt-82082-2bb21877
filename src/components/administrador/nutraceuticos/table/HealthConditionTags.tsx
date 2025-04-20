@@ -5,7 +5,7 @@ import { NutraceuticalCondition } from "@/types";
 
 interface HealthConditionTagsProps {
   conditions: NutraceuticalCondition[];
-  onConditionClick: (condition: string) => void;
+  onConditionClick: (condition: NutraceuticalCondition) => void;
 }
 
 const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({ 
@@ -26,7 +26,7 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
           key={`${condition.name}-${index}`}
           variant="outline" 
           className={`cursor-pointer transition-colors ${getTagColor(condition.efficacyScore)}`}
-          onClick={() => onConditionClick(condition.name)}
+          onClick={() => onConditionClick(condition)}
         >
           {condition.name}
         </Badge>
