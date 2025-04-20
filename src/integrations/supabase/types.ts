@@ -159,6 +159,45 @@ export type Database = {
         }
         Relationships: []
       }
+      scispace_imports: {
+        Row: {
+          base_studies_filename: string
+          base_studies_storage_path: string
+          id: string
+          imported_at: string | null
+          imported_by: string | null
+          meta_summary_filename: string
+          meta_summary_storage_path: string
+          notes: string | null
+          nutraceutical: string | null
+          scispace_status: string | null
+        }
+        Insert: {
+          base_studies_filename: string
+          base_studies_storage_path: string
+          id?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          meta_summary_filename: string
+          meta_summary_storage_path: string
+          notes?: string | null
+          nutraceutical?: string | null
+          scispace_status?: string | null
+        }
+        Update: {
+          base_studies_filename?: string
+          base_studies_storage_path?: string
+          id?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          meta_summary_filename?: string
+          meta_summary_storage_path?: string
+          notes?: string | null
+          nutraceutical?: string | null
+          scispace_status?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
