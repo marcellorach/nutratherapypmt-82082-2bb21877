@@ -34,68 +34,108 @@ const SciSpace2StepImport: React.FC = () => {
     setLoading(true);
     setProgress(10);
 
-    const timestamp = `${Date.now()}`;
-    const metaPath = `scispace/${timestamp}_${metaSummaryFile!.name}`;
-    const basePath = `scispace/${timestamp}_${baseStudiesFile!.name}`;
+    try {
+      // Cria nomes de arquivo seguros para evitar problemas com caracteres especiais
+      const timestamp = Date.now().toString();
+      const metaFileName = `${timestamp}_${metaSummaryFile!.name.replace(/[^\w\s.-]/g, '')}`;
+      const baseFileName = `${timestamp}_${baseStudiesFile!.name.replace(/[^\w\s.-]/g, '')}`;
+      
+      const metaPath = `meta/${metaFileName}`;
+      const basePath = `base/${baseFileName}`;
 
-    // Upload meta summary
-    const { error:metaErr } = await supabase.storage
-      .from('scispace')
-      .upload(metaPath, metaSummaryFile!, { upsert: false });
-    setProgress(40);
+      // Upload meta summary
+      const { error:metaErr } = await supabase.storage
+        .from('scispace')
+        .upload(metaPath, metaSummaryFile!, { 
+          upsert: false,
+          contentType: metaSummaryFile!.type
+        });
+      
+      setProgress(40);
+      
+      if (metaErr) {
+        console.error("Erro ao fazer upload do Meta Sumário:", metaErr);
+        toast({
+          title: 'Erro no upload do Meta Sumário',
+          description: metaErr.message,
+          variant: 'destructive'
+        });
+        setLoading(false);
+        setProgress(0);
+        return;
+      }
 
-    // Upload base studies
-    const { error:baseErr } = await supabase.storage
-      .from('scispace')
-      .upload(basePath, baseStudiesFile!, { upsert: false });
-    setProgress(70);
+      // Upload base studies
+      const { error:baseErr } = await supabase.storage
+        .from('scispace')
+        .upload(basePath, baseStudiesFile!, { 
+          upsert: false,
+          contentType: baseStudiesFile!.type
+        });
+      
+      setProgress(70);
+      
+      if (baseErr) {
+        console.error("Erro ao fazer upload da Base de Estudos:", baseErr);
+        toast({
+          title: 'Erro no upload da Base de Estudos',
+          description: baseErr.message,
+          variant: 'destructive'
+        });
+        setLoading(false);
+        setProgress(0);
+        return;
+      }
 
-    if (metaErr || baseErr) {
+      // Registrar no banco
+      const { error:dbErr } = await supabase
+        .from('scispace_imports')
+        .insert([{
+          meta_summary_filename: metaSummaryFile!.name,
+          meta_summary_storage_path: metaPath,
+          base_studies_filename: baseStudiesFile!.name,
+          base_studies_storage_path: basePath,
+          scispace_status: 'especial',
+          notes: comentarios,
+          nutraceutical: consensoName // aproveitando este campo para o nome do consenso
+        }]);
+      
+      setProgress(100);
+
+      if (dbErr) {
+        console.error("Erro ao registrar importação no banco:", dbErr);
+        toast({
+          title: 'Erro ao registrar importação',
+          description: dbErr.message,
+          variant: 'destructive'
+        });
+        setLoading(false);
+        setProgress(0);
+        return;
+      }
+
       toast({
-        title: 'Erro no upload',
-        description: (metaErr?.message || '') + ' ' + (baseErr?.message || ''),
+        title: 'Importação registrada',
+        description: 'Arquivos e informações salvos com sucesso.'
+      });
+      
+      setMetaSummaryFile(null);
+      setBaseStudiesFile(null);
+      setConsensoName('');
+      setComentarios('');
+      setLoading(false);
+      setProgress(0);
+      
+    } catch (err: any) {
+      console.error("Erro inesperado:", err);
+      toast({
+        title: 'Erro inesperado',
+        description: err?.message || 'Ocorreu um erro ao processar sua solicitação',
         variant: 'destructive'
       });
       setLoading(false);
       setProgress(0);
-      return;
     }
-
-    // Registrar no banco
-    const { error:dbErr } = await supabase
-      .from('scispace_imports')
-      .insert([{
-        meta_summary_filename: metaSummaryFile!.name,
-        meta_summary_storage_path: metaPath,
-        base_studies_filename: baseStudiesFile!.name,
-        base_studies_storage_path: basePath,
-        scispace_status: 'especial',
-        notes: comentarios,
-        nutraceutical: consensoName // aproveitando este campo para o nome do consenso
-      }]);
-    setProgress(100);
-
-    if (dbErr) {
-      toast({
-        title: 'Erro ao registrar importação',
-        description: dbErr.message,
-        variant: 'destructive'
-      });
-      setLoading(false);
-      setProgress(0);
-      return;
-    }
-
-    toast({
-      title: 'Importação registrada',
-      description: 'Arquivos e informações salvos como "especial".'
-    });
-    setMetaSummaryFile(null);
-    setBaseStudiesFile(null);
-    setConsensoName('');
-    setComentarios('');
-    setLoading(false);
-    setProgress(0);
   };
 
   return (
@@ -220,4 +260,3 @@ const SciSpace2StepImport: React.FC = () => {
 };
 
 export default SciSpace2StepImport;
-
