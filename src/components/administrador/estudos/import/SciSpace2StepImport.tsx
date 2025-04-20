@@ -21,8 +21,10 @@ const SciSpace2StepImport: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
+  // Só habilita botão se ambos arquivos e nome do consenso preenchidos
   const canSave = !!(metaSummaryFile && baseStudiesFile && consensoName.trim());
 
+  // Remove arquivos enviados
   const handleRemoveMeta = () => setMetaSummaryFile(null);
   const handleRemoveBase = () => setBaseStudiesFile(null);
 
@@ -101,17 +103,16 @@ const SciSpace2StepImport: React.FC = () => {
       <CardHeader>
         <CardTitle>Importação Manual SciSpace</CardTitle>
         <CardDescription>
-          <span className="block">1. Anexe o <b>Meta Sumário</b> (.pdf, .doc, .docx)</span>
-          <span className="block">2. Anexe a <b>Base de Estudos</b> (.csv, .xls, .bib, .json)</span>
+          <span className="block">1. Carregue o <b>Meta Sumário</b> e a <b>Base de Estudos</b> (ambos obrigatórios)</span>
           <span className="block text-gray-500 text-xs mt-2">
-            Preencha todos os campos para salvar.
+            Preencha todos os campos obrigatórios para salvar.
           </span>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
-          {/* Quadrado Meta Sumário */}
-          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col">
+          {/* QUADRADO META SUMÁRIO */}
+          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
             <span className="font-medium mb-2">Meta Sumário</span>
             {!metaSummaryFile ? (
               <>
@@ -130,7 +131,7 @@ const SciSpace2StepImport: React.FC = () => {
                     <span>Selecionar Arquivo</span>
                   </Button>
                 </label>
-                <span className="text-xs text-gray-400 mt-2">Formatos: .pdf, .doc, .docx</span>
+                <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .pdf, .doc, .docx</span>
               </>
             ) : (
               <div className="flex items-center gap-2">
@@ -141,9 +142,8 @@ const SciSpace2StepImport: React.FC = () => {
               </div>
             )}
           </div>
-          
-          {/* Quadrado Base */}
-          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col">
+          {/* QUADRADO BASE DE ESTUDOS */}
+          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
             <span className="font-medium mb-2">Base de Estudos</span>
             {!baseStudiesFile ? (
               <>
@@ -162,7 +162,7 @@ const SciSpace2StepImport: React.FC = () => {
                     <span>Selecionar Arquivo</span>
                   </Button>
                 </label>
-                <span className="text-xs text-gray-400 mt-2">Formatos: .csv, .xls, .bib, .json</span>
+                <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .csv, .xls, .bib, .json</span>
               </>
             ) : (
               <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ const SciSpace2StepImport: React.FC = () => {
             )}
           </div>
         </div>
-        {/* Nome do Consenso e Comentários */}
+        {/* NOME DO CONSENSO E COMENTÁRIOS */}
         <div className="mb-4 grid md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">Nome do Consenso Integrativo <span className="text-red-500">*</span></label>
@@ -197,7 +197,7 @@ const SciSpace2StepImport: React.FC = () => {
             />
           </div>
         </div>
-        {/* Salvar */}
+        {/* BOTÃO SALVAR */}
         <div>
           <Button
             onClick={handleSubmit}
@@ -220,3 +220,4 @@ const SciSpace2StepImport: React.FC = () => {
 };
 
 export default SciSpace2StepImport;
+
