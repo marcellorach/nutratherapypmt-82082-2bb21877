@@ -84,7 +84,6 @@ export const Sidebar = React.forwardRef<
 })
 Sidebar.displayName = "Sidebar"
 
-// Other basic components
 export const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => (
     <div ref={ref} data-sidebar="content" className={cn("flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden", className)} {...props} />
@@ -316,6 +315,8 @@ export const SidebarMenuButton = React.forwardRef<
     asChild?: boolean
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    variant?: "default" | "outline"
+    size?: "default" | "sm" | "lg"
   }
 >(
   (
