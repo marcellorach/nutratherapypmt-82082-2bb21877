@@ -2,6 +2,7 @@
 import React from 'react';
 import { ExternalLink, FileText } from "lucide-react";
 import { Nutraceutical, NutraceuticalCondition } from "@/types";
+import EvidenceTag from '../../tags/EvidenceTag';
 
 interface StudiesTabProps {
   selectedCondition: NutraceuticalCondition;
@@ -9,6 +10,13 @@ interface StudiesTabProps {
 }
 
 const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutical }) => {
+  // Função para gerar um score para estudos
+  const getStudyScore = (title: string): number => {
+    // Hash simples para gerar pontuações consistentes baseadas no título
+    const hash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;
+    return 2 + (hash / 10); // Pontuação entre 2.0 e 6.9
+  };
+  
   const relevantStudies = [
     {
       title: `Eficácia de ${nutraceutical.name} em ${selectedCondition.name} em cães`,
@@ -43,16 +51,22 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="text-sm font-medium mb-2">
-          Estudos Científicos Específicos para {selectedCondition.name}
-        </h4>
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="text-sm font-medium">
+            Estudos Científicos Específicos para {selectedCondition.name}
+          </h4>
+          <EvidenceTag score={selectedCondition.efficacyScore} showLabel={false} />
+        </div>
         <div className="space-y-3">
           {relevantStudies.map((study, idx) => (
             <div key={idx} className="border rounded-md p-3 hover:bg-gray-50 transition-colors">
               <div className="flex items-start">
                 <FileText className="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h5 className="font-medium text-sm">{study.title}</h5>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <h5 className="font-medium text-sm">{study.title}</h5>
+                    <EvidenceTag score={getStudyScore(study.title)} showLabel={false} className="ml-2 shrink-0" />
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">
                     {study.authors} • {study.journal} • {study.year}
                   </p>
@@ -78,7 +92,14 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
         <div className="space-y-3">
           {nutraceutical.scientificEvidence.studies.map((study, idx) => (
             <div key={idx} className="border rounded-md p-3 bg-slate-50">
-              <h5 className="font-medium text-sm">{study.title}</h5>
+              <div className="flex justify-between items-start">
+                <h5 className="font-medium text-sm">{study.title}</h5>
+                <EvidenceTag 
+                  score={nutraceutical.scientificEvidence.efficacyScore} 
+                  showLabel={false} 
+                  className="ml-2 shrink-0" 
+                />
+              </div>
               <div className="mt-2">
                 <a 
                   href={study.link} 

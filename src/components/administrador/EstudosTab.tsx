@@ -1,14 +1,16 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, FileText, ClipboardCheck, ExternalLink, Filter, CheckCircle } from "lucide-react";
-import { Dialog } from "@/components/ui/dialog";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
 import { useToast } from "@/hooks/use-toast";
 import ApprovalStagesList from './pesquisa/components/ApprovalStagesList';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import NutraceuticalTag from './tags/NutraceuticalTag';
+import EvidenceTag from './tags/EvidenceTag';
 
 const estudosExemplo = [
   {
@@ -21,6 +23,7 @@ const estudosExemplo = [
     abstract: "Este estudo examina os efeitos de suplementação de ômega 3 e 6 em cães com problemas articulares. Os resultados mostram melhora significativa na mobilidade após 8 semanas de tratamento.",
     nutraceuticals: ["Ômega 3", "Ômega 6"],
     sampleSize: 120,
+    qualityScore: 4.2,
   },
   {
     id: "2",
@@ -32,6 +35,7 @@ const estudosExemplo = [
     abstract: "Estudo controlado randomizado avaliando a eficácia de glucosamina em cães idosos com osteoartrite. O grupo de tratamento mostrou melhora de 42% nos escores de dor em comparação com o placebo.",
     nutraceuticals: ["Glucosamina", "Condroitina"],
     sampleSize: 85,
+    qualityScore: 3.8,
   },
   {
     id: "3",
@@ -43,6 +47,7 @@ const estudosExemplo = [
     abstract: "Meta-análise de 17 estudos sobre o uso de nutracêuticos para saúde articular em cães. A análise demonstra benefícios consistentes com tratamento prolongado de combinações específicas de suplementos.",
     nutraceuticals: ["MSM", "Glucosamina", "Condroitina", "Extrato de Mexilhão de Lábio Verde"],
     sampleSize: 940,
+    qualityScore: 4.5,
   },
 ];
 
@@ -88,6 +93,13 @@ const EstudosTab: React.FC = () => {
   const emRevEstudos = filteredEstudos.filter(estudo => estudo.status === "in-review");
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.status === "approved");
   
+  // Função para gerar uma pontuação artificial para nutracêuticos
+  const getNutraceuticalScore = (name: string): number => {
+    // Hash simples para gerar pontuações consistentes baseadas no nome
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;
+    return 2 + (hash / 10); // Pontuação entre 2.0 e 6.9
+  };
+  
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -132,15 +144,20 @@ const EstudosTab: React.FC = () => {
                 {novoEstudos.map(estudo => (
                   <Card key={estudo.id}>
                     <CardHeader>
-                      <CardTitle>{estudo.title}</CardTitle>
+                      <div className="flex items-center justify-between mb-2">
+                        <CardTitle>{estudo.title}</CardTitle>
+                        <EvidenceTag score={estudo.qualityScore} showLabel={false} />
+                      </div>
                       <CardDescription>{estudo.description}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex flex-wrap gap-1">
                         {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-                          <span key={idx} className="text-xs bg-blue-100 text-blue-800 rounded-full px-2 py-0.5">
-                            {nutra}
-                          </span>
+                          <NutraceuticalTag 
+                            key={idx} 
+                            name={nutra} 
+                            score={getNutraceuticalScore(nutra)} 
+                          />
                         ))}
                       </div>
                       <div className="flex justify-between">
@@ -182,7 +199,10 @@ const EstudosTab: React.FC = () => {
               {emRevEstudos.map(estudo => (
                 <Card key={estudo.id} className="mb-4">
                   <CardHeader>
-                    <CardTitle>{estudo.title}</CardTitle>
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle>{estudo.title}</CardTitle>
+                      <EvidenceTag score={estudo.qualityScore} showLabel={false} />
+                    </div>
                     <CardDescription>{estudo.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -227,10 +247,22 @@ const EstudosTab: React.FC = () => {
               {aprovadosEstudos.map(estudo => (
                 <Card key={estudo.id} className="mb-4">
                   <CardHeader>
-                    <CardTitle>{estudo.title}</CardTitle>
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle>{estudo.title}</CardTitle>
+                      <EvidenceTag score={estudo.qualityScore} showLabel={false} />
+                    </div>
                     <CardDescription>{estudo.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="flex flex-wrap gap-1">
+                      {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
+                        <NutraceuticalTag 
+                          key={idx} 
+                          name={nutra} 
+                          score={getNutraceuticalScore(nutra)} 
+                        />
+                      ))}
+                    </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center text-green-600 text-sm">
                         <CheckCircle className="mr-1 h-4 w-4" />

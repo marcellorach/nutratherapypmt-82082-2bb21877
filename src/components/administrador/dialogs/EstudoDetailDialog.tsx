@@ -1,9 +1,15 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, FlaskConical, Activity, CheckCircle, ArrowRight } from "lucide-react";
+import { FileText, FlaskConical, Activity, CheckCircle, ArrowRight, Leaf } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
+import EvidenceTag from '../tags/EvidenceTag';
+import NutraceuticalTag from '../tags/NutraceuticalTag';
+import OutcomeTag from '../tags/OutcomeTag';
+import ScoreSummaryCard from '../tags/ScoreSummaryCard';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface EstudoDetailDialogProps {
   open: boolean;
@@ -53,6 +59,13 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
     },
   ];
 
+  // Pontuações científicas do estudo
+  const studyScores = {
+    qualityScore: 4.2, // Qualidade metodológica
+    relevanceScore: 3.8, // Relevância clínica
+    noveltyScore: 3.5, // Novidade científica
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
@@ -61,9 +74,21 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
             <FileText className="mr-2 h-5 w-5" />
             {estudo.title}
           </DialogTitle>
-          <p className="text-sm text-gray-500">
-            {estudo.journal}, {estudo.year}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              {estudo.journal}, {estudo.year}
+            </p>
+            <div className="flex items-center gap-2">
+              <EvidenceTag score={4.2} showLabel={false} />
+              {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
+                <NutraceuticalTag 
+                  key={idx} 
+                  name={nutra} 
+                  score={[4.2, 3.9, 3.7, 4.5][idx % 4]} 
+                />
+              ))}
+            </div>
+          </div>
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
@@ -89,6 +114,24 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <ScoreSummaryCard 
+                  score={studyScores.qualityScore}
+                  title="Qualidade Metodológica"
+                  description="Rigor científico e design do estudo"
+                />
+                <ScoreSummaryCard 
+                  score={studyScores.relevanceScore}
+                  title="Relevância Clínica"
+                  description="Aplicabilidade na prática veterinária"
+                />
+                <ScoreSummaryCard 
+                  score={studyScores.noveltyScore}
+                  title="Novidade Científica"
+                  description="Contribuição ao conhecimento existente"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium">Metodologia</h4>
@@ -98,9 +141,11 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                   <h4 className="text-sm font-medium">Nutracêuticos Analisados</h4>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-                      <span key={idx} className="text-xs bg-blue-100 text-blue-800 rounded-full px-2 py-0.5">
-                        {nutra}
-                      </span>
+                      <NutraceuticalTag 
+                        key={idx} 
+                        name={nutra} 
+                        score={[4.2, 3.9, 3.7, 4.5][idx % 4]} 
+                      />
                     )) || 'Não especificado'}
                   </div>
                 </div>
@@ -152,26 +197,24 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
             {condicoesAnalisadas.map((condicao, index) => (
               <div key={index} className="border rounded-lg p-3 space-y-2">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium">{condicao.nome}</h3>
-                  <div className="flex items-center">
-                    <div className="text-sm font-semibold mr-1">{condicao.eficacia.toFixed(1)}</div>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <span 
-                          key={i}
-                          className={`text-sm ${i < Math.floor(condicao.eficacia) ? "text-amber-400" : "text-gray-300"}`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Leaf className="h-4 w-4 text-green-600" />
+                    <h3 className="font-medium">{condicao.nome}</h3>
                   </div>
+                  <OutcomeTag 
+                    condition={condicao.nome} 
+                    score={condicao.eficacia} 
+                    showScore={false}
+                  />
                 </div>
                 
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
                     <p className="text-gray-500">Evidência</p>
-                    <p>{condicao.evidencia}</p>
+                    <div className="flex items-center">
+                      <EvidenceTag score={condicao.eficacia} showLabel={false} />
+                      <span className="ml-2">{condicao.evidencia}</span>
+                    </div>
                   </div>
                   <div>
                     <p className="text-gray-500">População</p>
