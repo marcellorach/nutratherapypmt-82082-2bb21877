@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, File, Download } from "lucide-react";
@@ -8,15 +8,28 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import ImportFilePreview from './ImportFilePreview';
 import SciSpace2StepImport from './SciSpace2StepImport';
+import SciImportHistoryRow from './SciImportHistoryRow';
 
 const SCISPACE_LOGO_URL = "/lovable-uploads/8eed700f-39e7-4208-aeb1-664f3660af90.png";
 const SCISPACE_FORMATS_URL = "/lovable-uploads/d0b8670e-c0fc-4068-b3b2-2a859ea82023.png";
+
+interface ImportHistoryRow {
+  id: string;
+  imported_at: string | null;
+  meta_summary_filename: string;
+  meta_summary_storage_path: string;
+  base_studies_filename: string;
+  base_studies_storage_path: string;
+  scispace_status: string | null;
+}
 
 const SciImportSection: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("file-upload");
+  const [importHistory, setImportHistory] = useState<ImportHistoryRow[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +73,42 @@ const SciImportSection: React.FC = () => {
 
   const removeFile = (index: number) => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
+  useEffect(() => {
+    if (activeTab === "import-history") {
+      setHistoryLoading(true);
+      // Busca os registros mais recentes primeiro
+      supabase
+        .from("scispace_imports")
+        .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status")
+        .order("imported_at", { ascending: false })
+        .then(({ data, error }) => {
+          if (error) {
+            toast({
+              title: "Erro ao buscar histórico",
+              description: error.message,
+              variant: "destructive"
+            });
+            setImportHistory([]);
+          } else {
+            setImportHistory(data || []);
+          }
+          setHistoryLoading(false);
+        });
+    }
+  }, [activeTab]);
+
+  const refreshHistory = () => {
+    setHistoryLoading(true);
+    supabase
+      .from("scispace_imports")
+      .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status")
+      .order("imported_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error) setImportHistory(data || []);
+        setHistoryLoading(false);
+      });
   };
 
   return (
@@ -148,8 +197,44 @@ const SciImportSection: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="import-history">
-            <div className="text-center py-6">
-              <h3 className="text-sm font-medium text-gray-500">Nenhuma importação anterior registrada</h3>
+            <div className="py-2">
+              {historyLoading ? (
+                <div className="text-center p-6 text-gray-400">Carregando histórico...</div>
+              ) : (
+                <>
+                <Button variant="outline" size="sm" className="mb-2" onClick={refreshHistory}>
+                  Atualizar lista
+                </Button>
+                {importHistory && importHistory.length > 0 ? (
+                  <div className="overflow-auto border rounded-lg">
+                    <table className="min-w-full text-xs">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-1">Data / Hora</th>
+                          <th className="px-2 py-1">Meta Sumário</th>
+                          <th className="px-2 py-1">Base Estudos</th>
+                          <th className="px-2 py-1">Status</th>
+                          <th className="px-2 py-1">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importHistory.map((item) => (
+                          <SciImportHistoryRow
+                            key={item.id}
+                            item={item}
+                            onDeleted={refreshHistory}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhuma importação anterior registrada.
+                  </div>
+                )}
+                </>
+              )}
             </div>
           </TabsContent>
         </Tabs>
