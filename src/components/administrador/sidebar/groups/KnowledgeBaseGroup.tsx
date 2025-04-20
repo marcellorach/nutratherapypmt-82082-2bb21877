@@ -16,20 +16,20 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
     <>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "nutraceuticos"} 
-          onClick={() => handleStepClick("nutraceuticos")}
-        >
-          <Beaker />
-          <span>Nutracêuticos</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           isActive={currentStep === "estudos"} 
           onClick={() => handleStepClick("estudos")}
         >
           <BookOpen />
           <span>Estudos Científicos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "nutraceuticos"} 
+          onClick={() => handleStepClick("nutraceuticos")}
+        >
+          <Beaker />
+          <span>Nutracêuticos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>

@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Microscope } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, FileText, ClipboardCheck } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import { useToast } from "@/hooks/use-toast";
+import ApprovalChain from './pesquisa/components/ApprovalChain';
 
 const EstudosTab: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -19,83 +20,97 @@ const EstudosTab: React.FC = () => {
     setDialogOpen(false);
     toast({
       title: "Estudo adicionado com sucesso",
-      description: "O estudo foi processado pela IA e está disponível no sistema.",
+      description: "O estudo foi enviado para o processo de curadoria.",
     });
   };
   
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold">Estudos Científicos</h2>
-        <Button className="flex items-center gap-2" onClick={handleAddEstudo}>
-          <Plus className="h-4 w-4" />
-          Adicionar Estudo
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Journal of Veterinary Medicine, 2023</CardTitle>
-            <CardDescription>Estudo sobre ômega 3 e 6 em cães</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Fundamentação:</span>
-                <span className="text-sm">4.5/5</span>
+      <div className="flex flex-col space-y-6">
+        <div className="grid grid-cols-3 gap-6">
+          {/* Coluna: Novos Estudos */}
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Novos Estudos
+            </h3>
+            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
+              <div className="grid gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Journal of Veterinary Medicine, 2023</CardTitle>
+                    <CardDescription>Estudo sobre ômega 3 e 6 em cães</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full" size="sm">
+                      Iniciar Curadoria
+                    </Button>
+                  </CardContent>
+                </Card>
+                
+                {/* Card para adicionar novo estudo */}
+                <Card className="border-dashed border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" onClick={handleAddEstudo}>
+                  <CardContent className="flex flex-col items-center justify-center py-6">
+                    <Plus className="h-8 w-8 text-gray-400" />
+                    <p className="text-gray-500 mt-2">Adicionar novo estudo</p>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Eficiência:</span>
-                <span className="text-sm">4.2/5</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Constância:</span>
-                <span className="text-sm">4.0/5</span>
-              </div>
-              <Button variant="outline" className="w-full mt-4" size="sm">
-                <Microscope className="mr-2 h-4 w-4" />
-                Ver detalhes
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Animal Care Journal, 2023</CardTitle>
-            <CardDescription>Eficácia de glucosamina em cães idosos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Fundamentação:</span>
-                <span className="text-sm">4.3/5</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Eficiência:</span>
-                <span className="text-sm">4.1/5</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Constância:</span>
-                <span className="text-sm">3.8/5</span>
-              </div>
-              <Button variant="outline" className="w-full mt-4" size="sm">
-                <Microscope className="mr-2 h-4 w-4" />
-                Ver detalhes
-              </Button>
+          </div>
+
+          {/* Coluna: Em Curadoria */}
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <ClipboardCheck className="h-5 w-5" />
+              Em Curadoria
+            </h3>
+            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Animal Care Journal, 2023</CardTitle>
+                  <CardDescription>Eficácia de glucosamina em cães idosos</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ApprovalChain 
+                    stages={[
+                      { name: 'Análise Inicial', status: 'completed' },
+                      { name: 'Revisão Técnica', status: 'in-progress' },
+                      { name: 'Validação', status: 'pending' },
+                      { name: 'Aprovação Final', status: 'pending' }
+                    ]}
+                  />
+                  <Button variant="outline" className="w-full" size="sm">
+                    Ver Detalhes
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-dashed border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" onClick={handleAddEstudo}>
-          <CardContent className="flex flex-col items-center justify-center h-full py-12">
-            <Plus className="h-12 w-12 text-gray-400" />
-            <p className="text-gray-500 mt-2">Adicionar novo estudo</p>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Coluna: Aguardando Integração */}
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Aguardando Integração
+            </h3>
+            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Veterinary Research, 2023</CardTitle>
+                  <CardDescription>Nutracêuticos para saúde articular</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" className="w-full" size="sm">
+                    Integrar ao Sistema
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
-      
+
       <AdicionarEstudoDialog 
         open={dialogOpen} 
         onClose={() => setDialogOpen(false)}
