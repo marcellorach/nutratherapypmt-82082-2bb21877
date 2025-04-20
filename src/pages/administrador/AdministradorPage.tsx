@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -15,8 +14,8 @@ import FontesTab from '@/components/administrador/FontesTab';
 import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTab';
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
+import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
 
-// Importando os componentes de Pesquisa e Desenvolvimento
 import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
 import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
 import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
@@ -28,7 +27,6 @@ const AdministradorPage: React.FC = () => {
   
   const renderContent = () => {
     switch (currentStep) {
-      // Base de Conhecimento
       case "nutraceuticos":
         return <NutraceuticosTab />;
       case "estudos":
@@ -37,8 +35,6 @@ const AdministradorPage: React.FC = () => {
         return <RegrasClinicasTab />;
       case "relacoes":
         return <RelationsTab />;
-
-      // Processamento de Dados
       case "import":
         return <ImportStep />;
       case "fontes":
@@ -47,8 +43,6 @@ const AdministradorPage: React.FC = () => {
         return <AnalysisStep />;
       case "visualization":
         return <VisualizationStep />;
-
-      // Pesquisa e Desenvolvimento
       case "estudos-planejados":
         return <EstudosPlanejadosTab />;
       case "estudos-andamento":
@@ -59,16 +53,12 @@ const AdministradorPage: React.FC = () => {
         return <SugestoesAITab />;
       case "ora-biomedical":
         return <OraBiomedicalTab />;
-
-      // Análise Preditiva
       case "modelos":
         return <ModelosPreditivosTab />;
       case "custo-beneficio":
         return <CustoBeneficioTab />;
       case "relatorios":
         return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
-
-      // Configuração
       case "config-ia":
         return <ConfiguracoesIATab />;
       case "prompts":
@@ -77,6 +67,8 @@ const AdministradorPage: React.FC = () => {
         return <AnalyticsTab />;
       case "actions":
         return <ActionsStep />;
+      case "design-conventions":
+        return <DesignConventionsTab />;
       default:
         return <EstudosTab />;
     }
