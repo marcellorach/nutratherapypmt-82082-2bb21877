@@ -1,50 +1,51 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
 
 const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
 const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
 
 const SciSpace2StepImport: React.FC = () => {
-  const [step, setStep] = useState<1 | 2>(1);
   const [metaSummaryFile, setMetaSummaryFile] = useState<File | null>(null);
   const [baseStudiesFile, setBaseStudiesFile] = useState<File | null>(null);
+  const [consensoName, setConsensoName] = useState('');
+  const [comentarios, setComentarios] = useState('');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
-  // Save both files in Supabase Storage and register in DB
+  const canSave = !!(metaSummaryFile && baseStudiesFile && consensoName.trim());
+
+  const handleRemoveMeta = () => setMetaSummaryFile(null);
+  const handleRemoveBase = () => setBaseStudiesFile(null);
+
+  // Salvar os arquivos e informações
   const handleSubmit = async () => {
-    if (!metaSummaryFile || !baseStudiesFile) {
-      toast({
-        title: 'Favor anexar ambos os arquivos',
-        description: 'Você deve anexar o Meta Sumário e a Base de Estudos',
-        variant: 'destructive'
-      });
-      return;
-    }
+    if (!canSave) return;
     setLoading(true);
     setProgress(10);
 
-    // Simples caminho para evitar conflitos de nome
     const timestamp = `${Date.now()}`;
-    const metaPath = `scispace/${timestamp}_${metaSummaryFile.name}`;
-    const basePath = `scispace/${timestamp}_${baseStudiesFile.name}`;
+    const metaPath = `scispace/${timestamp}_${metaSummaryFile!.name}`;
+    const basePath = `scispace/${timestamp}_${baseStudiesFile!.name}`;
 
     // Upload meta summary
-    const { data:metaUpload, error:metaErr } = await supabase.storage
+    const { error:metaErr } = await supabase.storage
       .from('scispace')
-      .upload(metaPath, metaSummaryFile, { upsert: false });
+      .upload(metaPath, metaSummaryFile!, { upsert: false });
     setProgress(40);
 
     // Upload base studies
-    const { data:baseUpload, error:baseErr } = await supabase.storage
+    const { error:baseErr } = await supabase.storage
       .from('scispace')
-      .upload(basePath, baseStudiesFile, { upsert: false });
+      .upload(basePath, baseStudiesFile!, { upsert: false });
     setProgress(70);
 
     if (metaErr || baseErr) {
@@ -58,15 +59,17 @@ const SciSpace2StepImport: React.FC = () => {
       return;
     }
 
-    // Insere registro no banco
+    // Registrar no banco
     const { error:dbErr } = await supabase
       .from('scispace_imports')
       .insert([{
-        meta_summary_filename: metaSummaryFile.name,
+        meta_summary_filename: metaSummaryFile!.name,
         meta_summary_storage_path: metaPath,
-        base_studies_filename: baseStudiesFile.name,
+        base_studies_filename: baseStudiesFile!.name,
         base_studies_storage_path: basePath,
-        scispace_status: 'especial'
+        scispace_status: 'especial',
+        notes: comentarios,
+        nutraceutical: consensoName // aproveitando este campo para o nome do consenso
       }]);
     setProgress(100);
 
@@ -83,89 +86,133 @@ const SciSpace2StepImport: React.FC = () => {
 
     toast({
       title: 'Importação registrada',
-      description: 'Os arquivos foram salvos e o registro adicionado como "especial".'
+      description: 'Arquivos e informações salvos como "especial".'
     });
     setMetaSummaryFile(null);
     setBaseStudiesFile(null);
-    setStep(1);
+    setConsensoName('');
+    setComentarios('');
     setLoading(false);
     setProgress(0);
   };
 
   return (
-    <Card className="mx-auto max-w-lg my-6">
+    <Card className="mx-auto max-w-2xl my-6">
       <CardHeader>
         <CardTitle>Importação Manual SciSpace</CardTitle>
-        <div className="text-gray-500 mb-2 text-sm">
-          1. Anexe o <b>Meta Sumário</b> (.pdf, .doc, .docx)
-          <br />
-          2. Em seguida, anexe a <b>Base de Estudos</b> (.csv, .xls, .bib, .json)
-        </div>
+        <CardDescription>
+          <span className="block">1. Anexe o <b>Meta Sumário</b> (.pdf, .doc, .docx)</span>
+          <span className="block">2. Anexe a <b>Base de Estudos</b> (.csv, .xls, .bib, .json)</span>
+          <span className="block text-gray-500 text-xs mt-2">
+            Preencha todos os campos para salvar.
+          </span>
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-5">
-          {step === 1 && (
-            <div>
-              <label className="block font-medium mb-2">Meta Sumário:</label>
-              <input 
-                type="file" 
-                accept={ACCEPTED_META_SUMMARY}
-                onChange={e => {
-                  if (e.target.files?.[0]) setMetaSummaryFile(e.target.files[0]);
-                }}
-                disabled={loading}
-              />
-              {metaSummaryFile && (
-                <div className="text-xs mt-2 text-gray-500">
-                  Arquivo selecionado: <b>{metaSummaryFile.name}</b>
-                </div>
-              )}
-              <Button 
-                className="mt-4" 
-                onClick={() => setStep(2)} 
-                disabled={!metaSummaryFile || loading}
-              >
-                Próximo: Base de Estudos
-              </Button>
-            </div>
-          )}
-          {step === 2 && (
-            <div>
-              <label className="block font-medium mb-2">Base de Estudos:</label>
-              <input 
-                type="file" 
-                accept={ACCEPTED_BASE_STUDY}
-                onChange={e => {
-                  if (e.target.files?.[0]) setBaseStudiesFile(e.target.files[0]);
-                }}
-                disabled={loading}
-              />
-              {baseStudiesFile && (
-                <div className="text-xs mt-2 text-gray-500">
-                  Arquivo selecionado: <b>{baseStudiesFile.name}</b>
-                </div>
-              )}
-              <div className="flex space-x-2 mt-4">
-                <Button variant="secondary" onClick={() => setStep(1)} disabled={loading}>
-                  Voltar
-                </Button>
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={!baseStudiesFile || loading}
-                  className="relative"
-                >
-                  {loading ? (
-                    <>
-                      <span>Salvando...</span>
-                      <Progress value={progress} className="h-2 mt-2" />
-                    </>
-                  ) : (
-                    <>Finalizar Importação</>
-                  )}
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
+          {/* Quadrado Meta Sumário */}
+          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col">
+            <span className="font-medium mb-2">Meta Sumário</span>
+            {!metaSummaryFile ? (
+              <>
+                <input
+                  type="file"
+                  accept={ACCEPTED_META_SUMMARY}
+                  id="metaFile"
+                  className="hidden"
+                  onChange={e => {
+                    if (e.target.files?.[0]) setMetaSummaryFile(e.target.files[0]);
+                  }}
+                  disabled={loading}
+                />
+                <label htmlFor="metaFile">
+                  <Button variant="outline" asChild>
+                    <span>Selecionar Arquivo</span>
+                  </Button>
+                </label>
+                <span className="text-xs text-gray-400 mt-2">Formatos: .pdf, .doc, .docx</span>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm truncate max-w-[180px]">{metaSummaryFile.name}</span>
+                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário">
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+          
+          {/* Quadrado Base */}
+          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col">
+            <span className="font-medium mb-2">Base de Estudos</span>
+            {!baseStudiesFile ? (
+              <>
+                <input
+                  type="file"
+                  accept={ACCEPTED_BASE_STUDY}
+                  id="baseFile"
+                  className="hidden"
+                  onChange={e => {
+                    if (e.target.files?.[0]) setBaseStudiesFile(e.target.files[0]);
+                  }}
+                  disabled={loading}
+                />
+                <label htmlFor="baseFile">
+                  <Button variant="outline" asChild>
+                    <span>Selecionar Arquivo</span>
+                  </Button>
+                </label>
+                <span className="text-xs text-gray-400 mt-2">Formatos: .csv, .xls, .bib, .json</span>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm truncate max-w-[180px]">{baseStudiesFile.name}</span>
+                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Nome do Consenso e Comentários */}
+        <div className="mb-4 grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium">Nome do Consenso Integrativo <span className="text-red-500">*</span></label>
+            <Input
+              value={consensoName}
+              onChange={(e) => setConsensoName(e.target.value)}
+              disabled={loading}
+              placeholder="Ex: Consenso Brasileiro de Saúde Articular 2025"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium">Comentários Gerais</label>
+            <Textarea
+              value={comentarios}
+              onChange={(e) => setComentarios(e.target.value)}
+              disabled={loading}
+              placeholder="Observações importantes sobre este consenso ou base de estudos."
+              rows={2}
+            />
+          </div>
+        </div>
+        {/* Salvar */}
+        <div>
+          <Button
+            onClick={handleSubmit}
+            disabled={!canSave || loading}
+            className="w-full md:w-auto"
+          >
+            {loading ? (
+              <>
+                <span>Salvando...</span>
+                <Progress value={progress} className="h-2 bg-gray-100 mt-2 w-full" />
+              </>
+            ) : (
+              <>Salvar Importação</>
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>
