@@ -18,7 +18,7 @@ const Header: React.FC = () => {
           <img 
             src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png" 
             alt="NutraTherapy"
-            className="h-16" 
+            className="h-10" // Reduced logo height from h-16 to h-10 (approx 60% reduction)
           />
           <div className="flex flex-col">
             <span className="font-bold text-gray-800 text-xl">
