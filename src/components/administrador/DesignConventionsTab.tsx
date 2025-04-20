@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,11 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 const DesignConventionsTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editText, setEditText] = useState('');
+  const [editingSection, setEditingSection] = useState('');
   const [isAIAssistanceActive, setIsAIAssistanceActive] = useState(false);
   const { toast } = useToast();
 
-  const handleEditClick = () => {
-    setEditText('Ajude-me a ajustar as convenções de design para: [descreva suas alterações]');
+  const handleEditClick = (section: string) => {
+    setEditingSection(section);
+    setEditText(`Ajude-me a ajustar as convenções de design para ${section}: [descreva suas alterações]`);
     setIsEditDialogOpen(true);
   };
 
@@ -54,23 +57,23 @@ const DesignConventionsTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Convenções de Design</h2>
-          <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
-        </div>
-        <Button onClick={handleEditClick} variant="outline" className="flex items-center gap-2">
-          <Edit className="w-4 h-4" />
-          Alterar
-        </Button>
+      <div>
+        <h2 className="text-2xl font-bold">Convenções de Design</h2>
+        <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Sistema de Tags e Ícones</CardTitle>
-          <CardDescription>
-            Padrões de visualização para tags, badges e indicadores visuais
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Sistema de Tags e Ícones</CardTitle>
+            <CardDescription>
+              Padrões de visualização para tags, badges e indicadores visuais
+            </CardDescription>
+          </div>
+          <Button onClick={() => handleEditClick('Sistema de Tags e Ícones')} variant="ghost" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Assistente de Alterações
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
@@ -128,9 +131,9 @@ const DesignConventionsTab = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Editar Convenções de Design</DialogTitle>
+            <DialogTitle>Editar {editingSection}</DialogTitle>
             <DialogDescription>
-              Descreva as alterações desejadas e nosso assistente AI ajudará a implementá-las.
+              Use o assistente de IA para ajudar nas alterações de design
             </DialogDescription>
           </DialogHeader>
           
