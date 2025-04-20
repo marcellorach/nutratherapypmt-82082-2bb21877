@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
+import OutcomeTag from '../../tags/OutcomeTag';
+import { Badge } from "@/components/ui/badge";
 
 interface EstudoCardProps {
   estudo: any;
@@ -18,8 +20,28 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   buttonLabel = "Ver Detalhes",
   getNutraceuticalScore 
 }) => {
+  // Dados de exemplo para as seções NTAI (em produção viriam do backend)
+  const ntaiData = {
+    nutraceuticos: estudo.nutraceuticals || [],
+    condicoes: [
+      { nome: "Artrite Canina", score: 4.5 },
+      { nome: "Inflamação Articular", score: 3.8 }
+    ],
+    interacoesPositivas: [
+      { nome: "Glucosamina", score: 4.0 },
+      { nome: "MSM", score: 3.8 }
+    ],
+    interacoesNegativas: [
+      { nome: "Anti-inflamatórios", score: 2.5 }
+    ],
+    efeitosColaterais: [
+      { nome: "Sonolência Leve", score: 2.0 },
+      { nome: "Alteração Apetite", score: 1.8 }
+    ]
+  };
+
   return (
-    <Card key={estudo.id}>
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between mb-2">
           <CardTitle>{estudo.title}</CardTitle>
@@ -27,16 +49,80 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
         </div>
         <CardDescription>{estudo.description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex flex-wrap gap-1">
-          {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-            <NutraceuticalTag 
-              key={idx} 
-              name={nutra} 
-              score={getNutraceuticalScore(nutra)} 
-            />
-          ))}
+      <CardContent className="space-y-4">
+        <div>
+          <h4 className="text-sm font-semibold mb-3 text-purple-700">Análise NTAI</h4>
+          
+          {/* Seção Nutraceuticos */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-1">Nutraceuticos</p>
+            <div className="flex flex-wrap gap-1">
+              {ntaiData.nutraceuticos.map((nutra: string, idx: number) => (
+                <NutraceuticalTag 
+                  key={idx} 
+                  name={nutra} 
+                  score={getNutraceuticalScore(nutra)} 
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Seção Condições */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-1">Condições</p>
+            <div className="flex flex-wrap gap-1">
+              {ntaiData.condicoes.map((condicao, idx) => (
+                <OutcomeTag 
+                  key={idx}
+                  condition={condicao.nome}
+                  score={condicao.score}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Seção Interações */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-1">Interações</p>
+            <div className="flex flex-wrap gap-1">
+              {ntaiData.interacoesPositivas.map((interacao, idx) => (
+                <Badge 
+                  key={`pos-${idx}`}
+                  variant="outline" 
+                  className="bg-green-50 text-green-700 border-green-200"
+                >
+                  {interacao.nome} ({interacao.score.toFixed(1)})
+                </Badge>
+              ))}
+              {ntaiData.interacoesNegativas.map((interacao, idx) => (
+                <Badge 
+                  key={`neg-${idx}`}
+                  variant="outline" 
+                  className="bg-red-50 text-red-700 border-red-200"
+                >
+                  {interacao.nome} ({interacao.score.toFixed(1)})
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Seção Efeitos Colaterais */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-1">Efeitos Colaterais</p>
+            <div className="flex flex-wrap gap-1">
+              {ntaiData.efeitosColaterais.map((efeito, idx) => (
+                <Badge 
+                  key={idx}
+                  variant="outline" 
+                  className="bg-amber-50 text-amber-700 border-amber-200"
+                >
+                  {efeito.nome} ({efeito.score.toFixed(1)})
+                </Badge>
+              ))}
+            </div>
+          </div>
         </div>
+
         <Button 
           variant="outline" 
           className="w-full" 
