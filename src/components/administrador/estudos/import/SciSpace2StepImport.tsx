@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -34,21 +33,17 @@ const SciSpace2StepImport: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
-  // Só habilita botão se ambos arquivos e nome do consenso preenchidos
   const canSave = !!(metaSummaryFile && baseStudiesFile && consensoName.trim());
 
-  // Remove arquivos enviados
   const handleRemoveMeta = () => setMetaSummaryFile(null);
   const handleRemoveBase = () => setBaseStudiesFile(null);
 
-  // Salvar os arquivos e informações
   const handleSubmit = async () => {
     if (!canSave) return;
     setLoading(true);
     setProgress(10);
 
     try {
-      // Cria nomes de arquivo seguros para evitar problemas com caracteres especiais
       const timestamp = Date.now().toString();
       const metaFileName = `${timestamp}_${metaSummaryFile!.name.replace(/[^\w\s.-]/g, '')}`;
       const baseFileName = `${timestamp}_${baseStudiesFile!.name.replace(/[^\w\s.-]/g, '')}`;
@@ -56,7 +51,6 @@ const SciSpace2StepImport: React.FC = () => {
       const metaPath = `meta/${metaFileName}`;
       const basePath = `base/${baseFileName}`;
 
-      // Upload meta summary
       const { error:metaErr } = await supabase.storage
         .from('scispace')
         .upload(metaPath, metaSummaryFile!, { 
@@ -78,7 +72,6 @@ const SciSpace2StepImport: React.FC = () => {
         return;
       }
 
-      // Upload base studies
       const { error:baseErr } = await supabase.storage
         .from('scispace')
         .upload(basePath, baseStudiesFile!, { 
@@ -100,7 +93,6 @@ const SciSpace2StepImport: React.FC = () => {
         return;
       }
 
-      // Registrar no banco
       const { error:dbErr } = await supabase
         .from('scispace_imports')
         .insert([{
@@ -110,7 +102,7 @@ const SciSpace2StepImport: React.FC = () => {
           base_studies_storage_path: basePath,
           scispace_status: 'especial',
           notes: comentarios,
-          nutraceutical: consensoName // aproveitando este campo para o nome do consenso
+          nutraceutical: consensoName
         }]);
       
       setProgress(100);
@@ -164,7 +156,6 @@ const SciSpace2StepImport: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
-          {/* QUADRADO META SUMÁRIO */}
           <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
             <span className="font-semibold mb-2 text-sm">Meta Sumário</span>
             {!metaSummaryFile ? (
@@ -189,7 +180,7 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[300px] truncate">
-                  <span className="truncate max-w-[30ch]">{metaSummaryFile.name}</span>
+                  <span className="truncate max-w-[60ch]">{metaSummaryFile.name}</span>
                   <span className={`${sizeColor(metaSummaryFile.size)} flex items-center text-xs font-medium gap-1`}>
                     <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(metaSummaryFile.size)}
@@ -201,7 +192,6 @@ const SciSpace2StepImport: React.FC = () => {
               </div>
             )}
           </div>
-          {/* QUADRADO BASE DE ESTUDOS */}
           <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
             <span className="font-semibold mb-2 text-sm">Base de Estudos</span>
             {!baseStudiesFile ? (
@@ -226,7 +216,7 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[300px] truncate">
-                  <span className="truncate max-w-[30ch]">{baseStudiesFile.name}</span>
+                  <span className="truncate max-w-[60ch]">{baseStudiesFile.name}</span>
                   <span className={`${sizeColor(baseStudiesFile.size)} flex items-center text-xs font-medium gap-1`}>
                     <Database className="h-4 w-4 flex-shrink-0" />
                     {formatFileSize(baseStudiesFile.size)}
@@ -239,7 +229,6 @@ const SciSpace2StepImport: React.FC = () => {
             )}
           </div>
         </div>
-        {/* NOME DO CONSENSO E COMENTÁRIOS */}
         <div className="mb-4 grid md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">Nome do Consenso Integrativo <span className="text-red-500">*</span></label>
@@ -262,7 +251,6 @@ const SciSpace2StepImport: React.FC = () => {
             />
           </div>
         </div>
-        {/* BOTÃO SALVAR */}
         <div>
           <Button
             onClick={handleSubmit}
