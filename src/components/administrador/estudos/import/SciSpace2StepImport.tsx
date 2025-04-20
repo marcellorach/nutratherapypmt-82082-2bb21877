@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, FileText } from "lucide-react";
 
 const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
 const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
@@ -189,12 +189,13 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
+                  <FileText className="text-muted-foreground mr-1 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{metaSummaryFile.name}</span>
                   <span className={`${sizeColor(metaSummaryFile.size)} text-xs font-medium`}>
                     {formatFileSize(metaSummaryFile.size)}
                   </span>
                 </div>
-                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário" className="ml-2">
+                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário" className="ml-2 text-red-600 hover:text-red-700">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -225,12 +226,13 @@ const SciSpace2StepImport: React.FC = () => {
             ) : (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[230px] truncate">
+                  <FileText className="text-muted-foreground mr-1 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{baseStudiesFile.name}</span>
                   <span className={`${sizeColor(baseStudiesFile.size)} text-xs font-medium`}>
                     {formatFileSize(baseStudiesFile.size)}
                   </span>
                 </div>
-                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos" className="ml-2">
+                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos" className="ml-2 text-red-600 hover:text-red-700">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
