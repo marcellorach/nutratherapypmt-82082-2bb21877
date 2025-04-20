@@ -1,19 +1,52 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ArrowRight, Edit, Sparkles } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowRight, Edit, Sparkles, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface DesignConvention {
+  id: string;
+  section: string;
+  content: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
 
 const DesignConventionsTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editText, setEditText] = useState('');
   const [editingSection, setEditingSection] = useState('');
   const [isAIAssistanceActive, setIsAIAssistanceActive] = useState(false);
+  const [conventions, setConventions] = useState<DesignConvention[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchConventions();
+  }, []);
+
+  const fetchConventions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('design_conventions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setConventions(data || []);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar convenções",
+        description: "Não foi possível carregar as convenções de design.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleEditClick = (section: string) => {
     setEditingSection(section);
@@ -27,7 +60,6 @@ const DesignConventionsTab = () => {
       toast({
         title: "Assistente de IA Ativado",
         description: "O assistente de IA está pronto para ajudar com as convenções de design.",
-        variant: "default"
       });
     } catch (error) {
       toast({
@@ -41,13 +73,24 @@ const DesignConventionsTab = () => {
 
   const handleInitiateApproval = async () => {
     try {
+      const { error } = await supabase
+        .from('design_conventions')
+        .insert({
+          section: editingSection,
+          content: editText,
+          status: 'pending',
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Solicitação enviada para aprovação",
         description: "As alterações foram enviadas para revisão da equipe de supervisão.",
       });
       setIsEditDialogOpen(false);
+      fetchConventions();
       
-      // Notificação adicional para mostrar o status do processo
       setTimeout(() => {
         toast({
           title: "Status da aprovação",
@@ -63,6 +106,34 @@ const DesignConventionsTab = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Aprovado
+          </Badge>
+        );
+      case 'pending':
+        return (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center">
+            <Clock className="w-3 h-3 mr-1" />
+            Em Análise
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center">
+            <XCircle className="w-3 h-3 mr-1" />
+            Rejeitado
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -70,71 +141,31 @@ const DesignConventionsTab = () => {
         <p className="text-gray-600">Documentação de padrões visuais e convenções de design do sistema</p>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Sistema de Tags e Ícones</CardTitle>
-            <CardDescription>
-              Padrões de visualização para tags, badges e indicadores visuais
-            </CardDescription>
-          </div>
-          <Button onClick={() => handleEditClick('Sistema de Tags e Ícones')} variant="ghost" className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            Assistente de Alterações
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Direcionais e Indicadores</h3>
-            <div className="grid gap-4">
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center">
-                  <ArrowUp className="w-3 h-3 mr-1" />
-                  Positivo/Melhora
-                </Badge>
-                <span className="text-sm text-gray-600">Usado para interações positivas e melhorias</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center">
-                  <ArrowDown className="w-3 h-3 mr-1" />
-                  Negativo/Piora
-                </Badge>
-                <span className="text-sm text-gray-600">Usado para interações negativas e contraindicações</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center">
-                  <ArrowRight className="w-3 h-3 mr-1" />
-                  Efeito/Resultado
-                </Badge>
-                <span className="text-sm text-gray-600">Usado para efeitos colaterais e resultados neutros</span>
-              </div>
+      {conventions.map((convention) => (
+        <Card key={convention.id}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>{convention.section}</CardTitle>
+              <CardDescription className="flex items-center gap-2">
+                Última atualização: {new Date(convention.updated_at).toLocaleDateString()}
+                {getStatusBadge(convention.status)}
+              </CardDescription>
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Paleta de Cores</h3>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="font-medium">Interações Positivas:</span>
-                <span className="ml-2 px-2 py-1 bg-green-50 text-green-700 rounded">bg-green-50</span>
-                <span className="ml-2 px-2 py-1 text-green-700">text-green-700</span>
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Interações Negativas:</span>
-                <span className="ml-2 px-2 py-1 bg-red-50 text-red-700 rounded">bg-red-50</span>
-                <span className="ml-2 px-2 py-1 text-red-700">text-red-700</span>
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Efeitos e Alertas:</span>
-                <span className="ml-2 px-2 py-1 bg-amber-50 text-amber-700 rounded">bg-amber-50</span>
-                <span className="ml-2 px-2 py-1 text-amber-700">text-amber-700</span>
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            <Button 
+              onClick={() => handleEditClick(convention.section)} 
+              variant="ghost" 
+              className="flex items-center gap-2"
+              disabled={convention.status === 'pending'}
+            >
+              <Edit className="w-4 h-4" />
+              Propor Alterações
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="whitespace-pre-wrap">{convention.content}</div>
+          </CardContent>
+        </Card>
+      ))}
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
