@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ArrowRight, Edit } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowRight, Edit, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 const DesignConventionsTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editText, setEditText] = useState('');
+  const [isAIAssistanceActive, setIsAIAssistanceActive] = useState(false);
   const { toast } = useToast();
 
   const handleEditClick = () => {
     setEditText('Ajude-me a ajustar as convenções de design para: [descreva suas alterações]');
     setIsEditDialogOpen(true);
+  };
+
+  const handleAIAssistance = async () => {
+    setIsAIAssistanceActive(true);
+    try {
+      toast({
+        title: "Assistente de IA Ativado",
+        description: "O assistente de IA está pronto para ajudar com as convenções de design.",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na Assistência de IA",
+        description: "Não foi possível iniciar a assistência de IA.",
+        variant: "destructive"
+      });
+      setIsAIAssistanceActive(false);
+    }
   };
 
   const handleSave = async () => {
@@ -123,13 +142,25 @@ const DesignConventionsTab = () => {
               placeholder="Descreva as alterações desejadas..."
             />
             
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                Cancelar
+            <div className="flex justify-between items-center">
+              <Button 
+                onClick={handleAIAssistance} 
+                variant="ghost" 
+                className="flex items-center gap-2"
+                disabled={isAIAssistanceActive}
+              >
+                <Sparkles className="w-4 h-4" />
+                Assistente de IA
               </Button>
-              <Button onClick={handleSave}>
-                Salvar Alterações
-              </Button>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave}>
+                  Salvar Alterações
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
