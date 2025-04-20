@@ -18,8 +18,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "config-ia"} 
           onClick={() => handleStepClick("config-ia")}
+          className={currentStep === "config-ia" ? "bg-primary/10 text-primary" : ""}
         >
-          <Cpu />
+          <Cpu className={currentStep === "config-ia" ? "text-primary" : ""} />
           <span>Config. de IA</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -27,8 +28,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "prompts"} 
           onClick={() => handleStepClick("prompts")}
+          className={currentStep === "prompts" ? "bg-primary/10 text-primary" : ""}
         >
-          <Bot />
+          <Bot className={currentStep === "prompts" ? "text-primary" : ""} />
           <span>Prompts da IA</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -36,8 +38,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "analytics"} 
           onClick={() => handleStepClick("analytics")}
+          className={currentStep === "analytics" ? "bg-primary/10 text-primary" : ""}
         >
-          <Zap />
+          <Zap className={currentStep === "analytics" ? "text-primary" : ""} />
           <span>Analytics</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -45,8 +48,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "actions"} 
           onClick={() => handleStepClick("actions")}
+          className={currentStep === "actions" ? "bg-primary/10 text-primary" : ""}
         >
-          <Check />
+          <Check className={currentStep === "actions" ? "text-primary" : ""} />
           <span>Ações em Massa</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
