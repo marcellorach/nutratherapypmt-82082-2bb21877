@@ -4,7 +4,7 @@ import React from 'react';
 const EvidenceLegend: React.FC = () => {
   return (
     <div className="flex items-center gap-4 text-sm mb-4 ml-4">
-      <span className="font-medium">Nível de Evidência:</span>
+      <span className="font-medium">Nível de Evidência/Eficiência:</span>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-full bg-red-200"></div>
