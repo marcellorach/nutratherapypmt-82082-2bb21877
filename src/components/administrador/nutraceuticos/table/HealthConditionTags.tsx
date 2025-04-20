@@ -21,6 +21,14 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
     return "bg-red-200 hover:bg-red-300";
   };
 
+  const getIconColor = (score: number): string => {
+    if (score >= 4) return "text-green-600";
+    if (score >= 3) return "text-amber-600";
+    if (score >= 2) return "text-blue-600";
+    if (score >= 1) return "text-orange-600";
+    return "text-red-600";
+  };
+
   return (
     <div className="flex flex-wrap gap-1">
       {conditions.map((condition, index) => (
@@ -35,11 +43,11 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
             <div className="flex items-center ml-2">
               <TrendingUp 
                 size={14} 
-                className="text-black/50 mr-1 opacity-70" 
+                className={`mr-1 opacity-70 ${getIconColor(condition.efficacyScore)}`} 
                 strokeWidth={2}
               />
               <span className="text-xs font-light text-black/70">
-                {condition.efficacyScore.toFixed(1)}
+                {condition.efficacyScore.toFixed(1)}/5
               </span>
             </div>
           </div>
