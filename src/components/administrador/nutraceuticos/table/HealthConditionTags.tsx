@@ -13,13 +13,21 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
   conditions,
   onConditionClick
 }) => {
+  const getEfficacyColor = (score: number): string => {
+    if (score >= 4) return "bg-green-200 hover:bg-green-300";
+    if (score >= 3) return "bg-amber-200 hover:bg-amber-300";
+    if (score >= 2) return "bg-blue-200 hover:bg-blue-300";
+    if (score >= 1) return "bg-orange-200 hover:bg-orange-300";
+    return "bg-red-200 hover:bg-red-300";
+  };
+
   return (
     <div className="flex flex-wrap gap-1">
       {conditions.map((condition, index) => (
         <Badge 
           key={`${condition.name}-${index}`}
           variant="outline" 
-          className="cursor-pointer transition-colors bg-green-50 hover:bg-green-100 flex items-center"
+          className={`cursor-pointer transition-colors ${getEfficacyColor(condition.efficacyScore)} flex items-center`}
           onClick={() => onConditionClick(condition)}
         >
           <div className="flex items-center space-x-1">
