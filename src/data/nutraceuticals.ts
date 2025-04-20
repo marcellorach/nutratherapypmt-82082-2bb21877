@@ -1,7 +1,5 @@
-
 import { Nutraceutical } from "../types";
 
-// Mock de Nutracêuticos (substâncias simples)
 export const nutraceuticals: Nutraceutical[] = [
   {
     id: "nut1",
@@ -12,7 +10,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Distúrbios de coagulação", "Uso concomitante com anticoagulantes em altas doses"],
     source: "Óleo de peixe, especialmente peixes de águas frias e profundas",
     chemicalCompound: "C20H30O2 (ácido 5,8,11,14,17-eicosapentaenoico)",
-    condition: "Dermatite atópica canina",
+    preventionConditions: ["Doença cardiovascular", "Inflamação crônica"],
+    treatmentConditions: ["Dermatite atópica canina", "Artrite"],
+    supportConditions: ["Saúde cognitiva", "Função imune"],
     activeIngredients: ["Ácido eicosapentaenoico", "Ésteres de EPA", "Triglicerídeos de cadeia média"],
     scientificEvidence: {
       efficacyScore: 4.2,
@@ -40,7 +40,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Alergia a produtos marinhos"],
     source: "Algas marinhas, óleo de peixe, krill",
     chemicalCompound: "C22H32O2 (ácido 4,7,10,13,16,19-docosahexaenoico)",
-    condition: "Desenvolvimento cognitivo e neurológico",
+    preventionConditions: ["Saúde ocular"],
+    treatmentConditions: ["Problemas de desenvolvimento neurológico"],
+    supportConditions: ["Função cognitiva"],
     activeIngredients: ["Ácido docosa-hexaenoico", "Fosfolipídios de DHA", "Ésteres etílicos de DHA"],
     scientificEvidence: {
       efficacyScore: 4.5,
@@ -68,7 +70,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Diabetes (monitoramento da glicemia)", "Insuficiência renal"],
     source: "Exoesqueleto de crustáceos, produção sintética",
     chemicalCompound: "C6H13NO5 (2-amino-2-desoxi-D-glucose)",
-    condition: "Osteoartrite canina",
+    preventionConditions: ["Problemas articulares"],
+    treatmentConditions: ["Osteoartrite canina"],
+    supportConditions: ["Mobilidade articular"],
     activeIngredients: ["2-amino-2-desoxi-D-glucose", "Sulfato de glucosamina", "Cloridrato de glucosamina"],
     scientificEvidence: {
       efficacyScore: 3.8,
@@ -96,7 +100,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Coagulopatias"],
     source: "Cartilagem de tubarão, bovina ou suína",
     chemicalCompound: "Polímero linear de N-acetilgalactosamina e ácido glucurônico sulfatado",
-    condition: "Osteoartrite canina",
+    preventionConditions: ["Degradação articular"],
+    treatmentConditions: ["Osteoartrite canina"],
+    supportConditions: ["Estrutura cartilaginosa"],
     activeIngredients: ["Sulfato de condroitina", "Polissacarídeos sulfatados", "Glicosaminoglicanos"],
     scientificEvidence: {
       efficacyScore: 3.7,
@@ -124,7 +130,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Doenças autoimunes", "Imunossupressão medicamentosa"],
     source: "Echinacea purpurea (planta)",
     chemicalCompound: "Alquilamidas, glicoproteínas, polissacarídeos e derivados do ácido cafeico",
-    condition: "Imunodeficiência e susceptibilidade a infecções",
+    preventionConditions: ["Infecções recorrentes"],
+    treatmentConditions: ["Imunodeficiência"],
+    supportConditions: ["Sistema imunológico"],
     activeIngredients: ["Alquilamidas", "Glicoproteínas", "Polissacarídeos", "Derivados do ácido cafeico"],
     scientificEvidence: {
       efficacyScore: 3.4,
@@ -152,7 +160,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Hipotireoidismo não controlado (monitoramento)"],
     source: "Síntese endógena a partir de lisina e metionina, suplementação sintética",
     chemicalCompound: "C7H15NO3 (3-hidroxi-4-N-trimetilamino-butirato)",
-    condition: "Cardiomiopatia dilatada",
+    preventionConditions: ["Problemas cardíacos"],
+    treatmentConditions: ["Cardiomiopatia dilatada"],
+    supportConditions: ["Metabolismo energético"],
     activeIngredients: ["L-carnitina", "Fumarato de L-carnitina", "Tartarato de L-carnitina"],
     scientificEvidence: {
       efficacyScore: 4.3,
@@ -180,7 +190,9 @@ export const nutraceuticals: Nutraceutical[] = [
     contraindications: ["Alergia a plantas da família Asteraceae"],
     source: "Sementes de Silybum marianum (cardo mariano)",
     chemicalCompound: "Mistura de silibina, silicristina, silidianina e isosilibina",
-    condition: "Hepatopatias crônicas e agudas",
+    preventionConditions: ["Danos hepáticos"],
+    treatmentConditions: ["Hepatopatias crônicas e agudas"],
+    supportConditions: ["Função hepática"],
     activeIngredients: ["Silibina", "Silicristina", "Silidianina", "Isosilibina"],
     scientificEvidence: {
       efficacyScore: 4.1,

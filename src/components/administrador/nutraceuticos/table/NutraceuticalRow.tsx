@@ -2,10 +2,10 @@
 import React from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
 import { Nutraceutical } from "@/types";
 import StarRating from './StarRating';
+import HealthConditionTags from './HealthConditionTags';
 
 interface NutraceuticalRowProps {
   nutraceutical: Nutraceutical;
@@ -14,12 +14,19 @@ interface NutraceuticalRowProps {
 
 const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({ nutraceutical, onOpenDetails }) => {
   return (
-    <TableRow className="hover:bg-gray-50">
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer"
+      onClick={() => onOpenDetails(nutraceutical)}
+    >
       <TableCell className="font-medium">{nutraceutical.name}</TableCell>
       <TableCell>
-        <Badge variant="outline" className="bg-slate-50">
-          {nutraceutical.condition}
-        </Badge>
+        <HealthConditionTags conditions={nutraceutical.preventionConditions} />
+      </TableCell>
+      <TableCell>
+        <HealthConditionTags conditions={nutraceutical.treatmentConditions} />
+      </TableCell>
+      <TableCell>
+        <HealthConditionTags conditions={nutraceutical.supportConditions} />
       </TableCell>
       <TableCell>
         <div className="flex items-center">
@@ -32,9 +39,12 @@ const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({ nutraceutical, onOp
       <TableCell className="text-right">
         <Button 
           variant="ghost" 
-          size="sm" 
-          onClick={() => onOpenDetails(nutraceutical)}
+          size="sm"
           className="hover:bg-gray-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenDetails(nutraceutical);
+          }}
         >
           <FileText className="h-4 w-4 mr-1" />
           Detalhes

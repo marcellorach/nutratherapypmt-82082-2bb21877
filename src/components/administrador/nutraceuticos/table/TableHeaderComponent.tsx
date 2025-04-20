@@ -7,7 +7,9 @@ const TableHeaderComponent: React.FC = () => {
     <TableHeader>
       <TableRow>
         <TableHead>Nome</TableHead>
-        <TableHead>Condição de Saúde</TableHead>
+        <TableHead>Prevenção</TableHead>
+        <TableHead>Tratamento</TableHead>
+        <TableHead>Suporte</TableHead>
         <TableHead>Evidência</TableHead>
         <TableHead className="text-right">Ações</TableHead>
       </TableRow>

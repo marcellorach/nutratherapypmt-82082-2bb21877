@@ -38,10 +38,12 @@ export interface Nutraceutical {
   benefits: string[];
   dosage: string;
   contraindications: string[];
-  source: string; // Origem natural da substância
-  chemicalCompound: string; // Composto químico principal
-  condition: string;
-  activeIngredients: string[]; // Lista de princípios ativos do nutracêutico
+  source: string;
+  chemicalCompound: string;
+  preventionConditions: string[];
+  treatmentConditions: string[];
+  supportConditions: string[];
+  activeIngredients: string[];
   scientificEvidence: {
     efficacyScore: number;
     sustainabilityScore: number;
