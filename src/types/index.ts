@@ -41,6 +41,7 @@ export interface Nutraceutical {
   source: string; // Origem natural da substância
   chemicalCompound: string; // Composto químico principal
   condition: string;
+  activeIngredients: string[]; // Lista de princípios ativos do nutracêutico
   scientificEvidence: {
     efficacyScore: number;
     sustainabilityScore: number;
