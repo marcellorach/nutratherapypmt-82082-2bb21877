@@ -32,7 +32,7 @@ export interface ExamResult {
 
 export interface NutraceuticalCondition {
   name: string;
-  efficacyScore: number;
+  efficacyScore: number;  // 0-1: Sem evidência, 1-2: Anedótica, 2-3: Leve, 3-4: Moderada, 4-5: Alta
 }
 
 export interface Nutraceutical {
