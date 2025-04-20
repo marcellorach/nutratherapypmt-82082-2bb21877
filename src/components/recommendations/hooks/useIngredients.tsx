@@ -10,7 +10,7 @@ export interface ActiveIngredientTag {
   efficacy: number;
 }
 
-export const useIngredients = (nutraceutical: Nutraceutical) => {
+export const useIngredients = (nutraceutical: Nutraceutical | undefined) => {
   const { toast } = useToast();
   
   // Gerar quantidades variadas para cada ingrediente
@@ -22,14 +22,21 @@ export const useIngredients = (nutraceutical: Nutraceutical) => {
   };
   
   // Preparar os ingredientes ativos como tags com eficácia base
-  const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>(
-    nutraceutical.activeIngredients.map((ingredient, index) => ({
-      name: ingredient,
-      quantity: generateVariedQuantity(index), // Quantidade variada para cada ingrediente
-      removed: false,
-      efficacy: 1.0 // Iniciar todos com eficácia 1.0
-    }))
-  );
+  const [ingredients, setIngredients] = useState<ActiveIngredientTag[]>([]);
+
+  // Inicializar os ingredientes quando o nutraceutical mudar ou estiver disponível
+  useEffect(() => {
+    if (nutraceutical && nutraceutical.activeIngredients) {
+      setIngredients(
+        nutraceutical.activeIngredients.map((ingredient, index) => ({
+          name: ingredient,
+          quantity: generateVariedQuantity(index), // Quantidade variada para cada ingrediente
+          removed: false,
+          efficacy: 1.0 // Iniciar todos com eficácia 1.0
+        }))
+      );
+    }
+  }, [nutraceutical]);
 
   // Função para remover um ingrediente
   const removeIngredient = (index: number) => {

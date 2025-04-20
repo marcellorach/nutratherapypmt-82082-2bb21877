@@ -17,13 +17,25 @@ import RecommendationDetails from './RecommendationDetails';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
-  nutraceutical: Nutraceutical;
+  nutraceutical?: Nutraceutical;
 }
 
 const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({ 
   recommendation, 
   nutraceutical 
 }) => {
+  // Se o nutraceutical não estiver definido, exibir uma mensagem de erro
+  if (!nutraceutical) {
+    return (
+      <Card className="shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-red-500 relative">
+        <CardContent className="p-6 text-center">
+          <div className="text-red-500 font-medium mb-2">Erro: Dados do nutraceutical não encontrados</div>
+          <div className="text-sm text-gray-500">ID: {recommendation.nutraceuticalId}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const {
     ingredients,
     removeIngredient,
@@ -50,17 +62,23 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
 
   // Atualizar escores sempre que os ingredientes mudarem
   useEffect(() => {
-    recalculateScores(ingredients);
+    if (ingredients.length > 0) {
+      recalculateScores(ingredients);
+    }
   }, [ingredients]);
   
   // Calcular escores iniciais
   useEffect(() => {
-    recalculateScores(ingredients);
-  }, []);
+    if (ingredients.length > 0) {
+      recalculateScores(ingredients);
+    }
+  }, [ingredients.length]);
   
   // Verificar por mudanças quando ingredientes ou escores mudarem
   useEffect(() => {
-    checkForChanges(ingredients);
+    if (ingredients.length > 0) {
+      checkForChanges(ingredients);
+    }
   }, [ingredients, efficacyScore, sustainabilityScore, isApproved]);
   
   // Criar um objeto nutraceutical modificado com os escores atualizados
@@ -109,14 +127,16 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
         )}
         
         {/* Princípios ativos como tags */}
-        <IngredientsSection 
-          ingredients={ingredients}
-          nutraceutical={nutraceutical}
-          onEdit={editIngredientQuantity}
-          onRemove={removeIngredient}
-          onEfficacyChange={updateIngredientEfficacy}
-          onQuantityChange={updateIngredientQuantity}
-        />
+        {ingredients.length > 0 && (
+          <IngredientsSection 
+            ingredients={ingredients}
+            nutraceutical={nutraceutical}
+            onEdit={editIngredientQuantity}
+            onRemove={removeIngredient}
+            onEfficacyChange={updateIngredientEfficacy}
+            onQuantityChange={updateIngredientQuantity}
+          />
+        )}
         
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
@@ -150,10 +170,12 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
         </div>
         
         {/* Área de ingredientes excluídos */}
-        <RemovedIngredientsSection 
-          ingredients={ingredients}
-          onRestore={restoreIngredient}
-        />
+        {ingredients.length > 0 && (
+          <RemovedIngredientsSection 
+            ingredients={ingredients}
+            onRestore={restoreIngredient}
+          />
+        )}
       </CardFooter>
     </Card>
   );

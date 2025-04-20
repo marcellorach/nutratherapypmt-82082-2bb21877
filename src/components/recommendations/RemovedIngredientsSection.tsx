@@ -17,6 +17,11 @@ const RemovedIngredientsSection: React.FC<RemovedIngredientsSectionProps> = ({
   ingredients,
   onRestore
 }) => {
+  // Verificar se existe um array de ingredientes válido
+  if (!ingredients || ingredients.length === 0) {
+    return null;
+  }
+
   // Filtrar apenas ingredientes removidos
   const removedIngredients = ingredients.filter(ingredient => ingredient.removed);
   

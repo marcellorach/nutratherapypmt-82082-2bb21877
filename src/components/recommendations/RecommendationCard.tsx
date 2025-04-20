@@ -5,7 +5,7 @@ import { Recommendation, Nutraceutical } from '@/types';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
-  nutraceutical: Nutraceutical;
+  nutraceutical?: Nutraceutical;
 }
 
 const RecommendationCard: React.FC<RecommendationCardProps> = ({ 

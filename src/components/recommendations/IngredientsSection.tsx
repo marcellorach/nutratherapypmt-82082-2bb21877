@@ -27,6 +27,16 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({
   onEfficacyChange,
   onQuantityChange
 }) => {
+  // Se não houver ingredientes, não renderizar nada
+  if (!ingredients || ingredients.length === 0) {
+    return (
+      <div>
+        <p className="text-sm font-medium mb-2">Princípios ativos:</p>
+        <div className="bg-slate-50 p-3 rounded-md text-sm text-gray-500">Carregando ingredientes...</div>
+      </div>
+    );
+  }
+
   // Filtrar apenas ingredientes ativos (não removidos)
   const activeIngredients = ingredients.filter(ingredient => !ingredient.removed);
   
