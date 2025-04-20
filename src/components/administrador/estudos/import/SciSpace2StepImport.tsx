@@ -1,28 +1,12 @@
+
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import FilePreview from './FilePreview';
-
-const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
-const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
-
-const formatFileSize = (size: number): string => {
-  if (size < 1024) return `${size} B`;
-  else if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-  else return `${(size / (1024 * 1024)).toFixed(2)} MB`;
-};
-
-const sizeColor = (size: number): string => {
-  if (size < 1024 * 50) return 'text-green-600';           // até 50KB verde
-  if (size < 1024 * 200) return 'text-yellow-600';         // até 200KB amarelo
-  if (size < 1024 * 1024) return 'text-orange-500';        // até 1MB laranja
-  return 'text-red-600';                                   // acima, vermelho
-};
+import MetaSummaryUpload from './MetaSummaryUpload';
+import BaseStudiesUpload from './BaseStudiesUpload';
+import ConsensoForm from './ConsensoForm';
+import SubmitImportButton from './SubmitImportButton';
 
 const SciSpace2StepImport: React.FC = () => {
   const [metaSummaryFile, setMetaSummaryFile] = useState<File | null>(null);
@@ -34,9 +18,6 @@ const SciSpace2StepImport: React.FC = () => {
   const { toast } = useToast();
 
   const canSave = !!(metaSummaryFile && baseStudiesFile && consensoName.trim());
-
-  const handleRemoveMeta = () => setMetaSummaryFile(null);
-  const handleRemoveBase = () => setBaseStudiesFile(null);
 
   const handleSubmit = async () => {
     if (!canSave) return;
@@ -130,7 +111,6 @@ const SciSpace2StepImport: React.FC = () => {
       setComentarios('');
       setLoading(false);
       setProgress(0);
-      
     } catch (err: any) {
       console.error("Erro inesperado:", err);
       toast({
@@ -156,102 +136,31 @@ const SciSpace2StepImport: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
-          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
-            <span className="font-semibold mb-2 text-sm">Meta Sumário</span>
-            {!metaSummaryFile ? (
-              <>
-                <input
-                  type="file"
-                  accept={ACCEPTED_META_SUMMARY}
-                  id="metaFile"
-                  className="hidden"
-                  onChange={e => {
-                    if (e.target.files?.[0]) setMetaSummaryFile(e.target.files[0]);
-                  }}
-                  disabled={loading}
-                />
-                <label htmlFor="metaFile">
-                  <Button variant="outline" asChild>
-                    <span>Selecionar Arquivo</span>
-                  </Button>
-                </label>
-                <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .pdf, .doc, .docx</span>
-              </>
-            ) : (
-              <FilePreview
-                file={metaSummaryFile}
-                onRemove={handleRemoveMeta}
-                label="Meta Sumário"
-              />
-            )}
-          </div>
-          <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
-            <span className="font-semibold mb-2 text-sm">Base de Estudos</span>
-            {!baseStudiesFile ? (
-              <>
-                <input
-                  type="file"
-                  accept={ACCEPTED_BASE_STUDY}
-                  id="baseFile"
-                  className="hidden"
-                  onChange={e => {
-                    if (e.target.files?.[0]) setBaseStudiesFile(e.target.files[0]);
-                  }}
-                  disabled={loading}
-                />
-                <label htmlFor="baseFile">
-                  <Button variant="outline" asChild>
-                    <span>Selecionar Arquivo</span>
-                  </Button>
-                </label>
-                <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .csv, .xls, .bib, .json</span>
-              </>
-            ) : (
-              <FilePreview
-                file={baseStudiesFile}
-                onRemove={handleRemoveBase}
-                label="Base de Estudos"
-              />
-            )}
-          </div>
+          <MetaSummaryUpload
+            metaSummaryFile={metaSummaryFile}
+            setMetaSummaryFile={setMetaSummaryFile}
+            disabled={loading}
+          />
+          <BaseStudiesUpload
+            baseStudiesFile={baseStudiesFile}
+            setBaseStudiesFile={setBaseStudiesFile}
+            disabled={loading}
+          />
         </div>
-        <div className="mb-4 grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium">Nome do Consenso Integrativo <span className="text-red-500">*</span></label>
-            <Input
-              value={consensoName}
-              onChange={(e) => setConsensoName(e.target.value)}
-              disabled={loading}
-              placeholder="Ex: Consenso Brasileiro de Saúde Articular 2025"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 text-sm font-medium">Comentários Gerais</label>
-            <Textarea
-              value={comentarios}
-              onChange={(e) => setComentarios(e.target.value)}
-              disabled={loading}
-              placeholder="Observações importantes sobre este consenso ou base de estudos."
-              rows={2}
-            />
-          </div>
-        </div>
+        <ConsensoForm
+          consensoName={consensoName}
+          setConsensoName={setConsensoName}
+          comentarios={comentarios}
+          setComentarios={setComentarios}
+          disabled={loading}
+        />
         <div>
-          <Button
+          <SubmitImportButton
             onClick={handleSubmit}
             disabled={!canSave || loading}
-            className="w-full md:w-auto"
-          >
-            {loading ? (
-              <>
-                <span>Salvando...</span>
-                <Progress value={progress} className="h-2 bg-gray-100 mt-2 w-full" />
-              </>
-            ) : (
-              <>Salvar Importação</>
-            )}
-          </Button>
+            loading={loading}
+            progress={progress}
+          />
         </div>
       </CardContent>
     </Card>
