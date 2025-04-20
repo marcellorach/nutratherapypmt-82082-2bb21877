@@ -14,5 +14,5 @@ export interface Study {
   alerts?: number;
   category?: 'geroproptetor' | 'antiinflamatório' | 'neuroprotetor' | 'metabólico';
   targetSpecies?: string[];
-  objective?: string; // Adicionando a propriedade objective como opcional
+  objective?: string;
 }

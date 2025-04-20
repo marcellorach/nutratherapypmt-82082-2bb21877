@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { Study } from '../types/oraBiomedical';
-import DetailedStudyCharts from './DetailedStudyCharts';
+import StudyDetailsDialog from './StudyDetailsDialog';
 
 interface StudyCardProps {
   study: Study;
@@ -52,14 +52,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
       </Card>
 
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{study.title}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <DetailedStudyCharts isComplete={study.status === 'completed'} />
-          </div>
-        </DialogContent>
+        <StudyDetailsDialog study={study} />
       </Dialog>
     </>
   );
