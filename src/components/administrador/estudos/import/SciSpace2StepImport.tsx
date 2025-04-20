@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, Database } from "lucide-react";
+import FilePreview from './FilePreview';
 
 const ACCEPTED_META_SUMMARY = '.pdf,.doc,.docx';
 const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
@@ -178,18 +178,11 @@ const SciSpace2StepImport: React.FC = () => {
                 <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .pdf, .doc, .docx</span>
               </>
             ) : (
-              <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[350px] truncate">
-                  <span className="truncate max-w-[60ch] font-normal">{metaSummaryFile.name}</span>
-                  <span className={`${sizeColor(metaSummaryFile.size)} flex items-center text-xs font-medium gap-1`}>
-                    <Database className="h-4 w-4 flex-shrink-0" />
-                    {formatFileSize(metaSummaryFile.size)}
-                  </span>
-                </div>
-                <Button size="icon" variant="ghost" onClick={handleRemoveMeta} aria-label="Remover Meta Sumário" className="ml-2 text-red-600 hover:text-red-700">
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
+              <FilePreview
+                file={metaSummaryFile}
+                onRemove={handleRemoveMeta}
+                label="Meta Sumário"
+              />
             )}
           </div>
           <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
@@ -214,18 +207,11 @@ const SciSpace2StepImport: React.FC = () => {
                 <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .csv, .xls, .bib, .json</span>
               </>
             ) : (
-              <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-[350px] truncate">
-                  <span className="truncate max-w-[60ch] font-normal">{baseStudiesFile.name}</span>
-                  <span className={`${sizeColor(baseStudiesFile.size)} flex items-center text-xs font-medium gap-1`}>
-                    <Database className="h-4 w-4 flex-shrink-0" />
-                    {formatFileSize(baseStudiesFile.size)}
-                  </span>
-                </div>
-                <Button size="icon" variant="ghost" onClick={handleRemoveBase} aria-label="Remover Base de Estudos" className="ml-2 text-red-600 hover:text-red-700">
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
+              <FilePreview
+                file={baseStudiesFile}
+                onRemove={handleRemoveBase}
+                label="Base de Estudos"
+              />
             )}
           </div>
         </div>
