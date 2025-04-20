@@ -5,7 +5,7 @@ export interface Study {
   description: string;
   startDate: string;
   endDate?: string;
-  progress: number; // 0-100
+  progress: number;
   compounds: number;
   positiveResults?: number;
   status: 'ongoing' | 'completed' | 'planned';
@@ -32,4 +32,5 @@ export interface CElegansData {
   survivalRate: DataPoint[];
   healthyRate: DataPoint[];
   stressResponseRate: DataPoint[];
+  stressHealthyRate: DataPoint[];
 }

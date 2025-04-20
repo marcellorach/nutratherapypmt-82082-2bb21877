@@ -12,17 +12,19 @@ interface DetailedStudyChartsProps {
       survivalRate: DataPoint[];
       healthyRate: DataPoint[];
       stressResponseRate: DataPoint[];
+      stressHealthyRate: DataPoint[];
     };
     midLifeIntervention: {
       survivalRate: DataPoint[];
       healthyRate: DataPoint[];
       stressResponseRate: DataPoint[];
+      stressHealthyRate: DataPoint[];
     };
   };
 }
 
 const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, interventionData }) => {
-  // Dados de exemplo caso não haja dados específicos
+  // Dados padrão para sobrevivência
   const defaultSurvivalData = [
     { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
     { age: 5, control: 0.98, lowIntervention: 0.99, highIntervention: 1.0 },
@@ -34,6 +36,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
     { age: 35, control: 0.0, lowIntervention: 0.02, highIntervention: 0.08 },
   ];
 
+  // Dados padrão para taxa de saúde
   const defaultHealthyRateData = [
     { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
     { age: 5, control: 0.95, lowIntervention: 0.98, highIntervention: 1.0 },
@@ -44,27 +47,42 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
     { age: 30, control: 0.0, lowIntervention: 0.10, highIntervention: 0.20 },
   ];
 
+  // Dados padrão para resposta ao estresse
   const defaultStressResponseData = [
     { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
     { age: 5, control: 0.97, lowIntervention: 0.99, highIntervention: 1.0 },
     { age: 10, control: 0.83, lowIntervention: 0.91, highIntervention: 0.94 },
     { age: 15, control: 0.60, lowIntervention: 0.78, highIntervention: 0.85 },
-    { age: 17, control: 0.40, lowIntervention: 0.68, highIntervention: 0.80 }, // Estressor aplicado
+    { age: 17, control: 0.40, lowIntervention: 0.68, highIntervention: 0.80 },
     { age: 20, control: 0.20, lowIntervention: 0.45, highIntervention: 0.65 },
     { age: 25, control: 0.05, lowIntervention: 0.25, highIntervention: 0.40 },
     { age: 30, control: 0.0, lowIntervention: 0.08, highIntervention: 0.20 },
   ];
 
+  // Dados padrão para taxa de saúde com estresse
+  const defaultStressHealthyRateData = [
+    { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+    { age: 5, control: 0.95, lowIntervention: 0.98, highIntervention: 1.0 },
+    { age: 10, control: 0.80, lowIntervention: 0.90, highIntervention: 0.95 },
+    { age: 15, control: 0.50, lowIntervention: 0.75, highIntervention: 0.85 },
+    { age: 17, control: 0.30, lowIntervention: 0.60, highIntervention: 0.75 },
+    { age: 20, control: 0.15, lowIntervention: 0.45, highIntervention: 0.60 },
+    { age: 25, control: 0.05, lowIntervention: 0.20, highIntervention: 0.35 },
+    { age: 30, control: 0.0, lowIntervention: 0.05, highIntervention: 0.15 },
+  ];
+
   const earlyData = interventionData?.earlyIntervention || {
     survivalRate: defaultSurvivalData,
     healthyRate: defaultHealthyRateData,
-    stressResponseRate: defaultStressResponseData
+    stressResponseRate: defaultStressResponseData,
+    stressHealthyRate: defaultStressHealthyRateData
   };
   
   const midLifeData = interventionData?.midLifeIntervention || {
     survivalRate: defaultSurvivalData.map(d => ({...d, lowIntervention: d.lowIntervention * 0.9, highIntervention: d.highIntervention * 0.85})),
     healthyRate: defaultHealthyRateData.map(d => ({...d, lowIntervention: d.lowIntervention * 0.85, highIntervention: d.highIntervention * 0.8})),
-    stressResponseRate: defaultStressResponseData.map(d => ({...d, lowIntervention: d.lowIntervention * 0.8, highIntervention: d.highIntervention * 0.75}))
+    stressResponseRate: defaultStressResponseData.map(d => ({...d, lowIntervention: d.lowIntervention * 0.8, highIntervention: d.highIntervention * 0.75})),
+    stressHealthyRate: defaultStressHealthyRateData.map(d => ({...d, lowIntervention: d.lowIntervention * 0.75, highIntervention: d.highIntervention * 0.7}))
   };
 
   const renderGraph = (data: DataPoint[], title: string, subtitle?: string) => (
@@ -83,7 +101,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
                 label={{ value: 'Idade (dias)', position: 'bottom', offset: 0 }}
               />
               <YAxis 
-                label={{ value: 'Taxa de Sobrevivência', angle: -90, position: 'insideLeft', offset: -5 }}
+                label={{ value: 'Taxa', angle: -90, position: 'insideLeft', offset: -5 }}
                 domain={[0, 1]} 
                 tickFormatter={(value) => `${Math.round(value * 100)}%`} 
               />
@@ -134,7 +152,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {renderGraph(
             earlyData.survivalRate, 
-            "Taxa de Sobrevivência Geral", 
+            "Taxa de Sobrevivência", 
             "Intervenção desde o início da vida adulta"
           )}
           {renderGraph(
@@ -144,8 +162,13 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
           )}
           {renderGraph(
             earlyData.stressResponseRate, 
-            "Resposta ao Estresse", 
+            "Taxa de Sobrevivência com Stress", 
             "Estressor aplicado no dia 15"
+          )}
+          {renderGraph(
+            earlyData.stressHealthyRate, 
+            "Taxa de Manutenção de Saúde com Stress", 
+            "Saúde após estressor no dia 15"
           )}
         </div>
       </TabsContent>
@@ -154,7 +177,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {renderGraph(
             midLifeData.survivalRate, 
-            "Taxa de Sobrevivência Geral", 
+            "Taxa de Sobrevivência", 
             "Intervenção iniciada na meia-vida"
           )}
           {renderGraph(
@@ -164,8 +187,13 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
           )}
           {renderGraph(
             midLifeData.stressResponseRate, 
-            "Resposta ao Estresse", 
+            "Taxa de Sobrevivência com Stress", 
             "Estressor aplicado no dia 15"
+          )}
+          {renderGraph(
+            midLifeData.stressHealthyRate, 
+            "Taxa de Manutenção de Saúde com Stress", 
+            "Saúde após estressor no dia 15"
           )}
         </div>
       </TabsContent>
