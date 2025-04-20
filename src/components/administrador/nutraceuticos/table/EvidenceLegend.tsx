@@ -15,6 +15,11 @@ const EvidenceLegend: React.FC = () => {
           <span>Anedótica</span>
         </div>
         <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-blue-200">
+            <span>Leve</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-full bg-amber-200"></div>
           <span>Moderada</span>
         </div>
