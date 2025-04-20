@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
-import VisaoGeralTab from '../estudos/detalhes/tabs/VisaoGeralTab';
-import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
+import VisaoGeralTab from '../estudos/detalhes/tabs/VisaoGeralTab';
+import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
 
 interface EstudoDetailDialogProps {
   open: boolean;
