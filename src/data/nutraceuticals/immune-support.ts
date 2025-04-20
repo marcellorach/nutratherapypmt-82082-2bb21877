@@ -12,9 +12,15 @@ export const immuneSupportNutraceuticals: Nutraceutical[] = [
     source: "Echinacea purpurea (planta)",
     chemicalCompound: "Alquilamidas, glicoproteínas, polissacarídeos e derivados do ácido cafeico",
     condition: "Imunodeficiência",
-    preventionConditions: ["Infecções recorrentes"],
-    treatmentConditions: ["Imunodeficiência"],
-    supportConditions: ["Sistema imunológico"],
+    preventionConditions: [
+      { name: "Infecções recorrentes", efficacyScore: 3.4 }
+    ],
+    treatmentConditions: [
+      { name: "Imunodeficiência", efficacyScore: 3.6 }
+    ],
+    supportConditions: [
+      { name: "Sistema imunológico", efficacyScore: 4.2 }
+    ],
     activeIngredients: ["Alquilamidas", "Glicoproteínas", "Polissacarídeos", "Derivados do ácido cafeico"],
     scientificEvidence: {
       efficacyScore: 3.4,

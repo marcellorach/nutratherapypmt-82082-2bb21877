@@ -12,9 +12,15 @@ export const jointHealthNutraceuticals: Nutraceutical[] = [
     source: "Exoesqueleto de crustáceos, produção sintética",
     chemicalCompound: "C6H13NO5 (2-amino-2-desoxi-D-glucose)",
     condition: "Osteoartrite canina",
-    preventionConditions: ["Problemas articulares"],
-    treatmentConditions: ["Osteoartrite canina"],
-    supportConditions: ["Mobilidade articular"],
+    preventionConditions: [
+      { name: "Problemas articulares", efficacyScore: 3.8 }
+    ],
+    treatmentConditions: [
+      { name: "Osteoartrite canina", efficacyScore: 3.8 }
+    ],
+    supportConditions: [
+      { name: "Mobilidade articular", efficacyScore: 4.0 }
+    ],
     activeIngredients: ["2-amino-2-desoxi-D-glucose", "Sulfato de glucosamina", "Cloridrato de glucosamina"],
     scientificEvidence: {
       efficacyScore: 3.8,
@@ -43,9 +49,15 @@ export const jointHealthNutraceuticals: Nutraceutical[] = [
     source: "Cartilagem de tubarão, bovina ou suína",
     chemicalCompound: "Polímero linear de N-acetilgalactosamina e ácido glucurônico sulfatado",
     condition: "Osteoartrite canina",
-    preventionConditions: ["Degradação articular"],
-    treatmentConditions: ["Osteoartrite canina"],
-    supportConditions: ["Estrutura cartilaginosa"],
+    preventionConditions: [
+      { name: "Degradação articular", efficacyScore: 3.7 }
+    ],
+    treatmentConditions: [
+      { name: "Osteoartrite canina", efficacyScore: 3.7 }
+    ],
+    supportConditions: [
+      { name: "Estrutura cartilaginosa", efficacyScore: 3.5 }
+    ],
     activeIngredients: ["Sulfato de condroitina", "Polissacarídeos sulfatados", "Glicosaminoglicanos"],
     scientificEvidence: {
       efficacyScore: 3.7,

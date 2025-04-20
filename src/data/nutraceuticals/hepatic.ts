@@ -12,9 +12,15 @@ export const hepaticNutraceuticals: Nutraceutical[] = [
     source: "Sementes de Silybum marianum (cardo mariano)",
     chemicalCompound: "Mistura de silibina, silicristina, silidianina e isosilibina",
     condition: "Hepatopatias crônicas e agudas",
-    preventionConditions: ["Danos hepáticos"],
-    treatmentConditions: ["Hepatopatias crônicas e agudas"],
-    supportConditions: ["Função hepática"],
+    preventionConditions: [
+      { name: "Danos hepáticos", efficacyScore: 3.9 }
+    ],
+    treatmentConditions: [
+      { name: "Hepatopatias crônicas e agudas", efficacyScore: 4.1 }
+    ],
+    supportConditions: [
+      { name: "Função hepática", efficacyScore: 3.8 }
+    ],
     activeIngredients: ["Silibina", "Silicristina", "Silidianina", "Isosilibina"],
     scientificEvidence: {
       efficacyScore: 4.1,

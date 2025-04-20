@@ -12,9 +12,15 @@ export const longevityNutraceuticals: Nutraceutical[] = [
     source: "Síntese laboratorial",
     chemicalCompound: "C11H15N2O8P",
     condition: "Envelhecimento celular",
-    preventionConditions: ["Envelhecimento precoce"],
-    treatmentConditions: ["Declínio metabólico relacionado à idade"],
-    supportConditions: ["Metabolismo energético"],
+    preventionConditions: [
+      { name: "Envelhecimento precoce", efficacyScore: 3.2 }
+    ],
+    treatmentConditions: [
+      { name: "Declínio metabólico relacionado à idade", efficacyScore: 3.0 }
+    ],
+    supportConditions: [
+      { name: "Metabolismo energético", efficacyScore: 3.5 }
+    ],
     activeIngredients: ["Nicotinamida Mononucleotídeo"],
     scientificEvidence: {
       efficacyScore: 3.2,
@@ -38,9 +44,15 @@ export const longevityNutraceuticals: Nutraceutical[] = [
     source: "Uvas, vinho tinto, polygonum cuspidatum",
     chemicalCompound: "C14H12O3",
     condition: "Envelhecimento oxidativo",
-    preventionConditions: ["Estresse oxidativo"],
-    treatmentConditions: ["Envelhecimento celular"],
-    supportConditions: ["Função mitocondrial"],
+    preventionConditions: [
+      { name: "Estresse oxidativo", efficacyScore: 3.8 }
+    ],
+    treatmentConditions: [
+      { name: "Envelhecimento celular", efficacyScore: 3.6 }
+    ],
+    supportConditions: [
+      { name: "Função mitocondrial", efficacyScore: 4.0 }
+    ],
     activeIngredients: ["Trans-resveratrol"],
     scientificEvidence: {
       efficacyScore: 3.8,

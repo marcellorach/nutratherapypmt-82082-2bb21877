@@ -12,9 +12,15 @@ export const renalNutraceuticals: Nutraceutical[] = [
     source: "Frutas cítricas, maçãs, cebolas",
     chemicalCompound: "C15H10O7",
     condition: "Doença renal crônica",
-    preventionConditions: ["Lesão renal"],
-    treatmentConditions: ["Nefropatia"],
-    supportConditions: ["Função renal"],
+    preventionConditions: [
+      { name: "Lesão renal", efficacyScore: 3.5 }
+    ],
+    treatmentConditions: [
+      { name: "Nefropatia", efficacyScore: 3.2 }
+    ],
+    supportConditions: [
+      { name: "Função renal", efficacyScore: 3.8 }
+    ],
     activeIngredients: ["Quercetina di-hidratada"],
     scientificEvidence: {
       efficacyScore: 3.5,
@@ -38,9 +44,15 @@ export const renalNutraceuticals: Nutraceutical[] = [
     source: "Raiz de Astragalus membranaceus",
     chemicalCompound: "Complexo de saponinas e flavonoides",
     condition: "Insuficiência renal",
-    preventionConditions: ["Disfunção renal"],
-    treatmentConditions: ["Proteínuria"],
-    supportConditions: ["Sistema imunológico renal"],
+    preventionConditions: [
+      { name: "Disfunção renal", efficacyScore: 2.8 }
+    ],
+    treatmentConditions: [
+      { name: "Proteínuria", efficacyScore: 2.6 }
+    ],
+    supportConditions: [
+      { name: "Sistema imunológico renal", efficacyScore: 3.0 }
+    ],
     activeIngredients: ["Astragalosídeos", "Isoflavonas"],
     scientificEvidence: {
       efficacyScore: 2.8,

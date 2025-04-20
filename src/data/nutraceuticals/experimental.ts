@@ -12,9 +12,16 @@ export const experimentalNutraceuticals: Nutraceutical[] = [
     source: "Resina coletada por abelhas de árvores específicas",
     chemicalCompound: "Compostos fenólicos, flavonoides e ácidos orgânicos",
     condition: "Infecções respiratórias",
-    preventionConditions: ["Infecções respiratórias", "Alergias sazonais"],
-    treatmentConditions: ["Infecções bacterianas leves"],
-    supportConditions: ["Sistema imune"],
+    preventionConditions: [
+      { name: "Infecções respiratórias", efficacyScore: 2.5 },
+      { name: "Alergias sazonais", efficacyScore: 2.2 }
+    ],
+    treatmentConditions: [
+      { name: "Infecções bacterianas leves", efficacyScore: 2.5 }
+    ],
+    supportConditions: [
+      { name: "Sistema imune", efficacyScore: 3.0 }
+    ],
     activeIngredients: ["Artepillin C", "Ácido cafeico", "Quercetina"],
     scientificEvidence: {
       efficacyScore: 2.5,
@@ -38,9 +45,16 @@ export const experimentalNutraceuticals: Nutraceutical[] = [
     source: "Pólen coletado por abelhas de diversas flores",
     chemicalCompound: "Proteínas, carboidratos, lipídios, vitaminas e minerais",
     condition: "Fadiga crônica",
-    preventionConditions: ["Deficiência nutricional"],
-    treatmentConditions: ["Fadiga"],
-    supportConditions: ["Metabolismo", "Energia"],
+    preventionConditions: [
+      { name: "Deficiência nutricional", efficacyScore: 1.8 }
+    ],
+    treatmentConditions: [
+      { name: "Fadiga", efficacyScore: 2.0 }
+    ],
+    supportConditions: [
+      { name: "Metabolismo", efficacyScore: 2.2 },
+      { name: "Energia", efficacyScore: 2.5 }
+    ],
     activeIngredients: ["Proteínas", "Flavonoides", "Carotenoides"],
     scientificEvidence: {
       efficacyScore: 1.8,

@@ -12,9 +12,15 @@ export const cardiacNutraceuticals: Nutraceutical[] = [
     source: "Síntese endógena a partir de lisina e metionina, suplementação sintética",
     chemicalCompound: "C7H15NO3 (3-hidroxi-4-N-trimetilamino-butirato)",
     condition: "Cardiomiopatia dilatada",
-    preventionConditions: ["Problemas cardíacos"],
-    treatmentConditions: ["Cardiomiopatia dilatada"],
-    supportConditions: ["Metabolismo energético"],
+    preventionConditions: [
+      { name: "Problemas cardíacos", efficacyScore: 3.8 }
+    ],
+    treatmentConditions: [
+      { name: "Cardiomiopatia dilatada", efficacyScore: 4.3 }
+    ],
+    supportConditions: [
+      { name: "Metabolismo energético", efficacyScore: 4.0 }
+    ],
     activeIngredients: ["L-carnitina", "Fumarato de L-carnitina", "Tartarato de L-carnitina"],
     scientificEvidence: {
       efficacyScore: 4.3,
