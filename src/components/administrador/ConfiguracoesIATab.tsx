@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,6 @@ interface ApiKeyFormProps {
   isLoading: boolean;
 }
 
-// Schema para validação das chaves
 const apiKeySchema = z.object({
   apiKey: z.string().min(10, "A chave API deve ter pelo menos 10 caracteres")
 });
@@ -42,7 +40,6 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     },
   });
 
-  // Atualiza o formulário quando o initialKey muda
   useEffect(() => {
     form.reset({ apiKey: initialKey });
   }, [initialKey, form]);
@@ -63,7 +60,6 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     }
   };
 
-  // Verificar se a chave inicial não está vazia
   const hasInitialKey = initialKey.trim() !== "";
 
   return (
@@ -90,14 +86,11 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
         />
         <Button 
           type="submit" 
-          className={`w-full ${hasInitialKey ? 'bg-black text-white' : ''}`}
+          className={`w-full ${hasInitialKey ? 'bg-green-500 text-white' : ''}`}
           disabled={isLoading}
         >
           {hasInitialKey ? (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              Salvar
-            </>
+            "Chave API da OpenAI salva"
           ) : (
             isLoading ? (
               <>
@@ -122,11 +115,9 @@ const ConfiguracoesIATab: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  // Função para buscar todas as configurações
   const fetchKeys = async () => {
     setIsLoading(true);
     try {
-      // Buscar usando a edge function
       const response = await supabase.functions.invoke('ai-config', {
         method: 'GET'
       });
@@ -151,7 +142,6 @@ const ConfiguracoesIATab: React.FC = () => {
         description: "Não foi possível carregar as chaves API. Tente novamente mais tarde."
       });
       
-      // Fallback para localStorage se houver erro com o Supabase
       setOpenaiKey(localStorage.getItem('openai_api_key') || "");
       setClaudeKey(localStorage.getItem('claude_api_key') || "");
       setGrokKey(localStorage.getItem('grok_api_key') || "");
@@ -161,18 +151,15 @@ const ConfiguracoesIATab: React.FC = () => {
     }
   };
 
-  // Carregar configurações ao montar o componente
   useEffect(() => {
     fetchKeys();
   }, []);
 
-  // Funções para salvar as chaves
   const saveOpenAIKey = async (key: string) => {
     setIsSaving(true);
     try {
       await saveConfigToSupabase('openai_api_key', key);
       setOpenaiKey(key);
-      // Fallback para localStorage
       localStorage.setItem('openai_api_key', key);
     } finally {
       setIsSaving(false);
@@ -184,7 +171,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('claude_api_key', key);
       setClaudeKey(key);
-      // Fallback para localStorage
       localStorage.setItem('claude_api_key', key);
     } finally {
       setIsSaving(false);
@@ -196,14 +182,12 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('grok_api_key', key);
       setGrokKey(key);
-      // Fallback para localStorage
       localStorage.setItem('grok_api_key', key);
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Função para salvar configuração no Supabase
   const saveConfigToSupabase = async (key: string, value: string) => {
     try {
       const response = await supabase.functions.invoke('ai-config', {
@@ -336,7 +320,6 @@ const ConfiguracoesIATab: React.FC = () => {
   );
 };
 
-// Componente do painel de consumo da OpenAI
 const ConsumoPainel: React.FC = () => {
   const [consumptionData, setConsumptionData] = useState({
     totalUsage: 0,
@@ -349,10 +332,9 @@ const ConsumoPainel: React.FC = () => {
     ]
   });
 
-  // Simulação de dados de consumo
   const gerarDadosAleatorios = () => {
-    const totalUsage = Math.random() * 80 + 20; // Entre $20 e $100
-    const monthlyUsage = Math.random() * 40 + 10; // Entre $10 e $50
+    const totalUsage = Math.random() * 80 + 20;
+    const monthlyUsage = Math.random() * 40 + 10;
     
     const dailyUsage = Array.from({ length: 30 }, () => Math.random() * 2);
     
@@ -370,7 +352,6 @@ const ConsumoPainel: React.FC = () => {
     });
   };
 
-  // Para renderizar o gráfico de barras simples
   const renderBarChart = (data: number[]) => {
     const max = Math.max(...data);
     
