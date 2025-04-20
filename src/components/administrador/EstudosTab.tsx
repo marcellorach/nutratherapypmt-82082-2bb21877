@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
@@ -5,6 +6,7 @@ import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
 import EstudosHeader from './estudos/EstudosHeader';
 import EstudoSearch from './estudos/EstudoSearch';
 import EstudosColumn from './estudos/EstudosColumn';
+import SciImportSection from './estudos/import/SciImportSection';
 
 const estudosExemplo = [
   {
@@ -95,6 +97,11 @@ const EstudosTab: React.FC = () => {
   return (
     <>
       <EstudosHeader onAddEstudo={handleAddEstudo} />
+      
+      {/* Início - Nova seção de importação de estudos SCISPACE */}
+      <SciImportSection />
+      {/* Fim - Nova seção de importação de estudos SCISPACE */}
+      
       <EstudoSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
       <div className="flex flex-col space-y-6">

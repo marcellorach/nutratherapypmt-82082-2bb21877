@@ -78,6 +78,63 @@ export type Database = {
         }
         Relationships: []
       }
+      design_approvers: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      design_conventions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          section: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          section: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          section?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       global_tags: {
         Row: {
           category: string
