@@ -1,7 +1,7 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import FilePreview from "./FilePreview";
+import React, { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload } from 'lucide-react';
 
 interface BaseStudiesUploadProps {
   baseStudiesFile: File | null;
@@ -9,41 +9,74 @@ interface BaseStudiesUploadProps {
   disabled?: boolean;
 }
 
-const ACCEPTED_BASE_STUDY = '.csv,.xls,.bib,.json';
-
-const BaseStudiesUpload: React.FC<BaseStudiesUploadProps> = ({
-  baseStudiesFile,
+const BaseStudiesUpload: React.FC<BaseStudiesUploadProps> = ({ 
+  baseStudiesFile, 
   setBaseStudiesFile,
-  disabled = false,
+  disabled = false
 }) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setBaseStudiesFile(acceptedFiles[0]);
+    }
+  }, [setBaseStudiesFile]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/json': ['.json'],
+      'text/csv': ['.csv'],
+      'application/vnd.ms-excel': ['.xls', '.xlsx'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+    },
+    multiple: false,
+    disabled
+  });
+
+  const removeFile = () => {
+    setBaseStudiesFile(null);
+  };
+
   return (
-    <div className="flex-1 border rounded-md bg-gray-50 p-4 flex flex-col items-start">
-      <span className="font-semibold mb-2 text-sm">Base de Estudos</span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Base de Estudos</h3>
+      </div>
+      
       {!baseStudiesFile ? (
-        <>
-          <input
-            type="file"
-            accept={ACCEPTED_BASE_STUDY}
-            id="baseFile"
-            className="hidden"
-            onChange={e => {
-              if (e.target.files?.[0]) setBaseStudiesFile(e.target.files[0]);
-            }}
-            disabled={disabled}
-          />
-          <label htmlFor="baseFile">
-            <Button variant="outline" asChild>
-              <span>Selecionar Arquivo</span>
-            </Button>
-          </label>
-          <span className="text-xs text-gray-400 mt-2">Formatos aceitos: .csv, .xls, .bib, .json</span>
-        </>
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors
+            ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'}
+            ${disabled ? 'opacity-70 cursor-not-allowed' : ''}
+          `}
+        >
+          <input {...getInputProps()} />
+          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-2 text-sm text-gray-600">
+            Arraste e solte o arquivo de base de estudos aqui, ou clique para selecionar
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Formatos suportados: JSON, CSV, XLS, XLSX
+          </p>
+        </div>
       ) : (
-        <FilePreview
-          file={baseStudiesFile}
-          onRemove={() => setBaseStudiesFile(null)}
-          label="Base de Estudos"
-        />
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="font-medium">{baseStudiesFile.name}</p>
+              <p className="text-sm text-gray-500">
+                {(baseStudiesFile.size / 1024).toFixed(2)} KB
+              </p>
+            </div>
+            <button
+              onClick={removeFile}
+              className="text-red-500 hover:text-red-700"
+              disabled={disabled}
+            >
+              Remover
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

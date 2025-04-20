@@ -1,13 +1,7 @@
-import React, { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
+import React, { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
-import { Upload, File, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ConsensoForm from "./ConsensoForm";
 import SciSpaceStepSelect from "./SciSpaceStepSelect";
 import SciSpaceUploadMetaResumo from "./SciSpaceUploadMetaResumo";
 import SciSpaceUploadBaseEstudos from "./SciSpaceUploadBaseEstudos";
