@@ -6,6 +6,8 @@ import { immuneSupportNutraceuticals } from "./immune-support";
 import { cardiacNutraceuticals } from "./cardiac";
 import { hepaticNutraceuticals } from "./hepatic";
 import { experimentalNutraceuticals } from "./experimental";
+import { longevityNutraceuticals } from "./longevity";
+import { renalNutraceuticals } from "./renal";
 
 export const nutraceuticals: Nutraceutical[] = [
   ...omega3Nutraceuticals,
@@ -13,5 +15,7 @@ export const nutraceuticals: Nutraceutical[] = [
   ...immuneSupportNutraceuticals,
   ...cardiacNutraceuticals,
   ...hepaticNutraceuticals,
-  ...experimentalNutraceuticals
+  ...experimentalNutraceuticals,
+  ...longevityNutraceuticals,
+  ...renalNutraceuticals
 ];
