@@ -91,7 +91,10 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
         </TabsContent>
 
         <TabsContent value="charts" className="space-y-6 mt-4">
-          <DetailedStudyCharts isComplete={study.status === 'completed'} />
+          <DetailedStudyCharts 
+            isComplete={study.status === 'completed'} 
+            interventionData={study.interventionData}
+          />
         </TabsContent>
 
         <TabsContent value="hypotheses" className="space-y-4 mt-4">
@@ -111,6 +114,9 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
                     <li>O composto X atua diretamente nas vias de sinalização relacionadas ao estresse oxidativo</li>
                     <li>A eficácia do tratamento é dose-dependente</li>
                     <li>O tratamento não apresenta efeitos colaterais significativos na longevidade geral</li>
+                    <li>O momento de início da intervenção (precoce vs. meia-vida) afeta significativamente a eficácia</li>
+                    <li>A manutenção da saúde (≥30%) é mais prolongada nos grupos de intervenção</li>
+                    <li>A resistência ao estressor externo aplicado no dia 15 é aumentada nos grupos de intervenção</li>
                   </ul>
                 </div>
               </div>
@@ -139,6 +145,15 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Resultados: Estabelecimento da faixa terapêutica segura
+                  </p>
+                </div>
+                <div className="pb-4">
+                  <h4 className="font-medium mb-2">Metanálise 2023-C</h4>
+                  <p className="text-muted-foreground mb-2">
+                    Comparação dos efeitos de intervenções precoces versus intervenções tardias em modelos de nematódeos.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Resultados: Intervenções precoces demonstraram 20-35% maior eficácia na prevenção de declínio relacionado à idade
                   </p>
                 </div>
               </div>

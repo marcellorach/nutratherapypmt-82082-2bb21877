@@ -15,4 +15,21 @@ export interface Study {
   category?: 'geroproptetor' | 'antiinflamatório' | 'neuroprotetor' | 'metabólico';
   targetSpecies?: string[];
   objective?: string;
+  interventionData?: {
+    earlyIntervention: CElegansData;
+    midLifeIntervention: CElegansData;
+  };
+}
+
+export interface DataPoint {
+  age: number;
+  control: number;
+  lowIntervention: number;
+  highIntervention: number;
+}
+
+export interface CElegansData {
+  survivalRate: DataPoint[];
+  healthyRate: DataPoint[];
+  stressResponseRate: DataPoint[];
 }
