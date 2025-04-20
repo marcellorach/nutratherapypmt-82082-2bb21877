@@ -1,16 +1,10 @@
-
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileText, ClipboardCheck, ExternalLink, Filter, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
-import { useToast } from "@/hooks/use-toast";
-import ApprovalStagesList from './pesquisa/components/ApprovalStagesList';
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import NutraceuticalTag from './tags/NutraceuticalTag';
-import EvidenceTag from './tags/EvidenceTag';
+import EstudosHeader from './estudos/EstudosHeader';
+import EstudoSearch from './estudos/EstudoSearch';
+import EstudosColumn from './estudos/EstudosColumn';
 
 const estudosExemplo = [
   {
@@ -93,211 +87,43 @@ const EstudosTab: React.FC = () => {
   const emRevEstudos = filteredEstudos.filter(estudo => estudo.status === "in-review");
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.status === "approved");
   
-  // Função para gerar uma pontuação artificial para nutracêuticos
   const getNutraceuticalScore = (name: string): number => {
-    // Hash simples para gerar pontuações consistentes baseadas no nome
     const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;
     return 2 + (hash / 10); // Pontuação entre 2.0 e 6.9
   };
-  
+
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-xl font-bold">Estudos Científicos</h2>
-          <p className="text-gray-600">Gerenciamento e análise de estudos sobre nutracêuticos</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="flex items-center">
-            <Filter className="mr-2 h-4 w-4" />
-            Filtros Avançados
-          </Button>
-          <Button onClick={handleAddEstudo} className="flex items-center">
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Estudo
-          </Button>
-        </div>
-      </div>
-      
-      <div className="mb-6">
-        <Input
-          placeholder="Buscar estudos por título, descrição ou journal..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="max-w-lg"
-        />
-      </div>
+      <EstudosHeader onAddEstudo={handleAddEstudo} />
+      <EstudoSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
       <div className="flex flex-col space-y-6">
         <div className="grid grid-cols-3 gap-6">
-          <div className="flex flex-col space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Novos Estudos
-              {novoEstudos.length > 0 && (
-                <Badge variant="secondary">{novoEstudos.length}</Badge>
-              )}
-            </h3>
-            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
-              <div className="grid gap-4">
-                {novoEstudos.map(estudo => (
-                  <Card key={estudo.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between mb-2">
-                        <CardTitle>{estudo.title}</CardTitle>
-                        <EvidenceTag score={estudo.qualityScore} showLabel={false} />
-                      </div>
-                      <CardDescription>{estudo.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex flex-wrap gap-1">
-                        {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-                          <NutraceuticalTag 
-                            key={idx} 
-                            name={nutra} 
-                            score={getNutraceuticalScore(nutra)} 
-                          />
-                        ))}
-                      </div>
-                      <div className="flex justify-between">
-                        <Button 
-                          variant="outline" 
-                          className="w-full" 
-                          size="sm"
-                          onClick={() => handleViewEstudo(estudo)}
-                        >
-                          Iniciar Curadoria
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                <Card 
-                  className="border-dashed border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" 
-                  onClick={handleAddEstudo}
-                >
-                  <CardContent className="flex flex-col items-center justify-center py-6">
-                    <Plus className="h-8 w-8 text-gray-400" />
-                    <p className="text-gray-500 mt-2">Adicionar novo estudo</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5" />
-              Em Curadoria
-              {emRevEstudos.length > 0 && (
-                <Badge variant="secondary">{emRevEstudos.length}</Badge>
-              )}
-            </h3>
-            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
-              {emRevEstudos.map(estudo => (
-                <Card key={estudo.id} className="mb-4">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <CardTitle>{estudo.title}</CardTitle>
-                      <EvidenceTag score={estudo.qualityScore} showLabel={false} />
-                    </div>
-                    <CardDescription>{estudo.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ApprovalStagesList 
-                      stages={[
-                        { name: 'Análise Inicial', status: 'completed' },
-                        { name: 'Revisão Técnica', status: 'in-progress' },
-                        { name: 'Validação', status: 'pending' },
-                        { name: 'Aprovação Final', status: 'pending' }
-                      ]}
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="sm"
-                      onClick={() => handleViewEstudo(estudo)}
-                    >
-                      Ver Detalhes
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {emRevEstudos.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                  <ClipboardCheck className="h-10 w-10 mb-2 opacity-30" />
-                  <p>Nenhum estudo em curadoria</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Aprovados
-              {aprovadosEstudos.length > 0 && (
-                <Badge variant="secondary">{aprovadosEstudos.length}</Badge>
-              )}
-            </h3>
-            <div className="bg-secondary/20 rounded-lg p-4 min-h-[500px]">
-              {aprovadosEstudos.map(estudo => (
-                <Card key={estudo.id} className="mb-4">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <CardTitle>{estudo.title}</CardTitle>
-                      <EvidenceTag score={estudo.qualityScore} showLabel={false} />
-                    </div>
-                    <CardDescription>{estudo.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-1">
-                      {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-                        <NutraceuticalTag 
-                          key={idx} 
-                          name={nutra} 
-                          score={getNutraceuticalScore(nutra)} 
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-green-600 text-sm">
-                        <CheckCircle className="mr-1 h-4 w-4" />
-                        Aprovado
-                      </div>
-                      <div className="text-xs text-gray-500">15/04/2024</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        className="flex-1" 
-                        size="sm"
-                        onClick={() => handleViewEstudo(estudo)}
-                      >
-                        Ver Detalhes
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="icon"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {aprovadosEstudos.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                  <FileText className="h-10 w-10 mb-2 opacity-30" />
-                  <p>Nenhum estudo aprovado</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <EstudosColumn
+            title="Novos Estudos"
+            icon="new"
+            estudos={novoEstudos}
+            onViewEstudo={handleViewEstudo}
+            onAddEstudo={handleAddEstudo}
+            buttonLabel="Iniciar Curadoria"
+            getNutraceuticalScore={getNutraceuticalScore}
+          />
+          
+          <EstudosColumn
+            title="Em Curadoria"
+            icon="review"
+            estudos={emRevEstudos}
+            onViewEstudo={handleViewEstudo}
+            getNutraceuticalScore={getNutraceuticalScore}
+          />
+          
+          <EstudosColumn
+            title="Aprovados"
+            icon="approved"
+            estudos={aprovadosEstudos}
+            onViewEstudo={handleViewEstudo}
+            getNutraceuticalScore={getNutraceuticalScore}
+          />
         </div>
       </div>
 
