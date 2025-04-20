@@ -8,6 +8,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import ImportFilePreview from './ImportFilePreview';
+import SciSpaceLogo from './SciSpaceLogo';
+
+const formatosAceitosUrl = "/lovable-uploads/cc140302-5c6e-4e97-8745-6843ede2a415.png";
 
 const SciImportSection: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -34,13 +37,10 @@ const SciImportSection: React.FC = () => {
     }
 
     setImporting(true);
-    
-    // Simulação do processo de importação
     let currentProgress = 0;
     const interval = setInterval(() => {
       currentProgress += 10;
       setProgress(currentProgress);
-      
       if (currentProgress >= 100) {
         clearInterval(interval);
         setTimeout(() => {
@@ -64,13 +64,61 @@ const SciImportSection: React.FC = () => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Importar Estudos Científicos</CardTitle>
-            <CardDescription>Importe estudos do SCISPACE ou outras fontes científicas</CardDescription>
+            <CardTitle className="flex items-center">
+              Importar Estudos Científicos
+            </CardTitle>
+            <CardDescription>
+              Importe estudos do SCISPACE ou outras fontes científicas
+            </CardDescription>
           </div>
-          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">SCISPACE</Badge>
+          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 flex gap-2 items-center px-3 py-1">
+            <SciSpaceLogo className="h-6 w-auto mr-2 rounded-md" />
+            SCISPACE
+          </Badge>
         </div>
       </CardHeader>
       <CardContent>
+        {/* BLoco de destaque Analise Integrativa */}
+        <div className="border border-blue-200 rounded-md bg-blue-50 p-4 mb-6 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <SciSpaceLogo className="h-14 w-auto mb-3" />
+            <span className="text-xs text-gray-400 italic">Exportação manual</span>
+          </div>
+          <div className="flex-1">
+            <div className="text-blue-800 font-semibold text-base mb-1">
+              Importação de <span className="underline underline-offset-2">Analise Integrativa</span> do SCISPACE
+            </div>
+            <div className="text-sm text-slate-700 mb-1">
+              Para importar uma Análise Integrativa:
+            </div>
+            <ul className="text-sm mb-2 text-slate-700 list-disc list-inside space-y-1">
+              <li>
+                <strong>1. Exporte manualmente os arquivos da plataforma SCISPACE:</strong>
+                <ul className="ml-5 mt-1 list-disc text-xs text-slate-600 space-y-1">
+                  <li>
+                    <span className="font-medium text-blue-800">Meta Sumário</span> <span className="text-gray-500">(arquivo de texto/Word contendo resumo, citações e hiperlinks nos dados extraídos)</span>
+                  </li>
+                  <li>
+                    <span className="font-medium text-blue-800">Base de Estudos</span> <span className="text-gray-500">(arquivo Excel ou CSV padronizado com colunas de dados estruturadas, conforme extração da plataforma)</span>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <strong>2. Faça o upload abaixo, anexando ambos os arquivos.</strong>
+              </li>
+            </ul>
+            <div className="flex flex-wrap items-center gap-4">
+              <img 
+                src={formatosAceitosUrl} 
+                alt="Formatos Aceitos" 
+                className="h-16 w-auto rounded-md border border-blue-200 bg-white shadow-sm"
+              />
+              <span className="text-xs text-gray-500">Exemplo de formatos aceitos</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs anteriores */}
         <Tabs defaultValue="file-upload" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="file-upload">Upload de Arquivos</TabsTrigger>
@@ -87,7 +135,7 @@ const SciImportSection: React.FC = () => {
                   <input 
                     type="file" 
                     multiple 
-                    accept=".bib,.csv,.json,.pdf" 
+                    accept=".bib,.csv,.json,.pdf,.doc,.docx,.xlsx" 
                     className="hidden"
                     onChange={handleFileChange}
                     disabled={importing}
@@ -95,7 +143,7 @@ const SciImportSection: React.FC = () => {
                 </label>
               </Button>
               <p className="text-sm text-gray-500">
-                Formatos suportados: BibTeX (.bib), CSV, JSON, PDF
+                Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, XLSX
               </p>
             </div>
             
@@ -138,13 +186,14 @@ const SciImportSection: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="scispace-api">
-            <div className="text-center py-8 border border-dashed rounded-md">
-              <File className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium">Integração com API SCISPACE</h3>
+            <div className="text-center py-8 border border-dashed rounded-md flex flex-col items-center">
+              <SciSpaceLogo className="h-14 w-auto mb-3 mx-auto" />
+              <h3 className="mt-1 text-lg font-medium">Integração com API SCISPACE</h3>
               <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
-                Configure sua API key do SCISPACE para importar estudos diretamente da plataforma.
+                Ainda não disponível via API. <br />
+                Faça exportação manual dos arquivos pela plataforma.
               </p>
-              <Button className="mt-4">
+              <Button className="mt-4" disabled>
                 Configurar Integração
               </Button>
             </div>
