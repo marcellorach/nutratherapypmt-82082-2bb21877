@@ -1,117 +1,64 @@
-
-import React from 'react';
-import { Card, CardHeader, CardContent, CardFooter, CardDescription, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Bot, Beaker, Microscope, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react";
-import { Study } from "../types/oraBiomedical";
-import { useTranslation } from 'react-i18next';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Study } from '../types/oraBiomedical';
+import DetailedStudyCharts from './DetailedStudyCharts';
 
 interface StudyCardProps {
   study: Study;
 }
 
 const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
-  const { t, i18n } = useTranslation();
+  const [showDetails, setShowDetails] = useState(false);
 
-  const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
-    switch (priority) {
-      case 'high': return 'bg-red-50 text-red-600 border-red-200';
-      case 'medium': return 'bg-amber-50 text-amber-600 border-amber-200';
-      case 'low': return 'bg-green-50 text-green-600 border-green-200';
-    }
-  };
-  
-  const getStatusIcon = (status: 'ongoing' | 'completed' | 'planned') => {
-    switch (status) {
-      case 'ongoing': return <Beaker className="h-4 w-4 text-blue-600" />;
-      case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'planned': return <Microscope className="h-4 w-4 text-purple-600" />;
-    }
-  };
-  
-  const getStatusColor = (status: 'ongoing' | 'completed' | 'planned') => {
-    switch (status) {
-      case 'ongoing': return 'bg-blue-50 text-blue-600 border-blue-200';
-      case 'completed': return 'bg-green-50 text-green-600 border-green-200';
-      case 'planned': return 'bg-purple-50 text-purple-600 border-purple-200';
-    }
-  };
-  
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'pt-BR').format(date);
-  };
-  
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className={getStatusColor(study.status)}>
-                <div className="flex items-center gap-1">
-                  {getStatusIcon(study.status)}
-                  {t(`research.oraBiomedical.status.${study.status}`)}
-                </div>
-              </Badge>
-              <Badge variant="outline" className={getPriorityColor(study.priority)}>
-                {t(`research.oraBiomedical.priority.${study.priority}`)}
-              </Badge>
-              {study.alerts && (
-                <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
-                  <AlertTriangle className="h-3 w-3 mr-1" /> {study.alerts} {t('research.oraBiomedical.alerts')}
-                </Badge>
-              )}
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold">{study.title}</h3>
+              <p className="text-sm text-muted-foreground">{study.description}</p>
             </div>
-            <CardTitle>{study.title}</CardTitle>
-            <CardDescription className="mt-1">{study.description}</CardDescription>
+            <Button variant="outline" onClick={() => setShowDetails(true)}>
+              Ver detalhes
+            </Button>
           </div>
-          <Bot className="h-10 w-10 text-gray-300" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
-          <div>
-            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.investigator')}</p>
-            <p className="font-medium">{study.primaryInvestigator}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.compounds')}</p>
-            <p className="font-medium">{study.compounds}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-1">{t('research.oraBiomedical.period')}</p>
-            <p className="font-medium">
-              {formatDate(study.startDate)}
-              {study.endDate && ` - ${formatDate(study.endDate)}`}
-            </p>
-          </div>
-        </div>
-        
-        {study.status !== 'planned' && (
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span>{t('research.oraBiomedical.progress')}</span>
-              <span className="font-medium">{study.progress}%</span>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 text-sm">
+            <div className="flex justify-between">
+              <span className="font-medium">Status:</span>
+              <span>{study.status}</span>
             </div>
-            <Progress value={study.progress} className="h-2" />
-            {study.positiveResults !== undefined && (
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{t('research.oraBiomedical.positiveResults')}: {study.positiveResults} {t('research.oraBiomedical.compounds').toLowerCase()}</span>
-                <span>{t('research.oraBiomedical.rate')}: {((study.positiveResults / study.compounds) * 100).toFixed(1)}%</span>
-              </div>
-            )}
+            <div className="flex justify-between">
+              <span className="font-medium">Início:</span>
+              <span>{study.startDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Fim:</span>
+              <span>{study.endDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Objetivo:</span>
+              <span>{study.objective}</span>
+            </div>
           </div>
-        )}
-      </CardContent>
-      <CardFooter className="pt-0">
-        <Button variant="ghost" className="w-full flex justify-center items-center text-sm">
-          {t('research.oraBiomedical.viewDetails')} <ChevronRight className="h-4 w-4 ml-1" />
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{study.title}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <DetailedStudyCharts isComplete={study.status === 'completed'} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
