@@ -64,7 +64,7 @@ const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = fals
                 stroke="#222222"
                 name="Controle"
                 strokeWidth={2}
-                dot={false}
+                dot={true}
               />
               <Line
                 type="monotone"
@@ -72,7 +72,7 @@ const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = fals
                 stroke="#0EA5E9"
                 name="Tratamento"
                 strokeWidth={2}
-                dot={false}
+                dot={true}
               />
             </LineChart>
           </ResponsiveContainer>

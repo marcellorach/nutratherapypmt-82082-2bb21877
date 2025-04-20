@@ -23,8 +23,8 @@ const EstudosAndamentoTab: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <MortalityChart data={ongoingMortalityData} isComplete={false} />
         
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Dados do Experimento</h3>
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Dados do Experimento</h3>
           <div className="grid gap-2 text-sm">
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium">População Inicial:</span>
@@ -38,11 +38,16 @@ const EstudosAndamentoTab: React.FC = () => {
               <span className="font-medium">Sobrevivência Atual:</span>
               <span>Controle: 15% | Tratamento: 38%</span>
             </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">Status do Experimento:</span>
+              <span className="text-blue-600 font-medium">Em andamento</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-8">
+        <h3 className="text-xl font-semibold">Estudos Ativos</h3>
         {ongoingStudies.map((study: Study) => (
           <StudyCard key={study.id} study={study} />
         ))}
