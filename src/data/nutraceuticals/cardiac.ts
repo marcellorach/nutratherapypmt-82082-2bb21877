@@ -1,4 +1,3 @@
-
 import { Nutraceutical } from "../../types";
 
 export const cardiacNutraceuticals: Nutraceutical[] = [
@@ -13,13 +12,19 @@ export const cardiacNutraceuticals: Nutraceutical[] = [
     chemicalCompound: "C7H15NO3 (3-hidroxi-4-N-trimetilamino-butirato)",
     condition: "Cardiomiopatia dilatada",
     preventionConditions: [
-      { name: "Problemas cardíacos", efficacyScore: 3.8 }
+      { name: "Problemas cardíacos", efficacyScore: 3.8 },
+      { name: "Cardiomiopatia", efficacyScore: 3.5 },
+      { name: "Função cardíaca", efficacyScore: 3.6 }
     ],
     treatmentConditions: [
-      { name: "Cardiomiopatia dilatada", efficacyScore: 4.3 }
+      { name: "Cardiomiopatia dilatada", efficacyScore: 4.3 },
+      { name: "Função cardíaca", efficacyScore: 4.0 },
+      { name: "Insuficiência cardíaca", efficacyScore: 3.9 }
     ],
     supportConditions: [
-      { name: "Metabolismo energético", efficacyScore: 4.0 }
+      { name: "Função cardíaca", efficacyScore: 4.0 },
+      { name: "Metabolismo energético", efficacyScore: 3.8 },
+      { name: "Saúde cardiovascular", efficacyScore: 3.7 }
     ],
     activeIngredients: ["L-carnitina", "Fumarato de L-carnitina", "Tartarato de L-carnitina"],
     scientificEvidence: {

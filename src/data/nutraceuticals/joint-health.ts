@@ -1,4 +1,3 @@
-
 import { Nutraceutical } from "../../types";
 
 export const jointHealthNutraceuticals: Nutraceutical[] = [
@@ -13,13 +12,19 @@ export const jointHealthNutraceuticals: Nutraceutical[] = [
     chemicalCompound: "C6H13NO5 (2-amino-2-desoxi-D-glucose)",
     condition: "Osteoartrite canina",
     preventionConditions: [
-      { name: "Problemas articulares", efficacyScore: 3.8 }
+      { name: "Osteoartrite canina", efficacyScore: 3.2 },
+      { name: "Problemas articulares", efficacyScore: 3.8 },
+      { name: "Degeneração cartilaginosa", efficacyScore: 3.5 }
     ],
     treatmentConditions: [
-      { name: "Osteoartrite canina", efficacyScore: 3.8 }
+      { name: "Osteoartrite canina", efficacyScore: 4.2 },
+      { name: "Problemas articulares", efficacyScore: 4.0 },
+      { name: "Dor articular", efficacyScore: 3.9 }
     ],
     supportConditions: [
-      { name: "Mobilidade articular", efficacyScore: 4.0 }
+      { name: "Osteoartrite canina", efficacyScore: 3.7 },
+      { name: "Mobilidade articular", efficacyScore: 4.0 },
+      { name: "Saúde das cartilagens", efficacyScore: 3.8 }
     ],
     activeIngredients: ["2-amino-2-desoxi-D-glucose", "Sulfato de glucosamina", "Cloridrato de glucosamina"],
     scientificEvidence: {
@@ -50,13 +55,19 @@ export const jointHealthNutraceuticals: Nutraceutical[] = [
     chemicalCompound: "Polímero linear de N-acetilgalactosamina e ácido glucurônico sulfatado",
     condition: "Osteoartrite canina",
     preventionConditions: [
-      { name: "Degradação articular", efficacyScore: 3.7 }
+      { name: "Osteoartrite canina", efficacyScore: 3.5 },
+      { name: "Degeneração articular", efficacyScore: 3.7 },
+      { name: "Problemas articulares", efficacyScore: 3.4 }
     ],
     treatmentConditions: [
-      { name: "Osteoartrite canina", efficacyScore: 3.7 }
+      { name: "Osteoartrite canina", efficacyScore: 4.1 },
+      { name: "Degeneração articular", efficacyScore: 3.9 },
+      { name: "Dor articular", efficacyScore: 3.8 }
     ],
     supportConditions: [
-      { name: "Estrutura cartilaginosa", efficacyScore: 3.5 }
+      { name: "Osteoartrite canina", efficacyScore: 3.6 },
+      { name: "Estrutura cartilaginosa", efficacyScore: 3.5 },
+      { name: "Saúde articular", efficacyScore: 3.7 }
     ],
     activeIngredients: ["Sulfato de condroitina", "Polissacarídeos sulfatados", "Glicosaminoglicanos"],
     scientificEvidence: {

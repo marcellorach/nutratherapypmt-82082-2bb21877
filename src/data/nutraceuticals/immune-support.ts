@@ -1,4 +1,3 @@
-
 import { Nutraceutical } from "../../types";
 
 export const immuneSupportNutraceuticals: Nutraceutical[] = [
@@ -13,13 +12,19 @@ export const immuneSupportNutraceuticals: Nutraceutical[] = [
     chemicalCompound: "Alquilamidas, glicoproteínas, polissacarídeos e derivados do ácido cafeico",
     condition: "Imunodeficiência",
     preventionConditions: [
-      { name: "Infecções recorrentes", efficacyScore: 3.4 }
+      { name: "Infecções recorrentes", efficacyScore: 3.8 },
+      { name: "Sistema imunológico", efficacyScore: 3.5 },
+      { name: "Infecções respiratórias", efficacyScore: 3.4 }
     ],
     treatmentConditions: [
+      { name: "Infecções respiratórias", efficacyScore: 3.9 },
+      { name: "Sistema imunológico", efficacyScore: 3.7 },
       { name: "Imunodeficiência", efficacyScore: 3.6 }
     ],
     supportConditions: [
-      { name: "Sistema imunológico", efficacyScore: 4.2 }
+      { name: "Sistema imunológico", efficacyScore: 4.2 },
+      { name: "Resposta imune", efficacyScore: 3.8 },
+      { name: "Infecções recorrentes", efficacyScore: 3.3 }
     ],
     activeIngredients: ["Alquilamidas", "Glicoproteínas", "Polissacarídeos", "Derivados do ácido cafeico"],
     scientificEvidence: {
