@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,12 +39,14 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Fim:</span>
-              <span>{study.endDate}</span>
+              <span>{study.endDate || 'Em andamento'}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Objetivo:</span>
-              <span>{study.objective}</span>
-            </div>
+            {study.objective && (
+              <div className="flex justify-between">
+                <span className="font-medium">Objetivo:</span>
+                <span>{study.objective}</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
