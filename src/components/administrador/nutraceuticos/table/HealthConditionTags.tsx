@@ -1,16 +1,15 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
+import { NutraceuticalCondition } from "@/types";
 
 interface HealthConditionTagsProps {
-  conditions: string[];
-  efficacyScore: number;
+  conditions: NutraceuticalCondition[];
   onConditionClick: (condition: string) => void;
 }
 
 const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({ 
   conditions,
-  efficacyScore,
   onConditionClick
 }) => {
   const getTagColor = (score: number): string => {
@@ -24,12 +23,12 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
     <div className="flex flex-wrap gap-1">
       {conditions.map((condition, index) => (
         <Badge 
-          key={`${condition}-${index}`}
+          key={`${condition.name}-${index}`}
           variant="outline" 
-          className={`cursor-pointer transition-colors ${getTagColor(efficacyScore)}`}
-          onClick={() => onConditionClick(condition)}
+          className={`cursor-pointer transition-colors ${getTagColor(condition.efficacyScore)}`}
+          onClick={() => onConditionClick(condition.name)}
         >
-          {condition}
+          {condition.name}
         </Badge>
       ))}
     </div>

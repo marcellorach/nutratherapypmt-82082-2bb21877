@@ -1,4 +1,3 @@
-
 export interface Pet {
   id: string;
   name: string;
@@ -31,6 +30,11 @@ export interface ExamResult {
   notes: string;
 }
 
+export interface NutraceuticalCondition {
+  name: string;
+  efficacyScore: number;
+}
+
 export interface Nutraceutical {
   id: string;
   name: string;
@@ -40,10 +44,10 @@ export interface Nutraceutical {
   contraindications: string[];
   source: string;
   chemicalCompound: string;
-  condition: string; // Adicionada para compatibilidade com código existente
-  preventionConditions: string[];
-  treatmentConditions: string[];
-  supportConditions: string[];
+  condition: string;
+  preventionConditions: NutraceuticalCondition[];
+  treatmentConditions: NutraceuticalCondition[];
+  supportConditions: NutraceuticalCondition[];
   activeIngredients: string[];
   scientificEvidence: {
     efficacyScore: number;

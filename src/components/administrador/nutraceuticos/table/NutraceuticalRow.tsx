@@ -18,28 +18,23 @@ const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({
   onConditionClick
 }) => {
   return (
-    <TableRow 
-      className="hover:bg-gray-50"
-    >
+    <TableRow className="hover:bg-gray-50">
       <TableCell className="font-medium">{nutraceutical.name}</TableCell>
       <TableCell>
         <HealthConditionTags 
-          conditions={nutraceutical.preventionConditions} 
-          efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
+          conditions={nutraceutical.preventionConditions}
           onConditionClick={onConditionClick}
         />
       </TableCell>
       <TableCell>
         <HealthConditionTags 
-          conditions={nutraceutical.treatmentConditions} 
-          efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
+          conditions={nutraceutical.treatmentConditions}
           onConditionClick={onConditionClick}
         />
       </TableCell>
       <TableCell>
         <HealthConditionTags 
-          conditions={nutraceutical.supportConditions} 
-          efficacyScore={nutraceutical.scientificEvidence.efficacyScore}
+          conditions={nutraceutical.supportConditions}
           onConditionClick={onConditionClick}
         />
       </TableCell>
