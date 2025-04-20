@@ -1,27 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ArrowRight, Edit, Sparkles, CheckCircle, Clock, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-// Alterando a definição da interface para aceitar o tipo string na propriedade status
-// e garantir que ela corresponda aos tipos retornados pela API do Supabase
-interface DesignConvention {
-  id: string;
-  section: string;
-  content: string;
-  status: string; // Alterado de 'pending' | 'approved' | 'rejected' para string
-  created_at: string;
-  updated_at: string;
-  approved_at: string | null;
-  approved_by: string | null;
-  created_by: string | null;
-}
+import { ConventionCard } from './design/ConventionCard';
+import { EditDesignDialog } from './design/EditDesignDialog';
+import { DesignConvention } from '@/types/design';
 
 const DesignConventionsTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -111,34 +94,6 @@ const DesignConventionsTab = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Aprovado
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center">
-            <Clock className="w-3 h-3 mr-1" />
-            Em Análise
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center">
-            <XCircle className="w-3 h-3 mr-1" />
-            Rejeitado
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -147,75 +102,23 @@ const DesignConventionsTab = () => {
       </div>
 
       {conventions.map((convention) => (
-        <Card key={convention.id}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>{convention.section}</CardTitle>
-              <CardDescription className="flex items-center gap-2">
-                Última atualização: {new Date(convention.updated_at).toLocaleDateString()}
-                {getStatusBadge(convention.status)}
-              </CardDescription>
-            </div>
-            <Button 
-              onClick={() => handleEditClick(convention.section)} 
-              variant="ghost" 
-              className="flex items-center gap-2"
-              disabled={convention.status === 'pending'}
-            >
-              <Edit className="w-4 h-4" />
-              Propor Alterações
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="whitespace-pre-wrap">{convention.content}</div>
-          </CardContent>
-        </Card>
+        <ConventionCard
+          key={convention.id}
+          convention={convention}
+          onEditClick={handleEditClick}
+        />
       ))}
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar {editingSection}</DialogTitle>
-            <DialogDescription>
-              Use o assistente de IA para ajudar nas alterações de design. As alterações passarão por aprovação antes de serem aplicadas.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <Textarea
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              className="min-h-[200px]"
-              placeholder="Descreva as alterações desejadas..."
-            />
-            
-            <div className="flex justify-between items-center">
-              <Button 
-                onClick={handleAIAssistance} 
-                variant="ghost" 
-                className="flex items-center gap-2"
-                disabled={isAIAssistanceActive}
-              >
-                <Sparkles className="w-4 h-4" />
-                Assistente de IA
-              </Button>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button 
-                  onClick={handleInitiateApproval}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                  Iniciar Aprovação
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EditDesignDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        editText={editText}
+        editingSection={editingSection}
+        onEditTextChange={setEditText}
+        onAIAssistance={handleAIAssistance}
+        onInitiateApproval={handleInitiateApproval}
+        isAIAssistanceActive={isAIAssistanceActive}
+      />
     </div>
   );
 };
