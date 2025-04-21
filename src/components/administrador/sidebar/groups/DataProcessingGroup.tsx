@@ -1,55 +1,36 @@
 
 import React from 'react';
-import { Import, Database, Brain, BarChart3 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarGroup } from "../AdminSidebarGroups";
 
 interface DataProcessingGroupProps {
+  group: SidebarGroup;
   currentStep: string;
-  handleStepClick: (step: string) => void;
+  setCurrentStep: (step: string) => void;
 }
 
 const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({ 
+  group, 
   currentStep, 
-  handleStepClick 
+  setCurrentStep 
 }) => {
+  const handleStepClick = (step: string) => {
+    setCurrentStep(step);
+  };
+
   return (
     <>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "import"} 
-          onClick={() => handleStepClick("import")}
-        >
-          <Import />
-          <span>Importar Dados</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "fontes"} 
-          onClick={() => handleStepClick("fontes")}
-        >
-          <Database />
-          <span>Fontes de Dados</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "analysis"} 
-          onClick={() => handleStepClick("analysis")}
-        >
-          <Brain />
-          <span>Simulação Multi-Agente</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "visualization"} 
-          onClick={() => handleStepClick("visualization")}
-        >
-          <BarChart3 />
-          <span>Visualização</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      {group.items.map((item) => (
+        <SidebarMenuItem key={item.id}>
+          <SidebarMenuButton 
+            isActive={currentStep === item.id} 
+            onClick={() => handleStepClick(item.id)}
+          >
+            {item.icon && React.createElement(item.icon, { className: "h-4 w-4" })}
+            <span>{item.title}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
     </>
   );
 };
