@@ -1,37 +1,64 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Network, Microscope, Settings } from "lucide-react";
+import { Beaker, BookOpen, Microscope, Network, Settings } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { SidebarGroup } from "../AdminSidebarGroups";
 
 interface KnowledgeBaseGroupProps {
-  group: SidebarGroup;
   currentStep: string;
-  setCurrentStep: (step: string) => void;
+  handleStepClick: (step: string) => void;
 }
 
 const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({ 
-  group, 
   currentStep, 
-  setCurrentStep 
+  handleStepClick 
 }) => {
-  const handleStepClick = (step: string) => {
-    setCurrentStep(step);
-  };
-
   return (
     <>
-      {group.items.map((item) => (
-        <SidebarMenuItem key={item.id}>
-          <SidebarMenuButton 
-            isActive={currentStep === item.id} 
-            onClick={() => handleStepClick(item.id)}
-          >
-            {item.icon && React.createElement(item.icon, { className: "h-4 w-4" })}
-            <span>{item.title}</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "estudos"} 
+          onClick={() => handleStepClick("estudos")}
+        >
+          <BookOpen />
+          <span>Estudos Científicos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "nutraceuticos"} 
+          onClick={() => handleStepClick("nutraceuticos")}
+        >
+          <Beaker />
+          <span>Nutracêuticos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "relacoes"} 
+          onClick={() => handleStepClick("relacoes")}
+        >
+          <Network />
+          <span>Relações</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "regras"} 
+          onClick={() => handleStepClick("regras")}
+        >
+          <Microscope />
+          <span>Regras Clínicas</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "design-conventions"} 
+          onClick={() => handleStepClick("design-conventions")}
+        >
+          <Settings />
+          <span>Convenções de Design</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </>
   );
 };

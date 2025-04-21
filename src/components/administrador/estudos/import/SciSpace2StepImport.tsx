@@ -7,8 +7,6 @@ import SciSpaceUploadMetaResumo from "./SciSpaceUploadMetaResumo";
 import SciSpaceUploadBaseEstudos from "./SciSpaceUploadBaseEstudos";
 import SciSpaceReviewAndSubmit from "./SciSpaceReviewAndSubmit";
 import SciSpaceProcessingPreviewMini from "./SciSpaceProcessingPreviewMini";
-import MetaSummaryUpload from "./MetaSummaryUpload";
-import BaseStudiesUpload from "./BaseStudiesUpload";
 
 const SciSpace2StepImport: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -146,10 +144,6 @@ const SciSpace2StepImport: React.FC = () => {
           canSubmit={!!metaSummaryFile && !!baseStudiesFile}
           onPrev={() => setStep(1)}
           onSubmit={handleSubmit}
-          consensoName={consensoName}
-          setConsensoName={setConsensoName}
-          comentarios={comentarios}
-          setComentarios={setComentarios}
         />
       )}
       {isLoading && <SciSpaceProcessingPreviewMini progress={progress} />}

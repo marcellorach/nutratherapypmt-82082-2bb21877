@@ -163,8 +163,6 @@ export type Database = {
         Row: {
           base_studies_filename: string
           base_studies_storage_path: string
-          consenso_comments: string | null
-          consenso_name: string | null
           id: string
           imported_at: string | null
           imported_by: string | null
@@ -177,8 +175,6 @@ export type Database = {
         Insert: {
           base_studies_filename: string
           base_studies_storage_path: string
-          consenso_comments?: string | null
-          consenso_name?: string | null
           id?: string
           imported_at?: string | null
           imported_by?: string | null
@@ -191,8 +187,6 @@ export type Database = {
         Update: {
           base_studies_filename?: string
           base_studies_storage_path?: string
-          consenso_comments?: string | null
-          consenso_name?: string | null
           id?: string
           imported_at?: string | null
           imported_by?: string | null

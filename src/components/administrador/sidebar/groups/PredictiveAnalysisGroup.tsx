@@ -1,36 +1,46 @@
 
 import React from 'react';
+import { Lightbulb, Gauge, LineChart } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { SidebarGroup } from "../AdminSidebarGroups";
 
 interface PredictiveAnalysisGroupProps {
-  group: SidebarGroup;
   currentStep: string;
-  setCurrentStep: (step: string) => void;
+  handleStepClick: (step: string) => void;
 }
 
 const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({ 
-  group, 
   currentStep, 
-  setCurrentStep 
+  handleStepClick 
 }) => {
-  const handleStepClick = (step: string) => {
-    setCurrentStep(step);
-  };
-
   return (
     <>
-      {group.items.map((item) => (
-        <SidebarMenuItem key={item.id}>
-          <SidebarMenuButton 
-            isActive={currentStep === item.id} 
-            onClick={() => handleStepClick(item.id)}
-          >
-            {item.icon && React.createElement(item.icon, { className: "h-4 w-4" })}
-            <span>{item.title}</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "modelos"} 
+          onClick={() => handleStepClick("modelos")}
+        >
+          <Lightbulb />
+          <span>Modelos Preditivos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "custo-beneficio"} 
+          onClick={() => handleStepClick("custo-beneficio")}
+        >
+          <Gauge />
+          <span>Análise de ROI</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "relatorios"} 
+          onClick={() => handleStepClick("relatorios")}
+        >
+          <LineChart />
+          <span>Relatórios</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </>
   );
 };

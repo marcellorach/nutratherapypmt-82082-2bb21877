@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -15,14 +14,13 @@ import FontesTab from '@/components/administrador/FontesTab';
 import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTab';
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
-import EnginesConvencoesTab from '@/components/administrador/EnginesConvencoesTab';
+import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
 
 import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
 import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
 import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
-import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
 
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("estudos");
@@ -69,7 +67,7 @@ const AdministradorPage: React.FC = () => {
         return <AnalyticsTab />;
       case "actions":
         return <ActionsStep />;
-      case "engines-convencoes":
+      case "design-conventions":
         return <DesignConventionsTab />;
       default:
         return <EstudosTab />;
