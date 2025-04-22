@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { useToast } from "@/hooks/use-toast";
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
-import { ProcessingItem, NtaiAnalysisStage, NtaiAnalysisResult } from '@/types/ntai';
+import { ProcessingItem, NtaiAnalysisStage, NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
 import NtaiProcessingPhases from './NtaiProcessingPhases';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import ntaiService from '@/services/ntai-service';
