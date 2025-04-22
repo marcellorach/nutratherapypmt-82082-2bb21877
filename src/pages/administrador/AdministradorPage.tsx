@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -22,11 +23,18 @@ import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosCon
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
 
+// Importando os novos componentes de configurações específicas
+import KnowledgeBaseSettingsTab from '@/components/administrador/settings/KnowledgeBaseSettingsTab';
+import DataProcessingSettingsTab from '@/components/administrador/settings/DataProcessingSettingsTab';
+import ResearchSettingsTab from '@/components/administrador/settings/ResearchSettingsTab';
+import PredictiveAnalysisSettingsTab from '@/components/administrador/settings/PredictiveAnalysisSettingsTab';
+
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("estudos");
   
   const renderContent = () => {
     switch (currentStep) {
+      // Base de Conhecimento
       case "nutraceuticos":
         return <NutraceuticosTab />;
       case "estudos":
@@ -35,6 +43,10 @@ const AdministradorPage: React.FC = () => {
         return <RegrasClinicasTab />;
       case "relacoes":
         return <RelationsTab />;
+      case "knowledge-base-settings":
+        return <KnowledgeBaseSettingsTab />;
+      
+      // Processamento de Dados
       case "import":
         return <ImportStep />;
       case "fontes":
@@ -43,6 +55,10 @@ const AdministradorPage: React.FC = () => {
         return <AnalysisStep />;
       case "visualization":
         return <VisualizationStep />;
+      case "data-processing-settings":
+        return <DataProcessingSettingsTab />;
+      
+      // Pesquisa e Desenvolvimento
       case "estudos-planejados":
         return <EstudosPlanejadosTab />;
       case "estudos-andamento":
@@ -53,12 +69,20 @@ const AdministradorPage: React.FC = () => {
         return <SugestoesAITab />;
       case "ora-biomedical":
         return <OraBiomedicalTab />;
+      case "research-settings":
+        return <ResearchSettingsTab />;
+      
+      // Análise Preditiva
       case "modelos":
         return <ModelosPreditivosTab />;
       case "custo-beneficio":
         return <CustoBeneficioTab />;
       case "relatorios":
         return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
+      case "predictive-analysis-settings":
+        return <PredictiveAnalysisSettingsTab />;
+      
+      // Configurações Gerais
       case "config-ia":
         return <ConfiguracoesIATab />;
       case "prompts":
@@ -69,6 +93,7 @@ const AdministradorPage: React.FC = () => {
         return <ActionsStep />;
       case "design-conventions":
         return <DesignConventionsTab />;
+        
       default:
         return <EstudosTab />;
     }

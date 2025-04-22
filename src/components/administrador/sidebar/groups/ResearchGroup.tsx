@@ -10,7 +10,8 @@ import {
   ClipboardList, 
   CheckSquare,
   Beaker,
-  Bot
+  Bot,
+  Settings
 } from "lucide-react";
 
 interface ResearchGroupProps {
@@ -76,6 +77,17 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
         >
           <Bot className="h-4 w-4" />
           <span>Ora Biomedical</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "research-settings"}
+          onClick={() => handleStepClick("research-settings")}
+          tooltip="Configurações de P&D"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Configurações</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Lightbulb, Gauge, LineChart } from "lucide-react";
+import { Lightbulb, Gauge, LineChart, Settings } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface PredictiveAnalysisGroupProps {
@@ -39,6 +39,15 @@ const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({
         >
           <LineChart />
           <span>Relatórios</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "predictive-analysis-settings"} 
+          onClick={() => handleStepClick("predictive-analysis-settings")}
+        >
+          <Settings className="h-4 w-4" />
+          <span>Configurações</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

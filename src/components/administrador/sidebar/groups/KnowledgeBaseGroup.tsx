@@ -52,11 +52,11 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "design-conventions"} 
-          onClick={() => handleStepClick("design-conventions")}
+          isActive={currentStep === "knowledge-base-settings"} 
+          onClick={() => handleStepClick("knowledge-base-settings")}
         >
-          <Settings />
-          <span>Convenções de Design</span>
+          <Settings className="h-4 w-4" />
+          <span>Configurações</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>
