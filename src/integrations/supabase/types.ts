@@ -159,6 +159,33 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_studies: {
+        Row: {
+          analysis_data: Json | null
+          created_at: string | null
+          id: string
+          kanban_status: string | null
+          processed_by: string | null
+          study_id: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          created_at?: string | null
+          id?: string
+          kanban_status?: string | null
+          processed_by?: string | null
+          study_id: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          created_at?: string | null
+          id?: string
+          kanban_status?: string | null
+          processed_by?: string | null
+          study_id?: string
+        }
+        Relationships: []
+      }
       scispace_imports: {
         Row: {
           base_studies_filename: string

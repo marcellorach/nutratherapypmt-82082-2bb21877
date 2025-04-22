@@ -1,4 +1,3 @@
-
 import { NutraceuticalCondition } from './index';
 
 export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
@@ -63,4 +62,13 @@ export interface NtaiAnalysisStage {
   progress: number; // 0-100
   startTime?: Date;
   endTime?: Date;
+}
+
+export interface ProcessedStudy {
+  id: string;
+  study_id: string;
+  analysis_data: NtaiAnalysisResult;
+  created_at: string;
+  kanban_status: string;
+  processed_by: string;
 }

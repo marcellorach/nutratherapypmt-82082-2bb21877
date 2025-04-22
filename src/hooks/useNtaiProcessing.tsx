@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
 import { useNtaiQueue } from './ntai/useNtaiQueue';
 import { useNtaiLogs } from './ntai/useNtaiLogs';
 import { useNtaiConfig } from './ntai/useNtaiConfig';
@@ -116,7 +115,6 @@ export const useNtaiProcessing = () => {
 
         addLogEntry(`Enviando para processamento com IA: ${item.title}`);
         
-        // Aqui chamamos a nova função que usa a Edge Function
         const simulatedResult = await ntaiService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
@@ -126,37 +124,36 @@ export const useNtaiProcessing = () => {
         
         setAnalysisResult(simulatedResult);
 
-        // Salvar dados no Supabase
-        const { data: savedCard, error } = await supabase
+        const { data: savedAnalysis, error: insertError } = await supabase
           .from('processed_studies')
-          .upsert({
+          .insert({
             study_id: item.id,
             analysis_data: simulatedResult,
             kanban_status: 'new',
             processed_by: 'ntai'
           })
-          .select();
+          .select()
+          .single();
 
-        const cardId = savedCard ? savedCard[0]?.id : `card-${Date.now()}-${item.id}`;
-        
-        if (error) {
-          addLogEntry(`[AVISO] Falha ao salvar no banco de dados: ${error.message}`);
-        } else {
-          addLogEntry(`Card gerado com ID: ${cardId}`);
-          addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
+        if (insertError) {
+          throw new Error(`Erro ao salvar análise: ${insertError.message}`);
         }
 
-        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as any, progress: 100 };
+        const cardId = savedAnalysis?.id;
+        addLogEntry(`Card gerado com ID: ${cardId}`);
+        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
+
+        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
 
       } catch (error: any) {
-        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message || error}`);
+        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
-          stage: 'error' as any, 
+          stage: 'error', 
           progress: 50,
-          error: `Erro: ${error.message || 'Erro desconhecido'}`
+          error: `Erro: ${error.message}`
         };
         setProcessQueue([...updatedQueue]);
       }
