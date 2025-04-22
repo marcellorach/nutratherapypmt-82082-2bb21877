@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import {
@@ -97,7 +96,7 @@ const Feature: React.FC<FeatureProps> = ({
               className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center justify-between ${
                 active && currentStepIncluded(item.step) ? "bg-primary/5 text-primary" : ""
               }`}
-              onClick={() => onClick(item.step)}
+              onClick={() => onClick()}
             >
               <div>
                 <p className="font-medium text-sm">{item.title}</p>

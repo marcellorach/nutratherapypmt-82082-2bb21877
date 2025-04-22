@@ -128,7 +128,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
                 Card Gerado para Kanban
               </Badge>
             </div>
-            <NtaiAnalysisResults result={analysisResult} />
+            <NtaiAnalysisResults analysisResult={analysisResult} />
             
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
               <h4 className="text-sm font-medium text-green-800 mb-2">Card adicionado ao kanban</h4>
