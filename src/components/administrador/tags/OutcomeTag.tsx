@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { getEvidenceLevel } from '@/rules/general/evidence-levels';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface OutcomeTagProps {
@@ -17,7 +16,30 @@ const OutcomeTag: React.FC<OutcomeTagProps> = ({
   showScore = true,
   className = ""
 }) => {
-  const level = getEvidenceLevel(score);
+  // Determina a cor do badge baseado na pontuação
+  const getBadgeStyle = (score: number) => {
+    if (score >= 4) {
+      return {
+        bg: '#D1FAE5', // Verde claro
+        color: '#047857', // Verde escuro
+        border: '#6EE7B7' // Verde médio
+      };
+    } else if (score >= 3) {
+      return {
+        bg: '#E0F2FE', // Azul claro
+        color: '#0369A1', // Azul escuro
+        border: '#7DD3FC' // Azul médio
+      };
+    } else {
+      return {
+        bg: '#FEF3C7', // Amarelo claro
+        color: '#92400E', // Amarelo escuro
+        border: '#FCD34D' // Amarelo médio
+      };
+    }
+  };
+  
+  const style = getBadgeStyle(score);
   
   return (
     <TooltipProvider>
@@ -27,9 +49,9 @@ const OutcomeTag: React.FC<OutcomeTagProps> = ({
             variant="outline" 
             className={`font-normal ${className}`}
             style={{ 
-              backgroundColor: level.backgroundColor,
-              color: level.color,
-              borderColor: `${level.color}50`
+              backgroundColor: style.bg,
+              color: style.color,
+              borderColor: style.border
             }}
           >
             <span>{condition}</span>
@@ -37,8 +59,8 @@ const OutcomeTag: React.FC<OutcomeTagProps> = ({
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{condition}</span> - Pontuação: {score.toFixed(1)}</p>
-          <p className="text-xs text-gray-500 mt-1">Eficácia, reprodutibilidade e tempo de resultado</p>
+          <p><span className="font-medium">{condition}</span> - Pontuação: {score.toFixed(1)}/5</p>
+          <p className="text-xs text-gray-500 mt-1">Relevância e eficácia para esta condição</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

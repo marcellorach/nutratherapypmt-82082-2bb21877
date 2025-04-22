@@ -3,24 +3,14 @@ import React from 'react';
 import { CheckCircle, AlertCircle, FileText, ArrowRight, Brain, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-
-type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
-
-interface ProcessingItem {
-  id: string;
-  title: string;
-  stage: ProcessingStage;
-  progress: number;
-  error?: string;
-  sourceFile?: string;
-  originalFormat?: string;
-}
+import { ProcessingItem } from '@/types/ntai';
 
 interface NtaiProcessCardProps {
   item: ProcessingItem;
+  isActive?: boolean;
 }
 
-const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item }) => {
+const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive = false }) => {
   const getStageIcon = () => {
     switch (item.stage) {
       case 'idle':
@@ -71,17 +61,24 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item }) => {
   };
 
   return (
-    <div className="border rounded-md p-4 hover:shadow-sm transition">
+    <div className={`border rounded-md p-4 hover:shadow-sm transition ${isActive ? 'border-purple-300 bg-purple-50' : ''}`}>
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-medium text-sm truncate max-w-[70%]" title={item.title}>
           {item.title}
         </h4>
-        <Badge className={getStatusColor()}>
-          <span className="flex items-center gap-1">
-            {getStageIcon()}
-            {getStageLabel()}
-          </span>
-        </Badge>
+        <div className="flex items-center gap-2">
+          {isActive && (
+            <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+              Ativo
+            </Badge>
+          )}
+          <Badge className={getStatusColor()}>
+            <span className="flex items-center gap-1">
+              {getStageIcon()}
+              {getStageLabel()}
+            </span>
+          </Badge>
+        </div>
       </div>
       
       <Progress value={item.progress} className="h-2 mb-3" />

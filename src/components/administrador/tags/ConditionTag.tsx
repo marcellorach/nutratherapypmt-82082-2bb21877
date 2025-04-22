@@ -4,15 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { getEvidenceLevel } from '@/rules/general/evidence-levels';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface EvidenceTagProps {
+interface ConditionTagProps {
+  condition: string;
   score: number;
-  showLabel?: boolean;
+  showScore?: boolean;
   className?: string;
 }
 
-const EvidenceTag: React.FC<EvidenceTagProps> = ({ 
+const ConditionTag: React.FC<ConditionTagProps> = ({ 
+  condition, 
   score,
-  showLabel = true,
+  showScore = true,
   className = ""
 }) => {
   const level = getEvidenceLevel(score);
@@ -25,21 +27,22 @@ const EvidenceTag: React.FC<EvidenceTagProps> = ({
             variant="outline" 
             className={`font-normal ${className}`}
             style={{ 
-              backgroundColor: level.backgroundColor,
-              color: level.color,
-              borderColor: `${level.color}50`
+              backgroundColor: '#D3E4FD', // Azul suave
+              color: '#1E40AF',
+              borderColor: '#93C5FD'
             }}
           >
-            <span>{showLabel ? level.label : `${score.toFixed(1)}/5`}</span>
+            <span>{condition}</span>
+            {showScore && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{level.label}</span> ({score.toFixed(1)}/5)</p>
-          <p className="text-xs text-gray-500 mt-1">Qualidade da evidência científica</p>
+          <p><span className="font-medium">{condition}</span> - Eficácia: {score.toFixed(1)}/5</p>
+          <p className="text-xs text-gray-500 mt-1">Relevância da condição para este nutracêutico</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 };
 
-export default EvidenceTag;
+export default ConditionTag;
