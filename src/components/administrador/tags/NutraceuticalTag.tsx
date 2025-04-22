@@ -8,13 +8,15 @@ interface NutraceuticalTagProps {
   score?: number;
   size?: "small" | "medium";
   isSimulated?: boolean;
+  className?: string; // Adicionando className como propriedade opcional
 }
 
 const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({ 
   name, 
   score, 
   size = "medium",
-  isSimulated
+  isSimulated,
+  className = "" // Valor padrão como string vazia
 }) => {
   // Cores baseadas na pontuação
   let colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -29,7 +31,7 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
   return (
     <Badge 
       variant="outline" 
-      className={`${colorClass} flex items-center ${size === "small" ? "text-xs px-1.5 py-0.5" : ""}`}
+      className={`${colorClass} flex items-center ${size === "small" ? "text-xs px-1.5 py-0.5" : ""} ${className}`}
     >
       {name}
       {score && (

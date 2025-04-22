@@ -41,6 +41,7 @@ export interface StudyPopulation {
   type: 'human' | 'canine' | 'feline' | 'rodent' | 'other';
   count: number;
   description: string;
+  isSimulated?: boolean;
 }
 
 export interface NtaiNutraceuticalTag {

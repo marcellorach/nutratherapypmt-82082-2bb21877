@@ -12,6 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { NtaiPromptConfig } from '@/types/ntai';
 import { supabase } from '@/integrations/supabase/client';
 
+interface AdminSettings {
+  id?: string;
+  ntai_prompts?: NtaiPromptConfig[];
+  [key: string]: any;
+}
+
 const defaultPrompts: NtaiPromptConfig[] = [
   {
     id: "summary-prompt",
@@ -179,12 +185,18 @@ const NtaiPromptsTab: React.FC = () => {
           .select('*')
           .single();
         
-        if (error || !adminSettings || !adminSettings.ntai_prompts) {
+        if (error || !adminSettings) {
           console.log("Usando prompts padrão:", defaultPrompts);
           setPrompts(defaultPrompts);
         } else {
-          console.log("Prompts carregados do banco:", adminSettings.ntai_prompts);
-          setPrompts(adminSettings.ntai_prompts);
+          const settings = adminSettings as AdminSettings;
+          if (settings.ntai_prompts) {
+            console.log("Prompts carregados do banco:", settings.ntai_prompts);
+            setPrompts(settings.ntai_prompts);
+          } else {
+            console.log("Usando prompts padrão (não encontrados no banco):", defaultPrompts);
+            setPrompts(defaultPrompts);
+          }
         }
       } catch (error) {
         console.error("Erro ao carregar prompts:", error);

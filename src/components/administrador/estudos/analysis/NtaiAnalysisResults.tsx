@@ -1,189 +1,168 @@
 
-import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NtaiAnalysisResult } from '@/types/ntai';
-import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
+import NtaiNutraceuticalsTab from './results/NtaiNutraceuticalsTab';
+import NtaiConditionsTab from './results/NtaiConditionsTab';
+import NtaiInteractionsTab from './results/NtaiInteractionsTab';
+import NtaiSideEffectsTab from './results/NtaiSideEffectsTab';
+import { AlertTriangle, Users, Clock, Award, FileText } from "lucide-react";
 
 interface NtaiAnalysisResultsProps {
-  result: NtaiAnalysisResult;
+  analysisResult: NtaiAnalysisResult | null;
 }
 
-const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => {
+const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ analysisResult }) => {
+  const [activeTab, setActiveTab] = useState("summary");
+  
+  if (!analysisResult) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Nenhum resultado disponível</CardTitle>
+          <CardDescription>
+            Selecione documentos na fila e inicie o processamento para visualizar os resultados da análise NTAI.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+  
   return (
-    <div className="space-y-6">
-      {/* Indicador de dados simulados, se necessário */}
-      {result.isSimulated && (
-        <div className="flex items-center p-3 bg-amber-50 border border-amber-200 rounded-md mb-4">
-          <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
-          <div className="text-amber-700 text-sm">
-            Alguns dados foram preenchidos automaticamente pois não puderam ser extraídos com precisão pelo sistema NTAI.
-          </div>
-        </div>
-      )}
-      
-      {/* Resumo do estudo */}
-      <Card className="bg-slate-50">
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-2">Resumo</h3>
-          <p className="text-gray-700">{result.summary}</p>
-          
-          <div className="flex flex-wrap gap-3 mt-4">
-            <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-              Relevância: {result.relevanceScore.toFixed(1)}/5
-            </Badge>
-            <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700">
-              Qualidade: {result.qualityScore.toFixed(1)}/5
-            </Badge>
-            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-              Citações: {result.citationScore?.toFixed(1) || "N/A"}/5
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* População e metodologia */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-2">População e Metodologia</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Tipo</p>
-              <p className="font-medium">
-                {result.studyPopulation?.type === 'human' ? 'Humanos' :
-                 result.studyPopulation?.type === 'canine' ? 'Cães' :
-                 result.studyPopulation?.type === 'feline' ? 'Gatos' :
-                 result.studyPopulation?.type === 'rodent' ? 'Roedores' : 'Outros'}
-                {result.studyPopulation?.isSimulated && (
-                  <span className="text-xs text-amber-500 ml-2">(simulado)</span>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          Resultados da Análise NTAI
+          {analysisResult.isSimulated && (
+            <span className="bg-amber-100 text-amber-800 text-xs py-0.5 px-2 rounded-full flex items-center">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Dados Simulados
+            </span>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Resultados do processamento para o estudo ID: {analysisResult.studyId}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-5 mb-4">
+            <TabsTrigger value="summary">Resumo</TabsTrigger>
+            <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
+            <TabsTrigger value="conditions">Condições</TabsTrigger>
+            <TabsTrigger value="interactions">Interações</TabsTrigger>
+            <TabsTrigger value="sideeffects">Efeitos Colaterais</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="summary">
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-md">
+                <h3 className="text-sm font-medium mb-2">Resumo do Estudo</h3>
+                <p className="text-gray-700">{analysisResult.summary}</p>
+                
+                {analysisResult.studyPopulation && (
+                  <div className="mt-4 flex items-start gap-1">
+                    <Users className="h-4 w-4 mt-0.5 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-medium">População do Estudo {analysisResult.studyPopulation.isSimulated && <AlertTriangle className="inline h-3 w-3 text-amber-500" />}</p>
+                      <p className="text-sm text-gray-600">
+                        {analysisResult.studyPopulation.type === 'human' ? 'Humanos' : 
+                          analysisResult.studyPopulation.type === 'canine' ? 'Caninos' :
+                          analysisResult.studyPopulation.type === 'feline' ? 'Felinos' :
+                          analysisResult.studyPopulation.type === 'rodent' ? 'Roedores' : 'Outros'}: {analysisResult.studyPopulation.count} indivíduos
+                      </p>
+                      <p className="text-xs text-gray-500">{analysisResult.studyPopulation.description}</p>
+                    </div>
+                  </div>
                 )}
-              </p>
+                
+                <div className="mt-3 flex items-start gap-1">
+                  <Clock className="h-4 w-4 mt-0.5 text-gray-500" />
+                  <div>
+                    <p className="text-sm font-medium">Duração {analysisResult.isSimulated && <AlertTriangle className="inline h-3 w-3 text-amber-500" />}</p>
+                    <p className="text-sm text-gray-600">{analysisResult.studyDuration}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-3 flex items-start gap-1">
+                  <FileText className="h-4 w-4 mt-0.5 text-gray-500" />
+                  <div>
+                    <p className="text-sm font-medium">Resultados {analysisResult.isSimulated && <AlertTriangle className="inline h-3 w-3 text-amber-500" />}</p>
+                    <p className="text-sm text-gray-600">{analysisResult.studyResults}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-3 flex items-start gap-1">
+                  <Award className="h-4 w-4 mt-0.5 text-gray-500" />
+                  <div>
+                    <p className="text-sm font-medium">Relevância Científica {analysisResult.isSimulated && <AlertTriangle className="inline h-3 w-3 text-amber-500" />}</p>
+                    <div className="flex items-center">
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        analysisResult.citationScore > 4 ? "bg-green-100 text-green-800" :
+                        analysisResult.citationScore > 3 ? "bg-blue-100 text-blue-800" :
+                        "bg-amber-100 text-amber-800"
+                      }`}>
+                        {analysisResult.citationScore.toFixed(1)}/5
+                      </span>
+                      <span className="ml-2 text-xs text-gray-500">
+                        Baseado em citações e impacto da publicação
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 rounded-md">
+                  <h3 className="text-sm font-medium mb-2">Qualidade Metodológica</h3>
+                  <div className="flex items-center">
+                    <span className={`text-2xl font-bold ${
+                      analysisResult.qualityScore > 4 ? "text-green-600" :
+                      analysisResult.qualityScore > 3 ? "text-blue-600" :
+                      "text-amber-600"
+                    }`}>
+                      {analysisResult.qualityScore.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500 ml-1">/5</span>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-gray-50 rounded-md">
+                  <h3 className="text-sm font-medium mb-2">Relevância Clínica</h3>
+                  <div className="flex items-center">
+                    <span className={`text-2xl font-bold ${
+                      analysisResult.relevanceScore > 4 ? "text-green-600" :
+                      analysisResult.relevanceScore > 3 ? "text-blue-600" :
+                      "text-amber-600"
+                    }`}>
+                      {analysisResult.relevanceScore.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500 ml-1">/5</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Tamanho da amostra</p>
-              <p className="font-medium">
-                {result.studyPopulation?.count || "N/A"}
-                {result.studyPopulation?.isSimulated && (
-                  <span className="text-xs text-amber-500 ml-2">(simulado)</span>
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Duração</p>
-              <p className="font-medium">{result.studyDuration || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Descrição</p>
-              <p className="text-sm">{result.studyPopulation?.description || "N/A"}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Nutracêuticos extraídos */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-3">Nutracêuticos Identificados</h3>
-          <div className="flex flex-wrap gap-2">
-            {result.extractedNutraceuticals.map((item, index) => (
-              <Badge 
-                key={`nutra-${index}`}
-                variant="outline" 
-                className="bg-green-50 text-green-700 border-green-200 flex items-center"
-              >
-                {item.name}
-                <span className="text-xs ml-1">({(item.confidence * 100).toFixed(0)}%)</span>
-                {item.isSimulated && (
-                  <AlertTriangle className="h-3 w-3 ml-1 text-amber-500" />
-                )}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Condições de saúde */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-3">Condições de Saúde</h3>
-          <div className="flex flex-wrap gap-2">
-            {result.extractedConditions.map((item, index) => (
-              <Badge 
-                key={`cond-${index}`}
-                variant="outline" 
-                className="bg-blue-50 text-blue-700 border-blue-200 flex items-center"
-              >
-                {item.name}
-                <span className="ml-1 px-1 py-0.5 rounded bg-blue-100 text-blue-800 text-xs">
-                  {item.efficacyScore.toFixed(1)}
-                </span>
-                {item.isSimulated && (
-                  <AlertTriangle className="h-3 w-3 ml-1 text-amber-500" />
-                )}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Interações */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-3">Interações</h3>
-          <div className="flex flex-wrap gap-2">
-            {result.extractedInteractions.map((item, index) => (
-              <Badge 
-                key={`int-${index}`}
-                variant="outline" 
-                className={`${item.type === 'positive' 
-                  ? 'bg-green-50 text-green-700 border-green-200' 
-                  : 'bg-red-50 text-red-700 border-red-200'} flex items-center`}
-              >
-                {item.type === 'positive' ? <ArrowUp className="h-3 w-3 mr-1" /> : <ArrowDown className="h-3 w-3 mr-1" />}
-                {item.name} ({item.score.toFixed(1)})
-                {item.isSimulated && (
-                  <AlertTriangle className="h-3 w-3 ml-1 text-amber-500" />
-                )}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Efeitos colaterais */}
-      {result.extractedSideEffects && result.extractedSideEffects.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-3">Efeitos Colaterais</h3>
-            <div className="flex flex-wrap gap-2">
-              {result.extractedSideEffects.map((item, index) => (
-                <Badge 
-                  key={`side-${index}`}
-                  variant="outline" 
-                  className="bg-amber-50 text-amber-700 border-amber-200 flex items-center"
-                >
-                  {item.name} ({item.intensityScore.toFixed(1)})
-                  <span className="ml-1 text-xs">{item.frequency}</span>
-                  {item.isSimulated && (
-                    <AlertTriangle className="h-3 w-3 ml-1 text-amber-500" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Resultados principais */}
-      {result.studyResults && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-2">Resultados Principais</h3>
-            <p className="text-gray-700">{result.studyResults}</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </TabsContent>
+
+          <TabsContent value="nutraceuticals">
+            <NtaiNutraceuticalsTab nutraceuticals={analysisResult.extractedNutraceuticals} />
+          </TabsContent>
+
+          <TabsContent value="conditions">
+            <NtaiConditionsTab conditions={analysisResult.extractedConditions} />
+          </TabsContent>
+
+          <TabsContent value="interactions">
+            <NtaiInteractionsTab interactions={analysisResult.extractedInteractions} />
+          </TabsContent>
+
+          <TabsContent value="sideeffects">
+            <NtaiSideEffectsTab sideEffects={analysisResult.extractedSideEffects} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

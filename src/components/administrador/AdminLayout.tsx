@@ -15,7 +15,7 @@ import {
   BarChart3,
   Brain,
   LineChart,
-  Flask,
+  Beaker,
   Layers,
   FilePlus2,
   Settings2,
@@ -185,7 +185,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
             />
 
             <Feature
-              icon={<Flask size={20} />}
+              icon={<Beaker size={20} />}
               title="Pesquisa & Desenvolvimento"
               description="Estudos em andamento e planejados"
               active={["estudos-planejados", "estudos-andamento", "estudos-concluidos", "sugestoes-ai", "ora-biomedical", "research-settings"].includes(currentStep)}

@@ -3,6 +3,20 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { NtaiPromptConfig } from '@/types/ntai';
 
+interface AdminSettings {
+  id?: string;
+  model_name?: string;
+  temperature?: string;
+  nutraceuticals_prompt?: string;
+  conditions_prompt?: string;
+  chronic_diseases_prompt?: string;
+  summary_prompt?: string;
+  interactions_prompt?: string;
+  additional_prompt?: string;
+  ntai_prompts?: NtaiPromptConfig[];
+  [key: string]: any;
+}
+
 export const useNtaiConfig = () => {
   const [aiConfigs, setAiConfigs] = useState<Record<string, string>>({});
   const [ntaiPrompts, setNtaiPrompts] = useState<NtaiPromptConfig[]>([]);
@@ -26,25 +40,28 @@ export const useNtaiConfig = () => {
             'conditions_prompt': 'Identifique as condições de saúde relacionadas aos nutracêuticos neste estudo e avalie a eficácia para cada condição.',
           };
           setAiConfigs(configs);
+          setNtaiPrompts(getDefaultPrompts());
           return;
         }
         
+        const settings = data as AdminSettings;
+        
         // Configurações encontradas no banco de dados
         const configs = {
-          'modelName': data.model_name || 'gpt-4o',
-          'temperature': data.temperature || '0.7',
-          'nutraceuticals_prompt': data.nutraceuticals_prompt || '',
-          'conditions_prompt': data.chronic_diseases_prompt || '',
-          'summary_prompt': data.summary_prompt || '',
-          'interactions_prompt': data.interactions_prompt || '',
-          'additional_prompt': data.additional_prompt || '',
+          'modelName': settings.model_name || 'gpt-4o',
+          'temperature': settings.temperature || '0.7',
+          'nutraceuticals_prompt': settings.nutraceuticals_prompt || '',
+          'conditions_prompt': settings.chronic_diseases_prompt || '',
+          'summary_prompt': settings.summary_prompt || '',
+          'interactions_prompt': settings.interactions_prompt || '',
+          'additional_prompt': settings.additional_prompt || '',
         };
         
         setAiConfigs(configs);
         
         // Carregar prompts NTAI
-        if (data.ntai_prompts) {
-          setNtaiPrompts(data.ntai_prompts);
+        if (settings.ntai_prompts) {
+          setNtaiPrompts(settings.ntai_prompts);
         } else {
           // Usar prompts padrão se não houver no banco
           setNtaiPrompts(getDefaultPrompts());
