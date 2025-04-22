@@ -65,7 +65,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
       return;
     }
     
-    const newItems = selectedItems.map(id => {
+    const newItems: ProcessingItem[] = selectedItems.map(id => {
       const estudo = estudos.find(e => e.id === id);
       return {
         id,
@@ -108,21 +108,21 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
       // Extração
       setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] Iniciando extração para: ${item.title}`]);
       
-      updatedQueue[index] = { ...item, stage: 'extracting', progress: 10 };
+      updatedQueue[index] = { ...item, stage: 'extracting' as ProcessingStage, progress: 10 };
       setProcessQueue([...updatedQueue]);
       
       setTimeout(() => {
         setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] Extração de texto concluída para: ${item.title}`]);
         
         // Análise
-        updatedQueue[index] = { ...updatedQueue[index], stage: 'analyzing', progress: 40 };
+        updatedQueue[index] = { ...updatedQueue[index], stage: 'analyzing' as ProcessingStage, progress: 40 };
         setProcessQueue([...updatedQueue]);
         
         setTimeout(() => {
           setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] Análise NTAI concluída para: ${item.title}`]);
           
           // Padronização
-          updatedQueue[index] = { ...updatedQueue[index], stage: 'standardizing', progress: 70 };
+          updatedQueue[index] = { ...updatedQueue[index], stage: 'standardizing' as ProcessingStage, progress: 70 };
           setProcessQueue([...updatedQueue]);
           
           setTimeout(() => {
@@ -133,13 +133,13 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
               setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] [ERRO] Falha na padronização para: ${item.title} - Formato incompatível`]);
               updatedQueue[index] = { 
                 ...updatedQueue[index], 
-                stage: 'error', 
+                stage: 'error' as ProcessingStage, 
                 progress: 85,
                 error: 'Formato incompatível de dados na padronização'
               };
             } else {
               setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] Padronização concluída para: ${item.title}`]);
-              updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
+              updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
             }
             
             setProcessQueue([...updatedQueue]);
@@ -162,7 +162,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
   
   const retryFailed = () => {
     const updatedQueue = processQueue.map(item => 
-      item.stage === 'error' ? { ...item, stage: 'idle', progress: 0, error: undefined } : item
+      item.stage === 'error' ? { ...item, stage: 'idle' as ProcessingStage, progress: 0, error: undefined } : item
     );
     
     setProcessQueue(updatedQueue);
