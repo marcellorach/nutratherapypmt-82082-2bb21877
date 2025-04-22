@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface ConventionsPanelProps {
   section: 'knowledge-base' | 'data-processing' | 'research' | 'predictive-analysis';
@@ -109,6 +110,86 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
   const [formatConventions, setFormatConventions] = useState(conventions.format);
   const [rulesConventions, setRulesConventions] = useState(conventions.rules);
   
+  const renderExamples = () => {
+    if (activeTab === 'naming') {
+      return (
+        <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-2">Exemplos Visuais:</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                Curcuma longa (Cúrcuma)
+              </Badge>
+              <span className="text-sm text-gray-600">← Nomenclatura de Nutracêutico</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                Smith et al. (2024) - Effects of Curcumin...
+              </Badge>
+              <span className="text-sm text-gray-600">← Formato de Citação</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                500mg/kg BID
+              </Badge>
+              <span className="text-sm text-gray-600">← Formato de Dosagem</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (activeTab === 'format') {
+      return (
+        <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-2">Formatos Padrão:</h4>
+          <div className="space-y-3">
+            <div className="p-2 bg-white rounded border border-gray-200">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                  Nível 5
+                </Badge>
+                <span className="text-sm">Evidência forte com múltiplos estudos</span>
+              </div>
+            </div>
+            
+            <div className="p-2 bg-white rounded border border-gray-200">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge className="bg-indigo-100 text-indigo-800 border-indigo-300">
+                  ID: NUT-2024-001
+                </Badge>
+                <span className="text-sm">Formato de Identificador</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (activeTab === 'rules') {
+      return (
+        <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-2">Validações:</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 p-2 bg-white rounded border border-green-200">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-sm">3+ estudos validados</span>
+            </div>
+            
+            <div className="flex items-center gap-2 p-2 bg-white rounded border border-red-200">
+              <div className="h-2 w-2 rounded-full bg-red-500"></div>
+              <span className="text-sm">Interações não documentadas</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -131,28 +212,31 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
           <TabsContent value="naming">
             <ScrollArea className="h-[400px] w-full rounded-md border mt-4 p-4">
               <Textarea 
-                className="min-h-[380px] border-0 resize-none" 
+                className="min-h-[200px] border-0 resize-none" 
                 value={namingConventions}
                 onChange={(e) => setNamingConventions(e.target.value)}
               />
+              {renderExamples()}
             </ScrollArea>
           </TabsContent>
           <TabsContent value="format">
             <ScrollArea className="h-[400px] w-full rounded-md border mt-4 p-4">
               <Textarea 
-                className="min-h-[380px] border-0 resize-none" 
+                className="min-h-[200px] border-0 resize-none" 
                 value={formatConventions}
                 onChange={(e) => setFormatConventions(e.target.value)}
               />
+              {renderExamples()}
             </ScrollArea>
           </TabsContent>
           <TabsContent value="rules">
             <ScrollArea className="h-[400px] w-full rounded-md border mt-4 p-4">
               <Textarea 
-                className="min-h-[380px] border-0 resize-none" 
+                className="min-h-[200px] border-0 resize-none" 
                 value={rulesConventions}
                 onChange={(e) => setRulesConventions(e.target.value)}
               />
+              {renderExamples()}
             </ScrollArea>
           </TabsContent>
         </Tabs>
