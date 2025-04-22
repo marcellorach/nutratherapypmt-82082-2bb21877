@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, File, Download } from "lucide-react";
+import { Upload, File, Download, Database, Import } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -134,9 +135,18 @@ const SciImportSection: React.FC = () => {
         
         <div className="px-6 pt-4">
           <TabsList className="w-full justify-start">
-            <TabsTrigger value="file-upload">Upload de Arquivos</TabsTrigger>
-            <TabsTrigger value="scispace-api">Importar Integrativa (SCISPACE)</TabsTrigger>
-            <TabsTrigger value="import-history">Histórico</TabsTrigger>
+            <TabsTrigger value="file-upload" className="flex items-center gap-1">
+              <Upload className="h-4 w-4" />
+              <span>Upload de Arquivos</span>
+            </TabsTrigger>
+            <TabsTrigger value="scispace-api" className="flex items-center gap-1">
+              <Import className="h-4 w-4" />
+              <span>Importar Integrativa (SCISPACE)</span>
+            </TabsTrigger>
+            <TabsTrigger value="import-history" className="flex items-center gap-1">
+              <Database className="h-4 w-4" />
+              <span>Histórico</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -150,7 +160,7 @@ const SciImportSection: React.FC = () => {
                   <input 
                     type="file" 
                     multiple 
-                    accept=".bib,.csv,.json,.pdf"
+                    accept=".bib,.csv,.json,.pdf,.doc,.docx,.txt,.rtf"
                     className="hidden"
                     onChange={handleFileChange}
                     disabled={importing}
@@ -158,7 +168,7 @@ const SciImportSection: React.FC = () => {
                 </label>
               </Button>
               <p className="text-sm text-gray-500">
-                Formatos suportados: BibTeX (.bib), CSV, JSON, PDF
+                Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF
               </p>
             </div>
             
