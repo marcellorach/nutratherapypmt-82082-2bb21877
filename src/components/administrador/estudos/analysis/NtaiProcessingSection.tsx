@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";  // Add this import
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
