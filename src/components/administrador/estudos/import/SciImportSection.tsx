@@ -33,13 +33,7 @@ const SciImportSection: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
-    }
-  };
-
+  // Upload and register each file, then clear queue for NTAI step
   const handleImport = async () => {
     if (files.length === 0) {
       toast({
@@ -49,29 +43,46 @@ const SciImportSection: React.FC = () => {
       });
       return;
     }
-
     setImporting(true);
-    
-    // Simulação do processo de importação
+
     let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += 10;
-      setProgress(currentProgress);
-      
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setImporting(false);
-          setFiles([]);
-          toast({
-            title: "Importação concluída",
-            description: `${files.length} estudo(s) importado(s) com sucesso. Se algum for originado do SciSpace, receberá status especial.`,
-          });
-        }, 500);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const path = `scispace/manual-import/${Date.now()}-${file.name}`;
+      // upload para Supabase Storage
+      const { error } = await supabase.storage.from("scispace").upload(path, file, {
+        upsert: false,
+      });
+      if (error) {
+        toast({
+          title: "Erro ao importar arquivo",
+          description: `${file.name}: ${error.message}`,
+          variant: "destructive",
+        });
+        setImporting(false);
+        return;
       }
-    }, 500);
+      currentProgress = Math.round(((i + 1) / files.length) * 100);
+      setProgress(currentProgress);
+    }
+    setTimeout(() => {
+      setImporting(false);
+      setFiles([]);
+      setProgress(0);
+      toast({
+        title: "Importação concluída",
+        description: `${files.length} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise NTAI.`,
+      });
+    }, 800);
   };
 
+  // Adiciona/remover arquivos da fila local (antes do upload)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+    }
+  };
   const removeFile = (index: number) => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
@@ -176,11 +187,16 @@ const SciImportSection: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Button variant="outline" className="gap-2" asChild>
                 <label>
-                  <Upload className="h-4 w-4" />
-                  <span>Selecionar Arquivos</span>
-                  <input 
-                    type="file" 
-                    multiple 
+                  <span>
+                    {/* Ícone e texto do botão de upload */}
+                    <span className="inline-block align-middle">
+                      <Upload className="h-4 w-4" />
+                    </span>
+                    <span className="inline-block align-middle">Selecionar Arquivos</span>
+                  </span>
+                  <input
+                    type="file"
+                    multiple
                     accept=".bib,.csv,.json,.pdf,.doc,.docx,.txt,.rtf"
                     className="hidden"
                     onChange={handleFileChange}
@@ -192,18 +208,16 @@ const SciImportSection: React.FC = () => {
                 Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF
               </p>
             </div>
-            
+            {/* Lista de arquivos para upload */}
             {files.length > 0 && (
               <div className="mt-4 border rounded-md">
                 <div className="p-3 bg-gray-50 border-b">
                   <div className="flex justify-between items-center">
                     <h3 className="font-medium">Arquivos para importação ({files.length})</h3>
                     {!importing && (
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleImport}>
-                          Importar Arquivos
-                        </Button>
-                      </div>
+                      <Button size="sm" onClick={handleImport}>
+                        Importar Arquivos
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -219,8 +233,8 @@ const SciImportSection: React.FC = () => {
                   ) : (
                     <ul className="space-y-2">
                       {files.map((file, index) => (
-                        <ImportFilePreview 
-                          key={index}
+                        <ImportFilePreview
+                          key={file.name + index}
                           file={file}
                           index={index}
                           onRemove={() => removeFile(index)}

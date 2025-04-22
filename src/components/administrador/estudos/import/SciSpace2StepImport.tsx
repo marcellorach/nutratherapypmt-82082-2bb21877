@@ -26,7 +26,6 @@ const SciSpace2StepImport: React.FC = () => {
       });
       return;
     }
-
     if (!consensoName) {
       toast({
         title: "Nome do Consenso Integrativo faltando",
@@ -35,28 +34,20 @@ const SciSpace2StepImport: React.FC = () => {
       });
       return;
     }
-
     setIsLoading(true);
     setProgress(0);
-
     try {
       const metaSummaryPaths = await Promise.all(
         metaSummaryFiles.map(async (file) => {
           const path = `scispace/${Date.now()}-${file.name}`;
-          const { error } = await supabase.storage
-            .from("scispace")
-            .upload(path, file);
-
+          const { error } = await supabase.storage.from("scispace").upload(path, file);
           if (error) throw error;
           return { filename: file.name, path };
         })
       );
 
       const baseStudiesPath = `scispace/${Date.now()}-${baseStudiesFile.name}`;
-      const { error: baseError } = await supabase.storage
-        .from("scispace")
-        .upload(baseStudiesPath, baseStudiesFile);
-
+      const { error: baseError } = await supabase.storage.from("scispace").upload(baseStudiesPath, baseStudiesFile);
       if (baseError) {
         throw new Error(`Erro ao fazer upload do arquivo base: ${baseError.message}`);
       }
@@ -77,7 +68,6 @@ const SciSpace2StepImport: React.FC = () => {
                 consenso_comments: comentarios,
               },
             ]);
-
           if (insertError) {
             throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
           }
@@ -85,15 +75,13 @@ const SciSpace2StepImport: React.FC = () => {
       );
 
       setProgress(70);
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       setProgress(100);
       toast({
         title: "Importação Concluída!",
         description: `${metaSummaryFiles.length} arquivos enviados e metadados salvos com sucesso.`,
       });
-      
+
       setMetaSummaryFiles([]);
       setBaseStudiesFile(null);
       setConsensoName("");

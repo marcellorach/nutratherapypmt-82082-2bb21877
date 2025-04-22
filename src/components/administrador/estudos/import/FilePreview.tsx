@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Database, X } from "lucide-react";
@@ -34,15 +33,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({ file, onRemove, label }) => (
         {formatFileSize(file.size)}
       </span>
     </div>
-    <Button 
-      size="icon" 
-      variant="ghost" 
-      onClick={onRemove} 
-      aria-label={`Remover ${label}`} 
-      className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
-    >
-      <X className="h-5 w-5" />
-    </Button>
+    {onRemove && (
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={onRemove}
+        aria-label={`Remover ${label}`}
+        className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+        type="button"
+      >
+        <X className="h-5 w-5" />
+      </Button>
+    )}
   </div>
 );
 
