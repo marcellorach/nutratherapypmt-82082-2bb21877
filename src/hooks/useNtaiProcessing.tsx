@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
 import { useNtaiQueue } from './ntai/useNtaiQueue';
@@ -124,11 +125,14 @@ export const useNtaiProcessing = () => {
         
         setAnalysisResult(simulatedResult);
 
+        // Converter o resultado da análise para um objeto JSON simples para compatibilidade com Supabase
+        const jsonAnalysisData = JSON.parse(JSON.stringify(simulatedResult));
+        
         const { data: savedAnalysis, error: insertError } = await supabase
           .from('processed_studies')
           .insert({
             study_id: item.id,
-            analysis_data: simulatedResult,
+            analysis_data: jsonAnalysisData,
             kanban_status: 'new',
             processed_by: 'ntai'
           })
