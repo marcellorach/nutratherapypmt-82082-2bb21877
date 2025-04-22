@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ import SciSpaceProcessingPreviewMini from "./SciSpaceProcessingPreviewMini";
 
 const SciSpace2StepImport: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [metaSummaryFile, setMetaSummaryFile] = useState<File | null>(null);
+  const [metaSummaryFiles, setMetaSummaryFiles] = useState<File[]>([]);
   const [baseStudiesFile, setBaseStudiesFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -19,10 +18,10 @@ const SciSpace2StepImport: React.FC = () => {
   const [comentarios, setComentarios] = useState("");
 
   const handleSubmit = async () => {
-    if (!metaSummaryFile || !baseStudiesFile) {
+    if (metaSummaryFiles.length === 0 || !baseStudiesFile) {
       toast({
         title: "Arquivos faltando",
-        description: "Por favor, selecione os dois arquivos antes de submeter.",
+        description: "Por favor, selecione pelo menos um arquivo de meta sumário e um arquivo de base de estudos.",
         variant: "destructive",
       });
       return;
@@ -41,58 +40,61 @@ const SciSpace2StepImport: React.FC = () => {
     setProgress(0);
 
     try {
-      // 1. Upload dos arquivos para o Storage
-      const metaSummaryPath = `scispace/${Date.now()}-${metaSummaryFile.name}`;
+      const metaSummaryPaths = await Promise.all(
+        metaSummaryFiles.map(async (file) => {
+          const path = `scispace/${Date.now()}-${file.name}`;
+          const { error } = await supabase.storage
+            .from("scispace")
+            .upload(path, file);
+
+          if (error) throw error;
+          return { filename: file.name, path };
+        })
+      );
+
       const baseStudiesPath = `scispace/${Date.now()}-${baseStudiesFile.name}`;
-
-      const { error: metaError } = await supabase.storage
-        .from("scispace")
-        .upload(metaSummaryPath, metaSummaryFile);
-
       const { error: baseError } = await supabase.storage
         .from("scispace")
         .upload(baseStudiesPath, baseStudiesFile);
 
-      if (metaError || baseError) {
-        throw new Error(
-          `Erro ao fazer upload dos arquivos: ${metaError?.message || ""} ${
-            baseError?.message || ""
-          }`
-        );
+      if (baseError) {
+        throw new Error(`Erro ao fazer upload do arquivo base: ${baseError.message}`);
       }
 
       setProgress(30);
 
-      // 2. Salvar informações no banco de dados
-      const { data: insertData, error: insertError } = await supabase
-        .from("scispace_imports")
-        .insert([
-          {
-            meta_summary_filename: metaSummaryFile.name,
-            meta_summary_storage_path: metaSummaryPath,
-            base_studies_filename: baseStudiesFile.name,
-            base_studies_storage_path: baseStudiesPath,
-            consenso_name: consensoName,
-            consenso_comments: comentarios,
-          },
-        ])
-        .select()
+      await Promise.all(
+        metaSummaryPaths.map(async (meta) => {
+          const { error: insertError } = await supabase
+            .from("scispace_imports")
+            .insert([
+              {
+                meta_summary_filename: meta.filename,
+                meta_summary_storage_path: meta.path,
+                base_studies_filename: baseStudiesFile.name,
+                base_studies_storage_path: baseStudiesPath,
+                consenso_name: consensoName,
+                consenso_comments: comentarios,
+              },
+            ]);
 
-      if (insertError) {
-        throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
-      }
+          if (insertError) {
+            throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
+          }
+        })
+      );
 
       setProgress(70);
 
-      // Simula um tempo de processamento extra
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setProgress(100);
       toast({
         title: "Importação Concluída!",
-        description: `Arquivos enviados e metadados salvos com sucesso.`,
+        description: `${metaSummaryFiles.length} arquivos enviados e metadados salvos com sucesso.`,
       });
-      setMetaSummaryFile(null);
+      
+      setMetaSummaryFiles([]);
       setBaseStudiesFile(null);
       setConsensoName("");
       setComentarios("");
@@ -115,13 +117,13 @@ const SciSpace2StepImport: React.FC = () => {
         <SciSpaceStepSelect
           currentStep={step}
           setStep={setStep}
-          canGoNext={!!metaSummaryFile}
+          canGoNext={metaSummaryFiles.length > 0}
         />
       </div>
       {step === 0 && (
         <SciSpaceUploadMetaResumo
-          metaSummaryFile={metaSummaryFile}
-          setMetaSummaryFile={setMetaSummaryFile}
+          metaSummaryFiles={metaSummaryFiles}
+          setMetaSummaryFiles={setMetaSummaryFiles}
           disabled={isLoading}
           onNext={() => setStep(1)}
         />
@@ -137,11 +139,11 @@ const SciSpace2StepImport: React.FC = () => {
       )}
       {step === 2 && (
         <SciSpaceReviewAndSubmit
-          metaSummaryFile={metaSummaryFile}
+          metaSummaryFile={metaSummaryFiles[0]}
           baseStudiesFile={baseStudiesFile}
           loading={isLoading}
           progress={progress}
-          canSubmit={!!metaSummaryFile && !!baseStudiesFile}
+          canSubmit={!!metaSummaryFiles[0] && !!baseStudiesFile}
           onPrev={() => setStep(1)}
           onSubmit={handleSubmit}
         />
