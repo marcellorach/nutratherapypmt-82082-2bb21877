@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, ArrowRight, Settings } from "lucide-react";
+import { Brain, ArrowRight, Settings, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useNtaiProcessing } from '@/hooks/useNtaiProcessing'; // Updated import path
+import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
+import { useToast } from "@/hooks/use-toast";
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
@@ -16,13 +16,16 @@ interface NtaiProcessingSectionProps {
 }
 
 const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }) => {
+  const [pendingCuration, setPendingCuration] = useState<any[]>([]);
+  const { toast } = useToast();
+  
   const {
     processQueue,
     selectedItems,
     processingActive,
     logEntries,
     activeItemIndex,
-    analysisResult,
+    analysisResults,
     aiConfigs,
     toggleItemSelection,
     handleSelectAll,
@@ -30,11 +33,37 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
     clearCompleted,
     retryFailed,
     startProcessing,
+    sendToCuration
   } = useNtaiProcessing();
 
   const [logVisible, setLogVisible] = React.useState(false);
   
   const toggleLogVisibility = () => setLogVisible(!logVisible);
+
+  const handleSendToCuration = async () => {
+    if (analysisResults.length === 0) {
+      toast({
+        title: "Nenhum resultado para enviar",
+        description: "Processe alguns estudos primeiro antes de enviar para curadoria.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await sendToCuration(analysisResults);
+      toast({
+        title: "Estudos enviados para curadoria",
+        description: `${analysisResults.length} estudos foram enviados para a etapa de curadoria.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar para curadoria",
+        description: "Ocorreu um erro ao tentar enviar os estudos para curadoria.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card id="ntai-processing-section" className="transition-all">
@@ -58,7 +87,6 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
           </div>
         </div>
         
-        {/* Mostra informações sobre o processamento atual */}
         <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
           <h4 className="text-sm font-medium mb-2">Informações do Processamento</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -118,25 +146,31 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
           )}
         </div>
         
-        {/* Resultados da análise */}
-        {analysisResult && (
-          <div className="mt-8 border-t pt-4">
-            <div className="flex items-center mb-4">
-              <h3 className="text-lg font-medium">Resultados da Análise</h3>
-              <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Card Gerado para Kanban
-              </Badge>
+        {analysisResults.length > 0 && (
+          <div className="mt-8 space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-medium">Resultados da Análise</h3>
+                <ArrowRight className="h-4 w-4 text-gray-400" />
+                <Badge variant="outline" className="bg-green-50 text-green-700">
+                  {analysisResults.length} Cards Gerados
+                </Badge>
+              </div>
+              
+              <Button 
+                onClick={handleSendToCuration}
+                className="flex items-center gap-2"
+              >
+                <Send className="h-4 w-4" />
+                Enviar para Curadoria
+              </Button>
             </div>
-            <NtaiAnalysisResults analysisResult={analysisResult} />
-            
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <h4 className="text-sm font-medium text-green-800 mb-2">Card adicionado ao kanban</h4>
-              <p className="text-xs text-green-700">
-                O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna "Novos Estudos".
-                Você pode agora gerenciar este estudo no fluxo de trabalho.
-              </p>
-            </div>
+
+            {analysisResults.map((result, index) => (
+              <div key={index} className="border-t pt-4">
+                <NtaiAnalysisResults analysisResult={result} />
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

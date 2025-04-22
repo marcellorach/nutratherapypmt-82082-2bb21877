@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
-import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
-import ntaiService from '@/services/ntai-service';
+import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
 import { useNtaiQueue } from './useNtaiQueue';
 import { useNtaiLogs } from './useNtaiLogs';
 import { useNtaiConfig } from './useNtaiConfig';
+import { supabase } from '@/integrations/supabase/client';
+import ntaiService from '@/services/ntai-service';
 
 const getProgressForStage = (stage: ProcessingStage): number => {
   switch (stage) {
@@ -16,7 +16,7 @@ const getProgressForStage = (stage: ProcessingStage): number => {
 };
 
 export const useNtaiProcessing = () => {
-  const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<NtaiAnalysisResult[]>([]);
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
   const {
@@ -27,6 +27,7 @@ export const useNtaiProcessing = () => {
     setProcessQueue,
     setProcessingActive,
     setActiveItemIndex,
+    setSelectedItems,
     addToQueue,
     clearCompleted,
     retryFailed,
@@ -37,7 +38,7 @@ export const useNtaiProcessing = () => {
     
     setProcessingActive(true);
     const updatedQueue = [...processQueue];
-    setAnalysisResult(null);
+    setAnalysisResults([]);
     
     addLogEntry('Iniciando processamento com configurações:');
     addLogEntry(`Modelo: ${aiConfigs.modelName || 'padrão'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
@@ -64,29 +65,28 @@ export const useNtaiProcessing = () => {
           await simulateStageProcessing(stage, item.title, addLogEntry);
         }
 
+        addLogEntry(`Enviando para processamento com IA: ${item.title}`);
+        
         const simulatedResult = await ntaiService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
-        setAnalysisResult(simulatedResult);
+        
+        setAnalysisResults(prev => [...prev, simulatedResult]);
 
-        const cardId = `card-${Date.now()}-${item.id}`;
-        addLogEntry(`Card gerado com ID: ${cardId}`);
-        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
-
-        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
+        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
 
-      } catch (error) {
-        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error}`);
+      } catch (error: any) {
+        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
-          stage: 'error' as ProcessingStage, 
+          stage: 'error', 
           progress: 50,
-          error: `Erro desconhecido: ${error}`
+          error: `Erro: ${error.message}`
         };
         setProcessQueue([...updatedQueue]);
       }
@@ -97,18 +97,45 @@ export const useNtaiProcessing = () => {
     processNextItem(0);
   };
 
+  const sendToCuration = async (results: NtaiAnalysisResult[]) => {
+    try {
+      for (const result of results) {
+        const { error } = await supabase
+          .from('processed_studies')
+          .insert({
+            study_id: result.studyId,
+            analysis_data: JSON.parse(JSON.stringify(result)),
+            kanban_status: 'new',
+            processed_by: 'ntai'
+          });
+
+        if (error) throw error;
+        addLogEntry(`Estudo ${result.studyId} enviado para curadoria com sucesso`);
+      }
+      
+      setAnalysisResults([]);
+      
+    } catch (error: any) {
+      console.error('Error sending to curation:', error);
+      throw error;
+    }
+  };
+
   return {
     processQueue,
     selectedItems,
     processingActive,
     logEntries,
     activeItemIndex,
-    analysisResult,
+    analysisResults,
     aiConfigs,
+    toggleItemSelection,
+    handleSelectAll,
     addToQueue,
     clearCompleted,
     retryFailed,
     startProcessing,
+    sendToCuration,
   };
 };
 
