@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 interface FeatureSubMenuItem {
   title: string;
@@ -31,6 +30,12 @@ const Feature: React.FC<FeatureProps> = ({
   showSubMenu,
   onToggleSubMenu,
 }) => {
+  // Helper function para verificar se o currentStep está incluído na URL
+  const currentStepIncluded = (step: string): boolean => {
+    // Na ausência do hook useLocation, usamos window.location
+    return window.location.pathname.includes(step);
+  };
+
   return (
     <div className="relative">
       <Card
@@ -71,15 +76,15 @@ const Feature: React.FC<FeatureProps> = ({
           )}
         </div>
       </Card>
+
       {showSubMenu && subMenu && subMenu.length > 0 && (
         <div className="pl-4 border-l border-gray-200 ml-8 mt-1 space-y-1">
           {subMenu.map((item, index) => (
             <div
               key={index}
-              className={cn(
-                "p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center justify-between",
+              className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center justify-between ${
                 active && currentStepIncluded(item.step) ? "bg-primary/5 text-primary" : ""
-              )}
+              }`}
               onClick={() => onClick()}
             >
               <div>
@@ -100,10 +105,5 @@ const Feature: React.FC<FeatureProps> = ({
     </div>
   );
 };
-
-// Helper function to check if current step is included
-function currentStepIncluded(step: string): boolean {
-  return location.pathname.includes(step);
-}
 
 export default Feature;

@@ -31,7 +31,8 @@ import ResearchSettingsTab from '@/components/administrador/settings/ResearchSet
 import PredictiveAnalysisSettingsTab from '@/components/administrador/settings/PredictiveAnalysisSettingsTab';
 
 const AdministradorPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<string>("estudos");
+  // Inicializar com "nutraceuticos" para começar na aba de Nutracêuticos
+  const [currentStep, setCurrentStep] = useState<string>("nutraceuticos");
   
   const renderContent = () => {
     switch (currentStep) {
@@ -98,7 +99,7 @@ const AdministradorPage: React.FC = () => {
         return <DesignConventionsTab />;
         
       default:
-        return <EstudosTab />;
+        return <NutraceuticosTab />; // Default para Nutracêuticos
     }
   };
   

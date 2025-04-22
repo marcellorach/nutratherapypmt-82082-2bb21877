@@ -15,7 +15,23 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   currentStep,
   setCurrentStep,
 }) => {
-  const [expandedMenu, setExpandedMenu] = React.useState<string | null>("baseDeConhecimento");
+  const [expandedMenu, setExpandedMenu] = React.useState<string | null>(determineInitialExpandedMenu(currentStep));
+  
+  // Função para determinar qual menu deve iniciar expandido com base no currentStep
+  function determineInitialExpandedMenu(step: string): string | null {
+    if (["nutraceuticos", "estudos", "regras", "relacoes", "knowledge-base-settings"].includes(step)) {
+      return "baseDeConhecimento";
+    } else if (["import", "fontes", "analysis", "visualization", "data-processing-settings"].includes(step)) {
+      return "processamentoDados";
+    } else if (["estudos-planejados", "estudos-andamento", "estudos-concluidos", "sugestoes-ai", "ora-biomedical", "research-settings"].includes(step)) {
+      return "pesquisaDesenvolvimento";
+    } else if (["modelos", "custo-beneficio", "relatorios", "predictive-analysis-settings"].includes(step)) {
+      return "analisePreditiva";
+    } else if (["config-ia", "prompts", "ntai-prompts", "analytics", "actions", "design-conventions"].includes(step)) {
+      return "configuracoesGerais";
+    }
+    return "baseDeConhecimento"; // Default
+  }
   
   const toggleMenu = (menu: string) => {
     setExpandedMenu(expandedMenu === menu ? null : menu);

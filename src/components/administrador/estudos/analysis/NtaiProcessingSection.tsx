@@ -40,31 +40,6 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
   
   const toggleLogVisibility = () => setLogVisible(!logVisible);
 
-  const handleSendToCuration = async () => {
-    if (analysisResults.length === 0) {
-      toast({
-        title: "Nenhum resultado para enviar",
-        description: "Processe alguns estudos primeiro antes de enviar para curadoria.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await sendToCuration(analysisResults);
-      toast({
-        title: "Estudos enviados para curadoria",
-        description: `${analysisResults.length} estudos foram enviados para a etapa de curadoria.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao enviar para curadoria",
-        description: "Ocorreu um erro ao tentar enviar os estudos para curadoria.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Card id="ntai-processing-section" className="transition-all">
       <CardContent className="p-6 space-y-6">
@@ -156,14 +131,6 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
                   {analysisResults.length} Cards Gerados
                 </Badge>
               </div>
-              
-              <Button 
-                onClick={handleSendToCuration}
-                className="flex items-center gap-2"
-              >
-                <Send className="h-4 w-4" />
-                Enviar para Curadoria
-              </Button>
             </div>
 
             {analysisResults.map((result, index) => (
