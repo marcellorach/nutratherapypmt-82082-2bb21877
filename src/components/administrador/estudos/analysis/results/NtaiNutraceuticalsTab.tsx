@@ -22,7 +22,6 @@ const NtaiNutraceuticalsTab: React.FC<NtaiNutraceuticalsTabProps> = ({ nutraceut
               key={idx}
               name={nutra.name} 
               score={4.0}
-              isSimulated={nutra.isSimulated}
               className="m-1"
             />
           ))

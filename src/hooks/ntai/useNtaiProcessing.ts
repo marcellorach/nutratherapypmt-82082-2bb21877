@@ -1,11 +1,10 @@
 
 import { useState } from 'react';
 import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
+import ntaiService from '@/services/ntai-service';
 import { useNtaiQueue } from './useNtaiQueue';
 import { useNtaiLogs } from './useNtaiLogs';
 import { useNtaiConfig } from './useNtaiConfig';
-import { supabase } from '@/integrations/supabase/client';
-import ntaiService from '@/services/ntai-service';
 
 const getProgressForStage = (stage: ProcessingStage): number => {
   switch (stage) {
@@ -17,7 +16,7 @@ const getProgressForStage = (stage: ProcessingStage): number => {
 };
 
 export const useNtaiProcessing = () => {
-  const [analysisResults, setAnalysisResults] = useState<NtaiAnalysisResult[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
   const {
@@ -28,34 +27,17 @@ export const useNtaiProcessing = () => {
     setProcessQueue,
     setProcessingActive,
     setActiveItemIndex,
-    setSelectedItems,
     addToQueue,
     clearCompleted,
     retryFailed,
   } = useNtaiQueue();
-
-  const toggleItemSelection = (id: string) => {
-    setSelectedItems(prev => 
-      prev.includes(id)
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = (estudos: any[]) => {
-    if (selectedItems.length === estudos.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(estudos.map(estudo => estudo.id));
-    }
-  };
 
   const startProcessing = async () => {
     if (processQueue.length === 0 || processingActive) return;
     
     setProcessingActive(true);
     const updatedQueue = [...processQueue];
-    setAnalysisResults([]);
+    setAnalysisResult(null);
     
     addLogEntry('Iniciando processamento com configurações:');
     addLogEntry(`Modelo: ${aiConfigs.modelName || 'padrão'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
@@ -82,28 +64,29 @@ export const useNtaiProcessing = () => {
           await simulateStageProcessing(stage, item.title, addLogEntry);
         }
 
-        addLogEntry(`Enviando para processamento com IA: ${item.title}`);
-        
         const simulatedResult = await ntaiService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
-        
-        setAnalysisResults(prev => [...prev, simulatedResult]);
+        setAnalysisResult(simulatedResult);
 
-        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
+        const cardId = `card-${Date.now()}-${item.id}`;
+        addLogEntry(`Card gerado com ID: ${cardId}`);
+        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
+
+        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
 
-      } catch (error: any) {
-        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
+      } catch (error) {
+        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
-          stage: 'error', 
+          stage: 'error' as ProcessingStage, 
           progress: 50,
-          error: `Erro: ${error.message}`
+          error: `Erro desconhecido: ${error}`
         };
         setProcessQueue([...updatedQueue]);
       }
@@ -114,45 +97,18 @@ export const useNtaiProcessing = () => {
     processNextItem(0);
   };
 
-  const sendToCuration = async (results: NtaiAnalysisResult[]) => {
-    try {
-      for (const result of results) {
-        const { error } = await supabase
-          .from('processed_studies')
-          .insert({
-            study_id: result.studyId,
-            analysis_data: JSON.parse(JSON.stringify(result)),
-            kanban_status: 'new',
-            processed_by: 'ntai'
-          });
-
-        if (error) throw error;
-        addLogEntry(`Estudo ${result.studyId} enviado para curadoria com sucesso`);
-      }
-      
-      setAnalysisResults([]);
-      
-    } catch (error: any) {
-      console.error('Error sending to curation:', error);
-      throw error;
-    }
-  };
-
   return {
     processQueue,
     selectedItems,
     processingActive,
     logEntries,
     activeItemIndex,
-    analysisResults,
+    analysisResult,
     aiConfigs,
-    toggleItemSelection,
-    handleSelectAll,
     addToQueue,
     clearCompleted,
     retryFailed,
     startProcessing,
-    sendToCuration,
   };
 };
 

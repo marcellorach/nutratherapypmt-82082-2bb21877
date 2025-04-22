@@ -1,51 +1,69 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface OutcomeTagProps {
   condition: string;
   score: number;
-  size?: "small" | "medium";
-  isSimulated?: boolean;
+  showScore?: boolean;
+  className?: string;
 }
 
 const OutcomeTag: React.FC<OutcomeTagProps> = ({ 
   condition, 
   score,
-  size = "medium",
-  isSimulated
+  showScore = true,
+  className = ""
 }) => {
-  // Cores baseadas na pontuação (eficácia)
-  const getColorClass = () => {
-    if (score >= 4) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    if (score >= 3) return "bg-green-50 text-green-700 border-green-200";
-    if (score >= 2) return "bg-amber-50 text-amber-700 border-amber-200";
-    return "bg-red-50 text-red-700 border-red-200";
+  // Determina a cor do badge baseado na pontuação
+  const getBadgeStyle = (score: number) => {
+    if (score >= 4) {
+      return {
+        bg: '#D1FAE5', // Verde claro
+        color: '#047857', // Verde escuro
+        border: '#6EE7B7' // Verde médio
+      };
+    } else if (score >= 3) {
+      return {
+        bg: '#E0F2FE', // Azul claro
+        color: '#0369A1', // Azul escuro
+        border: '#7DD3FC' // Azul médio
+      };
+    } else {
+      return {
+        bg: '#FEF3C7', // Amarelo claro
+        color: '#92400E', // Amarelo escuro
+        border: '#FCD34D' // Amarelo médio
+      };
+    }
   };
   
-  const getScoreColorClass = () => {
-    if (score >= 4) return "bg-emerald-100 text-emerald-800";
-    if (score >= 3) return "bg-green-100 text-green-800";
-    if (score >= 2) return "bg-amber-100 text-amber-800";
-    return "bg-red-100 text-red-800";
-  };
-
+  const style = getBadgeStyle(score);
+  
   return (
-    <Badge 
-      variant="outline" 
-      className={`${getColorClass()} flex items-center ${size === "small" ? "text-xs px-1.5 py-0.5" : ""}`}
-    >
-      {condition}
-      <span className={`ml-1 px-1 py-0.5 rounded ${getScoreColorClass()} ${
-        size === "small" ? "text-[10px]" : "text-xs"
-      }`}>
-        {score.toFixed(1)}
-      </span>
-      {isSimulated && (
-        <AlertTriangle className={`${size === "small" ? "w-2 h-2" : "w-3 h-3"} ml-1 text-amber-500`} />
-      )}
-    </Badge>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge 
+            variant="outline" 
+            className={`font-normal ${className}`}
+            style={{ 
+              backgroundColor: style.bg,
+              color: style.color,
+              borderColor: style.border
+            }}
+          >
+            <span>{condition}</span>
+            {showScore && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p><span className="font-medium">{condition}</span> - Pontuação: {score.toFixed(1)}/5</p>
+          <p className="text-xs text-gray-500 mt-1">Relevância e eficácia para esta condição</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
