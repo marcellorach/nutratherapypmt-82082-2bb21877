@@ -27,6 +27,14 @@ const ImportFilePreview: React.FC<ImportFilePreviewProps> = ({ file, onRemove, i
         return 'CSV';
       case 'json':
         return 'JSON';
+      case 'doc':
+        return 'DOC';
+      case 'docx':
+        return 'DOCX';
+      case 'txt':
+        return 'TXT';
+      case 'rtf':
+        return 'RTF';
       default:
         return extension?.toUpperCase() || 'Arquivo';
     }

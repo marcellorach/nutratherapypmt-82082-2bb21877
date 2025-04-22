@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, File, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -12,8 +11,7 @@ import ImportFilePreview from './ImportFilePreview';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import SciImportHistoryRow from './SciImportHistoryRow';
 
-const SCISPACE_LOGO_URL = "/lovable-uploads/8eed700f-39e7-4208-aeb1-664f3660af90.png";
-const SCISPACE_FORMATS_URL = "/lovable-uploads/d0b8670e-c0fc-4068-b3b2-2a859ea82023.png";
+const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
 interface ImportHistoryRow {
   id: string;
@@ -114,28 +112,36 @@ const SciImportSection: React.FC = () => {
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+    <Card>
+      <Tabs defaultValue="file-upload" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="p-6 pb-0 flex items-center justify-between">
           <div>
-            <CardTitle>Importar Estudos Científicos</CardTitle>
-            <CardDescription>Importe estudos do SCISPACE, "análises integrativas" ou outras fontes</CardDescription>
+            <h2 className="text-2xl font-bold tracking-tight mb-1">Importar Estudos Científicos</h2>
+            <p className="text-muted-foreground">
+              Importe estudos do SCISPACE, "análises integrativas" ou outras fontes
+            </p>
           </div>
-          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1">
-            <img src={SCISPACE_LOGO_URL} alt="SciSpace Logo" className="h-6 w-6 mr-1 inline-block" style={{ background: 'white', borderRadius: 4, objectFit: 'contain' }} />
-            SCISPACE
-          </Badge>
+          {activeTab === 'scispace-api' && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1">
+              <img 
+                src={SCISPACE_LOGO_URL} 
+                alt="SciSpace Logo" 
+                className="h-8 w-auto mr-1 inline-block" 
+              />
+            </Badge>
+          )}
         </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="file-upload" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
+        
+        <div className="px-6 pt-4">
+          <TabsList className="w-full justify-start">
             <TabsTrigger value="file-upload">Upload de Arquivos</TabsTrigger>
             <TabsTrigger value="scispace-api">Importar Integrativa (SCISPACE)</TabsTrigger>
             <TabsTrigger value="import-history">Histórico</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="file-upload" className="space-y-4">
+        </div>
+
+        <CardContent>
+          <TabsContent value="file-upload" className="space-y-4 mt-4">
             <div className="flex items-center space-x-2">
               <Button variant="outline" className="gap-2" asChild>
                 <label>
@@ -194,11 +200,11 @@ const SciImportSection: React.FC = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="scispace-api">
+          <TabsContent value="scispace-api" className="mt-4">
             <SciSpace2StepImport />
           </TabsContent>
           
-          <TabsContent value="import-history">
+          <TabsContent value="import-history" className="mt-4">
             <div className="py-2">
               {historyLoading ? (
                 <div className="text-center p-6 text-gray-400">Carregando histórico...</div>
@@ -239,8 +245,8 @@ const SciImportSection: React.FC = () => {
               )}
             </div>
           </TabsContent>
-        </Tabs>
-      </CardContent>
+        </CardContent>
+      </Tabs>
     </Card>
   );
 };
