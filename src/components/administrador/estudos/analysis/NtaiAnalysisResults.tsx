@@ -1,34 +1,54 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Send, AlertTriangle, Users, Clock, Award, FileText } from "lucide-react";
 import { NtaiAnalysisResult } from '@/types/ntai';
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 import NtaiNutraceuticalsTab from './results/NtaiNutraceuticalsTab';
 import NtaiConditionsTab from './results/NtaiConditionsTab';
 import NtaiInteractionsTab from './results/NtaiInteractionsTab';
 import NtaiSideEffectsTab from './results/NtaiSideEffectsTab';
-import { AlertTriangle, Users, Clock, Award, FileText } from "lucide-react";
 
 interface NtaiAnalysisResultsProps {
-  analysisResult: NtaiAnalysisResult | null;
+  analysisResult: NtaiAnalysisResult;
 }
 
 const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ analysisResult }) => {
+  const { toast } = useToast();
+  const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState("summary");
   
-  if (!analysisResult) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Nenhum resultado disponível</CardTitle>
-          <CardDescription>
-            Selecione documentos na fila e inicie o processamento para visualizar os resultados da análise NTAI.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-  
+  const handleSendToCuration = async () => {
+    setIsSending(true);
+    try {
+      const { error } = await supabase
+        .from('processed_studies')
+        .insert({
+          study_id: analysisResult.studyId,
+          analysis_data: JSON.parse(JSON.stringify(analysisResult)),
+          kanban_status: 'new',
+          processed_by: 'ntai'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Estudo enviado para curadoria",
+        description: `Estudo ${analysisResult.studyId} enviado com sucesso.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar para curadoria",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -46,6 +66,17 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ analysisResul
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="flex justify-end mb-4">
+          <Button 
+            onClick={handleSendToCuration} 
+            disabled={isSending}
+            className="flex items-center gap-2"
+          >
+            <Send className="h-4 w-4" />
+            Enviar para Curadoria
+          </Button>
+        </div>
+
         <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="summary">Resumo</TabsTrigger>
