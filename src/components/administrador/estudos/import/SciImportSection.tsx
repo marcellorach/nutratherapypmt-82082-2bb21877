@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ const SciImportSection: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const { toast } = useToast();
 
-  // Upload and register each file, then clear queue for NTAI step
   const handleImport = async () => {
     if (files.length === 0) {
       toast({
@@ -49,7 +47,6 @@ const SciImportSection: React.FC = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const path = `scispace/manual-import/${Date.now()}-${file.name}`;
-      // upload para Supabase Storage
       const { error } = await supabase.storage.from("scispace").upload(path, file, {
         upsert: false,
       });
@@ -62,6 +59,23 @@ const SciImportSection: React.FC = () => {
         setImporting(false);
         return;
       }
+      await supabase.from("scispace_imports").insert([
+        {
+          meta_summary_filename: file.name,
+          meta_summary_storage_path: path,
+          base_studies_filename: file.name,
+          base_studies_storage_path: path,
+          scispace_status: "manual",
+        }
+      ]);
+      await supabase.from("processed_studies").insert([
+        {
+          study_id: path,
+          kanban_status: "new",
+          processed_by: "manual-import",
+          analysis_data: null
+        }
+      ]);
       currentProgress = Math.round(((i + 1) / files.length) * 100);
       setProgress(currentProgress);
     }
@@ -76,7 +90,6 @@ const SciImportSection: React.FC = () => {
     }, 800);
   };
 
-  // Adiciona/remover arquivos da fila local (antes do upload)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
@@ -87,20 +100,14 @@ const SciImportSection: React.FC = () => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
-  // Função para navegar para processamento NTAI
   const handleProcessWithAI = () => {
-    // Rolar para a seção de processamento NTAI
     const ntaiSection = document.getElementById('ntai-processing-section');
     if (ntaiSection) {
       ntaiSection.scrollIntoView({ behavior: 'smooth' });
-      
-      // Piscar o elemento para chamar atenção
       ntaiSection.classList.add('highlight-section');
       setTimeout(() => {
         ntaiSection.classList.remove('highlight-section');
       }, 2000);
-      
-      // Exibe toast com instruções
       toast({
         title: "Selecione os estudos para processamento",
         description: "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
@@ -111,7 +118,6 @@ const SciImportSection: React.FC = () => {
   useEffect(() => {
     if (activeTab === "import-history") {
       setHistoryLoading(true);
-      // Busca os registros mais recentes primeiro
       supabase
         .from("scispace_imports")
         .select("id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status")
@@ -188,7 +194,6 @@ const SciImportSection: React.FC = () => {
               <Button variant="outline" className="gap-2" asChild>
                 <label>
                   <span>
-                    {/* Ícone e texto do botão de upload */}
                     <span className="inline-block align-middle">
                       <Upload className="h-4 w-4" />
                     </span>
@@ -208,7 +213,6 @@ const SciImportSection: React.FC = () => {
                 Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF
               </p>
             </div>
-            {/* Lista de arquivos para upload */}
             {files.length > 0 && (
               <div className="mt-4 border rounded-md">
                 <div className="p-3 bg-gray-50 border-b">
