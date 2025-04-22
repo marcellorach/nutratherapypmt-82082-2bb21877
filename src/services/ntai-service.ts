@@ -3,12 +3,16 @@ import { NtaiAnalysisResult, NtaiNutraceuticalTag, NtaiConditionTag, NtaiInterac
 
 // Mock API Key para simulação
 const OPENAI_API_KEY = 'sk-mock-key-for-prototype';
-const GPT_MODEL = 'gpt-4.5-preview';
 
-export const extractNutraceuticalsFromStudy = async (studyText: string): Promise<NtaiNutraceuticalTag[]> => {
+export const extractNutraceuticalsFromStudy = async (
+  studyText: string,
+  prompt?: string
+): Promise<NtaiNutraceuticalTag[]> => {
   // Em um ambiente real, esta função enviaria o texto para a API da OpenAI
-  // Para o protótipo, vamos simular um resultado
+  // com o prompt personalizado
   await new Promise(resolve => setTimeout(resolve, 1500)); // Simula tempo de processamento
+  
+  console.log('Usando prompt para extração de nutracêuticos:', prompt);
   
   return [
     { name: "Ômega 3", confidence: 0.94 },
@@ -18,8 +22,13 @@ export const extractNutraceuticalsFromStudy = async (studyText: string): Promise
   ];
 };
 
-export const extractConditionsFromStudy = async (studyText: string): Promise<NtaiConditionTag[]> => {
+export const extractConditionsFromStudy = async (
+  studyText: string,
+  prompt?: string
+): Promise<NtaiConditionTag[]> => {
   await new Promise(resolve => setTimeout(resolve, 1800)); // Simula tempo de processamento
+  
+  console.log('Usando prompt para extração de condições:', prompt);
   
   return [
     { name: "Artrite Canina", efficacyScore: 4.2, confidence: 0.95 },
@@ -63,7 +72,16 @@ export const scoreStudyRelevance = async (studyText: string): Promise<number> =>
   return 2.5 + Math.random() * 2.5;
 };
 
-export const analyzeStudy = async (studyId: string, studyText: string): Promise<NtaiAnalysisResult> => {
+export const analyzeStudy = async (
+  studyId: string, 
+  studyText: string,
+  nutraceuticalsPrompt?: string,
+  conditionsPrompt?: string
+): Promise<NtaiAnalysisResult> => {
+  console.log('Analisando estudo com prompts personalizados:');
+  console.log('Prompt para nutracêuticos:', nutraceuticalsPrompt);
+  console.log('Prompt para condições:', conditionsPrompt);
+  
   // Em um ambiente de produção, isso seria feito com uma única chamada à API da OpenAI
   // com um prompt especializado que retornaria todos os dados necessários
   
@@ -76,8 +94,8 @@ export const analyzeStudy = async (studyId: string, studyText: string): Promise<
     qualityScore,
     relevanceScore
   ] = await Promise.all([
-    extractNutraceuticalsFromStudy(studyText),
-    extractConditionsFromStudy(studyText),
+    extractNutraceuticalsFromStudy(studyText, nutraceuticalsPrompt),
+    extractConditionsFromStudy(studyText, conditionsPrompt),
     extractInteractionsFromStudy(studyText),
     extractSideEffectsFromStudy(studyText),
     scoreStudyQuality(studyText),

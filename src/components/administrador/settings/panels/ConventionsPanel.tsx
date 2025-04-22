@@ -137,6 +137,18 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
               <span className="text-sm text-gray-600">← Formato de Dosagem</span>
             </div>
           </div>
+          
+          <div className="mt-6 border-t pt-4">
+            <h5 className="font-medium mb-2">Convenção em Prática:</h5>
+            <div className="p-3 bg-white rounded border">
+              <div className="flex items-center justify-between mb-2">
+                <Badge className="bg-green-100 text-green-800">Nutracêutico</Badge>
+                <span className="text-sm text-gray-500">✓ Validado</span>
+              </div>
+              <p className="text-sm"><strong>Correto:</strong> Zingiber officinale (Gengibre)</p>
+              <p className="text-sm text-red-600 mt-1"><strong>Incorreto:</strong> Gengibre</p>
+            </div>
+          </div>
         </div>
       );
     }
@@ -146,22 +158,46 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
         <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold mb-2">Formatos Padrão:</h4>
           <div className="space-y-3">
-            <div className="p-2 bg-white rounded border border-gray-200">
+            <div className="p-3 bg-white rounded border border-gray-200">
               <div className="flex items-center gap-2 mb-1">
                 <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
                   Nível 5
                 </Badge>
                 <span className="text-sm">Evidência forte com múltiplos estudos</span>
               </div>
+              <div className="flex mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                </div>
+              </div>
             </div>
             
-            <div className="p-2 bg-white rounded border border-gray-200">
+            <div className="p-3 bg-white rounded border border-gray-200">
               <div className="flex items-center gap-2 mb-1">
                 <Badge className="bg-indigo-100 text-indigo-800 border-indigo-300">
                   ID: NUT-2024-001
                 </Badge>
                 <span className="text-sm">Formato de Identificador</span>
               </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="text-xs bg-indigo-50 p-1 text-center rounded">NUT</div>
+                <div className="text-xs bg-indigo-50 p-1 text-center rounded">2024</div>
+                <div className="text-xs bg-indigo-50 p-1 text-center rounded">001</div>
+              </div>
+            </div>
+            
+            <div className="p-3 bg-white rounded border">
+              <h5 className="text-sm font-medium mb-2">Exemplo de metadados:</h5>
+              <code className="text-xs bg-gray-100 p-2 block rounded">
+                {`{
+  "id": "NUT-2024-001",
+  "name": "Curcuma longa (Cúrcuma)",
+  "added_at": "2024-05-22T10:30:00Z",
+  "updated_at": "2024-05-25T14:22:10Z",
+  "evidence_level": 4,
+  "tags": ["anti-inflamatório", "antioxidante", "cães"]
+}`}
+              </code>
             </div>
           </div>
         </div>
@@ -173,14 +209,64 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
         <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold mb-2">Validações:</h4>
           <div className="space-y-3">
-            <div className="flex items-center gap-2 p-2 bg-white rounded border border-green-200">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-sm">3+ estudos validados</span>
+            <div className="flex items-center gap-2 p-3 bg-white rounded border border-green-200">
+              <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <span className="text-sm font-medium">3+ estudos validados</span>
+                <div className="flex mt-1">
+                  <Badge variant="outline" className="mr-1 bg-blue-50 text-blue-700 text-xs">Estudo 1</Badge>
+                  <Badge variant="outline" className="mr-1 bg-blue-50 text-blue-700 text-xs">Estudo 2</Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">Estudo 3</Badge>
+                </div>
+              </div>
             </div>
             
-            <div className="flex items-center gap-2 p-2 bg-white rounded border border-red-200">
-              <div className="h-2 w-2 rounded-full bg-red-500"></div>
-              <span className="text-sm">Interações não documentadas</span>
+            <div className="flex items-start gap-2 p-3 bg-white rounded border border-red-200">
+              <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div>
+                <span className="text-sm font-medium">Interações não documentadas</span>
+                <p className="text-xs text-red-600 mt-1">
+                  É necessário documentar possíveis interações medicamentosas antes da aprovação
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-3 bg-white rounded border">
+              <h5 className="text-sm font-medium mb-2">Checklist de validação:</h5>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <div className="h-4 w-4 border border-gray-300 rounded-sm mr-2 flex items-center justify-center bg-green-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">Pelo menos 3 estudos de suporte</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="h-4 w-4 border border-gray-300 rounded-sm mr-2 flex items-center justify-center bg-green-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">Justificativa para nível de evidência</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="h-4 w-4 border border-gray-300 rounded-sm mr-2"></div>
+                  <span className="text-sm">Documentação de interações medicamentosas</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="h-4 w-4 border border-gray-300 rounded-sm mr-2"></div>
+                  <span className="text-sm">Frequência de efeitos colaterais</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

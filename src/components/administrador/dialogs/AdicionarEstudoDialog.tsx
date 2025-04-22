@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AIProcessingVisualization from '../visualizations/AIProcessingVisualization';
+import { useToast } from "@/hooks/use-toast";
 
 interface AdicionarEstudoDialogProps {
   open: boolean;
@@ -30,6 +31,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AdicionarEstudoDialog: React.FC<AdicionarEstudoDialogProps> = ({ open, onClose, onEstudoAdicionado }) => {
   const [step, setStep] = useState<'form' | 'processing'>('form');
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [processingStage, setProcessingStage] = useState('');
+  const { toast } = useToast();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -43,14 +47,77 @@ const AdicionarEstudoDialog: React.FC<AdicionarEstudoDialogProps> = ({ open, onC
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  const simulateAIProcessing = async () => {
+    // Estágio 1: Extração de texto
+    setProcessingStage('Extraindo texto do documento');
+    
+    for (let i = 0; i <= 25; i++) {
+      setProcessingProgress(i);
+      await new Promise(r => setTimeout(r, 80));
+    }
+    
+    // Estágio 2: Análise de conteúdo
+    setProcessingStage('Analisando conteúdo com IA');
+    
+    for (let i = 26; i <= 60; i++) {
+      setProcessingProgress(i);
+      await new Promise(r => setTimeout(r, 60));
+    }
+    
+    // Estágio 3: Identificando nutracêuticos
+    setProcessingStage('Identificando nutracêuticos e compostos');
+    
+    for (let i = 61; i <= 75; i++) {
+      setProcessingProgress(i);
+      await new Promise(r => setTimeout(r, 70));
+    }
+    
+    // Estágio 4: Correlacionando com condições médicas
+    setProcessingStage('Correlacionando com condições médicas');
+    
+    for (let i = 76; i <= 90; i++) {
+      setProcessingProgress(i);
+      await new Promise(r => setTimeout(r, 70));
+    }
+    
+    // Estágio 5: Finalizando e preparando card
+    setProcessingStage('Preparando card para o kanban');
+    
+    for (let i = 91; i <= 100; i++) {
+      setProcessingProgress(i);
+      await new Promise(r => setTimeout(r, 50));
+    }
+    
+    // Finalização
+    setProcessingStage('Processamento concluído!');
+    
+    // Simular tempo de conclusão visual
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Notificar conclusão
+    onEstudoAdicionado();
+  };
+
+  const onSubmit = async (data: FormValues) => {
     // Inicia o processamento da IA
     setStep('processing');
     
-    // Simulação do tempo de processamento
-    setTimeout(() => {
-      onEstudoAdicionado();
-    }, 8000);
+    try {
+      // Simulação do processamento da IA
+      await simulateAIProcessing();
+      
+      toast({
+        title: "Estudo processado com sucesso",
+        description: "O estudo foi analisado pela IA e adicionado ao kanban.",
+      });
+    } catch (error) {
+      console.error("Erro ao processar o estudo:", error);
+      toast({
+        title: "Erro ao processar estudo",
+        description: "Ocorreu um erro durante o processamento do estudo.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -178,7 +245,37 @@ const AdicionarEstudoDialog: React.FC<AdicionarEstudoDialogProps> = ({ open, onC
             </form>
           </Form>
         ) : (
-          <AIProcessingVisualization />
+          <div className="py-4">
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-2">{processingStage}</h3>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                <div 
+                  className="bg-purple-600 h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${processingProgress}%` }}
+                ></div>
+              </div>
+              <div className="text-right text-sm text-gray-500">{processingProgress}%</div>
+            </div>
+            
+            <AIProcessingVisualization 
+              progress={processingProgress}
+              stage={processingStage}
+            />
+            
+            <div className="mt-6 pt-6 border-t">
+              <h4 className="text-sm font-medium mb-2">Log de Processamento:</h4>
+              <div className="bg-gray-50 p-4 rounded text-xs font-mono h-24 overflow-y-auto">
+                {processingProgress >= 10 && <div>[{new Date().toLocaleTimeString()}] Iniciando processamento do documento...</div>}
+                {processingProgress >= 25 && <div>[{new Date().toLocaleTimeString()}] Extração de texto concluída com sucesso.</div>}
+                {processingProgress >= 40 && <div>[{new Date().toLocaleTimeString()}] Analisando conteúdo com modelo de IA...</div>}
+                {processingProgress >= 60 && <div>[{new Date().toLocaleTimeString()}] Análise de conteúdo concluída.</div>}
+                {processingProgress >= 70 && <div>[{new Date().toLocaleTimeString()}] Identificados 3 nutracêuticos principais.</div>}
+                {processingProgress >= 80 && <div>[{new Date().toLocaleTimeString()}] Correlacionando com 2 condições médicas...</div>}
+                {processingProgress >= 90 && <div>[{new Date().toLocaleTimeString()}] Gerando tags e metadados para o card.</div>}
+                {processingProgress >= 100 && <div>[{new Date().toLocaleTimeString()}] Processamento concluído. Card adicionado ao kanban.</div>}
+              </div>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>

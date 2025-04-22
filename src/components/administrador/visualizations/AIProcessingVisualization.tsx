@@ -1,120 +1,169 @@
-import React, { useState, useEffect } from 'react';
-import { CircleCheck, CircleDashed, Sparkles, BookOpen, Brain, MoveHorizontal, Database, FlaskConical, BadgeCheck } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import './ai-processing.css';
 
-const stages = [
-  { id: 'extract', label: 'Extração de Informações', icon: BookOpen, description: 'Extraindo dados estruturados do texto científico...' },
-  { id: 'analyze', label: 'Análise Contextual', icon: Brain, description: 'Analisando contexto e relevância para medicina veterinária...' },
-  { id: 'validate', label: 'Validação de Metodologia', icon: FlaskConical, description: 'Verificando rigor metodológico e amostragem...' },
-  { id: 'compare', label: 'Comparação com Base de Dados', icon: Database, description: 'Comparando com outros estudos e evidências científicas...' },
-  { id: 'integrate', label: 'Integração ao Sistema', icon: MoveHorizontal, description: 'Preparando dados para integração com nutracêuticos...' },
-  { id: 'score', label: 'Geração de Pontuações', icon: BadgeCheck, description: 'Calculando scores de fundamentação, eficiência e constância...' },
-];
+import React from 'react';
+import { Brain, Network, FileText, TagIcon, Vial, Database } from 'lucide-react';
 
-const AIProcessingVisualization: React.FC = () => {
-  const [currentStage, setCurrentStage] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [completedStages, setCompletedStages] = useState<string[]>([]);
+interface AIProcessingVisualizationProps {
+  progress: number;
+  stage?: string;
+}
+
+const AIProcessingVisualization: React.FC<AIProcessingVisualizationProps> = ({ 
+  progress,
+  stage
+}) => {
+  // Determinar qual etapa está ativa com base no progresso
+  const getActiveStage = () => {
+    if (progress < 25) return 'extraction';
+    if (progress < 60) return 'analysis';
+    if (progress < 75) return 'nutraceuticals';
+    if (progress < 90) return 'correlation';
+    return 'card';
+  };
   
-  useEffect(() => {
-    const stageTime = 1300; // tempo por estágio em ms
+  const activeStage = getActiveStage();
+  
+  // Configuração para os ícones e animações
+  const stageConfig = {
+    extraction: {
+      icon: FileText,
+      text: 'Extração de texto',
+      active: activeStage === 'extraction',
+      completed: progress >= 25,
+    },
+    analysis: {
+      icon: Brain,
+      text: 'Análise por IA',
+      active: activeStage === 'analysis',
+      completed: progress >= 60,
+    },
+    nutraceuticals: {
+      icon: Vial,
+      text: 'Identificação de nutracêuticos',
+      active: activeStage === 'nutraceuticals',
+      completed: progress >= 75,
+    },
+    correlation: {
+      icon: Network,
+      text: 'Correlação clínica',
+      active: activeStage === 'correlation',
+      completed: progress >= 90,
+    },
+    card: {
+      icon: TagIcon,
+      text: 'Criação de card',
+      active: activeStage === 'card',
+      completed: progress >= 100,
+    },
+  };
+  
+  // Renderiza os nós do processo
+  const renderStageNode = (stage: keyof typeof stageConfig, index: number) => {
+    const config = stageConfig[stage];
+    const Icon = config.icon;
     
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        const newProgress = prev + 1;
+    return (
+      <div className="flex flex-col items-center" key={stage}>
+        <div 
+          className={`
+            relative z-10 flex items-center justify-center w-12 h-12 rounded-full 
+            ${config.active ? 'bg-purple-100 border-2 border-purple-600 animate-pulse' : 
+              config.completed ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-100 border-2 border-gray-300'}
+            transition-all duration-300
+          `}
+        >
+          <Icon 
+            className={`
+              w-6 h-6 
+              ${config.active ? 'text-purple-600' : 
+                config.completed ? 'text-green-500' : 'text-gray-400'}
+            `} 
+          />
+          
+          {config.completed && !config.active && (
+            <div className="absolute -top-1 -right-1 bg-green-500 rounded-full w-4 h-4 flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          )}
+        </div>
         
-        const stageProgress = (newProgress / 100) * stages.length;
-        const newStage = Math.min(Math.floor(stageProgress), stages.length - 1);
+        <span className={`
+          mt-2 text-xs text-center max-w-[80px]
+          ${config.active ? 'text-purple-600 font-medium' : 
+            config.completed ? 'text-green-600 font-medium' : 'text-gray-500'}
+        `}>
+          {config.text}
+        </span>
         
-        if (newStage > currentStage) {
-          setCompletedStages(prev => [...prev, stages[currentStage].id]);
-          setCurrentStage(newStage);
-        }
+        {/* Linha de conexão */}
+        {index < Object.keys(stageConfig).length - 1 && (
+          <div className="hidden md:block absolute h-0.5 bg-gray-200 top-[45px]" 
+               style={{ 
+                 left: `${(index * 25) + 10}%`, 
+                 width: '15%',
+                 backgroundColor: config.completed ? '#10b981' : '#e5e7eb' 
+               }}>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full py-6 px-4 bg-white rounded-lg border">
+      <div className="relative flex justify-between md:justify-around">
+        {Object.keys(stageConfig).map((stage, index) => 
+          renderStageNode(stage as keyof typeof stageConfig, index)
+        )}
+      </div>
+      
+      {/* Animação de Partículas AI */}
+      <div className="mt-8 h-32 bg-gray-50 rounded-lg relative overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Brain 
+            className={`w-16 h-16 text-purple-300 ${activeStage === 'analysis' ? 'animate-pulse' : ''}`}
+            opacity={0.2}
+          />
+        </div>
         
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          if (!completedStages.includes(stages[stages.length - 1].id)) {
-            setCompletedStages(prev => [...prev, stages[stages.length - 1].id]);
+        {/* Simulação de fluxo de dados */}
+        <div className="absolute inset-0">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute h-2 w-2 rounded-full bg-purple-500"
+              style={{
+                top: `${20 + Math.random() * 60}%`,
+                left: `${(progress / 100) * 70}%`,
+                opacity: 0.7,
+                animation: `particle-flow ${1 + Math.random() * 3}s linear infinite`,
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-500">
+          {stage || "Processando estudo com IA..."}
+        </div>
+      </div>
+      
+      <style jsx>{`
+        @keyframes particle-flow {
+          0% {
+            transform: translateX(0) scale(0.8);
+            opacity: 0;
+          }
+          50% {
+            opacity: 0.8;
+            transform: translateX(50px) scale(1.2);
+          }
+          100% {
+            transform: translateX(100px) scale(0.8);
+            opacity: 0;
           }
         }
-        
-        return newProgress > 100 ? 100 : newProgress;
-      });
-    }, stageTime / 20); // 20 atualizações por estágio
-    
-    return () => clearInterval(interval);
-  }, [currentStage, completedStages]);
-  
-  return (
-    <div className="py-6 space-y-6">
-      <div className="flex items-center justify-center mb-10">
-        <Sparkles className="h-10 w-10 text-indigo-500 animate-pulse-glow mr-3" />
-        <h3 className="text-xl font-semibold">Processamento por Inteligência Artificial</h3>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm font-medium">Progresso Total</span>
-          <span className="text-sm font-medium">{Math.round(progress)}%</span>
-        </div>
-        <Progress value={progress} className="h-2" />
-      </div>
-      
-      <div className="space-y-4 mt-8">
-        {stages.map((stage, index) => {
-          const isActive = index === currentStage;
-          const isCompleted = completedStages.includes(stage.id);
-          
-          return (
-            <div 
-              key={stage.id} 
-              className={`flex items-start p-3 rounded-lg transition-all ${
-                isActive ? 'bg-indigo-50 border border-indigo-100' : 
-                isCompleted ? 'bg-green-50 border border-green-100' : 
-                'bg-gray-50 border border-gray-100 opacity-70'
-              }`}
-            >
-              <div className={`p-2 rounded-full mr-3 ${
-                isActive ? 'bg-indigo-100 text-indigo-500 animate-pulse-glow' : 
-                isCompleted ? 'bg-green-100 text-green-500' : 
-                'bg-gray-100 text-gray-500'
-              }`}>
-                {isCompleted ? (
-                  <CircleCheck className="h-6 w-6" />
-                ) : isActive ? (
-                  <stage.icon className="h-6 w-6 animate-spin-slow" />
-                ) : (
-                  <CircleDashed className="h-6 w-6" />
-                )}
-              </div>
-              <div>
-                <h4 className={`font-medium ${
-                  isActive ? 'text-indigo-700' : 
-                  isCompleted ? 'text-green-700' : 
-                  'text-gray-700'
-                }`}>
-                  {stage.label}
-                </h4>
-                <p className={`text-sm ${
-                  isActive ? 'text-indigo-600' : 
-                  isCompleted ? 'text-green-600' : 
-                  'text-gray-500'
-                }`}>
-                  {isActive || isCompleted ? stage.description : 'Aguardando processamento...'}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      
-      {progress >= 100 && (
-        <div className="flex items-center justify-center bg-green-50 p-4 rounded-lg mt-6">
-          <CircleCheck className="h-6 w-6 text-green-500 mr-2" />
-          <span className="font-medium text-green-700">Processamento concluído com sucesso!</span>
-        </div>
-      )}
+      `}</style>
     </div>
   );
 };

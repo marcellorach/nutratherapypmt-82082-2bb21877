@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProcessingItem, NtaiAnalysisStage, NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
 import { useToast } from "@/hooks/use-toast";
 import ntaiService from '@/services/ntai-service';
@@ -11,7 +11,27 @@ export const useNtaiProcessing = () => {
   const [logEntries, setLogEntries] = useState<string[]>([]);
   const [activeItemIndex, setActiveItemIndex] = useState<number>(-1);
   const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
+  const [aiConfigs, setAiConfigs] = useState<Record<string, string>>({});
   const { toast } = useToast();
+
+  // Efeito para carregar configurações de AI
+  useEffect(() => {
+    // Em um ambiente real, isso carregaria as configurações da API
+    // Por enquanto, simulamos o carregamento
+    const loadAiConfigs = async () => {
+      const configs = {
+        'modelName': 'gpt-4o',
+        'temperature': '0.7',
+        'nutraceuticals_prompt': 'Analise este estudo científico e identifique os nutracêuticos mencionados, suas propriedades, dosagens e evidências científicas.',
+        'conditions_prompt': 'Identifique as condições de saúde relacionadas aos nutracêuticos neste estudo e avalie a eficácia para cada condição.',
+      };
+      
+      setAiConfigs(configs);
+      addLogEntry('Configurações de AI carregadas com sucesso.');
+    };
+    
+    loadAiConfigs();
+  }, []);
 
   const addLogEntry = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -91,6 +111,9 @@ export const useNtaiProcessing = () => {
     const updatedQueue = [...processQueue];
     setAnalysisResult(null);
     
+    addLogEntry('Iniciando processamento com configurações:');
+    addLogEntry(`Modelo: ${aiConfigs.modelName || 'padrão'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
+    
     const processNextItem = async (index: number) => {
       if (index >= updatedQueue.length) {
         setProcessingActive(false);
@@ -107,16 +130,26 @@ export const useNtaiProcessing = () => {
       }
 
       try {
-        // Simular processamento
+        // Simulação do processamento usando as configurações dos prompts
         for (const stage of ['extracting', 'analyzing', 'standardizing'] as ProcessingStage[]) {
           updatedQueue[index] = { ...item, stage, progress: getProgressForStage(stage) };
           setProcessQueue([...updatedQueue]);
-          await simulateStageProcessing(stage, item.title, addLogEntry);
+          await simulateStageProcessing(stage, item.title, aiConfigs, addLogEntry);
         }
 
         // Gera resultado simulado
-        const simulatedResult = await ntaiService.analyzeStudy(item.id, `Texto simulado de ${item.title}`);
+        const simulatedResult = await ntaiService.analyzeStudy(
+          item.id, 
+          `Texto simulado de ${item.title}`, 
+          aiConfigs.nutraceuticals_prompt,
+          aiConfigs.conditions_prompt
+        );
         setAnalysisResult(simulatedResult);
+
+        // Adicionando timestamp para simular criação de card no kanban
+        const cardId = `card-${Date.now()}-${item.id}`;
+        addLogEntry(`Card gerado com ID: ${cardId}`);
+        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
 
         // Marca como completo
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
@@ -148,6 +181,7 @@ export const useNtaiProcessing = () => {
     logEntries,
     activeItemIndex,
     analysisResult,
+    aiConfigs,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
@@ -174,12 +208,26 @@ const getProgressForStage = (stage: ProcessingStage): number => {
 
 const simulateStageProcessing = async (
   stage: ProcessingStage, 
-  itemTitle: string, 
+  itemTitle: string,
+  aiConfigs: Record<string, string>, 
   logCallback: (message: string) => void
 ) => {
   const delay = Math.random() * 2000 + 1000;
   await new Promise(resolve => setTimeout(resolve, delay));
-  logCallback(`${getStageMessage(stage)} para: ${itemTitle}`);
+  
+  const modelName = aiConfigs.modelName || 'gpt-4o-mini';
+  const stageMessage = getStageMessage(stage);
+  
+  logCallback(`${stageMessage} para: ${itemTitle} usando ${modelName}`);
+  
+  // Logs específicos por estágio
+  if (stage === 'extracting') {
+    logCallback(`Extraindo texto de documento PDF: ${itemTitle}`);
+  } else if (stage === 'analyzing') {
+    logCallback(`Analisando conteúdo com prompt especializado para nutracêuticos (${modelName})`);
+  } else if (stage === 'standardizing') {
+    logCallback(`Padronizando dados para integração com o kanban`);
+  }
 };
 
 const getStageMessage = (stage: ProcessingStage): string => {
@@ -194,4 +242,3 @@ const getStageMessage = (stage: ProcessingStage): string => {
       return 'Processando';
   }
 };
-

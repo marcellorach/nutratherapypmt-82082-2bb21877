@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";  // Add this import
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, ArrowRight } from "lucide-react";
+import { Brain, ArrowRight, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
-import NtaiProcessingPhases from './NtaiProcessingPhases';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
@@ -24,6 +23,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
     logEntries,
     activeItemIndex,
     analysisResult,
+    aiConfigs,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
@@ -44,12 +44,37 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
             <Brain className="h-5 w-5 text-purple-600" />
             <h3 className="text-lg font-medium">Processamento NTAI</h3>
             <Badge className="ml-2 bg-purple-100 text-purple-800" variant="outline">
-              GPT-4.5
+              {aiConfigs.modelName || 'GPT-4o'}
             </Badge>
           </div>
-          <Button variant="outline" size="sm" onClick={toggleLogVisibility}>
-            {logVisible ? "Ocultar Log" : "Exibir Log"}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={toggleLogVisibility}>
+              {logVisible ? "Ocultar Log" : "Exibir Log"}
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Settings className="h-4 w-4" />
+              <span>Configurações</span>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Mostra informações sobre o processamento atual */}
+        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+          <h4 className="text-sm font-medium mb-2">Informações do Processamento</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Modelo:</span> {aiConfigs.modelName || 'GPT-4o'}
+            </div>
+            <div>
+              <span className="text-gray-500">Temperature:</span> {aiConfigs.temperature || '0.7'}
+            </div>
+            <div>
+              <span className="text-gray-500">Status:</span> {processingActive ? 'Ativo' : 'Inativo'}
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-gray-500">
+            Os prompts personalizados serão usados para extrair informações específicas dos estudos.
+          </div>
         </div>
         
         {logVisible && <NtaiProcessingLog entries={logEntries} />}
@@ -92,6 +117,28 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
             </div>
           )}
         </div>
+        
+        {/* Resultados da análise */}
+        {analysisResult && (
+          <div className="mt-8 border-t pt-4">
+            <div className="flex items-center mb-4">
+              <h3 className="text-lg font-medium">Resultados da Análise</h3>
+              <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                Card Gerado para Kanban
+              </Badge>
+            </div>
+            <NtaiAnalysisResults result={analysisResult} />
+            
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <h4 className="text-sm font-medium text-green-800 mb-2">Card adicionado ao kanban</h4>
+              <p className="text-xs text-green-700">
+                O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna "Novos Estudos".
+                Você pode agora gerenciar este estudo no fluxo de trabalho.
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
