@@ -1,3 +1,4 @@
+
 import { NutraceuticalCondition } from './index';
 
 export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
@@ -27,17 +28,32 @@ export interface NtaiAnalysisResult {
   extractedSideEffects: NtaiSideEffectTag[];
   qualityScore: number;
   relevanceScore: number;
+  // Novos campos
+  summary: string;
+  studyPopulation: StudyPopulation;
+  studyDuration: string;
+  studyResults: string;
+  citationScore: number;
+  isSimulated?: boolean; // Indica se os dados são simulados
+}
+
+export interface StudyPopulation {
+  type: 'human' | 'canine' | 'feline' | 'rodent' | 'other';
+  count: number;
+  description: string;
 }
 
 export interface NtaiNutraceuticalTag {
   name: string;
   confidence: number; // 0-1 representing confidence in extraction
+  isSimulated?: boolean;
 }
 
 export interface NtaiConditionTag {
   name: string;
   efficacyScore: number; // 0-5
   confidence: number; // 0-1 representing confidence in extraction
+  isSimulated?: boolean;
 }
 
 export interface NtaiInteractionTag {
@@ -45,6 +61,7 @@ export interface NtaiInteractionTag {
   score: number; // 0-5
   type: 'positive' | 'negative';
   confidence: number; // 0-1 representing confidence in extraction
+  isSimulated?: boolean;
 }
 
 export interface NtaiSideEffectTag {
@@ -52,6 +69,7 @@ export interface NtaiSideEffectTag {
   intensityScore: number; // 0-5
   frequency: string; // e.g., "rare", "common", "very common"
   confidence: number; // 0-1 representing confidence in extraction
+  isSimulated?: boolean;
 }
 
 export interface NtaiAnalysisStage {
@@ -71,4 +89,14 @@ export interface ProcessedStudy {
   created_at: string;
   kanban_status: string;
   processed_by: string;
+}
+
+export interface NtaiPromptConfig {
+  id: string;
+  name: string;
+  description: string;
+  prompt: string;
+  systemPrompt?: string;
+  stage: 'summary' | 'nutraceuticals' | 'conditions' | 'interactions' | 'additional';
+  active: boolean;
 }

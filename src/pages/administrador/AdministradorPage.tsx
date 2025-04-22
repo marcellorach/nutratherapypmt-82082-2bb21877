@@ -8,6 +8,7 @@ import ActionsStep from '@/components/administrador/dataAnalysis/ActionsStep';
 import NutraceuticosTab from '@/components/administrador/NutraceuticosTab';
 import EstudosTab from '@/components/administrador/EstudosTab';
 import PromptsTab from '@/components/administrador/PromptsTab';
+import NtaiPromptsTab from '@/components/administrador/NtaiPromptsTab';
 import RelationsTab from '@/components/administrador/RelationsTab';
 import AnalyticsTab from '@/components/administrador/AnalyticsTab';
 import RegrasClinicasTab from '@/components/administrador/RegrasClinicasTab';
@@ -87,6 +88,8 @@ const AdministradorPage: React.FC = () => {
         return <ConfiguracoesIATab />;
       case "prompts":
         return <PromptsTab />;
+      case "ntai-prompts":
+        return <NtaiPromptsTab />;
       case "analytics":
         return <AnalyticsTab />;
       case "actions":

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
@@ -38,8 +38,16 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
     efeitosColaterais: [
       { nome: "Sonolência Leve", score: 2.0 },
       { nome: "Alteração Apetite", score: 1.8 }
-    ]
+    ],
+    estudoSimulado: estudo.isSimulated || false
   };
+
+  // Verificar se o estudo tem análise NTAI
+  const hasNtaiAnalysis = estudo.analysis_data || estudo.ntaiAnalysis;
+  const ntaiAnalysis = estudo.analysis_data || estudo.ntaiAnalysis;
+  
+  // Identificar se os dados são simulados
+  const isDataSimulated = ntaiAnalysis?.isSimulated || ntaiData.estudoSimulado;
 
   return (
     <Card>
@@ -52,17 +60,34 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h4 className="text-sm font-semibold mb-3 text-purple-700">Análise NTAI</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold mb-3 text-purple-700">Análise NTAI</h4>
+            
+            {isDataSimulated && (
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center text-xs">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Parcialmente Simulado
+              </Badge>
+            )}
+          </div>
+          
+          {/* Exibir resumo do estudo se disponível */}
+          {ntaiAnalysis?.summary && (
+            <div className="mb-3 text-sm border-l-2 border-purple-300 pl-2">
+              <p className="text-gray-700">{ntaiAnalysis.summary}</p>
+            </div>
+          )}
           
           {/* Seção Nutraceuticos */}
           <div className="mb-3">
             <p className="text-xs text-gray-500 mb-1">Nutraceuticos</p>
             <div className="flex flex-wrap gap-1">
-              {ntaiData.nutraceuticos.map((nutra: string, idx: number) => (
+              {(ntaiAnalysis?.extractedNutraceuticals || ntaiData.nutraceuticos).map((nutra: any, idx: number) => (
                 <NutraceuticalTag 
                   key={idx} 
-                  name={nutra} 
-                  score={getNutraceuticalScore(nutra)} 
+                  name={nutra.name || nutra}
+                  score={nutra.confidence ? (nutra.confidence * 5) : getNutraceuticalScore(nutra.name || nutra)} 
+                  isSimulated={nutra.isSimulated}
                 />
               ))}
             </div>
@@ -72,11 +97,12 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
           <div className="mb-3">
             <p className="text-xs text-gray-500 mb-1">Condições</p>
             <div className="flex flex-wrap gap-1">
-              {ntaiData.condicoes.map((condicao, idx) => (
+              {(ntaiAnalysis?.extractedConditions || ntaiData.condicoes).map((condicao: any, idx: number) => (
                 <OutcomeTag 
                   key={idx}
-                  condition={condicao.nome}
-                  score={condicao.score}
+                  condition={condicao.name || condicao.nome}
+                  score={condicao.efficacyScore || condicao.score}
+                  isSimulated={condicao.isSimulated}
                 />
               ))}
             </div>
@@ -86,45 +112,54 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
           <div className="mb-3">
             <p className="text-xs text-gray-500 mb-1">Interações</p>
             <div className="flex flex-wrap gap-1">
-              {ntaiData.interacoesPositivas.map((interacao, idx) => (
+              {/* Interações positivas */}
+              {(ntaiAnalysis?.extractedInteractions?.filter((i: any) => i.type === 'positive') || ntaiData.interacoesPositivas).map((interacao: any, idx: number) => (
                 <Badge 
                   key={`pos-${idx}`}
                   variant="outline" 
                   className="bg-green-50 text-green-700 border-green-200 flex items-center"
                 >
                   <ArrowUp className="w-3 h-3 mr-1" />
-                  {interacao.nome} ({interacao.score.toFixed(1)})
+                  {interacao.name || interacao.nome} ({(interacao.score || 0).toFixed(1)})
+                  {interacao.isSimulated && (
+                    <AlertTriangle className="w-3 h-3 ml-1 text-amber-500" />
+                  )}
                 </Badge>
               ))}
-              {ntaiData.interacoesNegativas.map((interacao, idx) => (
+              
+              {/* Interações negativas */}
+              {(ntaiAnalysis?.extractedInteractions?.filter((i: any) => i.type === 'negative') || ntaiData.interacoesNegativas).map((interacao: any, idx: number) => (
                 <Badge 
                   key={`neg-${idx}`}
                   variant="outline" 
                   className="bg-red-50 text-red-700 border-red-200 flex items-center"
                 >
                   <ArrowDown className="w-3 h-3 mr-1" />
-                  {interacao.nome} ({interacao.score.toFixed(1)})
+                  {interacao.name || interacao.nome} ({(interacao.score || 0).toFixed(1)})
+                  {interacao.isSimulated && (
+                    <AlertTriangle className="w-3 h-3 ml-1 text-amber-500" />
+                  )}
                 </Badge>
               ))}
             </div>
           </div>
 
-          {/* Seção Efeitos Colaterais */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">Efeitos Colaterais</p>
-            <div className="flex flex-wrap gap-1">
-              {ntaiData.efeitosColaterais.map((efeito, idx) => (
-                <Badge 
-                  key={idx}
-                  variant="outline" 
-                  className="bg-amber-50 text-amber-700 border-amber-200 flex items-center"
-                >
-                  <ArrowRight className="w-3 h-3 mr-1" />
-                  {efeito.nome} ({efeito.score.toFixed(1)})
-                </Badge>
-              ))}
+          {/* Informações adicionais */}
+          {ntaiAnalysis?.studyPopulation && (
+            <div className="mb-3 text-xs">
+              <p className="text-gray-500 mb-1">População Estudada</p>
+              <div className="bg-gray-50 p-2 rounded-md">
+                {ntaiAnalysis.studyPopulation.type === 'human' ? 'Humanos' :
+                 ntaiAnalysis.studyPopulation.type === 'canine' ? 'Cães' :
+                 ntaiAnalysis.studyPopulation.type === 'feline' ? 'Gatos' :
+                 ntaiAnalysis.studyPopulation.type === 'rodent' ? 'Roedores' : 'Outros'} 
+                ({ntaiAnalysis.studyPopulation.count || 'N/A'})
+                {ntaiAnalysis.studyPopulation.isSimulated && (
+                  <span className="ml-1 text-amber-500">(simulado)</span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <Button 
@@ -141,4 +176,3 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 };
 
 export default EstudoCard;
-
