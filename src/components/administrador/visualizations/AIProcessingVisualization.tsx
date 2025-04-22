@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Brain, Network, FileText, TagIcon, Flask, Database } from 'lucide-react';
+import { Brain, Network, FileText, TagIcon, FlaskConical, Database } from 'lucide-react';
 
 interface AIProcessingVisualizationProps {
   progress: number;
@@ -37,7 +37,7 @@ const AIProcessingVisualization: React.FC<AIProcessingVisualizationProps> = ({
       completed: progress >= 60,
     },
     nutraceuticals: {
-      icon: Flask,
+      icon: FlaskConical,
       text: 'Identificação de nutracêuticos',
       active: activeStage === 'nutraceuticals',
       completed: progress >= 75,
