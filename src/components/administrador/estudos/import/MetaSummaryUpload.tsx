@@ -25,8 +25,13 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
     accept: {
       'application/json': ['.json'],
       'text/csv': ['.csv'],
-      'application/vnd.ms-excel': ['.xls', '.xlsx'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'text/plain': ['.txt'],
+      'text/rtf': ['.rtf'],
+      'application/pdf': ['.pdf']
     },
     multiple: false,
     disabled
@@ -34,6 +39,10 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
 
   const removeFile = () => {
     setMetaSummaryFile(null);
+  };
+
+  const getFileExtension = (filename: string) => {
+    return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
   };
 
   return (
@@ -56,7 +65,7 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
             Arraste e solte o arquivo de meta sumário aqui, ou clique para selecionar
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            Formatos suportados: JSON, CSV, XLS, XLSX
+            Formatos suportados: JSON, CSV, XLS, XLSX, DOC, DOCX, TXT, RTF, PDF
           </p>
         </div>
       ) : (
