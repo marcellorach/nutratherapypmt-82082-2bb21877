@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Brain, Network, FileText, TagIcon, Vial, Database } from 'lucide-react';
+import { Brain, Network, FileText, TagIcon, Flask, Database } from 'lucide-react';
 
 interface AIProcessingVisualizationProps {
   progress: number;
@@ -37,7 +37,7 @@ const AIProcessingVisualization: React.FC<AIProcessingVisualizationProps> = ({
       completed: progress >= 60,
     },
     nutraceuticals: {
-      icon: Vial,
+      icon: Flask,
       text: 'Identificação de nutracêuticos',
       active: activeStage === 'nutraceuticals',
       completed: progress >= 75,
@@ -148,7 +148,8 @@ const AIProcessingVisualization: React.FC<AIProcessingVisualizationProps> = ({
         </div>
       </div>
       
-      <style jsx>{`
+      <style>
+        {`
         @keyframes particle-flow {
           0% {
             transform: translateX(0) scale(0.8);
@@ -163,7 +164,8 @@ const AIProcessingVisualization: React.FC<AIProcessingVisualizationProps> = ({
             opacity: 0;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
