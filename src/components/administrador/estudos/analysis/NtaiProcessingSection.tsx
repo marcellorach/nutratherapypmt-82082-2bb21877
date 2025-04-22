@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, ArrowRight, Settings, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
+import { useNtaiProcessing } from '@/hooks/ntai/useNtaiProcessing';
 import { useToast } from "@/hooks/use-toast";
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
@@ -16,7 +17,6 @@ interface NtaiProcessingSectionProps {
 }
 
 const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }) => {
-  const [pendingCuration, setPendingCuration] = useState<any[]>([]);
   const { toast } = useToast();
   
   const {
@@ -146,7 +146,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
           )}
         </div>
         
-        {analysisResults.length > 0 && (
+        {analysisResults && analysisResults.length > 0 && (
           <div className="mt-8 space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">

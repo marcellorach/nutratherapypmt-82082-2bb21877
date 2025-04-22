@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
+import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
 import { useNtaiQueue } from './useNtaiQueue';
 import { useNtaiLogs } from './useNtaiLogs';
 import { useNtaiConfig } from './useNtaiConfig';
@@ -32,6 +33,22 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
   } = useNtaiQueue();
+
+  const toggleItemSelection = (id: string) => {
+    setSelectedItems(prev => 
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (estudos: any[]) => {
+    if (selectedItems.length === estudos.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(estudos.map(estudo => estudo.id));
+    }
+  };
 
   const startProcessing = async () => {
     if (processQueue.length === 0 || processingActive) return;
