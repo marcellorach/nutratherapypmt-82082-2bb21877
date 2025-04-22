@@ -5,6 +5,7 @@ import { useNtaiQueue } from './ntai/useNtaiQueue';
 import { useNtaiLogs } from './ntai/useNtaiLogs';
 import { useNtaiConfig } from './ntai/useNtaiConfig';
 import ntaiService from '@/services/ntai-service';
+import { supabase } from '@/integrations/supabase/client';
 
 // Helper function for simulating stage processing
 const simulateStageProcessing = async (
@@ -113,29 +114,49 @@ export const useNtaiProcessing = () => {
           await simulateStageProcessing(stage, item.title, addLogEntry);
         }
 
+        addLogEntry(`Enviando para processamento com IA: ${item.title}`);
+        
+        // Aqui chamamos a nova função que usa a Edge Function
         const simulatedResult = await ntaiService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
+        
         setAnalysisResult(simulatedResult);
 
-        const cardId = `card-${Date.now()}-${item.id}`;
-        addLogEntry(`Card gerado com ID: ${cardId}`);
-        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
+        // Salvar dados no Supabase
+        const { data: savedCard, error } = await supabase
+          .from('processed_studies')
+          .upsert({
+            study_id: item.id,
+            analysis_data: simulatedResult,
+            kanban_status: 'new',
+            processed_by: 'ntai'
+          })
+          .select();
+
+        const cardId = savedCard ? savedCard[0]?.id : `card-${Date.now()}-${item.id}`;
+        
+        if (error) {
+          addLogEntry(`[AVISO] Falha ao salvar no banco de dados: ${error.message}`);
+        } else {
+          addLogEntry(`Card gerado com ID: ${cardId}`);
+          addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
+        }
 
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as any, progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
 
       } catch (error: any) {
-        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error}`);
+        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message || error}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
           stage: 'error' as any, 
           progress: 50,
-          error: `Erro desconhecido: ${error}`
+          error: `Erro: ${error.message || 'Erro desconhecido'}`
         };
         setProcessQueue([...updatedQueue]);
       }

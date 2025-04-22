@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, File, Download, Database, Import } from "lucide-react";
+import { Upload, File, Download, Database, Import, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -74,6 +74,27 @@ const SciImportSection: React.FC = () => {
 
   const removeFile = (index: number) => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
+  // Função para navegar para processamento NTAI
+  const handleProcessWithAI = () => {
+    // Rolar para a seção de processamento NTAI
+    const ntaiSection = document.getElementById('ntai-processing-section');
+    if (ntaiSection) {
+      ntaiSection.scrollIntoView({ behavior: 'smooth' });
+      
+      // Piscar o elemento para chamar atenção
+      ntaiSection.classList.add('highlight-section');
+      setTimeout(() => {
+        ntaiSection.classList.remove('highlight-section');
+      }, 2000);
+      
+      // Exibe toast com instruções
+      toast({
+        title: "Selecione os estudos para processamento",
+        description: "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
+      });
+    }
   };
 
   useEffect(() => {
@@ -178,9 +199,11 @@ const SciImportSection: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <h3 className="font-medium">Arquivos para importação ({files.length})</h3>
                     {!importing && (
-                      <Button size="sm" onClick={handleImport}>
-                        Importar Arquivos
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleImport}>
+                          Importar Arquivos
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -220,9 +243,21 @@ const SciImportSection: React.FC = () => {
                 <div className="text-center p-6 text-gray-400">Carregando histórico...</div>
               ) : (
                 <>
-                <Button variant="outline" size="sm" className="mb-2" onClick={refreshHistory}>
-                  Atualizar lista
-                </Button>
+                <div className="flex justify-between mb-2">
+                  <Button variant="outline" size="sm" onClick={refreshHistory}>
+                    Atualizar lista
+                  </Button>
+                  
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="bg-purple-600 hover:bg-purple-700"
+                    onClick={handleProcessWithAI}
+                  >
+                    <Brain className="mr-1 h-4 w-4" />
+                    Processar com IA
+                  </Button>
+                </div>
                 {importHistory && importHistory.length > 0 ? (
                   <div className="overflow-auto border rounded-lg">
                     <table className="min-w-full text-xs">

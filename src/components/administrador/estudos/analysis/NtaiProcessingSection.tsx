@@ -37,7 +37,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
   const toggleLogVisibility = () => setLogVisible(!logVisible);
 
   return (
-    <Card>
+    <Card id="ntai-processing-section" className="transition-all">
       <CardContent className="p-6 space-y-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

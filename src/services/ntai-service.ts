@@ -1,5 +1,44 @@
 
 import { NtaiAnalysisResult, NtaiNutraceuticalTag, NtaiConditionTag, NtaiInteractionTag, NtaiSideEffectTag } from '@/types/ntai';
+import { supabase } from '@/integrations/supabase/client';
+
+// Função para processar um estudo usando a Edge Function
+export const processStudyWithAI = async (
+  studyId: string,
+  studyText: string,
+  nutraceuticalsPrompt?: string,
+  conditionsPrompt?: string
+): Promise<NtaiAnalysisResult> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('process-study', {
+      body: {
+        studyId,
+        studyContent: studyText,
+        nutraceuticalsPrompt,
+        conditionsPrompt
+      }
+    });
+
+    if (error) {
+      console.error('Erro ao processar estudo com IA:', error);
+      throw new Error(`Erro na Edge Function: ${error.message}`);
+    }
+
+    if (!data || !data.analysisResult) {
+      console.error('Resposta inválida da Edge Function:', data);
+      throw new Error('Resposta inválida da Edge Function');
+    }
+
+    return data.analysisResult;
+  } catch (error) {
+    console.error('Erro ao processar estudo com IA:', error);
+    // Para o protótipo, retornamos dados simulados em caso de erro
+    return simulateAnalysisResult(studyId);
+  }
+}
+
+// FUNÇÕES PARA SIMULAÇÃO (mantidas para compatibilidade e quando não houver conexão)
+// Caso a Edge Function falhe, estas funções são usadas como fallback
 
 // Mock API Key para simulação
 const OPENAI_API_KEY = 'sk-mock-key-for-prototype';
@@ -72,6 +111,38 @@ export const scoreStudyRelevance = async (studyText: string): Promise<number> =>
   return 2.5 + Math.random() * 2.5;
 };
 
+// Função de simulação em caso de falha na Edge Function
+const simulateAnalysisResult = (studyId: string): NtaiAnalysisResult => {
+  return {
+    studyId,
+    extractedNutraceuticals: [
+      { name: "Ômega 3", confidence: 0.94 },
+      { name: "Ômega 6", confidence: 0.92 },
+      { name: "DHA", confidence: 0.89 },
+      { name: "EPA", confidence: 0.85 }
+    ],
+    extractedConditions: [
+      { name: "Artrite Canina", efficacyScore: 4.2, confidence: 0.95 },
+      { name: "Inflamação Articular", efficacyScore: 3.8, confidence: 0.92 },
+      { name: "Mobilidade Reduzida", efficacyScore: 3.5, confidence: 0.85 }
+    ],
+    extractedInteractions: [
+      { name: "Glucosamina", score: 4.0, type: 'positive', confidence: 0.92 },
+      { name: "Vitamina E", score: 3.5, type: 'positive', confidence: 0.89 },
+      { name: "Anti-inflamatórios", score: 2.5, type: 'negative', confidence: 0.86 },
+      { name: "Anticoagulantes", score: 3.8, type: 'negative', confidence: 0.94 }
+    ],
+    extractedSideEffects: [
+      { name: "Sonolência", intensityScore: 2.0, frequency: "raro", confidence: 0.88 },
+      { name: "Alterações Gastrointestinais", intensityScore: 2.5, frequency: "ocasional", confidence: 0.91 },
+      { name: "Alterações no Apetite", intensityScore: 1.5, frequency: "raro", confidence: 0.83 }
+    ],
+    qualityScore: 4.2,
+    relevanceScore: 3.8
+  };
+};
+
+// Função principal que agora usa a Edge Function quando possível
 export const analyzeStudy = async (
   studyId: string, 
   studyText: string,
@@ -82,39 +153,44 @@ export const analyzeStudy = async (
   console.log('Prompt para nutracêuticos:', nutraceuticalsPrompt);
   console.log('Prompt para condições:', conditionsPrompt);
   
-  // Em um ambiente de produção, isso seria feito com uma única chamada à API da OpenAI
-  // com um prompt especializado que retornaria todos os dados necessários
-  
-  // Para o protótipo, vamos chamar cada função separadamente
-  const [
-    extractedNutraceuticals,
-    extractedConditions,
-    extractedInteractions,
-    extractedSideEffects,
-    qualityScore,
-    relevanceScore
-  ] = await Promise.all([
-    extractNutraceuticalsFromStudy(studyText, nutraceuticalsPrompt),
-    extractConditionsFromStudy(studyText, conditionsPrompt),
-    extractInteractionsFromStudy(studyText),
-    extractSideEffectsFromStudy(studyText),
-    scoreStudyQuality(studyText),
-    scoreStudyRelevance(studyText)
-  ]);
-  
-  return {
-    studyId,
-    extractedNutraceuticals,
-    extractedConditions,
-    extractedInteractions,
-    extractedSideEffects,
-    qualityScore,
-    relevanceScore
-  };
+  try {
+    // Tenta usar a Edge Function
+    return await processStudyWithAI(studyId, studyText, nutraceuticalsPrompt, conditionsPrompt);
+  } catch (error) {
+    console.log('Erro ao usar Edge Function, usando modo de simulação:', error);
+    
+    // Em caso de falha, usa o método de simulação anterior
+    const [
+      extractedNutraceuticals,
+      extractedConditions,
+      extractedInteractions,
+      extractedSideEffects,
+      qualityScore,
+      relevanceScore
+    ] = await Promise.all([
+      extractNutraceuticalsFromStudy(studyText, nutraceuticalsPrompt),
+      extractConditionsFromStudy(studyText, conditionsPrompt),
+      extractInteractionsFromStudy(studyText),
+      extractSideEffectsFromStudy(studyText),
+      scoreStudyQuality(studyText),
+      scoreStudyRelevance(studyText)
+    ]);
+    
+    return {
+      studyId,
+      extractedNutraceuticals,
+      extractedConditions,
+      extractedInteractions,
+      extractedSideEffects,
+      qualityScore,
+      relevanceScore
+    };
+  }
 };
 
 export default {
   analyzeStudy,
+  processStudyWithAI,
   extractNutraceuticalsFromStudy,
   extractConditionsFromStudy,
   extractInteractionsFromStudy,
