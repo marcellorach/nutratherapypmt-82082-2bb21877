@@ -1,17 +1,18 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { X, FileText, FilePdf, FileWord, FileSpreadsheet, FileCode, File as FileGeneric } from "lucide-react";
+import { X, FileText, File, FileSpreadsheet, FileCode, FileArchive } from "lucide-react";
 
 // Função pra determinar ícone baseado na extensão
 function getFileIcon(ext: string) {
   const extLower = ext.toLowerCase();
-  if (["pdf"].includes(extLower)) return <FilePdf className="text-red-600" />;
-  if (["doc", "docx", "rtf"].includes(extLower)) return <FileWord className="text-blue-700" />;
+  if (["pdf"].includes(extLower)) return <File className="text-red-600" />;
+  if (["doc", "docx", "rtf"].includes(extLower)) return <File className="text-blue-700" />;
   if (["csv", "xls", "xlsx"].includes(extLower)) return <FileSpreadsheet className="text-green-600" />;
   if (["bib", "json"].includes(extLower)) return <FileCode className="text-purple-600" />;
   if (["txt"].includes(extLower)) return <FileText className="text-gray-500" />;
-  return <FileGeneric className="text-gray-400" />;
+  if (["zip", "rar", "7z"].includes(extLower)) return <FileArchive className="text-orange-500" />;
+  return <File className="text-gray-400" />;
 }
 
 // Formata o tamanho do arquivo em kb/mb
