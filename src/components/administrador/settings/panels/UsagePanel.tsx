@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
+import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
@@ -34,6 +35,8 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
     ]
   };
 
+  const COLORS = ["#6366f1", "#3b82f6", "#8b5cf6", "#06b6d4"];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -63,15 +66,22 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
             <CardDescription>Uso mensal de tokens por esta seção</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <BarChart
-              data={usageData.tokens}
-              index="name"
-              categories={["tokens"]}
-              colors={["indigo"]}
-              valueFormatter={(value) => `${value.toLocaleString()} tokens`}
-              yAxisWidth={60}
+            <ChartContainer 
               className="h-80"
-            />
+              config={{
+                tokens: { color: "#6366f1" }
+              }}
+            >
+              <BarChart
+                data={usageData.tokens}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value) => `${value.toLocaleString()} tokens`} />
+                <Bar dataKey="tokens" fill="var(--color-tokens, #6366f1)" />
+              </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
 
@@ -81,14 +91,32 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
             <CardDescription>Uso por modelo de IA</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center p-0">
-            <PieChart
-              data={usageData.models}
-              index="name"
-              valueFormatter={(value) => `${value}%`}
-              category="value"
-              colors={["indigo", "blue", "violet", "cyan"]}
+            <ChartContainer 
               className="h-80"
-            />
+              config={{
+                default: { color: "#6366f1" }
+              }}
+            >
+              <PieChart>
+                <Pie
+                  data={usageData.models}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {usageData.models.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Legend />
+              </PieChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
