@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, ArrowRight, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
+import { useNtaiProcessing } from '@/hooks/useNtaiProcessing'; // Updated import path
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';

@@ -1,5 +1,15 @@
 
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
+
+export interface ProcessingItem {
+  id: string;
+  title: string;
+  stage: ProcessingStage;
+  progress: number;
+  error?: string;
+  sourceFile?: string;
+  originalFormat?: string;
+}
 
 export interface NtaiQueueState {
   processQueue: ProcessingItem[];
