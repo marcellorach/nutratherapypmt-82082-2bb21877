@@ -10,7 +10,7 @@ interface SciSpaceStepSelectProps {
 
 const steps = [
   "Meta Sumário",
-  "Base de Estudos",
+  "Base de Estudos", 
   "Revisar & Submeter"
 ];
 
