@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +10,7 @@ import EstudoSearch from './estudos/EstudoSearch';
 import EstudosColumn from './estudos/EstudosColumn';
 import SciImportSection from './estudos/import/SciImportSection';
 import NtaiProcessingSection from './estudos/analysis/NtaiProcessingSection';
+import './estudos/estudos.css';
 
 const estudosExemplo = [
   {
