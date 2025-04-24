@@ -22,12 +22,24 @@ export const useNtaiQueue = () => {
 
     const newItems: ProcessingItem[] = selectedItems.map(id => {
       const estudo = estudos.find(e => e.id === id);
+      
+      if (!estudo) {
+        return {
+          id,
+          title: `Estudo ${id.substring(0, 8)}`,
+          stage: 'idle' as ProcessingStage,
+          progress: 0,
+          sourceFile: '',
+          originalFormat: 'PDF'
+        };
+      }
+      
       return {
         id,
-        title: estudo?.title || `Estudo ${id}`,
+        title: estudo.title || `Estudo ${id.substring(0, 8)}`,
         stage: 'idle' as ProcessingStage,
         progress: 0,
-        sourceFile: estudo?.title || '',
+        sourceFile: estudo.journal || '',
         originalFormat: 'PDF'
       };
     });

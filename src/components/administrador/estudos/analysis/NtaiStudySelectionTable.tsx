@@ -62,10 +62,10 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>{estudo.journal}</TableCell>
                 <TableCell className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(estudo.created_at), {
+                  {estudo.created_at ? formatDistanceToNow(new Date(estudo.created_at), {
                     addSuffix: true,
                     locale: ptBR
-                  })}
+                  }) : 'Data desconhecida'}
                 </TableCell>
                 <TableCell>
                   <Badge variant={estudo.kanban_status === "new" ? "default" : "outline"}>
