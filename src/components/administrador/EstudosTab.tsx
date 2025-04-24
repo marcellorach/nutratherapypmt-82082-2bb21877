@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -137,7 +138,7 @@ const EstudosTab: React.FC = () => {
               Processamento Avançado
             </span>
           </div>
-          <NtaiProcessingSection estudos={[...novoEstudos, ...emRevEstudos]} />
+          <NtaiProcessingSection />
         </TabsContent>
         
         <TabsContent value="gerenciar" className="mt-0 space-y-6">

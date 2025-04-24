@@ -4,18 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, ArrowRight, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useNtaiProcessing } from '@/hooks/useNtaiProcessing'; // Updated import path
+import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
 
-interface NtaiProcessingSectionProps {
-  estudos: any[];
-}
-
-const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }) => {
+const NtaiProcessingSection: React.FC = () => {
   const {
     processQueue,
     selectedItems,
@@ -24,6 +20,7 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
     activeItemIndex,
     analysisResult,
     aiConfigs,
+    availableStudies,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
@@ -82,11 +79,11 @@ const NtaiProcessingSection: React.FC<NtaiProcessingSectionProps> = ({ estudos }
         <div className="space-y-4">
           <h4 className="text-sm font-medium">Estudos Disponíveis para Processamento</h4>
           <NtaiStudySelectionTable 
-            estudos={estudos}
+            estudos={availableStudies}
             selectedItems={selectedItems}
             onToggleSelection={toggleItemSelection}
-            onSelectAll={() => handleSelectAll(estudos)}
-            onAddToQueue={() => addToQueue(estudos)}
+            onSelectAll={() => handleSelectAll(availableStudies)}
+            onAddToQueue={() => addToQueue(availableStudies)}
           />
         </div>
         

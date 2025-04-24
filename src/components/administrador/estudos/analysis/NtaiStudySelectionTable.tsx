@@ -21,6 +21,26 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   onSelectAll,
   onAddToQueue,
 }) => {
+  // Função auxiliar para determinar o tipo de badge baseado no status
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case "new": return "default";
+      case "especial": return "secondary";
+      default: return "outline";
+    }
+  };
+
+  // Função auxiliar para formatar o texto do status
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "new": return "Novo";
+      case "especial": return "Especial";
+      case "in-review": return "Em Revisão";
+      case "manual": return "Manual";
+      default: return status || "Desconhecido";
+    }
+  };
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
@@ -54,22 +74,22 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{estudo.title}</div>
+                    <div className="font-medium">{estudo.title || `Estudo ${estudo.id.substring(0, 8)}`}</div>
                     {estudo.description && (
                       <div className="text-sm text-gray-500">{estudo.description}</div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{estudo.journal}</TableCell>
+                <TableCell>{estudo.journal || estudo.meta_summary_filename || 'Desconhecida'}</TableCell>
                 <TableCell className="text-sm text-gray-500">
-                  {estudo.created_at ? formatDistanceToNow(new Date(estudo.created_at), {
+                  {estudo.created_at || estudo.imported_at ? formatDistanceToNow(new Date(estudo.created_at || estudo.imported_at), {
                     addSuffix: true,
                     locale: ptBR
                   }) : 'Data desconhecida'}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={estudo.kanban_status === "new" ? "default" : "outline"}>
-                    {estudo.kanban_status === "new" ? "Novo" : "Em Processamento"}
+                  <Badge variant={getBadgeVariant(estudo.kanban_status || estudo.scispace_status)}>
+                    {getStatusText(estudo.kanban_status || estudo.scispace_status)}
                   </Badge>
                 </TableCell>
               </TableRow>

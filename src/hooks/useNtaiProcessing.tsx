@@ -6,8 +6,9 @@ import { useNtaiLogs } from './ntai/useNtaiLogs';
 import { useNtaiConfig } from './ntai/useNtaiConfig';
 import ntaiService from '@/services/ntai-service';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Helper function for simulating stage processing
+// Helper function para simular o processamento de etapas
 const simulateStageProcessing = async (
   stage: any,
   itemTitle: string,
@@ -28,7 +29,7 @@ const simulateStageProcessing = async (
   }
 };
 
-// Helper function for stage messages
+// Helper function para mensagens de etapa
 const getStageMessage = (stage: string): string => {
   switch (stage) {
     case 'extracting': return 'Extraindo texto';
@@ -38,7 +39,7 @@ const getStageMessage = (stage: string): string => {
   }
 };
 
-// Helper function for stage progress
+// Helper function para progresso de etapa
 const getProgressForStage = (stage: string): number => {
   switch (stage) {
     case 'extracting': return 30;
@@ -48,11 +49,25 @@ const getProgressForStage = (stage: string): number => {
   }
 };
 
+// Função para transformar dados de scispace_imports em formato compatível com estudos
+const transformImportToStudy = (importData: any) => {
+  return {
+    id: importData.id,
+    title: importData.meta_summary_filename || 'Estudo importado',
+    description: importData.notes || 'Importado via SciSpace',
+    journal: 'SciSpace Import',
+    kanban_status: importData.scispace_status || 'new',
+    import_type: importData.import_type || 'manual',
+    created_at: importData.imported_at
+  };
+};
+
 export const useNtaiProcessing = () => {
   const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
   const [availableStudies, setAvailableStudies] = useState<any[]>([]);
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
+  const { toast } = useToast();
   const {
     processQueue,
     selectedItems,
@@ -70,7 +85,8 @@ export const useNtaiProcessing = () => {
   // Carregar estudos disponíveis
   useEffect(() => {
     const loadStudies = async () => {
-      const { data, error } = await supabase
+      // Carregar estudos processados
+      const { data: processedData, error: processedError } = await supabase
         .from('processed_studies')
         .select(`
           id,
@@ -83,15 +99,52 @@ export const useNtaiProcessing = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        setAvailableStudies(data);
+      // Carregar importações do SciSpace
+      const { data: importData, error: importError } = await supabase
+        .from('scispace_imports')
+        .select('*')
+        .eq('is_deleted', false)
+        .order('imported_at', { ascending: false });
+
+      if (processedError) {
+        console.error('Erro ao carregar estudos processados:', processedError);
+        toast({
+          title: "Erro ao carregar estudos",
+          description: "Não foi possível carregar os estudos processados.",
+          variant: "destructive",
+        });
       }
+
+      if (importError) {
+        console.error('Erro ao carregar importações:', importError);
+        toast({
+          title: "Erro ao carregar importações",
+          description: "Não foi possível carregar as importações do SciSpace.",
+          variant: "destructive",
+        });
+      }
+
+      // Transformar importações em formato de estudo
+      const importStudies = importData ? importData.map(transformImportToStudy) : [];
+      
+      // Mesclar os dois conjuntos de dados (evitando duplicatas por ID)
+      const processedStudies = processedData || [];
+      const allStudies = [...processedStudies];
+      
+      // Adicionar apenas importações que não existem como estudos processados
+      importStudies.forEach(importStudy => {
+        if (!allStudies.some(study => study.id === importStudy.id)) {
+          allStudies.push(importStudy);
+        }
+      });
+
+      setAvailableStudies(allStudies);
     };
 
     loadStudies();
 
-    // Configurar realtime subscription
-    const channel = supabase
+    // Configurar realtime subscription para processed_studies
+    const processedChannel = supabase
       .channel('processed_studies_changes')
       .on(
         'postgres_changes',
@@ -106,10 +159,27 @@ export const useNtaiProcessing = () => {
       )
       .subscribe();
 
+    // Configurar realtime subscription para scispace_imports
+    const importsChannel = supabase
+      .channel('scispace_imports_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'scispace_imports'
+        },
+        () => {
+          loadStudies(); // Recarregar estudos quando houver mudanças
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(processedChannel);
+      supabase.removeChannel(importsChannel);
     };
-  }, []);
+  }, [toast]);
 
   const toggleItemSelection = (id: string) => {
     setSelectedItems(prev => 

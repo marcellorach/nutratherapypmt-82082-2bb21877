@@ -26,7 +26,7 @@ export const analyzeStudy = async (
     
     const jsonAnalysisData = JSON.parse(JSON.stringify(result));
     
-    // Vamos gerar um título para o estudo se ele não existir
+    // Gerar um título para o estudo se ele não existir
     const studyTitle = `Análise de Estudo ${studyId.substring(0, 8)}`;
     
     const { data: savedAnalysis, error: insertError } = await supabase
