@@ -26,13 +26,19 @@ export const analyzeStudy = async (
     
     const jsonAnalysisData = JSON.parse(JSON.stringify(result));
     
+    // Vamos gerar um título para o estudo se ele não existir
+    const studyTitle = `Análise de Estudo ${studyId.substring(0, 8)}`;
+    
     const { data: savedAnalysis, error: insertError } = await supabase
       .from('processed_studies')
       .insert({
         study_id: studyId,
         analysis_data: jsonAnalysisData,
         kanban_status: 'new',
-        processed_by: 'ntai'
+        processed_by: 'ntai',
+        title: studyTitle,
+        description: 'Análise gerada via processamento NTAI',
+        journal: 'Processamento NTAI'
       })
       .select()
       .single();

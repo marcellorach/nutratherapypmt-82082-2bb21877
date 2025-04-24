@@ -78,6 +78,15 @@ const SciSpace2StepImport: React.FC = () => {
           throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
         }
 
+        // Extrair título formatado do nome do arquivo
+        const fileTitle = meta.filename.replace(/\.[^/.]+$/, ""); // Remove extensão
+        const formattedTitle = fileTitle
+          .replace(/_/g, ' ')
+          .replace(/-/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+
         // Registrar na tabela processed_studies para análise NTAI
         const { error: processError } = await supabase
           .from("processed_studies")
@@ -89,7 +98,10 @@ const SciSpace2StepImport: React.FC = () => {
               original_filename: meta.filename,
               storage_path: meta.path,
               kanban_status: 'new',
-              processed_by: 'ntai'
+              processed_by: 'ntai',
+              title: formattedTitle,
+              description: `Estudo importado: ${formattedTitle}`,
+              journal: 'Importação Integrativa'
             }
           ]);
 

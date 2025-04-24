@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
 import { useNtaiQueue } from './ntai/useNtaiQueue';
@@ -178,7 +179,10 @@ export const useNtaiProcessing = () => {
             study_id: item.id,
             analysis_data: jsonAnalysisData,
             kanban_status: 'new',
-            processed_by: 'ntai'
+            processed_by: 'ntai',
+            title: item.title,
+            description: `Análise NTAI: ${item.title}`,
+            journal: item.sourceFile || 'NTAI'
           })
           .select()
           .single();
