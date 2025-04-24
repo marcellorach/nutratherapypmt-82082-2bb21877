@@ -3,6 +3,8 @@ import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface NtaiStudySelectionTableProps {
   estudos: any[];
@@ -34,6 +36,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             </TableHead>
             <TableHead>Estudo</TableHead>
             <TableHead>Fonte</TableHead>
+            <TableHead>Importado</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -49,18 +52,31 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                     className="rounded"
                   />
                 </TableCell>
-                <TableCell className="font-medium">{estudo.title}</TableCell>
-                <TableCell>{estudo.journal}</TableCell>
                 <TableCell>
-                  <Badge variant={estudo.status === "new" ? "default" : "outline"}>
-                    {estudo.status === "new" ? "Novo" : "Em Curadoria"}
+                  <div>
+                    <div className="font-medium">{estudo.title}</div>
+                    {estudo.description && (
+                      <div className="text-sm text-gray-500">{estudo.description}</div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>{estudo.journal}</TableCell>
+                <TableCell className="text-sm text-gray-500">
+                  {formatDistanceToNow(new Date(estudo.created_at), {
+                    addSuffix: true,
+                    locale: ptBR
+                  })}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={estudo.kanban_status === "new" ? "default" : "outline"}>
+                    {estudo.kanban_status === "new" ? "Novo" : "Em Processamento"}
                   </Badge>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                 Nenhum estudo disponível para processamento
               </TableCell>
             </TableRow>
@@ -68,17 +84,18 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
         </TableBody>
       </Table>
       
-      {estudos.length > 0 && (
-        <div className="p-2 bg-gray-50 border-t flex justify-end">
-          <Button 
-            size="sm" 
-            onClick={onAddToQueue}
-            disabled={selectedItems.length === 0}
-          >
-            Adicionar à Fila NTAI
-          </Button>
-        </div>
-      )}
+      <div className="p-2 bg-gray-50 border-t flex justify-between items-center">
+        <span className="text-sm text-gray-500">
+          {selectedItems.length} {selectedItems.length === 1 ? 'estudo selecionado' : 'estudos selecionados'}
+        </span>
+        <Button 
+          size="sm" 
+          onClick={onAddToQueue}
+          disabled={selectedItems.length === 0}
+        >
+          Adicionar à Fila NTAI
+        </Button>
+      </div>
     </div>
   );
 };

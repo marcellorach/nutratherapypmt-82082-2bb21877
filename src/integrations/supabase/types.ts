@@ -163,38 +163,47 @@ export type Database = {
         Row: {
           analysis_data: Json | null
           created_at: string | null
+          description: string | null
           id: string
           import_type: string | null
+          journal: string | null
           kanban_status: string | null
           original_filename: string | null
           processed_by: string | null
           source_import_id: string | null
           storage_path: string | null
           study_id: string
+          title: string
         }
         Insert: {
           analysis_data?: Json | null
           created_at?: string | null
+          description?: string | null
           id?: string
           import_type?: string | null
+          journal?: string | null
           kanban_status?: string | null
           original_filename?: string | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path?: string | null
           study_id: string
+          title: string
         }
         Update: {
           analysis_data?: Json | null
           created_at?: string | null
+          description?: string | null
           id?: string
           import_type?: string | null
+          journal?: string | null
           kanban_status?: string | null
           original_filename?: string | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path?: string | null
           study_id?: string
+          title?: string
         }
         Relationships: [
           {

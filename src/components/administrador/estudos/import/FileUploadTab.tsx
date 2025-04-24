@@ -37,6 +37,15 @@ const FileUploadTab: React.FC = () => {
           
         if (uploadError) throw uploadError;
 
+        // Extrair título do nome do arquivo
+        const fileTitle = file.name.replace(/\.[^/.]+$/, ""); // Remove extensão
+        const formattedTitle = fileTitle
+          .replace(/_/g, ' ')
+          .replace(/-/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+
         // Registrar na tabela scispace_imports
         const { data: importData, error: importError } = await supabase
           .from("scispace_imports")
@@ -55,7 +64,7 @@ const FileUploadTab: React.FC = () => {
 
         if (importError) throw importError;
 
-        // Registrar na tabela processed_studies
+        // Registrar na tabela processed_studies com informações aprimoradas
         const { error: processError } = await supabase
           .from("processed_studies")
           .insert([
@@ -66,7 +75,10 @@ const FileUploadTab: React.FC = () => {
               original_filename: file.name,
               storage_path: path,
               kanban_status: 'new',
-              processed_by: 'manual-import'
+              processed_by: 'manual-import',
+              title: formattedTitle,
+              description: `Estudo importado manualmente: ${formattedTitle}`,
+              journal: 'Importação Manual'
             }
           ]);
 

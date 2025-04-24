@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NtaiAnalysisResult, ProcessingItem } from '@/types/ntai';
 import { useNtaiQueue } from './ntai/useNtaiQueue';
 import { useNtaiLogs } from './ntai/useNtaiLogs';
@@ -50,6 +49,7 @@ const getProgressForStage = (stage: string): number => {
 
 export const useNtaiProcessing = () => {
   const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
+  const [availableStudies, setAvailableStudies] = useState<any[]>([]);
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
   const {
@@ -65,6 +65,50 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
   } = useNtaiQueue();
+
+  // Carregar estudos disponíveis
+  useEffect(() => {
+    const loadStudies = async () => {
+      const { data, error } = await supabase
+        .from('processed_studies')
+        .select(`
+          id,
+          title,
+          description,
+          journal,
+          kanban_status,
+          import_type,
+          created_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setAvailableStudies(data);
+      }
+    };
+
+    loadStudies();
+
+    // Configurar realtime subscription
+    const channel = supabase
+      .channel('processed_studies_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'processed_studies'
+        },
+        () => {
+          loadStudies(); // Recarregar estudos quando houver mudanças
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const toggleItemSelection = (id: string) => {
     setSelectedItems(prev => 
@@ -176,6 +220,7 @@ export const useNtaiProcessing = () => {
     activeItemIndex,
     analysisResult,
     aiConfigs,
+    availableStudies,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
