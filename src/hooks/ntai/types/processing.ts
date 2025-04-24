@@ -4,11 +4,11 @@ import { NtaiAnalysisResult } from '@/types/ntai';
 export interface AvailableStudy {
   id: string;
   title: string;
-  description?: string;
-  journal?: string;
-  kanban_status?: string;
-  import_type?: string;
-  created_at?: string;
+  description: string; // Alterado: não mais opcional
+  journal: string; // Alterado: não mais opcional
+  kanban_status: string;
+  import_type: string;
+  created_at: string;
   scispace_status?: string;
 }
 

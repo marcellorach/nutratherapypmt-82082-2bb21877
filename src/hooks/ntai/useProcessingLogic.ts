@@ -16,7 +16,9 @@ export const useProcessingLogic = (
   setActiveItemIndex: (index: number) => void
 ) => {
   const startProcessing = async () => {
-    if (processQueue.length === 0 || processQueue.some(item => item.stage === 'processing')) return;
+    // Corrigindo a verificação de tipo: verifica se algum item está no estágio intermediário ("extracting", "analyzing", "standardizing")
+    if (processQueue.length === 0 || processQueue.some(item => 
+      item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing')) return;
     
     setProcessingActive(true);
     const updatedQueue = [...processQueue];

@@ -7,11 +7,11 @@ import { AvailableStudy } from './types/processing';
 export const transformImportToStudy = (importData: any): AvailableStudy => ({
   id: importData.id,
   title: importData.meta_summary_filename || 'Estudo importado',
-  description: importData.notes || 'Importado via SciSpace',
-  journal: 'SciSpace Import',
+  description: importData.notes || 'Importado via SciSpace', // Garantindo valor não nulo
+  journal: importData.journal || 'SciSpace Import', // Garantindo valor não nulo
   kanban_status: importData.scispace_status || 'new',
   import_type: importData.import_type || 'manual',
-  created_at: importData.imported_at,
+  created_at: importData.imported_at || new Date().toISOString(), // Garantindo valor não nulo
   scispace_status: importData.scispace_status
 });
 
@@ -58,7 +58,13 @@ export const useAvailableStudies = () => {
     }
 
     const importStudies = importData ? importData.map(transformImportToStudy) : [];
-    const processedStudies = processedData || [];
+    const processedStudies = processedData ? processedData.map(study => ({
+      ...study,
+      description: study.description || 'Processado anteriormente', // Garantindo valor não nulo
+      journal: study.journal || 'Processamento anterior', // Garantindo valor não nulo
+      created_at: study.created_at || new Date().toISOString() // Garantindo valor não nulo
+    })) : [];
+    
     const allStudies = [...processedStudies];
     
     importStudies.forEach(importStudy => {
