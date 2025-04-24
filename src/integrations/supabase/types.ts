@@ -164,27 +164,47 @@ export type Database = {
           analysis_data: Json | null
           created_at: string | null
           id: string
+          import_type: string | null
           kanban_status: string | null
+          original_filename: string | null
           processed_by: string | null
+          source_import_id: string | null
+          storage_path: string | null
           study_id: string
         }
         Insert: {
           analysis_data?: Json | null
           created_at?: string | null
           id?: string
+          import_type?: string | null
           kanban_status?: string | null
+          original_filename?: string | null
           processed_by?: string | null
+          source_import_id?: string | null
+          storage_path?: string | null
           study_id: string
         }
         Update: {
           analysis_data?: Json | null
           created_at?: string | null
           id?: string
+          import_type?: string | null
           kanban_status?: string | null
+          original_filename?: string | null
           processed_by?: string | null
+          source_import_id?: string | null
+          storage_path?: string | null
           study_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "processed_studies_source_import_id_fkey"
+            columns: ["source_import_id"]
+            isOneToOne: false
+            referencedRelation: "scispace_imports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scispace_imports: {
         Row: {
@@ -192,9 +212,12 @@ export type Database = {
           base_studies_storage_path: string
           consenso_comments: string | null
           consenso_name: string | null
+          deleted_at: string | null
           id: string
+          import_type: string | null
           imported_at: string | null
           imported_by: string | null
+          is_deleted: boolean | null
           meta_summary_filename: string
           meta_summary_storage_path: string
           notes: string | null
@@ -206,9 +229,12 @@ export type Database = {
           base_studies_storage_path: string
           consenso_comments?: string | null
           consenso_name?: string | null
+          deleted_at?: string | null
           id?: string
+          import_type?: string | null
           imported_at?: string | null
           imported_by?: string | null
+          is_deleted?: boolean | null
           meta_summary_filename: string
           meta_summary_storage_path: string
           notes?: string | null
@@ -220,9 +246,12 @@ export type Database = {
           base_studies_storage_path?: string
           consenso_comments?: string | null
           consenso_name?: string | null
+          deleted_at?: string | null
           id?: string
+          import_type?: string | null
           imported_at?: string | null
           imported_by?: string | null
+          is_deleted?: boolean | null
           meta_summary_filename?: string
           meta_summary_storage_path?: string
           notes?: string | null

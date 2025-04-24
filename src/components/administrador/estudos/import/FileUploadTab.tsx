@@ -28,38 +28,63 @@ const FileUploadTab: React.FC = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const path = `scispace/manual-import/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("scispace").upload(path, file, {
-        upsert: false,
-      });
-      if (error) {
+      
+      try {
+        // Upload do arquivo
+        const { error: uploadError } = await supabase.storage
+          .from("scispace")
+          .upload(path, file);
+          
+        if (uploadError) throw uploadError;
+
+        // Registrar na tabela scispace_imports
+        const { data: importData, error: importError } = await supabase
+          .from("scispace_imports")
+          .insert([
+            {
+              meta_summary_filename: file.name,
+              meta_summary_storage_path: path,
+              base_studies_filename: file.name,
+              base_studies_storage_path: path,
+              import_type: 'manual',
+              scispace_status: 'manual'
+            }
+          ])
+          .select()
+          .single();
+
+        if (importError) throw importError;
+
+        // Registrar na tabela processed_studies
+        const { error: processError } = await supabase
+          .from("processed_studies")
+          .insert([
+            {
+              study_id: path,
+              source_import_id: importData.id,
+              import_type: 'manual',
+              original_filename: file.name,
+              storage_path: path,
+              kanban_status: 'new',
+              processed_by: 'manual-import'
+            }
+          ]);
+
+        if (processError) throw processError;
+
+        currentProgress = Math.round(((i + 1) / files.length) * 100);
+        setProgress(currentProgress);
+      } catch (error: any) {
         toast({
-          title: "Erro ao importar arquivo",
-          description: `${file.name}: ${error.message}`,
+          title: `Erro ao importar ${file.name}`,
+          description: error.message,
           variant: "destructive",
         });
         setImporting(false);
         return;
       }
-      await supabase.from("scispace_imports").insert([
-        {
-          meta_summary_filename: file.name,
-          meta_summary_storage_path: path,
-          base_studies_filename: file.name,
-          base_studies_storage_path: path,
-          scispace_status: "manual",
-        }
-      ]);
-      await supabase.from("processed_studies").insert([
-        {
-          study_id: path,
-          kanban_status: "new",
-          processed_by: "manual-import",
-          analysis_data: null
-        }
-      ]);
-      currentProgress = Math.round(((i + 1) / files.length) * 100);
-      setProgress(currentProgress);
     }
+
     setTimeout(() => {
       setImporting(false);
       setFiles([]);

@@ -55,32 +55,57 @@ const SciSpace2StepImport: React.FC = () => {
 
       setProgress(30);
 
-      await Promise.all(
-        metaSummaryPaths.map(async (meta) => {
-          const { error: insertError } = await supabase
-            .from("scispace_imports")
-            .insert([
-              {
-                meta_summary_filename: meta.filename,
-                meta_summary_storage_path: meta.path,
-                base_studies_filename: baseStudiesFile.name,
-                base_studies_storage_path: baseStudiesPath,
-                consenso_name: consensoName,
-                consenso_comments: comentarios,
-              },
-            ]);
-          if (insertError) {
-            throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
-          }
-        })
-      );
+      // Registrar na tabela scispace_imports
+      const importPromises = metaSummaryPaths.map(async (meta) => {
+        const { error: insertError, data: importData } = await supabase
+          .from("scispace_imports")
+          .insert([
+            {
+              meta_summary_filename: meta.filename,
+              meta_summary_storage_path: meta.path,
+              base_studies_filename: baseStudiesFile.name,
+              base_studies_storage_path: baseStudiesPath,
+              consenso_name: consensoName,
+              consenso_comments: comentarios,
+              import_type: 'integrativa',
+              is_deleted: false
+            }
+          ])
+          .select()
+          .single();
+
+        if (insertError) {
+          throw new Error(`Erro ao salvar informações no banco: ${insertError.message}`);
+        }
+
+        // Registrar na tabela processed_studies para análise NTAI
+        const { error: processError } = await supabase
+          .from("processed_studies")
+          .insert([
+            {
+              study_id: meta.path,
+              source_import_id: importData.id,
+              import_type: 'integrativa',
+              original_filename: meta.filename,
+              storage_path: meta.path,
+              kanban_status: 'new',
+              processed_by: 'ntai'
+            }
+          ]);
+
+        if (processError) {
+          throw new Error(`Erro ao adicionar estudo para processamento: ${processError.message}`);
+        }
+      });
+
+      await Promise.all(importPromises);
 
       setProgress(70);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setProgress(100);
       toast({
         title: "Importação Concluída!",
-        description: `${metaSummaryFiles.length} arquivos enviados e metadados salvos com sucesso.`,
+        description: `${metaSummaryFiles.length} arquivos enviados e registrados com sucesso.`,
       });
 
       setMetaSummaryFiles([]);
