@@ -1,3 +1,4 @@
+
 import { NutraceuticalCondition } from './index';
 
 export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
@@ -27,6 +28,8 @@ export interface NtaiAnalysisResult {
   extractedSideEffects: NtaiSideEffectTag[];
   qualityScore: number;
   relevanceScore: number;
+  summary?: string;
+  processedAt: string;
 }
 
 export interface NtaiNutraceuticalTag {

@@ -6,14 +6,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface SideEffectTagProps {
   effect: string;
-  score: number;
+  score?: number; // Tornando o score opcional
   showScore?: boolean;
   className?: string;
 }
 
 const SideEffectTag: React.FC<SideEffectTagProps> = ({ 
   effect, 
-  score,
+  score = 0, // Definindo um valor padrão para score
   showScore = true,
   className = ""
 }) => {
@@ -57,11 +57,11 @@ const SideEffectTag: React.FC<SideEffectTagProps> = ({
           >
             <AlertTriangle className="w-3 h-3 mr-1" />
             <span>{effect}</span>
-            {showScore && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
+            {showScore && score !== undefined && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{effect}</span> - Intensidade: {score.toFixed(1)}/5</p>
+          <p><span className="font-medium">{effect}</span> {score !== undefined && <>- Intensidade: {score.toFixed(1)}/5</>}</p>
           <p className="text-xs text-gray-500 mt-1">
             {score >= 4 ? 'Efeito colateral severo' : 
              score >= 2.5 ? 'Efeito colateral moderado' : 

@@ -45,8 +45,8 @@ export const extractConditionsFromStudy = async (studyText: string, prompt?: str
 export const extractInteractionsFromStudy = async (studyText: string) => {
   // Simulação: extrai interações baseadas no texto do estudo
   return [
-    { name: "Anti-inflamatórios", score: 3.8, type: "positive", confidence: 0.85 },
-    { name: "Anticoagulantes", score: 2.1, type: "negative", confidence: 0.80 }
+    { name: "Anti-inflamatórios", score: 3.8, type: "positive" as "positive", confidence: 0.85 },
+    { name: "Anticoagulantes", score: 2.1, type: "negative" as "negative", confidence: 0.80 }
   ];
 };
 
@@ -54,8 +54,8 @@ export const extractInteractionsFromStudy = async (studyText: string) => {
 export const extractSideEffectsFromStudy = async (studyText: string) => {
   // Simulação: extrai efeitos colaterais baseados no texto do estudo
   return [
-    { name: "Irritação gastrointestinal", severity: "low", confidence: 0.75 },
-    { name: "Alterações na coagulação", severity: "moderate", confidence: 0.60 }
+    { name: "Irritação gastrointestinal", intensityScore: 1.5, frequency: "low", confidence: 0.75 },
+    { name: "Alterações na coagulação", intensityScore: 2.5, frequency: "moderate", confidence: 0.60 }
   ];
 };
 
