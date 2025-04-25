@@ -72,7 +72,14 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
     if (!payload || !payload.length) return null;
     
     const item = payload[0];
-    const { source, target, value } = item.payload;
+    if (!item || !item.payload) return null;
+    
+    // Verificações de segurança para source e target
+    const source = item.payload.source;
+    const target = item.payload.target;
+    const value = item.payload.value;
+    
+    if (!source || !target) return null;
     
     return (
       <div className="bg-white p-3 shadow-lg rounded-md border border-gray-200">
