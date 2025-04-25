@@ -13,8 +13,16 @@ export const useNtaiProcessing = () => {
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
   const { availableStudies } = useAvailableStudies();
-  const { selectedItems, toggleItemSelection, handleSelectAll, setSelectedItems } = useSelectionHandling();
   
+  // Extrair métodos do hook de seleção
+  const { 
+    selectedItems, 
+    toggleItemSelection, 
+    handleSelectAll, 
+    clearSelection 
+  } = useSelectionHandling();
+  
+  // Extrair métodos e estados do hook de fila
   const {
     processQueue,
     processingActive,
@@ -27,6 +35,7 @@ export const useNtaiProcessing = () => {
     retryFailed,
   } = useNtaiQueue();
 
+  // Integrar com a lógica de processamento
   const { startProcessing } = useProcessingLogic(
     processQueue,
     setProcessQueue,
@@ -36,6 +45,15 @@ export const useNtaiProcessing = () => {
     setProcessingActive,
     setActiveItemIndex
   );
+
+  // Garantir que addToQueue receba os estudos disponíveis
+  const handleAddToQueue = () => {
+    console.log('Adicionando estudos selecionados à fila:', selectedItems);
+    console.log('Estudos disponíveis:', availableStudies);
+    addToQueue(availableStudies);
+    // Limpar a seleção após adicionar à fila
+    clearSelection();
+  };
 
   return {
     processQueue,
@@ -48,7 +66,7 @@ export const useNtaiProcessing = () => {
     availableStudies,
     toggleItemSelection,
     handleSelectAll,
-    addToQueue,
+    addToQueue: handleAddToQueue,
     clearCompleted,
     retryFailed,
     startProcessing,

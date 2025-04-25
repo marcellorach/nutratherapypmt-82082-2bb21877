@@ -41,6 +41,13 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
     }
   };
 
+  const allSelected = estudos.length > 0 && selectedItems.length === estudos.length;
+  
+  const handleSelectAll = () => {
+    console.log('Clicou em selecionar todos');
+    onSelectAll();
+  };
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
@@ -49,8 +56,8 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             <TableHead className="w-[40px]">
               <input 
                 type="checkbox"
-                checked={selectedItems.length === estudos.length && estudos.length > 0}
-                onChange={onSelectAll}
+                checked={allSelected}
+                onChange={handleSelectAll}
                 className="rounded"
               />
             </TableHead>
@@ -68,7 +75,10 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                   <input 
                     type="checkbox"
                     checked={selectedItems.includes(estudo.id)}
-                    onChange={() => onToggleSelection(estudo.id)}
+                    onChange={() => {
+                      console.log(`Clicou em ${estudo.id}`, estudo);
+                      onToggleSelection(estudo.id);
+                    }}
                     className="rounded"
                   />
                 </TableCell>

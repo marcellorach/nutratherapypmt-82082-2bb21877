@@ -20,27 +20,26 @@ export const useNtaiQueue = () => {
       return;
     }
 
-    const newItems: ProcessingItem[] = selectedItems.map(id => {
-      const estudo = estudos.find(e => e.id === id);
-      
-      if (!estudo) {
-        return {
-          id,
-          title: `Estudo ${id.substring(0, 8)}`,
-          stage: 'idle' as ProcessingStage,
-          progress: 0,
-          sourceFile: '',
-          originalFormat: 'PDF'
-        };
-      }
-      
+    // Filtrar apenas os estudos que estão selecionados
+    const estudosSelecionados = estudos.filter(estudo => selectedItems.includes(estudo.id));
+    
+    if (estudosSelecionados.length === 0) {
+      toast({
+        title: "Erro ao adicionar estudos",
+        description: "Não foi possível encontrar os estudos selecionados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newItems: ProcessingItem[] = estudosSelecionados.map(estudo => {
       return {
-        id,
-        title: estudo.title || `Estudo ${id.substring(0, 8)}`,
+        id: estudo.id,
+        title: estudo.title || `Estudo ${estudo.id.substring(0, 8)}`,
         stage: 'idle' as ProcessingStage,
         progress: 0,
-        sourceFile: estudo.journal || '',
-        originalFormat: 'PDF'
+        sourceFile: estudo.journal || estudo.meta_summary_filename || '',
+        originalFormat: estudo.meta_summary_filename?.split('.').pop()?.toUpperCase() || 'PDF'
       };
     });
 
@@ -49,7 +48,8 @@ export const useNtaiQueue = () => {
     
     toast({
       title: "Estudos adicionados à fila",
-      description: `${newItems.length} estudos adicionados para processamento NTAI.`,
+      description: `${newItems.length} estudo(s) adicionado(s) para processamento NTAI.`,
+      variant: "default",
     });
   };
 
@@ -58,6 +58,7 @@ export const useNtaiQueue = () => {
     toast({
       title: "Itens completos removidos",
       description: "Os itens processados com sucesso foram removidos da fila.",
+      variant: "default",
     });
   };
 
@@ -71,6 +72,7 @@ export const useNtaiQueue = () => {
     toast({
       title: "Itens com falha reiniciados",
       description: "Os itens com erro foram reiniciados para novo processamento.",
+      variant: "default",
     });
   };
 

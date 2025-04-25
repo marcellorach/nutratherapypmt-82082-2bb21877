@@ -33,6 +33,13 @@ const NtaiProcessingSection: React.FC = () => {
   
   const toggleLogVisibility = () => setLogVisible(!logVisible);
 
+  const handleAddToQueue = () => {
+    console.log("Botão 'Adicionar à Fila NTAI' clicado");
+    console.log("Estudos selecionados:", selectedItems);
+    console.log("Estudos disponíveis:", availableStudies);
+    addToQueue();
+  };
+
   return (
     <Card id="ntai-processing-section" className="transition-all">
       <CardContent className="p-6 space-y-6">
@@ -83,7 +90,7 @@ const NtaiProcessingSection: React.FC = () => {
             selectedItems={selectedItems}
             onToggleSelection={toggleItemSelection}
             onSelectAll={() => handleSelectAll(availableStudies)}
-            onAddToQueue={() => addToQueue(availableStudies)}
+            onAddToQueue={handleAddToQueue}
           />
         </div>
         
