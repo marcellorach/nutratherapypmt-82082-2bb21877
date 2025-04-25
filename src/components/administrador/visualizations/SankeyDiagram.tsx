@@ -198,10 +198,10 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             node={{
               stroke: '#fff',
               strokeWidth: 1,
-              fill: (node) => node.color || '#8884d8',
+              fill: '#8884d8', // Use uma string em vez de uma função
             }}
             link={{
-              stroke: (link) => link.color || '#77c878',
+              stroke: '#77c878', // Use uma string em vez de uma função
               strokeWidth: 2,
               fillOpacity: 0.8,
               onClick: handleLinkClick,
