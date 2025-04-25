@@ -133,12 +133,12 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             linkCurvature={0.5}
             iterations={64}
             node={{
-              stroke: '#fff',
+              stroke: "#fff",
               strokeWidth: 1,
-              fill: '#8884d8',
+              fill: "#8884d8",
             }}
             link={{
-              stroke: '#77c878',
+              stroke: "#77c878",
               strokeWidth: 2,
               fillOpacity: 0.8,
               onClick: handleLinkClick,
@@ -146,7 +146,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             }}
             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
           >
-            <Tooltip content={<SankeyTooltip />} />
+            <Tooltip content={<SankeyTooltip payload={[]} />} />
           </Sankey>
         </ResponsiveContainer>
       </div>
