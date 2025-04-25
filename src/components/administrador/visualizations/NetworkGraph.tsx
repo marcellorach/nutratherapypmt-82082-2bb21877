@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Network, Data, Node, Edge, Options } from 'vis-network/standalone';
 import { Search, Filter, ZoomIn, ZoomOut } from 'lucide-react';
@@ -68,7 +67,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
 
   const initNetwork = () => {
     if (networkContainer.current && data) {
-      // Opções de configuração da rede
       const options: Options = {
         nodes: {
           shape: 'dot',
@@ -89,7 +87,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         edges: {
           width: 1,
           smooth: {
-            type: 'continuous'
+            enabled: true,
+            type: 'continuous',
+            roundness: 0.5,
+            forceDirection: 'none'
           },
           arrows: {
             to: { enabled: true, scaleFactor: 0.5 }
@@ -116,7 +117,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         }
       };
 
-      // Criar a visualização de rede
       const networkData = prepareNetworkData();
       
       if (network.current) {
@@ -129,14 +129,12 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         options
       );
       
-      // Configurar eventos
       network.current.on('click', function(properties) {
         if (properties.nodes && properties.nodes.length > 0) {
           const nodeId = properties.nodes[0];
           const node = data.nodes.find(node => node.id === nodeId);
           
           if (node) {
-            // Encontrar todas as arestas conectadas a este nó
             const connectedEdges = data.edges.filter(
               edge => edge.from === nodeId || edge.to === nodeId
             );
@@ -153,7 +151,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     }
   };
 
-  // Inicializar rede quando o componente for montado
   useEffect(() => {
     initNetwork();
     
@@ -165,7 +162,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     };
   }, [data, selectedFilter]);
 
-  // Função para destacar nós ao pesquisar
   const handleSearch = () => {
     if (!network.current || !searchTerm.trim()) return;
 
@@ -182,7 +178,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     }
   };
 
-  // Funções de zoom
   const zoomIn = () => {
     if (network.current) {
       const scale = network.current.getScale() * 1.2;
@@ -197,7 +192,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     }
   };
 
-  // Função para resetar a visualização
   const resetView = () => {
     if (network.current) {
       network.current.fit({ animation: true });
@@ -210,7 +204,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
 
   return (
     <div className="flex flex-col h-full">
-      {/* Barra de controles */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="flex-1 flex gap-2">
           <div className="flex-1">
@@ -275,14 +268,12 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         </div>
       </div>
       
-      {/* Container da visualização de rede */}
       <div 
         ref={networkContainer} 
         style={{ height, width: '100%' }} 
         className="border rounded-md bg-slate-50"
       />
       
-      {/* Dialog para exibir detalhes do nó selecionado */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
