@@ -1,9 +1,8 @@
-
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ZoomIn, ZoomOut, Move, Plus } from 'lucide-react';
+import { ZoomIn, ZoomOut, Move } from 'lucide-react';
 
 interface SankeyNode {
   name: string;
@@ -40,53 +39,40 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
   const [selectedSourceNode, setSelectedSourceNode] = useState<SankeyNode | null>(null);
   const [selectedTargetNode, setSelectedTargetNode] = useState<SankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  
-  // Preparar cores baseadas na categoria
+
   const processedData = useMemo(() => {
     if (!data || !data.nodes || !data.links) {
       return { nodes: [], links: [] };
     }
 
-    // Atribuir cores baseadas na categoria do nó
-    const coloredNodes = data.nodes.map((node) => {
-      let color;
-      switch (node.category) {
-        case 'nutraceutico':
-          color = '#3b82f6'; // Azul para nutracêuticos
-          break;
-        case 'condicao':
-          color = '#10b981'; // Verde para condições de saúde
-          break;
-        case 'efeito':
-          color = '#f59e0b'; // Âmbar para efeitos
-          break;
-        default:
-          color = '#6b7280'; // Cinza para outros
-      }
-      
-      return {
-        ...node,
-        color: node.color || color,
-      };
-    });
+    const coloredNodes = data.nodes.map((node) => ({
+      ...node,
+      name: node.name,
+      color: node.category === 'nutraceutico' ? '#3b82f6' : 
+             node.category === 'condicao' ? '#10b981' : '#f59e0b',
+    }));
 
-    // Processar links para usar cores baseadas no valor (efeito/eficácia)
     const coloredLinks = data.links.map((link) => {
-      // Determinar cor baseada no valor (eficácia)
+      const sourceNode = coloredNodes[link.source];
+      const targetNode = coloredNodes[link.target];
+      
       let color;
       if (link.value >= 80) {
-        color = 'rgba(16, 185, 129, 0.7)'; // Verde para alta eficácia
+        color = 'rgba(16, 185, 129, 0.7)';
       } else if (link.value >= 60) {
-        color = 'rgba(59, 130, 246, 0.7)'; // Azul para eficácia média-alta
+        color = 'rgba(59, 130, 246, 0.7)';
       } else if (link.value >= 40) {
-        color = 'rgba(245, 158, 11, 0.7)'; // Âmbar para eficácia média
+        color = 'rgba(245, 158, 11, 0.7)';
       } else {
-        color = 'rgba(156, 163, 175, 0.7)'; // Cinza para baixa eficácia
+        color = 'rgba(156, 163, 175, 0.7)';
       }
 
       return {
         ...link,
-        color: link.color || color,
+        source: sourceNode.name,
+        target: targetNode.name,
+        color,
+        name: `${sourceNode.name} → ${targetNode.name}`,
       };
     });
 
@@ -98,42 +84,46 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
     
     const item = payload[0];
     if (!item || !item.payload) return null;
-    
-    // Verificações de segurança para source e target
-    const source = item.payload.source;
-    const target = item.payload.target;
+
+    const source = item.payload.sourceNode;
+    const target = item.payload.targetNode;
     const value = item.payload.value;
     
     if (!source || !target) return null;
-    
+
     return (
-      <div className="bg-white p-3 shadow-lg rounded-md border border-gray-200">
-        <p className="text-sm font-medium">
-          <span className="text-blue-600">{source.name}</span>
-          <span className="mx-1">→</span>
-          <span className="text-green-600">{target.name}</span>
-        </p>
-        <p className="text-xs text-gray-600 mt-1">
-          Eficácia: <span className="font-medium">{value}</span>
-          {item.payload.labelText && <span className="block mt-1">{item.payload.labelText}</span>}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">Clique para ver detalhes</p>
+      <div className="bg-white p-4 shadow-lg rounded-lg border border-gray-200">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-blue-600">{source.name}</span>
+            <span className="mx-2">→</span>
+            <span className="font-medium text-green-600">{target.name}</span>
+          </div>
+          <div className="text-sm">
+            <p className="text-gray-600">Eficácia: <span className="font-medium">{value}/100</span></p>
+            {item.payload.labelText && (
+              <p className="text-gray-600">{item.payload.labelText}</p>
+            )}
+          </div>
+          {item.payload.description && (
+            <p className="text-xs text-gray-500 mt-1">{item.payload.description}</p>
+          )}
+          <p className="text-xs text-gray-400 mt-1">Clique para mais detalhes</p>
+        </div>
       </div>
     );
   };
 
-  // Manipulador para clique em um link
   const handleLinkClick = (e: any) => {
     if (e && e.payload) {
       const { source, target, ...linkData } = e.payload;
       setSelectedLink(linkData);
-      setSelectedSourceNode(source);
-      setSelectedTargetNode(target);
+      setSelectedSourceNode(data.nodes.find(n => n.name === source));
+      setSelectedTargetNode(data.nodes.find(n => n.name === target));
       setDialogOpen(true);
     }
   };
 
-  // Controles de zoom
   const handleZoomIn = () => {
     setScale(prev => Math.min(prev + 0.2, 2.5));
   };
@@ -156,25 +146,24 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
 
   return (
     <div className="w-full">
-      {/* Controles de Zoom */}
       <div className="flex items-center justify-end mb-2 space-x-2">
         <div className="bg-white border rounded-md p-1 shadow-sm">
           <button 
-            onClick={handleZoomIn} 
+            onClick={() => setScale(prev => Math.min(prev + 0.2, 2.5))} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Ampliar"
           >
             <ZoomIn size={16} />
           </button>
           <button 
-            onClick={handleZoomOut} 
+            onClick={() => setScale(prev => Math.max(prev - 0.2, 0.5))} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Reduzir"
           >
             <ZoomOut size={16} />
           </button>
           <button 
-            onClick={handleResetZoom} 
+            onClick={() => setScale(1)} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Restaurar zoom"
           >
@@ -183,7 +172,6 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
         </div>
       </div>
       
-      {/* Diagrama Sankey */}
       <div 
         className="overflow-hidden" 
         style={{ 
@@ -196,34 +184,33 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
         <ResponsiveContainer width="100%" height="100%">
           <Sankey
             data={processedData}
-            nodePadding={30}
             nodeWidth={15}
+            nodePadding={40}
             linkCurvature={0.5}
             iterations={64}
             node={{
               stroke: '#fff',
               strokeWidth: 1,
-              onClick: (e) => console.log('Node clicked:', e),
+              fill: (node: any) => node.color,
             }}
             link={{
-              stroke: '#ddd',
+              stroke: (link: any) => link.color,
+              strokeWidth: 2,
+              fillOpacity: 0.8,
               onClick: handleLinkClick,
               className: "cursor-pointer hover:opacity-80 transition-opacity"
             }}
-            margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
           >
             <Tooltip content={CustomTooltip} />
           </Sankey>
         </ResponsiveContainer>
       </div>
 
-      {/* Diálogo de Detalhes */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
-              Relação Nutraceutico-Condição
-            </DialogTitle>
+            <DialogTitle>Detalhes da Relação</DialogTitle>
           </DialogHeader>
           
           {selectedSourceNode && selectedTargetNode && selectedLink && (
@@ -235,8 +222,11 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
                       {selectedSourceNode.name}
                     </h3>
                     <Badge variant="outline" className="mt-1">
-                      Nutraceutico
+                      {selectedSourceNode.category === 'nutraceutico' ? 'Nutracêutico' : 'Condição'}
                     </Badge>
+                    {selectedSourceNode.description && (
+                      <p className="text-sm text-gray-600 mt-1">{selectedSourceNode.description}</p>
+                    )}
                   </div>
                   <div className="text-2xl font-light text-gray-300">→</div>
                   <div className="text-right">
@@ -244,8 +234,11 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
                       {selectedTargetNode.name}
                     </h3>
                     <Badge variant="outline" className="mt-1">
-                      Condição de Saúde
+                      {selectedTargetNode.category === 'nutraceutico' ? 'Nutracêutico' : 'Condição'}
                     </Badge>
+                    {selectedTargetNode.description && (
+                      <p className="text-sm text-gray-600 mt-1">{selectedTargetNode.description}</p>
+                    )}
                   </div>
                 </div>
               </div>
