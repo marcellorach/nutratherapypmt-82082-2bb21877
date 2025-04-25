@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -52,6 +53,8 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
              node.category === 'condicao' ? '#10b981' : '#f59e0b',
     }));
 
+    // O problema principal estava aqui - não podemos transformar source e target em strings
+    // Precisamos manter como números para a biblioteca Recharts
     const coloredLinks = data.links.map((link) => {
       const sourceNode = coloredNodes[link.source];
       const targetNode = coloredNodes[link.target];
@@ -69,10 +72,11 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
 
       return {
         ...link,
-        source: sourceNode.name,
-        target: targetNode.name,
         color,
-        name: `${sourceNode.name} → ${targetNode.name}`,
+        // Mantemos source e target como números, mas adicionamos uma propriedade para o nome
+        // para referência interna
+        sourceName: sourceNode.name,
+        targetName: targetNode.name,
       };
     });
 
@@ -116,10 +120,13 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
 
   const handleLinkClick = (e: any) => {
     if (e && e.payload) {
-      const { source, target, ...linkData } = e.payload;
-      setSelectedLink(linkData);
-      setSelectedSourceNode(data.nodes.find(n => n.name === source));
-      setSelectedTargetNode(data.nodes.find(n => n.name === target));
+      // Encontramos os nós de origem e destino pelo índice
+      const sourceNode = data.nodes[e.payload.source];
+      const targetNode = data.nodes[e.payload.target];
+      
+      setSelectedLink(e.payload);
+      setSelectedSourceNode(sourceNode);
+      setSelectedTargetNode(targetNode);
       setDialogOpen(true);
     }
   };
@@ -149,21 +156,21 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
       <div className="flex items-center justify-end mb-2 space-x-2">
         <div className="bg-white border rounded-md p-1 shadow-sm">
           <button 
-            onClick={() => setScale(prev => Math.min(prev + 0.2, 2.5))} 
+            onClick={handleZoomIn} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Ampliar"
           >
             <ZoomIn size={16} />
           </button>
           <button 
-            onClick={() => setScale(prev => Math.max(prev - 0.2, 0.5))} 
+            onClick={handleZoomOut} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Reduzir"
           >
             <ZoomOut size={16} />
           </button>
           <button 
-            onClick={() => setScale(1)} 
+            onClick={handleResetZoom} 
             className="p-1 hover:bg-gray-100 rounded"
             title="Restaurar zoom"
           >
@@ -191,10 +198,10 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             node={{
               stroke: '#fff',
               strokeWidth: 1,
-              fill: (node: any) => node.color,
+              fill: (node) => node.color || '#8884d8',
             }}
             link={{
-              stroke: (link: any) => link.color,
+              stroke: (link) => link.color || '#77c878',
               strokeWidth: 2,
               fillOpacity: 0.8,
               onClick: handleLinkClick,
@@ -202,7 +209,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             }}
             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
           >
-            <Tooltip content={CustomTooltip} />
+            <Tooltip content={<CustomTooltip />} />
           </Sankey>
         </ResponsiveContainer>
       </div>
