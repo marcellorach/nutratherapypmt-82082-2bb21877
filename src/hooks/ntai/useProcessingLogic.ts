@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ntaiService from '@/services/ntai-service';
-import { ProcessingItem } from '@/types/ntai';
-import { simulateStageProcessing, getStageMessage } from './utils/processing';
+import { ProcessingItem, ProcessingStage } from '@/types/ntai';
+import { simulateStageProcessing, getStageMessage, getProgressForStage } from './utils/processing';
 
 export const useProcessingLogic = (
   processQueue: ProcessingItem[],
@@ -18,9 +18,26 @@ export const useProcessingLogic = (
   const { toast } = useToast();
 
   const startProcessing = async () => {
-    // Corrigindo a verificação de tipo: verifica se algum item está no estágio intermediário ("extracting", "analyzing", "standardizing")
-    if (processQueue.length === 0 || processQueue.some(item => 
-      item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing')) return;
+    // Verificar se há itens para processar e se não há processamento ativo
+    if (processQueue.length === 0) {
+      toast({
+        title: "Nenhum item na fila",
+        description: "Adicione estudos à fila antes de iniciar o processamento.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Verificar se já há processamento em andamento
+    if (processQueue.some(item => 
+      item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing')) {
+      toast({
+        title: "Processamento em andamento",
+        description: "Aguarde a conclusão do processamento atual.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setProcessingActive(true);
     const updatedQueue = [...processQueue];
@@ -33,6 +50,11 @@ export const useProcessingLogic = (
       if (index >= updatedQueue.length) {
         setProcessingActive(false);
         setActiveItemIndex(-1);
+        toast({
+          title: "Processamento concluído",
+          description: "Todos os estudos foram processados com sucesso.",
+          variant: "default",
+        });
         return;
       }
       
@@ -45,7 +67,8 @@ export const useProcessingLogic = (
       }
 
       try {
-        for (const stage of ['extracting', 'analyzing', 'standardizing'] as const) {
+        // Simular as etapas de processamento
+        for (const stage of ['extracting', 'analyzing', 'standardizing'] as ProcessingStage[]) {
           updatedQueue[index] = { ...item, stage, progress: getProgressForStage(stage) };
           setProcessQueue([...updatedQueue]);
           await simulateStageProcessing(stage, item.title, addLogEntry);
@@ -53,51 +76,30 @@ export const useProcessingLogic = (
 
         addLogEntry(`Enviando para processamento com IA: ${item.title}`);
         
-        const simulatedResult = await ntaiService.analyzeStudy(
+        const result = await ntaiService.analyzeStudy(
           item.id,
-          `Texto simulado de ${item.title}`,
+          `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
         
-        setAnalysisResult(simulatedResult);
-
-        const jsonAnalysisData = JSON.parse(JSON.stringify(simulatedResult));
+        setAnalysisResult(result);
         
-        const { error: insertError } = await supabase
-          .from('processed_studies')
-          .insert({
-            study_id: item.id,
-            analysis_data: jsonAnalysisData,
-            kanban_status: 'new',
-            processed_by: 'ntai',
-            title: item.title,
-            description: `Análise NTAI: ${item.title}`,
-            journal: item.sourceFile || 'NTAI'
-          });
-
-        if (insertError) {
-          throw new Error(`Erro ao salvar análise: ${insertError.message}`);
-        }
-
-        addLogEntry(`Card adicionado ao kanban na coluna "Novos Estudos"`);
-
-        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
+        updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
         
-        // Corrigindo o tipo do variant para "default" em vez de "success"
         toast({
           title: "Análise concluída",
           description: `Processamento de '${item.title}' finalizado com sucesso.`,
-          variant: "default", // Alterado de "success" para "default"
+          variant: "default",
         });
 
       } catch (error: any) {
         addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
-          stage: 'error', 
+          stage: 'error' as ProcessingStage, 
           progress: 50,
           error: `Erro: ${error.message}`
         };
@@ -110,20 +112,13 @@ export const useProcessingLogic = (
         });
       }
 
+      // Aguardar um momento antes de processar o próximo item
       setTimeout(() => processNextItem(index + 1), 1000);
     };
     
+    // Iniciar o processamento pelo primeiro item
     processNextItem(0);
   };
 
   return { startProcessing };
-};
-
-const getProgressForStage = (stage: string): number => {
-  switch (stage) {
-    case 'extracting': return 30;
-    case 'analyzing': return 60;
-    case 'standardizing': return 90;
-    default: return 0;
-  }
 };

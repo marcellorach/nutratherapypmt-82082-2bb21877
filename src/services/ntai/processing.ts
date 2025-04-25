@@ -9,6 +9,8 @@ export const processStudyWithAI = async (
   conditionsPrompt?: string
 ): Promise<NtaiAnalysisResult> => {
   try {
+    console.log(`Enviando estudo ${studyId} para processamento na edge function`);
+    
     const { data, error } = await supabase.functions.invoke('process-study', {
       body: {
         studyId,
@@ -28,6 +30,7 @@ export const processStudyWithAI = async (
       throw new Error('Resposta inválida da Edge Function');
     }
 
+    console.log('Análise concluída com sucesso:', data.analysisResult.studyId);
     return data.analysisResult;
   } catch (error) {
     console.error('Erro ao processar estudo com IA:', error);

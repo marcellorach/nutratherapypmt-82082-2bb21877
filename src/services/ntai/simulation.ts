@@ -1,185 +1,109 @@
 
-import { 
-  NtaiNutraceuticalTag, 
-  NtaiConditionTag, 
-  NtaiInteractionTag, 
-  NtaiSideEffectTag,
-  NtaiAnalysisResult
-} from '@/types/ntai';
+import { NtaiAnalysisResult } from '@/types/ntai';
 
-// Lista de nutracêuticos comuns
-const commonNutraceuticals = [
-  'Ômega 3', 'Ômega 6', 'Glucosamina', 'Condroitina', 'MSM', 
-  'Curcumina', 'Extrato de Gengibre', 'Extrato de Boswellia',
-  'Vitamina E', 'Vitamina C', 'CoQ10', 'Probióticos', 
-  'Extrato de Mexilhão de Lábio Verde', 'Ácido Hialurônico',
-  'CBD', 'L-Carnitina', 'Taurina', 'Resveratrol', 'Quercetina'
-];
-
-// Lista de condições comuns em pets
-const commonConditions = [
-  'Artrite', 'Displasia Coxofemoral', 'Osteoartrite', 'Dermatite Atópica',
-  'Alergias Alimentares', 'Gengivite', 'Doença Periodontal', 'Obesidade',
-  'Diabetes', 'Insuficiência Cardíaca', 'Doença Renal Crônica', 'Ansiedade',
-  'Problemas Digestivos', 'Inflamação Intestinal', 'Degeneração Cognitiva',
-  'Problemas Hepáticos', 'Hipertireoidismo', 'Hipotireoidismo', 'Epilepsia'
-];
-
-// Lista de interações comuns
-const commonInteractions = [
-  { name: 'Anti-inflamatórios', type: 'negative' },
-  { name: 'Glicocorticoides', type: 'negative' },
-  { name: 'Anticoagulantes', type: 'negative' },
-  { name: 'Antidepressivos', type: 'negative' },
-  { name: 'Vitamina K', type: 'negative' },
-  { name: 'Glucosamina', type: 'positive' },
-  { name: 'Condroitina', type: 'positive' },
-  { name: 'Probióticos', type: 'positive' },
-  { name: 'Vitamina E', type: 'positive' },
-  { name: 'Ácidos Graxos Essenciais', type: 'positive' }
-];
-
-// Lista de efeitos colaterais comuns
-const commonSideEffects = [
-  { name: 'Vômito', frequency: 'raro' },
-  { name: 'Diarreia', frequency: 'ocasional' },
-  { name: 'Sonolência', frequency: 'raro' },
-  { name: 'Alterações no apetite', frequency: 'comum' },
-  { name: 'Alterações no comportamento', frequency: 'raro' },
-  { name: 'Aumento de enzimas hepáticas', frequency: 'raro' },
-  { name: 'Irritação gastrointestinal', frequency: 'comum' }
-];
-
-// Função para extrair nutracêuticos do texto
-export const extractNutraceuticalsFromStudy = async (
-  studyText: string, 
-  customPrompt?: string
-): Promise<NtaiNutraceuticalTag[]> => {
-  // Simulando extração baseada em palavras-chave no texto
-  await new Promise(resolve => setTimeout(resolve, 1500));
+// Função para simular a extração de nutracêuticos de um estudo
+export const extractNutraceuticalsFromStudy = async (studyText: string, prompt?: string) => {
+  // Simulação: extrai nutracêuticos baseados no texto do estudo
+  const nutracêuticos = [
+    { name: "Glucosamina", confidence: 0.95 },
+    { name: "Condroitina", confidence: 0.88 },
+    { name: "MSM", confidence: 0.82 },
+    { name: "Ômega 3", confidence: 0.78 },
+    { name: "Curcumina", confidence: 0.65 }
+  ];
   
-  // Selecionando aleatoriamente 2-5 nutracêuticos baseado em seed do texto
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const count = 2 + (hash % 4); // 2 a 5 nutracêuticos
-  
-  const extractedNutraceuticals: NtaiNutraceuticalTag[] = [];
-  const usedIndices = new Set<number>();
-  
-  for (let i = 0; i < count; i++) {
-    let index;
-    do {
-      index = (hash + i * 123) % commonNutraceuticals.length;
-    } while (usedIndices.has(index));
-    
-    usedIndices.add(index);
-    extractedNutraceuticals.push({
-      name: commonNutraceuticals[index],
-      confidence: 0.5 + (Math.random() * 0.5) // Confiança entre 0.5 e 1
-    });
+  // Verifica se o texto contém certas palavras-chave e adiciona nutracêuticos específicos
+  if (studyText.toLowerCase().includes('articular') || studyText.toLowerCase().includes('joint')) {
+    nutracêuticos.push({ name: "Colágeno Tipo II", confidence: 0.90 });
   }
   
-  return extractedNutraceuticals;
-};
-
-// Função para extrair condições de saúde do texto
-export const extractConditionsFromStudy = async (
-  studyText: string,
-  customPrompt?: string
-): Promise<NtaiConditionTag[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1800));
-  
-  // Selecionando aleatoriamente 1-4 condições baseado em seed do texto
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const count = 1 + (hash % 4); // 1 a 4 condições
-  
-  const extractedConditions: NtaiConditionTag[] = [];
-  const usedIndices = new Set<number>();
-  
-  for (let i = 0; i < count; i++) {
-    let index;
-    do {
-      index = (hash + i * 456) % commonConditions.length;
-    } while (usedIndices.has(index));
-    
-    usedIndices.add(index);
-    extractedConditions.push({
-      name: commonConditions[index],
-      efficacyScore: 1 + Math.random() * 4, // Eficácia entre 1 e 5
-      confidence: 0.6 + (Math.random() * 0.4) // Confiança entre 0.6 e 1
-    });
+  if (studyText.toLowerCase().includes('inflamação') || studyText.toLowerCase().includes('inflammation')) {
+    nutracêuticos.push({ name: "Boswellia", confidence: 0.85 });
   }
   
-  return extractedConditions;
+  return nutracêuticos;
 };
 
-// Função para extrair interações do texto
-export const extractInteractionsFromStudy = async (
+// Função para simular a extração de condições de saúde de um estudo
+export const extractConditionsFromStudy = async (studyText: string, prompt?: string) => {
+  // Simulação: extrai condições de saúde baseadas no texto do estudo
+  const condições = [
+    { name: "Artrite", efficacyScore: 4.2, confidence: 0.92 },
+    { name: "Displasia", efficacyScore: 3.8, confidence: 0.84 },
+    { name: "Dor crônica", efficacyScore: 3.5, confidence: 0.78 }
+  ];
+  
+  // Adiciona condições específicas baseadas em palavras-chave
+  if (studyText.toLowerCase().includes('idoso') || studyText.toLowerCase().includes('senior')) {
+    condições.push({ name: "Envelhecimento", efficacyScore: 4.0, confidence: 0.88 });
+  }
+  
+  return condições;
+};
+
+// Função para simular a extração de interações de um estudo
+export const extractInteractionsFromStudy = async (studyText: string) => {
+  // Simulação: extrai interações baseadas no texto do estudo
+  return [
+    { name: "Anti-inflamatórios", score: 3.8, type: "positive", confidence: 0.85 },
+    { name: "Anticoagulantes", score: 2.1, type: "negative", confidence: 0.80 }
+  ];
+};
+
+// Função para simular a extração de efeitos colaterais de um estudo
+export const extractSideEffectsFromStudy = async (studyText: string) => {
+  // Simulação: extrai efeitos colaterais baseados no texto do estudo
+  return [
+    { name: "Irritação gastrointestinal", severity: "low", confidence: 0.75 },
+    { name: "Alterações na coagulação", severity: "moderate", confidence: 0.60 }
+  ];
+};
+
+// Função para pontuar a qualidade do estudo
+export const scoreStudyQuality = async (studyText: string) => {
+  // Simulação: avalia a qualidade do estudo com base no comprimento e palavras-chave
+  const baseScore = 3.5;
+  let bonusScore = 0;
+  
+  // Adiciona pontos para estudos mais longos
+  bonusScore += Math.min(studyText.length / 5000, 1.0);
+  
+  // Adiciona pontos para palavras-chave de qualidade
+  const qualityTerms = [
+    'randomizado', 'duplo-cego', 'placebo', 'significância estatística',
+    'randomized', 'double-blind', 'statistically significant'
+  ];
+  
+  for (const term of qualityTerms) {
+    if (studyText.toLowerCase().includes(term)) bonusScore += 0.2;
+  }
+  
+  return Math.min(baseScore + bonusScore, 5.0);
+};
+
+// Função para pontuar a relevância do estudo
+export const scoreStudyRelevance = async (studyText: string) => {
+  // Simulação: avalia a relevância do estudo com base em palavras-chave
+  const baseScore = 3.0;
+  let bonusScore = 0;
+  
+  const relevanceTerms = [
+    'cão', 'cachorro', 'canino', 'veterinária', 'nutracêutico',
+    'dog', 'canine', 'veterinary', 'nutraceutical'
+  ];
+  
+  for (const term of relevanceTerms) {
+    if (studyText.toLowerCase().includes(term)) bonusScore += 0.25;
+  }
+  
+  return Math.min(baseScore + bonusScore, 5.0);
+};
+
+// Função principal para simular um resultado completo de análise
+export const simulateAnalysisResult = async (
+  studyId: string,
   studyText: string
-): Promise<NtaiInteractionTag[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1200));
-  
-  // Selecionando aleatoriamente 0-3 interações baseado em seed do texto
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const count = hash % 4; // 0 a 3 interações
-  
-  const extractedInteractions: NtaiInteractionTag[] = [];
-  const usedIndices = new Set<number>();
-  
-  for (let i = 0; i < count; i++) {
-    let index;
-    do {
-      index = (hash + i * 789) % commonInteractions.length;
-    } while (usedIndices.has(index));
-    
-    usedIndices.add(index);
-    const interaction = commonInteractions[index];
-    
-    extractedInteractions.push({
-      name: interaction.name,
-      score: 1 + Math.random() * 4, // Pontuação entre 1 e 5
-      type: interaction.type as 'positive' | 'negative',
-      confidence: 0.6 + (Math.random() * 0.4) // Confiança entre 0.6 e 1
-    });
-  }
-  
-  return extractedInteractions;
-};
-
-// Função para extrair efeitos colaterais do texto
-export const extractSideEffectsFromStudy = async (
-  studyText: string
-): Promise<NtaiSideEffectTag[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Selecionando aleatoriamente 0-2 efeitos colaterais baseado em seed do texto
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const count = hash % 3; // 0 a 2 efeitos colaterais
-  
-  const extractedSideEffects: NtaiSideEffectTag[] = [];
-  const usedIndices = new Set<number>();
-  
-  for (let i = 0; i < count; i++) {
-    let index;
-    do {
-      index = (hash + i * 321) % commonSideEffects.length;
-    } while (usedIndices.has(index));
-    
-    usedIndices.add(index);
-    const sideEffect = commonSideEffects[index];
-    
-    extractedSideEffects.push({
-      name: sideEffect.name,
-      intensityScore: 1 + Math.random() * 4, // Intensidade entre 1 e 5
-      frequency: sideEffect.frequency,
-      confidence: 0.5 + (Math.random() * 0.5) // Confiança entre 0.5 e 1
-    });
-  }
-  
-  return extractedSideEffects;
-};
-
-// Função para simular o resultado completo da análise
-export const simulateAnalysisResult = async (studyId: string, studyText: string): Promise<NtaiAnalysisResult> => {
+): Promise<NtaiAnalysisResult> => {
   const [
     extractedNutraceuticals,
     extractedConditions,
@@ -203,19 +127,18 @@ export const simulateAnalysisResult = async (studyId: string, studyText: string)
     extractedInteractions,
     extractedSideEffects,
     qualityScore,
-    relevanceScore
+    relevanceScore,
+    summary: `Estudo sobre os efeitos de nutracêuticos em saúde animal, com foco em ${extractedConditions[0]?.name || 'condições diversas'}.`,
+    processedAt: new Date().toISOString()
   };
 };
 
-// Funções de pontuação
-export const scoreStudyQuality = async (studyText: string): Promise<number> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return 2.5 + ((hash % 25) / 10); // Pontuação entre 2.5 e 5.0
-};
-
-export const scoreStudyRelevance = async (studyText: string): Promise<number> => {
-  await new Promise(resolve => setTimeout(resolve, 700));
-  const hash = studyText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return 2.0 + ((hash % 30) / 10); // Pontuação entre 2.0 e 5.0
+export default {
+  extractNutraceuticalsFromStudy,
+  extractConditionsFromStudy,
+  extractInteractionsFromStudy,
+  extractSideEffectsFromStudy,
+  scoreStudyQuality,
+  scoreStudyRelevance,
+  simulateAnalysisResult
 };
