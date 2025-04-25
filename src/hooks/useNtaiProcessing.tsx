@@ -18,8 +18,8 @@ export const useNtaiProcessing = () => {
   const { 
     selectedItems, 
     toggleItemSelection, 
-    handleSelectAll, 
-    clearSelection 
+    handleSelectAll,
+    clearSelection
   } = useSelectionHandling();
   
   // Extrair métodos e estados do hook de fila
@@ -46,11 +46,14 @@ export const useNtaiProcessing = () => {
     setActiveItemIndex
   );
 
-  // Garantir que addToQueue receba os estudos disponíveis
+  // Função para adicionar os itens selecionados à fila
   const handleAddToQueue = () => {
     console.log('Adicionando estudos selecionados à fila:', selectedItems);
     console.log('Estudos disponíveis:', availableStudies);
-    addToQueue(availableStudies);
+    
+    // Passa os estudos disponíveis e os IDs selecionados
+    addToQueue(availableStudies, selectedItems);
+    
     // Limpar a seleção após adicionar à fila
     clearSelection();
   };
@@ -70,6 +73,7 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
     startProcessing,
+    clearSelection
   };
 };
 

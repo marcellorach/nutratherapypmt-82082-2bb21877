@@ -48,6 +48,11 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
     onSelectAll();
   };
 
+  const handleAddToQueue = () => {
+    console.log('Chamando onAddToQueue com selectedItems:', selectedItems);
+    onAddToQueue();
+  };
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
@@ -120,7 +125,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
         </span>
         <Button 
           size="sm" 
-          onClick={onAddToQueue}
+          onClick={handleAddToQueue}
           disabled={selectedItems.length === 0}
         >
           Adicionar à Fila NTAI
