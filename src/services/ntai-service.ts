@@ -67,7 +67,7 @@ export const analyzeStudy = async (
       scoreStudyRelevance(studyText)
     ]);
     
-    return {
+    const result = {
       studyId,
       extractedNutraceuticals,
       extractedConditions,
@@ -76,6 +76,33 @@ export const analyzeStudy = async (
       qualityScore,
       relevanceScore
     };
+    
+    try {
+      const jsonAnalysisData = JSON.parse(JSON.stringify(result));
+      
+      // Gerar um título para o estudo se ele não existir
+      const studyTitle = `Análise de Estudo ${studyId.substring(0, 8)}`;
+      
+      const { error: insertError } = await supabase
+        .from('processed_studies')
+        .insert({
+          study_id: studyId,
+          analysis_data: jsonAnalysisData,
+          kanban_status: 'new',
+          processed_by: 'ntai',
+          title: studyTitle,
+          description: 'Análise gerada via processamento NTAI',
+          journal: 'Processamento NTAI'
+        });
+        
+      if (insertError) {
+        console.error('Erro ao salvar análise:', insertError);
+      }
+    } catch (insertError) {
+      console.error('Erro ao inserir no banco de dados:', insertError);
+    }
+    
+    return result;
   }
 };
 

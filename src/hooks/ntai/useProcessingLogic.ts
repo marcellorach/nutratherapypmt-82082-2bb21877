@@ -15,6 +15,8 @@ export const useProcessingLogic = (
   setProcessingActive: (active: boolean) => void,
   setActiveItemIndex: (index: number) => void
 ) => {
+  const { toast } = useToast();
+
   const startProcessing = async () => {
     // Corrigindo a verificação de tipo: verifica se algum item está no estágio intermediário ("extracting", "analyzing", "standardizing")
     if (processQueue.length === 0 || processQueue.some(item => 
@@ -83,6 +85,12 @@ export const useProcessingLogic = (
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
+        
+        toast({
+          title: "Análise concluída",
+          description: `Processamento de '${item.title}' finalizado com sucesso.`,
+          variant: "success",
+        });
 
       } catch (error: any) {
         addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
@@ -93,6 +101,12 @@ export const useProcessingLogic = (
           error: `Erro: ${error.message}`
         };
         setProcessQueue([...updatedQueue]);
+        
+        toast({
+          title: "Erro no processamento",
+          description: `Falha ao processar '${item.title}': ${error.message}`,
+          variant: "destructive",
+        });
       }
 
       setTimeout(() => processNextItem(index + 1), 1000);

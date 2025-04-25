@@ -12,10 +12,13 @@ export const simulateStageProcessing = async (
   
   if (stage === 'extracting') {
     logCallback(`Extraindo texto de documento PDF: ${itemTitle}`);
+    logCallback(`Analisando estrutura do documento e convertendo para texto plano`);
   } else if (stage === 'analyzing') {
     logCallback(`Analisando conteúdo com prompt especializado para nutracêuticos`);
+    logCallback(`Identificando menções a nutracêuticos, condições de saúde e dados de eficácia`);
   } else if (stage === 'standardizing') {
     logCallback(`Padronizando dados para integração com o kanban`);
+    logCallback(`Convertendo informações em formato estruturado para armazenamento`);
   }
 };
 
