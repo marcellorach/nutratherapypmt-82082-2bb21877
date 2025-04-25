@@ -86,10 +86,11 @@ export const useProcessingLogic = (
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
         
+        // Corrigindo o tipo do variant para "default" em vez de "success"
         toast({
           title: "Análise concluída",
           description: `Processamento de '${item.title}' finalizado com sucesso.`,
-          variant: "success",
+          variant: "default", // Alterado de "success" para "default"
         });
 
       } catch (error: any) {
