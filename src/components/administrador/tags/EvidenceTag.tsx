@@ -25,16 +25,16 @@ const EvidenceTag: React.FC<EvidenceTagProps> = ({
             variant="outline" 
             className={`font-normal ${className}`}
             style={{ 
-              backgroundColor: level.backgroundColor,
+              backgroundColor: level.backgroundColor || 'transparent',
               color: level.color,
               borderColor: `${level.color}50`
             }}
           >
-            <span>{showLabel ? level.label : `${score.toFixed(1)}/5`}</span>
+            <span>{showLabel ? level.level : `${score.toFixed(1)}/5`}</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{level.label}</span> ({score.toFixed(1)}/5)</p>
+          <p><span className="font-medium">{level.level}</span> ({score.toFixed(1)}/5)</p>
           <p className="text-xs text-gray-500 mt-1">Qualidade da evidência científica</p>
         </TooltipContent>
       </Tooltip>

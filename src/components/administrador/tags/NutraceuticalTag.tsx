@@ -27,7 +27,7 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
             variant="outline" 
             className={`font-normal ${className}`}
             style={{ 
-              backgroundColor: level.backgroundColor,
+              backgroundColor: level.backgroundColor || 'transparent',
               color: level.color,
               borderColor: `${level.color}50`
             }}
