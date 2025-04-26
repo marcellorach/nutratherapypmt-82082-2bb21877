@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useCallback } from 'react';
 import { MatrixCell, MatrixItem } from '../types';
 
@@ -42,6 +43,13 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
     return filtered;
   }, [nutraceuticos, searchTerm, favoriteRows, showOnlyFavorites]);
 
+  const getAverageEfficacy = useCallback((nutraceuticoId: number) => {
+    const cells = data.filter(cell => cell.nutraceuticoId === nutraceuticoId);
+    if (cells.length === 0) return 0;
+    
+    return cells.reduce((sum, cell) => sum + cell.efficacyScore, 0) / cells.length;
+  }, [data]);
+
   const sortedNutraceuticos = useMemo(() => {
     return [...filteredNutraceuticos].sort((a, b) => {
       if (sortBy === 'name') {
@@ -58,14 +66,7 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
       
       return 0;
     });
-  }, [filteredNutraceuticos, sortBy, sortDirection]);
-
-  const getAverageEfficacy = useCallback((nutraceuticoId: number) => {
-    const cells = data.filter(cell => cell.nutraceuticoId === nutraceuticoId);
-    if (cells.length === 0) return 0;
-    
-    return cells.reduce((sum, cell) => sum + cell.efficacyScore, 0) / cells.length;
-  }, [data]);
+  }, [filteredNutraceuticos, sortBy, sortDirection, getAverageEfficacy]);
 
   const filteredData = useMemo(() => {
     return data.filter(cell => {
@@ -153,6 +154,36 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
     });
   }, []);
 
+  // Adicionando a função exportMatrixData que estava faltando
+  const exportMatrixData = useCallback(() => {
+    // Criar cabeçalho CSV
+    let csvContent = "Nutraceutico,";
+    condicoes.forEach(condicao => {
+      csvContent += `${condicao.name},`;
+    });
+    csvContent += "\n";
+
+    // Adicionar dados
+    filteredNutraceuticos.forEach(nutraceutico => {
+      csvContent += `${nutraceutico.name},`;
+      condicoes.forEach(condicao => {
+        const cell = findCell(nutraceutico.id, condicao.id);
+        csvContent += `${cell ? cell.efficacyScore : "N/A"},`;
+      });
+      csvContent += "\n";
+    });
+
+    // Criar e acionar o download
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'matriz-eficacia.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, [condicoes, filteredNutraceuticos, findCell]);
+
   return {
     searchTerm,
     setSearchTerm,
@@ -196,6 +227,8 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
     toggleSortDirection,
     toggleSortBy,
     toggleFavorite,
-    toggleComparison
+    toggleComparison,
+    getAverageEfficacy, // Adicionando a função no objeto retornado
+    exportMatrixData // Adicionando a função no objeto retornado
   };
 };
