@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Microscope, RefreshCw, Link, ExternalLink } from "lucide-react";
+import { Microscope, RefreshCw, Link, ExternalLink, AlertCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { toast } from "sonner";
 
 const SciSpaceTab: React.FC = () => {
@@ -22,6 +21,7 @@ const SciSpaceTab: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [embedBlocked, setEmbedBlocked] = useState(false);
   const [iframeKey, setIframeKey] = useState<number>(0);
   
   const handleConfigChange = (key: string, value: string | boolean) => {
@@ -40,14 +40,29 @@ const SciSpaceTab: React.FC = () => {
   const reloadIframe = () => {
     setLoading(true);
     setError(null);
+    setEmbedBlocked(false);
     // Força a recriação do iframe alterando a key
     setIframeKey(prev => prev + 1);
     toast.info("Recarregando o SciSpace...");
   };
-  
+
+  // Detecta se o iframe foi carregado corretamente
   const handleIframeLoad = () => {
     setLoading(false);
-    toast.success("SciSpace carregado com sucesso!");
+    
+    // Verifica se conseguimos acessar o conteúdo do iframe
+    try {
+      const iframeContent = iframeRef.current?.contentWindow?.document;
+      // Se não conseguirmos acessar o conteúdo, provavelmente o site está bloqueando
+      if (!iframeContent) {
+        setEmbedBlocked(true);
+      } else {
+        toast.success("SciSpace carregado com sucesso!");
+      }
+    } catch (e) {
+      // Erro de acesso devido a restrições de segurança
+      setEmbedBlocked(true);
+    }
   };
 
   const handleIframeError = () => {
@@ -61,12 +76,80 @@ const SciSpaceTab: React.FC = () => {
     if (config.url && !config.url.match(/^https?:\/\//)) {
       setConfig(prev => ({ ...prev, url: `https://${config.url}` }));
     }
-  }, []);
+    
+    // Tenta detectar bloqueio após um tempo
+    const timer = setTimeout(() => {
+      if (loading) {
+        setEmbedBlocked(true);
+        setLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [config.url, loading]);
 
   // Abre o site em uma nova guia
   const openInNewTab = () => {
     window.open(config.url, '_blank');
   };
+
+  // Opções alternativas quando a incorporação não funciona
+  const renderAlternatives = () => (
+    <div className="flex flex-col space-y-6 py-8">
+      <Alert variant="default" className="bg-amber-50 border-amber-200">
+        <AlertCircle className="h-5 w-5 text-amber-500" />
+        <AlertTitle className="text-amber-800">Incorporação bloqueada</AlertTitle>
+        <AlertDescription className="text-amber-700">
+          <p className="mb-4">
+            O site SciSpace parece estar bloqueando a incorporação direta nesta página, 
+            possivelmente devido a políticas de segurança do site.
+          </p>
+          <p className="mb-4">
+            Você pode tentar algumas alternativas:
+          </p>
+          <ul className="list-disc pl-6 space-y-2 mb-4">
+            <li>Acessar o SciSpace diretamente em uma nova guia do navegador</li>
+            <li>Verificar se há uma API oficial do SciSpace para integração</li>
+            <li>Entrar em contato com o suporte do SciSpace sobre opções de incorporação</li>
+          </ul>
+        </AlertDescription>
+      </Alert>
+      
+      <div className="flex flex-col md:flex-row gap-4">
+        <Button 
+          onClick={openInNewTab}
+          size="lg" 
+          className="flex-1 space-x-2"
+        >
+          <ExternalLink className="h-5 w-5" />
+          <span>Abrir SciSpace em Nova Guia</span>
+        </Button>
+        
+        <Button 
+          onClick={reloadIframe}
+          variant="outline"
+          size="lg"
+          className="flex-1 space-x-2"
+        >
+          <RefreshCw className="h-5 w-5" />
+          <span>Tentar Novamente</span>
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-medium">Dica para equipe de desenvolvimento:</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-sm text-muted-foreground">
+            Para integrar com o SciSpace, considere verificar se eles oferecem uma API oficial ou 
+            widgets de incorporação específicos que permitam a integração com seus serviços de forma
+            autorizada e segura.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="space-y-6 p-6">
@@ -196,18 +279,22 @@ const SciSpaceTab: React.FC = () => {
             </div>
           )}
           
-          <iframe 
-            key={iframeKey}
-            ref={iframeRef}
-            src={config.url}
-            className="w-full h-[calc(100vh-32rem)]"
-            sandbox={getSandboxPermissions()}
-            title="SciSpace Platform"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            allow={`camera; microphone; geolocation; ${config.allowFullscreen ? 'fullscreen' : ''}`}
-            style={{border: "1px solid #e2e8f0", borderRadius: "0.5rem"}}
-          />
+          {embedBlocked ? (
+            renderAlternatives()
+          ) : (
+            <iframe 
+              key={iframeKey}
+              ref={iframeRef}
+              src={config.url}
+              className="w-full h-[calc(100vh-32rem)]"
+              sandbox={getSandboxPermissions()}
+              title="SciSpace Platform"
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
+              allow={`camera; microphone; geolocation; ${config.allowFullscreen ? 'fullscreen' : ''}`}
+              style={{border: "1px solid #e2e8f0", borderRadius: "0.5rem"}}
+            />
+          )}
         </div>
         <CardFooter className="text-sm text-muted-foreground pt-4 pb-2">
           <Link className="h-4 w-4 mr-1" /> {config.url}
