@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { 
   SidebarMenuItem, 
   SidebarMenuButton 
 } from "@/components/ui/sidebar";
 import { 
-  Microscope, 
   FlaskConical, 
   ClipboardList, 
   CheckSquare,
@@ -25,17 +23,6 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
 }) => {
   return (
     <>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "scispace"}
-          onClick={() => handleStepClick("scispace")}
-          tooltip="SciSpace"
-        >
-          <Microscope className="h-4 w-4" />
-          <span>SciSpace</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "estudos-planejados"}
