@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   SidebarMenuItem, 
@@ -9,7 +10,8 @@ import {
   CheckSquare,
   Beaker,
   Bot,
-  Settings
+  Settings,
+  Search
 } from "lucide-react";
 
 interface ResearchGroupProps {
@@ -23,6 +25,17 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
 }) => {
   return (
     <>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "pesquisa-estudos"}
+          onClick={() => handleStepClick("pesquisa-estudos")}
+          tooltip="Pesquisa de Estudos"
+        >
+          <Search className="h-4 w-4" />
+          <span>Pesquisa de Estudos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "estudos-planejados"}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -21,6 +22,7 @@ import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAnda
 import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosConcluidosTab';
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
+import PesquisaEstudosTab from '@/components/administrador/pesquisa/PesquisaEstudosTab';
 
 import KnowledgeBaseSettingsTab from '@/components/administrador/settings/KnowledgeBaseSettingsTab';
 import DataProcessingSettingsTab from '@/components/administrador/settings/DataProcessingSettingsTab';
@@ -64,6 +66,8 @@ const AdministradorPage: React.FC = () => {
         return <SugestoesAITab />;
       case "ora-biomedical":
         return <OraBiomedicalTab />;
+      case "pesquisa-estudos":
+        return <PesquisaEstudosTab />;
       case "research-settings":
         return <ResearchSettingsTab />;
       
