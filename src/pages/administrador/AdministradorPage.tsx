@@ -27,8 +27,6 @@ import DataProcessingSettingsTab from '@/components/administrador/settings/DataP
 import ResearchSettingsTab from '@/components/administrador/settings/ResearchSettingsTab';
 import PredictiveAnalysisSettingsTab from '@/components/administrador/settings/PredictiveAnalysisSettingsTab';
 
-import SciSpaceTab from '@/components/administrador/pesquisa/SciSpaceTab';
-
 const AdministradorPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("estudos");
   
@@ -88,8 +86,6 @@ const AdministradorPage: React.FC = () => {
         return <ActionsStep />;
       case "design-conventions":
         return <DesignConventionsTab />;
-      case "scispace":
-        return <SciSpaceTab />;
       
       default:
         return <EstudosTab />;

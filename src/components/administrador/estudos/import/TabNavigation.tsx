@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Import, Database } from "lucide-react";
+import { Upload, Database } from "lucide-react";
 
 interface TabNavigationProps {
   activeTab: string;
@@ -19,14 +19,6 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
         >
           <Upload className="h-4 w-4" />
           <span>Upload de Arquivos</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="scispace-api" 
-          className="flex items-center gap-1"
-          onClick={() => onTabChange("scispace-api")}
-        >
-          <Import className="h-4 w-4" />
-          <span>Importar Integrativa (SCISPACE)</span>
         </TabsTrigger>
         <TabsTrigger 
           value="import-history" 
