@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   SidebarMenuItem, 
@@ -25,6 +24,17 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
 }) => {
   return (
     <>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "scispace"}
+          onClick={() => handleStepClick("scispace")}
+          tooltip="SciSpace"
+        >
+          <Microscope className="h-4 w-4" />
+          <span>SciSpace</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "estudos-planejados"}
