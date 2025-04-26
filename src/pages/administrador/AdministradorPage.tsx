@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
@@ -8,7 +7,7 @@ import ActionsStep from '@/components/administrador/dataAnalysis/ActionsStep';
 import NutraceuticosTab from '@/components/administrador/NutraceuticosTab';
 import EstudosTab from '@/components/administrador/EstudosTab';
 import PromptsTab from '@/components/administrador/PromptsTab';
-import RelationsTab from '@/components/administrador/RelationsTab';
+import RelationsTab from '@/components/administrador/visualizations/relations/RelationsTab';
 import AnalyticsTab from '@/components/administrador/AnalyticsTab';
 import RegrasClinicasTab from '@/components/administrador/RegrasClinicasTab';
 import FontesTab from '@/components/administrador/FontesTab';
@@ -23,7 +22,6 @@ import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosCon
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
 
-// Importando os novos componentes de configurações específicas
 import KnowledgeBaseSettingsTab from '@/components/administrador/settings/KnowledgeBaseSettingsTab';
 import DataProcessingSettingsTab from '@/components/administrador/settings/DataProcessingSettingsTab';
 import ResearchSettingsTab from '@/components/administrador/settings/ResearchSettingsTab';
@@ -34,7 +32,6 @@ const AdministradorPage: React.FC = () => {
   
   const renderContent = () => {
     switch (currentStep) {
-      // Base de Conhecimento
       case "nutraceuticos":
         return <NutraceuticosTab />;
       case "estudos":
@@ -46,7 +43,6 @@ const AdministradorPage: React.FC = () => {
       case "knowledge-base-settings":
         return <KnowledgeBaseSettingsTab />;
       
-      // Processamento de Dados
       case "import":
         return <ImportStep />;
       case "fontes":
@@ -58,7 +54,6 @@ const AdministradorPage: React.FC = () => {
       case "data-processing-settings":
         return <DataProcessingSettingsTab />;
       
-      // Pesquisa e Desenvolvimento
       case "estudos-planejados":
         return <EstudosPlanejadosTab />;
       case "estudos-andamento":
@@ -72,7 +67,6 @@ const AdministradorPage: React.FC = () => {
       case "research-settings":
         return <ResearchSettingsTab />;
       
-      // Análise Preditiva
       case "modelos":
         return <ModelosPreditivosTab />;
       case "custo-beneficio":
@@ -82,7 +76,6 @@ const AdministradorPage: React.FC = () => {
       case "predictive-analysis-settings":
         return <PredictiveAnalysisSettingsTab />;
       
-      // Configurações Gerais
       case "config-ia":
         return <ConfiguracoesIATab />;
       case "prompts":
