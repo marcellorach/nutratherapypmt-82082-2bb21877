@@ -25,7 +25,7 @@ export const ScientificStudiesService = {
   },
 
   /**
-   * Busca um estudo pelo ID
+   * Busca um estudo científico pelo ID
    */
   async getStudyById(id: string) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -45,45 +45,28 @@ export const ScientificStudiesService = {
   },
 
   /**
-   * Busca estudos associados a um nutracêutico
-   */
-  async getStudiesByNutraceutical(nutraceuticalId: string) {
-    // Usando type assertion para contornar a verificação de tipos do TypeScript
-    const client = supabase as any;
-    const { data, error } = await client
-      .from('nutraceutical_studies')
-      .select(`
-        id,
-        relevance_score,
-        study_id (*)
-      `)
-      .eq('nutraceutical_id', nutraceuticalId)
-      .order('relevance_score', { ascending: false });
-
-    if (error) {
-      console.error('Erro ao buscar estudos do nutracêutico:', error);
-      throw new Error('Não foi possível carregar os estudos do nutracêutico');
-    }
-
-    return data;
-  },
-
-  /**
    * Cria um novo estudo científico
    */
-  async createStudy(study: {
-    title: string,
-    link: string,
-    year: number,
-    journal?: string,
-    authors?: string[],
-    abstract?: string
+  async createStudy({ 
+    title, 
+    link, 
+    year,
+    journal,
+    authors,
+    abstract
   }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
     const { data, error } = await client
       .from('scientific_studies')
-      .insert([study])
+      .insert([{
+        title,
+        link,
+        year,
+        journal,
+        authors,
+        abstract
+      }])
       .select()
       .single();
 
@@ -100,20 +83,27 @@ export const ScientificStudiesService = {
    */
   async updateStudy(
     id: string, 
-    study: {
-      title?: string,
-      link?: string,
-      year?: number,
-      journal?: string,
-      authors?: string[],
-      abstract?: string
+    { 
+      title, 
+      link, 
+      year,
+      journal,
+      authors,
+      abstract
     }
   ) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
     const { data, error } = await client
       .from('scientific_studies')
-      .update(study)
+      .update({
+        title,
+        link,
+        year,
+        journal,
+        authors,
+        abstract
+      })
       .eq('id', id)
       .select()
       .single();
@@ -127,7 +117,7 @@ export const ScientificStudiesService = {
   },
 
   /**
-   * Exclui um estudo científico
+   * Remove um estudo científico
    */
   async deleteStudy(id: string) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript

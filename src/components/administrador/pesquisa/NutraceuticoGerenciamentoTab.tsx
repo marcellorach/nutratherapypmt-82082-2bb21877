@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNutraceuticalManager } from '@/hooks/nutraceuticals/useNutraceuticalManager';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
@@ -153,7 +154,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
           
           <LastUpdatePanel isLoading={isLoading} />
           
-          <ActionPanel />
+          <ActionPanel refreshData={refreshData} />
         </div>
       </div>
       

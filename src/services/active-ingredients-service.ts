@@ -17,8 +17,8 @@ export const ActiveIngredientsService = {
       .order('name');
 
     if (error) {
-      console.error('Erro ao buscar ingredientes:', error);
-      throw new Error('Não foi possível carregar os ingredientes');
+      console.error('Erro ao buscar ingredientes ativos:', error);
+      throw new Error('Não foi possível carregar os ingredientes ativos');
     }
 
     return data;
@@ -37,8 +37,8 @@ export const ActiveIngredientsService = {
       .single();
 
     if (error) {
-      console.error('Erro ao buscar ingrediente:', error);
-      throw new Error('Não foi possível carregar o ingrediente');
+      console.error('Erro ao buscar ingrediente ativo:', error);
+      throw new Error('Não foi possível carregar o ingrediente ativo');
     }
 
     return data;
@@ -57,15 +57,15 @@ export const ActiveIngredientsService = {
       .single();
 
     if (error) {
-      console.error('Erro ao criar ingrediente:', error);
-      throw new Error('Não foi possível criar o ingrediente');
+      console.error('Erro ao criar ingrediente ativo:', error);
+      throw new Error('Não foi possível criar o ingrediente ativo');
     }
 
     return data;
   },
 
   /**
-   * Atualiza um ingrediente ativo existente
+   * Atualiza um ingrediente existente
    */
   async updateIngredient(id: string, { name, description }: { name: string, description?: string }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -78,15 +78,15 @@ export const ActiveIngredientsService = {
       .single();
 
     if (error) {
-      console.error('Erro ao atualizar ingrediente:', error);
-      throw new Error('Não foi possível atualizar o ingrediente');
+      console.error('Erro ao atualizar ingrediente ativo:', error);
+      throw new Error('Não foi possível atualizar o ingrediente ativo');
     }
 
     return data;
   },
 
   /**
-   * Exclui um ingrediente ativo
+   * Remove um ingrediente
    */
   async deleteIngredient(id: string) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -97,8 +97,8 @@ export const ActiveIngredientsService = {
       .eq('id', id);
 
     if (error) {
-      console.error('Erro ao excluir ingrediente:', error);
-      throw new Error('Não foi possível excluir o ingrediente');
+      console.error('Erro ao excluir ingrediente ativo:', error);
+      throw new Error('Não foi possível excluir o ingrediente ativo');
     }
 
     return true;

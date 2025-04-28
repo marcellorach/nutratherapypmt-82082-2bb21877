@@ -25,7 +25,7 @@ export const HealthConditionsService = {
   },
 
   /**
-   * Busca uma condição pelo ID
+   * Busca uma condição de saúde pelo ID
    */
   async getConditionById(id: string) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -86,7 +86,7 @@ export const HealthConditionsService = {
   },
 
   /**
-   * Exclui uma condição de saúde
+   * Remove uma condição de saúde
    */
   async deleteCondition(id: string) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
