@@ -5,6 +5,7 @@ import { NutraceuticalCategoriesService } from "@/services/nutraceutical-categor
 import { HealthConditionsService } from "@/services/health-conditions-service";
 import { ActiveIngredientsService } from "@/services/active-ingredients-service";
 import { ScientificStudiesService } from "@/services/scientific-studies-service";
+import { toast } from "@/hooks/use-toast";
 
 /**
  * Utilitário para migrar dados dos arquivos .ts para o Supabase

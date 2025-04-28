@@ -37,6 +37,8 @@ const AdministradorPage: React.FC = () => {
     switch (currentStep) {
       case "nutraceuticos":
         return <NutraceuticosTab />;
+      case "nutraceu-gerenciamento":
+        return <NutraceuticoGerenciamentoTab />;
       case "estudos":
         return <EstudosTab />;
       case "regras":
@@ -69,8 +71,6 @@ const AdministradorPage: React.FC = () => {
         return <OraBiomedicalTab />;
       case "pesquisa-estudos":
         return <PesquisaEstudosTab />;
-      case "nutraceu-gerenciamento":
-        return <NutraceuticoGerenciamentoTab />;
       case "research-settings":
         return <ResearchSettingsTab />;
       

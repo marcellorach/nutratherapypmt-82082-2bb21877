@@ -42,12 +42,12 @@ export const useNutraceuticalManager = () => {
           ScientificStudiesService.getAllStudies()
         ]);
         
-        setNutraceuticals(nutraData);
-        setCategories(catData);
-        setConditions(condData);
-        setIngredients(ingData);
-        setStudies(studiesData);
-      } catch (err) {
+        setNutraceuticals(nutraData || []);
+        setCategories(catData || []);
+        setConditions(condData || []);
+        setIngredients(ingData || []);
+        setStudies(studiesData || []);
+      } catch (err: any) {
         console.error('Erro ao carregar dados:', err);
         setError('Não foi possível carregar os dados. Por favor, tente novamente.');
         
@@ -76,7 +76,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar nutracêutico:', err);
       
       toast({
@@ -100,7 +100,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao atualizar nutracêutico:', err);
       
       toast({
@@ -124,7 +124,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao remover nutracêutico:', err);
       
       toast({
@@ -149,7 +149,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar categoria:', err);
       
       toast({
@@ -174,7 +174,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar condição de saúde:', err);
       
       toast({
@@ -199,7 +199,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar estudo científico:', err);
       
       toast({
@@ -232,7 +232,7 @@ export const useNutraceuticalManager = () => {
       });
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao associar estudo ao nutracêutico:', err);
       
       toast({
