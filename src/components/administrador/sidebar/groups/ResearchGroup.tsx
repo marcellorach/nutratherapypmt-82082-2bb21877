@@ -3,9 +3,9 @@ import React from 'react';
 import { 
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuLabel
+  SidebarGroupLabel
 } from "@/components/ui/sidebar";
-import { Database, Microscope, BookOpen, Flask, Vial, BarChart3, ListFilter } from "lucide-react";
+import { Database, Microscope, BookOpen, BarChart3, ListFilter } from "lucide-react";
 
 interface ResearchGroupProps {
   currentStep: string;
@@ -15,53 +15,78 @@ interface ResearchGroupProps {
 const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepClick }) => {
   return (
     <>
-      <SidebarMenuLabel>Pesquisa</SidebarMenuLabel>
-      <SidebarMenuItem active={currentStep === "nutraceu-gerenciamento"}>
-        <SidebarMenuButton onClick={() => handleStepClick("nutraceu-gerenciamento")} className="font-medium">
+      <SidebarGroupLabel>Pesquisa</SidebarGroupLabel>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("nutraceu-gerenciamento")}
+          isActive={currentStep === "nutraceu-gerenciamento"}
+          className="font-medium"
+        >
           <Database className="h-4 w-4 mr-2" />
           <span>Banco de Nutracêuticos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "pesquisa-estudos"}>
-        <SidebarMenuButton onClick={() => handleStepClick("pesquisa-estudos")}>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("pesquisa-estudos")}
+          isActive={currentStep === "pesquisa-estudos"}
+        >
           <BookOpen className="h-4 w-4 mr-2" />
           <span>Pesquisa de Estudos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "estudos-planejados"}>
-        <SidebarMenuButton onClick={() => handleStepClick("estudos-planejados")}>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("estudos-planejados")}
+          isActive={currentStep === "estudos-planejados"}
+        >
           <ListFilter className="h-4 w-4 mr-2" />
           <span>Estudos Planejados</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "estudos-andamento"}>
-        <SidebarMenuButton onClick={() => handleStepClick("estudos-andamento")}>
-          <Flask className="h-4 w-4 mr-2" />
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("estudos-andamento")}
+          isActive={currentStep === "estudos-andamento"}
+        >
+          <Database className="h-4 w-4 mr-2" />
           <span>Estudos em Andamento</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "estudos-concluidos"}>
-        <SidebarMenuButton onClick={() => handleStepClick("estudos-concluidos")}>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("estudos-concluidos")}
+          isActive={currentStep === "estudos-concluidos"}
+        >
           <BarChart3 className="h-4 w-4 mr-2" />
           <span>Estudos Concluídos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "sugestoes-ai"}>
-        <SidebarMenuButton onClick={() => handleStepClick("sugestoes-ai")}>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("sugestoes-ai")}
+          isActive={currentStep === "sugestoes-ai"}
+        >
           <Microscope className="h-4 w-4 mr-2" />
           <span>Sugestões da IA</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem active={currentStep === "ora-biomedical"}>
-        <SidebarMenuButton onClick={() => handleStepClick("ora-biomedical")}>
-          <Vial className="h-4 w-4 mr-2" />
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("ora-biomedical")}
+          isActive={currentStep === "ora-biomedical"}
+        >
+          <Database className="h-4 w-4 mr-2" />
           <span>Ora Biomedical</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      <SidebarMenuLabel className="mt-4">Configurações</SidebarMenuLabel>
-      <SidebarMenuItem active={currentStep === "research-settings"}>
-        <SidebarMenuButton onClick={() => handleStepClick("research-settings")}>
+      <SidebarGroupLabel className="mt-4">Configurações</SidebarGroupLabel>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          onClick={() => handleStepClick("research-settings")}
+          isActive={currentStep === "research-settings"}
+        >
           <span>Configurações de Pesquisa</span>
         </SidebarMenuButton>
       </SidebarMenuItem>

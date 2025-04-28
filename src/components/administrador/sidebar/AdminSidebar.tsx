@@ -10,6 +10,7 @@ import {
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminSidebarGroups from './AdminSidebarGroups';
+import { useSearchParams } from 'react-router-dom';
 
 interface AdminSidebarProps {
   currentStep: string;
@@ -17,6 +18,13 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleSettingsClick = () => {
+    setCurrentStep('knowledge-base-settings');
+    setSearchParams({ tab: 'knowledge-base-settings' });
+  };
+
   return (
     <Sidebar variant="inset" collapsible="icon" className="mt-20">
       <SidebarHeader className="p-4">
@@ -36,7 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
             variant="outline" 
             className="w-full" 
             size="sm"
-            onClick={() => setCurrentStep('knowledge-base-settings')}
+            onClick={handleSettingsClick}
           >
             <Settings className="mr-2 h-4 w-4" />
             Configurações

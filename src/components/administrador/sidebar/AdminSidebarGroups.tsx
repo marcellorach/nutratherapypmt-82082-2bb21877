@@ -12,6 +12,7 @@ import PredictiveAnalysisGroup from './groups/PredictiveAnalysisGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
 import ResearchGroup from './groups/ResearchGroup';
 import { Microscope } from "lucide-react";
+import { useSearchParams } from 'react-router-dom';
 
 interface AdminSidebarGroupsProps {
   currentStep: string;
@@ -19,8 +20,11 @@ interface AdminSidebarGroupsProps {
 }
 
 const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, setCurrentStep }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const handleStepClick = (step: string) => {
     setCurrentStep(step);
+    setSearchParams({ tab: step });
   };
 
   return (
