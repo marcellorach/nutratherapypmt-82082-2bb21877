@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useNutraceuticalManager } from '@/hooks/useNutraceuticalManager';
+import { useNutraceuticalManager } from '@/hooks/nutraceuticals/useNutraceuticalManager';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { useToast } from '@/hooks/use-toast';
 
