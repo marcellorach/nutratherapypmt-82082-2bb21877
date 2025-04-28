@@ -23,6 +23,7 @@ import EstudosConcluidosTab from '@/components/administrador/pesquisa/EstudosCon
 import SugestoesAITab from '@/components/administrador/pesquisa/SugestoesAITab';
 import OraBiomedicalTab from '@/components/administrador/pesquisa/OraBiomedicalTab';
 import PesquisaEstudosTab from '@/components/administrador/pesquisa/PesquisaEstudosTab';
+import NutraceuticoGerenciamentoTab from '@/components/administrador/pesquisa/NutraceuticoGerenciamentoTab';
 
 import KnowledgeBaseSettingsTab from '@/components/administrador/settings/KnowledgeBaseSettingsTab';
 import DataProcessingSettingsTab from '@/components/administrador/settings/DataProcessingSettingsTab';
@@ -68,6 +69,8 @@ const AdministradorPage: React.FC = () => {
         return <OraBiomedicalTab />;
       case "pesquisa-estudos":
         return <PesquisaEstudosTab />;
+      case "nutraceu-gerenciamento":
+        return <NutraceuticoGerenciamentoTab />;
       case "research-settings":
         return <ResearchSettingsTab />;
       

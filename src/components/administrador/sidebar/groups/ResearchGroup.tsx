@@ -11,7 +11,8 @@ import {
   Beaker,
   Bot,
   Settings,
-  Search
+  Search,
+  Database
 } from "lucide-react";
 
 interface ResearchGroupProps {
@@ -33,6 +34,17 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({
         >
           <Search className="h-4 w-4" />
           <span>Pesquisa de Estudos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "nutraceu-gerenciamento"}
+          onClick={() => handleStepClick("nutraceu-gerenciamento")}
+          tooltip="Gerenciamento de Nutracêuticos"
+        >
+          <Database className="h-4 w-4" />
+          <span>Nutracêuticos DB</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       

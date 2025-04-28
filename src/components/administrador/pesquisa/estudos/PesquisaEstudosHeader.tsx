@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Microscope, BookOpen, BookMarked, Search } from 'lucide-react';
+import { Microscope, BookOpen, BookMarked, Search, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const PesquisaEstudosHeader: React.FC = () => {
@@ -26,6 +26,10 @@ const PesquisaEstudosHeader: React.FC = () => {
         <Button variant="outline" className="flex items-center">
           <Microscope className="mr-2 h-4 w-4" />
           Estratégias de Busca
+        </Button>
+        <Button variant="outline" className="flex items-center">
+          <Database className="mr-2 h-4 w-4" />
+          Banco de Nutracêuticos
         </Button>
       </div>
     </div>
