@@ -47,8 +47,8 @@ export const NutraceuticalDataMigrator = {
       const conditions = new Map();
       nutraceuticals.forEach(n => {
         // Condições de prevenção
-        if (n.prevention) {
-          n.prevention.forEach(p => {
+        if (n.preventionConditions) {
+          n.preventionConditions.forEach(p => {
             if (!conditions.has(p.name)) {
               conditions.set(p.name, { 
                 name: p.name, 
@@ -59,8 +59,8 @@ export const NutraceuticalDataMigrator = {
         }
         
         // Condições de tratamento
-        if (n.treatment) {
-          n.treatment.forEach(t => {
+        if (n.treatmentConditions) {
+          n.treatmentConditions.forEach(t => {
             if (!conditions.has(t.name)) {
               conditions.set(t.name, { 
                 name: t.name, 
@@ -71,8 +71,8 @@ export const NutraceuticalDataMigrator = {
         }
         
         // Condições de suporte
-        if (n.supportive) {
-          n.supportive.forEach(s => {
+        if (n.supportConditions) {
+          n.supportConditions.forEach(s => {
             if (!conditions.has(s.name)) {
               conditions.set(s.name, { 
                 name: s.name, 
@@ -137,8 +137,8 @@ export const NutraceuticalDataMigrator = {
           }
           
           // Adicionar relações de condições (prevenção)
-          if (nutra.prevention) {
-            for (const prevention of nutra.prevention) {
+          if (nutra.preventionConditions) {
+            for (const prevention of nutra.preventionConditions) {
               const conditionId = conditionMap.get(prevention.name);
               if (conditionId) {
                 await NutraceuticalsService.relateToCondition(
@@ -149,12 +149,12 @@ export const NutraceuticalDataMigrator = {
                 );
               }
             }
-            console.log(`Adicionadas ${nutra.prevention.length} condições de prevenção para ${nutra.name}`);
+            console.log(`Adicionadas ${nutra.preventionConditions.length} condições de prevenção para ${nutra.name}`);
           }
           
           // Adicionar relações de condições (tratamento)
-          if (nutra.treatment) {
-            for (const treatment of nutra.treatment) {
+          if (nutra.treatmentConditions) {
+            for (const treatment of nutra.treatmentConditions) {
               const conditionId = conditionMap.get(treatment.name);
               if (conditionId) {
                 await NutraceuticalsService.relateToCondition(
@@ -165,12 +165,12 @@ export const NutraceuticalDataMigrator = {
                 );
               }
             }
-            console.log(`Adicionadas ${nutra.treatment.length} condições de tratamento para ${nutra.name}`);
+            console.log(`Adicionadas ${nutra.treatmentConditions.length} condições de tratamento para ${nutra.name}`);
           }
           
           // Adicionar relações de condições (suporte)
-          if (nutra.supportive) {
-            for (const supportive of nutra.supportive) {
+          if (nutra.supportConditions) {
+            for (const supportive of nutra.supportConditions) {
               const conditionId = conditionMap.get(supportive.name);
               if (conditionId) {
                 await NutraceuticalsService.relateToCondition(
@@ -181,7 +181,7 @@ export const NutraceuticalDataMigrator = {
                 );
               }
             }
-            console.log(`Adicionadas ${nutra.supportive.length} condições de suporte para ${nutra.name}`);
+            console.log(`Adicionadas ${nutra.supportConditions.length} condições de suporte para ${nutra.name}`);
           }
           
         } catch (err) {
