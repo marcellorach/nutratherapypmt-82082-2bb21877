@@ -12,7 +12,7 @@ export const NutraceuticalCategoriesService = {
     const { data, error } = await supabase
       .from('nutraceutical_categories')
       .select('*')
-      .order('name');
+      .order('name') as any;
 
     if (error) {
       console.error('Erro ao buscar categorias:', error);
@@ -30,7 +30,7 @@ export const NutraceuticalCategoriesService = {
       .from('nutraceutical_categories')
       .select('*')
       .eq('id', id)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao buscar categoria:', error);
@@ -48,7 +48,7 @@ export const NutraceuticalCategoriesService = {
       .from('nutraceutical_categories')
       .insert([{ name, description }])
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao criar categoria:', error);
@@ -67,7 +67,7 @@ export const NutraceuticalCategoriesService = {
       .update({ name, description })
       .eq('id', id)
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao atualizar categoria:', error);
@@ -84,7 +84,7 @@ export const NutraceuticalCategoriesService = {
     const { error } = await supabase
       .from('nutraceutical_categories')
       .delete()
-      .eq('id', id);
+      .eq('id', id) as any;
 
     if (error) {
       console.error('Erro ao excluir categoria:', error);

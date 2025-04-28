@@ -12,7 +12,7 @@ export const ActiveIngredientsService = {
     const { data, error } = await supabase
       .from('active_ingredients')
       .select('*')
-      .order('name');
+      .order('name') as any;
 
     if (error) {
       console.error('Erro ao buscar ingredientes:', error);
@@ -30,7 +30,7 @@ export const ActiveIngredientsService = {
       .from('active_ingredients')
       .select('*')
       .eq('id', id)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao buscar ingrediente:', error);
@@ -48,7 +48,7 @@ export const ActiveIngredientsService = {
       .from('active_ingredients')
       .insert([{ name, description }])
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao criar ingrediente:', error);
@@ -67,7 +67,7 @@ export const ActiveIngredientsService = {
       .update({ name, description })
       .eq('id', id)
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao atualizar ingrediente:', error);
@@ -84,7 +84,7 @@ export const ActiveIngredientsService = {
     const { error } = await supabase
       .from('active_ingredients')
       .delete()
-      .eq('id', id);
+      .eq('id', id) as any;
 
     if (error) {
       console.error('Erro ao excluir ingrediente:', error);

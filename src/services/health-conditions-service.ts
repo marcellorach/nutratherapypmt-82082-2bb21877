@@ -12,7 +12,7 @@ export const HealthConditionsService = {
     const { data, error } = await supabase
       .from('health_conditions')
       .select('*')
-      .order('name');
+      .order('name') as any;
 
     if (error) {
       console.error('Erro ao buscar condições de saúde:', error);
@@ -30,7 +30,7 @@ export const HealthConditionsService = {
       .from('health_conditions')
       .select('*')
       .eq('id', id)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao buscar condição de saúde:', error);
@@ -48,7 +48,7 @@ export const HealthConditionsService = {
       .from('health_conditions')
       .insert([{ name, description }])
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao criar condição de saúde:', error);
@@ -67,7 +67,7 @@ export const HealthConditionsService = {
       .update({ name, description })
       .eq('id', id)
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao atualizar condição de saúde:', error);
@@ -84,7 +84,7 @@ export const HealthConditionsService = {
     const { error } = await supabase
       .from('health_conditions')
       .delete()
-      .eq('id', id);
+      .eq('id', id) as any;
 
     if (error) {
       console.error('Erro ao excluir condição de saúde:', error);

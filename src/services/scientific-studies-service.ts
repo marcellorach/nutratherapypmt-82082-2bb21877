@@ -12,7 +12,7 @@ export const ScientificStudiesService = {
     const { data, error } = await supabase
       .from('scientific_studies')
       .select('*')
-      .order('year', { ascending: false });
+      .order('year', { ascending: false }) as any;
 
     if (error) {
       console.error('Erro ao buscar estudos científicos:', error);
@@ -30,7 +30,7 @@ export const ScientificStudiesService = {
       .from('scientific_studies')
       .select('*')
       .eq('id', id)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao buscar estudo científico:', error);
@@ -52,7 +52,7 @@ export const ScientificStudiesService = {
         study_id (*)
       `)
       .eq('nutraceutical_id', nutraceuticalId)
-      .order('relevance_score', { ascending: false });
+      .order('relevance_score', { ascending: false }) as any;
 
     if (error) {
       console.error('Erro ao buscar estudos do nutracêutico:', error);
@@ -77,7 +77,7 @@ export const ScientificStudiesService = {
       .from('scientific_studies')
       .insert([study])
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao criar estudo científico:', error);
@@ -106,7 +106,7 @@ export const ScientificStudiesService = {
       .update(study)
       .eq('id', id)
       .select()
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao atualizar estudo científico:', error);
@@ -123,7 +123,7 @@ export const ScientificStudiesService = {
     const { error } = await supabase
       .from('scientific_studies')
       .delete()
-      .eq('id', id);
+      .eq('id', id) as any;
 
     if (error) {
       console.error('Erro ao excluir estudo científico:', error);

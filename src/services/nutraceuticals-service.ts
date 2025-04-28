@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Nutraceutical } from '@/types';
 
@@ -29,8 +28,7 @@ export const NutraceuticalsService = {
         nutraceutical_studies (
           study_id (id, title, year, journal, authors)
         )
-      `)
-      .order('name');
+      `) as any;
 
     if (error) {
       console.error('Erro ao buscar nutracêuticos:', error);
@@ -65,7 +63,7 @@ export const NutraceuticalsService = {
         )
       `)
       .eq('id', id)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Erro ao buscar nutracêutico:', error);
