@@ -16,6 +16,15 @@ export const NutraceuticalDataMigrator = {
    */
   async migrateAll() {
     try {
+      // Verificar se já existem dados no banco
+      const existingData = await NutraceuticalsService.getAllNutraceuticals();
+      if (existingData && existingData.length > 0) {
+        return {
+          success: false,
+          message: `A migração já foi realizada anteriormente. ${existingData.length} nutracêuticos já existem no banco de dados.`
+        };
+      }
+      
       // 1. Primeiro criamos as categorias únicas
       const categories = new Map();
       nutraceuticals.forEach(n => {
@@ -102,6 +111,7 @@ export const NutraceuticalDataMigrator = {
       console.log(`${conditionMap.size} condições de saúde processadas`);
       
       // 3. Para cada nutracêutico, criar registro e suas relações
+      let nutraceuticosProcessados = 0;
       for (const nutra of nutraceuticals) {
         try {
           // Criar nutracêutico base
@@ -116,6 +126,7 @@ export const NutraceuticalDataMigrator = {
             contraindications: nutra.contraindications || []
           });
           console.log(`Criado nutracêutico: ${nutra.name}`);
+          nutraceuticosProcessados++;
           
           // Adicionar benefícios
           if (nutra.benefits) {
@@ -138,6 +149,7 @@ export const NutraceuticalDataMigrator = {
           }
           
           // Adicionar relações de condições (prevenção)
+          let prevencaoProcessadas = 0;
           if (nutra.preventionConditions) {
             for (const prevention of nutra.preventionConditions) {
               const conditionId = conditionMap.get(prevention.name);
@@ -148,12 +160,14 @@ export const NutraceuticalDataMigrator = {
                   'prevention',
                   prevention.efficacyScore || 0
                 );
+                prevencaoProcessadas++;
               }
             }
-            console.log(`Adicionadas ${nutra.preventionConditions.length} condições de prevenção para ${nutra.name}`);
+            console.log(`Adicionadas ${prevencaoProcessadas} condições de prevenção para ${nutra.name}`);
           }
           
           // Adicionar relações de condições (tratamento)
+          let tratamentoProcessadas = 0;
           if (nutra.treatmentConditions) {
             for (const treatment of nutra.treatmentConditions) {
               const conditionId = conditionMap.get(treatment.name);
@@ -164,12 +178,14 @@ export const NutraceuticalDataMigrator = {
                   'treatment',
                   treatment.efficacyScore || 0
                 );
+                tratamentoProcessadas++;
               }
             }
-            console.log(`Adicionadas ${nutra.treatmentConditions.length} condições de tratamento para ${nutra.name}`);
+            console.log(`Adicionadas ${tratamentoProcessadas} condições de tratamento para ${nutra.name}`);
           }
           
           // Adicionar relações de condições (suporte)
+          let suporteProcessadas = 0;
           if (nutra.supportConditions) {
             for (const supportive of nutra.supportConditions) {
               const conditionId = conditionMap.get(supportive.name);
@@ -180,9 +196,10 @@ export const NutraceuticalDataMigrator = {
                   'support',
                   supportive.efficacyScore || 0
                 );
+                suporteProcessadas++;
               }
             }
-            console.log(`Adicionadas ${nutra.supportConditions.length} condições de suporte para ${nutra.name}`);
+            console.log(`Adicionadas ${suporteProcessadas} condições de suporte para ${nutra.name}`);
           }
           
         } catch (err) {
@@ -192,7 +209,7 @@ export const NutraceuticalDataMigrator = {
       
       return {
         success: true,
-        message: `Migração concluída. Processados ${nutraceuticals.length} nutracêuticos, ${categoryMap.size} categorias e ${conditionMap.size} condições de saúde.`
+        message: `Migração concluída. Processados ${nutraceuticosProcessados} nutracêuticos, ${categoryMap.size} categorias e ${conditionMap.size} condições de saúde.`
       };
       
     } catch (error) {

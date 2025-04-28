@@ -37,13 +37,24 @@ import {
   Filter,
   RefreshCcw,
   FileText,
-  BookOpen
+  BookOpen,
+  AlertTriangle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Componente para o cabeçalho da página
 const NutraceuticoGerenciamentoHeader = () => (
@@ -79,6 +90,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     isLoading,
     error,
     refreshData,
+    deleteNutraceutical
   } = useNutraceuticalManager();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,20 +98,56 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
   const [isMigratorDialogOpen, setIsMigratorDialogOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationResult, setMigrationResult] = useState<any>(null);
+  const [hasMigratedData, setHasMigratedData] = useState(false);
+
+  // Estado para diálogo de confirmação de exclusão
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [nutraceuticalToDelete, setNutraceuticalToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { toast } = useToast();
   
   // Função para filtrar nutracêuticos
   const filteredNutraceuticals = nutraceuticals.filter(nutra => {
     const matchesSearch = searchTerm === '' || 
-      nutra.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nutra.description.toLowerCase().includes(searchTerm.toLowerCase());
+      nutra.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nutra.description && nutra.description.toLowerCase().includes(searchTerm.toLowerCase()));
       
     const matchesCategory = selectedCategory === null || 
       nutra.category_id?.id === selectedCategory;
       
     return matchesSearch && matchesCategory;
   });
+
+  // Função para iniciar o processo de exclusão
+  const handleDeleteClick = (nutraId: string) => {
+    setNutraceuticalToDelete(nutraId);
+    setDeleteDialogOpen(true);
+  };
+
+  // Função para confirmar e executar a exclusão
+  const confirmDelete = async () => {
+    if (!nutraceuticalToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteNutraceutical(nutraceuticalToDelete);
+      toast({
+        title: "Nutracêutico excluído",
+        description: "O nutracêutico foi removido com sucesso.",
+      });
+      setDeleteDialogOpen(false);
+      setNutraceuticalToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir",
+        description: `Não foi possível excluir o nutracêutico: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   
   // Função para executar a migração
   const handleStartMigration = async () => {
@@ -109,6 +157,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       setMigrationResult(result);
       
       if (result.success) {
+        setHasMigratedData(true);
         toast({
           title: "Migração concluída",
           description: result.message,
@@ -121,7 +170,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
           variant: "destructive",
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao executar migração:", err);
       setMigrationResult({
         success: false,
@@ -159,13 +208,15 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
                     <RefreshCcw className="h-4 w-4 mr-1" />
                     Atualizar
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsMigratorDialogOpen(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Migrar Dados
-                  </Button>
+                  {!hasMigratedData && (
+                    <Button
+                      size="sm"
+                      onClick={() => setIsMigratorDialogOpen(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Migrar Dados
+                    </Button>
+                  )}
                 </div>
               </div>
               <CardDescription>
@@ -247,7 +298,12 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
                                 <Button size="icon" variant="ghost" className="h-8 w-8">
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500">
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 text-red-500"
+                                  onClick={() => handleDeleteClick(nutra.id)}
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -392,6 +448,28 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog para confirmação de exclusão */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este nutracêutico? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              disabled={isDeleting} 
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
