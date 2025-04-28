@@ -9,10 +9,12 @@ export const NutraceuticalCategoriesService = {
    * Busca todas as categorias
    */
   async getAllCategories() {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_categories')
       .select('*')
-      .order('name') as any;
+      .order('name');
 
     if (error) {
       console.error('Erro ao buscar categorias:', error);
@@ -26,11 +28,13 @@ export const NutraceuticalCategoriesService = {
    * Busca uma categoria pelo ID
    */
   async getCategoryById(id: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_categories')
       .select('*')
       .eq('id', id)
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao buscar categoria:', error);
@@ -44,11 +48,13 @@ export const NutraceuticalCategoriesService = {
    * Cria uma nova categoria
    */
   async createCategory({ name, description }: { name: string, description?: string }) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_categories')
       .insert([{ name, description }])
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao criar categoria:', error);
@@ -62,12 +68,14 @@ export const NutraceuticalCategoriesService = {
    * Atualiza uma categoria existente
    */
   async updateCategory(id: string, { name, description }: { name: string, description?: string }) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_categories')
       .update({ name, description })
       .eq('id', id)
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao atualizar categoria:', error);
@@ -81,10 +89,12 @@ export const NutraceuticalCategoriesService = {
    * Exclui uma categoria
    */
   async deleteCategory(id: string) {
-    const { error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { error } = await client
       .from('nutraceutical_categories')
       .delete()
-      .eq('id', id) as any;
+      .eq('id', id);
 
     if (error) {
       console.error('Erro ao excluir categoria:', error);

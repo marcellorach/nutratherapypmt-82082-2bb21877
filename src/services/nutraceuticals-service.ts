@@ -1,5 +1,5 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { Nutraceutical } from '@/types';
 
 /**
  * Serviço para gerenciar nutracêuticos no Supabase
@@ -9,26 +9,18 @@ export const NutraceuticalsService = {
    * Busca todos os nutracêuticos
    */
   async getAllNutraceuticals() {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceuticals')
       .select(`
         *,
-        category_id (id, name),
-        nutraceutical_benefits (id, benefit),
-        nutraceutical_scientific_metadata (*),
-        nutraceutical_health_conditions (
-          id, 
-          efficacy_score, 
-          relation_type,
-          condition_id (id, name, description)
-        ),
-        nutraceutical_ingredients (
-          ingredient_id (id, name, description)
-        ),
-        nutraceutical_studies (
-          study_id (id, title, year, journal, authors)
+        category:category_id (
+          id,
+          name
         )
-      `) as any;
+      `)
+      .order('name');
 
     if (error) {
       console.error('Erro ao buscar nutracêuticos:', error);
@@ -42,28 +34,19 @@ export const NutraceuticalsService = {
    * Busca um nutracêutico pelo ID
    */
   async getNutraceuticalById(id: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceuticals')
       .select(`
         *,
-        category_id (id, name),
-        nutraceutical_benefits (id, benefit),
-        nutraceutical_scientific_metadata (*),
-        nutraceutical_health_conditions (
-          id, 
-          efficacy_score, 
-          relation_type,
-          condition_id (id, name, description)
-        ),
-        nutraceutical_ingredients (
-          ingredient_id (id, name, description)
-        ),
-        nutraceutical_studies (
-          study_id (id, title, year, journal, authors, abstract, link)
+        category:category_id (
+          id,
+          name
         )
       `)
       .eq('id', id)
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao buscar nutracêutico:', error);
@@ -74,23 +57,90 @@ export const NutraceuticalsService = {
   },
 
   /**
+   * Busca nutracêuticos por categoria
+   */
+  async getNutraceuticalsByCategory(categoryId: string) {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
+      .from('nutraceuticals')
+      .select(`
+        *,
+        category:category_id (
+          id,
+          name
+        )
+      `)
+      .eq('category_id', categoryId)
+      .order('name');
+
+    if (error) {
+      console.error('Erro ao buscar nutracêuticos por categoria:', error);
+      throw new Error('Não foi possível carregar os nutracêuticos');
+    }
+
+    return data;
+  },
+
+  /**
+   * Busca nutracêuticos por condição de saúde
+   */
+  async getNutraceuticalsByCondition(conditionId: string, relationshipType?: 'prevention' | 'treatment' | 'support') {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    let query = client
+      .from('nutraceutical_conditions')
+      .select(`
+        id,
+        efficacy_score,
+        relationship_type,
+        nutraceutical:nutraceutical_id (
+          id,
+          name,
+          description,
+          dosage,
+          source,
+          chemical_compound,
+          contraindications,
+          category:category_id (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('condition_id', conditionId);
+
+    if (relationshipType) {
+      query = query.eq('relationship_type', relationshipType);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erro ao buscar nutracêuticos por condição:', error);
+      throw new Error('Não foi possível carregar os nutracêuticos');
+    }
+
+    return data;
+  },
+
+  /**
    * Cria um novo nutracêutico
    */
-  async createNutraceutical(nutraceutical: any) {
-    const { name, description, dosage, source, chemical_compound, category_id, contraindications } = nutraceutical;
-    
-    // Inserir o nutracêutico base
-    const { data, error } = await supabase
+  async createNutraceutical(nutraceutical: {
+    name: string,
+    description?: string,
+    dosage?: string,
+    source?: string,
+    chemical_compound?: string,
+    category_id?: string,
+    contraindications?: string[]
+  }) {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceuticals')
-      .insert([{ 
-        name, 
-        description, 
-        dosage, 
-        source, 
-        chemical_compound, 
-        category_id,
-        contraindications: contraindications || []
-      }])
+      .insert([nutraceutical])
       .select()
       .single();
 
@@ -105,20 +155,23 @@ export const NutraceuticalsService = {
   /**
    * Atualiza um nutracêutico existente
    */
-  async updateNutraceutical(id: string, nutraceutical: any) {
-    const { name, description, dosage, source, chemical_compound, category_id, contraindications } = nutraceutical;
-    
-    const { data, error } = await supabase
+  async updateNutraceutical(
+    id: string,
+    nutraceutical: {
+      name?: string,
+      description?: string,
+      dosage?: string,
+      source?: string,
+      chemical_compound?: string,
+      category_id?: string,
+      contraindications?: string[]
+    }
+  ) {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceuticals')
-      .update({ 
-        name, 
-        description, 
-        dosage, 
-        source, 
-        chemical_compound, 
-        category_id,
-        contraindications: contraindications || []
-      })
+      .update(nutraceutical)
       .eq('id', id)
       .select()
       .single();
@@ -135,7 +188,9 @@ export const NutraceuticalsService = {
    * Exclui um nutracêutico
    */
   async deleteNutraceutical(id: string) {
-    const { error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { error } = await client
       .from('nutraceuticals')
       .delete()
       .eq('id', id);
@@ -149,15 +204,14 @@ export const NutraceuticalsService = {
   },
 
   /**
-   * Adiciona um benefício ao nutracêutico
+   * Adiciona um benefício a um nutracêutico
    */
   async addBenefit(nutraceuticalId: string, benefit: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_benefits')
-      .insert([{ 
-        nutraceutical_id: nutraceuticalId, 
-        benefit 
-      }])
+      .insert([{ nutraceutical_id: nutraceuticalId, benefit }])
       .select()
       .single();
 
@@ -170,10 +224,12 @@ export const NutraceuticalsService = {
   },
 
   /**
-   * Remove um benefício do nutracêutico
+   * Remove um benefício de um nutracêutico
    */
   async removeBenefit(benefitId: string) {
-    const { error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { error } = await client
       .from('nutraceutical_benefits')
       .delete()
       .eq('id', benefitId);
@@ -187,82 +243,59 @@ export const NutraceuticalsService = {
   },
 
   /**
-   * Adiciona ou atualiza os metadados científicos de um nutracêutico
+   * Atualiza metadados científicos de um nutracêutico
    */
-  async updateScientificMetadata(nutraceuticalId: string, data: { efficacy_score: number, sustainability_score: number }) {
-    // Verificar se já existe um registro
-    const { data: existingData, error: checkError } = await supabase
+  async updateScientificMetadata(
+    nutraceuticalId: string,
+    metadata: {
+      efficacy_score?: number,
+      sustainability_score?: number,
+      notes?: string
+    }
+  ) {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_scientific_metadata')
-      .select('*')
-      .eq('nutraceutical_id', nutraceuticalId)
-      .maybeSingle();
+      .upsert([{ 
+        nutraceutical_id: nutraceuticalId,
+        ...metadata
+      }])
+      .select()
+      .single();
 
-    if (checkError) {
-      console.error('Erro ao verificar metadados científicos:', checkError);
-      throw new Error('Falha ao atualizar metadados científicos');
+    if (error) {
+      console.error('Erro ao atualizar metadados científicos:', error);
+      throw new Error('Não foi possível atualizar os metadados científicos');
     }
 
-    if (existingData) {
-      // Atualizar registro existente
-      const { data: updatedData, error } = await supabase
-        .from('nutraceutical_scientific_metadata')
-        .update({ 
-          efficacy_score: data.efficacy_score, 
-          sustainability_score: data.sustainability_score 
-        })
-        .eq('id', existingData.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erro ao atualizar metadados científicos:', error);
-        throw new Error('Não foi possível atualizar os metadados científicos');
-      }
-      
-      return updatedData;
-    } else {
-      // Inserir novo registro
-      const { data: newData, error } = await supabase
-        .from('nutraceutical_scientific_metadata')
-        .insert([{ 
-          nutraceutical_id: nutraceuticalId, 
-          efficacy_score: data.efficacy_score, 
-          sustainability_score: data.sustainability_score 
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erro ao criar metadados científicos:', error);
-        throw new Error('Não foi possível criar os metadados científicos');
-      }
-      
-      return newData;
-    }
+    return data;
   },
 
   /**
    * Relaciona um nutracêutico a uma condição de saúde
    */
   async relateToCondition(
-    nutraceuticalId: string, 
-    conditionId: string, 
-    relationType: 'prevention' | 'treatment' | 'support',
-    efficacyScore: number
+    nutraceuticalId: string,
+    conditionId: string,
+    relationshipType: 'prevention' | 'treatment' | 'support',
+    efficacyScore: number = 0
   ) {
-    const { data, error } = await supabase
-      .from('nutraceutical_health_conditions')
-      .insert([{ 
-        nutraceutical_id: nutraceuticalId, 
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
+      .from('nutraceutical_conditions')
+      .upsert([{
+        nutraceutical_id: nutraceuticalId,
         condition_id: conditionId,
-        relation_type: relationType,
+        relationship_type: relationshipType,
         efficacy_score: efficacyScore
       }])
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao relacionar nutracêutico à condição:', error);
+      console.error('Erro ao relacionar nutracêutico a condição:', error);
       throw new Error('Não foi possível relacionar o nutracêutico à condição');
     }
 
@@ -270,90 +303,19 @@ export const NutraceuticalsService = {
   },
 
   /**
-   * Atualiza a relação entre um nutracêutico e uma condição
-   */
-  async updateConditionRelation(
-    relationId: string,
-    data: { efficacy_score: number }
-  ) {
-    const { data: updatedData, error } = await supabase
-      .from('nutraceutical_health_conditions')
-      .update({ efficacy_score: data.efficacy_score })
-      .eq('id', relationId)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Erro ao atualizar relação com condição:', error);
-      throw new Error('Não foi possível atualizar a relação com a condição');
-    }
-
-    return updatedData;
-  },
-
-  /**
-   * Remove a relação entre um nutracêutico e uma condição
-   */
-  async removeConditionRelation(relationId: string) {
-    const { error } = await supabase
-      .from('nutraceutical_health_conditions')
-      .delete()
-      .eq('id', relationId);
-
-    if (error) {
-      console.error('Erro ao remover relação com condição:', error);
-      throw new Error('Não foi possível remover a relação com a condição');
-    }
-
-    return true;
-  },
-
-  /**
-   * Relaciona um nutracêutico a um ingrediente ativo
-   */
-  async relateToIngredient(nutraceuticalId: string, ingredientId: string) {
-    const { data, error } = await supabase
-      .from('nutraceutical_ingredients')
-      .insert([{ 
-        nutraceutical_id: nutraceuticalId, 
-        ingredient_id: ingredientId 
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Erro ao relacionar nutracêutico ao ingrediente:', error);
-      throw new Error('Não foi possível relacionar o nutracêutico ao ingrediente');
-    }
-
-    return data;
-  },
-
-  /**
-   * Remove a relação entre um nutracêutico e um ingrediente
-   */
-  async removeIngredientRelation(relationId: string) {
-    const { error } = await supabase
-      .from('nutraceutical_ingredients')
-      .delete()
-      .eq('id', relationId);
-
-    if (error) {
-      console.error('Erro ao remover relação com ingrediente:', error);
-      throw new Error('Não foi possível remover a relação com o ingrediente');
-    }
-
-    return true;
-  },
-
-  /**
    * Relaciona um nutracêutico a um estudo científico
    */
-  async relateToStudy(nutraceuticalId: string, studyId: string, relevanceScore: number) {
-    const { data, error } = await supabase
+  async relateToStudy(
+    nutraceuticalId: string,
+    studyId: string,
+    relevanceScore: number = 0
+  ) {
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_studies')
-      .insert([{ 
-        nutraceutical_id: nutraceuticalId, 
+      .upsert([{
+        nutraceutical_id: nutraceuticalId,
         study_id: studyId,
         relevance_score: relevanceScore
       }])
@@ -361,27 +323,10 @@ export const NutraceuticalsService = {
       .single();
 
     if (error) {
-      console.error('Erro ao relacionar nutracêutico ao estudo:', error);
+      console.error('Erro ao relacionar nutracêutico a estudo:', error);
       throw new Error('Não foi possível relacionar o nutracêutico ao estudo');
     }
 
     return data;
-  },
-
-  /**
-   * Remove a relação entre um nutracêutico e um estudo
-   */
-  async removeStudyRelation(relationId: string) {
-    const { error } = await supabase
-      .from('nutraceutical_studies')
-      .delete()
-      .eq('id', relationId);
-
-    if (error) {
-      console.error('Erro ao remover relação com estudo:', error);
-      throw new Error('Não foi possível remover a relação com o estudo');
-    }
-
-    return true;
   }
 };

@@ -9,10 +9,12 @@ export const ActiveIngredientsService = {
    * Busca todos os ingredientes ativos
    */
   async getAllIngredients() {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('active_ingredients')
       .select('*')
-      .order('name') as any;
+      .order('name');
 
     if (error) {
       console.error('Erro ao buscar ingredientes:', error);
@@ -26,11 +28,13 @@ export const ActiveIngredientsService = {
    * Busca um ingrediente pelo ID
    */
   async getIngredientById(id: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('active_ingredients')
       .select('*')
       .eq('id', id)
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao buscar ingrediente:', error);
@@ -44,11 +48,13 @@ export const ActiveIngredientsService = {
    * Cria um novo ingrediente ativo
    */
   async createIngredient({ name, description }: { name: string, description?: string }) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('active_ingredients')
       .insert([{ name, description }])
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao criar ingrediente:', error);
@@ -62,12 +68,14 @@ export const ActiveIngredientsService = {
    * Atualiza um ingrediente ativo existente
    */
   async updateIngredient(id: string, { name, description }: { name: string, description?: string }) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('active_ingredients')
       .update({ name, description })
       .eq('id', id)
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao atualizar ingrediente:', error);
@@ -81,10 +89,12 @@ export const ActiveIngredientsService = {
    * Exclui um ingrediente ativo
    */
   async deleteIngredient(id: string) {
-    const { error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { error } = await client
       .from('active_ingredients')
       .delete()
-      .eq('id', id) as any;
+      .eq('id', id);
 
     if (error) {
       console.error('Erro ao excluir ingrediente:', error);

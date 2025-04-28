@@ -9,10 +9,12 @@ export const ScientificStudiesService = {
    * Busca todos os estudos científicos
    */
   async getAllStudies() {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('scientific_studies')
       .select('*')
-      .order('year', { ascending: false }) as any;
+      .order('year', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar estudos científicos:', error);
@@ -26,11 +28,13 @@ export const ScientificStudiesService = {
    * Busca um estudo pelo ID
    */
   async getStudyById(id: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('scientific_studies')
       .select('*')
       .eq('id', id)
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao buscar estudo científico:', error);
@@ -44,7 +48,9 @@ export const ScientificStudiesService = {
    * Busca estudos associados a um nutracêutico
    */
   async getStudiesByNutraceutical(nutraceuticalId: string) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('nutraceutical_studies')
       .select(`
         id,
@@ -52,7 +58,7 @@ export const ScientificStudiesService = {
         study_id (*)
       `)
       .eq('nutraceutical_id', nutraceuticalId)
-      .order('relevance_score', { ascending: false }) as any;
+      .order('relevance_score', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar estudos do nutracêutico:', error);
@@ -73,11 +79,13 @@ export const ScientificStudiesService = {
     authors?: string[],
     abstract?: string
   }) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('scientific_studies')
       .insert([study])
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao criar estudo científico:', error);
@@ -101,12 +109,14 @@ export const ScientificStudiesService = {
       abstract?: string
     }
   ) {
-    const { data, error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { data, error } = await client
       .from('scientific_studies')
       .update(study)
       .eq('id', id)
       .select()
-      .single() as any;
+      .single();
 
     if (error) {
       console.error('Erro ao atualizar estudo científico:', error);
@@ -120,10 +130,12 @@ export const ScientificStudiesService = {
    * Exclui um estudo científico
    */
   async deleteStudy(id: string) {
-    const { error } = await supabase
+    // Usando type assertion para contornar a verificação de tipos do TypeScript
+    const client = supabase as any;
+    const { error } = await client
       .from('scientific_studies')
       .delete()
-      .eq('id', id) as any;
+      .eq('id', id);
 
     if (error) {
       console.error('Erro ao excluir estudo científico:', error);
