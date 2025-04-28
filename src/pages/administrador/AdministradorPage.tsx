@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
 import AnalysisStep from '@/components/administrador/dataAnalysis/AnalysisStep';
@@ -31,7 +32,23 @@ import ResearchSettingsTab from '@/components/administrador/settings/ResearchSet
 import PredictiveAnalysisSettingsTab from '@/components/administrador/settings/PredictiveAnalysisSettingsTab';
 
 const AdministradorPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<string>("estudos");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const tabParam = searchParams.get('tab');
+  const [currentStep, setCurrentStep] = useState<string>(tabParam || "estudos");
+  
+  // Atualiza a URL quando o passo atual muda
+  const handleStepChange = (newStep: string) => {
+    setCurrentStep(newStep);
+    setSearchParams({ tab: newStep });
+  };
+  
+  // Efeito para sincronizar o estado com os parâmetros da URL quando eles mudam
+  useEffect(() => {
+    if (tabParam && tabParam !== currentStep) {
+      setCurrentStep(tabParam);
+    }
+  }, [tabParam, currentStep]);
   
   const renderContent = () => {
     switch (currentStep) {
@@ -100,7 +117,7 @@ const AdministradorPage: React.FC = () => {
   };
   
   return (
-    <AdminLayout currentStep={currentStep} setCurrentStep={setCurrentStep}>
+    <AdminLayout currentStep={currentStep} setCurrentStep={handleStepChange}>
       {renderContent()}
     </AdminLayout>
   );

@@ -18,7 +18,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep }) => {
   return (
-    <Sidebar variant="inset" collapsible="icon" className="mt-20"> {/* Added top margin */}
+    <Sidebar variant="inset" collapsible="icon" className="mt-20">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Área de P&D</h2>
@@ -32,7 +32,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
       
       <SidebarFooter>
         <div className="p-4">
-          <Button variant="outline" className="w-full" size="sm">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            size="sm"
+            onClick={() => setCurrentStep('knowledge-base-settings')}
+          >
             <Settings className="mr-2 h-4 w-4" />
             Configurações
           </Button>
@@ -43,4 +48,3 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
 };
 
 export default AdminSidebar;
-
