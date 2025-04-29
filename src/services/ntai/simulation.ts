@@ -118,17 +118,17 @@ export const extractInteractionsFromStudy = (studyText: string): Array<{nutraceu
   return selectedInteractions;
 };
 
-export const extractSideEffectsFromStudy = (studyText: string): Array<{description: string, severity: string, confidence: number}> => {
+export const extractSideEffectsFromStudy = (studyText: string): Array<{name: string, description: string, severity: string, confidence: number}> => {
   // Simulando a extração de efeitos colaterais de um texto
   const possibleSideEffects = [
-    { description: 'Distúrbios gastrointestinais leves', severity: 'leve', confidence: 0.82 },
-    { description: 'Náusea temporária', severity: 'leve', confidence: 0.78 },
-    { description: 'Sonolência', severity: 'leve', confidence: 0.71 },
-    { description: 'Reação alérgica', severity: 'moderado', confidence: 0.68 },
-    { description: 'Diarreia', severity: 'moderado', confidence: 0.76 },
-    { description: 'Vômito', severity: 'moderado', confidence: 0.73 },
-    { description: 'Alteração da coagulação', severity: 'grave', confidence: 0.65 },
-    { description: 'Hepatotoxicidade em altas doses', severity: 'grave', confidence: 0.62 }
+    { name: 'Distúrbios GI', description: 'Distúrbios gastrointestinais leves', severity: 'leve', confidence: 0.82 },
+    { name: 'Náusea', description: 'Náusea temporária', severity: 'leve', confidence: 0.78 },
+    { name: 'Sonolência', description: 'Sonolência', severity: 'leve', confidence: 0.71 },
+    { name: 'Reação alérgica', description: 'Reação alérgica', severity: 'moderado', confidence: 0.68 },
+    { name: 'Diarreia', description: 'Diarreia', severity: 'moderado', confidence: 0.76 },
+    { name: 'Vômito', description: 'Vômito', severity: 'moderado', confidence: 0.73 },
+    { name: 'Alt. coagulação', description: 'Alteração da coagulação', severity: 'grave', confidence: 0.65 },
+    { name: 'Hepatotoxicidade', description: 'Hepatotoxicidade em altas doses', severity: 'grave', confidence: 0.62 }
   ];
   
   // Decidir se há efeitos colaterais
@@ -139,7 +139,7 @@ export const extractSideEffectsFromStudy = (studyText: string): Array<{descripti
   }
   
   const numSideEffects = Math.floor(Math.random() * 2) + 1; // 1 a 2 efeitos colaterais
-  const selectedSideEffects: Array<{description: string, severity: string, confidence: number}> = [];
+  const selectedSideEffects: Array<{name: string, description: string, severity: string, confidence: number}> = [];
   
   const shuffled = [...possibleSideEffects].sort(() => 0.5 - Math.random());
   for (let i = 0; i < Math.min(numSideEffects, shuffled.length); i++) {

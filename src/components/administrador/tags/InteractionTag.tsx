@@ -5,20 +5,31 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface InteractionTagProps {
-  name: string;
-  score: number;
-  type: 'positive' | 'negative';
+  nutraceutical?: string;
+  interaction?: string;
+  name?: string;
+  score?: number;
+  type?: 'positive' | 'negative';
+  confidence?: number;
   showScore?: boolean;
   className?: string;
 }
 
 const InteractionTag: React.FC<InteractionTagProps> = ({ 
-  name, 
-  score,
-  type,
+  nutraceutical, 
+  interaction,
+  name,
+  score = 0,
+  type = 'positive',
+  confidence = 0,
   showScore = true,
   className = ""
 }) => {
+  // Usamos name como fallback se nutraceutical não for fornecido
+  const displayName = name || nutraceutical || interaction || "";
+  // Usamos score como fallback se confidence não for fornecido
+  const displayScore = score || confidence || 0;
+  
   // Estilos com base no tipo de interação
   const getStyle = () => {
     if (type === 'positive') {
@@ -54,14 +65,14 @@ const InteractionTag: React.FC<InteractionTagProps> = ({
             }}
           >
             {style.icon}
-            <span>{name}</span>
-            {showScore && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
+            <span>{displayName}</span>
+            {showScore && <span className="ml-1 font-semibold">({displayScore.toFixed(1)})</span>}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            <span className="font-medium">{name}</span> - 
-            {type === 'positive' ? ' Interação positiva' : ' Interação negativa'}: {score.toFixed(1)}/5
+            <span className="font-medium">{displayName}</span> - 
+            {type === 'positive' ? ' Interação positiva' : ' Interação negativa'}: {displayScore.toFixed(1)}/5
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {type === 'positive' 

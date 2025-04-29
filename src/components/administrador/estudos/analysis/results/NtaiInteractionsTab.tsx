@@ -24,6 +24,8 @@ const NtaiInteractionsTab: React.FC<NtaiInteractionsTabProps> = ({ interactions 
               interaction={interaction.interaction}
               confidence={interaction.confidence}
               className="m-1"
+              // Determinando se é positiva ou negativa com base no conteúdo
+              type={interaction.interaction.toLowerCase().includes('não') ? 'negative' : 'positive'}
             />
           ))
         ) : (

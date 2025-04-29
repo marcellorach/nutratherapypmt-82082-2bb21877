@@ -20,7 +20,7 @@ const NtaiSideEffectsTab: React.FC<NtaiSideEffectsTabProps> = ({ sideEffects }) 
           sideEffects.map((effect, idx) => (
             <SideEffectTag 
               key={idx}
-              effect={effect.name} 
+              effect={effect.name || effect.description || ""} 
               score={effect.intensityScore || 3}
               className="m-1"
             />

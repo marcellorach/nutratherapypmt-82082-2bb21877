@@ -17,6 +17,7 @@ export interface NtaiAnalysisResult {
     confidence: number;
   }>;
   extractedSideEffects: Array<{
+    name: string;
     description: string;
     severity: string;
     confidence: number;
@@ -57,7 +58,7 @@ export interface SankeyLink {
   description?: string;
 }
 
-// Adicionando os tipos que estão faltando
+// Tipos de processamento
 export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
 
 export interface ProcessingItem {
