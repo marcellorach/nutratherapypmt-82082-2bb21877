@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   LineChart, 
   Line, 
@@ -13,61 +12,157 @@ import {
   ResponsiveContainer, 
   PieChart, 
   Pie, 
-  Cell 
+  Cell, 
+  Sector 
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   ChartContainer, 
   ChartTooltip, 
   ChartTooltipContent 
 } from "@/components/ui/chart";
+import HealthConditionsSankey from './visualizations/HealthConditionsSankey';
+import BreedDistribution from './visualizations/BreedDistribution';
+import AgeDistributionChart from './visualizations/AgeDistributionChart';
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
-const ageData = [
-  { name: '0-1', value: 452 },
-  { name: '1-3', value: 785 },
-  { name: '3-5', value: 573 },
-  { name: '5-8', value: 328 },
-  { name: '8+', value: 203 }
+// Dados detalhados de idade, ano a ano
+const detailedAgeData = [
+  { name: '< 1', value: 328, percent: 12.4 },
+  { name: '1', value: 421, percent: 15.9 },
+  { name: '2', value: 387, percent: 14.6 },
+  { name: '3', value: 352, percent: 13.3 },
+  { name: '4', value: 289, percent: 10.9 },
+  { name: '5', value: 235, percent: 8.9 },
+  { name: '6', value: 187, percent: 7.1 },
+  { name: '7', value: 142, percent: 5.4 },
+  { name: '8', value: 98, percent: 3.7 },
+  { name: '9', value: 76, percent: 2.9 },
+  { name: '10', value: 52, percent: 2.0 },
+  { name: '11', value: 38, percent: 1.4 },
+  { name: '12', value: 26, percent: 1.0 },
+  { name: '13', value: 18, percent: 0.7 },
+  { name: '14', value: 12, percent: 0.5 },
+  { name: '15', value: 9, percent: 0.3 },
+  { name: '16', value: 5, percent: 0.2 },
+  { name: '17', value: 3, percent: 0.1 },
+  { name: '18', value: 1, percent: 0.04 },
+  { name: '19+', value: 1, percent: 0.04 }
 ];
 
+// Dados de espécies e raças
 const speciesData = [
-  { name: 'Cachorros', value: 1560 },
-  { name: 'Gatos', value: 730 },
-  { name: 'Outros', value: 51 }
+  { name: 'Cães', value: 1560, percent: 66.7 },
+  { name: 'Gatos', value: 730, percent: 31.2 },
+  { name: 'Outros', value: 51, percent: 2.1 }
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+// Dados de raças para cada espécie
+const breedData = {
+  'Cães': [
+    { name: 'SRD', value: 645, percent: 41.3 },
+    { name: 'Golden Retriever', value: 187, percent: 12.0 },
+    { name: 'Bulldog Francês', value: 156, percent: 10.0 },
+    { name: 'Shih Tzu', value: 124, percent: 7.9 },
+    { name: 'Poodle', value: 98, percent: 6.3 },
+    { name: 'Labrador', value: 93, percent: 6.0 },
+    { name: 'Pastor Alemão', value: 78, percent: 5.0 },
+    { name: 'Yorkshire', value: 65, percent: 4.2 },
+    { name: 'Outras raças', value: 114, percent: 7.3 }
+  ],
+  'Gatos': [
+    { name: 'SRD', value: 543, percent: 74.4 },
+    { name: 'Siamês', value: 58, percent: 7.9 },
+    { name: 'Persa', value: 43, percent: 5.9 },
+    { name: 'Maine Coon', value: 36, percent: 4.9 },
+    { name: 'Ragdoll', value: 23, percent: 3.2 },
+    { name: 'Bengal', value: 15, percent: 2.1 },
+    { name: 'Outras raças', value: 12, percent: 1.6 }
+  ],
+  'Outros': [
+    { name: 'Coelhos', value: 28, percent: 54.9 },
+    { name: 'Hamsters', value: 12, percent: 23.5 },
+    { name: 'Aves', value: 8, percent: 15.7 },
+    { name: 'Outros', value: 3, percent: 5.9 }
+  ]
+};
 
-const treatmentData = [
-  { month: 'Jan', success: 65, failure: 12 },
-  { month: 'Fev', success: 72, failure: 18 },
-  { month: 'Mar', success: 78, failure: 14 },
-  { month: 'Abr', success: 83, failure: 11 },
-  { month: 'Mai', success: 75, failure: 15 },
-  { month: 'Jun', success: 84, failure: 10 },
-];
-
-const conditionsData = [
-  { name: 'Artrite', dogs: 125, cats: 32 },
-  { name: 'Diabetes', dogs: 87, cats: 65 },
-  { name: 'Obesidade', dogs: 215, cats: 110 },
-  { name: 'Alergias', dogs: 178, cats: 58 },
-  { name: 'Problemas Dentários', dogs: 156, cats: 142 },
-];
-
-const tableData = [
-  { id: 1, name: 'Condroitina', efficacy: 87, pets: 324, avgImprovement: '74%', recommendation: 'Alta' },
-  { id: 2, name: 'Ômega 3', efficacy: 92, pets: 415, avgImprovement: '82%', recommendation: 'Alta' },
-  { id: 3, name: 'Glucosamina', efficacy: 85, pets: 287, avgImprovement: '71%', recommendation: 'Alta' },
-  { id: 4, name: 'Probióticos', efficacy: 78, pets: 356, avgImprovement: '68%', recommendation: 'Média' },
-  { id: 5, name: 'MSM', efficacy: 76, pets: 201, avgImprovement: '65%', recommendation: 'Média' },
-];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+const HOVER_COLORS = ['#4dabff', '#4ad9bf', '#ffca5b', '#ff9f71', '#a6a3e2', '#4a9fe5', '#ffab5e', '#6dbe6d', '#e45a5a', '#b595cf'];
 
 const VisualizationStep: React.FC = () => {
   const [timeFrame, setTimeFrame] = useState('6m');
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+  const [showBreedDistribution, setShowBreedDistribution] = useState(false);
+  const [isAbsoluteValues, setIsAbsoluteValues] = useState(true);
+  
+  // Renderização personalizada para setor ativo no gráfico de pizza
+  const renderActiveShape = useCallback((props: any) => {
+    const RADIAN = Math.PI / 180;
+    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle,
+      fill, payload, percent, value } = props;
+    const sin = Math.sin(-RADIAN * midAngle);
+    const cos = Math.cos(-RADIAN * midAngle);
+    const sx = cx + (outerRadius + 10) * cos;
+    const sy = cy + (outerRadius + 10) * sin;
+    const mx = cx + (outerRadius + 30) * cos;
+    const my = cy + (outerRadius + 30) * sin;
+    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+    const ey = my;
+    const textAnchor = cos >= 0 ? 'start' : 'end';
+    
+    return (
+      <g>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          opacity={0.8}
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 6}
+          outerRadius={outerRadius + 10}
+          fill={fill}
+        />
+        <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none"/>
+        <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none"/>
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={-12} textAnchor={textAnchor} fill="#333" fontSize={12}>
+          {payload.name}
+        </text>
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333" fontSize={12}>
+          {`${value} (${(percent * 100).toFixed(1)}%)`}
+        </text>
+      </g>
+    );
+  }, []);
+  
+  // Função para lidar com o clique em uma espécie no gráfico de pizza
+  const handlePieClick = (data: any) => {
+    setSelectedSpecies(data.name);
+    setShowBreedDistribution(true);
+  };
+  
+  // Função para retornar à visão de espécies
+  const handleBackToSpecies = () => {
+    setSelectedSpecies(null);
+    setShowBreedDistribution(false);
+  };
+  
+  // Toggle para valores absolutos/percentuais
+  const toggleValueType = () => {
+    setIsAbsoluteValues(!isAbsoluteValues);
+  };
   
   return (
     <div className="space-y-6">
@@ -101,114 +196,107 @@ const VisualizationStep: React.FC = () => {
           <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuição por Idade</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ChartContainer 
-                    config={{
-                      age: {
-                        label: 'Idade',
-                        theme: {
-                          light: '#8B5CF6',
-                          dark: '#8B5CF6',
-                        }
-                      },
-                    }}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={ageData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <ChartTooltip
-                          content={
-                            <ChartTooltipContent labelKey="name" nameKey="name" />
-                          }
-                        />
-                        <Bar dataKey="value" fill="var(--color-age)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuição por Espécie</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
+        <TabsContent value="overview" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Distribuição por Idade</CardTitle>
+              <Button variant="outline" size="sm" onClick={toggleValueType}>
+                {isAbsoluteValues ? "Mostrar Percentuais" : "Mostrar Valores Absolutos"}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <AgeDistributionChart data={detailedAgeData} isAbsoluteValues={isAbsoluteValues} />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {showBreedDistribution 
+                  ? `Distribuição de Raças - ${selectedSpecies}` 
+                  : "Distribuição por Espécie"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                {showBreedDistribution ? (
+                  <BreedDistribution 
+                    data={selectedSpecies ? breedData[selectedSpecies] : []} 
+                    onBackClick={handleBackToSpecies}
+                    colors={COLORS}
+                    hoverColors={HOVER_COLORS}
+                  />
+                ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={speciesData}
                         cx="50%"
                         cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
+                        innerRadius={70}
+                        outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        activeIndex={0}
+                        activeShape={renderActiveShape}
+                        onClick={handlePieClick}
+                        isAnimationActive={true}
+                        animationDuration={800}
+                        className="cursor-pointer"
                       >
                         {speciesData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={COLORS[index % COLORS.length]} 
+                            stroke="#fff"
+                            strokeWidth={2}
+                          />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => [`${value} pets`, 'Quantidade']} />
-                      <Legend />
+                      <Legend 
+                        verticalAlign="bottom" 
+                        align="center" 
+                        layout="horizontal"
+                        formatter={(value, entry, index) => (
+                          <span style={{ color: '#333', cursor: 'pointer' }}>
+                            {value} ({speciesData[index].percent}%)
+                          </span>
+                        )}
+                      />
+                      <Tooltip 
+                        formatter={(value: number, name: string, props: any) => {
+                          return [`${value} pets (${props.payload.percent}%)`, name];
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
+                )}
+                <div className="mt-4 text-sm text-gray-500 text-center">
+                  {showBreedDistribution ? (
+                    <p>Clique em uma raça para ver detalhes ou <button 
+                      onClick={handleBackToSpecies}
+                      className="text-blue-500 underline"
+                    >voltar para visão de espécies</button></p>
+                  ) : (
+                    <p>Clique em uma espécie para ver a distribuição por raças</p>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle>Taxa de Sucesso de Tratamentos</CardTitle>
+              <CardTitle>Mapeamento de Condições de Saúde</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ChartContainer 
-                  config={{
-                    success: {
-                      label: 'Sucesso',
-                      theme: {
-                        light: '#22C55E',
-                        dark: '#22C55E',
-                      }
-                    },
-                    failure: {
-                      label: 'Falha',
-                      theme: {
-                        light: '#EF4444',
-                        dark: '#EF4444',
-                      }
-                    },
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={treatmentData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent labelKey="month" nameKey="dataKey" />
-                        }
-                      />
-                      <Legend />
-                      <Line type="monotone" dataKey="success" stroke="var(--color-success)" strokeWidth={2} />
-                      <Line type="monotone" dataKey="failure" stroke="var(--color-failure)" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <div className="h-96">
+                <HealthConditionsSankey height={360} />
+              </div>
+              <div className="mt-2 text-xs text-center text-gray-500">
+                Diagrama de Sankey mostrando a distribuição de condições de saúde por espécie e raça
               </div>
             </CardContent>
           </Card>
@@ -220,41 +308,16 @@ const VisualizationStep: React.FC = () => {
               <CardTitle>Prevalência de Condições por Espécie</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="text-sm text-gray-500 mb-4">
+                Análise detalhada das condições de saúde encontradas, com filtros por espécie e faixa etária.
+              </div>
               <div className="h-96">
-                <ChartContainer 
-                  config={{
-                    dogs: {
-                      label: 'Cachorros',
-                      theme: {
-                        light: '#3B82F6',
-                        dark: '#3B82F6',
-                      }
-                    },
-                    cats: {
-                      label: 'Gatos',
-                      theme: {
-                        light: '#EC4899',
-                        dark: '#EC4899',
-                      }
-                    },
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={conditionsData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" width={150} />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent labelKey="name" nameKey="dataKey" />
-                        }
-                      />
-                      <Legend />
-                      <Bar dataKey="dogs" fill="var(--color-dogs)" />
-                      <Bar dataKey="cats" fill="var(--color-cats)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <div className="flex items-center justify-center h-full bg-gray-50 rounded-md border border-gray-200">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Carregar Dados Detalhados
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
