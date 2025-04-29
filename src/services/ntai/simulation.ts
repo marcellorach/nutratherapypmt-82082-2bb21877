@@ -1,144 +1,166 @@
 
 import { NtaiAnalysisResult } from '@/types/ntai';
 
-// Função para simular a extração de nutracêuticos de um estudo
-export const extractNutraceuticalsFromStudy = async (studyText: string, prompt?: string) => {
-  // Simulação: extrai nutracêuticos baseados no texto do estudo
-  const nutracêuticos = [
-    { name: "Glucosamina", confidence: 0.95 },
-    { name: "Condroitina", confidence: 0.88 },
-    { name: "MSM", confidence: 0.82 },
-    { name: "Ômega 3", confidence: 0.78 },
-    { name: "Curcumina", confidence: 0.65 }
+export const scoreStudyQuality = (studyId: string): number => {
+  // Algoritmo simulado para avaliação da qualidade do estudo
+  return Number((3 + Math.random() * 2).toFixed(1)); // Entre 3.0 e 5.0
+};
+
+export const scoreStudyRelevance = (studyId: string): number => {
+  // Algoritmo simulado para avaliação da relevância do estudo
+  return Number((2.5 + Math.random() * 2.5).toFixed(1)); // Entre 2.5 e 5.0
+};
+
+export const extractNutraceuticalsFromStudy = (studyText: string): Array<{name: string, confidence: number}> => {
+  // Simulando a extração de nutracêuticos de um texto
+  const commonNutraceuticals = [
+    'Glucosamina',
+    'Condroitina',
+    'Ômega 3',
+    'Ômega 6',
+    'MSM (Metilsulfonilmetano)',
+    'Curcumina',
+    'Resveratrol',
+    'Probióticos',
+    'Prebióticos',
+    'Quitosana',
+    'Vitamina E',
+    'Coenzima Q10',
+    'L-carnitina',
+    'Taurina',
+    'Extrato de Canabidiol',
+    'SAMe'
   ];
+
+  // Selecionar alguns nutracêuticos aleatoriamente
+  const numToSelect = Math.floor(Math.random() * 5) + 1; // 1 a 5 nutracêuticos
+  const selectedNutraceuticals: Array<{name: string, confidence: number}> = [];
   
-  // Verifica se o texto contém certas palavras-chave e adiciona nutracêuticos específicos
-  if (studyText.toLowerCase().includes('articular') || studyText.toLowerCase().includes('joint')) {
-    nutracêuticos.push({ name: "Colágeno Tipo II", confidence: 0.90 });
+  const shuffled = [...commonNutraceuticals].sort(() => 0.5 - Math.random());
+  for (let i = 0; i < Math.min(numToSelect, shuffled.length); i++) {
+    selectedNutraceuticals.push({
+      name: shuffled[i],
+      confidence: Number((0.7 + Math.random() * 0.3).toFixed(2)) // Entre 0.7 e 1.0
+    });
   }
   
-  if (studyText.toLowerCase().includes('inflamação') || studyText.toLowerCase().includes('inflammation')) {
-    nutracêuticos.push({ name: "Boswellia", confidence: 0.85 });
+  return selectedNutraceuticals;
+};
+
+export const extractConditionsFromStudy = (studyText: string): Array<{name: string, confidence: number}> => {
+  // Simulando a extração de condições de saúde de um texto
+  const commonConditions = [
+    'Artrite',
+    'Osteoartrite',
+    'Displasia',
+    'Obesidade',
+    'Diabetes',
+    'Problemas Cardíacos',
+    'Doença Renal Crônica',
+    'Alergias Alimentares',
+    'Dermatite Atópica',
+    'Doença Periodontal',
+    'Ansiedade',
+    'Problemas Digestivos',
+    'Inflamação Intestinal',
+    'Hipotireoidismo',
+    'Hipertensão',
+    'Câncer'
+  ];
+
+  // Selecionar algumas condições aleatoriamente
+  const numToSelect = Math.floor(Math.random() * 4) + 1; // 1 a 4 condições
+  const selectedConditions: Array<{name: string, confidence: number}> = [];
+  
+  const shuffled = [...commonConditions].sort(() => 0.5 - Math.random());
+  for (let i = 0; i < Math.min(numToSelect, shuffled.length); i++) {
+    selectedConditions.push({
+      name: shuffled[i],
+      confidence: Number((0.65 + Math.random() * 0.35).toFixed(2)) // Entre 0.65 e 1.0
+    });
   }
   
-  return nutracêuticos;
+  return selectedConditions;
 };
 
-// Função para simular a extração de condições de saúde de um estudo
-export const extractConditionsFromStudy = async (studyText: string, prompt?: string) => {
-  // Simulação: extrai condições de saúde baseadas no texto do estudo
-  const condições = [
-    { name: "Artrite", efficacyScore: 4.2, confidence: 0.92 },
-    { name: "Displasia", efficacyScore: 3.8, confidence: 0.84 },
-    { name: "Dor crônica", efficacyScore: 3.5, confidence: 0.78 }
+export const extractInteractionsFromStudy = (studyText: string): Array<{nutraceutical: string, interaction: string, confidence: number}> => {
+  // Simulando a extração de interações de um texto
+  const positiveInteractions = [
+    { nutraceutical: 'Glucosamina', interaction: 'Melhora mobilidade articular', confidence: 0.85 },
+    { nutraceutical: 'Ômega 3', interaction: 'Reduz inflamação', confidence: 0.92 },
+    { nutraceutical: 'Curcumina', interaction: 'Anti-inflamatório natural', confidence: 0.78 },
+    { nutraceutical: 'Probióticos', interaction: 'Melhora flora intestinal', confidence: 0.88 },
+    { nutraceutical: 'CoQ10', interaction: 'Suporte cardíaco', confidence: 0.75 }
   ];
   
-  // Adiciona condições específicas baseadas em palavras-chave
-  if (studyText.toLowerCase().includes('idoso') || studyText.toLowerCase().includes('senior')) {
-    condições.push({ name: "Envelhecimento", efficacyScore: 4.0, confidence: 0.88 });
+  const negativeInteractions = [
+    { nutraceutical: 'Taurina', interaction: 'Interação com medicamentos cardíacos', confidence: 0.72 },
+    { nutraceutical: 'Quitosana', interaction: 'Pode afetar absorção de nutrientes', confidence: 0.68 },
+    { nutraceutical: 'Resveratrol', interaction: 'Interação com anticoagulantes', confidence: 0.77 },
+    { nutraceutical: 'SAMe', interaction: 'Não recomendado com inibidores de serotonina', confidence: 0.81 }
+  ];
+  
+  const numInteractions = Math.floor(Math.random() * 3) + 1; // 1 a 3 interações
+  let selectedInteractions: Array<{nutraceutical: string, interaction: string, confidence: number}> = [];
+  
+  // Adicionar algumas interações positivas
+  const shuffledPositive = [...positiveInteractions].sort(() => 0.5 - Math.random());
+  for (let i = 0; i < Math.min(Math.ceil(numInteractions/2), shuffledPositive.length); i++) {
+    selectedInteractions.push(shuffledPositive[i]);
   }
   
-  return condições;
-};
-
-// Função para simular a extração de interações de um estudo
-export const extractInteractionsFromStudy = async (studyText: string) => {
-  // Simulação: extrai interações baseadas no texto do estudo
-  return [
-    { name: "Anti-inflamatórios", score: 3.8, type: "positive" as "positive", confidence: 0.85 },
-    { name: "Anticoagulantes", score: 2.1, type: "negative" as "negative", confidence: 0.80 }
-  ];
-};
-
-// Função para simular a extração de efeitos colaterais de um estudo
-export const extractSideEffectsFromStudy = async (studyText: string) => {
-  // Simulação: extrai efeitos colaterais baseados no texto do estudo
-  return [
-    { name: "Irritação gastrointestinal", intensityScore: 1.5, frequency: "low", confidence: 0.75 },
-    { name: "Alterações na coagulação", intensityScore: 2.5, frequency: "moderate", confidence: 0.60 }
-  ];
-};
-
-// Função para pontuar a qualidade do estudo
-export const scoreStudyQuality = async (studyText: string) => {
-  // Simulação: avalia a qualidade do estudo com base no comprimento e palavras-chave
-  const baseScore = 3.5;
-  let bonusScore = 0;
-  
-  // Adiciona pontos para estudos mais longos
-  bonusScore += Math.min(studyText.length / 5000, 1.0);
-  
-  // Adiciona pontos para palavras-chave de qualidade
-  const qualityTerms = [
-    'randomizado', 'duplo-cego', 'placebo', 'significância estatística',
-    'randomized', 'double-blind', 'statistically significant'
-  ];
-  
-  for (const term of qualityTerms) {
-    if (studyText.toLowerCase().includes(term)) bonusScore += 0.2;
+  // Adicionar algumas interações negativas
+  const shuffledNegative = [...negativeInteractions].sort(() => 0.5 - Math.random());
+  for (let i = 0; i < Math.min(Math.floor(numInteractions/2), shuffledNegative.length); i++) {
+    selectedInteractions.push(shuffledNegative[i]);
   }
   
-  return Math.min(baseScore + bonusScore, 5.0);
+  return selectedInteractions;
 };
 
-// Função para pontuar a relevância do estudo
-export const scoreStudyRelevance = async (studyText: string) => {
-  // Simulação: avalia a relevância do estudo com base em palavras-chave
-  const baseScore = 3.0;
-  let bonusScore = 0;
-  
-  const relevanceTerms = [
-    'cão', 'cachorro', 'canino', 'veterinária', 'nutracêutico',
-    'dog', 'canine', 'veterinary', 'nutraceutical'
+export const extractSideEffectsFromStudy = (studyText: string): Array<{description: string, severity: string, confidence: number}> => {
+  // Simulando a extração de efeitos colaterais de um texto
+  const possibleSideEffects = [
+    { description: 'Distúrbios gastrointestinais leves', severity: 'leve', confidence: 0.82 },
+    { description: 'Náusea temporária', severity: 'leve', confidence: 0.78 },
+    { description: 'Sonolência', severity: 'leve', confidence: 0.71 },
+    { description: 'Reação alérgica', severity: 'moderado', confidence: 0.68 },
+    { description: 'Diarreia', severity: 'moderado', confidence: 0.76 },
+    { description: 'Vômito', severity: 'moderado', confidence: 0.73 },
+    { description: 'Alteração da coagulação', severity: 'grave', confidence: 0.65 },
+    { description: 'Hepatotoxicidade em altas doses', severity: 'grave', confidence: 0.62 }
   ];
   
-  for (const term of relevanceTerms) {
-    if (studyText.toLowerCase().includes(term)) bonusScore += 0.25;
+  // Decidir se há efeitos colaterais
+  const hasSideEffects = Math.random() > 0.4; // 60% de chance de ter efeitos colaterais
+  
+  if (!hasSideEffects) {
+    return [];
   }
   
-  return Math.min(baseScore + bonusScore, 5.0);
+  const numSideEffects = Math.floor(Math.random() * 2) + 1; // 1 a 2 efeitos colaterais
+  const selectedSideEffects: Array<{description: string, severity: string, confidence: number}> = [];
+  
+  const shuffled = [...possibleSideEffects].sort(() => 0.5 - Math.random());
+  for (let i = 0; i < Math.min(numSideEffects, shuffled.length); i++) {
+    selectedSideEffects.push(shuffled[i]);
+  }
+  
+  return selectedSideEffects;
 };
 
-// Função principal para simular um resultado completo de análise
-export const simulateAnalysisResult = async (
-  studyId: string,
-  studyText: string
-): Promise<NtaiAnalysisResult> => {
-  const [
-    extractedNutraceuticals,
-    extractedConditions,
-    extractedInteractions,
-    extractedSideEffects,
-    qualityScore,
-    relevanceScore
-  ] = await Promise.all([
-    extractNutraceuticalsFromStudy(studyText),
-    extractConditionsFromStudy(studyText),
-    extractInteractionsFromStudy(studyText),
-    extractSideEffectsFromStudy(studyText),
-    scoreStudyQuality(studyText),
-    scoreStudyRelevance(studyText)
-  ]);
+export const simulateAnalysisResult = async (studyId: string, studyText: string): Promise<NtaiAnalysisResult> => {
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Simular tempo de processamento
   
-  return {
-    studyId,
-    extractedNutraceuticals,
-    extractedConditions,
-    extractedInteractions,
-    extractedSideEffects,
-    qualityScore,
-    relevanceScore,
-    summary: `Estudo sobre os efeitos de nutracêuticos em saúde animal, com foco em ${extractedConditions[0]?.name || 'condições diversas'}.`,
-    processedAt: new Date().toISOString()
+  const result: NtaiAnalysisResult = {
+    studyId: studyId,
+    qualityScore: scoreStudyQuality(studyId),
+    relevanceScore: scoreStudyRelevance(studyId),
+    extractedNutraceuticals: extractNutraceuticalsFromStudy(studyText),
+    extractedConditions: extractConditionsFromStudy(studyText),
+    extractedInteractions: extractInteractionsFromStudy(studyText),
+    extractedSideEffects: extractSideEffectsFromStudy(studyText)
   };
-};
-
-export default {
-  extractNutraceuticalsFromStudy,
-  extractConditionsFromStudy,
-  extractInteractionsFromStudy,
-  extractSideEffectsFromStudy,
-  scoreStudyQuality,
-  scoreStudyRelevance,
-  simulateAnalysisResult
+  
+  return result;
 };

@@ -56,3 +56,52 @@ export interface SankeyLink {
   evidenceLevel?: number;
   description?: string;
 }
+
+// Adicionando os tipos que estão faltando
+export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
+
+export interface ProcessingItem {
+  id: string;
+  title: string;
+  stage: ProcessingStage;
+  progress: number;
+  error?: string;
+  sourceFile?: string;
+  originalFormat?: string;
+}
+
+export interface NtaiAnalysisStage {
+  name: string;
+  description: string;
+  progress: number;
+  completed: boolean;
+  startTime?: Date;
+  endTime?: Date;
+  icon: any;
+}
+
+export interface NtaiNutraceuticalTag {
+  name: string;
+  confidence: number;
+}
+
+export interface NtaiConditionTag {
+  name: string;
+  confidence: number;
+  efficacyScore?: number;
+}
+
+export interface NtaiInteractionTag {
+  nutraceutical: string;
+  interaction: string;
+  confidence: number;
+}
+
+export interface NtaiSideEffectTag {
+  name: string;
+  description?: string;
+  severity: string;
+  intensityScore?: number;
+  confidence: number;
+  frequency?: string;
+}

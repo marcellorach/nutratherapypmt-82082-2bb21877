@@ -17,7 +17,7 @@ const NtaiConditionsTab: React.FC<NtaiConditionsTabProps> = ({ conditions }) => 
             <ConditionTag 
               key={idx}
               condition={condition.name} 
-              score={condition.efficacyScore}
+              score={condition.efficacyScore || condition.confidence}
               className="m-1"
             />
           ))

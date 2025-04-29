@@ -28,6 +28,15 @@ import BreedDistribution from './visualizations/BreedDistribution';
 import AgeDistributionChart from './visualizations/AgeDistributionChart';
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+// Importação dos componentes da tabela
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Dados detalhados de idade, ano a ano
 const detailedAgeData = [
@@ -89,6 +98,17 @@ const breedData = {
     { name: 'Outros', value: 3, percent: 5.9 }
   ]
 };
+
+// Dados para a tabela de nutracêuticos
+const tableData = [
+  { id: 1, name: 'Glucosamina', efficacy: 87, pets: 354, avgImprovement: '+42%', recommendation: 'Alta' },
+  { id: 2, name: 'Ômega 3', efficacy: 82, pets: 572, avgImprovement: '+38%', recommendation: 'Alta' },
+  { id: 3, name: 'Curcumina', efficacy: 75, pets: 218, avgImprovement: '+31%', recommendation: 'Média' },
+  { id: 4, name: 'MSM', efficacy: 73, pets: 183, avgImprovement: '+28%', recommendation: 'Média' },
+  { id: 5, name: 'Probióticos', efficacy: 78, pets: 425, avgImprovement: '+35%', recommendation: 'Alta' },
+  { id: 6, name: 'Extrato de Canabidiol', efficacy: 68, pets: 162, avgImprovement: '+25%', recommendation: 'Média' },
+  { id: 7, name: 'Quitosana', efficacy: 58, pets: 87, avgImprovement: '+14%', recommendation: 'Baixa' }
+];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 const HOVER_COLORS = ['#4dabff', '#4ad9bf', '#ffca5b', '#ff9f71', '#a6a3e2', '#4a9fe5', '#ffab5e', '#6dbe6d', '#e45a5a', '#b595cf'];
