@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Import, Database, CheckCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowDown } from "lucide-react";
 
 const ImportStep: React.FC = () => {
   const [importing, setImporting] = useState(false);
@@ -12,8 +13,8 @@ const ImportStep: React.FC = () => {
   const [importStats, setImportStats] = useState({
     totalRecords: 0,
     petsImported: 0,
-    examsImported: 0,
-    treatmentsImported: 0
+    prontuariosImported: 0,
+    examsImported: 0
   });
   
   const simulateImport = () => {
@@ -30,10 +31,10 @@ const ImportStep: React.FC = () => {
           setImporting(false);
           setStatus('success');
           setImportStats({
-            totalRecords: 5487,
-            petsImported: 2341,
-            examsImported: 1876,
-            treatmentsImported: 1270
+            totalRecords: 5877,
+            petsImported: 5222,
+            prontuariosImported: 4002,
+            examsImported: 3987
           });
           return 100;
         }
@@ -68,11 +69,34 @@ const ImportStep: React.FC = () => {
               <CheckCircle className="h-5 w-5 text-green-600" />
               <AlertTitle>Importação concluída com sucesso</AlertTitle>
               <AlertDescription>
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                  <div>Total de registros: <span className="font-medium">{importStats.totalRecords}</span></div>
-                  <div>Pets importados: <span className="font-medium">{importStats.petsImported}</span></div>
-                  <div>Exames importados: <span className="font-medium">{importStats.examsImported}</span></div>
-                  <div>Tratamentos importados: <span className="font-medium">{importStats.treatmentsImported}</span></div>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Total de registros:</span>
+                    <span className="font-bold">{importStats.totalRecords}</span>
+                  </div>
+                  
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span>Pets correlacionados:</span>
+                      <span className="font-medium">{importStats.petsImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>Prontuários correlacionados:</span>
+                      <span className="font-medium">{importStats.prontuariosImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>Exames laboratoriais correlacionados:</span>
+                      <span className="font-medium">{importStats.examsImported}</span>
+                    </div>
+                  </div>
                 </div>
               </AlertDescription>
             </Alert>
