@@ -1,53 +1,36 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { Plus, Upload, Download, FileSpreadsheet } from "lucide-react";
+import NutraceuticalImportDialog from './import/NutraceuticalImportDialog';
 
 export const NutraceuticosHeader: React.FC = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { toast } = useToast();
-  
-  const handleAddNutraceutico = () => {
-    // Aqui seria implementada a lógica para adicionar um novo nutracêutico
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "A adição de novos nutracêuticos será implementada em breve.",
-    });
-    setIsDialogOpen(false);
-  };
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Catálogo de Nutracêuticos</h2>
-          <p className="text-gray-600">Gerenciamento de substâncias individuais e suas evidências científicas</p>
-        </div>
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => setIsDialogOpen(true)}
-        >
-          <PlusCircle className="h-4 w-4" />
-          Adicionar Nutracêutico
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+      <div>
+        <h1 className="text-2xl font-bold">Nutracêuticos</h1>
+        <p className="text-gray-500">
+          Visualize e gerencie o banco de dados de nutracêuticos
+        </p>
+      </div>
+      
+      <div className="flex gap-2 mt-4 sm:mt-0">
+        <Button variant="outline" size="sm" onClick={() => setIsImportDialogOpen(true)}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Importar Dados
+        </Button>
+        <Button size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Nutracêutico
         </Button>
       </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Novo Nutracêutico</DialogTitle>
-            <DialogDescription>
-              Esta funcionalidade está em desenvolvimento. Em breve você poderá adicionar novos nutracêuticos ao catálogo.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleAddNutraceutico}>Continuar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+      
+      <NutraceuticalImportDialog 
+        open={isImportDialogOpen} 
+        onOpenChange={setIsImportDialogOpen} 
+      />
+    </div>
   );
 };
