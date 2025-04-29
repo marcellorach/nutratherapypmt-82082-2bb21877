@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableRow, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Nutraceutical, NutraceuticalCondition } from "@/types";
 import TableHeaderComponent from './table/TableHeaderComponent';
 import NutraceuticalRow from './table/NutraceuticalRow';
