@@ -15,7 +15,6 @@ interface ResearchGroupProps {
 const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepClick }) => {
   return (
     <>
-      <SidebarGroupLabel>Pesquisa</SidebarGroupLabel>
       <SidebarMenuItem>
         <SidebarMenuButton 
           onClick={() => handleStepClick("nutraceu-gerenciamento")}

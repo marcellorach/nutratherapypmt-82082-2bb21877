@@ -19,7 +19,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "scispace"} 
           onClick={() => handleStepClick("scispace")}
         >
-          <Microscope />
+          <Microscope className="h-4 w-4 mr-2" />
           <span>SciSpace</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -28,7 +28,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "estudos"} 
           onClick={() => handleStepClick("estudos")}
         >
-          <BookOpen />
+          <BookOpen className="h-4 w-4 mr-2" />
           <span>Estudos Científicos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -37,17 +37,8 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "nutraceuticos"} 
           onClick={() => handleStepClick("nutraceuticos")}
         >
-          <Beaker />
+          <Beaker className="h-4 w-4 mr-2" />
           <span>Nutracêuticos</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "nutraceu-gerenciamento"} 
-          onClick={() => handleStepClick("nutraceu-gerenciamento")}
-        >
-          <Database />
-          <span>Banco de Nutracêuticos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
@@ -55,7 +46,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "relacoes"} 
           onClick={() => handleStepClick("relacoes")}
         >
-          <Network />
+          <Network className="h-4 w-4 mr-2" />
           <span>Relações</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -64,7 +55,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "regras"} 
           onClick={() => handleStepClick("regras")}
         >
-          <Microscope />
+          <Microscope className="h-4 w-4 mr-2" />
           <span>Regras Clínicas</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -73,7 +64,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           isActive={currentStep === "knowledge-base-settings"} 
           onClick={() => handleStepClick("knowledge-base-settings")}
         >
-          <Settings className="h-4 w-4" />
+          <Settings className="h-4 w-4 mr-2" />
           <span>Configurações</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
