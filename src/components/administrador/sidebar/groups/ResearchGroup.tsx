@@ -17,16 +17,6 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
     <>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          onClick={() => handleStepClick("nutraceu-gerenciamento")}
-          isActive={currentStep === "nutraceu-gerenciamento"}
-          className="font-medium"
-        >
-          <Database className="h-4 w-4 mr-2" />
-          <span>Banco de Nutracêuticos</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           onClick={() => handleStepClick("pesquisa-estudos")}
           isActive={currentStep === "pesquisa-estudos"}
         >

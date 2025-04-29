@@ -34,6 +34,15 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
+          isActive={currentStep === "nutraceu-gerenciamento"} 
+          onClick={() => handleStepClick("nutraceu-gerenciamento")}
+        >
+          <Database className="h-4 w-4 mr-2" />
+          <span>Banco de Nutracêuticos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
           isActive={currentStep === "nutraceuticos"} 
           onClick={() => handleStepClick("nutraceuticos")}
         >
