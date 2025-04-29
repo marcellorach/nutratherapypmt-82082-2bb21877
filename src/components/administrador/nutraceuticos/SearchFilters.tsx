@@ -84,7 +84,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
               <SelectValue placeholder="Eficácia científica" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="5">Excelente (5)</SelectItem>
               <SelectItem value="4">Muito boa (4)</SelectItem>
               <SelectItem value="3">Boa (3)</SelectItem>
@@ -101,7 +101,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
               <SelectValue placeholder="Condição" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               {conditions.map((condition) => (
                 <SelectItem key={condition} value={condition}>
                   {condition}

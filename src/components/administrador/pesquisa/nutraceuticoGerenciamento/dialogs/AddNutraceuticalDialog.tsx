@@ -135,7 +135,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                     </FormControl>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                        <SelectItem key={category.id} value={category.id || "none"}>
                           {category.name}
                         </SelectItem>
                       ))}

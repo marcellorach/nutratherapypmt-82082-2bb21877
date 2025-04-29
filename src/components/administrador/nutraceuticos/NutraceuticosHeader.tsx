@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus, Upload, Download, FileSpreadsheet } from "lucide-react";
 import NutraceuticalImportDialog from './import/NutraceuticalImportDialog';
+import AddNutraceuticalDialog from '../pesquisa/nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog';
 
 export const NutraceuticosHeader: React.FC = () => {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -21,7 +23,7 @@ export const NutraceuticosHeader: React.FC = () => {
           <FileSpreadsheet className="h-4 w-4 mr-2" />
           Importar Dados
         </Button>
-        <Button size="sm">
+        <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Nutracêutico
         </Button>
@@ -30,6 +32,14 @@ export const NutraceuticosHeader: React.FC = () => {
       <NutraceuticalImportDialog 
         open={isImportDialogOpen} 
         onOpenChange={setIsImportDialogOpen} 
+      />
+      
+      <AddNutraceuticalDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={() => {
+          // Aqui pode ser adicionada a lógica para atualizar a tabela ou mostrar uma notificação
+        }}
       />
     </div>
   );
