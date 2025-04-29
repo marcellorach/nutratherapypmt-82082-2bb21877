@@ -208,7 +208,7 @@ const HealthConditionsSankey: React.FC<HealthConditionsSankeyProps> = ({ height 
               <SelectItem value="dogs">Somente cães</SelectItem>
               <SelectItem value="cats">Somente gatos</SelectItem>
               <SelectItem value="senior">Pets sênior (7+ anos)</SelectItem>
-              <SelectItem value="young">Pets jovens (< 3 anos)</SelectItem>
+              <SelectItem value="young">Pets jovens (&lt; 3 anos)</SelectItem>
             </SelectContent>
           </Select>
         </div>
