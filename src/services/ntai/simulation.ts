@@ -1,166 +1,219 @@
 
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { NtaiAnalysisResult } from "@/types/ntai";
 
-export const scoreStudyQuality = (studyId: string): number => {
-  // Algoritmo simulado para avaliação da qualidade do estudo
-  return Number((3 + Math.random() * 2).toFixed(1)); // Entre 3.0 e 5.0
-};
-
-export const scoreStudyRelevance = (studyId: string): number => {
-  // Algoritmo simulado para avaliação da relevância do estudo
-  return Number((2.5 + Math.random() * 2.5).toFixed(1)); // Entre 2.5 e 5.0
-};
-
-export const extractNutraceuticalsFromStudy = (studyText: string): Array<{name: string, confidence: number}> => {
-  // Simulando a extração de nutracêuticos de um texto
-  const commonNutraceuticals = [
-    'Glucosamina',
-    'Condroitina',
-    'Ômega 3',
-    'Ômega 6',
-    'MSM (Metilsulfonilmetano)',
-    'Curcumina',
-    'Resveratrol',
-    'Probióticos',
-    'Prebióticos',
-    'Quitosana',
-    'Vitamina E',
-    'Coenzima Q10',
-    'L-carnitina',
-    'Taurina',
-    'Extrato de Canabidiol',
-    'SAMe'
-  ];
-
-  // Selecionar alguns nutracêuticos aleatoriamente
-  const numToSelect = Math.floor(Math.random() * 5) + 1; // 1 a 5 nutracêuticos
-  const selectedNutraceuticals: Array<{name: string, confidence: number}> = [];
-  
-  const shuffled = [...commonNutraceuticals].sort(() => 0.5 - Math.random());
-  for (let i = 0; i < Math.min(numToSelect, shuffled.length); i++) {
-    selectedNutraceuticals.push({
-      name: shuffled[i],
-      confidence: Number((0.7 + Math.random() * 0.3).toFixed(2)) // Entre 0.7 e 1.0
-    });
-  }
-  
-  return selectedNutraceuticals;
-};
-
-export const extractConditionsFromStudy = (studyText: string): Array<{name: string, confidence: number}> => {
-  // Simulando a extração de condições de saúde de um texto
-  const commonConditions = [
-    'Artrite',
-    'Osteoartrite',
-    'Displasia',
-    'Obesidade',
-    'Diabetes',
-    'Problemas Cardíacos',
-    'Doença Renal Crônica',
-    'Alergias Alimentares',
-    'Dermatite Atópica',
-    'Doença Periodontal',
-    'Ansiedade',
-    'Problemas Digestivos',
-    'Inflamação Intestinal',
-    'Hipotireoidismo',
-    'Hipertensão',
-    'Câncer'
-  ];
-
-  // Selecionar algumas condições aleatoriamente
-  const numToSelect = Math.floor(Math.random() * 4) + 1; // 1 a 4 condições
-  const selectedConditions: Array<{name: string, confidence: number}> = [];
-  
-  const shuffled = [...commonConditions].sort(() => 0.5 - Math.random());
-  for (let i = 0; i < Math.min(numToSelect, shuffled.length); i++) {
-    selectedConditions.push({
-      name: shuffled[i],
-      confidence: Number((0.65 + Math.random() * 0.35).toFixed(2)) // Entre 0.65 e 1.0
-    });
-  }
-  
-  return selectedConditions;
-};
-
-export const extractInteractionsFromStudy = (studyText: string): Array<{nutraceutical: string, interaction: string, confidence: number}> => {
-  // Simulando a extração de interações de um texto
-  const positiveInteractions = [
-    { nutraceutical: 'Glucosamina', interaction: 'Melhora mobilidade articular', confidence: 0.85 },
-    { nutraceutical: 'Ômega 3', interaction: 'Reduz inflamação', confidence: 0.92 },
-    { nutraceutical: 'Curcumina', interaction: 'Anti-inflamatório natural', confidence: 0.78 },
-    { nutraceutical: 'Probióticos', interaction: 'Melhora flora intestinal', confidence: 0.88 },
-    { nutraceutical: 'CoQ10', interaction: 'Suporte cardíaco', confidence: 0.75 }
+/**
+ * Extrai nutracêuticos mencionados no texto de um estudo
+ */
+export const extractNutraceuticalsFromStudy = (text: string): { name: string, confidence: number }[] => {
+  // Palavras-chave para nutracêuticos comuns
+  const keywords = [
+    "Ômega-3", "Curcumina", "Glucosamina", "Condroitina", "Resveratrol",
+    "CoQ10", "MSM", "Probiótico", "Própolis", "Spirulina",
+    "Ashwagandha", "SAMe", "L-carnitina", "Silimarina", "CBD"
   ];
   
-  const negativeInteractions = [
-    { nutraceutical: 'Taurina', interaction: 'Interação com medicamentos cardíacos', confidence: 0.72 },
-    { nutraceutical: 'Quitosana', interaction: 'Pode afetar absorção de nutrientes', confidence: 0.68 },
-    { nutraceutical: 'Resveratrol', interaction: 'Interação com anticoagulantes', confidence: 0.77 },
-    { nutraceutical: 'SAMe', interaction: 'Não recomendado com inibidores de serotonina', confidence: 0.81 }
-  ];
+  const results: { name: string, confidence: number }[] = [];
   
-  const numInteractions = Math.floor(Math.random() * 3) + 1; // 1 a 3 interações
-  let selectedInteractions: Array<{nutraceutical: string, interaction: string, confidence: number}> = [];
+  keywords.forEach(keyword => {
+    if (text.toLowerCase().includes(keyword.toLowerCase())) {
+      const randomConfidence = 0.7 + Math.random() * 0.29; // Entre 0.7 e 0.99
+      results.push({
+        name: keyword,
+        confidence: randomConfidence
+      });
+    }
+  });
   
-  // Adicionar algumas interações positivas
-  const shuffledPositive = [...positiveInteractions].sort(() => 0.5 - Math.random());
-  for (let i = 0; i < Math.min(Math.ceil(numInteractions/2), shuffledPositive.length); i++) {
-    selectedInteractions.push(shuffledPositive[i]);
+  // Adicionar alguns nutracêuticos aleatórios para diversidade nos dados simulados
+  if (results.length < 3) {
+    const randomNutraceuticals = [
+      "Vitamina E", "Zinco Quelato", "Quercetina", "Extrato de Cardo Mariano", 
+      "Colágeno Tipo II", "L-glutamina", "Extrato de Gengibre"
+    ];
+    
+    const numToAdd = Math.min(3 - results.length, randomNutraceuticals.length);
+    
+    for (let i = 0; i < numToAdd; i++) {
+      results.push({
+        name: randomNutraceuticals[i],
+        confidence: 0.6 + Math.random() * 0.2 // Entre 0.6 e 0.8
+      });
+    }
   }
   
-  // Adicionar algumas interações negativas
-  const shuffledNegative = [...negativeInteractions].sort(() => 0.5 - Math.random());
-  for (let i = 0; i < Math.min(Math.floor(numInteractions/2), shuffledNegative.length); i++) {
-    selectedInteractions.push(shuffledNegative[i]);
-  }
-  
-  return selectedInteractions;
+  return results;
 };
 
-export const extractSideEffectsFromStudy = (studyText: string): Array<{name: string, description: string, severity: string, confidence: number}> => {
-  // Simulando a extração de efeitos colaterais de um texto
+/**
+ * Extrai condições de saúde mencionadas no texto de um estudo
+ */
+export const extractConditionsFromStudy = (text: string): { name: string, confidence: number }[] => {
+  // Palavras-chave para condições comuns
+  const keywords = [
+    "Artrite", "Osteoartrite", "Doença inflamatória intestinal", "Dermatite",
+    "Alergias", "Obesidade", "Doença renal", "Doença hepática", "Ansiedade",
+    "Problemas cardíacos", "Diabetes", "Cistite", "Epilepsia"
+  ];
+  
+  const results: { name: string, confidence: number }[] = [];
+  
+  keywords.forEach(keyword => {
+    if (text.toLowerCase().includes(keyword.toLowerCase())) {
+      const randomConfidence = 0.75 + Math.random() * 0.24; // Entre 0.75 e 0.99
+      results.push({
+        name: keyword,
+        confidence: randomConfidence
+      });
+    }
+  });
+  
+  // Adicionar algumas condições aleatórias
+  if (results.length < 2) {
+    const randomConditions = [
+      "Inflamação crônica", "Problemas cognitivos", "Distúrbios gastrointestinais",
+      "Problemas de pele", "Baixa imunidade"
+    ];
+    
+    const numToAdd = Math.min(2 - results.length, randomConditions.length);
+    
+    for (let i = 0; i < numToAdd; i++) {
+      results.push({
+        name: randomConditions[i],
+        confidence: 0.65 + Math.random() * 0.2 // Entre 0.65 e 0.85
+      });
+    }
+  }
+  
+  return results;
+};
+
+/**
+ * Extrai interações mencionadas no texto de um estudo
+ */
+export const extractInteractionsFromStudy = (text: string): { nutraceutical: string, interaction: string, confidence: number }[] => {
+  // Para simulação, vamos gerar interações fictícias
+  const possibleInteractions = [
+    { 
+      nutraceutical: "Ômega-3", 
+      interaction: "Potencializa o efeito anti-inflamatório quando combinado com curcumina", 
+      confidence: 0.8
+    },
+    { 
+      nutraceutical: "Curcumina", 
+      interaction: "Interação sinérgica com boswellia para redução de inflamação", 
+      confidence: 0.75
+    },
+    { 
+      nutraceutical: "Probiótico", 
+      interaction: "Melhora a absorção de minerais no trato digestivo", 
+      confidence: 0.72
+    },
+    { 
+      nutraceutical: "Glucosamina", 
+      interaction: "Eficácia aumentada quando combinada com condroitina", 
+      confidence: 0.85
+    },
+    { 
+      nutraceutical: "Resveratrol", 
+      interaction: "Não recomendado uso concomitante com medicamentos anticoagulantes", 
+      confidence: 0.78
+    }
+  ];
+  
+  // Selecionar aleatoriamente 2-3 interações
+  const numInteractions = 2 + Math.floor(Math.random() * 2); // 2 ou 3
+  const selectedIndices = new Set<number>();
+  
+  while (selectedIndices.size < numInteractions && selectedIndices.size < possibleInteractions.length) {
+    const randomIndex = Math.floor(Math.random() * possibleInteractions.length);
+    selectedIndices.add(randomIndex);
+  }
+  
+  return Array.from(selectedIndices).map(index => possibleInteractions[index]);
+};
+
+/**
+ * Extrai efeitos colaterais mencionados no texto de um estudo
+ */
+export const extractSideEffectsFromStudy = (text: string): { name: string, description: string, severity: string, confidence: number }[] => {
+  // Para simulação, vamos gerar efeitos colaterais fictícios
   const possibleSideEffects = [
-    { name: 'Distúrbios GI', description: 'Distúrbios gastrointestinais leves', severity: 'leve', confidence: 0.82 },
-    { name: 'Náusea', description: 'Náusea temporária', severity: 'leve', confidence: 0.78 },
-    { name: 'Sonolência', description: 'Sonolência', severity: 'leve', confidence: 0.71 },
-    { name: 'Reação alérgica', description: 'Reação alérgica', severity: 'moderado', confidence: 0.68 },
-    { name: 'Diarreia', description: 'Diarreia', severity: 'moderado', confidence: 0.76 },
-    { name: 'Vômito', description: 'Vômito', severity: 'moderado', confidence: 0.73 },
-    { name: 'Alt. coagulação', description: 'Alteração da coagulação', severity: 'grave', confidence: 0.65 },
-    { name: 'Hepatotoxicidade', description: 'Hepatotoxicidade em altas doses', severity: 'grave', confidence: 0.62 }
+    {
+      name: "Distúrbios gastrointestinais leves",
+      description: "Alguns pacientes reportaram náusea e desconforto abdominal",
+      severity: "Leve",
+      confidence: 0.73
+    },
+    {
+      name: "Sonolência",
+      description: "Pode causar sonolência em doses elevadas",
+      severity: "Moderado",
+      confidence: 0.65
+    },
+    {
+      name: "Alteração da coagulação",
+      description: "Pode afetar os tempos de coagulação, risco para procedimentos cirúrgicos",
+      severity: "Moderado",
+      confidence: 0.82
+    },
+    {
+      name: "Reações alérgicas cutâneas",
+      description: "Observadas reações cutâneas em indivíduos sensíveis",
+      severity: "Moderado",
+      confidence: 0.68
+    },
+    {
+      name: "Redução dos níveis de glicose",
+      description: "Pode causar hipoglicemia em pacientes diabéticos",
+      severity: "Severo",
+      confidence: 0.79
+    }
   ];
   
-  // Decidir se há efeitos colaterais
-  const hasSideEffects = Math.random() > 0.4; // 60% de chance de ter efeitos colaterais
+  // Selecionar aleatoriamente 1-2 efeitos
+  const numEffects = 1 + Math.floor(Math.random() * 2); // 1 ou 2
+  const selectedIndices = new Set<number>();
   
-  if (!hasSideEffects) {
-    return [];
+  while (selectedIndices.size < numEffects && selectedIndices.size < possibleSideEffects.length) {
+    const randomIndex = Math.floor(Math.random() * possibleSideEffects.length);
+    selectedIndices.add(randomIndex);
   }
   
-  const numSideEffects = Math.floor(Math.random() * 2) + 1; // 1 a 2 efeitos colaterais
-  const selectedSideEffects: Array<{name: string, description: string, severity: string, confidence: number}> = [];
-  
-  const shuffled = [...possibleSideEffects].sort(() => 0.5 - Math.random());
-  for (let i = 0; i < Math.min(numSideEffects, shuffled.length); i++) {
-    selectedSideEffects.push(shuffled[i]);
-  }
-  
-  return selectedSideEffects;
+  return Array.from(selectedIndices).map(index => possibleSideEffects[index]);
 };
 
-export const simulateAnalysisResult = async (studyId: string, studyText: string): Promise<NtaiAnalysisResult> => {
-  await new Promise(resolve => setTimeout(resolve, 1500)); // Simular tempo de processamento
+/**
+ * Calcula uma pontuação de qualidade para o estudo
+ */
+export const scoreStudyQuality = (text: string): number => {
+  // Para simulação, gera uma pontuação aleatória entre 2.0 e 5.0
+  return 2.0 + Math.random() * 3.0;
+};
+
+/**
+ * Calcula uma pontuação de relevância para o estudo
+ */
+export const scoreStudyRelevance = (text: string): number => {
+  // Para simulação, gera uma pontuação aleatória entre 2.5 e 4.8
+  return 2.5 + Math.random() * 2.3;
+};
+
+/**
+ * Gera um resultado de análise NTAI simulado para testes
+ */
+export const simulateAnalysisResult = async (studyId: string, text: string): Promise<NtaiAnalysisResult> => {
+  const nutraceuticals = extractNutraceuticalsFromStudy(text);
+  const conditions = extractConditionsFromStudy(text);
+  const interactions = extractInteractionsFromStudy(text);
+  const sideEffects = extractSideEffectsFromStudy(text);
   
-  const result: NtaiAnalysisResult = {
-    studyId: studyId,
-    qualityScore: scoreStudyQuality(studyId),
-    relevanceScore: scoreStudyRelevance(studyId),
-    extractedNutraceuticals: extractNutraceuticalsFromStudy(studyText),
-    extractedConditions: extractConditionsFromStudy(studyText),
-    extractedInteractions: extractInteractionsFromStudy(studyText),
-    extractedSideEffects: extractSideEffectsFromStudy(studyText)
+  return {
+    studyId,
+    qualityScore: scoreStudyQuality(text),
+    relevanceScore: scoreStudyRelevance(text),
+    extractedNutraceuticals: nutraceuticals,
+    extractedConditions: conditions,
+    extractedInteractions: interactions,
+    extractedSideEffects: sideEffects
   };
-  
-  return result;
 };

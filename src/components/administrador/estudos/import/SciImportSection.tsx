@@ -1,57 +1,30 @@
 
 import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-
-import TabHeader from './TabHeader';
-import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
-import SciSpace2StepImport from './SciSpace2StepImport';
-import HistoryTab from './HistoryTab';
-
-const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
+import PdfStudiesUploadSection from './PdfStudiesUploadSection';
 
 const SciImportSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("file-upload");
-  const { toast } = useToast();
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-
-  const handleProcessWithAI = () => {
-    const ntaiSection = document.getElementById('ntai-processing-section');
-    if (ntaiSection) {
-      ntaiSection.scrollIntoView({ behavior: 'smooth' });
-      ntaiSection.classList.add('highlight-section');
-      setTimeout(() => {
-        ntaiSection.classList.remove('highlight-section');
-      }, 2000);
-      toast({
-        title: "Selecione os estudos para processamento",
-        description: "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
-      });
-    }
-  };
-
+  const [activeTab, setActiveTab] = useState('files');
+  
   return (
     <Card>
-      <Tabs value={activeTab} className="w-full">
-        <TabHeader activeTab={activeTab} scispaceLogo={SCISPACE_LOGO_URL} />
-        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
-
+      <Tabs className="w-full" value={activeTab} onValueChange={setActiveTab}>
+        <div className="border-b px-6 py-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="files">Upload de Arquivos</TabsTrigger>
+            <TabsTrigger value="pdf">Estudos Científicos PDF</TabsTrigger>
+          </TabsList>
+        </div>
+        
         <div className="p-6">
-          <TabsContent value="file-upload">
+          <TabsContent value="files" className="mt-0">
             <FileUploadTab />
           </TabsContent>
-
-          <TabsContent value="scispace-api">
-            <SciSpace2StepImport />
-          </TabsContent>
           
-          <TabsContent value="import-history">
-            <HistoryTab onProcessWithAI={handleProcessWithAI} />
+          <TabsContent value="pdf" className="mt-0">
+            <PdfStudiesUploadSection />
           </TabsContent>
         </div>
       </Tabs>
