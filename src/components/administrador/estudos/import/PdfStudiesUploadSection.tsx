@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 
 interface StudyPdfFile extends File {
   preview?: string;
-  uploadProgress?: number;
+  uploadProgress: number; // Garantindo que é sempre número
   processingState?: 'waiting' | 'uploading' | 'processing' | 'success' | 'error';
   error?: string;
   studyId?: string;
@@ -45,7 +45,7 @@ const PdfStudiesUploadSection: React.FC = () => {
       const newFiles = acceptedFiles.map(file => 
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-          uploadProgress: 0,
+          uploadProgress: 0, // Inicializa sempre com número
           processingState: 'waiting' as const,
           studyId: `pdf-${Date.now()}-${file.name}`,
           nutraceuticalAssociation: '',
@@ -321,9 +321,9 @@ const PdfStudiesUploadSection: React.FC = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs text-gray-500">
                           <span>{file.processingState === 'uploading' ? 'Enviando...' : 'Processando...'}</span>
-                          <span>{file.uploadProgress || 0}%</span>
+                          <span>{file.uploadProgress}%</span>
                         </div>
-                        <Progress value={file.uploadProgress || 0} className="h-1" />
+                        <Progress value={file.uploadProgress} className="h-1" />
                       </div>
                     )}
                   </div>
