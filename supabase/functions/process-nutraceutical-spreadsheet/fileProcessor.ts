@@ -17,6 +17,32 @@ export function processAiOutput(aiOutput: any, fileName: string) {
 
     // Verificar se temos os dados esperados, caso contrário, usar simulação
     if (nutraceuticals.length > 0) {
+      // Garantir que os tipos de relação e pontuações de eficácia estejam corretos
+      nutraceuticals.forEach((nutra: any) => {
+        if (Array.isArray(nutra.conditions)) {
+          nutra.conditions.forEach((condition: any) => {
+            // Garantir que o tipo de relacionamento esteja normalizado
+            if (condition.relationshipType) {
+              condition.relationshipType = condition.relationshipType.toLowerCase();
+              // Normalizar o tipo de relacionamento
+              if (condition.relationshipType.includes('preven')) {
+                condition.relationshipType = 'prevention';
+              } else if (condition.relationshipType.includes('trata')) {
+                condition.relationshipType = 'treatment';
+              } else {
+                condition.relationshipType = 'support';
+              }
+            }
+            
+            // Garantir que a pontuação de eficácia seja um número válido
+            if (condition.efficacyScore) {
+              const score = parseFloat(condition.efficacyScore);
+              condition.efficacyScore = !isNaN(score) ? score : 3.0;
+            }
+          });
+        }
+      });
+      
       // Contadores para estatísticas
       const nutraceuticalsCount = new Set(nutraceuticals.map((n: any) => n.name.toLowerCase())).size;
       let conditionsSet = new Set();
@@ -43,8 +69,8 @@ export function processAiOutput(aiOutput: any, fileName: string) {
         studiesCount,
         warnings: [
           "Revise os nutracêuticos extraídos para garantir que todos foram capturados corretamente.",
-          "Considere verificar as pontuações de eficácia com a literatura científica mais recente.",
-          "Alguns nutracêuticos podem necessitar de categorização adicional."
+          "Verifique se os tipos de relação (prevenção, tratamento, suporte) estão classificados corretamente.",
+          "Confirme se as pontuações de eficácia foram extraídas com precisão da planilha original."
         ]
       };
     } else {
@@ -79,6 +105,8 @@ export function simulateProcessedData(fileContent: string, fileName: string) {
           return obj;
         }, {});
       });
+      
+      console.log("Dados extraídos da planilha:", JSON.stringify(parsedData, null, 2));
     }
   } catch (error) {
     console.error('Erro ao analisar conteúdo da planilha:', error);
@@ -117,8 +145,8 @@ export function simulateProcessedData(fileContent: string, fileName: string) {
     studiesCount,
     warnings: [
       "Alguns nutracêuticos podem exigir revisão manual para garantir precisão dos dados.",
-      "Considere verificar as pontuações de eficácia com a literatura científica mais recente.",
-      "Verifique se os estudos científicos foram corretamente associados às condições."
+      "Verifique se os tipos de relação (prevenção, tratamento, suporte) estão classificados corretamente.",
+      "Confirme se as pontuações de eficácia foram extraídas com precisão da planilha original."
     ]
   };
 }

@@ -112,8 +112,18 @@ export const NutraceuticalDataMigrator = {
       
       // 3. Para cada nutracêutico, criar registro e suas relações
       let nutraceuticosProcessados = 0;
+      
+      // Manter um registro dos nutracêuticos já criados para evitar duplicações
+      const nutraceuticalCreated = new Map();
+      
       for (const nutra of nutraceuticals) {
         try {
+          // Verificar se o nutracêutico já foi criado
+          if (nutraceuticalCreated.has(nutra.name)) {
+            console.log(`Nutracêutico ${nutra.name} já foi processado, pulando...`);
+            continue;
+          }
+          
           // Criar nutracêutico base
           const categoryId = categoryMap.get(nutra.condition);
           const newNutraceutical = await NutraceuticalsService.createNutraceutical({
@@ -125,7 +135,11 @@ export const NutraceuticalDataMigrator = {
             category_id: categoryId,
             contraindications: nutra.contraindications || []
           });
-          console.log(`Criado nutracêutico: ${nutra.name}`);
+          
+          // Registrar que este nutracêutico foi criado
+          nutraceuticalCreated.set(nutra.name, newNutraceutical.id);
+          
+          console.log(`Criado nutracêutico: ${nutra.name} (ID: ${newNutraceutical.id})`);
           nutraceuticosProcessados++;
           
           // Adicionar benefícios

@@ -13,22 +13,26 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         id: nch.condition.id,
         name: nch.condition.name,
         description: nch.condition.description,
-        efficacyScore: nch.efficacy_score,
-        relationshipType: nch.relationship_type
+        efficacyScore: nch.efficacy_score || 0,
+        relationshipType: nch.relationship_type || 'support'
       }));
       
-    // Separar as condições pelo tipo de relacionamento EXATO especificado no banco de dados
-    // Não fazemos mais nenhuma inferência ou modificação do tipo aqui
+    // Separar as condições pelo tipo de relacionamento
+    // Garantir que o tipo esteja normalizado e que todas as condições tenham um tipo definido
     const preventionConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'prevention' || c.relationshipType === 'prevenção' || c.relationshipType === 'prevencao'
+      (c: any) => c.relationshipType === 'prevention' || 
+                 c.relationshipType === 'prevenção' || 
+                 c.relationshipType === 'prevencao'
     );
     
     const treatmentConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'treatment' || c.relationshipType === 'tratamento'
+      (c: any) => c.relationshipType === 'treatment' || 
+                 c.relationshipType === 'tratamento'
     );
     
     const supportConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'support' || c.relationshipType === 'suporte'
+      (c: any) => c.relationshipType === 'support' || 
+                 c.relationshipType === 'suporte'
     );
       
     // Extrair estudos científicos associados
@@ -40,7 +44,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         authors: ns.study.authors,
         year: ns.study.year,
         journal: ns.study.journal,
-        relevanceScore: ns.relevance_score
+        relevanceScore: ns.relevance_score || 0
       }));
       
     // Dados científicos

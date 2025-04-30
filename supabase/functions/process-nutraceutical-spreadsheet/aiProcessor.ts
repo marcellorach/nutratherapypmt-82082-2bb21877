@@ -74,7 +74,7 @@ Resveratrol,Anti-envelhecimento,Suporte,3.2`;
           messages: [
             {
               role: 'system',
-              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha.'
+              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte).'
             },
             {
               role: 'user',
