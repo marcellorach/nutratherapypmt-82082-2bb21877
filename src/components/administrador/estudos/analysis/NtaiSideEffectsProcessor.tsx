@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NtaiSideEffectTag } from '@/types/ntai';
-import SideEffectTag from '../../../tags/SideEffectTag';
+import SideEffectTag from '@/components/administrador/tags/SideEffectTag';
 import { AlertTriangle } from 'lucide-react';
 
 interface NtaiSideEffectsProcessorProps {
@@ -42,10 +42,9 @@ const NtaiSideEffectsProcessor: React.FC<NtaiSideEffectsProcessorProps> = ({ sid
             {groupedBySeverity[severity].map((effect, idx) => (
               <SideEffectTag
                 key={`${effect.name}-${idx}`}
-                name={effect.name}
+                effect={effect.name}
+                score={effect.confidence}
                 description={effect.description || ''}
-                severity={effect.severity}
-                confidence={effect.confidence}
                 className="m-0.5"
               />
             ))}

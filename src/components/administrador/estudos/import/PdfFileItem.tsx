@@ -11,7 +11,7 @@ export interface StudyPdfFile {
   name: string;
   size: number;
   type: string;
-  uploadProgress: number | string;
+  uploadProgress: number;
   status: 'queued' | 'uploading' | 'success' | 'error';
   errorMessage?: string;
   file: File;

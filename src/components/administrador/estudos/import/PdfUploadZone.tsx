@@ -26,7 +26,7 @@ const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
       name: file.name,
       size: file.size,
       type: file.type,
-      uploadProgress: 0, // Inicializar como número
+      uploadProgress: 0,
       status: 'queued',
       file
     }));
