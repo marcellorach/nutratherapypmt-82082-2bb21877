@@ -1,14 +1,19 @@
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileSpreadsheet, Check, AlertTriangle, Loader2, FileText } from 'lucide-react';
+import { Check, Loader2, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// Componentes refatorados
+import DropZoneArea from './DropZoneArea';
+import FilePreview from './FilePreview';
+import CsvPreview from './CsvPreview';
+import ProcessingProgress from './ProcessingProgress';
+import StudiesNotification from './StudiesNotification';
+import ErrorAlert from './ErrorAlert';
 
 interface SpreadsheetImportProps {
   onImportComplete: (result: any) => void;
@@ -170,97 +175,24 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({
       </CardHeader>
       
       <CardContent>
-        <div 
-          {...getRootProps()} 
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300'
-          }`}
-        >
-          <input {...getInputProps()} />
-          <Upload className="h-12 w-12 mx-auto text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            {isDragActive
-              ? "Solte o arquivo aqui..."
-              : "Arraste e solte uma planilha Excel ou CSV, ou clique para selecionar"
-            }
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            Formatos suportados: .xlsx, .xls, .csv
-          </p>
-        </div>
+        <DropZoneArea
+          onDrop={onDrop}
+          isDragActive={isDragActive}
+          getInputProps={getInputProps}
+          getRootProps={getRootProps}
+        />
 
         {file && (
           <div className="mt-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
-              <div className="flex items-center">
-                <FileSpreadsheet className="h-5 w-5 mr-2 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
-                </div>
-              </div>
-              <Badge variant="outline">{file.type || 'Planilha'}</Badge>
-            </div>
+            <FilePreview file={file} />
             
-            {previewData && (
-              <div className="mt-4">
-                <h3 className="text-sm font-medium mb-2">Pré-visualização:</h3>
-                <div className="bg-gray-50 p-2 rounded-md overflow-x-auto">
-                  <table className="w-full text-xs border-collapse">
-                    <thead>
-                      <tr>
-                        {Object.keys(previewData[0] || {}).map(header => (
-                          <th key={header} className="p-2 text-left border-b border-gray-200">
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previewData.map((row, i) => (
-                        <tr key={i}>
-                          {Object.values(row).map((val, j) => (
-                            <td key={j} className="p-2 border-b border-gray-200">
-                              {val as React.ReactNode}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Mostrando {previewData.length} linhas
-                </p>
-              </div>
-            )}
+            <CsvPreview previewData={previewData} />
             
-            {hasPdfFiles && (
-              <div className="mt-4 bg-blue-50 p-3 rounded-md flex items-start gap-2">
-                <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
-                <div className="text-sm text-blue-700">
-                  <p>Existem arquivos PDF de estudos científicos que serão associados durante o processamento.</p>
-                </div>
-              </div>
-            )}
+            <StudiesNotification hasPdfFiles={hasPdfFiles} />
             
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Erro</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+            <ErrorAlert error={error} />
             
-            {processing && (
-              <div className="mt-4 space-y-2">
-                <Progress value={progress} className="h-2" />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>Processando via IA...</span>
-                  <span>{Math.round(progress)}%</span>
-                </div>
-              </div>
-            )}
+            <ProcessingProgress progress={progress} processing={processing} />
           </div>
         )}
       </CardContent>
