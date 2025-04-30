@@ -14,11 +14,15 @@ const corsHeaders = {
 // Processar a planilha utilizando IA
 async function processSpreadsheetWithAI(fileUrl: string, fileName: string) {
   try {
+    // Verificar se conseguimos acessar a URL do arquivo
+    console.log(`Tentando acessar: ${fileUrl}`);
+    
     // Baixar o arquivo do storage
     const fileResponse = await fetch(fileUrl);
     
     if (!fileResponse.ok) {
-      throw new Error('Não foi possível baixar o arquivo');
+      console.error(`Erro ao baixar arquivo: ${fileResponse.status} ${fileResponse.statusText}`);
+      throw new Error(`Não foi possível baixar o arquivo: ${fileResponse.statusText}`);
     }
     
     // Para CSV, podemos processar o texto diretamente
@@ -40,6 +44,8 @@ Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Oste
     
     // Chamar a OpenAI para processar o conteúdo
     if (openAIApiKey) {
+      console.log("Chamando API da OpenAI para processar o conteúdo");
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -65,17 +71,20 @@ Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Oste
       const data = await response.json();
       
       if (data.error) {
+        console.error(`Erro na API da OpenAI:`, data.error);
         throw new Error(`Erro na API da OpenAI: ${data.error.message}`);
       }
       
       // Interpretar a resposta da IA e formatar os dados
       const aiOutput = JSON.parse(data.choices[0].message.content);
+      console.log("Resposta da OpenAI processada com sucesso");
       
       // Processar e estruturar os dados
       const processedData = processAiOutput(aiOutput, fileName);
       
       return processedData;
     } else {
+      console.log("Chave da API OpenAI não encontrada, usando dados simulados");
       // Se não temos API key, usamos dados simulados para demonstração
       return simulateProcessedData(fileContent, fileName);
     }
@@ -237,8 +246,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Recebida requisição para processar planilha");
+    
     // Obter dados da requisição
-    const { fileUrl, fileName, studiesFiles } = await req.json();
+    const { fileUrl, fileName, hasStudyFiles } = await req.json();
+    
+    console.log(`URL do arquivo: ${fileUrl}`);
+    console.log(`Nome do arquivo: ${fileName}`);
+    console.log(`Tem arquivos de estudos? ${hasStudyFiles ? 'Sim' : 'Não'}`);
     
     if (!fileUrl || !fileName) {
       throw new Error('URL do arquivo e nome do arquivo são obrigatórios');
@@ -247,14 +262,7 @@ serve(async (req) => {
     // Processar a planilha
     const processedData = await processSpreadsheetWithAI(fileUrl, fileName);
     
-    // Se houver arquivos de estudos, adicionar à resposta
-    if (studiesFiles && Array.isArray(studiesFiles)) {
-      processedData.studiesFiles = studiesFiles.map(file => ({
-        ...file,
-        processStatus: 'queued',
-        message: 'Arquivo de estudo científico na fila para processamento'
-      }));
-    }
+    console.log("Dados processados com sucesso");
     
     // Retornar os dados processados
     return new Response(
@@ -266,7 +274,7 @@ serve(async (req) => {
         } 
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     // Lidar com erros
     console.error('Erro na edge function:', error);
     

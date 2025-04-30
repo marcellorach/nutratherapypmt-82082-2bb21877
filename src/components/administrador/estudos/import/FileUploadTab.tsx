@@ -30,12 +30,20 @@ const FileUploadTab: React.FC = () => {
       const path = `scispace/manual-import/${Date.now()}-${file.name}`;
       
       try {
+        // Teste de conectividade com o bucket
+        console.log("Iniciando upload para:", path);
+        
         // Upload do arquivo
-        const { error: uploadError } = await supabase.storage
+        const { data, error: uploadError } = await supabase.storage
           .from("scispace")
           .upload(path, file);
           
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Erro no upload:", uploadError);
+          throw uploadError;
+        }
+        
+        console.log("Upload bem-sucedido:", data);
 
         // Extrair título do nome do arquivo
         const fileTitle = file.name.replace(/\.[^/.]+$/, ""); // Remove extensão
@@ -62,7 +70,12 @@ const FileUploadTab: React.FC = () => {
           .select()
           .single();
 
-        if (importError) throw importError;
+        if (importError) {
+          console.error("Erro ao registrar importação:", importError);
+          throw importError;
+        }
+        
+        console.log("Importação registrada:", importData);
 
         // Registrar na tabela processed_studies com informações aprimoradas
         const { error: processError } = await supabase
@@ -82,11 +95,15 @@ const FileUploadTab: React.FC = () => {
             }
           ]);
 
-        if (processError) throw processError;
+        if (processError) {
+          console.error("Erro ao registrar estudo processado:", processError);
+          throw processError;
+        }
 
         currentProgress = Math.round(((i + 1) / files.length) * 100);
         setProgress(currentProgress);
       } catch (error: any) {
+        console.error("Erro completo:", error);
         toast({
           title: `Erro ao importar ${file.name}`,
           description: error.message,

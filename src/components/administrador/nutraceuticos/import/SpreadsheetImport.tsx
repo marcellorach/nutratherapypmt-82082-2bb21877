@@ -82,6 +82,8 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({
     setError(null);
     
     try {
+      console.log("Iniciando processamento do arquivo:", file.name);
+      
       // Iniciar progressão simulada
       const interval = setInterval(() => {
         setProgress(prev => {
@@ -95,21 +97,30 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({
       
       // Upload para storage temporário
       const fileName = `temp_import/${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage
+      console.log("Fazendo upload para:", fileName);
+      
+      const { data, error: uploadError } = await supabase.storage
         .from('uploads')
         .upload(fileName, file);
       
       if (uploadError) {
+        console.error("Erro de upload:", uploadError);
         throw new Error(`Erro ao fazer upload: ${uploadError.message}`);
       }
       
+      console.log("Upload bem-sucedido:", data);
+      
       // Obter URL pública para o arquivo
-      const { data: { publicUrl } } = supabase.storage
+      const { data: urlData } = supabase.storage
         .from('uploads')
         .getPublicUrl(fileName);
       
+      const publicUrl = urlData.publicUrl;
+      console.log("URL pública gerada:", publicUrl);
+      
       // Processar via Edge Function
-      const { data, error: processError } = await supabase.functions.invoke('process-nutraceutical-spreadsheet', {
+      console.log("Chamando Edge Function para processamento...");
+      const { data: processedData, error: processError } = await supabase.functions.invoke('process-nutraceutical-spreadsheet', {
         body: { 
           fileUrl: publicUrl, 
           fileName: file.name,
@@ -119,20 +130,24 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({
       });
       
       if (processError) {
+        console.error("Erro na Edge Function:", processError);
         throw new Error(`Erro ao processar: ${processError.message}`);
       }
+      
+      console.log("Dados processados:", processedData);
       
       clearInterval(interval);
       setProgress(100);
       
       toast({
         title: "Processamento concluído",
-        description: `${data.nutraceuticalsCount || 0} nutracêuticos identificados com ${data.relationsCount || 0} relações e ${data.studiesCount || 0} estudos científicos.`,
+        description: `${processedData.nutraceuticalsCount || 0} nutracêuticos identificados com ${processedData.relationsCount || 0} relações e ${processedData.studiesCount || 0} estudos científicos.`,
       });
       
       // Callback com os resultados do processamento
-      onImportComplete(data);
+      onImportComplete(processedData);
     } catch (err: any) {
+      console.error("Erro completo:", err);
       setError(err.message || 'Erro ao processar arquivo');
       
       toast({
