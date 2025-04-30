@@ -17,17 +17,18 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         relationshipType: nch.relationship_type
       }));
       
-    // Separar as condições por tipo de relacionamento
+    // Separar as condições pelo tipo de relacionamento EXATO especificado no banco de dados
+    // Não fazemos mais nenhuma inferência ou modificação do tipo aqui
     const preventionConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'prevention'
+      (c: any) => c.relationshipType === 'prevention' || c.relationshipType === 'prevenção' || c.relationshipType === 'prevencao'
     );
     
     const treatmentConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'treatment'
+      (c: any) => c.relationshipType === 'treatment' || c.relationshipType === 'tratamento'
     );
     
     const supportConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'support'
+      (c: any) => c.relationshipType === 'support' || c.relationshipType === 'suporte'
     );
       
     // Extrair estudos científicos associados

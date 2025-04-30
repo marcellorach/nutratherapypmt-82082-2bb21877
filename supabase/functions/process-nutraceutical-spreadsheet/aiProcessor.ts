@@ -25,38 +25,38 @@ export async function processSpreadsheetWithAI(fileUrl: string, fileName: string
       fileContent = await fileResponse.text();
     } else {
       // Para demonstração, vamos simular um conteúdo para arquivos Excel que seja mais fiel à estrutura da planilha fornecida
-      fileContent = `Nutraceutico,Condição de Saúde,Aplicação
-Ácido Alfa-Lipóico,Estresse Oxidativo,Prevenção
-Allicina,Saúde Cardiovascular,Prevenção
-Apigenina,Câncer Canino,Tratamento
-Apigenina,Saúde Óssea,Suporte
-Astaxantina,Saúde Ocular,Suporte
-Astaxantina,Estresse Oxidativo,Prevenção
-Beta-Glucanas,Suporte Imunológico,Suporte
-Beta-Glucanas,Controle Glicêmico,Prevenção
-Coenzima Q10,Disfunção Mitocondrial,Tratamento
-Coenzima Q10,Saúde Cardiovascular,Prevenção
-Curcumina,Inflamação Crônica,Tratamento
-Curcumina,Saúde Digestiva,Suporte
-EGCG,Saúde Imunológica,Suporte
-Ergotionina,Saúde Muscular,Suporte
-Espermidina,Longevidade Celular,Prevenção
-Fisetina,Neuroproteção,Suporte
-Fucoidan,Suporte Imunológico,Suporte
-Fucoidan,Saúde Cardiovascular,Prevenção
-Glucosamina,Osteoartrite,Tratamento
-Glucosamina,Saúde Articular,Prevenção
-L-Carnitina,Cardiomiopatia Dilatada,Tratamento
-L-Carnitina,Obesidade Canina,Suporte
-Luteolina,Neuroproteção,Suporte
-Luteolina,Estresse Oxidativo,Prevenção
-N-Acetilcisteína (NAC),Estresse Oxidativo,Tratamento
-N-Acetilcisteína (NAC),Saúde Hepática,Suporte
-Ômega-3,Osteoartrite,Tratamento
-Ômega-3,Saúde Cardiovascular,Prevenção
-Ômega-3,Saúde da Pele e Pelagem,Suporte
-Resveratrol,Estresse Oxidativo,Prevenção
-Resveratrol,Anti-envelhecimento,Suporte`;
+      fileContent = `Nutraceutico,Condição de Saúde,Aplicação,Nota
+Ácido Alfa-Lipóico,Estresse Oxidativo,Prevenção,4.0
+Allicina,Saúde Cardiovascular,Prevenção,3.2
+Apigenina,Câncer Canino,Tratamento,3.5
+Apigenina,Saúde Óssea,Suporte,3.0
+Astaxantina,Saúde Ocular,Suporte,3.8
+Astaxantina,Estresse Oxidativo,Prevenção,4.2
+Beta-Glucanas,Suporte Imunológico,Suporte,3.5
+Beta-Glucanas,Controle Glicêmico,Prevenção,3.0
+Coenzima Q10,Disfunção Mitocondrial,Tratamento,4.0
+Coenzima Q10,Saúde Cardiovascular,Prevenção,3.8
+Curcumina,Inflamação Crônica,Tratamento,4.5
+Curcumina,Saúde Digestiva,Suporte,3.5
+EGCG,Saúde Imunológica,Suporte,3.2
+Ergotionina,Saúde Muscular,Suporte,3.0
+Espermidina,Longevidade Celular,Prevenção,3.5
+Fisetina,Neuroproteção,Suporte,3.0
+Fucoidan,Suporte Imunológico,Suporte,4.0
+Fucoidan,Saúde Cardiovascular,Prevenção,3.5
+Glucosamina,Osteoartrite,Tratamento,4.5
+Glucosamina,Saúde Articular,Prevenção,4.0
+L-Carnitina,Cardiomiopatia Dilatada,Tratamento,4.2
+L-Carnitina,Obesidade Canina,Suporte,3.8
+Luteolina,Neuroproteção,Suporte,3.5
+Luteolina,Estresse Oxidativo,Prevenção,3.2
+N-Acetilcisteína (NAC),Estresse Oxidativo,Tratamento,4.0
+N-Acetilcisteína (NAC),Saúde Hepática,Suporte,3.8
+Ômega-3,Osteoartrite,Tratamento,4.0
+Ômega-3,Saúde Cardiovascular,Prevenção,4.2
+Ômega-3,Saúde da Pele e Pelagem,Suporte,4.0
+Resveratrol,Estresse Oxidativo,Prevenção,3.5
+Resveratrol,Anti-envelhecimento,Suporte,3.2`;
     }
     
     // Chamar a OpenAI para processar o conteúdo
@@ -74,11 +74,11 @@ Resveratrol,Anti-envelhecimento,Suporte`;
           messages: [
             {
               role: 'system',
-              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação) e relações com condições de saúde (prevenção, tratamento e suporte). Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos.'
+              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha.'
             },
             {
               role: 'user',
-              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos. Identifique CADA nutracêutico como item separado, mesmo se repetidos, e associe-os às condições e tipos de aplicação corretas:\n\n${fileContent}`
+              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos. Identifique CADA nutracêutico como item separado, mesmo se repetidos, e associe-os às condições, tipos de aplicação e pontuações EXATAS da planilha:\n\n${fileContent}`
             }
           ],
           response_format: { type: 'json_object' }

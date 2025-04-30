@@ -29,7 +29,10 @@ export function processExtractedEntries(entries: any[]): any[] {
   const groupedByName: Record<string, any[]> = {};
   
   entries.forEach(entry => {
-    const name = entry.Nutraceutico || entry.nutraceutico || entry.Nutracêutico || entry.nutracêutico || "";
+    // Identificar as colunas de nome usando várias possíveis convenções de nomes
+    const name = entry.Nutraceutico || entry.nutraceutico || entry.Nutracêutico || 
+                 entry.nutracêutico || entry.Nome || entry.name || "";
+    
     if (!name) return;
     
     if (!groupedByName[name]) {
@@ -48,32 +51,59 @@ export function processExtractedEntries(entries: any[]): any[] {
     else if (name.includes("Curcumina")) category = "Anti-inflamatório";
     else if (name.includes("NAC") || name.includes("cetil")) category = "Antioxidante";
     else if (name.includes("EGCG") || name.includes("Astaxantina")) category = "Antioxidante";
+    else if (name.includes("Fucoidan")) category = "Imunológico";
     else category = "Suplemento Nutricional";
     
     // Criar condições para este nutracêutico
     const conditions = items.map(item => {
-      const conditionName = item["Condição de Saúde"] || item.condicao || "Saúde Geral";
-      const applicationType = item.Aplicação || item.aplicacao || "Suporte";
+      // Identificar diferentes convenções de nome para a condição de saúde
+      const conditionName = item["Condição de Saúde"] || item.condicao || 
+                            item.Condicao || item["Condição"] || 
+                            item.Condition || item.condition || "Saúde Geral";
       
-      // Determinar scores com base no tipo de aplicação
-      let preventionScore = 0;
-      let treatmentScore = 0;
-      let supportScore = 0;
+      // Identificar diferentes convenções de nome para o tipo de aplicação
+      const applicationType = item.Aplicação || item.aplicacao || 
+                             item.Aplicacao || item.Tipo || 
+                             item.type || item.Application || "Suporte";
       
-      if (applicationType === "Prevenção") preventionScore = 3.5 + Math.random() * 1.5;
-      else if (applicationType === "Tratamento") treatmentScore = 3.5 + Math.random() * 1.5;
-      else if (applicationType === "Suporte") supportScore = 3.5 + Math.random() * 1.5;
+      // Extrair o valor de eficácia diretamente da planilha
+      // Tentar diferentes convenções de nome para a coluna de eficácia
+      const rawScore = item.Nota || item.nota || item.Score || 
+                      item.score || item.Eficácia || item.eficacia || 
+                      item.Pontuacao || item.pontuacao || item.Pontuação || item.E;
+      
+      // Converter para número e garantir que seja um valor válido entre 0 e 5
+      const efficacyScore = parseFloat(rawScore) || 0;
+      const validScore = isNaN(efficacyScore) ? 3.0 : 
+                        Math.min(Math.max(efficacyScore, 0), 5);
+      
+      // Mapear tipo de aplicação para os tipos corretos esperados no banco de dados
+      // Normalizar para os valores esperados: prevention, treatment, support
+      let normalizedType = applicationType.toLowerCase();
+      
+      if (normalizedType.includes("preven")) {
+        normalizedType = "prevention";
+      } else if (normalizedType.includes("trata")) {
+        normalizedType = "treatment";
+      } else {
+        normalizedType = "support"; // Suporte como valor padrão
+      }
+      
+      // Estruturar os scores de eficácia com base no tipo normalizado
+      const efficacyScores = {
+        prevention: normalizedType === "prevention" ? validScore : 0,
+        treatment: normalizedType === "treatment" ? validScore : 0,
+        support: normalizedType === "support" ? validScore : 0
+      };
       
       return {
         name: conditionName,
-        efficacyScores: {
-          prevention: Number(preventionScore.toFixed(1)),
-          treatment: Number(treatmentScore.toFixed(1)),
-          support: Number(supportScore.toFixed(1))
-        },
+        relationshipType: normalizedType,
+        efficacyScore: validScore,
+        efficacyScores: efficacyScores,
         studies: [
           `Estudo sobre ${name} em casos de ${conditionName}`,
-          `Análise da eficácia de ${name} para ${applicationType} de ${conditionName}`
+          `Análise da eficácia de ${name} para ${normalizedType} de ${conditionName}`
         ]
       };
     });
