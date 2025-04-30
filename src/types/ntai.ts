@@ -106,35 +106,3 @@ export interface NtaiSideEffectTag {
   confidence: number;
   frequency?: string;
 }
-
-// Novas interfaces para importação de planilhas e PDFs
-export interface ImportProgress {
-  stage: 'uploading' | 'processing' | 'analyzing' | 'complete' | 'error';
-  progress: number;
-  message?: string;
-  error?: string;
-}
-
-export interface StudyPdfProcessingResult {
-  id: string;
-  filename: string;
-  extractedText: string;
-  analysis: {
-    nutraceuticals: NtaiNutraceuticalTag[];
-    conditions: NtaiConditionTag[];
-    interactions: NtaiInteractionTag[];
-    sideEffects: NtaiSideEffectTag[];
-    summary: string;
-    qualityScore: number;
-    relevanceScore: number;
-  };
-  processingTime: number;
-}
-
-export interface NutraceuticalSpreadsheetData {
-  nutraceutical: string;
-  condition: string;
-  relationshipType: 'prevention' | 'treatment' | 'support';
-  efficacyScore: number;
-  studies: string[];
-}

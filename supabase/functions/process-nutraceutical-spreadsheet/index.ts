@@ -29,19 +29,13 @@ async function processSpreadsheetWithAI(fileUrl: string, fileName: string) {
       fileContent = await fileResponse.text();
     } else {
       // Para demonstração, vamos simular um conteúdo para arquivos Excel
-      // Formato aprimorado com colunas para nutracêuticos, condições, relação e estudos científicos
-      fileContent = `Nome,Descrição,Categoria,Condição,Tipo de Relação,Pontuação,Estudo 1,Estudo 2,Estudo 3,Estudo 4,Estudo 5
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Artrite,Tratamento,4.2,Estudo sobre curcumina e artrite canina.pdf,Eficácia da curcumina em osteoartrite.pdf,,,
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Artrite,Prevenção,3.8,Prevenção de inflamação com curcumina.pdf,,,,
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Doenças Inflamatórias Intestinais,Tratamento,3.8,Estudo DIIs e curcumina.pdf,Ensaio clínico IBD felina.pdf,,,
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Doenças Inflamatórias Intestinais,Suporte,3.9,Uso complementar IBD canina.pdf,,,,
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Hipertensão,Tratamento,3.1,Estudo hipertensão canina e Omega-3.pdf,,,,
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Hipertensão,Suporte,4.0,Suporte cardiovascular com ômega-3.pdf,Uso em conjunto terapêutico cardíaco.pdf,,,
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Triglicerídeos Elevados,Tratamento,4.3,Eficácia em lipemia.pdf,Redução de triglicerídeos em cães.pdf,Lipídios séricos e EPA.pdf,,
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Triglicerídeos Elevados,Prevenção,2.8,Prevenção lipídica com DHA.pdf,,,,
-Resveratrol,Composto fenólico encontrado em uvas,Longevidade,Estresse Oxidativo,Prevenção,4.1,Antioxidante resveratrol estudo.pdf,Marcadores inflamatórios e resveratrol.pdf,Longevidade em cães geriátricos.pdf,,
-Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Osteoartrite,Tratamento,3.7,Glucosamina em cães idosos.pdf,Mobilidade articular estudo.pdf,Ensaio clínico duplo-cego glucosamina.pdf,Meta-análise suplementação.pdf,Estudo longitudinal 5 anos.pdf
-Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Osteoartrite,Suporte,4.2,Combinação glucosamina e condroitina.pdf,Terapia multimodal em artroses.pdf,,,`;
+      fileContent = `Nome,Descrição,Categoria,Condição,Prevenção,Tratamento,Suporte
+Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Artrite,3.8,4.2,4.0
+Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Doenças Inflamatórias Intestinais,3.5,3.8,3.9
+Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Hipertensão,3.9,3.1,4.0
+Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Triglicerídeos Elevados,2.8,4.3,3.7
+Resveratrol,Composto fenólico encontrado em uvas,Longevidade,Estresse Oxidativo,4.1,3.2,3.5
+Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Osteoartrite,2.5,3.7,4.2`;
     }
     
     // Chamar a OpenAI para processar o conteúdo
@@ -57,15 +51,7 @@ Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Oste
           messages: [
             {
               role: 'system',
-              content: `Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos de planilhas.
-              Identifique os seguintes elementos:
-              1. Nutracêuticos listados, com suas descrições, categorias e outras informações
-              2. Condições de saúde relacionadas a cada nutracêutico
-              3. O tipo de relação entre o nutracêutico e a condição (prevenção, tratamento ou suporte)
-              4. A pontuação de eficácia para cada relação
-              5. Os nomes de estudos científicos que embasam cada relação
-              
-              Estruture os dados em formato JSON com listas aninhadas para facilitar o processamento.`
+              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos de planilhas. Extraia os nutracêuticos, suas categorias e relações com condições de saúde (prevenção, tratamento e suporte).'
             },
             {
               role: 'user',
@@ -108,7 +94,7 @@ function processAiOutput(aiOutput: any, fileName: string) {
 
 // Função para simular dados processados (para demonstração)
 function simulateProcessedData(fileContent: string, fileName: string) {
-  // Criar dados simulados estruturados para demonstração
+  // Criar dados simulados para demonstração
   const nutraceuticals = [
     {
       name: "Curcumina",
@@ -117,43 +103,19 @@ function simulateProcessedData(fileContent: string, fileName: string) {
       conditions: [
         {
           name: "Artrite",
-          relationshipTypes: [
-            {
-              type: "treatment",
-              efficacyScore: 4.2,
-              studies: [
-                "Estudo sobre curcumina e artrite canina.pdf",
-                "Eficácia da curcumina em osteoartrite.pdf"
-              ]
-            },
-            {
-              type: "prevention",
-              efficacyScore: 3.8,
-              studies: [
-                "Prevenção de inflamação com curcumina.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 3.8,
+            treatment: 4.2,
+            support: 4.0
+          }
         },
         {
           name: "Doenças Inflamatórias Intestinais",
-          relationshipTypes: [
-            {
-              type: "treatment",
-              efficacyScore: 3.8,
-              studies: [
-                "Estudo DIIs e curcumina.pdf",
-                "Ensaio clínico IBD felina.pdf"
-              ]
-            },
-            {
-              type: "support",
-              efficacyScore: 3.9,
-              studies: [
-                "Uso complementar IBD canina.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 3.5,
+            treatment: 3.8,
+            support: 3.9
+          }
         }
       ]
     },
@@ -164,44 +126,19 @@ function simulateProcessedData(fileContent: string, fileName: string) {
       conditions: [
         {
           name: "Hipertensão",
-          relationshipTypes: [
-            {
-              type: "treatment",
-              efficacyScore: 3.1,
-              studies: [
-                "Estudo hipertensão canina e Omega-3.pdf"
-              ]
-            },
-            {
-              type: "support",
-              efficacyScore: 4.0,
-              studies: [
-                "Suporte cardiovascular com ômega-3.pdf",
-                "Uso em conjunto terapêutico cardíaco.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 3.9,
+            treatment: 3.1,
+            support: 4.0
+          }
         },
         {
           name: "Triglicerídeos Elevados",
-          relationshipTypes: [
-            {
-              type: "treatment",
-              efficacyScore: 4.3,
-              studies: [
-                "Eficácia em lipemia.pdf",
-                "Redução de triglicerídeos em cães.pdf",
-                "Lipídios séricos e EPA.pdf"
-              ]
-            },
-            {
-              type: "prevention",
-              efficacyScore: 2.8,
-              studies: [
-                "Prevenção lipídica com DHA.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 2.8,
+            treatment: 4.3,
+            support: 3.7
+          }
         }
       ]
     },
@@ -212,17 +149,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
       conditions: [
         {
           name: "Estresse Oxidativo",
-          relationshipTypes: [
-            {
-              type: "prevention",
-              efficacyScore: 4.1,
-              studies: [
-                "Antioxidante resveratrol estudo.pdf",
-                "Marcadores inflamatórios e resveratrol.pdf",
-                "Longevidade em cães geriátricos.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 4.1,
+            treatment: 3.2,
+            support: 3.5
+          }
         }
       ]
     },
@@ -233,69 +164,36 @@ function simulateProcessedData(fileContent: string, fileName: string) {
       conditions: [
         {
           name: "Osteoartrite",
-          relationshipTypes: [
-            {
-              type: "treatment",
-              efficacyScore: 3.7,
-              studies: [
-                "Glucosamina em cães idosos.pdf",
-                "Mobilidade articular estudo.pdf",
-                "Ensaio clínico duplo-cego glucosamina.pdf",
-                "Meta-análise suplementação.pdf",
-                "Estudo longitudinal 5 anos.pdf"
-              ]
-            },
-            {
-              type: "support",
-              efficacyScore: 4.2,
-              studies: [
-                "Combinação glucosamina e condroitina.pdf",
-                "Terapia multimodal em artroses.pdf"
-              ]
-            }
-          ]
+          efficacyScores: {
+            prevention: 2.5,
+            treatment: 3.7,
+            support: 4.2
+          }
         }
       ]
     }
   ];
 
-  // Informações estatísticas
+  // Contadores para estatísticas
   const nutraceuticalsCount = nutraceuticals.length;
-  const conditionsSet = new Set();
-  let studiesCount = 0;
+  let conditionsCount = 0;
   let relationsCount = 0;
   
-  // Calcular estatísticas
   nutraceuticals.forEach(n => {
-    n.conditions.forEach(c => {
-      conditionsSet.add(c.name);
-      c.relationshipTypes.forEach(r => {
-        relationsCount++;
-        studiesCount += r.studies.length;
-      });
-    });
+    conditionsCount += new Set(n.conditions.map(c => c.name)).size;
+    relationsCount += n.conditions.length;
   });
 
-  // Estrutura de retorno
   return {
     nutraceuticals,
     originalFileName: fileName,
     processedAt: new Date().toISOString(),
-    stats: {
-      nutraceuticalsCount,
-      conditionsCount: conditionsSet.size,
-      relationsCount,
-      studiesCount
-    },
-    recommendedActions: [
-      "Importar os nutracêuticos identificados para o banco de dados",
-      "Verificar os nomes das condições para garantir padronização",
-      "Associar os estudos listados aos respectivos nutracêuticos e condições",
-      "Revisar as pontuações de eficácia com base na literatura científica"
-    ],
+    nutraceuticalsCount,
+    conditionsCount,
+    relationsCount,
     warnings: [
       "Alguns nutracêuticos podem exigir revisão manual para garantir precisão dos dados.",
-      "Considere padronizar os nomes das condições antes de importar."
+      "Considere verificar as pontuações de eficácia com a literatura científica mais recente."
     ]
   };
 }

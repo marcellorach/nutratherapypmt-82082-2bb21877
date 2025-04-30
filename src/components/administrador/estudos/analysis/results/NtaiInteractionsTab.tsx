@@ -20,7 +20,7 @@ const NtaiInteractionsTab: React.FC<NtaiInteractionsTabProps> = ({ interactions 
           interactions.map((interaction, idx) => (
             <InteractionTag
               key={idx}
-              name={interaction.nutraceutical}
+              nutraceutical={interaction.nutraceutical}
               interaction={interaction.interaction}
               confidence={interaction.confidence}
               className="m-1"
