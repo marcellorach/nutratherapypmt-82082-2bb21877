@@ -8,6 +8,7 @@ import WarningsAlert from './results/WarningsAlert';
 import NutraceuticalsList from './results/NutraceuticalsList';
 import StudyFilesList from './results/StudyFilesList';
 import ActionFooter from './results/ActionFooter';
+import { useAnalysisResults } from '@/hooks/ntai/useAnalysisResults';
 
 interface ImportResultsViewProps {
   results: any;
@@ -22,6 +23,21 @@ const ImportResultsView: React.FC<ImportResultsViewProps> = ({
   onCancel,
   studyFiles = []
 }) => {
+  const { importResultsToDatabase, isImporting, importSuccess } = useAnalysisResults();
+  
+  // Preparar os resultados completos para importação
+  const handleImport = async () => {
+    // Adicionar os arquivos de estudo para o resultado completo
+    const completeResults = {
+      ...results,
+      studyFiles,
+      timestamp: new Date().toISOString()
+    };
+    
+    await importResultsToDatabase(completeResults);
+    onImport();
+  };
+
   return (
     <div className="space-y-6">
       <SummaryHeader 
@@ -40,7 +56,12 @@ const ImportResultsView: React.FC<ImportResultsViewProps> = ({
       <Card>
         <NutraceuticalsList nutraceuticals={results.nutraceuticals} />
         <StudyFilesList studyFiles={studyFiles} />
-        <ActionFooter onImport={onImport} onCancel={onCancel} />
+        <ActionFooter 
+          onImport={handleImport} 
+          onCancel={onCancel} 
+          isImporting={isImporting}
+          importSuccess={importSuccess}
+        />
       </Card>
     </div>
   );

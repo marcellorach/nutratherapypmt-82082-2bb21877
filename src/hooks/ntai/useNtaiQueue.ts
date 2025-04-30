@@ -1,14 +1,57 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProcessingItem, ProcessingStage } from '@/types/ntai';
 import { useToast } from "@/hooks/use-toast";
 import { AvailableStudy } from './types/processing';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useNtaiQueue = () => {
   const [processQueue, setProcessQueue] = useState<ProcessingItem[]>([]);
   const [processingActive, setProcessingActive] = useState(false);
   const [activeItemIndex, setActiveItemIndex] = useState<number>(-1);
   const { toast } = useToast();
+  
+  // Carregar estudos pendentes do banco ao inicializar
+  useEffect(() => {
+    const loadPendingStudies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('processed_studies')
+          .select('*')
+          .eq('kanban_status', 'new')
+          .is('analysis_data', null); // Estudos sem análise
+          
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          console.log('Estudos pendentes encontrados:', data.length);
+          
+          // Converter para formato de fila
+          const queueItems: ProcessingItem[] = data.map(study => ({
+            id: study.id,
+            title: study.title || `Estudo ${study.study_id.substring(0, 8)}`,
+            stage: 'idle' as ProcessingStage,
+            progress: 0,
+            sourceFile: study.original_filename || 'Desconhecido',
+            originalFormat: study.original_filename?.split('.').pop()?.toUpperCase() || 'PDF'
+          }));
+          
+          setProcessQueue(prev => {
+            // Adicionar apenas os itens que ainda não estão na fila
+            const existingIds = prev.map(item => item.id);
+            return [
+              ...prev, 
+              ...queueItems.filter(item => !existingIds.includes(item.id))
+            ];
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao carregar estudos pendentes:', err);
+      }
+    };
+    
+    loadPendingStudies();
+  }, []);
 
   const addToQueue = (estudos: AvailableStudy[], selectedIds: string[]) => {
     console.log('Função addToQueue chamada com:', { estudos, selectedIds });
@@ -76,6 +119,27 @@ export const useNtaiQueue = () => {
       variant: "default",
     });
   };
+  
+  // Função para atualizar estudos com análise concluída no banco
+  const updateProcessedStudy = async (studyId: string, analysisData: any) => {
+    try {
+      const { error } = await supabase
+        .from('processed_studies')
+        .update({ 
+          analysis_data: analysisData,
+          kanban_status: 'processed' 
+        })
+        .eq('id', studyId);
+        
+      if (error) throw error;
+      
+      console.log('Estudo atualizado com sucesso:', studyId);
+      return true;
+    } catch (err) {
+      console.error('Erro ao atualizar estudo processado:', err);
+      return false;
+    }
+  };
 
   return {
     processQueue,
@@ -87,5 +151,6 @@ export const useNtaiQueue = () => {
     addToQueue,
     clearCompleted,
     retryFailed,
+    updateProcessedStudy
   };
 };

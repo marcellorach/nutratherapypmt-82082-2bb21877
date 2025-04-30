@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NtaiAnalysisResult } from '@/types/ntai';
 import { useNtaiQueue } from './ntai/useNtaiQueue';
 import { useNtaiLogs } from './ntai/useNtaiLogs';
@@ -11,10 +11,10 @@ import { useAnalysisResults } from './ntai/useAnalysisResults';
 
 export const useNtaiProcessing = () => {
   // Integração dos hooks especializados
-  const { aiConfigs } = useNtaiConfig();
-  const { logEntries, addLogEntry } = useNtaiLogs();
-  const { availableStudies } = useAvailableStudies();
-  const { analysisResult, setAnalysisResult } = useAnalysisResults();
+  const { aiConfigs, updateAiConfig } = useNtaiConfig();
+  const { logEntries, addLogEntry, clearLogs, exportLogs } = useNtaiLogs();
+  const { availableStudies, refreshAvailableStudies } = useAvailableStudies();
+  const { analysisResult, setAnalysisResult, clearAnalysisResult } = useAnalysisResults();
   
   // Extrair métodos do hook de seleção
   const { 
@@ -35,6 +35,7 @@ export const useNtaiProcessing = () => {
     addToQueue,
     clearCompleted,
     retryFailed,
+    updateProcessedStudy
   } = useNtaiQueue();
 
   // Integrar com a lógica de processamento
@@ -45,8 +46,41 @@ export const useNtaiProcessing = () => {
     setAnalysisResult,
     aiConfigs,
     setProcessingActive,
-    setActiveItemIndex
+    setActiveItemIndex,
+    updateProcessedStudy
   );
+
+  // Dados para dashboard
+  const [processingStats, setProcessingStats] = useState({
+    totalProcessed: 0,
+    totalStudies: 0,
+    pendingAnalysis: 0
+  });
+
+  // Atualizar estatísticas
+  useEffect(() => {
+    const updateStats = () => {
+      setProcessingStats({
+        totalProcessed: processQueue.filter(item => item.stage === 'complete').length,
+        totalStudies: availableStudies.length,
+        pendingAnalysis: processQueue.filter(item => item.stage !== 'complete' && item.stage !== 'error').length
+      });
+    };
+    
+    updateStats();
+  }, [processQueue, availableStudies]);
+
+  // Verificar arquivos automaticamente após upload
+  useEffect(() => {
+    const checkNewStudies = async () => {
+      if (availableStudies.length > 0 && processQueue.length === 0 && !processingActive) {
+        addLogEntry('Verificando novos estudos para processamento...');
+        await refreshAvailableStudies();
+      }
+    };
+    
+    checkNewStudies();
+  }, [availableStudies.length]);
 
   // Função para adicionar os itens selecionados à fila
   const handleAddToQueue = () => {
@@ -69,13 +103,18 @@ export const useNtaiProcessing = () => {
     analysisResult,
     aiConfigs,
     availableStudies,
+    processingStats,
     toggleItemSelection,
     handleSelectAll,
     addToQueue: handleAddToQueue,
     clearCompleted,
     retryFailed,
     startProcessing,
-    clearSelection
+    clearSelection,
+    updateAiConfig,
+    clearLogs,
+    exportLogs,
+    refreshAvailableStudies
   };
 };
 

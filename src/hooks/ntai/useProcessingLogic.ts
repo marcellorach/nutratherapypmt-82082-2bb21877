@@ -13,7 +13,8 @@ export const useProcessingLogic = (
   setAnalysisResult: any,
   aiConfigs: Record<string, string>,
   setProcessingActive: (active: boolean) => void,
-  setActiveItemIndex: (index: number) => void
+  setActiveItemIndex: (index: number) => void,
+  updateProcessedStudy: (id: string, data: any) => Promise<boolean>
 ) => {
   const { toast } = useToast();
 
@@ -67,6 +68,17 @@ export const useProcessingLogic = (
       }
 
       try {
+        // Buscar dados do estudo no banco
+        const { data: studyData, error: studyError } = await supabase
+          .from('processed_studies')
+          .select('*')
+          .eq('id', item.id)
+          .single();
+          
+        if (studyError) {
+          throw new Error(`Erro ao buscar dados do estudo: ${studyError.message}`);
+        }
+        
         // Simular as etapas de processamento
         for (const stage of ['extracting', 'analyzing', 'standardizing'] as ProcessingStage[]) {
           updatedQueue[index] = { ...item, stage, progress: getProgressForStage(stage) };
@@ -78,12 +90,18 @@ export const useProcessingLogic = (
         
         const result = await ntaiService.analyzeStudy(
           item.id,
-          `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
+          studyData.description || `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
         
         setAnalysisResult(result);
+        
+        // Atualizar estudo no banco de dados
+        const updateSuccess = await updateProcessedStudy(item.id, result);
+        if (!updateSuccess) {
+          addLogEntry(`[AVISO] Análise concluída, mas houve um erro ao salvar no banco de dados: ${item.title}`);
+        }
         
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);

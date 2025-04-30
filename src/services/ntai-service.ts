@@ -18,12 +18,95 @@ export const analyzeStudy = async (
   conditionsPrompt?: string
 ): Promise<NtaiAnalysisResult> => {
   console.log('Analisando estudo com prompts personalizados:');
+  console.log('ID do estudo:', studyId);
   console.log('Prompt para nutracêuticos:', nutraceuticalsPrompt);
   console.log('Prompt para condições:', conditionsPrompt);
   
   try {
     // Tenta processar o estudo com a Edge Function
     const result = await processStudyWithAI(studyId, studyText, nutraceuticalsPrompt, conditionsPrompt);
+    
+    // Verificar se a análise foi bem-sucedida antes de salvar no banco
+    try {
+      const jsonAnalysisData = JSON.parse(JSON.stringify(result));
+      
+      // Atualizar o estudo no banco com os resultados da análise
+      const { data: studyData, error: studyError } = await supabase
+        .from('processed_studies')
+        .select('*')
+        .eq('id', studyId)
+        .maybeSingle();
+        
+      if (studyError) {
+        console.error('Erro ao buscar estudo:', studyError);
+      } else if (studyData) {
+        // Atualizar o estudo com os dados da análise
+        const { error: updateError } = await supabase
+          .from('processed_studies')
+          .update({
+            analysis_data: jsonAnalysisData,
+            kanban_status: 'processed'
+          })
+          .eq('id', studyId);
+          
+        if (updateError) {
+          console.error('Erro ao atualizar estudo com análise:', updateError);
+        }
+        
+        // Processar nutracêuticos e condições encontrados
+        if (result.nutraceuticals && result.nutraceuticals.length > 0) {
+          for (const nutra of result.nutraceuticals) {
+            // Verificar se o nutracêutico já existe
+            const { data: existingNutra, error: nutraQueryError } = await supabase
+              .from('nutraceuticals')
+              .select('*')
+              .eq('name', nutra.name)
+              .maybeSingle();
+              
+            let nutraId;
+            
+            if (!existingNutra) {
+              // Criar novo nutracêutico
+              const { data: newNutra, error: nutraCreateError } = await supabase
+                .from('nutraceuticals')
+                .insert([{
+                  name: nutra.name,
+                  description: nutra.description,
+                  chemical_compound: nutra.chemical_compound || null,
+                  source: nutra.source || "Análise NTAI"
+                }])
+                .select()
+                .single();
+                
+              if (nutraCreateError) {
+                console.error('Erro ao criar nutracêutico:', nutraCreateError);
+                continue;
+              }
+              
+              nutraId = newNutra.id;
+            } else {
+              nutraId = existingNutra.id;
+            }
+            
+            // Associar nutracêutico ao estudo
+            const { error: relateError } = await supabase
+              .from('nutraceutical_studies')
+              .insert([{
+                nutraceutical_id: nutraId,
+                study_id: studyId,
+                relevance_score: nutra.relevance || 4.0
+              }]);
+              
+            if (relateError) {
+              console.error('Erro ao associar nutracêutico ao estudo:', relateError);
+            }
+          }
+        }
+      }
+    } catch (dbError) {
+      console.error('Erro ao processar resultado para o banco:', dbError);
+    }
+    
     return result;
   } catch (error) {
     console.log('Erro ao usar Edge Function, usando modo de simulação:', error);
@@ -37,21 +120,44 @@ export const analyzeStudy = async (
       // Gerar um título para o estudo
       const studyTitle = `Análise Simulada: ${studyText.substring(0, 30) || studyId}`;
       
-      // Insere os dados simulados no banco
-      const { error: insertError } = await supabase
+      // Obter dados do estudo existente
+      const { data: existingStudy } = await supabase
         .from('processed_studies')
-        .insert({
-          study_id: studyId,
-          analysis_data: jsonAnalysisData,
-          kanban_status: 'new',
-          processed_by: 'ntai',
-          title: studyTitle,
-          description: 'Análise gerada via processamento NTAI simulado',
-          journal: 'Processamento NTAI'
-        });
-        
-      if (insertError) {
-        console.error('Erro ao salvar análise simulada:', insertError);
+        .select('*')
+        .eq('id', studyId)
+        .maybeSingle();
+      
+      if (existingStudy) {
+        // Atualizar o estudo existente
+        const { error: updateError } = await supabase
+          .from('processed_studies')
+          .update({
+            analysis_data: jsonAnalysisData,
+            kanban_status: 'processed',
+          })
+          .eq('id', studyId);
+          
+        if (updateError) {
+          console.error('Erro ao atualizar análise:', updateError);
+        }
+      } else {
+        // Inserir novo estudo caso não exista
+        const { error: insertError } = await supabase
+          .from('processed_studies')
+          .insert({
+            study_id: studyId,
+            id: studyId, // Usar o mesmo ID
+            analysis_data: jsonAnalysisData,
+            kanban_status: 'processed',
+            processed_by: 'ntai',
+            title: studyTitle,
+            description: 'Análise gerada via processamento NTAI simulado',
+            journal: 'Processamento NTAI'
+          });
+          
+        if (insertError) {
+          console.error('Erro ao salvar análise simulada:', insertError);
+        }
       }
     } catch (insertError) {
       console.error('Erro ao inserir no banco de dados:', insertError);

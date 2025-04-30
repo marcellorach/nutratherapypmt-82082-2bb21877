@@ -1,5 +1,5 @@
 
-import { ProcessingStage } from '@/types/ntai';
+export type ProcessingStage = 'idle' | 'extracting' | 'analyzing' | 'standardizing' | 'complete' | 'error';
 
 export const getProgressForStage = (stage: ProcessingStage): number => {
   switch (stage) {
@@ -8,6 +8,7 @@ export const getProgressForStage = (stage: ProcessingStage): number => {
     case 'standardizing': return 90;
     case 'complete': return 100;
     case 'error': return 50;
+    case 'idle':
     default: return 0;
   }
 };
@@ -17,9 +18,10 @@ export const getStageMessage = (stage: ProcessingStage): string => {
     case 'extracting': return 'Extraindo texto';
     case 'analyzing': return 'Analisando conteúdo';
     case 'standardizing': return 'Padronizando dados';
-    case 'complete': return 'Processado';
-    case 'error': return 'Erro';
-    default: return 'Pendente';
+    case 'complete': return 'Processamento concluído';
+    case 'error': return 'Erro no processamento';
+    case 'idle':
+    default: return 'Aguardando processamento';
   }
 };
 

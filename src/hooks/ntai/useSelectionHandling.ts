@@ -1,14 +1,11 @@
 
 import { useState } from 'react';
-import { AvailableStudy } from './types/processing';
-import { useToast } from "@/hooks/use-toast";
 
 export const useSelectionHandling = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const { toast } = useToast();
 
+  // Alternar seleção de um item
   const toggleItemSelection = (id: string) => {
-    console.log(`Toggling selection for item: ${id}`);
     setSelectedItems(prev => 
       prev.includes(id)
         ? prev.filter(item => item !== id)
@@ -16,23 +13,22 @@ export const useSelectionHandling = () => {
     );
   };
 
-  const handleSelectAll = (estudos: AvailableStudy[]) => {
-    console.log(`Handle select all - current selected: ${selectedItems.length}, total: ${estudos.length}`);
-    if (selectedItems.length === estudos.length) {
+  // Selecionar ou desselecionar todos os itens
+  const handleSelectAll = (items: Array<{ id: string }>) => {
+    if (selectedItems.length === items.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(estudos.map(estudo => estudo.id));
+      setSelectedItems(items.map(item => item.id));
     }
   };
 
+  // Limpar a seleção
   const clearSelection = () => {
-    console.log("Clearing selection");
     setSelectedItems([]);
   };
 
   return {
     selectedItems,
-    setSelectedItems,
     toggleItemSelection,
     handleSelectAll,
     clearSelection

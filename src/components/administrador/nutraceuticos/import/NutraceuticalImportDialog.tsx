@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -33,9 +33,11 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
   const { toast } = useToast();
 
   // Reset do diálogo quando é fechado
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
-      resetDialog();
+      setTimeout(() => {
+        resetDialog();
+      }, 300); // Pequeno delay para evitar visualização do reset durante a animação de fechamento
     }
   }, [open]);
 
@@ -61,8 +63,29 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
             .from('scispace')
             .getPublicUrl(fileName);
             
+          // Criar registro do estudo processado para associação futura
+          const { data: studyRecord, error: studyError } = await supabase
+            .from('processed_studies')
+            .insert({
+              study_id: fileName,
+              original_filename: pdfFile.name,
+              storage_path: fileName,
+              title: pdfFile.name.replace(/\.[^/.]+$/, ""),
+              description: `Estudo PDF associado à importação de nutracêuticos: ${pdfFile.name}`,
+              journal: 'Importação de Nutracêuticos',
+              kanban_status: 'new',
+              processed_by: 'import',
+              import_type: 'manual'
+            })
+            .select()
+            .single();
+            
+          if (studyError) {
+            console.error('Erro ao registrar estudo:', studyError);
+          }
+            
           return {
-            id: pdfFile.id,
+            id: studyRecord?.id || pdfFile.id,
             name: pdfFile.name,
             path: fileName,
             url: publicUrl,
@@ -97,7 +120,10 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
       onImportComplete();
     }
     
-    onOpenChange(false);
+    // Aguardar um momento para garantir que o toast seja exibido antes de fechar
+    setTimeout(() => {
+      onOpenChange(false);
+    }, 500);
   };
 
   const resetDialog = () => {
@@ -153,7 +179,7 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
                     <h3 className="text-base font-medium mb-2">Estudos Científicos em PDF</h3>
                     <p className="text-sm text-gray-500 mb-4">
                       Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos.
-                      Esses estudos serão associados aos nutracêuticos durante o processo de importação.
+                      Estes estudos serão importados para processamento NTAI e associados automaticamente aos nutracêuticos.
                     </p>
                   </div>
                   
