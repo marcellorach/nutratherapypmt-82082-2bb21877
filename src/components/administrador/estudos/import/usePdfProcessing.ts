@@ -130,7 +130,7 @@ export const usePdfProcessing = () => {
       } catch (error: any) {
         console.error(`Erro ao processar arquivo ${file.name}:`, error);
         
-        // Atualizar estado para erro, garantindo uploadProgress como número
+        // Atualizar estado para erro
         setPdfFiles(prev => prev.map((f, idx) => 
           idx === i ? { 
             ...f, 
