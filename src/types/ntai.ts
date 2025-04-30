@@ -3,6 +3,21 @@ export interface NtaiAnalysisResult {
   studyId: string;
   qualityScore: number;
   relevanceScore: number;
+  nutraceuticals?: Array<{
+    name: string;
+    description?: string;
+    chemical_compound?: string;
+    source?: string;
+    dosage?: string;
+    category?: string;
+    conditions?: Array<{
+      name: string;
+      description?: string;
+      relationship_type?: string;
+      efficacy_score?: number;
+    }>;
+    relevance?: number;
+  }>;
   extractedNutraceuticals: Array<{
     name: string;
     confidence: number;

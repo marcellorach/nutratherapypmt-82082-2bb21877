@@ -53,9 +53,9 @@ export const analyzeStudy = async (
           console.error('Erro ao atualizar estudo com análise:', updateError);
         }
         
-        // Processar nutracêuticos e condições encontrados
-        if (result.nutraceuticals && result.nutraceuticals.length > 0) {
-          for (const nutra of result.nutraceuticals) {
+        // Processar nutracêuticos encontrados
+        if (result.extractedNutraceuticals && result.extractedNutraceuticals.length > 0) {
+          for (const nutra of result.extractedNutraceuticals) {
             // Verificar se o nutracêutico já existe
             const { data: existingNutra, error: nutraQueryError } = await supabase
               .from('nutraceuticals')
@@ -71,9 +71,9 @@ export const analyzeStudy = async (
                 .from('nutraceuticals')
                 .insert([{
                   name: nutra.name,
-                  description: nutra.description,
-                  chemical_compound: nutra.chemical_compound || null,
-                  source: nutra.source || "Análise NTAI"
+                  description: `Encontrado em análise de estudo: ${studyData.title || studyId}`,
+                  chemical_compound: null,
+                  source: "Análise NTAI"
                 }])
                 .select()
                 .single();
@@ -94,7 +94,7 @@ export const analyzeStudy = async (
               .insert([{
                 nutraceutical_id: nutraId,
                 study_id: studyId,
-                relevance_score: nutra.relevance || 4.0
+                relevance_score: nutra.confidence || 4.0
               }]);
               
             if (relateError) {

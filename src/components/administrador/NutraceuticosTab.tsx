@@ -92,6 +92,19 @@ const NutraceuticosTab: React.FC = () => {
           relationshipType: nch.relationship_type
         }));
         
+      // Separar as condições por tipo de relacionamento
+      const preventionConditions = healthConditions.filter(
+        (c: any) => c.relationshipType === 'prevention'
+      );
+      
+      const treatmentConditions = healthConditions.filter(
+        (c: any) => c.relationshipType === 'treatment'
+      );
+      
+      const supportConditions = healthConditions.filter(
+        (c: any) => c.relationshipType === 'support'
+      );
+        
       // Extrair estudos científicos associados
       const studies = (item.nutraceutical_studies || [])
         .filter((ns: any) => ns.study)
@@ -131,7 +144,12 @@ const NutraceuticosTab: React.FC = () => {
         contraindications: item.contraindications || [],
         benefits: benefits,
         healthConditions: healthConditions,
-        studies: studies
+        studies: studies,
+        // Adicionar as propriedades faltantes
+        preventionConditions: preventionConditions,
+        treatmentConditions: treatmentConditions,
+        supportConditions: supportConditions,
+        activeIngredients: [] // Array vazio já que não temos esses dados
       };
     });
   };
