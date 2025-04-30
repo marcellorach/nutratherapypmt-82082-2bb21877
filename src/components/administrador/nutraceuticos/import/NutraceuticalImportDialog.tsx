@@ -7,9 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SpreadsheetImport from './SpreadsheetImport';
 import ImportResultsView from './ImportResultsView';
 import { useToast } from '@/hooks/use-toast';
+import PdfUploadZone from '@/components/administrador/estudos/import/PdfUploadZone';
+import { StudyPdfFile } from '@/components/administrador/estudos/import/PdfFileItem';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NutraceuticalImportDialogProps {
   open: boolean;
@@ -24,9 +28,61 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
 }) => {
   const [step, setStep] = useState<'upload' | 'review'>('upload');
   const [importResults, setImportResults] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<string>('spreadsheet');
+  const [pdfFiles, setPdfFiles] = useState<StudyPdfFile[]>([]);
   const { toast } = useToast();
 
-  const handleProcessingComplete = (results: any) => {
+  // Reset do diálogo quando é fechado
+  React.useEffect(() => {
+    if (!open) {
+      resetDialog();
+    }
+  }, [open]);
+
+  const handleProcessingComplete = async (results: any) => {
+    // Se temos arquivos PDF de estudos para processar
+    if (pdfFiles.length > 0) {
+      try {
+        // Fazer upload dos PDFs para o storage
+        const uploadedFiles = await Promise.all(pdfFiles.map(async (pdfFile) => {
+          const fileName = `studies/${Date.now()}_${pdfFile.name}`;
+          
+          // Upload para o Storage do Supabase
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('scispace')
+            .upload(fileName, pdfFile.file);
+            
+          if (uploadError) {
+            throw new Error(`Erro ao fazer upload: ${uploadError.message}`);
+          }
+          
+          // Obter URL pública para o arquivo
+          const { data: { publicUrl } } = supabase.storage
+            .from('scispace')
+            .getPublicUrl(fileName);
+            
+          return {
+            id: pdfFile.id,
+            name: pdfFile.name,
+            path: fileName,
+            url: publicUrl,
+            nutraceuticalId: pdfFile.nutraceuticalId || null,
+            conditionId: pdfFile.conditionId || null
+          };
+        }));
+        
+        // Adicionar informações dos PDFs ao resultado
+        results.studyFiles = uploadedFiles;
+      } catch (error) {
+        console.error('Erro ao processar PDFs:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao processar arquivos de estudos científicos",
+          variant: "destructive"
+        });
+      }
+    }
+    
     setImportResults(results);
     setStep('review');
   };
@@ -47,11 +103,18 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
   const resetDialog = () => {
     setStep('upload');
     setImportResults(null);
+    setPdfFiles([]);
+    setActiveTab('spreadsheet');
   };
 
   const handleClose = () => {
     resetDialog();
     onOpenChange(false);
+  };
+  
+  // Manipulador para alterações nos arquivos PDF
+  const handlePdfFilesChange = (files: StudyPdfFile[]) => {
+    setPdfFiles(files);
   };
 
   return (
@@ -59,11 +122,11 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {step === 'upload' ? 'Importar Nutracêuticos via Planilha' : 'Revisar Dados Importados'}
+            {step === 'upload' ? 'Importar Nutracêuticos e Estudos' : 'Revisar Dados Importados'}
           </DialogTitle>
           <DialogDescription>
             {step === 'upload' 
-              ? 'Arraste e solte uma planilha contendo dados de nutracêuticos para processamento via IA.'
+              ? 'Importe planilhas de dados de nutracêuticos e PDFs de estudos científicos para processamento via IA.'
               : 'Revise os dados extraídos pela IA antes de confirmar a importação.'
             }
           </DialogDescription>
@@ -71,7 +134,38 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
 
         <div className="py-4">
           {step === 'upload' && (
-            <SpreadsheetImport onImportComplete={handleProcessingComplete} />
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="spreadsheet">Planilha de Nutracêuticos</TabsTrigger>
+                <TabsTrigger value="studies">Estudos Científicos (PDF)</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="spreadsheet" className="py-4">
+                <SpreadsheetImport 
+                  onImportComplete={handleProcessingComplete} 
+                  hasPdfFiles={pdfFiles.length > 0}
+                />
+              </TabsContent>
+              
+              <TabsContent value="studies" className="py-4">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-base font-medium mb-2">Estudos Científicos em PDF</h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos.
+                      Esses estudos serão associados aos nutracêuticos durante o processo de importação.
+                    </p>
+                  </div>
+                  
+                  <PdfUploadZone
+                    files={pdfFiles}
+                    onFilesChange={handlePdfFilesChange}
+                    maxFiles={20}
+                    acceptedFileTypes={['application/pdf']}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
           )}
           
           {step === 'review' && importResults && (
@@ -79,6 +173,7 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
               results={importResults} 
               onImport={handleImportConfirm}
               onCancel={() => setStep('upload')} 
+              studyFiles={pdfFiles}
             />
           )}
         </div>

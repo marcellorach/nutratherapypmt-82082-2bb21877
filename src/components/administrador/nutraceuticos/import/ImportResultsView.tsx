@@ -1,304 +1,203 @@
 
 import React, { useState } from 'react';
-import { 
-  Check, 
-  AlertTriangle, 
-  FileSpreadsheet, 
-  ChevronDown, 
-  ChevronRight,
-  Database
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Check, AlertTriangle, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { StudyPdfFile } from '@/components/administrador/estudos/import/PdfFileItem';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useToast } from '@/hooks/use-toast';
-import { NutraceuticalsService } from '@/services/nutraceuticals-service';
-import EvidenceTag from '@/components/administrador/tags/EvidenceTag';
-import { getEfficacyColor } from '@/rules/general/evidence-levels';
-
-interface ProcessedNutraceutical {
-  name: string;
-  description: string;
-  category: string;
-  conditions: Array<{
-    name: string;
-    efficacyScores: {
-      prevention: number;
-      treatment: number;
-      support: number;
-    };
-  }>;
-}
-
-interface ImportResults {
-  nutraceuticals: ProcessedNutraceutical[];
-  originalFileName: string;
-  processedAt: string;
-  nutraceuticalsCount: number;
-  conditionsCount: number;
-  relationsCount: number;
-  warnings: string[];
-}
 
 interface ImportResultsViewProps {
-  results: ImportResults;
+  results: any;
   onImport: () => void;
   onCancel: () => void;
+  studyFiles?: StudyPdfFile[];
 }
 
 const ImportResultsView: React.FC<ImportResultsViewProps> = ({
   results,
   onImport,
-  onCancel
+  onCancel,
+  studyFiles = []
 }) => {
-  const [importing, setImporting] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [expandedNutraceuticals, setExpandedNutraceuticals] = useState<string[]>([]);
-  const { toast } = useToast();
+  const [expandedNutraceutical, setExpandedNutraceutical] = useState<string | null>(null);
   
   const toggleExpand = (name: string) => {
-    if (expandedNutraceuticals.includes(name)) {
-      setExpandedNutraceuticals(expandedNutraceuticals.filter(n => n !== name));
-    } else {
-      setExpandedNutraceuticals([...expandedNutraceuticals, name]);
-    }
+    setExpandedNutraceutical(expandedNutraceutical === name ? null : name);
   };
   
-  const handleImport = async () => {
-    setImporting(true);
-    setProgress(0);
-    
-    try {
-      // Simulação de progresso
-      const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 95) {
-            clearInterval(interval);
-            return 95;
-          }
-          return prev + Math.random() * 5;
-        });
-      }, 200);
-      
-      // Aqui implementaríamos a criação real dos nutracêuticos
-      // usando os serviços existentes
-      
-      // Para demonstração, simularemos uma pausa
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      clearInterval(interval);
-      setProgress(100);
-      
-      toast({
-        title: "Importação concluída",
-        description: `${results.nutraceuticalsCount} nutracêuticos e ${results.relationsCount} relações importados com sucesso.`,
-      });
-      
-      // Chamar callback de conclusão
-      setTimeout(() => {
-        onImport();
-      }, 1000);
-      
-    } catch (error: any) {
-      toast({
-        title: "Erro na importação",
-        description: error.message || "Ocorreu um erro ao importar os dados",
-        variant: "destructive",
-      });
-    }
+  const formatDateString = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   };
-  
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <FileSpreadsheet className="h-5 w-5 mr-2" />
-          Revisão de Dados Importados
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      <div className="bg-green-50 rounded-md p-4 flex items-start gap-3">
+        <Check className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <h3 className="font-medium text-green-800">Dados Processados com Sucesso</h3>
+          <p className="text-sm text-green-700 mt-1">
+            O arquivo <span className="font-medium">{results.originalFileName}</span> foi processado em {formatDateString(results.processedAt)}.
+          </p>
+        </div>
+      </div>
       
-      <CardContent className="space-y-4">
-        {/* Resumo */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-50 p-4 rounded-md">
-            <p className="text-sm text-gray-500">Nutracêuticos</p>
-            <p className="text-2xl font-bold">{results.nutraceuticalsCount}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard
+          title="Nutracêuticos"
+          value={results.nutraceuticalsCount}
+          description="nutracêuticos identificados"
+        />
+        <StatsCard
+          title="Condições"
+          value={results.conditionsCount}
+          description="condições de saúde identificadas"
+        />
+        <StatsCard
+          title="Relações"
+          value={results.relationsCount}
+          description="relações nutracêutico-condição encontradas"
+        />
+      </div>
+      
+      {results.warnings && results.warnings.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+          <div className="flex gap-2 items-center mb-2">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <h4 className="font-medium text-amber-800">Atenção:</h4>
           </div>
-          <div className="bg-gray-50 p-4 rounded-md">
-            <p className="text-sm text-gray-500">Condições de Saúde</p>
-            <p className="text-2xl font-bold">{results.conditionsCount}</p>
-          </div>
-          <div className="bg-gray-50 p-4 rounded-md">
-            <p className="text-sm text-gray-500">Relações</p>
-            <p className="text-2xl font-bold">{results.relationsCount}</p>
-          </div>
+          <ul className="list-disc list-inside pl-2 space-y-1">
+            {results.warnings.map((warning: string, idx: number) => (
+              <li key={idx} className="text-sm text-amber-700">{warning}</li>
+            ))}
+          </ul>
         </div>
-        
-        {/* Alertas */}
-        {results.warnings && results.warnings.length > 0 && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Atenção</AlertTitle>
-            <AlertDescription>
-              <ul className="list-disc pl-4 space-y-1 text-sm">
-                {results.warnings.map((warning, index) => (
-                  <li key={index}>{warning}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Tabela de Nutracêuticos */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[300px]">Nutracêutico</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Condições</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.nutraceuticals.map((nutra) => {
-                const isExpanded = expandedNutraceuticals.includes(nutra.name);
-                
-                return (
-                  <React.Fragment key={nutra.name}>
-                    <TableRow className="hover:bg-gray-50">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleExpand(nutra.name)}
-                            className="mr-2 p-1 h-6 w-6"
-                          >
-                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                          </Button>
-                          {nutra.name}
+      )}
+
+      <Card>
+        <CardContent className="pt-6 px-6">
+          <h3 className="text-lg font-medium mb-4">Nutracêuticos Identificados</h3>
+          <div className="divide-y">
+            {results.nutraceuticals.map((nutra: any, idx: number) => (
+              <div key={idx} className="py-3">
+                <Collapsible
+                  open={expandedNutraceutical === nutra.name}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div
+                      className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-md"
+                      onClick={() => toggleExpand(nutra.name)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">{nutra.name}</h4>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            {nutra.category}
+                          </Badge>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        {nutra.category ? (
-                          <Badge variant="outline">{nutra.category}</Badge>
-                        ) : (
-                          <span className="text-gray-400 text-xs">Não definida</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{nutra.conditions.length}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="h-8">
-                          <Database className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    
-                    {isExpanded && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="bg-gray-50 p-0">
-                          <div className="p-4 border-t">
-                            <p className="text-sm text-gray-600 mb-3">{nutra.description}</p>
-                            
-                            <h4 className="text-sm font-medium mb-2">Condições relacionadas:</h4>
-                            <div className="bg-white rounded-md border overflow-hidden">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Condição</TableHead>
-                                    <TableHead>Prevenção</TableHead>
-                                    <TableHead>Tratamento</TableHead>
-                                    <TableHead>Suporte</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {nutra.conditions.map((condition, idx) => (
-                                    <TableRow key={idx}>
-                                      <TableCell>{condition.name}</TableCell>
-                                      <TableCell>
-                                        <EvidenceTag 
-                                          score={condition.efficacyScores.prevention || 0} 
-                                          showLabel={false}
-                                        />
-                                      </TableCell>
-                                      <TableCell>
-                                        <EvidenceTag 
-                                          score={condition.efficacyScores.treatment || 0} 
-                                          showLabel={false}
-                                        />
-                                      </TableCell>
-                                      <TableCell>
-                                        <EvidenceTag 
-                                          score={condition.efficacyScores.support || 0} 
-                                          showLabel={false}
-                                        />
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                        <p className="text-sm text-gray-500 truncate">{nutra.description}</p>
+                      </div>
+                      {expandedNutraceutical === nutra.name ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="pl-6 pr-2 py-3 space-y-3">
+                      <div className="text-sm">
+                        <span className="font-medium">Descrição:</span> {nutra.description}
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-sm">Condições Relacionadas:</h5>
+                        <div className="grid gap-3">
+                          {nutra.conditions.map((cond: any, condIdx: number) => (
+                            <div key={condIdx} className="bg-gray-50 p-3 rounded-md">
+                              <div className="flex justify-between items-center">
+                                <h6 className="font-medium text-sm">{cond.name}</h6>
+                                <div className="flex gap-1">
+                                  <Badge className="bg-green-100 text-green-800 border-0">
+                                    P: {cond.efficacyScores.prevention.toFixed(1)}
+                                  </Badge>
+                                  <Badge className="bg-blue-100 text-blue-800 border-0">
+                                    T: {cond.efficacyScores.treatment.toFixed(1)}
+                                  </Badge>
+                                  <Badge className="bg-purple-100 text-purple-800 border-0">
+                                    S: {cond.efficacyScores.support.toFixed(1)}
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              {cond.studies && cond.studies.length > 0 && (
+                                <div className="mt-2">
+                                  <h6 className="text-xs font-medium mb-1 text-gray-600">Estudos Associados:</h6>
+                                  <ul className="text-xs space-y-1">
+                                    {cond.studies.map((study: string, studyIdx: number) => (
+                                      <li key={studyIdx} className="flex items-start gap-1">
+                                        <FileText className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-700">{study}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))}
+          </div>
+        </CardContent>
         
-        {importing && (
-          <div className="space-y-2">
-            <Progress value={progress} />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>Importando dados...</span>
-              <span>{Math.round(progress)}%</span>
+        {studyFiles && studyFiles.length > 0 && (
+          <div className="px-6 pb-3">
+            <div className="border-t pt-3">
+              <h4 className="font-medium mb-2">Arquivos de Estudos Científicos ({studyFiles.length})</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {studyFiles.map((file) => (
+                  <div key={file.id} className="border rounded p-2 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm truncate">{file.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
-        <div>
-          <p className="text-xs text-gray-500">
-            Arquivo original: {results.originalFileName}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} disabled={importing}>
-            Cancelar
-          </Button>
-          <Button onClick={handleImport} disabled={importing}>
-            {importing ? (
-              <>
-                <span className="animate-spin mr-2">●</span>
-                Importando...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Confirmar Importação
-              </>
-            )}
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+        
+        <CardFooter className="border-t flex justify-end gap-2 p-4">
+          <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button onClick={onImport}>Confirmar Importação</Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
+
+// Componente para cartões de estatísticas
+const StatsCard: React.FC<{ title: string; value: number; description: string }> = ({
+  title,
+  value,
+  description
+}) => (
+  <div className="bg-white border rounded-md p-4 flex flex-col gap-1">
+    <h4 className="text-sm text-gray-500 uppercase tracking-wide">{title}</h4>
+    <div className="text-2xl font-bold">{value}</div>
+    <p className="text-sm text-gray-600">{description}</p>
+  </div>
+);
 
 export default ImportResultsView;

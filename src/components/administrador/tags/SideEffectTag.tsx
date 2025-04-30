@@ -6,17 +6,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface SideEffectTagProps {
   effect: string;
-  score?: number; // Tornando o score opcional
+  score?: number; 
   showScore?: boolean;
-  description?: string; // Adicionando a propriedade description
+  description?: string;
   className?: string;
 }
 
 const SideEffectTag: React.FC<SideEffectTagProps> = ({ 
   effect, 
-  score = 0, // Definindo um valor padrão para score
+  score = 0,
   showScore = true,
-  description = "", // Valor padrão para description
+  description = "",
   className = ""
 }) => {
   // Determina a cor do badge baseado na intensidade do efeito colateral

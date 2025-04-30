@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileSpreadsheet, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, Check, AlertTriangle, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -12,9 +12,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SpreadsheetImportProps {
   onImportComplete: (result: any) => void;
+  hasPdfFiles?: boolean;
 }
 
-const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({ onImportComplete }) => {
+const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({
+  onImportComplete,
+  hasPdfFiles = false
+}) => {
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
@@ -89,10 +93,6 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({ onImportComplete 
         });
       }, 300);
       
-      // Ler o conteúdo do arquivo
-      const formData = new FormData();
-      formData.append('file', file);
-      
       // Upload para storage temporário
       const fileName = `temp_import/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
@@ -110,7 +110,12 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({ onImportComplete 
       
       // Processar via Edge Function
       const { data, error: processError } = await supabase.functions.invoke('process-nutraceutical-spreadsheet', {
-        body: { fileUrl: publicUrl, fileName: file.name }
+        body: { 
+          fileUrl: publicUrl, 
+          fileName: file.name,
+          // Adicionar flag para indicar que há PDFs associados
+          hasStudyFiles: hasPdfFiles
+        }
       });
       
       if (processError) {
@@ -122,7 +127,7 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({ onImportComplete 
       
       toast({
         title: "Processamento concluído",
-        description: `${data.nutraceuticalsCount || 0} nutracêuticos identificados com ${data.relationsCount || 0} relações.`,
+        description: `${data.nutraceuticalsCount || 0} nutracêuticos identificados com ${data.relationsCount || 0} relações e ${data.studiesCount || 0} estudos científicos.`,
       });
       
       // Callback com os resultados do processamento
@@ -210,8 +215,17 @@ const SpreadsheetImport: React.FC<SpreadsheetImportProps> = ({ onImportComplete 
                   </table>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Mostrando {previewData.length} de {previewData.length} linhas
+                  Mostrando {previewData.length} linhas
                 </p>
+              </div>
+            )}
+            
+            {hasPdfFiles && (
+              <div className="mt-4 bg-blue-50 p-3 rounded-md flex items-start gap-2">
+                <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm text-blue-700">
+                  <p>Existem arquivos PDF de estudos científicos que serão associados durante o processamento.</p>
+                </div>
               </div>
             )}
             

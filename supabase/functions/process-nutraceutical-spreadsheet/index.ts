@@ -29,13 +29,13 @@ async function processSpreadsheetWithAI(fileUrl: string, fileName: string) {
       fileContent = await fileResponse.text();
     } else {
       // Para demonstração, vamos simular um conteúdo para arquivos Excel
-      fileContent = `Nome,Descrição,Categoria,Condição,Prevenção,Tratamento,Suporte
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Artrite,3.8,4.2,4.0
-Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Doenças Inflamatórias Intestinais,3.5,3.8,3.9
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Hipertensão,3.9,3.1,4.0
-Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Triglicerídeos Elevados,2.8,4.3,3.7
-Resveratrol,Composto fenólico encontrado em uvas,Longevidade,Estresse Oxidativo,4.1,3.2,3.5
-Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Osteoartrite,2.5,3.7,4.2`;
+      fileContent = `Nome,Descrição,Categoria,Condição,Prevenção,Tratamento,Suporte,Estudos
+Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Artrite,3.8,4.2,4.0,"Estudo 1|Estudo 2|Estudo 3"
+Curcumina,Extrato de Cúrcuma com propriedades anti-inflamatórias,Anti-inflamatório,Doenças Inflamatórias Intestinais,3.5,3.8,3.9,"Estudo 2|Estudo 4"
+Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Hipertensão,3.9,3.1,4.0,"Estudo 5|Estudo 6"
+Ômega-3,Ácidos graxos essenciais de cadeia longa,Cardíaco,Triglicerídeos Elevados,2.8,4.3,3.7,"Estudo 5|Estudo 7"
+Resveratrol,Composto fenólico encontrado em uvas,Longevidade,Estresse Oxidativo,4.1,3.2,3.5,"Estudo 8|Estudo 9"
+Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Osteoartrite,2.5,3.7,4.2,"Estudo 10|Estudo 11|Estudo 12"`;
     }
     
     // Chamar a OpenAI para processar o conteúdo
@@ -51,11 +51,11 @@ Glucosamina,Aminomonossacarídeo precursor de glicosaminoglicanos,Articular,Oste
           messages: [
             {
               role: 'system',
-              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos de planilhas. Extraia os nutracêuticos, suas categorias e relações com condições de saúde (prevenção, tratamento e suporte).'
+              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos de planilhas. Extraia os nutracêuticos, suas categorias e relações com condições de saúde (prevenção, tratamento e suporte), bem como estudos científicos relacionados.'
             },
             {
               role: 'user',
-              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos:\n\n${fileContent}`
+              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos. Identifique cada estudo científico como um item separado na estrutura e associe-os com os nutracêuticos e condições corretos:\n\n${fileContent}`
             }
           ],
           response_format: { type: 'json_object' }
@@ -94,7 +94,7 @@ function processAiOutput(aiOutput: any, fileName: string) {
 
 // Função para simular dados processados (para demonstração)
 function simulateProcessedData(fileContent: string, fileName: string) {
-  // Criar dados simulados para demonstração
+  // Criar dados simulados para demonstração, agora com estudos científicos
   const nutraceuticals = [
     {
       name: "Curcumina",
@@ -107,7 +107,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 3.8,
             treatment: 4.2,
             support: 4.0
-          }
+          },
+          studies: [
+            "Estudo clínico randomizado sobre efeitos anti-inflamatórios da curcumina em pacientes com artrite",
+            "Meta-análise de efeitos da curcumina em condições inflamatórias"
+          ]
         },
         {
           name: "Doenças Inflamatórias Intestinais",
@@ -115,7 +119,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 3.5,
             treatment: 3.8,
             support: 3.9
-          }
+          },
+          studies: [
+            "Meta-análise de efeitos da curcumina em condições inflamatórias",
+            "Estudo observacional sobre curcumina e microbioma intestinal"
+          ]
         }
       ]
     },
@@ -130,7 +138,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 3.9,
             treatment: 3.1,
             support: 4.0
-          }
+          },
+          studies: [
+            "Revisão sistemática sobre ácidos graxos ômega-3 e saúde cardiovascular",
+            "Estudo longitudinal sobre consumo de ômega-3 e pressão arterial"
+          ]
         },
         {
           name: "Triglicerídeos Elevados",
@@ -138,7 +150,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 2.8,
             treatment: 4.3,
             support: 3.7
-          }
+          },
+          studies: [
+            "Revisão sistemática sobre ácidos graxos ômega-3 e saúde cardiovascular",
+            "Ensaio clínico sobre suplementação de EPA/DHA e perfil lipídico"
+          ]
         }
       ]
     },
@@ -153,7 +169,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 4.1,
             treatment: 3.2,
             support: 3.5
-          }
+          },
+          studies: [
+            "Estudo in vitro sobre capacidade antioxidante do resveratrol",
+            "Estudo em modelo animal sobre resveratrol e biomarcadores de estresse oxidativo"
+          ]
         }
       ]
     },
@@ -168,7 +188,12 @@ function simulateProcessedData(fileContent: string, fileName: string) {
             prevention: 2.5,
             treatment: 3.7,
             support: 4.2
-          }
+          },
+          studies: [
+            "Meta-análise dos efeitos da glucosamina em pacientes com osteoartrite",
+            "Estudo de acompanhamento de longo prazo sobre mobilidade articular e glucosamina",
+            "Comparação entre glucosamina e anti-inflamatórios em dor articular"
+          ]
         }
       ]
     }
@@ -178,10 +203,14 @@ function simulateProcessedData(fileContent: string, fileName: string) {
   const nutraceuticalsCount = nutraceuticals.length;
   let conditionsCount = 0;
   let relationsCount = 0;
+  let studiesCount = 0;
   
   nutraceuticals.forEach(n => {
     conditionsCount += new Set(n.conditions.map(c => c.name)).size;
     relationsCount += n.conditions.length;
+    n.conditions.forEach(c => {
+      studiesCount += (c.studies?.length || 0);
+    });
   });
 
   return {
@@ -191,9 +220,11 @@ function simulateProcessedData(fileContent: string, fileName: string) {
     nutraceuticalsCount,
     conditionsCount,
     relationsCount,
+    studiesCount,
     warnings: [
       "Alguns nutracêuticos podem exigir revisão manual para garantir precisão dos dados.",
-      "Considere verificar as pontuações de eficácia com a literatura científica mais recente."
+      "Considere verificar as pontuações de eficácia com a literatura científica mais recente.",
+      "Verifique se os estudos científicos foram corretamente associados às condições."
     ]
   };
 }
@@ -207,7 +238,7 @@ serve(async (req) => {
 
   try {
     // Obter dados da requisição
-    const { fileUrl, fileName } = await req.json();
+    const { fileUrl, fileName, studiesFiles } = await req.json();
     
     if (!fileUrl || !fileName) {
       throw new Error('URL do arquivo e nome do arquivo são obrigatórios');
@@ -215,6 +246,15 @@ serve(async (req) => {
     
     // Processar a planilha
     const processedData = await processSpreadsheetWithAI(fileUrl, fileName);
+    
+    // Se houver arquivos de estudos, adicionar à resposta
+    if (studiesFiles && Array.isArray(studiesFiles)) {
+      processedData.studiesFiles = studiesFiles.map(file => ({
+        ...file,
+        processStatus: 'queued',
+        message: 'Arquivo de estudo científico na fila para processamento'
+      }));
+    }
     
     // Retornar os dados processados
     return new Response(

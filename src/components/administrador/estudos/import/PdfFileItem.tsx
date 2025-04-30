@@ -13,6 +13,8 @@ export interface StudyPdfFile {
   status: 'queued' | 'uploading' | 'success' | 'error';
   errorMessage?: string;
   file: File;
+  nutraceuticalId?: string; // ID do nutracêutico associado
+  conditionId?: string;    // ID da condição associada
 }
 
 interface PdfFileItemProps {
