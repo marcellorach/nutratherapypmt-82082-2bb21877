@@ -5,34 +5,54 @@ import { Nutraceutical } from "@/types";
  * Mapeia os dados dos nutracêuticos do formato do banco para o formato utilizado na UI
  */
 export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
-  return dbItems.map(item => {
+  // Verificar se já processamos algum item para evitar duplicações
+  const processedIds = new Set<string>();
+  
+  return dbItems.filter(item => {
+    // Filtrar itens duplicados baseado no ID
+    if (processedIds.has(item.id)) {
+      return false;
+    }
+    processedIds.add(item.id);
+    return true;
+  }).map(item => {
     // Extrair condições de saúde associadas
     const healthConditions = (item.nutraceutical_health_conditions || [])
       .filter((nch: any) => nch.condition)
-      .map((nch: any) => ({
-        id: nch.condition.id,
-        name: nch.condition.name,
-        description: nch.condition.description,
-        efficacyScore: nch.efficacy_score || 0,
-        relationshipType: nch.relationship_type || 'support'
-      }));
+      .map((nch: any) => {
+        // Garantir que o tipo de relacionamento esteja normalizado
+        let relationshipType = nch.relationship_type || 'support';
+        
+        // Normalizar o tipo de relacionamento (garantindo consistência)
+        relationshipType = relationshipType.toLowerCase();
+        if (relationshipType.includes('prev')) {
+          relationshipType = 'prevention';
+        } else if (relationshipType.includes('trat')) {
+          relationshipType = 'treatment';
+        } else {
+          relationshipType = 'support';
+        }
+        
+        return {
+          id: nch.condition.id,
+          name: nch.condition.name,
+          description: nch.condition.description,
+          efficacyScore: nch.efficacy_score || 0,
+          relationshipType: relationshipType
+        };
+      });
       
     // Separar as condições pelo tipo de relacionamento
-    // Garantir que o tipo esteja normalizado e que todas as condições tenham um tipo definido
     const preventionConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'prevention' || 
-                 c.relationshipType === 'prevenção' || 
-                 c.relationshipType === 'prevencao'
+      (c: any) => c.relationshipType === 'prevention'
     );
     
     const treatmentConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'treatment' || 
-                 c.relationshipType === 'tratamento'
+      (c: any) => c.relationshipType === 'treatment'
     );
     
     const supportConditions = healthConditions.filter(
-      (c: any) => c.relationshipType === 'support' || 
-                 c.relationshipType === 'suporte'
+      (c: any) => c.relationshipType === 'support'
     );
       
     // Extrair estudos científicos associados

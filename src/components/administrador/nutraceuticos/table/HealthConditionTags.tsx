@@ -29,6 +29,10 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
 
   return (
     <div className="flex flex-wrap gap-1">
+      {conditions.length === 0 && (
+        <span className="text-gray-400 text-sm">Nenhuma condição</span>
+      )}
+      
       {conditions.map((condition, index) => (
         <Badge 
           key={`${condition.name}-${index}`}

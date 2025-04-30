@@ -74,11 +74,11 @@ Resveratrol,Anti-envelhecimento,Suporte,3.2`;
           messages: [
             {
               role: 'system',
-              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte).'
+              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte). É crucial que você preserve os valores exatos de pontuação de eficácia da planilha original e não os altere em nenhuma hipótese.'
             },
             {
               role: 'user',
-              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos. Identifique CADA nutracêutico como item separado, mesmo se repetidos, e associe-os às condições, tipos de aplicação e pontuações EXATAS da planilha:\n\n${fileContent}`
+              content: `Analise esta planilha de nutracêuticos e retorne um objeto JSON estruturado com os dados extraídos. Identifique CADA nutracêutico como item separado, mesmo se repetidos, e associe-os às condições, tipos de aplicação e pontuações EXATAS da planilha. Lembre-se que é EXTREMAMENTE IMPORTANTE preservar as pontuações exatas de eficácia para cada condição conforme estão na planilha:\n\n${fileContent}`
             }
           ],
           response_format: { type: 'json_object' }

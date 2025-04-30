@@ -11,33 +11,44 @@ export function processAiOutput(aiOutput: any, fileName: string) {
   // Aqui processaríamos a saída da IA de forma mais completa
   // Se a estrutura não for o que esperamos, fazemos adaptações
   try {
+    console.log("Processando saída da IA:", JSON.stringify(aiOutput).substring(0, 200) + "...");
+    
     const nutraceuticals = Array.isArray(aiOutput.nutraceuticals) 
       ? aiOutput.nutraceuticals 
       : aiOutput.items || aiOutput.data || [];
 
     // Verificar se temos os dados esperados, caso contrário, usar simulação
     if (nutraceuticals.length > 0) {
+      console.log(`Encontrados ${nutraceuticals.length} nutracêuticos na saída da IA`);
+      
       // Garantir que os tipos de relação e pontuações de eficácia estejam corretos
       nutraceuticals.forEach((nutra: any) => {
         if (Array.isArray(nutra.conditions)) {
           nutra.conditions.forEach((condition: any) => {
             // Garantir que o tipo de relacionamento esteja normalizado
             if (condition.relationshipType) {
-              condition.relationshipType = condition.relationshipType.toLowerCase();
+              const normalized = condition.relationshipType.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              
               // Normalizar o tipo de relacionamento
-              if (condition.relationshipType.includes('preven')) {
+              if (normalized.includes('preven')) {
                 condition.relationshipType = 'prevention';
-              } else if (condition.relationshipType.includes('trata')) {
+              } else if (normalized.includes('trata')) {
                 condition.relationshipType = 'treatment';
               } else {
                 condition.relationshipType = 'support';
               }
+              
+              console.log(`Tipo de relacionamento normalizado: ${condition.relationshipType}`);
             }
             
             // Garantir que a pontuação de eficácia seja um número válido
-            if (condition.efficacyScore) {
+            if (condition.efficacyScore !== undefined) {
               const score = parseFloat(condition.efficacyScore);
               condition.efficacyScore = !isNaN(score) ? score : 3.0;
+              console.log(`Pontuação de eficácia: ${condition.efficacyScore}`);
+            } else {
+              condition.efficacyScore = 3.0;
+              console.log("Usando pontuação padrão de 3.0 por falta de valor");
             }
           });
         }

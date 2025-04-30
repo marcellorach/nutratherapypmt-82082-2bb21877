@@ -28,11 +28,16 @@ export function normalizeRelationType(applicationType: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   
+  // Verificar correspondências com diferentes padrões de nomes para prevenção
   if (normalized.includes('preven')) {
     return 'prevention';
-  } else if (normalized.includes('trata')) {
+  } 
+  // Verificar correspondências com diferentes padrões de nomes para tratamento
+  else if (normalized.includes('trata')) {
     return 'treatment';
-  } else {
+  } 
+  // Por padrão, assumir suporte
+  else {
     return 'support';
   }
 }
@@ -45,7 +50,7 @@ export function normalizeRelationType(applicationType: string): string {
 export function processExtractedEntries(entries: any[]): any[] {
   console.log(`Processando ${entries.length} entradas da planilha`);
   
-  // Agrupar por nome de nutracêutico
+  // Agrupar por nome de nutracêutico para evitar duplicações
   const groupedByName: Record<string, any[]> = {};
   
   entries.forEach(entry => {

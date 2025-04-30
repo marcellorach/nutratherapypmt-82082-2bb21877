@@ -1,47 +1,82 @@
 
 import React from 'react';
-import { FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { TrendingUp } from 'lucide-react';
 
 interface RelatedConditionsListProps {
   conditions: any[];
 }
 
 const RelatedConditionsList: React.FC<RelatedConditionsListProps> = ({ conditions }) => {
-  return (
-    <div className="grid gap-3">
-      {conditions.map((cond: any, condIdx: number) => (
-        <div key={condIdx} className="bg-gray-50 p-3 rounded-md">
-          <div className="flex justify-between items-center">
-            <h6 className="font-medium text-sm">{cond.name}</h6>
-            <div className="flex gap-1">
-              <Badge className="bg-green-100 text-green-800 border-0">
-                P: {cond.efficacyScores.prevention.toFixed(1)}
+  if (!conditions || conditions.length === 0) {
+    return <div className="text-sm text-gray-500">Nenhuma condição relacionada encontrada</div>;
+  }
+
+  // Agrupar por tipo de relacionamento
+  const preventionConditions = conditions.filter(c => 
+    c.relationshipType === 'prevention' || 
+    c.relationship_type === 'prevention'
+  );
+  
+  const treatmentConditions = conditions.filter(c => 
+    c.relationshipType === 'treatment' || 
+    c.relationship_type === 'treatment'
+  );
+  
+  const supportConditions = conditions.filter(c => 
+    c.relationshipType === 'support' || 
+    c.relationship_type === 'support' || 
+    (!c.relationshipType && !c.relationship_type)
+  );
+
+  const getRelationType = (type: string) => {
+    if (type === 'prevention') return 'Prevenção';
+    if (type === 'treatment') return 'Tratamento';
+    return 'Suporte';
+  };
+
+  const getEfficacyColor = (score: number): string => {
+    if (score >= 4) return "bg-green-100 text-green-800 border-green-300";
+    if (score >= 3) return "bg-blue-100 text-blue-800 border-blue-300";
+    if (score >= 2) return "bg-amber-100 text-amber-800 border-amber-300";
+    return "bg-gray-100 text-gray-800 border-gray-300";
+  };
+
+  const renderConditionsGroup = (conditionsGroup: any[], title: string) => {
+    if (conditionsGroup.length === 0) return null;
+
+    return (
+      <div className="mb-3" key={title}>
+        <h6 className="text-sm font-medium mb-1">{title}</h6>
+        <div className="flex flex-wrap gap-1">
+          {conditionsGroup.map((condition, idx) => {
+            const score = condition.efficacyScore || condition.efficacy_score || 0;
+            return (
+              <Badge 
+                key={idx} 
+                variant="outline"
+                className={`${getEfficacyColor(score)} flex items-center gap-1`}
+              >
+                <span>{condition.name}</span>
+                <div className="flex items-center space-x-1 ml-1">
+                  <TrendingUp size={12} className="opacity-70" />
+                  <span className="text-xs font-medium">
+                    {score.toFixed(1)}/5
+                  </span>
+                </div>
               </Badge>
-              <Badge className="bg-blue-100 text-blue-800 border-0">
-                T: {cond.efficacyScores.treatment.toFixed(1)}
-              </Badge>
-              <Badge className="bg-purple-100 text-purple-800 border-0">
-                S: {cond.efficacyScores.support.toFixed(1)}
-              </Badge>
-            </div>
-          </div>
-          
-          {cond.studies && cond.studies.length > 0 && (
-            <div className="mt-2">
-              <h6 className="text-xs font-medium mb-1 text-gray-600">Estudos Associados:</h6>
-              <ul className="text-xs space-y-1">
-                {cond.studies.map((study: string, studyIdx: number) => (
-                  <li key={studyIdx} className="flex items-start gap-1">
-                    <FileText className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{study}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            );
+          })}
         </div>
-      ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-2">
+      {renderConditionsGroup(preventionConditions, "Prevenção")}
+      {renderConditionsGroup(treatmentConditions, "Tratamento")}
+      {renderConditionsGroup(supportConditions, "Suporte")}
     </div>
   );
 };
