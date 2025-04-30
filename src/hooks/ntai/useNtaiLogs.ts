@@ -5,13 +5,16 @@ export const useNtaiLogs = () => {
   const [logEntries, setLogEntries] = useState<string[]>([]);
 
   const addLogEntry = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogEntries(prev => [...prev, `[${timestamp}] ${message}`]);
+    setLogEntries(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
 
-  return {
-    logEntries,
+  const clearLogs = () => {
+    setLogEntries([]);
+  };
+
+  return { 
+    logEntries, 
     addLogEntry,
-    setLogEntries,
+    clearLogs
   };
 };

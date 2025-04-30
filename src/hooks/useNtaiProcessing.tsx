@@ -7,12 +7,14 @@ import { useNtaiConfig } from './ntai/useNtaiConfig';
 import { useAvailableStudies } from './ntai/useAvailableStudies';
 import { useSelectionHandling } from './ntai/useSelectionHandling';
 import { useProcessingLogic } from './ntai/useProcessingLogic';
+import { useAnalysisResults } from './ntai/useAnalysisResults';
 
 export const useNtaiProcessing = () => {
-  const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
+  // Integração dos hooks especializados
   const { aiConfigs } = useNtaiConfig();
   const { logEntries, addLogEntry } = useNtaiLogs();
   const { availableStudies } = useAvailableStudies();
+  const { analysisResult, setAnalysisResult } = useAnalysisResults();
   
   // Extrair métodos do hook de seleção
   const { 

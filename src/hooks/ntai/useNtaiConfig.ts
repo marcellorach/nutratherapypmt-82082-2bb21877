@@ -1,26 +1,23 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useNtaiConfig = () => {
-  const [aiConfigs, setAiConfigs] = useState<Record<string, string>>({});
+  const [aiConfigs, setAiConfigs] = useState({
+    modelName: "GPT-4o",
+    temperature: "0.7",
+    nutraceuticals_prompt: "Extrair todos os nutracêuticos mencionados no estudo e suas aplicações.",
+    conditions_prompt: "Identificar todas as condições de saúde abordadas no estudo."
+  });
 
-  useEffect(() => {
-    const loadAiConfigs = async () => {
-      const configs = {
-        'modelName': 'gpt-4o',
-        'temperature': '0.7',
-        'nutraceuticals_prompt': 'Analise este estudo científico e identifique os nutracêuticos mencionados, suas propriedades, dosagens e evidências científicas.',
-        'conditions_prompt': 'Identifique as condições de saúde relacionadas aos nutracêuticos neste estudo e avalie a eficácia para cada condição.',
-      };
-      
-      setAiConfigs(configs);
-    };
-    
-    loadAiConfigs();
-  }, []);
+  const updateAiConfig = (key: string, value: string) => {
+    setAiConfigs(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
-  return {
-    aiConfigs,
-    setAiConfigs,
+  return { 
+    aiConfigs, 
+    updateAiConfig 
   };
 };
