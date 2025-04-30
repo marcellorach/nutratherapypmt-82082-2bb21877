@@ -113,7 +113,7 @@ const PdfStudiesUploadSection: React.FC = () => {
           .from('scispace')
           .getPublicUrl(filePath);
           
-        // Atualizar progresso
+        // Atualizar progresso - Garantindo que é um número
         setPdfFiles(prev => prev.map((f, idx) => 
           idx === i ? { ...f, uploadProgress: 50, processingState: 'processing' } : f
         ));
@@ -149,7 +149,7 @@ const PdfStudiesUploadSection: React.FC = () => {
           
         if (dbError) throw new Error(`Erro ao salvar no banco: ${dbError.message}`);
         
-        // Finalizar com sucesso
+        // Finalizar com sucesso - Garantindo que é um número
         setPdfFiles(prev => prev.map((f, idx) => 
           idx === i ? { ...f, uploadProgress: 100, processingState: 'success' } : f
         ));
@@ -159,7 +159,7 @@ const PdfStudiesUploadSection: React.FC = () => {
       } catch (error: any) {
         console.error(`Erro ao processar arquivo ${file.name}:`, error);
         
-        // Atualizar estado para erro
+        // Atualizar estado para erro - Garantindo que uploadProgress é um número
         setPdfFiles(prev => prev.map((f, idx) => 
           idx === i ? { 
             ...f, 
