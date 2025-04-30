@@ -99,7 +99,7 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({
             <span>{file.processingState === 'uploading' ? 'Enviando...' : 'Processando...'}</span>
             <span>{file.uploadProgress}%</span>
           </div>
-          <Progress value={file.uploadProgress} className="h-1" />
+          <Progress value={Number(file.uploadProgress)} className="h-1" />
         </div>
       )}
     </div>
