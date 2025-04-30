@@ -19,7 +19,7 @@ const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({ onFilesAdded, disabled })
       const newFiles = acceptedFiles.map(file => 
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-          uploadProgress: 0,
+          uploadProgress: 0, // Garantindo que é inicializado como número
           processingState: 'waiting' as const,
           studyId: `pdf-${Date.now()}-${file.name}`,
           nutraceuticalAssociation: '',
