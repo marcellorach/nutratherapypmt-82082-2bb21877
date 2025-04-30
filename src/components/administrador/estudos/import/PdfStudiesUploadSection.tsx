@@ -321,9 +321,9 @@ const PdfStudiesUploadSection: React.FC = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs text-gray-500">
                           <span>{file.processingState === 'uploading' ? 'Enviando...' : 'Processando...'}</span>
-                          <span>{file.uploadProgress}%</span>
+                          <span>{file.uploadProgress || 0}%</span>
                         </div>
-                        <Progress value={file.uploadProgress} className="h-1" />
+                        <Progress value={file.uploadProgress || 0} className="h-1" />
                       </div>
                     )}
                   </div>
