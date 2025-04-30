@@ -97,7 +97,7 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({
         <div className="space-y-1">
           <div className="flex justify-between text-xs text-gray-500">
             <span>{file.processingState === 'uploading' ? 'Enviando...' : 'Processando...'}</span>
-            <span>{Number(file.uploadProgress)}%</span>
+            <span>{Math.round(Number(file.uploadProgress))}%</span>
           </div>
           <Progress value={Number(file.uploadProgress)} className="h-1" />
         </div>

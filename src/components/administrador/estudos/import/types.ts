@@ -1,7 +1,7 @@
 
 export interface StudyPdfFile extends File {
   preview?: string;
-  uploadProgress: number; // Garantindo que é sempre um número
+  uploadProgress: number; // Definido explicitamente como number
   processingState: 'waiting' | 'uploading' | 'processing' | 'success' | 'error';
   error?: string;
   studyId: string;
