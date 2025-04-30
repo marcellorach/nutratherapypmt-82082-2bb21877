@@ -27,8 +27,8 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({
 }) => {
   // Converter uploadProgress para número sempre que for usado
   const progressValue = typeof file.uploadProgress === 'string' 
-    ? parseFloat(file.uploadProgress) 
-    : file.uploadProgress;
+    ? parseFloat(file.uploadProgress) || 0 // Se parseFloat retornar NaN, use 0
+    : file.uploadProgress || 0; // Se for null/undefined, use 0
 
   return (
     <div className="p-3 hover:bg-gray-50">
@@ -104,7 +104,7 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({
             <span>{file.processingState === 'uploading' ? 'Enviando...' : 'Processando...'}</span>
             <span>{Math.round(progressValue)}%</span>
           </div>
-          <Progress value={progressValue as number} className="h-1" />
+          <Progress value={Number(progressValue)} className="h-1" />
         </div>
       )}
     </div>
