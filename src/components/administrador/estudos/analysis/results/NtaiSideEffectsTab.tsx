@@ -2,7 +2,7 @@
 import React from 'react';
 import { AlertTriangle } from "lucide-react";
 import { NtaiSideEffectTag } from '@/types/ntai';
-import SideEffectTag from '../../../tags/SideEffectTag';
+import SideEffectTag from '@/components/administrador/tags/SideEffectTag';
 
 interface NtaiSideEffectsTabProps {
   sideEffects: NtaiSideEffectTag[];
@@ -22,6 +22,7 @@ const NtaiSideEffectsTab: React.FC<NtaiSideEffectsTabProps> = ({ sideEffects }) 
               key={idx}
               effect={effect.name || effect.description || ""} 
               score={effect.intensityScore || 3}
+              description={effect.description || ""}
               className="m-1"
             />
           ))

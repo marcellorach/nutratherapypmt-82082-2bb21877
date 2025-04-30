@@ -8,6 +8,7 @@ interface SideEffectTagProps {
   effect: string;
   score?: number; // Tornando o score opcional
   showScore?: boolean;
+  description?: string; // Adicionando a propriedade description
   className?: string;
 }
 
@@ -15,6 +16,7 @@ const SideEffectTag: React.FC<SideEffectTagProps> = ({
   effect, 
   score = 0, // Definindo um valor padrão para score
   showScore = true,
+  description = "", // Valor padrão para description
   className = ""
 }) => {
   // Determina a cor do badge baseado na intensidade do efeito colateral
@@ -62,6 +64,7 @@ const SideEffectTag: React.FC<SideEffectTagProps> = ({
         </TooltipTrigger>
         <TooltipContent>
           <p><span className="font-medium">{effect}</span> {score !== undefined && <>- Intensidade: {score.toFixed(1)}/5</>}</p>
+          {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
           <p className="text-xs text-gray-500 mt-1">
             {score >= 4 ? 'Efeito colateral severo' : 
              score >= 2.5 ? 'Efeito colateral moderado' : 

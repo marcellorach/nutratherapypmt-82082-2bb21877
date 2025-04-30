@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { X, Trash2, AlertCircle, FileSpreadsheet, FileCheck, Loader2 } from 'lucide-react';
+import { Trash2, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 export interface StudyPdfFile {
   id: string;
@@ -20,99 +18,68 @@ export interface StudyPdfFile {
 interface PdfFileItemProps {
   file: StudyPdfFile;
   onRemove: (id: string) => void;
-  canRemove?: boolean;
 }
 
-const PdfFileItem: React.FC<PdfFileItemProps> = ({ file, onRemove, canRemove = true }) => {
-  const getStatusIcon = () => {
-    switch (file.status) {
-      case 'queued':
-        return <FileSpreadsheet className="h-4 w-4 text-blue-500" />;
-      case 'uploading':
-        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
-      case 'success':
-        return <FileCheck className="h-4 w-4 text-green-500" />;
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <FileSpreadsheet className="h-4 w-4" />;
-    }
-  };
+const formatSize = (bytes: number): string => {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = bytes;
+  let unitIndex = 0;
   
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
-  };
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  
+  return `${size.toFixed(1)} ${units[unitIndex]}`;
+};
 
+const PdfFileItem: React.FC<PdfFileItemProps> = ({ file, onRemove }) => {
   return (
-    <div 
-      className={cn(
-        "flex items-center justify-between p-3 rounded-lg border transition-colors",
-        file.status === 'error' ? "bg-red-50 border-red-200" : 
-        file.status === 'success' ? "bg-green-50 border-green-200" : 
-        "bg-blue-50 border-blue-100"
-      )}
-    >
-      <div className="flex items-center space-x-3 flex-1">
-        {getStatusIcon()}
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start">
-            <p className="text-sm font-medium truncate mr-2">{file.name}</p>
-            {canRemove && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
-                onClick={() => onRemove(file.id)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          
-          <div className="mt-1">
-            {file.status === 'error' ? (
-              <div className="flex items-center text-xs text-red-600">
-                <span className="truncate">{file.errorMessage || 'Erro no upload'}</span>
-              </div>
-            ) : file.status === 'uploading' ? (
-              <div className="w-full space-y-1">
-                <Progress 
-                  value={Number(file.uploadProgress) || 0} 
-                  className="h-1" 
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{formatFileSize(file.size)}</span>
-                  <span>{Number(file.uploadProgress).toFixed(0)}%</span>
-                </div>
-              </div>
-            ) : (
-              <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
-            )}
+    <div className="border rounded-md p-3 bg-white">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-blue-500" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{file.name}</p>
+            <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onRemove(file.id)}
+          className="h-8 w-8 p-0"
+        >
+          <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500 transition-colors" />
+          <span className="sr-only">Remover</span>
+        </Button>
       </div>
       
-      {file.status !== 'uploading' && canRemove && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 ml-2 hover:bg-red-100 hover:text-red-600"
-                onClick={() => onRemove(file.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Remover arquivo</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      {file.status === 'queued' && (
+        <div className="text-xs text-gray-500">Aguardando processamento...</div>
+      )}
+      
+      {file.status === 'uploading' && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-blue-600 font-medium">Enviando...</span>
+            <span className="text-gray-500">{Number(file.uploadProgress).toFixed(0)}%</span>
+          </div>
+          <Progress value={Number(file.uploadProgress)} className="h-1.5" />
+        </div>
+      )}
+      
+      {file.status === 'success' && (
+        <div className="text-xs text-green-600 font-medium">
+          Upload concluído
+        </div>
+      )}
+      
+      {file.status === 'error' && (
+        <div className="text-xs text-red-600 font-medium flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          <span>{file.errorMessage || 'Erro no upload'}</span>
+        </div>
       )}
     </div>
   );
