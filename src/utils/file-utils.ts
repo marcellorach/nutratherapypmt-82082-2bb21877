@@ -20,8 +20,8 @@ export function formatFileSize(bytes: number): string {
  * @returns Configuração com componente de ícone e classe de cor
  */
 import { 
-  FileSpreadsheet, FileText, FilePdf, FileCode, 
-  FileJson, File
+  FileSpreadsheet, FileText, File, 
+  FileCode, FileJson
 } from 'lucide-react';
 
 export function getFileIconConfig(extension: string) {
@@ -38,7 +38,7 @@ export function getFileIconConfig(extension: string) {
       };
     case 'pdf':
       return { 
-        icon: FilePdf, 
+        icon: FileText, 
         color: 'text-red-600' 
       };
     case 'txt':
