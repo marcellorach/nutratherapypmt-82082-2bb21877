@@ -305,6 +305,45 @@ export type Database = {
           },
         ]
       }
+      nutraceutical_imports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_processed: boolean | null
+          name: string
+          nutraceutical_count: number | null
+          source_file_name: string | null
+          source_file_path: string | null
+          source_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_processed?: boolean | null
+          name: string
+          nutraceutical_count?: number | null
+          source_file_name?: string | null
+          source_file_path?: string | null
+          source_type?: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_processed?: boolean | null
+          name?: string
+          nutraceutical_count?: number | null
+          source_file_name?: string | null
+          source_file_path?: string | null
+          source_type?: string
+        }
+        Relationships: []
+      }
       nutraceutical_scientific_metadata: {
         Row: {
           created_at: string
@@ -391,6 +430,8 @@ export type Database = {
           description: string | null
           dosage: string | null
           id: string
+          import_batch: string | null
+          import_id: string | null
           name: string
           source: string | null
           updated_at: string
@@ -403,6 +444,8 @@ export type Database = {
           description?: string | null
           dosage?: string | null
           id?: string
+          import_batch?: string | null
+          import_id?: string | null
           name: string
           source?: string | null
           updated_at?: string
@@ -415,6 +458,8 @@ export type Database = {
           description?: string | null
           dosage?: string | null
           id?: string
+          import_batch?: string | null
+          import_id?: string | null
           name?: string
           source?: string | null
           updated_at?: string
@@ -425,6 +470,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "nutraceutical_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceuticals_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceutical_imports"
             referencedColumns: ["id"]
           },
         ]

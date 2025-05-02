@@ -12,15 +12,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useImportManager } from '@/hooks/nutraceuticals/useImportManager';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, 
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction 
 } from '@/components/ui/alert-dialog';
 
+// Interface para importação de nutracêuticos
 interface ImportRecord {
   id: string;
-  created_at: string;
   name: string;
+  created_at: string;
   nutraceutical_count: number;
   description?: string;
   source_type: string;
@@ -37,8 +38,7 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
   onOpenChange,
   onImportsDeleted
 }) => {
-  const [imports, setImports] = useState<ImportRecord[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { imports, isLoading, fetchImports, deleteImport } = useImportManager();
   const [selectedImport, setSelectedImport] = useState<ImportRecord | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -47,37 +47,9 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
   // Carregar dados de importações quando o diálogo for aberto
   useEffect(() => {
     if (open) {
-      fetchImportHistory();
+      fetchImports(50);
     }
   }, [open]);
-
-  const fetchImportHistory = async () => {
-    setIsLoading(true);
-    try {
-      // Buscar registros de importação de nutracêuticos
-      // Nota: Ajuste a tabela conforme sua estrutura de dados
-      const { data, error } = await supabase
-        .from('nutraceutical_imports')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        throw error;
-      }
-
-      setImports(data || []);
-    } catch (err) {
-      console.error('Erro ao buscar histórico de importações:', err);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar o histórico de importações',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDeleteClick = (importRecord: ImportRecord) => {
     setSelectedImport(importRecord);
@@ -89,44 +61,13 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
     
     setIsDeleting(true);
     try {
-      // Primeiramente excluir todos os nutracêuticos dessa importação
-      const { error: deleteNutraceuticalsError } = await supabase
-        .from('nutraceuticals')
-        .delete()
-        .eq('import_id', selectedImport.id);
-
-      if (deleteNutraceuticalsError) {
-        throw deleteNutraceuticalsError;
-      }
-
-      // Remover o registro da importação
-      const { error: deleteImportError } = await supabase
-        .from('nutraceutical_imports')
-        .delete()
-        .eq('id', selectedImport.id);
-
-      if (deleteImportError) {
-        throw deleteImportError;
-      }
-
-      toast({
-        title: 'Importação excluída',
-        description: 'A importação e seus dados foram removidos com sucesso',
-      });
-
-      // Atualizar a lista
-      setImports(prev => prev.filter(item => item.id !== selectedImport.id));
+      const result = await deleteImport(selectedImport.id);
       
-      if (onImportsDeleted) {
-        onImportsDeleted();
+      if (result.success) {
+        if (onImportsDeleted) {
+          onImportsDeleted();
+        }
       }
-    } catch (err) {
-      console.error('Erro ao excluir importação:', err);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir a importação',
-        variant: 'destructive',
-      });
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);

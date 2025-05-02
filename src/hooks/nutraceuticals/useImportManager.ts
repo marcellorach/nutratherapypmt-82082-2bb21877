@@ -3,11 +3,21 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { NutraceuticalImportManager } from '@/utils/import-manager';
 
+// Interface para importação de nutracêuticos
+interface ImportRecord {
+  id: string;
+  name: string;
+  created_at: string;
+  nutraceutical_count: number;
+  description?: string;
+  source_type: string;
+}
+
 /**
  * Hook para gerenciar importações de nutracêuticos
  */
 export const useImportManager = () => {
-  const [imports, setImports] = useState<any[]>([]);
+  const [imports, setImports] = useState<ImportRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -20,7 +30,7 @@ export const useImportManager = () => {
     
     try {
       const data = await NutraceuticalImportManager.listRecentImports(limit);
-      setImports(data);
+      setImports(data as ImportRecord[]);
       return data;
     } catch (err: any) {
       console.error('Erro ao carregar importações:', err);

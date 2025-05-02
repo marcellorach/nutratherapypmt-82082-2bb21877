@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, FileImport, FileQuestion, Trash } from 'lucide-react';
+import { PlusCircle, FileUp, FileQuestion, Trash } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import NutraceuticalImportDialog from './import/NutraceuticalImportDialog';
 import ManageImportsDialog from './import/ManageImportsDialog';
@@ -51,7 +51,7 @@ export const NutraceuticosHeader: React.FC = () => {
           onClick={() => setIsImportDialogOpen(true)}
           size="sm"
         >
-          <FileImport className="mr-2 h-4 w-4" />
+          <FileUp className="mr-2 h-4 w-4" />
           Importar Dados
         </Button>
         

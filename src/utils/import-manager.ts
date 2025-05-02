@@ -2,6 +2,22 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
+ * Interface para os dados de importação
+ */
+interface NutraceuticalImport {
+  id: string;
+  name: string;
+  description?: string;
+  source_type: string;
+  nutraceutical_count?: number;
+  created_at: string;
+  created_by?: string;
+  source_file_name?: string;
+  source_file_path?: string;
+  is_processed?: boolean;
+}
+
+/**
  * Utilitário para gerenciar importações de nutracêuticos
  */
 export const NutraceuticalImportManager = {
@@ -10,10 +26,13 @@ export const NutraceuticalImportManager = {
    * @param limit Número máximo de registros para retornar (padrão: 20)
    * @returns Dados de importações recentes
    */
-  async listRecentImports(limit = 20) {
+  async listRecentImports(limit = 20): Promise<NutraceuticalImport[]> {
     try {
+      // Como a tabela 'nutraceutical_imports' foi recém-criada, precisamos explicitamente
+      // utilizar o método `.from` com `any` para evitar erros de tipagem até que
+      // os tipos do Supabase sejam atualizados
       const { data, error } = await supabase
-        .from('nutraceutical_imports')
+        .from('nutraceutical_imports' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -51,7 +70,7 @@ export const NutraceuticalImportManager = {
 
       // 3. Excluir o registro da importação
       const { error: deleteImportError } = await supabase
-        .from('nutraceutical_imports')
+        .from('nutraceutical_imports' as any)
         .delete()
         .eq('id', importId);
 
