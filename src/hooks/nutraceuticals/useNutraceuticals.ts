@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { NutraceuticalsService } from '@/services/nutraceuticals-service';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 import { useToast } from '@/hooks/use-toast';
 
 /**

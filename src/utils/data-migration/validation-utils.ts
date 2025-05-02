@@ -1,5 +1,5 @@
 
-import { NutraceuticalsService } from "@/services/nutraceuticals-service";
+import { NutraceuticalsService } from "@/services/nutraceuticals";
 
 /**
  * Utilidades para validação na migração de dados
