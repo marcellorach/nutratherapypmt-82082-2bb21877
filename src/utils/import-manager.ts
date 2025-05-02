@@ -29,10 +29,9 @@ export const NutraceuticalImportManager = {
   async listRecentImports(limit = 20): Promise<NutraceuticalImport[]> {
     try {
       // Como a tabela 'nutraceutical_imports' foi recém-criada, precisamos explicitamente
-      // utilizar o método `.from` com `any` para evitar erros de tipagem até que
-      // os tipos do Supabase sejam atualizados
+      // converter os resultados para o tipo NutraceuticalImport para evitar erros de tipagem
       const { data, error } = await supabase
-        .from('nutraceutical_imports' as any)
+        .from('nutraceutical_imports')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -41,7 +40,8 @@ export const NutraceuticalImportManager = {
         throw error;
       }
 
-      return data || [];
+      // Explicitamente converter os dados para o tipo esperado
+      return (data || []) as NutraceuticalImport[];
     } catch (error) {
       console.error('Erro ao listar importações recentes:', error);
       throw error;
@@ -70,7 +70,7 @@ export const NutraceuticalImportManager = {
 
       // 3. Excluir o registro da importação
       const { error: deleteImportError } = await supabase
-        .from('nutraceutical_imports' as any)
+        .from('nutraceutical_imports')
         .delete()
         .eq('id', importId);
 
