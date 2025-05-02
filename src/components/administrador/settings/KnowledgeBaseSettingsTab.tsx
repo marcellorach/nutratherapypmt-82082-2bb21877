@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Brush, Cpu, BarChart } from "lucide-react";
+import { Brush, Cpu, Database, BarChart } from "lucide-react";
 import EnginesPromptsPanel from './panels/EnginesPromptsPanel';
 import ConventionsPanel from './panels/ConventionsPanel';
 import UsagePanel from './panels/UsagePanel';
+import NutraceuticalManagementPanel from './panels/NutraceuticalManagementPanel';
 
 const KnowledgeBaseSettingsTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('engines');
@@ -21,7 +22,7 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="engines" className="flex items-center gap-2">
             <Cpu className="h-4 w-4" />
             <span>Engines & Prompts</span>
@@ -29,6 +30,10 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
           <TabsTrigger value="conventions" className="flex items-center gap-2">
             <Brush className="h-4 w-4" />
             <span>Convenções</span>
+          </TabsTrigger>
+          <TabsTrigger value="nutraceuticals" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            <span>Nutracêuticos</span>
           </TabsTrigger>
           <TabsTrigger value="usage" className="flex items-center gap-2">
             <BarChart className="h-4 w-4" />
@@ -40,6 +45,9 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
         </TabsContent>
         <TabsContent value="conventions" className="mt-6">
           <ConventionsPanel section="knowledge-base" />
+        </TabsContent>
+        <TabsContent value="nutraceuticals" className="mt-6">
+          <NutraceuticalManagementPanel />
         </TabsContent>
         <TabsContent value="usage" className="mt-6">
           <UsagePanel section="knowledge-base" />
