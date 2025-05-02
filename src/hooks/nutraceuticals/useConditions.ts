@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { HealthConditionsService } from '@/services/health-conditions-service';
-import { NutraceuticalsService } from '@/services/nutraceuticals-service';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 import { useToast } from '@/hooks/use-toast';
 
 /**
