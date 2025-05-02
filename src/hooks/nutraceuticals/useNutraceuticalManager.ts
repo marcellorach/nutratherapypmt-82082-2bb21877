@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNutraceuticals } from './useNutraceuticals';
-import { useCategories } from './useCategories';
+import { useOutcomes } from './useOutcomes';
 import { useConditions } from './useConditions';
 import { useIngredients } from './useIngredients';
 import { useStudies } from './useStudies';
@@ -22,12 +22,12 @@ export const useNutraceuticalManager = () => {
   } = useNutraceuticals();
   
   const {
-    categories,
-    isLoading: isLoadingCategories,
-    error: categoriesError,
-    fetchCategories,
-    createCategory
-  } = useCategories();
+    outcomes,
+    isLoading: isLoadingOutcomes,
+    error: outcomesError,
+    fetchOutcomes,
+    createOutcome
+  } = useOutcomes();
   
   const {
     conditions,
@@ -59,14 +59,14 @@ export const useNutraceuticalManager = () => {
   // Estado combinado de carregamento e erro
   const isLoading = 
     isLoadingNutraceuticals || 
-    isLoadingCategories || 
+    isLoadingOutcomes || 
     isLoadingConditions || 
     isLoadingIngredients || 
     isLoadingStudies;
   
   const error = 
     nutraceuticalsError || 
-    categoriesError || 
+    outcomesError || 
     conditionsError || 
     ingredientsError || 
     studiesError;
@@ -77,7 +77,7 @@ export const useNutraceuticalManager = () => {
       try {
         await Promise.all([
           fetchNutraceuticals(),
-          fetchCategories(),
+          fetchOutcomes(),
           fetchConditions(),
           fetchIngredients(),
           fetchStudies()
@@ -98,7 +98,7 @@ export const useNutraceuticalManager = () => {
   return {
     // Dados
     nutraceuticals,
-    categories,
+    outcomes,
     conditions,
     ingredients,
     studies,
@@ -115,8 +115,8 @@ export const useNutraceuticalManager = () => {
     updateNutraceutical,
     deleteNutraceutical,
     
-    // Funções de gerenciamento de categorias
-    createCategory,
+    // Funções de gerenciamento de outcomes
+    createOutcome,
     
     // Funções de gerenciamento de condições
     createCondition,

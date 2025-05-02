@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNutraceuticals } from "@/hooks/nutraceuticals/useNutraceuticals";
-import { useCategories } from "@/hooks/nutraceuticals/useCategories";
+import { useOutcomes } from "@/hooks/nutraceuticals/useOutcomes";
 import { useConditions } from "@/hooks/nutraceuticals/useConditions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
@@ -47,18 +47,18 @@ const NutraceuticalManagementPanel: React.FC = () => {
     source: "",
     chemical_compound: "",
     contraindications: "",
-    category_id: ""
+    outcome_id: ""
   });
 
   // Hooks para carregar dados
   const { nutraceuticals, isLoading, fetchNutraceuticals, createNutraceutical, updateNutraceutical, deleteNutraceutical } = useNutraceuticals();
-  const { categories, fetchCategories } = useCategories();
+  const { outcomes, fetchOutcomes } = useOutcomes();
   const { conditions, fetchConditions } = useConditions();
 
   // Carregar dados iniciais
   useEffect(() => {
     fetchNutraceuticals();
-    fetchCategories();
+    fetchOutcomes();
     fetchConditions();
   }, []);
 
@@ -86,7 +86,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
       contraindications: Array.isArray(nutraceutical.contraindications) 
         ? nutraceutical.contraindications.join("\n") 
         : "",
-      category_id: nutraceutical.category_id || ""
+      outcome_id: nutraceutical.outcome_id || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -191,7 +191,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
       source: "",
       chemical_compound: "",
       contraindications: "",
-      category_id: ""
+      outcome_id: ""
     });
   };
 
@@ -210,19 +210,19 @@ const NutraceuticalManagementPanel: React.FC = () => {
     }));
   };
 
-  // Handler para alterar categoria no select
-  const handleCategoryChange = (value: string) => {
+  // Handler para alterar outcome no select
+  const handleOutcomeChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      category_id: value
+      outcome_id: value
     }));
   };
 
-  // Função para obter o nome da categoria
-  const getCategoryName = (categoryId: string | null) => {
-    if (!categoryId) return "Sem categoria";
-    const category = categories?.find(cat => cat.id === categoryId);
-    return category ? category.name : "Categoria desconhecida";
+  // Função para obter o nome do outcome
+  const getOutcomeName = (outcomeId: string | null) => {
+    if (!outcomeId) return "Sem outcome";
+    const outcome = outcomes?.find(out => out.id === outcomeId);
+    return outcome ? outcome.name : "Outcome desconhecido";
   };
 
   // Renderizar diálogo de formulário (compartilhado entre criar e editar)
@@ -256,19 +256,19 @@ const NutraceuticalManagementPanel: React.FC = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="outcome">Outcome</Label>
               <Select 
-                value={formData.category_id} 
-                onValueChange={handleCategoryChange}
+                value={formData.outcome_id} 
+                onValueChange={handleOutcomeChange}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder="Selecione um outcome" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="no_category">Sem categoria</SelectItem>
-                  {categories?.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                  <SelectItem value="no_outcome">Sem outcome</SelectItem>
+                  {outcomes?.map((outcome) => (
+                    <SelectItem key={outcome.id} value={outcome.id}>
+                      {outcome.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -381,7 +381,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead>Outcome</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -399,7 +399,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
                     <TableCell>{nutraceutical.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {getCategoryName(nutraceutical.category_id)}
+                        {getOutcomeName(nutraceutical.outcome_id)}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-md truncate">

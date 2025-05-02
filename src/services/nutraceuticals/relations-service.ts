@@ -13,7 +13,8 @@ export const NutraceuticalRelationsService = {
     nutraceuticalId: string,
     conditionId: string,
     relationshipType: 'prevention' | 'treatment' | 'support',
-    efficacyScore: number
+    efficacyScore: number,
+    notes?: string
   ) {
     try {
       // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -24,7 +25,8 @@ export const NutraceuticalRelationsService = {
           nutraceutical_id: nutraceuticalId,
           condition_id: conditionId,
           relationship_type: relationshipType,
-          efficacy_score: efficacyScore
+          efficacy_score: efficacyScore,
+          notes: notes
         }])
         .select()
         .single();

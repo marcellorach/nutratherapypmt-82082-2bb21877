@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { HealthConditionsService } from '@/services/health-conditions-service';
 import { NutraceuticalsService } from '@/services/nutraceuticals';
@@ -68,14 +67,16 @@ export const useConditions = () => {
     nutraceuticalId: string,
     conditionId: string,
     relationshipType: 'prevention' | 'treatment' | 'support',
-    efficacyScore: number
+    efficacyScore: number,
+    notes?: string
   ) => {
     try {
       const result = await NutraceuticalsService.relateToCondition(
         nutraceuticalId, 
         conditionId, 
         relationshipType,
-        efficacyScore
+        efficacyScore,
+        notes
       );
       
       toast({

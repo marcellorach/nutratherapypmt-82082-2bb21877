@@ -15,11 +15,14 @@ import { Trash2 } from "lucide-react";
 import { useConditions } from "@/hooks/nutraceuticals/useConditions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface NutraceuticalCondition {
   id: string;
   relationship_type: string;
   efficacy_score: number;
+  notes?: string;
   condition: {
     id: string;
     name: string;
@@ -51,8 +54,10 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
   const [selectedConditionId, setSelectedConditionId] = useState<string>("");
   const [selectedRelationType, setSelectedRelationType] = useState<string>("prevention");
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
+  const [notes, setNotes] = useState<string>("");
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [existingRelations, setExistingRelations] = useState<NutraceuticalCondition[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("all");
   
   // Inicializar as relações existentes
   useEffect(() => {
@@ -85,7 +90,8 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
         nutraceutical.id, 
         selectedConditionId, 
         selectedRelationType as 'prevention' | 'treatment' | 'support',
-        efficacyScore
+        efficacyScore,
+        notes
       );
       
       // Atualizar a lista local de relações
@@ -95,6 +101,7 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
           id: `temp-${Date.now()}`,
           relationship_type: selectedRelationType,
           efficacy_score: efficacyScore,
+          notes: notes,
           condition: {
             id: newCondition.id,
             name: newCondition.name
@@ -107,6 +114,7 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
       // Resetar o formulário
       setSelectedConditionId("");
       setEfficacyScore(3);
+      setNotes("");
       
       toast({
         title: "Sucesso",
@@ -145,6 +153,12 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
   const getRelationshipTypeLabel = (type: string) => {
     const relation = relationshipTypes.find(r => r.id === type);
     return relation ? relation.label : type;
+  };
+
+  // Filtrar relações por tipo
+  const getFilteredRelations = () => {
+    if (activeTab === "all") return existingRelations;
+    return existingRelations.filter(rel => rel.relationship_type === activeTab);
   };
 
   return (
@@ -214,6 +228,18 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
             />
           </div>
           
+          <div className="md:col-span-2">
+            <Label htmlFor="notes">Notas ou Observações</Label>
+            <Textarea
+              id="notes"
+              placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              disabled={isAdding}
+              className="mt-1"
+            />
+          </div>
+          
           <div className="md:col-span-2 flex justify-end">
             <Button 
               onClick={handleAssociateCondition} 
@@ -237,14 +263,34 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
             Este nutracêutico não possui relações com condições de saúde
           </div>
         ) : (
-          <div className="space-y-2">
-            {existingRelations.map((relation) => (
-              <div 
-                key={relation.id}
-                className="flex items-center justify-between p-3 border rounded-md"
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">{relation.condition.name}</span>
+          <div className="space-y-4">
+            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="all">Todas</TabsTrigger>
+                <TabsTrigger value="prevention">Prevenção</TabsTrigger>
+                <TabsTrigger value="treatment">Tratamento</TabsTrigger>
+                <TabsTrigger value="support">Suporte</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            <div className="space-y-2">
+              {getFilteredRelations().map((relation) => (
+                <div 
+                  key={relation.id}
+                  className="flex flex-col gap-2 p-3 border rounded-md"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{relation.condition.name}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleRemoveAssociation(relation.id)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
                   <div className="flex gap-2">
                     <Badge variant="outline">
                       {getRelationshipTypeLabel(relation.relationship_type)}
@@ -256,17 +302,16 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
                       Eficácia: {relation.efficacy_score}
                     </Badge>
                   </div>
+                  
+                  {relation.notes && (
+                    <div className="mt-1 text-sm text-muted-foreground border-t pt-2">
+                      <p className="font-medium text-xs mb-1">Notas:</p>
+                      <p>{relation.notes}</p>
+                    </div>
+                  )}
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => handleRemoveAssociation(relation.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>

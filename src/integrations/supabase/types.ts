@@ -236,36 +236,13 @@ export type Database = {
           },
         ]
       }
-      nutraceutical_categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       nutraceutical_conditions: {
         Row: {
           condition_id: string | null
           created_at: string
           efficacy_score: number | null
           id: string
+          notes: string | null
           nutraceutical_id: string | null
           relationship_type: string
           updated_at: string
@@ -275,6 +252,7 @@ export type Database = {
           created_at?: string
           efficacy_score?: number | null
           id?: string
+          notes?: string | null
           nutraceutical_id?: string | null
           relationship_type: string
           updated_at?: string
@@ -284,6 +262,7 @@ export type Database = {
           created_at?: string
           efficacy_score?: number | null
           id?: string
+          notes?: string | null
           nutraceutical_id?: string | null
           relationship_type?: string
           updated_at?: string
@@ -341,6 +320,30 @@ export type Database = {
           source_file_name?: string | null
           source_file_path?: string | null
           source_type?: string
+        }
+        Relationships: []
+      }
+      nutraceutical_outcomes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -423,7 +426,6 @@ export type Database = {
       }
       nutraceuticals: {
         Row: {
-          category_id: string | null
           chemical_compound: string | null
           contraindications: string[] | null
           created_at: string
@@ -433,11 +435,11 @@ export type Database = {
           import_batch: string | null
           import_id: string | null
           name: string
+          outcome_id: string | null
           source: string | null
           updated_at: string
         }
         Insert: {
-          category_id?: string | null
           chemical_compound?: string | null
           contraindications?: string[] | null
           created_at?: string
@@ -447,11 +449,11 @@ export type Database = {
           import_batch?: string | null
           import_id?: string | null
           name: string
+          outcome_id?: string | null
           source?: string | null
           updated_at?: string
         }
         Update: {
-          category_id?: string | null
           chemical_compound?: string | null
           contraindications?: string[] | null
           created_at?: string
@@ -461,15 +463,16 @@ export type Database = {
           import_batch?: string | null
           import_id?: string | null
           name?: string
+          outcome_id?: string | null
           source?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "nutraceuticals_category_id_fkey"
-            columns: ["category_id"]
+            columns: ["outcome_id"]
             isOneToOne: false
-            referencedRelation: "nutraceutical_categories"
+            referencedRelation: "nutraceutical_outcomes"
             referencedColumns: ["id"]
           },
           {

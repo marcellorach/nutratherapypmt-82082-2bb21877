@@ -115,7 +115,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
+                  <TableHead>Outcome</TableHead>
                   <TableHead>Condições</TableHead>
                   <TableHead>Estudos</TableHead>
                   <TableHead>Ações</TableHead>
@@ -135,10 +135,10 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                         {nutra.name}
                       </TableCell>
                       <TableCell>
-                        {nutra.category_id ? (
-                          <Badge variant="outline">{nutra.category_id.name}</Badge>
+                        {nutra.outcome_id ? (
+                          <Badge variant="outline">{nutra.outcome_id.name}</Badge>
                         ) : (
-                          <span className="text-muted-foreground text-xs">Sem categoria</span>
+                          <span className="text-muted-foreground text-xs">Sem outcome</span>
                         )}
                       </TableCell>
                       <TableCell>

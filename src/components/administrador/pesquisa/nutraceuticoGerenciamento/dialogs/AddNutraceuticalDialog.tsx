@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
-import { useCategories } from '@/hooks/nutraceuticals/useCategories';
+import { useOutcomes } from '@/hooks/nutraceuticals/useOutcomes';
 
 // Schema de validação
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   description: z.string().optional(),
-  category_id: z.string().optional(),
+  outcome_id: z.string().optional(),
   dosage: z.string().optional(),
   source: z.string().optional(),
   chemical_compound: z.string().optional(),
@@ -38,14 +38,14 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   onSuccess
 }) => {
   const { createNutraceutical } = useNutraceuticals();
-  const { categories, fetchCategories } = useCategories();
+  const { outcomes, fetchOutcomes } = useOutcomes();
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     if (open) {
-      fetchCategories();
+      fetchOutcomes();
     }
-  }, [open, fetchCategories]);
+  }, [open, fetchOutcomes]);
   
   // Inicialização do formulário
   const form = useForm<FormData>({
@@ -53,7 +53,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     defaultValues: {
       name: '',
       description: '',
-      category_id: undefined,
+      outcome_id: undefined,
       dosage: '',
       source: '',
       chemical_compound: '',
@@ -75,7 +75,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       await createNutraceutical({
         name: values.name,
         description: values.description || undefined,
-        category_id: values.category_id || undefined,
+        outcome_id: values.outcome_id || undefined,
         dosage: values.dosage || undefined,
         source: values.source || undefined,
         chemical_compound: values.chemical_compound || undefined,
@@ -120,23 +120,24 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
             
             <FormField
               control={form.control}
-              name="category_id"
+              name="outcome_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categoria</FormLabel>
+                  <FormLabel>Outcome</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
+                        <SelectValue placeholder="Selecione um outcome" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id || "none"}>
-                          {category.name}
+                      <SelectItem value="none">Sem outcome</SelectItem>
+                      {outcomes.map((outcome) => (
+                        <SelectItem key={outcome.id} value={outcome.id || "none"}>
+                          {outcome.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
