@@ -15,13 +15,14 @@ export const NutraceuticalBaseService = {
       .from('nutraceuticals')
       .select(`
         *,
-        category_id:nutraceutical_categories(*),
+        outcome_id:nutraceutical_outcomes(*),
         nutraceutical_benefits(id, benefit),
         nutraceutical_scientific_metadata(*),
         nutraceutical_health_conditions:nutraceutical_conditions(
           id, 
           relationship_type,
           efficacy_score,
+          notes,
           condition:health_conditions(*)
         ),
         nutraceutical_studies(
