@@ -1,15 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NutraceuticosHeader } from './nutraceuticos/NutraceuticosHeader';
 import { SearchFilters } from './nutraceuticos/SearchFilters';
 import { NutraceuticosTable } from './nutraceuticos/NutraceuticosTable';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNutraceuticalsData } from '@/hooks/nutraceuticals/useNutraceuticalsData';
 import { useNutraceuticalsFilter } from '@/hooks/nutraceuticals/useNutraceuticalsFilter';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import ManageRelationshipsDialog from './pesquisa/nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
 const NutraceuticosTab: React.FC = () => {
   // Hook para carregar e gerenciar os dados dos nutracêuticos
   const { nutraceuticals, isLoading, isRefreshing, handleRefreshData } = useNutraceuticalsData();
+  
+  // Estados para gerenciar o diálogo de relações
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
+  const [isRelationsDialogOpen, setIsRelationsDialogOpen] = useState(false);
   
   // Hook para filtrar os nutracêuticos
   const {
@@ -22,6 +29,18 @@ const NutraceuticosTab: React.FC = () => {
     filteredNutraceuticals,
     clearFilters
   } = useNutraceuticalsFilter(nutraceuticals);
+
+  // Handler para quando um nutraceutico é selecionado para gerenciar relações
+  const handleManageRelations = (nutraceutical: any) => {
+    setSelectedNutraceutical(nutraceutical);
+    setIsRelationsDialogOpen(true);
+  };
+
+  // Handler para quando o diálogo de relações é fechado
+  const handleRelationsDialogClose = () => {
+    setIsRelationsDialogOpen(false);
+    handleRefreshData();
+  };
 
   return (
     <>
@@ -49,9 +68,18 @@ const NutraceuticosTab: React.FC = () => {
         ) : (
           <NutraceuticosTable 
             nutraceuticals={filteredNutraceuticals}
+            onManageRelations={handleManageRelations}
           />
         )}
       </div>
+      
+      {/* Diálogo para gerenciar relações */}
+      <ManageRelationshipsDialog
+        open={isRelationsDialogOpen}
+        onOpenChange={setIsRelationsDialogOpen}
+        nutraceutical={selectedNutraceutical}
+        onSuccess={handleRelationsDialogClose}
+      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Database } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import NutraceuticoDetailDialog from '../dialogs/NutraceuticoDetailDialog';
@@ -8,9 +8,13 @@ import ManageRelationshipsDialog from '../pesquisa/nutraceuticoGerenciamento/dia
 
 interface NutraceuticosTableProps {
   nutraceuticals: any[];
+  onManageRelations?: (nutraceutical: any) => void;
 }
 
-export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ nutraceuticals }) => {
+export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ 
+  nutraceuticals,
+  onManageRelations
+}) => {
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [isManageRelationsOpen, setIsManageRelationsOpen] = useState<boolean>(false);
@@ -24,8 +28,15 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ nutraceu
   // Seleciona um nutracêutico e abre o diálogo de gerenciamento de relacionamentos
   const handleManageRelations = (nutraceutical: any, event: React.MouseEvent) => {
     event.stopPropagation(); // Previne que o evento de clique propague para a linha
-    setSelectedNutraceutical(nutraceutical);
-    setIsManageRelationsOpen(true);
+    
+    if (onManageRelations) {
+      // Se foi passado um callback externo, use-o
+      onManageRelations(nutraceutical);
+    } else {
+      // Senão, use o comportamento interno
+      setSelectedNutraceutical(nutraceutical);
+      setIsManageRelationsOpen(true);
+    }
   };
 
   return (
@@ -75,14 +86,25 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ nutraceu
                   )}
                 </td>
                 <td className="p-3 text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => handleManageRelations(nutraceutical, e)}
-                    title="Gerenciar relacionamentos"
-                  >
-                    <ChevronDown size={16} />
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleManageRelations(nutraceutical, e)}
+                      title="Gerenciar relacionamentos"
+                      className="h-8 w-8"
+                    >
+                      <Database size={16} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Ver detalhes"
+                      className="h-8 w-8"
+                    >
+                      <ChevronDown size={16} />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -97,12 +119,14 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ nutraceu
         nutraceutical={selectedNutraceutical}
       />
       
-      {/* Diálogo de gerenciamento de relacionamentos */}
-      <ManageRelationshipsDialog
-        open={isManageRelationsOpen}
-        onOpenChange={setIsManageRelationsOpen}
-        nutraceutical={selectedNutraceutical}
-      />
+      {/* Diálogo de gerenciamento de relacionamentos (usado apenas se não houver callback externo) */}
+      {!onManageRelations && (
+        <ManageRelationshipsDialog
+          open={isManageRelationsOpen}
+          onOpenChange={setIsManageRelationsOpen}
+          nutraceutical={selectedNutraceutical}
+        />
+      )}
     </>
   );
 };
