@@ -11,9 +11,13 @@ export const NutraceuticalsService = {
   getAll: NutraceuticalQueryService.getAll,
   getAllNutraceuticals: NutraceuticalQueryService.getAll, // Alias para compatibilidade
   getByName: NutraceuticalQueryService.getByName,
-  create: NutraceuticalMutationService.createNutraceutical, // Alias para métodos utilizados em outros lugares
+  
+  // Aliases para manter compatibilidade com código existente
+  create: NutraceuticalMutationService.createNutraceutical,
   update: NutraceuticalMutationService.updateNutraceutical,
-  delete: NutraceuticalMutationService.deleteNutraceutical, 
+  delete: NutraceuticalMutationService.deleteNutraceutical,
+  
+  // Operações de mutação
   createNutraceutical: NutraceuticalMutationService.createNutraceutical,
   updateNutraceutical: NutraceuticalMutationService.updateNutraceutical,
   deleteNutraceutical: NutraceuticalMutationService.deleteNutraceutical,

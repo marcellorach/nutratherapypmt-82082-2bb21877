@@ -81,10 +81,11 @@ const NutraceuticosTab: React.FC = () => {
         )}
       </div>
       
-      {/* Diálogo para adicionar/editar nutracêutico */}
+      {/* Diálogo unificado para adicionar/editar nutracêutico incluindo gestão de condições e estudos */}
       <AddNutraceuticalDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
+        nutraceutical={selectedNutraceutical}
         onSuccess={handleEditDialogClose}
       />
     </>
