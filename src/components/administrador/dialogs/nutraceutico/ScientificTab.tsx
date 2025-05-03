@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ExternalLink, ChartBar, CircleCheck } from "lucide-react";
 import { Nutraceutical } from "@/types";
 
 interface ScientificTabProps {
@@ -10,90 +8,101 @@ interface ScientificTabProps {
 }
 
 export const ScientificTab: React.FC<ScientificTabProps> = ({ nutraceutical }) => {
+  // Dividir condições por tipo de relacionamento
+  const preventionConditions = nutraceutical.preventionConditions || [];
+  const treatmentConditions = nutraceutical.treatmentConditions || [];
+  const supportConditions = nutraceutical.supportConditions || [];
+  
+  // Função para render uma seção de condições
+  const renderConditionSection = (title: string, conditions: any[], emptyMessage: string) => {
+    return (
+      <div className="mb-4">
+        <h3 className="font-medium mb-2">{title}</h3>
+        {conditions.length > 0 ? (
+          <div className="grid gap-2">
+            {conditions.map((condition, index) => (
+              <div 
+                key={index} 
+                className="bg-slate-50 p-2 rounded flex justify-between items-center"
+              >
+                <div>{condition.name}</div>
+                <Badge 
+                  variant={condition.efficacyScore >= 4 ? "default" : "secondary"}
+                >
+                  Eficácia: {condition.efficacyScore.toFixed(1)}/5
+                </Badge>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground bg-slate-50 p-2 rounded">
+            {emptyMessage}
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   return (
     <div className="space-y-4">
-      <section>
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium">Estudos Científicos</h4>
-          <Badge variant="outline" className="bg-slate-50">
-            {nutraceutical.scientificEvidence.studies.length} {nutraceutical.scientificEvidence.studies.length === 1 ? 'estudo' : 'estudos'}
-          </Badge>
-        </div>
-        <div className="rounded-md border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Ano</TableHead>
-                <TableHead className="w-24 text-right">Link</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nutraceutical.scientificEvidence.studies.map((study, index) => (
-                <TableRow key={index}>
-                  <TableCell>{study.title}</TableCell>
-                  <TableCell>{study.year}</TableCell>
-                  <TableCell className="text-right">
-                    <a 
-                      href={study.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline inline-flex items-center"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
+      {/* Pontuação científica */}
+      <div className="flex flex-wrap gap-3">
+        <Badge className="bg-slate-50 text-slate-800">
+          Eficácia: {nutraceutical.scientificEvidence?.efficacyScore.toFixed(1)}/5
+        </Badge>
+        <Badge className="bg-slate-50 text-slate-800">
+          Sustentação: {nutraceutical.scientificEvidence?.sustainabilityScore.toFixed(1)}/5
+        </Badge>
+      </div>
       
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ScoreCard
-          icon={<ChartBar className="h-5 w-5 text-blue-500" />}
-          title="Eficácia"
-          score={nutraceutical.scientificEvidence.efficacyScore}
-          description="Baseado em estudos clínicos e análises sistemáticas"
-        />
-        <ScoreCard
-          icon={<CircleCheck className="h-5 w-5 text-green-500" />}
-          title="Sustentação"
-          score={nutraceutical.scientificEvidence.sustainabilityScore}
-          description="Consistência dos resultados ao longo do tempo"
-        />
-      </section>
+      {/* Categorias de condições */}
+      <div className="space-y-4 mt-4">
+        {renderConditionSection(
+          "Prevenção", 
+          preventionConditions, 
+          "Este nutracêutico não tem condições de prevenção cadastradas."
+        )}
+        
+        {renderConditionSection(
+          "Tratamento", 
+          treatmentConditions, 
+          "Este nutracêutico não tem condições de tratamento cadastradas."
+        )}
+        
+        {renderConditionSection(
+          "Suporte", 
+          supportConditions, 
+          "Este nutracêutico não tem condições de suporte cadastradas."
+        )}
+      </div>
+      
+      {/* Estudos científicos */}
+      <div className="mt-4">
+        <h3 className="font-medium mb-2">Estudos Científicos</h3>
+        {nutraceutical.scientificEvidence?.studies?.length > 0 ? (
+          <div className="space-y-3">
+            {nutraceutical.scientificEvidence.studies.map((study, i) => (
+              <div key={i} className="bg-slate-50 p-3 rounded">
+                <a 
+                  href={study.link} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-blue-600 hover:underline"
+                >
+                  {study.title}
+                </a>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {study.year}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground bg-slate-50 p-2 rounded">
+            Este nutracêutico não tem estudos científicos cadastrados.
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
-interface ScoreCardProps {
-  icon: React.ReactNode;
-  title: string;
-  score: number;
-  description: string;
-}
-
-const ScoreCard: React.FC<ScoreCardProps> = ({ icon, title, score, description }) => (
-  <div className="border rounded-md p-4 bg-white">
-    <div className="flex items-center gap-2 mb-3">
-      {icon}
-      <h4 className="font-medium">{title}</h4>
-    </div>
-    <div className="flex items-center">
-      <div className="text-2xl font-bold mr-3">{score.toFixed(1)}</div>
-      <div className="flex">
-        {[...Array(5)].map((_, i) => (
-          <span 
-            key={i}
-            className={`text-lg ${i < Math.floor(score) ? "text-amber-400" : "text-gray-300"}`}
-          >
-            ★
-          </span>
-        ))}
-      </div>
-    </div>
-    <p className="text-sm text-gray-500 mt-2">{description}</p>
-  </div>
-);

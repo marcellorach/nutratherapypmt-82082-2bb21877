@@ -70,5 +70,47 @@ export const NutraceuticalRelationsService = {
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'relacionar com estudo científico');
     }
+  },
+
+  /**
+   * Remove a relação entre um nutracêutico e uma condição
+   */
+  async removeConditionRelation(relationId: string) {
+    try {
+      const client = supabase as any;
+      const { error } = await client
+        .from('nutraceutical_conditions')
+        .delete()
+        .eq('id', relationId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'remover relação com condição');
+      }
+
+      return true;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'remover relação com condição');
+    }
+  },
+
+  /**
+   * Remove a relação entre um nutracêutico e um estudo
+   */
+  async removeStudyRelation(relationId: string) {
+    try {
+      const client = supabase as any;
+      const { error } = await client
+        .from('nutraceutical_studies')
+        .delete()
+        .eq('id', relationId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
+      }
+
+      return true;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
+    }
   }
 };

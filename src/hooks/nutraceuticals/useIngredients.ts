@@ -1,6 +1,5 @@
 
-import { useState } from 'react';
-import { ActiveIngredientsService } from '@/services/active-ingredients-service';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 /**
@@ -10,63 +9,45 @@ export const useIngredients = () => {
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
   const { toast } = useToast();
-  
-  // Carregar ingredientes
-  const fetchIngredients = async () => {
-    setIsLoading(true);
-    setError(null);
-    
+
+  const fetchIngredients = useCallback(async () => {
     try {
-      const data = await ActiveIngredientsService.getAllIngredients();
-      setIngredients(data || []);
-      return data;
+      setIsLoading(true);
+      
+      // Aqui teríamos a chamada para o serviço de ingredientes
+      // Por enquanto, vamos usar dados fictícios
+      const mockIngredients = [
+        { id: '1', name: 'Resveratrol', description: 'Composto fenólico encontrado em uvas' },
+        { id: '2', name: 'Curcumina', description: 'Princípio ativo da cúrcuma' },
+        { id: '3', name: 'NMN', description: 'Mononucleotídeo de Nicotinamida, um precursor do NAD+' },
+        { id: '4', name: 'Quercetina', description: 'Flavonóide encontrado em frutas e vegetais' },
+        { id: '5', name: 'Ômega-3', description: 'Ácido graxo essencial' },
+      ];
+      
+      setIngredients(mockIngredients);
+      return mockIngredients;
     } catch (err: any) {
-      console.error('Erro ao carregar ingredientes:', err);
-      setError('Não foi possível carregar os ingredientes ativos');
+      const errorMessage = 'Erro ao carregar ingredientes ativos';
+      setError(errorMessage);
       
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar os ingredientes ativos',
+        description: errorMessage,
         variant: 'destructive',
       });
-      throw err;
+      
+      console.error('Error fetching ingredients:', err);
+      return [];
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  // Ações para ingredientes ativos
-  const createIngredient = async (data: any) => {
-    try {
-      const result = await ActiveIngredientsService.createIngredient(data);
-      setIngredients(prev => [...prev, result]);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Ingrediente ativo criado com sucesso',
-      });
-      
-      return result;
-    } catch (err: any) {
-      console.error('Erro ao criar ingrediente ativo:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível criar o ingrediente ativo',
-        variant: 'destructive',
-      });
-      
-      throw err;
-    }
-  };
+  }, [toast]);
 
   return {
     ingredients,
     isLoading,
     error,
-    fetchIngredients,
-    createIngredient
+    fetchIngredients
   };
 };

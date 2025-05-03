@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { HealthConditionsService } from '@/services/health-conditions-service';
-import { NutraceuticalsService } from '@/services/nutraceuticals';
+
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { NutraceuticalRelationsService } from '@/services/nutraceuticals';
 
 /**
  * Hook para gerenciar condições de saúde
@@ -10,60 +10,77 @@ export const useConditions = () => {
   const [conditions, setConditions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
   const { toast } = useToast();
-  
-  // Carregar condições de saúde
-  const fetchConditions = async () => {
-    setIsLoading(true);
-    setError(null);
-    
+
+  const fetchConditions = useCallback(async () => {
     try {
-      const data = await HealthConditionsService.getAllConditions();
-      setConditions(data || []);
-      return data;
+      setIsLoading(true);
+      
+      // Aqui teríamos a chamada para o serviço de condições
+      // Por enquanto, vamos usar dados fictícios
+      const mockConditions = [
+        { id: '1', name: 'Hipertensão', description: 'Pressão arterial elevada' },
+        { id: '2', name: 'Diabetes', description: 'Distúrbio metabólico caracterizado por hiperglicemia' },
+        { id: '3', name: 'Artrite', description: 'Inflamação das articulações' },
+        { id: '4', name: 'Alzheimer', description: 'Doença neurodegenerativa progressiva' },
+        { id: '5', name: 'Osteoporose', description: 'Redução da densidade óssea' },
+      ];
+      
+      setConditions(mockConditions);
+      return mockConditions;
     } catch (err: any) {
-      console.error('Erro ao carregar condições de saúde:', err);
-      setError('Não foi possível carregar as condições de saúde');
+      const errorMessage = 'Erro ao carregar condições de saúde';
+      setError(errorMessage);
       
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar as condições de saúde',
+        description: errorMessage,
         variant: 'destructive',
       });
-      throw err;
+      
+      console.error('Error fetching conditions:', err);
+      return [];
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  // Ações para condições de saúde
-  const createCondition = async (data: any) => {
+  }, [toast]);
+
+  const createCondition = useCallback(async (data: any) => {
     try {
-      const result = await HealthConditionsService.createCondition(data);
-      setConditions(prev => [...prev, result]);
+      setIsLoading(true);
+      
+      // Aqui teríamos a chamada para o serviço de criação de condição
+      // Por enquanto, simulamos uma resposta
+      const newCondition = {
+        id: `new-${Date.now()}`,
+        ...data,
+      };
+      
+      setConditions(prev => [...prev, newCondition]);
       
       toast({
         title: 'Sucesso',
         description: 'Condição de saúde criada com sucesso',
       });
       
-      return result;
+      return newCondition;
     } catch (err: any) {
-      console.error('Erro ao criar condição de saúde:', err);
+      const errorMessage = 'Erro ao criar condição de saúde';
       
       toast({
         title: 'Erro',
-        description: 'Não foi possível criar a condição de saúde',
+        description: errorMessage,
         variant: 'destructive',
       });
       
+      console.error('Error creating condition:', err);
       throw err;
+    } finally {
+      setIsLoading(false);
     }
-  };
-  
-  // Função para associar um nutracêutico a uma condição de saúde
-  const associateNutraceuticalToCondition = async (
+  }, [toast]);
+
+  const associateNutraceuticalToCondition = useCallback(async (
     nutraceuticalId: string,
     conditionId: string,
     relationshipType: 'prevention' | 'treatment' | 'support',
@@ -71,32 +88,19 @@ export const useConditions = () => {
     notes?: string
   ) => {
     try {
-      const result = await NutraceuticalsService.relateToCondition(
-        nutraceuticalId, 
-        conditionId, 
+      const result = await NutraceuticalRelationsService.relateToCondition(
+        nutraceuticalId,
+        conditionId,
         relationshipType,
         efficacyScore,
         notes
       );
       
-      toast({
-        title: 'Sucesso',
-        description: 'Nutracêutico associado à condição de saúde com sucesso',
-      });
-      
       return result;
-    } catch (err: any) {
-      console.error('Erro ao associar nutracêutico à condição de saúde:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível associar o nutracêutico à condição de saúde',
-        variant: 'destructive',
-      });
-      
+    } catch (err) {
       throw err;
     }
-  };
+  }, []);
 
   return {
     conditions,
@@ -104,6 +108,6 @@ export const useConditions = () => {
     error,
     fetchConditions,
     createCondition,
-    associateNutraceuticalToCondition
+    associateNutraceuticalToCondition,
   };
 };

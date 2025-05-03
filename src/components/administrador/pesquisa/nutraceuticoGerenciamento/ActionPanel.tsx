@@ -1,93 +1,85 @@
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Upload, Plus, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import AddNutraceuticalDialog from './dialogs/AddNutraceuticalDialog';
-import AddCategoryDialog from './dialogs/AddCategoryDialog';
-import AddConditionDialog from './dialogs/AddConditionDialog';
-import AddScientificStudyDialog from './dialogs/AddScientificStudyDialog';
 
 interface ActionPanelProps {
-  refreshData?: () => void;
+  refreshData: () => void;
 }
 
 const ActionPanel: React.FC<ActionPanelProps> = ({ refreshData }) => {
-  const [addNutraceuticalOpen, setAddNutraceuticalOpen] = useState(false);
-  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
-  const [addConditionOpen, setAddConditionOpen] = useState(false);
-  const [addStudyOpen, setAddStudyOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+  
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshData();
+      toast({
+        title: 'Dados atualizados',
+        description: 'Os dados foram atualizados com sucesso',
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar dados:', err);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao atualizar os dados',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
+          <CardTitle>Ações</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
           <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            size="sm"
-            onClick={() => setAddNutraceuticalOpen(true)}
+            onClick={() => setIsAddDialogOpen(true)}
+            className="w-full justify-start"
+            variant="outline"
           >
             <Plus className="mr-2 h-4 w-4" />
             Adicionar Nutracêutico
           </Button>
+          
           <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            size="sm"
-            onClick={() => setAddCategoryOpen(true)}
+            onClick={handleRefresh}
+            className="w-full justify-start"
+            variant="outline"
+            disabled={isRefreshing}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Categoria
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
           </Button>
+          
           <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            size="sm"
-            onClick={() => setAddConditionOpen(true)}
+            className="w-full justify-start"
+            variant="outline"
+            onClick={() => {
+              toast({
+                title: 'Importação',
+                description: 'Funcionalidade de importação será implementada em breve',
+              });
+            }}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Condição de Saúde
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            size="sm"
-            onClick={() => setAddStudyOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Estudo Científico
+            <Upload className="mr-2 h-4 w-4" />
+            Importar Dados
           </Button>
         </CardContent>
       </Card>
-
-      {/* Diálogos para adição de dados */}
-      <AddNutraceuticalDialog 
-        open={addNutraceuticalOpen} 
-        onOpenChange={setAddNutraceuticalOpen}
-        onSuccess={refreshData}
-      />
-      <AddCategoryDialog 
-        open={addCategoryOpen} 
-        onOpenChange={setAddCategoryOpen}
-        onSuccess={refreshData}
-      />
-      <AddConditionDialog 
-        open={addConditionOpen} 
-        onOpenChange={setAddConditionOpen}
-        onSuccess={refreshData}
-      />
-      <AddScientificStudyDialog 
-        open={addStudyOpen} 
-        onOpenChange={setAddStudyOpen}
+      
+      <AddNutraceuticalDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
         onSuccess={refreshData}
       />
     </>

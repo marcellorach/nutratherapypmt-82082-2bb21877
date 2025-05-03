@@ -1,131 +1,106 @@
+
 import React, { useState } from 'react';
-import { Table, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Nutraceutical, NutraceuticalCondition } from "@/types";
-import TableHeaderComponent from './table/TableHeaderComponent';
-import NutraceuticalRow from './table/NutraceuticalRow';
-import EmptyState from './table/EmptyState';
-import EvidenceLegend from './table/EvidenceLegend';
-import ConditionDetailDialog from '../dialogs/ConditionDetailDialog';
+import { ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import NutraceuticoDetailDialog from '../dialogs/NutraceuticoDetailDialog';
-import StarRating from './table/StarRating';
+import ManageRelationshipsDialog from '../pesquisa/nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
 interface NutraceuticosTableProps {
-  nutraceuticals: Nutraceutical[];
+  nutraceuticals: any[];
 }
 
-export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ 
-  nutraceuticals
-}) => {
-  const [selectedNutraceutical, setSelectedNutraceutical] = useState<Nutraceutical | null>(null);
-  const [selectedCondition, setSelectedCondition] = useState<NutraceuticalCondition | null>(null);
-  const [conditionType, setConditionType] = useState<'prevention' | 'treatment' | 'support' | null>(null);
-  const [isConditionDialogOpen, setIsConditionDialogOpen] = useState(false);
-  const [isNutraceuticalDialogOpen, setIsNutraceuticalDialogOpen] = useState(false);
-  const [expandedRows, setExpandedRows] = useState<string[]>([]);
-
-  const handleConditionClick = (
-    nutraceutical: Nutraceutical, 
-    condition: NutraceuticalCondition,
-    type: 'prevention' | 'treatment' | 'support'
-  ) => {
+export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({ nutraceuticals }) => {
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+  const [isManageRelationsOpen, setIsManageRelationsOpen] = useState<boolean>(false);
+  
+  // Seleciona um nutracêutico e abre o diálogo de detalhes
+  const handleViewDetails = (nutraceutical: any) => {
     setSelectedNutraceutical(nutraceutical);
-    setSelectedCondition(condition);
-    setConditionType(type);
-    setIsConditionDialogOpen(true);
+    setIsDetailOpen(true);
   };
   
-  const handleNutraceuticalClick = (nutraceutical: Nutraceutical) => {
+  // Seleciona um nutracêutico e abre o diálogo de gerenciamento de relacionamentos
+  const handleManageRelations = (nutraceutical: any, event: React.MouseEvent) => {
+    event.stopPropagation(); // Previne que o evento de clique propague para a linha
     setSelectedNutraceutical(nutraceutical);
-    setIsNutraceuticalDialogOpen(true);
-  };
-  
-  const toggleRowExpand = (nutraceuticalId: string) => {
-    setExpandedRows(prev => 
-      prev.includes(nutraceuticalId) 
-        ? prev.filter(id => id !== nutraceuticalId)
-        : [...prev, nutraceuticalId]
-    );
+    setIsManageRelationsOpen(true);
   };
 
   return (
     <>
-      <EvidenceLegend />
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeaderComponent />
-          <TableBody>
-            {nutraceuticals.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <>
-                {nutraceuticals.map((item) => (
-                  <React.Fragment key={item.id}>
-                    <NutraceuticalRow 
-                      nutraceutical={item}
-                      expanded={expandedRows.includes(item.id)}
-                      onToggleExpand={() => toggleRowExpand(item.id)}
-                      onConditionClick={handleConditionClick}
-                    />
-                    
-                    {expandedRows.includes(item.id) && (
-                      <TableRow className="bg-gray-50">
-                        <TableCell colSpan={4}>
-                          <div className="p-4 space-y-4">
-                            <p className="text-sm">{item.description}</p>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                              <div>
-                                <h4 className="text-sm font-medium mb-2">Origem</h4>
-                                <p className="text-sm bg-white p-2 rounded-md border">{item.source}</p>
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-medium mb-2">Evidência Científica</h4>
-                                <div className="flex items-center gap-2 bg-white p-2 rounded-md border">
-                                  <StarRating score={item.scientificEvidence.efficacyScore} />
-                                  <span className="text-sm font-medium">{item.scientificEvidence.efficacyScore.toFixed(1)}/5</span>
-                                </div>
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-medium mb-2">Composto Químico</h4>
-                                <p className="text-sm bg-white p-2 rounded-md border">
-                                  {item.chemicalCompound}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="mt-2">
-                              <Button
-                                variant="link"
-                                onClick={() => handleNutraceuticalClick(item)}
-                                className="p-0"
-                              >
-                                Ver mais detalhes
-                              </Button>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
-                ))}
-              </>
-            )}
-          </TableBody>
-        </Table>
+        <table className="w-full">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-left p-3 font-medium text-sm">Nome</th>
+              <th className="text-left p-3 font-medium text-sm">Descrição</th>
+              <th className="text-left p-3 font-medium text-sm">Outcome</th>
+              <th className="text-left p-3 font-medium text-sm">Condições</th>
+              <th className="text-left p-3 font-medium text-sm">Estudos</th>
+              <th className="text-right p-3 font-medium text-sm">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {nutraceuticals.map((nutraceutical) => (
+              <tr 
+                key={nutraceutical.id} 
+                className="border-b hover:bg-muted/30 cursor-pointer"
+                onClick={() => handleViewDetails(nutraceutical)}
+              >
+                <td className="p-3 font-medium">{nutraceutical.name}</td>
+                <td className="p-3 text-sm max-w-xs truncate">
+                  {nutraceutical.description || 'Sem descrição'}
+                </td>
+                <td className="p-3">
+                  {nutraceutical.outcome ? (
+                    <Badge variant="outline">{nutraceutical.outcome.name}</Badge>
+                  ) : 
+                    <span className="text-sm text-muted-foreground">-</span>
+                  }
+                </td>
+                <td className="p-3">
+                  {nutraceutical.health_conditions?.length > 0 ? (
+                    <Badge>{nutraceutical.health_conditions.length}</Badge>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
+                </td>
+                <td className="p-3">
+                  {nutraceutical.studies?.length > 0 ? (
+                    <Badge>{nutraceutical.studies.length}</Badge>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
+                </td>
+                <td className="p-3 text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => handleManageRelations(nutraceutical, e)}
+                    title="Gerenciar relacionamentos"
+                  >
+                    <ChevronDown size={16} />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <ConditionDetailDialog 
-        open={isConditionDialogOpen}
-        onOpenChange={setIsConditionDialogOpen}
+      
+      {/* Diálogo de detalhes */}
+      <NutraceuticoDetailDialog 
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
         nutraceutical={selectedNutraceutical}
-        selectedCondition={selectedCondition}
-        conditionType={conditionType}
       />
       
-      <NutraceuticoDetailDialog
-        open={isNutraceuticalDialogOpen}
-        onOpenChange={setIsNutraceuticalDialogOpen}
+      {/* Diálogo de gerenciamento de relacionamentos */}
+      <ManageRelationshipsDialog
+        open={isManageRelationsOpen}
+        onOpenChange={setIsManageRelationsOpen}
         nutraceutical={selectedNutraceutical}
       />
     </>
