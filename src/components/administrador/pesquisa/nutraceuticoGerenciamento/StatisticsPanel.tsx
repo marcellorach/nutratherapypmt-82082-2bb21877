@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface StatisticsPanelProps {
   nutraceuticals: any[];
-  categories: any[];
+  outcomes: any[];
   conditions: any[];
   studies: any[];
   isLoading: boolean;
@@ -20,7 +20,7 @@ interface StatisticsPanelProps {
 
 const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   nutraceuticals,
-  categories,
+  outcomes,
   conditions,
   studies,
   isLoading
@@ -41,8 +41,8 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
           </div>
           <Separator />
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Categorias</div>
-            <div className="text-2xl font-bold">{categories.length}</div>
+            <div className="text-sm font-medium">Outcomes</div>
+            <div className="text-2xl font-bold">{outcomes.length}</div>
           </div>
           <Separator />
           <div className="flex items-center justify-between">

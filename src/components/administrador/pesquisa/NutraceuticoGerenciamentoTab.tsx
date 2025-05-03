@@ -17,7 +17,7 @@ import DeleteDialog from './nutraceuticoGerenciamento/DeleteDialog';
 const NutraceuticoGerenciamentoTab: React.FC = () => {
   const {
     nutraceuticals,
-    categories,
+    outcomes,
     conditions,
     studies,
     isLoading,
@@ -47,7 +47,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       (nutra.description && nutra.description.toLowerCase().includes(searchTerm.toLowerCase()));
       
     const matchesCategory = selectedCategory === null || 
-      nutra.category_id?.id === selectedCategory;
+      nutra.outcome_id === selectedCategory;
       
     return matchesSearch && matchesCategory;
   });
@@ -146,7 +146,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
         <div className="w-full lg:w-1/3 space-y-4">
           <StatisticsPanel 
             nutraceuticals={nutraceuticals}
-            categories={categories}
+            outcomes={outcomes}
             conditions={conditions}
             studies={studies}
             isLoading={isLoading}
