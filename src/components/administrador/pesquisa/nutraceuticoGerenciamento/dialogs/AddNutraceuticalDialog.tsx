@@ -271,14 +271,13 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
           contraindications: contraindications.length > 0 ? contraindications : undefined
         });
         
-        // Atualizar metadata científica
+        // Atualizar metadata científica - CORRIGIDO: modificado para passar apenas 2 argumentos
         await NutraceuticalsService.updateScientificMetadata(
           nutraceutical.id, 
-          parseInt(values.efficacyScore || '3', 10),
-          relationNotes
+          parseInt(values.efficacyScore || '3', 10)
         );
         
-        // Aqui está a correção - removido o terceiro argumento que estava causando o erro
+        // Atualizar relação com outcome
         await NutraceuticalsService.updateOutcomeRelation(
           nutraceutical.id,
           relationNotes
