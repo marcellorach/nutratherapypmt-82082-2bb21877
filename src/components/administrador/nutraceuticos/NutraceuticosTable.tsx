@@ -29,6 +29,12 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
     return nutraceutical.outcome.name;
   };
 
+  // Função para obter o número de condições associadas
+  const getConditionsCount = (nutraceutical: any) => {
+    if (!nutraceutical.conditions) return 0;
+    return nutraceutical.conditions.length;
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -74,6 +80,7 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
                     title="Editar nutracêutico, condições e estudos"
                   >
                     <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
                   </Button>
                 </TableCell>
               </TableRow>

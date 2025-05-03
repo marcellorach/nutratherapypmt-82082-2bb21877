@@ -13,19 +13,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
 import { useOutcomes } from '@/hooks/nutraceuticals/useOutcomes';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Info } from 'lucide-react';
 import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
 import { NutraceuticalsService } from '@/services/nutraceuticals';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Schema de validação
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   description: z.string().optional(),
-  outcome_id: z.string().optional(),
+  category: z.string().optional(),
   dosage: z.string().optional(),
   source: z.string().optional(),
   chemical_compound: z.string().optional(),
@@ -139,7 +141,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     defaultValues: {
       name: nutraceutical?.name || '',
       description: nutraceutical?.description || '',
-      outcome_id: nutraceutical?.outcome_id || undefined,
+      category: nutraceutical?.outcome_id || undefined, // Renomeado para category
       dosage: nutraceutical?.dosage || '',
       source: nutraceutical?.source || '',
       chemical_compound: nutraceutical?.chemical_compound || '',
@@ -154,7 +156,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       form.reset({
         name: nutraceutical.name || '',
         description: nutraceutical.description || '',
-        outcome_id: nutraceutical.outcome_id || undefined,
+        category: nutraceutical.outcome_id || undefined,
         dosage: nutraceutical.dosage || '',
         source: nutraceutical.source || '',
         chemical_compound: nutraceutical.chemical_compound || '',
@@ -165,7 +167,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       form.reset({
         name: '',
         description: '',
-        outcome_id: undefined,
+        category: undefined,
         dosage: '',
         source: '',
         chemical_compound: '',
@@ -192,7 +194,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         result = await createNutraceutical({
           name: values.name,
           description: values.description || undefined,
-          outcome_id: values.outcome_id || undefined,
+          outcome_id: values.category || undefined, // Usando category como outcome_id
           dosage: values.dosage || undefined,
           source: values.source || undefined,
           chemical_compound: values.chemical_compound || undefined,
@@ -208,7 +210,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         result = await updateNutraceutical(nutraceutical.id, {
           name: values.name,
           description: values.description || undefined,
-          outcome_id: values.outcome_id || undefined,
+          outcome_id: values.category || undefined, // Usando category como outcome_id
           dosage: values.dosage || undefined,
           source: values.source || undefined,
           chemical_compound: values.chemical_compound || undefined,
@@ -432,6 +434,11 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     if (score >= 3) return "bg-yellow-100 text-yellow-800";
     return "bg-red-100 text-red-800";
   };
+
+  // Função para ir para a próxima aba
+  const goToNextTab = () => {
+    setActiveTab('relations');
+  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -475,21 +482,21 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                 
                 <FormField
                   control={form.control}
-                  name="outcome_id"
+                  name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Outcome</FormLabel>
+                      <FormLabel>Categoria</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione um outcome" />
+                            <SelectValue placeholder="Selecione uma categoria" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">Sem outcome</SelectItem>
+                          <SelectItem value="none">Sem categoria</SelectItem>
                           {outcomes.map((outcome) => (
                             <SelectItem key={outcome.id} value={outcome.id || ""}>
                               {outcome.name}
@@ -580,14 +587,28 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                   )}
                 />
                 
-                <DialogFooter>
+                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={isSubmitting || loading}>
-                    {(isSubmitting || loading) ? 'Salvando...' : 'Salvar'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={isSubmitting || loading}>
+                      {(isSubmitting || loading) ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                    {!isNewNutraceutical && (
+                      <Button type="submit" onClick={goToNextTab} variant="secondary">
+                        Próximo: Condições e Estudos
+                      </Button>
+                    )}
+                  </div>
                 </DialogFooter>
+
+                {isNewNutraceutical && (
+                  <div className="text-sm text-muted-foreground mt-2 flex items-center">
+                    <Info className="h-4 w-4 mr-2" />
+                    Após salvar as informações básicas, você poderá adicionar condições de saúde e estudos científicos na próxima aba.
+                  </div>
+                )}
               </form>
             </Form>
           </TabsContent>
@@ -595,225 +616,268 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
           {/* Aba de Condições e Estudos */}
           <TabsContent value="relations">
             <div className="space-y-6">
-              {/* Seção de Condições de Saúde */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Condições de Saúde Relacionadas</h3>
-                
-                <Card className="mb-4">
-                  <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Condição de Saúde</label>
-                        <Select 
-                          value={selectedCondition} 
-                          onValueChange={setSelectedCondition}
-                          disabled={loading}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma condição" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Selecione uma condição</SelectItem>
-                            {conditions.map(condition => (
-                              <SelectItem key={condition.id} value={condition.id}>
-                                {condition.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+              <Alert variant="default" className="bg-blue-50 mb-6">
+                <AlertCircle className="h-5 w-5" />
+                <AlertTitle>Como funcionam as relações de nutracêuticos</AlertTitle>
+                <AlertDescription>
+                  Cada nutracêutico pode ser relacionado a múltiplas condições de saúde e estudos científicos. 
+                  Para cada condição, você pode especificar o tipo de relação (prevenção, tratamento ou suporte), 
+                  a eficácia e adicionar notas específicas. Os estudos científicos também podem ser associados 
+                  com um score de relevância.
+                </AlertDescription>
+              </Alert>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Seção de Condições de Saúde */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium flex items-center">
+                    <span>Condições de Saúde</span>
+                    <Badge className="ml-2 bg-blue-100 text-blue-800 hover:bg-blue-200">
+                      {relatedConditions.length}
+                    </Badge>
+                  </h3>
+                  
+                  <Card>
+                    <CardContent className="pt-6 pb-4">
+                      <h4 className="text-sm font-medium mb-3">Adicionar Nova Condição</h4>
+                      
+                      <div className="grid grid-cols-1 gap-4 mb-4">
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">Condição de Saúde</label>
+                          <Select 
+                            value={selectedCondition} 
+                            onValueChange={setSelectedCondition}
+                            disabled={loading}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione uma condição" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Selecione uma condição</SelectItem>
+                              {conditions.map(condition => (
+                                <SelectItem key={condition.id} value={condition.id}>
+                                  {condition.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">Tipo de Relação</label>
+                          <Select 
+                            value={relationshipType} 
+                            onValueChange={(value: 'prevention' | 'treatment' | 'support') => setRelationshipType(value)}
+                            disabled={loading}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="prevention">Prevenção</SelectItem>
+                              <SelectItem value="treatment">Tratamento</SelectItem>
+                              <SelectItem value="support">Suporte</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Eficácia (1-5): {efficacyScore}
+                          </label>
+                          <Slider
+                            value={[efficacyScore]}
+                            min={1}
+                            max={5}
+                            step={1}
+                            onValueChange={(values) => setEfficacyScore(values[0])}
+                            disabled={loading}
+                            className="py-4"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">Notas sobre a Relação</label>
+                          <Textarea
+                            value={conditionNotes}
+                            onChange={(e) => setConditionNotes(e.target.value)}
+                            placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
+                            disabled={loading}
+                            className="resize-none h-20"
+                          />
+                        </div>
                       </div>
                       
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Tipo de Relação</label>
-                        <Select 
-                          value={relationshipType} 
-                          onValueChange={(value: 'prevention' | 'treatment' | 'support') => setRelationshipType(value)}
-                          disabled={loading}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="prevention">Prevenção</SelectItem>
-                            <SelectItem value="treatment">Tratamento</SelectItem>
-                            <SelectItem value="support">Suporte</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <label className="text-sm font-medium mb-1 block">
-                        Eficácia (1-5): {efficacyScore}
-                      </label>
-                      <Slider
-                        value={[efficacyScore]}
-                        min={1}
-                        max={5}
-                        step={1}
-                        onValueChange={(values) => setEfficacyScore(values[0])}
-                        disabled={loading}
-                        className="py-4"
-                      />
-                    </div>
-                    
-                    <div className="mb-4">
-                      <label className="text-sm font-medium mb-1 block">Notas sobre a Relação</label>
-                      <Textarea
-                        value={conditionNotes}
-                        onChange={(e) => setConditionNotes(e.target.value)}
-                        placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
-                        disabled={loading}
-                      />
-                    </div>
-                    
-                    <Button 
-                      onClick={handleAddCondition} 
-                      disabled={loading || !currentNutraceutical}
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Condição
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                {loadingRelations ? (
-                  <div className="text-center py-4">Carregando relações...</div>
-                ) : relatedConditions.length > 0 ? (
-                  <div className="space-y-4">
-                    {relatedConditions.map((relation) => (
-                      <div key={relation.id} className="border rounded-md p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-medium">{getConditionName(relation.condition_id)}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge>
-                                {relation.relationship_type === 'prevention' ? 'Prevenção' : 
-                                relation.relationship_type === 'treatment' ? 'Tratamento' : 'Suporte'}
-                              </Badge>
-                              <Badge className={getEfficacyBadgeClass(relation.efficacy_score)}>
-                                Eficácia: {relation.efficacy_score}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleRemoveCondition(relation.id)}
-                            disabled={loading}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            title="Remover relação"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        {relation.notes && (
-                          <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            <p className="font-medium text-xs mb-1 text-gray-500">Notas:</p>
-                            {relation.notes}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-gray-500">
-                    Nenhuma condição de saúde associada a este nutracêutico.
-                  </div>
-                )}
-              </div>
-              
-              {/* Seção de Estudos Científicos */}
-              <div className="mt-8">
-                <h3 className="text-lg font-medium mb-4">Estudos Científicos Relacionados</h3>
-                
-                <Card className="mb-4">
-                  <CardContent className="pt-6">
-                    <div className="mb-4">
-                      <label className="text-sm font-medium mb-1 block">Estudo Científico</label>
-                      <Select 
-                        value={selectedStudy} 
-                        onValueChange={setSelectedStudy}
-                        disabled={loading}
+                      <Button 
+                        onClick={handleAddCondition} 
+                        disabled={loading || !currentNutraceutical}
+                        className="w-full"
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um estudo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Selecione um estudo</SelectItem>
-                          {studies.map(study => (
-                            <SelectItem key={study.id} value={study.id}>
-                              {study.title} ({study.year})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <label className="text-sm font-medium mb-1 block">
-                        Relevância (1-5): {relevanceScore}
-                      </label>
-                      <Slider
-                        value={[relevanceScore]}
-                        min={1}
-                        max={5}
-                        step={1}
-                        onValueChange={(values) => setRelevanceScore(values[0])}
-                        disabled={loading}
-                        className="py-4"
-                      />
-                    </div>
-                    
-                    <Button 
-                      onClick={handleAddStudy} 
-                      disabled={loading || !currentNutraceutical}
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Estudo
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                {loadingRelations ? (
-                  <div className="text-center py-4">Carregando estudos...</div>
-                ) : relatedStudies.length > 0 ? (
-                  <div className="space-y-4">
-                    {relatedStudies.map((relation) => (
-                      <div key={relation.id} className="border rounded-md p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{getStudyName(relation.study_id)}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge className={getEfficacyBadgeClass(relation.relevance_score)}>
-                                Relevância: {relation.relevance_score}
-                              </Badge>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Condição
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  <div className="overflow-y-auto max-h-[300px] pr-1">
+                    {loadingRelations ? (
+                      <div className="text-center py-4">Carregando relações...</div>
+                    ) : relatedConditions.length > 0 ? (
+                      <div className="space-y-3">
+                        {relatedConditions.map((relation) => (
+                          <div key={relation.id} className="border rounded-md p-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-medium">{getConditionName(relation.condition_id)}</h4>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  <Badge className="whitespace-nowrap">
+                                    {relation.relationship_type === 'prevention' ? 'Prevenção' : 
+                                    relation.relationship_type === 'treatment' ? 'Tratamento' : 'Suporte'}
+                                  </Badge>
+                                  <Badge className={getEfficacyBadgeClass(relation.efficacy_score)}>
+                                    Eficácia: {relation.efficacy_score}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleRemoveCondition(relation.id)}
+                                disabled={loading}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                title="Remover relação"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
+                            {relation.notes && (
+                              <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                                <p className="font-medium text-xs mb-1 text-gray-500">Notas:</p>
+                                {relation.notes}
+                              </div>
+                            )}
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleRemoveStudy(relation.id)}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 border rounded-md border-dashed">
+                        <p className="text-muted-foreground">
+                          Nenhuma condição de saúde associada. 
+                          <br />Adicione a primeira condição acima.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Seção de Estudos Científicos */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium flex items-center">
+                    <span>Estudos Científicos</span>
+                    <Badge className="ml-2 bg-blue-100 text-blue-800 hover:bg-blue-200">
+                      {relatedStudies.length}
+                    </Badge>
+                  </h3>
+                  
+                  <Card>
+                    <CardContent className="pt-6 pb-4">
+                      <h4 className="text-sm font-medium mb-3">Adicionar Novo Estudo</h4>
+                      
+                      <div className="grid grid-cols-1 gap-4 mb-4">
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">Estudo Científico</label>
+                          <Select 
+                            value={selectedStudy} 
+                            onValueChange={setSelectedStudy}
                             disabled={loading}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            title="Remover relação"
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um estudo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Selecione um estudo</SelectItem>
+                              {studies.map(study => (
+                                <SelectItem key={study.id} value={study.id}>
+                                  {study.title} ({study.year})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Relevância (1-5): {relevanceScore}
+                          </label>
+                          <Slider
+                            value={[relevanceScore]}
+                            min={1}
+                            max={5}
+                            step={1}
+                            onValueChange={(values) => setRelevanceScore(values[0])}
+                            disabled={loading}
+                            className="py-4"
+                          />
                         </div>
                       </div>
-                    ))}
+                      
+                      <Button 
+                        onClick={handleAddStudy} 
+                        disabled={loading || !currentNutraceutical}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Estudo
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  <div className="overflow-y-auto max-h-[300px] pr-1">
+                    {loadingRelations ? (
+                      <div className="text-center py-4">Carregando estudos...</div>
+                    ) : relatedStudies.length > 0 ? (
+                      <div className="space-y-3">
+                        {relatedStudies.map((relation) => (
+                          <div key={relation.id} className="border rounded-md p-3">
+                            <div className="flex justify-between items-start">
+                              <div className="pr-2">
+                                <h4 className="font-medium line-clamp-2">{getStudyName(relation.study_id)}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className={getEfficacyBadgeClass(relation.relevance_score)}>
+                                    Relevância: {relation.relevance_score}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleRemoveStudy(relation.id)}
+                                disabled={loading}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
+                                title="Remover relação"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 border rounded-md border-dashed">
+                        <p className="text-muted-foreground">
+                          Nenhum estudo científico associado.
+                          <br />Adicione o primeiro estudo acima.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-4 text-gray-500">
-                    Nenhum estudo científico associado a este nutracêutico.
-                  </div>
-                )}
+                </div>
               </div>
               
               <DialogFooter className="pt-4">
+                <Button variant="outline" onClick={() => setActiveTab('info')}>
+                  Voltar para Informações Básicas
+                </Button>
                 <Button onClick={handleFinish}>
                   Concluir
                 </Button>
