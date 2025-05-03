@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Filter, RefreshCcw, Database, Edit, Trash2 } from 'lucide-react';
+import { Search, Filter, RefreshCcw, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import ManageRelationshipsDialog from '../nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
 interface NutraceuticalTableProps {
   nutraceuticals: any[];
@@ -34,6 +33,7 @@ interface NutraceuticalTableProps {
   handleDeleteClick: (id: string) => void;
   hasMigratedData: boolean;
   openMigratorDialog: () => void;
+  onEditClick?: (nutraceutical: any) => void;
 }
 
 const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
@@ -46,24 +46,9 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   refreshData,
   handleDeleteClick,
   hasMigratedData,
-  openMigratorDialog
+  openMigratorDialog,
+  onEditClick
 }) => {
-  const [relationDialogOpen, setRelationDialogOpen] = React.useState(false);
-  const [selectedNutraceutical, setSelectedNutraceutical] = React.useState<any>(null);
-  
-  // Função para abrir o diálogo de gerenciamento de relações
-  const handleManageRelations = (nutraceutical: any) => {
-    setSelectedNutraceutical(nutraceutical);
-    setRelationDialogOpen(true);
-  };
-  
-  // Função para fechar o diálogo e atualizar dados
-  const handleRelationsDialogClose = () => {
-    setRelationDialogOpen(false);
-    // Opcional: atualizar dados para refletir as mudanças
-    refreshData();
-  };
-
   // Função auxiliar para obter o nome do outcome
   const getOutcomeName = (nutra: any) => {
     // Se outcome_id é um objeto (Supabase retorna a relação expandida)
@@ -180,12 +165,9 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                             size="icon" 
                             variant="ghost" 
                             className="h-8 w-8"
-                            onClick={() => handleManageRelations(nutra)}
-                            title="Gerenciar relações"
+                            onClick={() => onEditClick && onEditClick(nutra)}
+                            title="Editar nutracêutico"
                           >
-                            <Database className="h-4 w-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8">
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
@@ -193,6 +175,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                             variant="ghost" 
                             className="h-8 w-8 text-red-500"
                             onClick={() => handleDeleteClick(nutra.id)}
+                            title="Excluir nutracêutico"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -211,14 +194,6 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
           {filteredNutraceuticals.length} de {nutraceuticals.length} nutracêuticos
         </div>
       </CardFooter>
-      
-      {/* Diálogo de gerenciamento de relações */}
-      <ManageRelationshipsDialog 
-        open={relationDialogOpen}
-        onOpenChange={setRelationDialogOpen}
-        nutraceutical={selectedNutraceutical}
-        onSuccess={handleRelationsDialogClose}
-      />
     </Card>
   );
 };

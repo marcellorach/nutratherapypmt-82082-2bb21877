@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -8,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
 import { useOutcomes } from '@/hooks/nutraceuticals/useOutcomes';
-import ManageRelationshipsDialog from './ManageRelationshipsDialog';
+import { RelationsTab } from '@/components/administrador/dialogs/nutraceutico/RelationsTab';
 
 // Schema de validação
 const formSchema = z.object({
@@ -41,12 +43,13 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   const { outcomes, fetchOutcomes } = useOutcomes();
   const [loading, setLoading] = useState(false);
   const [createdNutraceutical, setCreatedNutraceutical] = useState<any>(null);
-  const [relationDialogOpen, setRelationDialogOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState('info');
   
   useEffect(() => {
     if (open) {
       fetchOutcomes();
       setCreatedNutraceutical(null);
+      setActiveTab('info');
     }
   }, [open, fetchOutcomes]);
   
@@ -88,12 +91,9 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       // Armazenar o nutracêutico recém-criado para possível gerenciamento de relações
       setCreatedNutraceutical(newNutraceutical);
       
-      // Reiniciar o formulário
-      form.reset();
+      // Alterar para a tab de relações
+      setActiveTab('relations');
       
-      if (onSuccess) {
-        onSuccess();
-      }
     } catch (error) {
       console.error('Erro ao criar nutracêutico:', error);
     } finally {
@@ -101,38 +101,101 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     }
   };
 
-  // Função para gerenciar relações após criar o nutracêutico
-  const handleManageRelations = () => {
-    setRelationDialogOpen(true);
-  };
-
-  // Função para fechar o diálogo de gerenciamento de relações
-  const handleRelationsDialogClose = () => {
-    setRelationDialogOpen(false);
-    onOpenChange(false); // Fechar o diálogo principal
+  // Função para finalizar o processo
+  const handleFinish = () => {
+    // Reiniciar o formulário
+    form.reset();
+    
+    // Notificar o componente pai
+    if (onSuccess) {
+      onSuccess();
+    }
+    
+    // Fechar o diálogo
+    onOpenChange(false);
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {createdNutraceutical ? 'Nutracêutico Criado' : 'Adicionar Novo Nutracêutico'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {!createdNutraceutical ? (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {createdNutraceutical ? `Editar Nutracêutico: ${createdNutraceutical.name}` : 'Adicionar Novo Nutracêutico'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        {!createdNutraceutical ? (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome do Nutracêutico</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Ex: Resveratrol, Ômega-3, etc." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="outcome_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Outcome</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um outcome" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Sem outcome</SelectItem>
+                        {outcomes.map((outcome) => (
+                          <SelectItem key={outcome.id} value={outcome.id || "none"}>
+                            {outcome.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Descreva o nutracêutico e suas propriedades principais"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="chemical_compound"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome do Nutracêutico</FormLabel>
+                      <FormLabel>Composto Químico</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Ex: Resveratrol, Ômega-3, etc." />
+                        <Input {...field} placeholder="Fórmula ou nome químico" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -141,155 +204,127 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                 
                 <FormField
                   control={form.control}
-                  name="outcome_id"
+                  name="source"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Outcome</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um outcome" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Sem outcome</SelectItem>
-                          {outcomes.map((outcome) => (
-                            <SelectItem key={outcome.id} value={outcome.id || "none"}>
-                              {outcome.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
+                      <FormLabel>Fonte Natural</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Descreva o nutracêutico e suas propriedades principais"
-                        />
+                        <Input {...field} placeholder="Ex: Uva, Nozes, Peixes, etc." />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="chemical_compound"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Composto Químico</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Fórmula ou nome químico" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="source"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fonte Natural</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ex: Uva, Nozes, Peixes, etc." />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="dosage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dosagem Recomendada</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Ex: 500mg diários, 2-5g por dia, etc." />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="contraindications"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraindicações (separadas por vírgula)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Ex: Gravidez, Lactação, Uso de anticoagulantes, etc."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting || loading}>
-                    {(isSubmitting || loading) ? 'Salvando...' : 'Salvar Nutracêutico'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          ) : (
-            <div className="space-y-6">
-              <div className="text-center py-6 bg-green-50 border border-green-100 rounded-md">
-                <p className="text-green-600 font-medium">
-                  Nutracêutico criado com sucesso!
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Deseja gerenciar relações com condições de saúde ou estudos científicos?
-                </p>
               </div>
               
-              <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <FormField
+                control={form.control}
+                name="dosage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dosagem Recomendada</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Ex: 500mg diários, 2-5g por dia, etc." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="contraindications"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraindicações (separadas por vírgula)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Ex: Gravidez, Lactação, Uso de anticoagulantes, etc."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmitting || loading}>
+                  {(isSubmitting || loading) ? 'Salvando...' : 'Salvar e Continuar'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        ) : (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="info">Informações Básicas</TabsTrigger>
+              <TabsTrigger value="relations">Condições e Estudos</TabsTrigger>
+            </TabsList>
+            <TabsContent value="info" className="space-y-6">
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Nome</FormLabel>
+                  <div className="col-span-3">
+                    <Input value={createdNutraceutical.name} readOnly />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Descrição</FormLabel>
+                  <div className="col-span-3">
+                    <Textarea value={createdNutraceutical.description || ''} readOnly />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Dosagem</FormLabel>
+                  <div className="col-span-3">
+                    <Input value={createdNutraceutical.dosage || ''} readOnly />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Fonte</FormLabel>
+                  <div className="col-span-3">
+                    <Input value={createdNutraceutical.source || ''} readOnly />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Composto Químico</FormLabel>
+                  <div className="col-span-3">
+                    <Input value={createdNutraceutical.chemical_compound || ''} readOnly />
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button onClick={() => setActiveTab('relations')}>
+                  Gerenciar Condições e Estudos
+                </Button>
+              </DialogFooter>
+            </TabsContent>
+            
+            <TabsContent value="relations" className="space-y-6">
+              <RelationsTab 
+                nutraceutical={createdNutraceutical} 
+                onUpdate={() => {/* Opcional: atualizar dados */}}
+              />
+              
+              <DialogFooter>
+                <Button onClick={handleFinish}>
                   Concluir
                 </Button>
-                <Button onClick={handleManageRelations}>
-                  Gerenciar Relações
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Diálogo de gerenciamento de relações */}
-      {createdNutraceutical && (
-        <ManageRelationshipsDialog 
-          open={relationDialogOpen}
-          onOpenChange={setRelationDialogOpen}
-          nutraceutical={createdNutraceutical}
-          onSuccess={handleRelationsDialogClose}
-        />
-      )}
-    </>
+              </DialogFooter>
+            </TabsContent>
+          </Tabs>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 

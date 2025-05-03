@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Search, X, RefreshCw, Filter, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -10,18 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, X, Filter, RefreshCcw } from "lucide-react";
 
 interface SearchFiltersProps {
   searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  filterEfficacy: number | null;
-  setFilterEfficacy: (value: number | null) => void;
-  filterCondition: string | null;
-  setFilterCondition: (value: string | null) => void;
+  setSearchTerm: (value: string) => void;
+  filterEfficacy: string;
+  setFilterEfficacy: (value: string) => void;
+  filterCondition: string;
+  setFilterCondition: (value: string) => void;
   clearFilters: () => void;
-  onRefresh?: () => void;
+  onRefresh: () => void;
   isRefreshing?: boolean;
+  onAddNewClick?: () => void;
 }
 
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
@@ -33,124 +35,177 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   setFilterCondition,
   clearFilters,
   onRefresh,
-  isRefreshing = false
+  isRefreshing = false,
+  onAddNewClick
 }) => {
-  const conditions = [
-    "Artrite",
-    "Problemas cardíacos",
-    "Deficiência imunológica",
-    "Problemas digestivos",
-    "Funções hepáticas",
-    "Saúde ocular",
-    "Função cognitiva",
-    "Saúde renal"
-  ];
-
-  const handleEfficacyChange = (value: string) => {
-    setFilterEfficacy(value ? parseInt(value) : null);
-  };
-
-  const handleConditionChange = (value: string) => {
-    setFilterCondition(value || null);
-  };
+  const hasActiveFilters = !!filterEfficacy || !!filterCondition;
 
   return (
     <div className="border-b p-4">
-      <div className="flex flex-col sm:flex-row gap-3 items-center">
-        <div className="relative flex-grow">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar nutracêuticos..."
+            placeholder="Buscar por nome, descrição ou propriedades..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-9"
           />
           {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-2.5"
-            >
-              <X className="h-4 w-4 text-gray-500" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 self-end">
-          <Select
-            value={filterEfficacy?.toString() || ""}
-            onValueChange={handleEfficacyChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Eficácia científica" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="5">Excelente (5)</SelectItem>
-              <SelectItem value="4">Muito boa (4)</SelectItem>
-              <SelectItem value="3">Boa (3)</SelectItem>
-              <SelectItem value="2">Moderada (2)</SelectItem>
-              <SelectItem value="1">Baixa (1)</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={filterCondition || ""}
-            onValueChange={handleConditionChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Condição" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {conditions.map((condition) => (
-                <SelectItem key={condition} value={condition}>
-                  {condition}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {(searchTerm || filterEfficacy || filterCondition) && (
-            <Button variant="ghost" onClick={clearFilters} size="sm">
-              <X className="h-4 w-4 mr-1" /> Limpar
-            </Button>
-          )}
-          
-          {onRefresh && (
             <Button
-              variant="outline"
-              size="icon"
-              onClick={onRefresh}
-              disabled={isRefreshing}
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+              onClick={() => setSearchTerm('')}
             >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-      </div>
 
-      {/* Filtros ativos */}
-      {(filterEfficacy || filterCondition) && (
-        <div className="flex flex-wrap gap-2 mt-3">
-          <span className="text-sm text-gray-500 flex items-center">
-            <Filter className="h-3 w-3 mr-1" /> Filtros:
-          </span>
-          {filterEfficacy && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Eficácia {filterEfficacy}
-              <button onClick={() => setFilterEfficacy(null)}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </Badge>
-          )}
-          {filterCondition && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {filterCondition}
-              <button onClick={() => setFilterCondition(null)}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </Badge>
-          )}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant={hasActiveFilters ? "secondary" : "outline"}
+              size="sm"
+              className="gap-1"
+            >
+              <Filter className="h-4 w-4" />
+              Filtros
+              {hasActiveFilters && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs"
+                >
+                  {(!!filterEfficacy ? 1 : 0) + (!!filterCondition ? 1 : 0)}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Filtros Avançados</h4>
+              
+              <div className="space-y-2">
+                <label className="text-sm" htmlFor="efficacy">Eficácia</label>
+                <Select value={filterEfficacy} onValueChange={setFilterEfficacy}>
+                  <SelectTrigger id="efficacy">
+                    <SelectValue placeholder="Nível de eficácia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos os níveis</SelectItem>
+                    <SelectItem value="high">Alta (4-5)</SelectItem>
+                    <SelectItem value="medium">Média (3)</SelectItem>
+                    <SelectItem value="low">Baixa (1-2)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm" htmlFor="condition">Condição de Saúde</label>
+                <Select value={filterCondition} onValueChange={setFilterCondition}>
+                  <SelectTrigger id="condition">
+                    <SelectValue placeholder="Todas as condições" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas as condições</SelectItem>
+                    <SelectItem value="cardiac">Cardíacas</SelectItem>
+                    <SelectItem value="joint">Articulações</SelectItem>
+                    <SelectItem value="renal">Renais</SelectItem>
+                    <SelectItem value="liver">Hepáticas</SelectItem>
+                    <SelectItem value="immune">Imunológicas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-between pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters}
+                >
+                  Limpar Filtros
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                >
+                  Aplicar Filtros
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={onRefresh}
+          className="gap-1"
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Atualizar
+        </Button>
+        
+        {onAddNewClick && (
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={onAddNewClick}
+            className="gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Nutracêutico
+          </Button>
+        )}
+      </div>
+      
+      {hasActiveFilters && (
+        <div className="flex items-center gap-2 mt-3">
+          <p className="text-sm text-muted-foreground">Filtros ativos:</p>
+          <div className="flex flex-wrap gap-2">
+            {filterEfficacy && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Eficácia: {filterEfficacy === 'high' ? 'Alta' : filterEfficacy === 'medium' ? 'Média' : 'Baixa'}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-4 w-4 p-0 ml-1"
+                  onClick={() => setFilterEfficacy('')}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            {filterCondition && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Condição: {
+                  filterCondition === 'cardiac' ? 'Cardíacas' : 
+                  filterCondition === 'joint' ? 'Articulações' : 
+                  filterCondition === 'renal' ? 'Renais' : 
+                  filterCondition === 'liver' ? 'Hepáticas' : 'Imunológicas'
+                }
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-4 w-4 p-0 ml-1"
+                  onClick={() => setFilterCondition('')}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-7 text-xs text-muted-foreground"
+              onClick={clearFilters}
+            >
+              Limpar todos
+            </Button>
+          </div>
         </div>
       )}
     </div>

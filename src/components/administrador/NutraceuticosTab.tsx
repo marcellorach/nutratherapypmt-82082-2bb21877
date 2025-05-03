@@ -6,17 +6,15 @@ import { NutraceuticosTable } from './nutraceuticos/NutraceuticosTable';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNutraceuticalsData } from '@/hooks/nutraceuticals/useNutraceuticalsData';
 import { useNutraceuticalsFilter } from '@/hooks/nutraceuticals/useNutraceuticalsFilter';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import ManageRelationshipsDialog from './pesquisa/nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
+import AddNutraceuticalDialog from './pesquisa/nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog';
 
 const NutraceuticosTab: React.FC = () => {
   // Hook para carregar e gerenciar os dados dos nutracêuticos
   const { nutraceuticals, isLoading, isRefreshing, handleRefreshData } = useNutraceuticalsData();
   
-  // Estados para gerenciar o diálogo de relações
+  // Estados para gerenciar o diálogo de edição
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
-  const [isRelationsDialogOpen, setIsRelationsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   // Hook para filtrar os nutracêuticos
   const {
@@ -30,15 +28,15 @@ const NutraceuticosTab: React.FC = () => {
     clearFilters
   } = useNutraceuticalsFilter(nutraceuticals);
 
-  // Handler para quando um nutraceutico é selecionado para gerenciar relações
-  const handleManageRelations = (nutraceutical: any) => {
+  // Handler para quando um nutraceutico é selecionado para edição
+  const handleEditClick = (nutraceutical: any) => {
     setSelectedNutraceutical(nutraceutical);
-    setIsRelationsDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
-  // Handler para quando o diálogo de relações é fechado
-  const handleRelationsDialogClose = () => {
-    setIsRelationsDialogOpen(false);
+  // Handler para quando o diálogo de edição é fechado
+  const handleEditDialogClose = () => {
+    setIsEditDialogOpen(false);
     handleRefreshData();
   };
 
@@ -57,6 +55,10 @@ const NutraceuticosTab: React.FC = () => {
           clearFilters={clearFilters}
           onRefresh={handleRefreshData}
           isRefreshing={isRefreshing}
+          onAddNewClick={() => {
+            setSelectedNutraceutical(null);
+            setIsEditDialogOpen(true);
+          }}
         />
         
         {isLoading ? (
@@ -68,17 +70,16 @@ const NutraceuticosTab: React.FC = () => {
         ) : (
           <NutraceuticosTable 
             nutraceuticals={filteredNutraceuticals}
-            onManageRelations={handleManageRelations}
+            onEditClick={handleEditClick}
           />
         )}
       </div>
       
-      {/* Diálogo para gerenciar relações */}
-      <ManageRelationshipsDialog
-        open={isRelationsDialogOpen}
-        onOpenChange={setIsRelationsDialogOpen}
-        nutraceutical={selectedNutraceutical}
-        onSuccess={handleRelationsDialogClose}
+      {/* Diálogo para adicionar/editar nutracêutico */}
+      <AddNutraceuticalDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={handleEditDialogClose}
       />
     </>
   );

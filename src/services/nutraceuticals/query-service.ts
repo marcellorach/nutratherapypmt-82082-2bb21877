@@ -2,76 +2,108 @@
 import { supabase } from '@/integrations/supabase/client';
 import { NutraceuticalBaseService } from './base-service';
 
-/**
- * Serviço para operações de consulta de nutracêuticos
- */
 export const NutraceuticalQueryService = {
   /**
-   * Busca todos os nutracêuticos com suas categorias
+   * Obtém um nutraceutico pelo ID
    */
-  async getAllNutraceuticals() {
+  async getById(id: string) {
     try {
-      const query = NutraceuticalBaseService.getBaseQuery()
-        // Incluir outcomes (antigas categorias)
-        .select(`
-          *,
-          outcome:outcome_id(*),
-          nutraceutical_health_conditions:nutraceutical_conditions(
-            id, relationship_type, efficacy_score, notes,
-            condition:condition_id(*)
-          ),
-          nutraceutical_studies:nutraceutical_studies(
-            id, relevance_score,
-            study:study_id(*)
-          )
-        `)
-        .order('name');
-      
-      const { data, error } = await query;
+      const { data, error } = await supabase
+        .from('nutraceuticals')
+        .select('*, outcome:outcome_id (*)')
+        .eq('id', id)
+        .single();
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'buscar nutracêuticos');
+        NutraceuticalBaseService.handleError(error, 'buscar por ID');
       }
 
       return data;
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'buscar nutracêuticos');
+      NutraceuticalBaseService.handleError(error, 'buscar por ID');
+    }
+  },
+
+  /**
+   * Obtém todos os nutraceuticos
+   */
+  async getAll() {
+    try {
+      const { data, error } = await supabase
+        .from('nutraceuticals')
+        .select('*, outcome:outcome_id (*)');
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'listar todos');
+      }
+
+      return data || [];
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'listar todos');
       return [];
     }
   },
 
   /**
-   * Busca um nutracêutico específico por ID
+   * Busca nutraceuticos por nome
    */
-  async getNutraceuticalById(id: string) {
+  async getByName(name: string) {
     try {
-      const query = NutraceuticalBaseService.getBaseQuery()
-        .select(`
-          *,
-          outcome:outcome_id(*),
-          nutraceutical_health_conditions:nutraceutical_conditions(
-            id, relationship_type, efficacy_score, notes,
-            condition:condition_id(*)
-          ),
-          nutraceutical_studies:nutraceutical_studies(
-            id, relevance_score,
-            study:study_id(*)
-          ),
-          nutraceutical_benefits:nutraceutical_benefits(*)
-        `)
-        .eq('id', id)
-        .single();
-      
-      const { data, error } = await query;
+      const { data, error } = await supabase
+        .from('nutraceuticals')
+        .select('*, outcome:outcome_id (*)')
+        .ilike('name', `%${name}%`);
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'buscar nutracêutico');
+        NutraceuticalBaseService.handleError(error, 'buscar por nome');
       }
 
-      return data;
+      return data || [];
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'buscar nutracêutico');
-      return null;
+      NutraceuticalBaseService.handleError(error, 'buscar por nome');
+      return [];
+    }
+  },
+  
+  /**
+   * Obter todas as relações com condições de saúde para um nutracêutico
+   */
+  async getConditionRelations(nutraceuticalId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('nutraceutical_conditions')
+        .select('*, condition:condition_id (*)')
+        .eq('nutraceutical_id', nutraceuticalId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'buscar relações de condições');
+      }
+
+      return data || [];
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'buscar relações de condições');
+      return [];
+    }
+  },
+  
+  /**
+   * Obter todas as relações com estudos científicos para um nutracêutico
+   */
+  async getStudyRelations(nutraceuticalId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('nutraceutical_studies')
+        .select('*, study:study_id (*)')
+        .eq('nutraceutical_id', nutraceuticalId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'buscar relações de estudos');
+      }
+
+      return data || [];
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'buscar relações de estudos');
+      return [];
     }
   }
 };

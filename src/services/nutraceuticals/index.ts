@@ -1,29 +1,31 @@
 
-import { NutraceuticalQueryService } from './query-service';
+import { NutraceuticalBaseService } from './base-service';
 import { NutraceuticalMutationService } from './mutation-service';
+import { NutraceuticalQueryService } from './query-service';
 import { NutraceuticalMetadataService } from './metadata-service';
 import { NutraceuticalRelationsService } from './relations-service';
 
-/**
- * Serviço unificado para gerenciar nutracêuticos no Supabase
- */
 export const NutraceuticalsService = {
-  // Consulta de nutracêuticos
-  getAllNutraceuticals: NutraceuticalQueryService.getAllNutraceuticals,
-  getNutraceuticalById: NutraceuticalQueryService.getNutraceuticalById,
+  // Operações Básicas
+  getById: NutraceuticalQueryService.getById,
+  getAll: NutraceuticalQueryService.getAll,
+  getByName: NutraceuticalQueryService.getByName,
+  create: NutraceuticalMutationService.create,
+  update: NutraceuticalMutationService.update,
+  delete: NutraceuticalMutationService.delete,
   
-  // Operações de mutação básicas
-  createNutraceutical: NutraceuticalMutationService.createNutraceutical,
-  updateNutraceutical: NutraceuticalMutationService.updateNutraceutical,
-  deleteNutraceutical: NutraceuticalMutationService.deleteNutraceutical,
+  // Operações de Metadados
+  getAllOutcomes: NutraceuticalMetadataService.getAllOutcomes,
+  getAllCategories: NutraceuticalMetadataService.getAllCategories,
+  getAllActiveIngredients: NutraceuticalMetadataService.getAllActiveIngredients,
+  getAllConditions: NutraceuticalMetadataService.getAllConditions,
+  getAllStudies: NutraceuticalMetadataService.getAllStudies,
   
-  // Operações de benefícios e metadados
-  addBenefit: NutraceuticalMetadataService.addBenefit,
-  updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
-  
-  // Operações de relações
+  // Operações de Relações
   relateToCondition: NutraceuticalRelationsService.relateToCondition,
   relateToStudy: NutraceuticalRelationsService.relateToStudy,
   removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation,
-  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation
+  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
+  getConditionRelations: NutraceuticalQueryService.getConditionRelations,
+  getStudyRelations: NutraceuticalQueryService.getStudyRelations
 };
