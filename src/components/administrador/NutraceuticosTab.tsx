@@ -40,6 +40,12 @@ const NutraceuticosTab: React.FC = () => {
     handleRefreshData();
   };
 
+  // Converter o valor numérico para string ao passar para o componente SearchFilters
+  const filterEfficacyString = filterEfficacy !== null ? filterEfficacy.toString() : '';
+  const handleSetFilterEfficacy = (value: string) => {
+    setFilterEfficacy(value === '' ? null : parseInt(value, 10));
+  };
+
   return (
     <>
       <NutraceuticosHeader />
@@ -48,8 +54,8 @@ const NutraceuticosTab: React.FC = () => {
         <SearchFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          filterEfficacy={filterEfficacy}
-          setFilterEfficacy={setFilterEfficacy}
+          filterEfficacy={filterEfficacyString}
+          setFilterEfficacy={handleSetFilterEfficacy}
           filterCondition={filterCondition}
           setFilterCondition={setFilterCondition}
           clearFilters={clearFilters}

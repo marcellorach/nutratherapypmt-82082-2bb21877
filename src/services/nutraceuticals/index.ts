@@ -9,10 +9,14 @@ export const NutraceuticalsService = {
   // Operações Básicas
   getById: NutraceuticalQueryService.getById,
   getAll: NutraceuticalQueryService.getAll,
+  getAllNutraceuticals: NutraceuticalQueryService.getAll, // Alias para compatibilidade
   getByName: NutraceuticalQueryService.getByName,
-  create: NutraceuticalMutationService.create,
-  update: NutraceuticalMutationService.update,
-  delete: NutraceuticalMutationService.delete,
+  create: NutraceuticalMutationService.createNutraceutical, // Alias para métodos utilizados em outros lugares
+  update: NutraceuticalMutationService.updateNutraceutical,
+  delete: NutraceuticalMutationService.deleteNutraceutical, 
+  createNutraceutical: NutraceuticalMutationService.createNutraceutical,
+  updateNutraceutical: NutraceuticalMutationService.updateNutraceutical,
+  deleteNutraceutical: NutraceuticalMutationService.deleteNutraceutical,
   
   // Operações de Metadados
   getAllOutcomes: NutraceuticalMetadataService.getAllOutcomes,
@@ -20,6 +24,8 @@ export const NutraceuticalsService = {
   getAllActiveIngredients: NutraceuticalMetadataService.getAllActiveIngredients,
   getAllConditions: NutraceuticalMetadataService.getAllConditions,
   getAllStudies: NutraceuticalMetadataService.getAllStudies,
+  addBenefit: NutraceuticalMetadataService.addBenefit,
+  updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
   
   // Operações de Relações
   relateToCondition: NutraceuticalRelationsService.relateToCondition,
