@@ -35,7 +35,7 @@ export const NutraceuticalMigrator = {
           dosage: nutra.dosage,
           source: nutra.source,
           chemical_compound: nutra.chemicalCompound,
-          category_id: categoryId,
+          outcome_id: categoryId, // Alterado de category_id para outcome_id
           contraindications: nutra.contraindications || []
         });
         
