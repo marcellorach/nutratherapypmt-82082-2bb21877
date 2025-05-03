@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
 import { useOutcomes } from '@/hooks/nutraceuticals/useOutcomes';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Info } from 'lucide-react';
+import { Plus, Trash2, Info, FileText, Star, StarHalf, StarOff } from 'lucide-react';
 import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +28,7 @@ const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   description: z.string().optional(),
   category: z.string().optional(),
+  efficacyScore: z.string().optional(),
   dosage: z.string().optional(),
   source: z.string().optional(),
   chemical_compound: z.string().optional(),
@@ -36,6 +37,13 @@ const formSchema = z.object({
 
 // Tipagem para os dados do formulário
 type FormData = z.infer<typeof formSchema>;
+
+interface RelationData {
+  category: string;
+  efficacyScore: number;
+  studies: string[];
+  notes: string;
+}
 
 interface AddNutraceuticalDialogProps {
   open: boolean;
@@ -53,87 +61,55 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   const { toast } = useToast();
   const { createNutraceutical, updateNutraceutical } = useNutraceuticals();
   const { outcomes, fetchOutcomes } = useOutcomes();
-  const { conditions, fetchConditions } = useConditions();
   const { studies, fetchStudies } = useStudies();
   
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [isNewNutraceutical, setIsNewNutraceutical] = useState(true);
   const [currentNutraceutical, setCurrentNutraceutical] = useState<any>(null);
-  
-  // Estados para gestão de condições e estudos
-  const [relatedConditions, setRelatedConditions] = useState<any[]>([]);
-  const [relatedStudies, setRelatedStudies] = useState<any[]>([]);
-  const [loadingRelations, setLoadingRelations] = useState(false);
-  
-  // Estados para o formulário de adição de condições
-  const [selectedCondition, setSelectedCondition] = useState<string>('');
-  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('prevention');
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
-  const [conditionNotes, setConditionNotes] = useState<string>('');
+  const [relations, setRelations] = useState<RelationData[]>([]);
+  const [selectedStudies, setSelectedStudies] = useState<string[]>([]);
+  const [relationNotes, setRelationNotes] = useState<string>("");
   
-  // Estados para o formulário de adição de estudos
-  const [selectedStudy, setSelectedStudy] = useState<string>('');
-  const [relevanceScore, setRelevanceScore] = useState<number>(3);
+  // Estados para gestão de relações adicionais
+  const [showAddRelation, setShowAddRelation] = useState(false);
+  const [addRelationCategory, setAddRelationCategory] = useState("");
+  const [addRelationEfficacy, setAddRelationEfficacy] = useState(3);
+  const [addRelationStudies, setAddRelationStudies] = useState<string[]>([]);
+  const [addRelationNotes, setAddRelationNotes] = useState("");
   
   useEffect(() => {
     if (open) {
       fetchOutcomes();
-      fetchConditions();
       fetchStudies();
       
       setIsNewNutraceutical(!nutraceutical);
       setCurrentNutraceutical(nutraceutical);
       
       if (nutraceutical) {
-        loadRelatedConditions(nutraceutical.id);
-        loadRelatedStudies(nutraceutical.id);
+        // Inicializar com a relação primária (outcome do nutracêutico)
+        if (nutraceutical.outcome_id) {
+          setRelations([{
+            category: nutraceutical.outcome_id,
+            efficacyScore: nutraceutical.scientific_metadata?.efficacy_score || 3,
+            studies: [],
+            notes: nutraceutical.scientific_metadata?.notes || ""
+          }]);
+        }
+        
+        // Inicializar eficácia com o valor do metadata
+        setEfficacyScore(nutraceutical.scientific_metadata?.efficacy_score || 3);
       } else {
-        setRelatedConditions([]);
-        setRelatedStudies([]);
+        setRelations([]);
+        setEfficacyScore(3);
       }
       
       setActiveTab('info');
-      resetConditionForm();
-      resetStudyForm();
+      setSelectedStudies([]);
+      setRelationNotes("");
     }
   }, [open, nutraceutical]);
-  
-  // Carrega as condições relacionadas ao nutracêutico
-  const loadRelatedConditions = async (nutraceuticalId: string) => {
-    try {
-      setLoadingRelations(true);
-      const conditions = await NutraceuticalsService.getConditionRelations(nutraceuticalId);
-      setRelatedConditions(conditions || []);
-    } catch (error) {
-      console.error("Erro ao carregar condições relacionadas:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as condições relacionadas",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingRelations(false);
-    }
-  };
-  
-  // Carrega os estudos relacionados ao nutracêutico
-  const loadRelatedStudies = async (nutraceuticalId: string) => {
-    try {
-      setLoadingRelations(true);
-      const studies = await NutraceuticalsService.getStudyRelations(nutraceuticalId);
-      setRelatedStudies(studies || []);
-    } catch (error) {
-      console.error("Erro ao carregar estudos relacionados:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os estudos relacionados",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingRelations(false);
-    }
-  };
   
   // Inicialização do formulário
   const form = useForm<FormData>({
@@ -141,7 +117,8 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     defaultValues: {
       name: nutraceutical?.name || '',
       description: nutraceutical?.description || '',
-      category: nutraceutical?.outcome_id || undefined, // Renomeado para category
+      category: nutraceutical?.outcome_id || undefined,
+      efficacyScore: String(nutraceutical?.scientific_metadata?.efficacy_score || 3),
       dosage: nutraceutical?.dosage || '',
       source: nutraceutical?.source || '',
       chemical_compound: nutraceutical?.chemical_compound || '',
@@ -157,6 +134,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         name: nutraceutical.name || '',
         description: nutraceutical.description || '',
         category: nutraceutical.outcome_id || undefined,
+        efficacyScore: String(nutraceutical.scientific_metadata?.efficacy_score || 3),
         dosage: nutraceutical.dosage || '',
         source: nutraceutical.source || '',
         chemical_compound: nutraceutical.chemical_compound || '',
@@ -168,6 +146,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         name: '',
         description: '',
         category: undefined,
+        efficacyScore: '3',
         dosage: '',
         source: '',
         chemical_compound: '',
@@ -177,6 +156,45 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   }, [nutraceutical, form]);
   
   const { isSubmitting } = form.formState;
+  
+  // Função para remover uma relação
+  const handleRemoveRelation = (index: number) => {
+    setRelations(prevRelations => prevRelations.filter((_, i) => i !== index));
+  };
+  
+  // Função para adicionar uma nova relação
+  const handleAddRelation = () => {
+    if (!addRelationCategory || addRelationCategory === 'none') {
+      toast({
+        title: "Atenção",
+        description: "Selecione uma categoria para adicionar a relação",
+        variant: "default"
+      });
+      return;
+    }
+    
+    setRelations(prevRelations => [
+      ...prevRelations, 
+      {
+        category: addRelationCategory,
+        efficacyScore: addRelationEfficacy,
+        studies: addRelationStudies,
+        notes: addRelationNotes
+      }
+    ]);
+    
+    // Limpar o formulário
+    setAddRelationCategory("");
+    setAddRelationEfficacy(3);
+    setAddRelationStudies([]);
+    setAddRelationNotes("");
+    setShowAddRelation(false);
+    
+    toast({
+      title: "Sucesso",
+      description: "Nova relação adicionada",
+    });
+  };
 
   // Função para lidar com o envio do formulário
   const handleSubmit = async (values: FormData) => {
@@ -187,19 +205,56 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         ? values.contraindications.split('\n').map(item => item.trim()).filter(Boolean)
         : [];
       
+      // Atualizar a primeira relação com os dados do formulário principal
+      if (values.category) {
+        const updatedRelations = [...relations];
+        if (updatedRelations.length === 0) {
+          updatedRelations.push({
+            category: values.category,
+            efficacyScore: parseInt(values.efficacyScore || '3', 10),
+            studies: selectedStudies,
+            notes: relationNotes
+          });
+        } else {
+          updatedRelations[0] = {
+            ...updatedRelations[0],
+            category: values.category,
+            efficacyScore: parseInt(values.efficacyScore || '3', 10),
+            studies: selectedStudies,
+            notes: relationNotes
+          };
+        }
+        setRelations(updatedRelations);
+      }
+      
       let result;
       
       if (isNewNutraceutical) {
-        // Criar novo nutracêutico
+        // Criar novo nutracêutico com a primeira relação como outcome principal
         result = await createNutraceutical({
           name: values.name,
           description: values.description || undefined,
-          outcome_id: values.category || undefined, // Usando category como outcome_id
+          outcome_id: values.category || undefined,
           dosage: values.dosage || undefined,
           source: values.source || undefined,
           chemical_compound: values.chemical_compound || undefined,
-          contraindications: contraindications.length > 0 ? contraindications : undefined
+          contraindications: contraindications.length > 0 ? contraindications : undefined,
+          scientific_metadata: {
+            efficacy_score: parseInt(values.efficacyScore || '3', 10),
+            notes: relationNotes
+          }
         });
+        
+        // Se temos estudos selecionados, associá-los ao nutracêutico
+        if (selectedStudies.length > 0) {
+          for (const studyId of selectedStudies) {
+            await NutraceuticalsService.relateToStudy(
+              result.id,
+              studyId,
+              parseInt(values.efficacyScore || '3', 10)
+            );
+          }
+        }
         
         toast({
           title: "Sucesso",
@@ -210,12 +265,19 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         result = await updateNutraceutical(nutraceutical.id, {
           name: values.name,
           description: values.description || undefined,
-          outcome_id: values.category || undefined, // Usando category como outcome_id
+          outcome_id: values.category || undefined,
           dosage: values.dosage || undefined,
           source: values.source || undefined,
           chemical_compound: values.chemical_compound || undefined,
           contraindications: contraindications.length > 0 ? contraindications : undefined
         });
+        
+        // Atualizar metadata científica
+        await NutraceuticalsService.updateScientificMetadata(
+          nutraceutical.id, 
+          parseInt(values.efficacyScore || '3', 10),
+          relationNotes
+        );
         
         toast({
           title: "Sucesso",
@@ -223,14 +285,9 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         });
       }
       
-      // Atualizar o nutracêutico atual e mudar para a aba de relações
+      // Atualizar o nutracêutico atual
       setCurrentNutraceutical(result);
       setIsNewNutraceutical(false);
-      
-      // Se é um novo nutracêutico, muda para a aba de relações
-      if (isNewNutraceutical) {
-        setActiveTab('relations');
-      }
       
     } catch (error) {
       console.error('Erro ao salvar nutracêutico:', error);
@@ -243,155 +300,35 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       setLoading(false);
     }
   };
-
-  // Função para adicionar uma nova relação com condição de saúde
-  const handleAddCondition = async () => {
-    if (!currentNutraceutical) return;
-    
-    if (!selectedCondition || selectedCondition === 'none') {
-      toast({
-        title: "Atenção",
-        description: "Selecione uma condição de saúde",
-        variant: "default"
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await NutraceuticalsService.relateToCondition(
-        currentNutraceutical.id,
-        selectedCondition,
-        relationshipType,
-        efficacyScore,
-        conditionNotes
-      );
-      
-      toast({
-        title: "Sucesso",
-        description: "Condição de saúde associada com sucesso",
-      });
-      
-      // Recarregar relações
-      await loadRelatedConditions(currentNutraceutical.id);
-      
-      // Limpar formulário
-      resetConditionForm();
-    } catch (error) {
-      console.error("Erro ao adicionar condição:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível associar a condição de saúde",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  
+  // Função para toggle seleção de estudo
+  const toggleStudySelection = (studyId: string) => {
+    if (selectedStudies.includes(studyId)) {
+      setSelectedStudies(selectedStudies.filter(id => id !== studyId));
+    } else {
+      setSelectedStudies([...selectedStudies, studyId]);
     }
   };
   
-  // Função para adicionar uma nova relação com estudo científico
-  const handleAddStudy = async () => {
-    if (!currentNutraceutical) return;
-    
-    if (!selectedStudy || selectedStudy === 'none') {
-      toast({
-        title: "Atenção",
-        description: "Selecione um estudo científico",
-        variant: "default"
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await NutraceuticalsService.relateToStudy(
-        currentNutraceutical.id,
-        selectedStudy,
-        relevanceScore
-      );
-      
-      toast({
-        title: "Sucesso",
-        description: "Estudo científico associado com sucesso",
-      });
-      
-      // Recarregar relações
-      await loadRelatedStudies(currentNutraceutical.id);
-      
-      // Limpar formulário
-      resetStudyForm();
-    } catch (error) {
-      console.error("Erro ao adicionar estudo:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível associar o estudo científico",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Função para remover uma relação com condição de saúde
-  const handleRemoveCondition = async (relationId: string) => {
-    try {
-      setLoading(true);
-      await NutraceuticalsService.removeConditionRelation(relationId);
-      
-      toast({
-        title: "Sucesso",
-        description: "Relação com condição removida com sucesso",
-      });
-      
-      // Recarregar relações
-      if (currentNutraceutical) {
-        await loadRelatedConditions(currentNutraceutical.id);
-      }
-    } catch (error) {
-      console.error("Erro ao remover relação com condição:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover a relação com a condição",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Função para remover uma relação com estudo científico
-  const handleRemoveStudy = async (relationId: string) => {
-    try {
-      setLoading(true);
-      await NutraceuticalsService.removeStudyRelation(relationId);
-      
-      toast({
-        title: "Sucesso",
-        description: "Relação com estudo removida com sucesso",
-      });
-      
-      // Recarregar relações
-      if (currentNutraceutical) {
-        await loadRelatedStudies(currentNutraceutical.id);
-      }
-    } catch (error) {
-      console.error("Erro ao remover relação com estudo:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover a relação com o estudo",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  // Toggle seleção de estudo para novas relações
+  const toggleAddRelationStudy = (studyId: string) => {
+    if (addRelationStudies.includes(studyId)) {
+      setAddRelationStudies(addRelationStudies.filter(id => id !== studyId));
+    } else {
+      setAddRelationStudies([...addRelationStudies, studyId]);
     }
   };
   
   // Função para finalizar o processo
   const handleFinish = () => {
+    // Implementar salvamento das relações adicionais aqui
+    
     // Reiniciar o formulário
     form.reset();
-    resetConditionForm();
-    resetStudyForm();
+    setRelations([]);
+    setEfficacyScore(3);
+    setSelectedStudies([]);
+    setRelationNotes("");
     
     // Notificar o componente pai
     if (onSuccess) {
@@ -402,42 +339,31 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     onOpenChange(false);
   };
   
-  // Resetar o formulário de condição
-  const resetConditionForm = () => {
-    setSelectedCondition('');
-    setRelationshipType('prevention');
-    setEfficacyScore(3);
-    setConditionNotes('');
+  // Função para renderizar estrelas com base na pontuação
+  const renderStars = (score: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= score) {
+        stars.push(<Star key={i} className="h-4 w-4 text-yellow-500" />);
+      } else if (i - 0.5 <= score) {
+        stars.push(<StarHalf key={i} className="h-4 w-4 text-yellow-500" />);
+      } else {
+        stars.push(<StarOff key={i} className="h-4 w-4 text-gray-300" />);
+      }
+    }
+    return <div className="flex">{stars}</div>;
   };
   
-  // Resetar o formulário de estudo
-  const resetStudyForm = () => {
-    setSelectedStudy('');
-    setRelevanceScore(3);
+  // Função para obter o nome da categoria
+  const getCategoryName = (categoryId: string) => {
+    const outcome = outcomes.find(out => out.id === categoryId);
+    return outcome ? outcome.name : 'Categoria desconhecida';
   };
   
-  // Função auxiliar para obter o nome da condição pelo ID
-  const getConditionName = (conditionId: string) => {
-    const condition = conditions.find(c => c.id === conditionId);
-    return condition ? condition.name : 'Condição desconhecida';
-  };
-  
-  // Função auxiliar para obter o nome do estudo pelo ID
+  // Função para obter o nome do estudo
   const getStudyName = (studyId: string) => {
     const study = studies.find(s => s.id === studyId);
     return study ? study.title : 'Estudo desconhecido';
-  };
-  
-  // Função para obter a cor do badge de acordo com a eficácia
-  const getEfficacyBadgeClass = (score: number) => {
-    if (score >= 4) return "bg-green-100 text-green-800";
-    if (score >= 3) return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
-  };
-
-  // Função para ir para a próxima aba
-  const goToNextTab = () => {
-    setActiveTab('relations');
   };
   
   return (
@@ -458,7 +384,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
               value="relations" 
               disabled={isNewNutraceutical && !currentNutraceutical}
             >
-              Condições e Estudos
+              Relações e Estudos
             </TabsTrigger>
           </TabsList>
           
@@ -480,34 +406,72 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Categoria</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value}
-                      >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Categoria Principal</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione uma categoria" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Sem categoria</SelectItem>
+                            {outcomes.map((outcome) => (
+                              <SelectItem key={outcome.id} value={outcome.id || ""}>
+                                {outcome.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="efficacyScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nota de Eficácia (0-5)</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma categoria" />
-                          </SelectTrigger>
+                          <div className="flex items-center gap-4">
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma nota" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="0">0 - Sem eficácia</SelectItem>
+                                <SelectItem value="1">1 - Muito baixa</SelectItem>
+                                <SelectItem value="2">2 - Baixa</SelectItem>
+                                <SelectItem value="3">3 - Moderada</SelectItem>
+                                <SelectItem value="4">4 - Alta</SelectItem>
+                                <SelectItem value="5">5 - Muito alta</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <div className="flex">
+                              {renderStars(parseInt(field.value || '3', 10))}
+                            </div>
+                          </div>
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Sem categoria</SelectItem>
-                          {outcomes.map((outcome) => (
-                            <SelectItem key={outcome.id} value={outcome.id || ""}>
-                              {outcome.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <FormField
                   control={form.control}
@@ -587,6 +551,51 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                   )}
                 />
                 
+                <div className="space-y-4 border p-4 rounded-md">
+                  <h3 className="font-medium">Estudos Científicos Associados</h3>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      Selecione os estudos científicos que comprovam a eficácia deste nutracêutico para a categoria principal.
+                    </p>
+                    
+                    <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                      {studies.length > 0 ? (
+                        studies.map(study => (
+                          <div key={study.id} className="flex items-center gap-2 py-1">
+                            <input 
+                              type="checkbox" 
+                              id={`study-${study.id}`} 
+                              checked={selectedStudies.includes(study.id)} 
+                              onChange={() => toggleStudySelection(study.id)}
+                              className="h-4 w-4"
+                            />
+                            <label htmlFor={`study-${study.id}`} className="text-sm">
+                              {study.title} ({study.year})
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Nenhum estudo disponível</p>
+                      )}
+                    </div>
+                    
+                    <Button type="button" variant="outline" size="sm" className="w-full flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Upload de Novos Estudos
+                    </Button>
+                  </div>
+                  
+                  <div>
+                    <FormLabel>Notas sobre a Eficácia</FormLabel>
+                    <Textarea
+                      value={relationNotes}
+                      onChange={(e) => setRelationNotes(e.target.value)}
+                      placeholder="Adicione notas sobre a eficácia deste nutracêutico"
+                      className="resize-none h-20"
+                    />
+                  </div>
+                </div>
+                
                 <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancelar
@@ -596,8 +605,8 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                       {(isSubmitting || loading) ? 'Salvando...' : 'Salvar'}
                     </Button>
                     {!isNewNutraceutical && (
-                      <Button type="submit" onClick={goToNextTab} variant="secondary">
-                        Próximo: Condições e Estudos
+                      <Button type="button" onClick={() => setActiveTab('relations')} variant="secondary">
+                        Relações Adicionais
                       </Button>
                     )}
                   </div>
@@ -606,272 +615,204 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                 {isNewNutraceutical && (
                   <div className="text-sm text-muted-foreground mt-2 flex items-center">
                     <Info className="h-4 w-4 mr-2" />
-                    Após salvar as informações básicas, você poderá adicionar condições de saúde e estudos científicos na próxima aba.
+                    Após salvar as informações básicas, você poderá adicionar relações adicionais na próxima aba.
                   </div>
                 )}
               </form>
             </Form>
           </TabsContent>
           
-          {/* Aba de Condições e Estudos */}
+          {/* Aba de Relações Adicionais */}
           <TabsContent value="relations">
             <div className="space-y-6">
               <Alert variant="default" className="bg-blue-50 mb-6">
                 <AlertCircle className="h-5 w-5" />
-                <AlertTitle>Como funcionam as relações de nutracêuticos</AlertTitle>
+                <AlertTitle>Relações de Nutracêuticos</AlertTitle>
                 <AlertDescription>
-                  Cada nutracêutico pode ser relacionado a múltiplas condições de saúde e estudos científicos. 
-                  Para cada condição, você pode especificar o tipo de relação (prevenção, tratamento ou suporte), 
-                  a eficácia e adicionar notas específicas. Os estudos científicos também podem ser associados 
-                  com um score de relevância.
+                  Cada nutracêutico pode estar relacionado a múltiplas categorias com diferentes notas de eficácia.
+                  A categoria principal foi definida na primeira aba, mas você pode adicionar relações adicionais aqui.
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Seção de Condições de Saúde */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium flex items-center">
-                    <span>Condições de Saúde</span>
-                    <Badge className="ml-2 bg-blue-100 text-blue-800 hover:bg-blue-200">
-                      {relatedConditions.length}
-                    </Badge>
-                  </h3>
-                  
-                  <Card>
-                    <CardContent className="pt-6 pb-4">
-                      <h4 className="text-sm font-medium mb-3">Adicionar Nova Condição</h4>
-                      
-                      <div className="grid grid-cols-1 gap-4 mb-4">
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">Condição de Saúde</label>
-                          <Select 
-                            value={selectedCondition} 
-                            onValueChange={setSelectedCondition}
-                            disabled={loading}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione uma condição" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Selecione uma condição</SelectItem>
-                              {conditions.map(condition => (
-                                <SelectItem key={condition.id} value={condition.id}>
-                                  {condition.name}
-                                </SelectItem>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Relações do Nutracêutico</h3>
+                  <Button 
+                    onClick={() => setShowAddRelation(true)}
+                    variant="outline"
+                    disabled={showAddRelation}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar Relação
+                  </Button>
+                </div>
+                
+                {/* Lista de Relações Existentes */}
+                {relations.length > 0 ? (
+                  <div className="space-y-4">
+                    {relations.map((relation, index) => (
+                      <div key={index} className="border rounded-md p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-base font-medium">
+                              {getCategoryName(relation.category)}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline">
+                                Eficácia: {relation.efficacyScore}
+                              </Badge>
+                              <div className="flex">
+                                {renderStars(relation.efficacyScore)}
+                              </div>
+                            </div>
+                          </div>
+                          {index > 0 && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleRemoveRelation(index)}
+                              className="text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        {relation.notes && (
+                          <div className="mt-3 text-sm bg-gray-50 p-3 rounded">
+                            <p className="font-medium mb-1">Notas:</p>
+                            <p>{relation.notes}</p>
+                          </div>
+                        )}
+                        
+                        {relation.studies && relation.studies.length > 0 && (
+                          <div className="mt-3">
+                            <p className="font-medium mb-1">Estudos associados:</p>
+                            <ul className="text-sm list-disc pl-5">
+                              {relation.studies.map(studyId => (
+                                <li key={studyId}>{getStudyName(studyId)}</li>
                               ))}
-                            </SelectContent>
-                          </Select>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 border rounded-md border-dashed">
+                    <p className="text-muted-foreground">
+                      Nenhuma relação definida. Adicione uma nova relação ou defina a categoria principal na primeira aba.
+                    </p>
+                  </div>
+                )}
+                
+                {/* Formulário para Adicionar Nova Relação */}
+                {showAddRelation && (
+                  <Card className="mt-6">
+                    <CardContent className="pt-6">
+                      <h4 className="font-medium mb-4">Nova Relação</h4>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium mb-1 block">Categoria</label>
+                            <Select
+                              value={addRelationCategory}
+                              onValueChange={setAddRelationCategory}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione uma categoria" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Selecione uma categoria</SelectItem>
+                                {outcomes.map((outcome) => (
+                                  <SelectItem key={outcome.id} value={outcome.id || ""}>
+                                    {outcome.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <label className="text-sm font-medium mb-1 block">
+                              Nota de Eficácia (0-5): {addRelationEfficacy}
+                            </label>
+                            <div className="flex items-center gap-4">
+                              <Slider
+                                value={[addRelationEfficacy]}
+                                min={0}
+                                max={5}
+                                step={1}
+                                onValueChange={(values) => setAddRelationEfficacy(values[0])}
+                                className="flex-1"
+                              />
+                              <div className="flex">
+                                {renderStars(addRelationEfficacy)}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         
                         <div>
-                          <label className="text-sm font-medium mb-1 block">Tipo de Relação</label>
-                          <Select 
-                            value={relationshipType} 
-                            onValueChange={(value: 'prevention' | 'treatment' | 'support') => setRelationshipType(value)}
-                            disabled={loading}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="prevention">Prevenção</SelectItem>
-                              <SelectItem value="treatment">Tratamento</SelectItem>
-                              <SelectItem value="support">Suporte</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">
-                            Eficácia (1-5): {efficacyScore}
-                          </label>
-                          <Slider
-                            value={[efficacyScore]}
-                            min={1}
-                            max={5}
-                            step={1}
-                            onValueChange={(values) => setEfficacyScore(values[0])}
-                            disabled={loading}
-                            className="py-4"
-                          />
+                          <label className="text-sm font-medium mb-1 block">Estudos Científicos Associados</label>
+                          <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                            {studies.length > 0 ? (
+                              studies.map(study => (
+                                <div key={study.id} className="flex items-center gap-2 py-1">
+                                  <input 
+                                    type="checkbox" 
+                                    id={`add-study-${study.id}`} 
+                                    checked={addRelationStudies.includes(study.id)} 
+                                    onChange={() => toggleAddRelationStudy(study.id)}
+                                    className="h-4 w-4"
+                                  />
+                                  <label htmlFor={`add-study-${study.id}`} className="text-sm">
+                                    {study.title} ({study.year})
+                                  </label>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-muted-foreground">Nenhum estudo disponível</p>
+                            )}
+                          </div>
+                          
+                          <Button type="button" variant="outline" size="sm" className="w-full mt-2 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Upload de Novos Estudos
+                          </Button>
                         </div>
                         
                         <div>
                           <label className="text-sm font-medium mb-1 block">Notas sobre a Relação</label>
                           <Textarea
-                            value={conditionNotes}
-                            onChange={(e) => setConditionNotes(e.target.value)}
-                            placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
-                            disabled={loading}
+                            value={addRelationNotes}
+                            onChange={(e) => setAddRelationNotes(e.target.value)}
+                            placeholder="Adicione notas sobre esta relação"
                             className="resize-none h-20"
                           />
                         </div>
-                      </div>
-                      
-                      <Button 
-                        onClick={handleAddCondition} 
-                        disabled={loading || !currentNutraceutical}
-                        className="w-full"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Condição
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <div className="overflow-y-auto max-h-[300px] pr-1">
-                    {loadingRelations ? (
-                      <div className="text-center py-4">Carregando relações...</div>
-                    ) : relatedConditions.length > 0 ? (
-                      <div className="space-y-3">
-                        {relatedConditions.map((relation) => (
-                          <div key={relation.id} className="border rounded-md p-3">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{getConditionName(relation.condition_id)}</h4>
-                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                  <Badge className="whitespace-nowrap">
-                                    {relation.relationship_type === 'prevention' ? 'Prevenção' : 
-                                    relation.relationship_type === 'treatment' ? 'Tratamento' : 'Suporte'}
-                                  </Badge>
-                                  <Badge className={getEfficacyBadgeClass(relation.efficacy_score)}>
-                                    Eficácia: {relation.efficacy_score}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => handleRemoveCondition(relation.id)}
-                                disabled={loading}
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                title="Remover relação"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            {relation.notes && (
-                              <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                                <p className="font-medium text-xs mb-1 text-gray-500">Notas:</p>
-                                {relation.notes}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 border rounded-md border-dashed">
-                        <p className="text-muted-foreground">
-                          Nenhuma condição de saúde associada. 
-                          <br />Adicione a primeira condição acima.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Seção de Estudos Científicos */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium flex items-center">
-                    <span>Estudos Científicos</span>
-                    <Badge className="ml-2 bg-blue-100 text-blue-800 hover:bg-blue-200">
-                      {relatedStudies.length}
-                    </Badge>
-                  </h3>
-                  
-                  <Card>
-                    <CardContent className="pt-6 pb-4">
-                      <h4 className="text-sm font-medium mb-3">Adicionar Novo Estudo</h4>
-                      
-                      <div className="grid grid-cols-1 gap-4 mb-4">
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">Estudo Científico</label>
-                          <Select 
-                            value={selectedStudy} 
-                            onValueChange={setSelectedStudy}
-                            disabled={loading}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um estudo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Selecione um estudo</SelectItem>
-                              {studies.map(study => (
-                                <SelectItem key={study.id} value={study.id}>
-                                  {study.title} ({study.year})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
                         
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">
-                            Relevância (1-5): {relevanceScore}
-                          </label>
-                          <Slider
-                            value={[relevanceScore]}
-                            min={1}
-                            max={5}
-                            step={1}
-                            onValueChange={(values) => setRelevanceScore(values[0])}
-                            disabled={loading}
-                            className="py-4"
-                          />
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setShowAddRelation(false)}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button 
+                            type="button"
+                            onClick={handleAddRelation}
+                          >
+                            Adicionar Relação
+                          </Button>
                         </div>
                       </div>
-                      
-                      <Button 
-                        onClick={handleAddStudy} 
-                        disabled={loading || !currentNutraceutical}
-                        className="w-full"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Estudo
-                      </Button>
                     </CardContent>
                   </Card>
-                  
-                  <div className="overflow-y-auto max-h-[300px] pr-1">
-                    {loadingRelations ? (
-                      <div className="text-center py-4">Carregando estudos...</div>
-                    ) : relatedStudies.length > 0 ? (
-                      <div className="space-y-3">
-                        {relatedStudies.map((relation) => (
-                          <div key={relation.id} className="border rounded-md p-3">
-                            <div className="flex justify-between items-start">
-                              <div className="pr-2">
-                                <h4 className="font-medium line-clamp-2">{getStudyName(relation.study_id)}</h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge className={getEfficacyBadgeClass(relation.relevance_score)}>
-                                    Relevância: {relation.relevance_score}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => handleRemoveStudy(relation.id)}
-                                disabled={loading}
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
-                                title="Remover relação"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 border rounded-md border-dashed">
-                        <p className="text-muted-foreground">
-                          Nenhum estudo científico associado.
-                          <br />Adicione o primeiro estudo acima.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
               
               <DialogFooter className="pt-4">

@@ -37,5 +37,8 @@ export const NutraceuticalsService = {
   removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation,
   removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
   getConditionRelations: NutraceuticalQueryService.getConditionRelations,
-  getStudyRelations: NutraceuticalQueryService.getStudyRelations
+  getStudyRelations: NutraceuticalQueryService.getStudyRelations,
+  
+  // Nova operação para adicionar/atualizar relações completas (categoria + estudos + notas)
+  updateOutcomeRelation: NutraceuticalRelationsService.updateOutcomeRelation
 };
