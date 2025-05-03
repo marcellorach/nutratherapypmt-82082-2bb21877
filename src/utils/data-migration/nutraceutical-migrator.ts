@@ -76,13 +76,18 @@ export const NutraceuticalMigrator = {
     
     // Adicionar metadados científicos
     if (nutraData.scientificEvidence) {
+      // CORREÇÃO: Passando apenas o nutraId e o efficacyScore como número
       await NutraceuticalsService.updateScientificMetadata(
         nutraId,
-        {
-          efficacy_score: nutraData.scientificEvidence.efficacyScore || 0,
-          sustainability_score: nutraData.scientificEvidence.sustainabilityScore || 0
-        }
+        nutraData.scientificEvidence.efficacyScore || 0
       );
+      
+      // Adicionando as notas científicas separadamente
+      await NutraceuticalsService.updateOutcomeRelation(
+        nutraId,
+        `Pontuação de sustentabilidade: ${nutraData.scientificEvidence.sustainabilityScore || 0}`
+      );
+      
       console.log(`Adicionados metadados científicos para ${nutraData.name}`);
     }
     
