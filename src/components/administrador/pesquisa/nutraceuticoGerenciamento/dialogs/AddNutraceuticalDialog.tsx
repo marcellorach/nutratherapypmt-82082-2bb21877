@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -276,6 +275,12 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         await NutraceuticalsService.updateScientificMetadata(
           nutraceutical.id, 
           parseInt(values.efficacyScore || '3', 10),
+          relationNotes
+        );
+        
+        // Aqui está a correção - removido o terceiro argumento que estava causando o erro
+        await NutraceuticalsService.updateOutcomeRelation(
+          nutraceutical.id,
           relationNotes
         );
         

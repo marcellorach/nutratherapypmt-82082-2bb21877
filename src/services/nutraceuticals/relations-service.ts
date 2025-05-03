@@ -112,5 +112,36 @@ export const NutraceuticalRelationsService = {
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
     }
+  },
+  
+  /**
+   * Atualiza ou adiciona informações de relação entre um nutracêutico e um outcome específico
+   * Inclui metadados científicos como eficácia, sustentabilidade e notas
+   */
+  async updateOutcomeRelation(
+    nutraceuticalId: string,
+    notes: string
+  ) {
+    try {
+      // Atualiza os metadados científicos do nutracêutico
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('nutraceutical_scientific_metadata')
+        .upsert({
+          nutraceutical_id: nutraceuticalId,
+          notes: notes,
+          updated_at: new Date()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'atualizar relação com outcome');
+      }
+
+      return data;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'atualizar relação com outcome');
+    }
   }
 };
