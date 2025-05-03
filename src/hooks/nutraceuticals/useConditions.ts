@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { NutraceuticalRelationsService } from '@/services/nutraceuticals';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 
 /**
  * Hook para gerenciar condições de saúde
@@ -88,7 +88,7 @@ export const useConditions = () => {
     notes?: string
   ) => {
     try {
-      const result = await NutraceuticalRelationsService.relateToCondition(
+      const result = await NutraceuticalsService.relateToCondition(
         nutraceuticalId,
         conditionId,
         relationshipType,

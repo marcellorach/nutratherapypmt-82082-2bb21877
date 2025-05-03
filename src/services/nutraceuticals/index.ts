@@ -23,5 +23,7 @@ export const NutraceuticalsService = {
   
   // Operações de relações
   relateToCondition: NutraceuticalRelationsService.relateToCondition,
-  relateToStudy: NutraceuticalRelationsService.relateToStudy
+  relateToStudy: NutraceuticalRelationsService.relateToStudy,
+  removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation,
+  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation
 };

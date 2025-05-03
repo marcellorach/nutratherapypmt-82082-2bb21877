@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Loader } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { NutraceuticalRelationsService } from '@/services/nutraceuticals';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 
 interface ConditionRelation {
   id: string;
@@ -64,7 +64,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
   
   const fetchExistingRelations = async () => {
     try {
-      // Aqui seria ideal ter uma função específica no NutraceuticalRelationsService
+      // Aqui seria ideal ter uma função específica no NutraceuticalsService
       // para buscar relações, mas vamos criar uma adaptação
       const relations = nutraceutical.nutraceutical_health_conditions || [];
       setExistingRelations(relations);
@@ -91,7 +91,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
     setIsAdding(true);
     
     try {
-      const result = await NutraceuticalRelationsService.relateToCondition(
+      const result = await NutraceuticalsService.relateToCondition(
         nutraceutical.id,
         selectedConditionId,
         selectedRelationType as 'prevention' | 'treatment' | 'support',
@@ -140,8 +140,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
   // Função para remover associação
   const handleRemoveAssociation = async (relationId: string) => {
     try {
-      // Implementação a ser adicionada no NutraceuticalRelationsService
-      // await NutraceuticalRelationsService.removeConditionRelation(relationId);
+      await NutraceuticalsService.removeConditionRelation(relationId);
       
       // Atualizar a lista local
       setExistingRelations(prev => prev.filter(rel => rel.id !== relationId));
@@ -263,7 +262,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
             >
               {isAdding ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Adicionando...
                 </>
               ) : (

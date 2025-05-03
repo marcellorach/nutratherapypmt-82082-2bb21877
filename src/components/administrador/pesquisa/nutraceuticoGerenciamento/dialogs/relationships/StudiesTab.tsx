@@ -15,7 +15,7 @@ import { Trash2, Plus, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { NutraceuticalRelationsService } from '@/services/nutraceuticals';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 
 interface StudyRelation {
   id: string;
@@ -95,7 +95,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
     setIsAdding(true);
     
     try {
-      const result = await NutraceuticalRelationsService.relateToStudy(
+      const result = await NutraceuticalsService.relateToStudy(
         nutraceutical.id,
         selectedStudyId,
         relevanceScore
@@ -142,8 +142,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   // Função para remover associação
   const handleRemoveAssociation = async (relationId: string) => {
     try {
-      // Implementação a ser adicionada no NutraceuticalRelationsService
-      // await NutraceuticalRelationsService.removeStudyRelation(relationId);
+      await NutraceuticalsService.removeStudyRelation(relationId);
       
       // Atualizar a lista local
       setExistingRelations(prev => prev.filter(rel => rel.id !== relationId));
