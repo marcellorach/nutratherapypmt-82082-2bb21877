@@ -15,7 +15,7 @@ export const NutraceuticalMutationService = {
     dosage,
     source,
     chemical_compound,
-    category_id,
+    outcome_id,
     contraindications
   }) {
     try {
@@ -29,7 +29,7 @@ export const NutraceuticalMutationService = {
           dosage,
           source,
           chemical_compound,
-          category_id,
+          outcome_id,
           contraindications
         }])
         .select()
@@ -56,7 +56,7 @@ export const NutraceuticalMutationService = {
       dosage,
       source,
       chemical_compound,
-      category_id,
+      outcome_id,
       contraindications
     }
   ) {
@@ -71,7 +71,7 @@ export const NutraceuticalMutationService = {
           dosage,
           source,
           chemical_compound,
-          category_id,
+          outcome_id,
           contraindications
         })
         .eq('id', id)

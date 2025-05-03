@@ -27,7 +27,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
   } = useNutraceuticalManager();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
   const [isMigratorDialogOpen, setIsMigratorDialogOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationResult, setMigrationResult] = useState<any>(null);
@@ -46,10 +46,10 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       nutra.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (nutra.description && nutra.description.toLowerCase().includes(searchTerm.toLowerCase()));
       
-    const matchesCategory = selectedCategory === null || 
-      nutra.outcome_id === selectedCategory;
+    const matchesOutcome = selectedOutcome === null || 
+      nutra.outcome_id === selectedOutcome;
       
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesOutcome;
   });
 
   // Função para iniciar o processo de exclusão

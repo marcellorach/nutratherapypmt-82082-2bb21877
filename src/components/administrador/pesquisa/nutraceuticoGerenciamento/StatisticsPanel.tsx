@@ -34,27 +34,36 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Total de Nutracêuticos</div>
-            <div className="text-2xl font-bold">{nutraceuticals.length}</div>
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Outcomes</div>
-            <div className="text-2xl font-bold">{outcomes.length}</div>
+        ) : (
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Total de Nutracêuticos</div>
+              <div className="text-2xl font-bold">{nutraceuticals.length}</div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Outcomes</div>
+              <div className="text-2xl font-bold">{outcomes.length}</div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Condições de Saúde</div>
+              <div className="text-2xl font-bold">{conditions.length}</div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Estudos Científicos</div>
+              <div className="text-2xl font-bold">{studies.length}</div>
+            </div>
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Condições de Saúde</div>
-            <div className="text-2xl font-bold">{conditions.length}</div>
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Estudos Científicos</div>
-            <div className="text-2xl font-bold">{studies.length}</div>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

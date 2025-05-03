@@ -48,6 +48,17 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   hasMigratedData,
   openMigratorDialog
 }) => {
+  // Função auxiliar para obter o nome do outcome
+  const getOutcomeName = (nutra: any) => {
+    // Se outcome_id é um objeto (Supabase retorna a relação expandida)
+    if (nutra.outcome_id && typeof nutra.outcome_id === 'object') {
+      return nutra.outcome_id.name || 'Sem outcome';
+    }
+    
+    // Se outcome_id é apenas um ID ou não existe
+    return 'Sem outcome';
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -135,8 +146,8 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                         {nutra.name}
                       </TableCell>
                       <TableCell>
-                        {nutra.outcome_id ? (
-                          <Badge variant="outline">{nutra.outcome_id.name}</Badge>
+                        {getOutcomeName(nutra) !== 'Sem outcome' ? (
+                          <Badge variant="outline">{getOutcomeName(nutra)}</Badge>
                         ) : (
                           <span className="text-muted-foreground text-xs">Sem outcome</span>
                         )}
