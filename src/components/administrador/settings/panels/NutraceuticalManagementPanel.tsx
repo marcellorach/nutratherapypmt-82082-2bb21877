@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Search, Pencil } from "lucide-react";
+import { Trash2, Search, Pencil } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNutraceuticals } from "@/hooks/nutraceuticals/useNutraceuticals";
 import { useOutcomes } from "@/hooks/nutraceuticals/useOutcomes";
 import { useConditions } from "@/hooks/nutraceuticals/useConditions";
+import { useStudies } from "@/hooks/nutraceuticals/useStudies";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import NutraceuticalConditionsEditor from "./NutraceuticalConditionsEditor";
 
 const NutraceuticalManagementPanel: React.FC = () => {
@@ -38,6 +40,8 @@ const NutraceuticalManagementPanel: React.FC = () => {
   const [isConditionsDialogOpen, setIsConditionsDialogOpen] = useState(false);
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
   const [filteredNutraceuticals, setFilteredNutraceuticals] = useState<any[]>([]);
+  const [selectedStudy, setSelectedStudy] = useState<string>("");
+  const [relations, setRelations] = useState<any[]>([]);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -47,19 +51,23 @@ const NutraceuticalManagementPanel: React.FC = () => {
     source: "",
     chemical_compound: "",
     contraindications: "",
-    outcome_id: ""
+    outcome_id: "",
+    efficacy_score: 3, // Valor padrão para o score de eficácia
+    notes: "" // Notas sobre a relação outcome/nutracêutico
   });
 
   // Hooks para carregar dados
   const { nutraceuticals, isLoading, fetchNutraceuticals, createNutraceutical, updateNutraceutical, deleteNutraceutical } = useNutraceuticals();
   const { outcomes, fetchOutcomes } = useOutcomes();
   const { conditions, fetchConditions } = useConditions();
+  const { studies, fetchStudies, isLoading: studiesLoading } = useStudies();
 
   // Carregar dados iniciais
   useEffect(() => {
     fetchNutraceuticals();
     fetchOutcomes();
     fetchConditions();
+    fetchStudies();
   }, []);
 
   // Filtrar nutracêuticos quando mudar a pesquisa ou os dados
@@ -86,8 +94,11 @@ const NutraceuticalManagementPanel: React.FC = () => {
       contraindications: Array.isArray(nutraceutical.contraindications) 
         ? nutraceutical.contraindications.join("\n") 
         : "",
-      outcome_id: nutraceutical.outcome_id || ""
+      outcome_id: nutraceutical.outcome_id || "",
+      efficacy_score: 3,
+      notes: ""
     });
+    setRelations([]);
     setIsEditDialogOpen(true);
   };
 
@@ -101,6 +112,44 @@ const NutraceuticalManagementPanel: React.FC = () => {
   const handleConditionsClick = (nutraceutical: any) => {
     setSelectedNutraceutical(nutraceutical);
     setIsConditionsDialogOpen(true);
+  };
+
+  // Handler para adicionar uma relação à lista
+  const handleAddRelation = () => {
+    if (!formData.outcome_id || formData.outcome_id === "no_outcome") return;
+    
+    const outcome = outcomes?.find(out => out.id === formData.outcome_id);
+    
+    const newRelation = {
+      outcome_id: formData.outcome_id,
+      outcome_name: outcome ? outcome.name : "Outcome desconhecido",
+      efficacy_score: formData.efficacy_score,
+      notes: formData.notes,
+      study_id: selectedStudy,
+      study_name: studies.find(s => s.id === selectedStudy)?.title || ""
+    };
+    
+    setRelations([...relations, newRelation]);
+    
+    // Limpar campos após adicionar
+    setFormData({
+      ...formData,
+      outcome_id: "",
+      efficacy_score: 3,
+      notes: ""
+    });
+    setSelectedStudy("");
+    
+    toast({
+      title: "Relação adicionada",
+      description: "A relação com outcome foi adicionada à lista",
+    });
+  };
+
+  // Handler para remover uma relação da lista
+  const handleRemoveRelation = (index: number) => {
+    const updatedRelations = relations.filter((_, i) => i !== index);
+    setRelations(updatedRelations);
   };
 
   // Handler para criar novo nutracêutico
@@ -140,10 +189,73 @@ const NutraceuticalManagementPanel: React.FC = () => {
         .split("\n")
         .filter(line => line.trim() !== "");
 
+      // Primeiro atualiza o nutracêutico básico
       await updateNutraceutical(selectedNutraceutical.id, {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        dosage: formData.dosage,
+        source: formData.source,
+        chemical_compound: formData.chemical_compound,
         contraindications
       });
+
+      // Depois atualiza as relações, se houver outcome selecionado
+      if (formData.outcome_id && formData.outcome_id !== "no_outcome") {
+        // Atualize o outcome principal do nutracêutico
+        await updateNutraceutical(selectedNutraceutical.id, {
+          outcome_id: formData.outcome_id,
+        });
+        
+        try {
+          // Atualiza os metadados científicos (eficácia, notas)
+          const metadataService = await import('@/services/nutraceuticals/metadata-service');
+          await metadataService.NutraceuticalMetadataService.updateScientificMetadata(
+            selectedNutraceutical.id, 
+            formData.efficacy_score
+          );
+          
+          // Adiciona as notas se houver
+          if (formData.notes) {
+            const relationsService = await import('@/services/nutraceuticals/relations-service');
+            await relationsService.NutraceuticalRelationsService.updateOutcomeRelation(
+              selectedNutraceutical.id,
+              formData.notes
+            );
+          }
+          
+          // Se houver estudo selecionado, relaciona ao nutracêutico
+          if (selectedStudy) {
+            const relationsService = await import('@/services/nutraceuticals/relations-service');
+            await relationsService.NutraceuticalRelationsService.relateToStudy(
+              selectedNutraceutical.id,
+              selectedStudy,
+              formData.efficacy_score
+            );
+          }
+          
+          // Processa as relações adicionais
+          for (const relation of relations) {
+            if (relation.outcome_id) {
+              // Aqui idealmente criaríamos relações separadas no banco para cada outcome
+              // ou salvaria de alguma forma esta relação múltipla
+              console.log("Salvando relação adicional:", relation);
+              
+              // Este é um pseudo-código, precisamos implementar esta funcionalidade no backend
+              /*
+              await relationsService.NutraceuticalRelationsService.createSecondaryOutcomeRelation(
+                selectedNutraceutical.id,
+                relation.outcome_id,
+                relation.efficacy_score,
+                relation.notes,
+                relation.study_id
+              );
+              */
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao atualizar metadados científicos:", error);
+        }
+      }
 
       toast({
         title: "Sucesso",
@@ -191,8 +303,12 @@ const NutraceuticalManagementPanel: React.FC = () => {
       source: "",
       chemical_compound: "",
       contraindications: "",
-      outcome_id: ""
+      outcome_id: "",
+      efficacy_score: 3,
+      notes: ""
     });
+    setRelations([]);
+    setSelectedStudy("");
   };
 
   // Handler para abrir diálogo de criação
@@ -216,6 +332,19 @@ const NutraceuticalManagementPanel: React.FC = () => {
       ...prev,
       outcome_id: value
     }));
+  };
+
+  // Handler para alterar o score de eficácia
+  const handleEfficacyChange = (value: number[]) => {
+    setFormData(prev => ({
+      ...prev,
+      efficacy_score: value[0]
+    }));
+  };
+
+  // Handler para alterar o estudo selecionado
+  const handleStudyChange = (value: string) => {
+    setSelectedStudy(value);
   };
 
   // Função para obter o nome do outcome
@@ -255,25 +384,119 @@ const NutraceuticalManagementPanel: React.FC = () => {
               />
             </div>
             
+            {/* Campo de Outcome e Eficácia lado a lado */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="outcome">Outcome Principal</Label>
+                <Select 
+                  value={formData.outcome_id} 
+                  onValueChange={handleOutcomeChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione um outcome" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no_outcome">Sem outcome</SelectItem>
+                    {outcomes?.map((outcome) => (
+                      <SelectItem key={outcome.id} value={outcome.id}>
+                        {outcome.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="efficacy_score">Nota de Eficácia (0-5): {formData.efficacy_score}</Label>
+                <Slider
+                  id="efficacy_score"
+                  name="efficacy_score"
+                  value={[formData.efficacy_score]}
+                  min={0}
+                  max={5}
+                  step={1}
+                  onValueChange={handleEfficacyChange}
+                  className="py-4"
+                />
+              </div>
+            </div>
+
+            {/* Seleção de Estudo Associado */}
             <div className="grid gap-2">
-              <Label htmlFor="outcome">Outcome</Label>
+              <Label htmlFor="study">Estudo Científico Associado</Label>
               <Select 
-                value={formData.outcome_id} 
-                onValueChange={handleOutcomeChange}
+                value={selectedStudy} 
+                onValueChange={handleStudyChange}
+                disabled={studiesLoading}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um outcome" />
+                  <SelectValue placeholder="Selecione um estudo científico" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="no_outcome">Sem outcome</SelectItem>
-                  {outcomes?.map((outcome) => (
-                    <SelectItem key={outcome.id} value={outcome.id}>
-                      {outcome.name}
+                  <SelectItem value="">Nenhum estudo selecionado</SelectItem>
+                  {studies?.map((study) => (
+                    <SelectItem key={study.id} value={study.id}>
+                      {study.title || "Estudo sem título"} ({study.year || "s/ano"})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Notas sobre a relação */}
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notas sobre a relação com o outcome</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleFormChange}
+                placeholder="Observações sobre como este nutracêutico se relaciona com o outcome"
+                rows={2}
+              />
+            </div>
+            
+            {/* Botão para adicionar a relação à lista */}
+            {formData.outcome_id && formData.outcome_id !== "no_outcome" && (
+              <div className="flex justify-end">
+                <Button 
+                  type="button" 
+                  onClick={handleAddRelation}
+                  variant="outline"
+                >
+                  Adicionar mais uma relação
+                </Button>
+              </div>
+            )}
+            
+            {/* Lista de relações adicionadas */}
+            {relations.length > 0 && (
+              <div className="border rounded-md p-4 mt-2 bg-slate-50">
+                <h4 className="font-medium mb-3">Relações adicionais</h4>
+                <div className="space-y-2">
+                  {relations.map((rel, index) => (
+                    <div key={index} className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <div className="font-medium">{rel.outcome_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Eficácia: {rel.efficacy_score} 
+                          {rel.study_name && ` | Estudo: ${rel.study_name}`}
+                        </div>
+                        {rel.notes && <div className="text-sm mt-1">{rel.notes}</div>}
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-red-500"
+                        onClick={() => handleRemoveRelation(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="grid gap-2">
               <Label htmlFor="description">Descrição</Label>
@@ -354,7 +577,6 @@ const NutraceuticalManagementPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Gerenciamento de Nutracêuticos</h3>
         <Button onClick={handleOpenCreateDialog}>
-          <Plus className="h-4 w-4 mr-2" />
           Novo Nutracêutico
         </Button>
       </div>
@@ -413,7 +635,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
                           onClick={() => handleConditionsClick(nutraceutical)}
                           title="Gerenciar condições"
                         >
-                          <Plus className="h-4 w-4" />
+                          Condições
                         </Button>
                         <Button 
                           variant="ghost" 
