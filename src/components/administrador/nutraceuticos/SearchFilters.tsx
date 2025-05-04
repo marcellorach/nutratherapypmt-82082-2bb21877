@@ -93,7 +93,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                     <SelectValue placeholder="Nível de eficácia" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os níveis</SelectItem>
+                    <SelectItem value="all">Todos os níveis</SelectItem>
                     <SelectItem value="high">Alta (4-5)</SelectItem>
                     <SelectItem value="medium">Média (3)</SelectItem>
                     <SelectItem value="low">Baixa (1-2)</SelectItem>
@@ -108,7 +108,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                     <SelectValue placeholder="Todas as condições" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas as condições</SelectItem>
+                    <SelectItem value="all">Todas as condições</SelectItem>
                     <SelectItem value="cardiac">Cardíacas</SelectItem>
                     <SelectItem value="joint">Articulações</SelectItem>
                     <SelectItem value="renal">Renais</SelectItem>

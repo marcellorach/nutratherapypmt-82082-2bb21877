@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -193,7 +192,7 @@ const NutraceuticalOutcomesEditor: React.FC<NutraceuticalOutcomesEditorProps> = 
               </SelectTrigger>
               <SelectContent>
                 {availableOutcomes.length === 0 ? (
-                  <SelectItem value="empty_placeholder" disabled>
+                  <SelectItem value="no_outcomes">
                     Todos os outcomes já foram associados
                   </SelectItem>
                 ) : (
