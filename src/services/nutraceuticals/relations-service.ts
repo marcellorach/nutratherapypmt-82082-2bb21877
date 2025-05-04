@@ -1,17 +1,16 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { NutraceuticalBaseService } from './base-service';
 
 /**
- * Serviço para gerenciar relações de nutracêuticos com condições e estudos
+ * Serviço para gerenciar relações de nutracêuticos com outcomes e estudos
  */
 export const NutraceuticalRelationsService = {
   /**
-   * Relaciona um nutracêutico a uma condição de saúde
+   * Relaciona um nutracêutico a um outcome
    */
-  async relateToCondition(
+  async relateToOutcome(
     nutraceuticalId: string,
-    conditionId: string,
+    outcomeId: string,
     relationshipType: 'prevention' | 'treatment' | 'support',
     efficacyScore: number,
     notes?: string
@@ -23,7 +22,7 @@ export const NutraceuticalRelationsService = {
         .from('nutraceutical_conditions')
         .insert([{
           nutraceutical_id: nutraceuticalId,
-          condition_id: conditionId,
+          condition_id: outcomeId, // mantido como condition_id para compatibilidade
           relationship_type: relationshipType,
           efficacy_score: efficacyScore,
           notes: notes
@@ -32,12 +31,12 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'relacionar com condição de saúde');
+        NutraceuticalBaseService.handleError(error, 'relacionar com outcome');
       }
 
       return data;
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'relacionar com condição de saúde');
+      NutraceuticalBaseService.handleError(error, 'relacionar com outcome');
     }
   },
 
@@ -73,9 +72,9 @@ export const NutraceuticalRelationsService = {
   },
 
   /**
-   * Remove a relação entre um nutracêutico e uma condição
+   * Remove a relação entre um nutracêutico e um outcome
    */
-  async removeConditionRelation(relationId: string) {
+  async removeOutcomeRelation(relationId: string) {
     try {
       const client = supabase as any;
       const { error } = await client
@@ -84,12 +83,12 @@ export const NutraceuticalRelationsService = {
         .eq('id', relationId);
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'remover relação com condição');
+        NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
       }
 
       return true;
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'remover relação com condição');
+      NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
     }
   },
 

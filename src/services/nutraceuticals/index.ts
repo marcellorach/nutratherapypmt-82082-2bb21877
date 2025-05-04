@@ -26,17 +26,19 @@ export const NutraceuticalsService = {
   getAllOutcomes: NutraceuticalMetadataService.getAllOutcomes,
   getAllCategories: NutraceuticalMetadataService.getAllCategories,
   getAllActiveIngredients: NutraceuticalMetadataService.getAllActiveIngredients,
-  getAllConditions: NutraceuticalMetadataService.getAllConditions,
+  getAllConditions: NutraceuticalMetadataService.getAllConditions, // Depreciado, mas mantido para compatibilidade
   getAllStudies: NutraceuticalMetadataService.getAllStudies,
   addBenefit: NutraceuticalMetadataService.addBenefit,
   updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
   
   // Operações de Relações
-  relateToCondition: NutraceuticalRelationsService.relateToCondition,
+  relateToCondition: NutraceuticalRelationsService.relateToCondition, // Depreciado, mas mantido para compatibilidade
+  relateToOutcome: NutraceuticalRelationsService.relateToOutcome, // Novo método para substituir o anterior
   relateToStudy: NutraceuticalRelationsService.relateToStudy,
-  removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation,
+  removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation, // Depreciado, mas mantido para compatibilidade
+  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation, // Novo método para substituir o anterior
   removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
-  getConditionRelations: NutraceuticalQueryService.getConditionRelations,
+  getConditionRelations: NutraceuticalQueryService.getConditionRelations, // Depreciado, mas mantido para compatibilidade
   getStudyRelations: NutraceuticalQueryService.getStudyRelations,
   
   // Nova operação para adicionar/atualizar relações completas (categoria + estudos + notas)

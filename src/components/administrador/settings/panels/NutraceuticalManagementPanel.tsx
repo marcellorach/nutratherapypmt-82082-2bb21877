@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +11,7 @@ import FormDialog from "./nutraceuticalManagement/FormDialog";
 import DeleteDialog from "./nutraceuticalManagement/DeleteDialog";
 import NutraceuticalTable from "./nutraceuticalManagement/NutraceuticalTable";
 import SearchBar from "./nutraceuticalManagement/SearchBar";
-import ConditionsDialog from "./nutraceuticalManagement/ConditionsDialog";
+import OutcomesDialog from "./nutraceuticalManagement/OutcomesDialog";
 
 const NutraceuticalManagementPanel: React.FC = () => {
   const { toast } = useToast();
@@ -20,7 +19,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isConditionsDialogOpen, setIsConditionsDialogOpen] = useState(false);
+  const [isOutcomesDialogOpen, setIsOutcomesDialogOpen] = useState(false);
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
   const [filteredNutraceuticals, setFilteredNutraceuticals] = useState<any[]>([]);
   
@@ -93,10 +92,10 @@ const NutraceuticalManagementPanel: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  // Handler para abrir o diálogo de condições
-  const handleConditionsClick = (nutraceutical: any) => {
+  // Handler para abrir o diálogo de outcomes
+  const handleOutcomesClick = (nutraceutical: any) => {
     setSelectedNutraceutical(nutraceutical);
-    setIsConditionsDialogOpen(true);
+    setIsOutcomesDialogOpen(true);
   };
 
   // Handler para adicionar uma relação à lista
@@ -362,7 +361,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isLoading={isLoading}
         onEditClick={handleEditClick}
         onDeleteClick={handleDeleteClick}
-        onConditionsClick={handleConditionsClick}
+        onOutcomesClick={handleOutcomesClick}
         getOutcomeName={getOutcomeName}
       />
       
@@ -412,10 +411,10 @@ const NutraceuticalManagementPanel: React.FC = () => {
         onConfirm={handleDeleteConfirm}
       />
       
-      {/* Diálogo de gerenciar condições */}
-      <ConditionsDialog
-        isOpen={isConditionsDialogOpen}
-        setIsOpen={setIsConditionsDialogOpen}
+      {/* Diálogo de gerenciar outcomes */}
+      <OutcomesDialog
+        isOpen={isOutcomesDialogOpen}
+        setIsOpen={setIsOutcomesDialogOpen}
         nutraceutical={selectedNutraceutical}
         onComplete={fetchNutraceuticals}
       />
