@@ -35,6 +35,22 @@ export const NutraceuticalsService = {
   
   getOutcomeRelations: NutraceuticalQueryService.getOutcomeRelations,
   getConditionRelations: NutraceuticalQueryService.getOutcomeRelations, // Alias
+  
+  // Nova função para adicionar benefícios
+  addBenefit: async (nutraceuticalId: string, benefit: string) => {
+    try {
+      // Vamos usar o serviço de metadados para adicionar benefícios
+      await NutraceuticalMetadataService.updateScientificMetadata(
+        nutraceuticalId, 
+        undefined, // Mantém o score de eficácia atual
+        { benefit }
+      );
+      return { success: true };
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'adicionar benefício');
+      return { success: false, error };
+    }
+  }
 };
 
 export default NutraceuticalsService;

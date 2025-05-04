@@ -69,7 +69,12 @@ export const NutraceuticalMigrator = {
     // Adicionar benefícios
     if (nutraData.benefits) {
       for (const benefit of nutraData.benefits) {
-        await NutraceuticalsService.addBenefit(nutraId, benefit);
+        // Ao invés de usar addBenefit diretamente, armazenamos o benefício em metadados
+        await NutraceuticalsService.updateScientificMetadata(
+          nutraId,
+          undefined, // Mantém o score de eficácia atual
+          { benefit }
+        );
       }
       console.log(`Adicionados ${nutraData.benefits.length} benefícios para ${nutraData.name}`);
     }

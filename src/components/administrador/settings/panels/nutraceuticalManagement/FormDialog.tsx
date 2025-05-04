@@ -20,10 +20,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Loader, X } from "lucide-react";
+import { Loader, X, InfoIcon } from "lucide-react";
 import StudiesDropZone from "./StudiesDropZone";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 interface FormDialogProps {
   isOpen: boolean;
