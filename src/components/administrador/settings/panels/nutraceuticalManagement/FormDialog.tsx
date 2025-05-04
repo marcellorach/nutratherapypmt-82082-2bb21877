@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Loader, X } from "lucide-react";
+import StudiesDropZone from "./StudiesDropZone";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 interface FormDialogProps {
   isOpen: boolean;
@@ -38,6 +41,8 @@ interface FormDialogProps {
   studies: any[];
   outcomes: any[];
   studiesLoading?: boolean;
+  handleStudiesDropped?: (studyIds: string[]) => void;
+  selectedStudies?: string[];
 }
 
 const FormDialog: React.FC<FormDialogProps> = ({
@@ -55,7 +60,9 @@ const FormDialog: React.FC<FormDialogProps> = ({
   relations,
   studies,
   outcomes,
-  studiesLoading
+  studiesLoading,
+  handleStudiesDropped,
+  selectedStudies = []
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -85,15 +92,18 @@ const FormDialog: React.FC<FormDialogProps> = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="dosage">Dosagem</Label>
+              <Label htmlFor="dosage">Dosagem (mg/10kg de peso)</Label>
               <Input
                 id="dosage"
                 name="dosage"
                 value={formData.dosage}
                 onChange={handleFormChange}
-                placeholder="Ex: 500mg 2x ao dia"
+                placeholder="Ex: 100mg/10kg de peso"
                 autoComplete="off"
               />
+              <p className="text-xs text-muted-foreground">
+                Informe a dosagem em mg por 10kg de peso do animal. Valores decimais são permitidos (ex: 0,25).
+              </p>
             </div>
           </div>
           
@@ -146,7 +156,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
           </div>
           
           <div className="space-y-4 pt-4 border-t">
-            <h3 className="font-medium">Outcome Principal</h3>
+            <h3 className="font-medium">Relação com Outcomes e Estudos</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -160,7 +170,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="no_outcome">
-                      Sem outcome principal
+                      Sem outcome
                     </SelectItem>
                     {outcomes?.map(outcome => (
                       <SelectItem key={outcome.id} value={outcome.id}>
@@ -172,40 +182,25 @@ const FormDialog: React.FC<FormDialogProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="study">Estudo relacionado (opcional)</Label>
-                <Select 
-                  value={formData.study_id} 
-                  onValueChange={handleStudyChange}
-                  disabled={studiesLoading}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione um estudo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no_study">
-                      Sem estudo relacionado
-                    </SelectItem>
-                    {studies?.map(study => (
-                      <SelectItem key={study.id} value={study.id}>
-                        {study.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="efficacy_score">Eficácia ({formData.efficacy_score}/5)</Label>
+                <Slider
+                  id="efficacy_score"
+                  value={[formData.efficacy_score]}
+                  min={1}
+                  max={5}
+                  step={0.5}
+                  onValueChange={handleEfficacyChange}
+                />
               </div>
             </div>
             
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="efficacy_score">Eficácia ({formData.efficacy_score}/5)</Label>
-              </div>
-              <Slider
-                id="efficacy_score"
-                value={[formData.efficacy_score]}
-                min={1}
-                max={5}
-                step={0.5}
-                onValueChange={handleEfficacyChange}
+              <Label>Estudos Relacionados</Label>
+              <StudiesDropZone 
+                studies={studies} 
+                selectedStudies={selectedStudies}
+                onStudiesDropped={handleStudiesDropped}
+                loading={studiesLoading}
               />
             </div>
             

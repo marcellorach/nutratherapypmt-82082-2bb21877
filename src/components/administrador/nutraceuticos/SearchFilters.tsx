@@ -166,20 +166,20 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="flex items-center gap-2 mt-3">
           <p className="text-sm text-muted-foreground">Filtros ativos:</p>
           <div className="flex flex-wrap gap-2">
-            {filterEfficacy && (
+            {filterEfficacy && filterEfficacy !== 'all' && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Eficácia: {filterEfficacy === 'high' ? 'Alta' : filterEfficacy === 'medium' ? 'Média' : 'Baixa'}
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   className="h-4 w-4 p-0 ml-1"
-                  onClick={() => setFilterEfficacy('')}
+                  onClick={() => setFilterEfficacy('all')}
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
             )}
-            {filterCondition && (
+            {filterCondition && filterCondition !== 'all' && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Condição: {
                   filterCondition === 'cardiac' ? 'Cardíacas' : 
@@ -191,7 +191,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   variant="ghost" 
                   size="sm" 
                   className="h-4 w-4 p-0 ml-1"
-                  onClick={() => setFilterCondition('')}
+                  onClick={() => setFilterCondition('all')}
                 >
                   <X className="h-3 w-3" />
                 </Button>

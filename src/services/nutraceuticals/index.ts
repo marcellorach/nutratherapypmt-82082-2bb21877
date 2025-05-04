@@ -9,41 +9,32 @@ export const NutraceuticalsService = {
   // Operações Básicas
   getById: NutraceuticalQueryService.getById,
   getAll: NutraceuticalQueryService.getAll,
-  getAllNutraceuticals: NutraceuticalQueryService.getAll, // Alias para compatibilidade
-  getByName: NutraceuticalQueryService.getByName,
+  getAllNutraceuticals: NutraceuticalQueryService.getAllNutraceuticals,
   
-  // Aliases para manter compatibilidade com código existente
-  create: NutraceuticalMutationService.createNutraceutical,
-  update: NutraceuticalMutationService.updateNutraceutical,
-  delete: NutraceuticalMutationService.deleteNutraceutical,
-  
-  // Operações de mutação
+  // Criação, atualização e exclusão
   createNutraceutical: NutraceuticalMutationService.createNutraceutical,
   updateNutraceutical: NutraceuticalMutationService.updateNutraceutical,
   deleteNutraceutical: NutraceuticalMutationService.deleteNutraceutical,
   
-  // Operações de Metadados
-  getAllOutcomes: NutraceuticalMetadataService.getAllOutcomes,
-  getAllCategories: NutraceuticalMetadataService.getAllCategories,
-  getAllActiveIngredients: NutraceuticalMetadataService.getAllActiveIngredients,
-  getAllConditions: NutraceuticalMetadataService.getAllOutcomes, // Agora aponta para outcomes
-  getAllStudies: NutraceuticalMetadataService.getAllStudies,
-  addBenefit: NutraceuticalMetadataService.addBenefit,
+  // Metadados científicos
   updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
   
-  // Operações de Relações
-  // Utilizando apenas os novos métodos orientados a outcomes
+  // Relações com outcomes e estudos
   relateToOutcome: NutraceuticalRelationsService.relateToOutcome,
-  relateToStudy: NutraceuticalRelationsService.relateToStudy,
-  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation,
-  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
+  relateToCondition: NutraceuticalRelationsService.relateToOutcome, // Alias para compatibilidade
   
-  // Alias para compatibilidade com código existente
-  relateToCondition: NutraceuticalRelationsService.relateToOutcome, // Alias para relateToOutcome
-  removeConditionRelation: NutraceuticalRelationsService.removeOutcomeRelation, // Alias para removeOutcomeRelation
-  getConditionRelations: NutraceuticalQueryService.getOutcomeRelations, // Alias para getOutcomeRelations
+  relateToStudy: NutraceuticalRelationsService.relateToStudy,
+  
+  updateOutcomeRelation: NutraceuticalRelationsService.updateOutcomeRelation,
+  
   getStudyRelations: NutraceuticalQueryService.getStudyRelations,
   
-  // Nova operação para adicionar/atualizar relações completas (categoria + estudos + notas)
-  updateOutcomeRelation: NutraceuticalRelationsService.updateOutcomeRelation
+  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
+  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation,
+  removeConditionRelation: NutraceuticalRelationsService.removeOutcomeRelation, // Alias
+  
+  getOutcomeRelations: NutraceuticalQueryService.getOutcomeRelations,
+  getConditionRelations: NutraceuticalQueryService.getOutcomeRelations, // Alias
 };
+
+export default NutraceuticalsService;
