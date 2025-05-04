@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NtaiConditionTag } from '@/types/ntai';
-import ConditionTag from '../../../tags/ConditionTag';
+import OutcomeTag from '../../../tags/OutcomeTag';
 
 interface NtaiConditionsTabProps {
   conditions: NtaiConditionTag[];
@@ -14,9 +14,9 @@ const NtaiConditionsTab: React.FC<NtaiConditionsTabProps> = ({ conditions }) => 
       <div className="flex flex-wrap gap-2 bg-gray-50 p-3 rounded-md">
         {conditions.length > 0 ? (
           conditions.map((condition, idx) => (
-            <ConditionTag 
+            <OutcomeTag 
               key={idx}
-              condition={condition.name} 
+              outcome={condition.name} 
               score={condition.efficacyScore || condition.confidence}
               className="m-1"
             />

@@ -75,7 +75,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               {ntaiData.condicoes.map((condicao, idx) => (
                 <OutcomeTag 
                   key={idx}
-                  condition={condicao.nome}
+                  outcome={condicao.nome}
                   score={condicao.score}
                 />
               ))}
@@ -141,4 +141,3 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 };
 
 export default EstudoCard;
-

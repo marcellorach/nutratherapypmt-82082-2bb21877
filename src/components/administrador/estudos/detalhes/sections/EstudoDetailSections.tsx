@@ -59,7 +59,7 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
           {condicoes.map((condicao, idx) => (
             <OutcomeTag 
               key={idx}
-              condition={condicao.nome}
+              outcome={condicao.nome}
               score={condicao.score}
             />
           ))}

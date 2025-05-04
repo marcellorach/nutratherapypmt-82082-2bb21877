@@ -32,11 +32,10 @@ export const NutraceuticalsService = {
   updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
   
   // Operações de Relações
-  relateToCondition: NutraceuticalRelationsService.relateToCondition, // Depreciado, mas mantido para compatibilidade
-  relateToOutcome: NutraceuticalRelationsService.relateToOutcome, // Novo método para substituir o anterior
+  // Utilizando apenas os novos métodos orientados a outcomes
+  relateToOutcome: NutraceuticalRelationsService.relateToOutcome,
   relateToStudy: NutraceuticalRelationsService.relateToStudy,
-  removeConditionRelation: NutraceuticalRelationsService.removeConditionRelation, // Depreciado, mas mantido para compatibilidade
-  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation, // Novo método para substituir o anterior
+  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation,
   removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
   getConditionRelations: NutraceuticalQueryService.getConditionRelations, // Depreciado, mas mantido para compatibilidade
   getStudyRelations: NutraceuticalQueryService.getStudyRelations,
