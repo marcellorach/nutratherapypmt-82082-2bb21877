@@ -15,6 +15,7 @@ interface ManageRelationshipsDialogProps {
   onOpenChange: (open: boolean) => void;
   nutraceutical: any;
   onSuccess?: () => void;
+  initialTab?: 'conditions' | 'studies';
 }
 
 /**
@@ -25,9 +26,10 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   open,
   onOpenChange,
   nutraceutical,
-  onSuccess
+  onSuccess,
+  initialTab = 'conditions'
 }) => {
-  const [activeTab, setActiveTab] = useState('conditions');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   

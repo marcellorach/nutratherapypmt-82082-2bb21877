@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Search, Filter, RefreshCcw, Edit, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Filter, RefreshCcw, Edit, Trash2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import ManageRelationshipsDialog from '../nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
 interface NutraceuticalTableProps {
   nutraceuticals: any[];
@@ -49,6 +50,10 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   openMigratorDialog,
   onEditClick
 }) => {
+  // Estado para o diálogo de gerenciamento de relações
+  const [isRelationshipsDialogOpen, setIsRelationshipsDialogOpen] = useState(false);
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
+  
   // Função auxiliar para obter o nome do outcome
   const getOutcomeName = (nutra: any) => {
     // Se outcome_id é um objeto (Supabase retorna a relação expandida)
@@ -67,6 +72,12 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
     } else {
       console.warn("Nenhum handler de edição fornecido");
     }
+  };
+  
+  // Função para abrir o diálogo de gerenciamento de relações
+  const handleManageRelationships = (nutra: any) => {
+    setSelectedNutraceutical(nutra);
+    setIsRelationshipsDialogOpen(true);
   };
 
   return (
@@ -182,6 +193,15 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                           <Button 
                             size="icon" 
                             variant="ghost" 
+                            className="h-8 w-8"
+                            onClick={() => handleManageRelationships(nutra)}
+                            title="Gerenciar estudos e condições"
+                          >
+                            <BookOpen className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
                             className="h-8 w-8 text-red-500"
                             onClick={() => handleDeleteClick(nutra.id)}
                             title="Excluir nutracêutico"
@@ -203,6 +223,16 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
           {filteredNutraceuticals.length} de {nutraceuticals.length} nutracêuticos
         </div>
       </CardFooter>
+
+      {/* Diálogo para gerenciar relações (estudos e condições) */}
+      {selectedNutraceutical && (
+        <ManageRelationshipsDialog
+          open={isRelationshipsDialogOpen}
+          onOpenChange={setIsRelationshipsDialogOpen}
+          nutraceutical={selectedNutraceutical}
+          onSuccess={refreshData}
+        />
+      )}
     </Card>
   );
 };

@@ -1,6 +1,7 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { ScientificStudiesService } from '@/services/scientific-studies-service';
 
 /**
  * Hook para gerenciar estudos científicos
@@ -15,34 +16,10 @@ export const useStudies = () => {
     try {
       setIsLoading(true);
       
-      // Aqui teríamos a chamada para o serviço de estudos
-      // Por enquanto, vamos usar dados fictícios
-      const mockStudies = [
-        {
-          id: '1',
-          title: 'Efeitos do Resveratrol na Longevidade',
-          year: 2021,
-          journal: 'Journal of Nutraceutical Research',
-          link: 'https://example.com/study1',
-        },
-        {
-          id: '2',
-          title: 'Curcumina como Anti-inflamatório Natural',
-          year: 2020,
-          journal: 'Natural Medicine Reviews',
-          link: 'https://example.com/study2',
-        },
-        {
-          id: '3',
-          title: 'NMN e a Regeneração Celular em Idosos',
-          year: 2022,
-          journal: 'Aging Research Reviews',
-          link: 'https://example.com/study3',
-        },
-      ];
-      
-      setStudies(mockStudies);
-      return mockStudies;
+      // Buscar estudos do serviço real
+      const studiesData = await ScientificStudiesService.getAllStudies();
+      setStudies(studiesData);
+      return studiesData;
     } catch (err: any) {
       const errorMessage = 'Erro ao carregar estudos científicos';
       setError(errorMessage);
@@ -60,17 +37,19 @@ export const useStudies = () => {
     }
   }, [toast]);
 
+  // Carregar estudos ao inicializar
+  useEffect(() => {
+    fetchStudies();
+  }, [fetchStudies]);
+
   const createStudy = useCallback(async (data: any) => {
     try {
       setIsLoading(true);
       
-      // Aqui teríamos a chamada para o serviço de criação de estudo
-      // Por enquanto, simulamos uma resposta
-      const newStudy = {
-        id: `new-${Date.now()}`,
-        ...data,
-      };
+      // Usar o serviço real para criar o estudo
+      const newStudy = await ScientificStudiesService.createStudy(data);
       
+      // Atualizar a lista local
       setStudies(prev => [...prev, newStudy]);
       
       toast({
@@ -101,7 +80,7 @@ export const useStudies = () => {
     relevanceScore: number
   ) => {
     try {
-      // Aqui teríamos a chamada para o serviço de associação
+      // Usar serviço para associar estudo ao nutracêutico
       // Por enquanto, simulamos uma resposta
       
       toast({
