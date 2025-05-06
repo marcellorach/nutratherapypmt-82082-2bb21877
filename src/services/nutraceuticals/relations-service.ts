@@ -1,8 +1,10 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { NutraceuticalBaseService } from './base-service';
 
 /**
- * Serviço para gerenciar relações de nutracêuticos com outcomes e estudos
+ * Serviço para gerenciar relacionamentos de nutracêuticos
+ * com outcomes, condições e estudos
  */
 export const NutraceuticalRelationsService = {
   /**
@@ -20,23 +22,23 @@ export const NutraceuticalRelationsService = {
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_conditions')
-        .insert([{
+        .insert({
           nutraceutical_id: nutraceuticalId,
-          condition_id: outcomeId, // mantido como condition_id para compatibilidade
+          condition_id: outcomeId,
           relationship_type: relationshipType,
           efficacy_score: efficacyScore,
-          notes: notes
-        }])
+          notes
+        })
         .select()
         .single();
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'relacionar com outcome');
+        NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a outcome');
       }
 
       return data;
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'relacionar com outcome');
+      NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a outcome');
     }
   },
 
@@ -53,84 +55,41 @@ export const NutraceuticalRelationsService = {
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_studies')
-        .insert([{
+        .insert({
           nutraceutical_id: nutraceuticalId,
           study_id: studyId,
           relevance_score: relevanceScore
-        }])
+        })
         .select()
         .single();
 
       if (error) {
-        NutraceuticalBaseService.handleError(error, 'relacionar com estudo científico');
+        NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a estudo');
       }
 
       return data;
     } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'relacionar com estudo científico');
+      NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a estudo');
     }
   },
 
   /**
-   * Remove a relação entre um nutracêutico e um outcome
-   */
-  async removeOutcomeRelation(relationId: string) {
-    try {
-      const client = supabase as any;
-      const { error } = await client
-        .from('nutraceutical_conditions')
-        .delete()
-        .eq('id', relationId);
-
-      if (error) {
-        NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
-      }
-
-      return true;
-    } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
-    }
-  },
-
-  /**
-   * Remove a relação entre um nutracêutico e um estudo
-   */
-  async removeStudyRelation(relationId: string) {
-    try {
-      const client = supabase as any;
-      const { error } = await client
-        .from('nutraceutical_studies')
-        .delete()
-        .eq('id', relationId);
-
-      if (error) {
-        NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
-      }
-
-      return true;
-    } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
-    }
-  },
-  
-  /**
-   * Atualiza ou adiciona informações de relação entre um nutracêutico e um outcome específico
-   * Inclui metadados científicos como eficácia, sustentabilidade e notas
+   * Atualiza a relação entre nutracêutico e outcome
    */
   async updateOutcomeRelation(
     nutraceuticalId: string,
     notes: string
   ) {
     try {
-      // Atualiza os metadados científicos do nutracêutico
+      // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_scientific_metadata')
-        .upsert({
-          nutraceutical_id: nutraceuticalId,
-          notes: notes,
+        .update({
+          notes,
           updated_at: new Date()
         })
+        .eq('nutraceutical_id', nutraceuticalId)
         .select()
         .single();
 
@@ -141,6 +100,106 @@ export const NutraceuticalRelationsService = {
       return data;
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'atualizar relação com outcome');
+    }
+  },
+
+  /**
+   * Remove uma relação entre nutracêutico e outcome
+   */
+  async removeOutcomeRelation(relationId: string) {
+    try {
+      // Usando type assertion para contornar a verificação de tipos do TypeScript
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('nutraceutical_conditions')
+        .delete()
+        .eq('id', relationId)
+        .select()
+        .single();
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
+      }
+
+      return data;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
+    }
+  },
+
+  /**
+   * Remove uma relação entre nutracêutico e estudo
+   */
+  async removeStudyRelation(relationId: string) {
+    try {
+      // Usando type assertion para contornar a verificação de tipos do TypeScript
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('nutraceutical_studies')
+        .delete()
+        .eq('id', relationId)
+        .select()
+        .single();
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
+      }
+
+      return data;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
+    }
+  },
+  
+  /**
+   * Obtém as relações de um nutracêutico com estudos científicos
+   */
+  async getStudyRelations(nutraceuticalId: string) {
+    try {
+      // Usando type assertion para contornar a verificação de tipos do TypeScript
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('nutraceutical_studies')
+        .select(`
+          *,
+          study:scientific_studies(id, title, journal)
+        `)
+        .eq('nutraceutical_id', nutraceuticalId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'obter relações com estudos');
+      }
+
+      return data;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'obter relações com estudos');
+      return [];
+    }
+  },
+
+  /**
+   * Obtém as relações de um nutracêutico com outcomes
+   */
+  async getOutcomeRelations(nutraceuticalId: string) {
+    try {
+      // Usando type assertion para contornar a verificação de tipos do TypeScript
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('nutraceutical_conditions')
+        .select(`
+          *,
+          condition:health_conditions(id, name, description)
+        `)
+        .eq('nutraceutical_id', nutraceuticalId);
+
+      if (error) {
+        NutraceuticalBaseService.handleError(error, 'obter relações com outcomes');
+      }
+
+      return data;
+    } catch (error) {
+      NutraceuticalBaseService.handleError(error, 'obter relações com outcomes');
+      return [];
     }
   }
 };
