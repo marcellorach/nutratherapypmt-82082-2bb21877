@@ -10,18 +10,33 @@ export const useNutraceuticalsFilter = (nutraceuticals: Nutraceutical[]) => {
   // Filtrar nutracêuticos com base nos critérios
   const filteredNutraceuticals = useMemo(() => {
     return nutraceuticals.filter(item => {
-      const matchesSearch = 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.chemicalCompound.toLowerCase().includes(searchTerm.toLowerCase());
+      // Filtro de pesquisa por texto
+      const matchesSearch = searchTerm === '' || (
+        (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.chemicalCompound && item.chemicalCompound.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
       
-      const matchesEfficacy = 
-        filterEfficacy === null || 
-        Math.floor(item.scientificEvidence.efficacyScore) === filterEfficacy;
+      // Filtro por nível de eficácia
+      let matchesEfficacy = true;
+      if (filterEfficacy !== null) {
+        if (!item.scientificEvidence) {
+          matchesEfficacy = false;
+        } else {
+          const score = item.scientificEvidence.efficacyScore;
+          if (filterEfficacy === 4) {
+            matchesEfficacy = score >= 4; // Alta (4-5)
+          } else if (filterEfficacy === 3) {
+            matchesEfficacy = score >= 3 && score < 4; // Média (3)
+          } else {
+            matchesEfficacy = score < 3; // Baixa (1-2)
+          }
+        }
+      }
       
-      const matchesCondition = 
-        filterCondition === null ||
-        item.condition === filterCondition;
+      // Filtro por condição
+      const matchesCondition = !filterCondition || filterCondition === 'all' || 
+                              item.condition === filterCondition;
       
       return matchesSearch && matchesEfficacy && matchesCondition;
     });

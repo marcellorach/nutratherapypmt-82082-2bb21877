@@ -42,9 +42,22 @@ const NutraceuticosTab: React.FC = () => {
   };
 
   // Converter o valor numérico para string ao passar para o componente SearchFilters
-  const filterEfficacyString = filterEfficacy !== null ? filterEfficacy.toString() : '';
+  const filterEfficacyString = filterEfficacy !== null 
+    ? (typeof filterEfficacy === 'number' ? filterEfficacy.toString() : filterEfficacy) 
+    : '';
+    
   const handleSetFilterEfficacy = (value: string) => {
-    setFilterEfficacy(value === '' ? null : parseInt(value, 10));
+    if (value === '' || value === 'all') {
+      setFilterEfficacy(null);
+    } else if (value === 'high') {
+      setFilterEfficacy(4);
+    } else if (value === 'medium') {
+      setFilterEfficacy(3);
+    } else if (value === 'low') {
+      setFilterEfficacy(2);
+    } else {
+      setFilterEfficacy(parseInt(value, 10) || null);
+    }
   };
 
   return (
@@ -57,7 +70,7 @@ const NutraceuticosTab: React.FC = () => {
           setSearchTerm={setSearchTerm}
           filterEfficacy={filterEfficacyString}
           setFilterEfficacy={handleSetFilterEfficacy}
-          filterCondition={filterCondition}
+          filterCondition={filterCondition || 'all'}
           setFilterCondition={setFilterCondition}
           clearFilters={clearFilters}
           onRefresh={handleRefreshData}
