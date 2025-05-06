@@ -11,11 +11,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink } from "lucide-react";
+import { Trash2, Plus, ExternalLink, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { NutraceuticalsService } from '@/services/nutraceuticals';
+import AddScientificStudyDialog from '../AddScientificStudyDialog';
 
 interface StudyRelation {
   id: string;
@@ -47,6 +48,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [existingRelations, setExistingRelations] = useState<StudyRelation[]>([]);
+  const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState<boolean>(false);
   
   // Carregar relações existentes
   useEffect(() => {
@@ -160,6 +162,17 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
       console.error(error);
     }
   };
+
+  // Handler para quando um novo estudo é adicionado
+  const handleStudyAdded = async () => {
+    toast({
+      title: "Sucesso",
+      description: "Estudo adicionado com sucesso",
+    });
+    // Atualizar a lista de estudos disponíveis
+    // Isso poderia ser feito através de um callback passado como prop
+    setIsAddStudyDialogOpen(false);
+  };
   
   const getRelevanceColor = (score: number) => {
     if (score >= 4) return "bg-green-100 text-green-800 border-green-200";
@@ -170,7 +183,17 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   return (
     <div className="space-y-6">
       <div className="rounded-md border p-4 bg-slate-50">
-        <h4 className="font-semibold mb-4">Adicionar estudo científico</h4>
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-semibold">Adicionar estudo científico</h4>
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => setIsAddStudyDialogOpen(true)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Criar Novo Estudo
+          </Button>
+        </div>
         <div className="grid gap-4">
           <div>
             <Label htmlFor="searchStudy">Buscar Estudos</Label>
@@ -305,6 +328,13 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
           </div>
         )}
       </div>
+      
+      {/* Diálogo para adicionar um novo estudo */}
+      <AddScientificStudyDialog
+        open={isAddStudyDialogOpen}
+        onOpenChange={setIsAddStudyDialogOpen}
+        onSuccess={handleStudyAdded}
+      />
     </div>
   );
 };

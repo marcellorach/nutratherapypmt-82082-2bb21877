@@ -1,64 +1,41 @@
 
 import { NutraceuticalBaseService } from './base-service';
-import { NutraceuticalMutationService } from './mutation-service';
 import { NutraceuticalQueryService } from './query-service';
+import { NutraceuticalMutationService } from './mutation-service';
 import { NutraceuticalMetadataService } from './metadata-service';
 import { NutraceuticalRelationsService } from './relations-service';
 
+/**
+ * Serviço agregador para nutracêuticos
+ * Exporta todas as funções dos serviços especializados
+ */
 export const NutraceuticalsService = {
-  // Operações Básicas
-  getById: NutraceuticalQueryService.getById,
-  getAll: NutraceuticalQueryService.getAll,
-  getAllNutraceuticals: NutraceuticalQueryService.getAllNutraceuticals,
+  // Funções básicas CRUD
+  ...NutraceuticalQueryService,
+  ...NutraceuticalMutationService,
   
-  // Criação, atualização e exclusão
-  createNutraceutical: NutraceuticalMutationService.createNutraceutical,
-  updateNutraceutical: NutraceuticalMutationService.updateNutraceutical,
-  deleteNutraceutical: NutraceuticalMutationService.deleteNutraceutical,
+  // Funções de metadados
+  ...NutraceuticalMetadataService,
   
-  // Metadados científicos
-  updateScientificMetadata: NutraceuticalMetadataService.updateScientificMetadata,
+  // Funções de relações
+  ...NutraceuticalRelationsService,
   
-  // Relações com outcomes e estudos
-  relateToOutcome: NutraceuticalRelationsService.relateToOutcome,
-  relateToCondition: NutraceuticalRelationsService.relateToOutcome, // Alias para compatibilidade
+  // Helper para lidar com erros
+  handleError: NutraceuticalBaseService.handleError,
   
+  // Funções específicas que não estão nos outros serviços
+  
+  /**
+   * Relaciona um nutracêutico a um estudo científico
+   * @param nutraceuticalId ID do nutracêutico
+   * @param studyId ID do estudo científico
+   * @param relevanceScore Pontuação de relevância (1-5)
+   */
   relateToStudy: NutraceuticalRelationsService.relateToStudy,
   
-  updateOutcomeRelation: NutraceuticalRelationsService.updateOutcomeRelation,
-  
-  // Exportando getStudyRelations e getOutcomeRelations da relations service
-  getStudyRelations: NutraceuticalRelationsService.getStudyRelations,
-  
-  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
-  removeOutcomeRelation: NutraceuticalRelationsService.removeOutcomeRelation,
-  removeConditionRelation: NutraceuticalRelationsService.removeOutcomeRelation, // Alias
-  
-  getOutcomeRelations: NutraceuticalRelationsService.getOutcomeRelations,
-  getConditionRelations: NutraceuticalRelationsService.getOutcomeRelations, // Alias
-  
-  // Nova função para adicionar benefícios
-  addBenefit: async (nutraceuticalId: string, benefit: string) => {
-    try {
-      // Vamos usar o serviço de metadados para adicionar benefícios
-      const metadata = await NutraceuticalQueryService.getById(nutraceuticalId);
-      await NutraceuticalMetadataService.updateScientificMetadata(
-        nutraceuticalId, 
-        metadata?.scientific_metadata?.efficacy_score || 0
-      );
-      
-      // Adicionamos o benefício usando o updateOutcomeRelation
-      await NutraceuticalRelationsService.updateOutcomeRelation(
-        nutraceuticalId,
-        `Benefício: ${benefit}`
-      );
-      
-      return { success: true };
-    } catch (error) {
-      NutraceuticalBaseService.handleError(error, 'adicionar benefício');
-      return { success: false, error };
-    }
-  }
+  /**
+   * Remove uma relação entre nutracêutico e estudo
+   * @param relationId ID da relação
+   */
+  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation
 };
-
-export default NutraceuticalsService;
