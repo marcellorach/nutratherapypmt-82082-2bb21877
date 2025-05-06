@@ -22,20 +22,4 @@ export const NutraceuticalsService = {
   
   // Helper para lidar com erros
   handleError: NutraceuticalBaseService.handleError,
-  
-  // Funções específicas que não estão nos outros serviços
-  
-  /**
-   * Relaciona um nutracêutico a um estudo científico
-   * @param nutraceuticalId ID do nutracêutico
-   * @param studyId ID do estudo científico
-   * @param relevanceScore Pontuação de relevância (1-5)
-   */
-  relateToStudy: NutraceuticalRelationsService.relateToStudy,
-  
-  /**
-   * Remove uma relação entre nutracêutico e estudo
-   * @param relationId ID da relação
-   */
-  removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation
 };
