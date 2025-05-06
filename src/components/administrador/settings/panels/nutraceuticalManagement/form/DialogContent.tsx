@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FormDialogProps } from "../types";
-import { FormInputField, FormSelectField, FormTextareaField } from "../../FormDialog";
+import { FormInputField, FormSelectField, FormTextareaField } from "@/components/administrador/settings/FormDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -100,19 +100,24 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormSelectField
-                label="Categoria / Outcome"
-                value={relation.outcome_id || 'none'}
-                onChange={(value) => handleOutcomeChange(index, value)}
-                placeholder="Selecione uma categoria"
-                options={[
-                  { value: 'none', label: 'Selecione uma categoria' },
-                  ...outcomes.map(outcome => ({ 
-                    value: outcome.id, 
-                    label: outcome.name 
-                  }))
-                ]}
-              />
+              <div className="space-y-2">
+                <label htmlFor={`outcome-${index}`} className="text-sm font-medium">
+                  Categoria / Outcome
+                </label>
+                <select
+                  id={`outcome-${index}`}
+                  value={relation.outcome_id || 'none'}
+                  onChange={(e) => handleOutcomeChange(index, e.target.value)}
+                  className="w-full border rounded px-3 py-2"
+                >
+                  <option value="none">Selecione uma categoria</option>
+                  {outcomes.map(outcome => (
+                    <option key={outcome.id} value={outcome.id}>
+                      {outcome.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
               <div className="space-y-1">
                 <label className="text-sm font-medium">
@@ -138,19 +143,25 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
               </div>
             </div>
             
-            <FormTextareaField
-              label="Notas / Observações"
-              value={relation.notes || ''}
-              onChange={(e) => {
-                const newRelations = [...relations];
-                newRelations[index] = {
-                  ...newRelations[index],
-                  notes: e.target.value
-                };
-                // Atualizar relações
-              }}
-              placeholder="Observações sobre esta relação"
-            />
+            <div className="space-y-2">
+              <label htmlFor={`notes-${index}`} className="text-sm font-medium">
+                Notas / Observações
+              </label>
+              <textarea
+                id={`notes-${index}`}
+                value={relation.notes || ''}
+                onChange={(e) => {
+                  const newRelations = [...relations];
+                  newRelations[index] = {
+                    ...newRelations[index],
+                    notes: e.target.value
+                  };
+                  // Atualizar relações
+                }}
+                placeholder="Observações sobre esta relação"
+                className="w-full border rounded px-3 py-2 min-h-[80px]"
+              />
+            </div>
             
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Estudos Relacionados</h4>

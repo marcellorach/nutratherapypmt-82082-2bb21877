@@ -50,6 +50,27 @@ const NutraceuticalManagementPanel: React.FC = () => {
     fetchNutraceuticals
   } = useNutraceuticalPanel();
 
+  // Adaptar handlers para corresponder às assinaturas de tipo esperadas
+  const adaptedHandleFormChange = (field: keyof typeof formData, value: any) => {
+    handleFormChange({ target: { name: field, value } } as any);
+  };
+
+  const adaptedHandleOutcomeChange = (index: number, value: string) => {
+    handleOutcomeChange(value);
+  };
+
+  const adaptedHandleEfficacyChange = (index: number, value: number) => {
+    handleEfficacyChange([value]);
+  };
+
+  const adaptedHandleStudyChange = (index: number, studyId: string, checked: boolean) => {
+    handleStudyChange(studyId);
+  };
+
+  const adaptedHandleStudiesDropped = (acceptedFiles: File[], index: number) => {
+    handleStudiesDropped([] as string[]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -75,11 +96,11 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isOpen={isCreateDialogOpen}
         setIsOpen={setIsCreateDialogOpen}
         isCreate={true}
-        formData={formData}
-        handleFormChange={handleFormChange}
-        handleOutcomeChange={handleOutcomeChange}
-        handleEfficacyChange={handleEfficacyChange}
-        handleStudyChange={handleStudyChange}
+        formData={{...formData, relations: []}}
+        handleFormChange={adaptedHandleFormChange}
+        handleOutcomeChange={adaptedHandleOutcomeChange}
+        handleEfficacyChange={adaptedHandleEfficacyChange}
+        handleStudyChange={adaptedHandleStudyChange}
         handleAddRelation={handleAddRelation}
         handleRemoveRelation={handleRemoveRelation}
         submitAction={handleCreateSubmit}
@@ -87,8 +108,8 @@ const NutraceuticalManagementPanel: React.FC = () => {
         studies={studies}
         outcomes={outcomes}
         studiesLoading={studiesLoading}
-        handleStudiesDropped={handleStudiesDropped}
-        selectedStudies={selectedStudies}
+        handleStudiesDropped={adaptedHandleStudiesDropped}
+        selectedStudies={{0: selectedStudies || []}}
       />
       
       {/* Diálogo de editar nutracêutico */}
@@ -96,11 +117,11 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isOpen={isEditDialogOpen}
         setIsOpen={setIsEditDialogOpen}
         isCreate={false}
-        formData={formData}
-        handleFormChange={handleFormChange}
-        handleOutcomeChange={handleOutcomeChange}
-        handleEfficacyChange={handleEfficacyChange}
-        handleStudyChange={handleStudyChange}
+        formData={{...formData, relations: []}}
+        handleFormChange={adaptedHandleFormChange}
+        handleOutcomeChange={adaptedHandleOutcomeChange}
+        handleEfficacyChange={adaptedHandleEfficacyChange}
+        handleStudyChange={adaptedHandleStudyChange}
         handleAddRelation={handleAddRelation}
         handleRemoveRelation={handleRemoveRelation}
         submitAction={handleEditSubmit}
@@ -108,8 +129,8 @@ const NutraceuticalManagementPanel: React.FC = () => {
         studies={studies}
         outcomes={outcomes}
         studiesLoading={studiesLoading}
-        handleStudiesDropped={handleStudiesDropped}
-        selectedStudies={selectedStudies}
+        handleStudiesDropped={adaptedHandleStudiesDropped}
+        selectedStudies={{0: selectedStudies || []}}
       />
       
       {/* Diálogo de excluir nutracêutico */}

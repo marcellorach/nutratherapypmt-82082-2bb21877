@@ -55,3 +55,31 @@ export interface FormDialogProps {
   selectedStudies: {[key: number]: string[]};
   handleStudiesDropped?: (acceptedFiles: File[], relationIndex: number) => void;
 }
+
+export interface NutraceuticalTableProps {
+  filteredNutraceuticals: any[];
+  isLoading: boolean;
+  onEditClick: (nutraceutical: any) => void;
+  onDeleteClick: (nutraceutical: any) => void;
+  onOutcomesClick: (nutraceutical: any) => void;
+  getOutcomeName: (outcomeId: string | null) => string;
+}
+
+export interface DeleteDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  name: string;
+  onConfirm: () => void;
+}
+
+export interface SearchBarProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+}
+
+export interface OutcomesDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  nutraceutical: any;
+  onComplete: () => void;
+}

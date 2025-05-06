@@ -1,32 +1,16 @@
 
-import { FormData, Relation } from '../types';
+import { Study, Outcome, NutraceuticalFormData, NutraceuticalRelation, Nutraceutical } from '../types';
 
 export interface FormSectionsProps {
-  formData: FormData;
+  formData: any;
   handleFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleOutcomeChange: (value: string) => void;
-  handleEfficacyChange: (value: number[]) => void;
-  handleAddRelation: () => void;
-  outcomes: any[];
-  studies: any[];
+  handleOutcomeChange?: (value: string) => void;
+  handleEfficacyChange?: (value: number[]) => void;
+  handleStudyChange?: (value: string) => void;
+  handleAddRelation?: () => void;
+  studies?: Study[];
+  outcomes?: Outcome[];
   studiesLoading?: boolean;
-  selectedStudies?: string[];
-  handleStudiesDropped?: (studyIds: string[]) => void;
-}
-
-export interface DialogContentProps {
-  isCreate: boolean;
-  formData: FormData;
-  handleFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleOutcomeChange: (value: string) => void;
-  handleEfficacyChange: (value: number[]) => void;
-  handleStudyChange: (value: string) => void;
-  handleAddRelation: () => void;
-  handleRemoveRelation: (index: number) => void;
-  relations: Relation[];
-  studies: any[];
-  outcomes: any[];
-  studiesLoading?: boolean;
-  selectedStudies?: string[];
+  selectedStudies?: any;
   handleStudiesDropped?: (studyIds: string[]) => void;
 }
