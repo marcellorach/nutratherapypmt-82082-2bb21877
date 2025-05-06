@@ -63,7 +63,7 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{getCategoryName(item)}</Badge>
+                  <Badge variant="outline">{item.category || 'Sem categoria'}</Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {item.source || '-'}
@@ -72,8 +72,8 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
                   {item.dosage || '-'}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {item.scientific_metadata?.efficacy_score ? 
-                    getEfficacyDisplay(item.scientific_metadata.efficacy_score) : '-'}
+                  {item.scientificEvidence?.efficacyScore ? 
+                    getEfficacyDisplay(item.scientificEvidence.efficacyScore) : '-'}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button 

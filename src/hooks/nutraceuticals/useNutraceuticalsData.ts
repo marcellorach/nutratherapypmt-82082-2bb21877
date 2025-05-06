@@ -20,7 +20,7 @@ export const useNutraceuticalsData = () => {
         .from('nutraceuticals')
         .select(`
           *,
-          category_id:nutraceutical_categories(*),
+          outcome:outcome_id(*),
           nutraceutical_benefits(id, benefit),
           nutraceutical_scientific_metadata(*),
           nutraceutical_health_conditions:nutraceutical_conditions(

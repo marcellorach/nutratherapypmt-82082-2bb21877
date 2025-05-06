@@ -15,7 +15,7 @@ export const NutraceuticalBaseService = {
       .from('nutraceuticals')
       .select(`
         *,
-        outcome_id:nutraceutical_outcomes(*),
+        outcome:outcome_id(*),
         nutraceutical_benefits(id, benefit),
         nutraceutical_scientific_metadata(*),
         nutraceutical_health_conditions:nutraceutical_conditions(
