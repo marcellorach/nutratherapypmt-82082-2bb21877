@@ -51,68 +51,84 @@ const AdministradorPage: React.FC = () => {
   }, [tabParam, currentStep]);
   
   const renderContent = () => {
-    switch (currentStep) {
-      case "nutraceuticos":
-        return <NutraceuticosTab />;
-      case "nutraceu-gerenciamento":
-        return <NutraceuticoGerenciamentoTab />;
-      case "estudos":
-        return <EstudosTab />;
-      case "regras":
-        return <RegrasClinicasTab />;
-      case "relacoes":
-        return <RelationsTab />;
-      case "knowledge-base-settings":
-        return <KnowledgeBaseSettingsTab />;
-      
-      case "import":
-        return <ImportStep />;
-      case "fontes":
-        return <FontesTab />;
-      case "analysis":
-        return <AnalysisStep />;
-      case "visualization":
-        return <VisualizationStep />;
-      case "data-processing-settings":
-        return <DataProcessingSettingsTab />;
-      
-      case "estudos-planejados":
-        return <EstudosPlanejadosTab />;
-      case "estudos-andamento":
-        return <EstudosAndamentoTab />;
-      case "estudos-concluidos":
-        return <EstudosConcluidosTab />;
-      case "sugestoes-ai":
-        return <SugestoesAITab />;
-      case "ora-biomedical":
-        return <OraBiomedicalTab />;
-      case "pesquisa-estudos":
-        return <PesquisaEstudosTab />;
-      case "research-settings":
-        return <ResearchSettingsTab />;
-      
-      case "modelos":
-        return <ModelosPreditivosTab />;
-      case "custo-beneficio":
-        return <CustoBeneficioTab />;
-      case "relatorios":
-        return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
-      case "predictive-analysis-settings":
-        return <PredictiveAnalysisSettingsTab />;
-      
-      case "config-ia":
-        return <ConfiguracoesIATab />;
-      case "prompts":
-        return <PromptsTab />;
-      case "analytics":
-        return <AnalyticsTab />;
-      case "actions":
-        return <ActionsStep />;
-      case "design-conventions":
-        return <DesignConventionsTab />;
-      
-      default:
-        return <EstudosTab />;
+    try {
+      switch (currentStep) {
+        case "nutraceuticos":
+          return <NutraceuticosTab />;
+        case "nutraceu-gerenciamento":
+          return <NutraceuticoGerenciamentoTab />;
+        case "estudos":
+          return <EstudosTab />;
+        case "regras":
+          return <RegrasClinicasTab />;
+        case "relacoes":
+          return <RelationsTab />;
+        case "knowledge-base-settings":
+          return <KnowledgeBaseSettingsTab />;
+        
+        case "import":
+          return <ImportStep />;
+        case "fontes":
+          return <FontesTab />;
+        case "analysis":
+          return <AnalysisStep />;
+        case "visualization":
+          return <VisualizationStep />;
+        case "actions":
+          return <ActionsStep />;
+        case "data-processing-settings":
+          return <DataProcessingSettingsTab />;
+        
+        case "estudos-planejados":
+          return <EstudosPlanejadosTab />;
+        case "estudos-andamento":
+          return <EstudosAndamentoTab />;
+        case "estudos-concluidos":
+          return <EstudosConcluidosTab />;
+        case "sugestoes-ai":
+          return <SugestoesAITab />;
+        case "ora-biomedical":
+          return <OraBiomedicalTab />;
+        case "pesquisa-estudos":
+          return <PesquisaEstudosTab />;
+        case "research-settings":
+          return <ResearchSettingsTab />;
+        
+        case "modelos":
+          return <ModelosPreditivosTab />;
+        case "custo-beneficio":
+          return <CustoBeneficioTab />;
+        case "relatorios":
+          return <div className="p-8 text-center text-gray-500">Relatórios (Em desenvolvimento)</div>;
+        case "predictive-analysis-settings":
+          return <PredictiveAnalysisSettingsTab />;
+        
+        case "config-ia":
+          return <ConfiguracoesIATab />;
+        case "prompts":
+          return <PromptsTab />;
+        case "analytics":
+          return <AnalyticsTab />;
+        case "design-conventions":
+          return <DesignConventionsTab />;
+        
+        default:
+          return <EstudosTab />;
+      }
+    } catch (error) {
+      console.error("Erro ao renderizar conteúdo:", error);
+      return (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold text-red-500">Erro ao carregar conteúdo</h2>
+          <p className="text-gray-600 mt-2">Ocorreu um erro ao carregar esta seção. Por favor, tente novamente.</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-4"
+          >
+            Recarregar Página
+          </Button>
+        </div>
+      );
     }
   };
   

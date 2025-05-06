@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -580,7 +579,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Selecione</SelectItem>
+                              <SelectItem value="none">Selecione</SelectItem>
                               {outcomes.map((outcome) => (
                                 <SelectItem key={outcome.id} value={outcome.id}>
                                   {outcome.name}
@@ -708,7 +707,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                                   <SelectValue placeholder="Selecione um outcome" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="">Selecione</SelectItem>
+                                  <SelectItem value="none">Selecione</SelectItem>
                                   {outcomes.map((outcome) => (
                                     <SelectItem key={outcome.id} value={outcome.id}>
                                       {outcome.name}
