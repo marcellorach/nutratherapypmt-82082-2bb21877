@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNutraceuticalPanel } from "@/hooks/nutraceuticals/useNutraceuticalPanel";
+import { Nutraceutical } from "./nutraceuticalManagement/types";
 
 // Componentes refatorados
 import FormDialog from "./nutraceuticalManagement/FormDialog";
@@ -51,12 +52,12 @@ const NutraceuticalManagementPanel: React.FC = () => {
   } = useNutraceuticalPanel();
 
   // Adaptar handlers para corresponder às assinaturas de tipo esperadas
-  const adaptedHandleFormChange = (field: keyof typeof formData, value: any) => {
+  const adaptedHandleFormChange = (field: keyof Nutraceutical, value: any) => {
     handleFormChange({ target: { name: field, value } } as any);
   };
 
   const adaptedHandleOutcomeChange = (index: number, value: string) => {
-    handleOutcomeChange(value);
+    handleOutcomeChange({ target: { value } } as any);
   };
 
   const adaptedHandleEfficacyChange = (index: number, value: number) => {
@@ -69,6 +70,21 @@ const NutraceuticalManagementPanel: React.FC = () => {
 
   const adaptedHandleStudiesDropped = (acceptedFiles: File[], index: number) => {
     handleStudiesDropped([] as string[]);
+  };
+
+  const adaptedHandleRemoveRelation = (index: number, e: React.MouseEvent) => {
+    handleRemoveRelation(index);
+  };
+
+  // Garantir que formData.contraindications seja um array
+  const prepareFormData = () => {
+    return {
+      ...formData,
+      contraindications: Array.isArray(formData.contraindications) 
+        ? formData.contraindications 
+        : (formData.contraindications ? [formData.contraindications] : []),
+      relations: relations || []
+    };
   };
 
   return (
@@ -96,13 +112,13 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isOpen={isCreateDialogOpen}
         setIsOpen={setIsCreateDialogOpen}
         isCreate={true}
-        formData={{...formData, relations: []}}
+        formData={prepareFormData()}
         handleFormChange={adaptedHandleFormChange}
         handleOutcomeChange={adaptedHandleOutcomeChange}
         handleEfficacyChange={adaptedHandleEfficacyChange}
         handleStudyChange={adaptedHandleStudyChange}
         handleAddRelation={handleAddRelation}
-        handleRemoveRelation={handleRemoveRelation}
+        handleRemoveRelation={adaptedHandleRemoveRelation}
         submitAction={handleCreateSubmit}
         relations={relations}
         studies={studies}
@@ -117,13 +133,13 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isOpen={isEditDialogOpen}
         setIsOpen={setIsEditDialogOpen}
         isCreate={false}
-        formData={{...formData, relations: []}}
+        formData={prepareFormData()}
         handleFormChange={adaptedHandleFormChange}
         handleOutcomeChange={adaptedHandleOutcomeChange}
         handleEfficacyChange={adaptedHandleEfficacyChange}
         handleStudyChange={adaptedHandleStudyChange}
         handleAddRelation={handleAddRelation}
-        handleRemoveRelation={handleRemoveRelation}
+        handleRemoveRelation={adaptedHandleRemoveRelation}
         submitAction={handleEditSubmit}
         relations={relations}
         studies={studies}
