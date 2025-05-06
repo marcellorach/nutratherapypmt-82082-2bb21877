@@ -48,6 +48,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   // Carregar dados necessários quando o diálogo abrir
   useEffect(() => {
     if (open) {
+      console.log('Diálogo aberto, carregando dados...');
       fetchConditions();
       fetchStudies();
     }
@@ -61,6 +62,11 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
     }
   };
   
+  // Este tipo corrige o problema de tipo no onValueChange
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as 'conditions' | 'studies');
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
@@ -71,7 +77,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={(value: 'conditions' | 'studies') => setActiveTab(value)} className="mt-2">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
           <TabsList className="grid grid-cols-2 mb-4">
             <TabsTrigger value="conditions">Condições de Saúde</TabsTrigger>
             <TabsTrigger value="studies">Estudos Científicos</TabsTrigger>

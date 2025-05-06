@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ScientificStudiesService } from '@/services/scientific-studies-service';
+import { NutraceuticalsService } from '@/services/nutraceuticals';
 
 /**
  * Hook para gerenciar estudos científicos
@@ -15,10 +16,12 @@ export const useStudies = () => {
   const fetchStudies = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Buscando estudos científicos...');
       
       // Buscar estudos do serviço real
       const studiesData = await ScientificStudiesService.getAllStudies();
-      setStudies(studiesData);
+      console.log('Estudos obtidos:', studiesData?.length || 0);
+      setStudies(studiesData || []);
       return studiesData;
     } catch (err: any) {
       const errorMessage = 'Erro ao carregar estudos científicos';
@@ -45,9 +48,11 @@ export const useStudies = () => {
   const createStudy = useCallback(async (data: any) => {
     try {
       setIsLoading(true);
+      console.log('Criando novo estudo com dados:', data);
       
       // Usar o serviço real para criar o estudo
       const newStudy = await ScientificStudiesService.createStudy(data);
+      console.log('Novo estudo criado:', newStudy);
       
       // Atualizar a lista local
       setStudies(prev => [...prev, newStudy]);
@@ -80,15 +85,24 @@ export const useStudies = () => {
     relevanceScore: number
   ) => {
     try {
-      // Usar serviço para associar estudo ao nutracêutico
-      // Por enquanto, simulamos uma resposta
+      console.log(`Associando estudo ${studyId} ao nutracêutico ${nutraceuticalId} com relevância ${relevanceScore}`);
+      setIsLoading(true);
+      
+      // Usar o serviço real de Nutraceuticals
+      const result = await NutraceuticalsService.relateToStudy(
+        nutraceuticalId,
+        studyId,
+        relevanceScore
+      );
+      
+      console.log('Resultado da associação:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Estudo associado com sucesso ao nutracêutico',
       });
       
-      return true;
+      return result;
     } catch (err: any) {
       const errorMessage = 'Erro ao associar estudo ao nutracêutico';
       
@@ -100,6 +114,8 @@ export const useStudies = () => {
       
       console.error('Error associating study:', err);
       throw err;
+    } finally {
+      setIsLoading(false);
     }
   }, [toast]);
 

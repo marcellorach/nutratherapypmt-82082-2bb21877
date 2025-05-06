@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
+import { Loader2 } from 'lucide-react';
 
 // Schema de validação
 const currentYear = new Date().getFullYear();
@@ -41,6 +42,7 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
   onSuccess
 }) => {
   const { createStudy } = useStudies();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Inicialização do formulário
   const form = useForm<FormData>({
@@ -54,39 +56,52 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       authors: '',
     }
   });
-  
-  const { isSubmitting } = form.formState;
 
   // Função para lidar com o envio do formulário
   const handleSubmit = async (values: FormData) => {
     try {
+      setIsSubmitting(true);
+      console.log('Enviando dados do formulário:', values);
+      
       // Processamento de autores
       const authors = values.authors 
         ? values.authors.split(',').map(author => author.trim()) 
         : [];
       
-      await createStudy({
+      const studyData = {
         title: values.title,
         link: values.link,
         year: values.year,
         journal: values.journal || undefined,
         abstract: values.abstract || undefined,
         authors: authors.length > 0 ? authors : undefined
-      });
+      };
+      
+      console.log('Dados do estudo formatados:', studyData);
+      
+      await createStudy(studyData);
+      console.log('Estudo criado com sucesso');
       
       form.reset();
-      onOpenChange(false);
       
       if (onSuccess) {
         onSuccess();
+      } else {
+        onOpenChange(false);
       }
     } catch (error) {
       console.error('Erro ao criar estudo científico:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isSubmitting) {
+        onOpenChange(isOpen);
+      }
+    }}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Estudo Científico</DialogTitle>
@@ -192,11 +207,21 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
             />
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => !isSubmitting && onOpenChange(false)}
+                disabled={isSubmitting}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : 'Salvar Estudo'}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : 'Salvar Estudo'}
               </Button>
             </DialogFooter>
           </form>

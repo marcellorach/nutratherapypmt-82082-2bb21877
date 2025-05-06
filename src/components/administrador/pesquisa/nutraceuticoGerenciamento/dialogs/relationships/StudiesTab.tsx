@@ -11,11 +11,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, FileText } from "lucide-react";
+import { Trash2, Plus, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { NutraceuticalsService } from '@/services/nutraceuticals';
+import { useStudies } from '@/hooks/nutraceuticals/useStudies';
 import AddScientificStudyDialog from '../AddScientificStudyDialog';
 
 interface StudyRelation {
@@ -42,6 +43,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   isLoading
 }) => {
   const { toast } = useToast();
+  const { associateStudyToNutraceutical, fetchStudies } = useStudies();
   
   const [selectedStudyId, setSelectedStudyId] = useState<string>("");
   const [relevanceScore, setRelevanceScore] = useState<number>(3);
@@ -49,6 +51,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [existingRelations, setExistingRelations] = useState<StudyRelation[]>([]);
   const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState<boolean>(false);
+  const [isLoadingRelations, setIsLoadingRelations] = useState<boolean>(false);
   
   // Carregar relações existentes
   useEffect(() => {
@@ -59,18 +62,30 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   
   const fetchExistingRelations = async () => {
     try {
-      // Idealmente teríamos uma função específica no serviço para isso
-      const relations = nutraceutical.nutraceutical_studies || [];
-      setExistingRelations(relations);
+      setIsLoadingRelations(true);
+      console.log('Buscando relações de estudos para o nutracêutico:', nutraceutical.id);
+      
+      // Usar o serviço real para buscar as relações
+      const relations = await NutraceuticalsService.getStudyRelations(nutraceutical.id);
+      console.log('Relações encontradas:', relations);
+      
+      setExistingRelations(relations || []);
     } catch (error) {
       console.error('Erro ao carregar estudos:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os estudos associados",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingRelations(false);
     }
   };
   
   // Filtrar estudos já associados e por termo de busca
   const filteredStudies = studies?.filter(study => {
     const isAlreadyAssociated = existingRelations.some(
-      relation => relation.study.id === study.id
+      relation => relation.study?.id === study.id
     );
     
     const matchesSearch = searchTerm === "" || 
@@ -97,38 +112,43 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
     setIsAdding(true);
     
     try {
-      const result = await NutraceuticalsService.relateToStudy(
-        nutraceutical.id,
-        selectedStudyId,
+      console.log(`Associando estudo ${selectedStudyId} ao nutracêutico ${nutraceutical.id}`);
+      
+      // Usar o hook useStudies para associar o estudo
+      const result = await associateStudyToNutraceutical(
+        selectedStudyId, 
+        nutraceutical.id, 
         relevanceScore
       );
       
-      // Atualizar a lista local
-      const newStudy = studies?.find(s => s.id === selectedStudyId);
-      if (newStudy) {
-        const newRelation = {
-          id: result.id,
-          relevance_score: relevanceScore,
-          study: {
-            id: newStudy.id,
-            title: newStudy.title,
-            year: newStudy.year,
-            journal: newStudy.journal,
-            link: newStudy.link
-          }
-        };
+      if (result) {
+        // Atualizar a lista local
+        const newStudy = studies?.find(s => s.id === selectedStudyId);
+        if (newStudy) {
+          const newRelation = {
+            id: result.id,
+            relevance_score: relevanceScore,
+            study: {
+              id: newStudy.id,
+              title: newStudy.title,
+              year: newStudy.year,
+              journal: newStudy.journal,
+              link: newStudy.link
+            }
+          };
+          
+          setExistingRelations(prev => [...prev, newRelation]);
+        }
         
-        setExistingRelations(prev => [...prev, newRelation]);
+        // Resetar o formulário
+        setSelectedStudyId("");
+        setRelevanceScore(3);
+        
+        toast({
+          title: "Sucesso",
+          description: "Estudo associado com sucesso",
+        });
       }
-      
-      // Resetar o formulário
-      setSelectedStudyId("");
-      setRelevanceScore(3);
-      
-      toast({
-        title: "Sucesso",
-        description: "Estudo associado com sucesso",
-      });
     } catch (error) {
       toast({
         title: "Erro",
@@ -144,6 +164,8 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   // Função para remover associação
   const handleRemoveAssociation = async (relationId: string) => {
     try {
+      console.log(`Removendo relação ${relationId}`);
+      
       await NutraceuticalsService.removeStudyRelation(relationId);
       
       // Atualizar a lista local
@@ -165,12 +187,14 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
 
   // Handler para quando um novo estudo é adicionado
   const handleStudyAdded = async () => {
+    // Recarregar os estudos disponíveis
+    await fetchStudies();
+    
     toast({
       title: "Sucesso",
       description: "Estudo adicionado com sucesso",
     });
-    // Atualizar a lista de estudos disponíveis
-    // Isso poderia ser feito através de um callback passado como prop
+    
     setIsAddStudyDialogOpen(false);
   };
   
@@ -254,7 +278,10 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
               disabled={!selectedStudyId || isAdding}
             >
               {isAdding ? (
-                <>Adicionando...</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adicionando...
+                </>
               ) : (
                 <>
                   <Plus className="mr-2 h-4 w-4" />
@@ -269,7 +296,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
       <div>
         <h4 className="font-semibold mb-4">Estudos Associados</h4>
         
-        {isLoading ? (
+        {isLoading || isLoadingRelations ? (
           <div className="space-y-2">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
@@ -287,10 +314,10 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h5 className="font-medium">{relation.study.title}</h5>
+                    <h5 className="font-medium">{relation.study?.title}</h5>
                     <div className="text-sm text-muted-foreground mt-1">
-                      {relation.study.journal} 
-                      {relation.study.year ? `, ${relation.study.year}` : ''}
+                      {relation.study?.journal} 
+                      {relation.study?.year ? `, ${relation.study.year}` : ''}
                     </div>
                     
                     <div className="flex gap-2 mt-2">
@@ -301,7 +328,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
                         Relevância: {relation.relevance_score}
                       </Badge>
                       
-                      {relation.study.link && (
+                      {relation.study?.link && (
                         <a 
                           href={relation.study.link} 
                           target="_blank" 
