@@ -12,6 +12,7 @@ import LastUpdatePanel from './nutraceuticoGerenciamento/LastUpdatePanel';
 import ActionPanel from './nutraceuticoGerenciamento/ActionPanel';
 import MigratorDialog from './nutraceuticoGerenciamento/MigratorDialog';
 import DeleteDialog from './nutraceuticoGerenciamento/DeleteDialog';
+import AddNutraceuticalDialog from './nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog';
 
 // Componente principal
 const NutraceuticoGerenciamentoTab: React.FC = () => {
@@ -38,6 +39,10 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
   const [nutraceuticalToDelete, setNutraceuticalToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
+  // Estado para diálogo de edição
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
+  
   const { toast } = useToast();
   
   // Função para filtrar nutracêuticos
@@ -51,6 +56,12 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       
     return matchesSearch && matchesOutcome;
   });
+
+  // Função para iniciar o processo de edição
+  const handleEditClick = (nutra: any) => {
+    setSelectedNutraceutical(nutra);
+    setEditDialogOpen(true);
+  };
 
   // Função para iniciar o processo de exclusão
   const handleDeleteClick = (nutraId: string) => {
@@ -139,6 +150,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
             handleDeleteClick={handleDeleteClick}
             hasMigratedData={hasMigratedData}
             openMigratorDialog={() => setIsMigratorDialogOpen(true)}
+            onEditClick={handleEditClick}
           />
         </div>
         
@@ -173,6 +185,19 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
         isDeleting={isDeleting}
         onConfirmDelete={confirmDelete}
       />
+      
+      {/* Diálogo de edição */}
+      {selectedNutraceutical && (
+        <AddNutraceuticalDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          nutraceutical={selectedNutraceutical}
+          onSuccess={() => {
+            setEditDialogOpen(false);
+            refreshData();
+          }}
+        />
+      )}
     </div>
   );
 };

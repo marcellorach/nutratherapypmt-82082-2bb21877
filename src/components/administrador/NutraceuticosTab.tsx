@@ -30,6 +30,7 @@ const NutraceuticosTab: React.FC = () => {
 
   // Handler para quando um nutraceutico é selecionado para edição
   const handleEditClick = (nutraceutical: any) => {
+    console.log("Editar nutracêutico:", nutraceutical);
     setSelectedNutraceutical(nutraceutical);
     setIsEditDialogOpen(true);
   };

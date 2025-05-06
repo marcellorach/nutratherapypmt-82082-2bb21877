@@ -29,6 +29,15 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
     return nutraceutical.outcome.name;
   };
 
+  // Função para lidar com o clique no botão de editar
+  const handleEditClick = (nutraceutical: any) => {
+    if (onEditClick) {
+      onEditClick(nutraceutical);
+    } else {
+      console.warn("Nenhum handler de edição fornecido");
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -70,8 +79,9 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => onEditClick(item)}
+                    onClick={() => handleEditClick(item)}
                     title="Editar nutracêutico, condições e estudos"
+                    className="cursor-pointer"
                   >
                     <Pencil className="h-4 w-4" />
                     <span className="sr-only">Editar</span>

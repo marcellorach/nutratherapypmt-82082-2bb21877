@@ -60,6 +60,15 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
     return 'Sem outcome';
   };
 
+  // Função para lidar com o clique no botão de editar
+  const handleEditClick = (nutra: any) => {
+    if (onEditClick) {
+      onEditClick(nutra);
+    } else {
+      console.warn("Nenhum handler de edição fornecido");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -165,7 +174,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                             size="icon" 
                             variant="ghost" 
                             className="h-8 w-8"
-                            onClick={() => onEditClick && onEditClick(nutra)}
+                            onClick={() => handleEditClick(nutra)}
                             title="Editar nutracêutico"
                           >
                             <Edit className="h-4 w-4" />
