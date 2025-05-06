@@ -12,15 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, List } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-
-interface NutraceuticalTableProps {
-  filteredNutraceuticals: any[];
-  isLoading: boolean;
-  onEditClick: (nutraceutical: any) => void;
-  onDeleteClick: (nutraceutical: any) => void;
-  onOutcomesClick: (nutraceutical: any) => void;
-  getOutcomeName: (outcomeId: string | null) => string;
-}
+import { NutraceuticalTableProps } from './types';
 
 const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   filteredNutraceuticals,

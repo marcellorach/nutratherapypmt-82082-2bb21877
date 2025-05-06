@@ -20,29 +20,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Loader, X, InfoIcon } from "lucide-react";
+import { X, InfoIcon } from "lucide-react";
 import StudiesDropZone from "./StudiesDropZone";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface FormDialogProps {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  isCreate: boolean;
-  formData: any;
-  handleFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleOutcomeChange: (value: string) => void;
-  handleEfficacyChange: (value: number[]) => void;
-  handleStudyChange: (value: string) => void;
-  handleAddRelation: () => void;
-  handleRemoveRelation: (index: number) => void;
-  submitAction: () => void;
-  relations: any[];
-  studies: any[];
-  outcomes: any[];
-  studiesLoading?: boolean;
-  handleStudiesDropped?: (studyIds: string[]) => void;
-  selectedStudies?: string[];
-}
+import { FormDialogProps } from "./types";
 
 const FormDialog: React.FC<FormDialogProps> = ({
   isOpen,
@@ -60,7 +40,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
   studies,
   outcomes,
   studiesLoading,
-  handleStudiesDropped,
+  handleStudiesDropped = () => {},
   selectedStudies = []
 }) => {
   return (
