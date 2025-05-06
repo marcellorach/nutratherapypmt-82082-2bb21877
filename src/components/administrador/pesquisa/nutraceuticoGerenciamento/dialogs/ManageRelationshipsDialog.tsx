@@ -29,7 +29,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   onSuccess,
   initialTab = 'conditions'
 }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState<'conditions' | 'studies'>(initialTab);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   
@@ -71,7 +71,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+        <Tabs value={activeTab} onValueChange={(value: 'conditions' | 'studies') => setActiveTab(value)} className="mt-2">
           <TabsList className="grid grid-cols-2 mb-4">
             <TabsTrigger value="conditions">Condições de Saúde</TabsTrigger>
             <TabsTrigger value="studies">Estudos Científicos</TabsTrigger>
