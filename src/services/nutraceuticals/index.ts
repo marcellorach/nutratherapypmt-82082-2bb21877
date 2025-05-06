@@ -27,6 +27,7 @@ export const NutraceuticalsService = {
   
   updateOutcomeRelation: NutraceuticalRelationsService.updateOutcomeRelation,
   
+  // Exportando getStudyRelations da query service
   getStudyRelations: NutraceuticalQueryService.getStudyRelations,
   
   removeStudyRelation: NutraceuticalRelationsService.removeStudyRelation,
@@ -40,11 +41,20 @@ export const NutraceuticalsService = {
   addBenefit: async (nutraceuticalId: string, benefit: string) => {
     try {
       // Vamos usar o serviço de metadados para adicionar benefícios
+      // Atualizando para usar apenas 2 argumentos conforme a interface esperada
+      const metadata = await NutraceuticalQueryService.getById(nutraceuticalId);
       await NutraceuticalMetadataService.updateScientificMetadata(
         nutraceuticalId, 
-        undefined, // Mantém o score de eficácia atual
-        { benefit }
+        metadata?.scientific_metadata?.efficacy_score || 0,
+        // Adicionamos o benefício através de outro método ou no updateOutcomeRelation
       );
+      
+      // Adicionamos o benefício usando o updateOutcomeRelation
+      await NutraceuticalRelationsService.updateOutcomeRelation(
+        nutraceuticalId,
+        `Benefício: ${benefit}`
+      );
+      
       return { success: true };
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'adicionar benefício');
