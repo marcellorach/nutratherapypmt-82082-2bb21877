@@ -1,357 +1,207 @@
 
-import React, { useState, useEffect } from 'react';
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { 
-  Select,
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Loader } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
-import { NutraceuticalsService } from '@/services/nutraceuticals';
-
-interface ConditionRelation {
-  id: string;
-  condition: {
-    id: string;
-    name: string;
-  };
-  relationship_type: string;
-  efficacy_score: number;
-  notes?: string;
-}
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Search, Plus } from 'lucide-react';
+import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations-service';
 
 interface ConditionsTabProps {
   nutraceutical: any;
   conditions: any[];
   isLoading: boolean;
+  onSuccess?: () => void;
 }
-
-const relationshipTypes = [
-  { id: 'prevention', label: 'Prevenção' },
-  { id: 'treatment', label: 'Tratamento' },
-  { id: 'support', label: 'Suporte' },
-];
 
 const ConditionsTab: React.FC<ConditionsTabProps> = ({
   nutraceutical,
   conditions,
-  isLoading
+  isLoading,
+  onSuccess
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCondition, setSelectedCondition] = useState<any | null>(null);
+  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('support');
+  const [efficacyScore, setEfficacyScore] = useState<number>(3);
+  const [notes, setNotes] = useState('');
+  const [isAssociating, setIsAssociating] = useState(false);
   const { toast } = useToast();
   
-  const [selectedConditionId, setSelectedConditionId] = useState<string>("");
-  const [selectedRelationType, setSelectedRelationType] = useState<string>("prevention");
-  const [efficacyScore, setEfficacyScore] = useState<number>(3);
-  const [notes, setNotes] = useState<string>("");
-  const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [existingRelations, setExistingRelations] = useState<ConditionRelation[]>([]);
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+  // Filtrar condições por termo de pesquisa
+  const filteredConditions = conditions.filter(condition => 
+    condition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (condition.description && condition.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
   
-  // Carregar relações existentes
-  useEffect(() => {
-    if (nutraceutical?.id) {
-      fetchExistingRelations();
-    }
-  }, [nutraceutical]);
-  
-  const fetchExistingRelations = async () => {
-    try {
-      // Aqui seria ideal ter uma função específica no NutraceuticalsService
-      // para buscar relações, mas vamos criar uma adaptação
-      const relations = nutraceutical.nutraceutical_health_conditions || [];
-      setExistingRelations(relations);
-    } catch (error) {
-      console.error('Erro ao carregar relações:', error);
-    }
-  };
-  
-  // Filtrar condições já associadas
-  const availableConditions = conditions?.filter(condition => 
-    !existingRelations.some(relation => relation.condition.id === condition.id)
-  ) || [];
-  
+  // Função para associar condição ao nutracêutico
   const handleAssociateCondition = async () => {
-    if (!selectedConditionId) {
+    if (!selectedCondition || !nutraceutical?.id) {
       toast({
         title: "Erro",
-        description: "Selecione uma condição de saúde",
-        variant: "destructive",
+        description: "Selecione uma condição para associar",
+        variant: "destructive"
       });
       return;
     }
     
-    setIsAdding(true);
-    
     try {
-      const result = await NutraceuticalsService.relateToCondition(
+      setIsAssociating(true);
+      
+      await NutraceuticalRelationsService.relateToCondition(
         nutraceutical.id,
-        selectedConditionId,
-        selectedRelationType as 'prevention' | 'treatment' | 'support',
+        selectedCondition.id,
+        relationshipType,
         efficacyScore,
         notes
       );
       
-      // Atualizar a lista local
-      const newCondition = conditions?.find(c => c.id === selectedConditionId);
-      if (newCondition) {
-        const newRelation = {
-          id: result.id,
-          relationship_type: selectedRelationType,
-          efficacy_score: efficacyScore,
-          notes: notes,
-          condition: {
-            id: newCondition.id,
-            name: newCondition.name
-          }
-        };
-        
-        setExistingRelations(prev => [...prev, newRelation]);
+      toast({
+        title: "Sucesso",
+        description: "Condição associada com sucesso ao nutracêutico",
+      });
+      
+      // Resetar campos
+      setSelectedCondition(null);
+      setRelationshipType('support');
+      setEfficacyScore(3);
+      setNotes('');
+      
+      if (onSuccess) {
+        onSuccess();
       }
       
-      // Resetar o formulário
-      setSelectedConditionId("");
-      setEfficacyScore(3);
-      setNotes("");
-      
-      toast({
-        title: "Sucesso",
-        description: "Condição associada com sucesso",
-      });
     } catch (error) {
+      console.error('Erro ao associar condição:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível associar a condição",
-        variant: "destructive",
+        description: "Não foi possível associar a condição ao nutracêutico",
+        variant: "destructive"
       });
-      console.error(error);
     } finally {
-      setIsAdding(false);
+      setIsAssociating(false);
     }
-  };
-  
-  // Função para remover associação
-  const handleRemoveAssociation = async (relationId: string) => {
-    try {
-      await NutraceuticalsService.removeConditionRelation(relationId);
-      
-      // Atualizar a lista local
-      setExistingRelations(prev => prev.filter(rel => rel.id !== relationId));
-      
-      toast({
-        title: "Sucesso",
-        description: "Relação removida com sucesso",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover a relação",
-        variant: "destructive",
-      });
-      console.error(error);
-    }
-  };
-  
-  const getEfficiencyColor = (score: number) => {
-    if (score >= 4) return "bg-green-100 text-green-800 border-green-200";
-    if (score >= 2.5) return "bg-amber-100 text-amber-800 border-amber-200";
-    return "bg-red-100 text-red-800 border-red-200";
-  };
-  
-  const getRelationshipTypeLabel = (type: string) => {
-    const relation = relationshipTypes.find(r => r.id === type);
-    return relation ? relation.label : type;
-  };
-  
-  // Filtrar relações por tipo
-  const getFilteredRelations = () => {
-    if (activeFilter === "all") return existingRelations;
-    return existingRelations.filter(rel => rel.relationship_type === activeFilter);
   };
   
   return (
-    <div className="space-y-6">
-      <div className="rounded-md border p-4 bg-slate-50">
-        <h4 className="font-semibold mb-4">Adicionar nova condição de saúde</h4>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <Label htmlFor="condition">Condição de Saúde</Label>
-            <Select 
-              value={selectedConditionId} 
-              onValueChange={setSelectedConditionId}
-              disabled={availableConditions.length === 0 || isAdding}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione uma condição" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableConditions.length === 0 ? (
-                  <SelectItem value="empty_placeholder" disabled>
-                    Todas as condições já foram associadas
-                  </SelectItem>
-                ) : (
-                  availableConditions.map((condition) => (
-                    <SelectItem key={condition.id} value={condition.id}>
-                      {condition.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="relationship">Tipo de Relação</Label>
-            <Select 
-              value={selectedRelationType} 
-              onValueChange={setSelectedRelationType}
-              disabled={isAdding}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {relationshipTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="md:col-span-2">
-            <div className="flex justify-between">
-              <Label htmlFor="efficacy">Eficácia (1-5): {efficacyScore}</Label>
-            </div>
-            <Slider
-              id="efficacy"
-              min={1}
-              max={5}
-              step={0.5}
-              value={[efficacyScore]}
-              onValueChange={(values) => setEfficacyScore(values[0])}
-              disabled={isAdding}
-              className="py-4"
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <Label htmlFor="notes">Notas ou Observações</Label>
-            <Textarea
-              id="notes"
-              placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              disabled={isAdding}
-              className="mt-1"
-            />
-          </div>
-          
-          <div className="md:col-span-2 flex justify-end">
-            <Button 
-              onClick={handleAssociateCondition} 
-              disabled={!selectedConditionId || isAdding}
-            >
-              {isAdding ? (
-                <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Adicionando...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Relação
-                </>
-              )}
-            </Button>
-          </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Pesquisar condições..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          disabled // Será implementado na próxima versão
+        >
+          <Plus className="h-4 w-4 mr-1" /> Nova Condição
+        </Button>
       </div>
       
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h4 className="font-semibold">Condições Associadas</h4>
-          
-          <div className="flex gap-1">
-            <Button 
-              variant={activeFilter === "all" ? "secondary" : "outline"} 
-              size="sm"
-              onClick={() => setActiveFilter("all")}
-            >
-              Todas
-            </Button>
-            {relationshipTypes.map((type) => (
-              <Button
-                key={type.id}
-                variant={activeFilter === type.id ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => setActiveFilter(type.id)}
-              >
-                {type.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto p-1">
         {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+          <div className="col-span-2 flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
-        ) : existingRelations.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border rounded-md">
-            Este nutracêutico não possui relações com condições de saúde
+        ) : filteredConditions.length === 0 ? (
+          <div className="col-span-2 text-center py-8 text-gray-500">
+            Nenhuma condição de saúde encontrada.
           </div>
         ) : (
-          <div className="space-y-2">
-            {getFilteredRelations().map((relation) => (
-              <div 
-                key={relation.id}
-                className="flex flex-col gap-2 p-3 border rounded-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{relation.condition.name}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleRemoveAssociation(relation.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Badge variant="outline">
-                    {getRelationshipTypeLabel(relation.relationship_type)}
-                  </Badge>
-                  <Badge 
-                    variant="outline" 
-                    className={getEfficiencyColor(relation.efficacy_score)}
-                  >
-                    Eficácia: {relation.efficacy_score}
-                  </Badge>
-                </div>
-                
-                {relation.notes && (
-                  <div className="mt-1 text-sm text-muted-foreground border-t pt-2">
-                    <p className="font-medium text-xs mb-1">Notas:</p>
-                    <p>{relation.notes}</p>
+          filteredConditions.map(condition => (
+            <Card 
+              key={condition.id} 
+              className={`p-3 cursor-pointer transition-colors ${
+                selectedCondition?.id === condition.id ? 'bg-blue-50 border-blue-300' : ''
+              }`}
+              onClick={() => setSelectedCondition(condition)}
+            >
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">{condition.name}</h4>
+                {condition.description && (
+                  <div className="text-xs text-gray-500 line-clamp-2">
+                    {condition.description}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+            </Card>
+          ))
         )}
       </div>
+      
+      {selectedCondition && (
+        <div className="border rounded-md p-3 mt-4">
+          <h4 className="font-medium">Associar condição ao nutracêutico</h4>
+          <p className="text-sm text-gray-500 mb-3">
+            Defina como este nutracêutico se relaciona com a condição {selectedCondition?.name}.
+          </p>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium">Tipo de relação</label>
+              <Select 
+                value={relationshipType}
+                onValueChange={(value) => setRelationshipType(value as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo de relação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prevention">Prevenção</SelectItem>
+                  <SelectItem value="treatment">Tratamento</SelectItem>
+                  <SelectItem value="support">Suporte</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium">Eficácia</label>
+                <span className="text-sm">{efficacyScore.toFixed(1)}</span>
+              </div>
+              <Slider
+                defaultValue={[3]}
+                min={1}
+                max={5}
+                step={0.1}
+                value={[efficacyScore]}
+                onValueChange={(vals) => setEfficacyScore(vals[0])}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Baixa</span>
+                <span>Alta</span>
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium">Notas (opcional)</label>
+              <Input
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Observações sobre a relação"
+              />
+            </div>
+            
+            <Button 
+              onClick={handleAssociateCondition} 
+              className="w-full"
+              disabled={isAssociating}
+            >
+              {isAssociating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Associar Condição
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

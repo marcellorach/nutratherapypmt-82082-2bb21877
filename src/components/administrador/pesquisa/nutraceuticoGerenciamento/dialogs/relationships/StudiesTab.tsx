@@ -9,31 +9,32 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Loader2, Search, ExternalLink, Download, Plus } from 'lucide-react';
 import AddScientificStudyDialog from '../AddScientificStudyDialog';
-import { ScientificStudiesService } from '@/services/scientific-studies-service';
 
 interface StudiesTabProps {
   nutraceutical: any;
   studies: any[];
   isLoading: boolean;
+  onSuccess?: () => void;
 }
 
 const StudiesTab: React.FC<StudiesTabProps> = ({
   nutraceutical,
   studies: allStudies,
-  isLoading: isLoadingProp
+  isLoading: isLoadingProp,
+  onSuccess
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudy, setSelectedStudy] = useState<any | null>(null);
   const [relevanceScore, setRelevanceScore] = useState<number>(4);
   const [isAssociating, setIsAssociating] = useState(false);
-  const { associateStudyToNutraceutical } = useStudies();
+  const { associateStudyToNutraceutical, getStudyFileUrl } = useStudies();
   const { toast } = useToast();
   const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState(false);
   const [studiesRefreshKey, setStudiesRefreshKey] = useState(0);
   
   // Filtrar estudos por termo de pesquisa
   const filteredStudies = allStudies.filter(study => 
-    study.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    study.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (study.journal && study.journal.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
@@ -50,6 +51,11 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
     
     try {
       setIsAssociating(true);
+      console.log('Associando estudo ao nutracêutico:', {
+        studyId: selectedStudy.id,
+        nutraceuticalId: nutraceutical.id,
+        relevanceScore
+      });
       
       await associateStudyToNutraceutical(
         selectedStudy.id,
@@ -57,14 +63,25 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
         relevanceScore
       );
       
+      toast({
+        title: "Sucesso",
+        description: "Estudo associado com sucesso ao nutracêutico",
+      });
+      
       setSelectedStudy(null);
       setRelevanceScore(4);
       
-      // Forçar atualização dos estudos do nutracêutico
-      setStudiesRefreshKey(prev => prev + 1);
+      if (onSuccess) {
+        onSuccess();
+      }
       
     } catch (error) {
       console.error('Erro ao associar estudo:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível associar o estudo ao nutracêutico",
+        variant: "destructive"
+      });
     } finally {
       setIsAssociating(false);
     }
@@ -73,14 +90,11 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   // Handler para quando um novo estudo é criado
   const handleStudyCreated = () => {
     setIsAddStudyDialogOpen(false);
+    // Recarregar estudos
     setStudiesRefreshKey(prev => prev + 1);
-  };
-  
-  // Função para obter URL do arquivo
-  const getFileUrl = (study: any): string | null => {
-    if (!study || !study.file_path) return null;
-    
-    return study.fileUrl || ScientificStudiesService.getPublicFileUrl(study.file_path);
+    if (onSuccess) {
+      onSuccess();
+    }
   };
   
   return (
@@ -151,7 +165,7 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
                   
                   {study.file_path && (
                     <a 
-                      href={getFileUrl(study)} 
+                      href={getStudyFileUrl(study.file_path)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}

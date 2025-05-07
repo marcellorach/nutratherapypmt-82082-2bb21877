@@ -27,67 +27,65 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   onOpenChange,
   nutraceutical,
   onSuccess,
-  initialTab = 'conditions'
+  initialTab = 'studies'
 }) => {
   const [activeTab, setActiveTab] = useState<'conditions' | 'studies'>(initialTab);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
-  const { 
-    conditions,
-    isLoading: conditionsLoading,
-    fetchConditions 
-  } = useConditions();
+  // Carregar dados necessários
+  const { conditions, fetchConditions, isLoading: isLoadingConditions } = useConditions();
+  const { studies, fetchStudies, isLoading: isLoadingStudies } = useStudies();
   
-  const { 
-    studies,
-    isLoading: studiesLoading,
-    fetchStudies
-  } = useStudies();
-  
-  // Carregar dados necessários quando o diálogo abrir
+  // Carregar dados quando o diálogo é aberto
   useEffect(() => {
     if (open) {
-      console.log('Diálogo aberto, carregando dados...');
+      console.log('Carregando dados para o diálogo de relações');
       fetchConditions();
       fetchStudies();
     }
-  }, [open, fetchConditions, fetchStudies]);
+  }, [open]);
   
-  const handleClose = () => {
-    onOpenChange(false);
-    
+  // Handler para quando uma operação é concluída com sucesso
+  const handleSuccess = () => {
     if (onSuccess) {
+      console.log('Relações atualizadas com sucesso, chamando callback de sucesso');
       onSuccess();
     }
   };
   
-  // Corrigir o problema de tipo no onValueChange
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as 'conditions' | 'studies');
-  };
-  
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isLoading) {
+        onOpenChange(isOpen);
+      }
+    }}>
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Gerenciar Relações - {nutraceutical?.name}</DialogTitle>
+          <DialogTitle>
+            Gerenciar Relações para: {nutraceutical?.name}
+          </DialogTitle>
           <DialogDescription>
-            Associe condições de saúde e estudos científicos a este nutracêutico.
+            Associar condições de saúde e estudos científicos a este nutracêutico
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-2">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="conditions">Condições de Saúde</TabsTrigger>
-            <TabsTrigger value="studies">Estudos Científicos</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'conditions' | 'studies')}>
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="conditions">
+              Condições de Saúde
+            </TabsTrigger>
+            <TabsTrigger value="studies">
+              Estudos Científicos
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="conditions">
             <ConditionsTab 
               nutraceutical={nutraceutical}
               conditions={conditions}
-              isLoading={conditionsLoading}
+              isLoading={isLoadingConditions}
+              onSuccess={handleSuccess}
             />
           </TabsContent>
           
@@ -95,7 +93,8 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
             <StudiesTab 
               nutraceutical={nutraceutical}
               studies={studies}
-              isLoading={studiesLoading}
+              isLoading={isLoadingStudies}
+              onSuccess={handleSuccess}
             />
           </TabsContent>
         </Tabs>
@@ -103,7 +102,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
         <DialogFooter>
           <Button 
             variant="outline" 
-            onClick={handleClose}
+            onClick={() => onOpenChange(false)}
           >
             Fechar
           </Button>

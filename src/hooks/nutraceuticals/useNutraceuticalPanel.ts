@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNutraceuticals } from "./useNutraceuticals";
@@ -259,11 +258,23 @@ export const useNutraceuticalPanel = () => {
     
     setIsSaving(true);
     try {
-      const contraindications = formData.contraindications
-        .split("\n")
-        .filter(line => line.trim() !== "");
-
+      console.log('Iniciando atualização do nutracêutico:', selectedNutraceutical.id);
+      console.log('Dados do formulário:', formData);
+      
+      // Garantir que contraindications seja sempre um array
+      let contraindications = [];
+      if (formData.contraindications) {
+        if (typeof formData.contraindications === 'string') {
+          contraindications = formData.contraindications
+            .split("\n")
+            .filter(line => line.trim() !== "");
+        } else if (Array.isArray(formData.contraindications)) {
+          contraindications = formData.contraindications;
+        }
+      }
+      
       // 1. Atualizar o nutracêutico básico
+      console.log('1. Atualizando dados básicos do nutracêutico');
       await updateNutraceutical(selectedNutraceutical.id, {
         name: formData.name,
         description: formData.description,
@@ -271,11 +282,12 @@ export const useNutraceuticalPanel = () => {
         source: formData.source,
         chemical_compound: formData.chemical_compound,
         contraindications,
-        outcome_id: formData.outcome_id === "no_outcome" ? null : formData.outcome_id
+        outcome_id: formData.outcome_id === "no_outcome" ? null : formData.outcome_id || null
       });
 
       // 2. Atualizar metadados científicos
       try {
+        console.log('2. Atualizando metadados científicos');
         const metadataService = await import('@/services/nutraceuticals/metadata-service');
         await metadataService.NutraceuticalMetadataService.updateScientificMetadata(
           selectedNutraceutical.id, 
@@ -284,6 +296,7 @@ export const useNutraceuticalPanel = () => {
           
         // Adicionar notas se houver
         if (formData.notes) {
+          console.log('3. Atualizando notas do nutracêutico');
           const relationsService = await import('@/services/nutraceuticals/relations-service');
           await relationsService.NutraceuticalRelationsService.updateOutcomeRelation(
             selectedNutraceutical.id,
@@ -292,6 +305,7 @@ export const useNutraceuticalPanel = () => {
         }
         
         // 3. Atualizar estudos relacionados
+        console.log('4. Atualizando estudos relacionados');
         const relationsService = await import('@/services/nutraceuticals/relations-service');
         
         // Primeiro, obter as relações de estudos existentes
@@ -299,10 +313,14 @@ export const useNutraceuticalPanel = () => {
           selectedNutraceutical.id
         );
         
+        console.log('Relações existentes:', existingStudyRelations);
+        console.log('Estudos selecionados:', selectedStudies);
+        
         // Remover relações que não estão mais presentes
         if (existingStudyRelations && existingStudyRelations.length > 0) {
           for (const relation of existingStudyRelations) {
             if (!selectedStudies.includes(relation.study_id)) {
+              console.log('Removendo relação com estudo:', relation.study_id);
               await relationsService.NutraceuticalRelationsService.removeStudyRelation(relation.id);
             }
           }
@@ -312,6 +330,7 @@ export const useNutraceuticalPanel = () => {
         const existingStudyIds = existingStudyRelations?.map((rel: any) => rel.study_id) || [];
         for (const studyId of selectedStudies) {
           if (!existingStudyIds.includes(studyId)) {
+            console.log('Adicionando nova relação com estudo:', studyId);
             await relationsService.NutraceuticalRelationsService.relateToStudy(
               selectedNutraceutical.id,
               studyId,
@@ -320,30 +339,35 @@ export const useNutraceuticalPanel = () => {
           }
         }
         
-        // 4. Processar relações adicionais - similar ao método de criação
-        for (const relation of relations) {
-          if (relation.outcome_id) {
-            await relationsService.NutraceuticalRelationsService.relateToOutcome(
-              selectedNutraceutical.id,
-              relation.outcome_id,
-              'support',
-              relation.efficacy_score,
-              relation.notes
-            );
-            
-            if (relation.study_id) {
-              await relationsService.NutraceuticalRelationsService.relateToStudy(
+        // 4. Processar relações adicionais
+        if (relations && relations.length > 0) {
+          console.log('5. Processando relações adicionais:', relations.length);
+          for (const relation of relations) {
+            if (relation.outcome_id) {
+              await relationsService.NutraceuticalRelationsService.relateToOutcome(
                 selectedNutraceutical.id,
-                relation.study_id,
-                relation.efficacy_score
+                relation.outcome_id,
+                'support',
+                relation.efficacy_score,
+                relation.notes
               );
+              
+              if (relation.study_id) {
+                await relationsService.NutraceuticalRelationsService.relateToStudy(
+                  selectedNutraceutical.id,
+                  relation.study_id,
+                  relation.efficacy_score
+                );
+              }
             }
           }
         }
       } catch (error) {
         console.error("Erro ao atualizar metadados científicos:", error);
+        throw error; // Re-lançar erro para tratamento no bloco catch principal
       }
 
+      console.log('Atualização do nutracêutico concluída com sucesso');
       toast({
         title: "Sucesso",
         description: "Nutracêutico atualizado com sucesso",
@@ -356,7 +380,7 @@ export const useNutraceuticalPanel = () => {
       console.error("Erro ao atualizar nutracêutico:", err);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o nutracêutico",
+        description: "Não foi possível atualizar o nutracêutico. Verifique os dados informados.",
         variant: "destructive",
       });
     } finally {
