@@ -11,9 +11,7 @@ export const NutraceuticalQueryService = {
    */
   async getById(id: string) {
     try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceuticals')
         .select(`
           *,
@@ -39,9 +37,7 @@ export const NutraceuticalQueryService = {
    */
   async getAll() {
     try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceuticals')
         .select(`
           *,
@@ -68,24 +64,23 @@ export const NutraceuticalQueryService = {
     try {
       console.log('Buscando todos os nutracêuticos com relacionamentos');
       
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceuticals')
         .select(`
           *,
+          outcome:nutraceutical_outcomes(id, name, description),
           scientific_metadata:nutraceutical_scientific_metadata(*),
-          nutraceutical_conditions!nutraceutical_conditions(
+          nutraceutical_conditions(
             id,
             relationship_type,
             efficacy_score,
             notes,
-            condition:condition_id(id, name, description)
+            condition:health_conditions(id, name, description)
           ),
-          nutraceutical_studies!nutraceutical_studies(
+          nutraceutical_studies(
             id,
             relevance_score,
-            study:study_id(id, title, journal)
+            study:scientific_studies(id, title, journal)
           )
         `)
         .order('name');
@@ -109,9 +104,7 @@ export const NutraceuticalQueryService = {
    */
   async getOutcomeRelations(nutraceuticalId: string) {
     try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceutical_conditions')
         .select(`
           *,
@@ -135,9 +128,7 @@ export const NutraceuticalQueryService = {
    */
   async getStudyRelations(nutraceuticalId: string) {
     try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceutical_studies')
         .select(`
           *,

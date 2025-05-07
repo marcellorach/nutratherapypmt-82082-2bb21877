@@ -20,6 +20,8 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import ManageRelationshipsDialog from '../nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 import NutraceuticalExpandableRow from './NutraceuticalExpandableRow';
 
@@ -122,15 +124,22 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
             <Skeleton className="h-10 w-full" />
           </div>
         ) : error ? (
-          <div className="text-center py-6 text-red-500">
-            <p>{error}</p>
-            <Button 
-              variant="outline" 
-              onClick={refreshData}
-              className="mt-2"
-            >
-              Tentar novamente
-            </Button>
+          <div className="py-6">
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              <AlertTitle>Erro ao carregar os dados</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <div className="text-center">
+              <Button 
+                variant="default" 
+                onClick={refreshData}
+                className="mt-2"
+              >
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Tentar novamente
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="rounded-md border">

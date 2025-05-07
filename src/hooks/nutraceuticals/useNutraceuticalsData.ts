@@ -10,28 +10,32 @@ export const useNutraceuticalsData = () => {
   const [dbNutraceuticals, setDbNutraceuticals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Carregar nutracêuticos do banco de dados com suas relações
   const loadNutraceuticals = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
-      console.log('Iniciando carregamento de nutracêuticos com relações...');
+      console.log('Iniciando carregamento de nutracêuticos...');
+      
       const { data, error } = await supabase
         .from('nutraceuticals')
         .select(`
           *,
-          outcome:outcome_id(*),
+          outcome_id,
           nutraceutical_benefits(id, benefit),
-          nutraceutical_scientific_metadata(*),
-          nutraceutical_conditions!nutraceutical_conditions(
+          scientific_metadata:nutraceutical_scientific_metadata(*),
+          nutraceutical_conditions(
             id, 
             relationship_type,
             efficacy_score,
             notes,
             condition:health_conditions(*)
           ),
-          nutraceutical_studies!nutraceutical_studies(
+          nutraceutical_studies(
             id,
             relevance_score,
             study:scientific_studies(*)
@@ -62,6 +66,8 @@ export const useNutraceuticalsData = () => {
       setDbNutraceuticals(enhancedData);
     } catch (err: any) {
       console.error('Erro ao carregar nutracêuticos:', err);
+      setError(err.message || 'Não foi possível carregar os dados dos nutracêuticos');
+      
       toast({
         title: "Erro ao carregar dados",
         description: err.message || "Não foi possível carregar os nutracêuticos.",
@@ -112,6 +118,7 @@ export const useNutraceuticalsData = () => {
     nutraceuticals: allNutraceuticals,
     isLoading,
     isRefreshing,
+    error,
     handleRefreshData
   };
 };
