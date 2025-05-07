@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Zap, Check, Database, Cpu } from "lucide-react";
+import { Bot, Zap, Check, Database, Cpu, Award } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface ConfigurationGroupProps {
@@ -22,6 +22,16 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         >
           <Database className={currentStep === "knowledge-base-settings" ? "text-primary" : ""} />
           <span>Base de Conhecimento</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "outcomes-management"} 
+          onClick={() => handleStepClick("outcomes-management")}
+          className={currentStep === "outcomes-management" ? "bg-primary/10 text-primary" : ""}
+        >
+          <Award className={currentStep === "outcomes-management" ? "text-primary" : ""} />
+          <span>Gerenciar Outcomes</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>

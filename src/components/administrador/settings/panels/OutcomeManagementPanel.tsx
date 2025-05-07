@@ -6,7 +6,7 @@ import { useOutcomes } from "@/hooks/nutraceuticals/useOutcomes";
 import SearchBar from "./nutraceuticalManagement/SearchBar";
 import OutcomeTable from "./outcomeManagement/OutcomeTable";
 import OutcomeFormDialog from "./outcomeManagement/OutcomeFormDialog";
-import OutcomeDeleteDialog from "./outcomeManagement/DeleteDialog";
+import OutcomeDeleteDialog from "./outcomeManagement/OutcomeDeleteDialog";
 
 const OutcomeManagementPanel: React.FC = () => {
   const { toast } = useToast();
@@ -76,6 +76,7 @@ const OutcomeManagementPanel: React.FC = () => {
       resetFormData();
       fetchOutcomes();
     } catch (err) {
+      console.error("Erro ao criar outcome:", err);
       toast({
         title: "Erro",
         description: "Não foi possível criar o outcome",
@@ -102,6 +103,7 @@ const OutcomeManagementPanel: React.FC = () => {
       setIsEditDialogOpen(false);
       fetchOutcomes();
     } catch (err) {
+      console.error("Erro ao atualizar outcome:", err);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o outcome",
@@ -125,6 +127,7 @@ const OutcomeManagementPanel: React.FC = () => {
       setIsDeleteDialogOpen(false);
       fetchOutcomes();
     } catch (err) {
+      console.error("Erro ao excluir outcome:", err);
       toast({
         title: "Erro",
         description: "Não foi possível excluir o outcome",
