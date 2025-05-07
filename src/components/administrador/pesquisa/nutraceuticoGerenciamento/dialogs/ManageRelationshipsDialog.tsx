@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import ConditionsTab from './relationships/ConditionsTab';
+import OutcomesTab from './relationships/OutcomesTab';
 import StudiesTab from './relationships/StudiesTab';
 import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
@@ -15,12 +15,12 @@ interface ManageRelationshipsDialogProps {
   onOpenChange: (open: boolean) => void;
   nutraceutical: any;
   onSuccess?: () => void;
-  initialTab?: 'conditions' | 'studies';
+  initialTab?: 'outcomes' | 'studies';
 }
 
 /**
  * Diálogo para gerenciar as relações de um nutracêutico com
- * condições de saúde e estudos científicos
+ * outcomes e estudos científicos
  */
 const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   open,
@@ -29,7 +29,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   onSuccess,
   initialTab = 'studies'
 }) => {
-  const [activeTab, setActiveTab] = useState<'conditions' | 'studies'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'outcomes' | 'studies'>(initialTab);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
@@ -66,22 +66,22 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
             Gerenciar Relações para: {nutraceutical?.name}
           </DialogTitle>
           <DialogDescription>
-            Associar condições de saúde e estudos científicos a este nutracêutico
+            Associar outcomes e estudos científicos a este nutracêutico
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'conditions' | 'studies')}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'outcomes' | 'studies')}>
           <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="conditions">
-              Condições de Saúde
+            <TabsTrigger value="outcomes">
+              Outcomes
             </TabsTrigger>
             <TabsTrigger value="studies">
               Estudos Científicos
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="conditions">
-            <ConditionsTab 
+          <TabsContent value="outcomes">
+            <OutcomesTab 
               nutraceutical={nutraceutical}
               conditions={conditions}
               isLoading={isLoadingConditions}

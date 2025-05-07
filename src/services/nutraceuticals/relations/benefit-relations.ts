@@ -13,9 +13,7 @@ export const BenefitRelationsService = {
     try {
       console.log('Adicionando benefício ao nutracêutico:', { nutraceuticalId, benefit });
       
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceutical_benefits')
         .insert({
           nutraceutical_id: nutraceuticalId,
@@ -43,9 +41,7 @@ export const BenefitRelationsService = {
     try {
       console.log('Obtendo benefícios para o nutracêutico:', nutraceuticalId);
       
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceutical_benefits')
         .select('*')
         .eq('nutraceutical_id', nutraceuticalId);
@@ -70,9 +66,7 @@ export const BenefitRelationsService = {
     try {
       console.log('Removendo benefício:', { benefitId });
       
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('nutraceutical_benefits')
         .delete()
         .eq('id', benefitId)

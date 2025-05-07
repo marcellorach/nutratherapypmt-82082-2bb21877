@@ -81,6 +81,12 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
     
     setIsSaving(true);
     try {
+      console.log('Adicionando estudo:', { 
+        nutraceuticalId: nutraceutical.id, 
+        studyId: selectedStudyId, 
+        relevanceScore 
+      });
+      
       await NutraceuticalRelationsService.relateToStudy(
         nutraceutical.id,
         selectedStudyId,

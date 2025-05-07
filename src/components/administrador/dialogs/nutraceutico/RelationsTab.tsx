@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,10 +19,10 @@ interface RelationsTabProps {
 }
 
 export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState('conditions');
+  const [activeTab, setActiveTab] = useState('outcomes');
   const { toast } = useToast();
   
-  // Condições de saúde
+  // Outcomes (antigas condições de saúde)
   const [selectedCondition, setSelectedCondition] = useState<string>('');
   const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('prevention');
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
@@ -49,17 +50,17 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
     }
   }, [nutraceutical?.id]);
   
-  // Carrega as condições de saúde relacionadas ao nutracêutico
+  // Carrega os outcomes relacionados ao nutracêutico
   const loadHealthConditions = async () => {
     try {
       setConditionsLoading(true);
       const response = await NutraceuticalsService.getConditionRelations(nutraceutical.id);
       setHealthConditions(response || []);
     } catch (error) {
-      console.error("Erro ao carregar condições de saúde:", error);
+      console.error("Erro ao carregar outcomes:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar as condições de saúde",
+        description: "Não foi possível carregar os outcomes",
         variant: "destructive"
       });
     } finally {
@@ -85,12 +86,12 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
     }
   };
   
-  // Adiciona uma nova relação com condição de saúde
+  // Adiciona uma nova relação com outcome
   const handleAddCondition = async () => {
     if (!selectedCondition || selectedCondition === 'none') {
       toast({
         title: "Atenção",
-        description: "Selecione uma condição de saúde",
+        description: "Selecione um outcome",
         variant: "default"
       });
       return;
@@ -112,20 +113,20 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
       setEfficacyScore(3);
       setNotes('');
       
-      // Recarregar condições
+      // Recarregar outcomes
       await loadHealthConditions();
       
       if (onUpdate) onUpdate();
       
       toast({
         title: "Sucesso",
-        description: "Condição de saúde adicionada com sucesso"
+        description: "Outcome adicionado com sucesso"
       });
     } catch (error) {
-      console.error("Erro ao adicionar condição:", error);
+      console.error("Erro ao adicionar outcome:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível adicionar a condição de saúde",
+        description: "Não foi possível adicionar o outcome",
         variant: "destructive"
       });
     } finally {
@@ -133,13 +134,13 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
     }
   };
   
-  // Remove uma relação com condição de saúde
+  // Remove uma relação com outcome
   const handleRemoveCondition = async (relationId: string) => {
     try {
       setConditionsLoading(true);
       await NutraceuticalsService.removeConditionRelation(relationId);
       
-      // Recarregar condições
+      // Recarregar outcomes
       await loadHealthConditions();
       
       if (onUpdate) onUpdate();
@@ -231,13 +232,13 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
     }
   };
   
-  // Helper para obter o nome da condição de saúde
+  // Helper para obter o nome do outcome
   const getConditionName = (conditionId: string) => {
     const condition = conditions.find(c => c.id === conditionId);
-    return condition ? condition.name : 'Condição desconhecida';
+    return condition ? condition.name : 'Outcome desconhecido';
   };
   
-  // Organiza as condições de saúde por tipo de relação
+  // Organiza os outcomes por tipo de relação
   const filterRelationsByType = (type: string | null = null) => {
     if (!type) return healthConditions;
     return healthConditions.filter(relation => relation.relationship_type === type);
@@ -247,28 +248,28 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
         <TabsList className="grid grid-cols-2 mb-4">
-          <TabsTrigger value="conditions">Condições de Saúde</TabsTrigger>
+          <TabsTrigger value="outcomes">Outcomes</TabsTrigger>
           <TabsTrigger value="studies">Estudos Científicos</TabsTrigger>
         </TabsList>
         
-        {/* Tab de Condições de Saúde */}
-        <TabsContent value="conditions" className="space-y-4 pt-2">
+        {/* Tab de Outcomes */}
+        <TabsContent value="outcomes" className="space-y-4 pt-2">
           <div className="bg-slate-50 border rounded-md p-4">
-            <h3 className="text-lg font-medium mb-4">Adicionar nova relação</h3>
+            <h3 className="text-lg font-medium mb-4">Adicionar novo outcome</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Condição de Saúde</label>
+                <label className="block text-sm font-medium mb-1">Outcome</label>
                 <Select 
                   value={selectedCondition} 
                   onValueChange={setSelectedCondition}
                   disabled={isLoadingConditions}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma condição" />
+                    <SelectValue placeholder="Selecione um outcome" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Selecione uma condição</SelectItem>
+                    <SelectItem value="none">Selecione um outcome</SelectItem>
                     {conditions.map(condition => (
                       <SelectItem key={condition.id} value={condition.id}>
                         {condition.name}
@@ -315,7 +316,7 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
+                placeholder="Adicione notas sobre esta relação entre nutracêutico e outcome"
                 className="min-h-[100px]"
               />
             </div>
@@ -326,13 +327,13 @@ export const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpd
               className="w-full"
             >
               {conditionsLoading ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              Adicionar Relação
+              Adicionar Outcome
             </Button>
           </div>
           
           <div className="border rounded-md">
             <div className="p-4 border-b bg-slate-50">
-              <h3 className="font-medium">Relações Existentes</h3>
+              <h3 className="font-medium">Outcomes Existentes</h3>
             </div>
             
             <Tabs defaultValue="all" className="p-4">

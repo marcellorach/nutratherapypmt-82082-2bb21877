@@ -80,6 +80,22 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
     setIsRelationshipsDialogOpen(true);
   };
 
+  // Função para contar estudos relacionados
+  const countRelatedStudies = (nutra: any) => {
+    if (nutra.nutraceutical_studies && Array.isArray(nutra.nutraceutical_studies)) {
+      return nutra.nutraceutical_studies.length;
+    }
+    return 0;
+  };
+
+  // Função para contar outcomes relacionados
+  const countRelatedOutcomes = (nutra: any) => {
+    if (nutra.nutraceutical_health_conditions && Array.isArray(nutra.nutraceutical_health_conditions)) {
+      return nutra.nutraceutical_health_conditions.length;
+    }
+    return 0;
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -148,7 +164,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Outcome</TableHead>
-                  <TableHead>Condições</TableHead>
+                  <TableHead>Outcomes</TableHead>
                   <TableHead>Estudos</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
@@ -174,10 +190,14 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                         )}
                       </TableCell>
                       <TableCell>
-                        {nutra.nutraceutical_health_conditions?.length || 0}
+                        <Badge variant="outline" className="bg-blue-50">
+                          {countRelatedOutcomes(nutra)}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        {nutra.nutraceutical_studies?.length || 0}
+                        <Badge variant="outline" className="bg-green-50">
+                          {countRelatedStudies(nutra)}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
@@ -195,7 +215,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                             variant="ghost" 
                             className="h-8 w-8"
                             onClick={() => handleManageRelationships(nutra)}
-                            title="Gerenciar estudos e condições"
+                            title="Gerenciar estudos e outcomes"
                           >
                             <BookOpen className="h-4 w-4" />
                           </Button>
@@ -224,7 +244,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
         </div>
       </CardFooter>
 
-      {/* Diálogo para gerenciar relações (estudos e condições) */}
+      {/* Diálogo para gerenciar relações (estudos e outcomes) */}
       {selectedNutraceutical && (
         <ManageRelationshipsDialog
           open={isRelationshipsDialogOpen}
