@@ -1,71 +1,145 @@
+
 import { SankeyData } from '../sankey/types';
 
+/**
+ * Prepara os dados para visualização em rede
+ */
 export const prepareNetworkData = (sankeyData: SankeyData) => {
-  const nodes = sankeyData.nodes.map((node, index) => ({
-    id: index,
+  const { nodes, links } = sankeyData;
+  
+  if (!nodes || !links || nodes.length === 0) {
+    return { nodes: [], links: [] };
+  }
+  
+  // Preparar nós para visualização em rede
+  const networkNodes = nodes.map(node => ({
+    id: node.name,
     label: node.name,
-    title: node.description,
     group: node.category,
-    value: node.category === 'nutraceutico' ? 15 : 10,
-    shape: node.category === 'nutraceutico' ? 'dot' : 'diamond',
-    color: {
-      background: node.category === 'nutraceutico' ? '#3b82f6' : 
-               node.category === 'condicao' ? '#10b981' : '#f59e0b',
-      border: node.category === 'nutraceutico' ? '#2563eb' : 
-              node.category === 'condicao' ? '#059669' : '#d97706',
-      highlight: {
-        background: node.category === 'nutraceutico' ? '#60a5fa' : 
-                 node.category === 'condicao' ? '#34d399' : '#fbbf24',
-        border: node.category === 'nutraceutico' ? '#3b82f6' : 
-                node.category === 'condicao' ? '#10b981' : '#f59e0b'
-      }
+    type: node.category,
+    title: node.description || node.name,
+    color: node.color,
+    value: 1, // Tamanho base do nó
+    metadata: node.metadata || {}
+  }));
+  
+  // Contar quantas conexões cada nó tem
+  const nodeConnections = new Map();
+  links.forEach(link => {
+    const sourceName = nodes[link.source]?.name || '';
+    const targetName = nodes[link.target]?.name || '';
+    
+    if (sourceName && targetName) {
+      nodeConnections.set(sourceName, (nodeConnections.get(sourceName) || 0) + 1);
+      nodeConnections.set(targetName, (nodeConnections.get(targetName) || 0) + 1);
     }
-  }));
-
-  const edges = sankeyData.links.map(link => ({
-    from: link.source,
-    to: link.target,
-    title: link.labelText ? `${link.labelText} (${link.value / 20}/5)` : `Eficácia: ${link.value / 20}/5`,
-    value: link.value / 20, // Adaptar a escala
-    width: (link.value / 100) * 5,
-    label: (link.value / 20).toString(),
-    color: link.value >= 80 ? '#10b981' : 
-         link.value >= 60 ? '#3b82f6' : 
-         link.value >= 40 ? '#f59e0b' : '#9ca3af'
-  }));
-
-  return { nodes, edges };
+  });
+  
+  // Ajustar tamanho do nó com base no número de conexões
+  networkNodes.forEach(node => {
+    const connections = nodeConnections.get(node.id) || 0;
+    // Valor mínimo de 1, aumentando com o número de conexões
+    node.value = Math.max(1, Math.min(5, 1 + connections / 5));
+  });
+  
+  // Preparar links para visualização em rede
+  const networkLinks = links.map(link => {
+    const sourceName = nodes[link.source]?.name || '';
+    const targetName = nodes[link.target]?.name || '';
+    
+    // Determinar largura da linha com base no valor
+    const width = Math.max(1, Math.min(5, link.value / 20));
+    
+    return {
+      from: sourceName,
+      to: targetName,
+      value: link.value / 10, // Ajustar para escala apropriada
+      title: link.description || `${sourceName} → ${targetName}`,
+      color: link.color || undefined,
+      width: width,
+      arrows: {
+        to: {
+          enabled: true,
+          scaleFactor: 0.5
+        }
+      },
+      dashes: link.relationshipType === 'study'
+    };
+  });
+  
+  // Filtrar quaisquer links inválidos
+  const validNetworkLinks = networkLinks.filter(
+    link => Boolean(link.from) && Boolean(link.to)
+  );
+  
+  return {
+    nodes: networkNodes,
+    links: validNetworkLinks
+  };
 };
 
+/**
+ * Prepara os dados para visualização em matriz
+ */
 export const prepareMatrixData = (sankeyData: SankeyData) => {
-  const nutraceuticos = sankeyData.nodes
-    .filter(node => node.category === 'nutraceutico')
-    .map((node, index) => ({
-      id: index,
-      name: node.name,
-      description: node.description,
-      category: 'nutraceutico' as const
-    }));
-
-  const condicoes = sankeyData.nodes
-    .filter(node => node.category === 'condicao')
-    .map((node, index) => ({
-      id: index + nutraceuticos.length,
-      name: node.name,
-      description: node.description,
-      category: 'condicao' as const
-    }));
-
-  const cells = sankeyData.links.map(link => ({
-    nutraceuticoId: link.source,
-    condicaoId: link.target,
-    efficacyScore: link.value / 20, // Converter de volta para escala 0-5
-    evidenceLevel: (link.value / 20).toFixed(1) || '-',
-    studyCount: link.originalRelation?.studyCount || 0,
-    description: link.description,
-    relationshipType: link.relationshipType || 'prevention'
+  const { nodes, links } = sankeyData;
+  
+  if (!nodes || !links || nodes.length === 0) {
+    return { nutraceuticos: [], condicoes: [], cells: [] };
+  }
+  
+  // Separar nós por categoria
+  const nutraceuticoNodes = nodes.filter(node => node.category === 'nutraceutico');
+  const condicaoNodes = nodes.filter(node => node.category === 'condicao');
+  
+  // Preparar listas de nutracêuticos e condições
+  const nutraceuticos = nutraceuticoNodes.map((node, index) => ({
+    id: index,
+    name: node.name,
+    description: node.description || '',
+    originalId: nodes.indexOf(node) // Índice original no array de nós
   }));
-
+  
+  const condicoes = condicaoNodes.map((node, index) => ({
+    id: index,
+    name: node.name,
+    description: node.description || '',
+    originalId: nodes.indexOf(node)
+  }));
+  
+  // Preparar células de matriz
+  const cells = links
+    .filter(link => {
+      const sourceNode = nodes[link.source];
+      const targetNode = nodes[link.target];
+      return sourceNode?.category === 'nutraceutico' && targetNode?.category === 'condicao';
+    })
+    .map(link => {
+      const sourceNode = nodes[link.source];
+      const targetNode = nodes[link.target];
+      
+      // Encontrar índices na nova lista
+      const nutraceuticoIndex = nutraceuticos.findIndex(n => n.originalId === link.source);
+      const condicaoIndex = condicoes.findIndex(c => c.originalId === link.target);
+      
+      if (nutraceuticoIndex === -1 || condicaoIndex === -1) {
+        return null;
+      }
+      
+      const efficacyScore = link.value / 20; // Normalizar o valor
+      
+      return {
+        nutraceuticoId: nutraceuticoIndex,
+        condicaoId: condicaoIndex,
+        efficacyScore: Math.min(5, Math.max(0, efficacyScore)), // Limitar entre 0 e 5
+        relationshipType: link.relationshipType || 'support',
+        evidenceLevel: Math.floor(Math.random() * 5) + 1, // Aleatório para demonstração
+        studyCount: Math.floor(Math.random() * 10) + 1, // Aleatório para demonstração
+        description: link.description || ''
+      };
+    })
+    .filter(Boolean);
+  
   return {
     nutraceuticos,
     condicoes,

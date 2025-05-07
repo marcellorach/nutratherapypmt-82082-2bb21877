@@ -1,42 +1,35 @@
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 
 const VisualizationLegend: React.FC = () => {
   return (
-    <div className="mt-6 border-t pt-4">
-      <h4 className="text-sm font-medium mb-2">Legenda</h4>
-      <div className="flex flex-wrap gap-4 text-xs">
+    <div className="mt-4">
+      <div className="text-sm font-medium mb-2">Legenda</div>
+      <div className="flex flex-wrap gap-3 text-xs">
         <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 mr-1 rounded-sm"></div>
-          <span>Nutracêuticos</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 mr-1 rounded-sm"></div>
-          <span>Condições de Saúde</span>
-        </div>
-        <div className="flex items-center ml-4">
-          <span className="font-medium">Espessura das conexões:</span>
-          <span className="ml-1">Grau de eficácia</span>
-        </div>
-        <div className="flex items-center ml-4">
-          <span className="font-medium">Cores das conexões:</span>
+          <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+          <span>Nutracêutico</span>
         </div>
         <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 opacity-70 mr-1 rounded-sm"></div>
-          <span>Alta eficácia (4-5)</span>
+          <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+          <span>Condição de Saúde</span>
         </div>
         <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 opacity-70 mr-1 rounded-sm"></div>
-          <span>Média eficácia (3-4)</span>
+          <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+          <span>Estudo Científico</span>
         </div>
         <div className="flex items-center">
-          <div className="w-3 h-3 bg-amber-500 opacity-70 mr-1 rounded-sm"></div>
-          <span>Baixa eficácia (2-3)</span>
+          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Alto</Badge>
+          <span className="mx-1">→</span>
+          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Baixo</Badge>
+          <span className="ml-1">Nível de Eficácia</span>
         </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-gray-400 opacity-70 mr-1 rounded-sm"></div>
-          <span>Muito baixa eficácia (0-2)</span>
-        </div>
+      </div>
+      <div className="mt-3 p-3 bg-gray-50 rounded-md text-xs text-gray-600">
+        <p className="font-medium mb-1">Sobre estes dados:</p>
+        <p>Os dados visualizados incluem registros reais e dados de demonstração (prefixados com [DEMO]). Esta visualização permite explorar como os nutracêuticos se relacionam com diferentes condições de saúde em pets e quais estudos científicos suportam essas relações.</p>
+        <p className="mt-1">Para mais detalhes sobre cada relação, interaja diretamente com os elementos da visualização.</p>
       </div>
     </div>
   );

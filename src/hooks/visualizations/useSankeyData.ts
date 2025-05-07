@@ -5,7 +5,7 @@ import { SankeyData, SankeyNode, SankeyLink } from '@/components/administrador/v
 import { toast } from 'sonner';
 
 /**
- * Hook para buscar e formatar dados para o diagrama Sankey
+ * Hook para buscar e formatar dados para visualizações de relação
  */
 export const useSankeyData = () => {
   const [sankeyData, setSankeyData] = useState<SankeyData>({ nodes: [], links: [] });
@@ -16,7 +16,7 @@ export const useSankeyData = () => {
   const CATEGORY_COLORS = {
     nutraceutico: '#3b82f6', // Azul
     condicao: '#10b981',     // Verde
-    outcome: '#f59e0b'       // Amarelo
+    study: '#a855f7'         // Roxo (adicionado para estudos)
   };
   
   useEffect(() => {
@@ -45,6 +45,16 @@ export const useSankeyData = () => {
         if (condError) throw condError;
         console.log(`useSankeyData: ${conditions?.length || 0} condições encontradas`);
         
+        // Buscar estudos científicos (novidade)
+        const { data: studies, error: studiesError } = await supabase
+          .from('scientific_studies')
+          .select('id, title, abstract, journal, year')
+          .order('year', { ascending: false })
+          .limit(50); // Limitar para não sobrecarregar a visualização
+          
+        if (studiesError) throw studiesError;
+        console.log(`useSankeyData: ${studies?.length || 0} estudos científicos encontrados`);
+        
         // Buscar as relações entre nutracêuticos e condições
         const { data: relations, error: relError } = await supabase
           .from('nutraceutical_conditions')
@@ -58,11 +68,25 @@ export const useSankeyData = () => {
           `);
           
         if (relError) throw relError;
-        console.log(`useSankeyData: ${relations?.length || 0} relações encontradas`);
+        console.log(`useSankeyData: ${relations?.length || 0} relações entre nutracêuticos e condições encontradas`);
         
+        // Buscar relações entre nutracêuticos e estudos (novidade)
+        const { data: studyRelations, error: studyRelError } = await supabase
+          .from('nutraceutical_studies')
+          .select(`
+            id,
+            relevance_score,
+            nutraceutical_id,
+            study_id
+          `);
+          
+        if (studyRelError) throw studyRelError;
+        console.log(`useSankeyData: ${studyRelations?.length || 0} relações entre nutracêuticos e estudos encontradas`);
+
         // Criar mapa de IDs para índices
         const nutraMap = new Map();
         const conditionMap = new Map();
+        const studyMap = new Map();
         
         // Nós - Nutracêuticos
         const nutraNodes: SankeyNode[] = nutraceuticals.map((nutra, index) => {
@@ -70,6 +94,7 @@ export const useSankeyData = () => {
           return {
             name: nutra.name,
             category: 'nutraceutico',
+            type: 'nutraceutico',
             description: nutra.description || `Nutracêutico: ${nutra.name}`,
             color: CATEGORY_COLORS.nutraceutico
           };
@@ -82,13 +107,31 @@ export const useSankeyData = () => {
           return {
             name: cond.name,
             category: 'condicao',
+            type: 'condicao',
             description: cond.description || `Condição: ${cond.name}`,
             color: CATEGORY_COLORS.condicao
           };
         });
         
+        // Nós - Estudos (novidade)
+        const studyNodes: SankeyNode[] = studies.map((study, index) => {
+          const nodeIndex = index + nutraNodes.length + conditionNodes.length;
+          studyMap.set(study.id, nodeIndex);
+          return {
+            name: study.title,
+            category: 'study',
+            type: 'study',
+            description: `${study.abstract?.substring(0, 100)}... (${study.year}, ${study.journal})`,
+            color: CATEGORY_COLORS.study,
+            metadata: {
+              year: study.year,
+              journal: study.journal
+            }
+          };
+        });
+        
         // Todos os nós
-        const nodes = [...nutraNodes, ...conditionNodes];
+        const nodes = [...nutraNodes, ...conditionNodes, ...studyNodes];
         
         // Verificar se temos nós suficientes
         if (nodes.length < 2) {
@@ -100,8 +143,8 @@ export const useSankeyData = () => {
         
         console.log(`useSankeyData: Total de ${nodes.length} nós preparados`);
         
-        // Links entre nós
-        const links: SankeyLink[] = relations
+        // Links entre nutracêuticos e condições
+        const conditionLinks: SankeyLink[] = relations
           .filter(rel => 
             nutraMap.has(rel.nutraceutical_id) && 
             conditionMap.has(rel.condition_id)
@@ -182,16 +225,54 @@ export const useSankeyData = () => {
           })
           .filter(Boolean) as SankeyLink[];
           
+        // Links entre nutracêuticos e estudos (novidade)
+        const studyLinks: SankeyLink[] = studyRelations
+          .filter(rel => 
+            nutraMap.has(rel.nutraceutical_id) && 
+            studyMap.has(rel.study_id)
+          )
+          .map(rel => {
+            const sourceIndex = nutraMap.get(rel.nutraceutical_id);
+            const targetIndex = studyMap.get(rel.study_id);
+            
+            // Verificar se os índices são válidos
+            if (sourceIndex === undefined || targetIndex === undefined) {
+              console.warn("useSankeyData: Índice inválido para relação de estudo", rel);
+              return null;
+            }
+            
+            // Determinar cor para estudos
+            const color = 'rgba(168, 85, 247, 0.6)'; // Roxo para estudos
+            
+            // Aumentar o valor para melhor visualização
+            const enhancedValue = Math.max(rel.relevance_score * 15, 8);
+            
+            return {
+              source: sourceIndex,
+              target: targetIndex,
+              value: enhancedValue,
+              color,
+              labelText: 'Estudo relacionado',
+              description: `Relevância: ${rel.relevance_score}/5`,
+              relationshipType: 'study',
+              originalRelation: rel
+            };
+          })
+          .filter(Boolean) as SankeyLink[];
+          
+        // Combinar todos os links
+        const links = [...conditionLinks, ...studyLinks];
+        
         console.log(`useSankeyData: Total de ${links.length} links válidos preparados`);
         
-        // Atualizar os dados para o Sankey
+        // Atualizar os dados para visualizações
         setSankeyData({
           nodes,
           links
         });
         
       } catch (err: any) {
-        console.error('Erro ao buscar dados para o diagrama Sankey:', err);
+        console.error('Erro ao buscar dados para visualizações de relações:', err);
         setError(err.message);
         
         toast.error('Não foi possível carregar os dados para visualização', {

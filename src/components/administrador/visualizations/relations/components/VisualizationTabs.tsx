@@ -54,7 +54,23 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
         {isLoading ? (
           <LoadingState />
         ) : hasNetworkData ? (
-          <NetworkGraph data={networkData} height="550px" />
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm text-gray-500">
+                Visualizando <span className="font-medium text-primary">{networkData.nodes.length}</span> nós e 
+                <span className="font-medium text-primary"> {networkData.links.length}</span> conexões
+              </div>
+              <div className="bg-gray-50 px-3 py-1 rounded-md border text-xs">
+                Os dados incluem <span className="font-semibold">{
+                  networkData.nodes.filter(n => n.type === 'study' || n.category === 'study').length
+                }</span> estudos científicos
+              </div>
+            </div>
+            <NetworkGraph data={networkData} height="550px" />
+            <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
+              Dica: Passe o mouse sobre os nós para ver mais informações. Clique e arraste para ajustar a visualização.
+            </div>
+          </div>
         ) : (
           <NoDataMessage />
         )}
@@ -64,11 +80,22 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
         {isLoading ? (
           <LoadingState />
         ) : matrixData && matrixData.nutraceuticos && matrixData.nutraceuticos.length > 0 ? (
-          <EfficacyMatrix 
-            nutraceuticos={matrixData.nutraceuticos}
-            condicoes={matrixData.condicoes}
-            data={matrixData.cells}
-          />
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm text-gray-500">
+                Matriz com <span className="font-medium text-primary">{matrixData.nutraceuticos.length}</span> nutracêuticos e 
+                <span className="font-medium text-primary"> {matrixData.condicoes.length}</span> condições
+              </div>
+            </div>
+            <EfficacyMatrix 
+              nutraceuticos={matrixData.nutraceuticos}
+              condicoes={matrixData.condicoes}
+              data={matrixData.cells}
+            />
+            <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
+              Dica: Clique nas células para ver detalhes sobre a relação entre o nutracêutico e a condição.
+            </div>
+          </div>
         ) : (
           <NoDataMessage />
         )}
