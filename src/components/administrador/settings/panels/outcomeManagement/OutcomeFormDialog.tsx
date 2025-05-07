@@ -6,6 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,12 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
           <DialogTitle>
             {isCreate ? "Criar Novo Outcome" : "Editar Outcome"}
           </DialogTitle>
+          <DialogDescription>
+            {isCreate 
+              ? "Preencha os campos abaixo para adicionar um novo outcome."
+              : "Edite os campos para atualizar o outcome."
+            }
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit}>

@@ -139,7 +139,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nenhum outcome</SelectItem>
+                  <SelectItem value="no_outcome_selected">Nenhum outcome</SelectItem>
                   {outcomes?.map(outcome => (
                     <SelectItem key={outcome.id} value={outcome.id}>
                       {outcome.name}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNutraceuticals } from "./useNutraceuticals";
@@ -117,7 +118,7 @@ export const useNutraceuticalPanel = () => {
 
   // Handler para adicionar uma relação à lista
   const handleAddRelation = () => {
-    if (!formData.outcome_id || formData.outcome_id === "no_outcome") return;
+    if (!formData.outcome_id || formData.outcome_id === "no_outcome_selected") return;
     
     const outcome = outcomes?.find(out => out.id === formData.outcome_id);
     const study = formData.study_id ? studies.find(s => s.id === formData.study_id) : null;
@@ -204,44 +205,24 @@ export const useNutraceuticalPanel = () => {
               );
             }
           }
-          
-          // 4. Processar relações adicionais
-          for (const relation of relations) {
-            if (relation.outcome_id) {
-              const relationsService = await import('@/services/nutraceuticals/relations-service');
-              await relationsService.NutraceuticalRelationsService.relateToOutcome(
-                createdNutraceutical.id,
-                relation.outcome_id,
-                'support', // Tipo padrão
-                relation.efficacy_score,
-                relation.notes
-              );
-              
-              // Se a relação tem um estudo associado
-              if (relation.study_id) {
-                await relationsService.NutraceuticalRelationsService.relateToStudy(
-                  createdNutraceutical.id,
-                  relation.study_id,
-                  relation.efficacy_score
-                );
-              }
-            }
-          }
         } catch (error) {
-          console.error("Erro ao atualizar metadados ou relações:", error);
+          console.error('Erro ao adicionar metadados ou relações:', error);
         }
       }
-
+      
+      // Resetar o formulário e fechar o diálogo
+      setIsCreateDialogOpen(false);
+      resetForm();
+      
+      // Atualizar a lista de nutracêuticos
+      fetchNutraceuticals();
+      
       toast({
         title: "Sucesso",
         description: "Nutracêutico criado com sucesso",
       });
-      
-      setIsCreateDialogOpen(false);
-      resetFormData();
-      fetchNutraceuticals();
-    } catch (err) {
-      console.error("Erro ao criar nutracêutico:", err);
+    } catch (error) {
+      console.error('Erro ao criar nutracêutico:', error);
       toast({
         title: "Erro",
         description: "Não foi possível criar o nutracêutico",
@@ -252,135 +233,90 @@ export const useNutraceuticalPanel = () => {
     }
   };
 
-  // Handler para editar nutracêutico
+  // Handler para editar nutracêutico existente
   const handleEditSubmit = async () => {
-    if (!selectedNutraceutical) return;
-    
     setIsSaving(true);
+    
     try {
-      console.log('Iniciando atualização do nutracêutico:', selectedNutraceutical.id);
-      console.log('Dados do formulário:', formData);
-      
-      // Garantir que contraindications seja sempre um array
-      let contraindications = [];
-      if (formData.contraindications) {
-        if (typeof formData.contraindications === 'string') {
-          contraindications = formData.contraindications
-            .split("\n")
-            .filter(line => line.trim() !== "");
-        } else if (Array.isArray(formData.contraindications)) {
-          contraindications = formData.contraindications;
-        }
+      if (!selectedNutraceutical) {
+        throw new Error('Nenhum nutracêutico selecionado para edição');
       }
       
-      // 1. Atualizar o nutracêutico básico
-      console.log('1. Atualizando dados básicos do nutracêutico');
-      await updateNutraceutical(selectedNutraceutical.id, {
-        name: formData.name,
-        description: formData.description,
-        dosage: formData.dosage,
-        source: formData.source,
-        chemical_compound: formData.chemical_compound,
-        contraindications,
-        outcome_id: formData.outcome_id === "no_outcome" ? null : formData.outcome_id || null
-      });
-
-      // 2. Atualizar metadados científicos
-      try {
-        console.log('2. Atualizando metadados científicos');
-        const metadataService = await import('@/services/nutraceuticals/metadata-service');
-        await metadataService.NutraceuticalMetadataService.updateScientificMetadata(
-          selectedNutraceutical.id, 
-          formData.efficacy_score
-        );
-          
-        // Adicionar notas se houver
-        if (formData.notes) {
-          console.log('3. Atualizando notas do nutracêutico');
-          const relationsService = await import('@/services/nutraceuticals/relations-service');
-          await relationsService.NutraceuticalRelationsService.updateOutcomeRelation(
-            selectedNutraceutical.id,
-            formData.notes
+      // Converter contraindications de texto para array
+      const contraindications = formData.contraindications
+        .split("\n")
+        .filter(line => line.trim() !== "");
+        
+      const updatedNutraceutical = await updateNutraceutical(
+        selectedNutraceutical.id, 
+        { 
+          ...formData, 
+          contraindications 
+        }
+      );
+      
+      // Atualizar metadados científicos também
+      if (updatedNutraceutical) {
+        try {
+          const metadataService = await import('@/services/nutraceuticals/metadata-service');
+          await metadataService.NutraceuticalMetadataService.updateScientificMetadata(
+            selectedNutraceutical.id, 
+            formData.efficacy_score
           );
+        } catch (error) {
+          console.error('Erro ao atualizar metadados científicos:', error);
         }
-        
-        // 3. Atualizar estudos relacionados
-        console.log('4. Atualizando estudos relacionados');
-        const relationsService = await import('@/services/nutraceuticals/relations-service');
-        
-        // Primeiro, obter as relações de estudos existentes
-        const existingStudyRelations = await relationsService.NutraceuticalRelationsService.getStudyRelations(
-          selectedNutraceutical.id
-        );
-        
-        console.log('Relações existentes:', existingStudyRelations);
-        console.log('Estudos selecionados:', selectedStudies);
-        
-        // Remover relações que não estão mais presentes
-        if (existingStudyRelations && existingStudyRelations.length > 0) {
-          for (const relation of existingStudyRelations) {
-            if (!selectedStudies.includes(relation.study_id)) {
-              console.log('Removendo relação com estudo:', relation.study_id);
-              await relationsService.NutraceuticalRelationsService.removeStudyRelation(relation.id);
-            }
-          }
-        }
-        
-        // Adicionar novas relações de estudo
-        const existingStudyIds = existingStudyRelations?.map((rel: any) => rel.study_id) || [];
-        for (const studyId of selectedStudies) {
-          if (!existingStudyIds.includes(studyId)) {
-            console.log('Adicionando nova relação com estudo:', studyId);
-            await relationsService.NutraceuticalRelationsService.relateToStudy(
-              selectedNutraceutical.id,
-              studyId,
-              formData.efficacy_score
-            );
-          }
-        }
-        
-        // 4. Processar relações adicionais
-        if (relations && relations.length > 0) {
-          console.log('5. Processando relações adicionais:', relations.length);
-          for (const relation of relations) {
-            if (relation.outcome_id) {
-              await relationsService.NutraceuticalRelationsService.relateToOutcome(
-                selectedNutraceutical.id,
-                relation.outcome_id,
-                'support',
-                relation.efficacy_score,
-                relation.notes
-              );
-              
-              if (relation.study_id) {
-                await relationsService.NutraceuticalRelationsService.relateToStudy(
-                  selectedNutraceutical.id,
-                  relation.study_id,
-                  relation.efficacy_score
-                );
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao atualizar metadados científicos:", error);
-        throw error; // Re-lançar erro para tratamento no bloco catch principal
       }
-
-      console.log('Atualização do nutracêutico concluída com sucesso');
+      
+      // Resetar o formulário e fechar o diálogo
+      setIsEditDialogOpen(false);
+      resetForm();
+      
+      // Atualizar a lista de nutracêuticos
+      fetchNutraceuticals();
+      
       toast({
         title: "Sucesso",
         description: "Nutracêutico atualizado com sucesso",
-        variant: "default"
       });
-      
-      setIsEditDialogOpen(false);
-      fetchNutraceuticals();
-    } catch (err) {
-      console.error("Erro ao atualizar nutracêutico:", err);
+    } catch (error) {
+      console.error('Erro ao editar nutracêutico:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o nutracêutico. Verifique os dados informados.",
+        description: "Não foi possível atualizar o nutracêutico",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Handler para excluir nutracêutico
+  const handleDeleteConfirm = async () => {
+    if (!selectedNutraceutical) {
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      await deleteNutraceutical(selectedNutraceutical.id);
+      
+      setIsDeleteDialogOpen(false);
+      setSelectedNutraceutical(null);
+      
+      // Atualizar a lista de nutracêuticos
+      fetchNutraceuticals();
+      
+      toast({
+        title: "Sucesso",
+        description: "Nutracêutico excluído com sucesso",
+      });
+    } catch (error) {
+      console.error('Erro ao excluir nutracêutico:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o nutracêutico",
         variant: "destructive",
       });
     } finally {
@@ -388,31 +324,23 @@ export const useNutraceuticalPanel = () => {
     }
   };
 
-  // Handler para excluir nutracêutico
-  const handleDeleteConfirm = async () => {
-    if (!selectedNutraceutical) return;
-    
-    try {
-      await deleteNutraceutical(selectedNutraceutical.id);
-
-      toast({
-        title: "Sucesso",
-        description: "Nutracêutico excluído com sucesso",
-      });
-      
-      setIsDeleteDialogOpen(false);
-      fetchNutraceuticals();
-    } catch (err) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o nutracêutico",
-        variant: "destructive",
-      });
-    }
+  // Handler para formulário
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
   };
-
-  // Resetar dados do formulário
-  const resetFormData = () => {
+  
+  // Para obter o nome de um outcome pelo ID
+  const getOutcomeName = (outcomeId: string) => {
+    const outcome = outcomes?.find(o => o.id === outcomeId);
+    return outcome ? outcome.name : "Sem outcome";
+  };
+  
+  // Resetar o formulário
+  const resetForm = () => {
     setFormData({
       name: "",
       description: "",
@@ -428,51 +356,44 @@ export const useNutraceuticalPanel = () => {
     setRelations([]);
     setSelectedStudies([]);
   };
-
+  
   // Handler para abrir diálogo de criação
   const handleOpenCreateDialog = () => {
-    resetFormData();
+    resetForm();
     setIsCreateDialogOpen(true);
   };
-
-  // Handler para alterar dados do formulário
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  
+  // Handlers específicos para campos específicos
+  
+  // Handler para mudança em efficacy
+  const handleEfficacyChange = (values: number[]) => {
+    if (values.length > 0) {
+      setFormData({
+        ...formData,
+        efficacy_score: values[0]
+      });
+    }
   };
-
-  // Handler para alterar outcome no select
-  const handleOutcomeChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      outcome_id: value
-    }));
+  
+  // Handler para mudança de outcome 
+  const handleOutcomeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      outcome_id: e.target.value
+    });
   };
-
-  // Handler para alterar o score de eficácia
-  const handleEfficacyChange = (value: number[]) => {
-    setFormData(prev => ({
-      ...prev,
-      efficacy_score: value[0]
-    }));
-  };
-
-  // Handler para alterar o estudo selecionado
-  const handleStudyChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      study_id: value
-    }));
-  };
-
-  // Função para obter o nome do outcome
-  const getOutcomeName = (outcomeId: string | null) => {
-    if (!outcomeId) return "Sem outcome";
-    const outcome = outcomes?.find(out => out.id === outcomeId);
-    return outcome ? outcome.name : "Outcome desconhecido";
+  
+  // Handler para mudança de estudo
+  const handleStudyChange = (studyId: string) => {
+    // Toggle seleção do estudo
+    setSelectedStudies(prev => {
+      const isAlreadySelected = prev.includes(studyId);
+      if (isAlreadySelected) {
+        return prev.filter(id => id !== studyId);
+      } else {
+        return [...prev, studyId];
+      }
+    });
   };
 
   return {
@@ -487,7 +408,6 @@ export const useNutraceuticalPanel = () => {
     isOutcomesDialogOpen,
     setIsOutcomesDialogOpen,
     selectedNutraceutical,
-    setSelectedNutraceutical,
     filteredNutraceuticals,
     formData,
     relations,

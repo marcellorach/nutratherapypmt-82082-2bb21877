@@ -178,7 +178,7 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
               </SelectTrigger>
               <SelectContent>
                 {availableConditions.length === 0 ? (
-                  <SelectItem value="empty_placeholder" disabled>
+                  <SelectItem value="no_conditions_available">
                     Todas as condições já foram associadas
                   </SelectItem>
                 ) : (
