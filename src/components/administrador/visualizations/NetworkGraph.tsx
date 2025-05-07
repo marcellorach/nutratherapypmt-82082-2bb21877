@@ -44,9 +44,12 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
       }
     };
     
+    // Garantir que os IDs dos nós sejam únicos antes de criar o DataSet
+    const uniqueNodes = ensureUniqueIds(data.nodes);
+    
     // Converter dados para formato vis.js
     const nodes = new DataSet(
-      data.nodes.map(node => ({
+      uniqueNodes.map(node => ({
         ...node,
         group: node.group || node.type
       }))
@@ -104,10 +107,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         width: 1,
         color: { inherit: 'from' },
         smooth: {
-          enabled: true, // Adicionando propriedade obrigatória
+          enabled: true,
           type: 'continuous',
           forceDirection: 'none',
-          roundness: 0.5 // Adicionando propriedade obrigatória
+          roundness: 0.5
         }
       },
       physics: {
@@ -165,6 +168,41 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
       }
     };
   }, [data]);
+  
+  // Função para garantir que os nós tenham IDs únicos
+  const ensureUniqueIds = (nodes: any[]): any[] => {
+    const idMap = new Map();
+    const result = [];
+    
+    for (const node of nodes) {
+      let nodeId = node.id;
+      
+      // Se o nó tiver um ID que já existe, criamos um novo ID único
+      if (idMap.has(nodeId) || nodeId === undefined) {
+        // Se o nó tiver uma propriedade label, usamos como base para o novo ID
+        const baseId = node.label || node.name || 'node';
+        let uniqueId = baseId;
+        let counter = 1;
+        
+        // Incrementamos um contador até encontrar um ID único
+        while (idMap.has(uniqueId)) {
+          uniqueId = `${baseId}_${counter}`;
+          counter++;
+        }
+        
+        // Criamos um novo objeto para evitar mutações
+        const newNode = { ...node, id: uniqueId };
+        result.push(newNode);
+        idMap.set(uniqueId, true);
+      } else {
+        // Se o ID for único, adicionamos ao mapa e ao resultado
+        result.push(node);
+        idMap.set(nodeId, true);
+      }
+    }
+    
+    return result;
+  };
   
   return (
     <div 

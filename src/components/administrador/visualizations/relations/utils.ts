@@ -12,8 +12,8 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   }
   
   // Preparar nós para visualização em rede
-  const networkNodes = nodes.map(node => ({
-    id: node.name,
+  const networkNodes = nodes.map((node, index) => ({
+    id: `node_${index}_${node.name}`, // Garantindo IDs únicos
     label: node.name,
     group: node.category,
     type: node.category,
@@ -38,22 +38,31 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   
   // Ajustar tamanho do nó com base no número de conexões
   networkNodes.forEach(node => {
-    const connections = nodeConnections.get(node.id) || 0;
+    const connections = nodeConnections.get(node.label) || 0;
     // Valor mínimo de 1, aumentando com o número de conexões
     node.value = Math.max(1, Math.min(5, 1 + connections / 5));
   });
   
   // Preparar links para visualização em rede
-  const networkLinks = links.map(link => {
+  const networkLinks = links.map((link, index) => {
     const sourceName = nodes[link.source]?.name || '';
     const targetName = nodes[link.target]?.name || '';
+    
+    // Encontrar IDs dos nós correspondentes
+    const sourceNode = networkNodes.find(node => node.label === sourceName);
+    const targetNode = networkNodes.find(node => node.label === targetName);
+    
+    if (!sourceNode || !targetNode) {
+      return null;
+    }
     
     // Determinar largura da linha com base no valor
     const width = Math.max(1, Math.min(5, link.value / 20));
     
     return {
-      from: sourceName,
-      to: targetName,
+      id: `link_${index}`,
+      from: sourceNode.id,
+      to: targetNode.id,
       value: link.value / 10, // Ajustar para escala apropriada
       title: link.description || `${sourceName} → ${targetName}`,
       color: link.color || undefined,
@@ -70,7 +79,7 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   
   // Filtrar quaisquer links inválidos
   const validNetworkLinks = networkLinks.filter(
-    link => Boolean(link.from) && Boolean(link.to)
+    link => Boolean(link)
   );
   
   return {
