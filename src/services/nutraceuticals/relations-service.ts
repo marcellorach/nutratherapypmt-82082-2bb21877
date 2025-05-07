@@ -13,7 +13,7 @@ export const NutraceuticalRelationsService = {
   async relateToOutcome(
     nutraceuticalId: string,
     outcomeId: string,
-    relationshipType: 'prevention' | 'treatment' | 'support',
+    relationshipType: 'prevention' | 'treatment' | 'support' | 'primary',
     efficacyScore: number,
     notes?: string
   ) {
@@ -52,7 +52,7 @@ export const NutraceuticalRelationsService = {
   async relateToCondition(
     nutraceuticalId: string,
     conditionId: string,
-    relationshipType: 'prevention' | 'treatment' | 'support',
+    relationshipType: 'prevention' | 'treatment' | 'support' | 'primary',
     efficacyScore: number,
     notes?: string
   ) {

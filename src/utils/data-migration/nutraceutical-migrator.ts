@@ -142,7 +142,7 @@ export const NutraceuticalMigrator = {
     nutraName: string,
     conditions: any[] | undefined,
     conditionMap: Map<string, string>,
-    relationshipType: 'prevention' | 'treatment' | 'support' | 'primary'
+    relationshipType: 'prevention' | 'treatment' | 'support'
   ) {
     if (!conditions || conditions.length === 0) return 0;
     

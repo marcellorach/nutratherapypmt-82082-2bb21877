@@ -1,3 +1,4 @@
+
 export interface Pet {
   id: string;
   name: string;
@@ -94,3 +95,7 @@ export interface Message {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
+
+// Tipos adicionais
+export type RelationshipType = 'prevention' | 'treatment' | 'support' | 'primary';
+
