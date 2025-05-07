@@ -115,12 +115,15 @@ export const ScientificStudiesService = {
       }
     }
     
+    // Garantir que o link nunca seja nulo - usar um valor padrão se não for fornecido
+    const safeLink = link || `https://placeholder.link/${Date.now()}`;
+    
     // Criar o registro do estudo no banco de dados
     const { data, error } = await client
       .from('scientific_studies')
       .insert([{
         title,
-        link,
+        link: safeLink, // Usando o valor seguro que nunca será nulo
         year,
         journal,
         authors,

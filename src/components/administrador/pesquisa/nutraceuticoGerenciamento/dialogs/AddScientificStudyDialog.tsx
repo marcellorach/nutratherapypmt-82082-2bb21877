@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -20,7 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 const currentYear = new Date().getFullYear();
 
 const formSchema = z.object({
-  title: z.string().min(5, 'O título deve ter no mínimo 5 caracteres'),
+  title: z.string().min(1, 'O título é obrigatório'),
+  // Link é opcional na validação, mas um valor padrão será fornecido se estiver vazio
   link: z.string().url('Deve ser uma URL válida').optional().or(z.literal('')),
   year: z.coerce
     .number()
@@ -59,7 +59,7 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      link: '',
+      link: 'https://placeholder.com',  // Valor padrão para link
       year: currentYear,
       journal: '',
       abstract: '',
@@ -71,7 +71,14 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
   useEffect(() => {
     if (!open) {
       setPdfFiles([]);
-      form.reset();
+      form.reset({
+        title: '',
+        link: 'https://placeholder.com',  // Redefina para o valor padrão
+        year: currentYear,
+        journal: '',
+        abstract: '',
+        authors: '',
+      });
     }
   }, [open, form]);
 
@@ -118,9 +125,14 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
         }, 300);
       }
       
+      // Garantir que o link nunca seja undefined ou vazio
+      const safeLink = values.link && values.link.trim() !== '' 
+        ? values.link.trim() 
+        : `https://placeholder.com/${Date.now()}`;
+      
       const studyData = {
         title: values.title,
-        link: values.link || undefined,
+        link: safeLink,
         year: values.year,
         journal: values.journal || undefined,
         abstract: values.abstract || undefined,
@@ -146,7 +158,15 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       
       // Pequeno atraso antes de fechar o modal para mostrar o status de sucesso
       setTimeout(() => {
-        form.reset();
+        // Resetar o form com valores padrão incluindo o link
+        form.reset({
+          title: '',
+          link: 'https://placeholder.com',
+          year: currentYear,
+          journal: '',
+          abstract: '',
+          authors: '',
+        });
         setPdfFiles([]);
         
         if (onSuccess) {
@@ -214,7 +234,7 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
                     name="link"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Link para o Estudo (opcional)</FormLabel>
+                        <FormLabel>Link para o Estudo (obrigatório)</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="https://..." />
                         </FormControl>
