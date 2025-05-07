@@ -122,22 +122,27 @@ export const useSankeyData = () => {
               labelText = 'Eficácia muito baixa';
             }
             
-            // Determinar tipo de relação em português
-            let relationshipType;
+            // Determinar tipo de relação em português para exibição
+            let relationText;
             
             switch (rel.relationship_type) {
               case 'prevention':
-                relationshipType = 'Prevenção';
+                relationText = 'Prevenção';
                 break;
               case 'treatment':
-                relationshipType = 'Tratamento';
+                relationText = 'Tratamento';
                 break;
               case 'support':
-                relationshipType = 'Suporte';
+                relationText = 'Suporte';
                 break;
               default:
-                relationshipType = 'Outro';
+                relationText = 'Outro';
             }
+            
+            // Garantir que o relationshipType seja exatamente um dos tipos esperados no retorno
+            const validatedRelationType = ['prevention', 'treatment', 'support'].includes(rel.relationship_type) 
+              ? rel.relationship_type as 'prevention' | 'treatment' | 'support'
+              : 'support';
             
             return {
               source: sourceIndex,
@@ -145,8 +150,8 @@ export const useSankeyData = () => {
               value: rel.efficacy_score * 20, // Escala para visualização
               color,
               labelText,
-              description: rel.notes || `${relationshipType}: Eficácia ${rel.efficacy_score}/5`,
-              relationshipType: rel.relationship_type,
+              description: rel.notes || `${relationText}: Eficácia ${rel.efficacy_score}/5`,
+              relationshipType: validatedRelationType,
               originalRelation: rel
             };
           });

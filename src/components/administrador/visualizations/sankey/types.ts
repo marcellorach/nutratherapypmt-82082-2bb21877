@@ -1,3 +1,4 @@
+
 export interface SankeyNode {
   name: string;
   category: string;
@@ -15,7 +16,7 @@ export interface SankeyLink {
   studyCount?: number;
   evidenceLevel?: number;
   description?: string;
-  relationshipType?: 'prevention' | 'treatment' | 'support';
+  relationshipType?: 'prevention' | 'treatment' | 'support' | string;
   originalRelation?: any; // Dados originais da relação
 }
 
