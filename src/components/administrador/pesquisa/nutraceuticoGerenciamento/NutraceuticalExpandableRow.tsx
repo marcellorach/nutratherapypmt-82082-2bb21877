@@ -32,12 +32,10 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
     }
   };
 
-  // Helper para obter o nome do outcome
+  // Helper para obter o nome do outcome (adaptado para funcionar quando outcome não existir)
   const getOutcomeName = () => {
-    if (nutraceutical.outcome && nutraceutical.outcome[0]) {
-      return nutraceutical.outcome[0].name;
-    }
-    return "Não definido";
+    if (!nutraceutical) return "Não definido";
+    return "Categoria não definida";
   };
 
   // Estado expandido para mostrar detalhes
@@ -59,10 +57,10 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
           {/* Condições relacionadas */}
           <div className="space-y-2">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm">Condições ({nutraceutical.nutraceutical_conditions?.length || 0})</h4>
+              <h4 className="font-medium text-sm">Condições ({nutraceutical.conditionCount || 0})</h4>
             </div>
             <div className="max-h-48 overflow-y-auto">
-              {nutraceutical.nutraceutical_conditions && nutraceutical.nutraceutical_conditions.length > 0 ? (
+              {Array.isArray(nutraceutical.nutraceutical_conditions) && nutraceutical.nutraceutical_conditions.length > 0 ? (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
@@ -75,12 +73,12 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
                     {nutraceutical.nutraceutical_conditions.map((relation: any) => (
                       <tr key={relation.id} className="border-b border-gray-100">
                         <td className="py-1">{relation.condition?.name || "Desconhecida"}</td>
-                        <td className="py-1">{formatRelationshipType(relation.relationship_type)}</td>
+                        <td className="py-1">{formatRelationshipType(relation.relationship_type || "")}</td>
                         <td className="py-1">
                           <Badge variant="outline" className={`
-                            ${relation.efficacy_score >= 4 ? 'bg-green-50 text-green-800' : 
-                              relation.efficacy_score >= 3 ? 'bg-blue-50 text-blue-800' : 
-                              relation.efficacy_score >= 2 ? 'bg-yellow-50 text-yellow-800' : 
+                            ${Number(relation.efficacy_score) >= 4 ? 'bg-green-50 text-green-800' : 
+                              Number(relation.efficacy_score) >= 3 ? 'bg-blue-50 text-blue-800' : 
+                              Number(relation.efficacy_score) >= 2 ? 'bg-yellow-50 text-yellow-800' : 
                               'bg-red-50 text-red-800'}
                           `}>
                             {relation.efficacy_score || 0}
@@ -100,10 +98,10 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
         {/* Estudos Científicos */}
         <div className="mt-4">
           <div className="flex justify-between">
-            <h4 className="font-medium text-sm">Estudos ({nutraceutical.nutraceutical_studies?.length || 0})</h4>
+            <h4 className="font-medium text-sm">Estudos ({nutraceutical.studyCount || 0})</h4>
           </div>
           <div className="max-h-48 overflow-y-auto mt-2">
-            {nutraceutical.nutraceutical_studies && nutraceutical.nutraceutical_studies.length > 0 ? (
+            {Array.isArray(nutraceutical.nutraceutical_studies) && nutraceutical.nutraceutical_studies.length > 0 ? (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -119,9 +117,9 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
                       <td className="py-1">{relation.study?.journal || "N/A"}</td>
                       <td className="py-1">
                         <Badge variant="outline" className={`
-                          ${relation.relevance_score >= 4 ? 'bg-green-50 text-green-800' : 
-                            relation.relevance_score >= 3 ? 'bg-blue-50 text-blue-800' : 
-                            relation.relevance_score >= 2 ? 'bg-yellow-50 text-yellow-800' : 
+                          ${Number(relation.relevance_score) >= 4 ? 'bg-green-50 text-green-800' : 
+                            Number(relation.relevance_score) >= 3 ? 'bg-blue-50 text-blue-800' : 
+                            Number(relation.relevance_score) >= 2 ? 'bg-yellow-50 text-yellow-800' : 
                             'bg-red-50 text-red-800'}
                         `}>
                           {relation.relevance_score || 0}
@@ -140,6 +138,19 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
     </TableRow>
   );
 
+  // Verificação de segurança para garantir que o nutraceutical existe
+  if (!nutraceutical || typeof nutraceutical !== 'object') {
+    return (
+      <TableRow>
+        <TableCell colSpan={5}>
+          <div className="text-center text-red-500">
+            Erro ao exibir este nutracêutico. Dados inválidos.
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  }
+
   return (
     <>
       {/* Linha principal */}
@@ -154,7 +165,7 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
             >
               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </Button>
-            <span>{nutraceutical.name}</span>
+            <span>{nutraceutical.name || "Sem nome"}</span>
           </div>
         </TableCell>
         <TableCell>
@@ -162,12 +173,12 @@ const NutraceuticalExpandableRow: React.FC<NutraceuticalExpandableRowProps> = ({
         </TableCell>
         <TableCell>
           <Badge variant="outline" className="bg-blue-50">
-            {nutraceutical.conditionCount || nutraceutical.nutraceutical_conditions?.length || 0}
+            {nutraceutical.conditionCount || 0}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge variant="outline" className="bg-green-50">
-            {nutraceutical.studyCount || nutraceutical.nutraceutical_studies?.length || 0}
+            {nutraceutical.studyCount || 0}
           </Badge>
         </TableCell>
         <TableCell>

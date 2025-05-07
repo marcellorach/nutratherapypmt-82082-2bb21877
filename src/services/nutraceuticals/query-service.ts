@@ -68,7 +68,6 @@ export const NutraceuticalQueryService = {
         .from('nutraceuticals')
         .select(`
           *,
-          outcome:nutraceutical_outcomes(id, name, description),
           scientific_metadata:nutraceutical_scientific_metadata(*),
           nutraceutical_conditions(
             id,
@@ -91,7 +90,7 @@ export const NutraceuticalQueryService = {
       }
 
       console.log(`Encontrados ${data?.length || 0} nutracêuticos`);
-      return data;
+      return data || [];
     } catch (error) {
       console.error('Exceção ao obter nutracêuticos completos:', error);
       NutraceuticalBaseService.handleError(error, 'obter todos os nutracêuticos');

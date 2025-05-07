@@ -25,7 +25,6 @@ export const useNutraceuticalsData = () => {
         .from('nutraceuticals')
         .select(`
           *,
-          outcome_id,
           nutraceutical_benefits(id, benefit),
           scientific_metadata:nutraceutical_scientific_metadata(*),
           nutraceutical_conditions(
@@ -47,14 +46,28 @@ export const useNutraceuticalsData = () => {
         throw error;
       }
       
-      console.log(`Carregados ${data?.length || 0} nutracêuticos com suas relações`);
+      if (!data) {
+        console.log('Nenhum nutracêutico encontrado');
+        setDbNutraceuticals([]);
+        return;
+      }
+      
+      console.log(`Carregados ${data.length || 0} nutracêuticos com suas relações`);
       
       // Para cada nutracêutico, conte as relações
-      const enhancedData = (data || []).map(nutra => {
-        const conditionCount = nutra.nutraceutical_conditions?.length || 0;
-        const studyCount = nutra.nutraceutical_studies?.length || 0;
+      const enhancedData = data.map(nutra => {
+        // Verificação de segurança para evitar erros com objetos nulos/indefinidos
+        const conditionCount = Array.isArray(nutra.nutraceutical_conditions) 
+          ? nutra.nutraceutical_conditions.length 
+          : 0;
+          
+        const studyCount = Array.isArray(nutra.nutraceutical_studies) 
+          ? nutra.nutraceutical_studies.length 
+          : 0;
         
-        console.log(`Nutracêutico ${nutra.name}: ${conditionCount} condições, ${studyCount} estudos`);
+        if (nutra.name) {
+          console.log(`Nutracêutico ${nutra.name}: ${conditionCount} condições, ${studyCount} estudos`);
+        }
         
         return {
           ...nutra,
