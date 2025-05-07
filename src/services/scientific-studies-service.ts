@@ -56,6 +56,15 @@ export const ScientificStudiesService = {
     abstract,
     file,
     nutraceuticalId
+  }: {
+    title: string;
+    link?: string;
+    year: number;
+    journal?: string;
+    authors?: string | string[];
+    abstract?: string;
+    file?: File;
+    nutraceuticalId?: string;
   }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
@@ -161,13 +170,21 @@ export const ScientificStudiesService = {
       authors,
       abstract,
       file
+    }: {
+      title?: string;
+      link?: string;
+      year?: number;
+      journal?: string;
+      authors?: string | string[];
+      abstract?: string;
+      file?: File;
     }
   ) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
     
     // Dados para atualização
-    const updateData = {
+    const updateData: any = {
       title,
       link,
       year,
