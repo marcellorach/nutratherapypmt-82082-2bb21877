@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ScientificStudiesService } from '@/services/scientific-studies-service';
@@ -71,12 +70,7 @@ export const useStudies = () => {
       }
       
       // Atualizar a lista local
-      setStudies(prev => [...prev, newStudy]);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Estudo criado com sucesso',
-      });
+      setStudies(prev => [newStudy, ...prev]);
       
       return newStudy;
     } catch (err: any) {

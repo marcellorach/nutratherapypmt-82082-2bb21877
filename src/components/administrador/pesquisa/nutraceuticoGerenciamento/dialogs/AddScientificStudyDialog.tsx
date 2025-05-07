@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -14,6 +14,7 @@ import PdfUploadZone from '@/components/administrador/estudos/import/PdfUploadZo
 import { StudyPdfFile } from '@/components/administrador/estudos/import/PdfFileItem';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 // Schema de validação
 const currentYear = new Date().getFullYear();
@@ -51,6 +52,7 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [pdfFiles, setPdfFiles] = useState<StudyPdfFile[]>([]);
+  const { toast } = useToast();
   
   // Inicialização do formulário
   const form = useForm<FormData>({
@@ -65,9 +67,28 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
     }
   });
 
+  // Reset do estado quando o diálogo é fechado
+  useEffect(() => {
+    if (!open) {
+      setPdfFiles([]);
+      form.reset();
+    }
+  }, [open, form]);
+
   // Manipulador para alterações nos arquivos PDF
   const handlePdfFilesChange = (files: StudyPdfFile[]) => {
     setPdfFiles(files);
+  };
+
+  // Função para atualizar o status de upload de um arquivo
+  const updateFileStatus = (fileId: string, status: 'queued' | 'uploading' | 'error' | 'complete', progress?: number) => {
+    setPdfFiles(prevFiles => 
+      prevFiles.map(file => 
+        file.id === fileId 
+          ? { ...file, status, uploadProgress: progress !== undefined ? progress : file.uploadProgress } 
+          : file
+      )
+    );
   };
 
   // Função para lidar com o envio do formulário
@@ -80,6 +101,22 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       const authors = values.authors 
         ? values.authors.split(',').map(author => author.trim()) 
         : [];
+      
+      // Se temos um arquivo, atualizar seu status
+      if (pdfFiles.length > 0) {
+        updateFileStatus(pdfFiles[0].id, 'uploading', 10);
+        
+        // Simular progresso de upload
+        let progress = 10;
+        const interval = setInterval(() => {
+          progress += 10;
+          if (progress <= 90) {
+            updateFileStatus(pdfFiles[0].id, 'uploading', progress);
+          } else {
+            clearInterval(interval);
+          }
+        }, 300);
+      }
       
       const studyData = {
         title: values.title,
@@ -94,19 +131,44 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       
       console.log('Dados do estudo formatados:', studyData);
       
-      await createStudy(studyData);
-      console.log('Estudo criado com sucesso');
+      const result = await createStudy(studyData);
+      console.log('Estudo criado com sucesso:', result);
       
-      form.reset();
-      setPdfFiles([]);
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        onOpenChange(false);
+      // Atualizar status para completo
+      if (pdfFiles.length > 0) {
+        updateFileStatus(pdfFiles[0].id, 'complete', 100);
       }
+      
+      toast({
+        title: "Sucesso!",
+        description: "Estudo científico adicionado com sucesso.",
+      });
+      
+      // Pequeno atraso antes de fechar o modal para mostrar o status de sucesso
+      setTimeout(() => {
+        form.reset();
+        setPdfFiles([]);
+        
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          onOpenChange(false);
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Erro ao criar estudo científico:', error);
+      
+      // Atualizar status para erro
+      if (pdfFiles.length > 0) {
+        updateFileStatus(pdfFiles[0].id, 'error');
+      }
+      
+      toast({
+        title: "Erro!",
+        description: "Não foi possível adicionar o estudo científico.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

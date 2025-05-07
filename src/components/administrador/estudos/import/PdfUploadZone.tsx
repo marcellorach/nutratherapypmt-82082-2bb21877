@@ -27,7 +27,7 @@ const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
       size: file.size,
       type: file.type,
       uploadProgress: 0,
-      status: 'queued',
+      status: 'queued', // Definido como 'queued' para indicar que está pronto para envio
       file
     }));
 
@@ -78,7 +78,7 @@ const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
             }
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            Formatos suportados: PDF
+            Formatos suportados: PDF, DOCX
           </p>
           {maxFiles && (
             <p className="text-xs text-gray-500 mt-1">
