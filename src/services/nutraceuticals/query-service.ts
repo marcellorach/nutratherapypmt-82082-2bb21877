@@ -17,7 +17,9 @@ export const NutraceuticalQueryService = {
         .from('nutraceuticals')
         .select(`
           *,
-          scientific_metadata:nutraceutical_scientific_metadata(*)
+          scientific_metadata:nutraceutical_scientific_metadata(*),
+          nutraceutical_conditions(*),
+          nutraceutical_studies(*)
         `)
         .eq('id', id)
         .single();
@@ -44,7 +46,8 @@ export const NutraceuticalQueryService = {
         .select(`
           *,
           scientific_metadata:nutraceutical_scientific_metadata(*),
-          conditions:nutraceutical_conditions(*)
+          nutraceutical_conditions(*),
+          nutraceutical_studies(*)
         `)
         .order('name');
 
@@ -59,24 +62,45 @@ export const NutraceuticalQueryService = {
   },
 
   /**
-   * Obtém todos os nutracêuticos com metadados
+   * Obtém todos os nutracêuticos com metadados e relacionamentos
    */
   async getAllNutraceuticals() {
     try {
+      console.log('Buscando todos os nutracêuticos com relacionamentos');
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceuticals')
-        .select('*, scientific_metadata:nutraceutical_scientific_metadata(*)')
+        .select(`
+          *,
+          scientific_metadata:nutraceutical_scientific_metadata(*),
+          nutraceutical_conditions!nutraceutical_conditions(
+            id,
+            relationship_type,
+            efficacy_score,
+            notes,
+            condition:condition_id(id, name, description)
+          ),
+          nutraceutical_studies!nutraceutical_studies(
+            id,
+            relevance_score,
+            study:study_id(id, title, journal)
+          )
+        `)
         .order('name');
 
       if (error) {
+        console.error('Erro ao obter nutracêuticos completos:', error);
         NutraceuticalBaseService.handleError(error, 'obter todos os nutracêuticos');
       }
 
+      console.log(`Encontrados ${data?.length || 0} nutracêuticos`);
       return data;
     } catch (error) {
+      console.error('Exceção ao obter nutracêuticos completos:', error);
       NutraceuticalBaseService.handleError(error, 'obter todos os nutracêuticos');
+      return [];
     }
   },
   
@@ -102,6 +126,7 @@ export const NutraceuticalQueryService = {
       return data;
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'obter relações com outcomes');
+      return [];
     }
   },
   
@@ -127,6 +152,7 @@ export const NutraceuticalQueryService = {
       return data;
     } catch (error) {
       NutraceuticalBaseService.handleError(error, 'obter relações com estudos');
+      return [];
     }
   }
 };

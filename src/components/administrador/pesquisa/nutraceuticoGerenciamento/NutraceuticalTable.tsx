@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, RefreshCcw, Edit, Trash2, BookOpen } from 'lucide-react';
+import { Search, Filter, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,9 +19,9 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import ManageRelationshipsDialog from '../nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
+import NutraceuticalExpandableRow from './NutraceuticalExpandableRow';
 
 interface NutraceuticalTableProps {
   nutraceuticals: any[];
@@ -50,50 +50,25 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   openMigratorDialog,
   onEditClick
 }) => {
+  // Estado para linhas expandidas
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+
   // Estado para o diálogo de gerenciamento de relações
   const [isRelationshipsDialogOpen, setIsRelationshipsDialogOpen] = useState(false);
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
   
-  // Função auxiliar para obter o nome do outcome
-  const getOutcomeName = (nutra: any) => {
-    // Se outcome_id é um objeto (Supabase retorna a relação expandida)
-    if (nutra.outcome_id && typeof nutra.outcome_id === 'object') {
-      return nutra.outcome_id.name || 'Sem outcome';
-    }
-    
-    // Se outcome_id é apenas um ID ou não existe
-    return 'Sem outcome';
-  };
-
-  // Função para lidar com o clique no botão de editar
-  const handleEditClick = (nutra: any) => {
-    if (onEditClick) {
-      onEditClick(nutra);
-    } else {
-      console.warn("Nenhum handler de edição fornecido");
-    }
+  // Função para alternar a expansão de uma linha
+  const toggleRowExpansion = (nutraId: string) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [nutraId]: !prev[nutraId]
+    }));
   };
   
   // Função para abrir o diálogo de gerenciamento de relações
   const handleManageRelationships = (nutra: any) => {
     setSelectedNutraceutical(nutra);
     setIsRelationshipsDialogOpen(true);
-  };
-
-  // Função para contar estudos relacionados
-  const countRelatedStudies = (nutra: any) => {
-    if (nutra.nutraceutical_studies && Array.isArray(nutra.nutraceutical_studies)) {
-      return nutra.nutraceutical_studies.length;
-    }
-    return 0;
-  };
-
-  // Função para contar outcomes relacionados
-  const countRelatedOutcomes = (nutra: any) => {
-    if (nutra.nutraceutical_health_conditions && Array.isArray(nutra.nutraceutical_health_conditions)) {
-      return nutra.nutraceutical_health_conditions.length;
-    }
-    return 0;
   };
 
   return (
@@ -178,59 +153,15 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                   </TableRow>
                 ) : (
                   filteredNutraceuticals.map((nutra) => (
-                    <TableRow key={nutra.id}>
-                      <TableCell className="font-medium">
-                        {nutra.name}
-                      </TableCell>
-                      <TableCell>
-                        {getOutcomeName(nutra) !== 'Sem outcome' ? (
-                          <Badge variant="outline">{getOutcomeName(nutra)}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">Sem outcome</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-blue-50">
-                          {countRelatedOutcomes(nutra)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-green-50">
-                          {countRelatedStudies(nutra)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8"
-                            onClick={() => handleEditClick(nutra)}
-                            title="Editar nutracêutico"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8"
-                            onClick={() => handleManageRelationships(nutra)}
-                            title="Gerenciar estudos e outcomes"
-                          >
-                            <BookOpen className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-red-500"
-                            onClick={() => handleDeleteClick(nutra.id)}
-                            title="Excluir nutracêutico"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <NutraceuticalExpandableRow
+                      key={nutra.id}
+                      nutraceutical={nutra}
+                      isExpanded={!!expandedRows[nutra.id]}
+                      onToggleExpand={() => toggleRowExpansion(nutra.id)}
+                      onEditClick={onEditClick}
+                      onDeleteClick={handleDeleteClick}
+                      onManageRelationships={handleManageRelationships}
+                    />
                   ))
                 )}
               </TableBody>

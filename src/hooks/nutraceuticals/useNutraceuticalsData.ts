@@ -12,10 +12,11 @@ export const useNutraceuticalsData = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
-  // Carregar nutracêuticos do banco de dados
+  // Carregar nutracêuticos do banco de dados com suas relações
   const loadNutraceuticals = async () => {
     setIsLoading(true);
     try {
+      console.log('Iniciando carregamento de nutracêuticos com relações...');
       const { data, error } = await supabase
         .from('nutraceuticals')
         .select(`
@@ -23,13 +24,14 @@ export const useNutraceuticalsData = () => {
           outcome:outcome_id(*),
           nutraceutical_benefits(id, benefit),
           nutraceutical_scientific_metadata(*),
-          nutraceutical_health_conditions:nutraceutical_conditions(
+          nutraceutical_conditions!nutraceutical_conditions(
             id, 
             relationship_type,
             efficacy_score,
+            notes,
             condition:health_conditions(*)
           ),
-          nutraceutical_studies(
+          nutraceutical_studies!nutraceutical_studies(
             id,
             relevance_score,
             study:scientific_studies(*)
@@ -41,8 +43,23 @@ export const useNutraceuticalsData = () => {
         throw error;
       }
       
-      setDbNutraceuticals(data || []);
-      console.log('Nutracêuticos carregados:', data);
+      console.log(`Carregados ${data?.length || 0} nutracêuticos com suas relações`);
+      
+      // Para cada nutracêutico, conte as relações
+      const enhancedData = (data || []).map(nutra => {
+        const conditionCount = nutra.nutraceutical_conditions?.length || 0;
+        const studyCount = nutra.nutraceutical_studies?.length || 0;
+        
+        console.log(`Nutracêutico ${nutra.name}: ${conditionCount} condições, ${studyCount} estudos`);
+        
+        return {
+          ...nutra,
+          conditionCount,
+          studyCount
+        };
+      });
+      
+      setDbNutraceuticals(enhancedData);
     } catch (err: any) {
       console.error('Erro ao carregar nutracêuticos:', err);
       toast({
