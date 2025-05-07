@@ -15,6 +15,10 @@ const VisualizationLegend: React.FC = () => {
           <span>Condições de Saúde</span>
         </div>
         <div className="flex items-center ml-4">
+          <span className="font-medium">Espessura das conexões:</span>
+          <span className="ml-1">Grau de eficácia</span>
+        </div>
+        <div className="flex items-center ml-4">
           <span className="font-medium">Cores das conexões:</span>
         </div>
         <div className="flex items-center">

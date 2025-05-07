@@ -25,6 +25,8 @@ export const useSankeyData = () => {
       setError(null);
       
       try {
+        console.log("useSankeyData: Iniciando busca de dados");
+        
         // Buscar nutracêuticos
         const { data: nutraceuticals, error: nutraError } = await supabase
           .from('nutraceuticals')
@@ -32,6 +34,7 @@ export const useSankeyData = () => {
           .order('name');
           
         if (nutraError) throw nutraError;
+        console.log(`useSankeyData: ${nutraceuticals?.length || 0} nutracêuticos encontrados`);
         
         // Buscar condições de saúde
         const { data: conditions, error: condError } = await supabase
@@ -40,6 +43,7 @@ export const useSankeyData = () => {
           .order('name');
           
         if (condError) throw condError;
+        console.log(`useSankeyData: ${conditions?.length || 0} condições encontradas`);
         
         // Buscar as relações entre nutracêuticos e condições
         const { data: relations, error: relError } = await supabase
@@ -54,6 +58,7 @@ export const useSankeyData = () => {
           `);
           
         if (relError) throw relError;
+        console.log(`useSankeyData: ${relations?.length || 0} relações encontradas`);
         
         // Criar mapa de IDs para índices
         const nutraMap = new Map();
@@ -85,6 +90,16 @@ export const useSankeyData = () => {
         // Todos os nós
         const nodes = [...nutraNodes, ...conditionNodes];
         
+        // Verificar se temos nós suficientes
+        if (nodes.length < 2) {
+          console.log("useSankeyData: Não há nós suficientes para renderizar o diagrama");
+          setSankeyData({ nodes: [], links: [] });
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log(`useSankeyData: Total de ${nodes.length} nós preparados`);
+        
         // Links entre nós
         const links: SankeyLink[] = relations
           .filter(rel => 
@@ -94,6 +109,12 @@ export const useSankeyData = () => {
           .map(rel => {
             const sourceIndex = nutraMap.get(rel.nutraceutical_id);
             const targetIndex = conditionMap.get(rel.condition_id);
+            
+            // Verificar se os índices são válidos
+            if (sourceIndex === undefined || targetIndex === undefined) {
+              console.warn("useSankeyData: Índice inválido para relação", rel);
+              return null;
+            }
             
             // Determinar cor com base no score de eficácia
             let color;
@@ -144,18 +165,25 @@ export const useSankeyData = () => {
               ? rel.relationship_type as 'prevention' | 'treatment' | 'support'
               : 'support';
             
+            // Aumentar o valor para melhor visualização
+            // Valores muito pequenos podem não ser visíveis no diagrama
+            const enhancedValue = Math.max(rel.efficacy_score * 20, 10);
+            
             return {
               source: sourceIndex,
               target: targetIndex,
-              value: rel.efficacy_score * 20, // Escala para visualização
+              value: enhancedValue, // Escala para visualização
               color,
               labelText,
               description: rel.notes || `${relationText}: Eficácia ${rel.efficacy_score}/5`,
               relationshipType: validatedRelationType,
               originalRelation: rel
             };
-          });
+          })
+          .filter(Boolean) as SankeyLink[];
           
+        console.log(`useSankeyData: Total de ${links.length} links válidos preparados`);
+        
         // Atualizar os dados para o Sankey
         setSankeyData({
           nodes,

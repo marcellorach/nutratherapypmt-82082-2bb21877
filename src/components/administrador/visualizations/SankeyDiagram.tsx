@@ -1,11 +1,12 @@
 
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
-import { ZoomIn, ZoomOut, Move, AlertCircle } from 'lucide-react';
+import { ZoomIn, ZoomOut, Move, AlertCircle, Info } from 'lucide-react';
 import SankeyTooltip from './sankey/SankeyTooltip';
 import SankeyDetailsDialog from './sankey/SankeyDetailsDialog';
 import { SankeyData, SankeyNode, SankeyLink } from './sankey/types';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface SankeyDiagramProps {
   data: SankeyData;
@@ -21,8 +22,14 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
 
   const processedData = useMemo(() => {
     if (!data || !data.nodes || !data.links) {
+      console.log("SankeyDiagram: No data provided");
       return { nodes: [], links: [] };
     }
+
+    console.log("SankeyDiagram processing data:", { 
+      nodesCount: data.nodes.length, 
+      linksCount: data.links.length 
+    });
 
     // Filtrar nós vazios ou indefinidos
     const validNodes = data.nodes.filter(node => node && node.name);
@@ -35,6 +42,11 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
       link.target < validNodes.length &&
       link.value > 0
     );
+
+    console.log("SankeyDiagram after filtering:", { 
+      validNodesCount: validNodes.length, 
+      validLinksCount: validLinks.length 
+    });
 
     const coloredNodes = validNodes.map((node) => ({
       ...node,
@@ -138,9 +150,26 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
     );
   }
 
+  console.log("SankeyDiagram rendering with data:", {
+    nodes: finalData.nodes.length,
+    links: finalData.links.length,
+    height
+  });
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-end mb-2 space-x-2">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <Badge variant="outline" className="mr-2">
+            {finalData.nodes.filter(n => n.category === 'nutraceutico').length} Nutracêuticos
+          </Badge>
+          <Badge variant="outline" className="mr-2">
+            {finalData.nodes.filter(n => n.category === 'condicao').length} Condições
+          </Badge>
+          <Badge variant="outline">
+            {finalData.links.length} Relações
+          </Badge>
+        </div>
         <div className="bg-white border rounded-md p-1 shadow-sm">
           <button 
             onClick={handleZoomIn} 
@@ -169,7 +198,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
       <div 
         className="overflow-auto relative border rounded-lg" 
         style={{ 
-          height, 
+          height: height || 500, 
           transition: 'transform 0.3s ease'
         }}
       >
@@ -181,7 +210,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
             transition: 'transform 0.3s ease'
           }}
         >
-          <ResponsiveContainer width="100%" height={height}>
+          <ResponsiveContainer width="100%" height={height || 500}>
             <Sankey
               data={finalData}
               nodeWidth={15}
@@ -200,7 +229,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
                 onClick: handleLinkClick,
                 className: "cursor-pointer hover:opacity-80 transition-opacity"
               }}
-              margin={{ top: 20, right: 150, bottom: 20, left: 150 }}
+              margin={{ top: 20, right: 50, bottom: 20, left: 50 }}
             >
               <Tooltip content={<SankeyTooltip payload={[]} />} />
             </Sankey>
@@ -208,7 +237,13 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
         </div>
       </div>
 
-      <div className="mt-3 text-xs text-gray-500">
+      <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center">
+          <Info className="h-3 w-3 mr-1" />
+          <span>
+            {scale < 1 ? "Reduza o zoom" : scale > 1.5 ? "Aumente o zoom" : "Ajuste o zoom"} para melhor visualização
+          </span>
+        </div>
         <span>Total de relacionamentos: {finalData.links.length}</span>
       </div>
 

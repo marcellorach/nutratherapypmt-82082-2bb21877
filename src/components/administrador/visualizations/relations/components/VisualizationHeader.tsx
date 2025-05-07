@@ -2,7 +2,8 @@
 import React from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, InfoIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface VisualizationHeaderProps {
   efficacyFilter: string;
@@ -17,6 +18,18 @@ const VisualizationHeader: React.FC<VisualizationHeaderProps> = ({
     <div className="flex items-center justify-between">
       <div className="flex items-center">
         <div className="text-lg font-medium">Mapa de Relações</div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-1 h-6 w-6">
+                <InfoIcon size={14} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-sm">
+              <p>Visualize as relações entre nutracêuticos e condições de saúde. Use os filtros para focar em relações específicas.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="flex items-center gap-4">
         <Select value={efficacyFilter} onValueChange={onEfficacyFilterChange}>
