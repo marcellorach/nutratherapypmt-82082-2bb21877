@@ -62,7 +62,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
     }
   };
   
-  // Este tipo corrige o problema de tipo no onValueChange
+  // Corrigir o problema de tipo no onValueChange
   const handleTabChange = (value: string) => {
     setActiveTab(value as 'conditions' | 'studies');
   };

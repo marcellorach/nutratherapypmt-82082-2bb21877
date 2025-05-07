@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -22,6 +23,7 @@ import { NutraceuticalsService } from '@/services/nutraceuticals';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from '@/components/ui/separator';
+import AddScientificStudyDialog from './AddScientificStudyDialog';
 
 // Schema de validação
 const formSchema = z.object({
@@ -69,6 +71,9 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   const [isNewNutraceutical, setIsNewNutraceutical] = useState(true);
   const [currentNutraceutical, setCurrentNutraceutical] = useState<any>(null);
   const [relationNotes, setRelationNotes] = useState<string>("");
+  
+  // Novo estado para controlar a abertura do diálogo de adicionar estudo
+  const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState(false);
   
   // Estados para gestão das relações
   const [relations, setRelations] = useState<RelationData[]>([{
@@ -195,6 +200,13 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       
       return { ...prev, [relationIndex]: updatedStudies };
     });
+  };
+  
+  // Handler para quando um novo estudo é criado
+  const handleStudyCreated = () => {
+    console.log('Novo estudo criado, atualizando lista de estudos...');
+    fetchStudies();
+    setIsAddStudyDialogOpen(false);
   };
   
   // Adicionar uma nova relação
@@ -627,7 +639,17 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                   </div>
                   
                   <div className="space-y-2">
-                    <FormLabel>Estudos Relacionados</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Estudos Relacionados</FormLabel>
+                      <Button 
+                        type="button" 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setIsAddStudyDialogOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> Adicionar Estudo
+                      </Button>
+                    </div>
                     <Card>
                       <CardContent className="p-3 max-h-[200px] overflow-y-auto">
                         {studies.length === 0 ? (
@@ -745,7 +767,17 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
                           </div>
                           
                           <div className="space-y-2">
-                            <FormLabel>Estudos Relacionados</FormLabel>
+                            <div className="flex items-center justify-between">
+                              <FormLabel>Estudos Relacionados</FormLabel>
+                              <Button 
+                                type="button" 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => setIsAddStudyDialogOpen(true)}
+                              >
+                                <Plus className="h-4 w-4 mr-1" /> Adicionar Estudo
+                              </Button>
+                            </div>
                             <Card>
                               <CardContent className="p-3 max-h-[200px] overflow-y-auto">
                                 {studies.length === 0 ? (
@@ -826,9 +858,17 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
             </Form>
           </TabsContent>
         </Tabs>
+        
+        {/* Diálogo para adicionar novo estudo científico */}
+        <AddScientificStudyDialog 
+          open={isAddStudyDialogOpen}
+          onOpenChange={setIsAddStudyDialogOpen}
+          onSuccess={handleStudyCreated}
+        />
       </DialogContent>
     </Dialog>
   );
 };
 
 export default AddNutraceuticalDialog;
+
