@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,7 +111,10 @@ const prepareNetworkData = () => {
            link.value >= 40 ? '#f59e0b' : '#9ca3af'
   }));
 
-  return { nodes, edges };
+  return { 
+    nodes: nodes, 
+    links: edges // Adicionar a propriedade links que estava faltando
+  };
 };
 
 // Preparar dados para a matriz de eficácia
