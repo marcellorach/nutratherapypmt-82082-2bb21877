@@ -23,10 +23,37 @@ const MainRow: React.FC<MainRowProps> = ({
   onDeleteClick,
   onManageRelationships
 }) => {
-  // Helper para obter o nome do outcome (adaptado para funcionar quando outcome não existir)
+  // Helper para obter o nome do outcome
   const getOutcomeName = () => {
     if (!nutraceutical) return "Não definido";
-    return "Categoria não definida";
+    if (nutraceutical.outcome && nutraceutical.outcome.name) {
+      return nutraceutical.outcome.name;
+    }
+    if (nutraceutical.category) {
+      return nutraceutical.category;
+    }
+    return "Não definido";
+  };
+
+  // Helper para obter o número de outcomes associados
+  const getOutcomeCount = () => {
+    if (!nutraceutical) return 0;
+    if (nutraceutical.outcomeCount !== undefined) return nutraceutical.outcomeCount;
+    if (nutraceutical.conditionCount !== undefined) return nutraceutical.conditionCount;
+    if (Array.isArray(nutraceutical.nutraceutical_conditions)) {
+      return nutraceutical.nutraceutical_conditions.length;
+    }
+    return 0;
+  };
+
+  // Helper para obter o número de estudos associados
+  const getStudyCount = () => {
+    if (!nutraceutical) return 0;
+    if (nutraceutical.studyCount !== undefined) return nutraceutical.studyCount;
+    if (Array.isArray(nutraceutical.nutraceutical_studies)) {
+      return nutraceutical.nutraceutical_studies.length;
+    }
+    return 0;
   };
 
   return (
@@ -49,12 +76,12 @@ const MainRow: React.FC<MainRowProps> = ({
       </TableCell>
       <TableCell>
         <Badge variant="outline" className="bg-blue-50">
-          {nutraceutical.conditionCount || 0}
+          {getOutcomeCount()}
         </Badge>
       </TableCell>
       <TableCell>
         <Badge variant="outline" className="bg-green-50">
-          {nutraceutical.studyCount || 0}
+          {getStudyCount()}
         </Badge>
       </TableCell>
       <TableCell>

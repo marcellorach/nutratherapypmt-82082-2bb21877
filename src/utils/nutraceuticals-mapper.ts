@@ -16,8 +16,8 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
     processedIds.add(item.id);
     return true;
   }).map(item => {
-    // Extrair condições de saúde associadas
-    const healthConditions = (item.nutraceutical_health_conditions || [])
+    // Extrair condições de saúde associadas (outcomes)
+    const healthConditions = (item.nutraceutical_conditions || [])
       .filter((nch: any) => nch.condition)
       .map((nch: any) => {
         // Garantir que o tipo de relacionamento esteja normalizado
@@ -68,7 +68,8 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
       }));
       
     // Dados científicos
-    const scientificData = item.nutraceutical_scientific_metadata && 
+    const scientificData = item.scientific_metadata || 
+      item.nutraceutical_scientific_metadata && 
       item.nutraceutical_scientific_metadata.length > 0 ? 
       item.nutraceutical_scientific_metadata[0] : 
       { efficacy_score: 0, sustainability_score: 0 };
@@ -76,6 +77,10 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
     // Benefícios
     const benefits = (item.nutraceutical_benefits || [])
       .map((b: any) => b.benefit);
+
+    // Adicionar contadores explícitos para outcomes e estudos
+    const outcomeCount = healthConditions.length;
+    const studyCount = studies.length;
       
     return {
       id: item.id,
@@ -98,7 +103,10 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
       preventionConditions: preventionConditions,
       treatmentConditions: treatmentConditions,
       supportConditions: supportConditions,
-      activeIngredients: []
+      activeIngredients: [],
+      outcomeCount: outcomeCount,
+      studyCount: studyCount,
+      outcome: item.outcome || null
     };
   });
 };

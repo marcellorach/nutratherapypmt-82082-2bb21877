@@ -102,6 +102,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
           onOpenChange={setIsRelationshipsDialogOpen}
           nutraceutical={selectedNutraceutical}
           onSuccess={refreshData}
+          initialTab="outcomes"
         />
       )}
     </Card>
