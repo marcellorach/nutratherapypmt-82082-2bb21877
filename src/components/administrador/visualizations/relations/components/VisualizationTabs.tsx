@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SankeyDiagram from '../../SankeyDiagram';
 import NetworkGraph from '../../NetworkGraph';
-import EfficacyMatrix from '../../efficacy-matrix/EfficacyMatrix';
+import EfficacyMatrix from '../../EfficacyMatrix';
 
 interface VisualizationTabsProps {
   relationView: string;
@@ -21,7 +21,7 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
   sankeyData
 }) => {
   return (
-    <Tabs defaultValue="sankey" value={relationView} onValueChange={onRelationViewChange}>
+    <Tabs value={relationView} onValueChange={onRelationViewChange}>
       <TabsList className="mb-4">
         <TabsTrigger value="sankey">Diagrama Sankey</TabsTrigger>
         <TabsTrigger value="network">Rede de Relações</TabsTrigger>

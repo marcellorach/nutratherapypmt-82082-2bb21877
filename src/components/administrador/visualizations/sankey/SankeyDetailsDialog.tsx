@@ -3,6 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { SankeyLink, SankeyNode } from './types';
+import { EvidenceLegend } from '../EvidenceLegend';
 
 interface SankeyDetailsDialogProps {
   open: boolean;
@@ -20,6 +21,25 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
   selectedTargetNode,
 }) => {
   if (!selectedSourceNode || !selectedTargetNode || !selectedLink) return null;
+
+  // Determinar o tipo de relacionamento
+  let relationshipType = 'Relação';
+  if (selectedLink.relationshipType) {
+    switch(selectedLink.relationshipType) {
+      case 'prevention':
+        relationshipType = 'Prevenção';
+        break;
+      case 'treatment':
+        relationshipType = 'Tratamento';
+        break;
+      case 'support':
+        relationshipType = 'Suporte';
+        break;
+    }
+  }
+
+  // Calcular a eficácia real (de 0-5)
+  const efficacyValue = selectedLink.value / 20;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,15 +78,16 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
           </div>
           
           <div className="bg-gray-50 p-4 rounded-md">
-            <h4 className="font-medium mb-2">Informações sobre a Eficácia</h4>
+            <h4 className="font-medium mb-2">Informações sobre a Relação</h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-3 rounded border">
-                <p className="text-sm text-gray-500">Grau de Eficácia</p>
-                <p className="text-xl font-medium">{selectedLink.value}/100</p>
+                <p className="text-sm text-gray-500">Tipo de Relação</p>
+                <p className="text-xl font-medium">{relationshipType}</p>
               </div>
               <div className="bg-white p-3 rounded border">
-                <p className="text-sm text-gray-500">Categorização</p>
-                <p className="text-xl font-medium">{selectedLink.labelText || "Não categorizado"}</p>
+                <p className="text-sm text-gray-500">Grau de Eficácia</p>
+                <p className="text-xl font-medium">{efficacyValue}/5</p>
+                <p className="text-sm text-gray-500">{selectedLink.labelText || 'Não categorizado'}</p>
               </div>
             </div>
           </div>
@@ -77,24 +98,15 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
               {selectedLink.description || 
                 `A relação entre ${selectedSourceNode.name} e ${selectedTargetNode.name} 
                  tem sido estudada em diversos trabalhos científicos, mostrando 
-                 ${selectedLink.value >= 70 ? 'resultados bastante promissores' : 
-                   selectedLink.value >= 40 ? 'resultados moderadamente positivos' : 
+                 ${efficacyValue >= 4 ? 'resultados bastante promissores' : 
+                   efficacyValue >= 3 ? 'resultados moderadamente positivos' : 
                    'alguns resultados preliminares'}.`
               }
             </p>
             
-            <div className="mt-4 text-sm">
-              <p className="text-gray-500">
-                Estudos relacionados: <span className="font-medium">{selectedLink.studyCount || "5+"}</span>
-              </p>
-              <p className="text-gray-500">
-                Nível de evidência: <span className="font-medium">
-                  {selectedLink.evidenceLevel ? `${selectedLink.evidenceLevel}/5` : 
-                   selectedLink.value >= 80 ? "Alto" : 
-                   selectedLink.value >= 60 ? "Moderado-Alto" :
-                   selectedLink.value >= 40 ? "Moderado" : "Inicial"}
-                </span>
-              </p>
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2">Legenda de Eficácia</h4>
+              <EvidenceLegend compact={true} />
             </div>
           </div>
         </div>
