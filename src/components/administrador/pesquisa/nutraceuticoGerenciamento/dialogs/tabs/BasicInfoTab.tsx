@@ -4,13 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 
 interface BasicInfoTabProps {
   form: UseFormReturn<any>;
-  outcomes: any[];
   isSubmitting: boolean;
   isEditMode: boolean;
   onCancel: () => void;
@@ -18,7 +16,6 @@ interface BasicInfoTabProps {
 
 const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
   form,
-  outcomes,
   isSubmitting,
   isEditMode,
   onCancel
@@ -119,35 +116,6 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
               <p className="text-xs text-muted-foreground">
                 Digite cada contraindicação em uma linha separada.
               </p>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="outcome_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Outcome Principal</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value || ''}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um outcome" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="no_outcome_selected">Nenhum outcome</SelectItem>
-                  {outcomes?.map(outcome => (
-                    <SelectItem key={outcome.id} value={outcome.id}>
-                      {outcome.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
             </FormItem>
           )}
         />

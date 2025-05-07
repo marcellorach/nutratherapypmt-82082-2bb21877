@@ -254,7 +254,7 @@ export type Database = {
           id?: string
           notes?: string | null
           nutraceutical_id?: string | null
-          relationship_type: string
+          relationship_type?: string
           updated_at?: string
         }
         Update: {
@@ -435,7 +435,6 @@ export type Database = {
           import_batch: string | null
           import_id: string | null
           name: string
-          outcome_id: string | null
           source: string | null
           updated_at: string
         }
@@ -449,7 +448,6 @@ export type Database = {
           import_batch?: string | null
           import_id?: string | null
           name: string
-          outcome_id?: string | null
           source?: string | null
           updated_at?: string
         }
@@ -463,18 +461,10 @@ export type Database = {
           import_batch?: string | null
           import_id?: string | null
           name?: string
-          outcome_id?: string | null
           source?: string | null
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "nutraceuticals_category_id_fkey"
-            columns: ["outcome_id"]
-            isOneToOne: false
-            referencedRelation: "nutraceutical_outcomes"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "nutraceuticals_import_id_fkey"
             columns: ["import_id"]

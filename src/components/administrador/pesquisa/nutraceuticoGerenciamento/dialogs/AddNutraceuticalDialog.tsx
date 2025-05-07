@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
-import { useOutcomes } from '@/hooks/nutraceuticals/useOutcomes';
 
 // Importando os componentes de cada tab
 import BasicInfoTab from './tabs/BasicInfoTab';
@@ -21,8 +20,7 @@ const nutraceuticalSchema = z.object({
   dosage: z.string().optional(),
   source: z.string().optional(),
   chemical_compound: z.string().optional(),
-  contraindications: z.string().optional(),
-  outcome_id: z.string().optional()
+  contraindications: z.string().optional()
 });
 
 // Tipagem para os dados do formulário
@@ -43,7 +41,6 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
 }) => {
   const { toast } = useToast();
   const { createNutraceutical, updateNutraceutical } = useNutraceuticals();
-  const { outcomes } = useOutcomes();
   
   const [activeTab, setActiveTab] = useState('basic-info');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,8 +59,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       dosage: '',
       source: '',
       chemical_compound: '',
-      contraindications: '',
-      outcome_id: ''
+      contraindications: ''
     },
   });
 
@@ -81,8 +77,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         dosage: nutraceutical.dosage || '',
         source: nutraceutical.source || '',
         chemical_compound: nutraceutical.chemical_compound || '',
-        contraindications: contraindicationsString,
-        outcome_id: nutraceutical.outcome_id || ''
+        contraindications: contraindicationsString
       });
     }
   }, [isEditMode, nutraceutical, form]);
@@ -200,7 +195,6 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
               <TabsContent value="basic-info">
                 <BasicInfoTab 
                   form={form}
-                  outcomes={outcomes}
                   isSubmitting={isSubmitting}
                   isEditMode={isEditMode}
                   onCancel={() => onOpenChange(false)}

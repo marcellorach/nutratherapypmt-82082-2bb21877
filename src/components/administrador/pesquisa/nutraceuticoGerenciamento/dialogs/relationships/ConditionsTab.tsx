@@ -27,7 +27,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
   const [selectedConditionId, setSelectedConditionId] = useState<string>('');
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
   const [notes, setNotes] = useState<string>('');
-  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('support');
+  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('prevention');
   const [existingRelations, setExistingRelations] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoadingRelations, setIsLoadingRelations] = useState<boolean>(true);
@@ -100,7 +100,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
       setSelectedConditionId('');
       setEfficacyScore(3);
       setNotes('');
-      setRelationshipType('support');
+      setRelationshipType('prevention');
       
       // Recarregar relações
       await loadExistingRelations();
@@ -235,7 +235,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Observações sobre esta relação"
+                placeholder="Notas sobre esta relação"
                 disabled={isLoading || isSaving}
               />
             </div>
@@ -255,14 +255,14 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
           ) : (
             <>
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Relação
+              Adicionar Condição
             </>
           )}
         </Button>
       </div>
       
       <div>
-        <h3 className="text-lg font-medium mb-4">Relações Existentes</h3>
+        <h3 className="text-lg font-medium mb-4">Condições Relacionadas</h3>
         
         {isLoadingRelations ? (
           <div className="flex items-center justify-center p-6">
@@ -270,7 +270,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
           </div>
         ) : existingRelations.length === 0 ? (
           <div className="text-center p-6 text-muted-foreground border rounded-md">
-            Nenhuma relação cadastrada para este nutracêutico
+            Nenhuma condição relacionada a este nutracêutico
           </div>
         ) : (
           <div className="space-y-3">
@@ -289,7 +289,7 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
                         </Badge>
                       </div>
                       {relation.notes && (
-                        <p className="text-sm text-muted-foreground mt-2">{relation.notes}</p>
+                        <p className="text-sm text-muted-foreground">{relation.notes}</p>
                       )}
                     </div>
                     <Button

@@ -17,7 +17,6 @@ export const NutraceuticalQueryService = {
         .from('nutraceuticals')
         .select(`
           *,
-          outcome:outcome_id(*),
           scientific_metadata:nutraceutical_scientific_metadata(*)
         `)
         .eq('id', id)
@@ -44,7 +43,6 @@ export const NutraceuticalQueryService = {
         .from('nutraceuticals')
         .select(`
           *,
-          outcome:outcome_id(*),
           scientific_metadata:nutraceutical_scientific_metadata(*),
           conditions:nutraceutical_conditions(*)
         `)
@@ -69,7 +67,7 @@ export const NutraceuticalQueryService = {
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceuticals')
-        .select('*, outcome:outcome_id(*), scientific_metadata:nutraceutical_scientific_metadata(*)')
+        .select('*, scientific_metadata:nutraceutical_scientific_metadata(*)')
         .order('name');
 
       if (error) {
