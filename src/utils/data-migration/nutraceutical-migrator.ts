@@ -35,7 +35,6 @@ export const NutraceuticalMigrator = {
           dosage: nutra.dosage,
           source: nutra.source,
           chemical_compound: nutra.chemicalCompound,
-          outcome_id: categoryId, // Alterado de category_id para outcome_id
           contraindications: nutra.contraindications || []
         });
         
@@ -47,6 +46,16 @@ export const NutraceuticalMigrator = {
         
         // Adicionar metadados e relacionamentos
         await this.addNutraceuticalDetails(newNutraceutical.id, nutra, conditionMap);
+        
+        // Adicionar relação com categoria principal (condition) após criar o nutracêutico
+        if (categoryId) {
+          await NutraceuticalsService.relateToCondition(
+            newNutraceutical.id, 
+            categoryId, 
+            'primary', 
+            5 // Alta eficácia para categoria principal
+          );
+        }
       } catch (err) {
         console.error(`Erro ao processar nutracêutico ${nutra.name}:`, err);
       }
@@ -133,7 +142,7 @@ export const NutraceuticalMigrator = {
     nutraName: string,
     conditions: any[] | undefined,
     conditionMap: Map<string, string>,
-    relationshipType: 'prevention' | 'treatment' | 'support'
+    relationshipType: 'prevention' | 'treatment' | 'support' | 'primary'
   ) {
     if (!conditions || conditions.length === 0) return 0;
     

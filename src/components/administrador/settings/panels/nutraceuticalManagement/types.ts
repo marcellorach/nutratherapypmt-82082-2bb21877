@@ -9,7 +9,6 @@ export interface Nutraceutical {
   dosage?: string;
   chemical_compound?: string;
   contraindications?: string[];
-  outcome_id?: string;
 }
 
 export interface NutraceuticalRelation {
