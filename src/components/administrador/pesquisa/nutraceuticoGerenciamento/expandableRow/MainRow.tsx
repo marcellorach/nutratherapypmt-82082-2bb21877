@@ -26,33 +26,65 @@ const MainRow: React.FC<MainRowProps> = ({
   // Helper para obter o nome do outcome
   const getOutcomeName = () => {
     if (!nutraceutical) return "Não definido";
+    
+    // Primeiro, verifica se o objeto outcome completo está disponível
     if (nutraceutical.outcome && nutraceutical.outcome.name) {
       return nutraceutical.outcome.name;
     }
+    
+    // Depois, verifica se existe um outcome_name
+    if (nutraceutical.outcome_name) {
+      return nutraceutical.outcome_name;
+    }
+    
+    // Depois verifica se existe category (nomenclatura antiga)
     if (nutraceutical.category) {
       return nutraceutical.category;
     }
+    
     return "Não definido";
   };
 
   // Helper para obter o número de outcomes associados
   const getOutcomeCount = () => {
     if (!nutraceutical) return 0;
-    if (nutraceutical.outcomeCount !== undefined) return nutraceutical.outcomeCount;
-    if (nutraceutical.conditionCount !== undefined) return nutraceutical.conditionCount;
+    
+    // Verifica diferentes propriedades onde o contador pode estar
+    if (nutraceutical.outcomeCount !== undefined) {
+      return nutraceutical.outcomeCount;
+    }
+    
+    if (nutraceutical.conditionCount !== undefined) {
+      return nutraceutical.conditionCount;
+    }
+    
     if (Array.isArray(nutraceutical.nutraceutical_conditions)) {
       return nutraceutical.nutraceutical_conditions.length;
     }
+    
+    if (nutraceutical.outcomes_count !== undefined) {
+      return nutraceutical.outcomes_count;
+    }
+    
     return 0;
   };
 
   // Helper para obter o número de estudos associados
   const getStudyCount = () => {
     if (!nutraceutical) return 0;
-    if (nutraceutical.studyCount !== undefined) return nutraceutical.studyCount;
+    
+    if (nutraceutical.studyCount !== undefined) {
+      return nutraceutical.studyCount;
+    }
+    
     if (Array.isArray(nutraceutical.nutraceutical_studies)) {
       return nutraceutical.nutraceutical_studies.length;
     }
+    
+    if (nutraceutical.studies_count !== undefined) {
+      return nutraceutical.studies_count;
+    }
+    
     return 0;
   };
 
