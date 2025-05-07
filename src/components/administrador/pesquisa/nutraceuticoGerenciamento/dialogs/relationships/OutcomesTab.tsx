@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations-service';
+import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations';
 
 interface OutcomesTabProps {
   nutraceutical: any;
@@ -35,7 +35,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
   const { toast } = useToast();
   
   // Carregar relações existentes quando o componente é montado
-  React.useEffect(() => {
+  useEffect(() => {
     if (nutraceutical?.id) {
       loadExistingRelations();
     }
@@ -45,7 +45,9 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
   const loadExistingRelations = async () => {
     setIsLoadingRelations(true);
     try {
+      console.log('Carregando relações de outcomes para o nutracêutico:', nutraceutical.id);
       const relations = await NutraceuticalRelationsService.getConditionRelations(nutraceutical.id);
+      console.log('Relações de outcomes carregadas:', relations);
       setExistingRelations(relations || []);
     } catch (error) {
       console.error('Erro ao carregar relações existentes:', error);
@@ -83,13 +85,23 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
     
     setIsSaving(true);
     try {
-      await NutraceuticalRelationsService.relateToCondition(
+      console.log('Adicionando relação com outcome:', {
+        nutraceuticalId: nutraceutical.id,
+        outcomeId: selectedConditionId,
+        relationshipType,
+        efficacyScore,
+        notes
+      });
+      
+      const result = await NutraceuticalRelationsService.relateToCondition(
         nutraceutical.id,
         selectedConditionId,
         relationshipType,
         efficacyScore,
         notes
       );
+      
+      console.log('Resultado da adição da relação:', result);
       
       toast({
         title: 'Sucesso',
@@ -124,6 +136,8 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
   const handleRemoveRelation = async (relationId: string) => {
     setIsSaving(true);
     try {
+      console.log('Removendo relação com outcome:', { relationId });
+      
       await NutraceuticalRelationsService.removeConditionRelation(relationId);
       
       toast({

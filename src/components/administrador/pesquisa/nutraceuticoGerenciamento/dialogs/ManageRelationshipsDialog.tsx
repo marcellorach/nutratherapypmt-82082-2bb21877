@@ -27,7 +27,7 @@ const ManageRelationshipsDialog: React.FC<ManageRelationshipsDialogProps> = ({
   onOpenChange,
   nutraceutical,
   onSuccess,
-  initialTab = 'studies'
+  initialTab = 'outcomes'
 }) => {
   const [activeTab, setActiveTab] = useState<'outcomes' | 'studies'>(initialTab);
   const [isLoading, setIsLoading] = useState(false);
