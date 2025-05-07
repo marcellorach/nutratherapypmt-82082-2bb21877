@@ -28,7 +28,6 @@ import PesquisaEstudosTab from '@/components/administrador/pesquisa/PesquisaEstu
 import NutraceuticoGerenciamentoTab from '@/components/administrador/pesquisa/NutraceuticoGerenciamentoTab';
 
 import KnowledgeBaseSettingsTab from '@/components/administrador/settings/KnowledgeBaseSettingsTab';
-import OutcomeManagementPanel from '@/components/administrador/settings/panels/OutcomeManagementPanel';
 import DataProcessingSettingsTab from '@/components/administrador/settings/DataProcessingSettingsTab';
 import ResearchSettingsTab from '@/components/administrador/settings/ResearchSettingsTab';
 import PredictiveAnalysisSettingsTab from '@/components/administrador/settings/PredictiveAnalysisSettingsTab';
@@ -67,8 +66,6 @@ const AdministradorPage: React.FC = () => {
           return <RelationsTab />;
         case "knowledge-base-settings":
           return <KnowledgeBaseSettingsTab />;
-        case "outcomes-management":
-          return <OutcomeManagementPanel />;
         
         case "import":
           return <ImportStep />;
