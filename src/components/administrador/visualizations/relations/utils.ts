@@ -21,7 +21,7 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
     color: node.color,
     value: 1, // Tamanho base do nó
     // Usar um objeto vazio se metadata não existir
-    metadata: (node as any).metadata || {}
+    metadata: ((node as any).metadata || {})
   }));
   
   // Contar quantas conexões cada nó tem

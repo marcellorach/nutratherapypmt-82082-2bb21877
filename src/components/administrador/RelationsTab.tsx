@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,7 +98,7 @@ const prepareNetworkData = () => {
     }
   }));
 
-  const edges = exampleSankeyData.links.map(link => ({
+  const links = exampleSankeyData.links.map(link => ({
     from: link.source,
     to: link.target,
     title: `Eficácia: ${link.value}/100 - ${link.labelText}`,
@@ -113,7 +112,7 @@ const prepareNetworkData = () => {
 
   return { 
     nodes: nodes, 
-    links: edges // Adicionar a propriedade links que estava faltando
+    links: links // Garantir que 'links' é propriamente fornecido
   };
 };
 

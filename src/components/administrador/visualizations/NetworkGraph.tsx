@@ -53,10 +53,32 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     );
     
     const edges = new DataSet(
-      data.links.map((link, index) => ({
-        ...link,
-        id: index
-      }))
+      data.links.map((link, index) => {
+        // Converter formato 'from/to' para o formato esperado pelo vis.js
+        const edgeData: any = {
+          id: index
+        };
+
+        // Se o link tiver propriedades 'from' e 'to', usá-las
+        if ('from' in link && 'to' in link) {
+          edgeData.from = link.from;
+          edgeData.to = link.to;
+        } else {
+          // Caso contrário, usar 'source' e 'target'
+          edgeData.from = link.source;
+          edgeData.to = link.target;
+        }
+
+        // Copiar outras propriedades
+        if (link.value) edgeData.value = link.value;
+        if (link.title) edgeData.title = link.title;
+        if (link.color) edgeData.color = link.color;
+        if (link.width) edgeData.width = link.width;
+        if (link.arrows) edgeData.arrows = link.arrows;
+        if (link.dashes !== undefined) edgeData.dashes = link.dashes;
+
+        return edgeData;
+      })
     );
     
     // Opções para o grafo
@@ -82,8 +104,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         width: 1,
         color: { inherit: 'from' },
         smooth: {
+          enabled: true, // Adicionando propriedade obrigatória
           type: 'continuous',
-          forceDirection: 'none'
+          forceDirection: 'none',
+          roundness: 0.5 // Adicionando propriedade obrigatória
         }
       },
       physics: {
