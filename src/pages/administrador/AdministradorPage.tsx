@@ -18,6 +18,7 @@ import ModelosPreditivosTab from '@/components/administrador/ModelosPreditivosTa
 import CustoBeneficioTab from '@/components/administrador/CustoBeneficioTab';
 import ConfiguracoesIATab from '@/components/administrador/ConfiguracoesIATab';
 import DesignConventionsTab from '@/components/administrador/DesignConventionsTab';
+import OutcomeManagementPanel from '@/components/administrador/settings/panels/OutcomeManagementPanel';
 
 import EstudosPlanejadosTab from '@/components/administrador/pesquisa/EstudosPlanejadosTab';
 import EstudosAndamentoTab from '@/components/administrador/pesquisa/EstudosAndamentoTab';
@@ -66,6 +67,8 @@ const AdministradorPage: React.FC = () => {
           return <RelationsTab />;
         case "knowledge-base-settings":
           return <KnowledgeBaseSettingsTab />;
+        case "outcomes-management":
+          return <OutcomeManagementPanel />;
         
         case "import":
           return <ImportStep />;
