@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Search, Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Trash2, Plus, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations-service';
 
 interface ConditionsTabProps {
@@ -22,137 +24,186 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
   isLoading,
   onSuccess
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCondition, setSelectedCondition] = useState<any | null>(null);
-  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('support');
+  const [selectedConditionId, setSelectedConditionId] = useState<string>('');
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
-  const [notes, setNotes] = useState('');
-  const [isAssociating, setIsAssociating] = useState(false);
+  const [notes, setNotes] = useState<string>('');
+  const [relationshipType, setRelationshipType] = useState<'prevention' | 'treatment' | 'support'>('support');
+  const [existingRelations, setExistingRelations] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isLoadingRelations, setIsLoadingRelations] = useState<boolean>(true);
+  
   const { toast } = useToast();
   
-  // Filtrar condições por termo de pesquisa
-  const filteredConditions = conditions.filter(condition => 
-    condition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (condition.description && condition.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Carregar relações existentes quando o componente é montado
+  React.useEffect(() => {
+    if (nutraceutical?.id) {
+      loadExistingRelations();
+    }
+  }, [nutraceutical]);
   
-  // Função para associar condição ao nutracêutico
-  const handleAssociateCondition = async () => {
-    if (!selectedCondition || !nutraceutical?.id) {
+  // Carregar relações existentes entre o nutracêutico e condições
+  const loadExistingRelations = async () => {
+    setIsLoadingRelations(true);
+    try {
+      const relations = await NutraceuticalRelationsService.getConditionRelations(nutraceutical.id);
+      setExistingRelations(relations || []);
+    } catch (error) {
+      console.error('Erro ao carregar relações existentes:', error);
       toast({
-        title: "Erro",
-        description: "Selecione uma condição para associar",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Não foi possível carregar as relações existentes',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingRelations(false);
+    }
+  };
+  
+  // Adicionar nova relação entre nutracêutico e condição
+  const handleAddRelation = async () => {
+    if (!selectedConditionId) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione uma condição para adicionar',
+        variant: 'destructive'
       });
       return;
     }
     
+    // Verificar se já existe uma relação com esta condição
+    const existingRelation = existingRelations.find(rel => rel.condition_id === selectedConditionId);
+    if (existingRelation) {
+      toast({
+        title: 'Aviso',
+        description: 'Esta condição já está relacionada a este nutracêutico',
+        variant: 'default'
+      });
+      return;
+    }
+    
+    setIsSaving(true);
     try {
-      setIsAssociating(true);
-      
       await NutraceuticalRelationsService.relateToCondition(
         nutraceutical.id,
-        selectedCondition.id,
+        selectedConditionId,
         relationshipType,
         efficacyScore,
         notes
       );
       
       toast({
-        title: "Sucesso",
-        description: "Condição associada com sucesso ao nutracêutico",
+        title: 'Sucesso',
+        description: 'Relação adicionada com sucesso',
       });
       
-      // Resetar campos
-      setSelectedCondition(null);
-      setRelationshipType('support');
+      // Limpar campos
+      setSelectedConditionId('');
       setEfficacyScore(3);
       setNotes('');
+      setRelationshipType('support');
+      
+      // Recarregar relações
+      await loadExistingRelations();
       
       if (onSuccess) {
         onSuccess();
       }
-      
     } catch (error) {
-      console.error('Erro ao associar condição:', error);
+      console.error('Erro ao adicionar relação:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível associar a condição ao nutracêutico",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Não foi possível adicionar a relação',
+        variant: 'destructive'
       });
     } finally {
-      setIsAssociating(false);
+      setIsSaving(false);
+    }
+  };
+  
+  // Remover relação existente
+  const handleRemoveRelation = async (relationId: string) => {
+    setIsSaving(true);
+    try {
+      await NutraceuticalRelationsService.removeConditionRelation(relationId);
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Relação removida com sucesso',
+      });
+      
+      // Recarregar relações
+      await loadExistingRelations();
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Erro ao remover relação:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover a relação',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Obter nome da condição pelo ID
+  const getConditionName = (conditionId: string) => {
+    const condition = conditions.find(c => c.id === conditionId);
+    return condition?.name || 'Condição desconhecida';
+  };
+  
+  // Renderizar etiqueta para o tipo de relacionamento
+  const renderRelationshipTypeBadge = (type: string) => {
+    switch(type) {
+      case 'prevention':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Prevenção</Badge>;
+      case 'treatment':
+        return <Badge variant="outline" className="bg-green-50 text-green-700">Tratamento</Badge>;
+      case 'support':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700">Suporte</Badge>;
+      default:
+        return <Badge variant="outline">Desconhecido</Badge>;
     }
   };
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="text"
-            placeholder="Pesquisar condições..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          disabled // Será implementado na próxima versão
-        >
-          <Plus className="h-4 w-4 mr-1" /> Nova Condição
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto p-1">
-        {isLoading ? (
-          <div className="col-span-2 flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
-        ) : filteredConditions.length === 0 ? (
-          <div className="col-span-2 text-center py-8 text-gray-500">
-            Nenhuma condição de saúde encontrada.
-          </div>
-        ) : (
-          filteredConditions.map(condition => (
-            <Card 
-              key={condition.id} 
-              className={`p-3 cursor-pointer transition-colors ${
-                selectedCondition?.id === condition.id ? 'bg-blue-50 border-blue-300' : ''
-              }`}
-              onClick={() => setSelectedCondition(condition)}
-            >
-              <div className="space-y-1">
-                <h4 className="font-medium text-sm">{condition.name}</h4>
-                {condition.description && (
-                  <div className="text-xs text-gray-500 line-clamp-2">
-                    {condition.description}
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
-      
-      {selectedCondition && (
-        <div className="border rounded-md p-3 mt-4">
-          <h4 className="font-medium">Associar condição ao nutracêutico</h4>
-          <p className="text-sm text-gray-500 mb-3">
-            Defina como este nutracêutico se relaciona com a condição {selectedCondition?.name}.
-          </p>
-          
-          <div className="space-y-3">
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-4">Associar a Condições de Saúde</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Tipo de relação</label>
-              <Select 
-                value={relationshipType}
-                onValueChange={(value) => setRelationshipType(value as any)}
+              <Label htmlFor="conditionSelect">Condição de Saúde</Label>
+              <Select
+                value={selectedConditionId}
+                onValueChange={setSelectedConditionId}
+                disabled={isLoading || isSaving}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione uma condição" />
+                </SelectTrigger>
+                <SelectContent>
+                  {conditions && conditions.map((condition) => (
+                    <SelectItem key={condition.id} value={condition.id}>
+                      {condition.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="relationshipType">Tipo de Relação</Label>
+              <Select
+                value={relationshipType}
+                onValueChange={(value) => setRelationshipType(value as 'prevention' | 'treatment' | 'support')}
+                disabled={isLoading || isSaving}
+              >
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o tipo de relação" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,46 +213,100 @@ const ConditionsTab: React.FC<ConditionsTabProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Eficácia</label>
-                <span className="text-sm">{efficacyScore.toFixed(1)}</span>
-              </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Nível de Eficácia ({efficacyScore})</Label>
               <Slider
-                defaultValue={[3]}
+                value={[efficacyScore]}
                 min={1}
                 max={5}
-                step={0.1}
-                value={[efficacyScore]}
-                onValueChange={(vals) => setEfficacyScore(vals[0])}
+                step={1}
+                onValueChange={(value) => setEfficacyScore(value[0])}
+                disabled={isLoading || isSaving}
+                className="py-4"
               />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Baixa</span>
-                <span>Alta</span>
-              </div>
             </div>
             
             <div>
-              <label className="text-sm font-medium">Notas (opcional)</label>
-              <Input
+              <Label htmlFor="notes">Notas</Label>
+              <Textarea
+                id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Observações sobre a relação"
+                placeholder="Observações sobre esta relação"
+                disabled={isLoading || isSaving}
               />
             </div>
-            
-            <Button 
-              onClick={handleAssociateCondition} 
-              className="w-full"
-              disabled={isAssociating}
-            >
-              {isAssociating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Associar Condição
-            </Button>
           </div>
         </div>
-      )}
+        
+        <Button 
+          onClick={handleAddRelation}
+          disabled={!selectedConditionId || isLoading || isSaving}
+          className="mt-4"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Relação
+            </>
+          )}
+        </Button>
+      </div>
+      
+      <div>
+        <h3 className="text-lg font-medium mb-4">Relações Existentes</h3>
+        
+        {isLoadingRelations ? (
+          <div className="flex items-center justify-center p-6">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : existingRelations.length === 0 ? (
+          <div className="text-center p-6 text-muted-foreground border rounded-md">
+            Nenhuma relação cadastrada para este nutracêutico
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {existingRelations.map((relation) => (
+              <Card key={relation.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <h4 className="font-medium">
+                        {relation.condition?.name || getConditionName(relation.condition_id)}
+                      </h4>
+                      <div className="flex items-center space-x-2">
+                        {renderRelationshipTypeBadge(relation.relationship_type)}
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                          Eficácia: {relation.efficacy_score}/5
+                        </Badge>
+                      </div>
+                      {relation.notes && (
+                        <p className="text-sm text-muted-foreground mt-2">{relation.notes}</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveRelation(relation.id)}
+                      disabled={isSaving}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

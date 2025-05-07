@@ -18,6 +18,8 @@ export const NutraceuticalRelationsService = {
     notes?: string
   ) {
     try {
+      console.log('Relacionando nutracêutico ao outcome:', { nutraceuticalId, outcomeId, relationshipType, efficacyScore, notes });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -33,11 +35,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao relacionar nutracêutico a outcome:', error);
         NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a outcome');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao relacionar nutracêutico a outcome:', error);
       NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a outcome');
     }
   },
@@ -53,6 +57,8 @@ export const NutraceuticalRelationsService = {
     notes?: string
   ) {
     try {
+      console.log('Relacionando nutracêutico à condição:', { nutraceuticalId, conditionId, relationshipType, efficacyScore, notes });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -68,11 +74,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao relacionar nutracêutico a condição:', error);
         NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a condição');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao relacionar nutracêutico a condição:', error);
       NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a condição');
     }
   },
@@ -86,6 +94,8 @@ export const NutraceuticalRelationsService = {
     relevanceScore: number
   ) {
     try {
+      console.log('Relacionando nutracêutico ao estudo:', { nutraceuticalId, studyId, relevanceScore });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -99,11 +109,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao relacionar nutracêutico a estudo:', error);
         NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a estudo');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao relacionar nutracêutico a estudo:', error);
       NutraceuticalBaseService.handleError(error, 'relacionar nutracêutico a estudo');
     }
   },
@@ -113,6 +125,8 @@ export const NutraceuticalRelationsService = {
    */
   async addBenefit(nutraceuticalId: string, benefit: string) {
     try {
+      console.log('Adicionando benefício ao nutracêutico:', { nutraceuticalId, benefit });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -125,11 +139,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao adicionar benefício:', error);
         NutraceuticalBaseService.handleError(error, 'adicionar benefício ao nutracêutico');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao adicionar benefício:', error);
       NutraceuticalBaseService.handleError(error, 'adicionar benefício ao nutracêutico');
     }
   },
@@ -142,6 +158,8 @@ export const NutraceuticalRelationsService = {
     notes: string
   ) {
     try {
+      console.log('Atualizando relação com outcome:', { nutraceuticalId, notes });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -155,11 +173,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao atualizar relação com outcome:', error);
         NutraceuticalBaseService.handleError(error, 'atualizar relação com outcome');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao atualizar relação com outcome:', error);
       NutraceuticalBaseService.handleError(error, 'atualizar relação com outcome');
     }
   },
@@ -169,6 +189,8 @@ export const NutraceuticalRelationsService = {
    */
   async removeConditionRelation(relationId: string) {
     try {
+      console.log('Removendo relação com condição:', { relationId });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -179,11 +201,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao remover relação com condição:', error);
         NutraceuticalBaseService.handleError(error, 'remover relação com condição');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao remover relação com condição:', error);
       NutraceuticalBaseService.handleError(error, 'remover relação com condição');
     }
   },
@@ -193,6 +217,8 @@ export const NutraceuticalRelationsService = {
    */
   async removeOutcomeRelation(relationId: string) {
     try {
+      console.log('Removendo relação com outcome:', { relationId });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -203,11 +229,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao remover relação com outcome:', error);
         NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao remover relação com outcome:', error);
       NutraceuticalBaseService.handleError(error, 'remover relação com outcome');
     }
   },
@@ -217,6 +245,8 @@ export const NutraceuticalRelationsService = {
    */
   async removeStudyRelation(relationId: string) {
     try {
+      console.log('Removendo relação com estudo:', { relationId });
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
@@ -227,11 +257,13 @@ export const NutraceuticalRelationsService = {
         .single();
 
       if (error) {
+        console.error('Erro ao remover relação com estudo:', error);
         NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao remover relação com estudo:', error);
       NutraceuticalBaseService.handleError(error, 'remover relação com estudo');
     }
   },
@@ -241,22 +273,26 @@ export const NutraceuticalRelationsService = {
    */
   async getStudyRelations(nutraceuticalId: string) {
     try {
+      console.log('Obtendo relações com estudos para o nutracêutico:', nutraceuticalId);
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_studies')
         .select(`
           *,
-          study:scientific_studies(id, title, journal)
+          study:study_id(id, title, journal)
         `)
         .eq('nutraceutical_id', nutraceuticalId);
 
       if (error) {
+        console.error('Erro ao obter relações com estudos:', error);
         NutraceuticalBaseService.handleError(error, 'obter relações com estudos');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao obter relações com estudos:', error);
       NutraceuticalBaseService.handleError(error, 'obter relações com estudos');
       return [];
     }
@@ -267,22 +303,26 @@ export const NutraceuticalRelationsService = {
    */
   async getConditionRelations(nutraceuticalId: string) {
     try {
+      console.log('Obtendo relações com condições para o nutracêutico:', nutraceuticalId);
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_conditions')
         .select(`
           *,
-          condition:health_conditions(id, name, description)
+          condition:condition_id(id, name, description)
         `)
         .eq('nutraceutical_id', nutraceuticalId);
 
       if (error) {
+        console.error('Erro ao obter relações com condições:', error);
         NutraceuticalBaseService.handleError(error, 'obter relações com condições');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao obter relações com condições:', error);
       NutraceuticalBaseService.handleError(error, 'obter relações com condições');
       return [];
     }
@@ -293,22 +333,26 @@ export const NutraceuticalRelationsService = {
    */
   async getOutcomeRelations(nutraceuticalId: string) {
     try {
+      console.log('Obtendo relações com outcomes para o nutracêutico:', nutraceuticalId);
+      
       // Usando type assertion para contornar a verificação de tipos do TypeScript
       const client = supabase as any;
       const { data, error } = await client
         .from('nutraceutical_conditions')
         .select(`
           *,
-          condition:health_conditions(id, name, description)
+          condition:condition_id(id, name, description)
         `)
         .eq('nutraceutical_id', nutraceuticalId);
 
       if (error) {
+        console.error('Erro ao obter relações com outcomes:', error);
         NutraceuticalBaseService.handleError(error, 'obter relações com outcomes');
       }
 
       return data;
     } catch (error) {
+      console.error('Exceção ao obter relações com outcomes:', error);
       NutraceuticalBaseService.handleError(error, 'obter relações com outcomes');
       return [];
     }
