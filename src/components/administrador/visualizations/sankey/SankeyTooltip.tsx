@@ -2,25 +2,17 @@
 import React from 'react';
 
 interface SankeyTooltipProps {
-  payload: any[];
+  active?: boolean;
+  payload?: any[];
 }
 
-const SankeyTooltip: React.FC<SankeyTooltipProps> = ({ payload }) => {
-  if (!payload || !payload.length) return null;
-  
-  const item = payload[0];
-  if (!item || !item.payload) return null;
-
-  const source = item.payload.sourceNode;
-  const target = item.payload.targetNode;
-  const value = item.payload.value;
-  
-  if (!source || !target) return null;
-
-  // Determinar o tipo de relacionamento
-  let relationshipType = 'Relação';
-  if (item.payload.relationshipType) {
-    switch(item.payload.relationshipType) {
+const SankeyTooltip: React.FC<SankeyTooltipProps> = ({ active, payload }) => {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload;
+    const efficacyScore = data.value / 20; // Convertendo de volta para escala 0-5
+    
+    let relationshipType = '';
+    switch (data.relationshipType) {
       case 'prevention':
         relationshipType = 'Prevenção';
         break;
@@ -30,34 +22,38 @@ const SankeyTooltip: React.FC<SankeyTooltipProps> = ({ payload }) => {
       case 'support':
         relationshipType = 'Suporte';
         break;
+      default:
+        relationshipType = 'Outro';
     }
+
+    return (
+      <div className="bg-white p-3 border rounded shadow-md min-w-[200px]">
+        <div className="font-medium text-base mb-1">{data.sourceName} → {data.targetName}</div>
+        <div className="text-sm text-gray-600 mb-2">{relationshipType}</div>
+        <div className="flex items-center mb-1">
+          <span className="text-sm mr-2">Eficácia:</span>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="h-2 rounded-full"
+              style={{
+                width: `${efficacyScore * 20}%`,
+                backgroundColor: efficacyScore >= 4 ? '#10b981' : efficacyScore >= 3 ? '#3b82f6' : '#f59e0b'
+              }}
+            ></div>
+          </div>
+          <span className="ml-2 text-sm font-medium">{efficacyScore.toFixed(1)}/5</span>
+        </div>
+        {data.studyCount && (
+          <div className="text-xs text-gray-500">
+            Baseado em {data.studyCount} estudo{data.studyCount !== 1 ? 's' : ''}
+          </div>
+        )}
+        <div className="text-xs text-gray-500 mt-1">Clique para mais detalhes</div>
+      </div>
+    );
   }
 
-  // Calcular o valor real de eficácia (de 0-5)
-  const efficacyValue = value / 20;
-
-  return (
-    <div className="bg-white p-4 shadow-lg rounded-lg border border-gray-200">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="font-medium text-blue-600">{source.name}</span>
-          <span className="mx-2">→</span>
-          <span className="font-medium text-green-600">{target.name}</span>
-        </div>
-        <div className="text-sm">
-          <p className="text-gray-600 font-medium">{relationshipType}</p>
-          <p className="text-gray-600">Eficácia: <span className="font-medium">{efficacyValue}/5</span></p>
-          {item.payload.labelText && (
-            <p className="text-gray-600">{item.payload.labelText}</p>
-          )}
-        </div>
-        {item.payload.description && (
-          <p className="text-xs text-gray-500 mt-1">{item.payload.description}</p>
-        )}
-        <p className="text-xs text-gray-400 mt-1">Clique para mais detalhes</p>
-      </div>
-    </div>
-  );
+  return null;
 };
 
 export default SankeyTooltip;

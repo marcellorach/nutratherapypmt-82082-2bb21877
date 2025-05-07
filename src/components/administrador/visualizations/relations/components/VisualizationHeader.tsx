@@ -1,29 +1,22 @@
 
 import React from 'react';
-import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, Network } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 interface VisualizationHeaderProps {
   efficacyFilter: string;
   onEfficacyFilterChange: (value: string) => void;
 }
 
-const VisualizationHeader: React.FC<VisualizationHeaderProps> = ({ 
-  efficacyFilter, 
-  onEfficacyFilterChange 
+const VisualizationHeader: React.FC<VisualizationHeaderProps> = ({
+  efficacyFilter,
+  onEfficacyFilterChange
 }) => {
   return (
     <div className="flex items-center justify-between">
-      <div>
-        <CardTitle className="flex items-center">
-          <Network className="mr-2 h-5 w-5 text-primary" />
-          Mapa de Relações
-        </CardTitle>
-        <CardDescription>
-          Visualize como os nutracêuticos se relacionam com diferentes condições de saúde
-        </CardDescription>
+      <div className="flex items-center">
+        <div className="text-lg font-medium">Mapa de Relações</div>
       </div>
       <div className="flex items-center gap-4">
         <Select value={efficacyFilter} onValueChange={onEfficacyFilterChange}>
