@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const RelationsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [efficacyFilter, setEfficacyFilter] = useState<string>("all");
-  const [relationView, setRelationView] = useState<string>('sankey');
+  const [relationView, setRelationView] = useState<string>('network');
   const [relationshipFilter, setRelationshipFilter] = useState<string>("all");
   
   const { sankeyData, isLoading, error, refresh } = useSankeyData();
@@ -110,7 +110,6 @@ const RelationsTab: React.FC = () => {
           onRelationViewChange={setRelationView}
           networkData={networkData}
           matrixData={matrixData}
-          sankeyData={filteredSankeyData}
         />
       )}
     </div>

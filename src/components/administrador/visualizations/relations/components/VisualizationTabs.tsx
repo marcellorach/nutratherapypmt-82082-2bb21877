@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SankeyDiagram from '../../SankeyDiagram';
 import NetworkGraph from '../../NetworkGraph';
 import EfficacyMatrix from '../../EfficacyMatrix';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -11,7 +10,6 @@ interface VisualizationTabsProps {
   onRelationViewChange: (value: string) => void;
   networkData: any;
   matrixData: any;
-  sankeyData: any;
   isLoading?: boolean;
 }
 
@@ -20,11 +18,10 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
   onRelationViewChange,
   networkData,
   matrixData,
-  sankeyData,
   isLoading = false
 }) => {
   // Verificar se há dados disponíveis
-  const hasSankeyData = sankeyData && sankeyData.nodes && sankeyData.nodes.length > 0;
+  const hasNetworkData = networkData && networkData.nodes && networkData.nodes.length > 0;
   
   // Mensagem se não houver dados
   const NoDataMessage = () => (
@@ -49,25 +46,14 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
   return (
     <Tabs value={relationView} onValueChange={onRelationViewChange}>
       <TabsList className="mb-4">
-        <TabsTrigger value="sankey">Diagrama Sankey</TabsTrigger>
         <TabsTrigger value="network">Rede de Relações</TabsTrigger>
         <TabsTrigger value="matrix">Matriz de Eficácia</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="sankey" className="pt-4">
-        {isLoading ? (
-          <LoadingState />
-        ) : hasSankeyData ? (
-          <SankeyDiagram data={sankeyData} height={550} />
-        ) : (
-          <NoDataMessage />
-        )}
-      </TabsContent>
-      
       <TabsContent value="network" className="pt-4">
         {isLoading ? (
           <LoadingState />
-        ) : networkData && networkData.nodes && networkData.nodes.length > 0 ? (
+        ) : hasNetworkData ? (
           <NetworkGraph data={networkData} height="550px" />
         ) : (
           <NoDataMessage />

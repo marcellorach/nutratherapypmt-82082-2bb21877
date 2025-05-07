@@ -12,7 +12,6 @@ interface VisualizationCardProps {
   onRelationViewChange: (value: string) => void;
   networkData: any;
   matrixData: any;
-  sankeyData: any;
 }
 
 const VisualizationCard: React.FC<VisualizationCardProps> = ({
@@ -21,8 +20,7 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
   relationView,
   onRelationViewChange,
   networkData,
-  matrixData,
-  sankeyData
+  matrixData
 }) => {
   return (
     <Card>
@@ -39,7 +37,7 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
           onRelationViewChange={onRelationViewChange}
           networkData={networkData}
           matrixData={matrixData}
-          sankeyData={sankeyData}
+          isLoading={false}
         />
         <VisualizationLegend />
       </CardContent>
