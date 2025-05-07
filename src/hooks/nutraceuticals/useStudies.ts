@@ -21,8 +21,18 @@ export const useStudies = () => {
       // Buscar estudos do serviço real
       const studiesData = await ScientificStudiesService.getAllStudies();
       console.log('Estudos obtidos:', studiesData?.length || 0);
-      setStudies(studiesData || []);
-      return studiesData;
+      
+      // Adicionar URLs públicas dos arquivos
+      const studiesWithUrls = studiesData?.map(study => {
+        if (study.file_path) {
+          const publicUrl = ScientificStudiesService.getPublicFileUrl(study.file_path);
+          return { ...study, fileUrl: publicUrl };
+        }
+        return study;
+      });
+      
+      setStudies(studiesWithUrls || []);
+      return studiesWithUrls;
     } catch (err: any) {
       const errorMessage = 'Erro ao carregar estudos científicos';
       setError(errorMessage);
@@ -53,6 +63,12 @@ export const useStudies = () => {
       // Usar o serviço real para criar o estudo
       const newStudy = await ScientificStudiesService.createStudy(data);
       console.log('Novo estudo criado:', newStudy);
+      
+      // Adicionar URL pública do arquivo
+      if (newStudy && newStudy.file_path) {
+        const publicUrl = ScientificStudiesService.getPublicFileUrl(newStudy.file_path);
+        newStudy.fileUrl = publicUrl;
+      }
       
       // Atualizar a lista local
       setStudies(prev => [...prev, newStudy]);
@@ -119,6 +135,43 @@ export const useStudies = () => {
     }
   }, [toast]);
 
+  const getStudyFileUrl = useCallback((study: any) => {
+    if (!study || !study.file_path) return null;
+    return study.fileUrl || ScientificStudiesService.getPublicFileUrl(study.file_path);
+  }, []);
+  
+  const deleteStudy = useCallback(async (id: string) => {
+    try {
+      setIsLoading(true);
+      console.log('Excluindo estudo:', id);
+      
+      await ScientificStudiesService.deleteStudy(id);
+      
+      // Remover da lista local
+      setStudies(prevStudies => prevStudies.filter(study => study.id !== id));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Estudo excluído com sucesso',
+      });
+      
+      return true;
+    } catch (err: any) {
+      const errorMessage = 'Erro ao excluir estudo científico';
+      
+      toast({
+        title: 'Erro',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      
+      console.error('Error deleting study:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
   return {
     studies,
     isLoading,
@@ -126,5 +179,7 @@ export const useStudies = () => {
     fetchStudies,
     createStudy,
     associateStudyToNutraceutical,
+    getStudyFileUrl,
+    deleteStudy,
   };
 };

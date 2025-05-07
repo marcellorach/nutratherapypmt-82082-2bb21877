@@ -1,35 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { 
-  Select,
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, FileText, Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { NutraceuticalsService } from '@/services/nutraceuticals';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Loader2, Search, ExternalLink, Download, Plus } from 'lucide-react';
 import AddScientificStudyDialog from '../AddScientificStudyDialog';
-
-interface StudyRelation {
-  id: string;
-  study: {
-    id: string;
-    title: string;
-    year?: number;
-    journal?: string;
-    link?: string;
-  };
-  relevance_score: number;
-}
+import { ScientificStudiesService } from '@/services/scientific-studies-service';
 
 interface StudiesTabProps {
   nutraceutical: any;
@@ -39,328 +19,208 @@ interface StudiesTabProps {
 
 const StudiesTab: React.FC<StudiesTabProps> = ({
   nutraceutical,
-  studies,
-  isLoading
+  studies: allStudies,
+  isLoading: isLoadingProp
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStudy, setSelectedStudy] = useState<any | null>(null);
+  const [relevanceScore, setRelevanceScore] = useState<number>(4);
+  const [isAssociating, setIsAssociating] = useState(false);
+  const { associateStudyToNutraceutical } = useStudies();
   const { toast } = useToast();
-  const { associateStudyToNutraceutical, fetchStudies } = useStudies();
+  const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState(false);
+  const [studiesRefreshKey, setStudiesRefreshKey] = useState(0);
   
-  const [selectedStudyId, setSelectedStudyId] = useState<string>("");
-  const [relevanceScore, setRelevanceScore] = useState<number>(3);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [existingRelations, setExistingRelations] = useState<StudyRelation[]>([]);
-  const [isAddStudyDialogOpen, setIsAddStudyDialogOpen] = useState<boolean>(false);
-  const [isLoadingRelations, setIsLoadingRelations] = useState<boolean>(false);
+  // Filtrar estudos por termo de pesquisa
+  const filteredStudies = allStudies.filter(study => 
+    study.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (study.journal && study.journal.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
   
-  // Carregar relações existentes
-  useEffect(() => {
-    if (nutraceutical?.id) {
-      fetchExistingRelations();
-    }
-  }, [nutraceutical]);
-  
-  const fetchExistingRelations = async () => {
-    try {
-      setIsLoadingRelations(true);
-      console.log('Buscando relações de estudos para o nutracêutico:', nutraceutical.id);
-      
-      // Usar o serviço real para buscar as relações
-      const relations = await NutraceuticalsService.getStudyRelations(nutraceutical.id);
-      console.log('Relações encontradas:', relations);
-      
-      setExistingRelations(relations || []);
-    } catch (error) {
-      console.error('Erro ao carregar estudos:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os estudos associados",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingRelations(false);
-    }
-  };
-  
-  // Filtrar estudos já associados e por termo de busca
-  const filteredStudies = studies?.filter(study => {
-    const isAlreadyAssociated = existingRelations.some(
-      relation => relation.study?.id === study.id
-    );
-    
-    const matchesSearch = searchTerm === "" || 
-      study.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (study.authors && 
-        study.authors.some((author: string) => 
-          author.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    
-    return !isAlreadyAssociated && matchesSearch;
-  }) || [];
-  
+  // Função para associar estudo ao nutracêutico
   const handleAssociateStudy = async () => {
-    if (!selectedStudyId) {
+    if (!selectedStudy || !nutraceutical?.id) {
       toast({
         title: "Erro",
-        description: "Selecione um estudo científico",
-        variant: "destructive",
+        description: "Selecione um estudo para associar",
+        variant: "destructive"
       });
       return;
     }
     
-    setIsAdding(true);
-    
     try {
-      console.log(`Associando estudo ${selectedStudyId} ao nutracêutico ${nutraceutical.id}`);
+      setIsAssociating(true);
       
-      // Usar o hook useStudies para associar o estudo
-      const result = await associateStudyToNutraceutical(
-        selectedStudyId, 
-        nutraceutical.id, 
+      await associateStudyToNutraceutical(
+        selectedStudy.id,
+        nutraceutical.id,
         relevanceScore
       );
       
-      if (result) {
-        // Atualizar a lista local
-        const newStudy = studies?.find(s => s.id === selectedStudyId);
-        if (newStudy) {
-          const newRelation = {
-            id: result.id,
-            relevance_score: relevanceScore,
-            study: {
-              id: newStudy.id,
-              title: newStudy.title,
-              year: newStudy.year,
-              journal: newStudy.journal,
-              link: newStudy.link
-            }
-          };
-          
-          setExistingRelations(prev => [...prev, newRelation]);
-        }
-        
-        // Resetar o formulário
-        setSelectedStudyId("");
-        setRelevanceScore(3);
-        
-        toast({
-          title: "Sucesso",
-          description: "Estudo associado com sucesso",
-        });
-      }
+      setSelectedStudy(null);
+      setRelevanceScore(4);
+      
+      // Forçar atualização dos estudos do nutracêutico
+      setStudiesRefreshKey(prev => prev + 1);
+      
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível associar o estudo",
-        variant: "destructive",
-      });
-      console.error(error);
+      console.error('Erro ao associar estudo:', error);
     } finally {
-      setIsAdding(false);
+      setIsAssociating(false);
     }
   };
   
-  // Função para remover associação
-  const handleRemoveAssociation = async (relationId: string) => {
-    try {
-      console.log(`Removendo relação ${relationId}`);
-      
-      await NutraceuticalsService.removeStudyRelation(relationId);
-      
-      // Atualizar a lista local
-      setExistingRelations(prev => prev.filter(rel => rel.id !== relationId));
-      
-      toast({
-        title: "Sucesso",
-        description: "Relação removida com sucesso",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover a relação",
-        variant: "destructive",
-      });
-      console.error(error);
-    }
-  };
-
-  // Handler para quando um novo estudo é adicionado
-  const handleStudyAdded = async () => {
-    // Recarregar os estudos disponíveis
-    await fetchStudies();
-    
-    toast({
-      title: "Sucesso",
-      description: "Estudo adicionado com sucesso",
-    });
-    
+  // Handler para quando um novo estudo é criado
+  const handleStudyCreated = () => {
     setIsAddStudyDialogOpen(false);
+    setStudiesRefreshKey(prev => prev + 1);
   };
   
-  const getRelevanceColor = (score: number) => {
-    if (score >= 4) return "bg-green-100 text-green-800 border-green-200";
-    if (score >= 2.5) return "bg-amber-100 text-amber-800 border-amber-200";
-    return "bg-red-100 text-red-800 border-red-200";
+  // Função para obter URL do arquivo
+  const getFileUrl = (study: any): string | null => {
+    if (!study || !study.file_path) return null;
+    
+    return study.fileUrl || ScientificStudiesService.getPublicFileUrl(study.file_path);
   };
   
   return (
-    <div className="space-y-6">
-      <div className="rounded-md border p-4 bg-slate-50">
-        <div className="flex justify-between items-center mb-4">
-          <h4 className="font-semibold">Adicionar estudo científico</h4>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => setIsAddStudyDialogOpen(true)}
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Criar Novo Estudo
-          </Button>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Pesquisar estudos..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <div className="grid gap-4">
-          <div>
-            <Label htmlFor="searchStudy">Buscar Estudos</Label>
-            <Input
-              id="searchStudy"
-              placeholder="Digite título ou autor para buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="study">Selecionar Estudo</Label>
-            <Select 
-              value={selectedStudyId} 
-              onValueChange={setSelectedStudyId}
-              disabled={filteredStudies.length === 0 || isAdding}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um estudo" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredStudies.length === 0 ? (
-                  <SelectItem value="empty_placeholder" disabled>
-                    {searchTerm ? "Nenhum resultado encontrado" : "Todos os estudos já foram associados"}
-                  </SelectItem>
-                ) : (
-                  filteredStudies.map((study) => (
-                    <SelectItem key={study.id} value={study.id}>
-                      {study.title} {study.year ? `(${study.year})` : ''}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <div className="flex justify-between">
-              <Label htmlFor="relevance">Relevância (1-5): {relevanceScore}</Label>
-            </div>
-            <Slider
-              id="relevance"
-              min={1}
-              max={5}
-              step={0.5}
-              value={[relevanceScore]}
-              onValueChange={(values) => setRelevanceScore(values[0])}
-              disabled={isAdding}
-              className="py-4"
-            />
-          </div>
-          
-          <div className="flex justify-end">
-            <Button 
-              onClick={handleAssociateStudy} 
-              disabled={!selectedStudyId || isAdding}
-            >
-              {isAdding ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adicionando...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Estudo
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setIsAddStudyDialogOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-1" /> Novo Estudo
+        </Button>
       </div>
       
-      <div>
-        <h4 className="font-semibold mb-4">Estudos Associados</h4>
-        
-        {isLoading || isLoadingRelations ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto p-1">
+        {isLoadingProp ? (
+          <div className="col-span-2 flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
-        ) : existingRelations.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border rounded-md">
-            Este nutracêutico não possui estudos científicos associados
+        ) : filteredStudies.length === 0 ? (
+          <div className="col-span-2 text-center py-8 text-gray-500">
+            Nenhum estudo científico encontrado.
           </div>
         ) : (
-          <div className="space-y-3">
-            {existingRelations.map((relation) => (
-              <div 
-                key={relation.id}
-                className="p-3 border rounded-md"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h5 className="font-medium">{relation.study?.title}</h5>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {relation.study?.journal} 
-                      {relation.study?.year ? `, ${relation.study.year}` : ''}
-                    </div>
-                    
-                    <div className="flex gap-2 mt-2">
-                      <Badge 
-                        variant="outline" 
-                        className={getRelevanceColor(relation.relevance_score)}
-                      >
-                        Relevância: {relation.relevance_score}
-                      </Badge>
-                      
-                      {relation.study?.link && (
-                        <a 
-                          href={relation.study.link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          Ver estudo <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
-                      )}
-                    </div>
+          filteredStudies.map(study => (
+            <Card 
+              key={study.id} 
+              className={`p-3 cursor-pointer transition-colors ${
+                selectedStudy?.id === study.id ? 'bg-blue-50 border-blue-300' : ''
+              }`}
+              onClick={() => setSelectedStudy(study)}
+            >
+              <div className="flex justify-between items-start">
+                <div className="space-y-1 flex-1">
+                  <h4 className="font-medium text-sm line-clamp-2">{study.title}</h4>
+                  <div className="text-xs text-gray-500">
+                    {study.journal && (
+                      <div className="line-clamp-1">{study.journal}, {study.year}</div>
+                    )}
+                    {!study.journal && study.year && (
+                      <div>Publicado em {study.year}</div>
+                    )}
                   </div>
+                </div>
+                <div className="flex gap-2">
+                  {study.link && (
+                    <a 
+                      href={study.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      <span className="sr-only">Link para o estudo</span>
+                    </a>
+                  )}
                   
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleRemoveAssociation(relation.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {study.file_path && (
+                    <a 
+                      href={getFileUrl(study)} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="sr-only">Download do estudo</span>
+                    </a>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+              
+              {study.file_path && (
+                <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-500">
+                  <FileText className="h-3 w-3" />
+                  <span className="truncate">
+                    {study.file_name || "Arquivo disponível"}
+                  </span>
+                </div>
+              )}
+            </Card>
+          ))
         )}
       </div>
       
-      {/* Diálogo para adicionar um novo estudo */}
+      {selectedStudy && (
+        <div className="border rounded-md p-3 mt-4">
+          <h4 className="font-medium">Associar estudo ao nutracêutico</h4>
+          <p className="text-sm text-gray-500 mb-3">
+            Defina a relevância deste estudo para o nutracêutico {nutraceutical?.name}.
+          </p>
+          
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <Label>Relevância do estudo</Label>
+                <span className="text-sm font-medium">{relevanceScore.toFixed(1)}</span>
+              </div>
+              <Slider
+                defaultValue={[4]}
+                min={1}
+                max={5}
+                step={0.1}
+                value={[relevanceScore]}
+                onValueChange={(vals) => setRelevanceScore(vals[0])}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Baixa</span>
+                <span>Alta</span>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleAssociateStudy} 
+              className="w-full"
+              disabled={isAssociating}
+            >
+              {isAssociating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Associar Estudo
+            </Button>
+          </div>
+        </div>
+      )}
+      
       <AddScientificStudyDialog
         open={isAddStudyDialogOpen}
         onOpenChange={setIsAddStudyDialogOpen}
-        onSuccess={handleStudyAdded}
+        onSuccess={handleStudyCreated}
+        nutraceuticalId={nutraceutical?.id}
       />
     </div>
   );

@@ -9,14 +9,18 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
+import PdfUploadZone from '@/components/administrador/estudos/import/PdfUploadZone';
+import { StudyPdfFile } from '@/components/administrador/estudos/import/PdfFileItem';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Schema de validação
 const currentYear = new Date().getFullYear();
 
 const formSchema = z.object({
   title: z.string().min(5, 'O título deve ter no mínimo 5 caracteres'),
-  link: z.string().url('Deve ser uma URL válida'),
+  link: z.string().url('Deve ser uma URL válida').optional().or(z.literal('')),
   year: z.coerce
     .number()
     .int('O ano deve ser um número inteiro')
@@ -34,15 +38,19 @@ interface AddScientificStudyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  nutraceuticalId?: string;
 }
 
 const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({ 
   open, 
   onOpenChange,
-  onSuccess
+  onSuccess,
+  nutraceuticalId
 }) => {
   const { createStudy } = useStudies();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('info');
+  const [pdfFiles, setPdfFiles] = useState<StudyPdfFile[]>([]);
   
   // Inicialização do formulário
   const form = useForm<FormData>({
@@ -57,6 +65,11 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
     }
   });
 
+  // Manipulador para alterações nos arquivos PDF
+  const handlePdfFilesChange = (files: StudyPdfFile[]) => {
+    setPdfFiles(files);
+  };
+
   // Função para lidar com o envio do formulário
   const handleSubmit = async (values: FormData) => {
     try {
@@ -70,11 +83,13 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       
       const studyData = {
         title: values.title,
-        link: values.link,
+        link: values.link || undefined,
         year: values.year,
         journal: values.journal || undefined,
         abstract: values.abstract || undefined,
-        authors: authors.length > 0 ? authors : undefined
+        authors: authors.length > 0 ? authors : undefined,
+        file: pdfFiles.length > 0 ? pdfFiles[0].file : undefined,
+        nutraceuticalId: nutraceuticalId
       };
       
       console.log('Dados do estudo formatados:', studyData);
@@ -83,6 +98,7 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
       console.log('Estudo criado com sucesso');
       
       form.reset();
+      setPdfFiles([]);
       
       if (onSuccess) {
         onSuccess();
@@ -102,130 +118,165 @@ const AddScientificStudyDialog: React.FC<AddScientificStudyDialogProps> = ({
         onOpenChange(isOpen);
       }
     }}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Estudo Científico</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título do Estudo</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Título completo do estudo científico" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Link para o Estudo</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://..." />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="info">Informações do Estudo</TabsTrigger>
+            <TabsTrigger value="file">Arquivo do Estudo</TabsTrigger>
+          </TabsList>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-4">
+              <TabsContent value="info" className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Título do Estudo</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Título completo do estudo científico" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="link"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Link para o Estudo (opcional)</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="https://..." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ano de Publicação</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            placeholder={currentYear.toString()} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="journal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Revista ou Publicação (opcional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Nome da revista ou jornal científico" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="authors"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Autores (opcional, separados por vírgula)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="Ex: Silva, J., Pereira, A., Santos, M."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="abstract"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Resumo (opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="Resumo ou abstract do estudo científico"
+                          className="min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
               
-              <FormField
-                control={form.control}
-                name="year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ano de Publicação</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        placeholder={currentYear.toString()} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="journal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Revista ou Publicação (opcional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nome da revista ou jornal científico" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="authors"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Autores (opcional, separados por vírgula)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="Ex: Silva, J., Pereira, A., Santos, M."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="abstract"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Resumo (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Resumo ou abstract do estudo científico"
-                      className="min-h-[100px]"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => !isSubmitting && onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : 'Salvar Estudo'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              <TabsContent value="file" className="space-y-4">
+                <div>
+                  <FormLabel className="text-base">Arquivo do Estudo</FormLabel>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Faça upload do arquivo PDF completo do estudo científico.
+                    Este arquivo será armazenado e associado ao estudo.
+                  </p>
+                  
+                  <PdfUploadZone 
+                    files={pdfFiles}
+                    onFilesChange={handlePdfFilesChange}
+                    maxFiles={1}
+                    acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                  />
+                  
+                  {pdfFiles.length > 0 && (
+                    <div className="mt-4 flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-blue-500" />
+                      <span className="text-sm font-medium">Arquivo selecionado: {pdfFiles[0].name}</span>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <Separator className="my-4" />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => !isSubmitting && onOpenChange(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : 'Salvar Estudo'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

@@ -545,6 +545,10 @@ export type Database = {
           abstract: string | null
           authors: string[] | null
           created_at: string
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
           id: string
           journal: string | null
           link: string
@@ -556,6 +560,10 @@ export type Database = {
           abstract?: string | null
           authors?: string[] | null
           created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
           id?: string
           journal?: string | null
           link: string
@@ -567,6 +575,10 @@ export type Database = {
           abstract?: string | null
           authors?: string[] | null
           created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
           id?: string
           journal?: string | null
           link?: string
