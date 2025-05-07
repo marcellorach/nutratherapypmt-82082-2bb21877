@@ -1,5 +1,6 @@
 
 import { NutraceuticalsService } from "@/services/nutraceuticals";
+import { RelationshipType } from "@/types";
 
 /**
  * Utilidade para migrar nutracêuticos
@@ -142,7 +143,7 @@ export const NutraceuticalMigrator = {
     nutraName: string,
     conditions: any[] | undefined,
     conditionMap: Map<string, string>,
-    relationshipType: 'prevention' | 'treatment' | 'support'
+    relationshipType: RelationshipType
   ) {
     if (!conditions || conditions.length === 0) return 0;
     
