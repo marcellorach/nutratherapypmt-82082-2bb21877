@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { 
   EnhancedSankeyData, 
@@ -110,8 +109,14 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }));
 
     // Converter links para garantir compatibilidade
-    // Usamos uma asserção de tipo explícita para garantir compatibilidade
-    const links = convertLinksToNumericIndices(inputData.links, nodeMap) as SankeyLink[];
+    const convertedLinks = convertLinksToNumericIndices(inputData.links, nodeMap);
+    // Garantir que cada link tenha source e target como números
+    const links: SankeyLink[] = convertedLinks.map(link => ({
+      ...link,
+      source: typeof link.source === 'string' ? parseInt(link.source) : link.source,
+      target: typeof link.target === 'string' ? parseInt(link.target) : link.target,
+      value: link.value
+    }));
 
     return { nodes, links };
   };
