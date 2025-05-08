@@ -5,7 +5,7 @@ import {
   SidebarMenuButton,
   SidebarGroupLabel
 } from "@/components/ui/sidebar";
-import { Database, Microscope, BookOpen, BarChart3, ListFilter } from "lucide-react";
+import { Database, Microscope, ListFilter, BarChart3 } from "lucide-react";
 
 interface ResearchGroupProps {
   currentStep: string;
@@ -15,15 +15,6 @@ interface ResearchGroupProps {
 const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepClick }) => {
   return (
     <>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          onClick={() => handleStepClick("pesquisa-estudos")}
-          isActive={currentStep === "pesquisa-estudos"}
-        >
-          <BookOpen className="h-4 w-4 mr-2" />
-          <span>Pesquisa de Estudos</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           onClick={() => handleStepClick("estudos-planejados")}

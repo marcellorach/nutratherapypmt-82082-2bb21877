@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Import, Database, Brain, BarChart3, Settings } from "lucide-react";
+import { Import, Brain, BarChart3, Settings } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface DataProcessingGroupProps {
@@ -21,15 +21,6 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
         >
           <Import />
           <span>Importar Dados</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "fontes"} 
-          onClick={() => handleStepClick("fontes")}
-        >
-          <Database />
-          <span>Fontes de Dados</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>

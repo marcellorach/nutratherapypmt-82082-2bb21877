@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Beaker, BookOpen, Database, Microscope, Network, Settings, ListChecks } from "lucide-react";
+import { Beaker, BookOpen, Database, Network, Settings, ListChecks } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface KnowledgeBaseGroupProps {
@@ -14,15 +14,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
 }) => {
   return (
     <>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "scispace"} 
-          onClick={() => handleStepClick("scispace")}
-        >
-          <Microscope className="h-4 w-4 mr-2" />
-          <span>SciSpace</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "estudos"} 
