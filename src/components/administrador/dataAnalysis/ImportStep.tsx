@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Import, Database, CheckCircle, X } from "lucide-react";
+import { Import, Database, CheckCircle, X, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowDown } from "lucide-react";
 
@@ -14,7 +14,8 @@ const ImportStep: React.FC = () => {
     totalRecords: 0,
     petsImported: 0,
     prontuariosImported: 0,
-    examsImported: 0
+    examsImported: 0,
+    eligiblePets: 0
   });
   
   const simulateImport = () => {
@@ -34,7 +35,8 @@ const ImportStep: React.FC = () => {
             totalRecords: 5877,
             petsImported: 5222,
             prontuariosImported: 4002,
-            examsImported: 3987
+            examsImported: 3987,
+            eligiblePets: 3981
           });
           return 100;
         }
@@ -95,6 +97,17 @@ const ImportStep: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span>Exames laboratoriais correlacionados:</span>
                       <span className="font-medium">{importStats.examsImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-1 p-2 bg-purple-50 border border-purple-200 rounded-md">
+                      <span className="font-medium text-purple-900">Pets elegíveis para próxima etapa:</span>
+                      <div className="flex items-center">
+                        <span className="font-bold text-purple-800">{importStats.eligiblePets}</span>
+                        <ArrowRight className="h-4 w-4 ml-1 text-purple-600" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -192,3 +205,4 @@ const ImportStep: React.FC = () => {
 };
 
 export default ImportStep;
+
