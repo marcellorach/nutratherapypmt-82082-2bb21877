@@ -33,7 +33,7 @@ export function useSankeyData(
       originalNode: node
     }));
 
-    // Converter links usando a função auxiliar para garantir que source e target são números
+    // Converter links para garantir que source e target são números
     const links = convertLinksToNumericIndices(inputData.links, nodeMap);
     
     return { nodes, links };
