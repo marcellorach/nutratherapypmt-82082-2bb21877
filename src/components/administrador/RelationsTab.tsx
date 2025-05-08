@@ -264,7 +264,12 @@ const RelationsTab: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="network" className="pt-4">
-              <NetworkGraph data={networkData} height="500px" />
+              <NetworkGraph 
+                data={networkData} 
+                height="500px" 
+                showControls={true} 
+                showLegend={true}
+              />
             </TabsContent>
             
             <TabsContent value="matrix" className="pt-4">
