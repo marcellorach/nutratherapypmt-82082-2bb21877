@@ -16,6 +16,7 @@ const OraBiomedicalTab: React.FC = () => {
   const { t } = useTranslation();
   
   // ID do vídeo do YouTube extraído da URL completa
+  // Usando o ID correto do vídeo do YouTube
   const youtubeVideoId = "IpJn4jv8Qsw";
   
   return (

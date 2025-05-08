@@ -21,7 +21,8 @@ const YouTubeDialog: React.FC<YouTubeDialogProps> = ({
   title = 'Visualização de vídeo'
 }) => {
   // Formatar a URL do YouTube corretamente
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  // Adicionando parâmetros para garantir que o vídeo funcione
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
