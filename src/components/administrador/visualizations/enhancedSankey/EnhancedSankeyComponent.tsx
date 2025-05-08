@@ -4,7 +4,8 @@ import {
   EnhancedSankeyData, 
   EnhancedSankeyLink, 
   EnhancedSankeyNode, 
-  NodeCategory 
+  NodeCategory,
+  SankeyLink
 } from '../sankey/types';
 
 import SankeyChart from './SankeyChart';

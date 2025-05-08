@@ -3,9 +3,11 @@ import { useMemo } from 'react';
 import { 
   EnhancedSankeyData,
   EnhancedSankeyNode, 
+  EnhancedSankeyLink,
   SankeyData,
   SankeyLink
 } from '../../sankey/types';
+import { convertLinksToNumericIndices } from '@/utils/graph-utils';
 
 export function useSankeyData(
   inputData: EnhancedSankeyData | null
@@ -31,30 +33,8 @@ export function useSankeyData(
       originalNode: node
     }));
 
-    // Converter links para garantir compatibilidade
-    const links: SankeyLink[] = inputData.links.map(link => {
-      // Garantir que source e target sejam números
-      const sourceIndex = typeof link.source === 'string' || typeof link.source === 'number'
-        ? nodeMap.get(link.source) || 0
-        : 0;
-      
-      const targetIndex = typeof link.target === 'string' || typeof link.target === 'number'
-        ? nodeMap.get(link.target) || 0
-        : 0;
-      
-      const sourceName = link.sourceName || String(link.source);
-      const targetName = link.targetName || String(link.target);
-        
-      return {
-        source: sourceIndex,
-        target: targetIndex,
-        value: link.value || 1,
-        color: link.color,
-        sourceName,
-        targetName,
-        originalLink: link
-      };
-    });
+    // Converter links usando a função auxiliar para garantir que source e target são números
+    const links = convertLinksToNumericIndices(inputData.links, nodeMap);
     
     return { nodes, links };
   }, [inputData]);
