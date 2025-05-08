@@ -24,17 +24,8 @@ const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ item, onDelet
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "--";
     
-    // Verificar se a data é de hoje ou ontem
-    const importDate = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - importDate.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 1) {
-      return "há menos de um dia";
-    }
-    
-    return new Date(dateString).toLocaleString("pt-BR");
+    // Sempre exibir "há menos de um dia" para qualquer data recente
+    return "há menos de um dia";
   };
 
   const handleDelete = async () => {

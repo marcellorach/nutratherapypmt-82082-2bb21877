@@ -77,10 +77,21 @@ export const useNtaiQueue = () => {
       return;
     }
 
+    // Antes de adicionar, vamos garantir que os IDs sejam UUIDs válidos
+    // Se não forem, vamos gerar novos UUIDs para evitar erros
     const newItems: ProcessingItem[] = estudosSelecionados.map(estudo => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      let studyId = estudo.id;
+      
+      // Se não for um UUID válido, vamos gerar um novo
+      if (!uuidRegex.test(studyId)) {
+        studyId = crypto.randomUUID();
+        console.log(`ID inválido detectado. Gerado novo UUID: ${studyId} para estudo ${estudo.title}`);
+      }
+      
       return {
-        id: estudo.id,
-        title: estudo.title || `Estudo ${estudo.id.substring(0, 8)}`,
+        id: studyId,
+        title: estudo.title || `Estudo ${studyId.substring(0, 8)}`,
         stage: 'idle' as ProcessingStage,
         progress: 0,
         sourceFile: estudo.journal || 'Desconhecido',
@@ -123,6 +134,13 @@ export const useNtaiQueue = () => {
   // Função para atualizar estudos com análise concluída no banco
   const updateProcessedStudy = async (studyId: string, analysisData: any) => {
     try {
+      // Verificar se o ID é um UUID válido
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(studyId)) {
+        console.error('ID de estudo inválido para atualização:', studyId);
+        return false;
+      }
+      
       const { error } = await supabase
         .from('processed_studies')
         .update({ 

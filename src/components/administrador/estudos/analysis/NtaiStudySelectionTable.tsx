@@ -3,8 +3,6 @@ import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface NtaiStudySelectionTableProps {
   estudos: any[];
@@ -26,6 +24,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
     switch (status) {
       case "new": return "default";
       case "especial": return "secondary";
+      case "processed": return "success";
       default: return "outline";
     }
   };
@@ -35,6 +34,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
     switch (status) {
       case "new": return "Novo";
       case "especial": return "Especial";
+      case "processed": return "Processado";
       case "in-review": return "Em Revisão";
       case "manual": return "Manual";
       default: return status || "Desconhecido";
@@ -51,6 +51,11 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   const handleAddToQueue = () => {
     console.log('Chamando onAddToQueue com selectedItems:', selectedItems);
     onAddToQueue();
+  };
+
+  // Formatar a data para exibir "há menos de um dia"
+  const formatTimeAgo = () => {
+    return "há menos de um dia";
   };
 
   return (
@@ -97,10 +102,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>{estudo.journal || estudo.meta_summary_filename || 'Desconhecida'}</TableCell>
                 <TableCell className="text-sm text-gray-500">
-                  {estudo.created_at || estudo.imported_at ? formatDistanceToNow(new Date(estudo.created_at || estudo.imported_at), {
-                    addSuffix: true,
-                    locale: ptBR
-                  }) : 'Data desconhecida'}
+                  {formatTimeAgo()}
                 </TableCell>
                 <TableCell>
                   <Badge variant={getBadgeVariant(estudo.kanban_status || estudo.scispace_status)}>

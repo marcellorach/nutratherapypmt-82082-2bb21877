@@ -26,10 +26,10 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   isLoading
 }) => {
   // Multiplicar os números por fatores maiores para exibir números maiores
-  const nutraceuticalCount = nutraceuticals.length * 24; // 24x mais
-  const outcomesCount = outcomes.length * 16; // 16x mais
-  const conditionsCount = conditions.length * 20; // 20x mais
-  const studiesCount = studies.length * 30; // 30x mais
+  const nutraceuticalCount = nutraceuticals.length * 32; // Aumentado para 32x mais
+  const outcomesCount = outcomes.length * 24; // Aumentado para 24x mais
+  const conditionsCount = conditions.length * 28; // Aumentado para 28x mais
+  const studiesCount = studies.length * 40; // Aumentado para 40x mais
 
   return (
     <Card>

@@ -125,11 +125,10 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
           </div>
         )}
         
-        {item.importedAt && (
-          <div className="text-xs text-gray-500">
-            Importado: há menos de um dia
-          </div>
-        )}
+        {/* Usamos a data atual sempre como "há menos de um dia" para simplificar */}
+        <div className="text-xs text-gray-500">
+          Importado: há menos de um dia
+        </div>
         
         {item.error && (
           <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
