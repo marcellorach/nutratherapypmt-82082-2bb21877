@@ -16,8 +16,6 @@ interface SankeyDiagramProps {
 const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 500, showControls = true }) => {
   const [scale, setScale] = useState(1);
   const [selectedLink, setSelectedLink] = useState<SankeyLink | null>(null);
-  const [selectedSourceNode, setSelectedSourceNode] = useState<SankeyNode | null>(null);
-  const [selectedTargetNode, setSelectedTargetNode] = useState<SankeyNode | null>(null);
   const [selectedNode, setSelectedNode] = useState<SankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 

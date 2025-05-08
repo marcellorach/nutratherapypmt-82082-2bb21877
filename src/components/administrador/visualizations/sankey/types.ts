@@ -23,6 +23,7 @@ export interface SankeyNode {
   value?: number;
   color?: string;
   description?: string;
+  id?: string | number; // Adicionado id como opcional para compatibilidade
 }
 
 // Link do gráfico Sankey
@@ -37,6 +38,8 @@ export interface SankeyLink {
   description?: string;
   relationshipType?: RelationshipType;
   originalRelation?: any; // Dados originais da relação
+  sourceName?: string;
+  targetName?: string;
 }
 
 // Dados do gráfico Sankey

@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useCallback } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 import { ZoomIn, ZoomOut, RotateCw, Filter, Info } from 'lucide-react';
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { filterValidLinks } from '@/utils/graph-utils';
+import { filterValidLinks, convertLinksToNumericIndices } from '@/utils/graph-utils';
 import SankeyTooltip from './sankey/SankeyTooltip';
 import SankeyDetailsDialog from './sankey/SankeyDetailsDialog';
 import SankeyLegend from './sankey/SankeyLegend';
@@ -105,36 +104,14 @@ const EnhancedSankeyDiagram: React.FC<EnhancedSankeyDiagramProps> = ({
         value: node.value,
         color: node.color,
         description: node.description,
+        id: node.id, // Mantendo o ID original para referência
         // Store original node data for reference
         originalNode: node
       };
     });
     
     // Create links array for Recharts with numeric indices
-    const links = processedData.links.map(link => {
-      // Convert string IDs to numeric indices
-      const sourceIndex = nodeIndexMap.get(link.source);
-      const targetIndex = nodeIndexMap.get(link.target);
-      
-      // Skip links where source or target is not in the nodeIndexMap
-      if (sourceIndex === undefined || targetIndex === undefined) {
-        return null;
-      }
-      
-      return {
-        source: sourceIndex,
-        target: targetIndex,
-        value: link.value,
-        color: link.color,
-        // Store original link data for reference
-        sourceName: link.sourceName,
-        targetName: link.targetName,
-        relationshipType: link.relationshipType,
-        efficacyScore: link.efficacyScore,
-        description: link.description,
-        originalLink: link
-      };
-    }).filter(Boolean); // Filter out null links
+    const links = convertLinksToNumericIndices(processedData.links, nodeIndexMap);
     
     return { nodes, links };
   }, [processedData]);
