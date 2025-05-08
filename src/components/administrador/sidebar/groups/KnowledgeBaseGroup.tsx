@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Beaker, BookOpen, Database, Network, Settings, ListChecks } from "lucide-react";
+import { Beaker, BookOpen, Database, Network, Settings, ListChecks, Microscope } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface KnowledgeBaseGroupProps {
