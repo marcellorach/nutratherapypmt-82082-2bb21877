@@ -6,7 +6,7 @@ import {
   EnhancedSankeyLink, 
   NodeCategory 
 } from '@/components/administrador/visualizations/sankey/types';
-import { filterValidLinks, convertLinksToNumericIndices } from '@/utils/graph-utils';
+import { filterValidLinks } from '@/utils/graph-utils';
 
 export const useEnhancedSankeyVisualization = (
   data: EnhancedSankeyData | null,
@@ -15,9 +15,6 @@ export const useEnhancedSankeyVisualization = (
   minEfficacy: number = 0,
   relationshipType: string = 'all'
 ) => {
-  // Local state
-  const [scale, setScale] = useState(1);
-  
   // Process and filter data based on selected categories and filters
   const processedData = useMemo(() => {
     if (isLoading || !data) {
@@ -52,40 +49,6 @@ export const useEnhancedSankeyVisualization = (
     };
   }, [data, isLoading, activeCategories, minEfficacy, relationshipType]);
   
-  // Format data for Recharts
-  const formatDataForRecharts = useMemo(() => {
-    if (!processedData.nodes.length || !processedData.links.length) {
-      return { nodes: [], links: [] };
-    }
-    
-    // Create a map of node IDs to array indices
-    const nodeIndexMap = new Map<string | number, number>();
-    
-    // Create nodes array for Recharts with array indices
-    const nodes = processedData.nodes.map((node, index) => {
-      nodeIndexMap.set(node.id, index);
-      
-      return {
-        name: node.name,
-        category: node.category,
-        value: node.value,
-        color: node.color,
-        description: node.description,
-        id: node.id, // Mantendo o ID original para referência
-        // Store original node data for reference
-        originalNode: node
-      };
-    });
-    
-    // Create links array for Recharts with numeric indices
-    const links = convertLinksToNumericIndices(processedData.links, nodeIndexMap);
-    
-    return { 
-      nodes, 
-      links: links.filter(Boolean) // Garantir que não temos links nulos
-    };
-  }, [processedData]);
-
   // Calculate stats for display
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
@@ -122,54 +85,45 @@ export const useEnhancedSankeyVisualization = (
       links: [
         // Nutracêuticos -> Condições
         { source: 0, target: 3, value: 80, color: 'rgba(16, 185, 129, 0.7)', 
-          relationshipType: 'treatment', efficacyScore: 4.0 },
+          relationshipType: 'treatment', efficacyScore: 4.0, sourceName: 'Glucosamina', targetName: 'Artrite' },
         { source: 1, target: 4, value: 90, color: 'rgba(16, 185, 129, 0.7)', 
-          relationshipType: 'prevention', efficacyScore: 4.5 },
+          relationshipType: 'prevention', efficacyScore: 4.5, sourceName: 'Curcumina', targetName: 'Inflamação' },
         { source: 2, target: 5, value: 60, color: 'rgba(59, 130, 246, 0.7)', 
-          relationshipType: 'support', efficacyScore: 3.0 },
+          relationshipType: 'support', efficacyScore: 3.0, sourceName: 'Ômega 3', targetName: 'Saúde Cardíaca' },
         
         // Condições -> Outcomes
-        { source: 3, target: 6, value: 75, color: 'rgba(245, 158, 11, 0.7)' },
-        { source: 3, target: 7, value: 65, color: 'rgba(59, 130, 246, 0.7)' },
-        { source: 4, target: 6, value: 80, color: 'rgba(16, 185, 129, 0.7)' },
-        { source: 5, target: 8, value: 70, color: 'rgba(59, 130, 246, 0.7)' },
+        { source: 3, target: 6, value: 75, color: 'rgba(245, 158, 11, 0.7)', 
+          sourceName: 'Artrite', targetName: 'Redução de Dor' },
+        { source: 3, target: 7, value: 65, color: 'rgba(59, 130, 246, 0.7)', 
+          sourceName: 'Artrite', targetName: 'Mobilidade Melhorada' },
+        { source: 4, target: 6, value: 80, color: 'rgba(16, 185, 129, 0.7)', 
+          sourceName: 'Inflamação', targetName: 'Redução de Dor' },
+        { source: 5, target: 8, value: 70, color: 'rgba(59, 130, 246, 0.7)', 
+          sourceName: 'Saúde Cardíaca', targetName: 'Função Cardíaca Melhorada' },
         
         // Outcomes -> Severidade
-        { source: 6, target: 9, value: 40, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 6, target: 10, value: 35, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 7, target: 10, value: 45, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 8, target: 11, value: 50, color: 'rgba(139, 92, 246, 0.7)' }
+        { source: 6, target: 9, value: 40, color: 'rgba(139, 92, 246, 0.7)', 
+          sourceName: 'Redução de Dor', targetName: 'Leve' },
+        { source: 6, target: 10, value: 35, color: 'rgba(139, 92, 246, 0.7)', 
+          sourceName: 'Redução de Dor', targetName: 'Moderada' },
+        { source: 7, target: 10, value: 45, color: 'rgba(139, 92, 246, 0.7)', 
+          sourceName: 'Mobilidade Melhorada', targetName: 'Moderada' },
+        { source: 8, target: 11, value: 50, color: 'rgba(139, 92, 246, 0.7)', 
+          sourceName: 'Função Cardíaca Melhorada', targetName: 'Grave' }
       ]
     };
   };
 
   // Use demo data if no data or links are available
   const demoData = getDemoData();
-  const finalData = (!formatDataForRecharts.nodes.length || !formatDataForRecharts.links.length) 
+  const finalData = (!processedData.nodes.length || !processedData.links.length) 
     ? demoData 
-    : formatDataForRecharts;
-
-  // Zoom controls
-  const handleZoomIn = () => {
-    setScale(prev => Math.min(prev + 0.1, 2));
-  };
-
-  const handleZoomOut = () => {
-    setScale(prev => Math.max(prev - 0.1, 0.5));
-  };
-
-  const handleResetZoom = () => {
-    setScale(1);
-  };
+    : processedData;
 
   return {
     processedData,
     finalData,
-    categoryStats,
-    scale,
-    handleZoomIn,
-    handleZoomOut,
-    handleResetZoom
+    categoryStats
   };
 };
 

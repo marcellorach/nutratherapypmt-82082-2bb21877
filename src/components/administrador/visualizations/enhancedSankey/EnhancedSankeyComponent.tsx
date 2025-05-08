@@ -1,13 +1,10 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { 
   EnhancedSankeyData, 
   EnhancedSankeyLink, 
   EnhancedSankeyNode, 
-  NodeCategory,
-  SankeyData,
-  SankeyLink,
-  SankeyNode 
+  NodeCategory 
 } from '../sankey/types';
 
 import SankeyChart from './SankeyChart';
@@ -17,9 +14,11 @@ import SankeyInfo from './SankeyInfo';
 import SankeyDetailsDialog from '../sankey/SankeyDetailsDialog';
 import SankeyLegend from '../sankey/SankeyLegend';
 import SankeyFilters from '../sankey/SankeyFilters';
+
 import useEnhancedSankeyVisualization from '@/hooks/visualizations/useEnhancedSankeyVisualization';
 import { useEnhancedSankeyData } from '@/hooks/visualizations/useEnhancedSankeyData';
-import { convertLinksToNumericIndices } from '@/utils/graph-utils';
+import { useSankeyData } from './hooks/useSankeyData';
+import { useZoom } from './hooks/useZoom';
 
 interface EnhancedSankeyComponentProps {
   initialData?: EnhancedSankeyData;
@@ -51,15 +50,11 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
   const [selectedNode, setSelectedNode] = useState<EnhancedSankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
+  // Zoom controls
+  const { scale, handleZoomIn, handleZoomOut, handleResetZoom } = useZoom(1);
+  
   // Usar o hook customizado para visualização
-  const { 
-    finalData, 
-    categoryStats, 
-    scale, 
-    handleZoomIn, 
-    handleZoomOut, 
-    handleResetZoom
-  } = useEnhancedSankeyVisualization(
+  const { finalData, categoryStats } = useEnhancedSankeyVisualization(
     data, 
     isLoading, 
     activeCategories, 
@@ -67,8 +62,11 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     relationshipType
   );
   
+  // Converter dados para formato compatível com o Sankey
+  const sankeyData = useSankeyData(finalData);
+  
   // Tratamento de clique em link
-  const handleLinkClick = useCallback((e: any) => {
+  const handleLinkClick = React.useCallback((e: any) => {
     if (e && e.payload) {
       const originalLink = e.payload.originalLink || e.payload;
       setSelectedLink(originalLink);
@@ -78,7 +76,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
   }, []);
   
   // Tratamento de clique em nó
-  const handleNodeClick = useCallback((e: any) => {
+  const handleNodeClick = React.useCallback((e: any) => {
     if (e && e.payload) {
       const originalNode = e.payload.originalNode || e.payload;
       setSelectedNode(originalNode);
@@ -87,54 +85,6 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }
   }, []);
 
-  // Preparar dados para o Sankey
-  const prepareSankeyData = (inputData: EnhancedSankeyData | null): SankeyData => {
-    if (!inputData || !inputData.nodes || !inputData.links) {
-      return { nodes: [], links: [] };
-    }
-
-    // Criar mapa de IDs de nós para índices
-    const nodeMap = new Map<string | number, number>();
-    inputData.nodes.forEach((node, index) => {
-      nodeMap.set(node.id !== undefined ? node.id : index, index);
-    });
-
-    // Criar nós compatíveis com SankeyNode
-    const nodes: SankeyNode[] = inputData.nodes.map((node, index) => ({
-      name: node.name,
-      category: node.category,
-      value: node.value || 1,
-      color: node.color,
-      description: node.description || '',
-      originalNode: node
-    }));
-
-    // Converter links para garantir compatibilidade
-    const links: SankeyLink[] = inputData.links.map(link => {
-      // Garantir que source e target sejam números
-      const sourceIndex = typeof link.source === 'string' || typeof link.source === 'number'
-        ? nodeMap.get(link.source) || 0
-        : 0;
-      
-      const targetIndex = typeof link.target === 'string' || typeof link.target === 'number'
-        ? nodeMap.get(link.target) || 0
-        : 0;
-        
-      return {
-        source: sourceIndex,
-        target: targetIndex,
-        value: link.value || 1,
-        color: link.color,
-        originalLink: link
-      };
-    });
-    
-    return { nodes, links };
-  };
-
-  // Dados já compatíveis com o componente Sankey
-  const sankeyData = finalData ? prepareSankeyData(finalData) : { nodes: [], links: [] };
-  
   if (isLoading) {
     return (
       <div className="w-full h-[400px] flex items-center justify-center">

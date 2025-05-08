@@ -39,8 +39,8 @@ export interface SankeyLink {
   description?: string;
   relationshipType?: RelationshipType;
   originalRelation?: any; // Dados originais da relação
-  sourceName: string; // Nome da fonte para exibição
-  targetName: string; // Nome do alvo para exibição
+  sourceName: string; // Nome da fonte para exibição (adicionado como obrigatório)
+  targetName: string; // Nome do alvo para exibição (adicionado como obrigatório)
   originalLink?: any; // Link original para referência
 }
 

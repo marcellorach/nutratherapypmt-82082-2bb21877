@@ -5,7 +5,7 @@ import SankeyTooltip from '../sankey/SankeyTooltip';
 import { SankeyData } from '../sankey/types';
 
 interface SankeyChartProps {
-  data: SankeyData;  // Dados já convertidos para o formato correto
+  data: SankeyData;
   height: number;
   scale: number;
   onNodeClick: (e: any) => void;

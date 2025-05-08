@@ -1,64 +1,40 @@
 
 import React from 'react';
-import { Paw } from 'lucide-react';
+import { PawPrint } from 'lucide-react';
 
 interface DogGroupVisualizationProps {
-  treatmentCount: number;
-  controlCount: number;
-  treatmentIcon?: React.ReactNode;
-  controlIcon?: React.ReactNode;
-  maxIconsToShow?: number;
+  count: number;
+  type: 'treatment' | 'control';
+  groupLabel?: string;
 }
 
-const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
-  treatmentCount,
-  controlCount,
-  treatmentIcon = <Paw className="h-4 w-4 text-blue-500" />,
-  controlIcon = <Paw className="h-4 w-4 text-gray-500" />,
-  maxIconsToShow = 10
+const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({ 
+  count, 
+  type, 
+  groupLabel 
 }) => {
-  // Determinar quantos ícones mostrar para cada grupo
-  const treatmentIconsToShow = Math.min(treatmentCount, maxIconsToShow);
-  const controlIconsToShow = Math.min(controlCount, maxIconsToShow);
-  
-  // Se temos mais cães do que o máximo de ícones, exibir contador extra
-  const treatmentExtraCount = treatmentCount > maxIconsToShow ? treatmentCount - maxIconsToShow : 0;
-  const controlExtraCount = controlCount > maxIconsToShow ? controlCount - maxIconsToShow : 0;
+  const iconColor = type === 'treatment' ? 'text-blue-600' : 'text-gray-600';
+  const bgColor = type === 'treatment' ? 'bg-blue-50' : 'bg-gray-50';
+  const groupName = groupLabel || (type === 'treatment' ? 'Grupo de Tratamento' : 'Grupo de Controle');
   
   return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-700">Grupo Tratamento</span>
-          <span className="text-sm font-semibold">{treatmentCount} cães</span>
-        </div>
-        <div className="flex items-center gap-1 flex-wrap">
-          {Array.from({ length: treatmentIconsToShow }).map((_, index) => (
-            <div key={`treatment-${index}`} className="animate-pulse">
-              {treatmentIcon}
-            </div>
-          ))}
-          {treatmentExtraCount > 0 && (
-            <span className="text-xs text-blue-500">+{treatmentExtraCount}</span>
-          )}
-        </div>
+    <div className={`${bgColor} p-3 rounded-lg`}>
+      <div className="mb-2 text-sm font-medium flex justify-between">
+        <span>{groupName}</span>
+        <span className="font-semibold">{count} cães</span>
       </div>
       
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Grupo Controle</span>
-          <span className="text-sm font-semibold">{controlCount} cães</span>
-        </div>
-        <div className="flex items-center gap-1 flex-wrap">
-          {Array.from({ length: controlIconsToShow }).map((_, index) => (
-            <div key={`control-${index}`}>
-              {controlIcon}
-            </div>
-          ))}
-          {controlExtraCount > 0 && (
-            <span className="text-xs text-gray-500">+{controlExtraCount}</span>
-          )}
-        </div>
+      <div className="flex flex-wrap gap-1">
+        {Array.from({ length: Math.min(count, 20) }).map((_, i) => (
+          <PawPrint 
+            key={i} 
+            className={`h-4 w-4 ${iconColor} ${i >= 20 ? 'opacity-50' : ''}`} 
+          />
+        ))}
+        
+        {count > 20 && (
+          <span className="text-xs text-gray-500 ml-1 mt-0.5">+{count - 20}</span>
+        )}
       </div>
     </div>
   );
