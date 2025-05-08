@@ -30,9 +30,24 @@ export interface NetworkLink {
   [key: string]: any;
 }
 
+// Interface adicional para dar suporte ao formato alternativo de links
+export interface SourceTargetLink {
+  id?: string | number;
+  source: string | number;
+  target: string | number;
+  title?: string;
+  label?: string;
+  color?: string;
+  width?: number;
+  value?: number;
+  arrows?: any;
+  dashes?: boolean;
+  [key: string]: any;
+}
+
 export interface NetworkData {
   nodes: NetworkNode[];
-  links: NetworkLink[];
+  links: (NetworkLink | SourceTargetLink)[];
 }
 
 export interface NetworkGraphOptions {
@@ -155,23 +170,28 @@ export const useNetworkGraph = (
           id: link.id || `edge_${index}`
         };
 
-        // Se o link tiver propriedades 'from' e 'to', usá-las
+        // Verificar se o link está no formato from/to ou source/target
         if ('from' in link && 'to' in link) {
           edgeData.from = link.from;
           edgeData.to = link.to;
-        } else {
-          // Caso contrário, usar 'source' e 'target'
+        } else if ('source' in link && 'target' in link) {
+          // Para links no formato source/target (comum em visualizações D3)
           edgeData.from = link.source;
           edgeData.to = link.target;
+        } else {
+          console.warn(`Link ${index} não possui formato válido:`, link);
+          // Fornecer valores padrão para evitar erros
+          edgeData.from = `unknown_${index}`;
+          edgeData.to = `unknown_${index + 1}`;
         }
 
         // Copiar outras propriedades
         if (link.value) edgeData.value = link.value;
         if (link.title) edgeData.title = link.title;
         if (link.color) edgeData.color = link.color;
-        if (link.width) edgeData.width = link.width || 2;
-        if (link.arrows) edgeData.arrows = link.arrows;
-        if (link.dashes !== undefined) edgeData.dashes = link.dashes;
+        if ('width' in link) edgeData.width = link.width || 2;
+        if ('arrows' in link) edgeData.arrows = link.arrows;
+        if ('dashes' in link) edgeData.dashes = link.dashes;
 
         return edgeData;
       })
