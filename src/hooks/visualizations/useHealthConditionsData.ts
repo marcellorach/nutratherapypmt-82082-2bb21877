@@ -9,6 +9,7 @@ const mockConditions = [
     description: 'Inflamação das articulações, causando dor, inchaço e rigidez. Comum em pets mais velhos e determinadas raças.',
     treatabilityScore: 48,
     preventionScore: 55,
+    roi: 2.3,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Golden Retriever', 'Labrador', 'Pastor Alemão', 'Siamês'],
     recommendedPackages: 3
@@ -19,6 +20,7 @@ const mockConditions = [
     description: 'Condição inflamatória crônica da pele associada a alergias ambientais, causando coceira intensa.',
     treatabilityScore: 52,
     preventionScore: 45,
+    roi: 1.5,
     speciesAffected: ['Cães'],
     breedsAffected: ['Bulldog Francês', 'Labrador', 'Shih Tzu', 'West Highland Terrier'],
     recommendedPackages: 2
@@ -29,6 +31,7 @@ const mockConditions = [
     description: 'Inclui diarreias, vômitos, constipação e síndrome do intestino irritável, afetando a digestão e absorção de nutrientes.',
     treatabilityScore: 40,
     preventionScore: 65,
+    roi: 3.1,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Dachshund', 'Poodle', 'Siamês'],
     recommendedPackages: 3
@@ -39,6 +42,7 @@ const mockConditions = [
     description: 'Doenças do músculo cardíaco ou valvulares, podendo causar insuficiência cardíaca com o tempo.',
     treatabilityScore: 32,
     preventionScore: 48,
+    roi: -0.7,
     speciesAffected: ['Cães'],
     breedsAffected: ['Cavalier King Charles Spaniel', 'Doberman', 'Boxer'],
     recommendedPackages: 2
@@ -49,6 +53,7 @@ const mockConditions = [
     description: 'Perda gradual da função renal que pode se desenvolver ao longo de meses ou anos.',
     treatabilityScore: 28,
     preventionScore: 42,
+    roi: -1.2,
     speciesAffected: ['Gatos', 'Cães'],
     breedsAffected: ['Persian', 'Maine Coon', 'Pastor Alemão'],
     recommendedPackages: 2
@@ -59,6 +64,7 @@ const mockConditions = [
     description: 'Inclui gengivite, periodontite e acúmulo de tártaro, podendo levar a perda dentária e infecções.',
     treatabilityScore: 45,
     preventionScore: 78,
+    roi: 2.8,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Yorkshire', 'Chihuahua', 'Persa', 'Maltês'],
     recommendedPackages: 2
@@ -69,6 +75,7 @@ const mockConditions = [
     description: 'Acúmulo excessivo de gordura corporal, levando a várias complicações de saúde e redução da qualidade de vida.',
     treatabilityScore: 55,
     preventionScore: 80,
+    roi: 3.4,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Labrador', 'Beagle', 'Pug', 'British Shorthair'],
     recommendedPackages: 3
@@ -79,6 +86,7 @@ const mockConditions = [
     description: 'Desordem comportamental manifestada por medo excessivo, inquietação e comportamentos destrutivos.',
     treatabilityScore: 38,
     preventionScore: 52,
+    roi: 0.9,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Border Collie', 'Pastor Alemão', 'Siamês'],
     recommendedPackages: 2
@@ -90,6 +98,7 @@ const mockConditions = [
     description: 'Acúmulo de células senescentes que não realizam sua função normal e secretam substâncias inflamatórias, acelerando o envelhecimento.',
     treatabilityScore: 35,
     preventionScore: 60,
+    roi: 1.8,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
     recommendedPackages: 4
@@ -100,6 +109,7 @@ const mockConditions = [
     description: 'Risco de mortalidade por todas as causas, frequentemente associado a fatores como inflamação crônica, estresse oxidativo e disfunção mitocondrial.',
     treatabilityScore: 22,
     preventionScore: 45,
+    roi: -0.5,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
     recommendedPackages: 4
@@ -110,6 +120,7 @@ const mockConditions = [
     description: 'Desequilíbrio entre radicais livres e antioxidantes no organismo, causando danos celulares e contribuindo para o envelhecimento acelerado.',
     treatabilityScore: 42,
     preventionScore: 68,
+    roi: 2.1,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
     recommendedPackages: 3
@@ -120,6 +131,7 @@ const mockConditions = [
     description: 'Comprometimento da função das mitocôndrias, organelas responsáveis pela produção de energia celular, impactando na saúde geral e longevidade.',
     treatabilityScore: 30,
     preventionScore: 52,
+    roi: 0.3,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças', 'Raças grandes especialmente afetadas'],
     recommendedPackages: 3
@@ -222,4 +234,3 @@ export const useHealthConditionsData = ({
     stats
   };
 };
-

@@ -45,13 +45,13 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Alta Tratabilidade (>45%)
+              Alta Tratabilidade ({'>'}45%)
             </p>
             <p className="text-xl font-semibold text-green-600">{stats.highTreatability}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Alta Prevenção (>65%)
+              Alta Prevenção ({'>'}65%)
             </p>
             <p className="text-xl font-semibold text-purple-600">{stats.highPrevention}</p>
           </div>

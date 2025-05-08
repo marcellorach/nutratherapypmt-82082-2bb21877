@@ -18,6 +18,7 @@ interface Condition {
   description: string;
   treatabilityScore: number;
   preventionScore: number;
+  roi: number;
   speciesAffected: string[];
   breedsAffected: string[];
   recommendedPackages: number;
@@ -64,6 +65,14 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
     return "bg-orange-500";
   }
   
+  const getRoiColor = (roi: number) => {
+    if (roi >= 2) return "bg-green-600";
+    if (roi > 0) return "bg-green-400";
+    if (roi === 0) return "bg-gray-400";
+    if (roi > -2) return "bg-red-400";
+    return "bg-red-600";
+  }
+  
   return (
     <div className="rounded-md border">
       <Table>
@@ -73,6 +82,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
             <TableHead>Nome</TableHead>
             <TableHead>Tratabilidade</TableHead>
             <TableHead>Prevenção</TableHead>
+            <TableHead>ROI</TableHead>
             <TableHead>Espécies Afetadas</TableHead>
             <TableHead>Pacotes Recomendados</TableHead>
             <TableHead className="w-[100px]">Ações</TableHead>
@@ -81,7 +91,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
         <TableBody>
           {conditions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                 Nenhuma condição encontrada
               </TableCell>
             </TableRow>
@@ -126,6 +136,23 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                     </div>
                   </TableCell>
                   <TableCell>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 relative">
+                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                          <div className="w-[1px] h-full bg-gray-400"></div>
+                        </div>
+                        <div 
+                          className={`h-2.5 rounded-full ${getRoiColor(condition.roi)}`} 
+                          style={{ 
+                            width: `${Math.abs(condition.roi) * 15}%`,
+                            marginLeft: condition.roi >= 0 ? '50%' : `calc(50% - ${Math.abs(condition.roi) * 15}%)` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="ml-2 text-sm">{condition.roi.toFixed(1)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     {condition.speciesAffected.join(', ')}
                   </TableCell>
                   <TableCell>{condition.recommendedPackages}</TableCell>
@@ -143,7 +170,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                 
                 {expandedRows[condition.id] && (
                   <TableRow>
-                    <TableCell colSpan={7} className="bg-gray-50 p-4">
+                    <TableCell colSpan={8} className="bg-gray-50 p-4">
                       <div className="space-y-4">
                         <div>
                           <h4 className="text-sm font-semibold">Descrição</h4>

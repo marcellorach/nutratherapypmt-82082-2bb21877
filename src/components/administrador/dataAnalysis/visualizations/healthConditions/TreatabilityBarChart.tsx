@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface TreatabilityBarChartProps {
@@ -9,6 +9,7 @@ interface TreatabilityBarChartProps {
     name: string;
     treatabilityScore: number;
     preventionScore: number;
+    roi: number;
   }>;
   isLoading: boolean;
 }
@@ -21,7 +22,8 @@ const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions,
     .map(condition => ({
       name: condition.name,
       tratabilidade: condition.treatabilityScore,
-      prevenção: condition.preventionScore
+      prevenção: condition.preventionScore,
+      roi: condition.roi
     }));
     
   if (isLoading) {
@@ -51,7 +53,12 @@ const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions,
         />
         <YAxis domain={[0, 100]} />
         <Tooltip 
-          formatter={(value) => [`${value}%`, '']}
+          formatter={(value, name) => {
+            if (name === 'roi') {
+              return [`${value}`, 'ROI'];
+            }
+            return [`${value}%`, name === 'tratabilidade' ? 'Tratabilidade' : 'Prevenção'];
+          }}
           labelFormatter={(label) => `Condição: ${label}`}
         />
         <Legend />
@@ -65,6 +72,8 @@ const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions,
           dataKey="prevenção" 
           fill="#8b5cf6" 
         />
+        <ReferenceLine y={45} stroke="#10b981" strokeDasharray="3 3" />
+        <ReferenceLine y={65} stroke="#8b5cf6" strokeDasharray="3 3" />
       </BarChart>
     </ResponsiveContainer>
   );
