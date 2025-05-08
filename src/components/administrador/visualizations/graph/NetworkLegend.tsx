@@ -4,7 +4,7 @@ import React from 'react';
 interface LegendItem {
   color: string;
   label: string;
-  dashed?: boolean;
+  dashed?: boolean | number[];
 }
 
 interface NetworkLegendProps {
@@ -22,8 +22,12 @@ const NetworkLegend: React.FC<NetworkLegendProps> = ({ items, className = '' }) 
               <div className="absolute inset-y-1/2 left-0 right-0 h-[1px] bg-current opacity-70"
                    style={{ 
                      backgroundColor: item.color,
-                     backgroundImage: `linear-gradient(to right, ${item.color} 50%, transparent 50%)`,
-                     backgroundSize: '6px 1px'
+                     backgroundImage: Array.isArray(item.dashed) 
+                       ? `linear-gradient(to right, ${item.color} ${item.dashed[0]}px, transparent ${item.dashed[0]}px, transparent ${item.dashed[0] + item.dashed[1]}px)`
+                       : `linear-gradient(to right, ${item.color} 50%, transparent 50%)`,
+                     backgroundSize: Array.isArray(item.dashed) 
+                       ? `${item.dashed[0] + item.dashed[1]}px 1px`
+                       : '6px 1px'
                    }} 
               />
             </div>

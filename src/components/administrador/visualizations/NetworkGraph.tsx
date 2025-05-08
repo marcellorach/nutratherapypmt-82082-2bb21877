@@ -33,9 +33,9 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
         fit: true
       },
       barnesHut: {
-        gravitationalConstant: -8000,
+        gravitationalConstant: -10000,  // Aumentei para melhorar a distribuição
         centralGravity: 0.8,
-        springLength: 120,
+        springLength: 150,  // Aumentado para espaçar mais os nós
         springConstant: 0.08,
         damping: 0.09
       }
@@ -66,6 +66,16 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
         type: 'continuous'
       },
       hoverWidth: 2
+    },
+    layout: {
+      improvedLayout: true,
+      randomSeed: 42  // Usar seed fixo para garantir consistência na visualização
+    },
+    interaction: {
+      hover: true,
+      tooltipDelay: 200,
+      zoomView: true,
+      dragView: true
     }
   };
   
@@ -75,12 +85,14 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   // Usar o hook para inicializar o grafo
   const { network } = useNetworkGraph(containerRef, data, mergedOptions);
   
-  // Itens da legenda padrão
+  // Itens da legenda expandida
   const defaultLegendItems = [
     { color: '#3b82f6', label: 'Nutracêuticos' },
     { color: '#10b981', label: 'Condições de Saúde' },
     { color: '#a855f7', label: 'Estudos' },
-    { color: '#9ca3af', label: 'Conexões Potenciais (tracejadas)', dashed: true }
+    { color: '#9ca3af', label: 'Conexões Potenciais', dashed: true },
+    { color: '#8b5cf6', label: 'Sinergias', dashed: [2, 2] },
+    { color: '#d1d5db', label: 'Correlações entre Condições', dashed: [5, 5] }
   ];
   
   return (

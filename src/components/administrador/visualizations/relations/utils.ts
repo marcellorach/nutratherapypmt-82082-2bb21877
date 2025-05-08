@@ -1,3 +1,4 @@
+
 import { SankeyData } from '../sankey/types';
 
 /**
@@ -110,10 +111,10 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   // Encontrar nutracêuticos com maior número de conexões para conectar às condições isoladas
   const nutraceuticoNodes = networkNodes.filter(node => node.group === 'nutraceutico');
   
-  // Para cada condição sem conexão, criar até 2 ligações com nutracêuticos
+  // Para cada condição sem conexão, criar até 3 ligações com nutracêuticos (aumentado de 2 para 3)
   conditionsWithoutConnections.forEach((condition, idx) => {
-    // Escolher 1-2 nutracêuticos para conectar
-    const numConnections = Math.min(2, nutraceuticoNodes.length);
+    // Escolher 2-3 nutracêuticos para conectar
+    const numConnections = Math.min(3, nutraceuticoNodes.length);
     
     for (let i = 0; i < numConnections; i++) {
       // Usar o índice rotacionado para distribuir as conexões
@@ -139,6 +140,37 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
     }
   });
   
+  // Conectar condições entre si para criar uma rede mais densa
+  // Isso criará relações entre condições que podem estar relacionadas
+  if (conditionsWithoutConnections.length > 1) {
+    for (let i = 0; i < conditionsWithoutConnections.length; i++) {
+      const condition1 = conditionsWithoutConnections[i];
+      
+      // Conectar com 1-2 outras condições
+      const maxConnections = Math.min(2, conditionsWithoutConnections.length - 1);
+      for (let j = 1; j <= maxConnections; j++) {
+        const nextIndex = (i + j) % conditionsWithoutConnections.length;
+        if (nextIndex !== i) {
+          const condition2 = conditionsWithoutConnections[nextIndex];
+          
+          extraLinks.push({
+            id: `condition_relation_${i}_${nextIndex}`,
+            from: condition1.id,
+            to: condition2.id,
+            value: 2, // Valor reduzido para indicar que é uma relação secundária
+            title: `Possível correlação: ${condition1.label} ↔ ${condition2.label}`,
+            color: '#d1d5db', // Cor cinza claro
+            width: 1,
+            arrows: {
+              to: { enabled: false } // Sem setas para indicar relação bidirecional
+            },
+            dashes: [5, 5] // Padrão tracejado diferente
+          });
+        }
+      }
+    }
+  }
+  
   // Também conectar alguns nutracêuticos isolados a condições com conexões
   const nutraceuticosWithoutConnections = nodesWithoutConnections.filter(
     node => node.group === 'nutraceutico'
@@ -150,8 +182,8 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   
   nutraceuticosWithoutConnections.forEach((nutraceutico, idx) => {
     if (connectedConditions.length > 0) {
-      // Escolher 1-2 condições para conectar
-      const numConnections = Math.min(2, connectedConditions.length);
+      // Escolher 2-3 condições para conectar (aumentado de 2 para 3)
+      const numConnections = Math.min(3, connectedConditions.length);
       
       for (let i = 0; i < numConnections; i++) {
         const conditionIndex = (idx + i) % connectedConditions.length;
@@ -176,6 +208,33 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
       }
     }
   });
+  
+  // Conectar nutracêuticos entre si com base em possíveis sinergias
+  // Esta parte simula sinergias entre nutracêuticos
+  if (nutraceuticoNodes.length > 3) {
+    const synergiesCount = Math.ceil(nutraceuticoNodes.length / 3);
+    
+    for (let i = 0; i < synergiesCount; i++) {
+      const nutraceutico1 = nutraceuticoNodes[i % nutraceuticoNodes.length];
+      const nutraceutico2 = nutraceuticoNodes[(i + 2) % nutraceuticoNodes.length];
+      
+      if (nutraceutico1.id !== nutraceutico2.id) {
+        extraLinks.push({
+          id: `synergy_${i}`,
+          from: nutraceutico1.id,
+          to: nutraceutico2.id,
+          value: 2,
+          title: `Sinergia Potencial: ${nutraceutico1.label} + ${nutraceutico2.label}`,
+          color: '#8b5cf6', // Cor roxa para indicar sinergia
+          width: 1.5,
+          arrows: {
+            to: { enabled: false } // Sem setas para indicar relação bidirecional
+          },
+          dashes: [2, 2] // Padrão tracejado curto
+        });
+      }
+    }
+  }
   
   console.log(`NetworkGraph - Adicionadas ${extraLinks.length} conexões simuladas`);
   
