@@ -86,34 +86,29 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }
   }, []);
 
-  // Converter os dados do formato enhanced para o formato compatível com o componente SankeyChart
-  const convertToSankeyData = (enhancedData: any): SankeyData => {
-    if (!enhancedData || !enhancedData.nodes || !enhancedData.links) {
+  // Simplificar a conversão de dados para evitar problemas de tipo
+  const convertToSankeyData = (data: any): SankeyData => {
+    if (!data || !data.nodes || !data.links) {
       return { nodes: [], links: [] };
     }
 
     // Garantir que os nós tenham o formato esperado
-    const nodes: SankeyNode[] = enhancedData.nodes.map((node: any, index: number) => ({
+    const nodes: SankeyNode[] = data.nodes.map((node: any, index: number) => ({
       name: node.name,
       category: node.category,
       value: node.value,
       color: node.color,
       description: node.description || '',
-      id: node.id,
-      // Preservar os dados originais para referência
+      id: node.id || index,
       originalNode: node
     }));
 
-    // Garantir que os links tenham source e target como números
-    const links: SankeyLink[] = enhancedData.links.map((link: any) => {
-      // Garantir que source e target sejam números
-      let sourceIndex = typeof link.source === 'number' ? link.source : 0;
-      let targetIndex = typeof link.target === 'number' ? link.target : 0;
-
+    // Converter os links para garantir que source e target sejam números
+    const links: SankeyLink[] = data.links.map((link: any, index: number) => {
       return {
-        source: sourceIndex,
-        target: targetIndex,
-        value: link.value,
+        source: typeof link.source === 'number' ? link.source : 0,
+        target: typeof link.target === 'number' ? link.target : 0,
+        value: link.value || 10,
         color: link.color,
         labelText: link.labelText,
         studyCount: link.studyCount,
@@ -121,16 +116,15 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
         description: link.description,
         relationshipType: link.relationshipType,
         originalRelation: link,
-        sourceName: link.sourceName,
-        targetName: link.targetName
+        sourceName: link.sourceName || 'Fonte',
+        targetName: link.targetName || 'Destino'
       };
     });
 
     return { nodes, links };
   };
 
-  // Converter os dados para o formato esperado pelo SankeyChart
-  const sankeyCompatibleData = convertToSankeyData(finalData);
+  const sankeyCompatibleData = finalData ? convertToSankeyData(finalData) : { nodes: [], links: [] };
   
   if (isLoading) {
     return (

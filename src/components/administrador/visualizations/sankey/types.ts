@@ -24,6 +24,7 @@ export interface SankeyNode {
   color?: string;
   description?: string;
   id?: string | number; // Adicionado id como opcional para compatibilidade
+  originalNode?: any; // Dados originais do nó para referência
 }
 
 // Link do gráfico Sankey
@@ -38,8 +39,9 @@ export interface SankeyLink {
   description?: string;
   relationshipType?: RelationshipType;
   originalRelation?: any; // Dados originais da relação
-  sourceName?: string;
-  targetName?: string;
+  sourceName: string; // Nome da fonte para exibição
+  targetName: string; // Nome do alvo para exibição
+  originalLink?: any; // Link original para referência
 }
 
 // Dados do gráfico Sankey
@@ -57,11 +59,11 @@ export interface EnhancedSankeyNode extends Omit<SankeyNode, 'category'> {
 }
 
 // Link aprimorado com suporte a IDs de string
-export interface EnhancedSankeyLink extends Omit<SankeyLink, 'source' | 'target'> {
+export interface EnhancedSankeyLink extends Omit<SankeyLink, 'source' | 'target' | 'sourceName' | 'targetName'> {
   source: string | number; // Pode ser string ou número nas versões enhanced
   target: string | number; // Pode ser string ou número nas versões enhanced
-  sourceName?: string;
-  targetName?: string;
+  sourceName?: string; // Opcional na versão enhanced
+  targetName?: string; // Opcional na versão enhanced
   efficacyScore?: number;
   treatabilityScore?: number;
   evidenceStrength?: number;

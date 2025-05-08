@@ -36,14 +36,23 @@ export const convertLinksToNumericIndices = (
         return null;
       }
       
-      return {
-        ...link,
+      // Criar um link compatível com o tipo SankeyLink
+      const sankeyLink: SankeyLink = {
         source: sourceIndex,
         target: targetIndex,
-        // Garantir que source e target sejam sempre números
+        value: link.value,
+        color: link.color,
+        labelText: link.labelText,
+        studyCount: link.studyCount,
+        evidenceLevel: link.evidenceLevel,
+        description: link.description,
+        relationshipType: link.relationshipType,
+        originalRelation: link.originalRelation,
         sourceName: link.sourceName || String(link.source),
         targetName: link.targetName || String(link.target),
       };
+      
+      return sankeyLink;
     })
     .filter((link): link is SankeyLink => link !== null);
 };
