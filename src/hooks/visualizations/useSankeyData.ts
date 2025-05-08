@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SankeyData, SankeyNode, SankeyLink } from '@/components/administrador/visualizations/sankey/types';
@@ -213,8 +212,8 @@ export const useSankeyData = () => {
             const enhancedValue = Math.max(rel.efficacy_score * 20, 10);
             
             return {
-              source: sourceIndex,
-              target: targetIndex,
+              source: Number(sourceIndex),
+              target: Number(targetIndex),
               value: enhancedValue, // Escala para visualização
               color,
               labelText,
@@ -248,8 +247,8 @@ export const useSankeyData = () => {
             const enhancedValue = Math.max(rel.relevance_score * 15, 8);
             
             return {
-              source: sourceIndex,
-              target: targetIndex,
+              source: Number(sourceIndex),
+              target: Number(targetIndex),
               value: enhancedValue,
               color,
               labelText: 'Estudo relacionado',
