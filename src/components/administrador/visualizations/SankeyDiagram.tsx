@@ -1,5 +1,4 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 import { ZoomIn, ZoomOut, Move, AlertCircle, Info } from 'lucide-react';
 import SankeyTooltip from './sankey/SankeyTooltip';
@@ -11,13 +10,15 @@ import { Badge } from "@/components/ui/badge";
 interface SankeyDiagramProps {
   data: SankeyData;
   height?: number;
+  showControls?: boolean;
 }
 
-const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => {
+const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 500, showControls = true }) => {
   const [scale, setScale] = useState(1);
   const [selectedLink, setSelectedLink] = useState<SankeyLink | null>(null);
   const [selectedSourceNode, setSelectedSourceNode] = useState<SankeyNode | null>(null);
   const [selectedTargetNode, setSelectedTargetNode] = useState<SankeyNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<SankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const processedData = useMemo(() => {
@@ -89,17 +90,20 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
     };
   }, [data]);
 
-  const handleLinkClick = (e: any) => {
-    if (e && e.payload) {
-      const sourceNode = data.nodes[e.payload.source];
-      const targetNode = data.nodes[e.payload.target];
-      
-      setSelectedLink(e.payload);
-      setSelectedSourceNode(sourceNode);
-      setSelectedTargetNode(targetNode);
-      setDialogOpen(true);
-    }
-  };
+  // Handle link click to show details
+  const handleLinkClick = useCallback((event: any) => {
+    if (!event || !event.payload) return;
+    
+    const clickedLink = event.payload;
+    setSelectedLink(clickedLink);
+    
+    // Find source and target nodes
+    const sourceNode = data.nodes[clickedLink.source];
+    const targetNode = data.nodes[clickedLink.target];
+    
+    setSelectedNode(sourceNode); // Use selectedNode to store the source node
+    setDialogOpen(true);
+  }, [data]);
 
   const handleZoomIn = () => {
     setScale(prev => Math.min(prev + 0.2, 2.5));
@@ -251,8 +255,7 @@ const SankeyDiagram: React.FC<SankeyDiagramProps> = ({ data, height = 400 }) => 
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         selectedLink={selectedLink}
-        selectedSourceNode={selectedSourceNode}
-        selectedTargetNode={selectedTargetNode}
+        selectedNode={selectedNode}
       />
     </div>
   );

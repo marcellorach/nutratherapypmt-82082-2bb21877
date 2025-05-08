@@ -86,6 +86,59 @@ const EnhancedSankeyDiagram: React.FC<EnhancedSankeyDiagramProps> = ({
     };
   }, [data, isLoading, activeCategories, minEfficacy, relationshipType]);
   
+  // Function to convert enhanced data to format compatible with Recharts Sankey
+  const formatDataForRecharts = useMemo(() => {
+    if (!processedData.nodes.length || !processedData.links.length) {
+      return { nodes: [], links: [] };
+    }
+    
+    // Create a map of node IDs to array indices
+    const nodeIndexMap = new Map<string | number, number>();
+    
+    // Create nodes array for Recharts with array indices
+    const nodes = processedData.nodes.map((node, index) => {
+      nodeIndexMap.set(node.id, index);
+      
+      return {
+        name: node.name,
+        category: node.category,
+        value: node.value,
+        color: node.color,
+        description: node.description,
+        // Store original node data for reference
+        originalNode: node
+      };
+    });
+    
+    // Create links array for Recharts with numeric indices
+    const links = processedData.links.map(link => {
+      // Convert string IDs to numeric indices
+      const sourceIndex = nodeIndexMap.get(link.source);
+      const targetIndex = nodeIndexMap.get(link.target);
+      
+      // Skip links where source or target is not in the nodeIndexMap
+      if (sourceIndex === undefined || targetIndex === undefined) {
+        return null;
+      }
+      
+      return {
+        source: sourceIndex,
+        target: targetIndex,
+        value: link.value,
+        color: link.color,
+        // Store original link data for reference
+        sourceName: link.sourceName,
+        targetName: link.targetName,
+        relationshipType: link.relationshipType,
+        efficacyScore: link.efficacyScore,
+        description: link.description,
+        originalLink: link
+      };
+    }).filter(Boolean); // Filter out null links
+    
+    return { nodes, links };
+  }, [processedData]);
+  
   // Handle zoom controls
   const handleZoomIn = () => {
     setScale(prev => Math.min(prev + 0.1, 2));
@@ -102,7 +155,9 @@ const EnhancedSankeyDiagram: React.FC<EnhancedSankeyDiagramProps> = ({
   // Handle link click
   const handleLinkClick = useCallback((e: any) => {
     if (e && e.payload) {
-      setSelectedLink(e.payload);
+      const originalLink = e.payload.originalLink || e.payload;
+      setSelectedLink(originalLink);
+      setSelectedNode(null);
       setDialogOpen(true);
     }
   }, []);
@@ -110,7 +165,9 @@ const EnhancedSankeyDiagram: React.FC<EnhancedSankeyDiagramProps> = ({
   // Handle node click
   const handleNodeClick = useCallback((e: any) => {
     if (e && e.payload) {
-      setSelectedNode(e.payload);
+      const originalNode = e.payload.originalNode || e.payload;
+      setSelectedNode(originalNode);
+      setSelectedLink(null);
       setDialogOpen(true);
     }
   }, []);
@@ -120,60 +177,63 @@ const EnhancedSankeyDiagram: React.FC<EnhancedSankeyDiagramProps> = ({
     return {
       nodes: [
         // Nutracêuticos
-        { id: 'n_1', name: 'Glucosamina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
-        { id: 'n_2', name: 'Curcumina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
-        { id: 'n_3', name: 'Ômega 3', category: 'nutraceutico', value: 30, color: '#3b82f6' },
+        { name: 'Glucosamina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
+        { name: 'Curcumina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
+        { name: 'Ômega 3', category: 'nutraceutico', value: 30, color: '#3b82f6' },
         
         // Condições
-        { id: 'c_1', name: 'Artrite', category: 'condicao', value: 25, color: '#10b981' },
-        { id: 'c_2', name: 'Inflamação', category: 'condicao', value: 25, color: '#10b981' },
-        { id: 'c_3', name: 'Saúde Cardíaca', category: 'condicao', value: 25, color: '#10b981' },
+        { name: 'Artrite', category: 'condicao', value: 25, color: '#10b981' },
+        { name: 'Inflamação', category: 'condicao', value: 25, color: '#10b981' },
+        { name: 'Saúde Cardíaca', category: 'condicao', value: 25, color: '#10b981' },
         
         // Outcomes
-        { id: 'o_1', name: 'Redução de Dor', category: 'outcome', value: 20, color: '#f59e0b' },
-        { id: 'o_2', name: 'Mobilidade Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
-        { id: 'o_3', name: 'Função Cardíaca Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
+        { name: 'Redução de Dor', category: 'outcome', value: 20, color: '#f59e0b' },
+        { name: 'Mobilidade Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
+        { name: 'Função Cardíaca Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
         
         // Severidade
-        { id: 's_1', name: 'Leve', category: 'severidade', value: 15, color: '#8b5cf6' },
-        { id: 's_2', name: 'Moderada', category: 'severidade', value: 15, color: '#8b5cf6' },
-        { id: 's_3', name: 'Grave', category: 'severidade', value: 15, color: '#8b5cf6' }
+        { name: 'Leve', category: 'severidade', value: 15, color: '#8b5cf6' },
+        { name: 'Moderada', category: 'severidade', value: 15, color: '#8b5cf6' },
+        { name: 'Grave', category: 'severidade', value: 15, color: '#8b5cf6' }
       ],
       links: [
         // Nutracêuticos -> Condições
-        { source: 'n_1', target: 'c_1', value: 80, color: 'rgba(16, 185, 129, 0.7)', 
+        { source: 0, target: 3, value: 80, color: 'rgba(16, 185, 129, 0.7)', 
           relationshipType: 'treatment', efficacyScore: 4.0 },
-        { source: 'n_2', target: 'c_2', value: 90, color: 'rgba(16, 185, 129, 0.7)', 
+        { source: 1, target: 4, value: 90, color: 'rgba(16, 185, 129, 0.7)', 
           relationshipType: 'prevention', efficacyScore: 4.5 },
-        { source: 'n_3', target: 'c_3', value: 60, color: 'rgba(59, 130, 246, 0.7)', 
+        { source: 2, target: 5, value: 60, color: 'rgba(59, 130, 246, 0.7)', 
           relationshipType: 'support', efficacyScore: 3.0 },
         
         // Condições -> Outcomes
-        { source: 'c_1', target: 'o_1', value: 75, color: 'rgba(245, 158, 11, 0.7)' },
-        { source: 'c_1', target: 'o_2', value: 65, color: 'rgba(59, 130, 246, 0.7)' },
-        { source: 'c_2', target: 'o_1', value: 80, color: 'rgba(16, 185, 129, 0.7)' },
-        { source: 'c_3', target: 'o_3', value: 70, color: 'rgba(59, 130, 246, 0.7)' },
+        { source: 3, target: 6, value: 75, color: 'rgba(245, 158, 11, 0.7)' },
+        { source: 3, target: 7, value: 65, color: 'rgba(59, 130, 246, 0.7)' },
+        { source: 4, target: 6, value: 80, color: 'rgba(16, 185, 129, 0.7)' },
+        { source: 5, target: 8, value: 70, color: 'rgba(59, 130, 246, 0.7)' },
         
         // Outcomes -> Severidade
-        { source: 'o_1', target: 's_1', value: 40, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 'o_1', target: 's_2', value: 35, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 'o_2', target: 's_2', value: 45, color: 'rgba(139, 92, 246, 0.7)' },
-        { source: 'o_3', target: 's_3', value: 50, color: 'rgba(139, 92, 246, 0.7)' }
+        { source: 6, target: 9, value: 40, color: 'rgba(139, 92, 246, 0.7)' },
+        { source: 6, target: 10, value: 35, color: 'rgba(139, 92, 246, 0.7)' },
+        { source: 7, target: 10, value: 45, color: 'rgba(139, 92, 246, 0.7)' },
+        { source: 8, target: 11, value: 50, color: 'rgba(139, 92, 246, 0.7)' }
       ]
     };
   };
   
   // Use demo data if no data or links are available
-  const finalData = (!processedData.nodes.length || !processedData.links.length) ? getDemoData() : processedData;
+  const demoData = getDemoData();
+  const finalData = (!formatDataForRecharts.nodes.length || !formatDataForRecharts.links.length) 
+    ? demoData 
+    : formatDataForRecharts;
   
   // Calculate stats for display
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
     activeCategories.forEach(category => {
-      stats[category] = finalData.nodes.filter(node => node.category === category).length;
+      stats[category] = processedData.nodes.filter(node => node.category === category).length;
     });
     return stats;
-  }, [finalData, activeCategories]);
+  }, [processedData, activeCategories]);
   
   if (isLoading) {
     return (

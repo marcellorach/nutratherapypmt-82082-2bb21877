@@ -1,19 +1,45 @@
 
-import { ensureUniqueNodeIds } from '@/hooks/network/utils';
+import { EnhancedSankeyLink } from '@/components/administrador/visualizations/sankey/types';
 
 /**
- * Função para extrair IDs de links válidos
- * @param links Array de links para processar
- * @param nodeIds Mapa de IDs de nós válidos
- * @returns Links filtrados que têm nós válidos como origem e destino
+ * Filtra links para garantir que conectam apenas a nós válidos
+ * @param links Lista de links do diagrama Sankey
+ * @param nodeIdsMap Mapa de IDs de nós válidos
+ * @returns Lista filtrada de links
  */
-export const filterValidLinks = (links: any[], nodeIds: Map<string | number, boolean>): any[] => {
-  return links.filter(link => {
-    const sourceId = link.from || link.source;
-    const targetId = link.to || link.target;
-    return nodeIds.has(sourceId) && nodeIds.has(targetId);
-  });
+export const filterValidLinks = (
+  links: EnhancedSankeyLink[],
+  nodeIdsMap: Map<string | number, boolean>
+): EnhancedSankeyLink[] => {
+  return links.filter(link => 
+    nodeIdsMap.has(link.source) && nodeIdsMap.has(link.target)
+  );
 };
 
-// Re-exportando para manter compatibilidade com código existente
-export { ensureUniqueNodeIds };
+/**
+ * Converte links com IDs de string para links com índices numéricos
+ * @param links Lista de links com IDs string
+ * @param nodeMap Mapa de IDs de nós para índices
+ * @returns Lista de links com índices numéricos
+ */
+export const convertLinksToNumericIndices = (
+  links: EnhancedSankeyLink[],
+  nodeMap: Map<string | number, number>
+) => {
+  return links
+    .map(link => {
+      const sourceIndex = nodeMap.get(link.source);
+      const targetIndex = nodeMap.get(link.target);
+      
+      if (sourceIndex === undefined || targetIndex === undefined) {
+        return null;
+      }
+      
+      return {
+        ...link,
+        source: sourceIndex,
+        target: targetIndex
+      };
+    })
+    .filter(Boolean);
+};
