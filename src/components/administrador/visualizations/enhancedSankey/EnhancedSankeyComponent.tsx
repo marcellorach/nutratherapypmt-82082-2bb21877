@@ -19,6 +19,7 @@ import SankeyLegend from '../sankey/SankeyLegend';
 import SankeyFilters from '../sankey/SankeyFilters';
 import useEnhancedSankeyVisualization from '@/hooks/visualizations/useEnhancedSankeyVisualization';
 import { useEnhancedSankeyData } from '@/hooks/visualizations/useEnhancedSankeyData';
+import { convertLinksToNumericIndices } from '@/utils/graph-utils';
 
 interface EnhancedSankeyComponentProps {
   initialData?: EnhancedSankeyData;
@@ -86,14 +87,20 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }
   }, []);
 
-  // Converter dados para formato compatível com Sankey
-  const prepareSankeyData = (inputData: any): SankeyData => {
+  // Preparar dados para o Sankey
+  const prepareSankeyData = (inputData: EnhancedSankeyData | null): SankeyData => {
     if (!inputData || !inputData.nodes || !inputData.links) {
       return { nodes: [], links: [] };
     }
 
+    // Criar mapa de IDs de nós para índices
+    const nodeMap = new Map<string | number, number>();
+    inputData.nodes.forEach((node, index) => {
+      nodeMap.set(node.id !== undefined ? node.id : index, index);
+    });
+
     // Criar nós compatíveis com SankeyNode
-    const nodes: SankeyNode[] = inputData.nodes.map((node: any) => ({
+    const nodes: SankeyNode[] = inputData.nodes.map((node, index) => ({
       name: node.name,
       category: node.category,
       value: node.value || 1,
@@ -103,20 +110,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }));
 
     // Converter links para garantir compatibilidade
-    const links: SankeyLink[] = inputData.links.map((link: any) => ({
-      source: typeof link.source === 'number' ? link.source : 0,
-      target: typeof link.target === 'number' ? link.target : 0,
-      value: link.value || 1,
-      color: link.color,
-      labelText: link.labelText || '',
-      studyCount: link.studyCount || 0,
-      evidenceLevel: link.evidenceLevel || 0,
-      description: link.description || '',
-      relationshipType: link.relationshipType || '',
-      sourceName: link.sourceName || String(link.source),
-      targetName: link.targetName || String(link.target),
-      originalLink: link
-    }));
+    const links: SankeyLink[] = convertLinksToNumericIndices(inputData.links, nodeMap);
 
     return { nodes, links };
   };

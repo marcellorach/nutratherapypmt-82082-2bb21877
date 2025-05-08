@@ -41,7 +41,7 @@ export const convertLinksToNumericIndices = (
       const targetName = link.targetName || String(link.target);
       
       // Criar um link compatível com o tipo SankeyLink
-      const sankeyLink: SankeyLink = {
+      return {
         source: sourceIndex,
         target: targetIndex,
         value: link.value,
@@ -55,8 +55,6 @@ export const convertLinksToNumericIndices = (
         sourceName: sourceName,
         targetName: targetName
       };
-      
-      return sankeyLink;
     })
     .filter((link): link is SankeyLink => link !== null);
 };

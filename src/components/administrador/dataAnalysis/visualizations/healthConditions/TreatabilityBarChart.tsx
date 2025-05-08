@@ -1,0 +1,73 @@
+
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface TreatabilityBarChartProps {
+  conditions: Array<{
+    id: string;
+    name: string;
+    treatabilityScore: number;
+    preventionScore: number;
+  }>;
+  isLoading: boolean;
+}
+
+const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions, isLoading }) => {
+  // Preparar dados para o gráfico (top 10 condições)
+  const chartData = conditions
+    .sort((a, b) => b.treatabilityScore - a.treatabilityScore)
+    .slice(0, 10)
+    .map(condition => ({
+      name: condition.name,
+      tratabilidade: condition.treatabilityScore,
+      prevenção: condition.preventionScore
+    }));
+    
+  if (isLoading) {
+    return <Skeleton className="h-80 w-full" />;
+  }
+  
+  return (
+    <ResponsiveContainer width="100%" height={320}>
+      <BarChart
+        data={chartData}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis 
+          dataKey="name" 
+          tick={{ fontSize: 12 }} 
+          interval={0}
+          tickMargin={10}
+          height={60}
+          angle={-45}
+          textAnchor="end"
+        />
+        <YAxis domain={[0, 100]} />
+        <Tooltip 
+          formatter={(value) => [`${value}%`, '']}
+          labelFormatter={(label) => `Condição: ${label}`}
+        />
+        <Legend />
+        <Bar 
+          name="Índice de Tratabilidade" 
+          dataKey="tratabilidade" 
+          fill="#10b981" 
+        />
+        <Bar 
+          name="Índice de Prevenção" 
+          dataKey="prevenção" 
+          fill="#8b5cf6" 
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+export default TreatabilityBarChart;
