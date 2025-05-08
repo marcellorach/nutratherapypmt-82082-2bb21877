@@ -19,6 +19,11 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
   useEffect(() => {
     if (!containerRef.current || !data.nodes || !data.links) return;
     
+    console.log('NetworkGraph - Dados recebidos:', { 
+      nodes: data.nodes.length, 
+      links: data.links.length 
+    });
+    
     // Configurar grupos para diferentes tipos de nós
     const groups = {
       nutraceutico: {
@@ -57,9 +62,12 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
     
     const edges = new DataSet(
       data.links.map((link, index) => {
+        // Debug para visualizar os links recebidos
+        console.log(`Link ${index}:`, link);
+        
         // Converter formato 'from/to' para o formato esperado pelo vis.js
         const edgeData: any = {
-          id: index
+          id: link.id || `edge_${index}`
         };
 
         // Se o link tiver propriedades 'from' e 'to', usá-las
@@ -76,13 +84,19 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         if (link.value) edgeData.value = link.value;
         if (link.title) edgeData.title = link.title;
         if (link.color) edgeData.color = link.color;
-        if (link.width) edgeData.width = link.width;
+        if (link.width) edgeData.width = link.width || 2; // Valor padrão para garantir visibilidade
         if (link.arrows) edgeData.arrows = link.arrows;
         if (link.dashes !== undefined) edgeData.dashes = link.dashes;
 
         return edgeData;
       })
     );
+    
+    // Debug para verificar o que foi criado
+    console.log('NetworkGraph - DataSets criados:', { 
+      nodes: nodes.length, 
+      edges: edges.length 
+    });
     
     // Opções para o grafo
     const options = {
@@ -104,13 +118,16 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ data, height = '500px' }) =
         }
       },
       edges: {
-        width: 1,
+        width: 2, // Aumentar largura padrão para melhorar visibilidade
         color: { inherit: 'from' },
         smooth: {
           enabled: true,
           type: 'continuous',
           forceDirection: 'none',
           roundness: 0.5
+        },
+        arrows: {
+          to: { enabled: true, scaleFactor: 0.5 } // Garantir que setas sejam exibidas
         }
       },
       physics: {

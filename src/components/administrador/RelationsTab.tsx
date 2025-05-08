@@ -75,10 +75,10 @@ const exampleSankeyData = {
   ]
 };
 
-// Preparar dados para o NetworkGraph
+// Preparar dados para o NetworkGraph com conexões melhoradas
 const prepareNetworkData = () => {
   const nodes = exampleSankeyData.nodes.map((node, index) => ({
-    id: index,
+    id: `node_${index}`,
     label: node.name,
     title: node.description,
     group: node.category,
@@ -98,16 +98,23 @@ const prepareNetworkData = () => {
     }
   }));
 
-  const links = exampleSankeyData.links.map(link => ({
-    from: link.source,
-    to: link.target,
-    title: `Eficácia: ${link.value}/100 - ${link.labelText}`,
+  const links = exampleSankeyData.links.map((link, index) => ({
+    id: `link_${index}`,
+    from: `node_${link.source}`,
+    to: `node_${link.target}`,
+    title: `Eficácia: ${link.value}/100 - ${link.labelText || ''}`,
     value: link.value / 20, // Adaptar a escala
-    width: (link.value / 100) * 5,
+    width: Math.max(2, (link.value / 100) * 7), // Aumentar largura mínima e escala
     label: link.value.toString(),
     color: link.value >= 80 ? '#10b981' : 
            link.value >= 60 ? '#3b82f6' : 
-           link.value >= 40 ? '#f59e0b' : '#9ca3af'
+           link.value >= 40 ? '#f59e0b' : '#9ca3af',
+    arrows: {
+      to: {
+        enabled: true,
+        scaleFactor: 0.5
+      }
+    }
   }));
 
   return { 
