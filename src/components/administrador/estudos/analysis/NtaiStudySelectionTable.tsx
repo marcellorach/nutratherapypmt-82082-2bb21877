@@ -24,7 +24,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
     switch (status) {
       case "new": return "default";
       case "especial": return "secondary";
-      case "processed": return "success";
+      case "processed": return "secondary"; // Alterado de "success" para "secondary" para compatibilidade
       default: return "outline";
     }
   };

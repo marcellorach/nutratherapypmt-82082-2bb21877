@@ -99,7 +99,7 @@ export const analyzeStudy = async (
               .from('nutraceuticals')
               .insert([{
                 name: nutra.name,
-                description: `Encontrado em análise de estudo: ${result.studyTitle || validStudyId}`,
+                description: `Encontrado em análise de estudo: ${result.studyId || validStudyId}`,
                 chemical_compound: null,
                 source: "Análise NTAI"
               }])

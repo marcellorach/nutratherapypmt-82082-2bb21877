@@ -42,8 +42,8 @@ export const convertLinksToNumericIndices = (
       
       // Criar um link compatível com o tipo SankeyLink, garantindo que source e target sejam números
       return {
-        source: Number(sourceIndex), // Conversão explícita para número
-        target: Number(targetIndex), // Conversão explícita para número
+        source: Number(sourceIndex),
+        target: Number(targetIndex),
         value: link.value,
         color: link.color,
         labelText: link.labelText,

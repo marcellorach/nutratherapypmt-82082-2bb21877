@@ -46,18 +46,40 @@ export interface ExtractedSideEffect {
 
 export interface NtaiAnalysisResult {
   studyId: string;
-  studyTitle?: string;
-  studyAuthors?: string[];
-  studyYear?: number;
-  studyJournal?: string;
-  extractedNutraceuticals?: ExtractedNutraceutical[];
-  extractedConditions?: ExtractedCondition[];
-  extractedInteractions?: ExtractedInteraction[];
-  extractedSideEffects?: ExtractedSideEffect[];
-  studyQuality?: number;
-  studyRelevance?: number;
-  processingTime?: number;
-  processingStatus?: string;
-  summary?: string;
-  warnings?: string[];
+  qualityScore: number;
+  relevanceScore: number;
+  extractedNutraceuticals: Array<{
+    name: string;
+    confidence: number;
+  }>;
+  extractedConditions: Array<{
+    name: string;
+    confidence: number;
+  }>;
+  extractedInteractions: Array<{
+    nutraceutical: string;
+    interaction: string;
+    confidence: number;
+  }>;
+  extractedSideEffects: Array<{
+    name: string;
+    description: string;
+    severity: string;
+    confidence: number;
+  }>;
+  nutraceuticals?: Array<{
+    name: string;
+    description?: string;
+    chemical_compound?: string;
+    source?: string;
+    dosage?: string;
+    category?: string;
+    conditions?: Array<{
+      name: string;
+      description?: string;
+      relationship_type?: string;
+      efficacy_score?: number;
+    }>;
+    relevance?: number;
+  }>;
 }
