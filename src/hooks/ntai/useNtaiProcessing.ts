@@ -21,33 +21,70 @@ export const useNtaiProcessing = () => {
   const [analysisResult, setAnalysisResult] = useState<NtaiAnalysisResult | null>(null);
   const [processingActive, setProcessingActive] = useState(false);
   const [activeItemIndex, setActiveItemIndex] = useState<number>(-1);
-  const [processQueue, setProcessQueue] = useState<ProcessingItem[]>([]);
-  const [logEntries, setLogEntries] = useState<string[]>([]);
+  const [processQueue, setProcessQueue] = useState<ProcessingItem[]>([
+    // Pré-preencher com dois estudos já processados para simulação
+    {
+      id: "1",
+      title: "The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+      stage: 'complete' as ProcessingStage,
+      progress: 100,
+      sourceFile: "PubMed",
+      originalFormat: "PDF"
+    },
+    {
+      id: "2",
+      title: "Senescent cells as a target for anti-aging interventions",
+      stage: 'complete' as ProcessingStage,
+      progress: 100,
+      sourceFile: "National Institute of Health",
+      originalFormat: "PDF"
+    }
+  ]);
+  const [logEntries, setLogEntries] = useState<string[]>([
+    // Log entries para mostrar histórico de processamento
+    "[10:25:30] Iniciando processamento com configurações:",
+    "[10:25:30] Modelo: GPT-4o, Temperature: 0.7",
+    "[10:25:31] Extraindo texto para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+    "[10:25:33] Extraindo texto de documento PDF: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+    "[10:25:36] Analisando conteúdo para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+    "[10:25:38] Analisando conteúdo com prompt especializado para nutracêuticos",
+    "[10:25:42] Padronizando dados para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+    "[10:25:45] Padronizando dados para integração com o kanban",
+    "[10:25:48] Processamento NTAI concluído para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+    "[10:25:50] Iniciando processamento para o próximo estudo...",
+    "[10:25:51] Extraindo texto para: Senescent cells as a target for anti-aging interventions",
+    "[10:25:54] Extraindo texto de documento PDF: Senescent cells as a target for anti-aging interventions",
+    "[10:25:57] Analisando conteúdo para: Senescent cells as a target for anti-aging interventions",
+    "[10:25:59] Analisando conteúdo com prompt especializado para nutracêuticos",
+    "[10:26:03] Padronizando dados para: Senescent cells as a target for anti-aging interventions",
+    "[10:26:05] Padronizando dados para integração com o kanban",
+    "[10:26:08] Processamento NTAI concluído para: Senescent cells as a target for anti-aging interventions"
+  ]);
   const [availableStudies, setAvailableStudies] = useState<AvailableStudy[]>([
     {
       id: "1",
-      title: "Efeitos de Glucosamina na Saúde Articular",
-      description: "Estudo randomizado sobre glucosamina",
-      journal: "Journal of Veterinary Medicine",
-      kanban_status: "new",
+      title: "The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
+      description: "Sulforafano reduz invasão tumoral e protege células contra toxicidade da doxorrubicina em osteossarcoma canino",
+      journal: "PubMed",
+      kanban_status: "processed", // Alterado para "processed"
       import_type: "manual",
       created_at: new Date().toISOString(),
     },
     {
       id: "2",
-      title: "Ômega 3 e Saúde Cardiovascular em Cães",
-      description: "Meta-análise de estudos sobre ômega 3",
-      journal: "Animal Health Research",
-      kanban_status: "especial",
+      title: "Senescent cells as a target for anti-aging interventions",
+      description: "Células senescentes impulsionam doenças do envelhecimento. Senoterapias visam eliminá-las, prometendo ampliar a saúde e longevidade",
+      journal: "National Institute of Health",
+      kanban_status: "processed", // Alterado para "processed"
       import_type: "scispace",
       created_at: new Date().toISOString(),
     },
     {
       id: "3",
-      title: "Curcumina como Anti-inflamatório Natural",
-      description: "Revisão sistemática sobre curcumina",
-      journal: "Nutraceutical Research",
-      kanban_status: "new",
+      title: "Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+      description: "Estudo sobre suplementos dietéticos e seu efeito na redução da mortalidade em cães com doença renal crônica",
+      journal: "Veterinary Research",
+      kanban_status: "new", // Este ainda não foi processado
       import_type: "scispace",
       created_at: new Date().toISOString(),
     }

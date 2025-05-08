@@ -73,10 +73,15 @@ export const useProcessingLogic = (
           .from('processed_studies')
           .select('*')
           .eq('id', item.id)
-          .single();
+          .maybeSingle();
           
         if (studyError) {
           throw new Error(`Erro ao buscar dados do estudo: ${studyError.message}`);
+        }
+        
+        if (!studyData) {
+          // Se não encontrar o estudo, usar dados simulados
+          addLogEntry(`[INFO] Usando dados simulados para: ${item.title}`);
         }
         
         // Simular as etapas de processamento
@@ -90,7 +95,7 @@ export const useProcessingLogic = (
         
         const result = await ntaiService.analyzeStudy(
           item.id,
-          studyData.description || `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
+          studyData?.description || `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
           aiConfigs.nutraceuticals_prompt,
           aiConfigs.conditions_prompt
         );
