@@ -1,5 +1,5 @@
 
-import { EnhancedSankeyLink } from '@/components/administrador/visualizations/sankey/types';
+import { EnhancedSankeyLink, SankeyLink } from '@/components/administrador/visualizations/sankey/types';
 
 /**
  * Filtra links para garantir que conectam apenas a nós válidos
@@ -18,28 +18,32 @@ export const filterValidLinks = (
 
 /**
  * Converte links com IDs de string para links com índices numéricos
- * @param links Lista de links com IDs string
+ * @param links Lista de links com IDs string ou number
  * @param nodeMap Mapa de IDs de nós para índices
  * @returns Lista de links com índices numéricos
  */
 export const convertLinksToNumericIndices = (
   links: EnhancedSankeyLink[],
   nodeMap: Map<string | number, number>
-) => {
+): SankeyLink[] => {
   return links
     .map(link => {
       const sourceIndex = nodeMap.get(link.source);
       const targetIndex = nodeMap.get(link.target);
       
       if (sourceIndex === undefined || targetIndex === undefined) {
+        console.warn('Link inválido: nó fonte ou alvo não encontrado', link);
         return null;
       }
       
       return {
         ...link,
         source: sourceIndex,
-        target: targetIndex
+        target: targetIndex,
+        // Garantir que source e target sejam sempre números
+        sourceName: link.sourceName || String(link.source),
+        targetName: link.targetName || String(link.target),
       };
     })
-    .filter(Boolean);
+    .filter((link): link is SankeyLink => link !== null);
 };

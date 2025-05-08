@@ -1,11 +1,13 @@
 
 import React, { useState, useCallback } from 'react';
-import { Info } from 'lucide-react';
 import { 
   EnhancedSankeyData, 
   EnhancedSankeyLink, 
   EnhancedSankeyNode, 
-  NodeCategory 
+  NodeCategory,
+  SankeyData,
+  SankeyLink,
+  SankeyNode 
 } from '../sankey/types';
 
 import SankeyChart from './SankeyChart';
@@ -83,6 +85,52 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
       setDialogOpen(true);
     }
   }, []);
+
+  // Converter os dados do formato enhanced para o formato compatível com o componente SankeyChart
+  const convertToSankeyData = (enhancedData: any): SankeyData => {
+    if (!enhancedData || !enhancedData.nodes || !enhancedData.links) {
+      return { nodes: [], links: [] };
+    }
+
+    // Garantir que os nós tenham o formato esperado
+    const nodes: SankeyNode[] = enhancedData.nodes.map((node: any, index: number) => ({
+      name: node.name,
+      category: node.category,
+      value: node.value,
+      color: node.color,
+      description: node.description || '',
+      id: node.id,
+      // Preservar os dados originais para referência
+      originalNode: node
+    }));
+
+    // Garantir que os links tenham source e target como números
+    const links: SankeyLink[] = enhancedData.links.map((link: any) => {
+      // Garantir que source e target sejam números
+      let sourceIndex = typeof link.source === 'number' ? link.source : 0;
+      let targetIndex = typeof link.target === 'number' ? link.target : 0;
+
+      return {
+        source: sourceIndex,
+        target: targetIndex,
+        value: link.value,
+        color: link.color,
+        labelText: link.labelText,
+        studyCount: link.studyCount,
+        evidenceLevel: link.evidenceLevel,
+        description: link.description,
+        relationshipType: link.relationshipType,
+        originalRelation: link,
+        sourceName: link.sourceName,
+        targetName: link.targetName
+      };
+    });
+
+    return { nodes, links };
+  };
+
+  // Converter os dados para o formato esperado pelo SankeyChart
+  const sankeyCompatibleData = convertToSankeyData(finalData);
   
   if (isLoading) {
     return (
@@ -122,7 +170,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
       <div className="flex items-center justify-between mb-2">
         <SankeyStats 
           stats={categoryStats} 
-          linkCount={finalData.links.length} 
+          linkCount={sankeyCompatibleData.links.length} 
         />
         
         {showControls && (
@@ -136,7 +184,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
       </div>
       
       <SankeyChart 
-        data={finalData}
+        data={sankeyCompatibleData}
         height={height}
         scale={scale}
         onNodeClick={handleNodeClick}

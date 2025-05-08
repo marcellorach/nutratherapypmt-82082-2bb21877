@@ -1,13 +1,11 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 import SankeyTooltip from '../sankey/SankeyTooltip';
+import { SankeyData } from '../sankey/types';
 
 interface SankeyChartProps {
-  data: {
-    nodes: any[];
-    links: any[];
-  };
+  data: SankeyData;  // Mudado para SankeyData que exige source/target como números
   height: number;
   scale: number;
   onNodeClick: (e: any) => void;

@@ -28,8 +28,8 @@ export interface SankeyNode {
 
 // Link do gráfico Sankey
 export interface SankeyLink {
-  source: number;
-  target: number;
+  source: number; // Deve ser sempre número para Recharts
+  target: number; // Deve ser sempre número para Recharts
   value: number;
   color?: string;
   labelText?: string;
@@ -58,8 +58,8 @@ export interface EnhancedSankeyNode extends Omit<SankeyNode, 'category'> {
 
 // Link aprimorado com suporte a IDs de string
 export interface EnhancedSankeyLink extends Omit<SankeyLink, 'source' | 'target'> {
-  source: string | number;
-  target: string | number;
+  source: string | number; // Pode ser string ou número nas versões enhanced
+  target: string | number; // Pode ser string ou número nas versões enhanced
   sourceName?: string;
   targetName?: string;
   efficacyScore?: number;

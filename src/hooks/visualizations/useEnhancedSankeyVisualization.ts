@@ -80,7 +80,10 @@ export const useEnhancedSankeyVisualization = (
     // Create links array for Recharts with numeric indices
     const links = convertLinksToNumericIndices(processedData.links, nodeIndexMap);
     
-    return { nodes, links };
+    return { 
+      nodes, 
+      links: links.filter(Boolean) // Garantir que não temos links nulos
+    };
   }, [processedData]);
 
   // Calculate stats for display
@@ -97,24 +100,24 @@ export const useEnhancedSankeyVisualization = (
     return {
       nodes: [
         // Nutracêuticos
-        { name: 'Glucosamina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
-        { name: 'Curcumina', category: 'nutraceutico', value: 30, color: '#3b82f6' },
-        { name: 'Ômega 3', category: 'nutraceutico', value: 30, color: '#3b82f6' },
+        { name: 'Glucosamina', category: 'nutraceutico', value: 30, color: '#3b82f6', id: 0 },
+        { name: 'Curcumina', category: 'nutraceutico', value: 30, color: '#3b82f6', id: 1 },
+        { name: 'Ômega 3', category: 'nutraceutico', value: 30, color: '#3b82f6', id: 2 },
         
         // Condições
-        { name: 'Artrite', category: 'condicao', value: 25, color: '#10b981' },
-        { name: 'Inflamação', category: 'condicao', value: 25, color: '#10b981' },
-        { name: 'Saúde Cardíaca', category: 'condicao', value: 25, color: '#10b981' },
+        { name: 'Artrite', category: 'condicao', value: 25, color: '#10b981', id: 3 },
+        { name: 'Inflamação', category: 'condicao', value: 25, color: '#10b981', id: 4 },
+        { name: 'Saúde Cardíaca', category: 'condicao', value: 25, color: '#10b981', id: 5 },
         
         // Outcomes
-        { name: 'Redução de Dor', category: 'outcome', value: 20, color: '#f59e0b' },
-        { name: 'Mobilidade Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
-        { name: 'Função Cardíaca Melhorada', category: 'outcome', value: 20, color: '#f59e0b' },
+        { name: 'Redução de Dor', category: 'outcome', value: 20, color: '#f59e0b', id: 6 },
+        { name: 'Mobilidade Melhorada', category: 'outcome', value: 20, color: '#f59e0b', id: 7 },
+        { name: 'Função Cardíaca Melhorada', category: 'outcome', value: 20, color: '#f59e0b', id: 8 },
         
         // Severidade
-        { name: 'Leve', category: 'severidade', value: 15, color: '#8b5cf6' },
-        { name: 'Moderada', category: 'severidade', value: 15, color: '#8b5cf6' },
-        { name: 'Grave', category: 'severidade', value: 15, color: '#8b5cf6' }
+        { name: 'Leve', category: 'severidade', value: 15, color: '#8b5cf6', id: 9 },
+        { name: 'Moderada', category: 'severidade', value: 15, color: '#8b5cf6', id: 10 },
+        { name: 'Grave', category: 'severidade', value: 15, color: '#8b5cf6', id: 11 }
       ],
       links: [
         // Nutracêuticos -> Condições
