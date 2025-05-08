@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import SankeyDiagram from './visualizations/SankeyDiagram';
 import NetworkGraph from './visualizations/NetworkGraph';
 import EfficacyMatrix from './visualizations/EfficacyMatrix';
+import EnhancedSankeyDiagram from './visualizations/EnhancedSankeyDiagram';
 import { Badge } from "@/components/ui/badge";
 
 // Dados de exemplo para o diagrama Sankey
@@ -161,7 +163,7 @@ const prepareMatrixData = () => {
 
 // Componente para visualizar relações entre nutraceuticos e condições de saúde
 const RelationsTab: React.FC = () => {
-  const [relationView, setRelationView] = useState<string>('sankey');
+  const [relationView, setRelationView] = useState<string>('enhanced-sankey');
   const [efficacyFilter, setEfficacyFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -252,12 +254,17 @@ const RelationsTab: React.FC = () => {
         </CardHeader>
         
         <CardContent className="pt-4">
-          <Tabs defaultValue="sankey" value={relationView} onValueChange={setRelationView}>
+          <Tabs defaultValue="enhanced-sankey" value={relationView} onValueChange={setRelationView}>
             <TabsList className="mb-4">
-              <TabsTrigger value="sankey">Diagrama Sankey</TabsTrigger>
+              <TabsTrigger value="enhanced-sankey">Diagrama Sankey Avançado</TabsTrigger>
+              <TabsTrigger value="sankey">Diagrama Sankey Simples</TabsTrigger>
               <TabsTrigger value="network">Rede de Relações</TabsTrigger>
               <TabsTrigger value="matrix">Matriz de Eficácia</TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="enhanced-sankey" className="pt-4">
+              <EnhancedSankeyDiagram height={500} />
+            </TabsContent>
             
             <TabsContent value="sankey" className="pt-4">
               <SankeyDiagram data={exampleSankeyData} height={500} />
@@ -294,7 +301,11 @@ const RelationsTab: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-amber-500 mr-1 rounded-sm"></div>
-                <span>Efeitos</span>
+                <span>Outcomes</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-purple-500 mr-1 rounded-sm"></div>
+                <span>Severidade</span>
               </div>
               <div className="flex items-center ml-4">
                 <span className="font-medium">Largura da conexão:</span>
