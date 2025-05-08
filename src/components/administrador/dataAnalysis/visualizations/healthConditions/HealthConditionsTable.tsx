@@ -50,6 +50,19 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
       </div>
     );
   }
+
+  // Função para determinar a cor com base no score (ajustada para valores mais realistas)
+  const getTreatabilityColor = (score: number) => {
+    if (score >= 45) return "bg-green-500";
+    if (score >= 30) return "bg-yellow-500";
+    return "bg-red-500";
+  }
+
+  const getPreventionColor = (score: number) => {
+    if (score >= 65) return "bg-purple-500";
+    if (score >= 40) return "bg-blue-500";
+    return "bg-orange-500";
+  }
   
   return (
     <div className="rounded-md border">
@@ -94,10 +107,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                     <div className="flex items-center">
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div 
-                          className={`h-2.5 rounded-full ${
-                            condition.treatabilityScore >= 75 ? "bg-green-500" : 
-                            condition.treatabilityScore >= 50 ? "bg-yellow-500" : "bg-red-500"
-                          }`} 
+                          className={`h-2.5 rounded-full ${getTreatabilityColor(condition.treatabilityScore)}`} 
                           style={{ width: `${condition.treatabilityScore}%` }}
                         ></div>
                       </div>
@@ -108,10 +118,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                     <div className="flex items-center">
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div 
-                          className={`h-2.5 rounded-full ${
-                            condition.preventionScore >= 75 ? "bg-purple-500" : 
-                            condition.preventionScore >= 50 ? "bg-blue-500" : "bg-orange-500"
-                          }`} 
+                          className={`h-2.5 rounded-full ${getPreventionColor(condition.preventionScore)}`} 
                           style={{ width: `${condition.preventionScore}%` }}
                         ></div>
                       </div>
@@ -149,17 +156,31 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <h4 className="text-sm font-semibold">Pacotes de Tratamento</h4>
-                            <ul className="text-sm text-gray-600 list-disc pl-5">
-                              <li>Pack Articular Premium (82% eficácia)</li>
-                              <li>Pack Anti-inflamatório Plus (78% eficácia)</li>
-                            </ul>
+                            {condition.id.startsWith('c9') || condition.id.startsWith('c10') ? (
+                              <ul className="text-sm text-gray-600 list-disc pl-5">
+                                <li>Pack Longevidade Plus ({Math.round(condition.treatabilityScore * 0.9)}% eficácia)</li>
+                                <li>Pack Senolítico Avançado ({Math.round(condition.treatabilityScore * 0.85)}% eficácia)</li>
+                              </ul>
+                            ) : (
+                              <ul className="text-sm text-gray-600 list-disc pl-5">
+                                <li>Pack {condition.name} Premium ({Math.round(condition.treatabilityScore * 0.9)}% eficácia)</li>
+                                <li>Pack Suporte {condition.name.split(' ')[0]} ({Math.round(condition.treatabilityScore * 0.8)}% eficácia)</li>
+                              </ul>
+                            )}
                           </div>
                           <div>
                             <h4 className="text-sm font-semibold">Pacotes de Prevenção</h4>
-                            <ul className="text-sm text-gray-600 list-disc pl-5">
-                              <li>Pack Preventivo Articular (92% eficácia)</li>
-                              <li>Pack Suporte Imune (87% eficácia)</li>
-                            </ul>
+                            {condition.id.startsWith('c9') || condition.id.startsWith('c10') ? (
+                              <ul className="text-sm text-gray-600 list-disc pl-5">
+                                <li>Pack Anti-envelhecimento ({Math.round(condition.preventionScore * 0.9)}% eficácia)</li>
+                                <li>Pack Protetor Celular ({Math.round(condition.preventionScore * 0.85)}% eficácia)</li>
+                              </ul>
+                            ) : (
+                              <ul className="text-sm text-gray-600 list-disc pl-5">
+                                <li>Pack Preventivo {condition.name.split(' ')[0]} ({Math.round(condition.preventionScore * 0.9)}% eficácia)</li>
+                                <li>Pack Suporte Imune ({Math.round(condition.preventionScore * 0.8)}% eficácia)</li>
+                              </ul>
+                            )}
                           </div>
                         </div>
                         <div className="flex justify-end">
