@@ -163,7 +163,9 @@ export const useNetworkGraph = (
     edgesDataSet.current = new DataSet(
       data.links.map((link, index) => {
         // Debug para visualizar os links recebidos
-        console.log(`Link ${index}:`, link);
+        if (index < 5 || index % 20 === 0) {
+          console.log(`Link ${index} (amostra):`, link);
+        }
         
         // Converter formato para o formato esperado pelo vis.js
         const edgeData: any = {
@@ -232,9 +234,38 @@ export const useNetworkGraph = (
               easingFunction: 'easeInOutQuad'
             }
           });
+          
+          // Depois que a rede estabiliza, exibir estatísticas
+          if (nodesDataSet.current && edgesDataSet.current) {
+            console.log('NetworkGraph - Estatísticas após estabilização:', {
+              nodes: nodesDataSet.current.length,
+              edges: edgesDataSet.current.length,
+              isolatedNodes: countIsolatedNodes()
+            });
+          }
         }
       }, 200);
     });
+    
+    // Função para contar nós isolados (sem conexões)
+    const countIsolatedNodes = () => {
+      if (!nodesDataSet.current || !edgesDataSet.current) return 0;
+      
+      let isolatedCount = 0;
+      const allNodes = nodesDataSet.current.get();
+      
+      allNodes.forEach(node => {
+        const connections = edgesDataSet.current!.get({
+          filter: item => item.from === node.id || item.to === node.id
+        });
+        
+        if (connections.length === 0) {
+          isolatedCount++;
+        }
+      });
+      
+      return isolatedCount;
+    };
     
     // Limpeza
     return () => {

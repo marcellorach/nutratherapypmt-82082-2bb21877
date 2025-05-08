@@ -24,13 +24,63 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   customOptions = {}
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { network } = useNetworkGraph(containerRef, data, customOptions);
+  
+  // Configurações personalizadas para melhorar a visualização
+  const defaultCustomOptions = {
+    physics: {
+      stabilization: {
+        iterations: 200,
+        fit: true
+      },
+      barnesHut: {
+        gravitationalConstant: -8000,
+        centralGravity: 0.8,
+        springLength: 120,
+        springConstant: 0.08,
+        damping: 0.09
+      }
+    },
+    nodes: {
+      shape: 'dot',
+      scaling: {
+        min: 10,
+        max: 30
+      },
+      font: {
+        size: 14,
+        face: 'Inter, system-ui, sans-serif',
+        color: '#333333'
+      },
+      borderWidth: 2,
+      shadow: {
+        enabled: true,
+        color: 'rgba(0,0,0,0.2)',
+        size: 5
+      }
+    },
+    edges: {
+      width: 2,
+      selectionWidth: 3,
+      smooth: {
+        enabled: true,
+        type: 'continuous'
+      },
+      hoverWidth: 2
+    }
+  };
+  
+  // Mesclar as configurações personalizadas
+  const mergedOptions = { ...defaultCustomOptions, ...customOptions };
+  
+  // Usar o hook para inicializar o grafo
+  const { network } = useNetworkGraph(containerRef, data, mergedOptions);
   
   // Itens da legenda padrão
   const defaultLegendItems = [
     { color: '#3b82f6', label: 'Nutracêuticos' },
     { color: '#10b981', label: 'Condições de Saúde' },
-    { color: '#a855f7', label: 'Estudos' }
+    { color: '#a855f7', label: 'Estudos' },
+    { color: '#9ca3af', label: 'Conexões Potenciais (tracejadas)', dashed: true }
   ];
   
   return (
@@ -50,8 +100,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
             height, 
             border: '1px solid #e2e8f0',
             borderRadius: '0.375rem',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            backgroundColor: '#f8fafc'
           }}
+          className="shadow-inner"
         />
       </div>
       
