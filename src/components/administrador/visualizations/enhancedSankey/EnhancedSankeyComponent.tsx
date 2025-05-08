@@ -35,22 +35,22 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
   showFilters = true,
   showLegend = true
 }) => {
-  // Hooks for data loading
+  // Hooks para carregamento de dados
   const { data, isLoading, error } = useEnhancedSankeyData(initialData);
   
-  // State for filters
+  // Estado para filtros
   const [activeCategories, setActiveCategories] = useState<NodeCategory[]>([
     'nutraceutico', 'condicao', 'outcome', 'severidade'
   ]);
-  const [minEfficacy, setMinEfficacy] = useState(0); // 0-100 scale
+  const [minEfficacy, setMinEfficacy] = useState(0); // escala 0-100
   const [relationshipType, setRelationshipType] = useState<string>("all");
   
-  // State for dialog
+  // Estado para diálogo
   const [selectedLink, setSelectedLink] = useState<EnhancedSankeyLink | null>(null);
   const [selectedNode, setSelectedNode] = useState<EnhancedSankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  // Use the custom hook for visualization
+  // Usar o hook customizado para visualização
   const { 
     finalData, 
     categoryStats, 
@@ -66,7 +66,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     relationshipType
   );
   
-  // Handle link click
+  // Tratamento de clique em link
   const handleLinkClick = useCallback((e: any) => {
     if (e && e.payload) {
       const originalLink = e.payload.originalLink || e.payload;
@@ -76,7 +76,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }
   }, []);
   
-  // Handle node click
+  // Tratamento de clique em nó
   const handleNodeClick = useCallback((e: any) => {
     if (e && e.payload) {
       const originalNode = e.payload.originalNode || e.payload;
@@ -86,45 +86,43 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }
   }, []);
 
-  // Simplificar a conversão de dados para evitar problemas de tipo
-  const convertToSankeyData = (data: any): SankeyData => {
-    if (!data || !data.nodes || !data.links) {
+  // Converter dados para formato compatível com Sankey
+  const prepareSankeyData = (inputData: any): SankeyData => {
+    if (!inputData || !inputData.nodes || !inputData.links) {
       return { nodes: [], links: [] };
     }
 
-    // Garantir que os nós tenham o formato esperado
-    const nodes: SankeyNode[] = data.nodes.map((node: any, index: number) => ({
+    // Criar nós compatíveis com SankeyNode
+    const nodes: SankeyNode[] = inputData.nodes.map((node: any) => ({
       name: node.name,
       category: node.category,
-      value: node.value,
+      value: node.value || 1,
       color: node.color,
       description: node.description || '',
-      id: node.id || index,
       originalNode: node
     }));
 
-    // Converter os links para garantir que source e target sejam números
-    const links: SankeyLink[] = data.links.map((link: any, index: number) => {
-      return {
-        source: typeof link.source === 'number' ? link.source : 0,
-        target: typeof link.target === 'number' ? link.target : 0,
-        value: link.value || 10,
-        color: link.color,
-        labelText: link.labelText,
-        studyCount: link.studyCount,
-        evidenceLevel: link.evidenceLevel,
-        description: link.description,
-        relationshipType: link.relationshipType,
-        originalRelation: link,
-        sourceName: link.sourceName || 'Fonte',
-        targetName: link.targetName || 'Destino'
-      };
-    });
+    // Converter links para garantir compatibilidade
+    const links: SankeyLink[] = inputData.links.map((link: any) => ({
+      source: typeof link.source === 'number' ? link.source : 0,
+      target: typeof link.target === 'number' ? link.target : 0,
+      value: link.value || 1,
+      color: link.color,
+      labelText: link.labelText || '',
+      studyCount: link.studyCount || 0,
+      evidenceLevel: link.evidenceLevel || 0,
+      description: link.description || '',
+      relationshipType: link.relationshipType || '',
+      sourceName: link.sourceName || String(link.source),
+      targetName: link.targetName || String(link.target),
+      originalLink: link
+    }));
 
     return { nodes, links };
   };
 
-  const sankeyCompatibleData = finalData ? convertToSankeyData(finalData) : { nodes: [], links: [] };
+  // Dados já compatíveis com o componente Sankey
+  const sankeyData = finalData ? prepareSankeyData(finalData) : { nodes: [], links: [] };
   
   if (isLoading) {
     return (
@@ -164,7 +162,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
       <div className="flex items-center justify-between mb-2">
         <SankeyStats 
           stats={categoryStats} 
-          linkCount={sankeyCompatibleData.links.length} 
+          linkCount={sankeyData.links.length} 
         />
         
         {showControls && (
@@ -178,7 +176,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
       </div>
       
       <SankeyChart 
-        data={sankeyCompatibleData}
+        data={sankeyData}
         height={height}
         scale={scale}
         onNodeClick={handleNodeClick}

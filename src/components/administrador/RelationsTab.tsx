@@ -11,9 +11,10 @@ import NetworkGraph from './visualizations/NetworkGraph';
 import EfficacyMatrix from './visualizations/EfficacyMatrix';
 import EnhancedSankeyDiagram from './visualizations/EnhancedSankeyDiagram';
 import { Badge } from "@/components/ui/badge";
+import { SankeyData, SankeyLink } from './visualizations/sankey/types';
 
 // Dados de exemplo para o diagrama Sankey
-const exampleSankeyData = {
+const exampleSankeyData: SankeyData = {
   nodes: [
     // Nutracêuticos
     { name: 'Glucosamina', category: 'nutraceutico', description: 'Aminossacarídeo natural que ajuda na formação e reparo de cartilagem' },
@@ -37,43 +38,43 @@ const exampleSankeyData = {
   ],
   links: [
     // Glucosamina
-    { source: 0, target: 8, value: 85, labelText: 'Alta eficácia', studyCount: 12, evidenceLevel: 4.2, description: 'Glucosamina demonstra alta eficácia no alívio dos sintomas da artrite, particularmente na redução da dor e melhoria da função articular em cães.' },
-    { source: 0, target: 9, value: 40, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 2.8 },
-    { source: 0, target: 13, value: 75, labelText: 'Eficácia alta', studyCount: 8, evidenceLevel: 3.9 },
+    { source: 0, target: 8, value: 85, labelText: 'Alta eficácia', studyCount: 12, evidenceLevel: 4.2, description: 'Glucosamina demonstra alta eficácia no alívio dos sintomas da artrite, particularmente na redução da dor e melhoria da função articular em cães.', sourceName: 'Glucosamina', targetName: 'Artrite' },
+    { source: 0, target: 9, value: 40, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 2.8, sourceName: 'Glucosamina', targetName: 'Inflamação' },
+    { source: 0, target: 13, value: 75, labelText: 'Eficácia alta', studyCount: 8, evidenceLevel: 3.9, sourceName: 'Glucosamina', targetName: 'Mobilidade Articular' },
     
     // Condroitina
-    { source: 1, target: 8, value: 70, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.7 },
-    { source: 1, target: 13, value: 80, labelText: 'Eficácia muito alta', studyCount: 7, evidenceLevel: 4.0 },
+    { source: 1, target: 8, value: 70, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.7, sourceName: 'Condroitina', targetName: 'Artrite' },
+    { source: 1, target: 13, value: 80, labelText: 'Eficácia muito alta', studyCount: 7, evidenceLevel: 4.0, sourceName: 'Condroitina', targetName: 'Mobilidade Articular' },
     
     // Ômega 3
-    { source: 2, target: 9, value: 75, labelText: 'Eficácia alta', studyCount: 15, evidenceLevel: 4.1 },
-    { source: 2, target: 10, value: 60, labelText: 'Eficácia moderada', studyCount: 11, evidenceLevel: 3.8 },
-    { source: 2, target: 12, value: 50, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.2 },
-    { source: 2, target: 15, value: 65, labelText: 'Eficácia moderada-alta', studyCount: 8, evidenceLevel: 3.5 },
+    { source: 2, target: 9, value: 75, labelText: 'Eficácia alta', studyCount: 15, evidenceLevel: 4.1, sourceName: 'Ômega 3', targetName: 'Inflamação' },
+    { source: 2, target: 10, value: 60, labelText: 'Eficácia moderada', studyCount: 11, evidenceLevel: 3.8, sourceName: 'Ômega 3', targetName: 'Saúde Cardíaca' },
+    { source: 2, target: 12, value: 50, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.2, sourceName: 'Ômega 3', targetName: 'Saúde da Pele' },
+    { source: 2, target: 15, value: 65, labelText: 'Eficácia moderada-alta', studyCount: 8, evidenceLevel: 3.5, sourceName: 'Ômega 3', targetName: 'Sistema Imune' },
     
     // Curcumina
-    { source: 3, target: 9, value: 90, labelText: 'Eficácia muito alta', studyCount: 18, evidenceLevel: 4.5, description: 'A curcumina mostra resultados excepcionais no controle de processos inflamatórios em múltiplos sistemas do organismo, com alta biodisponibilidade em formulações específicas para pets.' },
-    { source: 3, target: 8, value: 45, labelText: 'Eficácia moderada', studyCount: 7, evidenceLevel: 3.0 },
-    { source: 3, target: 15, value: 70, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.8 },
+    { source: 3, target: 9, value: 90, labelText: 'Eficácia muito alta', studyCount: 18, evidenceLevel: 4.5, description: 'A curcumina mostra resultados excepcionais no controle de processos inflamatórios em múltiplos sistemas do organismo, com alta biodisponibilidade em formulações específicas para pets.', sourceName: 'Curcumina', targetName: 'Inflamação' },
+    { source: 3, target: 8, value: 45, labelText: 'Eficácia moderada', studyCount: 7, evidenceLevel: 3.0, sourceName: 'Curcumina', targetName: 'Artrite' },
+    { source: 3, target: 15, value: 70, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.8, sourceName: 'Curcumina', targetName: 'Sistema Imune' },
     
     // MSM
-    { source: 4, target: 8, value: 65, labelText: 'Eficácia moderada-alta', studyCount: 8, evidenceLevel: 3.4 },
-    { source: 4, target: 9, value: 55, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.1 },
-    { source: 4, target: 13, value: 60, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 3.3 },
+    { source: 4, target: 8, value: 65, labelText: 'Eficácia moderada-alta', studyCount: 8, evidenceLevel: 3.4, sourceName: 'MSM', targetName: 'Artrite' },
+    { source: 4, target: 9, value: 55, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.1, sourceName: 'MSM', targetName: 'Inflamação' },
+    { source: 4, target: 13, value: 60, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 3.3, sourceName: 'MSM', targetName: 'Mobilidade Articular' },
     
     // Coenzima Q10
-    { source: 5, target: 10, value: 80, labelText: 'Eficácia alta', studyCount: 14, evidenceLevel: 4.2, description: 'Coenzima Q10 é essencial para a produção de energia celular e função cardíaca, demonstrando resultados significativos na melhoria da função miocárdica em cães idosos e com problemas cardíacos.' },
-    { source: 5, target: 11, value: 45, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 2.9 },
+    { source: 5, target: 10, value: 80, labelText: 'Eficácia alta', studyCount: 14, evidenceLevel: 4.2, description: 'Coenzima Q10 é essencial para a produção de energia celular e função cardíaca, demonstrando resultados significativos na melhoria da função miocárdica em cães idosos e com problemas cardíacos.', sourceName: 'Coenzima Q10', targetName: 'Saúde Cardíaca' },
+    { source: 5, target: 11, value: 45, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 2.9, sourceName: 'Coenzima Q10', targetName: 'Função Cognitiva' },
     
     // Resveratrol
-    { source: 6, target: 10, value: 55, labelText: 'Eficácia moderada', studyCount: 7, evidenceLevel: 3.2 },
-    { source: 6, target: 11, value: 60, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.5 },
-    { source: 6, target: 15, value: 50, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 3.0 },
+    { source: 6, target: 10, value: 55, labelText: 'Eficácia moderada', studyCount: 7, evidenceLevel: 3.2, sourceName: 'Resveratrol', targetName: 'Saúde Cardíaca' },
+    { source: 6, target: 11, value: 60, labelText: 'Eficácia moderada', studyCount: 6, evidenceLevel: 3.5, sourceName: 'Resveratrol', targetName: 'Função Cognitiva' },
+    { source: 6, target: 15, value: 50, labelText: 'Eficácia moderada', studyCount: 5, evidenceLevel: 3.0, sourceName: 'Resveratrol', targetName: 'Sistema Imune' },
     
     // Ácido Hialurônico
-    { source: 7, target: 8, value: 75, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.9 },
-    { source: 7, target: 12, value: 70, labelText: 'Eficácia alta', studyCount: 8, evidenceLevel: 3.7 },
-    { source: 7, target: 13, value: 85, labelText: 'Eficácia muito alta', studyCount: 11, evidenceLevel: 4.3, description: 'O ácido hialurônico tem papel fundamental na manutenção da viscosidade do líquido sinovial, proporcionando lubrificação ideal e absorção de choque nas articulações de pets com problemas de mobilidade.' },
+    { source: 7, target: 8, value: 75, labelText: 'Eficácia alta', studyCount: 9, evidenceLevel: 3.9, sourceName: 'Ácido Hialurônico', targetName: 'Artrite' },
+    { source: 7, target: 12, value: 70, labelText: 'Eficácia alta', studyCount: 8, evidenceLevel: 3.7, sourceName: 'Ácido Hialurônico', targetName: 'Saúde da Pele' },
+    { source: 7, target: 13, value: 85, labelText: 'Eficácia muito alta', studyCount: 11, evidenceLevel: 4.3, description: 'O ácido hialurônico tem papel fundamental na manutenção da viscosidade do líquido sinovial, proporcionando lubrificação ideal e absorção de choque nas articulações de pets com problemas de mobilidade.', sourceName: 'Ácido Hialurônico', targetName: 'Mobilidade Articular' },
   ]
 };
 

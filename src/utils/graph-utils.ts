@@ -36,6 +36,10 @@ export const convertLinksToNumericIndices = (
         return null;
       }
       
+      // Garantir que todos os campos obrigatórios estão presentes
+      const sourceName = link.sourceName || String(link.source);
+      const targetName = link.targetName || String(link.target);
+      
       // Criar um link compatível com o tipo SankeyLink
       const sankeyLink: SankeyLink = {
         source: sourceIndex,
@@ -48,8 +52,8 @@ export const convertLinksToNumericIndices = (
         description: link.description,
         relationshipType: link.relationshipType,
         originalRelation: link.originalRelation,
-        sourceName: link.sourceName || String(link.source),
-        targetName: link.targetName || String(link.target),
+        sourceName: sourceName,
+        targetName: targetName
       };
       
       return sankeyLink;
