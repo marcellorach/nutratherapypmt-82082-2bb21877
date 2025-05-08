@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 import 'vis-network/styles/vis-network.css';
-import { useNetworkGraph } from '@/hooks/useNetworkGraph';
+import { useNetworkGraph } from '@/hooks/network/useNetworkGraph';
 import NetworkControls from './graph/NetworkControls';
 import NetworkLegend from './graph/NetworkLegend';
 
