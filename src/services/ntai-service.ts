@@ -22,6 +22,13 @@ export const analyzeStudy = async (
   console.log('Prompt para nutracêuticos:', nutraceuticalsPrompt);
   console.log('Prompt para condições:', conditionsPrompt);
   
+  // Validar o formato do UUID antes de prosseguir
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(studyId)) {
+    console.error('ID de estudo inválido, não é um UUID válido:', studyId);
+    throw new Error(`ID de estudo inválido: ${studyId}. É necessário fornecer um UUID válido.`);
+  }
+  
   try {
     // Tenta processar o estudo com a Edge Function
     const result = await processStudyWithAI(studyId, studyText, nutraceuticalsPrompt, conditionsPrompt);
@@ -115,8 +122,8 @@ export const analyzeStudy = async (
     const simulatedResult = await simulateAnalysisResult(studyId, studyText);
     
     try {
-      // Só tentamos inserir no banco se o ID do estudo for um UUID válido
-      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studyId)) {
+      // Garantir que o ID é um UUID válido antes de tentar inserir no banco
+      if (uuidRegex.test(studyId)) {
         const jsonAnalysisData = JSON.parse(JSON.stringify(simulatedResult));
         
         // Gerar um título para o estudo

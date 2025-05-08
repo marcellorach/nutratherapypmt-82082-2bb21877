@@ -75,6 +75,11 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
     if (error.includes("duplicate key value violates unique constraint")) {
       return "Já existe um estudo com este ID no banco de dados.";
     }
+
+    // Verificar erro de conexão
+    if (error.includes("NetworkError") || error.includes("network") || error.includes("fetch")) {
+      return "Erro de conexão com o servidor. Verifique sua conexão com a internet.";
+    }
     
     return error;
   };

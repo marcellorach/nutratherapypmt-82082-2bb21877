@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +37,30 @@ export const useNtaiProcessing = () => {
       progress: 100,
       sourceFile: "National Institute of Health",
       originalFormat: "PDF"
+    },
+    {
+      id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", // UUID válido adicional
+      title: "Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+      stage: 'complete' as ProcessingStage,
+      progress: 100,
+      sourceFile: "Veterinary Research",
+      originalFormat: "PDF"
+    },
+    {
+      id: "123e4567-e89b-12d3-a456-426614174000", // UUID válido adicional
+      title: "Impact of green tea extract on oxidative stress in companion animals",
+      stage: 'complete' as ProcessingStage,
+      progress: 100,
+      sourceFile: "Journal of Veterinary Science",
+      originalFormat: "PDF"
+    },
+    {
+      id: "9ed9e1c2-2e5a-4b77-857a-9c1d10f7afe5", // UUID válido adicional
+      title: "Vitamin supplements and cognitive function in aging dogs",
+      stage: 'complete' as ProcessingStage,
+      progress: 100,
+      sourceFile: "Canine Health Research",
+      originalFormat: "PDF"
     }
   ]);
   const [logEntries, setLogEntries] = useState<string[]>([
@@ -58,7 +81,14 @@ export const useNtaiProcessing = () => {
     "[10:25:59] Analisando conteúdo com prompt especializado para nutracêuticos",
     "[10:26:03] Padronizando dados para: Senescent cells as a target for anti-aging interventions",
     "[10:26:05] Padronizando dados para integração com o kanban",
-    "[10:26:08] Processamento NTAI concluído para: Senescent cells as a target for anti-aging interventions"
+    "[10:26:08] Processamento NTAI concluído para: Senescent cells as a target for anti-aging interventions",
+    "[10:26:10] Iniciando processamento para o próximo estudo...",
+    "[10:26:11] Extraindo texto para: Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+    "[10:26:14] Extraindo texto de documento PDF: Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+    "[10:26:17] Analisando conteúdo para: Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+    "[10:26:20] Analisando conteúdo com prompt especializado para nutracêuticos",
+    "[10:26:23] Padronizando dados para: Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
+    "[10:26:25] Processamento NTAI concluído para: Effect of dietary supplements in reducing probability of death for uremic crises in dogs"
   ]);
   const [availableStudies, setAvailableStudies] = useState<AvailableStudy[]>([
     {
@@ -84,7 +114,25 @@ export const useNtaiProcessing = () => {
       title: "Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
       description: "Estudo sobre suplementos dietéticos e seu efeito na redução da mortalidade em cães com doença renal crônica",
       journal: "Veterinary Research",
-      kanban_status: "new", // Este ainda não foi processado
+      kanban_status: "processed", // Modificado para processado
+      import_type: "scispace",
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "123e4567-e89b-12d3-a456-426614174000", // UUID válido adicional
+      title: "Impact of green tea extract on oxidative stress in companion animals",
+      description: "Avaliação dos efeitos antioxidantes do extrato de chá verde em cães e gatos com estresse oxidativo",
+      journal: "Journal of Veterinary Science",
+      kanban_status: "processed",
+      import_type: "manual",
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "9ed9e1c2-2e5a-4b77-857a-9c1d10f7afe5", // UUID válido adicional
+      title: "Vitamin supplements and cognitive function in aging dogs",
+      description: "Pesquisa sobre o impacto de suplementos vitamínicos na função cognitiva de cães idosos",
+      journal: "Canine Health Research",
+      kanban_status: "processed",
       import_type: "scispace",
       created_at: new Date().toISOString(),
     }
@@ -196,6 +244,7 @@ export const useNtaiProcessing = () => {
           await simulateStageProcessing(stage, item.title, addLogEntry);
         }
 
+        // Usar o ID do estudo diretamente, que agora é um UUID válido
         const simulatedResult = await ntaiService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
@@ -205,10 +254,19 @@ export const useNtaiProcessing = () => {
         
         setAnalysisResult(simulatedResult);
 
+        // Marcar como concluído
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete', progress: 100 };
         setProcessQueue([...updatedQueue]);
         addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
-
+        
+        // Atualizar a lista de estudos disponíveis
+        setAvailableStudies(prev => 
+          prev.map(estudo => 
+            estudo.id === item.id 
+              ? { ...estudo, kanban_status: "processed" }
+              : estudo
+          )
+        );
       } catch (error: any) {
         addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
         updatedQueue[index] = { 
@@ -253,7 +311,8 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
     startProcessing,
-    clearSelection
+    clearSelection,
+    addLogEntry
   };
 };
 
