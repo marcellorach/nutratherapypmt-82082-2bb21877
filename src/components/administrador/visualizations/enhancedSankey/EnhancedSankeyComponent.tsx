@@ -110,7 +110,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
     }));
 
     // Converter links para garantir compatibilidade
-    const links: SankeyLink[] = convertLinksToNumericIndices(inputData.links, nodeMap);
+    const links = convertLinksToNumericIndices(inputData.links, nodeMap);
 
     return { nodes, links };
   };

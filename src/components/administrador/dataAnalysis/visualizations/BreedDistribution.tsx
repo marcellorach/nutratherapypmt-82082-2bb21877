@@ -21,13 +21,17 @@ interface BreedDistributionProps {
   onBackClick: () => void;
   colors: string[];
   hoverColors: string[];
+  onPieClick?: (data: any) => void;
+  showPieDetails?: boolean;
 }
 
 const BreedDistribution: React.FC<BreedDistributionProps> = ({ 
   data, 
   onBackClick,
   colors,
-  hoverColors
+  hoverColors,
+  onPieClick,
+  showPieDetails = false
 }) => {
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -37,6 +41,12 @@ const BreedDistribution: React.FC<BreedDistributionProps> = ({
 
   const onPieLeave = () => {
     setActiveIndex(-1);
+  };
+  
+  const handlePieClick = (data: any) => {
+    if (onPieClick) {
+      onPieClick(data);
+    }
   };
 
   const renderActiveShape = (props: any) => {
@@ -114,6 +124,7 @@ const BreedDistribution: React.FC<BreedDistributionProps> = ({
             activeShape={renderActiveShape}
             onMouseEnter={onPieEnter}
             onMouseLeave={onPieLeave}
+            onClick={showPieDetails ? handlePieClick : undefined}
             isAnimationActive={true}
             animationDuration={800}
           >
@@ -131,7 +142,7 @@ const BreedDistribution: React.FC<BreedDistributionProps> = ({
             align="center"
             layout="horizontal"
             formatter={(value, entry, index) => (
-              <span style={{ color: '#333', cursor: 'pointer' }}>
+              <span style={{ color: '#333', cursor: showPieDetails ? 'pointer' : 'default' }}>
                 {value} ({data[index].percent}%)
               </span>
             )}

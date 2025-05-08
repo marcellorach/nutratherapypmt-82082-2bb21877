@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronUp, Eye, FileChart } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, FileHeart } from "lucide-react";
 
 interface Condition {
   id: string;
@@ -128,7 +128,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="outline" size="icon">
-                        <FileChart className="h-4 w-4" />
+                        <FileHeart className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

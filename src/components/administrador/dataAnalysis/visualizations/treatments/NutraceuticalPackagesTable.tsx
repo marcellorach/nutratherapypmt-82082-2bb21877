@@ -17,12 +17,12 @@ import { Eye, FileText, Send } from "lucide-react";
 interface Package {
   id: string;
   name: string;
-  type: 'treatment' | 'prevention' | 'support';
+  type: 'treatment' | 'prevention' | 'support' | string;
   condition: string;
   nutraceuticalCount: number;
   efficacyScore: number;
   speciesTarget: string[];
-  status: 'approved' | 'pending' | 'draft';
+  status: 'approved' | 'pending' | 'draft' | string;
 }
 
 interface NutraceuticalPackagesTableProps {

@@ -18,6 +18,7 @@ import PackageDetailsPanel from './treatments/PackageDetailsPanel';
 import PackageEfficiencyMetrics from './treatments/PackageEfficiencyMetrics';
 import { useTreatmentsData } from '@/hooks/visualizations/useTreatmentsData';
 import { Checkbox } from "@/components/ui/checkbox";
+import { CheckedState } from "@radix-ui/react-checkbox";
 
 const TreatmentsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,8 +50,8 @@ const TreatmentsTab: React.FC = () => {
     );
   };
   
-  const handleSelectAllPackages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
+  const handleSelectAllPackages = (checked: CheckedState) => {
+    if (checked) {
       setSelectedPackages(filteredPackages.map(pkg => pkg.id));
     } else {
       setSelectedPackages([]);
