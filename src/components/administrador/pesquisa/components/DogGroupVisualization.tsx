@@ -3,10 +3,10 @@ import React from 'react';
 import { PawPrint } from 'lucide-react';
 
 interface DogGroupVisualizationProps {
-  count: number;
-  type: 'treatment' | 'control';
+  count?: number; // Tornando opcional
+  type?: 'treatment' | 'control'; // Tornando opcional
   groupLabel?: string;
-  // Adicionando propriedades alternativas para compatibilidade
+  // Propriedades alternativas para compatibilidade
   treatmentCount?: number;
   controlCount?: number;
 }
@@ -18,10 +18,6 @@ const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
   treatmentCount,
   controlCount 
 }) => {
-  const iconColor = type === 'treatment' ? 'text-blue-600' : 'text-gray-600';
-  const bgColor = type === 'treatment' ? 'bg-blue-50' : 'bg-gray-50';
-  const groupName = groupLabel || (type === 'treatment' ? 'Grupo de Tratamento' : 'Grupo de Controle');
-  
   // Se o componente for chamado com treatmentCount e controlCount, renderiza os dois grupos
   if (treatmentCount !== undefined && controlCount !== undefined) {
     return (
@@ -69,7 +65,17 @@ const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
     );
   }
   
+  // Verificar se count e type estão definidos para o caso tradicional
+  if (count === undefined || type === undefined) {
+    console.error('DogGroupVisualization: count e type são necessários quando treatmentCount e controlCount não são fornecidos');
+    return null;
+  }
+  
   // Caso contrário, renderiza apenas um grupo conforme a chamada original
+  const iconColor = type === 'treatment' ? 'text-blue-600' : 'text-gray-600';
+  const bgColor = type === 'treatment' ? 'bg-blue-50' : 'bg-gray-50';
+  const groupName = groupLabel || (type === 'treatment' ? 'Grupo de Tratamento' : 'Grupo de Controle');
+  
   return (
     <div className={`${bgColor} p-3 rounded-lg`}>
       <div className="mb-2 text-sm font-medium flex justify-between">
