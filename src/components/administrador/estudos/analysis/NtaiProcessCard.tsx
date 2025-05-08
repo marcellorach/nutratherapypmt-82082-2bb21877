@@ -50,7 +50,7 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
     
     switch (item.stage) {
       case 'complete':
-        return 'border-green-200';
+        return 'border-green-200 bg-green-50';
       case 'error':
         return 'border-red-200';
       case 'extracting':
@@ -81,7 +81,20 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
       return "Erro de conexão com o servidor. Verifique sua conexão com a internet.";
     }
     
+    // Erro de status
+    if (error.includes("status")) {
+      return "Erro ao atualizar status do estudo para 'processado'.";
+    }
+    
     return error;
+  };
+
+  // Adicionar um estilo visual diferenciado para itens processados
+  const getStatusClass = () => {
+    if (item.stage === 'complete') {
+      return 'text-green-700 font-semibold';
+    }
+    return 'text-gray-500 font-normal';
   };
 
   return (
@@ -92,7 +105,7 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
             {getStatusIcon()}
             <span className="truncate max-w-[180px]">{item.title}</span>
           </div>
-          <span className="text-xs text-gray-500 font-normal">
+          <span className={`text-xs ${getStatusClass()}`}>
             {getStatusText()}
           </span>
         </CardTitle>
@@ -103,7 +116,7 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
             <span>{getStatusText()}</span>
             <span>{item.progress}%</span>
           </div>
-          <Progress value={item.progress} className="h-2" />
+          <Progress value={item.progress} className={`h-2 ${item.stage === 'complete' ? 'bg-green-100' : ''}`} />
         </div>
         
         {item.sourceFile && (
@@ -112,9 +125,22 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
           </div>
         )}
         
+        {item.importedAt && (
+          <div className="text-xs text-gray-500">
+            Importado: há menos de um dia
+          </div>
+        )}
+        
         {item.error && (
           <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
             {formatErrorMessage(item.error)}
+          </div>
+        )}
+        
+        {/* Adicionar um indicador visual para estudos processados */}
+        {item.stage === 'complete' && (
+          <div className="p-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">
+            Estudo processado com sucesso e disponível no sistema.
           </div>
         )}
       </CardContent>

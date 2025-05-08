@@ -21,6 +21,22 @@ interface SciImportHistoryRowProps {
 const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ item, onDeleted }) => {
   const [deleting, setDeleting] = useState(false);
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "--";
+    
+    // Verificar se a data é de hoje ou ontem
+    const importDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - importDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 1) {
+      return "há menos de um dia";
+    }
+    
+    return new Date(dateString).toLocaleString("pt-BR");
+  };
+
   const handleDelete = async () => {
     if (!window.confirm("Deseja realmente apagar esta importação? Os arquivos serão removidos permanentemente.")) {
       return;
@@ -73,7 +89,7 @@ const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ item, onDelet
 
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-2 py-1 text-xs">{item.imported_at ? new Date(item.imported_at).toLocaleString("pt-BR") : "--"}</td>
+      <td className="px-2 py-1 text-xs">{formatDate(item.imported_at)}</td>
       <td className="px-2 py-1 text-xs">{item.meta_summary_filename}</td>
       <td className="px-2 py-1 text-xs">{item.base_studies_filename}</td>
       <td className="px-2 py-1 text-xs">{item.scispace_status ?? "-"}</td>
