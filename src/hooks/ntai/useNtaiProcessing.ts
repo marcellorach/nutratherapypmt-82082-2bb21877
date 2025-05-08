@@ -22,9 +22,9 @@ export const useNtaiProcessing = () => {
   const [processingActive, setProcessingActive] = useState(false);
   const [activeItemIndex, setActiveItemIndex] = useState<number>(-1);
   const [processQueue, setProcessQueue] = useState<ProcessingItem[]>([
-    // Pré-preencher com dois estudos já processados para simulação
+    // Pré-preencher com dois estudos já processados para simulação - usando UUIDs válidos
     {
-      id: "1",
+      id: "f47ac10b-58cc-4372-a567-0e02b2c3d479", // UUID válido
       title: "The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
       stage: 'complete' as ProcessingStage,
       progress: 100,
@@ -32,7 +32,7 @@ export const useNtaiProcessing = () => {
       originalFormat: "PDF"
     },
     {
-      id: "2",
+      id: "550e8400-e29b-41d4-a716-446655440000", // UUID válido
       title: "Senescent cells as a target for anti-aging interventions",
       stage: 'complete' as ProcessingStage,
       progress: 100,
@@ -62,25 +62,25 @@ export const useNtaiProcessing = () => {
   ]);
   const [availableStudies, setAvailableStudies] = useState<AvailableStudy[]>([
     {
-      id: "1",
+      id: "f47ac10b-58cc-4372-a567-0e02b2c3d479", // UUID válido
       title: "The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
       description: "Sulforafano reduz invasão tumoral e protege células contra toxicidade da doxorrubicina em osteossarcoma canino",
       journal: "PubMed",
-      kanban_status: "processed", // Alterado para "processed"
+      kanban_status: "processed", // Marcado como processado
       import_type: "manual",
       created_at: new Date().toISOString(),
     },
     {
-      id: "2",
+      id: "550e8400-e29b-41d4-a716-446655440000", // UUID válido
       title: "Senescent cells as a target for anti-aging interventions",
       description: "Células senescentes impulsionam doenças do envelhecimento. Senoterapias visam eliminá-las, prometendo ampliar a saúde e longevidade",
       journal: "National Institute of Health",
-      kanban_status: "processed", // Alterado para "processed"
+      kanban_status: "processed", // Marcado como processado
       import_type: "scispace",
       created_at: new Date().toISOString(),
     },
     {
-      id: "3",
+      id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", // UUID válido
       title: "Effect of dietary supplements in reducing probability of death for uremic crises in dogs",
       description: "Estudo sobre suplementos dietéticos e seu efeito na redução da mortalidade em cães com doença renal crônica",
       journal: "Veterinary Research",

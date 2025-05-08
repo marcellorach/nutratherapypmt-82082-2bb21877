@@ -111,13 +111,22 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
 
     // Converter links para garantir compatibilidade
     const convertedLinks = convertLinksToNumericIndices(inputData.links, nodeMap);
-    // Garantir que cada link tenha source e target como números
-    const links: SankeyLink[] = convertedLinks.map(link => ({
-      ...link,
-      source: typeof link.source === 'string' ? parseInt(link.source) : link.source,
-      target: typeof link.target === 'string' ? parseInt(link.target) : link.target,
-      value: link.value
-    }));
+    
+    // Garantir que todos os links tenham source e target como números
+    const links: SankeyLink[] = convertedLinks.map(link => {
+      // Garantir que source e target são sempre números
+      const source: number = typeof link.source === 'number' ? link.source : 
+                             typeof link.source === 'string' ? parseInt(link.source) || 0 : 0;
+      const target: number = typeof link.target === 'number' ? link.target : 
+                             typeof link.target === 'string' ? parseInt(link.target) || 0 : 0;
+      
+      return {
+        ...link,
+        source,  // Agora garantido como number
+        target,  // Agora garantido como number
+        value: link.value
+      };
+    });
 
     return { nodes, links };
   };

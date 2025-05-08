@@ -62,6 +62,23 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
     }
   };
 
+  // Formata a mensagem de erro para melhor legibilidade
+  const formatErrorMessage = (error?: string) => {
+    if (!error) return "";
+    
+    // Verificar se o erro é sobre sintaxe UUID inválida
+    if (error.includes("invalid input syntax for type uuid")) {
+      return "ID de estudo inválido. É necessário usar um UUID válido para o banco de dados.";
+    }
+    
+    // Verificar outros erros comuns e apresentar mensagens mais amigáveis
+    if (error.includes("duplicate key value violates unique constraint")) {
+      return "Já existe um estudo com este ID no banco de dados.";
+    }
+    
+    return error;
+  };
+
   return (
     <Card className={`shadow-sm transition-all ${getBorderClass()}`}>
       <CardHeader className="py-3 px-4">
@@ -92,7 +109,7 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
         
         {item.error && (
           <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-            {item.error}
+            {formatErrorMessage(item.error)}
           </div>
         )}
       </CardContent>

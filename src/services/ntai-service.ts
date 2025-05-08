@@ -108,59 +108,68 @@ export const analyzeStudy = async (
     }
     
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.log('Erro ao usar Edge Function, usando modo de simulação:', error);
     
     // Gera resultados simulados para testes em caso de falha
     const simulatedResult = await simulateAnalysisResult(studyId, studyText);
     
     try {
-      const jsonAnalysisData = JSON.parse(JSON.stringify(simulatedResult));
-      
-      // Gerar um título para o estudo
-      const studyTitle = `Análise Simulada: ${studyText.substring(0, 30) || studyId}`;
-      
-      // Obter dados do estudo existente
-      const { data: existingStudy } = await supabase
-        .from('processed_studies')
-        .select('*')
-        .eq('id', studyId)
-        .maybeSingle();
-      
-      if (existingStudy) {
-        // Atualizar o estudo existente
-        const { error: updateError } = await supabase
+      // Só tentamos inserir no banco se o ID do estudo for um UUID válido
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studyId)) {
+        const jsonAnalysisData = JSON.parse(JSON.stringify(simulatedResult));
+        
+        // Gerar um título para o estudo
+        const studyTitle = `Análise Simulada: ${studyText.substring(0, 30) || studyId}`;
+        
+        // Obter dados do estudo existente
+        const { data: existingStudy } = await supabase
           .from('processed_studies')
-          .update({
-            analysis_data: jsonAnalysisData,
-            kanban_status: 'processed',
-          })
-          .eq('id', studyId);
-          
-        if (updateError) {
-          console.error('Erro ao atualizar análise:', updateError);
+          .select('*')
+          .eq('id', studyId)
+          .maybeSingle();
+        
+        if (existingStudy) {
+          // Atualizar o estudo existente
+          const { error: updateError } = await supabase
+            .from('processed_studies')
+            .update({
+              analysis_data: jsonAnalysisData,
+              kanban_status: 'processed',
+            })
+            .eq('id', studyId);
+            
+          if (updateError) {
+            console.error('Erro ao atualizar análise:', updateError);
+            throw new Error(`Erro ao atualizar análise: ${updateError.message}`);
+          }
+        } else {
+          // Inserir novo estudo caso não exista
+          const { error: insertError } = await supabase
+            .from('processed_studies')
+            .insert({
+              study_id: studyId,
+              id: studyId, // Usar o mesmo ID
+              analysis_data: jsonAnalysisData,
+              kanban_status: 'processed',
+              processed_by: 'ntai',
+              title: studyTitle,
+              description: 'Análise gerada via processamento NTAI simulado',
+              journal: 'Processamento NTAI'
+            });
+            
+          if (insertError) {
+            console.error('Erro ao salvar análise simulada:', insertError);
+            throw new Error(`Erro ao salvar análise simulada: ${insertError.message}`);
+          }
         }
       } else {
-        // Inserir novo estudo caso não exista
-        const { error: insertError } = await supabase
-          .from('processed_studies')
-          .insert({
-            study_id: studyId,
-            id: studyId, // Usar o mesmo ID
-            analysis_data: jsonAnalysisData,
-            kanban_status: 'processed',
-            processed_by: 'ntai',
-            title: studyTitle,
-            description: 'Análise gerada via processamento NTAI simulado',
-            journal: 'Processamento NTAI'
-          });
-          
-        if (insertError) {
-          console.error('Erro ao salvar análise simulada:', insertError);
-        }
+        console.warn('ID de estudo inválido para inserção no banco:', studyId);
+        // Ainda retornamos o resultado simulado, mas avisamos sobre o ID inválido
       }
-    } catch (insertError) {
+    } catch (insertError: any) {
       console.error('Erro ao inserir no banco de dados:', insertError);
+      throw new Error(`Erro ao salvar no banco de dados: ${insertError.message}`);
     }
     
     return simulatedResult;
