@@ -54,7 +54,7 @@ export const convertLinksToNumericIndices = (
         originalRelation: link.originalRelation,
         sourceName: sourceName,
         targetName: targetName
-      };
+      } as SankeyLink;
     })
     .filter((link): link is SankeyLink => link !== null);
 };

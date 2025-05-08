@@ -132,6 +132,7 @@ const OverviewTab: React.FC = () => {
                 hoverColors={HOVER_COLORS}
                 onPieClick={handlePieClick}
                 showPieDetails={true}
+                onBackClick={handleBackToSpecies}
               />
             )}
           </div>
