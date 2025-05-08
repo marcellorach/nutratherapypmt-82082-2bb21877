@@ -6,12 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Microscope, Eye } from "lucide-react";
 import StatsCard from "./components/StatsCard";
 import StudyCard from "./components/StudyCard";
+import YouTubeDialog from "@/components/shared/YouTubeDialog";
 import { ongoingStudies, completedStudies, plannedStudies } from "./data/oraBiomedicalData";
 import { useTranslation } from 'react-i18next';
 
 const OraBiomedicalTab: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>("ongoing");
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const { t } = useTranslation();
+  
+  // ID do vídeo do YouTube extraído da URL completa
+  const youtubeVideoId = "IpJn4jv8Qsw";
   
   return (
     <div className="space-y-6">
@@ -28,7 +33,11 @@ const OraBiomedicalTab: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="flex items-center">
+          <Button 
+            variant="outline" 
+            className="flex items-center"
+            onClick={() => setVideoDialogOpen(true)}
+          >
             <Eye className="mr-2 h-4 w-4" />
             {t('research.oraBiomedical.liveDashboard')}
           </Button>
@@ -88,6 +97,14 @@ const OraBiomedicalTab: React.FC = () => {
           ))}
         </TabsContent>
       </Tabs>
+      
+      {/* Diálogo de vídeo do YouTube */}
+      <YouTubeDialog
+        open={videoDialogOpen}
+        onOpenChange={setVideoDialogOpen}
+        videoId={youtubeVideoId}
+        title="Dashboard Ao Vivo - ORA Biomedical"
+      />
     </div>
   );
 };

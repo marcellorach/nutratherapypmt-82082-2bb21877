@@ -47,7 +47,7 @@ const EnhancedSankeyComponent: React.FC<EnhancedSankeyComponentProps> = ({
   const [relationshipType, setRelationshipType] = useState<string>("all");
   
   // Estado para diálogo
-  const [selectedLink, setSelectedLink] = useState<EnhancedSankeyLink | null>(null);
+  const [selectedLink, setSelectedLink] = useState<SankeyLink | null>(null);
   const [selectedNode, setSelectedNode] = useState<EnhancedSankeyNode | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
