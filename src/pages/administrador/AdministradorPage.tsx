@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button"; // Adicionando import do Button
+import { Button } from "@/components/ui/button"; 
 import AdminLayout from '@/components/administrador/AdminLayout';
 import ImportStep from '@/components/administrador/dataAnalysis/ImportStep';
 import AnalysisStep from '@/components/administrador/dataAnalysis/AnalysisStep';

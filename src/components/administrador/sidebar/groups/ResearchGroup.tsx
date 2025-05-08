@@ -1,11 +1,8 @@
 
 import React from 'react';
-import { 
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarGroupLabel
-} from "@/components/ui/sidebar";
-import { Database, Microscope, ListFilter, BarChart3 } from "lucide-react";
+import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
+import { Beaker, FlaskConical, CheckCheck, Database, Sparkles, Microscope } from "lucide-react";
+import { useSearchParams } from 'react-router-dom';
 
 interface ResearchGroupProps {
   currentStep: string;
@@ -16,58 +13,66 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
   return (
     <>
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          onClick={() => handleStepClick("estudos-planejados")}
-          isActive={currentStep === "estudos-planejados"}
+        <SidebarMenuButton
+          active={currentStep === "sugestoes-ai"}
+          onClick={() => handleStepClick("sugestoes-ai")}
         >
-          <ListFilter className="h-4 w-4 mr-2" />
+          <Sparkles className="h-4 w-4" />
+          <span>Proposição de Estudos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          active={currentStep === "estudos-planejados"}
+          onClick={() => handleStepClick("estudos-planejados")}
+        >
+          <Beaker className="h-4 w-4" />
           <span>Estudos Planejados</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton 
+        <SidebarMenuButton
+          active={currentStep === "estudos-andamento"}
           onClick={() => handleStepClick("estudos-andamento")}
-          isActive={currentStep === "estudos-andamento"}
         >
-          <Database className="h-4 w-4 mr-2" />
+          <FlaskConical className="h-4 w-4" />
           <span>Estudos em Andamento</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton 
+        <SidebarMenuButton
+          active={currentStep === "estudos-concluidos"}
           onClick={() => handleStepClick("estudos-concluidos")}
-          isActive={currentStep === "estudos-concluidos"}
         >
-          <BarChart3 className="h-4 w-4 mr-2" />
+          <CheckCheck className="h-4 w-4" />
           <span>Estudos Concluídos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          onClick={() => handleStepClick("sugestoes-ai")}
-          isActive={currentStep === "sugestoes-ai"}
-        >
-          <Microscope className="h-4 w-4 mr-2" />
-          <span>Sugestões da IA</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
+        <SidebarMenuButton
+          active={currentStep === "ora-biomedical"}
           onClick={() => handleStepClick("ora-biomedical")}
-          isActive={currentStep === "ora-biomedical"}
         >
-          <Database className="h-4 w-4 mr-2" />
+          <Database className="h-4 w-4" />
           <span>Ora Biomedical</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      
-      <SidebarGroupLabel className="mt-4">Configurações</SidebarGroupLabel>
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          onClick={() => handleStepClick("research-settings")}
-          isActive={currentStep === "research-settings"}
+        <SidebarMenuButton
+          active={currentStep === "nutraceu-gerenciamento"}
+          onClick={() => handleStepClick("nutraceu-gerenciamento")}
         >
-          <span>Configurações de Pesquisa</span>
+          <Microscope className="h-4 w-4" />
+          <span>Gerenciamento de Nutracêuticos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          active={currentStep === "pesquisa-estudos"}
+          onClick={() => handleStepClick("pesquisa-estudos")}
+        >
+          <Microscope className="h-4 w-4" />
+          <span>Pesquisa de Estudos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>
