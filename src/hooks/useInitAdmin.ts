@@ -11,8 +11,6 @@ export const useInitAdmin = () => {
   useEffect(() => {
     const initAdmin = async () => {
       try {
-        setLoading(true);
-        
         // Verificar se já foi inicializado para evitar múltiplas chamadas
         const initialized = localStorage.getItem('admin_initialized');
         if (initialized === 'true') {
@@ -22,6 +20,7 @@ export const useInitAdmin = () => {
           return;
         }
         
+        setLoading(true);
         console.log('Inicializando usuário administrador...');
         
         // Fazer uma chamada para a função Edge para inicializar o administrador
@@ -42,6 +41,12 @@ export const useInitAdmin = () => {
             title: 'Inicialização do Administrador',
             description: data.message || 'Usuário administrador configurado com sucesso',
           });
+        } else {
+          toast({
+            title: 'Aviso de inicialização',
+            description: 'Não foi possível inicializar o administrador automaticamente. Tente fazer login com as credenciais padrão: mrachlyn@gmail.com / nutra12',
+            variant: 'default',
+          });
         }
         
       } catch (err) {
@@ -49,8 +54,8 @@ export const useInitAdmin = () => {
         setError(err.message || 'Erro desconhecido');
         toast({
           title: 'Erro ao inicializar administrador',
-          description: err.message || 'Ocorreu um erro ao configurar o usuário administrador',
-          variant: 'destructive',
+          description: 'Tente fazer login com as credenciais padrão: mrachlyn@gmail.com / nutra12',
+          variant: 'default',
         });
       } finally {
         setLoading(false);

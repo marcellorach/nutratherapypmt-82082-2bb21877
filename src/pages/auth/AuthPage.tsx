@@ -74,6 +74,9 @@ const AuthPage: React.FC = () => {
             : error.message,
           variant: 'destructive',
         });
+        
+        // Log para debugging
+        console.error('Erro no login:', error);
         return;
       }
 
@@ -84,6 +87,7 @@ const AuthPage: React.FC = () => {
 
       navigate('/');
     } catch (error: any) {
+      console.error('Exceção no login:', error);
       toast({
         title: 'Erro ao fazer login',
         description: error.message,
@@ -93,8 +97,22 @@ const AuthPage: React.FC = () => {
   };
 
   const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
-    await signUp(values.email, values.password, values.firstName, values.lastName);
-    setActiveTab('login');
+    try {
+      await signUp(values.email, values.password, values.firstName, values.lastName);
+      toast({
+        title: 'Cadastro realizado',
+        description: 'Sua conta foi criada com sucesso. Agora você pode fazer login.',
+        variant: 'default',
+      });
+      setActiveTab('login');
+    } catch (error: any) {
+      console.error('Erro no registro:', error);
+      toast({
+        title: 'Erro ao realizar cadastro',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   // Se o usuário já estiver autenticado, redireciona para a página inicial

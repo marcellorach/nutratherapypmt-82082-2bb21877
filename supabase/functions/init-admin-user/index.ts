@@ -26,98 +26,65 @@ serve(async (req: Request) => {
     const firstName = 'Admin'
     const lastName = 'NutraTherapy'
     
-    // Verificar se o usuário já existe através do email
-    const { data: existingUser, error: getUserError } = await supabase.auth.admin.getUserByEmail(email)
+    // Procurar o usuário pelo email diretamente, sem usar getUserByEmail
+    const { data: existingUsers, error: searchError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle()
     
-    if (getUserError) {
-      console.log('Erro ao verificar usuário existente:', getUserError)
-      throw getUserError
+    if (searchError) {
+      console.log('Erro ao procurar usuário existente:', searchError)
     }
     
-    console.log('Resultado da verificação do usuário:', existingUser ? 'Usuário encontrado' : 'Usuário não encontrado')
+    let userId = null
     
-    // Se o usuário não existir, cria-o
-    if (!existingUser?.user) {
-      console.log('Criando novo usuário administrador')
+    // Se o usuário não existir pelos perfis, verificar na autenticação
+    if (!existingUsers) {
+      const { data: authUserData, error: authError } = await supabase.auth.admin.listUsers()
       
-      // Cria o usuário com confirmação de email ativada
-      const { data: user, error: createError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          first_name: firstName,
-          last_name: lastName,
-        },
-      })
-      
-      if (createError) {
-        console.log('Erro ao criar usuário:', createError)
-        throw createError
+      if (authError) {
+        console.log('Erro ao listar usuários:', authError)
+        throw authError
       }
       
-      console.log('Usuário criado com sucesso:', user?.user?.id)
+      const existingUser = authUserData.users.find(user => user.email === email)
       
-      if (user?.user) {
-        // Adiciona a função de administrador
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: user.user.id,
-            role: 'admin',
-          })
+      if (existingUser) {
+        userId = existingUser.id
+        console.log('Usuário encontrado na autenticação:', userId)
+      } else {
+        console.log('Usuário não encontrado, criando novo usuário')
         
-        if (roleError) {
-          console.log('Erro ao adicionar função de administrador:', roleError)
-          throw roleError
+        // Cria o usuário com confirmação de email ativada
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+        })
+        
+        if (createError) {
+          console.log('Erro ao criar usuário:', createError)
+          throw createError
         }
         
-        console.log('Função de administrador adicionada com sucesso')
+        console.log('Usuário criado com sucesso:', newUser?.user?.id)
         
-        return new Response(
-          JSON.stringify({ success: true, message: 'Usuário administrador criado com sucesso' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-        )
+        if (newUser?.user) {
+          userId = newUser.user.id
+        }
       }
     } else {
-      // Usuário já existe, vamos verificar se tem o papel de administrador
-      console.log('Usuário já existe, verificando papel de administrador')
-      
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', existingUser.user.id)
-        .eq('role', 'admin')
-      
-      if (rolesError) {
-        console.log('Erro ao verificar papel de administrador:', rolesError)
-        throw rolesError
-      }
-      
-      // Se o usuário não tiver o papel de administrador, adicionamos
-      if (!roles || roles.length === 0) {
-        console.log('Adicionando papel de administrador para usuário existente')
-        
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: existingUser.user.id,
-            role: 'admin',
-          })
-        
-        if (roleError) {
-          console.log('Erro ao adicionar função de administrador para usuário existente:', roleError)
-          throw roleError
-        }
-        
-        console.log('Função de administrador adicionada com sucesso para usuário existente')
-      } else {
-        console.log('Usuário já possui papel de administrador')
-      }
+      userId = existingUsers.id
+      console.log('Usuário já existe no perfil:', userId)
       
       // Atualizar a senha do usuário para garantir que seja a correta
       const { error: updateError } = await supabase.auth.admin.updateUserById(
-        existingUser.user.id,
+        userId,
         { password }
       )
       
@@ -127,12 +94,47 @@ serve(async (req: Request) => {
       }
       
       console.log('Senha atualizada com sucesso')
+    }
+    
+    if (userId) {
+      // Verificar se o usuário já tem o papel de administrador
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+      
+      if (rolesError) {
+        console.log('Erro ao verificar papel de administrador:', rolesError)
+        throw rolesError
+      }
+      
+      // Se o usuário não tiver o papel de administrador, adicionamos
+      if (!roles || roles.length === 0) {
+        console.log('Adicionando papel de administrador para usuário')
+        
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role: 'admin',
+          })
+        
+        if (roleError) {
+          console.log('Erro ao adicionar função de administrador:', roleError)
+          throw roleError
+        }
+        
+        console.log('Função de administrador adicionada com sucesso')
+      } else {
+        console.log('Usuário já possui papel de administrador')
+      }
       
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'Usuário administrador já existe e foi atualizado', 
-          user: existingUser.user.id 
+          message: 'Usuário administrador configurado com sucesso', 
+          user: userId 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       )
