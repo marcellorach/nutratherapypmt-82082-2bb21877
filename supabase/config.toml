@@ -3,3 +3,6 @@ project_id = "zqdfzzxiheyqfxrejmba"
 
 [functions.process-nutraceutical-spreadsheet]
 verify_jwt = true
+
+[functions.init-admin-user]
+verify_jwt = true
