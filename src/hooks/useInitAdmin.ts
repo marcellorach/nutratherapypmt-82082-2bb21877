@@ -39,7 +39,8 @@ export const useInitAdmin = () => {
           setSuccess(true);
           toast({
             title: 'Inicialização do Administrador',
-            description: data.message || 'Usuário administrador configurado com sucesso',
+            description: 'Usuário administrador configurado com sucesso. Você pode fazer login com mrachlyn@gmail.com / nutra12',
+            variant: 'default',
           });
         } else {
           toast({

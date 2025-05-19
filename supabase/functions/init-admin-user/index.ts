@@ -98,19 +98,19 @@ serve(async (req: Request) => {
     
     if (userId) {
       // Verificar se o usuário já tem o papel de administrador
-      const { data: roles, error: rolesError } = await supabase
+      const { data: adminRoles, error: adminRolesError } = await supabase
         .from('user_roles')
         .select('*')
         .eq('user_id', userId)
         .eq('role', 'admin')
       
-      if (rolesError) {
-        console.log('Erro ao verificar papel de administrador:', rolesError)
-        throw rolesError
+      if (adminRolesError) {
+        console.log('Erro ao verificar papel de administrador:', adminRolesError)
+        throw adminRolesError
       }
       
       // Se o usuário não tiver o papel de administrador, adicionamos
-      if (!roles || roles.length === 0) {
+      if (!adminRoles || adminRoles.length === 0) {
         console.log('Adicionando papel de administrador para usuário')
         
         const { error: roleError } = await supabase
@@ -128,6 +128,39 @@ serve(async (req: Request) => {
         console.log('Função de administrador adicionada com sucesso')
       } else {
         console.log('Usuário já possui papel de administrador')
+      }
+      
+      // Verificar se o usuário já tem o papel de veterinário
+      const { data: vetRoles, error: vetRolesError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role', 'veterinarian')
+      
+      if (vetRolesError) {
+        console.log('Erro ao verificar papel de veterinário:', vetRolesError)
+        throw vetRolesError
+      }
+      
+      // Se o usuário não tiver o papel de veterinário, adicionamos
+      if (!vetRoles || vetRoles.length === 0) {
+        console.log('Adicionando papel de veterinário para usuário')
+        
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role: 'veterinarian',
+          })
+        
+        if (roleError) {
+          console.log('Erro ao adicionar função de veterinário:', roleError)
+          throw roleError
+        }
+        
+        console.log('Função de veterinário adicionada com sucesso')
+      } else {
+        console.log('Usuário já possui papel de veterinário')
       }
       
       return new Response(
