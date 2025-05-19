@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -12,9 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, User } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'react-toastify';
-import { navigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 // Schema de validação para login
 const loginSchema = z.object({
@@ -38,6 +38,7 @@ const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('login');
   const { user, signIn, signUp, loading } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
