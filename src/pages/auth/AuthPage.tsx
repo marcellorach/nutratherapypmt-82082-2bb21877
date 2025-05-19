@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, User } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-toastify';
+import { navigate } from 'react-router-dom';
 
 // Schema de validação para login
 const loginSchema = z.object({
@@ -57,7 +59,36 @@ const AuthPage: React.FC = () => {
   });
 
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
-    await signIn(values.email, values.password);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        toast({
+          title: 'Erro ao fazer login',
+          description: error.message === 'Invalid login credentials' 
+            ? 'Credenciais inválidas. Verifique seu e-mail e senha.' 
+            : error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Login realizado com sucesso!',
+        variant: 'default',
+      });
+
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao fazer login',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {

@@ -1,39 +1,57 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export const useInitAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   
   useEffect(() => {
     const initAdmin = async () => {
       try {
         setLoading(true);
         
-        // Verificar se há uma sessão de usuário
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          console.log('Usuário não autenticado, não inicializando administrador');
+        // Verificar se já foi inicializado para evitar múltiplas chamadas
+        const initialized = localStorage.getItem('admin_initialized');
+        if (initialized === 'true') {
+          console.log('Administrador já foi inicializado anteriormente');
+          setSuccess(true);
           setLoading(false);
           return;
         }
         
+        console.log('Inicializando usuário administrador...');
+        
         // Fazer uma chamada para a função Edge para inicializar o administrador
-        const { error } = await supabase.functions.invoke('init-admin-user', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
-        });
+        const { data, error } = await supabase.functions.invoke('init-admin-user');
         
         if (error) {
+          console.error('Erro ao invocar função init-admin-user:', error);
           throw error;
+        }
+        
+        console.log('Resposta da função init-admin-user:', data);
+        
+        // Marcar como inicializado mesmo em caso de usuário já existente
+        if (data && (data.success || (data.message && data.message.includes('já existe')))) {
+          localStorage.setItem('admin_initialized', 'true');
+          setSuccess(true);
+          toast({
+            title: 'Inicialização do Administrador',
+            description: data.message || 'Usuário administrador configurado com sucesso',
+          });
         }
         
       } catch (err) {
         console.error('Erro ao inicializar administrador:', err);
         setError(err.message || 'Erro desconhecido');
+        toast({
+          title: 'Erro ao inicializar administrador',
+          description: err.message || 'Ocorreu um erro ao configurar o usuário administrador',
+          variant: 'destructive',
+        });
       } finally {
         setLoading(false);
       }
@@ -42,5 +60,5 @@ export const useInitAdmin = () => {
     initAdmin();
   }, []);
   
-  return { loading, error };
+  return { loading, error, success };
 };
