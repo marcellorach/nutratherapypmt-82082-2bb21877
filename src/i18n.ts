@@ -1,9 +1,10 @@
 
-import i18n from 'i18next';
+import { createRoot } from 'react-dom/client';
+import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Import translations
+// Carrega traduções
 import translationEN from './locales/en/translation.json';
 import translationPT from './locales/pt/translation.json';
 
@@ -16,19 +17,16 @@ const resources = {
   }
 };
 
-i18n
+i18next
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'pt', // Default language
     fallbackLng: 'pt',
+    debug: false,
     interpolation: {
-      escapeValue: false // React already escapes by default
-    },
-    react: {
-      useSuspense: false // Disable suspense to prevent issues during loading
+      escapeValue: false
     }
   });
 
-export default i18n;
+export default i18next;
