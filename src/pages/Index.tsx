@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, Book, UserCog, LogIn, ArrowRight } from 'lucide-react';
+import { Heart, Book, UserCog, LogIn, ArrowRight, Microscope } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInitAdmin } from '@/hooks/useInitAdmin';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,8 +21,7 @@ const Index: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-5xl font-bold mb-4">NutraTherapy PET</h1>
           <p className="text-xl text-gray-700 mb-6">
-            Sistema inteligente de recomendação de nutracêuticos para pets que visa complementar deficiências nutricionais, 
-            prevenir doenças degenerativas e promover longevidade saudável através de estratégias personalizadas.
+            Plataforma inteligente de terapia nutracêutica personalizada e P&D
           </p>
         </div>
         
@@ -32,7 +31,7 @@ const Index: React.FC = () => {
               <h2 className="text-2xl font-semibold mb-4">Acesse a Plataforma</h2>
               <p className="text-gray-600 mb-6">
                 Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET.
-                Nossa plataforma oferece soluções personalizadas para tutores e veterinários.
+                Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores.
               </p>
               <Link to="/auth">
                 <Button className="flex items-center gap-2 px-6 py-6 text-lg">
@@ -43,7 +42,7 @@ const Index: React.FC = () => {
             </div>
             
             {/* Destaque dos benefícios */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 w-full">
               <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
@@ -71,11 +70,23 @@ const Index: React.FC = () => {
               <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
+                    <Microscope size={32} className="text-gray-700" />
+                  </div>
+                  <h3 className="text-xl font-medium mb-2">P&D + Base de Conhecimento</h3>
+                  <p className="text-gray-600">
+                    Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.
+                  </p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col items-center text-center">
+                  <div className="rounded-full bg-gray-50 p-3 mb-4">
                     <UserCog size={32} className="text-gray-700" />
                   </div>
                   <h3 className="text-xl font-medium mb-2">Para Administradores</h3>
                   <p className="text-gray-600">
-                    Gerencie o catálogo de nutracêuticos, correlações clínicas e configure a inteligência artificial.
+                    Gerencie configurações do sistema, usuários e integrações da plataforma.
                   </p>
                 </div>
               </Card>
@@ -91,7 +102,7 @@ const Index: React.FC = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 <div className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center text-center">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
@@ -136,11 +147,35 @@ const Index: React.FC = () => {
                 <div className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center text-center">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
+                      <Microscope size={28} className="text-gray-800" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-3">P&D + Base de Conhecimento</h3>
+                    <p className="text-gray-500 mb-4">
+                      Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.
+                    </p>
+                    <Link to="/administrador">
+                      <Button 
+                        variant="outline" 
+                        className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={!hasRole('admin')}
+                      >
+                        Acessar <ArrowRight size={16} />
+                      </Button>
+                    </Link>
+                    {!hasRole('admin') && (
+                      <p className="text-xs text-red-500 mt-2">Acesso restrito para administradores</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <UserCog size={28} className="text-gray-800" />
                     </div>
                     <h3 className="text-lg font-medium mb-3">Área do Administrador</h3>
                     <p className="text-gray-500 mb-4">
-                      Configure o sistema, gerencie nutracêuticos e integre evidências científicas.
+                      Gerencie configurações do sistema, usuários e integrações da plataforma.
                     </p>
                     <Link to="/administrador">
                       <Button 
