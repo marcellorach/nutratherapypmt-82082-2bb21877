@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -40,7 +39,7 @@ const mockModelos: PredictionModel[] = [
     id: "model1",
     name: "Previsão de Eficácia de Nutracêuticos",
     description: "Modelo de regressão para prever eficácia de nutracêuticos para condições específicas",
-    algorithm: "XGBoost",
+    algorithm: "PetLove Nutra",
     accuracy: 0.87,
     lastTrained: new Date(2024, 2, 15),
     parameters: {
@@ -56,7 +55,7 @@ const mockModelos: PredictionModel[] = [
     id: "model2",
     name: "Análise de Custo-Benefício",
     description: "Predição de retorno sobre investimento para diferentes categorias de tratamento preventivo",
-    algorithm: "Random Forest",
+    algorithm: "PetLove CuBe",
     accuracy: 0.82,
     lastTrained: new Date(2024, 1, 20),
     parameters: {
@@ -72,7 +71,7 @@ const mockModelos: PredictionModel[] = [
     id: "model3",
     name: "Segmentação de Pacientes",
     description: "Modelo para segmentação de pacientes com base em características e necessidades nutricionais",
-    algorithm: "KMeans Clustering",
+    algorithm: "PetLove Seg",
     accuracy: 0.79,
     lastTrained: new Date(2024, 3, 5),
     parameters: {
@@ -88,7 +87,7 @@ const mockModelos: PredictionModel[] = [
     id: "model4",
     name: "Previsão de Progressão de Doenças",
     description: "Modelo de série temporal para prever progressão ou regressão de condições crônicas com tratamento",
-    algorithm: "LSTM Neural Network",
+    algorithm: "PetLove Prev",
     accuracy: 0.91,
     lastTrained: new Date(2023, 11, 30),
     parameters: {
@@ -115,14 +114,12 @@ const ModelosPreditivosTab: React.FC = () => {
 
   // Função para renderizar o ícone do modelo com base no algoritmo
   const renderModelIcon = (algorithm: string) => {
-    if (algorithm.includes('Boost') || algorithm.includes('Forest')) {
+    if (algorithm.includes('Nutra') || algorithm.includes('CuBe')) {
       return <BarChart className="h-5 w-5 text-green-600" />;
-    } else if (algorithm.includes('Neural') || algorithm.includes('LSTM')) {
+    } else if (algorithm.includes('Prev')) {
       return <Brain className="h-5 w-5 text-purple-600" />;
-    } else if (algorithm.includes('Clustering') || algorithm.includes('Means')) {
+    } else if (algorithm.includes('Seg')) {
       return <CircleDashed className="h-5 w-5 text-blue-600" />;
-    } else if (algorithm.includes('Regression')) {
-      return <LineChart className="h-5 w-5 text-amber-600" />;
     } else {
       return <AreaChart className="h-5 w-5 text-slate-600" />;
     }
@@ -179,11 +176,10 @@ const ModelosPreditivosTab: React.FC = () => {
                     <Label htmlFor="model-algorithm">Algoritmo</Label>
                     <select id="model-algorithm" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                       <option value="">Selecione um algoritmo</option>
-                      <option value="xgboost">XGBoost</option>
-                      <option value="random_forest">Random Forest</option>
-                      <option value="lstm">LSTM Neural Network</option>
-                      <option value="kmeans">KMeans Clustering</option>
-                      <option value="linear_regression">Linear Regression</option>
+                      <option value="petlove_nutra">PetLove Nutra</option>
+                      <option value="petlove_cube">PetLove CuBe</option>
+                      <option value="petlove_seg">PetLove Seg</option>
+                      <option value="petlove_prev">PetLove Prev</option>
                     </select>
                   </div>
                 </div>
