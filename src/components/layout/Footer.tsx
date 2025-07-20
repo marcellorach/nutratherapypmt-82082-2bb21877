@@ -19,9 +19,9 @@ const Footer: React.FC = () => {
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
             {/* Google Cloud */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <img 
-                  src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
+                  src="/lovable-uploads/836ec4b0-4874-42fe-9d1d-6f1da2b92798.png" 
                   alt="Google Cloud" 
                   className="h-11 w-auto transition-all"
                 />
@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
             
             {/* Mistral AI */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <img 
                   src="/lovable-uploads/1a7e4474-434a-4b14-9905-18d52a577319.png" 
                   alt="Mistral AI" 
