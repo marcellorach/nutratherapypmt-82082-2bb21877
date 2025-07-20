@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
                 <img 
                   src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
                   alt="Google Cloud" 
-                  className="h-8 w-auto transition-all"
+                  className="h-9 w-auto transition-all"
                 />
                 <span className="text-sm text-gray-600 font-medium">Google Cloud</span>
               </div>
@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Anthropic_logo.svg/2560px-Anthropic_logo.svg.png" 
                   alt="Anthropic" 
-                  className="h-7 w-auto transition-all"
+                  className="h-6 w-auto transition-all"
                 />
               </div>
             </div>
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="https://mistral.ai/images/logo_hubc88c4ece131b91c7cb753f40e9e1cc5_2589_256x0_resize_q97_h2_lanczos_3.webp" 
+                  src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mistral/mistral-original.svg" 
                   alt="Mistral AI" 
                   className="h-7 w-auto transition-all"
                 />
@@ -70,7 +70,7 @@ const Footer: React.FC = () => {
                   <img 
                     src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" 
                     alt="Google" 
-                    className="h-7 w-auto"
+                    className="h-9 w-auto"
                   />
                   <span className="text-sm text-gray-600 font-medium">Co-Scientist</span>
                 </div>
