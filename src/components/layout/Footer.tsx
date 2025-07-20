@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
             {/* Google Cloud */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-0.5">
                 <img 
                   src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
                   alt="Google Cloud" 
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mistral/mistral-original.svg" 
+                  src="/lovable-uploads/2d33ccdb-51fa-4bad-b754-b9be1e37cac4.png" 
                   alt="Mistral AI" 
                   className="h-7 w-auto transition-all"
                 />
