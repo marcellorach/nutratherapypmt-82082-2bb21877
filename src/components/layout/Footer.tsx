@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
             {/* Google Cloud */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-0">
+              <div className="flex items-center space-x-1">
                 <img 
                   src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
                   alt="Google Cloud" 
