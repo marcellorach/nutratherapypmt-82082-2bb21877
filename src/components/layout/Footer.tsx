@@ -17,12 +17,12 @@ const Footer: React.FC = () => {
           </div>
           
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
-            {/* Google Cloud - apenas imagem, sem texto duplicado */}
+            {/* Google Cloud - usando URL direta do Google */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <img 
-                src="/lovable-uploads/8be5adbe-6093-4b17-b9f6-867d7ecc3c6a.png" 
+                src="https://cloud.google.com/_static/cloud/images/cloud-logo.svg" 
                 alt="Google Cloud" 
-                className="h-11 w-auto transition-all"
+                className="h-8 w-auto transition-all"
               />
             </div>
             
