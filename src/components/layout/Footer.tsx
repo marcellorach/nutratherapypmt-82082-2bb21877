@@ -19,11 +19,11 @@ const Footer: React.FC = () => {
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
             {/* Google Cloud */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <img 
                   src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
                   alt="Google Cloud" 
-                  className="h-9 w-auto transition-all"
+                  className="h-11 w-auto transition-all"
                 />
                 <span className="text-sm text-gray-600 font-medium">Google Cloud</span>
               </div>
@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Anthropic_logo.svg/2560px-Anthropic_logo.svg.png" 
                   alt="Anthropic" 
-                  className="h-6 w-auto transition-all"
+                  className="h-[18px] w-auto transition-all"
                 />
               </div>
             </div>
@@ -70,7 +70,7 @@ const Footer: React.FC = () => {
                   <img 
                     src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" 
                     alt="Google" 
-                    className="h-9 w-auto"
+                    className="h-6 w-auto"
                   />
                   <span className="text-sm text-gray-600 font-medium">Co-Scientist</span>
                 </div>
