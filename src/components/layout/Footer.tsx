@@ -19,54 +19,62 @@ const Footer: React.FC = () => {
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
             {/* Google Cloud */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <img 
-                src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
-                alt="Google Cloud" 
-                className="h-7 w-auto transition-all"
-              />
+              <div className="flex items-center space-x-2">
+                <img 
+                  src="https://cloud.google.com/_static/cloud/images/social-icon-google-cloud-1200-630.png" 
+                  alt="Google Cloud" 
+                  className="h-8 w-auto transition-all"
+                />
+                <span className="text-sm text-gray-600 font-medium">Google Cloud</span>
+              </div>
             </div>
             
             {/* OpenAI */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/1024px-ChatGPT_logo.svg.png" 
-                alt="OpenAI" 
-                className="h-7 w-auto transition-all"
-              />
+              <div className="flex items-center space-x-2">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/1024px-ChatGPT_logo.svg.png" 
+                  alt="OpenAI" 
+                  className="h-7 w-auto transition-all"
+                />
+                <span className="text-sm text-gray-600 font-medium">OpenAI</span>
+              </div>
             </div>
             
-            {/* Claude/Anthropic */}
+            {/* Anthropic */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">A</span>
-                </div>
-                <span className="text-sm text-gray-600 font-medium">Claude</span>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Anthropic_logo.svg/2560px-Anthropic_logo.svg.png" 
+                  alt="Anthropic" 
+                  className="h-7 w-auto transition-all"
+                />
               </div>
             </div>
             
             {/* Mistral AI */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 bg-orange-500 rounded-sm flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">M</span>
-                </div>
-                <span className="text-sm text-gray-600 font-medium">Mistral</span>
+                <img 
+                  src="https://mistral.ai/images/logo_hubc88c4ece131b91c7cb753f40e9e1cc5_2589_256x0_resize_q97_h2_lanczos_3.webp" 
+                  alt="Mistral AI" 
+                  className="h-7 w-auto transition-all"
+                />
               </div>
             </div>
             
             {/* Google Co-Scientist - em breve */}
-            <div className="flex items-center opacity-60">
+            <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex flex-col items-center space-y-1">
                 <div className="flex items-center space-x-2">
                   <img 
                     src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" 
                     alt="Google" 
-                    className="h-6 w-auto"
+                    className="h-7 w-auto"
                   />
-                  <span className="text-sm text-gray-500 font-medium">Co-Scientist</span>
+                  <span className="text-sm text-gray-600 font-medium">Co-Scientist</span>
                 </div>
-                <span className="text-xs text-gray-400 font-light italic">em breve</span>
+                <span className="text-xs text-gray-500 font-medium italic">em breve</span>
               </div>
             </div>
           </div>
