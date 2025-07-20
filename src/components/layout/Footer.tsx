@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="/lovable-uploads/836ec4b0-4874-42fe-9d1d-6f1da2b92798.png" 
+                  src="/lovable-uploads/8be5adbe-6093-4b17-b9f6-867d7ecc3c6a.png" 
                   alt="Google Cloud" 
                   className="h-11 w-auto transition-all"
                 />
