@@ -25,11 +25,11 @@ const Header: React.FC = () => {
             className="h-6"
           />
           <div className="flex flex-col leading-tight">
-            <div className="text-xs text-gray-600 font-light text-center">
-              Plataforma de terapia nutracêutica
-            </div>
             <div className="text-lg font-bold text-gray-800 text-center">
               NutraTherapy
+            </div>
+            <div className="text-xs text-gray-600 font-light text-center">
+              Plataforma de terapia nutracêutica
             </div>
             <div className="text-xs text-gray-600 font-light text-center">
               personalizada em massa e P&D
@@ -37,13 +37,6 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        <nav className="hidden md:flex gap-6">
-          {isVeterinarian && (
-            <Link to="/veterinario" className="text-gray-700 hover:text-gray-900 transition-colors font-medium">
-              {t('common.veterinarian')}
-            </Link>
-          )}
-        </nav>
         
         <div className="flex gap-3 items-center">
           <LanguageSwitcher />
