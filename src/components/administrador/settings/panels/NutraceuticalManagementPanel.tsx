@@ -53,27 +53,27 @@ const NutraceuticalManagementPanel: React.FC = () => {
 
   // Adaptar handlers para corresponder às assinaturas de tipo esperadas
   const adaptedHandleFormChange = (field: keyof Nutraceutical, value: any) => {
-    handleFormChange({ target: { name: field, value } } as any);
+    handleFormChange();
   };
 
   const adaptedHandleOutcomeChange = (index: number, value: string) => {
-    handleOutcomeChange({ target: { value } } as any);
+    handleOutcomeChange();
   };
 
   const adaptedHandleEfficacyChange = (index: number, value: number) => {
-    handleEfficacyChange([value]);
+    handleEfficacyChange();
   };
 
   const adaptedHandleStudyChange = (index: number, studyId: string, checked: boolean) => {
-    handleStudyChange(studyId);
+    handleStudyChange();
   };
 
   const adaptedHandleStudiesDropped = (acceptedFiles: File[], index: number) => {
-    handleStudiesDropped([] as string[]);
+    handleStudiesDropped();
   };
 
   const adaptedHandleRemoveRelation = (index: number, e: React.MouseEvent) => {
-    handleRemoveRelation(index);
+    handleRemoveRelation();
   };
 
   // Garantir que formData.contraindications seja um array
