@@ -7,9 +7,11 @@ interface AdminContentProps {
 
 const AdminContent: React.FC<AdminContentProps> = ({ children }) => {
   return (
-    <div className="flex-1 overflow-auto p-6 pl-8 pr-12 mt-24">
-      {children}
-    </div>
+    <main className="flex-1 overflow-auto bg-white">
+      <div className="p-6">
+        {children}
+      </div>
+    </main>
   );
 };
 
