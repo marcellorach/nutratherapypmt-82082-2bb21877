@@ -20,7 +20,6 @@ class NutraceuticalsService {
       .from('nutraceuticals')
       .select(`
         *,
-        outcome:outcome_id(*),
         nutraceutical_benefits(id, benefit),
         nutraceutical_scientific_metadata(*),
         nutraceutical_health_conditions:nutraceutical_conditions(
@@ -71,7 +70,7 @@ class NutraceuticalsService {
         this.handleError(error, 'buscar nutracêuticos');
       }
 
-      return data || [];
+      return (data || []) as any;
     } catch (error) {
       this.handleError(error, 'buscar nutracêuticos');
     }
@@ -85,7 +84,7 @@ class NutraceuticalsService {
         this.handleError(error, 'buscar nutracêutico');
       }
 
-      return data || null;
+      return (data || null) as any;
     } catch (error) {
       this.handleError(error, 'buscar nutracêutico');
     }

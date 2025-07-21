@@ -24,7 +24,10 @@ interface UseNutraceuticalsOptions {
 
 export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
   const { enabledQuery = true, initialFilters = {}, autoRefresh = false } = options;
-  const [filters, setFilters] = useState<NutraceuticalFilters>(initialFilters);
+  const [filters, setFilters] = useState<NutraceuticalFilters>({
+    searchTerm: '',
+    ...initialFilters
+  });
   const { getDataTypes } = useDataManagement();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -155,7 +158,7 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
   }, []);
 
   const clearFilters = useCallback(() => {
-    setFilters(initialFilters);
+    setFilters({ searchTerm: '', ...initialFilters });
   }, [initialFilters]);
 
   // Funções de conveniência
@@ -203,6 +206,9 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
     updateNutraceutical,
     deleteNutraceutical,
     refreshData,
+    
+    // Compatibilidade
+    fetchNutraceuticals: refreshData,
     
     // Estados de loading
     isCreating: createMutation.isPending,

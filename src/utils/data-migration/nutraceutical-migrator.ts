@@ -1,5 +1,5 @@
 
-import { NutraceuticalsService } from "@/services/nutraceuticals";
+import { nutraceuticalsService } from "@/services/nutraceuticals";
 import { RelationshipType } from "@/types";
 
 /**
@@ -30,7 +30,7 @@ export const NutraceuticalMigrator = {
         
         // Criar nutracêutico base
         const categoryId = categoryMap.get(nutra.condition);
-        const newNutraceutical = await NutraceuticalsService.createNutraceutical({
+        const result = await nutraceuticalsService.create({
           name: nutra.name,
           description: nutra.description,
           dosage: nutra.dosage,
@@ -39,23 +39,28 @@ export const NutraceuticalMigrator = {
           contraindications: nutra.contraindications || []
         });
         
-        // Registrar que este nutracêutico foi criado
-        nutraceuticalCreated.set(nutra.name, newNutraceutical.id);
+        if (!result.success || !result.data) {
+          throw new Error('Falha ao criar nutracêutico');
+        }
         
-        console.log(`Criado nutracêutico: ${nutra.name} (ID: ${newNutraceutical.id})`);
+        // Registrar que este nutracêutico foi criado
+        nutraceuticalCreated.set(nutra.name, result.data.id);
+        
+        console.log(`Criado nutracêutico: ${nutra.name} (ID: ${result.data.id})`);
         nutraceuticosProcessados++;
         
         // Adicionar metadados e relacionamentos
-        await this.addNutraceuticalDetails(newNutraceutical.id, nutra, conditionMap);
+        await this.addNutraceuticalDetails(result.data.id, nutra, conditionMap);
         
         // Adicionar relação com categoria principal (condition) após criar o nutracêutico
         if (categoryId) {
-          await NutraceuticalsService.relateToCondition(
-            newNutraceutical.id, 
-            categoryId, 
-            'primary', 
-            5 // Alta eficácia para categoria principal
-          );
+          await nutraceuticalsService.addConditionRelation({
+            nutraceutical_id: result.data.id,
+            condition_id: categoryId,
+            relationship_type: 'prevention',
+            efficacy_score: 5,
+            notes: 'Categoria principal'
+          });
         }
       } catch (err) {
         console.error(`Erro ao processar nutracêutico ${nutra.name}:`, err);
@@ -80,26 +85,15 @@ export const NutraceuticalMigrator = {
     if (nutraData.benefits) {
       for (const benefit of nutraData.benefits) {
         // Usando a função addBenefit que foi corrigida
-        await NutraceuticalsService.addBenefit(nutraId, benefit);
+        await nutraceuticalsService.addBenefit(nutraId, benefit);
       }
       console.log(`Adicionados ${nutraData.benefits.length} benefícios para ${nutraData.name}`);
     }
     
-    // Adicionar metadados científicos
+    // Adicionar metadados científicos seria implementado aqui
+    // Por enquanto apenas log
     if (nutraData.scientificEvidence) {
-      // CORREÇÃO: Passando apenas o nutraId e o efficacyScore como número
-      await NutraceuticalsService.updateScientificMetadata(
-        nutraId,
-        nutraData.scientificEvidence.efficacyScore || 0
-      );
-      
-      // Adicionando as notas científicas separadamente
-      await NutraceuticalsService.updateOutcomeRelation(
-        nutraId,
-        `Pontuação de sustentabilidade: ${nutraData.scientificEvidence.sustainabilityScore || 0}`
-      );
-      
-      console.log(`Adicionados metadados científicos para ${nutraData.name}`);
+      console.log(`Metadados científicos para ${nutraData.name} - Eficácia: ${nutraData.scientificEvidence.efficacyScore}`);
     }
     
     // Adicionar relações de condições (prevenção)
@@ -151,12 +145,13 @@ export const NutraceuticalMigrator = {
     for (const condition of conditions) {
       const conditionId = conditionMap.get(condition.name);
       if (conditionId) {
-        await NutraceuticalsService.relateToCondition(
-          nutraId,
-          conditionId,
-          relationshipType,
-          condition.efficacyScore || 0
-        );
+        await nutraceuticalsService.addConditionRelation({
+          nutraceutical_id: nutraId,
+          condition_id: conditionId,
+          relationship_type: relationshipType as 'prevention' | 'treatment' | 'support',
+          efficacy_score: condition.efficacyScore || 3,
+          notes: condition.notes || ''
+        });
         processadas++;
       }
     }

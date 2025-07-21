@@ -52,7 +52,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       (nutra.description && nutra.description.toLowerCase().includes(searchTerm.toLowerCase()));
       
     const matchesOutcome = selectedOutcome === null || 
-      nutra.outcome_id === selectedOutcome;
+      nutra.outcome?.id === selectedOutcome;
       
     return matchesSearch && matchesOutcome;
   });

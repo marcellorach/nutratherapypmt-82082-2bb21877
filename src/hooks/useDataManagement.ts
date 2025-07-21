@@ -20,6 +20,23 @@ export const useDataManagement = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to get data types based on settings
+  const getDataTypes = (): string[] => {
+    const { data_mode, use_seed_data } = settings;
+    
+    switch (data_mode) {
+      case 'production':
+        return ['production'];
+      case 'development':
+        return use_seed_data ? ['seed', 'mock'] : ['production'];
+      case 'hybrid':
+      default:
+        return use_seed_data 
+          ? ['production', 'seed', 'mock'] 
+          : ['production'];
+    }
+  };
+
   const loadSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -125,6 +142,7 @@ export const useDataManagement = () => {
   return {
     settings,
     isLoading,
+    getDataTypes,
     updateSetting,
     cleanSeedData,
     generateNewSeedBatch,

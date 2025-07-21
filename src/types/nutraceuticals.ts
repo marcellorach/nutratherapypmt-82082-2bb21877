@@ -80,7 +80,7 @@ export interface ScientificStudy {
 }
 
 export interface NutraceuticalWithRelations extends NutraceuticalCore {
-  outcome?: NutraceuticalOutcome;
+  outcome?: NutraceuticalOutcome | null;
   nutraceutical_benefits: NutraceuticalBenefit[];
   nutraceutical_scientific_metadata: NutraceuticalMetadata[];
   nutraceutical_health_conditions: NutraceuticalCondition[];

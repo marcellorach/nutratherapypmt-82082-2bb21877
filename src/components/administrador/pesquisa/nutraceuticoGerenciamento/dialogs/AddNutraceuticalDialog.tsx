@@ -120,7 +120,10 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       } else {
         // Criar novo nutracêutico
         console.log('Criando novo nutracêutico');
-        result = await createNutraceutical(nutraceuticalData);
+        result = await createNutraceutical({
+          name: values.name || '',
+          ...nutraceuticalData
+        });
         
         toast({
           title: "Sucesso",

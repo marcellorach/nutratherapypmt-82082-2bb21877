@@ -1,5 +1,5 @@
 
-import { NutraceuticalsService } from "@/services/nutraceuticals";
+import { nutraceuticalsService } from "@/services/nutraceuticals";
 
 /**
  * Utilidades para validação na migração de dados
@@ -11,7 +11,7 @@ export const ValidationUtils = {
    */
   async checkExistingData() {
     try {
-      const existingData = await NutraceuticalsService.getAllNutraceuticals();
+      const existingData = await nutraceuticalsService.getAll();
       
       if (existingData && existingData.length > 0) {
         return {
