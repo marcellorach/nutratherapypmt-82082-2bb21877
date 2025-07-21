@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { mapDbToUiFormat } from '@/utils/nutraceuticals-mapper';
 import { nutraceuticals as mockNutraceuticals } from '@/data';
+import { useDataManagement } from '@/hooks/useDataManagement';
 
 export const useNutraceuticalsData = () => {
   const [dbNutraceuticals, setDbNutraceuticals] = useState<any[]>([]);
@@ -12,6 +13,7 @@ export const useNutraceuticalsData = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { settings } = useDataManagement();
 
   // Carregar nutracêuticos do banco de dados com suas relações
   const loadNutraceuticals = async () => {
@@ -121,11 +123,27 @@ export const useNutraceuticalsData = () => {
     });
   };
 
-  // Combinar dados do banco com dados de exemplo
-  const allNutraceuticals: Nutraceutical[] = [
-    ...mapDbToUiFormat(dbNutraceuticals),
-    ...mockNutraceuticals
-  ];
+  // Combinar dados baseado no modo configurado
+  const getAllNutraceuticals = (): Nutraceutical[] => {
+    const dbData = mapDbToUiFormat(dbNutraceuticals);
+    
+    switch (settings.data_mode) {
+      case 'production':
+        // Apenas dados do banco (sem mock)
+        return dbData;
+      
+      case 'development':
+        // Priorizar dados mock sobre dados do banco
+        return [...mockNutraceuticals, ...dbData];
+      
+      case 'hybrid':
+      default:
+        // Combinar dados do banco com dados mock (padrão atual)
+        return [...dbData, ...mockNutraceuticals];
+    }
+  };
+
+  const allNutraceuticals: Nutraceutical[] = getAllNutraceuticals();
 
   return {
     nutraceuticals: allNutraceuticals,

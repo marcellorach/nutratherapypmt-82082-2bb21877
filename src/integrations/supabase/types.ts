@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       active_ingredients: {
@@ -39,6 +44,8 @@ export type Database = {
           chronic_diseases_system_prompt: string | null
           continuous_medication_prompt: string | null
           continuous_medication_system_prompt: string | null
+          exam_ocr_prompt: string | null
+          exam_ocr_system_prompt: string | null
           health_assistant_prompt: string | null
           health_assistant_system_prompt: string | null
           id: string
@@ -53,6 +60,8 @@ export type Database = {
           chronic_diseases_system_prompt?: string | null
           continuous_medication_prompt?: string | null
           continuous_medication_system_prompt?: string | null
+          exam_ocr_prompt?: string | null
+          exam_ocr_system_prompt?: string | null
           health_assistant_prompt?: string | null
           health_assistant_system_prompt?: string | null
           id: string
@@ -67,6 +76,8 @@ export type Database = {
           chronic_diseases_system_prompt?: string | null
           continuous_medication_prompt?: string | null
           continuous_medication_system_prompt?: string | null
+          exam_ocr_prompt?: string | null
+          exam_ocr_system_prompt?: string | null
           health_assistant_prompt?: string | null
           health_assistant_system_prompt?: string | null
           id?: string
@@ -99,6 +110,66 @@ export type Database = {
           name?: string
           updated_at?: string
           value?: string | null
+        }
+        Relationships: []
+      }
+      anamnesis_responses: {
+        Row: {
+          created_at: string
+          extracted_tags: Json | null
+          field_name: string
+          field_value: string | null
+          id: string
+          section: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          extracted_tags?: Json | null
+          field_name: string
+          field_value?: string | null
+          id?: string
+          section: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          extracted_tags?: Json | null
+          field_name?: string
+          field_value?: string | null
+          id?: string
+          section?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_management_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -159,6 +230,135 @@ export type Database = {
         }
         Relationships: []
       }
+      device_data: {
+        Row: {
+          created_at: string
+          data_date: string
+          data_type: string
+          device_type: string
+          id: string
+          processed_data: Json | null
+          raw_data: Json
+          sync_timestamp: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_date: string
+          data_type: string
+          device_type: string
+          id?: string
+          processed_data?: Json | null
+          raw_data?: Json
+          sync_timestamp?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_date?: string
+          data_type?: string
+          device_type?: string
+          id?: string
+          processed_data?: Json | null
+          raw_data?: Json
+          sync_timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      device_integrations: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          device_info: Json | null
+          device_type: string
+          id: string
+          last_sync: string | null
+          refresh_token: string | null
+          status: string
+          sync_frequency: number | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          device_info?: Json | null
+          device_type: string
+          id?: string
+          last_sync?: string | null
+          refresh_token?: string | null
+          status?: string
+          sync_frequency?: number | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          device_info?: Json | null
+          device_type?: string
+          id?: string
+          last_sync?: string | null
+          refresh_token?: string | null
+          status?: string
+          sync_frequency?: number | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exam_uploads: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          ocr_extracted_data: Json | null
+          ocr_processed_at: string | null
+          ocr_raw_data: Json | null
+          original_filename: string
+          updated_at: string
+          user_approved: boolean | null
+          user_corrections: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_processed_at?: string | null
+          ocr_raw_data?: Json | null
+          original_filename: string
+          updated_at?: string
+          user_approved?: boolean | null
+          user_corrections?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_processed_at?: string | null
+          ocr_raw_data?: Json | null
+          original_filename?: string
+          updated_at?: string
+          user_approved?: boolean | null
+          user_corrections?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       global_tags: {
         Row: {
           category: string
@@ -185,21 +385,27 @@ export type Database = {
       }
       health_conditions: {
         Row: {
+          batch_id: string | null
           created_at: string
+          data_type: string | null
           description: string
           id: string
           name: string
           updated_at: string
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           description: string
           id?: string
           name: string
           updated_at?: string
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           description?: string
           id?: string
           name?: string
@@ -238,8 +444,10 @@ export type Database = {
       }
       nutraceutical_conditions: {
         Row: {
+          batch_id: string | null
           condition_id: string | null
           created_at: string
+          data_type: string | null
           efficacy_score: number | null
           id: string
           notes: string | null
@@ -248,8 +456,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          batch_id?: string | null
           condition_id?: string | null
           created_at?: string
+          data_type?: string | null
           efficacy_score?: number | null
           id?: string
           notes?: string | null
@@ -258,8 +468,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          batch_id?: string | null
           condition_id?: string | null
           created_at?: string
+          data_type?: string | null
           efficacy_score?: number | null
           id?: string
           notes?: string | null
@@ -349,7 +561,9 @@ export type Database = {
       }
       nutraceutical_scientific_metadata: {
         Row: {
+          batch_id: string | null
           created_at: string
+          data_type: string | null
           efficacy_score: number | null
           id: string
           notes: string | null
@@ -358,7 +572,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           efficacy_score?: number | null
           id?: string
           notes?: string | null
@@ -367,7 +583,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           efficacy_score?: number | null
           id?: string
           notes?: string | null
@@ -387,21 +605,27 @@ export type Database = {
       }
       nutraceutical_studies: {
         Row: {
+          batch_id: string | null
           created_at: string
+          data_type: string | null
           id: string
           nutraceutical_id: string | null
           relevance_score: number | null
           study_id: string | null
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           id?: string
           nutraceutical_id?: string | null
           relevance_score?: number | null
           study_id?: string | null
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           id?: string
           nutraceutical_id?: string | null
           relevance_score?: number | null
@@ -426,9 +650,11 @@ export type Database = {
       }
       nutraceuticals: {
         Row: {
+          batch_id: string | null
           chemical_compound: string | null
           contraindications: string[] | null
           created_at: string
+          data_type: string | null
           description: string | null
           dosage: string | null
           id: string
@@ -439,9 +665,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          batch_id?: string | null
           chemical_compound?: string | null
           contraindications?: string[] | null
           created_at?: string
+          data_type?: string | null
           description?: string | null
           dosage?: string | null
           id?: string
@@ -452,9 +680,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          batch_id?: string | null
           chemical_compound?: string | null
           contraindications?: string[] | null
           created_at?: string
+          data_type?: string | null
           description?: string | null
           dosage?: string | null
           id?: string
@@ -534,25 +764,37 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
+          name: string | null
+          phone: string | null
+          role: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          name?: string | null
+          phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          name?: string | null
+          phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -561,7 +803,9 @@ export type Database = {
         Row: {
           abstract: string | null
           authors: string[] | null
+          batch_id: string | null
           created_at: string
+          data_type: string | null
           file_name: string | null
           file_path: string | null
           file_size: number | null
@@ -576,7 +820,9 @@ export type Database = {
         Insert: {
           abstract?: string | null
           authors?: string[] | null
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           file_name?: string | null
           file_path?: string | null
           file_size?: number | null
@@ -591,7 +837,9 @@ export type Database = {
         Update: {
           abstract?: string | null
           authors?: string[] | null
+          batch_id?: string | null
           created_at?: string
+          data_type?: string | null
           file_name?: string | null
           file_path?: string | null
           file_size?: number | null
@@ -659,6 +907,78 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_logs: {
+        Row: {
+          completed_at: string | null
+          device_type: string
+          error_message: string | null
+          id: string
+          records_synced: number | null
+          started_at: string
+          status: string
+          sync_duration_ms: number | null
+          sync_type: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          device_type: string
+          error_message?: string | null
+          id?: string
+          records_synced?: number | null
+          started_at?: string
+          status: string
+          sync_duration_ms?: number | null
+          sync_type: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          device_type?: string
+          error_message?: string | null
+          id?: string
+          records_synced?: number | null
+          started_at?: string
+          status?: string
+          sync_duration_ms?: number | null
+          sync_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          completed_steps: Json | null
+          current_state: Database["public"]["Enums"]["user_state"]
+          id: string
+          last_updated: string | null
+          progress_percentage: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_state?: Database["public"]["Enums"]["user_state"]
+          id?: string
+          last_updated?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_state?: Database["public"]["Enums"]["user_state"]
+          id?: string
+          last_updated?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -685,6 +1005,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clean_seed_data: {
+        Args: { batch_id_param?: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -695,6 +1019,18 @@ export type Database = {
     }
     Enums: {
       user_role: "admin" | "veterinarian" | "tutor"
+      user_state:
+        | "new"
+        | "disclaimer_completed"
+        | "education_completed"
+        | "exam_upload_completed"
+        | "anamnesis_completed"
+        | "medical_review_pending"
+        | "medical_review_completed"
+        | "exams_requested"
+        | "exams_uploaded"
+        | "results_processed"
+        | "active"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -702,21 +1038,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -734,14 +1074,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -757,14 +1099,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -780,14 +1124,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -795,14 +1141,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
@@ -811,6 +1159,19 @@ export const Constants = {
   public: {
     Enums: {
       user_role: ["admin", "veterinarian", "tutor"],
+      user_state: [
+        "new",
+        "disclaimer_completed",
+        "education_completed",
+        "exam_upload_completed",
+        "anamnesis_completed",
+        "medical_review_pending",
+        "medical_review_completed",
+        "exams_requested",
+        "exams_uploaded",
+        "results_processed",
+        "active",
+      ],
     },
   },
 } as const
