@@ -26,7 +26,7 @@ interface SearchFiltersProps {
   onAddNewClick?: () => void;
 }
 
-export const SearchFilters: React.FC<SearchFiltersProps> = ({
+export const SearchFilters = ({
   searchTerm,
   setSearchTerm,
   filterEfficacy,

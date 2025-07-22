@@ -13,7 +13,7 @@ interface NutraceuticosExpandableTableProps {
   onConditionClick: (nutraceutical: Nutraceutical, condition: any, conditionType: 'prevention' | 'treatment' | 'support') => void;
 }
 
-const NutraceuticosExpandableTable: React.FC<NutraceuticosExpandableTableProps> = ({
+const NutraceuticosExpandableTable = ({
   nutraceuticals,
   onEditClick,
   onConditionClick

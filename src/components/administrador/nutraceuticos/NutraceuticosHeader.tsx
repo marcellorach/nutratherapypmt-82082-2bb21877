@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import NutraceuticalImportDialog from './import/NutraceuticalImportDialog';
 import ManageImportsDialog from './import/ManageImportsDialog';
 
-export const NutraceuticosHeader: React.FC = () => {
+export const NutraceuticosHeader = () => {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isManageImportsDialogOpen, setIsManageImportsDialogOpen] = useState(false);
   
