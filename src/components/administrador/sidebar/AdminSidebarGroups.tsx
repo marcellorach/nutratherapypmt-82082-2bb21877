@@ -30,7 +30,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
     <>
       {/* Base Conhecimento/Relacional */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500 font-bold">
+        <SidebarGroupLabel className="text-orange-500">
           Base Conhecimento/Relacional
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -45,7 +45,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       
       {/* Processamento de Dados */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500 font-bold">
+        <SidebarGroupLabel className="text-orange-500">
           Processamento de Dados
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -60,7 +60,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
 
       {/* Ações */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500 font-bold">
+        <SidebarGroupLabel className="text-orange-500">
           Ações
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -75,7 +75,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
 
       {/* Pesquisa e Desenvolvimento */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500 font-bold">
+        <SidebarGroupLabel className="text-orange-500">
           Pesquisa e Desenvolvimento
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -90,7 +90,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       
       {/* Configuração */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500 font-bold">
+        <SidebarGroupLabel className="text-orange-500">
           Configuração
         </SidebarGroupLabel>
         <SidebarGroupContent>
