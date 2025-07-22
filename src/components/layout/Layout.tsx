@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-grow mt-20"> {/* Keep top margin for fixed header */}
+      <main className="flex-grow mt-24"> {/* Increased from mt-20 to mt-24 to account for header padding */}
         {children}
       </main>
       <Footer />
