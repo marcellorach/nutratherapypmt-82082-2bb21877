@@ -32,8 +32,10 @@ export interface ExamResult {
 }
 
 export interface NutraceuticalCondition {
+  id?: string;
   name: string;
   efficacyScore: number;  // 0-1: Sem evidência, 1-2: Anedótica, 2-3: Leve, 3-4: Moderada, 4-5: Alta
+  relationshipType?: string;
 }
 
 export interface Nutraceutical {
@@ -59,6 +61,11 @@ export interface Nutraceutical {
       year: number;
     }>;
   };
+  healthConditions?: NutraceuticalCondition[];
+  studies?: any[];
+  outcomeCount?: number;
+  studyCount?: number;
+  outcome?: any;
 }
 
 export interface Formulation {
