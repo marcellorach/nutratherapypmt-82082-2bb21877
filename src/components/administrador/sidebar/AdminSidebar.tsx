@@ -28,8 +28,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
   return (
     <Sidebar 
       variant="inset" 
-      collapsible="icon" 
-      className="fixed top-20 h-[calc(100vh-5rem)]"
+      collapsible="icon"
     >
       <SidebarHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
@@ -38,7 +37,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="pt-0">
+      <SidebarContent>
         <AdminSidebarGroups currentStep={currentStep} setCurrentStep={setCurrentStep} />
       </SidebarContent>
       
