@@ -9,7 +9,7 @@ import AddNutraceuticalDialog from './pesquisa/nutraceuticoGerenciamento/dialogs
 import NutraceuticosExpandableTable from './nutraceuticos/NutraceuticosExpandableTable';
 import EvidenceLegendPanel from './nutraceuticos/table/EvidenceLegendPanel';
 
-const NutraceuticosTab: React.FC = () => {
+const NutraceuticosTab = () => {
   // Hook para carregar e gerenciar os dados dos nutracêuticos
   const { nutraceuticals, isLoading, isRefreshing, handleRefreshData } = useNutraceuticalsData();
   
