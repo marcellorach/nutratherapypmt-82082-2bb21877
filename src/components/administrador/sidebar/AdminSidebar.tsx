@@ -27,14 +27,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
 
   return (
     <Sidebar variant="inset" collapsible="icon" className="mt-20">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Área de P&D</h2>
           <SidebarTrigger />
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="pt-2">
         <AdminSidebarGroups currentStep={currentStep} setCurrentStep={setCurrentStep} />
       </SidebarContent>
       

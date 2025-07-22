@@ -11,7 +11,6 @@ import DataProcessingGroup from './groups/DataProcessingGroup';
 import ActionsGroup from './groups/ActionsGroup';
 import ResearchGroup from './groups/ResearchGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
-import { Microscope, Zap } from "lucide-react";
 import { useSearchParams } from 'react-router-dom';
 
 interface AdminSidebarGroupsProps {
@@ -29,9 +28,11 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
 
   return (
     <>
-      {/* Base de Conhecimento */}
+      {/* Base Conhecimento/Relacional */}
       <SidebarGroup>
-        <SidebarGroupLabel>Base de Conhecimento</SidebarGroupLabel>
+        <SidebarGroupLabel className="text-orange-500 font-bold">
+          Base Conhecimento/Relacional
+        </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             <KnowledgeBaseGroup 
@@ -44,7 +45,9 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       
       {/* Processamento de Dados */}
       <SidebarGroup>
-        <SidebarGroupLabel>Processamento de Dados</SidebarGroupLabel>
+        <SidebarGroupLabel className="text-orange-500 font-bold">
+          Processamento de Dados
+        </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             <DataProcessingGroup 
@@ -55,10 +58,9 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Ações - Nova Seção */}
+      {/* Ações */}
       <SidebarGroup>
-        <SidebarGroupLabel>
-          <Zap className="mr-2 h-4 w-4" />
+        <SidebarGroupLabel className="text-orange-500 font-bold">
           Ações
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -71,10 +73,9 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Pesquisa e Desenvolvimento - Agora com Modelos Preditivos */}
+      {/* Pesquisa e Desenvolvimento */}
       <SidebarGroup>
-        <SidebarGroupLabel>
-          <Microscope className="mr-2 h-4 w-4" />
+        <SidebarGroupLabel className="text-orange-500 font-bold">
           Pesquisa e Desenvolvimento
         </SidebarGroupLabel>
         <SidebarGroupContent>
@@ -87,9 +88,11 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
         </SidebarGroupContent>
       </SidebarGroup>
       
-      {/* Configuração - Sem Analytics e Ações em Massa */}
+      {/* Configuração */}
       <SidebarGroup>
-        <SidebarGroupLabel>Configuração</SidebarGroupLabel>
+        <SidebarGroupLabel className="text-orange-500 font-bold">
+          Configuração
+        </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             <ConfigurationGroup 
