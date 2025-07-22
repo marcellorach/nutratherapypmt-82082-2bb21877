@@ -112,6 +112,11 @@ export const useNutraceuticalsData = () => {
     window.addEventListener('nutraceuticals-imported', handleImport);
     window.addEventListener('nutraceuticals-updated', handleDataUpdate);
     
+    // Disparar evento de atualização após limpeza de duplicatas
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('nutraceuticals-updated'));
+    }, 500);
+    
     return () => {
       window.removeEventListener('nutraceuticals-imported', handleImport);
       window.removeEventListener('nutraceuticals-updated', handleDataUpdate);
