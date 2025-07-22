@@ -103,10 +103,18 @@ export const useNutraceuticalsData = () => {
       loadNutraceuticals();
     };
     
+    // Adicionar listener para mudanças nas configurações de dados
+    const handleDataUpdate = () => {
+      console.log('Dados atualizados, recarregando nutracêuticos...');
+      loadNutraceuticals();
+    };
+    
     window.addEventListener('nutraceuticals-imported', handleImport);
+    window.addEventListener('nutraceuticals-updated', handleDataUpdate);
     
     return () => {
       window.removeEventListener('nutraceuticals-imported', handleImport);
+      window.removeEventListener('nutraceuticals-updated', handleDataUpdate);
     };
   }, []);
 
@@ -116,6 +124,8 @@ export const useNutraceuticalsData = () => {
     
     loadNutraceuticals().then(() => {
       setIsRefreshing(false);
+      // Disparar evento para notificar outros componentes
+      window.dispatchEvent(new CustomEvent('nutraceuticals-updated'));
       toast({
         title: "Dados atualizados",
         description: "A lista de nutracêuticos foi atualizada com sucesso."
