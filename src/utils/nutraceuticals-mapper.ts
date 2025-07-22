@@ -5,6 +5,9 @@ import { Nutraceutical } from "@/types";
  * Mapeia os dados dos nutracêuticos do formato do banco para o formato utilizado na UI
  */
 export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
+  console.log('🔍 [MAPPER] Total de itens recebidos:', dbItems?.length);
+  console.log('🔍 [MAPPER] Primeiro item completo:', JSON.stringify(dbItems?.[0], null, 2));
+  
   // Verificar se já processamos algum item para evitar duplicações
   const processedIds = new Set<string>();
   
@@ -17,33 +20,50 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
     return true;
   }).map(item => {
     try {
+      console.log(`🔍 [MAPPER] Processando ${item.name}:`, {
+        nutraceutical_conditions: item.nutraceutical_conditions,
+        total_conditions: item.nutraceutical_conditions?.length || 0
+      });
+      
       // Extrair condições de saúde associadas (outcomes)
       const healthConditions = Array.isArray(item.nutraceutical_conditions) ? 
         item.nutraceutical_conditions
-          .filter((nch: any) => nch && nch.condition)
+          .filter((nch: any) => {
+            console.log(`🔍 [MAPPER] Condição raw:`, nch);
+            return nch && nch.condition;
+          })
           .map((nch: any) => {
             // Garantir que o tipo de relacionamento esteja normalizado
             let relationshipType = nch.relationship_type || 'support';
+            
+            console.log(`🔍 [MAPPER] Tipo original: ${relationshipType}`);
             
             // Normalizar o tipo de relacionamento (garantindo consistência)
             relationshipType = relationshipType.toLowerCase();
             if (relationshipType.includes('prev')) {
               relationshipType = 'prevention';
-            } else if (relationshipType.includes('trat')) {
+            } else if (relationshipType.includes('trat') || relationshipType.includes('treat')) {
               relationshipType = 'treatment';
             } else {
               relationshipType = 'support';
             }
             
-            return {
+            console.log(`🔍 [MAPPER] Tipo normalizado: ${relationshipType}`);
+            
+            const mappedCondition = {
               id: nch.condition.id,
               name: nch.condition.name,
               description: nch.condition.description,
-              efficacyScore: nch.efficacy_score || 0,
+              efficacyScore: Number(nch.efficacy_score) || 0,
               relationshipType: relationshipType
             };
+            
+            console.log(`🔍 [MAPPER] Condição mapeada:`, mappedCondition);
+            return mappedCondition;
           }) : [];
           
+      console.log(`🔍 [MAPPER] Total de condições processadas para ${item.name}:`, healthConditions.length);
+      
       // Separar as condições pelo tipo de relacionamento
       const preventionConditions = healthConditions.filter(
         (c: any) => c.relationshipType === 'prevention'
@@ -56,6 +76,12 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
       const supportConditions = healthConditions.filter(
         (c: any) => c.relationshipType === 'support'
       );
+      
+      console.log(`🔍 [MAPPER] ${item.name} - Distribuição de condições:`, {
+        prevention: preventionConditions.length,
+        treatment: treatmentConditions.length,
+        support: supportConditions.length
+      });
         
       // Extrair estudos científicos associados
       const studies = Array.isArray(item.nutraceutical_studies) ?
@@ -86,8 +112,8 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
       // Adicionar contadores explícitos para outcomes e estudos
       const outcomeCount = healthConditions.length;
       const studyCount = studies.length;
-        
-      return {
+      
+      const finalResult = {
         id: item.id,
         name: item.name || 'Sem nome',
         description: item.description || '',
@@ -113,8 +139,17 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         studyCount: studyCount,
         outcome: item.outcome || null
       };
+      
+      console.log(`✅ [MAPPER] ${item.name} mapeado com sucesso:`, {
+        totalConditions: finalResult.healthConditions.length,
+        prevention: finalResult.preventionConditions.length,
+        treatment: finalResult.treatmentConditions.length,
+        support: finalResult.supportConditions.length
+      });
+      
+      return finalResult;
     } catch (error) {
-      console.error(`Erro ao processar o nutracêutico ${item?.name || 'desconhecido'}:`, error);
+      console.error(`❌ [MAPPER] Erro ao processar o nutracêutico ${item?.name || 'desconhecido'}:`, error);
       // Retorna um objeto válido com informações básicas para evitar quebrar a interface
       return {
         id: item?.id || `error-${Date.now()}`,
