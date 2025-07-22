@@ -37,7 +37,7 @@ export const renalNutraceuticals: Nutraceutical[] = [
   {
     id: "nut13",
     name: "Astragalus",
-    description: "Erva tradicional com propriedades nefroprotetoras",
+    description: "Erva tradicional com propriedades nefroprotetoras e imunomoduladoras",
     benefits: ["Suporte à função renal", "Modulação imunológica", "Proteção celular"],
     dosage: "2-4mg/kg/dia do extrato padronizado",
     contraindications: ["Doenças autoimunes", "Uso de imunossupressores"],
@@ -45,23 +45,29 @@ export const renalNutraceuticals: Nutraceutical[] = [
     chemicalCompound: "Complexo de saponinas e flavonoides",
     condition: "Insuficiência renal",
     preventionConditions: [
-      { name: "Disfunção renal", efficacyScore: 2.8 }
+      { name: "Disfunção renal", efficacyScore: 2.8 },
+      { name: "Imunossupressão", efficacyScore: 3.8 }
     ],
-    treatmentConditions: [
-      { name: "Proteínuria", efficacyScore: 2.6 }
-    ],
+    treatmentConditions: [],
     supportConditions: [
-      { name: "Sistema imunológico renal", efficacyScore: 3.0 }
+      { name: "Proteinúria", efficacyScore: 2.6 },
+      { name: "Sistema imunológico renal", efficacyScore: 3.0 },
+      { name: "Função imune", efficacyScore: 3.5 }
     ],
-    activeIngredients: ["Astragalosídeos", "Isoflavonas"],
+    activeIngredients: ["Astragalosídeos", "Isoflavonas", "Polissacarídeos"],
     scientificEvidence: {
       efficacyScore: 2.8,
       sustainabilityScore: 3.0,
       studies: [
         {
-          title: "Astragalus effects on canine kidney function",
-          link: "https://doi.org/10.xxxx/bbbb",
+          title: "Astragalus membranaceus effects on canine kidney function",
+          link: "https://doi.org/10.1016/j.phymed.2021.153628",
           year: 2023
+        },
+        {
+          title: "Immunomodulatory effects of Astragalus in chronic kidney disease",
+          link: "https://doi.org/10.1111/jvim.16142",
+          year: 2022
         }
       ]
     }

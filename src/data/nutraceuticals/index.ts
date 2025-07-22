@@ -8,6 +8,9 @@ import { hepaticNutraceuticals } from "./hepatic";
 import { experimentalNutraceuticals } from "./experimental";
 import { longevityNutraceuticals } from "./longevity";
 import { renalNutraceuticals } from "./renal";
+import { antioxidantNutraceuticals } from "./antioxidants";
+import { plantCompoundNutraceuticals } from "./plant-compounds";
+import { immuneModulatorNutraceuticals } from "./immune-modulators";
 
 export const nutraceuticals: Nutraceutical[] = [
   ...omega3Nutraceuticals,
@@ -17,5 +20,8 @@ export const nutraceuticals: Nutraceutical[] = [
   ...hepaticNutraceuticals,
   ...experimentalNutraceuticals,
   ...longevityNutraceuticals,
-  ...renalNutraceuticals
+  ...renalNutraceuticals,
+  ...antioxidantNutraceuticals,
+  ...plantCompoundNutraceuticals,
+  ...immuneModulatorNutraceuticals
 ];
