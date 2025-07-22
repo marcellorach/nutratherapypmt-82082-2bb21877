@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/sidebar";
 import KnowledgeBaseGroup from './groups/KnowledgeBaseGroup';
 import DataProcessingGroup from './groups/DataProcessingGroup';
-import PredictiveAnalysisGroup from './groups/PredictiveAnalysisGroup';
-import ConfigurationGroup from './groups/ConfigurationGroup';
+import ActionsGroup from './groups/ActionsGroup';
 import ResearchGroup from './groups/ResearchGroup';
-import { Microscope } from "lucide-react";
+import ConfigurationGroup from './groups/ConfigurationGroup';
+import { Microscope, Zap } from "lucide-react";
 import { useSearchParams } from 'react-router-dom';
 
 interface AdminSidebarGroupsProps {
@@ -55,7 +55,23 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Pesquisa e Desenvolvimento */}
+      {/* Ações - Nova Seção */}
+      <SidebarGroup>
+        <SidebarGroupLabel>
+          <Zap className="mr-2 h-4 w-4" />
+          Ações
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <ActionsGroup
+              currentStep={currentStep}
+              handleStepClick={handleStepClick}
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {/* Pesquisa e Desenvolvimento - Agora com Modelos Preditivos */}
       <SidebarGroup>
         <SidebarGroupLabel>
           <Microscope className="mr-2 h-4 w-4" />
@@ -70,21 +86,8 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-
-      {/* Análise Preditiva */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Análise Preditiva</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <PredictiveAnalysisGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
       
-      {/* Configuração */}
+      {/* Configuração - Sem Analytics e Ações em Massa */}
       <SidebarGroup>
         <SidebarGroupLabel>Configuração</SidebarGroupLabel>
         <SidebarGroupContent>

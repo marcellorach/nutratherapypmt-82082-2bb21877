@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Zap, Check, Database, Cpu } from "lucide-react";
+import { Bot, Database, Cpu } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface ConfigurationGroupProps {
@@ -42,26 +42,6 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
         >
           <Bot className={currentStep === "prompts" ? "text-primary" : ""} />
           <span>Prompts da IA</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "analytics"} 
-          onClick={() => handleStepClick("analytics")}
-          className={currentStep === "analytics" ? "bg-primary/10 text-primary" : ""}
-        >
-          <Zap className={currentStep === "analytics" ? "text-primary" : ""} />
-          <span>Analytics</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "actions"} 
-          onClick={() => handleStepClick("actions")}
-          className={currentStep === "actions" ? "bg-primary/10 text-primary" : ""}
-        >
-          <Check className={currentStep === "actions" ? "text-primary" : ""} />
-          <span>Ações em Massa</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

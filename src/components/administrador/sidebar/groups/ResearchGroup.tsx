@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
-import { Beaker, FlaskConical, CheckCheck, Database } from "lucide-react";
-import { useSearchParams } from 'react-router-dom';
+import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { Beaker, FlaskConical, CheckCheck, Database, Lightbulb } from "lucide-react";
 
 interface ResearchGroupProps {
   currentStep: string;
@@ -46,6 +45,15 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
         >
           <CheckCheck className="h-4 w-4" />
           <span>Estudos Concluídos</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "modelos"} 
+          onClick={() => handleStepClick("modelos")}
+        >
+          <Lightbulb />
+          <span>Modelos Preditivos</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
