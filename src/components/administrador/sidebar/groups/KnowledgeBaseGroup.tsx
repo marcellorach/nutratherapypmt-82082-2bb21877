@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Beaker, BookOpen, Database, Network, Settings, ListChecks, Microscope } from "lucide-react";
+import { Beaker, BookOpen, Database, Network, Settings, ListChecks, Microscope, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface KnowledgeBaseGroupProps {
@@ -18,63 +18,119 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "estudos"} 
           onClick={() => handleStepClick("estudos")}
+          className={currentStep === "estudos" ? "bg-primary/10 text-primary" : ""}
         >
-          <BookOpen className="h-4 w-4 mr-2" />
-          <span>Estudos Científicos</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <BookOpen className={`h-4 w-4 mr-2 ${currentStep === "estudos" ? "text-primary" : ""}`} />
+              <span>Estudos Científicos</span>
+            </div>
+            {currentStep === "estudos" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "nutraceu-gerenciamento"} 
           onClick={() => handleStepClick("nutraceu-gerenciamento")}
+          className={currentStep === "nutraceu-gerenciamento" ? "bg-primary/10 text-primary" : ""}
         >
-          <Database className="h-4 w-4 mr-2" />
-          <span>Banco de Nutracêuticos</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Database className={`h-4 w-4 mr-2 ${currentStep === "nutraceu-gerenciamento" ? "text-primary" : ""}`} />
+              <span>Banco de Nutracêuticos</span>
+            </div>
+            {currentStep === "nutraceu-gerenciamento" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "nutraceuticos"} 
           onClick={() => handleStepClick("nutraceuticos")}
+          className={currentStep === "nutraceuticos" ? "bg-primary/10 text-primary" : ""}
         >
-          <Beaker className="h-4 w-4 mr-2" />
-          <span>Nutracêuticos</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Beaker className={`h-4 w-4 mr-2 ${currentStep === "nutraceuticos" ? "text-primary" : ""}`} />
+              <span>Nutracêuticos</span>
+            </div>
+            {currentStep === "nutraceuticos" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "relacoes"} 
           onClick={() => handleStepClick("relacoes")}
+          className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
         >
-          <Network className="h-4 w-4 mr-2" />
-          <span>Relações</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Network className={`h-4 w-4 mr-2 ${currentStep === "relacoes" ? "text-primary" : ""}`} />
+              <span>Relações</span>
+            </div>
+            {currentStep === "relacoes" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "regras"} 
           onClick={() => handleStepClick("regras")}
+          className={currentStep === "regras" ? "bg-primary/10 text-primary" : ""}
         >
-          <Microscope className="h-4 w-4 mr-2" />
-          <span>Regras Clínicas</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Microscope className={`h-4 w-4 mr-2 ${currentStep === "regras" ? "text-primary" : ""}`} />
+              <span>Regras Clínicas</span>
+            </div>
+            {currentStep === "regras" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "outcomes-management"} 
           onClick={() => handleStepClick("outcomes-management")}
+          className={currentStep === "outcomes-management" ? "bg-primary/10 text-primary" : ""}
         >
-          <ListChecks className="h-4 w-4 mr-2" />
-          <span>Gerenciar Outcomes</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <ListChecks className={`h-4 w-4 mr-2 ${currentStep === "outcomes-management" ? "text-primary" : ""}`} />
+              <span>Gerenciar Outcomes</span>
+            </div>
+            {currentStep === "outcomes-management" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "knowledge-base-settings"} 
           onClick={() => handleStepClick("knowledge-base-settings")}
+          className={currentStep === "knowledge-base-settings" ? "bg-primary/10 text-primary" : ""}
         >
-          <Settings className="h-4 w-4 mr-2" />
-          <span>Configurações</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Settings className={`h-4 w-4 mr-2 ${currentStep === "knowledge-base-settings" ? "text-primary" : ""}`} />
+              <span>Configurações</span>
+            </div>
+            {currentStep === "knowledge-base-settings" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

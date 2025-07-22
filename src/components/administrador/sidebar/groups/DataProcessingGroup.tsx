@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Import, Brain, BarChart3, Settings } from "lucide-react";
+import { Import, Brain, BarChart3, Settings, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface DataProcessingGroupProps {
@@ -18,36 +18,68 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
         <SidebarMenuButton 
           isActive={currentStep === "import"} 
           onClick={() => handleStepClick("import")}
+          className={currentStep === "import" ? "bg-primary/10 text-primary" : ""}
         >
-          <Import />
-          <span>Importar Dados</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Import className={`h-4 w-4 mr-2 ${currentStep === "import" ? "text-primary" : ""}`} />
+              <span>Importar Dados</span>
+            </div>
+            {currentStep === "import" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "analysis"} 
           onClick={() => handleStepClick("analysis")}
+          className={currentStep === "analysis" ? "bg-primary/10 text-primary" : ""}
         >
-          <Brain />
-          <span>Simulação Multi-Agente</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Brain className={`h-4 w-4 mr-2 ${currentStep === "analysis" ? "text-primary" : ""}`} />
+              <span>Simulação Multi-Agente</span>
+            </div>
+            {currentStep === "analysis" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "visualization"} 
           onClick={() => handleStepClick("visualization")}
+          className={currentStep === "visualization" ? "bg-primary/10 text-primary" : ""}
         >
-          <BarChart3 />
-          <span>Visualização</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <BarChart3 className={`h-4 w-4 mr-2 ${currentStep === "visualization" ? "text-primary" : ""}`} />
+              <span>Visualização</span>
+            </div>
+            {currentStep === "visualization" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "data-processing-settings"} 
           onClick={() => handleStepClick("data-processing-settings")}
+          className={currentStep === "data-processing-settings" ? "bg-primary/10 text-primary" : ""}
         >
-          <Settings className="h-4 w-4" />
-          <span>Configurações</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Settings className={`h-4 w-4 mr-2 ${currentStep === "data-processing-settings" ? "text-primary" : ""}`} />
+              <span>Configurações</span>
+            </div>
+            {currentStep === "data-processing-settings" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>
