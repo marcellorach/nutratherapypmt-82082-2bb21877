@@ -74,12 +74,86 @@ export const useOutcomes = () => {
     createMutation.mutate(data);
   }, [createMutation]);
 
+  // Mutation para atualizar outcome
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const { data: result, error } = await supabase
+        .from('health_conditions')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Outcome atualizado com sucesso."
+      });
+      queryClient.invalidateQueries({ queryKey: ['outcomes'] });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao atualizar outcome:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar outcome",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation para deletar outcome
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('health_conditions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Outcome excluído com sucesso."
+      });
+      queryClient.invalidateQueries({ queryKey: ['outcomes'] });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao excluir outcome:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir outcome",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const updateOutcome = useCallback((id: string, data: any) => {
+    updateMutation.mutate({ id, data });
+  }, [updateMutation]);
+
+  const deleteOutcome = useCallback((id: string) => {
+    deleteMutation.mutate(id);
+  }, [deleteMutation]);
+
   return {
     outcomes,
     isLoading: isQueryLoading || isLoading,
     error: queryError?.message || error,
     fetchOutcomes,
     createOutcome,
+    updateOutcome,
+    deleteOutcome,
     refetch
   };
 };

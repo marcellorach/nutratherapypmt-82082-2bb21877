@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminLayout from '@/components/administrador/AdminLayout';
 import { adminTabsConfig, getTabConfig } from '@/config/admin-tabs';
+import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 
 const AdministradorPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,11 +44,20 @@ const AdministradorPage: React.FC = () => {
 
     const Component = tabConfig.component;
 
-    return (
+    // Para tabs que precisam do NutraceuticalProvider
+    const needsProvider = ['nutraceuticos', 'nutraceu-gerenciamento'].includes(currentStep);
+
+    const componentElement = (
       <Suspense fallback={<LoadingTab />}>
         <Component />
       </Suspense>
     );
+
+    return needsProvider ? (
+      <NutraceuticalProvider>
+        {componentElement}
+      </NutraceuticalProvider>
+    ) : componentElement;
   };
   
   return (
