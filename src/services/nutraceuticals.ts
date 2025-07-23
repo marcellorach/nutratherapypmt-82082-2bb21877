@@ -1,4 +1,3 @@
-
 /**
  * Serviço consolidado para nutracêuticos
  * Centraliza todas as operações relacionadas a nutracêuticos
@@ -46,6 +45,8 @@ class NutraceuticalsService {
 
   async getAll(options: NutraceuticalQueryOptions = {}): Promise<NutraceuticalWithRelations[]> {
     try {
+      console.log('🔄 [SERVICE] Iniciando busca de nutracêuticos...');
+      
       let query = this.baseQuery();
 
       // Aplicar filtros de tipo de dados
@@ -69,16 +70,27 @@ class NutraceuticalsService {
       const { data, error } = await query;
 
       if (error) {
+        console.error('❌ [SERVICE] Erro na query:', error);
         this.handleError(error, 'buscar nutracêuticos');
       }
 
-      // Aplicar transformação dos dados usando o mapper
-      const transformedData = mapDbToUiFormat(data || []);
+      console.log('✅ [SERVICE] Dados brutos carregados:', data?.length || 0);
       
-      console.log('🔄 [SERVICE] Dados transformados:', transformedData.length, 'nutracêuticos');
+      if (!data || data.length === 0) {
+        console.log('⚠️ [SERVICE] Nenhum dado encontrado');
+        return [];
+      }
+
+      // Aplicar transformação dos dados usando o mapper
+      console.log('🔄 [SERVICE] Aplicando transformação com mapper...');
+      const transformedData = mapDbToUiFormat(data);
+      
+      console.log('✅ [SERVICE] Dados transformados:', transformedData.length, 'nutracêuticos');
+      console.log('🔍 [SERVICE] Primeiro nutracêutico transformado:', transformedData[0]);
       
       return transformedData as any;
     } catch (error) {
+      console.error('❌ [SERVICE] Exceção durante busca:', error);
       this.handleError(error, 'buscar nutracêuticos');
     }
   }

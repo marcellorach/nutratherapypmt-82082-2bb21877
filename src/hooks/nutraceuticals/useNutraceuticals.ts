@@ -45,8 +45,8 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
       
       const result = await nutraceuticalsService.getAll(queryOptions);
       
-      console.log('🔄 [HOOK] Nutracêuticos carregados:', result.length);
-      console.log('🔄 [HOOK] Primeiro nutracêutico:', result[0]);
+      console.log('✅ [HOOK] Nutracêuticos carregados:', result.length);
+      console.log('🔍 [HOOK] Primeiro nutracêutico:', result[0]);
       
       return result;
     },
@@ -186,12 +186,22 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
   );
 
   const refreshData = useCallback(() => {
+    console.log('🔄 [HOOK] Atualizando dados...');
     refetch();
     queryClient.invalidateQueries({ queryKey: ['nutraceuticals'] });
   }, [refetch, queryClient]);
 
-  const fetchNutraceuticals = useCallback(() => {
-    refetch();
+  // Função fetchNutraceuticals corrigida para ser assíncrona
+  const fetchNutraceuticals = useCallback(async () => {
+    console.log('🔄 [HOOK] Fetch nutracêuticos chamado');
+    try {
+      const result = await refetch();
+      console.log('✅ [HOOK] Fetch nutracêuticos concluído:', result.data?.length || 0);
+      return result.data || [];
+    } catch (error) {
+      console.error('❌ [HOOK] Erro no fetch nutracêuticos:', error);
+      throw error;
+    }
   }, [refetch]);
 
   return {
