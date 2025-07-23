@@ -1,9 +1,11 @@
 
 import { useMemo } from 'react';
 import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
+import { useStudies } from '@/hooks/nutraceuticals/useStudies';
 
 export const useNetworkData = () => {
   const { nutraceuticals, conditions, isLoading } = useNutraceuticalContext();
+  const { studies, isLoading: studiesLoading } = useStudies();
 
   const networkData = useMemo(() => {
     if (!nutraceuticals || !conditions) {
@@ -12,7 +14,8 @@ export const useNetworkData = () => {
 
     console.log('Processando dados do Network:', { 
       nutraceuticals: nutraceuticals.length, 
-      conditions: conditions.length 
+      conditions: conditions.length,
+      studies: studies.length
     });
 
     // Criar nós para nutracêuticos
@@ -51,25 +54,43 @@ export const useNetworkData = () => {
       }
     }));
 
-    const nodes = [...nutraceuticalNodes, ...conditionNodes];
+    // Criar nós para estudos científicos
+    const studyNodes = studies.map((study: any, index: number) => ({
+      id: `study_${index}`,
+      label: study.title.length > 30 ? study.title.substring(0, 30) + '...' : study.title,
+      title: `Estudo: ${study.title}\nJournal: ${study.journal || 'N/A'}\nAno: ${study.year || 'N/A'}`,
+      group: 'study',
+      value: 8,
+      shape: 'triangle',
+      color: {
+        background: '#a855f7',
+        border: '#9333ea',
+        highlight: {
+          background: '#c084fc',
+          border: '#a855f7'
+        }
+      }
+    }));
 
-    // Criar links baseados nas relações
+    const nodes = [...nutraceuticalNodes, ...conditionNodes, ...studyNodes];
+
+    // Criar links baseados nas relações nutracêutico-condição
     const links = [];
     
     for (let nutraIndex = 0; nutraIndex < nutraceuticals.length; nutraIndex++) {
       const nutraceutical = nutraceuticals[nutraIndex];
       const healthConditions = nutraceutical.healthConditions || [];
       
-      for (const relation of healthConditions) {
+      for (const condition of healthConditions) {
         const conditionIndex = conditions.findIndex(
-          (cond: any) => cond.id === relation.condition?.id
+          (cond: any) => cond.id === condition.id
         );
         
         if (conditionIndex !== -1) {
-          const efficacyScore = relation.efficacy_score || 0;
+          const efficacyScore = condition.efficacyScore || 0;
           
           links.push({
-            id: `link_${nutraIndex}_${conditionIndex}`,
+            id: `link_nutra_cond_${nutraIndex}_${conditionIndex}`,
             from: `nutra_${nutraIndex}`,
             to: `cond_${conditionIndex}`,
             title: `Eficácia: ${efficacyScore}/5 - ${efficacyScore >= 4 ? 'Alta' : efficacyScore >= 3 ? 'Moderada' : 'Baixa'}`,
@@ -88,15 +109,45 @@ export const useNetworkData = () => {
           });
         }
       }
+
+      // Criar links para estudos científicos
+      const nutraStudies = nutraceutical.studies || [];
+      for (const study of nutraStudies) {
+        const studyIndex = studies.findIndex(
+          (s: any) => s.id === study.id
+        );
+        
+        if (studyIndex !== -1) {
+          const relevanceScore = study.relevanceScore || 0;
+          
+          links.push({
+            id: `link_nutra_study_${nutraIndex}_${studyIndex}`,
+            from: `nutra_${nutraIndex}`,
+            to: `study_${studyIndex}`,
+            title: `Relevância: ${relevanceScore}/5`,
+            value: relevanceScore,
+            width: Math.max(1, (relevanceScore / 5) * 4),
+            color: '#a855f7',
+            dashes: [3, 3],
+            arrows: {
+              to: {
+                enabled: true,
+                scaleFactor: 0.3
+              }
+            }
+          });
+        }
+      }
     }
 
     console.log(`Criados ${links.length} links no Network`);
+    console.log(`Nós criados: ${nutraceuticalNodes.length} nutracêuticos, ${conditionNodes.length} condições, ${studyNodes.length} estudos`);
 
     return { nodes, links };
-  }, [nutraceuticals, conditions]);
+  }, [nutraceuticals, conditions, studies]);
 
   return {
     networkData,
-    isLoading
+    isLoading: isLoading || studiesLoading
   };
 };

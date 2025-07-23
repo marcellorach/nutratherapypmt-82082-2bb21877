@@ -23,6 +23,11 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
   // Verificar se há dados disponíveis
   const hasNetworkData = networkData && networkData.nodes && networkData.nodes.length > 0;
   
+  // Contar estudos científicos nos dados da rede
+  const studyCount = networkData?.nodes?.filter(
+    (node: any) => node.group === 'study' || node.id?.startsWith('study_')
+  ).length || 0;
+  
   // Mensagem se não houver dados
   const NoDataMessage = () => (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -61,9 +66,7 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
                 <span className="font-medium text-primary"> {networkData.links.length}</span> conexões
               </div>
               <div className="bg-gray-50 px-3 py-1 rounded-md border text-xs">
-                Os dados incluem <span className="font-semibold">{
-                  networkData.nodes.filter(n => n.type === 'study' || n.category === 'study').length
-                }</span> estudos científicos
+                Os dados incluem <span className="font-semibold">{studyCount}</span> estudos científicos
               </div>
             </div>
             <NetworkGraph data={networkData} height="550px" />
