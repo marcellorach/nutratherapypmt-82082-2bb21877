@@ -27,32 +27,31 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
 
   return (
     <Sidebar 
-      variant="inset" 
-      collapsible="icon"
+      variant="sidebar" 
+      collapsible="offcanvas"
+      className="border-r border-sidebar-border"
     >
-      <SidebarHeader className="p-4 pb-2">
+      <SidebarHeader className="p-4 pb-2 border-b border-sidebar-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Área de P&D</h2>
-          <SidebarTrigger />
+          <h2 className="text-lg font-semibold text-sidebar-foreground">Área de P&D</h2>
+          <SidebarTrigger className="h-8 w-8" />
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="px-2 py-4">
         <AdminSidebarGroups currentStep={currentStep} setCurrentStep={setCurrentStep} />
       </SidebarContent>
       
-      <SidebarFooter>
-        <div className="p-4">
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            size="sm"
-            onClick={handleSettingsClick}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Configurações
-          </Button>
-        </div>
+      <SidebarFooter className="p-4 border-t border-sidebar-border">
+        <Button 
+          variant="outline" 
+          className="w-full justify-start" 
+          size="sm"
+          onClick={handleSettingsClick}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Configurações
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
