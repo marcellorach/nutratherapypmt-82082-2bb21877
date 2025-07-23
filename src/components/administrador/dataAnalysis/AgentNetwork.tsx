@@ -1,5 +1,6 @@
 import React from 'react';
 import { AgentConnection } from './types';
+import { agents, agentPositions } from './agentData';
 
 interface AgentNetworkProps {
   connections: AgentConnection[];
@@ -7,19 +8,19 @@ interface AgentNetworkProps {
 }
 
 const AgentNetwork: React.FC<AgentNetworkProps> = ({ connections, activeAgent }) => {
-  const agents = [
-    { id: 'nutri-analyzer', name: 'Nutri Analyzer', x: 100, y: 100 },
-    { id: 'health-predictor', name: 'Health Predictor', x: 300, y: 100 },
-    { id: 'treatment-optimizer', name: 'Treatment Optimizer', x: 200, y: 250 },
-  ];
+  const agentsList = agents.map(agent => ({
+    ...agent,
+    x: agentPositions[agent.id]?.x * 4 || 100, // Multiply by 4 to fit the SVG viewport
+    y: agentPositions[agent.id]?.y * 4 || 100
+  }));
 
   return (
     <div className="relative w-full h-full bg-gray-50 rounded-lg border overflow-hidden">
       <svg width="100%" height="100%" className="absolute inset-0">
         {/* Connections */}
         {connections.map((conn, idx) => {
-          const fromAgent = agents.find(a => a.id === conn.from);
-          const toAgent = agents.find(a => a.id === conn.to);
+          const fromAgent = agentsList.find(a => a.id === conn.from);
+          const toAgent = agentsList.find(a => a.id === conn.to);
           if (!fromAgent || !toAgent) return null;
           
           return (
@@ -37,7 +38,7 @@ const AgentNetwork: React.FC<AgentNetworkProps> = ({ connections, activeAgent })
         })}
         
         {/* Agent nodes */}
-        {agents.map(agent => (
+        {agentsList.map(agent => (
           <g key={agent.id}>
             <circle
               cx={agent.x}
