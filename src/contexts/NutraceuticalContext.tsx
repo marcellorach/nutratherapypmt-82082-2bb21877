@@ -6,18 +6,19 @@ interface NutraceuticalContextType {
   nutraceuticals: any[];
   outcomes: any[];
   conditions: any[];
+  ingredients: any[];
   studies: any[];
   isLoading: boolean;
   error: string | null;
   refreshData: () => void;
-  createNutraceutical: (data: any) => Promise<any>;
-  updateNutraceutical: (id: string, data: any) => Promise<any>;
-  deleteNutraceutical: (id: string) => Promise<void>;
-  createOutcome: (data: any) => Promise<any>;
-  createCondition: (data: any) => Promise<any>;
-  createStudy: (data: any) => Promise<any>;
-  associateStudyToNutraceutical: (nutraceuticalId: string, studyId: string) => Promise<void>;
-  associateNutraceuticalToCondition: (nutraceuticalId: string, conditionId: string) => Promise<void>;
+  createNutraceutical: (data: any) => void;
+  updateNutraceutical: (id: string, data: any) => void;
+  deleteNutraceutical: (id: string) => void;
+  createOutcome: (data: any) => void;
+  createCondition: (data: any) => void;
+  createStudy: (data: any) => void;
+  associateStudyToNutraceutical: (studyId: string, nutraceuticalId: string, relevanceScore: number) => Promise<any>;
+  associateNutraceuticalToCondition: (nutraceuticalId: string, conditionId: string, relationshipType: "prevention" | "treatment" | "support", efficacyScore: number, notes?: string) => Promise<any>;
 }
 
 const NutraceuticalContext = createContext<NutraceuticalContextType | undefined>(undefined);
