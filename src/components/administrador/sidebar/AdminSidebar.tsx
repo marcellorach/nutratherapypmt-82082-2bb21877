@@ -5,7 +5,6 @@ import {
   SidebarContent, 
   SidebarFooter,
   SidebarHeader, 
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,14 +26,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
 
   return (
     <Sidebar 
-      variant="inset" 
-      collapsible="icon"
+      variant="sidebar"
+      collapsible="offcanvas"
     >
       <SidebarHeader className="p-4 pb-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Área de P&D</h2>
-          <SidebarTrigger />
-        </div>
+        <h2 className="text-lg font-semibold">Área de P&D</h2>
       </SidebarHeader>
       
       <SidebarContent>
