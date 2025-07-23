@@ -129,8 +129,8 @@ const RelationsTab: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {matrixData?.cells?.length > 0 
-                ? Math.round(matrixData.cells.reduce((acc, cell) => acc + cell.efficacyScore, 0) / matrixData.cells.length)
-                : 0}%
+                ? (matrixData.cells.reduce((acc, cell) => acc + cell.efficacyScore, 0) / matrixData.cells.length).toFixed(1)
+                : 0}/5
             </div>
             <p className="text-xs text-muted-foreground">
               Score médio
@@ -159,9 +159,9 @@ const RelationsTab: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as eficácias</SelectItem>
-                  <SelectItem value="high">Alta eficácia (80-100%)</SelectItem>
-                  <SelectItem value="medium">Média eficácia (60-79%)</SelectItem>
-                  <SelectItem value="low">Baixa eficácia (0-59%)</SelectItem>
+                  <SelectItem value="high">Alta eficácia (4-5)</SelectItem>
+                  <SelectItem value="medium">Média eficácia (3-4)</SelectItem>
+                  <SelectItem value="low">Baixa eficácia (0-3)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -190,7 +190,7 @@ const RelationsTab: React.FC = () => {
             
             <TabsContent value="network" className="mt-4">
               <div className="h-[600px] border rounded-lg">
-                <NetworkGraph data={networkData} />
+                <NetworkGraph data={networkData} showControls={true} showLegend={true} />
               </div>
             </TabsContent>
             

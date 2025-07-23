@@ -10,6 +10,11 @@ export const useNetworkData = () => {
       return { nodes: [], links: [] };
     }
 
+    console.log('Processando dados do Network:', { 
+      nutraceuticals: nutraceuticals.length, 
+      conditions: conditions.length 
+    });
+
     // Criar nós para nutracêuticos
     const nutraceuticalNodes = nutraceuticals.map((nutra: any, index: number) => ({
       id: `nutra_${index}`,
@@ -53,7 +58,7 @@ export const useNetworkData = () => {
     
     for (let nutraIndex = 0; nutraIndex < nutraceuticals.length; nutraIndex++) {
       const nutraceutical = nutraceuticals[nutraIndex];
-      const healthConditions = nutraceutical.nutraceutical_health_conditions || [];
+      const healthConditions = nutraceutical.healthConditions || [];
       
       for (const relation of healthConditions) {
         const conditionIndex = conditions.findIndex(
@@ -62,19 +67,18 @@ export const useNetworkData = () => {
         
         if (conditionIndex !== -1) {
           const efficacyScore = relation.efficacy_score || 0;
-          const value = efficacyScore * 20; // Converter para escala 0-100
           
           links.push({
             id: `link_${nutraIndex}_${conditionIndex}`,
             from: `nutra_${nutraIndex}`,
             to: `cond_${conditionIndex}`,
-            title: `Eficácia: ${value}/100 - ${efficacyScore >= 4 ? 'Alta' : efficacyScore >= 3 ? 'Moderada' : 'Baixa'}`,
-            value: value / 20,
-            width: Math.max(2, (value / 100) * 7),
-            label: value.toString(),
-            color: value >= 80 ? '#10b981' : 
-                   value >= 60 ? '#3b82f6' : 
-                   value >= 40 ? '#f59e0b' : '#9ca3af',
+            title: `Eficácia: ${efficacyScore}/5 - ${efficacyScore >= 4 ? 'Alta' : efficacyScore >= 3 ? 'Moderada' : 'Baixa'}`,
+            value: efficacyScore,
+            width: Math.max(2, (efficacyScore / 5) * 7),
+            label: efficacyScore.toString(),
+            color: efficacyScore >= 4 ? '#10b981' : 
+                   efficacyScore >= 3 ? '#3b82f6' : 
+                   efficacyScore >= 2 ? '#f59e0b' : '#9ca3af',
             arrows: {
               to: {
                 enabled: true,
@@ -85,6 +89,8 @@ export const useNetworkData = () => {
         }
       }
     }
+
+    console.log(`Criados ${links.length} links no Network`);
 
     return { nodes, links };
   }, [nutraceuticals, conditions]);

@@ -32,6 +32,11 @@ export const useEfficacyMatrixData = () => {
   const processedData = useMemo(() => {
     if (!nutraceuticals || !conditions) return null;
 
+    console.log('Processando dados da matriz:', { 
+      nutraceuticals: nutraceuticals.length, 
+      conditions: conditions.length 
+    });
+
     // Mapear nutracêuticos para o formato da matriz
     const nutraceuticos = nutraceuticals.map((nutra: any, index: number) => ({
       id: index,
@@ -54,8 +59,10 @@ export const useEfficacyMatrixData = () => {
     for (let i = 0; i < nutraceuticals.length; i++) {
       const nutraceutical = nutraceuticals[i];
       
-      // Verificar se há relações com condições
-      const healthConditions = nutraceutical.nutraceutical_health_conditions || [];
+      // Usar as relações já mapeadas pelo mapper (healthConditions)
+      const healthConditions = nutraceutical.healthConditions || [];
+      
+      console.log(`Nutracêutico ${nutraceutical.name} tem ${healthConditions.length} condições`);
       
       for (const relation of healthConditions) {
         const conditionIndex = conditions.findIndex(
@@ -64,12 +71,13 @@ export const useEfficacyMatrixData = () => {
         
         if (conditionIndex !== -1) {
           const efficacyScore = relation.efficacy_score || 0;
-          const studyCount = nutraceutical.nutraceutical_studies?.length || 0;
+          const studyCount = nutraceutical.studies?.length || 0;
           
+          // Manter a escala 0-5 original
           cells.push({
             nutraceuticoId: i,
             condicaoId: conditionIndex + nutraceuticos.length,
-            efficacyScore: efficacyScore * 20, // Converter para escala 0-100
+            efficacyScore, // Não multiplicar por 20
             evidenceLevel: efficacyScore >= 4 ? '4.0' : efficacyScore >= 3 ? '3.0' : '2.0',
             studyCount,
             description: relation.notes || `Eficácia: ${efficacyScore}/5`
@@ -77,6 +85,8 @@ export const useEfficacyMatrixData = () => {
         }
       }
     }
+
+    console.log(`Criadas ${cells.length} células na matriz`);
 
     return {
       nutraceuticos,

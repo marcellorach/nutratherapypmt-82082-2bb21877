@@ -11,6 +11,11 @@ export const useSankeyData = () => {
       return { nodes: [], links: [] };
     }
 
+    console.log('Processando dados do Sankey:', { 
+      nutraceuticals: nutraceuticals.length, 
+      conditions: conditions.length 
+    });
+
     // Criar nós para nutracêuticos
     const nutraceuticalNodes = nutraceuticals.map((nutra: any) => ({
       name: nutra.name,
@@ -32,7 +37,7 @@ export const useSankeyData = () => {
     
     for (let nutraIndex = 0; nutraIndex < nutraceuticals.length; nutraIndex++) {
       const nutraceutical = nutraceuticals[nutraIndex];
-      const healthConditions = nutraceutical.nutraceutical_health_conditions || [];
+      const healthConditions = nutraceutical.healthConditions || [];
       
       for (const relation of healthConditions) {
         const conditionIndex = conditions.findIndex(
@@ -41,12 +46,15 @@ export const useSankeyData = () => {
         
         if (conditionIndex !== -1) {
           const efficacyScore = relation.efficacy_score || 0;
-          const studyCount = nutraceutical.nutraceutical_studies?.length || 0;
+          const studyCount = nutraceutical.studies?.length || 0;
+          
+          // Usar a escala 0-5 original para cálculos
+          const normalizedValue = (efficacyScore / 5) * 100; // Para visualização
           
           links.push({
             source: nutraIndex,
             target: nutraceuticals.length + conditionIndex,
-            value: efficacyScore * 20, // Converter para escala 0-100
+            value: normalizedValue,
             labelText: efficacyScore >= 4 ? 'Alta eficácia' : 
                       efficacyScore >= 3 ? 'Eficácia moderada' : 'Eficácia baixa',
             studyCount,
@@ -58,6 +66,8 @@ export const useSankeyData = () => {
         }
       }
     }
+
+    console.log(`Criados ${links.length} links no Sankey`);
 
     return { nodes, links };
   }, [nutraceuticals, conditions]);
