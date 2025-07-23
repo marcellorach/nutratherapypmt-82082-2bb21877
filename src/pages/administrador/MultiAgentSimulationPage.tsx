@@ -236,7 +236,11 @@ const MultiAgentSimulationPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="h-96">
-                <MessageLog messages={messages} />
+                <MessageLog 
+                  messages={messages} 
+                  step={step}
+                  isPaused={isPaused}
+                />
               </div>
             </CardContent>
           </Card>
