@@ -6,7 +6,13 @@ import { Nutraceutical } from "@/types";
  */
 export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
   console.log('🔍 [MAPPER] Total de itens recebidos:', dbItems?.length);
-  console.log('🔍 [MAPPER] Primeiro item completo:', JSON.stringify(dbItems?.[0], null, 2));
+  
+  if (!dbItems || dbItems.length === 0) {
+    console.log('🔍 [MAPPER] Nenhum item para processar');
+    return [];
+  }
+  
+  console.log('🔍 [MAPPER] Primeiro item completo:', JSON.stringify(dbItems[0], null, 2));
   
   // Verificar se já processamos algum item para evitar duplicações
   const processedIds = new Set<string>();

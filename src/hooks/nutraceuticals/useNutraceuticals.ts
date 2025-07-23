@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { nutraceuticalsService } from '@/services/nutraceuticals';
@@ -41,7 +40,15 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
         filters,
         includeRelations: true
       };
-      return nutraceuticalsService.getAll(queryOptions);
+      
+      console.log('🔄 [HOOK] Carregando nutracêuticos com opções:', queryOptions);
+      
+      const result = await nutraceuticalsService.getAll(queryOptions);
+      
+      console.log('🔄 [HOOK] Nutracêuticos carregados:', result.length);
+      console.log('🔄 [HOOK] Primeiro nutracêutico:', result[0]);
+      
+      return result;
     },
     enabled: enabledQuery,
     refetchInterval: autoRefresh ? 30000 : false,

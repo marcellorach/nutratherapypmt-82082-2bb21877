@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { mapDbToUiFormat } from '@/utils/nutraceuticals-mapper';
 import { 
   NutraceuticalWithRelations, 
   NutraceuticalCore, 
@@ -22,7 +23,7 @@ class NutraceuticalsService {
         *,
         nutraceutical_benefits(id, benefit),
         nutraceutical_scientific_metadata(*),
-        nutraceutical_health_conditions:nutraceutical_conditions(
+        nutraceutical_conditions(
           id, 
           relationship_type,
           efficacy_score,
@@ -33,7 +34,8 @@ class NutraceuticalsService {
           id,
           relevance_score,
           study:scientific_studies(*)
-        )
+        ),
+        outcome:nutraceutical_outcomes(id, name, description)
       `);
   }
 
@@ -70,7 +72,12 @@ class NutraceuticalsService {
         this.handleError(error, 'buscar nutracêuticos');
       }
 
-      return (data || []) as any;
+      // Aplicar transformação dos dados usando o mapper
+      const transformedData = mapDbToUiFormat(data || []);
+      
+      console.log('🔄 [SERVICE] Dados transformados:', transformedData.length, 'nutracêuticos');
+      
+      return transformedData as any;
     } catch (error) {
       this.handleError(error, 'buscar nutracêuticos');
     }
@@ -84,7 +91,14 @@ class NutraceuticalsService {
         this.handleError(error, 'buscar nutracêutico');
       }
 
-      return (data || null) as any;
+      if (!data) {
+        return null;
+      }
+
+      // Aplicar transformação dos dados usando o mapper
+      const transformedData = mapDbToUiFormat([data]);
+      
+      return transformedData[0] as any || null;
     } catch (error) {
       this.handleError(error, 'buscar nutracêutico');
     }

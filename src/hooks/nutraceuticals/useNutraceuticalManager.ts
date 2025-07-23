@@ -74,7 +74,7 @@ export const useNutraceuticalManager = () => {
   // Carregar todos os dados
   useEffect(() => {
     const loadAllData = async () => {
-      console.log('Carregando todos os dados...');
+      console.log('🔄 [MANAGER] Carregando todos os dados...');
       try {
         // Aguardar todas as operações de carregamento
         await Promise.allSettled([
@@ -84,20 +84,32 @@ export const useNutraceuticalManager = () => {
           fetchIngredients(),
           fetchStudies()
         ]);
-        console.log('Todos os dados carregados com sucesso');
+        console.log('✅ [MANAGER] Todos os dados carregados com sucesso');
       } catch (err) {
-        console.error('Erro ao carregar dados:', err);
+        console.error('❌ [MANAGER] Erro ao carregar dados:', err);
       }
     };
     
     loadAllData();
-  }, [refreshTrigger, fetchNutraceuticals, fetchOutcomes, fetchConditions, fetchIngredients, fetchStudies]);
+  }, [refreshTrigger]);
   
   // Função para atualizar todos os dados
   const refreshAllData = () => {
-    console.log('Atualizando todos os dados...');
+    console.log('🔄 [MANAGER] Atualizando todos os dados...');
     setRefreshTrigger(prev => prev + 1);
   };
+
+  // Log dos dados carregados para debug
+  useEffect(() => {
+    console.log('📊 [MANAGER] Status dos dados:', {
+      nutraceuticals: nutraceuticals.length,
+      outcomes: outcomes.length,
+      conditions: conditions.length,
+      ingredients: ingredients.length,
+      studies: studies.length,
+      isLoading
+    });
+  }, [nutraceuticals, outcomes, conditions, ingredients, studies, isLoading]);
 
   return {
     // Dados
