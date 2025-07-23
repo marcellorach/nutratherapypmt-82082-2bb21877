@@ -6,12 +6,14 @@ interface AdminContentProps {
   children: React.ReactNode;
 }
 
-const AdminContent: React.FC<AdminContentProps> = ({ children }) => {
+const AdminContent = ({ children }: AdminContentProps) => {
   return (
     <SidebarInset>
-      <main className="flex-1 flex flex-col min-h-0">
-        <div className="flex-1 overflow-auto p-6">
-          {children}
+      <main className="flex-1 flex flex-col min-h-0 w-full">
+        <div className="flex-1 overflow-hidden p-6 w-full">
+          <div className="w-full max-w-full overflow-x-hidden">
+            {children}
+          </div>
         </div>
       </main>
     </SidebarInset>

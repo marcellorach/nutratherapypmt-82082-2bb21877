@@ -3,13 +3,14 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { NutraceuticalCondition } from "@/types";
 import { TrendingUp } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface HealthConditionTagsProps {
   conditions: NutraceuticalCondition[];
   onConditionClick: (condition: NutraceuticalCondition) => void;
 }
 
-const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({ 
+const HealthConditionTags = ({ 
   conditions,
   onConditionClick
 }) => {
@@ -33,42 +34,89 @@ const HealthConditionTags: React.FC<HealthConditionTagsProps> = ({
   if (!conditions || conditions.length === 0) {
     console.log('🏷️ [TAGS] Nenhuma condição para exibir');
     return (
-      <div className="flex flex-wrap gap-1">
-        <span className="text-gray-400 text-sm">Nenhuma condição</span>
+      <div className="flex items-center justify-center h-8">
+        <span className="text-gray-400 text-xs">Nenhuma condição</span>
       </div>
     );
   }
 
   console.log('🏷️ [TAGS] Renderizando', conditions.length, 'condições');
 
+  // Limitar a 3 condições visíveis + indicador se houver mais
+  const visibleConditions = conditions.slice(0, 3);
+  const hasMore = conditions.length > 3;
+
   return (
-    <div className="flex flex-wrap gap-1">
-      {conditions.map((condition, index) => {
+    <div className="flex flex-wrap gap-1 max-w-full">
+      {visibleConditions.map((condition, index) => {
         console.log(`🏷️ [TAGS] Renderizando condição ${index}:`, condition);
         
+        const truncatedName = condition.name.length > 15 
+          ? `${condition.name.substring(0, 15)}...` 
+          : condition.name;
+        
         return (
-          <Badge 
-            key={`${condition.id || condition.name}-${index}`}
-            variant="outline" 
-            className={`cursor-pointer transition-colors ${getEfficacyColor(condition.efficacyScore)} flex items-center`}
-            onClick={() => onConditionClick(condition)}
-          >
-            <div className="flex items-center space-x-1">
-              <span className="text-gray-800 font-normal">{condition.name}</span>
-              <div className="flex items-center ml-2">
-                <TrendingUp 
-                  size={14} 
-                  className={`mr-1 opacity-70 ${getIconColor(condition.efficacyScore)}`} 
-                  strokeWidth={2}
-                />
-                <span className="text-xs font-light text-black/70">
-                  {condition.efficacyScore.toFixed(1)}/5
-                </span>
-              </div>
-            </div>
-          </Badge>
+          <TooltipProvider key={`${condition.id || condition.name}-${index}`}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant="outline" 
+                  className={`cursor-pointer transition-colors text-xs px-2 py-1 ${getEfficacyColor(condition.efficacyScore)} flex items-center max-w-[140px]`}
+                  onClick={() => onConditionClick(condition)}
+                >
+                  <div className="flex items-center space-x-1 min-w-0">
+                    <span className="text-gray-800 font-normal truncate">{truncatedName}</span>
+                    <div className="flex items-center flex-shrink-0">
+                      <TrendingUp 
+                        size={12} 
+                        className={`${getIconColor(condition.efficacyScore)}`} 
+                        strokeWidth={2}
+                      />
+                      <span className="text-xs font-light text-black/70 ml-1">
+                        {condition.efficacyScore.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="max-w-xs">
+                  <p className="font-medium">{condition.name}</p>
+                  <p className="text-xs mt-1">Eficácia: {condition.efficacyScore.toFixed(1)}/5</p>
+                  {condition.description && (
+                    <p className="text-xs mt-1 text-gray-600">{condition.description}</p>
+                  )}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       })}
+      
+      {hasMore && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge 
+                variant="outline" 
+                className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-xs px-2 py-1"
+              >
+                +{conditions.length - 3}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="max-w-xs">
+                <p className="font-medium">Condições adicionais:</p>
+                <ul className="text-xs mt-1">
+                  {conditions.slice(3).map((condition, index) => (
+                    <li key={index} className="truncate">• {condition.name}</li>
+                  ))}
+                </ul>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 };

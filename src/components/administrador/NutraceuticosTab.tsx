@@ -78,10 +78,10 @@ const NutraceuticosTab = () => {
   };
 
   return (
-    <>
+    <div className="w-full max-w-full overflow-hidden">
       <NutraceuticosHeader />
       
-      <div className="bg-white rounded-md shadow mb-6">
+      <div className="bg-white rounded-md shadow mb-6 w-full max-w-full">
         <SearchFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -98,7 +98,7 @@ const NutraceuticosTab = () => {
           }}
         />
         
-        <div className="p-6">
+        <div className="p-6 w-full max-w-full">
           <EvidenceLegendPanel />
           
           {isLoading ? (
@@ -108,11 +108,13 @@ const NutraceuticosTab = () => {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
-            <NutraceuticosExpandableTable 
-              nutraceuticals={filteredNutraceuticals}
-              onEditClick={handleEditClick}
-              onConditionClick={handleConditionClick}
-            />
+            <div className="w-full max-w-full overflow-hidden">
+              <NutraceuticosExpandableTable 
+                nutraceuticals={filteredNutraceuticals}
+                onEditClick={handleEditClick}
+                onConditionClick={handleConditionClick}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -124,7 +126,7 @@ const NutraceuticosTab = () => {
         nutraceutical={selectedNutraceutical}
         onSuccess={handleEditDialogClose}
       />
-    </>
+    </div>
   );
 };
 
