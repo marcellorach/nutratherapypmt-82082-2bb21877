@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { AgentConnection, AgentMessage, DataPacket, AnalysisStep } from './types';
 import { agents, createInitialConnections } from './agentData';
