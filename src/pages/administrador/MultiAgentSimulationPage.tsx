@@ -9,12 +9,13 @@ import { ArrowLeft, Play, Pause, Brain, Database, Network, BarChart3 } from "luc
 import { useAnalysisSimulation } from '@/components/administrador/dataAnalysis/useAnalysisSimulation';
 import AgentNetwork from '@/components/administrador/dataAnalysis/AgentNetwork';
 import MessageLog from '@/components/administrador/dataAnalysis/MessageLog';
+import AdminLayout from '@/components/administrador/AdminLayout';
 
 const MultiAgentSimulationPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(3);
-  const [showCountdown, setShowCountdown] = useState(true);
+  const [countdown, setCountdown] = useState(0);
+  const [isCountingDown, setIsCountingDown] = useState(false);
   
   const importStats = location.state?.importStats || {
     totalRecords: 0,
@@ -36,75 +37,75 @@ const MultiAgentSimulationPage: React.FC = () => {
     pauseAnalysis
   } = useAnalysisSimulation();
 
-  // Contagem regressiva e início automático
+  // Contagem regressiva integrada no botão
   useEffect(() => {
-    if (showCountdown && countdown > 0) {
+    if (isCountingDown && countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(prev => prev - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (showCountdown && countdown === 0) {
-      setShowCountdown(false);
+    } else if (isCountingDown && countdown === 0) {
+      setIsCountingDown(false);
       simulateAnalysis();
     }
-  }, [countdown, showCountdown, simulateAnalysis]);
+  }, [countdown, isCountingDown, simulateAnalysis]);
 
-  const handleBack = () => {
-    navigate('/administrador?tab=analysis');
-  };
-
-  const handleToggleAnalysis = () => {
+  const handleStartAnalysis = () => {
     if (analyzing && !isPaused) {
       pauseAnalysis();
-    } else {
+    } else if (isPaused) {
       simulateAnalysis();
+    } else {
+      setIsCountingDown(true);
+      setCountdown(3);
     }
   };
 
-  if (showCountdown) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-8">
-            <Brain className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Simulação Multi-Agente</h1>
-            <p className="text-gray-600">Preparando análise inteligente dos dados importados</p>
-          </div>
-          
-          <div className="bg-white rounded-lg p-8 shadow-lg border">
-            <div className="text-6xl font-bold text-purple-600 mb-4">
-              {countdown}
-            </div>
-            <p className="text-lg text-gray-600">Iniciando análise automaticamente...</p>
-            <div className="mt-6 space-y-2">
-              <div className="text-sm text-gray-500">
-                Pets elegíveis para análise: <span className="font-medium">{importStats.eligiblePets}</span>
-              </div>
-              <div className="text-sm text-gray-500">
-                Exames disponíveis: <span className="font-medium">{importStats.examsImported}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const getButtonText = () => {
+    if (isCountingDown) {
+      return `Iniciando em ${countdown}...`;
+    }
+    if (analyzing && !isPaused) {
+      return 'Pausar';
+    }
+    if (isPaused) {
+      return 'Continuar';
+    }
+    return 'Iniciar Análise';
+  };
+
+  const getButtonIcon = () => {
+    if (isCountingDown) {
+      return <Brain className="h-4 w-4 animate-pulse" />;
+    }
+    if (analyzing && !isPaused) {
+      return <Pause className="h-4 w-4" />;
+    }
+    return <Play className="h-4 w-4" />;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <AdminLayout 
+      currentStep="analysis" 
+      setCurrentStep={() => navigate('/administrador?tab=analysis')}
+    >
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/administrador?tab=analysis')} 
+              className="flex items-center gap-2"
+            >
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>
             <div className="flex items-center gap-3">
               <Brain className="h-6 w-6 text-purple-600" />
               <div>
-                <h1 className="text-xl font-bold">Simulação Multi-Agente</h1>
-                <p className="text-sm text-gray-600">
+                <h1 className="text-2xl font-bold">Simulação Multi-Agente</h1>
+                <p className="text-gray-600">
                   Análise inteligente de {importStats.eligiblePets} pets com dados correlacionados
                 </p>
               </div>
@@ -115,29 +116,19 @@ const MultiAgentSimulationPage: React.FC = () => {
               SIMULAÇÃO IA
             </Badge>
             <Button
-              onClick={handleToggleAnalysis}
+              onClick={handleStartAnalysis}
               variant={analyzing && !isPaused ? "secondary" : "default"}
               className="flex items-center gap-2"
+              disabled={isCountingDown}
             >
-              {analyzing && !isPaused ? (
-                <>
-                  <Pause className="h-4 w-4" />
-                  Pausar
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4" />
-                  {isPaused ? 'Continuar' : 'Iniciar'}
-                </>
-              )}
+              {getButtonIcon()}
+              {getButtonText()}
             </Button>
           </div>
         </div>
-      </div>
 
-      <div className="p-6">
         {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -198,7 +189,7 @@ const MultiAgentSimulationPage: React.FC = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-6 bg-white p-4 rounded-lg border">
+        <div className="bg-white p-4 rounded-lg border">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Progresso da Análise</span>
             <span className="text-sm text-gray-500">{Math.round(progress)}%</span>
@@ -246,7 +237,7 @@ const MultiAgentSimulationPage: React.FC = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
