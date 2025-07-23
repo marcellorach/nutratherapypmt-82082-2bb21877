@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -6,7 +5,6 @@ import { Import, Database, CheckCircle, X, ArrowRight, Heart, Stethoscope, Store
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
 const ImportStep: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -18,16 +16,13 @@ const ImportStep: React.FC = () => {
     examsImported: 0,
     eligiblePets: 0
   });
-  
   const simulateImport = () => {
     setImporting(true);
     setStatus('importing');
     setProgress(0);
-    
     const interval = setInterval(() => {
       setProgress(prev => {
         const newProgress = prev + Math.random() * 10;
-        
         if (newProgress >= 100) {
           clearInterval(interval);
           setImporting(false);
@@ -41,14 +36,11 @@ const ImportStep: React.FC = () => {
           });
           return 100;
         }
-        
         return newProgress;
       });
     }, 200);
   };
-  
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -65,17 +57,14 @@ const ImportStep: React.FC = () => {
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Importação do PetLove</h3>
-            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-              <Heart className="h-6 w-6 text-red-600" />
-            </div>
+            
           </div>
           
           <p className="mb-6 text-sm text-gray-600">
             Importe dados de pets, tutores, exames e tratamentos do sistema PetLove para análise em massa.
           </p>
           
-          {status === 'success' ? (
-            <Alert className="mb-4 bg-green-50">
+          {status === 'success' ? <Alert className="mb-4 bg-green-50">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <AlertTitle>Importação concluída com sucesso</AlertTitle>
               <AlertDescription>
@@ -120,46 +109,33 @@ const ImportStep: React.FC = () => {
                   </div>
                 </div>
               </AlertDescription>
-            </Alert>
-          ) : status === 'error' ? (
-            <Alert className="mb-4 bg-red-50" variant="destructive">
+            </Alert> : status === 'error' ? <Alert className="mb-4 bg-red-50" variant="destructive">
               <X className="h-5 w-5" />
               <AlertTitle>Erro na importação</AlertTitle>
               <AlertDescription>
                 Ocorreu um erro durante a importação dos dados. Tente novamente.
               </AlertDescription>
-            </Alert>
-          ) : null}
+            </Alert> : null}
           
-          {status === 'importing' && (
-            <div className="mb-4 space-y-2">
+          {status === 'importing' && <div className="mb-4 space-y-2">
               <Progress value={progress} className="h-2 w-full" />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Importando...</span>
                 <span>{Math.round(progress)}%</span>
               </div>
-            </div>
-          )}
+            </div>}
           
-          <Button 
-            onClick={simulateImport}
-            disabled={importing}
-            className="w-full"
-          >
-            {importing ? (
-              <span className="flex items-center">
+          <Button onClick={simulateImport} disabled={importing} className="w-full">
+            {importing ? <span className="flex items-center">
                 <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Importando...
-              </span>
-            ) : (
-              <>
+              </span> : <>
                 <Import className="mr-2 h-4 w-4" />
                 {status === 'success' ? 'Importar Novamente' : 'Iniciar Importação'}
-              </>
-            )}
+              </>}
           </Button>
         </div>
         
@@ -208,8 +184,6 @@ const ImportStep: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ImportStep;
