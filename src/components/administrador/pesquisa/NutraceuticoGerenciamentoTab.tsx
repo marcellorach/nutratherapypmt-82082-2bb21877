@@ -1,10 +1,13 @@
 
 import React, { useState } from 'react';
-import { useNutraceuticalManager } from '@/hooks/nutraceuticals/useNutraceuticalManager';
+import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { useToast } from '@/hooks/use-toast';
 
-// Componentes refatorados
+// Componentes comuns
+import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
+
+// Componentes específicos
 import PageHeader from './nutraceuticoGerenciamento/PageHeader';
 import NutraceuticalTable from './nutraceuticoGerenciamento/NutraceuticalTable';
 import StatisticsPanel from './nutraceuticoGerenciamento/StatisticsPanel';
@@ -12,9 +15,7 @@ import LastUpdatePanel from './nutraceuticoGerenciamento/LastUpdatePanel';
 import ActionPanel from './nutraceuticoGerenciamento/ActionPanel';
 import MigratorDialog from './nutraceuticoGerenciamento/MigratorDialog';
 import DeleteDialog from './nutraceuticoGerenciamento/DeleteDialog';
-import AddNutraceuticalDialog from './nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog';
 
-// Componente principal
 const NutraceuticoGerenciamentoTab: React.FC = () => {
   const {
     nutraceuticals,
@@ -25,7 +26,7 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     error,
     refreshData,
     deleteNutraceutical
-  } = useNutraceuticalManager();
+  } = useNutraceuticalContext();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
@@ -34,18 +35,15 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
   const [migrationResult, setMigrationResult] = useState<any>(null);
   const [hasMigratedData, setHasMigratedData] = useState(nutraceuticals.length > 0);
 
-  // Estado para diálogo de confirmação de exclusão
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [nutraceuticalToDelete, setNutraceuticalToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Estado para diálogo de edição
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
   
   const { toast } = useToast();
   
-  // Função para filtrar nutracêuticos
   const filteredNutraceuticals = nutraceuticals.filter(nutra => {
     const matchesSearch = searchTerm === '' || 
       nutra.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,19 +55,16 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     return matchesSearch && matchesOutcome;
   });
 
-  // Função para iniciar o processo de edição
   const handleEditClick = (nutra: any) => {
     setSelectedNutraceutical(nutra);
     setEditDialogOpen(true);
   };
 
-  // Função para iniciar o processo de exclusão
   const handleDeleteClick = (nutraId: string) => {
     setNutraceuticalToDelete(nutraId);
     setDeleteDialogOpen(true);
   };
 
-  // Função para confirmar e executar a exclusão
   const confirmDelete = async () => {
     if (!nutraceuticalToDelete) return;
 
@@ -93,7 +88,6 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     }
   };
   
-  // Função para executar a migração
   const handleStartMigration = async () => {
     setIsMigrating(true);
     try {
@@ -131,13 +125,11 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     }
   };
   
-  // Renderização com componentes refatorados
   return (
     <div className="space-y-6">
       <PageHeader />
       
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Painel principal */}
         <div className="w-full lg:w-2/3 space-y-4">
           <NutraceuticalTable 
             nutraceuticals={nutraceuticals}
@@ -154,7 +146,6 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
           />
         </div>
         
-        {/* Painel lateral */}
         <div className="w-full lg:w-1/3 space-y-4">
           <StatisticsPanel 
             nutraceuticals={nutraceuticals}
@@ -170,7 +161,6 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
         </div>
       </div>
       
-      {/* Diálogos */}
       <MigratorDialog 
         open={isMigratorDialogOpen}
         onOpenChange={setIsMigratorDialogOpen}
@@ -186,18 +176,18 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
         onConfirmDelete={confirmDelete}
       />
       
-      {/* Diálogo de edição */}
-      {selectedNutraceutical && (
-        <AddNutraceuticalDialog
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          nutraceutical={selectedNutraceutical}
-          onSuccess={() => {
-            setEditDialogOpen(false);
-            refreshData();
-          }}
-        />
-      )}
+      {/* Diálogo de edição usando o componente unificado */}
+      <NutraceuticalCRUDDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        nutraceutical={selectedNutraceutical}
+        onSuccess={() => {
+          setEditDialogOpen(false);
+          setSelectedNutraceutical(null);
+          refreshData();
+        }}
+        mode="scientific"
+      />
     </div>
   );
 };

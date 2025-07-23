@@ -1,90 +1,87 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { useNutraceuticalPanel } from "@/hooks/nutraceuticals/useNutraceuticalPanel";
-import { Nutraceutical } from "./nutraceuticalManagement/types";
+import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
+import { useToast } from '@/hooks/use-toast';
 
-// Componentes refatorados
-import FormDialog from "./nutraceuticalManagement/FormDialog";
-import DeleteDialog from "./nutraceuticalManagement/DeleteDialog";
+// Componentes comuns
+import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
+import NutraceuticalSearchFilters from '@/components/common/nutraceuticals/NutraceuticalSearchFilters';
+
+// Componentes específicos
 import NutraceuticalTable from "./nutraceuticalManagement/NutraceuticalTable";
-import SearchBar from "./nutraceuticalManagement/SearchBar";
+import DeleteDialog from "./nutraceuticalManagement/DeleteDialog";
 import OutcomesDialog from "./nutraceuticalManagement/OutcomesDialog";
 
 const NutraceuticalManagementPanel: React.FC = () => {
+  const { toast } = useToast();
   const {
-    searchTerm,
-    setSearchTerm,
-    isCreateDialogOpen,
-    setIsCreateDialogOpen,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    isOutcomesDialogOpen,
-    setIsOutcomesDialogOpen,
-    selectedNutraceutical,
-    filteredNutraceuticals,
-    formData,
-    relations,
-    studies,
-    outcomes,
-    studiesLoading,
-    selectedStudies,
+    nutraceuticals,
     isLoading,
-    // Handlers
-    handleEditClick,
-    handleDeleteClick,
-    handleOutcomesClick,
-    handleOpenCreateDialog,
-    handleCreateSubmit,
-    handleEditSubmit,
-    handleDeleteConfirm,
-    handleFormChange,
-    handleOutcomeChange,
-    handleEfficacyChange,
-    handleStudyChange,
-    handleAddRelation,
-    handleRemoveRelation,
-    handleStudiesDropped,
-    getOutcomeName,
-    fetchNutraceuticals
-  } = useNutraceuticalPanel();
+    refreshData,
+    deleteNutraceutical,
+    outcomes
+  } = useNutraceuticalContext();
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isCRUDDialogOpen, setIsCRUDDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isOutcomesDialogOpen, setIsOutcomesDialogOpen] = useState(false);
+  const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
+  
+  // Filtrar nutracêuticos baseado no termo de busca
+  const filteredNutraceuticals = nutraceuticals.filter(nutra => {
+    const matchesSearch = searchTerm === '' || 
+      nutra.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (nutra.description && nutra.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    return matchesSearch;
+  });
 
-  // Adaptar handlers para corresponder às assinaturas de tipo esperadas
-  const adaptedHandleFormChange = (field: keyof Nutraceutical, value: any) => {
-    handleFormChange();
+  const handleEditClick = (nutraceutical: any) => {
+    setSelectedNutraceutical(nutraceutical);
+    setIsCRUDDialogOpen(true);
   };
 
-  const adaptedHandleOutcomeChange = (index: number, value: string) => {
-    handleOutcomeChange();
+  const handleDeleteClick = (nutraceutical: any) => {
+    setSelectedNutraceutical(nutraceutical);
+    setIsDeleteDialogOpen(true);
   };
 
-  const adaptedHandleEfficacyChange = (index: number, value: number) => {
-    handleEfficacyChange();
+  const handleOutcomesClick = (nutraceutical: any) => {
+    setSelectedNutraceutical(nutraceutical);
+    setIsOutcomesDialogOpen(true);
   };
 
-  const adaptedHandleStudyChange = (index: number, studyId: string, checked: boolean) => {
-    handleStudyChange();
+  const handleOpenCreateDialog = () => {
+    setSelectedNutraceutical(null);
+    setIsCRUDDialogOpen(true);
   };
 
-  const adaptedHandleStudiesDropped = (acceptedFiles: File[], index: number) => {
-    handleStudiesDropped();
+  const handleDeleteConfirm = async () => {
+    if (!selectedNutraceutical?.id) return;
+
+    try {
+      await deleteNutraceutical(selectedNutraceutical.id);
+      toast({
+        title: "Sucesso",
+        description: "Nutracêutico excluído com sucesso."
+      });
+      setIsDeleteDialogOpen(false);
+      setSelectedNutraceutical(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: `Erro ao excluir nutracêutico: ${error.message}`,
+        variant: "destructive"
+      });
+    }
   };
 
-  const adaptedHandleRemoveRelation = (index: number, e: React.MouseEvent) => {
-    handleRemoveRelation();
-  };
-
-  // Garantir que formData.contraindications seja um array
-  const prepareFormData = () => {
-    return {
-      ...formData,
-      contraindications: Array.isArray(formData.contraindications) 
-        ? formData.contraindications 
-        : (formData.contraindications ? [formData.contraindications] : []),
-      relations: relations || []
-    };
+  const getOutcomeName = (outcomeId: string | null) => {
+    if (!outcomeId) return "Sem categoria";
+    const outcome = outcomes.find(o => o.id === outcomeId);
+    return outcome?.name || "Categoria não encontrada";
   };
 
   return (
@@ -96,7 +93,13 @@ const NutraceuticalManagementPanel: React.FC = () => {
         </Button>
       </div>
       
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <NutraceuticalSearchFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onRefresh={refreshData}
+        onAddNew={handleOpenCreateDialog}
+        mode="admin"
+      />
       
       <NutraceuticalTable 
         filteredNutraceuticals={filteredNutraceuticals}
@@ -107,46 +110,16 @@ const NutraceuticalManagementPanel: React.FC = () => {
         getOutcomeName={getOutcomeName}
       />
       
-      {/* Diálogo de criar nutracêutico */}
-      <FormDialog
-        isOpen={isCreateDialogOpen}
-        setIsOpen={setIsCreateDialogOpen}
-        isCreate={true}
-        formData={prepareFormData()}
-        handleFormChange={adaptedHandleFormChange}
-        handleOutcomeChange={adaptedHandleOutcomeChange}
-        handleEfficacyChange={adaptedHandleEfficacyChange}
-        handleStudyChange={adaptedHandleStudyChange}
-        handleAddRelation={handleAddRelation}
-        handleRemoveRelation={adaptedHandleRemoveRelation}
-        submitAction={handleCreateSubmit}
-        relations={relations}
-        studies={studies}
-        outcomes={outcomes}
-        studiesLoading={studiesLoading}
-        handleStudiesDropped={adaptedHandleStudiesDropped}
-        selectedStudies={{0: selectedStudies || []}}
-      />
-      
-      {/* Diálogo de editar nutracêutico */}
-      <FormDialog
-        isOpen={isEditDialogOpen}
-        setIsOpen={setIsEditDialogOpen}
-        isCreate={false}
-        formData={prepareFormData()}
-        handleFormChange={adaptedHandleFormChange}
-        handleOutcomeChange={adaptedHandleOutcomeChange}
-        handleEfficacyChange={adaptedHandleEfficacyChange}
-        handleStudyChange={adaptedHandleStudyChange}
-        handleAddRelation={handleAddRelation}
-        handleRemoveRelation={adaptedHandleRemoveRelation}
-        submitAction={handleEditSubmit}
-        relations={relations}
-        studies={studies}
-        outcomes={outcomes}
-        studiesLoading={studiesLoading}
-        handleStudiesDropped={adaptedHandleStudiesDropped}
-        selectedStudies={{0: selectedStudies || []}}
+      {/* Diálogo CRUD unificado */}
+      <NutraceuticalCRUDDialog
+        open={isCRUDDialogOpen}
+        onOpenChange={setIsCRUDDialogOpen}
+        nutraceutical={selectedNutraceutical}
+        onSuccess={() => {
+          setIsCRUDDialogOpen(false);
+          refreshData();
+        }}
+        mode="admin"
       />
       
       {/* Diálogo de excluir nutracêutico */}
@@ -162,7 +135,7 @@ const NutraceuticalManagementPanel: React.FC = () => {
         isOpen={isOutcomesDialogOpen}
         setIsOpen={setIsOutcomesDialogOpen}
         nutraceutical={selectedNutraceutical}
-        onComplete={fetchNutraceuticals}
+        onComplete={refreshData}
       />
     </div>
   );

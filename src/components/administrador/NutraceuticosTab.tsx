@@ -1,27 +1,28 @@
 
 import React, { useState } from 'react';
 import { NutraceuticosHeader } from './nutraceuticos/NutraceuticosHeader';
-import { SearchFilters } from './nutraceuticos/SearchFilters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useNutraceuticalsData } from '@/hooks/nutraceuticals/useNutraceuticalsData';
+import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { useNutraceuticalsFilter } from '@/hooks/nutraceuticals/useNutraceuticalsFilter';
-import AddNutraceuticalDialog from './pesquisa/nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog';
+
+// Componentes comuns
+import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
+import NutraceuticalSearchFilters from '@/components/common/nutraceuticals/NutraceuticalSearchFilters';
+
+// Componentes específicos
 import NutraceuticosExpandableTable from './nutraceuticos/NutraceuticosExpandableTable';
 import EvidenceLegendPanel from './nutraceuticos/table/EvidenceLegendPanel';
 
 const NutraceuticosTab = () => {
-  // Hook para carregar e gerenciar os dados dos nutracêuticos
-  const { nutraceuticals, isLoading, isRefreshing, handleRefreshData } = useNutraceuticalsData();
+  const { nutraceuticals, isLoading, refreshData } = useNutraceuticalContext();
   
-  // Estados para gerenciar o diálogo de edição
   const [selectedNutraceutical, setSelectedNutraceutical] = useState<any>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCRUDDialogOpen, setIsCRUDDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Estado para armazenar a condição selecionada (para possível diálogo de detalhes)
   const [selectedCondition, setSelectedCondition] = useState<any>(null);
   const [selectedConditionType, setSelectedConditionType] = useState<'prevention' | 'treatment' | 'support' | null>(null);
   
-  // Hook para filtrar os nutracêuticos
   const {
     searchTerm,
     setSearchTerm,
@@ -33,32 +34,35 @@ const NutraceuticosTab = () => {
     clearFilters
   } = useNutraceuticalsFilter(nutraceuticals);
 
-  // Handler para quando um nutraceutico é selecionado para edição
   const handleEditClick = (nutraceutical: any) => {
-    console.log("Editar nutracêutico:", nutraceutical);
     setSelectedNutraceutical(nutraceutical);
-    setIsEditDialogOpen(true);
+    setIsCRUDDialogOpen(true);
   };
 
-  // Handler para quando o diálogo de edição é fechado
-  const handleEditDialogClose = () => {
-    setIsEditDialogOpen(false);
-    handleRefreshData();
+  const handleCRUDDialogClose = () => {
+    setIsCRUDDialogOpen(false);
+    setSelectedNutraceutical(null);
+    refreshData();
   };
 
-  // Handler para quando uma condição é clicada
   const handleConditionClick = (
     nutraceutical: any, 
     condition: any, 
     conditionType: 'prevention' | 'treatment' | 'support'
   ) => {
-    console.log(`Condição de ${conditionType} clicada:`, condition);
     setSelectedCondition(condition);
     setSelectedConditionType(conditionType);
-    // Aqui poderíamos abrir um diálogo com detalhes da condição se necessário
   };
 
-  // Converter o valor numérico para string ao passar para o componente SearchFilters
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshData();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const filterEfficacyString = filterEfficacy !== null 
     ? (typeof filterEfficacy === 'number' ? filterEfficacy.toString() : filterEfficacy) 
     : '';
@@ -82,7 +86,7 @@ const NutraceuticosTab = () => {
       <NutraceuticosHeader />
       
       <div className="bg-white rounded-md shadow mb-6 w-full max-w-full">
-        <SearchFilters
+        <NutraceuticalSearchFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           filterEfficacy={filterEfficacyString}
@@ -90,12 +94,13 @@ const NutraceuticosTab = () => {
           filterCondition={filterCondition || 'all'}
           setFilterCondition={setFilterCondition}
           clearFilters={clearFilters}
-          onRefresh={handleRefreshData}
+          onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
-          onAddNewClick={() => {
+          onAddNew={() => {
             setSelectedNutraceutical(null);
-            setIsEditDialogOpen(true);
+            setIsCRUDDialogOpen(true);
           }}
+          mode="scientific"
         />
         
         <div className="p-6 w-full max-w-full">
@@ -119,12 +124,13 @@ const NutraceuticosTab = () => {
         </div>
       </div>
       
-      {/* Diálogo unificado para adicionar/editar nutracêutico incluindo gestão de condições e estudos */}
-      <AddNutraceuticalDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
+      {/* Diálogo CRUD unificado */}
+      <NutraceuticalCRUDDialog
+        open={isCRUDDialogOpen}
+        onOpenChange={setIsCRUDDialogOpen}
         nutraceutical={selectedNutraceutical}
-        onSuccess={handleEditDialogClose}
+        onSuccess={handleCRUDDialogClose}
+        mode="scientific"
       />
     </div>
   );
