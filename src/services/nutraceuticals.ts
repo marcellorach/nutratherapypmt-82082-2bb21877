@@ -33,8 +33,7 @@ class NutraceuticalsService {
           id,
           relevance_score,
           study:scientific_studies(*)
-        ),
-        outcome:nutraceutical_outcomes(id, name, description)
+        )
       `);
   }
 
@@ -191,7 +190,6 @@ class NutraceuticalsService {
     }
   }
 
-  // Métodos para relacionamentos
   async addConditionRelation(data: RelationshipCreateData): Promise<NutraceuticalMutationResult> {
     try {
       const { error } = await supabase
@@ -262,7 +260,6 @@ class NutraceuticalsService {
     }
   }
 
-  // Métodos para limpeza de dados
   async cleanSeedData(batchId?: string): Promise<string> {
     try {
       const { data, error } = await supabase
@@ -278,7 +275,6 @@ class NutraceuticalsService {
     }
   }
 
-  // Métodos para dados de demonstração
   async hasMigratedData(): Promise<boolean> {
     try {
       const { data, error } = await supabase

@@ -31,7 +31,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         total_conditions: item.nutraceutical_conditions?.length || 0
       });
       
-      // Extrair condições de saúde associadas (outcomes)
+      // Extrair condições de saúde associadas
       const healthConditions = Array.isArray(item.nutraceutical_conditions) ? 
         item.nutraceutical_conditions
           .filter((nch: any) => {
@@ -44,7 +44,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
             
             console.log(`🔍 [MAPPER] Tipo original: ${relationshipType}`);
             
-            // Normalizar o tipo de relacionamento (garantindo consistência)
+            // Normalizar o tipo de relacionamento
             relationshipType = relationshipType.toLowerCase();
             if (relationshipType.includes('prev')) {
               relationshipType = 'prevention';
@@ -115,7 +115,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
           .filter((b: any) => b && b.benefit)
           .map((b: any) => b.benefit) : [];
 
-      // Adicionar contadores explícitos para outcomes e estudos
+      // Adicionar contadores explícitos
       const outcomeCount = healthConditions.length;
       const studyCount = studies.length;
       
@@ -126,13 +126,13 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         chemicalCompound: item.chemical_compound || '',
         source: item.source || '',
         dosage: item.dosage || '',
-        category: item.outcome?.name || 'Sem categoria',
+        category: 'Nutracêutico', // Categoria padrão
         scientificEvidence: {
           efficacyScore: scientificData ? (scientificData.efficacy_score || 0) : 0,
           sustainabilityScore: scientificData ? (scientificData.sustainability_score || 0) : 0,
           studies: studies.length,
         },
-        condition: item.outcome?.name || 'Geral',
+        condition: 'Geral',
         contraindications: item.contraindications || [],
         benefits: benefits,
         healthConditions: healthConditions,
@@ -143,7 +143,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         activeIngredients: [],
         outcomeCount: outcomeCount,
         studyCount: studyCount,
-        outcome: item.outcome || null
+        outcome: null
       };
       
       console.log(`✅ [MAPPER] ${item.name} mapeado com sucesso:`, {
@@ -156,7 +156,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
       return finalResult;
     } catch (error) {
       console.error(`❌ [MAPPER] Erro ao processar o nutracêutico ${item?.name || 'desconhecido'}:`, error);
-      // Retorna um objeto válido com informações básicas para evitar quebrar a interface
+      // Retorna um objeto válido com informações básicas
       return {
         id: item?.id || `error-${Date.now()}`,
         name: item?.name || 'Erro de processamento',
