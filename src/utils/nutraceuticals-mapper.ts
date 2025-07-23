@@ -168,7 +168,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         scientificEvidence: {
           efficacyScore: scientificData ? (scientificData.efficacy_score || 0) : 0,
           sustainabilityScore: convergenceScore, // Substituir por convergência
-          studies: studyCount, // Usar número realista
+          studies: studies, // Usar array de estudos
         },
         condition: 'Geral',
         contraindications: item.contraindications || [],
@@ -209,7 +209,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         scientificEvidence: {
           efficacyScore: 0,
           sustainabilityScore: 0,
-          studies: 0,
+          studies: [],
         },
         condition: 'Erro',
         contraindications: [],
