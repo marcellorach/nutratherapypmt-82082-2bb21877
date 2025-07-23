@@ -19,13 +19,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 }) => {
   return (
     <Layout>
-      <SidebarProvider 
-        defaultOpen={true}
-        style={{
-          "--sidebar-width": "280px",
-          "--sidebar-width-icon": "56px",
-        } as React.CSSProperties}
-      >
+      <SidebarProvider>
         <AdminContainer>
           <AdminSidebar 
             currentStep={currentStep} 

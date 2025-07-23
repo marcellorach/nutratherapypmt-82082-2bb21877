@@ -8,13 +8,11 @@ interface AdminContentProps {
 
 const AdminContent = ({ children }: AdminContentProps) => {
   return (
-    <SidebarInset className="flex-1 min-w-0">
-      <main className="flex flex-col min-h-0 w-full max-w-full">
-        <div className="flex-1 overflow-hidden p-6 w-full max-w-full">
-          <div className="w-full max-w-full overflow-x-auto">
-            <div className="min-w-0 w-full">
-              {children}
-            </div>
+    <SidebarInset>
+      <main className="flex-1 flex flex-col min-h-0 w-full">
+        <div className="flex-1 overflow-hidden p-6 w-full">
+          <div className="w-full max-w-full overflow-x-hidden">
+            {children}
           </div>
         </div>
       </main>
