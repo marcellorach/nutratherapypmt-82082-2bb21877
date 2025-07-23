@@ -66,7 +66,7 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
                 <span className="font-medium text-primary"> {networkData.links.length}</span> conexões
               </div>
               <div className="bg-gray-50 px-3 py-1 rounded-md border text-xs">
-                Os dados incluem <span className="font-semibold">{studyCount}</span> estudos científicos
+                Os dados incluem <span className="font-semibold">{studyCount}</span> {studyCount === 1 ? 'estudo científico' : 'estudos científicos'}
               </div>
             </div>
             <NetworkGraph data={networkData} height="550px" />
