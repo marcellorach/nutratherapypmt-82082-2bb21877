@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Import, Database, CheckCircle, X, ArrowRight } from "lucide-react";
+import { Import, Database, CheckCircle, X, ArrowRight, Heart, Stethoscope, Store } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const ImportStep: React.FC = () => {
   const [importing, setImporting] = useState(false);
@@ -50,7 +51,12 @@ const ImportStep: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Importação de Dados</h2>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-2xl font-bold">Importação de Dados</h2>
+            <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-300">
+              SIMULAÇÃO
+            </Badge>
+          </div>
           <p className="text-gray-600">Importe dados de sistemas externos para análise</p>
         </div>
       </div>
@@ -59,7 +65,9 @@ const ImportStep: React.FC = () => {
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Importação do PetLove</h3>
-            <Database className="h-6 w-6 text-gray-500" />
+            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+              <Heart className="h-6 w-6 text-red-600" />
+            </div>
           </div>
           
           <p className="mb-6 text-sm text-gray-600">
@@ -161,8 +169,8 @@ const ImportStep: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
               <div className="flex items-center">
-                <div className="mr-3 h-10 w-10 rounded-full bg-blue-100 p-2">
-                  <img src="https://via.placeholder.com/24" alt="PetLove" className="h-full w-full" />
+                <div className="mr-3 h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
                   <h4 className="font-medium">PetLove</h4>
@@ -174,8 +182,8 @@ const ImportStep: React.FC = () => {
             
             <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
               <div className="flex items-center">
-                <div className="mr-3 h-10 w-10 rounded-full bg-green-100 p-2">
-                  <img src="https://via.placeholder.com/24" alt="VetSmart" className="h-full w-full" />
+                <div className="mr-3 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Stethoscope className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <h4 className="font-medium">VetSmart</h4>
@@ -187,8 +195,8 @@ const ImportStep: React.FC = () => {
             
             <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
               <div className="flex items-center">
-                <div className="mr-3 h-10 w-10 rounded-full bg-yellow-100 p-2">
-                  <img src="https://via.placeholder.com/24" alt="PetShop" className="h-full w-full" />
+                <div className="mr-3 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <Store className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
                   <h4 className="font-medium">PetShop Manager</h4>
@@ -205,4 +213,3 @@ const ImportStep: React.FC = () => {
 };
 
 export default ImportStep;
-
