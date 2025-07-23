@@ -1,10 +1,5 @@
 
-/**
- * Hook consolidado para operações com nutracêuticos
- * Substitui múltiplos hooks específicos por uma interface unificada
- */
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { nutraceuticalsService } from '@/services/nutraceuticals';
 import { useDataManagement } from '@/hooks/useDataManagement';
@@ -188,6 +183,10 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
     queryClient.invalidateQueries({ queryKey: ['nutraceuticals'] });
   }, [refetch, queryClient]);
 
+  const fetchNutraceuticals = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   return {
     // Dados
     nutraceuticals,
@@ -206,9 +205,7 @@ export const useNutraceuticals = (options: UseNutraceuticalsOptions = {}) => {
     updateNutraceutical,
     deleteNutraceutical,
     refreshData,
-    
-    // Compatibilidade
-    fetchNutraceuticals: refreshData,
+    fetchNutraceuticals,
     
     // Estados de loading
     isCreating: createMutation.isPending,

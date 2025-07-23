@@ -1,103 +1,83 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-/**
- * Hook para gerenciar estudos científicos
- */
 export const useStudies = () => {
-  const [studies, setStudies] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Carregar estudos
-  const fetchStudies = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error: apiError } = await client
+  // Query para buscar estudos
+  const {
+    data: studies = [],
+    isLoading: isQueryLoading,
+    error: queryError,
+    refetch
+  } = useQuery({
+    queryKey: ['studies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('scientific_studies')
         .select('*')
         .order('title');
-      
-      if (apiError) {
-        throw apiError;
-      }
-      
-      setStudies(data || []);
-      return data;
-    } catch (err: any) {
-      console.error('Erro ao carregar estudos:', err);
-      setError('Não foi possível carregar os dados dos estudos científicos');
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os dados dos estudos científicos',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  // Criar um novo estudo
-  const createStudy = async (data: any) => {
-    try {
-      // Garantir que o campo link não seja nulo
-      const studyData = {
-        ...data,
-        link: data.link || 'https://placeholder-url.com',
-      };
-      
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data: newStudy, error: apiError } = await client
+      if (error) {
+        console.error('Erro ao buscar estudos:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+
+  // Mutation para criar estudo
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: result, error } = await supabase
         .from('scientific_studies')
-        .insert([studyData])
+        .insert([data])
         .select()
         .single();
-      
-      if (apiError) {
-        throw apiError;
-      }
-      
-      // Atualizar o estado local
-      setStudies(prev => [...prev, newStudy]);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Estudo científico criado com sucesso',
-      });
-      
-      return newStudy;
-    } catch (err: any) {
-      console.error('Erro ao criar estudo:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível criar o estudo científico',
-        variant: 'destructive',
-      });
-      
-      throw err;
-    }
-  };
 
-  // Associar estudo a um nutracêutico
-  const associateStudyToNutraceutical = async (
-    studyId: string,
-    nutraceuticalId: string,
-    relevanceScore: number
-  ) => {
-    try {
-      // Usando type assertion para contornar a verificação de tipos do TypeScript
-      const client = supabase as any;
-      const { data, error: apiError } = await client
+      if (error) {
+        throw error;
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Estudo criado com sucesso."
+      });
+      queryClient.invalidateQueries({ queryKey: ['studies'] });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao criar estudo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar estudo",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation para associar estudo ao nutracêutico
+  const associateMutation = useMutation({
+    mutationFn: async ({ 
+      studyId, 
+      nutraceuticalId, 
+      relevanceScore 
+    }: {
+      studyId: string;
+      nutraceuticalId: string;
+      relevanceScore: number;
+    }) => {
+      const { data: result, error } = await supabase
         .from('nutraceutical_studies')
         .insert([{
           study_id: studyId,
@@ -106,63 +86,57 @@ export const useStudies = () => {
         }])
         .select()
         .single();
-      
-      if (apiError) {
-        throw apiError;
+
+      if (error) {
+        throw error;
       }
-      
+
+      return result;
+    },
+    onSuccess: () => {
       toast({
-        title: 'Sucesso',
-        description: 'Estudo associado ao nutracêutico com sucesso',
+        title: "Sucesso",
+        description: "Associação criada com sucesso."
       });
-      
-      return data;
-    } catch (err: any) {
-      console.error('Erro ao associar estudo ao nutracêutico:', err);
-      
+      queryClient.invalidateQueries({ queryKey: ['nutraceuticals'] });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao associar estudo ao nutracêutico:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível associar o estudo ao nutracêutico',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Erro ao criar associação",
+        variant: "destructive"
       });
-      
-      throw err;
     }
-  };
-  
-  // Upload de arquivo de estudo
-  const uploadStudyFile = async (file: File, path: string) => {
-    try {
-      const client = supabase as any;
-      const { data, error: uploadError } = await client.storage
-        .from('studies')
-        .upload(path, file);
-      
-      if (uploadError) {
-        throw uploadError;
-      }
-      
-      return data;
-    } catch (err: any) {
-      console.error('Erro ao fazer upload do arquivo:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível fazer o upload do arquivo',
-        variant: 'destructive',
-      });
-      
-      throw err;
-    }
-  };
+  });
+
+  const fetchStudies = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const createStudy = useCallback((data: any) => {
+    createMutation.mutate(data);
+  }, [createMutation]);
+
+  const associateStudyToNutraceutical = useCallback(async (
+    studyId: string,
+    nutraceuticalId: string,
+    relevanceScore: number
+  ) => {
+    return associateMutation.mutateAsync({
+      studyId,
+      nutraceuticalId,
+      relevanceScore
+    });
+  }, [associateMutation]);
 
   return {
     studies,
-    isLoading,
-    error,
+    isLoading: isQueryLoading || isLoading,
+    error: queryError?.message || error,
     fetchStudies,
     createStudy,
     associateStudyToNutraceutical,
-    uploadStudyFile
+    refetch
   };
 };

@@ -1,122 +1,85 @@
 
-import { useState } from 'react';
-import { NutraceuticalOutcomesService } from '@/services/nutraceutical-outcomes-service';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-/**
- * Hook para gerenciar outcomes de nutracêuticos
- */
 export const useOutcomes = () => {
-  const [outcomes, setOutcomes] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
   const { toast } = useToast();
-  
-  // Carregar outcomes
-  const fetchOutcomes = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const data = await NutraceuticalOutcomesService.getAllOutcomes();
-      setOutcomes(data || []);
-      return data;
-    } catch (err: any) {
-      console.error('Erro ao carregar outcomes:', err);
-      setError('Não foi possível carregar os outcomes');
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os outcomes',
-        variant: 'destructive',
-      });
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Ações para outcomes
-  const createOutcome = async (data: any) => {
-    try {
-      const result = await NutraceuticalOutcomesService.createOutcome(data);
-      setOutcomes(prev => [...prev, result]);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Outcome criado com sucesso',
-      });
-      
+  const queryClient = useQueryClient();
+
+  // Query para buscar outcomes
+  const {
+    data: outcomes = [],
+    isLoading: isQueryLoading,
+    error: queryError,
+    refetch
+  } = useQuery({
+    queryKey: ['outcomes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('health_conditions')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar outcomes:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+
+  // Mutation para criar outcome
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: result, error } = await supabase
+        .from('health_conditions')
+        .insert([data])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       return result;
-    } catch (err: any) {
-      console.error('Erro ao criar outcome:', err);
-      
+    },
+    onSuccess: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível criar o outcome',
-        variant: 'destructive',
+        title: "Sucesso",
+        description: "Outcome criado com sucesso."
       });
-      
-      throw err;
+      queryClient.invalidateQueries({ queryKey: ['outcomes'] });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao criar outcome:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar outcome",
+        variant: "destructive"
+      });
     }
-  };
-  
-  const updateOutcome = async (id: string, data: any) => {
-    try {
-      const result = await NutraceuticalOutcomesService.updateOutcome(id, data);
-      setOutcomes(prev => prev.map(cat => cat.id === id ? result : cat));
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Outcome atualizado com sucesso',
-      });
-      
-      return result;
-    } catch (err: any) {
-      console.error('Erro ao atualizar outcome:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar o outcome',
-        variant: 'destructive',
-      });
-      
-      throw err;
-    }
-  };
-  
-  const deleteOutcome = async (id: string) => {
-    try {
-      await NutraceuticalOutcomesService.deleteOutcome(id);
-      setOutcomes(prev => prev.filter(cat => cat.id !== id));
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Outcome removido com sucesso',
-      });
-      
-      return true;
-    } catch (err: any) {
-      console.error('Erro ao remover outcome:', err);
-      
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível remover o outcome',
-        variant: 'destructive',
-      });
-      
-      throw err;
-    }
-  };
+  });
+
+  const fetchOutcomes = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const createOutcome = useCallback((data: any) => {
+    createMutation.mutate(data);
+  }, [createMutation]);
 
   return {
     outcomes,
-    isLoading,
-    error,
+    isLoading: isQueryLoading || isLoading,
+    error: queryError?.message || error,
     fetchOutcomes,
     createOutcome,
-    updateOutcome,
-    deleteOutcome
+    refetch
   };
 };
