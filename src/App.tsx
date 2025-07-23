@@ -5,6 +5,7 @@ import Index from './pages/Index';
 import TutorPage from './pages/tutor/TutorPage';
 import VeterinarioPage from './pages/veterinario/VeterinarioPage';
 import AdministradorPage from './pages/administrador/AdministradorPage';
+import MultiAgentSimulationPage from './pages/administrador/MultiAgentSimulationPage';
 import AuthPage from './pages/auth/AuthPage';
 import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toaster';
@@ -45,6 +46,11 @@ function App() {
                 <Route path="/administrador" element={
                   <ProtectedRoute requiredRole="admin">
                     <AdministradorPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/administrador/simulacao-multiagente" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <MultiAgentSimulationPage />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />

@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Import, Database, CheckCircle, X, ArrowRight, Heart, Stethoscope, Store } from "lucide-react";
+import { Import, Database, CheckCircle, X, ArrowRight, Heart, Stethoscope, Store, Brain } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from 'react-router-dom';
+
 const ImportStep: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -16,6 +19,8 @@ const ImportStep: React.FC = () => {
     examsImported: 0,
     eligiblePets: 0
   });
+  const navigate = useNavigate();
+
   const simulateImport = () => {
     setImporting(true);
     setStatus('importing');
@@ -40,7 +45,18 @@ const ImportStep: React.FC = () => {
       });
     }, 200);
   };
-  return <div className="space-y-6">
+
+  const handleMultiAgentProcessing = () => {
+    navigate('/administrador/simulacao-multiagente', { 
+      state: { 
+        importStats,
+        autoStart: true 
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -57,85 +73,104 @@ const ImportStep: React.FC = () => {
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Importação do PetLove</h3>
-            
           </div>
           
           <p className="mb-6 text-sm text-gray-600">
             Importe dados de pets, tutores, exames e tratamentos do sistema PetLove para análise em massa.
           </p>
           
-          {status === 'success' ? <Alert className="mb-4 bg-green-50">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <AlertTitle>Importação concluída com sucesso</AlertTitle>
-              <AlertDescription>
-                <div className="mt-2 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Total de registros:</span>
-                    <span className="font-bold">{importStats.totalRecords}</span>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-2">
+          {status === 'success' ? (
+            <>
+              <Alert className="mb-4 bg-green-50">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <AlertTitle>Importação concluída com sucesso</AlertTitle>
+                <AlertDescription>
+                  <div className="mt-2 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span>Pets correlacionados:</span>
-                      <span className="font-medium">{importStats.petsImported}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium">Total de registros:</span>
+                      <span className="font-bold">{importStats.totalRecords}</span>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <span>Prontuários correlacionados:</span>
-                      <span className="font-medium">{importStats.prontuariosImported}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <ArrowDown className="h-4 w-4 text-blue-500" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span>Exames laboratoriais correlacionados:</span>
-                      <span className="font-medium">{importStats.examsImported}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <ArrowDown className="h-4 w-4 text-blue-500" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-1 p-2 bg-purple-50 border border-purple-200 rounded-md">
-                      <span className="font-medium text-purple-900">Pets elegíveis para próxima etapa:</span>
-                      <div className="flex items-center">
-                        <span className="font-bold text-purple-800">{importStats.eligiblePets}</span>
-                        <ArrowRight className="h-4 w-4 ml-1 text-purple-600" />
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span>Pets correlacionados:</span>
+                        <span className="font-medium">{importStats.petsImported}</span>
+                      </div>
+                      <div className="flex justify-center">
+                        <ArrowDown className="h-4 w-4 text-blue-500" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span>Prontuários correlacionados:</span>
+                        <span className="font-medium">{importStats.prontuariosImported}</span>
+                      </div>
+                      <div className="flex justify-center">
+                        <ArrowDown className="h-4 w-4 text-blue-500" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span>Exames laboratoriais correlacionados:</span>
+                        <span className="font-medium">{importStats.examsImported}</span>
+                      </div>
+                      <div className="flex justify-center">
+                        <ArrowDown className="h-4 w-4 text-blue-500" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-1 p-2 bg-purple-50 border border-purple-200 rounded-md">
+                        <span className="font-medium text-purple-900">Pets elegíveis para próxima etapa:</span>
+                        <div className="flex items-center">
+                          <span className="font-bold text-purple-800">{importStats.eligiblePets}</span>
+                          <ArrowRight className="h-4 w-4 ml-1 text-purple-600" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </AlertDescription>
-            </Alert> : status === 'error' ? <Alert className="mb-4 bg-red-50" variant="destructive">
+                </AlertDescription>
+              </Alert>
+              
+              <Button 
+                onClick={handleMultiAgentProcessing}
+                className="w-full mb-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+              >
+                <Brain className="mr-2 h-4 w-4" />
+                Processar por Multiagente
+              </Button>
+            </>
+          ) : status === 'error' ? (
+            <Alert className="mb-4 bg-red-50" variant="destructive">
               <X className="h-5 w-5" />
               <AlertTitle>Erro na importação</AlertTitle>
               <AlertDescription>
                 Ocorreu um erro durante a importação dos dados. Tente novamente.
               </AlertDescription>
-            </Alert> : null}
+            </Alert>
+          ) : null}
           
-          {status === 'importing' && <div className="mb-4 space-y-2">
+          {status === 'importing' && (
+            <div className="mb-4 space-y-2">
               <Progress value={progress} className="h-2 w-full" />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Importando...</span>
                 <span>{Math.round(progress)}%</span>
               </div>
-            </div>}
+            </div>
+          )}
           
           <Button onClick={simulateImport} disabled={importing} className="w-full">
-            {importing ? <span className="flex items-center">
+            {importing ? (
+              <span className="flex items-center">
                 <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Importando...
-              </span> : <>
+              </span>
+            ) : (
+              <>
                 <Import className="mr-2 h-4 w-4" />
                 {status === 'success' ? 'Importar Novamente' : 'Iniciar Importação'}
-              </>}
+              </>
+            )}
           </Button>
         </div>
         
@@ -184,6 +219,8 @@ const ImportStep: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ImportStep;
