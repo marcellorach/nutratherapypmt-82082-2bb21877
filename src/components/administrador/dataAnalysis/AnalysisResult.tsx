@@ -1,18 +1,11 @@
 
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { Database, GitCompare, FileSearch } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 const AnalysisResult: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const handleVisualizationClick = () => {
-    setSearchParams({ tab: 'visualization' });
-  };
-
   return (
     <Card className="mt-6 bg-green-50">
       <CardHeader>
@@ -71,10 +64,7 @@ const AnalysisResult: React.FC = () => {
           <div className="mt-6">
             <h4 className="font-medium mb-2">Próximas Etapas</h4>
             <div className="grid grid-cols-2 gap-4">
-              <Button 
-                className="w-full"
-                onClick={handleVisualizationClick}
-              >
+              <Button className="w-full">
                 Visualizar Análise Detalhada
               </Button>
               <Button className="w-full">

@@ -9,7 +9,6 @@ import { ArrowLeft, Play, Pause, Brain, Database, Network, BarChart3 } from "luc
 import { useAnalysisSimulation } from '@/components/administrador/dataAnalysis/useAnalysisSimulation';
 import AgentNetwork from '@/components/administrador/dataAnalysis/AgentNetwork';
 import MessageLog from '@/components/administrador/dataAnalysis/MessageLog';
-import AdvancedControlPanel from '@/components/administrador/dataAnalysis/network/AdvancedControlPanel';
 import AdminLayout from '@/components/administrador/AdminLayout';
 
 const MultiAgentSimulationPage: React.FC = () => {
@@ -90,7 +89,7 @@ const MultiAgentSimulationPage: React.FC = () => {
       currentStep="analysis" 
       setCurrentStep={() => navigate('/administrador?tab=analysis')}
     >
-      <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -198,18 +197,18 @@ const MultiAgentSimulationPage: React.FC = () => {
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Main Content - Expandido */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Agent Network - Espaço ampliado */}
-          <Card className="lg:col-span-2">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Agent Network */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Network className="h-5 w-5" />
                 Rede de Agentes
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2">
-              <div className="h-[500px]">
+            <CardContent>
+              <div className="h-96">
                 <AgentNetwork
                   connections={connections}
                   activeAgent={activeAgent}
@@ -227,7 +226,7 @@ const MultiAgentSimulationPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[500px]">
+              <div className="h-96">
                 <MessageLog 
                   messages={messages} 
                   step={step}
@@ -236,14 +235,6 @@ const MultiAgentSimulationPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Advanced Control Panel - Reposicionado */}
-        <div className="mt-auto">
-          <AdvancedControlPanel
-            connections={connections}
-            activeAgent={activeAgent}
-          />
         </div>
       </div>
     </AdminLayout>
