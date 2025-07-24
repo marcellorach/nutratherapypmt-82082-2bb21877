@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExternalLink, Search, FileText, Award, Users } from "lucide-react";
+import { ExternalLink, Search, FileText, Award, Users, Brain } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { scoreStudyQuality, scoreStudyRelevance } from '@/services/ntai/scoring';
 interface Study {
   id: string;
   title: string;
@@ -31,6 +32,42 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
+  const [aiPredictions, setAiPredictions] = useState<any[]>([]);
+
+  // Gerar predições da AI PL Nutra
+  useEffect(() => {
+    const generateAIPredictions = async () => {
+      const predictions = [
+        {
+          nutraceutical: 'L-Carnitina',
+          expectedEfficacy: await scoreStudyQuality('L-Carnitina for obesity'),
+          predictionConfidence: await scoreStudyRelevance('obesity L-Carnitina'),
+          recommendationStrength: 'Alta'
+        },
+        {
+          nutraceutical: 'Cromo Picolinato', 
+          expectedEfficacy: await scoreStudyQuality('Chromium picolinate metabolism'),
+          predictionConfidence: await scoreStudyRelevance('chromium glucose metabolism'),
+          recommendationStrength: 'Moderada'
+        },
+        {
+          nutraceutical: 'Garcinia Cambogia',
+          expectedEfficacy: await scoreStudyQuality('Garcinia cambogia weight loss'),
+          predictionConfidence: await scoreStudyRelevance('garcinia obesity prevention'),
+          recommendationStrength: 'Moderada'
+        },
+        {
+          nutraceutical: 'EGCG (Chá Verde)',
+          expectedEfficacy: await scoreStudyQuality('EGCG thermogenesis'),
+          predictionConfidence: await scoreStudyRelevance('green tea extract metabolism'),
+          recommendationStrength: 'Baixa'
+        }
+      ];
+      setAiPredictions(predictions);
+    };
+
+    generateAIPredictions();
+  }, [condition]);
 
   // Estudos simulados baseados na condição
   const generateStudies = (): Study[] => {
@@ -228,34 +265,89 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
         </Card>
       </div>
 
-      {/* Distribuição por tipo de estudo */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Distribuição por Qualidade de Evidência</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ChartContainer config={{}}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={studyTypeData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Gráficos lado a lado */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Literatura Existente */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribuição por Qualidade de Evidência</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ChartContainer config={{}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={studyTypeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="type" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="hsl(var(--chart-1))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Predições AI PL Nutra */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              Evidências Esperadas (AI PL Nutra)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ChartContainer config={{}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={aiPredictions}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="nutraceutical" angle={-45} textAnchor="end" height={100} />
+                    <YAxis domain={[0, 5]} />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        typeof value === 'number' ? value.toFixed(1) : value, 
+                        name === 'expectedEfficacy' ? 'Eficácia Esperada' : 'Confiança da Predição'
+                      ]}
+                    />
+                    <Bar dataKey="expectedEfficacy" fill="hsl(var(--chart-2))" name="Eficácia Esperada" />
+                    <Bar dataKey="predictionConfidence" fill="hsl(var(--chart-3))" name="Confiança da Predição" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </div>
+            
+            {/* Legenda das predições */}
+            <div className="mt-4 space-y-2">
+              {aiPredictions.map((prediction, idx) => (
+                <div key={idx} className="flex items-center justify-between text-sm">
+                  <span className="font-medium">{prediction.nutraceutical}</span>
+                  <Badge variant={
+                    prediction.recommendationStrength === 'Alta' ? 'default' :
+                    prediction.recommendationStrength === 'Moderada' ? 'secondary' : 'outline'
+                  }>
+                    {prediction.recommendationStrength}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Filtros */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar estudos por título ou autor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-40">
