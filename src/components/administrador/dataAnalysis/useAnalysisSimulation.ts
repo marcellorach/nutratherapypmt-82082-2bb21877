@@ -29,7 +29,7 @@ export const useAnalysisSimulation = () => {
   }>({
     flowIndex: 0,
     isPaused: false,
-    totalTime: 60000, // 1 minuto exato
+    totalTime: 90000, // 1.5 minutos
     startTime: 0,
     elapsedBeforePause: 0,
   });
@@ -45,6 +45,7 @@ export const useAnalysisSimulation = () => {
   const activateConnection = (fromId: string, toId: string) => {
     if (isPaused) return;
     
+    // Primeiro ativa a conexão
     setConnections(prev => 
       prev.map(conn => 
         conn.from === fromId && conn.to === toId
@@ -53,15 +54,17 @@ export const useAnalysisSimulation = () => {
       )
     );
     
+    // Adiciona um pacote de dados para animação
     const newPacket: DataPacket = {
       fromId,
       toId,
       startTime: Date.now(),
-      duration: 2000,
+      duration: 2000, // duração da animação em ms
     };
     
     setDataPackets(prev => [...prev, newPacket]);
     
+    // Desliga a animação após a duração
     const timer = window.setTimeout(() => {
       setConnections(prev => 
         prev.map(conn => 
@@ -71,6 +74,7 @@ export const useAnalysisSimulation = () => {
         )
       );
       
+      // Remove o pacote após a animação
       setDataPackets(prev => prev.filter(p => !(p.fromId === fromId && p.toId === toId)));
     }, 2000);
     
@@ -89,41 +93,45 @@ export const useAnalysisSimulation = () => {
     setActiveAgent(agentId);
   };
   
-  // Sequência otimizada para 60 segundos
+  // Sequência de mensagens e ativações que compõem o fluxo da análise
   const analysisFlow: AnalysisFlowItem[] = [
-    { delay: 1000, action: () => addAgentMessage('supervisor', 'Iniciando análise multi-agente. Coordenando especialistas...') },
-    { delay: 2000, action: () => addAgentMessage('data', 'Claude-3 Opus carregando 2.341 registros de pets...') },
-    { delay: 1500, action: () => activateConnection('supervisor', 'data') },
-    { delay: 2000, action: () => addAgentMessage('data', 'Processando dados clínicos: raças, idades, condições de saúde...') },
-    { delay: 1800, action: () => activateConnection('supervisor', 'pattern') },
-    { delay: 2200, action: () => addAgentMessage('pattern', 'Gemini Pro identificando padrões em 1.876 exames...') },
-    { delay: 1500, action: () => activateConnection('data', 'pattern') },
-    { delay: 2500, action: () => addAgentMessage('pattern', 'Detectados 12 clusters de condições por raça e idade...') },
+    { delay: 1000, action: () => addAgentMessage('supervisor', 'Iniciando análise de dados de pets. Preparando agentes...') },
+    { delay: 1500, action: () => addAgentMessage('data', 'Conectando ao banco de dados. Preparando carregamento de 2.341 registros.') },
+    { delay: 1800, action: () => activateConnection('supervisor', 'data') },
+    { delay: 2000, action: () => addAgentMessage('supervisor', 'Distribuindo tarefas para agentes especializados...') },
+    { delay: 1500, action: () => activateConnection('supervisor', 'pattern') },
+    { delay: 1000, action: () => addAgentMessage('data', 'Extraindo informações de raças, idades, pesos e condições clínicas...') },
+    { delay: 2200, action: () => addAgentMessage('data', 'Normalizando dados de 1.876 exames laboratoriais com Llama-3-70B...') },
     { delay: 2000, action: () => activateConnection('supervisor', 'correlation') },
-    { delay: 2300, action: () => addAgentMessage('correlation', 'Mistral Large analisando correlações entre tratamentos...') },
+    { delay: 1800, action: () => addAgentMessage('pattern', 'Recebendo dados normalizados. Iniciando análise estatística com Claude-3 Opus...') },
+    { delay: 1500, action: () => activateConnection('data', 'pattern') },
+    { delay: 2000, action: () => addAgentMessage('pattern', 'Identificando clusters de condições de saúde por faixa etária e raça...') },
+    { delay: 1800, action: () => addAgentMessage('correlation', 'Preparando matriz de correlação com modelo Mistral Large...') },
+    { delay: 2200, action: () => addAgentMessage('pattern', 'Detectados 7 padrões significativos de saúde em populações caninas e 5 em felinas.') },
+    { delay: 1500, action: () => activateConnection('supervisor', 'recommendation') },
+    { delay: 1800, action: () => addAgentMessage('correlation', 'Analisando correlações entre condições identificadas e histórico de tratamentos...') },
     { delay: 1500, action: () => activateConnection('pattern', 'correlation') },
-    { delay: 2800, action: () => addAgentMessage('correlation', 'Matriz de correlação: 89% de eficácia em tratamentos combinados...') },
-    { delay: 2000, action: () => activateConnection('supervisor', 'recommendation') },
-    { delay: 2400, action: () => addAgentMessage('recommendation', 'GPT-4o gerando recomendações personalizadas...') },
-    { delay: 1800, action: () => activateConnection('correlation', 'recommendation') },
-    { delay: 3000, action: () => addAgentMessage('recommendation', 'Consultando base de 247 nutracêuticos validados...') },
-    { delay: 2200, action: () => addAgentMessage('recommendation', '1.156 recomendações geradas com base em evidências...') },
+    { delay: 2500, action: () => addAgentMessage('correlation', 'Calculando taxas de eficácia para 142 tratamentos existentes...') },
     { delay: 2000, action: () => activateConnection('supervisor', 'viz') },
-    { delay: 2500, action: () => addAgentMessage('viz', 'Gemini Pro preparando visualizações interativas...') },
-    { delay: 1800, action: () => activateConnection('recommendation', 'viz') },
-    { delay: 2800, action: () => addAgentMessage('viz', 'Criando dashboards e relatórios executivos...') },
-    { delay: 2000, action: () => activateConnection('viz', 'supervisor') },
-    { delay: 2500, action: () => addAgentMessage('supervisor', 'Validação final: 98.7% de precisão nas recomendações...') },
-    { delay: 2000, action: () => addAgentMessage('supervisor', 'Análise multi-agente concluída com sucesso!') },
-    { delay: 1500, action: () => {
+    { delay: 2300, action: () => addAgentMessage('correlation', 'Identificando gaps nutricionais em 37% dos casos analisados.') },
+    { delay: 2000, action: () => addAgentMessage('recommendation', 'Processando dados correlacionados com GPT-4-Turbo para gerar recomendações...') },
+    { delay: 1500, action: () => activateConnection('correlation', 'recommendation') },
+    { delay: 2500, action: () => addAgentMessage('recommendation', 'Consultando base de nutracêuticos e evidências científicas...') },
+    { delay: 2200, action: () => addAgentMessage('recommendation', 'Gerando 843 recomendações personalizadas com base em perfis clínicos.') },
+    { delay: 1800, action: () => addAgentMessage('supervisor', 'Validando recomendações e preparando relatório final...') },
+    { delay: 2000, action: () => addAgentMessage('viz', 'Preparando visualizações e relatórios com modelo Gemini Pro...') },
+    { delay: 1500, action: () => activateConnection('recommendation', 'viz') },
+    { delay: 2500, action: () => addAgentMessage('viz', 'Criando gráficos de distribuição de condições e eficácia de tratamentos...') },
+    { delay: 2300, action: () => addAgentMessage('viz', 'Agrupando recomendações por categorias e gerando relatórios interativos.') },
+    { delay: 2000, action: () => addAgentMessage('supervisor', 'Compilando resultados finais e preparando dashboard interativo...') },
+    { delay: 2500, action: () => {
       setStep('completed');
       setAnalyzing(false);
       setActiveAgent(null);
-      setProgress(100);
     }}
   ];
   
-  // Atualizador de progresso mais preciso
+  // Atualizador de progresso
   useEffect(() => {
     if (!analyzing || isPaused || step !== 'processing') return;
     
@@ -171,11 +179,12 @@ export const useAnalysisSimulation = () => {
       analysisRef.current.isPaused = false;
       analysisRef.current.startTime = Date.now();
       
+      // Continuar do último passo
       executeFlowStep(analysisRef.current.flowIndex);
       return;
     }
     
-    // Limpar temporizadores existentes
+    // Limpar quaisquer temporizadores existentes
     animationTimersRef.current.forEach(timer => window.clearTimeout(timer));
     animationTimersRef.current = [];
     
@@ -190,16 +199,16 @@ export const useAnalysisSimulation = () => {
     // Reset das conexões
     setConnections(prev => prev.map(conn => ({ ...conn, active: false, animating: false })));
     
-    // Inicializar controlador
+    // Inicializar o controlador de análise
     analysisRef.current = {
       flowIndex: 0,
       isPaused: false,
-      totalTime: 60000, // 1 minuto
+      totalTime: 90000, // 1.5 minutos
       startTime: Date.now(),
       elapsedBeforePause: 0
     };
     
-    // Iniciar simulação
+    // Iniciar a simulação
     executeFlowStep(0);
   };
   
@@ -208,7 +217,7 @@ export const useAnalysisSimulation = () => {
     analysisRef.current.isPaused = true;
     analysisRef.current.elapsedBeforePause += Date.now() - analysisRef.current.startTime;
     
-    // Pausar todos os temporizadores
+    // Pausar todos os temporizadores ativos
     animationTimersRef.current.forEach(timer => window.clearTimeout(timer));
     animationTimersRef.current = [];
   };

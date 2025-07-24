@@ -1,29 +1,16 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileText, Database, CheckCircle, AlertCircle } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast";
+import { Import, Database, CheckCircle, X, ArrowRight } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowDown } from "lucide-react";
 
-interface ImportStepProps {
-  onComplete: (stats: ImportStats) => void;
-}
-
-interface ImportStats {
-  totalRecords: number;
-  petsImported: number;
-  prontuariosImported: number;
-  examsImported: number;
-  eligiblePets: number;
-}
-
-const ImportStep: React.FC<ImportStepProps> = ({ onComplete }) => {
-  const [isImporting, setIsImporting] = useState(false);
+const ImportStep: React.FC = () => {
+  const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState('');
-  const [stats, setStats] = useState<ImportStats>({
+  const [status, setStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle');
+  const [importStats, setImportStats] = useState({
     totalRecords: 0,
     petsImported: 0,
     prontuariosImported: 0,
@@ -31,199 +18,191 @@ const ImportStep: React.FC<ImportStepProps> = ({ onComplete }) => {
     eligiblePets: 0
   });
   
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const hasCompletedRef = useRef(false);
-
-  // Função para simular importação
   const simulateImport = () => {
-    if (isImporting || hasCompletedRef.current) return;
-    
-    setIsImporting(true);
+    setImporting(true);
+    setStatus('importing');
     setProgress(0);
-    hasCompletedRef.current = false;
     
-    const steps = [
-      { progress: 15, step: 'Conectando ao banco de dados...', delay: 800 },
-      { progress: 30, step: 'Carregando dados de pets...', delay: 1200 },
-      { progress: 50, step: 'Importando prontuários médicos...', delay: 1000 },
-      { progress: 70, step: 'Processando exames laboratoriais...', delay: 1500 },
-      { progress: 85, step: 'Validando dados importados...', delay: 800 },
-      { progress: 100, step: 'Importação concluída!', delay: 500 }
-    ];
-    
-    let currentStepIndex = 0;
-    
-    const executeStep = () => {
-      if (currentStepIndex < steps.length && !hasCompletedRef.current) {
-        const step = steps[currentStepIndex];
-        setProgress(step.progress);
-        setCurrentStep(step.step);
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + Math.random() * 10;
         
-        // Simular dados sendo importados
-        setStats({
-          totalRecords: Math.floor((step.progress / 100) * 2341),
-          petsImported: Math.floor((step.progress / 100) * 1876),
-          prontuariosImported: Math.floor((step.progress / 100) * 1654),
-          examsImported: Math.floor((step.progress / 100) * 1432),
-          eligiblePets: Math.floor((step.progress / 100) * 1298)
-        });
-        
-        currentStepIndex++;
-        
-        if (currentStepIndex < steps.length) {
-          setTimeout(executeStep, step.delay);
-        } else {
-          // Importação concluída
-          setTimeout(() => {
-            if (!hasCompletedRef.current) {
-              hasCompletedRef.current = true;
-              setIsImporting(false);
-              
-              const finalStats = {
-                totalRecords: 2341,
-                petsImported: 1876,
-                prontuariosImported: 1654,
-                examsImported: 1432,
-                eligiblePets: 1298
-              };
-              
-              setStats(finalStats);
-              onComplete(finalStats);
-              
-              toast({
-                title: "Importação concluída",
-                description: "Dados importados com sucesso. Redirecionando para análise...",
-                variant: "default",
-              });
-              
-              // Navegar para a simulação após 2 segundos
-              setTimeout(() => {
-                navigate('/administrador/simulacao-multiagente', { 
-                  state: { importStats: finalStats } 
-                });
-              }, 2000);
-            }
-          }, step.delay);
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          setImporting(false);
+          setStatus('success');
+          setImportStats({
+            totalRecords: 5877,
+            petsImported: 5222,
+            prontuariosImported: 4002,
+            examsImported: 3987,
+            eligiblePets: 3981
+          });
+          return 100;
         }
-      }
-    };
-    
-    executeStep();
+        
+        return newProgress;
+      });
+    }, 200);
   };
-
-  // Limpeza ao desmontar o componente
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, []);
-
+  
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Importação de Dados</h2>
-        <p className="text-gray-600">
-          Importe dados de pets, prontuários e exames para análise inteligente
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Importação de Dados</h2>
+          <p className="text-gray-600">Importe dados de sistemas externos para análise</p>
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" />
-            Status da Importação
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Progresso</span>
-              <span className="text-sm text-gray-500">{progress}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-            
-            {currentStep && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                {progress === 100 ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-blue-500 animate-pulse" />
-                )}
-                {currentStep}
-              </div>
-            )}
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Importação do PetLove</h3>
+            <Database className="h-6 w-6 text-gray-500" />
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total de Registros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.totalRecords}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pets Importados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.petsImported}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Prontuários</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.prontuariosImported}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Exames</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.examsImported}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex justify-center">
-        <Button 
-          onClick={simulateImport} 
-          disabled={isImporting || hasCompletedRef.current}
-          className="flex items-center gap-2"
-        >
-          {isImporting ? (
-            <>
-              <Database className="h-4 w-4 animate-spin" />
-              Importando...
-            </>
-          ) : progress === 100 ? (
-            <>
-              <CheckCircle className="h-4 w-4" />
-              Importação Concluída
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4" />
-              Iniciar Importação
-            </>
+          
+          <p className="mb-6 text-sm text-gray-600">
+            Importe dados de pets, tutores, exames e tratamentos do sistema PetLove para análise em massa.
+          </p>
+          
+          {status === 'success' ? (
+            <Alert className="mb-4 bg-green-50">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertTitle>Importação concluída com sucesso</AlertTitle>
+              <AlertDescription>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Total de registros:</span>
+                    <span className="font-bold">{importStats.totalRecords}</span>
+                  </div>
+                  
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span>Pets correlacionados:</span>
+                      <span className="font-medium">{importStats.petsImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>Prontuários correlacionados:</span>
+                      <span className="font-medium">{importStats.prontuariosImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span>Exames laboratoriais correlacionados:</span>
+                      <span className="font-medium">{importStats.examsImported}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <ArrowDown className="h-4 w-4 text-blue-500" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-1 p-2 bg-purple-50 border border-purple-200 rounded-md">
+                      <span className="font-medium text-purple-900">Pets elegíveis para próxima etapa:</span>
+                      <div className="flex items-center">
+                        <span className="font-bold text-purple-800">{importStats.eligiblePets}</span>
+                        <ArrowRight className="h-4 w-4 ml-1 text-purple-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          ) : status === 'error' ? (
+            <Alert className="mb-4 bg-red-50" variant="destructive">
+              <X className="h-5 w-5" />
+              <AlertTitle>Erro na importação</AlertTitle>
+              <AlertDescription>
+                Ocorreu um erro durante a importação dos dados. Tente novamente.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          
+          {status === 'importing' && (
+            <div className="mb-4 space-y-2">
+              <Progress value={progress} className="h-2 w-full" />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Importando...</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+            </div>
           )}
-        </Button>
+          
+          <Button 
+            onClick={simulateImport}
+            disabled={importing}
+            className="w-full"
+          >
+            {importing ? (
+              <span className="flex items-center">
+                <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Importando...
+              </span>
+            ) : (
+              <>
+                <Import className="mr-2 h-4 w-4" />
+                {status === 'success' ? 'Importar Novamente' : 'Iniciar Importação'}
+              </>
+            )}
+          </Button>
+        </div>
+        
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <h3 className="mb-6 text-lg font-semibold">Fontes de Dados Disponíveis</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
+              <div className="flex items-center">
+                <div className="mr-3 h-10 w-10 rounded-full bg-blue-100 p-2">
+                  <img src="https://via.placeholder.com/24" alt="PetLove" className="h-full w-full" />
+                </div>
+                <div>
+                  <h4 className="font-medium">PetLove</h4>
+                  <p className="text-xs text-gray-500">Histórico médico e exames</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">Conectar</Button>
+            </div>
+            
+            <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
+              <div className="flex items-center">
+                <div className="mr-3 h-10 w-10 rounded-full bg-green-100 p-2">
+                  <img src="https://via.placeholder.com/24" alt="VetSmart" className="h-full w-full" />
+                </div>
+                <div>
+                  <h4 className="font-medium">VetSmart</h4>
+                  <p className="text-xs text-gray-500">Sistema de clínicas parceiras</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">Conectar</Button>
+            </div>
+            
+            <div className="flex items-center justify-between rounded-md border border-gray-200 p-3">
+              <div className="flex items-center">
+                <div className="mr-3 h-10 w-10 rounded-full bg-yellow-100 p-2">
+                  <img src="https://via.placeholder.com/24" alt="PetShop" className="h-full w-full" />
+                </div>
+                <div>
+                  <h4 className="font-medium">PetShop Manager</h4>
+                  <p className="text-xs text-gray-500">Dados de consumo e perfil</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">Conectar</Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default ImportStep;
+

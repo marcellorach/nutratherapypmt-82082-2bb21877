@@ -41,7 +41,7 @@ const EfficacyMatrixFilters: React.FC<Props> = ({
       
       <div className="w-full sm:w-1/2">
         <label htmlFor="efficacy-filter" className="text-sm font-medium">
-          Nível de Eficácia (0-5)
+          Nível de Eficácia
         </label>
         <Select 
           value={efficacyFilter}
@@ -53,8 +53,8 @@ const EfficacyMatrixFilters: React.FC<Props> = ({
           <SelectContent>
             <SelectItem value="all">Todos os níveis</SelectItem>
             <SelectItem value="high">Alta (4-5)</SelectItem>
-            <SelectItem value="medium">Média (3-4)</SelectItem>
-            <SelectItem value="low">Baixa (0-3)</SelectItem>
+            <SelectItem value="medium">Média (3)</SelectItem>
+            <SelectItem value="low">Baixa (1-2)</SelectItem>
           </SelectContent>
         </Select>
       </div>

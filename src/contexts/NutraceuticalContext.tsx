@@ -1,12 +1,11 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useNutraceuticalManager } from '@/hooks/nutraceuticals/useNutraceuticalManager';
-import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 
 interface NutraceuticalContextType {
   nutraceuticals: any[];
-  conditions: any[];
   outcomes: any[];
+  conditions: any[];
   ingredients: any[];
   studies: any[];
   isLoading: boolean;
@@ -30,15 +29,9 @@ interface NutraceuticalProviderProps {
 
 export const NutraceuticalProvider: React.FC<NutraceuticalProviderProps> = ({ children }) => {
   const managerData = useNutraceuticalManager();
-  const { conditions } = useConditions();
-
-  const contextValue = {
-    ...managerData,
-    conditions: conditions || []
-  };
 
   return (
-    <NutraceuticalContext.Provider value={contextValue}>
+    <NutraceuticalContext.Provider value={managerData}>
       {children}
     </NutraceuticalContext.Provider>
   );

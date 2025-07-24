@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useCallback } from 'react';
 import { MatrixCell, MatrixItem } from '../types';
 
@@ -70,9 +71,11 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
   const filteredData = useMemo(() => {
     return data.filter(cell => {
       if (efficacyFilter !== "all") {
-        if (efficacyFilter === "high" && cell.efficacyScore < 4) return false;
-        if (efficacyFilter === "medium" && (cell.efficacyScore < 3 || cell.efficacyScore >= 4)) return false;
-        if (efficacyFilter === "low" && cell.efficacyScore >= 3) return false;
+        const min = parseInt(efficacyFilter.split('-')[0]);
+        const max = parseInt(efficacyFilter.split('-')[1]);
+        if (cell.efficacyScore < min || cell.efficacyScore > max) {
+          return false;
+        }
       }
       
       if (evidenceFilter !== "all") {
@@ -151,13 +154,16 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
     });
   }, []);
 
+  // Adicionando a função exportMatrixData que estava faltando
   const exportMatrixData = useCallback(() => {
+    // Criar cabeçalho CSV
     let csvContent = "Nutraceutico,";
     condicoes.forEach(condicao => {
       csvContent += `${condicao.name},`;
     });
     csvContent += "\n";
 
+    // Adicionar dados
     filteredNutraceuticos.forEach(nutraceutico => {
       csvContent += `${nutraceutico.name},`;
       condicoes.forEach(condicao => {
@@ -167,6 +173,7 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
       csvContent += "\n";
     });
 
+    // Criar e acionar o download
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -221,7 +228,7 @@ export const useEfficacyMatrix = ({ nutraceuticos, condicoes, data }: UseEfficac
     toggleSortBy,
     toggleFavorite,
     toggleComparison,
-    getAverageEfficacy,
-    exportMatrixData
+    getAverageEfficacy, // Adicionando a função no objeto retornado
+    exportMatrixData // Adicionando a função no objeto retornado
   };
 };

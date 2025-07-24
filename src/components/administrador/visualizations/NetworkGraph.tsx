@@ -25,25 +25,20 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Configurações personalizadas para melhorar a visualização com animação suave
+  // Configurações personalizadas para melhorar a visualização
   const defaultCustomOptions = {
     physics: {
-      enabled: true,
       stabilization: {
-        iterations: 150,
+        iterations: 200,
         fit: true
       },
       barnesHut: {
-        gravitationalConstant: -8000,
-        centralGravity: 0.3,
-        springLength: 120,
-        springConstant: 0.05,
-        damping: 0.09,
-        avoidOverlap: 0.1
-      },
-      minVelocity: 0.75,
-      maxVelocity: 30,
-      solver: 'barnesHut'
+        gravitationalConstant: -10000,  // Aumentei para melhorar a distribuição
+        centralGravity: 0.8,
+        springLength: 150,  // Aumentado para espaçar mais os nós
+        springConstant: 0.08,
+        damping: 0.09
+      }
     },
     nodes: {
       shape: 'dot',
@@ -68,14 +63,13 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
       selectionWidth: 3,
       smooth: {
         enabled: true,
-        type: 'continuous',
-        roundness: 0.5
+        type: 'continuous'
       },
       hoverWidth: 2
     },
     layout: {
-      improvedLayout: true
-      // Removido randomSeed para permitir animação natural
+      improvedLayout: true,
+      randomSeed: 42  // Usar seed fixo para garantir consistência na visualização
     },
     interaction: {
       hover: true,
@@ -95,7 +89,7 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   const defaultLegendItems = [
     { color: '#3b82f6', label: 'Nutracêuticos' },
     { color: '#10b981', label: 'Condições de Saúde' },
-    { color: '#a855f7', label: 'Estudos Científicos' },
+    { color: '#a855f7', label: 'Estudos' },
     { color: '#9ca3af', label: 'Conexões Potenciais', dashed: true },
     { color: '#8b5cf6', label: 'Sinergias', dashed: [2, 2] },
     { color: '#d1d5db', label: 'Correlações entre Condições', dashed: [5, 5] }
