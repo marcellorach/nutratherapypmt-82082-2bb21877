@@ -80,20 +80,20 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
 
   const modelColor = getModelColor(agent.model);
   const errorColor = getErrorColor(metrics?.errorState || 'none');
-  const nodeRadius = 48; // Mantém o tamanho 50% maior
+  const nodeRadius = 42; // Reduzido de 48 para 42
   const ModelLogo = getModelLogo(agent.model);
 
-  // Mini-gráfico otimizado - AUMENTADO e mais visível
+  // Mini-gráfico corrigido - MAIOR e mais visível
   const renderActivityGraph = () => {
     if (!metrics?.activityHistory) return null;
     
-    // Aumentar o tamanho do quadro para melhor visibilidade
-    const graphWidth = 18;
-    const graphHeight = 16;
-    const marginX = 2;
-    const marginY = 2;
-    const frameWidth = 22;
-    const frameHeight = 20;
+    // Aumentar significativamente o tamanho do gráfico
+    const graphWidth = 28;
+    const graphHeight = 22;
+    const marginX = 3;
+    const marginY = 3;
+    const frameWidth = 34;
+    const frameHeight = 28;
     
     const points = metrics.activityHistory.map((value, index) => {
       const x = marginX + (index / (metrics.activityHistory.length - 1)) * graphWidth;
@@ -102,54 +102,54 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
     }).join(' ');
     
     return (
-      <g transform="translate(40, 2)">
-        {/* Quadro de fundo com melhor contraste */}
+      <g transform="translate(28, -2)">
+        {/* Quadro de fundo com alta visibilidade */}
         <rect 
           width={frameWidth} 
           height={frameHeight} 
-          fill="#ffffff" 
+          fill="rgba(255,255,255,0.95)" 
           stroke="#cbd5e1" 
-          strokeWidth="1" 
-          rx="3"
+          strokeWidth="1.5" 
+          rx="4"
           filter="url(#miniGraphShadow)"
         />
         
-        {/* Grid interno sutil */}
-        <g opacity="0.3">
-          <line x1="2" y1="10" x2="20" y2="10" stroke="#e2e8f0" strokeWidth="0.5" />
-          <line x1="11" y1="2" x2="11" y2="18" stroke="#e2e8f0" strokeWidth="0.5" />
+        {/* Grid interno mais visível */}
+        <g opacity="0.4">
+          <line x1="3" y1="14" x2="31" y2="14" stroke="#e2e8f0" strokeWidth="1" />
+          <line x1="17" y1="3" x2="17" y2="25" stroke="#e2e8f0" strokeWidth="1" />
         </g>
         
-        {/* Clipping para garantir que não saia do quadro */}
+        {/* Clipping para o gráfico */}
         <defs>
           <clipPath id={`clip-${agent.id}`}>
-            <rect x="1" y="1" width="20" height="18" />
+            <rect x="2" y="2" width="30" height="24" />
           </clipPath>
           <filter id="miniGraphShadow">
-            <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="rgba(0,0,0,0.1)" />
+            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(0,0,0,0.15)" />
           </filter>
         </defs>
         
         <g clipPath={`url(#clip-${agent.id})`}>
           {/* Área preenchida sob a linha */}
           <polygon
-            points={`2,18 ${points} 20,18`}
+            points={`3,25 ${points} 31,25`}
             fill={errorColor}
-            opacity="0.15"
+            opacity="0.2"
           />
           
-          {/* Linha principal do gráfico - mais espessa */}
+          {/* Linha principal do gráfico - mais espessa e visível */}
           <polyline
             points={points}
             fill="none"
             stroke={errorColor}
-            strokeWidth="2"
+            strokeWidth="3"
             opacity="0.9"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           
-          {/* Pontos animados - mais visíveis */}
+          {/* Pontos mais visíveis */}
           {metrics.activityHistory.map((value, index) => {
             const cx = marginX + (index / (metrics.activityHistory.length - 1)) * graphWidth;
             const cy = marginY + graphHeight - (value * graphHeight);
@@ -158,16 +158,16 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
                 key={index}
                 cx={cx}
                 cy={cy}
-                r={index === metrics.activityHistory.length - 1 ? "1.5" : "1"}
+                r={index === metrics.activityHistory.length - 1 ? "2.5" : "2"}
                 fill={errorColor}
-                opacity={index === metrics.activityHistory.length - 1 ? 1 : 0.7}
+                opacity={index === metrics.activityHistory.length - 1 ? 1 : 0.8}
                 stroke="white"
-                strokeWidth="0.5"
+                strokeWidth="1"
               >
                 {index === metrics.activityHistory.length - 1 && (
                   <animate
                     attributeName="r"
-                    values="1.5;2.5;1.5"
+                    values="2.5;4;2.5"
                     dur="2s"
                     repeatCount="indefinite"
                   />
@@ -177,15 +177,15 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
           })}
         </g>
         
-        {/* Label do gráfico */}
+        {/* Label do gráfico mais visível */}
         <text
           x={frameWidth/2}
-          y={frameHeight + 8}
+          y={frameHeight + 12}
           textAnchor="middle"
-          fill="#6b7280"
-          fontSize="6"
+          fill="#4b5563"
+          fontSize="8"
           fontFamily="monospace"
-          fontWeight="500"
+          fontWeight="600"
         >
           Activity
         </text>
@@ -222,16 +222,7 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         />
       )}
 
-      {/* Sombra do nó */}
-      <circle
-        cx="0"
-        cy="0"
-        r={nodeRadius}
-        fill="white"
-        filter={`url(#shadow-${agent.id})`}
-      />
-
-      {/* Nó principal com melhor contraste */}
+      {/* Nó principal */}
       <circle
         cx="0"
         cy="0"
@@ -239,15 +230,16 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         fill={`url(#nodeGradient-${agent.id})`}
         stroke={isActive ? errorColor : '#d1d5db'}
         strokeWidth={isActive ? 3 : 2}
+        filter={`url(#shadow-${agent.id})`}
         className={`transition-all duration-300 ${
           metrics?.errorState === 'error' ? 'animate-pulse' : ''
         }`}
       />
 
-      {/* Círculo interno para o modelo com melhor destaque */}
+      {/* Círculo interno para o modelo */}
       <circle
         cx="0"
-        cy="-10"
+        cy="-8"
         r={nodeRadius - 18}
         fill={modelColor}
         opacity="0.12"
@@ -256,18 +248,18 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         strokeOpacity="0.3"
       />
 
-      {/* Logo do modelo AI - melhor posicionamento */}
-      <g transform="translate(-14, -22)">
-        <ModelLogo size={28} />
+      {/* Logo do modelo AI */}
+      <g transform="translate(-12, -20)">
+        <ModelLogo size={24} />
       </g>
 
-      {/* Indicador de status com melhor visibilidade */}
+      {/* Indicador de status */}
       {isActive && (
         <g>
           <circle
-            cx="32"
-            cy="-32"
-            r="7"
+            cx="28"
+            cy="-28"
+            r="6"
             fill="white"
             stroke={
               metrics?.errorState === 'error' ? '#ef4444' :
@@ -278,9 +270,9 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
             className={metrics?.errorState === 'error' ? 'animate-pulse' : ''}
           />
           <circle
-            cx="32"
-            cy="-32"
-            r="4"
+            cx="28"
+            cy="-28"
+            r="3"
             fill={
               metrics?.errorState === 'error' ? '#ef4444' :
               metrics?.errorState === 'warning' ? '#f59e0b' :
@@ -291,33 +283,33 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         </g>
       )}
 
-      {/* Barra de processamento melhorada */}
-      <g transform="translate(-35, 52)">
+      {/* Barra de processamento */}
+      <g transform="translate(-30, 46)">
         <rect
           x="0"
           y="0"
-          width="70"
-          height="5"
+          width="60"
+          height="4"
           fill="#f1f5f9"
           stroke="#e2e8f0"
           strokeWidth="0.5"
-          rx="2.5"
+          rx="2"
         />
         <rect
           x="1"
           y="1"
-          width={68 * (processingProgress / 100)}
-          height="3"
+          width={58 * (processingProgress / 100)}
+          height="2"
           fill={errorColor}
-          rx="1.5"
+          rx="1"
           opacity="0.9"
         />
         <text
-          x="35"
-          y="16"
+          x="30"
+          y="14"
           textAnchor="middle"
           fill="#64748b"
-          fontSize="9"
+          fontSize="8"
           fontFamily="monospace"
           fontWeight="600"
         >
@@ -325,25 +317,25 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         </text>
       </g>
 
-      {/* Métricas de performance otimizadas */}
-      <g transform="translate(-40, 70)">
+      {/* Métricas de performance */}
+      <g transform="translate(-32, 62)">
         <rect
           x="0"
           y="0"
-          width="80"
-          height="32"
+          width="64"
+          height="28"
           fill="rgba(255,255,255,0.98)"
           stroke="#e2e8f0"
           strokeWidth="1"
-          rx="6"
+          rx="4"
           filter="url(#shadow-${agent.id})"
         />
         
         <text
-          x="8"
-          y="12"
+          x="6"
+          y="10"
           fill="#374151"
-          fontSize="8"
+          fontSize="7"
           fontFamily="monospace"
           fontWeight="600"
         >
@@ -351,10 +343,10 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         </text>
         
         <text
-          x="8"
-          y="24"
+          x="6"
+          y="20"
           fill="#374151"
-          fontSize="8"
+          fontSize="7"
           fontFamily="monospace"
           fontWeight="600"
         >
@@ -365,50 +357,50 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         {renderActivityGraph()}
       </g>
 
-      {/* TAG de throughput dinâmico - MELHORADA */}
+      {/* TAG de throughput dinâmico - MELHORADA E MAIS VISÍVEL */}
       {metrics && (
-        <g transform="translate(-35, 110)">
+        <g transform="translate(-30, 100)">
           <rect
             x="0"
             y="0"
-            width="70"
-            height="22"
-            fill="rgba(255,255,255,0.95)"
+            width="60"
+            height="24"
+            fill="rgba(255,255,255,0.98)"
             stroke={errorColor}
             strokeWidth="2"
             rx="6"
             filter="url(#shadow-${agent.id})"
           />
           
-          {/* Background com cor do estado */}
+          {/* Background com cor do estado mais visível */}
           <rect
             x="2"
             y="2"
-            width="66"
-            height="18"
+            width="56"
+            height="20"
             fill={errorColor}
-            opacity="0.08"
+            opacity="0.12"
             rx="4"
           />
           
           <text
-            x="35"
-            y="8"
+            x="30"
+            y="10"
             textAnchor="middle"
             fill="#6b7280"
-            fontSize="7"
+            fontSize="8"
             fontFamily="monospace"
-            fontWeight="500"
+            fontWeight="600"
           >
             {metrics.metricType.toUpperCase()}
           </text>
           
           <text
-            x="35"
-            y="17"
+            x="30"
+            y="19"
             textAnchor="middle"
-            fill="#374151"
-            fontSize="10"
+            fill="#1f2937"
+            fontSize="11"
             fontFamily="monospace"
             fontWeight="700"
           >
@@ -417,51 +409,51 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         </g>
       )}
 
-      {/* Nome do agente com melhor tipografia */}
+      {/* Nome do agente */}
       <text
         x="0"
-        y={nodeRadius + 140}
+        y={nodeRadius + 130}
         textAnchor="middle"
         fill="#374151"
-        fontSize="13"
+        fontSize="12"
         fontWeight="700"
         fontFamily="Inter, sans-serif"
       >
         {agent.name.replace('Agente de ', '')}
       </text>
 
-      {/* Modelo do agente com destaque */}
+      {/* Modelo do agente */}
       <text
         x="0"
-        y={nodeRadius + 157}
+        y={nodeRadius + 145}
         textAnchor="middle"
         fill="#6b7280"
-        fontSize="11"
+        fontSize="10"
         fontFamily="monospace"
         fontWeight="600"
       >
         {agent.model}
       </text>
 
-      {/* Indicador de atividade melhorado */}
+      {/* Indicador de atividade */}
       {activityLevel > 0 && (
-        <g transform={`translate(-25, ${nodeRadius + 165})`}>
+        <g transform={`translate(-20, ${nodeRadius + 150})`}>
           <rect
             x="0"
             y="0"
-            width="50"
-            height="4"
+            width="40"
+            height="3"
             fill="#f1f5f9"
-            rx="2"
+            rx="1.5"
           />
           <rect
             x="0"
             y="0"
-            width={50 * activityLevel}
-            height="4"
+            width={40 * activityLevel}
+            height="3"
             fill={errorColor}
             opacity="0.8"
-            rx="2"
+            rx="1.5"
           />
         </g>
       )}
