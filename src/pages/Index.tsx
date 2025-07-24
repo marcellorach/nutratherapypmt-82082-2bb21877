@@ -21,7 +21,7 @@ const Index: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-5xl font-bold mb-4">NutraTherapy PET</h1>
           <p className="text-xl text-gray-700 mb-6">
-            Terapia nutraceutica personalizada para mitigação de doenças degenerativas em cães e gatos baseada em ciência avançada e P&D
+            Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5
           </p>
         </div>
         
