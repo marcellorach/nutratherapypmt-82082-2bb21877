@@ -4,7 +4,6 @@ import { AgentConnection } from '../types';
 import { agents, agentPositions } from '../agentData';
 import SophisticatedAgentNode from './SophisticatedAgentNode';
 import SophisticatedConnections from './SophisticatedConnections';
-import AdvancedControlPanel from './AdvancedControlPanel';
 
 interface SophisticatedAgentNetworkProps {
   connections: AgentConnection[];
@@ -112,12 +111,6 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
           />
         ))}
       </svg>
-
-      {/* Painel de controle avançado */}
-      <AdvancedControlPanel
-        connections={connections}
-        activeAgent={activeAgent}
-      />
     </div>
   );
 };

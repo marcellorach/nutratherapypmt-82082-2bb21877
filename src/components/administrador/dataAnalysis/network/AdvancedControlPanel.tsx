@@ -54,8 +54,8 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({
   };
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg border border-slate-200 shadow-lg">
-      <div className="p-4 space-y-3">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div className="p-4 space-y-4">
         {/* Status principal */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -152,8 +152,8 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({
 
         {/* Alertas recentes */}
         {alerts.length > 0 && (
-          <div className="border-t border-slate-200 pt-2">
-            <div className="text-xs text-slate-600 mb-1">Eventos Recentes:</div>
+          <div className="border-t border-slate-200 pt-3">
+            <div className="text-xs text-slate-600 mb-2">Eventos Recentes:</div>
             <div className="space-y-1">
               {alerts.map((alert, index) => (
                 <div key={index} className="text-xs text-slate-500 font-mono">
