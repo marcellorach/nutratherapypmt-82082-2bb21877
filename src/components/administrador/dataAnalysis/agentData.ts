@@ -54,14 +54,14 @@ export const agents: Agent[] = [
   },
 ];
 
-// Posições em uma estrutura mais hierárquica e complexa
+// Posições otimizadas para melhor distanciamento e aproveitamento do espaço
 export const agentPositions: Record<string, AgentPosition> = {
-  'supervisor': { x: 50, y: 15 },
-  'data': { x: 20, y: 35 },
-  'pattern': { x: 80, y: 35 },
-  'correlation': { x: 35, y: 55 },
-  'recommendation': { x: 65, y: 55 },
-  'viz': { x: 50, y: 75 },
+  'supervisor': { x: 50, y: 20 },    // Centro-topo
+  'data': { x: 15, y: 40 },          // Esquerda-meio
+  'pattern': { x: 85, y: 40 },       // Direita-meio
+  'correlation': { x: 30, y: 65 },   // Esquerda-baixo
+  'recommendation': { x: 70, y: 65 }, // Direita-baixo
+  'viz': { x: 50, y: 85 },           // Centro-baixo
 };
 
 export const createInitialConnections = () => [
