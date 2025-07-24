@@ -231,7 +231,7 @@ const FontesTab: React.FC = () => {
                   </TableCell>
                   <TableCell>{fonte.recordCount.toLocaleString()}</TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {fonte.lastUpdated.toLocaleDateString('pt-BR')}
+                    {formatDate(fonte.lastUpdated)}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
