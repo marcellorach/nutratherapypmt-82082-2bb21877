@@ -9,143 +9,81 @@
 }
 
 .connection-path {
-  stroke-dasharray: 5;
-  animation: dash 1s linear infinite;
+  stroke-dasharray: 6 3;
+  animation: dash 2s linear infinite;
 }
 
 @keyframes dash {
   to {
-    stroke-dashoffset: -10;
+    stroke-dashoffset: -9;
   }
 }
 
 .connection-arrow {
-  animation: pulse 1.5s infinite;
+  animation: subtlePulse 2s infinite;
 }
 
-@keyframes pulse {
+@keyframes subtlePulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.6;
-  }
-}
-
-.animate-blink {
-  animation: blink 1s step-start infinite;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
+    opacity: 0.7;
   }
 }
 
 .data-packet {
-  filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.7));
+  filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3));
 }
 
-/* Animação para agentes ativos */
+/* Animação profissional para agentes ativos */
 .agent-active {
-  animation: agentPulse 1.5s infinite;
+  animation: professionalPulse 2s infinite;
 }
 
-@keyframes agentPulse {
+@keyframes professionalPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.2);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
   }
 }
 
-/* Novas animações para o sistema teatral */
-@keyframes neuralPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-}
-
-@keyframes dataFlow {
+/* Animações sutis e profissionais */
+@keyframes subtleDataFlow {
   0% {
     stroke-dashoffset: 0;
   }
   100% {
-    stroke-dashoffset: -20;
+    stroke-dashoffset: -12;
   }
 }
 
-@keyframes particleGlow {
-  0%, 100% {
-    filter: drop-shadow(0 0 2px currentColor);
-  }
-  50% {
-    filter: drop-shadow(0 0 8px currentColor);
-  }
-}
-
-@keyframes networkActivation {
-  0% {
-    opacity: 0.3;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 0.8;
-    transform: scale(1);
-  }
-}
-
-/* Classes para animações teatrais */
-.neural-pulse {
-  animation: neuralPulse 2s ease-in-out infinite;
+/* Classes para animações profissionais */
+.professional-pulse {
+  animation: subtlePulse 2s ease-in-out infinite;
 }
 
 .data-flow {
-  animation: dataFlow 3s linear infinite;
+  animation: subtleDataFlow 3s linear infinite;
 }
 
-.particle-glow {
-  animation: particleGlow 1.5s ease-in-out infinite;
-}
-
-.network-activation {
-  animation: networkActivation 0.8s ease-out;
-}
-
-/* Efeitos de hover para interatividade */
+/* Efeitos de hover discretos */
 .agent-node:hover {
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
 }
 
 .connection-line:hover {
-  stroke-width: 4;
-  opacity: 1;
+  stroke-width: 3;
+  transition: stroke-width 0.2s ease;
+}
+
+/* Transições suaves */
+.professional-transition {
   transition: all 0.3s ease;
-}
-
-/* Gradientes animados */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animated-gradient {
-  background: linear-gradient(-45deg, #3b82f6, #8b5cf6, #10b981, #f59e0b);
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
 }
