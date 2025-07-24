@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronDown, ChevronUp, Eye, FileHeart } from "lucide-react";
+import ConditionDetailedAnalysisModal from "./modals/ConditionDetailedAnalysisModal";
 
 interface Condition {
   id: string;
@@ -34,12 +35,19 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
   isLoading
 }) => {
   const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
+  const [selectedCondition, setSelectedCondition] = React.useState<Condition | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   
   const toggleRow = (id: string) => {
     setExpandedRows(prev => ({
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const handleDetailedAnalysis = (condition: Condition) => {
+    setSelectedCondition(condition);
+    setIsModalOpen(true);
   };
   
   if (isLoading) {
@@ -211,7 +219,12 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                           </div>
                         </div>
                         <div className="flex justify-end">
-                          <Button variant="outline">Ver Análise Detalhada</Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => handleDetailedAnalysis(condition)}
+                          >
+                            Ver Análise Detalhada
+                          </Button>
                           <Button className="ml-2">Ver Pacotes Recomendados</Button>
                         </div>
                       </div>
@@ -223,6 +236,12 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
           )}
         </TableBody>
       </Table>
+
+      <ConditionDetailedAnalysisModal
+        condition={selectedCondition}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
