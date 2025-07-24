@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Brain, Database, Network, BarChart3 } from "lucide-react";
+import { ArrowLeft, Play, Pause, Brain, Database, Network, BarChart3 } from "lucide-react";
 import { useAnalysisSimulation } from '@/components/administrador/dataAnalysis/useAnalysisSimulation';
 import AgentNetwork from '@/components/administrador/dataAnalysis/AgentNetwork';
 import MessageLog from '@/components/administrador/dataAnalysis/MessageLog';
 import AdvancedControlPanel from '@/components/administrador/dataAnalysis/network/AdvancedControlPanel';
 import AdminLayout from '@/components/administrador/AdminLayout';
-import AdminHeader from '@/components/administrador/AdminHeader';
 
 const MultiAgentSimulationPage: React.FC = () => {
   const location = useLocation();
@@ -63,44 +62,69 @@ const MultiAgentSimulationPage: React.FC = () => {
     }
   };
 
+  const getButtonText = () => {
+    if (isCountingDown) {
+      return `Iniciando em ${countdown}...`;
+    }
+    if (analyzing && !isPaused) {
+      return 'Pausar';
+    }
+    if (isPaused) {
+      return 'Continuar';
+    }
+    return 'Iniciar Análise';
+  };
+
+  const getButtonIcon = () => {
+    if (isCountingDown) {
+      return <Brain className="h-4 w-4 animate-pulse" />;
+    }
+    if (analyzing && !isPaused) {
+      return <Pause className="h-4 w-4" />;
+    }
+    return <Play className="h-4 w-4" />;
+  };
+
   return (
     <AdminLayout 
       currentStep="analysis" 
       setCurrentStep={() => navigate('/administrador?tab=analysis')}
     >
       <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
-        {/* Header com controles restaurados */}
-        <AdminHeader 
-          analyzing={analyzing}
-          isPaused={isPaused}
-          countdown={countdown}
-          isCountingDown={isCountingDown}
-          onStartAnalysis={handleStartAnalysis}
-        />
-
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/administrador?tab=analysis')} 
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
-          <div className="flex items-center gap-3">
-            <Brain className="h-6 w-6 text-purple-600" />
-            <div>
-              <h1 className="text-2xl font-bold">Simulação Multi-Agente</h1>
-              <p className="text-gray-600">
-                Análise inteligente de {importStats.eligiblePets} pets com dados correlacionados
-              </p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/administrador?tab=analysis')} 
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <div className="flex items-center gap-3">
+              <Brain className="h-6 w-6 text-purple-600" />
+              <div>
+                <h1 className="text-2xl font-bold">Simulação Multi-Agente</h1>
+                <p className="text-gray-600">
+                  Análise inteligente de {importStats.eligiblePets} pets com dados correlacionados
+                </p>
+              </div>
             </div>
           </div>
-          <div className="ml-auto">
+          <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-300">
               SIMULAÇÃO IA
             </Badge>
+            <Button
+              onClick={handleStartAnalysis}
+              variant={analyzing && !isPaused ? "secondary" : "default"}
+              className="flex items-center gap-2"
+              disabled={isCountingDown}
+            >
+              {getButtonIcon()}
+              {getButtonText()}
+            </Button>
           </div>
         </div>
 
@@ -174,9 +198,9 @@ const MultiAgentSimulationPage: React.FC = () => {
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Main Content */}
+        {/* Main Content - Expandido */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Agent Network */}
+          {/* Agent Network - Espaço ampliado */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -189,7 +213,6 @@ const MultiAgentSimulationPage: React.FC = () => {
                 <AgentNetwork
                   connections={connections}
                   activeAgent={activeAgent}
-                  step={step}
                 />
               </div>
             </CardContent>
@@ -204,16 +227,18 @@ const MultiAgentSimulationPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MessageLog 
-                messages={messages} 
-                step={step}
-                isPaused={isPaused}
-              />
+              <div className="h-[500px]">
+                <MessageLog 
+                  messages={messages} 
+                  step={step}
+                  isPaused={isPaused}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Advanced Control Panel */}
+        {/* Advanced Control Panel - Reposicionado */}
         <div className="mt-auto">
           <AdvancedControlPanel
             connections={connections}

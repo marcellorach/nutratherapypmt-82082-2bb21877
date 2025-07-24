@@ -1,49 +1,11 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, BookOpen, Database, Clock, Play, Pause, Brain } from "lucide-react";
+import { Settings, BookOpen, Database } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
-interface AdminHeaderProps {
-  // Propriedades para controle da simulação
-  analyzing?: boolean;
-  isPaused?: boolean;
-  countdown?: number;
-  isCountingDown?: boolean;
-  onStartAnalysis?: () => void;
-}
-
-const AdminHeader: React.FC<AdminHeaderProps> = ({ 
-  analyzing = false, 
-  isPaused = false, 
-  countdown = 0, 
-  isCountingDown = false, 
-  onStartAnalysis 
-}) => {
+const AdminHeader: React.FC = () => {
   const { t } = useTranslation();
-  
-  const getButtonText = () => {
-    if (isCountingDown) {
-      return `Iniciando em ${countdown}...`;
-    }
-    if (analyzing && !isPaused) {
-      return 'Pausar';
-    }
-    if (isPaused) {
-      return 'Continuar';
-    }
-    return 'Iniciar Análise';
-  };
-
-  const getButtonIcon = () => {
-    if (isCountingDown) {
-      return <Brain className="h-4 w-4 animate-pulse" />;
-    }
-    if (analyzing && !isPaused) {
-      return <Pause className="h-4 w-4" />;
-    }
-    return <Play className="h-4 w-4" />;
-  };
   
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -65,19 +27,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           <Settings className="mr-2 h-4 w-4" />
           {t('common.settings')}
         </Button>
-        
-        {/* Botão de cronômetro/simulação se fornecido */}
-        {onStartAnalysis && (
-          <Button
-            onClick={onStartAnalysis}
-            variant={analyzing && !isPaused ? "secondary" : "default"}
-            className="flex items-center gap-2"
-            disabled={isCountingDown}
-          >
-            {getButtonIcon()}
-            {getButtonText()}
-          </Button>
-        )}
       </div>
     </div>
   );

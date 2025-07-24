@@ -30,7 +30,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Plus, RefreshCw, ExternalLink, Database, FileText, FileSpreadsheet } from "lucide-react";
 import { DataSource } from './dataAnalysis/types';
-import { formatDate } from '../../utils/dateUtils';
 
 // Dados de demonstração
 const mockFontesDados: DataSource[] = [
@@ -231,7 +230,7 @@ const FontesTab: React.FC = () => {
                   </TableCell>
                   <TableCell>{fonte.recordCount.toLocaleString()}</TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {formatDate(fonte.lastUpdated)}
+                    {fonte.lastUpdated.toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">

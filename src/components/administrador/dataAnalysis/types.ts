@@ -1,16 +1,21 @@
 
+import React from 'react';
+
 export interface Agent {
   id: string;
   name: string;
   model: string;
   color: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   description: string;
+  capabilities?: string[];
+  version?: string;
 }
 
-export interface AgentPosition {
-  x: number;
-  y: number;
+export interface AgentMessage {
+  agentId: string;
+  message: string;
+  timestamp: Date;
 }
 
 export interface AgentConnection {
@@ -18,13 +23,6 @@ export interface AgentConnection {
   to: string;
   active: boolean;
   animating: boolean;
-  connectionType?: 'normal' | 'warning' | 'error';
-}
-
-export interface AgentMessage {
-  agentId: string;
-  message: string;
-  timestamp: Date;
 }
 
 export interface DataPacket {
@@ -34,39 +32,40 @@ export interface DataPacket {
   duration: number;
 }
 
+export interface AgentPosition {
+  x: number;
+  y: number;
+}
+
 export type AnalysisStep = 'waiting' | 'processing' | 'completed';
 
-// Tipos adicionais necessários para outros componentes
+export interface NutraceuticalRule {
+  id: string;
+  name: string;
+  description: string;
+  condition: string;
+  appliesTo: string[];
+  priority: number;
+  formula?: string;
+  active: boolean;
+}
+
 export interface DataSource {
   id: string;
   name: string;
-  type: string;
-  status: string;
+  type: 'clinical' | 'scientific' | 'analytics';
   description: string;
+  lastUpdated: Date;
   recordCount: number;
-  lastUpdated: Date | string;
+  status: 'online' | 'updating' | 'offline';
 }
 
 export interface PredictionModel {
   id: string;
   name: string;
-  accuracy: number;
-  status?: string;
   description: string;
   algorithm: string;
-  lastTrained: Date | string;
-  parameters?: any;
-}
-
-export interface NutraceuticalRule {
-  id: string;
-  name: string;
-  condition: string;
-  recommendation?: string;
-  evidence?: number;
-  description: string;
-  active: boolean;
-  priority: number | string;
-  appliesTo?: string[];
-  formula?: string;
+  accuracy: number;
+  lastTrained: Date;
+  parameters: Record<string, any>;
 }

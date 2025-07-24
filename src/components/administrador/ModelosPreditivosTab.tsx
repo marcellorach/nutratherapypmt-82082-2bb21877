@@ -32,7 +32,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Play, Brain, BarChart, CircleDashed, LineChart, AreaChart, Gauge } from "lucide-react";
 import { PredictionModel } from "./dataAnalysis/types";
-import { formatDate } from '../../utils/dateUtils';
 
 // Dados de exemplo para modelos preditivos
 const mockModelos: PredictionModel[] = [
@@ -327,7 +326,7 @@ const ModelosPreditivosTab: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {formatDate(modelo.lastTrained)}
+                    {modelo.lastTrained.toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
