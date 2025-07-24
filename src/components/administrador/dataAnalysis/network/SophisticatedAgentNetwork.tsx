@@ -4,7 +4,6 @@ import { AgentConnection } from '../types';
 import { agents, agentPositions } from '../agentData';
 import SophisticatedAgentNode from './SophisticatedAgentNode';
 import SophisticatedConnections from './SophisticatedConnections';
-import { useAgentMetrics } from './useAgentMetrics';
 
 interface SophisticatedAgentNetworkProps {
   connections: AgentConnection[];
@@ -16,10 +15,6 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
   activeAgent
 }) => {
   const [agentActivity, setAgentActivity] = useState<Record<string, number>>({});
-  const isNetworkActive = connections.some(conn => conn.active || conn.animating);
-  
-  // Hook para métricas dinâmicas
-  const agentMetrics = useAgentMetrics(agents, activeAgent, isNetworkActive);
 
   // Calcular atividade dos agentes baseada nas conexões
   useEffect(() => {
@@ -70,28 +65,28 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
 
       {/* Camada principal do diagrama */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 600">
-        {/* Zona de processamento central - mais sutil */}
+        {/* Zona de processamento central - sutil */}
         <circle
           cx="400"
           cy="300"
-          r="220"
+          r="200"
           fill="none"
           stroke="#e2e8f0"
           strokeWidth="1"
-          strokeDasharray="8,4"
-          opacity="0.3"
+          strokeDasharray="5,5"
+          opacity="0.4"
         />
         
         {/* Zona de dados */}
         <circle
           cx="400"
           cy="300"
-          r="160"
+          r="150"
           fill="none"
           stroke="#cbd5e1"
           strokeWidth="0.5"
-          strokeDasharray="4,4"
-          opacity="0.25"
+          strokeDasharray="3,3"
+          opacity="0.3"
         />
 
         {/* Conexões sofisticadas */}
@@ -103,7 +98,7 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
           activeAgent={activeAgent}
         />
 
-        {/* Nós dos agentes com métricas */}
+        {/* Nós dos agentes */}
         {agents.map(agent => (
           <SophisticatedAgentNode
             key={agent.id}
@@ -113,7 +108,6 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
             width={800}
             height={600}
             activityLevel={agentActivity[agent.id] || 0}
-            metrics={agentMetrics[agent.id]}
           />
         ))}
       </svg>
