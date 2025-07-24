@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ExternalLink, Search, FileText, Award, Users } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
 interface Study {
   id: string;
   title: string;
@@ -23,12 +22,12 @@ interface Study {
   effectSize: number;
   doi: string;
 }
-
 interface EvidenceMatrixProps {
   condition: any;
 }
-
-const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
+const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
+  condition
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
@@ -36,134 +35,131 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
   // Estudos simulados baseados na condição
   const generateStudies = (): Study[] => {
     const isObesity = condition.name.toLowerCase().includes('obesidade');
-    
     if (isObesity) {
-      return [
-        {
-          id: 'study1',
-          title: 'L-Carnitina suplementação na redução de peso corporal em cães obesos: um estudo randomizado controlado',
-          authors: 'Silva, M.R. et al.',
-          journal: 'Journal of Veterinary Nutrition',
-          year: 2023,
-          type: 'RCT',
-          sampleSize: 120,
-          species: 'Caninos',
-          outcome: 'Redução significativa de 18% no peso corporal',
-          confidenceScore: 4.8,
-          effectSize: 1.8,
-          doi: '10.1234/jvn.2023.04.015'
-        },
-        {
-          id: 'study2',
-          title: 'Eficácia do cromo picolinato no controle glicêmico de felinos com predisposição à obesidade',
-          authors: 'Costa, A.B. et al.',
-          journal: 'Veterinary Metabolism Research',
-          year: 2022,
-          type: 'RCT',
-          sampleSize: 85,
-          species: 'Felinos',
-          outcome: 'Melhora de 25% na sensibilidade à insulina',
-          confidenceScore: 4.5,
-          effectSize: 1.6,
-          doi: '10.1234/vmr.2022.09.033'
-        },
-        {
-          id: 'study3',
-          title: 'Meta-análise dos efeitos da Garcinia cambogia na prevenção do ganho de peso em pets',
-          authors: 'Rodriguez, L.F. et al.',
-          journal: 'Comparative Nutritional Studies',
-          year: 2023,
-          type: 'Meta-análise',
-          sampleSize: 450,
-          species: 'Caninos/Felinos',
-          outcome: 'Prevenção de ganho de peso em 32% dos casos',
-          confidenceScore: 4.2,
-          effectSize: 1.2,
-          doi: '10.1234/cns.2023.01.078'
-        },
-        {
-          id: 'study4',
-          title: 'Extrato de chá verde (EGCG) e termogênese em modelos caninos: estudo observacional longitudinal',
-          authors: 'Thompson, K.J. et al.',
-          journal: 'International Pet Obesity Research',
-          year: 2022,
-          type: 'Observacional',
-          sampleSize: 200,
-          species: 'Caninos',
-          outcome: 'Aumento de 15% na taxa metabólica basal',
-          confidenceScore: 3.8,
-          effectSize: 1.1,
-          doi: '10.1234/ipor.2022.11.124'
-        },
-        {
-          id: 'study5',
-          title: 'Mecanismos celulares da L-carnitina na oxidação lipídica: estudos in vitro em adipócitos',
-          authors: 'Park, S.H. et al.',
-          journal: 'Cellular Metabolism & Nutrition',
-          year: 2021,
-          type: 'In Vitro',
-          sampleSize: 0,
-          species: 'In Vitro',
-          outcome: 'Aumento de 40% na oxidação de ácidos graxos',
-          confidenceScore: 3.2,
-          effectSize: 2.1,
-          doi: '10.1234/cmn.2021.06.089'
-        }
-      ];
+      return [{
+        id: 'study1',
+        title: 'L-Carnitina suplementação na redução de peso corporal em cães obesos: um estudo randomizado controlado',
+        authors: 'Silva, M.R. et al.',
+        journal: 'Journal of Veterinary Nutrition',
+        year: 2023,
+        type: 'RCT',
+        sampleSize: 120,
+        species: 'Caninos',
+        outcome: 'Redução significativa de 18% no peso corporal',
+        confidenceScore: 4.8,
+        effectSize: 1.8,
+        doi: '10.1234/jvn.2023.04.015'
+      }, {
+        id: 'study2',
+        title: 'Eficácia do cromo picolinato no controle glicêmico de felinos com predisposição à obesidade',
+        authors: 'Costa, A.B. et al.',
+        journal: 'Veterinary Metabolism Research',
+        year: 2022,
+        type: 'RCT',
+        sampleSize: 85,
+        species: 'Felinos',
+        outcome: 'Melhora de 25% na sensibilidade à insulina',
+        confidenceScore: 4.5,
+        effectSize: 1.6,
+        doi: '10.1234/vmr.2022.09.033'
+      }, {
+        id: 'study3',
+        title: 'Meta-análise dos efeitos da Garcinia cambogia na prevenção do ganho de peso em pets',
+        authors: 'Rodriguez, L.F. et al.',
+        journal: 'Comparative Nutritional Studies',
+        year: 2023,
+        type: 'Meta-análise',
+        sampleSize: 450,
+        species: 'Caninos/Felinos',
+        outcome: 'Prevenção de ganho de peso em 32% dos casos',
+        confidenceScore: 4.2,
+        effectSize: 1.2,
+        doi: '10.1234/cns.2023.01.078'
+      }, {
+        id: 'study4',
+        title: 'Extrato de chá verde (EGCG) e termogênese em modelos caninos: estudo observacional longitudinal',
+        authors: 'Thompson, K.J. et al.',
+        journal: 'International Pet Obesity Research',
+        year: 2022,
+        type: 'Observacional',
+        sampleSize: 200,
+        species: 'Caninos',
+        outcome: 'Aumento de 15% na taxa metabólica basal',
+        confidenceScore: 3.8,
+        effectSize: 1.1,
+        doi: '10.1234/ipor.2022.11.124'
+      }, {
+        id: 'study5',
+        title: 'Mecanismos celulares da L-carnitina na oxidação lipídica: estudos in vitro em adipócitos',
+        authors: 'Park, S.H. et al.',
+        journal: 'Cellular Metabolism & Nutrition',
+        year: 2021,
+        type: 'In Vitro',
+        sampleSize: 0,
+        species: 'In Vitro',
+        outcome: 'Aumento de 40% na oxidação de ácidos graxos',
+        confidenceScore: 3.2,
+        effectSize: 2.1,
+        doi: '10.1234/cmn.2021.06.089'
+      }];
     } else {
-      return [
-        {
-          id: 'study1',
-          title: `Estudo controlado sobre nutracêuticos para ${condition.name} em animais de companhia`,
-          authors: 'Santos, J.P. et al.',
-          journal: 'Veterinary Research Journal',
-          year: 2023,
-          type: 'RCT',
-          sampleSize: 95,
-          species: 'Caninos',
-          outcome: 'Melhora significativa nos sintomas',
-          confidenceScore: 4.1,
-          effectSize: 1.5,
-          doi: '10.1234/vrj.2023.03.012'
-        },
-        {
-          id: 'study2',
-          title: `Análise longitudinal dos efeitos preventivos em ${condition.name}`,
-          authors: 'Miller, R.A. et al.',
-          journal: 'Comparative Medicine Review',
-          year: 2022,
-          type: 'Observacional',
-          sampleSize: 150,
-          species: 'Caninos/Felinos',
-          outcome: 'Redução de 30% na incidência',
-          confidenceScore: 3.7,
-          effectSize: 1.3,
-          doi: '10.1234/cmr.2022.08.045'
-        }
-      ];
+      return [{
+        id: 'study1',
+        title: `Estudo controlado sobre nutracêuticos para ${condition.name} em animais de companhia`,
+        authors: 'Santos, J.P. et al.',
+        journal: 'Veterinary Research Journal',
+        year: 2023,
+        type: 'RCT',
+        sampleSize: 95,
+        species: 'Caninos',
+        outcome: 'Melhora significativa nos sintomas',
+        confidenceScore: 4.1,
+        effectSize: 1.5,
+        doi: '10.1234/vrj.2023.03.012'
+      }, {
+        id: 'study2',
+        title: `Análise longitudinal dos efeitos preventivos em ${condition.name}`,
+        authors: 'Miller, R.A. et al.',
+        journal: 'Comparative Medicine Review',
+        year: 2022,
+        type: 'Observacional',
+        sampleSize: 150,
+        species: 'Caninos/Felinos',
+        outcome: 'Redução de 30% na incidência',
+        confidenceScore: 3.7,
+        effectSize: 1.3,
+        doi: '10.1234/cmr.2022.08.045'
+      }];
     }
   };
-
   const studies = generateStudies();
 
   // Filtrar estudos
   const filteredStudies = studies.filter(study => {
-    const matchesSearch = study.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         study.authors.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = study.title.toLowerCase().includes(searchTerm.toLowerCase()) || study.authors.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || study.type === filterType;
     const matchesSpecies = filterSpecies === 'all' || study.species.toLowerCase().includes(filterSpecies);
-    
     return matchesSearch && matchesType && matchesSpecies;
   });
 
   // Dados para gráfico de distribuição por tipo de estudo
-  const studyTypeData = [
-    { type: 'RCT', count: studies.filter(s => s.type === 'RCT').length, avgConfidence: 4.5 },
-    { type: 'Meta-análise', count: studies.filter(s => s.type === 'Meta-análise').length, avgConfidence: 4.2 },
-    { type: 'Observacional', count: studies.filter(s => s.type === 'Observacional').length, avgConfidence: 3.8 },
-    { type: 'In Vitro', count: studies.filter(s => s.type === 'In Vitro').length, avgConfidence: 3.2 }
-  ].filter(item => item.count > 0);
-
+  const studyTypeData = [{
+    type: 'RCT',
+    count: studies.filter(s => s.type === 'RCT').length,
+    avgConfidence: 4.5
+  }, {
+    type: 'Meta-análise',
+    count: studies.filter(s => s.type === 'Meta-análise').length,
+    avgConfidence: 4.2
+  }, {
+    type: 'Observacional',
+    count: studies.filter(s => s.type === 'Observacional').length,
+    avgConfidence: 3.8
+  }, {
+    type: 'In Vitro',
+    count: studies.filter(s => s.type === 'In Vitro').length,
+    avgConfidence: 3.2
+  }].filter(item => item.count > 0);
   const getTypeColor = (type: string) => {
     const colors = {
       'RCT': 'default',
@@ -173,22 +169,27 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
     } as const;
     return colors[type as keyof typeof colors] || 'outline';
   };
-
   const getConfidenceColor = (score: number) => {
     if (score >= 4.5) return 'text-green-600';
     if (score >= 4.0) return 'text-blue-600';
     if (score >= 3.5) return 'text-yellow-600';
     return 'text-red-600';
   };
-
   const getEffectSizeBadge = (size: number) => {
-    if (size >= 1.8) return { variant: 'default' as const, text: 'Alto' };
-    if (size >= 1.3) return { variant: 'secondary' as const, text: 'Moderado' };
-    return { variant: 'outline' as const, text: 'Baixo' };
+    if (size >= 1.8) return {
+      variant: 'default' as const,
+      text: 'Alto'
+    };
+    if (size >= 1.3) return {
+      variant: 'secondary' as const,
+      text: 'Moderado'
+    };
+    return {
+      variant: 'outline' as const,
+      text: 'Baixo'
+    };
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Resumo de evidências */}
       <div className="grid grid-cols-4 gap-4">
         <Card>
@@ -254,15 +255,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
         <CardContent className="p-4">
           <div className="flex items-center space-x-4">
             <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por título ou autor..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+              
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-40">
@@ -309,8 +302,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStudies.map((study) => (
-                <TableRow key={study.id}>
+              {filteredStudies.map(study => <TableRow key={study.id}>
                   <TableCell>
                     <div>
                       <p className="font-medium text-sm">{study.title}</p>
@@ -348,16 +340,13 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)}
             </TableBody>
           </Table>
           
-          {filteredStudies.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+          {filteredStudies.length === 0 && <div className="text-center py-8 text-muted-foreground">
               Nenhum estudo encontrado com os filtros aplicados.
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -388,8 +377,6 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({ condition }) => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default EvidenceMatrix;
