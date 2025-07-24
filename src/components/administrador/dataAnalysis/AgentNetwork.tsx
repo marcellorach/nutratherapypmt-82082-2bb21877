@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AgentConnection } from './types';
-import ProfessionalAgentNetwork from './network/ProfessionalAgentNetwork';
+import SophisticatedAgentNetwork from './network/SophisticatedAgentNetwork';
 
 interface AgentNetworkProps {
   connections: AgentConnection[];
@@ -10,7 +10,7 @@ interface AgentNetworkProps {
 
 const AgentNetwork: React.FC<AgentNetworkProps> = ({ connections, activeAgent }) => {
   return (
-    <ProfessionalAgentNetwork
+    <SophisticatedAgentNetwork
       connections={connections}
       activeAgent={activeAgent}
     />
