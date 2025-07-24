@@ -24,8 +24,8 @@ const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasCl
 const RelationsTab = lazy(() => import('@/components/administrador/visualizations/relations/RelationsTab'));
 const KnowledgeBaseSettingsTab = lazy(() => import('@/components/administrador/settings/KnowledgeBaseSettingsTab'));
 const OutcomeManagementPanel = lazy(() => import('@/components/administrador/settings/panels/OutcomeManagementPanel'));
-const ImportStep = lazy(() => import('@/components/administrador/dataAnalysis/ImportStep'));
 const FontesTab = lazy(() => import('@/components/administrador/FontesTab'));
+const ImportStep = lazy(() => import('@/components/administrador/dataAnalysis/ImportStep'));
 const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/AnalysisStep'));
 const VisualizationStep = lazy(() => import('@/components/administrador/dataAnalysis/VisualizationStep'));
 const ActionsStep = lazy(() => import('@/components/administrador/dataAnalysis/ActionsStep'));
@@ -102,15 +102,15 @@ export const adminTabsConfig: AdminTabConfig[] = [
     id: 'import',
     label: 'Importação',
     group: 'data-processing',
-    component: ImportStep,
-    description: 'Importação de dados'
+    component: FontesTab,
+    description: 'Fontes de dados e importação'
   },
   {
-    id: 'fontes',
-    label: 'Fontes',
+    id: 'simulacao-import',
+    label: 'Simulação',
     group: 'data-processing',
-    component: FontesTab,
-    description: 'Gerenciamento de fontes'
+    component: ImportStep,
+    description: 'Simulação de importação'
   },
   {
     id: 'analysis',
