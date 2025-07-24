@@ -103,8 +103,8 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
-        <DialogHeader className="pb-4 border-b">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-4 border-b flex-shrink-0">
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl font-bold">
@@ -141,37 +141,37 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
               <TabsTrigger value="epidemiology">Epidemiologia</TabsTrigger>
               <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
               <TabsTrigger value="evidence">Evidências</TabsTrigger>
               <TabsTrigger value="simulator">Simulador</TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-y-auto mt-4">
-              <TabsContent value="epidemiology" className="mt-0 h-full">
+            <div className="flex-1 overflow-y-auto mt-4 min-h-0">
+              <TabsContent value="epidemiology" className="mt-0 h-full overflow-y-auto">
                 <EpidemiologicalTree 
                   condition={condition}
                   data={epidemiologyData}
                 />
               </TabsContent>
 
-              <TabsContent value="nutraceuticals" className="mt-0 h-full">
+              <TabsContent value="nutraceuticals" className="mt-0 h-full overflow-y-auto">
                 <NutraceuticalComparisonChart 
                   condition={condition}
                   nutraceuticals={nutraceuticalData}
                 />
               </TabsContent>
 
-              <TabsContent value="evidence" className="mt-0 h-full">
+              <TabsContent value="evidence" className="mt-0 h-full overflow-y-auto">
                 <EvidenceMatrix 
                   condition={condition}
                 />
               </TabsContent>
 
-              <TabsContent value="simulator" className="mt-0 h-full">
+              <TabsContent value="simulator" className="mt-0 h-full overflow-y-auto">
                 <PredictiveSimulator 
                   condition={condition}
                   nutraceuticals={nutraceuticalData}
