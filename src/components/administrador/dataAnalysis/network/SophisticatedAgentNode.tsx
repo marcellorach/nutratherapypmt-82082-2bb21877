@@ -17,6 +17,7 @@ interface SophisticatedAgentNodeProps {
     activityHistory: number[];
     currentThroughput: string;
     metricType: 'tokens/s' | 'req/s' | 'ops/s';
+    errorState: 'none' | 'warning' | 'error' | 'recovery';
   };
 }
 
@@ -43,7 +44,6 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         setProcessingProgress(prev => {
           const newProgress = (prev + 15) % 100;
           if (newProgress === 0) {
-            // Resetar ciclo
             setCpuUsage(Math.random() * 60 + 40);
             setMemoryUsage(Math.random() * 50 + 35);
           }
@@ -69,54 +69,83 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
     }
   };
 
+  const getErrorColor = (errorState: string) => {
+    switch (errorState) {
+      case 'warning': return '#f59e0b';
+      case 'error': return '#ef4444';
+      case 'recovery': return '#10b981';
+      default: return getModelColor(agent.model);
+    }
+  };
+
   const modelColor = getModelColor(agent.model);
-  const nodeRadius = 48; // Aumentado de 32 para 48 (50% maior)
+  const errorColor = getErrorColor(metrics?.errorState || 'none');
+  const nodeRadius = 48;
   const ModelLogo = getModelLogo(agent.model);
 
-  // Renderizar gráfico de atividade animado
+  // Renderizar gráfico de atividade animado - CORRIGIDO para ficar dentro do quadro
   const renderActivityGraph = () => {
     if (!metrics?.activityHistory) return null;
     
+    // Garantir que os pontos fiquem dentro do quadro 16x14 (com margem de 2px)
+    const graphWidth = 14;
+    const graphHeight = 12;
+    const marginX = 2;
+    const marginY = 2;
+    
     const points = metrics.activityHistory.map((value, index) => {
-      const x = (index / (metrics.activityHistory.length - 1)) * 16;
-      const y = 16 - (value * 12);
+      const x = marginX + (index / (metrics.activityHistory.length - 1)) * graphWidth;
+      const y = marginY + graphHeight - (value * graphHeight);
       return `${x},${y}`;
     }).join(' ');
     
     return (
       <g transform="translate(35, 2)">
-        <rect width="18" height="18" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.5" rx="2" />
-        <polyline
-          points={points}
-          fill="none"
-          stroke={modelColor}
-          strokeWidth="1.5"
-          opacity="0.8"
-        />
-        {/* Pontos animados */}
-        {metrics.activityHistory.map((value, index) => {
-          const cx = (index / (metrics.activityHistory.length - 1)) * 16;
-          const cy = 16 - (value * 12);
-          return (
-            <circle
-              key={index}
-              cx={cx}
-              cy={cy}
-              r="0.8"
-              fill={modelColor}
-              opacity={index === metrics.activityHistory.length - 1 ? 1 : 0.6}
-            >
-              {index === metrics.activityHistory.length - 1 && (
-                <animate
-                  attributeName="r"
-                  values="0.8;1.2;0.8"
-                  dur="2s"
-                  repeatCount="indefinite"
-                />
-              )}
-            </circle>
-          );
-        })}
+        {/* Quadro de fundo */}
+        <rect width="18" height="16" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.5" rx="2" />
+        
+        {/* Clipping para garantir que não saia do quadro */}
+        <defs>
+          <clipPath id={`clip-${agent.id}`}>
+            <rect x="1" y="1" width="16" height="14" />
+          </clipPath>
+        </defs>
+        
+        <g clipPath={`url(#clip-${agent.id})`}>
+          {/* Linha do gráfico */}
+          <polyline
+            points={points}
+            fill="none"
+            stroke={errorColor}
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
+          
+          {/* Pontos animados */}
+          {metrics.activityHistory.map((value, index) => {
+            const cx = marginX + (index / (metrics.activityHistory.length - 1)) * graphWidth;
+            const cy = marginY + graphHeight - (value * graphHeight);
+            return (
+              <circle
+                key={index}
+                cx={cx}
+                cy={cy}
+                r="0.8"
+                fill={errorColor}
+                opacity={index === metrics.activityHistory.length - 1 ? 1 : 0.6}
+              >
+                {index === metrics.activityHistory.length - 1 && (
+                  <animate
+                    attributeName="r"
+                    values="0.8;1.2;0.8"
+                    dur="2s"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </circle>
+            );
+          })}
+        </g>
       </g>
     );
   };
@@ -143,15 +172,17 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         filter={`url(#shadow-${agent.id})`}
       />
 
-      {/* Nó principal */}
+      {/* Nó principal com cor baseada no estado de erro */}
       <circle
         cx="0"
         cy="0"
         r={nodeRadius}
         fill={`url(#nodeGradient-${agent.id})`}
-        stroke={isActive ? modelColor : '#d1d5db'}
+        stroke={isActive ? errorColor : '#d1d5db'}
         strokeWidth={isActive ? 3 : 1}
-        className="transition-all duration-300"
+        className={`transition-all duration-300 ${
+          metrics?.errorState === 'error' ? 'animate-pulse' : ''
+        }`}
       />
 
       {/* Círculo interno para o modelo */}
@@ -168,15 +199,19 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
         <ModelLogo size={24} />
       </g>
 
-      {/* Indicador de status */}
+      {/* Indicador de status com cores de erro */}
       {isActive && (
         <circle
           cx="28"
           cy="-28"
           r="5"
-          fill="#10b981"
-          className="animate-pulse"
-          style={{ animationDuration: '1.5s' }}
+          fill={
+            metrics?.errorState === 'error' ? '#ef4444' :
+            metrics?.errorState === 'warning' ? '#f59e0b' :
+            metrics?.errorState === 'recovery' ? '#10b981' : '#10b981'
+          }
+          className={metrics?.errorState === 'error' ? 'animate-pulse' : ''}
+          style={{ animationDuration: '1s' }}
         />
       )}
 
@@ -195,7 +230,7 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
           y="0"
           width={60 * (processingProgress / 100)}
           height="4"
-          fill={modelColor}
+          fill={errorColor}
           rx="2"
           opacity="0.8"
         />
@@ -306,7 +341,7 @@ const SophisticatedAgentNode: React.FC<SophisticatedAgentNodeProps> = ({
           y={nodeRadius + 145}
           width={40 * activityLevel}
           height="3"
-          fill={modelColor}
+          fill={errorColor}
           opacity="0.7"
           rx="1.5"
         />

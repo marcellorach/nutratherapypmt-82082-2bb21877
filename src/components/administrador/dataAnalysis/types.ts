@@ -1,21 +1,16 @@
 
-import React from 'react';
-
 export interface Agent {
   id: string;
   name: string;
   model: string;
   color: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: any;
   description: string;
-  capabilities?: string[];
-  version?: string;
 }
 
-export interface AgentMessage {
-  agentId: string;
-  message: string;
-  timestamp: Date;
+export interface AgentPosition {
+  x: number;
+  y: number;
 }
 
 export interface AgentConnection {
@@ -23,6 +18,13 @@ export interface AgentConnection {
   to: string;
   active: boolean;
   animating: boolean;
+  connectionType?: 'normal' | 'warning' | 'error';
+}
+
+export interface AgentMessage {
+  agentId: string;
+  message: string;
+  timestamp: Date;
 }
 
 export interface DataPacket {
@@ -32,40 +34,4 @@ export interface DataPacket {
   duration: number;
 }
 
-export interface AgentPosition {
-  x: number;
-  y: number;
-}
-
 export type AnalysisStep = 'waiting' | 'processing' | 'completed';
-
-export interface NutraceuticalRule {
-  id: string;
-  name: string;
-  description: string;
-  condition: string;
-  appliesTo: string[];
-  priority: number;
-  formula?: string;
-  active: boolean;
-}
-
-export interface DataSource {
-  id: string;
-  name: string;
-  type: 'clinical' | 'scientific' | 'analytics';
-  description: string;
-  lastUpdated: Date;
-  recordCount: number;
-  status: 'online' | 'updating' | 'offline';
-}
-
-export interface PredictionModel {
-  id: string;
-  name: string;
-  description: string;
-  algorithm: string;
-  accuracy: number;
-  lastTrained: Date;
-  parameters: Record<string, any>;
-}

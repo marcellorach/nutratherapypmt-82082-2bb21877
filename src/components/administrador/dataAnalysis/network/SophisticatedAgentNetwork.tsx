@@ -9,17 +9,19 @@ import { useAgentMetrics } from './useAgentMetrics';
 interface SophisticatedAgentNetworkProps {
   connections: AgentConnection[];
   activeAgent: string | null;
+  step?: string;
 }
 
 const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
   connections,
-  activeAgent
+  activeAgent,
+  step = 'waiting'
 }) => {
   const [agentActivity, setAgentActivity] = useState<Record<string, number>>({});
   const isNetworkActive = connections.some(conn => conn.active || conn.animating);
   
-  // Hook para métricas dinâmicas
-  const agentMetrics = useAgentMetrics(agents, activeAgent, isNetworkActive);
+  // Hook para métricas dinâmicas com controle de estado
+  const { metrics } = useAgentMetrics(agents, activeAgent, isNetworkActive, step);
 
   // Calcular atividade dos agentes baseada nas conexões
   useEffect(() => {
@@ -70,7 +72,7 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
 
       {/* Camada principal do diagrama */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 600">
-        {/* Zona de processamento central - mais sutil */}
+        {/* Zona de processamento central */}
         <circle
           cx="400"
           cy="300"
@@ -113,7 +115,7 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
             width={800}
             height={600}
             activityLevel={agentActivity[agent.id] || 0}
-            metrics={agentMetrics[agent.id]}
+            metrics={metrics[agent.id]}
           />
         ))}
       </svg>

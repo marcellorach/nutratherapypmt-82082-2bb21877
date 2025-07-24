@@ -213,12 +213,13 @@ const MultiAgentSimulationPage: React.FC = () => {
                 <AgentNetwork
                   connections={connections}
                   activeAgent={activeAgent}
+                  step={step}
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Message Log */}
+          {/* Message Log - EXPANDIDO */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -227,13 +228,11 @@ const MultiAgentSimulationPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[500px]">
-                <MessageLog 
-                  messages={messages} 
-                  step={step}
-                  isPaused={isPaused}
-                />
-              </div>
+              <MessageLog 
+                messages={messages} 
+                step={step}
+                isPaused={isPaused}
+              />
             </CardContent>
           </Card>
         </div>

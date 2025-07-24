@@ -10,12 +10,13 @@ interface AgentMetrics {
   activityHistory: number[];
   currentThroughput: string;
   metricType: 'tokens/s' | 'req/s' | 'ops/s';
+  errorState: 'none' | 'warning' | 'error' | 'recovery';
 }
 
-export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isActive: boolean) => {
+export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isActive: boolean, step: string) => {
   const [metrics, setMetrics] = useState<Record<string, AgentMetrics>>({});
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const historyLength = 8; // Pontos no gráfico
+  const historyLength = 8;
 
   // Inicializar métricas
   useEffect(() => {
@@ -29,19 +30,39 @@ export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isA
         operationsPerSecond: 0,
         activityHistory: new Array(historyLength).fill(0),
         currentThroughput: '0',
-        metricType: getMetricType(agent.id)
+        metricType: getMetricType(agent.id),
+        errorState: 'none'
       };
     });
     
     setMetrics(initialMetrics);
   }, [agents]);
 
-  // Atualizar métricas dinamicamente
+  // Atualizar métricas dinamicamente - parar quando completado
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || step === 'completed') {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
+      }
+      
+      // Zerar métricas quando terminado
+      if (step === 'completed') {
+        setMetrics(prev => {
+          const newMetrics = { ...prev };
+          Object.keys(newMetrics).forEach(agentId => {
+            newMetrics[agentId] = {
+              ...newMetrics[agentId],
+              tokensPerSecond: 0,
+              requestsPerSecond: 0,
+              operationsPerSecond: 0,
+              activityHistory: new Array(historyLength).fill(0),
+              currentThroughput: '0',
+              errorState: 'none'
+            };
+          });
+          return newMetrics;
+        });
       }
       return;
     }
@@ -60,11 +81,12 @@ export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isA
           // Gerar padrões únicos baseados no tipo de agente
           const newActivity = generateActivityPattern(agent.id, isCurrentActive) * activityMultiplier;
           
-          // Atualizar histórico
-          const newHistory = [...agentMetrics.activityHistory.slice(1), newActivity];
+          // Atualizar histórico - garantir que fique dentro dos limites
+          const clampedActivity = Math.max(0, Math.min(1, newActivity));
+          const newHistory = [...agentMetrics.activityHistory.slice(1), clampedActivity];
           
           // Calcular métricas baseadas na atividade
-          const baseValue = Math.max(0.1, newActivity);
+          const baseValue = Math.max(0.1, clampedActivity);
           
           newMetrics[agent.id] = {
             ...agentMetrics,
@@ -72,7 +94,8 @@ export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isA
             requestsPerSecond: baseValue * getRequestsMultiplier(agent.id),
             operationsPerSecond: baseValue * getOperationsMultiplier(agent.id),
             activityHistory: newHistory,
-            currentThroughput: formatThroughput(baseValue, agentMetrics.metricType, agent.id)
+            currentThroughput: formatThroughput(baseValue, agentMetrics.metricType, agent.id),
+            errorState: agentMetrics.errorState
           };
         });
         
@@ -86,9 +109,20 @@ export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isA
         intervalRef.current = null;
       }
     };
-  }, [isActive, activeAgent, agents]);
+  }, [isActive, activeAgent, agents, step]);
 
-  return metrics;
+  // Função para definir estado de erro
+  const setAgentError = (agentId: string, errorState: 'none' | 'warning' | 'error' | 'recovery') => {
+    setMetrics(prev => ({
+      ...prev,
+      [agentId]: {
+        ...prev[agentId],
+        errorState
+      }
+    }));
+  };
+
+  return { metrics, setAgentError };
 };
 
 // Padrões de atividade únicos para cada agente
@@ -98,29 +132,23 @@ const generateActivityPattern = (agentId: string, isActive: boolean): number => 
   
   switch (agentId) {
     case 'supervisor':
-      // Picos regulares de coordenação
       return baseActivity + 0.3 * Math.sin(now / 3000) + 0.2 * Math.random();
     
     case 'data':
-      // Processamento contínuo com variações
       return baseActivity + 0.4 * (0.5 + 0.5 * Math.sin(now / 2000)) + 0.1 * Math.random();
     
     case 'pattern':
-      // Rajadas de análise intensiva
       const burst = Math.sin(now / 4000) > 0.7 ? 0.6 : 0.1;
       return baseActivity + burst + 0.2 * Math.random();
     
     case 'correlation':
-      // Atividade em ondas correlacionadas
       return baseActivity + 0.5 * Math.sin(now / 2500 + 1) + 0.3 * Math.sin(now / 1200);
     
     case 'recommendation':
-      // Picos quando gera recomendações
       const spike = Math.sin(now / 5000) > 0.5 ? 0.8 : 0.2;
       return baseActivity + spike + 0.1 * Math.random();
     
     case 'viz':
-      // Atividade baixa até momentos de renderização
       const render = Math.sin(now / 6000) > 0.8 ? 0.9 : 0.1;
       return baseActivity + render + 0.1 * Math.random();
     

@@ -22,19 +22,24 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
     const activeWidth = connection.active ? 3 : baseWidth;
     const trafficWidth = connection.animating ? 4 : activeWidth;
     
-    const baseColor = '#e2e8f0';
-    const activeColor = '#3b82f6';
-    const trafficColor = '#1e40af';
-    
-    let strokeColor = baseColor;
-    if (connection.active) strokeColor = activeColor;
-    if (connection.animating) strokeColor = trafficColor;
+    // Cores baseadas no tipo de conexão
+    let strokeColor = '#e2e8f0'; // Padrão
+    if (connection.connectionType === 'error') {
+      strokeColor = '#ef4444'; // Vermelho para erro
+    } else if (connection.connectionType === 'warning') {
+      strokeColor = '#f59e0b'; // Amarelo para warning
+    } else if (connection.active) {
+      strokeColor = '#3b82f6'; // Azul para ativo
+    } else if (connection.animating) {
+      strokeColor = '#1e40af'; // Azul escuro para tráfego
+    }
     
     return {
       strokeWidth: trafficWidth,
       strokeColor,
       opacity: connection.active ? 0.9 : 0.4,
-      throughput: connection.animating ? getDynamicThroughput(connection) : '0.1 req/s'
+      throughput: connection.animating ? getDynamicThroughput(connection) : '0.1 req/s',
+      isError: connection.connectionType === 'error'
     };
   };
 
@@ -48,8 +53,7 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
       'viz': '220 ops/s'
     };
     
-    // Adicionar variação baseada na conexão
-    const variation = Math.random() * 0.3 + 0.8; // 0.8 a 1.1
+    const variation = Math.random() * 0.3 + 0.8;
     const baseValue = baseValues[connection.from] || '100 req/s';
     const [num, unit] = baseValue.split(' ');
     const newValue = Math.round(parseFloat(num) * variation);
@@ -95,7 +99,6 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
         const connectionId = `${connection.from}-${connection.to}-${index}`;
         const metrics = getConnectionMetrics(connection);
         
-        // Calcular posição do meio para métricas
         const midX = (fromX + toX) / 2;
         const midY = (fromY + toY) / 2;
         
@@ -125,8 +128,12 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
               opacity={metrics.opacity}
               markerEnd={connection.active ? `url(#arrow-${connectionId})` : ''}
               strokeDasharray={connection.animating ? '10 5' : 'none'}
-              className={connection.animating ? 'animate-pulse' : ''}
-              style={{ animationDuration: '1.2s' }}
+              className={`${connection.animating ? 'animate-pulse' : ''} ${
+                metrics.isError ? 'animate-pulse' : ''
+              }`}
+              style={{ 
+                animationDuration: metrics.isError ? '0.5s' : '1.2s'
+              }}
             />
             
             {/* Indicador de throughput dinâmico */}
@@ -146,7 +153,7 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
                   x={midX}
                   y={midY}
                   textAnchor="middle"
-                  fill="#374151"
+                  fill={metrics.isError ? '#ef4444' : '#374151'}
                   fontSize="9"
                   fontFamily="monospace"
                   fontWeight="500"
@@ -169,7 +176,7 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
                   <animate
                     attributeName="r"
                     values="2.5;4;2.5"
-                    dur="1s"
+                    dur={metrics.isError ? '0.5s' : '1s'}
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -184,7 +191,7 @@ const SophisticatedConnections: React.FC<SophisticatedConnectionsProps> = ({
                   <animate
                     attributeName="r"
                     values="2;3.5;2"
-                    dur="1.2s"
+                    dur={metrics.isError ? '0.6s' : '1.2s'}
                     repeatCount="indefinite"
                   />
                 </circle>
