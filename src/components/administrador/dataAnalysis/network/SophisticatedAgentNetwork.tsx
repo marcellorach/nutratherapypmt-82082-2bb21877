@@ -21,7 +21,12 @@ const SophisticatedAgentNetwork: React.FC<SophisticatedAgentNetworkProps> = ({
   const isNetworkActive = connections.some(conn => conn.active || conn.animating);
   
   // Hook para métricas dinâmicas com controle de estado
-  const { metrics } = useAgentMetrics(agents, activeAgent, isNetworkActive, step);
+  const { metrics, setAgentError } = useAgentMetrics(agents, activeAgent, isNetworkActive, step);
+
+  // Expor função para controle de erros
+  useEffect(() => {
+    window.setAgentError = setAgentError;
+  }, [setAgentError]);
 
   // Calcular atividade dos agentes baseada nas conexões
   useEffect(() => {

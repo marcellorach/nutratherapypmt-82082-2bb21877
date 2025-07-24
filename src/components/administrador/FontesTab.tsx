@@ -30,6 +30,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Plus, RefreshCw, ExternalLink, Database, FileText, FileSpreadsheet } from "lucide-react";
 import { DataSource } from './dataAnalysis/types';
+import { formatDate } from '../../utils/dateUtils';
 
 // Dados de demonstração
 const mockFontesDados: DataSource[] = [

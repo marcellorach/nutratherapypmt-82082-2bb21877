@@ -39,15 +39,13 @@ export const useAnalysisSimulation = () => {
     };
   }, []);
   
-  const activateConnection = (fromId: string, toId: string, isError = false) => {
+  const activateConnection = (fromId: string, toId: string, connectionType: 'normal' | 'warning' | 'error' = 'normal') => {
     if (isPaused) return;
-    
-    const connectionColor = isError ? 'error' : 'normal';
     
     setConnections(prev => 
       prev.map(conn => 
         conn.from === fromId && conn.to === toId
-          ? { ...conn, active: true, animating: true, connectionType: connectionColor }
+          ? { ...conn, active: true, animating: true, connectionType }
           : conn
       )
     );
@@ -62,13 +60,13 @@ export const useAnalysisSimulation = () => {
     setDataPackets(prev => [...prev, newPacket]);
     
     const timer = window.setTimeout(() => {
-      setConnections(prev => 
-        prev.map(conn => 
-          conn.from === fromId && conn.to === toId
-            ? { ...conn, animating: false, connectionType: 'normal' }
-            : conn
-        )
-      );
+        setConnections(prev => 
+          prev.map(conn => 
+            conn.from === fromId && conn.to === toId
+              ? { ...conn, animating: false, connectionType: connectionType === 'error' ? 'normal' : connectionType }
+              : conn
+          )
+        );
       
       setDataPackets(prev => prev.filter(p => !(p.fromId === fromId && p.toId === toId)));
     }, 2000);
@@ -85,6 +83,23 @@ export const useAnalysisSimulation = () => {
       timestamp: new Date()
     }]);
     setActiveAgent(agentId);
+
+    // Detectar tipo de mensagem e definir estado do agente
+    if (typeof window.setAgentError === 'function') {
+      if (message.includes('WARNING') || message.includes('Quebra') || message.includes('reboot')) {
+        window.setAgentError(agentId, 'warning');
+      } else if (message.includes('ERROR') || message.includes('Falha')) {
+        window.setAgentError(agentId, 'error');
+      } else if (message.includes('sucesso') || message.includes('concluída') || message.includes('restaurado')) {
+        window.setAgentError(agentId, 'recovery');
+        // Voltar ao normal após 2 segundos
+        setTimeout(() => {
+          if (typeof window.setAgentError === 'function') {
+            window.setAgentError(agentId, 'none');
+          }
+        }, 2000);
+      }
+    }
   };
   
   // Sequência expandida com erros e recuperação
@@ -99,7 +114,7 @@ export const useAnalysisSimulation = () => {
     
     // ERRO AOS 25% - Quebra de processamento
     { delay: 2500, action: () => addAgentMessage('data', 'WARNING: Quebra de processamento detectada no módulo de análise...') },
-    { delay: 1000, action: () => activateConnection('data', 'pattern', true) },
+    { delay: 1000, action: () => activateConnection('data', 'pattern', 'warning') },
     { delay: 1500, action: () => addAgentMessage('data', 'Executando reboot automático...') },
     { delay: 2000, action: () => addAgentMessage('data', 'Reboot concluído com sucesso. Retomando processamento...') },
     { delay: 1000, action: () => activateConnection('supervisor', 'data') },
@@ -111,7 +126,7 @@ export const useAnalysisSimulation = () => {
     
     // ERRO AOS 45% - Erro crítico
     { delay: 2000, action: () => addAgentMessage('correlation', 'ERROR: Falha crítica no processamento de correlações...') },
-    { delay: 1000, action: () => activateConnection('correlation', 'supervisor', true) },
+    { delay: 1000, action: () => activateConnection('correlation', 'supervisor', 'error') },
     { delay: 1500, action: () => addAgentMessage('correlation', 'Reprocessando... Procurando alternativas...') },
     { delay: 2000, action: () => addAgentMessage('correlation', 'Novo processo iniciado com algoritmo alternativo...') },
     { delay: 1500, action: () => addAgentMessage('correlation', 'Processamento restaurado com sucesso!') },

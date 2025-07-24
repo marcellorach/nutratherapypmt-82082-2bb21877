@@ -122,6 +122,15 @@ export const useAgentMetrics = (agents: Agent[], activeAgent: string | null, isA
     }));
   };
 
+  // Hook para escutar mensagens de erro e atualizar estado dos agentes
+  useEffect(() => {
+    // Esta função será chamada externamente para sincronizar erros
+    window.setAgentError = setAgentError;
+    return () => {
+      delete window.setAgentError;
+    };
+  }, []);
+
   return { metrics, setAgentError };
 };
 

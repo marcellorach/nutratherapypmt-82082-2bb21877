@@ -35,3 +35,38 @@ export interface DataPacket {
 }
 
 export type AnalysisStep = 'waiting' | 'processing' | 'completed';
+
+// Tipos adicionais necessários para outros componentes
+export interface DataSource {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  description: string;
+  recordCount: number;
+  lastUpdated: Date | string;
+}
+
+export interface PredictionModel {
+  id: string;
+  name: string;
+  accuracy: number;
+  status?: string;
+  description: string;
+  algorithm: string;
+  lastTrained: Date | string;
+  parameters?: any;
+}
+
+export interface NutraceuticalRule {
+  id: string;
+  name: string;
+  condition: string;
+  recommendation?: string;
+  evidence?: number;
+  description: string;
+  active: boolean;
+  priority: number | string;
+  appliesTo?: string[];
+  formula?: string;
+}
