@@ -103,82 +103,84 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
-        <DialogHeader className="pb-4 border-b flex-shrink-0">
-          <div className="flex items-start justify-between">
-            <div>
-              <DialogTitle className="text-2xl font-bold">
-                Análise Detalhada: {condition.name}
-              </DialogTitle>
-              <div className="flex items-center gap-2 mt-2">
-                <Badge variant="secondary">
-                  {condition.speciesAffected.join(', ')}
-                </Badge>
-                <Badge variant="outline">
-                  ROI: {condition.roi.toFixed(1)}
-                </Badge>
-                <Badge 
-                  variant={condition.treatabilityScore >= 45 ? "default" : "secondary"}
-                >
-                  Tratabilidade: {condition.treatabilityScore}%
-                </Badge>
+      <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0">
+        <div className="flex flex-col h-full">
+          <DialogHeader className="p-6 pb-4 border-b flex-shrink-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <DialogTitle className="text-2xl font-bold">
+                  Análise Detalhada: {condition.name}
+                </DialogTitle>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary">
+                    {condition.speciesAffected.join(', ')}
+                  </Badge>
+                  <Badge variant="outline">
+                    ROI: {condition.roi.toFixed(1)}
+                  </Badge>
+                  <Badge 
+                    variant={condition.treatabilityScore >= 45 ? "default" : "secondary"}
+                  >
+                    Tratabilidade: {condition.treatabilityScore}%
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Share className="h-4 w-4 mr-2" />
+                  Compartilhar
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Bookmark className="h-4 w-4 mr-2" />
+                  Salvar
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar PDF
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Share className="h-4 w-4 mr-2" />
-                Compartilhar
-              </Button>
-              <Button variant="outline" size="sm">
-                <Bookmark className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar PDF
-              </Button>
-            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-hidden">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-4 flex-shrink-0 mx-6 mt-4">
+                <TabsTrigger value="epidemiology">Epidemiologia</TabsTrigger>
+                <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
+                <TabsTrigger value="evidence">Evidências</TabsTrigger>
+                <TabsTrigger value="simulator">Simulador</TabsTrigger>
+              </TabsList>
+
+              <div className="flex-1 overflow-hidden mt-4">
+                <TabsContent value="epidemiology" className="h-full overflow-y-auto px-6 pb-6">
+                  <EpidemiologicalTree 
+                    condition={condition}
+                    data={epidemiologyData}
+                  />
+                </TabsContent>
+
+                <TabsContent value="nutraceuticals" className="h-full overflow-y-auto px-6 pb-6">
+                  <NutraceuticalComparisonChart 
+                    condition={condition}
+                    nutraceuticals={nutraceuticalData}
+                  />
+                </TabsContent>
+
+                <TabsContent value="evidence" className="h-full overflow-y-auto px-6 pb-6">
+                  <EvidenceMatrix 
+                    condition={condition}
+                  />
+                </TabsContent>
+
+                <TabsContent value="simulator" className="h-full overflow-y-auto px-6 pb-6">
+                  <PredictiveSimulator 
+                    condition={condition}
+                    nutraceuticals={nutraceuticalData}
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-hidden min-h-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
-              <TabsTrigger value="epidemiology">Epidemiologia</TabsTrigger>
-              <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
-              <TabsTrigger value="evidence">Evidências</TabsTrigger>
-              <TabsTrigger value="simulator">Simulador</TabsTrigger>
-            </TabsList>
-
-            <div className="flex-1 overflow-y-auto mt-4 min-h-0">
-              <TabsContent value="epidemiology" className="mt-0 h-full overflow-y-auto">
-                <EpidemiologicalTree 
-                  condition={condition}
-                  data={epidemiologyData}
-                />
-              </TabsContent>
-
-              <TabsContent value="nutraceuticals" className="mt-0 h-full overflow-y-auto">
-                <NutraceuticalComparisonChart 
-                  condition={condition}
-                  nutraceuticals={nutraceuticalData}
-                />
-              </TabsContent>
-
-              <TabsContent value="evidence" className="mt-0 h-full overflow-y-auto">
-                <EvidenceMatrix 
-                  condition={condition}
-                />
-              </TabsContent>
-
-              <TabsContent value="simulator" className="mt-0 h-full overflow-y-auto">
-                <PredictiveSimulator 
-                  condition={condition}
-                  nutraceuticals={nutraceuticalData}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
         </div>
       </DialogContent>
     </Dialog>
