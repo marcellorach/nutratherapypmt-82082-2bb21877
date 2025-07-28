@@ -1,7 +1,8 @@
 import { ExamResult, Nutraceutical, Pet, Recommendation, Message } from '@/types';
 
-// Chave da API OpenAI (em um ambiente de produção, isso estaria em variáveis de ambiente)
-const OPENAI_API_KEY = 'chave-simulada-da-openai-para-prototipo';
+// SECURITY FIX: Remover chave API hardcoded
+// A chave API deve ser obtida através de variáveis de ambiente seguras ou Supabase secrets
+// const OPENAI_API_KEY = 'REMOVIDO_POR_SEGURANCA'; // NUNCA mais hardcodar chaves API
 const OPENAI_MODEL = 'gpt-4o-mini';
 
 // Função auxiliar para preparar contexto

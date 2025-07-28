@@ -60,6 +60,17 @@ const ConfiguracoesIATab: React.FC = () => {
 
   const saveConfigToSupabase = async (key: string, value: string) => {
     try {
+      // SECURITY: Validar formato da chave API antes de salvar
+      if (key === 'openai_api_key' && !value.startsWith('sk-')) {
+        throw new Error('Formato de chave API da OpenAI inválido. Deve começar com "sk-"');
+      }
+      if (key === 'claude_api_key' && !value.startsWith('sk-ant-')) {
+        throw new Error('Formato de chave API do Claude inválido. Deve começar com "sk-ant-"');
+      }
+      if (key === 'grok_api_key' && value.length < 10) {
+        throw new Error('Chave API do Grok deve ter pelo menos 10 caracteres');
+      }
+
       const response = await supabase.functions.invoke('ai-config', {
         method: 'POST',
         body: { action: 'set', key, value }
