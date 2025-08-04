@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 // Módulos refatorados
 import DashboardModule from './modules/DashboardModule';
+import { CampaignProvider } from '@/contexts/CampaignContext';
 
 interface Campaign {
   id: string;
@@ -302,36 +303,34 @@ const AcompanhamentoTab: React.FC = () => {
   );
 
   return (
-    <div className="p-6">
-      <Tabs value={selectedModule} onValueChange={(value) => setSelectedModule(value as any)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="campanhas">Campanhas</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
-        </TabsList>
+    <CampaignProvider>
+      <div className="p-6">
+        <Tabs value={selectedModule} onValueChange={(value) => setSelectedModule(value as any)}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="campanhas">Campanhas</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="dashboard">
-          <DashboardModule 
-            activeCampaigns={activeCampaigns}
-            totalMetrics={totalMetrics}
-            onCampaignAction={handleCampaignAction}
-          />
-        </TabsContent>
+          <TabsContent value="dashboard">
+            <DashboardModule />
+          </TabsContent>
 
-        <TabsContent value="campanhas">
-          <CampanhasModule />
-        </TabsContent>
+          <TabsContent value="campanhas">
+            <CampanhasModule />
+          </TabsContent>
 
-        <TabsContent value="analytics">
-          <AnalyticsModule />
-        </TabsContent>
+          <TabsContent value="analytics">
+            <AnalyticsModule />
+          </TabsContent>
 
-        <TabsContent value="relatorios">
-          <RelatoriosModule />
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="relatorios">
+            <RelatoriosModule />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </CampaignProvider>
   );
 };
 
