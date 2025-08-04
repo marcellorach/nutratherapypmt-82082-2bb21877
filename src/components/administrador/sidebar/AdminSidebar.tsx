@@ -27,12 +27,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
   return (
     <Sidebar 
       variant="sidebar"
-      collapsible="offcanvas"
+      collapsible="none"
     >
-      <SidebarHeader className="p-4 pb-2">
-        <h2 className="text-lg font-semibold">Área de P&D</h2>
-      </SidebarHeader>
-      
       <SidebarContent>
         <AdminSidebarGroups currentStep={currentStep} setCurrentStep={setCurrentStep} />
       </SidebarContent>
