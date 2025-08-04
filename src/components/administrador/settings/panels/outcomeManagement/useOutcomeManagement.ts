@@ -16,6 +16,7 @@ export const useOutcomeManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    family_id: ""
   });
 
   // Hooks para carregar dados
@@ -44,6 +45,7 @@ export const useOutcomeManagement = () => {
     setFormData({
       name: outcome.name || "",
       description: outcome.description || "",
+      family_id: outcome.family_id || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -59,7 +61,8 @@ export const useOutcomeManagement = () => {
     try {
       await createOutcome({
         name: formData.name,
-        description: formData.description
+        description: formData.description,
+        family_id: formData.family_id || undefined
       });
 
       toast({
@@ -87,6 +90,7 @@ export const useOutcomeManagement = () => {
       await updateOutcome(selectedOutcome.id, {
         name: formData.name,
         description: formData.description,
+        family_id: formData.family_id || undefined
       });
 
       toast({
@@ -133,6 +137,7 @@ export const useOutcomeManagement = () => {
     setFormData({
       name: "",
       description: "",
+      family_id: ""
     });
   };
 
@@ -148,6 +153,14 @@ export const useOutcomeManagement = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // Handler para alterar família
+  const handleFamilyChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      family_id: value
     }));
   };
 
@@ -170,6 +183,7 @@ export const useOutcomeManagement = () => {
     handleEditSubmit,
     handleDeleteConfirm,
     handleOpenCreateDialog,
-    handleFormChange
+    handleFormChange,
+    handleFamilyChange
   };
 };

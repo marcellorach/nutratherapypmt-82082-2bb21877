@@ -539,6 +539,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          family_id: string | null
           id: string
           name: string
           updated_at: string
@@ -546,6 +547,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          family_id?: string | null
           id?: string
           name: string
           updated_at?: string
@@ -553,11 +555,20 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          family_id?: string | null
           id?: string
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_outcomes_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "outcome_families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nutraceutical_scientific_metadata: {
         Row: {
@@ -703,6 +714,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      outcome_families: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       processed_studies: {
         Row: {

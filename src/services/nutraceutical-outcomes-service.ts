@@ -13,7 +13,17 @@ export const NutraceuticalOutcomesService = {
     const client = supabase as any;
     const { data, error } = await client
       .from('nutraceutical_outcomes')
-      .select('*')
+      .select(`
+        *,
+        family:outcome_families(
+          id,
+          name,
+          description,
+          color,
+          icon,
+          sort_order
+        )
+      `)
       .order('name');
 
     if (error) {
@@ -47,13 +57,23 @@ export const NutraceuticalOutcomesService = {
   /**
    * Cria um novo outcome
    */
-  async createOutcome({ name, description }: { name: string, description?: string }) {
+  async createOutcome({ name, description, family_id }: { name: string, description?: string, family_id?: string }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
     const { data, error } = await client
       .from('nutraceutical_outcomes')
-      .insert([{ name, description }])
-      .select()
+      .insert([{ name, description, family_id }])
+      .select(`
+        *,
+        family:outcome_families(
+          id,
+          name,
+          description,
+          color,
+          icon,
+          sort_order
+        )
+      `)
       .single();
 
     if (error) {
@@ -67,14 +87,24 @@ export const NutraceuticalOutcomesService = {
   /**
    * Atualiza um outcome existente
    */
-  async updateOutcome(id: string, { name, description }: { name: string, description?: string }) {
+  async updateOutcome(id: string, { name, description, family_id }: { name: string, description?: string, family_id?: string }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
     const { data, error } = await client
       .from('nutraceutical_outcomes')
-      .update({ name, description })
+      .update({ name, description, family_id })
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        family:outcome_families(
+          id,
+          name,
+          description,
+          color,
+          icon,
+          sort_order
+        )
+      `)
       .single();
 
     if (error) {

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import FamilySelector from "./FamilySelector";
 
 interface OutcomeFormDialogProps {
   isOpen: boolean;
@@ -20,8 +21,10 @@ interface OutcomeFormDialogProps {
   formData: {
     name: string;
     description: string;
+    family_id: string;
   };
   handleFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleFamilyChange: (value: string) => void;
   submitAction: () => void;
 }
 
@@ -31,6 +34,7 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
   isCreate,
   formData,
   handleFormChange,
+  handleFamilyChange,
   submitAction,
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,6 +71,19 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
                 className="col-span-3"
                 required
               />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="family" className="text-right">
+                Família
+              </Label>
+              <div className="col-span-3">
+                <FamilySelector
+                  value={formData.family_id}
+                  onValueChange={handleFamilyChange}
+                  placeholder="Selecione uma família (opcional)"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">

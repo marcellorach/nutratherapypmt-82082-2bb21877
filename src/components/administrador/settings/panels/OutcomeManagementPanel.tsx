@@ -27,7 +27,8 @@ const OutcomeManagementPanel: React.FC = () => {
     handleEditSubmit,
     handleDeleteConfirm,
     handleOpenCreateDialog,
-    handleFormChange
+    handleFormChange,
+    handleFamilyChange
   } = useOutcomeManagement();
 
   return (
@@ -50,6 +51,7 @@ const OutcomeManagementPanel: React.FC = () => {
         isCreate={true}
         formData={formData}
         handleFormChange={handleFormChange}
+        handleFamilyChange={handleFamilyChange}
         submitAction={handleCreateSubmit}
       />
       
@@ -60,6 +62,7 @@ const OutcomeManagementPanel: React.FC = () => {
         isCreate={false}
         formData={formData}
         handleFormChange={handleFormChange}
+        handleFamilyChange={handleFamilyChange}
         submitAction={handleEditSubmit}
       />
       

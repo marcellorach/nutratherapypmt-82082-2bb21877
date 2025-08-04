@@ -69,6 +69,7 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
+            <TableHead>Família</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead className="w-[100px]">Ações</TableHead>
           </TableRow>
@@ -77,6 +78,16 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
           {filteredOutcomes.map((outcome) => (
             <TableRow key={outcome.id}>
               <TableCell className="font-medium">{outcome.name}</TableCell>
+              <TableCell>
+                {outcome.family ? (
+                  <div className="flex items-center gap-2">
+                    <span>{outcome.family.icon}</span>
+                    <span className="text-sm">{outcome.family.name}</span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">Sem família</span>
+                )}
+              </TableCell>
               <TableCell>{outcome.description || "-"}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
