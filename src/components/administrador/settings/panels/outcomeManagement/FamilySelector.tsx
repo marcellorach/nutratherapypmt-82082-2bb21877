@@ -31,7 +31,7 @@ const FamilySelector: React.FC<FamilySelectorProps> = ({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Sem família</SelectItem>
+        <SelectItem value="none">Sem família</SelectItem>
         {families.map((family) => (
           <SelectItem key={family.id} value={family.id}>
             <div className="flex items-center gap-2">

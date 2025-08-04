@@ -45,7 +45,7 @@ export const useOutcomeManagement = () => {
     setFormData({
       name: outcome.name || "",
       description: outcome.description || "",
-      family_id: outcome.family_id || ""
+      family_id: outcome.family_id || "none"
     });
     setIsEditDialogOpen(true);
   };
@@ -62,7 +62,7 @@ export const useOutcomeManagement = () => {
       await createOutcome({
         name: formData.name,
         description: formData.description,
-        family_id: formData.family_id || undefined
+        family_id: formData.family_id === 'none' ? undefined : formData.family_id || undefined
       });
 
       toast({
@@ -90,7 +90,7 @@ export const useOutcomeManagement = () => {
       await updateOutcome(selectedOutcome.id, {
         name: formData.name,
         description: formData.description,
-        family_id: formData.family_id || undefined
+        family_id: formData.family_id === 'none' ? undefined : formData.family_id || undefined
       });
 
       toast({
@@ -137,7 +137,7 @@ export const useOutcomeManagement = () => {
     setFormData({
       name: "",
       description: "",
-      family_id: ""
+      family_id: "none"
     });
   };
 
