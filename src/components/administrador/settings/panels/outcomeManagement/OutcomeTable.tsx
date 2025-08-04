@@ -79,10 +79,10 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
             <TableRow key={outcome.id}>
               <TableCell className="font-medium">{outcome.name}</TableCell>
               <TableCell>
-                {outcome.family ? (
+                {outcome.outcome_families ? (
                   <div className="flex items-center gap-2">
-                    <span>{outcome.family.icon}</span>
-                    <span className="text-sm">{outcome.family.name}</span>
+                    <span>{outcome.outcome_families.icon}</span>
+                    <span className="text-sm">{outcome.outcome_families.name}</span>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">Sem família</span>
