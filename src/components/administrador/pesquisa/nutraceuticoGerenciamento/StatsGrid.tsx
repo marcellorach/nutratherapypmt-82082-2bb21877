@@ -20,15 +20,15 @@ const StatsGrid: React.FC<StatsGridProps> = ({
   // Calcular números reais baseados nos dados
   const nutraceuticalCount = nutraceuticals.length;
   
-  // Somar outcomes e estudos das relações dos nutracêuticos
+  // Somar outcomes e estudos simulados dos nutracêuticos
   const outcomesCount = nutraceuticals.reduce((total, nutra) => {
-    return total + (nutra.nutraceutical_benefits?.length || 0);
+    return total + (nutra.outcomeCount || 0);
   }, 0);
   
   const conditionsCount = conditions.length;
   
   const studiesCount = nutraceuticals.reduce((total, nutra) => {
-    return total + (nutra.nutraceutical_studies?.length || 0);
+    return total + (nutra.studyCount || 0);
   }, 0);
 
   const stats = [
