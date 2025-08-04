@@ -45,7 +45,7 @@ const AdministradorPage: React.FC = () => {
     const Component = tabConfig.component;
 
     // Para tabs que precisam do NutraceuticalProvider
-    const needsProvider = ['nutraceuticos', 'nutraceu-gerenciamento'].includes(currentStep);
+    const needsProvider = ['nutraceuticos', 'nutraceu-gerenciamento', 'analytics'].includes(currentStep);
 
     const componentElement = (
       <Suspense fallback={<LoadingTab />}>
