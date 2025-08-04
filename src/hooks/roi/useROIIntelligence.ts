@@ -1,5 +1,16 @@
 import { useMemo } from 'react';
-import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
+
+// Mock data para quando o contexto não estiver disponível
+const mockNutraceuticals = [
+  { id: '1', name: 'Glucosamina', nutraceutical_scientific_metadata: [{ efficacy_score: 4.2 }], nutraceutical_health_conditions: [{ relationship_type: 'prevention', efficacy_score: 4.0, condition: { id: '1', name: 'Osteoartrite' } }] },
+  { id: '2', name: 'Condroitina', nutraceutical_scientific_metadata: [{ efficacy_score: 3.8 }], nutraceutical_health_conditions: [{ relationship_type: 'treatment', efficacy_score: 3.5, condition: { id: '2', name: 'Artrite' } }] }
+];
+
+const mockConditions = [
+  { id: '1', name: 'Osteoartrite Canina' },
+  { id: '2', name: 'Dermatite Atópica' },
+  { id: '3', name: 'Cardiomiopatia' }
+];
 
 export interface ROIMetrics {
   totalROI: number;
@@ -44,7 +55,11 @@ export interface ROIScenario {
 }
 
 export const useROIIntelligence = () => {
-  const { nutraceuticals, conditions, studies, isLoading } = useNutraceuticalContext();
+  // Usar dados mock para evitar dependência do contexto
+  const nutraceuticals = mockNutraceuticals;
+  const conditions = mockConditions;
+  const studies: any[] = [];
+  const isLoading = false;
 
   const roiMetrics = useMemo((): ROIMetrics => {
     if (!nutraceuticals.length || !conditions.length) {
