@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -16,16 +18,69 @@ interface TreatabilityMatrixProps {
 }
 
 const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
-  // Pegar apenas os top 10 para melhor visualização
-  const topConditions = data.slice(0, 10);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+  
+  // Filtrar dados baseado nas condições selecionadas
+  const filteredData = selectedConditions.length > 0 
+    ? data.filter(item => selectedConditions.includes(item.condition))
+    : data.slice(0, 10); // Top 10 se nenhuma selecionada
+  
+  // Encontrar a condição com maior cobertura
+  const maxCoverage = filteredData.reduce((max, item) => 
+    item.coverage > max.coverage ? item : max, 
+    filteredData[0] || { condition: 'N/A', coverage: 0 }
+  );
+
+  const handleConditionSelect = (condition: string) => {
+    setSelectedConditions(prev => 
+      prev.includes(condition) 
+        ? prev.filter(c => c !== condition)
+        : [...prev, condition]
+    );
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Matriz de Tratabilidade por Condição</CardTitle>
+    <Card className="h-fit">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
+          Matriz de Tratabilidade por Condição
+          <div className="h-2 w-2 bg-blue-500 rounded-full" />
+        </CardTitle>
         <CardDescription>
           Distribuição de nutracêuticos por tipo de intervenção e condição de saúde
         </CardDescription>
+        
+        {/* Seletor de Condições */}
+        <div className="space-y-3 mt-4">
+          <Select onValueChange={handleConditionSelect}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione condições para análise comparativa" />
+            </SelectTrigger>
+            <SelectContent>
+              {data.map(item => (
+                <SelectItem key={item.condition} value={item.condition}>
+                  {item.condition} ({item.coverage.toFixed(1)}% cobertura)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {/* Tags das condições selecionadas */}
+          {selectedConditions.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedConditions.map(condition => (
+                <Badge 
+                  key={condition} 
+                  variant="secondary" 
+                  className="cursor-pointer hover:bg-destructive/20"
+                  onClick={() => handleConditionSelect(condition)}
+                >
+                  {condition} ×
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">
@@ -36,7 +91,7 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
           }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={topConditions}
+                data={filteredData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
@@ -73,13 +128,18 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm font-medium text-muted-foreground">Maior Cobertura</div>
             <div className="text-lg font-bold">
-              {data[0]?.condition || 'N/A'} ({data[0]?.coverage.toFixed(1)}%)
+              {maxCoverage.condition} ({maxCoverage.coverage.toFixed(1)}%)
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
-            <div className="text-sm font-medium text-muted-foreground">Condições Cobertas</div>
+            <div className="text-sm font-medium text-muted-foreground">
+              Condições Cobertas: {filteredData.length}/{data.length}
+              {selectedConditions.length > 0 && (
+                <span className="ml-2 text-blue-600">(filtrado)</span>
+              )}
+            </div>
             <div className="text-lg font-bold">
-              {data.filter(d => d.coverage > 0).length}/{data.length}
+              {filteredData.filter(d => d.coverage > 0).length} ativas
             </div>
           </div>
         </div>

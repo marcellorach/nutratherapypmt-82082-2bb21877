@@ -58,29 +58,41 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80 w-full">
+        <div className="h-96 w-full">
           <ChartContainer config={{
             scatter: { color: "#9b87f5" }
           }}>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
                 data={scatterData}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis 
                   type="number" 
                   dataKey="x" 
                   name="Sustentabilidade"
                   domain={[0, 5]}
-                  label={{ value: 'Sustentabilidade', position: 'insideBottom', offset: -10 }}
+                  label={{ 
+                    value: 'Sustentabilidade', 
+                    position: 'insideBottom', 
+                    offset: -20,
+                    style: { textAnchor: 'middle', fontSize: '12px' }
+                  }}
+                  tick={{ fontSize: 11 }}
                 />
                 <YAxis 
                   type="number" 
                   dataKey="y" 
                   name="Eficácia"
                   domain={[0, 5]}
-                  label={{ value: 'Eficácia', angle: -90, position: 'insideLeft' }}
+                  label={{ 
+                    value: 'Eficácia', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fontSize: '12px' }
+                  }}
+                  tick={{ fontSize: 11 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Scatter 
@@ -91,6 +103,41 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
               </ScatterChart>
             </ResponsiveContainer>
           </ChartContainer>
+        </div>
+        
+        {/* Dados populados para demonstração */}
+        <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+          <h4 className="text-sm font-medium mb-2">Insights de Posicionamento</h4>
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="font-medium">Top Performers:</span>
+              <div className="mt-1 space-y-1">
+                {scatterData
+                  .filter(d => d.x >= 3.5 && d.y >= 3.5)
+                  .slice(0, 3)
+                  .map(item => (
+                    <div key={item.name} className="text-green-600">
+                      • {item.name}
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+            <div>
+              <span className="font-medium">Oportunidades:</span>
+              <div className="mt-1 space-y-1">
+                {scatterData
+                  .filter(d => d.x < 3 || d.y < 3)
+                  .slice(0, 3)
+                  .map(item => (
+                    <div key={item.name} className="text-amber-600">
+                      • {item.name}
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="mt-4 grid grid-cols-4 gap-2">
