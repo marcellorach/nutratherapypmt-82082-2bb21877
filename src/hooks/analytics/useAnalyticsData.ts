@@ -32,7 +32,12 @@ export const useAnalyticsData = () => {
   const { nutraceuticals, conditions, studies, isLoading } = useNutraceuticalContext();
 
   const metrics = useMemo((): AnalyticsMetrics => {
-    if (!nutraceuticals.length) return {
+    // Verificar se os dados existem e são arrays válidos
+    const validNutraceuticals = Array.isArray(nutraceuticals) ? nutraceuticals : [];
+    const validConditions = Array.isArray(conditions) ? conditions : [];
+    const validStudies = Array.isArray(studies) ? studies : [];
+
+    if (validNutraceuticals.length === 0) return {
       totalNutraceuticals: 0,
       averageEfficacy: 0,
       totalConditions: 0,
@@ -43,39 +48,39 @@ export const useAnalyticsData = () => {
       therapeuticGaps: 0
     };
 
-    const totalNutraceuticals = nutraceuticals.length;
-    const totalConditions = conditions.length;
-    const totalStudies = studies.length;
+    const totalNutraceuticals = validNutraceuticals.length;
+    const totalConditions = validConditions.length;
+    const totalStudies = validStudies.length;
 
-    // Calcular eficácia média
-    const efficacyScores = nutraceuticals.flatMap(n => 
-      n.nutraceutical_scientific_metadata?.map(m => m.efficacy_score) || []
-    ).filter(Boolean);
+    // Calcular eficácia média com verificações de segurança
+    const efficacyScores = validNutraceuticals.flatMap(n => 
+      (n.nutraceutical_scientific_metadata || []).map(m => m?.efficacy_score).filter(score => typeof score === 'number')
+    );
     const averageEfficacy = efficacyScores.length > 0 
       ? efficacyScores.reduce((a, b) => a + b, 0) / efficacyScores.length 
       : 0;
 
-    // Calcular índice de tratabilidade
-    const conditionsWithTreatment = conditions.filter(condition => 
-      nutraceuticals.some(n => 
-        n.nutraceutical_health_conditions?.some(hc => 
+    // Calcular índice de tratabilidade com verificações de segurança
+    const conditionsWithTreatment = validConditions.filter(condition => 
+      validNutraceuticals.some(n => 
+        (n.nutraceutical_health_conditions || []).some(hc => 
           hc.condition?.id === condition.id
         )
       )
     ).length;
     const treatabilityIndex = totalConditions > 0 ? (conditionsWithTreatment / totalConditions) * 100 : 0;
 
-    // Calcular índice de sustentabilidade
-    const sustainabilityScores = nutraceuticals.flatMap(n => 
-      n.nutraceutical_scientific_metadata?.map(m => m.sustainability_score) || []
-    ).filter(Boolean);
+    // Calcular índice de sustentabilidade com verificações de segurança
+    const sustainabilityScores = validNutraceuticals.flatMap(n => 
+      (n.nutraceutical_scientific_metadata || []).map(m => m?.sustainability_score).filter(score => typeof score === 'number')
+    );
     const sustainabilityIndex = sustainabilityScores.length > 0 
       ? sustainabilityScores.reduce((a, b) => a + b, 0) / sustainabilityScores.length 
       : 0;
 
-    // Calcular cobertura de prescrição
+    // Calcular cobertura de prescrição com verificações de segurança
     const prescriptionCoverage = totalNutraceuticals > 0 ? 
-      (nutraceuticals.filter(n => n.nutraceutical_health_conditions?.length > 0).length / totalNutraceuticals) * 100 : 0;
+      (validNutraceuticals.filter(n => (n.nutraceutical_health_conditions || []).length > 0).length / totalNutraceuticals) * 100 : 0;
 
     // Calcular gaps terapêuticos
     const therapeuticGaps = totalConditions - conditionsWithTreatment;
@@ -93,21 +98,24 @@ export const useAnalyticsData = () => {
   }, [nutraceuticals, conditions, studies]);
 
   const treatabilityData = useMemo((): TreatabilityData[] => {
-    if (!nutraceuticals.length || !conditions.length) return [];
+    const validNutraceuticals = Array.isArray(nutraceuticals) ? nutraceuticals : [];
+    const validConditions = Array.isArray(conditions) ? conditions : [];
+    
+    if (validNutraceuticals.length === 0 || validConditions.length === 0) return [];
 
-    return conditions.map(condition => {
-      const relations = nutraceuticals.flatMap(n => 
-        n.nutraceutical_health_conditions?.filter(hc => hc.condition?.id === condition.id) || []
+    return validConditions.map(condition => {
+      const relations = validNutraceuticals.flatMap(n => 
+        (n.nutraceutical_health_conditions || []).filter(hc => hc.condition?.id === condition.id)
       );
 
       const prevention = relations.filter(r => r.relationship_type === 'prevention').length;
       const treatment = relations.filter(r => r.relationship_type === 'treatment').length;
       const support = relations.filter(r => r.relationship_type === 'support').length;
       const total = prevention + treatment + support;
-      const coverage = total > 0 ? (total / nutraceuticals.length) * 100 : 0;
+      const coverage = total > 0 && validNutraceuticals.length > 0 ? (total / validNutraceuticals.length) * 100 : 0;
 
       return {
-        condition: condition.name,
+        condition: condition.name || 'Sem nome',
         prevention,
         treatment,
         support,
@@ -117,16 +125,18 @@ export const useAnalyticsData = () => {
   }, [nutraceuticals, conditions]);
 
   const prescriptionIntelligence = useMemo((): PrescriptionIntelligence[] => {
-    if (!nutraceuticals.length) return [];
+    const validNutraceuticals = Array.isArray(nutraceuticals) ? nutraceuticals : [];
+    if (validNutraceuticals.length === 0) return [];
 
-    return nutraceuticals.map(nutraceutical => {
-      const efficacy = nutraceutical.nutraceutical_scientific_metadata?.[0]?.efficacy_score || 0;
-      const sustainability = nutraceutical.nutraceutical_scientific_metadata?.[0]?.sustainability_score || 0;
-      const conditionsCount = nutraceutical.nutraceutical_health_conditions?.length || 0;
-      const studiesCount = nutraceutical.nutraceutical_studies?.length || 0;
+    return validNutraceuticals.map(nutraceutical => {
+      const metadata = (nutraceutical.nutraceutical_scientific_metadata || [])[0];
+      const efficacy = metadata?.efficacy_score || 0;
+      const sustainability = metadata?.sustainability_score || 0;
+      const conditionsCount = (nutraceutical.nutraceutical_health_conditions || []).length;
+      const studiesCount = (nutraceutical.nutraceutical_studies || []).length;
 
       return {
-        nutraceutical: nutraceutical.name,
+        nutraceutical: nutraceutical.name || 'Sem nome',
         efficacy,
         sustainability,
         conditionsCount,
