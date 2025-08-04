@@ -8,11 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
 
 // Componentes específicos
-import PageHeader from './nutraceuticoGerenciamento/PageHeader';
+import PageHeaderWithActions from './nutraceuticoGerenciamento/PageHeaderWithActions';
 import NutraceuticalTable from './nutraceuticoGerenciamento/NutraceuticalTable';
-import StatisticsPanel from './nutraceuticoGerenciamento/StatisticsPanel';
-import LastUpdatePanel from './nutraceuticoGerenciamento/LastUpdatePanel';
-import ActionPanel from './nutraceuticoGerenciamento/ActionPanel';
+import StatsGrid from './nutraceuticoGerenciamento/StatsGrid';
 import MigratorDialog from './nutraceuticoGerenciamento/MigratorDialog';
 import DeleteDialog from './nutraceuticoGerenciamento/DeleteDialog';
 
@@ -127,39 +125,29 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <PageHeader />
+      <PageHeaderWithActions refreshData={refreshData} />
       
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="w-full lg:w-2/3 space-y-4">
-          <NutraceuticalTable 
-            nutraceuticals={nutraceuticals}
-            filteredNutraceuticals={filteredNutraceuticals}
-            isLoading={isLoading}
-            error={error}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            refreshData={refreshData}
-            handleDeleteClick={handleDeleteClick}
-            hasMigratedData={hasMigratedData}
-            openMigratorDialog={() => setIsMigratorDialogOpen(true)}
-            onEditClick={handleEditClick}
-          />
-        </div>
-        
-        <div className="w-full lg:w-1/3 space-y-4">
-          <StatisticsPanel 
-            nutraceuticals={nutraceuticals}
-            outcomes={outcomes}
-            conditions={conditions}
-            studies={studies}
-            isLoading={isLoading}
-          />
-          
-          <LastUpdatePanel isLoading={isLoading} />
-          
-          <ActionPanel refreshData={refreshData} />
-        </div>
-      </div>
+      <StatsGrid
+        nutraceuticals={nutraceuticals}
+        outcomes={outcomes}
+        conditions={conditions}
+        studies={studies}
+        isLoading={isLoading}
+      />
+      
+      <NutraceuticalTable 
+        nutraceuticals={nutraceuticals}
+        filteredNutraceuticals={filteredNutraceuticals}
+        isLoading={isLoading}
+        error={error}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        refreshData={refreshData}
+        handleDeleteClick={handleDeleteClick}
+        hasMigratedData={hasMigratedData}
+        openMigratorDialog={() => setIsMigratorDialogOpen(true)}
+        onEditClick={handleEditClick}
+      />
       
       <MigratorDialog 
         open={isMigratorDialogOpen}
