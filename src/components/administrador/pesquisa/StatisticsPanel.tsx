@@ -25,11 +25,19 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   studies,
   isLoading
 }) => {
-  // Multiplicar os números por fatores maiores para exibir números maiores
-  const nutraceuticalCount = nutraceuticals.length * 32; // Aumentado para 32x mais
-  const outcomesCount = outcomes.length * 24; // Aumentado para 24x mais
-  const conditionsCount = conditions.length * 28; // Aumentado para 28x mais
-  const studiesCount = studies.length * 40; // Aumentado para 40x mais
+  // Calcular números reais baseados nos dados
+  const nutraceuticalCount = nutraceuticals.length;
+  
+  // Somar outcomes e estudos das relações dos nutracêuticos
+  const outcomesCount = nutraceuticals.reduce((total, nutra) => {
+    return total + (nutra.nutraceutical_benefits?.length || 0);
+  }, 0);
+  
+  const conditionsCount = conditions.length;
+  
+  const studiesCount = nutraceuticals.reduce((total, nutra) => {
+    return total + (nutra.nutraceutical_studies?.length || 0);
+  }, 0);
 
   return (
     <Card>

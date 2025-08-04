@@ -17,11 +17,19 @@ const StatsGrid: React.FC<StatsGridProps> = ({
   studies,
   isLoading
 }) => {
-  // Aplicar a mesma lógica de simulação que estava no StatisticsPanel
-  const nutraceuticalCount = nutraceuticals.length * 32;
-  const outcomesCount = outcomes.length * 24;
-  const conditionsCount = conditions.length * 28;
-  const studiesCount = studies.length * 40;
+  // Calcular números reais baseados nos dados
+  const nutraceuticalCount = nutraceuticals.length;
+  
+  // Somar outcomes e estudos das relações dos nutracêuticos
+  const outcomesCount = nutraceuticals.reduce((total, nutra) => {
+    return total + (nutra.nutraceutical_benefits?.length || 0);
+  }, 0);
+  
+  const conditionsCount = conditions.length;
+  
+  const studiesCount = nutraceuticals.reduce((total, nutra) => {
+    return total + (nutra.nutraceutical_studies?.length || 0);
+  }, 0);
 
   const stats = [
     {
