@@ -20,8 +20,16 @@ export const useOutcomes = () => {
     queryKey: ['outcomes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('health_conditions')
-        .select('*')
+        .from('nutraceutical_outcomes')
+        .select(`
+          *,
+          outcome_families (
+            id,
+            name,
+            color,
+            icon
+          )
+        `)
         .order('name');
 
       if (error) {
@@ -38,9 +46,17 @@ export const useOutcomes = () => {
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
       const { data: result, error } = await supabase
-        .from('health_conditions')
+        .from('nutraceutical_outcomes')
         .insert([data])
-        .select()
+        .select(`
+          *,
+          outcome_families (
+            id,
+            name,
+            color,
+            icon
+          )
+        `)
         .single();
 
       if (error) {
@@ -78,10 +94,18 @@ export const useOutcomes = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const { data: result, error } = await supabase
-        .from('health_conditions')
+        .from('nutraceutical_outcomes')
         .update(data)
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          outcome_families (
+            id,
+            name,
+            color,
+            icon
+          )
+        `)
         .single();
 
       if (error) {
@@ -111,7 +135,7 @@ export const useOutcomes = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('health_conditions')
+        .from('nutraceutical_outcomes')
         .delete()
         .eq('id', id);
 
