@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Zap, Gauge, Check, ChevronRight } from "lucide-react";
+import { Zap, Gauge, Check, ChevronRight, Activity } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface ActionsGroupProps {
@@ -60,6 +60,23 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
               <span>Ações em Massa</span>
             </div>
             {currentStep === "actions" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "acompanhamento"} 
+          onClick={() => handleStepClick("acompanhamento")}
+          className={currentStep === "acompanhamento" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Activity className={`h-4 w-4 mr-2 ${currentStep === "acompanhamento" ? "text-primary" : ""}`} />
+              <span>Acompanhamento</span>
+            </div>
+            {currentStep === "acompanhamento" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>

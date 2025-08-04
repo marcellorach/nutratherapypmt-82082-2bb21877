@@ -29,6 +29,7 @@ const FontesTab = lazy(() => import('@/components/administrador/FontesTab'));
 const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/AnalysisStep'));
 const VisualizationStep = lazy(() => import('@/components/administrador/dataAnalysis/VisualizationStep'));
 const ActionsStep = lazy(() => import('@/components/administrador/dataAnalysis/ActionsStep'));
+const AcompanhamentoTab = lazy(() => import('@/components/administrador/acompanhamento/AcompanhamentoTab'));
 const DataProcessingSettingsTab = lazy(() => import('@/components/administrador/settings/DataProcessingSettingsTab'));
 const EstudosPlanejadosTab = lazy(() => import('@/components/administrador/pesquisa/EstudosPlanejadosTab'));
 const EstudosAndamentoTab = lazy(() => import('@/components/administrador/pesquisa/EstudosAndamentoTab'));
@@ -132,6 +133,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'data-processing',
     component: ActionsStep,
     description: 'Ações e processamento'
+  },
+  {
+    id: 'acompanhamento',
+    label: 'Acompanhamento',
+    group: 'data-processing',
+    component: AcompanhamentoTab,
+    description: 'Acompanhamento de campanhas'
   },
   {
     id: 'data-processing-settings',
