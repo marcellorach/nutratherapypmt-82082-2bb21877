@@ -1,0 +1,178 @@
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+
+interface PerformanceTrendsProps {
+  efficacyData: Array<{
+    name: string;
+    score: number;
+    contraindications: number;
+  }>;
+}
+
+const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) => {
+  // Gerar dados temporais simulados baseados na eficácia atual
+  const generateTrendData = () => {
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const avgEfficacy = efficacyData.reduce((sum, item) => sum + item.score, 0) / efficacyData.length;
+    
+    return months.map((month, index) => {
+      const variance = (Math.random() - 0.5) * 0.5;
+      const trend = index * 0.1; // Tendência crescente
+      
+      return {
+        month,
+        eficacia: Math.max(1, Math.min(5, avgEfficacy + variance + trend)),
+        sustentabilidade: Math.max(1, Math.min(5, avgEfficacy * 0.9 + variance + trend * 0.8)),
+        prescricoes: Math.floor(50 + index * 10 + Math.random() * 20),
+        satisfacao: Math.max(1, Math.min(5, avgEfficacy * 0.95 + variance + trend * 0.6))
+      };
+    });
+  };
+
+  const trendData = generateTrendData();
+
+  // Dados de benchmark
+  const benchmarkData = efficacyData.map(item => ({
+    name: item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
+    atual: item.score,
+    media: 3.2,
+    melhorClasse: 4.1
+  })).slice(0, 8); // Top 8 para visualização
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Tendências de Performance</CardTitle>
+          <CardDescription>
+            Evolução temporal dos indicadores principais
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 w-full">
+            <ChartContainer config={{
+              eficacia: { color: "#3b82f6" },
+              sustentabilidade: { color: "#10b981" },
+              satisfacao: { color: "#f59e0b" }
+            }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis domain={[0, 5]} />
+                  <Tooltip />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="eficacia" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    name="Eficácia"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="sustentabilidade" 
+                    stroke="#10b981" 
+                    strokeWidth={2}
+                    name="Sustentabilidade"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="satisfacao" 
+                    stroke="#f59e0b" 
+                    strokeWidth={2}
+                    name="Satisfação"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Benchmark Competitivo</CardTitle>
+          <CardDescription>
+            Performance vs. média do mercado e melhor da classe
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 w-full">
+            <ChartContainer config={{
+              atual: { color: "#9b87f5" },
+              media: { color: "#64748b" },
+              melhorClasse: { color: "#22c55e" }
+            }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={benchmarkData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 10 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis domain={[0, 5]} />
+                  <Tooltip />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="melhorClasse"
+                    stackId="1"
+                    stroke="#22c55e"
+                    fill="#22c55e"
+                    fillOpacity={0.1}
+                    name="Melhor da Classe"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="media"
+                    stackId="2"
+                    stroke="#64748b"
+                    fill="#64748b"
+                    fillOpacity={0.2}
+                    name="Média do Mercado"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="atual" 
+                    stroke="#9b87f5" 
+                    strokeWidth={3}
+                    name="Performance Atual"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+          
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <div className="text-sm font-medium text-green-600">Acima da Média</div>
+              <div className="text-lg font-bold">
+                {benchmarkData.filter(d => d.atual > d.media).length}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm font-medium text-blue-600">Na Média</div>
+              <div className="text-lg font-bold">
+                {benchmarkData.filter(d => Math.abs(d.atual - d.media) <= 0.3).length}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm font-medium text-red-600">Abaixo da Média</div>
+              <div className="text-lg font-bold">
+                {benchmarkData.filter(d => d.atual < d.media - 0.3).length}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PerformanceTrends;
