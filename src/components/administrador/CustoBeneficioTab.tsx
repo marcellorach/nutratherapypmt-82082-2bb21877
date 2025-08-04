@@ -9,7 +9,6 @@ import {
   CardFooter 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
@@ -23,8 +22,17 @@ import {
   LineChart, 
   PiggyBank, 
   RefreshCw, 
-  Thermometer 
+  Thermometer,
+  TrendingUp,
+  Target,
+  Calculator
 } from "lucide-react";
+
+// Novos componentes ROI
+import { MarketOpportunityMatrix } from '@/components/administrador/roi/MarketOpportunityMatrix';
+import { PredictiveROIChart } from '@/components/administrador/roi/PredictiveROIChart';
+import { BusinessCaseSimulator } from '@/components/administrador/roi/BusinessCaseSimulator';
+import { useROIIntelligence } from '@/hooks/roi/useROIIntelligence';
 
 // Componente de exemplo do gráfico de ROI
 const ROIChart: React.FC = () => {
@@ -80,252 +88,298 @@ const CustoBeneficioTab: React.FC = () => {
   const [periodoAnalise, setPeriodoAnalise] = useState("6");
   const [custoPeriodo, setCustoPeriodo] = useState([3500]);
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
+  const [selectedCondition, setSelectedCondition] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  const { roiMetrics, marketOpportunities, isLoading } = useROIIntelligence();
   
   return (
     <>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold">Análise de Custo-Benefício</h2>
-          <p className="text-gray-600">Avaliação preditiva de retorno sobre investimento em nutracêuticos</p>
+          <h2 className="text-xl font-bold text-foreground">Inteligência de ROI & Business Case</h2>
+          <p className="text-muted-foreground">
+            Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários
+          </p>
         </div>
         
-        <Button className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Atualizar Previsões
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2">
+            <AreaChart className="h-4 w-4" />
+            Exportar Relatório
+          </Button>
+          <Button className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Atualizar Análises
+          </Button>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* KPIs Executivos */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <KPICard 
-          title="ROI Médio Esperado" 
-          value="312%" 
-          subtitle="Para intervenções preventivas" 
-          trend="18% maior que trimestre anterior" 
-          trendUp={true}
-          icon={<PiggyBank className="h-6 w-6" style={{ color: "#10b981" }} />} 
-          color="#10b981"
+          title="ROI Total Médio" 
+          value={`${roiMetrics.totalROI}%`}
+          subtitle="Retorno médio dos nutracêuticos" 
+          trend={`${roiMetrics.averageROI > 250 ? '+' : ''}${Math.round((roiMetrics.averageROI - 250) / 2.5)}% vs meta`}
+          trendUp={roiMetrics.averageROI > 250}
+          icon={<TrendingUp className="h-6 w-6" style={{ color: "hsl(var(--primary))" }} />} 
+          color="hsl(var(--primary))"
         />
         
         <KPICard 
-          title="Economia Projetada" 
-          value="R$ 428.500" 
-          subtitle="Em 12 meses de programa" 
-          trend="Por plano com 1000 pets" 
+          title="ROI Preventivo" 
+          value={`${roiMetrics.preventiveROI}%`}
+          subtitle="Maior retorno em prevenção" 
+          trend={`${roiMetrics.preventiveROI - roiMetrics.treatmentROI}% vs tratamento`}
           trendUp={true}
-          icon={<Gauge className="h-6 w-6" style={{ color: "#3b82f6" }} />} 
-          color="#3b82f6"
+          icon={<Target className="h-6 w-6" style={{ color: "hsl(var(--success))" }} />} 
+          color="hsl(var(--success))"
         />
         
         <KPICard 
-          title="Redução de Complicações" 
-          value="37.8%" 
-          subtitle="Em condições crônicas tratadas" 
-          trend="12% melhor que cenário base" 
+          title="Índice Sustentabilidade" 
+          value={`${roiMetrics.sustainabilityIndex}%`}
+          subtitle="Viabilidade a longo prazo" 
+          trend="Alta consistência"
           trendUp={true}
-          icon={<Thermometer className="h-6 w-6" style={{ color: "#8b5cf6" }} />} 
-          color="#8b5cf6"
+          icon={<Gauge className="h-6 w-6" style={{ color: "hsl(var(--secondary))" }} />} 
+          color="hsl(var(--secondary))"
+        />
+        
+        <KPICard 
+          title="Penetração Mercado" 
+          value={`${roiMetrics.marketPenetration}%`}
+          subtitle="Oportunidades disponíveis" 
+          trend={`${marketOpportunities.length} condições mapeadas`}
+          trendUp={true}
+          icon={<BarChart4 className="h-6 w-6" style={{ color: "hsl(var(--accent))" }} />} 
+          color="hsl(var(--accent))"
         />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+      {/* Painel Principal de Análises */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Visão Executiva
+          </TabsTrigger>
+          <TabsTrigger value="opportunities" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Oportunidades
+          </TabsTrigger>
+          <TabsTrigger value="predictive" className="flex items-center gap-2">
+            <AreaChart className="h-4 w-4" />
+            Análise Preditiva
+          </TabsTrigger>
+          <TabsTrigger value="simulator" className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Simulador
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Análise Comparativa ROI */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Análise Comparativa de ROI</CardTitle>
+                <CardDescription>Comparação entre abordagens preventivas vs. tratamento reativo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                      <h4 className="font-semibold text-green-800 dark:text-green-300">Abordagem Preventiva</h4>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">ROI Médio:</span>
+                          <span className="font-bold text-green-600">{roiMetrics.preventiveROI}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Custo por Pet/Ano:</span>
+                          <span className="font-medium">R$ 1.260</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Redução de Casos:</span>
+                          <span className="font-medium">76%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                      <h4 className="font-semibold text-orange-800 dark:text-orange-300">Tratamento Reativo</h4>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">ROI Médio:</span>
+                          <span className="font-bold text-orange-600">{roiMetrics.treatmentROI}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Custo por Caso:</span>
+                          <span className="font-medium">R$ 3.840</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Taxa de Incidência:</span>
+                          <span className="font-medium">18%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-primary">Vantagem Competitiva</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Prevenção oferece ROI {roiMetrics.preventiveROI - roiMetrics.treatmentROI}% superior ao tratamento reativo
+                      </p>
+                    </div>
+                    <Badge className="bg-primary text-primary-foreground">
+                      +{Math.round(((roiMetrics.preventiveROI - roiMetrics.treatmentROI) / roiMetrics.treatmentROI) * 100)}%
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Métricas de Sustentabilidade */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Métricas de Sustentabilidade</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>CLV Médio (24m):</span>
+                    <span className="font-medium">R$ 4.800</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Taxa de Retenção:</span>
+                    <span className="font-medium text-green-600">89%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Payback Médio:</span>
+                    <span className="font-medium">8.3 meses</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Margem de Contribuição:</span>
+                    <span className="font-medium">67%</span>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Impacto Clínico</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>Redução de consultas:</span>
+                    <span className="font-medium">43%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Redução de emergências:</span>
+                    <span className="font-medium">67%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Melhora qualidade de vida:</span>
+                    <span className="font-medium text-green-600">72%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Satisfação dos tutores:</span>
+                    <span className="font-medium">91%</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="opportunities" className="space-y-6">
+          <MarketOpportunityMatrix 
+            onOpportunitySelect={(opportunity) => {
+              setSelectedCondition(opportunity.conditionName);
+              setActiveTab('predictive');
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="predictive" className="space-y-6">
+          <PredictiveROIChart 
+            selectedCondition={selectedCondition}
+            timeHorizon={parseInt(periodoAnalise) || 12}
+          />
+        </TabsContent>
+
+        <TabsContent value="simulator" className="space-y-6">
+          <BusinessCaseSimulator />
+        </TabsContent>
+      </Tabs>
+      {/* Detalhes Avançados */}
+      {mostrarDetalhes && (
+        <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Projeção de Custo-Benefício</CardTitle>
-            <CardDescription>Análise preditiva ROI com base nos modelos treinados</CardDescription>
+            <CardTitle>Metodologia e Parâmetros Técnicos</CardTitle>
+            <CardDescription>
+              Detalhamento dos modelos e algoritmos utilizados nas análises preditivas
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col lg:flex-row gap-4 mb-4">
-              <div className="flex-1">
-                <Label htmlFor="condicao" className="mb-2 block">Condição clínica</Label>
-                <Select defaultValue="osteoartrite">
-                  <SelectTrigger id="condicao">
-                    <SelectValue placeholder="Selecione uma condição" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="osteoartrite">Osteoartrite canina</SelectItem>
-                    <SelectItem value="dermatite">Dermatite atópica</SelectItem>
-                    <SelectItem value="cardio">Cardiomiopatia</SelectItem>
-                    <SelectItem value="renal">Doença renal crônica</SelectItem>
-                    <SelectItem value="todas">Todas as condições</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Parâmetros de Cálculo</h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Parâmetro</TableHead>
+                      <TableHead>Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Taxa base incidência</TableCell>
+                      <TableCell>18.2%</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Redução com protocolo</TableCell>
+                      <TableCell>76.4%</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Custo médio tratamento</TableCell>
+                      <TableCell>R$ 3.840</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Custo protocolo preventivo</TableCell>
+                      <TableCell>R$ 1.260</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
               
-              <div className="flex-1">
-                <Label htmlFor="periodo" className="mb-2 block">Período de análise (meses)</Label>
-                <Select value={periodoAnalise} onValueChange={setPeriodoAnalise}>
-                  <SelectTrigger id="periodo">
-                    <SelectValue placeholder="Período de análise" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="3">3 meses</SelectItem>
-                    <SelectItem value="6">6 meses</SelectItem>
-                    <SelectItem value="12">12 meses</SelectItem>
-                    <SelectItem value="24">24 meses</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex-1">
-                <Label className="mb-2 block">Custo por período (R$)</Label>
-                <div className="pt-4">
-                  <Slider
-                    value={custoPeriodo}
-                    min={1000}
-                    max={10000}
-                    step={500}
-                    onValueChange={setCustoPeriodo}
-                  />
-                  <div className="flex justify-between mt-2 text-xs text-gray-500">
-                    <span>R$ 1.000</span>
-                    <span className="font-medium">R$ {custoPeriodo[0].toLocaleString()}</span>
-                    <span>R$ 10.000</span>
+              <div>
+                <h4 className="font-semibold mb-3">Modelos Utilizados</h4>
+                <div className="space-y-3">
+                  <div className="p-3 bg-muted/30 rounded-lg">
+                    <p className="font-medium text-sm">Análise Preditiva</p>
+                    <p className="text-xs text-muted-foreground">Ensemble: XGBoost + Random Forest</p>
+                    <p className="text-xs text-muted-foreground">Acurácia: 91.2%</p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded-lg">
+                    <p className="font-medium text-sm">Análise de Tendências</p>
+                    <p className="text-xs text-muted-foreground">LSTM + ARIMA</p>
+                    <p className="text-xs text-muted-foreground">R²: 0.87</p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded-lg">
+                    <p className="font-medium text-sm">Simulação Monte Carlo</p>
+                    <p className="text-xs text-muted-foreground">10,000 iterações</p>
+                    <p className="text-xs text-muted-foreground">IC: 95%</p>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <ROIChart />
-            
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center space-x-2">
-                <Switch id="detalhes" checked={mostrarDetalhes} onCheckedChange={setMostrarDetalhes} />
-                <Label htmlFor="detalhes">Mostrar detalhes avançados</Label>
-              </div>
-              
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Confiança da previsão: Alta
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Comparativo de Custos</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              <Tabs defaultValue="tratamento">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="tratamento">Tratamento</TabsTrigger>
-                  <TabsTrigger value="prevencao">Prevenção</TabsTrigger>
-                </TabsList>
-                <TabsContent value="tratamento" className="pt-4 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Custo médio por caso:</span>
-                    <span className="font-medium">R$ 3.840</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Taxa de ocorrência:</span>
-                    <span className="font-medium">18%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Duração média:</span>
-                    <span className="font-medium">17 meses</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
-                    <span className="font-medium">Custo projetado por 100 pets:</span>
-                    <span className="font-bold">R$ 69.120</span>
-                  </div>
-                </TabsContent>
-                <TabsContent value="prevencao" className="pt-4 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Custo do protocolo:</span>
-                    <span className="font-medium">R$ 1.260</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Eficácia preventiva:</span>
-                    <span className="font-medium">87%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Duração do protocolo:</span>
-                    <span className="font-medium">12 meses</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
-                    <span className="font-medium">Custo projetado por 100 pets:</span>
-                    <span className="font-bold text-green-600">R$ 22.140</span>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            <CardFooter className="bg-gray-50 border-t">
-              <div className="w-full flex justify-between items-center">
-                <span className="text-sm font-medium">Economia estimada:</span>
-                <span className="text-lg font-bold text-green-600">R$ 46.980</span>
-              </div>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Indicadores Clínicos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="flex justify-between items-center">
-                <span>Redução de consultas:</span>
-                <span className="font-medium">43%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Redução de emergências:</span>
-                <span className="font-medium">67%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Melhora na qualidade de vida:</span>
-                <span className="font-medium">72%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Diminuição do sofrimento:</span>
-                <span className="font-medium">85%</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      {mostrarDetalhes && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Detalhamento da Análise de ROI</CardTitle>
-            <CardDescription>Parâmetros utilizados no cálculo do retorno sobre investimento</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Parâmetro</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Observação</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Taxa de incidência base</TableCell>
-                  <TableCell>18.2%</TableCell>
-                  <TableCell>Média para a condição sem intervenção</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Taxa de incidência com protocolo</TableCell>
-                  <TableCell>4.3%</TableCell>
-                  <TableCell>Redução de 76.4% com intervenção nutracêutica</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Custo médio de tratamento</TableCell>
-                  <TableCell>R$ 3.840</TableCell>
-                  <TableCell>Inclui medicação, consultas e procedimentos</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Custo do protocolo preventivo</TableCell>
-                  <TableCell>R$ 1.260</TableCell>
-                  <TableCell>Por pet durante 12 meses</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Modelo de predição utilizado</TableCell>
-                  <TableCell>XGBoost + LSTM</TableCell>
-                  <TableCell>Acurácia combinada de 91%</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
           </CardContent>
         </Card>
       )}
