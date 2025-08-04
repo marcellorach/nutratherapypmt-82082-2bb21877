@@ -25,7 +25,7 @@ export const useOutcomeManagement = () => {
   // Carregar dados iniciais
   useEffect(() => {
     fetchOutcomes();
-  }, []);
+  }, [fetchOutcomes]);
 
   // Filtrar outcomes quando mudar a pesquisa ou os dados
   useEffect(() => {
