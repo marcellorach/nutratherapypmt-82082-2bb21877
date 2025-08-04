@@ -62,21 +62,38 @@ const KPIGrid: React.FC<KPIGridProps> = ({ metrics }) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {kpiCards.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
-          <Card key={index} className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground leading-tight">
                 {kpi.title}
               </CardTitle>
-              <div className={`p-2 rounded-full ${kpi.bgColor}`}>
+              <div className={`p-2 rounded-full ${kpi.bgColor} shadow-sm`}>
                 <Icon className={`h-4 w-4 ${kpi.color}`} />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{kpi.value}</div>
+            <CardContent className="pt-0">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold tracking-tight">{kpi.value}</div>
+                {index < 2 && (
+                  <div className="text-xs text-muted-foreground">
+                    {index === 0 ? 'Ativos no sistema' : 'Score médio do portfólio'}
+                  </div>
+                )}
+                {index >= 2 && index < 4 && (
+                  <div className="text-xs text-muted-foreground">
+                    {index === 2 ? 'Cobertura do mercado' : 'Efetividade operacional'}
+                  </div>
+                )}
+                {index >= 4 && (
+                  <div className="text-xs text-muted-foreground">
+                    {index === 4 ? 'Score de responsabilidade' : 'Oportunidades de melhoria'}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         );

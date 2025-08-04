@@ -33,29 +33,41 @@ const AnalyticsTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-muted-foreground">Carregando dados de analytics...</span>
+      <div className="space-y-8 p-6">
+        <div className="space-y-4">
+          <div className="h-8 bg-muted rounded animate-pulse w-64" />
+          <div className="h-5 bg-muted rounded animate-pulse w-96" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-24 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-96 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
-  
+
   return (
-    <div className="space-y-6">
-      {/* Header com ações */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Analytics Inteligente</h2>
-          <p className="text-muted-foreground">
-            Análise detalhada de tratabilidade, performance e inteligência de prescrição
+    <div className="space-y-8 p-6">
+      {/* Header Principal */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Analytics Inteligente</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Análise detalhada de tratabilidade, performance e inteligência de prescrição do seu ecossistema nutracêutico
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRefreshData} size="sm">
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={handleRefreshData} size="sm" className="shrink-0">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
-          <Button onClick={handleExportReport} size="sm">
+          <Button onClick={handleExportReport} size="sm" className="shrink-0">
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
@@ -63,88 +75,136 @@ const AnalyticsTab: React.FC = () => {
       </div>
 
       {/* KPIs Executivos */}
-      <KPIGrid metrics={metrics} />
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">Visão Executiva</h2>
+          <div className="h-px bg-border flex-1" />
+        </div>
+        <KPIGrid metrics={metrics} />
+      </div>
 
-      {/* Dashboard Principal em Grid 2x2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Eficácia Comparativa - Melhorada */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Eficácia Comparativa Global</CardTitle>
-            <CardDescription>
-              Performance de nutracêuticos vs contraindicações com benchmarking
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <NutraceuticalEfficacy data={efficacyData} />
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="text-sm font-medium text-muted-foreground">Maior Eficácia</div>
-                <div className="text-lg font-bold">
-                  {efficacyData.reduce((max, item) => item.score > max.score ? item : max).name}
+      {/* Seção Principal de Análises */}
+      <div className="space-y-8">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">Análises Detalhadas</h2>
+          <div className="h-px bg-border flex-1" />
+        </div>
+        
+        {/* Grid Principal 2x2 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Eficácia Comparativa */}
+          <Card className="h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                Eficácia Comparativa Global
+                <div className="h-2 w-2 bg-green-500 rounded-full" />
+              </CardTitle>
+              <CardDescription>
+                Performance de nutracêuticos vs contraindicações com insights de mercado
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <NutraceuticalEfficacy data={efficacyData} />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                  <div className="text-sm font-medium text-green-700">Maior Eficácia</div>
+                  <div className="text-lg font-bold text-green-800 truncate">
+                    {efficacyData.reduce((max, item) => item.score > max.score ? item : max, efficacyData[0])?.name || 'N/A'}
+                  </div>
+                  <div className="text-xs text-green-600">
+                    {efficacyData.reduce((max, item) => item.score > max.score ? item : max, efficacyData[0])?.score.toFixed(1)}/5
+                  </div>
+                </div>
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
+                  <div className="text-sm font-medium text-blue-700">Menor Risco</div>
+                  <div className="text-lg font-bold text-blue-800 truncate">
+                    {efficacyData.reduce((min, item) => item.contraindications < min.contraindications ? item : min, efficacyData[0])?.name || 'N/A'}
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    {efficacyData.reduce((min, item) => item.contraindications < min.contraindications ? item : min, efficacyData[0])?.contraindications || 0} contraindicações
+                  </div>
                 </div>
               </div>
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="text-sm font-medium text-muted-foreground">Menor Risco</div>
-                <div className="text-lg font-bold">
-                  {efficacyData.reduce((min, item) => item.contraindications < min.contraindications ? item : min).name}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Análise de Tratabilidade */}
-        <TreatabilityMatrix data={treatabilityData} />
+          {/* Análise de Tratabilidade */}
+          <TreatabilityMatrix data={treatabilityData} />
 
-        {/* Inteligência de Prescrição */}
-        <PrescriptionScatter data={prescriptionIntelligence} />
+          {/* Inteligência de Prescrição */}
+          <PrescriptionScatter data={prescriptionIntelligence} />
 
-        {/* Performance e Outcomes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Volume de Prescrições</CardTitle>
-            <CardDescription>
-              Evolução temporal e distribuição por categorias
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">
-                  {prescriptionIntelligence.reduce((sum, item) => sum + item.conditionsCount, 0)}
+          {/* Métricas de Prescrição */}
+          <Card className="h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                Métricas de Prescrição
+                <div className="h-2 w-2 bg-purple-500 rounded-full" />
+              </CardTitle>
+              <CardDescription>
+                Volume e distribuição de relações terapêuticas por categoria
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    {prescriptionIntelligence.reduce((sum, item) => sum + item.conditionsCount, 0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total de Relações Terapêuticas Mapeadas
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  Total de Relações Terapêuticas
-                </div>
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div className="text-2xl font-bold text-green-600">
                       {treatabilityData.reduce((sum, item) => sum + item.prevention, 0)}
                     </div>
-                    <div className="text-xs text-muted-foreground">Prevenção</div>
+                    <div className="text-xs text-green-700 font-medium">Prevenção</div>
+                    <div className="text-xs text-muted-foreground">Intervenções</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="text-2xl font-bold text-blue-600">
                       {treatabilityData.reduce((sum, item) => sum + item.treatment, 0)}
                     </div>
-                    <div className="text-xs text-muted-foreground">Tratamento</div>
+                    <div className="text-xs text-blue-700 font-medium">Tratamento</div>
+                    <div className="text-xs text-muted-foreground">Ativo</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600">
+                  <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                    <div className="text-2xl font-bold text-purple-600">
                       {treatabilityData.reduce((sum, item) => sum + item.support, 0)}
                     </div>
-                    <div className="text-xs text-muted-foreground">Suporte</div>
+                    <div className="text-xs text-purple-700 font-medium">Suporte</div>
+                    <div className="text-xs text-muted-foreground">Auxiliar</div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Taxa de Cobertura Média</span>
+                    <span className="font-semibold">
+                      {treatabilityData.length > 0 
+                        ? (treatabilityData.reduce((sum, item) => sum + item.coverage, 0) / treatabilityData.length).toFixed(1)
+                        : '0'
+                      }%
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Seção de Tendências - Full Width */}
-      <PerformanceTrends efficacyData={efficacyData} />
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">Performance & Tendências</h2>
+          <div className="h-px bg-border flex-1" />
+        </div>
+        <PerformanceTrends efficacyData={efficacyData} />
+      </div>
     </div>
   );
 };
