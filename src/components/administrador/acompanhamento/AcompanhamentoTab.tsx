@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 
 // Módulos refatorados
-import DashboardModule from './modules/DashboardModule';
+import { DashboardModule } from './modules/DashboardModule';
 import { CampaignProvider } from '@/contexts/CampaignContext';
 
 interface Campaign {

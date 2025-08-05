@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useMetricsContext } from '@/contexts/MetricsContext';
+import { useMetricsEffects } from './useMetricsEffects';
 import type { ROIMetrics, PerformanceMetrics, TimeSeriesData } from '@/contexts/MetricsContext';
 
 /**
@@ -7,13 +8,7 @@ import type { ROIMetrics, PerformanceMetrics, TimeSeriesData } from '@/contexts/
  */
 export const useMetricsManager = () => {
   const { state, actions } = useMetricsContext();
-
-  // Auto-load metrics on mount
-  useEffect(() => {
-    if (!state.lastUpdated) {
-      actions.refreshAllMetrics();
-    }
-  }, []);
+  const effects = useMetricsEffects();
 
   // Computed values
   const roiStatus = useMemo(() => {
@@ -50,15 +45,15 @@ export const useMetricsManager = () => {
     return 'stable';
   }, [state.timeSeriesData]);
 
-  // Helper functions
-  const getMetricsByDateRange = (startDate: Date, endDate: Date) => {
+  // Memoized helper functions
+  const getMetricsByDateRange = useCallback((startDate: Date, endDate: Date) => {
     return state.timeSeriesData.filter(data => {
       const dataDate = new Date(data.date);
       return dataDate >= startDate && dataDate <= endDate;
     });
-  };
+  }, [state.timeSeriesData]);
 
-  const getTopPerformingMetrics = (limit: number = 5) => {
+  const getTopPerformingMetrics = useCallback((limit: number = 5) => {
     const grouped = state.timeSeriesData.reduce((acc, data) => {
       if (!acc[data.metric]) {
         acc[data.metric] = [];
@@ -75,37 +70,37 @@ export const useMetricsManager = () => {
       }))
       .sort((a, b) => b.average - a.average)
       .slice(0, limit);
-  };
+  }, [state.timeSeriesData]);
 
-  const formatROI = (roi: number): string => {
+  const formatROI = useCallback((roi: number): string => {
     return `${roi.toFixed(1)}%`;
-  };
+  }, []);
 
-  const formatCurrency = (value: number): string => {
+  const formatCurrency = useCallback((value: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
-  };
+  }, []);
 
-  const formatPaybackPeriod = (months: number): string => {
+  const formatPaybackPeriod = useCallback((months: number): string => {
     if (months === Infinity) return 'Nunca';
     if (months < 1) return `${Math.round(months * 30)} dias`;
     if (months < 12) return `${months.toFixed(1)} meses`;
     return `${(months / 12).toFixed(1)} anos`;
-  };
+  }, []);
 
   // Validation functions
-  const isMetricsDataFresh = (): boolean => {
+  const isMetricsDataFresh = useCallback((): boolean => {
     if (!state.lastUpdated) return false;
     const now = new Date();
     const diffInHours = (now.getTime() - state.lastUpdated.getTime()) / (1000 * 60 * 60);
     return diffInHours < 24; // Considera fresh se atualizado nas últimas 24h
-  };
+  }, [state.lastUpdated]);
 
-  const hasMinimumDataForAnalysis = (): boolean => {
+  const hasMinimumDataForAnalysis = useCallback((): boolean => {
     return state.timeSeriesData.length >= 7; // Mínimo 7 pontos de dados
-  };
+  }, [state.timeSeriesData.length]);
 
   return {
     // State
@@ -121,6 +116,9 @@ export const useMetricsManager = () => {
     roiStatus,
     performanceStatus,
     roiTrend,
+    
+    // Effects
+    ...effects,
     
     // Actions
     loadROIMetrics: actions.loadROIMetrics,

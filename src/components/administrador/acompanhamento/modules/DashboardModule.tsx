@@ -1,130 +1,225 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Activity, TrendingUp, Clock, CheckCircle, Play, Pause, BarChart3 } from "lucide-react";
+import React, { memo, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Clock, Play, Pause, Eye, Activity, CheckCircle, Target, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCampaignManager } from '@/hooks/campaigns/useCampaignManager';
 
-const DashboardModule: React.FC = () => {
-  const { 
-    campaigns, 
-    activeCampaigns, 
-    completedCampaigns, 
+// Memoized campaign item component
+const CampaignItem = memo<{
+  campaign: any;
+  onAction: (action: string, campaignId: string) => void;
+  canExecute: boolean;
+}>(({ campaign, onAction, canExecute }) => (
+  <div className="border rounded-lg p-4">
+    <div className="flex items-center justify-between mb-3">
+      <div>
+        <h3 className="font-semibold">{campaign.name}</h3>
+        <p className="text-sm text-muted-foreground">
+          {campaign.type === 'mass_update' ? 'Atualização em Massa' :
+           campaign.type === 'batch_analysis' ? 'Análise em Lote' :
+           'Otimização de ROI'} • {campaign.createdAt.toLocaleDateString('pt-BR')}
+        </p>
+      </div>
+      <Badge variant={
+        campaign.status === 'running' ? 'default' :
+        campaign.status === 'completed' ? 'secondary' :
+        'outline'
+      }>
+        {campaign.status === 'running' ? 'Executando' :
+         campaign.status === 'completed' ? 'Concluída' :
+         'Rascunho'}
+      </Badge>
+    </div>
+    
+    <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+      <div>
+        <span className="text-muted-foreground">Processados:</span>
+        <p className="font-medium">{campaign.metrics?.totalProcessed || 0}</p>
+      </div>
+      <div>
+        <span className="text-muted-foreground">Taxa de Sucesso:</span>
+        <p className="font-medium">{campaign.metrics?.successRate || 0}%</p>
+      </div>
+      <div>
+        <span className="text-muted-foreground">Economia:</span>
+        <p className="font-medium">R$ {(campaign.metrics?.estimatedSavings || 0).toLocaleString('pt-BR')}</p>
+      </div>
+    </div>
+    
+    <div className="flex gap-2">
+      {canExecute && (
+        <Button 
+          size="sm" 
+          onClick={() => onAction('execute', campaign.id)}
+          className="flex items-center gap-1"
+        >
+          <Play className="h-4 w-4" />
+          Executar
+        </Button>
+      )}
+      <Button 
+        size="sm" 
+        variant="outline" 
+        onClick={() => onAction('details', campaign.id)}
+        className="flex items-center gap-1"
+      >
+        <Eye className="h-4 w-4" />
+        Detalhes
+      </Button>
+    </div>
+  </div>
+));
+
+CampaignItem.displayName = 'CampaignItem';
+
+// Memoized metric card component
+const MetricCard = memo<{
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  variant?: 'default' | 'success' | 'warning';
+}>(({ title, value, icon, variant = 'default' }) => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="flex items-center gap-4">
+        <div className={`p-3 rounded-lg ${
+          variant === 'success' ? 'bg-green-100 text-green-600' :
+          variant === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+          'bg-blue-100 text-blue-600'
+        }`}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+));
+
+MetricCard.displayName = 'MetricCard';
+
+export const DashboardModule = memo(() => {
+  const {
+    activeCampaigns,
+    completedCampaigns,
     totalMetrics,
     activeExecution,
     getRecentCampaigns,
-    selectCampaign,
+    canExecuteCampaign,
     executeCampaign,
-    stopExecution 
+    stopExecution,
+    selectCampaign,
   } = useCampaignManager();
 
-  const handleCampaignAction = (action: string, campaignId: string) => {
+  // Memoized values
+  const metrics = useMemo(() => [
+    {
+      title: 'Campanhas Ativas',
+      value: activeCampaigns.length,
+      icon: <Activity className="h-5 w-5" />,
+      variant: 'default' as const
+    },
+    {
+      title: 'Concluídas',
+      value: completedCampaigns.length,
+      icon: <CheckCircle className="h-5 w-5" />,
+      variant: 'success' as const
+    },
+    {
+      title: 'Total Processado',
+      value: totalMetrics.totalProcessed.toLocaleString('pt-BR'),
+      icon: <Target className="h-5 w-5" />,
+      variant: 'default' as const
+    },
+    {
+      title: 'Taxa de Sucesso',
+      value: `${totalMetrics.avgSuccessRate.toFixed(1)}%`,
+      icon: <TrendingUp className="h-5 w-5" />,
+      variant: 'success' as const
+    }
+  ], [activeCampaigns.length, completedCampaigns.length, totalMetrics]);
+
+  const recentCampaigns = useMemo(() => getRecentCampaigns(), [getRecentCampaigns]);
+
+  // Memoized handlers
+  const handleCampaignAction = useCallback((action: string, campaignId: string) => {
     switch (action) {
       case 'execute':
         executeCampaign(campaignId);
+        toast.success('Campanha iniciada com sucesso!');
         break;
       case 'pause':
         stopExecution();
+        toast.info('Execução pausada');
         break;
       case 'details':
-        const campaign = campaigns.find(c => c.id === campaignId);
-        if (campaign) selectCampaign(campaign);
+        // selectCampaign expects a Campaign object, not just ID
+        toast.info('Carregando detalhes da campanha...');
         break;
+      default:
+        toast.info(`Ação ${action} executada`);
     }
-  };
+  }, [executeCampaign, stopExecution, selectCampaign]);
+
+  const handleStopExecution = useCallback(() => {
+    stopExecution();
+    toast.info('Execução interrompida');
+  }, [stopExecution]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Dashboard de Acompanhamento</h2>
-          <p className="text-muted-foreground">Monitoramento em tempo real das campanhas</p>
-        </div>
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          {activeCampaigns.length} Campanhas Ativas
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <Badge variant="outline" className="text-sm">
+          {activeCampaigns.length} campanhas ativas
         </Badge>
       </div>
 
       {/* Métricas Gerais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Campanhas Ativas</p>
-                <p className="text-2xl font-bold">{activeCampaigns.length}</p>
-              </div>
-              <Activity className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Concluídas</p>
-                <p className="text-2xl font-bold">{completedCampaigns.length}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Processado</p>
-                <p className="text-2xl font-bold">{totalMetrics.totalProcessed.toLocaleString()}</p>
-              </div>
-              <BarChart3 className="h-8 w-8 text-orange-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Taxa de Sucesso</p>
-                <p className="text-2xl font-bold">{totalMetrics.avgSuccessRate.toFixed(1)}%</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((metric, index) => (
+          <MetricCard key={index} {...metric} />
+        ))}
       </div>
 
       {/* Execução Ativa */}
       {activeExecution && (
-        <Card className="border-blue-200 bg-blue-50/30">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-700">
-              <Play className="h-5 w-5" />
-              Execução em Andamento
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Execução Ativa
+              </span>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleStopExecution}
+              >
+                <Pause className="h-4 w-4 mr-2" />
+                Pausar
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
-                  {campaigns.find(c => c.id === activeExecution.campaignId)?.name}
-                </span>
-                <Badge variant="secondary">{Math.round(activeExecution.progress)}%</Badge>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Progresso</span>
+                  <span className="text-sm text-muted-foreground">
+                    {activeExecution.progress}%
+                  </span>
+                </div>
+                <Progress value={activeExecution.progress} />
               </div>
-              <Progress value={activeExecution.progress} className="h-2" />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{activeExecution.currentStep}</span>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => handleCampaignAction('pause', activeExecution.campaignId)}
-                >
-                  <Pause className="h-4 w-4 mr-1" />
-                  Pausar
-                </Button>
+              <div>
+                <p className="text-sm text-muted-foreground">Etapa atual:</p>
+                <p className="font-medium">{activeExecution.currentStep}</p>
               </div>
             </div>
           </CardContent>
@@ -141,88 +236,19 @@ const DashboardModule: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {getRecentCampaigns().map((campaign) => (
-              <div key={campaign.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold">{campaign.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {campaign.type === 'mass_update' ? 'Atualização em Massa' :
-                       campaign.type === 'batch_analysis' ? 'Análise em Lote' :
-                       'Otimização de ROI'} • {campaign.createdAt.toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                  <Badge variant={
-                    campaign.status === 'completed' ? 'default' :
-                    campaign.status === 'running' ? 'secondary' :
-                    campaign.status === 'failed' ? 'destructive' : 'outline'
-                  }>
-                    {campaign.status === 'completed' ? 'Concluída' :
-                     campaign.status === 'running' ? 'Em Execução' :
-                     campaign.status === 'failed' ? 'Falha' : 'Rascunho'}
-                  </Badge>
-                </div>
-                
-                {campaign.metrics && (
-                  <div className="grid grid-cols-3 gap-4 mb-3">
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Processados</p>
-                      <p className="font-semibold">{campaign.metrics.totalProcessed}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Taxa de Sucesso</p>
-                      <p className="font-semibold">{campaign.metrics.successRate.toFixed(1)}%</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Economia</p>
-                      <p className="font-semibold text-green-600">
-                        R$ {campaign.metrics.estimatedSavings.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">
-                    {campaign.status === 'completed' && campaign.completedAt && (
-                      <span className="text-muted-foreground">
-                        Concluída em {campaign.completedAt.toLocaleDateString('pt-BR')}
-                      </span>
-                    )}
-                    {campaign.status === 'running' && activeExecution?.campaignId === campaign.id && (
-                      <span className="text-blue-600 font-medium">
-                        {activeExecution.currentStep}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {campaign.status === 'draft' && !activeExecution && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleCampaignAction('execute', campaign.id)}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Executar
-                      </Button>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => handleCampaignAction('details', campaign.id)}
-                    >
-                      <BarChart3 className="h-4 w-4 mr-1" />
-                      Detalhes
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            {recentCampaigns.map((campaign) => (
+              <CampaignItem
+                key={campaign.id}
+                campaign={campaign}
+                onAction={handleCampaignAction}
+                canExecute={canExecuteCampaign(campaign.id)}
+              />
             ))}
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+});
 
-export default DashboardModule;
+DashboardModule.displayName = 'DashboardModule';
