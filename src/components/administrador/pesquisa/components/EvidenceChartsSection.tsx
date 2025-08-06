@@ -10,9 +10,9 @@ interface EvidenceChartsSectionProps {
 
 const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amostra }) => {
   // Tamanhos amostrais para cada grupo
-  const tamanhoControle = 1247;
-  const tamanhoDapa = 1120;
-  const tamanhoEmpa = 78;
+  const tamanhoControle = 12173;
+  const tamanhoDapa = 10941;
+  const tamanhoEmpa = 761;
   const totalAnimais = tamanhoControle + tamanhoDapa + tamanhoEmpa;
 
   // Função para calcular números absolutos baseados nos percentuais
@@ -112,7 +112,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-bold text-primary">Evidências da Análise Populacional DECLARE-CANINE</h2>
         <p className="text-muted-foreground text-lg">
-          Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= 2.445 - Tomada de dados assíncronas entre jan. 2016 até maio 2021
+          Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
         </p>
       </div>
 
