@@ -67,9 +67,9 @@ export const ongoingStudiesData: OngoingStudy[] = [
   },
   {
     id: "dog-study-2",
-    title: "Efeitos de Antioxidantes no Envelhecimento Cognitivo em Cães Sênior",
-    description: "Avaliação da eficácia de uma mistura de antioxidantes na função cognitiva de cães idosos",
-    objective: "Avaliar se a suplementação com uma combinação específica de antioxidantes melhora a função cognitiva e reduz sinais de declínio mental em cães sênior",
+    title: "Efeitos de Senolíticos + Moduladores mTOR na Prevenção do Declínio Cognitivo em Cães Idosos",
+    description: "Avaliação da eficácia combinada de senolíticos e moduladores mTOR na função cognitiva de cães sênior",
+    objective: "Determinar se a terapia combinada previne o declínio cognitivo e melhora biomarcadores de envelhecimento em cães idosos",
     startDate: "2025-04-10",
     currentDay: 28,
     totalDays: 70,
@@ -81,49 +81,48 @@ export const ongoingStudiesData: OngoingStudy[] = [
     primaryInvestigator: "Dr. Carlos Mendes",
     breeds: ["Poodle", "Beagle", "Dachshund", "Raças mistas pequenas"],
     ageRange: "8+ anos",
-    interventionType: "Suplementação diária com composto de antioxidantes (vitamina E, selênio, flavonóides)",
-    notes: "Testes cognitivos preliminares mostram tendência positiva no grupo de tratamento",
+    interventionType: "Suplementação diária com senolíticos + moduladores mTOR (rapamicina + quercetina + dasatinib)",
+    notes: "Biomarcadores de senescência mostram redução significativa e função cognitiva apresenta melhoria no grupo de tratamento",
     metrics: [
       {
-        title: "Tempo de Resolução de Problemas",
-        description: "Tempo médio para completar tarefas de resolução de problemas (segundos)",
+        title: "Índice de Função Cognitiva",
+        description: "Teste composto de memória, aprendizado e função executiva (0-100)",
         data: [
-          { label: "Semana 0", control: 45.3, treatment: 44.8 },
-          { label: "Semana 2", control: 44.9, treatment: 40.2 },
-          { label: "Semana 4", control: 44.5, treatment: 36.7 }
+          { label: "Semana 0", control: 67.2, treatment: 66.8 },
+          { label: "Semana 2", control: 67.5, treatment: 72.3 },
+          { label: "Semana 4", control: 67.1, treatment: 78.9 }
         ],
-        yAxisLabel: "Segundos",
+        yAxisLabel: "Índice (0-100)",
         chartType: "line"
       },
       {
-        title: "Testes de Reconhecimento",
-        description: "Taxa de sucesso em testes de reconhecimento de objetos (%)",
+        title: "Biomarcadores p16 e p21",
+        description: "Expressão de marcadores de senescência celular (unidades relativas)",
         data: [
-          { label: "Semana 0", control: 62, treatment: 61 },
-          { label: "Semana 2", control: 63, treatment: 68 },
-          { label: "Semana 4", control: 64, treatment: 74 }
+          { label: "Semana 0", control: 100, treatment: 98 },
+          { label: "Semana 2", control: 102, treatment: 85 },
+          { label: "Semana 4", control: 105, treatment: 72 }
         ],
-        yAxisLabel: "Sucesso (%)",
-        chartType: "bar",
-        formatter: "percent"
+        yAxisLabel: "Expressão Relativa",
+        chartType: "bar"
       },
       {
-        title: "Atenção Sustentada",
-        description: "Duração da atenção sustentada em tarefas padronizadas (segundos)",
+        title: "Atividade da Via mTOR",
+        description: "Fosforilação S6K1 - indicador de modulação mTOR (unidades arbitrárias)",
         data: [
-          { label: "Semana 0", control: 32.1, treatment: 31.8 },
-          { label: "Semana 2", control: 32.5, treatment: 35.4 },
-          { label: "Semana 4", control: 32.3, treatment: 38.9 }
+          { label: "Semana 0", control: 1.45, treatment: 1.43 },
+          { label: "Semana 2", control: 1.47, treatment: 1.12 },
+          { label: "Semana 4", control: 1.46, treatment: 0.89 }
         ],
-        yAxisLabel: "Segundos",
+        yAxisLabel: "Fosforilação S6K1",
         chartType: "line"
       }
     ],
     phases: [
       { name: "Início", day: 0 },
-      { name: "Avaliação 1", day: 14 },
-      { name: "Avaliação 2", day: 35 },
-      { name: "Avaliação 3", day: 56 },
+      { name: "Avaliação Cognitiva 1", day: 14 },
+      { name: "Biomarcadores 1", day: 28 },
+      { name: "Avaliação Cognitiva 2", day: 49 },
       { name: "Final", day: 70 }
     ]
   }
