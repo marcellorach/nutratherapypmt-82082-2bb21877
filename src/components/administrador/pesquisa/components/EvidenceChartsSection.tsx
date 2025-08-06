@@ -9,13 +9,40 @@ interface EvidenceChartsSectionProps {
 }
 
 const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amostra }) => {
-  // Dados para gráfico de eventos cardiovasculares
-  const cardiovascularData = [
-    { label: 'Insuficiência Cardíaca', control: 12.7, treatment: 8.2 },
-    { label: 'Arritmias', control: 15.3, treatment: 10.1 },
-    { label: 'Hipertensão', control: 18.9, treatment: 13.6 },
-    { label: 'Cardiomiopatia', control: 8.4, treatment: 5.8 },
-    { label: 'Eventos Totais', control: 55.3, treatment: 37.7 }
+  // Dados temporais para cada cardiopatia específica
+  const heartFailureData = [
+    { label: 'Baseline', control: 0, treatment: 0 },
+    { label: '6 meses', control: 4.2, treatment: 2.8 },
+    { label: '12 meses', control: 8.1, treatment: 5.4 },
+    { label: '18 meses', control: 12.7, treatment: 8.2 }
+  ];
+
+  const arrhythmiasData = [
+    { label: 'Baseline', control: 0, treatment: 0 },
+    { label: '6 meses', control: 5.1, treatment: 3.4 },
+    { label: '12 meses', control: 10.2, treatment: 6.8 },
+    { label: '18 meses', control: 15.3, treatment: 10.1 }
+  ];
+
+  const hypertensionData = [
+    { label: 'Baseline', control: 0, treatment: 0 },
+    { label: '6 meses', control: 6.3, treatment: 4.5 },
+    { label: '12 meses', control: 12.6, treatment: 9.1 },
+    { label: '18 meses', control: 18.9, treatment: 13.6 }
+  ];
+
+  const cardiomyopathyData = [
+    { label: 'Baseline', control: 0, treatment: 0 },
+    { label: '6 meses', control: 2.8, treatment: 1.9 },
+    { label: '12 meses', control: 5.6, treatment: 3.9 },
+    { label: '18 meses', control: 8.4, treatment: 5.8 }
+  ];
+
+  const totalEventsData = [
+    { label: 'Baseline', control: 0, treatment: 0 },
+    { label: '6 meses', control: 18.4, treatment: 12.6 },
+    { label: '12 meses', control: 36.5, treatment: 25.2 },
+    { label: '18 meses', control: 55.3, treatment: 37.7 }
   ];
 
   // Dados para gráfico de função renal
@@ -61,15 +88,52 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
 
         <TabsContent value="cardiovascular" className="space-y-4">
           <PartialResultsChart
-            title="Incidência de Eventos Cardiovasculares"
-            data={cardiovascularData}
-            description="Comparação entre grupo dapagliflozina vs controle (% de cães afetados)"
-            yAxisLabel="Incidência (%)"
-            chartType="bar"
+            title="Insuficiência Cardíaca"
+            data={heartFailureData}
+            description="Incidência cumulativa de insuficiência cardíaca ao longo do tempo"
+            yAxisLabel="Incidência Cumulativa (%)"
+            chartType="line"
             formatter={(value) => `${value}%`}
           />
+          
+          <PartialResultsChart
+            title="Arritmias"
+            data={arrhythmiasData}
+            description="Incidência cumulativa de arritmias ao longo do tempo"
+            yAxisLabel="Incidência Cumulativa (%)"
+            chartType="line"
+            formatter={(value) => `${value}%`}
+          />
+          
+          <PartialResultsChart
+            title="Hipertensão"
+            data={hypertensionData}
+            description="Incidência cumulativa de hipertensão ao longo do tempo"
+            yAxisLabel="Incidência Cumulativa (%)"
+            chartType="line"
+            formatter={(value) => `${value}%`}
+          />
+          
+          <PartialResultsChart
+            title="Cardiomiopatia"
+            data={cardiomyopathyData}
+            description="Incidência cumulativa de cardiomiopatia ao longo do tempo"
+            yAxisLabel="Incidência Cumulativa (%)"
+            chartType="line"
+            formatter={(value) => `${value}%`}
+          />
+          
+          <PartialResultsChart
+            title="Eventos Cardiovasculares Totais"
+            data={totalEventsData}
+            description="Incidência cumulativa de todos os eventos cardiovasculares"
+            yAxisLabel="Incidência Cumulativa (%)"
+            chartType="line"
+            formatter={(value) => `${value}%`}
+          />
+          
           <div className="text-xs text-muted-foreground bg-green-50 p-2 rounded border border-green-200">
-            <strong>Resultado:</strong> Redução de 34% nos eventos cardiovasculares totais (p&lt;0.001)
+            <strong>Resultado:</strong> Redução de 34% nos eventos cardiovasculares totais com dapagliflozina (p&lt;0.001)
           </div>
         </TabsContent>
 

@@ -57,7 +57,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                   type="monotone"
                   dataKey="treatment"
                   stroke="#3B82F6"
-                  name="Tratamento"
+                  name="Dapa"
                   strokeWidth={2}
                   dot={true}
                 />
@@ -73,7 +73,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                 <Tooltip formatter={(value: number) => formatter(value)} />
                 <Legend />
                 <Bar dataKey="control" name="Controle" fill="#9CA3AF" />
-                <Bar dataKey="treatment" name="Tratamento" fill="#3B82F6" />
+                <Bar dataKey="treatment" name="Dapa" fill="#3B82F6" />
               </BarChart>
             )}
           </ResponsiveContainer>
