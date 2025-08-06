@@ -135,7 +135,34 @@ export const mockSugestoes: Sugestao[] = [
           pequeno_porte: 25,
           medio_porte: 45,
           grande_porte: 30
-        }
+        },
+        racas_cardiacas: [
+          {
+            raca: "Cavalier King Charles Spaniel",
+            voluntarios: 45,
+            predisposicao: "Doença degenerativa da válvula mitral"
+          },
+          {
+            raca: "Dobermann",
+            voluntarios: 35,
+            predisposicao: "Cardiomiopatia dilatada"
+          },
+          {
+            raca: "Golden Retriever",
+            voluntarios: 40,
+            predisposicao: "Cardiomiopatia e estenose subaórtica"
+          },
+          {
+            raca: "Boxer",
+            voluntarios: 38,
+            predisposicao: "Cardiomiopatia arritmogênica"
+          },
+          {
+            raca: "Pastor Alemão",
+            voluntarios: 42,
+            predisposicao: "Cardiomiopatia dilatada e estenose aórtica"
+          }
+        ]
       },
       cronograma_exames: {
         pre_estudo: [

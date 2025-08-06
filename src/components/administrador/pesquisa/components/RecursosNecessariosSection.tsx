@@ -72,6 +72,32 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
               </Badge>
             </div>
           </div>
+
+          {recursos.populacao_estudo.racas_cardiacas && (
+            <div>
+              <h5 className="font-medium mb-2 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-red-500" />
+                Raças com Predisposição Cardíaca
+              </h5>
+              <div className="space-y-2">
+                {recursos.populacao_estudo.racas_cardiacas.map((raca, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{raca.raca}</div>
+                      <div className="text-xs text-muted-foreground">{raca.predisposicao}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-red-600 dark:text-red-400">{raca.voluntarios}</div>
+                      <div className="text-xs text-muted-foreground">voluntários</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="text-xs text-muted-foreground mt-2 p-2 bg-amber-50 dark:bg-amber-950/20 rounded border border-amber-200 dark:border-amber-800">
+                  <strong>Total de voluntários com predisposição cardíaca:</strong> {recursos.populacao_estudo.racas_cardiacas.reduce((total, raca) => total + raca.voluntarios, 0)} de {recursos.populacao_estudo.total_caes} cães
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

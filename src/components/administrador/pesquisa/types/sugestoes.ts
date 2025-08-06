@@ -41,6 +41,11 @@ export interface RecursosNecessarios {
       medio_porte: number;
       grande_porte: number;
     };
+    racas_cardiacas?: {
+      raca: string;
+      voluntarios: number;
+      predisposicao: string;
+    }[];
   };
   cronograma_exames: {
     pre_estudo: string[];
