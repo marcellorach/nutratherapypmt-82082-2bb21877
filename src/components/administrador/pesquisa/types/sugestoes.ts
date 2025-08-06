@@ -29,6 +29,35 @@ export interface DadosAmostra {
   };
 }
 
+export interface RecursosNecessarios {
+  populacao_estudo: {
+    total_caes: number;
+    idade: string;
+    grupo_placebo: number;
+    grupo_tratamento: number;
+    duracao_meses: number;
+    distribuicao_racas: {
+      pequeno_porte: number;
+      medio_porte: number;
+      grande_porte: number;
+    };
+  };
+  cronograma_exames: {
+    pre_estudo: string[];
+    durante_estudo: string[];
+    pos_estudo: string[];
+    acompanhamento: string[];
+  };
+  custos_estimados: {
+    exames_laboratoriais: number;
+    ultrassons: number;
+    medicamentos: number;
+    pessoal: number;
+    total: number;
+    custo_por_animal_mes: number;
+  };
+}
+
 export interface Sugestao {
   id: string;
   titulo: string;
@@ -42,4 +71,5 @@ export interface Sugestao {
   approvalChain: ApprovalStep[];
   origem: OrigemSugestao;
   dados_amostra?: DadosAmostra;
+  recursos_necessarios?: RecursosNecessarios;
 }

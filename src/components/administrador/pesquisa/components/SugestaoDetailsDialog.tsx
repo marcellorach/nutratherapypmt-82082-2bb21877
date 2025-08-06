@@ -28,6 +28,7 @@ import { Sugestao } from '../types/sugestoes';
 import ApprovalChain from './ApprovalChain';
 import { Badge } from "@/components/ui/badge";
 import EvidenceChartsSection from './EvidenceChartsSection';
+import RecursosNecessariosSection from './RecursosNecessariosSection';
 
 interface SugestaoDetailsDialogProps {
   open: boolean;
@@ -105,9 +106,10 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
           
           {/* Conteúdo principal com tabs */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="evidence">Evidências</TabsTrigger>
+              <TabsTrigger value="recursos">Recursos Necessários</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
@@ -142,6 +144,18 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
                 <div className="bg-muted p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">
                     Dados de evidência não disponíveis para esta sugestão.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="recursos" className="space-y-4">
+              {sugestao.recursos_necessarios ? (
+                <RecursosNecessariosSection recursos={sugestao.recursos_necessarios} />
+              ) : (
+                <div className="bg-muted p-4 rounded-lg text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Recursos necessários não definidos para esta sugestão.
                   </p>
                 </div>
               )}

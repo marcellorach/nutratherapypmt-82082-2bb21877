@@ -123,6 +123,63 @@ export const mockSugestoes: Sugestao[] = [
         melhora_funcao_renal: "28% redução na progressão da doença renal (p<0.001)",
         reducao_mortalidade: "22% redução em mortalidade por todas as causas (p=0.003)"
       }
+    },
+    recursos_necessarios: {
+      populacao_estudo: {
+        total_caes: 200,
+        idade: "5-8 anos",
+        grupo_placebo: 100,
+        grupo_tratamento: 100,
+        duracao_meses: 18,
+        distribuicao_racas: {
+          pequeno_porte: 25,
+          medio_porte: 45,
+          grande_porte: 30
+        }
+      },
+      cronograma_exames: {
+        pre_estudo: [
+          "Hemograma completo",
+          "Bioquímica sérica (glicose, creatinina, ALT, AST)",
+          "Ultrassom cardíaco (ecocardiograma)",
+          "Ultrassom abdominal",
+          "Eletrocardiograma",
+          "Pressão arterial",
+          "Urinálise completa",
+          "SDMA",
+          "NT-proBNP",
+          "Troponina I"
+        ],
+        durante_estudo: [
+          "Glicemia (mensal)",
+          "Creatinina e SDMA (trimestral)",
+          "NT-proBNP (trimestral)",
+          "Pressão arterial (mensal)",
+          "Urinálise básica (trimestral)"
+        ],
+        pos_estudo: [
+          "Ultrassom cardíaco completo",
+          "Ultrassom abdominal",
+          "Hemograma completo",
+          "Bioquímica sérica completa",
+          "Urinálise completa",
+          "Avaliação clínica detalhada"
+        ],
+        acompanhamento: [
+          "Consulta clínica anual",
+          "Hemograma básico",
+          "Bioquímica básica",
+          "Avaliação cardíaca (a cada 2 anos)"
+        ]
+      },
+      custos_estimados: {
+        exames_laboratoriais: 350000,
+        ultrassons: 180000,
+        medicamentos: 95000,
+        pessoal: 420000,
+        total: 1045000,
+        custo_por_animal_mes: 290
+      }
     }
   }
 ];
