@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -6,7 +5,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 interface DataPoint {
   label: string;
   control: number;
-  treatment: number;
+  dapagliflozin?: number;
+  empagliflozin?: number;
+  treatment?: number; // Mantém para compatibilidade com uso anterior
 }
 
 interface StatisticalInfo {
@@ -106,15 +107,39 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                   activeDot={{ r: 6, stroke: 'hsl(var(--muted-foreground))', strokeWidth: 2 }}
                   strokeDasharray="5 5"
                 />
-                <Line
-                  type="monotone"
-                  dataKey="treatment"
-                  stroke="hsl(var(--primary))"
-                  name="Dapa"
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
-                />
+                {data[0]?.dapagliflozin !== undefined && (
+                  <Line
+                    type="monotone"
+                    dataKey="dapagliflozin"
+                    stroke="hsl(var(--primary))"
+                    name="Dapagliflozina"
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+                  />
+                )}
+                {data[0]?.empagliflozin !== undefined && (
+                  <Line
+                    type="monotone"
+                    dataKey="empagliflozin"
+                    stroke="#ea580c"
+                    name="Empagliflozina"
+                    strokeWidth={3}
+                    dot={{ fill: '#ea580c', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: '#ea580c', strokeWidth: 2 }}
+                  />
+                )}
+                {data[0]?.treatment !== undefined && (
+                  <Line
+                    type="monotone"
+                    dataKey="treatment"
+                    stroke="hsl(var(--primary))"
+                    name="Tratamento"
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+                  />
+                )}
               </LineChart>
             ) : (
               <BarChart
@@ -156,7 +181,9 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                   }}
                 />
                 <Bar dataKey="control" name="Controle" fill="hsl(var(--muted))" />
-                <Bar dataKey="treatment" name="Dapa" fill="hsl(var(--primary))" />
+                {data[0]?.dapagliflozin !== undefined && <Bar dataKey="dapagliflozin" name="Dapagliflozina" fill="hsl(var(--primary))" />}
+                {data[0]?.empagliflozin !== undefined && <Bar dataKey="empagliflozin" name="Empagliflozina" fill="#ea580c" />}
+                {data[0]?.treatment !== undefined && <Bar dataKey="treatment" name="Tratamento" fill="hsl(var(--primary))" />}
               </BarChart>
             )}
           </ResponsiveContainer>
