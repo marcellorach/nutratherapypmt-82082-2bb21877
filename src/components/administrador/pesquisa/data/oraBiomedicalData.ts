@@ -67,7 +67,118 @@ export const completedStudies: Study[] = [
     positiveResults: 7,
     status: 'completed',
     primaryInvestigator: "Dr. André Correia",
-    priority: 'medium'
+    priority: 'medium',
+    studyPopulation: 100,
+    duration: "21 dias",
+    category: 'geroproptetor',
+    quantitativeResults: {
+      lifeExtension: "+23.5%",
+      pValue: "< 0.001",
+      statisticalPower: "95%",
+      effect: "Extensão significativa da expectativa de vida"
+    },
+    interventionData: {
+      earlyIntervention: {
+        survivalRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.98, lowIntervention: 0.99, highIntervention: 1.0 },
+          { age: 10, control: 0.85, lowIntervention: 0.92, highIntervention: 0.95 },
+          { age: 15, control: 0.65, lowIntervention: 0.80, highIntervention: 0.88 },
+          { age: 20, control: 0.40, lowIntervention: 0.60, highIntervention: 0.75 },
+          { age: 25, control: 0.20, lowIntervention: 0.35, highIntervention: 0.50 },
+          { age: 30, control: 0.05, lowIntervention: 0.15, highIntervention: 0.25 },
+          { age: 35, control: 0.0, lowIntervention: 0.02, highIntervention: 0.08 },
+        ],
+        healthyRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.95, lowIntervention: 0.98, highIntervention: 1.0 },
+          { age: 10, control: 0.80, lowIntervention: 0.90, highIntervention: 0.95 },
+          { age: 15, control: 0.50, lowIntervention: 0.75, highIntervention: 0.85 },
+          { age: 20, control: 0.20, lowIntervention: 0.50, highIntervention: 0.70 },
+          { age: 25, control: 0.05, lowIntervention: 0.25, highIntervention: 0.40 },
+          { age: 30, control: 0.0, lowIntervention: 0.10, highIntervention: 0.20 },
+        ],
+        stressResponseRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.97, lowIntervention: 0.99, highIntervention: 1.0 },
+          { age: 10, control: 0.83, lowIntervention: 0.91, highIntervention: 0.94 },
+          { age: 15, control: 0.60, lowIntervention: 0.78, highIntervention: 0.85 },
+          { age: 17, control: 0.40, lowIntervention: 0.68, highIntervention: 0.80 },
+          { age: 20, control: 0.20, lowIntervention: 0.45, highIntervention: 0.65 },
+          { age: 25, control: 0.05, lowIntervention: 0.25, highIntervention: 0.40 },
+          { age: 30, control: 0.0, lowIntervention: 0.08, highIntervention: 0.20 },
+        ],
+        stressHealthyRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.95, lowIntervention: 0.98, highIntervention: 1.0 },
+          { age: 10, control: 0.80, lowIntervention: 0.90, highIntervention: 0.95 },
+          { age: 15, control: 0.50, lowIntervention: 0.75, highIntervention: 0.85 },
+          { age: 17, control: 0.30, lowIntervention: 0.60, highIntervention: 0.75 },
+          { age: 20, control: 0.15, lowIntervention: 0.45, highIntervention: 0.60 },
+          { age: 25, control: 0.05, lowIntervention: 0.20, highIntervention: 0.35 },
+          { age: 30, control: 0.0, lowIntervention: 0.05, highIntervention: 0.15 },
+        ]
+      },
+      midLifeIntervention: {
+        survivalRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.98, lowIntervention: 0.99, highIntervention: 0.99 },
+          { age: 10, control: 0.85, lowIntervention: 0.90, highIntervention: 0.92 },
+          { age: 15, control: 0.65, lowIntervention: 0.75, highIntervention: 0.82 },
+          { age: 20, control: 0.40, lowIntervention: 0.55, highIntervention: 0.68 },
+          { age: 25, control: 0.20, lowIntervention: 0.32, highIntervention: 0.45 },
+          { age: 30, control: 0.05, lowIntervention: 0.14, highIntervention: 0.22 },
+          { age: 35, control: 0.0, lowIntervention: 0.02, highIntervention: 0.07 },
+        ],
+        healthyRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.95, lowIntervention: 0.97, highIntervention: 0.98 },
+          { age: 10, control: 0.80, lowIntervention: 0.87, highIntervention: 0.90 },
+          { age: 15, control: 0.50, lowIntervention: 0.70, highIntervention: 0.78 },
+          { age: 20, control: 0.20, lowIntervention: 0.45, highIntervention: 0.58 },
+          { age: 25, control: 0.05, lowIntervention: 0.22, highIntervention: 0.35 },
+          { age: 30, control: 0.0, lowIntervention: 0.08, highIntervention: 0.18 },
+        ],
+        stressResponseRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.97, lowIntervention: 0.98, highIntervention: 0.99 },
+          { age: 10, control: 0.83, lowIntervention: 0.88, highIntervention: 0.91 },
+          { age: 15, control: 0.60, lowIntervention: 0.72, highIntervention: 0.78 },
+          { age: 17, control: 0.40, lowIntervention: 0.62, highIntervention: 0.72 },
+          { age: 20, control: 0.20, lowIntervention: 0.40, highIntervention: 0.55 },
+          { age: 25, control: 0.05, lowIntervention: 0.20, highIntervention: 0.35 },
+          { age: 30, control: 0.0, lowIntervention: 0.06, highIntervention: 0.16 },
+        ],
+        stressHealthyRate: [
+          { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
+          { age: 5, control: 0.95, lowIntervention: 0.97, highIntervention: 0.98 },
+          { age: 10, control: 0.80, lowIntervention: 0.86, highIntervention: 0.88 },
+          { age: 15, control: 0.50, lowIntervention: 0.68, highIntervention: 0.75 },
+          { age: 17, control: 0.30, lowIntervention: 0.55, highIntervention: 0.68 },
+          { age: 20, control: 0.15, lowIntervention: 0.38, highIntervention: 0.52 },
+          { age: 25, control: 0.05, lowIntervention: 0.18, highIntervention: 0.30 },
+          { age: 30, control: 0.0, lowIntervention: 0.04, highIntervention: 0.12 },
+        ]
+      }
+    },
+    publications: [
+      {
+        journal: "Nature Aging",
+        status: "publicado",
+        submissionDate: "2024-12-15",
+        publicationDate: "2025-02-10",
+        title: "Rapamycin analogs extend lifespan in C. elegans through mTOR pathway modulation",
+        doi: "10.1038/s43587-025-00123-4",
+        impactFactor: 15.2
+      },
+      {
+        journal: "Cell Metabolism",
+        status: "em revisão",
+        submissionDate: "2025-01-20",
+        title: "Metabolic pathways involved in mTOR-mediated longevity extension",
+        impactFactor: 29.4
+      }
+    ]
   },
   {
     id: "ora-c2",
@@ -80,7 +191,32 @@ export const completedStudies: Study[] = [
     positiveResults: 4,
     status: 'completed',
     primaryInvestigator: "Dra. Paula Vieira",
-    priority: 'low'
+    priority: 'low',
+    studyPopulation: 150,
+    duration: "28 dias",
+    category: 'metabólico',
+    quantitativeResults: {
+      lifeExtension: "+18.2%",
+      pValue: "< 0.05",
+      statisticalPower: "88%",
+      effect: "Redução significativa de metais pesados e extensão moderada de vida"
+    },
+    publications: [
+      {
+        journal: "Free Radical Biology and Medicine",
+        status: "aceito",
+        submissionDate: "2024-11-30",
+        title: "Metal chelation therapy extends lifespan by reducing oxidative damage",
+        impactFactor: 8.3
+      },
+      {
+        journal: "Antioxidants & Redox Signaling",
+        status: "submetido",
+        submissionDate: "2025-01-05",
+        title: "Mechanisms of metal detoxification in aging C. elegans",
+        impactFactor: 6.5
+      }
+    ]
   },
   {
     id: "ora-c3",
@@ -93,7 +229,40 @@ export const completedStudies: Study[] = [
     positiveResults: 9,
     status: 'completed',
     primaryInvestigator: "Dra. Marina Souza",
-    priority: 'high'
+    priority: 'high',
+    studyPopulation: 200,
+    duration: "14 dias",
+    category: 'neuroprotetor',
+    quantitativeResults: {
+      lifeExtension: "+12.7%",
+      pValue: "< 0.01",
+      statisticalPower: "92%",
+      effect: "Proteção significativa contra danos UV e moderada extensão de vida"
+    },
+    publications: [
+      {
+        journal: "Journal of Gerontology: Biological Sciences",
+        status: "publicado",
+        submissionDate: "2024-12-20",
+        publicationDate: "2025-03-01",
+        title: "Plant extracts provide UV protection and extend lifespan in C. elegans",
+        doi: "10.1093/gerona/glab456",
+        impactFactor: 4.8
+      },
+      {
+        journal: "Mechanisms of Ageing and Development",
+        status: "negado",
+        submissionDate: "2024-11-15",
+        title: "UV-protective compounds from botanical sources",
+        impactFactor: 3.2
+      },
+      {
+        journal: "GeroScience",
+        status: "não submetido",
+        title: "Comparative analysis of botanical UV protectants in aging models",
+        impactFactor: 5.1
+      }
+    ]
   }
 ];
 

@@ -1,4 +1,14 @@
 
+export interface Publication {
+  journal: string;
+  status: 'não submetido' | 'submetido' | 'em revisão' | 'aceito' | 'publicado' | 'negado';
+  submissionDate?: string;
+  publicationDate?: string;
+  title: string;
+  doi?: string;
+  impactFactor?: number;
+}
+
 export interface Study {
   id: string;
   title: string;
@@ -18,6 +28,15 @@ export interface Study {
   interventionData?: {
     earlyIntervention: CElegansData;
     midLifeIntervention: CElegansData;
+  };
+  publications?: Publication[];
+  studyPopulation?: number;
+  duration?: string;
+  quantitativeResults?: {
+    lifeExtension?: string;
+    pValue?: string;
+    statisticalPower?: string;
+    effect?: string;
   };
 }
 

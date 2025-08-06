@@ -3,6 +3,7 @@ import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Study } from '../types/oraBiomedical';
 import DetailedStudyCharts from './DetailedStudyCharts';
+import PublicationStatus from './PublicationStatus';
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 
 interface StudyDetailsDialogProps {
@@ -17,11 +18,14 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
       </DialogHeader>
       
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full grid grid-cols-4 mb-4">
+        <TabsList className={`w-full grid ${study.status === 'completed' ? 'grid-cols-5' : 'grid-cols-4'} mb-4`}>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="charts">Resultados</TabsTrigger>
           <TabsTrigger value="hypotheses">Hipóteses</TabsTrigger>
           <TabsTrigger value="previous">Estudos Anteriores</TabsTrigger>
+          {study.status === 'completed' && (
+            <TabsTrigger value="publications">Publicações</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -75,12 +79,24 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
                         <span className="font-medium">Compostos:</span>
                         <span>{study.compounds}</span>
                       </div>
-                      {study.positiveResults && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Resultados Positivos:</span>
-                          <span>{study.positiveResults}</span>
-                        </div>
-                      )}
+                       {study.positiveResults && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">Resultados Positivos:</span>
+                           <span>{study.positiveResults}</span>
+                         </div>
+                       )}
+                       {study.studyPopulation && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">População:</span>
+                           <span>{study.studyPopulation} organismos</span>
+                         </div>
+                       )}
+                       {study.duration && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">Duração:</span>
+                           <span>{study.duration}</span>
+                         </div>
+                       )}
                     </div>
                   </div>
                 </CardContent>
@@ -90,6 +106,33 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
         </TabsContent>
 
         <TabsContent value="charts" className="space-y-6">
+          {study.status === 'completed' && study.quantitativeResults && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">Resultados Quantitativos</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-medium">Extensão de Vida:</span>
+                    <span className="ml-2 text-lg font-bold text-green-600">
+                      {study.quantitativeResults.lifeExtension}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Valor p:</span>
+                    <span className="ml-2 font-mono">{study.quantitativeResults.pValue}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Poder Estatístico:</span>
+                    <span className="ml-2">{study.quantitativeResults.statisticalPower}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="font-medium">Efeito:</span>
+                    <p className="mt-1 text-muted-foreground">{study.quantitativeResults.effect}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <DetailedStudyCharts 
             isComplete={study.status === 'completed'} 
             interventionData={study.interventionData}
@@ -159,6 +202,12 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {study.status === 'completed' && (
+          <TabsContent value="publications">
+            <PublicationStatus publications={study.publications || []} />
+          </TabsContent>
+        )}
       </Tabs>
     </DialogContent>
   );
