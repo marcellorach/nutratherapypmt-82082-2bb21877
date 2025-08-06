@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, Filter } from "lucide-react";
 import { useSugestoes } from './hooks/useSugestoes';
 import SugestaoCard from './components/SugestaoCard';
 import SugestaoDetailsDialog from './components/SugestaoDetailsDialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const SugestoesAITab: React.FC = () => {
   const {
