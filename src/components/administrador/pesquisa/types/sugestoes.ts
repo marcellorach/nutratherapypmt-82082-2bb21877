@@ -17,6 +17,18 @@ export interface ApprovalStep {
 
 export type OrigemSugestao = 'ia' | 'comite_cientifico' | 'externa';
 
+export interface DadosAmostra {
+  total_caes: number;
+  usuarios_tratamento: number;
+  grupo_controle: number;
+  periodo_analise: string;
+  resultados_observacionais: {
+    reducao_eventos_cardiovasculares: string;
+    melhora_funcao_renal: string;
+    reducao_mortalidade: string;
+  };
+}
+
 export interface Sugestao {
   id: string;
   titulo: string;
@@ -29,4 +41,5 @@ export interface Sugestao {
   status: 'nova' | 'aprovada' | 'rejeitada' | 'em_analise';
   approvalChain: ApprovalStep[];
   origem: OrigemSugestao;
+  dados_amostra?: DadosAmostra;
 }

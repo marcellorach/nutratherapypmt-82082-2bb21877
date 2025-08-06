@@ -87,21 +87,24 @@ export const mockSugestoes: Sugestao[] = [
   },
   {
     id: "4",
-    titulo: "Dapagliflozina para proteção cardiovascular e renal em cães não-diabéticos",
-    confianca: 89,
+    titulo: "Protocolo alternado de inibidores SGLT2 (dapagliflozina/empagliflozina) para proteção cardiovascular e renal em cães não-diabéticos",
+    confianca: 92,
     baseado_em: [
-      "Análise epidemiológica de 18.347 cães na plataforma (2.156 usuários de dapagliflozina)",
+      "Análise epidemiológica longitudinal de 18.347 cães na plataforma (jan/2023 - dez/2024)",
       "Meta-análise de estudos DECLARE-TIMI 58 e DAPA-CKD traduzidos para modelos caninos",
-      "Correlação observacional: 34% redução em eventos cardiovasculares, 28% melhora função renal"
+      "Algoritmos de machine learning identificaram padrões de dessensibilização em uso contínuo",
+      "Modelagem farmacocinética comparativa dapagliflozina vs empagliflozina em caninos"
     ],
     populacao_sugerida: "Cães não-diabéticos de 4-10 anos com fatores de risco cardiovascular ou renal",
-    metodologia: "Estudo randomizado duplo-cego com dapagliflozina 0,1mg/kg/dia vs placebo por 18 meses",
+    metodologia: "Estudo randomizado triplo-cego com protocolo alternado: dapagliflozina 0,1mg/kg/dia (12 dias) → empagliflozina 0,08mg/kg/dia (12 dias) → descanso (6 dias), em ciclos mensais por 18 meses vs placebo",
     marcadores_sugeridos: [
       "Biomarcadores cardíacos (NT-proBNP, troponina I)",
       "Função renal (creatinina, SDMA, proteinúria)",
-      "Mortalidade por todas as causas e eventos cardiovasculares maiores"
+      "Mortalidade por todas as causas",
+      "Eventos cardiovasculares maiores (MACE)",
+      "Marcadores de sensibilidade aos inibidores SGLT2"
     ],
-    raciocinio: "A análise epidemiológica longitudinal na plataforma identificou que cães não-diabéticos tratados com dapagliflozina para outras condições apresentaram redução significativa em marcadores de risco cardiovascular e preservação da função renal comparados ao grupo controle. Dados consistentes com estudos SGLT2 em humanos sugerem mecanismos cardioprotetivos e nefroprotetivos independentes do controle glicêmico.",
+    raciocinio: "A análise epidemiológica longitudinal na plataforma identificou que cães não-diabéticos tratados com dapagliflozina apresentaram redução significativa em eventos cardiovasculares e preservação da função renal. Entretanto, algoritmos de IA detectaram possível dessensibilização após 8-10 meses de uso contínuo. O protocolo alternado com empagliflozina (mecanismo SGLT2 ligeiramente diferente) pode prevenir dessensibilização mantendo eficácia cardioprotetiva e nefroprotetiva.",
     status: "aprovada",
     approvalChain: [
       { stage: 'scientific_supervision', approved: true, date: '10/01/2025' },
@@ -109,6 +112,17 @@ export const mockSugestoes: Sugestao[] = [
       { stage: 'ethics_committee', approved: true, date: '25/01/2025' },
       { stage: 'direction', approved: true, date: '02/02/2025' },
     ],
-    origem: "externa"
+    origem: "ia",
+    dados_amostra: {
+      total_caes: 18347,
+      usuarios_tratamento: 2156,
+      grupo_controle: 16191,
+      periodo_analise: "Janeiro 2023 - Dezembro 2024",
+      resultados_observacionais: {
+        reducao_eventos_cardiovasculares: "34% (IC95%: 28-41%, p<0.001)",
+        melhora_funcao_renal: "28% redução na progressão da doença renal (p<0.001)",
+        reducao_mortalidade: "22% redução em mortalidade por todas as causas (p=0.003)"
+      }
+    }
   }
 ];

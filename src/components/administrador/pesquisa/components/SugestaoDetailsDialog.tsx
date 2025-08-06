@@ -112,6 +112,40 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               </ul>
             </div>
             
+            {sugestao.dados_amostra && (
+              <div>
+                <h4 className="text-sm font-medium mb-1">Dados da Amostra Analisada</h4>
+                <div className="bg-muted p-3 rounded-lg space-y-2">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="font-medium">Total de cães:</span>
+                      <p className="text-muted-foreground">{sugestao.dados_amostra.total_caes.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Período de análise:</span>
+                      <p className="text-muted-foreground">{sugestao.dados_amostra.periodo_analise}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Grupo tratamento:</span>
+                      <p className="text-muted-foreground">{sugestao.dados_amostra.usuarios_tratamento.toLocaleString()} ({((sugestao.dados_amostra.usuarios_tratamento/sugestao.dados_amostra.total_caes)*100).toFixed(1)}%)</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Grupo controle:</span>
+                      <p className="text-muted-foreground">{sugestao.dados_amostra.grupo_controle.toLocaleString()} ({((sugestao.dados_amostra.grupo_controle/sugestao.dados_amostra.total_caes)*100).toFixed(1)}%)</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-2">
+                    <h5 className="font-medium text-xs mb-1">Resultados Observacionais</h5>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• <strong>Eventos cardiovasculares:</strong> {sugestao.dados_amostra.resultados_observacionais.reducao_eventos_cardiovasculares}</li>
+                      <li>• <strong>Função renal:</strong> {sugestao.dados_amostra.resultados_observacionais.melhora_funcao_renal}</li>
+                      <li>• <strong>Mortalidade:</strong> {sugestao.dados_amostra.resultados_observacionais.reducao_mortalidade}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div>
               <h4 className="text-sm font-medium mb-1">Metodologia Sugerida</h4>
               <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
