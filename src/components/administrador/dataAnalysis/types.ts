@@ -37,7 +37,7 @@ export interface AgentPosition {
   y: number;
 }
 
-export type AnalysisStep = 'waiting' | 'processing' | 'completed';
+export type AnalysisStep = 'waiting' | 'processing' | 'completed' | 'simulated';
 
 export interface NutraceuticalRule {
   id: string;

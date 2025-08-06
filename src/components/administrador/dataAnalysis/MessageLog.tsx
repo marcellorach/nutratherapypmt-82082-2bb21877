@@ -5,7 +5,7 @@ import { agents } from './agentData';
 
 interface MessageLogProps {
   messages: AgentMessage[];
-  step: 'waiting' | 'processing' | 'completed';
+  step: 'waiting' | 'processing' | 'completed' | 'simulated';
   isPaused: boolean;
 }
 

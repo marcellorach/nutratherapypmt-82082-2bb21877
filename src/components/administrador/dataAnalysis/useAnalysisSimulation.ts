@@ -222,6 +222,26 @@ export const useAnalysisSimulation = () => {
     animationTimersRef.current = [];
   };
   
+  const useExampleData = () => {
+    // Pausar análise atual se estiver rodando
+    if (analyzing) {
+      pauseAnalysis();
+    }
+    
+    // Definir estado como simulado
+    setStep('simulated');
+    setProgress(100);
+    setAnalyzing(false);
+    setActiveAgent(null);
+    
+    // Adicionar mensagem final de simulação
+    setMessages(prev => [...prev, {
+      agentId: 'supervisor',
+      message: 'Análise finalizada com dados de exemplo. Resultados simulados disponíveis.',
+      timestamp: new Date()
+    }]);
+  };
+
   return {
     analyzing,
     progress,
@@ -232,6 +252,7 @@ export const useAnalysisSimulation = () => {
     isPaused,
     dataPackets,
     simulateAnalysis,
-    pauseAnalysis
+    pauseAnalysis,
+    useExampleData
   };
 };

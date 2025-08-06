@@ -25,7 +25,8 @@ const AnalysisStep: React.FC = () => {
     isPaused,
     dataPackets,
     simulateAnalysis,
-    pauseAnalysis
+    pauseAnalysis,
+    useExampleData
   } = useAnalysisSimulation();
   
   return (
@@ -44,10 +45,10 @@ const AnalysisStep: React.FC = () => {
               <Network className="mr-2 h-5 w-5 text-primary" />
               Sistema de Análise Colaborativa
             </CardTitle>
-            {step === 'completed' && (
+            {(step === 'completed' || step === 'simulated') && (
               <div className="flex items-center text-green-600 text-sm">
                 <CheckCircle className="mr-1 h-4 w-4" />
-                Análise Completa
+                {step === 'simulated' ? 'Análise Simulada' : 'Análise Completa'}
               </div>
             )}
           </div>
@@ -62,11 +63,16 @@ const AnalysisStep: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">
-                    {step === 'processing' ? 'Processamento em andamento...' : 'Análise concluída'}
+                    {step === 'processing' ? 'Processamento em andamento...' : step === 'simulated' ? 'Análise SIMULADA concluída' : 'Análise concluída'}
                   </span>
                   <span className="text-sm font-medium">{Math.round(progress)}%</span>
                 </div>
                 <Progress value={progress} className="h-2 w-full" />
+                {step === 'processing' && (
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>Tempo estimado: 33 horas e 20 minutos</span>
+                  </div>
+                )}
               </div>
               
               {/* Visualização do fluxo de agentes */}
@@ -93,17 +99,27 @@ const AnalysisStep: React.FC = () => {
             </>
           )}
         </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
-          {step === 'processing' && analyzing && (
-            <Button 
-              variant="outline"
-              onClick={pauseAnalysis}
-              disabled={isPaused}
-            >
-              <Pause className="mr-2 h-4 w-4" />
-              Pausar
-            </Button>
-          )}
+        <CardFooter className="flex justify-between space-x-2">
+          <div className="flex space-x-2">
+            {step === 'processing' && analyzing && (
+              <Button 
+                variant="outline"
+                onClick={pauseAnalysis}
+                disabled={isPaused}
+              >
+                <Pause className="mr-2 h-4 w-4" />
+                Pausar
+              </Button>
+            )}
+            {step === 'processing' && (
+              <Button 
+                variant="secondary"
+                onClick={useExampleData}
+              >
+                Pausar e usar dados de exemplo
+              </Button>
+            )}
+          </div>
           <Button 
             onClick={simulateAnalysis}
             disabled={analyzing && !isPaused}
@@ -126,14 +142,14 @@ const AnalysisStep: React.FC = () => {
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                {step === 'completed' ? 'Executar Novamente' : 'Iniciar Análise Multi-Agente'}
+                {(step === 'completed' || step === 'simulated') ? 'Executar Novamente' : 'Iniciar Análise Multi-Agente'}
               </>
             )}
           </Button>
         </CardFooter>
       </Card>
       
-      {step === 'completed' && <AnalysisResult />}
+      {(step === 'completed' || step === 'simulated') && <AnalysisResult />}
     </div>
   );
 };
