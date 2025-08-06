@@ -9,6 +9,12 @@ interface DataPoint {
   treatment: number;
 }
 
+interface StatisticalInfo {
+  pValue: string;
+  hazardRatio: string;
+  riskReduction: string;
+}
+
 interface PartialResultsChartProps {
   title: string;
   data: DataPoint[];
@@ -16,6 +22,7 @@ interface PartialResultsChartProps {
   yAxisLabel?: string;
   chartType?: 'line' | 'bar';
   formatter?: (value: number) => string;
+  statisticalInfo?: StatisticalInfo;
 }
 
 const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
@@ -24,56 +31,132 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
   description,
   yAxisLabel = '',
   chartType = 'line',
-  formatter = (value) => `${value}`
+  formatter = (value) => `${value}`,
+  statisticalInfo
 }) => {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
+    <Card className="border-l-4 border-l-primary/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold flex items-center justify-between">
+          {title}
+          {statisticalInfo && (
+            <span className="text-xs font-normal px-2 py-1 bg-primary/10 text-primary rounded-md">
+              {statisticalInfo.pValue}
+            </span>
+          )}
+        </CardTitle>
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        {statisticalInfo && (
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mt-2">
+            <span className="font-medium">{statisticalInfo.hazardRatio}</span>
+            <span className="text-green-600 font-medium">{statisticalInfo.riskReduction}</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="h-[250px] w-full">
+        <div className="h-[320px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'line' ? (
               <LineChart
                 data={data}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 15, right: 30, left: 25, bottom: 25 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" />
-                <YAxis label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }} />
-                <Tooltip formatter={(value: number) => formatter(value)} />
-                <Legend />
+                <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
+                <XAxis 
+                  dataKey="label" 
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <YAxis 
+                  label={{ 
+                    value: yAxisLabel, 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                  }}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [formatter(value), '']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    fontSize: '12px'
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend 
+                  wrapperStyle={{ 
+                    paddingTop: '10px',
+                    fontSize: '12px'
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey="control"
-                  stroke="#9CA3AF"
+                  stroke="hsl(var(--muted-foreground))"
                   name="Controle"
-                  strokeWidth={2}
-                  dot={true}
+                  strokeWidth={3}
+                  dot={{ fill: 'hsl(var(--muted-foreground))', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: 'hsl(var(--muted-foreground))', strokeWidth: 2 }}
+                  strokeDasharray="5 5"
                 />
                 <Line
                   type="monotone"
                   dataKey="treatment"
-                  stroke="#3B82F6"
+                  stroke="hsl(var(--primary))"
                   name="Dapa"
-                  strokeWidth={2}
-                  dot={true}
+                  strokeWidth={3}
+                  dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
                 />
               </LineChart>
             ) : (
               <BarChart
                 data={data}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 15, right: 30, left: 25, bottom: 25 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" />
-                <YAxis label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }} />
-                <Tooltip formatter={(value: number) => formatter(value)} />
-                <Legend />
-                <Bar dataKey="control" name="Controle" fill="#9CA3AF" />
-                <Bar dataKey="treatment" name="Dapa" fill="#3B82F6" />
+                <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.3} />
+                <XAxis 
+                  dataKey="label" 
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <YAxis 
+                  label={{ 
+                    value: yAxisLabel, 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                  }}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [formatter(value), '']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    fontSize: '12px'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ 
+                    paddingTop: '10px',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar dataKey="control" name="Controle" fill="hsl(var(--muted))" />
+                <Bar dataKey="treatment" name="Dapa" fill="hsl(var(--primary))" />
               </BarChart>
             )}
           </ResponsiveContainer>
