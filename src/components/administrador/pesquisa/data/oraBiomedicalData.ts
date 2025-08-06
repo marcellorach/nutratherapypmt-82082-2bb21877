@@ -169,14 +169,49 @@ export const completedStudies: Study[] = [
         publicationDate: "2025-02-10",
         title: "Rapamycin analogs extend lifespan in C. elegans through mTOR pathway modulation",
         doi: "10.1038/s43587-025-00123-4",
-        impactFactor: 15.2
+        impactFactor: 15.2,
+        authors: "Matt Kaemberlend, PhD; Fabiano Matheus, PhD; Pet Love; PetMoreTime; Dr. André Correia",
+        journalType: "internacional",
+        journalCategory: "biomédica"
       },
       {
         journal: "Cell Metabolism",
         status: "em revisão",
         submissionDate: "2025-01-20",
         title: "Metabolic pathways involved in mTOR-mediated longevity extension",
-        impactFactor: 29.4
+        impactFactor: 29.4,
+        authors: "Matt Kaemberlend, PhD; Fabiano Matheus, PhD; Dr. André Correia; Pet Love",
+        journalType: "internacional",
+        journalCategory: "biomédica"
+      },
+      {
+        journal: "Journal of Veterinary Internal Medicine",
+        status: "aceito",
+        submissionDate: "2025-01-10",
+        title: "mTOR pathway modulation in companion animal longevity research",
+        impactFactor: 2.8,
+        authors: "Pet Love; PetMoreTime; Matt Kaemberlend, PhD; Fabiano Matheus, PhD",
+        journalType: "internacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Arquivo Brasileiro de Medicina Veterinária e Zootecnia",
+        status: "não submetido",
+        title: "Aplicações veterinárias de inibidores de mTOR na longevidade animal",
+        impactFactor: 0.8,
+        authors: "PetMoreTime; Pet Love; Fabiano Matheus, PhD; Matt Kaemberlend, PhD",
+        journalType: "nacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Veterinary Research",
+        status: "submetido",
+        submissionDate: "2025-02-01",
+        title: "Translational research on mTOR inhibitors from C. elegans to veterinary applications",
+        impactFactor: 4.2,
+        authors: "Matt Kaemberlend, PhD; Pet Love; PetMoreTime; Fabiano Matheus, PhD",
+        journalType: "internacional",
+        journalCategory: "veterinária"
       }
     ]
   },
@@ -207,14 +242,39 @@ export const completedStudies: Study[] = [
         status: "aceito",
         submissionDate: "2024-11-30",
         title: "Metal chelation therapy extends lifespan by reducing oxidative damage",
-        impactFactor: 8.3
+        impactFactor: 8.3,
+        authors: "Dra. Paula Vieira; Matt Kaemberlend, PhD; Fabiano Matheus, PhD; Pet Love",
+        journalType: "internacional",
+        journalCategory: "biomédica"
       },
       {
         journal: "Antioxidants & Redox Signaling",
         status: "submetido",
         submissionDate: "2025-01-05",
         title: "Mechanisms of metal detoxification in aging C. elegans",
-        impactFactor: 6.5
+        impactFactor: 6.5,
+        authors: "Matt Kaemberlend, PhD; Dra. Paula Vieira; Fabiano Matheus, PhD; PetMoreTime",
+        journalType: "internacional",
+        journalCategory: "biomédica"
+      },
+      {
+        journal: "Pesquisa Veterinária Brasileira",
+        status: "negado",
+        submissionDate: "2024-12-15",
+        title: "Terapia quelante para metais pesados em medicina veterinária",
+        impactFactor: 0.6,
+        authors: "Pet Love; PetMoreTime; Dra. Paula Vieira; Fabiano Matheus, PhD",
+        journalType: "nacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Journal of Small Animal Practice",
+        status: "não submetido",
+        title: "Clinical applications of metal chelation in companion animals",
+        impactFactor: 1.4,
+        authors: "PetMoreTime; Pet Love; Matt Kaemberlend, PhD; Dra. Paula Vieira",
+        journalType: "internacional",
+        journalCategory: "veterinária"
       }
     ]
   },
@@ -247,20 +307,68 @@ export const completedStudies: Study[] = [
         publicationDate: "2025-03-01",
         title: "Plant extracts provide UV protection and extend lifespan in C. elegans",
         doi: "10.1093/gerona/glab456",
-        impactFactor: 4.8
+        impactFactor: 4.8,
+        authors: "Dra. Marina Souza; Matt Kaemberlend, PhD; Fabiano Matheus, PhD; Pet Love; PetMoreTime",
+        journalType: "internacional",
+        journalCategory: "biomédica"
       },
       {
         journal: "Mechanisms of Ageing and Development",
         status: "negado",
         submissionDate: "2024-11-15",
         title: "UV-protective compounds from botanical sources",
-        impactFactor: 3.2
+        impactFactor: 3.2,
+        authors: "Matt Kaemberlend, PhD; Dra. Marina Souza; Fabiano Matheus, PhD; Pet Love",
+        journalType: "internacional",
+        journalCategory: "biomédica"
       },
       {
         journal: "GeroScience",
         status: "não submetido",
         title: "Comparative analysis of botanical UV protectants in aging models",
-        impactFactor: 5.1
+        impactFactor: 5.1,
+        authors: "Dra. Marina Souza; Fabiano Matheus, PhD; Matt Kaemberlend, PhD; PetMoreTime",
+        journalType: "internacional",
+        journalCategory: "biomédica"
+      },
+      {
+        journal: "Brazilian Journal of Veterinary Research and Animal Science",
+        status: "em revisão",
+        submissionDate: "2025-01-15",
+        title: "Extratos vegetais como fotoprotetores em medicina veterinária",
+        impactFactor: 0.7,
+        authors: "Pet Love; PetMoreTime; Dra. Marina Souza; Fabiano Matheus, PhD",
+        journalType: "nacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Veterinary Therapeutics",
+        status: "não submetido",
+        title: "UV protection strategies using botanical compounds in companion animals",
+        impactFactor: 1.8,
+        authors: "PetMoreTime; Pet Love; Matt Kaemberlend, PhD; Dra. Marina Souza",
+        journalType: "internacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Ciência Rural",
+        status: "aceito",
+        submissionDate: "2024-12-10",
+        title: "Fotoproteção natural em animais: uma revisão dos compostos botânicos",
+        impactFactor: 0.5,
+        authors: "Fabiano Matheus, PhD; Pet Love; PetMoreTime; Dra. Marina Souza",
+        journalType: "nacional",
+        journalCategory: "veterinária"
+      },
+      {
+        journal: "Preventive Veterinary Medicine",
+        status: "submetido",
+        submissionDate: "2025-02-05",
+        title: "Prevention of UV-induced skin damage in companion animals using plant extracts",
+        impactFactor: 2.9,
+        authors: "Matt Kaemberlend, PhD; Pet Love; Dra. Marina Souza; PetMoreTime; Fabiano Matheus, PhD",
+        journalType: "internacional",
+        journalCategory: "veterinária"
       }
     ]
   }

@@ -7,6 +7,9 @@ export interface Publication {
   title: string;
   doi?: string;
   impactFactor?: number;
+  authors: string;
+  journalType?: 'internacional' | 'nacional';
+  journalCategory?: 'veterinária' | 'biomédica' | 'geral';
 }
 
 export interface Study {

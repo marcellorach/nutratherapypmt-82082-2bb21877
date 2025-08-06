@@ -9,7 +9,10 @@ import {
   XCircle, 
   FileText, 
   ExternalLink,
-  AlertCircle 
+  AlertCircle,
+  Stethoscope,
+  Microscope,
+  Users
 } from "lucide-react";
 import { Publication } from '../types/oraBiomedical';
 
@@ -59,6 +62,27 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
     return new Date(dateStr).toLocaleDateString('pt-BR');
   };
 
+  const getJournalIcon = (category?: string) => {
+    switch (category) {
+      case 'veterinária':
+        return <Stethoscope className="h-4 w-4 text-blue-600" />;
+      case 'biomédica':
+        return <Microscope className="h-4 w-4 text-purple-600" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getJournalTypeBadge = (type?: string) => {
+    if (type === 'nacional') {
+      return <Badge variant="secondary" className="text-xs">Nacional</Badge>;
+    }
+    if (type === 'internacional') {
+      return <Badge variant="outline" className="text-xs">Internacional</Badge>;
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -90,14 +114,26 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
                     <CardTitle className="text-base font-medium line-clamp-2">
                       {publication.title}
                     </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {publication.journal}
-                      {publication.impactFactor && (
-                        <span className="ml-2 text-xs font-medium">
-                          (IF: {publication.impactFactor})
-                        </span>
-                      )}
-                    </p>
+                     <div className="flex items-center gap-2 mt-1">
+                       <div className="flex items-center gap-1">
+                         {getJournalIcon(publication.journalCategory)}
+                         <p className="text-sm text-muted-foreground">
+                           {publication.journal}
+                         </p>
+                       </div>
+                       {getJournalTypeBadge(publication.journalType)}
+                       {publication.impactFactor && (
+                         <span className="text-xs font-medium text-muted-foreground">
+                           IF: {publication.impactFactor}
+                         </span>
+                       )}
+                     </div>
+                     <div className="flex items-center gap-1 mt-2">
+                       <Users className="h-3 w-3 text-muted-foreground" />
+                       <p className="text-xs text-muted-foreground line-clamp-1">
+                         {publication.authors}
+                       </p>
+                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     {getStatusIcon(publication.status)}
