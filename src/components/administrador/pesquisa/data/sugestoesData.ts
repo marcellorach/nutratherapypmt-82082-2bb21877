@@ -87,23 +87,28 @@ export const mockSugestoes: Sugestao[] = [
   },
   {
     id: "4",
-    titulo: "Ômega-3 de alta pureza para doença articular degenerativa",
-    confianca: 92,
+    titulo: "Dapagliflozina para proteção cardiovascular e renal em cães não-diabéticos",
+    confianca: 89,
     baseado_em: [
-      "Revisão sistemática de estudos com suplementação de ômega-3",
-      "Dados de biomarcadores inflamatórios em pacientes da plataforma",
-      "Metanálise de resultados clínicos em cães com osteoartrite"
+      "Análise epidemiológica de 18.347 cães na plataforma (2.156 usuários de dapagliflozina)",
+      "Meta-análise de estudos DECLARE-TIMI 58 e DAPA-CKD traduzidos para modelos caninos",
+      "Correlação observacional: 34% redução em eventos cardiovasculares, 28% melhora função renal"
     ],
-    populacao_sugerida: "Cães acima de 6 anos com sinais clínicos de artrose",
-    metodologia: "Estudo de coorte com duas concentrações (EPA 500mg e 1000mg) por 9 meses",
+    populacao_sugerida: "Cães não-diabéticos de 4-10 anos com fatores de risco cardiovascular ou renal",
+    metodologia: "Estudo randomizado duplo-cego com dapagliflozina 0,1mg/kg/dia vs placebo por 18 meses",
     marcadores_sugeridos: [
-      "Biomarcadores inflamatórios sinoviais",
-      "Avaliação de mobilidade por acelerômetro",
-      "Escala de dor e qualidade de vida"
+      "Biomarcadores cardíacos (NT-proBNP, troponina I)",
+      "Função renal (creatinina, SDMA, proteinúria)",
+      "Mortalidade por todas as causas e eventos cardiovasculares maiores"
     ],
-    raciocinio: "A análise dos dados clínicos de cães com doença articular degenerativa na plataforma demonstrou correlação significativa entre concentrações plasmáticas de EPA/DHA e redução de marcadores inflamatórios. Formulações de alta pureza podem fornecer resultados superiores com menor incidência de efeitos adversos gastrointestinais.",
-    status: "nova",
-    approvalChain: [],
-    origem: "ia"
+    raciocinio: "A análise epidemiológica longitudinal na plataforma identificou que cães não-diabéticos tratados com dapagliflozina para outras condições apresentaram redução significativa em marcadores de risco cardiovascular e preservação da função renal comparados ao grupo controle. Dados consistentes com estudos SGLT2 em humanos sugerem mecanismos cardioprotetivos e nefroprotetivos independentes do controle glicêmico.",
+    status: "aprovada",
+    approvalChain: [
+      { stage: 'scientific_supervision', approved: true, date: '10/01/2025' },
+      { stage: 'scientific_committee', approved: true, date: '18/01/2025' },
+      { stage: 'ethics_committee', approved: true, date: '25/01/2025' },
+      { stage: 'direction', approved: true, date: '02/02/2025' },
+    ],
+    origem: "externa"
   }
 ];
