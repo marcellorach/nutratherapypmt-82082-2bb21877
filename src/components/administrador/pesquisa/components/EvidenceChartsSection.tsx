@@ -109,11 +109,13 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
 
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-primary">Evidências da Análise Populacional DECLARE-CANINE</h2>
-        <p className="text-muted-foreground text-lg">
-          Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
-        </p>
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-bold text-primary">Evidências da Análise Populacional DECLARE-CANINE</h2>
+          <p className="text-muted-foreground text-lg">
+            Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
+          </p>
+        </div>
       </div>
 
       {/* Informações Amostrais Destacadas */}
