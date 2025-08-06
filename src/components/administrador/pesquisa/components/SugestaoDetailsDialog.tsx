@@ -14,6 +14,7 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
   Lightbulb,
@@ -26,6 +27,7 @@ import {
 import { Sugestao } from '../types/sugestoes';
 import ApprovalChain from './ApprovalChain';
 import { Badge } from "@/components/ui/badge";
+import EvidenceChartsSection from './EvidenceChartsSection';
 
 interface SugestaoDetailsDialogProps {
   open: boolean;
@@ -76,7 +78,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             {origemInfo.icon}
@@ -92,7 +94,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-1">Raciocínio da IA</h4>
             <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
@@ -101,65 +103,50 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
           {/* Cadeia de aprovação */}
           <ApprovalChain approvalChain={sugestao.approvalChain} />
           
-          {/* Todos os detalhes visíveis sem accordion */}
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium mb-1">Baseado em</h4>
-              <ul className="text-sm text-muted-foreground list-disc ml-5">
-                {sugestao.baseado_em.map((base, index) => (
-                  <li key={index}>{base}</li>
-                ))}
-              </ul>
-            </div>
-            
-            {sugestao.dados_amostra && (
+          {/* Conteúdo principal com tabs */}
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+              <TabsTrigger value="evidence">Evidências</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium mb-1">Dados da Amostra Analisada</h4>
-                <div className="bg-muted p-3 rounded-lg space-y-2">
-                  <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <span className="font-medium">Total de cães:</span>
-                      <p className="text-muted-foreground">{sugestao.dados_amostra.total_caes.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Período de análise:</span>
-                      <p className="text-muted-foreground">{sugestao.dados_amostra.periodo_analise}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Grupo tratamento:</span>
-                      <p className="text-muted-foreground">{sugestao.dados_amostra.usuarios_tratamento.toLocaleString()} ({((sugestao.dados_amostra.usuarios_tratamento/sugestao.dados_amostra.total_caes)*100).toFixed(1)}%)</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Grupo controle:</span>
-                      <p className="text-muted-foreground">{sugestao.dados_amostra.grupo_controle.toLocaleString()} ({((sugestao.dados_amostra.grupo_controle/sugestao.dados_amostra.total_caes)*100).toFixed(1)}%)</p>
-                    </div>
-                  </div>
-                  <div className="border-t pt-2">
-                    <h5 className="font-medium text-xs mb-1">Resultados Observacionais</h5>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• <strong>Eventos cardiovasculares:</strong> {sugestao.dados_amostra.resultados_observacionais.reducao_eventos_cardiovasculares}</li>
-                      <li>• <strong>Função renal:</strong> {sugestao.dados_amostra.resultados_observacionais.melhora_funcao_renal}</li>
-                      <li>• <strong>Mortalidade:</strong> {sugestao.dados_amostra.resultados_observacionais.reducao_mortalidade}</li>
-                    </ul>
-                  </div>
-                </div>
+                <h4 className="text-sm font-medium mb-1">Baseado em</h4>
+                <ul className="text-sm text-muted-foreground list-disc ml-5">
+                  {sugestao.baseado_em.map((base, index) => (
+                    <li key={index}>{base}</li>
+                  ))}
+                </ul>
               </div>
-            )}
-            
-            <div>
-              <h4 className="text-sm font-medium mb-1">Metodologia Sugerida</h4>
-              <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-medium mb-1">Marcadores Sugeridos</h4>
-              <ul className="text-sm text-muted-foreground list-disc ml-5">
-                {sugestao.marcadores_sugeridos.map((marcador, index) => (
-                  <li key={index}>{marcador}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              
+              <div>
+                <h4 className="text-sm font-medium mb-1">Metodologia Sugerida</h4>
+                <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium mb-1">Marcadores Sugeridos</h4>
+                <ul className="text-sm text-muted-foreground list-disc ml-5">
+                  {sugestao.marcadores_sugeridos.map((marcador, index) => (
+                    <li key={index}>{marcador}</li>
+                  ))}
+                </ul>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="evidence" className="space-y-4">
+              {sugestao.dados_amostra ? (
+                <EvidenceChartsSection dados_amostra={sugestao.dados_amostra} />
+              ) : (
+                <div className="bg-muted p-4 rounded-lg text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Dados de evidência não disponíveis para esta sugestão.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
         
         <DialogFooter>
