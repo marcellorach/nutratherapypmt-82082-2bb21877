@@ -104,7 +104,7 @@ export const mockSugestoes: Sugestao[] = [
       "Eventos cardiovasculares maiores (MACE)",
       "Marcadores de sensibilidade aos inibidores SGLT2"
     ],
-    raciocinio: "A análise epidemiológica longitudinal na plataforma identificou que cães não-diabéticos tratados com dapagliflozina apresentaram redução significativa em eventos cardiovasculares e preservação da função renal. Entretanto, algoritmos de IA detectaram possível dessensibilização após 8-10 meses de uso contínuo. O protocolo alternado com empagliflozina (mecanismo SGLT2 ligeiramente diferente) pode prevenir dessensibilização mantendo eficácia cardioprotetiva e nefroprotetiva.",
+    raciocinio: "A análise epidemiológica longitudinal na plataforma identificou que cães não-diabéticos tratados com dapagliflozina identificou redução significativa em eventos cardiovasculares e preservação da função renal. Entretanto, algoritmos de IA detectaram possível dessensibilização após 8-10 meses de uso contínuo. O protocolo alternado com empagliflozina (mecanismo SGLT2 ligeiramente diferente) pode prevenir dessensibilização mantendo eficácia cardioprotetiva e nefroprotetiva.",
     status: "aprovada",
     approvalChain: [
       { stage: 'scientific_supervision', approved: true, date: '10/01/2025' },
