@@ -104,7 +104,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-bold text-primary">Evidências Científicas do Estudo DECLARE-CANINE</h2>
         <p className="text-muted-foreground text-lg">
-          Análise longitudinal de 18 meses em {totalAnimais.toLocaleString()} cães não-diabéticos
+          Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= 21.876 - Tomada de dados assíncronas entre jan. 2016 até maio 2021
         </p>
       </div>
 
