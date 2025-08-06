@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Sugestao } from '../types/sugestoes';
 import { mockSugestoes, approvalStages } from '../data/sugestoesData';
@@ -9,6 +9,11 @@ export const useSugestoes = () => {
   const [sugestaoSelecionada, setSugestaoSelecionada] = useState<Sugestao | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  // Atualizar dados quando mockSugestoes muda
+  useEffect(() => {
+    setSugestoes(mockSugestoes);
+  }, []);
   
   const handleApprove = (id: string) => {
     setSugestoes(sugestoes.map(s => {
