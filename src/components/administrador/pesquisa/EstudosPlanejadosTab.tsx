@@ -12,6 +12,7 @@ import {
   TableCell 
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Plus, FileEdit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,10 +20,11 @@ import { useToast } from "@/hooks/use-toast";
 const mockEstudos = [
   {
     id: "1",
-    titulo: "Eficácia de Ômega-3 em cães idosos",
-    objetivo: "Avaliar os efeitos de suplementação com ômega-3 na mobilidade articular",
-    populacao: 60,
-    duracao: "6 meses",
+    titulo: "Eficácia de SGLT2 duplo em cães idosos",
+    objetivo: "Avaliar os efeitos senolíticos, cardioprotetores e nefroprotetores de inibidores SGLT2 em cães",
+    populacao: 200,
+    recrutados: 47,
+    duracao: "18 meses",
     status: "Recrutando"
   },
   {
@@ -30,6 +32,7 @@ const mockEstudos = [
     titulo: "Probiótícos e saúde digestiva",
     objetivo: "Comparar diferentes formulações de probióticos em cães com histórico de problemas digestivos",
     populacao: 45,
+    recrutados: 12,
     duracao: "3 meses",
     status: "Aprovação pendente"
   },
@@ -38,6 +41,7 @@ const mockEstudos = [
     titulo: "Suporte cognitivo para cães seniores",
     objetivo: "Estudo randomizado para avaliar extratos de Ginkgo biloba em cães acima de 8 anos",
     populacao: 80,
+    recrutados: 0,
     duracao: "12 meses",
     status: "Planejamento"
   }
@@ -113,42 +117,58 @@ const EstudosPlanejadosTab: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {estudos.map((estudo) => (
-                <TableRow key={estudo.id}>
-                  <TableCell className="font-medium">{estudo.titulo}</TableCell>
-                  <TableCell className="max-w-md">{estudo.objetivo}</TableCell>
-                  <TableCell className="text-center">{estudo.populacao} cães</TableCell>
-                  <TableCell className="text-center">{estudo.duracao}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                      ${estudo.status === 'Recrutando' ? 'bg-green-100 text-green-800' : 
-                        estudo.status === 'Aprovação pendente' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-blue-100 text-blue-800'}`}>
-                      {estudo.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleEditEstudo(estudo)}
-                      >
-                        <FileEdit className="h-4 w-4" />
-                        <span className="sr-only">Editar</span>
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleDeleteEstudo(estudo.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Excluir</span>
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {estudos.map((estudo) => {
+                const progressoRecrutamento = (estudo.recrutados / estudo.populacao) * 100;
+                
+                return (
+                  <TableRow key={estudo.id}>
+                    <TableCell className="font-medium">{estudo.titulo}</TableCell>
+                    <TableCell className="max-w-md">{estudo.objetivo}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="space-y-1">
+                        <div className="text-sm">{estudo.populacao} cães</div>
+                        {estudo.status === 'Recrutando' && (
+                          <div className="space-y-1">
+                            <Progress value={progressoRecrutamento} className="h-2" />
+                            <div className="text-xs text-muted-foreground">
+                              {estudo.recrutados}/{estudo.populacao} recrutados
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">{estudo.duracao}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                        ${estudo.status === 'Recrutando' ? 'bg-green-100 text-green-800' : 
+                          estudo.status === 'Aprovação pendente' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-blue-100 text-blue-800'}`}>
+                        {estudo.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEditEstudo(estudo)}
+                        >
+                          <FileEdit className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteEstudo(estudo.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Excluir</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
