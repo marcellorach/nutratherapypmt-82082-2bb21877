@@ -1,14 +1,15 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
+import { ComponentLoadingFallback } from '@/components/base';
 
-// Componentes das abas
-import NutraceuticosTab from './NutraceuticosTab';
-import NutraceuticoGerenciamentoTab from './pesquisa/NutraceuticoGerenciamentoTab';
-import ConfiguracoesTab from './ConfiguracoesTab';
-import DataAnalysisTab from './dataAnalysis/DataAnalysisTab';
-import PromptConfigurationTab from './PromptConfigurationTab';
+// Lazy loading dos componentes das abas
+const NutraceuticosTab = React.lazy(() => import('./NutraceuticosTab'));
+const NutraceuticoGerenciamentoTab = React.lazy(() => import('./pesquisa/NutraceuticoGerenciamentoTab'));
+const ConfiguracoesTab = React.lazy(() => import('./ConfiguracoesTab'));
+const DataAnalysisTab = React.lazy(() => import('./dataAnalysis/DataAnalysisTab'));
+const PromptConfigurationTab = React.lazy(() => import('./PromptConfigurationTab'));
 
 const AdminPainel = () => {
   return (
@@ -24,23 +25,33 @@ const AdminPainel = () => {
           </TabsList>
           
           <TabsContent value="nutraceuticos">
-            <NutraceuticosTab />
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <NutraceuticosTab />
+            </Suspense>
           </TabsContent>
           
           <TabsContent value="banco">
-            <NutraceuticoGerenciamentoTab />
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <NutraceuticoGerenciamentoTab />
+            </Suspense>
           </TabsContent>
           
           <TabsContent value="configuracoes">
-            <ConfiguracoesTab />
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <ConfiguracoesTab />
+            </Suspense>
           </TabsContent>
           
           <TabsContent value="analise">
-            <DataAnalysisTab />
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <DataAnalysisTab />
+            </Suspense>
           </TabsContent>
           
           <TabsContent value="prompts">
-            <PromptConfigurationTab />
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <PromptConfigurationTab />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>

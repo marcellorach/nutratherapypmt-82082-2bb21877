@@ -249,3 +249,5 @@ export const DashboardModule = memo(() => {
 });
 
 DashboardModule.displayName = 'DashboardModule';
+
+export default DashboardModule;

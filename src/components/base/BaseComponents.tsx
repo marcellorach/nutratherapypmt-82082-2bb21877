@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Base Status Badge Component
@@ -282,3 +283,38 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </div>
   );
 };
+
+// Loading Fallbacks para componentes lazy
+export const ComponentLoadingFallback: React.FC<{ height?: string }> = ({ 
+  height = "h-64" 
+}) => (
+  <div className={cn("flex items-center justify-center", height)}>
+    <div className="flex flex-col items-center gap-2">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Carregando componente...</p>
+    </div>
+  </div>
+);
+
+export const PageLoadingFallback: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="text-center">
+        <h3 className="text-lg font-medium">Carregando página...</h3>
+        <p className="text-sm text-muted-foreground">Por favor, aguarde</p>
+      </div>
+    </div>
+  </div>
+);
+
+export const DataLoadingFallback: React.FC<{ message?: string }> = ({ 
+  message = "Carregando dados..." 
+}) => (
+  <div className="flex items-center justify-center p-8">
+    <div className="flex items-center gap-3">
+      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <span className="text-sm text-muted-foreground">{message}</span>
+    </div>
+  </div>
+);
