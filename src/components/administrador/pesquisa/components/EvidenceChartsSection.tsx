@@ -9,56 +9,68 @@ interface EvidenceChartsSectionProps {
 }
 
 const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amostra }) => {
-  // Dados cardiovasculares temporais mais realistas com curvas não-lineares
+  // Dados cardiovasculares completamente diferenciados por condição
+  
+  // INSUFICIÊNCIA CARDÍACA - Curva exponencial tardia (benefício após 12 meses)
   const heartFailureData = [
     { label: 'Baseline', control: 0, treatment: 0 },
-    { label: '3m', control: 1.2, treatment: 0.8 },
-    { label: '6m', control: 3.8, treatment: 2.1 },
-    { label: '9m', control: 6.2, treatment: 3.7 },
-    { label: '12m', control: 9.1, treatment: 5.4 },
-    { label: '15m', control: 11.2, treatment: 6.9 },
-    { label: '18m', control: 12.7, treatment: 8.2 }
+    { label: '2m', control: 0.8, treatment: 0.6 },
+    { label: '5m', control: 2.1, treatment: 1.2 },
+    { label: '8m', control: 4.7, treatment: 2.8 },
+    { label: '12m', control: 8.4, treatment: 4.3 },
+    { label: '16m', control: 18.7, treatment: 9.8 },
+    { label: '18m', control: 29.2, treatment: 16.1 }
   ];
 
+  // ARRITMIAS - Curva linear com separação precoce (benefício desde 3 meses)
   const arrhythmiasData = [
     { label: 'Baseline', control: 0, treatment: 0 },
-    { label: '3m', control: 2.1, treatment: 1.5 },
-    { label: '6m', control: 5.3, treatment: 3.2 },
-    { label: '9m', control: 8.7, treatment: 5.1 },
-    { label: '12m', control: 11.9, treatment: 7.3 },
-    { label: '15m', control: 13.8, treatment: 8.9 },
-    { label: '18m', control: 15.3, treatment: 10.1 }
+    { label: '2m', control: 3.8, treatment: 1.4 },
+    { label: '5m', control: 9.2, treatment: 4.1 },
+    { label: '8m', control: 13.6, treatment: 6.2 },
+    { label: '12m', control: 16.1, treatment: 7.8 },
+    { label: '16m', control: 20.8, treatment: 10.3 },
+    { label: '18m', control: 24.3, treatment: 12.5 }
   ];
 
+  // HIPERTENSÃO - Curva com platô intermediário (benefício estabiliza aos 9 meses)
   const hypertensionData = [
     { label: 'Baseline', control: 0, treatment: 0 },
-    { label: '3m', control: 2.8, treatment: 2.1 },
-    { label: '6m', control: 6.9, treatment: 4.5 },
-    { label: '9m', control: 11.2, treatment: 7.1 },
-    { label: '12m', control: 15.1, treatment: 9.8 },
-    { label: '15m', control: 17.3, treatment: 11.9 },
-    { label: '18m', control: 18.9, treatment: 13.6 }
+    { label: '2m', control: 5.2, treatment: 2.8 },
+    { label: '5m', control: 12.3, treatment: 6.4 },
+    { label: '8m', control: 14.7, treatment: 7.9 },
+    { label: '12m', control: 17.2, treatment: 9.8 },
+    { label: '16m', control: 19.8, treatment: 11.2 },
+    { label: '18m', control: 21.4, treatment: 13.6 }
   ];
 
+  // CARDIOMIOPATIA - Curva de baixa incidência com crescimento gradual
   const cardiomyopathyData = [
     { label: 'Baseline', control: 0, treatment: 0 },
-    { label: '3m', control: 0.9, treatment: 0.6 },
-    { label: '6m', control: 2.3, treatment: 1.5 },
-    { label: '9m', control: 3.8, treatment: 2.6 },
-    { label: '12m', control: 5.7, treatment: 4.1 },
-    { label: '15m', control: 7.2, treatment: 5.1 },
-    { label: '18m', control: 8.4, treatment: 5.8 }
+    { label: '2m', control: 0.6, treatment: 0.3 },
+    { label: '5m', control: 1.8, treatment: 1.1 },
+    { label: '8m', control: 3.2, treatment: 1.9 },
+    { label: '12m', control: 5.1, treatment: 2.8 },
+    { label: '16m', control: 7.4, treatment: 4.2 },
+    { label: '18m', control: 9.8, treatment: 5.7 }
   ];
 
-  const totalEventsData = [
-    { label: 'Baseline', control: 0, treatment: 0 },
-    { label: '3m', control: 6.8, treatment: 4.9 },
-    { label: '6m', control: 18.3, treatment: 11.3 },
-    { label: '9m', control: 29.9, treatment: 18.5 },
-    { label: '12m', control: 41.8, treatment: 26.6 },
-    { label: '15m', control: 49.5, treatment: 32.8 },
-    { label: '18m', control: 55.3, treatment: 37.7 }
-  ];
+  // EVENTOS TOTAIS - SOMATÓRIA REAL matemática de todas as condições
+  const totalEventsData = heartFailureData.map((item, index) => ({
+    label: item.label,
+    control: parseFloat((
+      heartFailureData[index].control + 
+      arrhythmiasData[index].control + 
+      hypertensionData[index].control + 
+      cardiomyopathyData[index].control
+    ).toFixed(1)),
+    treatment: parseFloat((
+      heartFailureData[index].treatment + 
+      arrhythmiasData[index].treatment + 
+      hypertensionData[index].treatment + 
+      cardiomyopathyData[index].treatment
+    ).toFixed(1))
+  }));
 
   // Dados para gráfico de função renal
   const renalData = [
