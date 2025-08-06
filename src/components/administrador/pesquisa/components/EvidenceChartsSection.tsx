@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PartialResultsChart from './PartialResultsChart';
 import { DadosAmostra } from '../types/sugestoes';
-
 interface EvidenceChartsSectionProps {
   dados_amostra: DadosAmostra;
 }
-
-const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amostra }) => {
+const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
+  dados_amostra
+}) => {
   // Tamanhos amostrais para cada grupo
   const tamanhoControle = 12173;
   const tamanhoDapa = 10941;
@@ -17,101 +17,221 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
 
   // Função para calcular números absolutos baseados nos percentuais
   const calcularAbsolutos = (percentual: number, grupo: 'controle' | 'dapa' | 'empa') => {
-    const tamanho = grupo === 'controle' ? tamanhoControle : 
-                    grupo === 'dapa' ? tamanhoDapa : tamanhoEmpa;
-    return Math.round((percentual / 100) * tamanho);
+    const tamanho = grupo === 'controle' ? tamanhoControle : grupo === 'dapa' ? tamanhoDapa : tamanhoEmpa;
+    return Math.round(percentual / 100 * tamanho);
   };
 
   // Dados cardiovasculares completamente diferenciados por condição
-  
+
   // INSUFICIÊNCIA CARDÍACA - Curva exponencial tardia (benefício após 12 meses)
-  const heartFailureData = [
-    { label: 'Baseline', control: 0, dapagliflozin: 0, empagliflozin: 0 },
-    { label: '2m', control: 0.8, dapagliflozin: 0.6, empagliflozin: 0.7 },
-    { label: '5m', control: 2.1, dapagliflozin: 1.2, empagliflozin: 1.4 },
-    { label: '8m', control: 4.7, dapagliflozin: 2.8, empagliflozin: 3.1 },
-    { label: '12m', control: 8.4, dapagliflozin: 4.3, empagliflozin: 4.8 },
-    { label: '16m', control: 18.7, dapagliflozin: 9.8, empagliflozin: 11.2 },
-    { label: '18m', control: 29.2, dapagliflozin: 16.1, empagliflozin: 18.3 }
-  ];
+  const heartFailureData = [{
+    label: 'Baseline',
+    control: 0,
+    dapagliflozin: 0,
+    empagliflozin: 0
+  }, {
+    label: '2m',
+    control: 0.8,
+    dapagliflozin: 0.6,
+    empagliflozin: 0.7
+  }, {
+    label: '5m',
+    control: 2.1,
+    dapagliflozin: 1.2,
+    empagliflozin: 1.4
+  }, {
+    label: '8m',
+    control: 4.7,
+    dapagliflozin: 2.8,
+    empagliflozin: 3.1
+  }, {
+    label: '12m',
+    control: 8.4,
+    dapagliflozin: 4.3,
+    empagliflozin: 4.8
+  }, {
+    label: '16m',
+    control: 18.7,
+    dapagliflozin: 9.8,
+    empagliflozin: 11.2
+  }, {
+    label: '18m',
+    control: 29.2,
+    dapagliflozin: 16.1,
+    empagliflozin: 18.3
+  }];
 
   // ARRITMIAS - Curva linear com separação precoce (benefício desde 3 meses)
-  const arrhythmiasData = [
-    { label: 'Baseline', control: 0, dapagliflozin: 0, empagliflozin: 0 },
-    { label: '2m', control: 3.8, dapagliflozin: 1.4, empagliflozin: 1.6 },
-    { label: '5m', control: 9.2, dapagliflozin: 4.1, empagliflozin: 4.8 },
-    { label: '8m', control: 13.6, dapagliflozin: 6.2, empagliflozin: 7.1 },
-    { label: '12m', control: 16.1, dapagliflozin: 7.8, empagliflozin: 8.9 },
-    { label: '16m', control: 20.8, dapagliflozin: 10.3, empagliflozin: 11.8 },
-    { label: '18m', control: 24.3, dapagliflozin: 12.5, empagliflozin: 14.2 }
-  ];
+  const arrhythmiasData = [{
+    label: 'Baseline',
+    control: 0,
+    dapagliflozin: 0,
+    empagliflozin: 0
+  }, {
+    label: '2m',
+    control: 3.8,
+    dapagliflozin: 1.4,
+    empagliflozin: 1.6
+  }, {
+    label: '5m',
+    control: 9.2,
+    dapagliflozin: 4.1,
+    empagliflozin: 4.8
+  }, {
+    label: '8m',
+    control: 13.6,
+    dapagliflozin: 6.2,
+    empagliflozin: 7.1
+  }, {
+    label: '12m',
+    control: 16.1,
+    dapagliflozin: 7.8,
+    empagliflozin: 8.9
+  }, {
+    label: '16m',
+    control: 20.8,
+    dapagliflozin: 10.3,
+    empagliflozin: 11.8
+  }, {
+    label: '18m',
+    control: 24.3,
+    dapagliflozin: 12.5,
+    empagliflozin: 14.2
+  }];
 
   // HIPERTENSÃO - Curva com platô intermediário (benefício estabiliza aos 9 meses)
-  const hypertensionData = [
-    { label: 'Baseline', control: 0, dapagliflozin: 0, empagliflozin: 0 },
-    { label: '2m', control: 5.2, dapagliflozin: 2.8, empagliflozin: 3.1 },
-    { label: '5m', control: 12.3, dapagliflozin: 6.4, empagliflozin: 7.2 },
-    { label: '8m', control: 14.7, dapagliflozin: 7.9, empagliflozin: 8.8 },
-    { label: '12m', control: 17.2, dapagliflozin: 9.8, empagliflozin: 10.9 },
-    { label: '16m', control: 19.8, dapagliflozin: 11.2, empagliflozin: 12.4 },
-    { label: '18m', control: 21.4, dapagliflozin: 13.6, empagliflozin: 15.1 }
-  ];
+  const hypertensionData = [{
+    label: 'Baseline',
+    control: 0,
+    dapagliflozin: 0,
+    empagliflozin: 0
+  }, {
+    label: '2m',
+    control: 5.2,
+    dapagliflozin: 2.8,
+    empagliflozin: 3.1
+  }, {
+    label: '5m',
+    control: 12.3,
+    dapagliflozin: 6.4,
+    empagliflozin: 7.2
+  }, {
+    label: '8m',
+    control: 14.7,
+    dapagliflozin: 7.9,
+    empagliflozin: 8.8
+  }, {
+    label: '12m',
+    control: 17.2,
+    dapagliflozin: 9.8,
+    empagliflozin: 10.9
+  }, {
+    label: '16m',
+    control: 19.8,
+    dapagliflozin: 11.2,
+    empagliflozin: 12.4
+  }, {
+    label: '18m',
+    control: 21.4,
+    dapagliflozin: 13.6,
+    empagliflozin: 15.1
+  }];
 
   // CARDIOMIOPATIA - Curva de baixa incidência com crescimento gradual
-  const cardiomyopathyData = [
-    { label: 'Baseline', control: 0, dapagliflozin: 0, empagliflozin: 0 },
-    { label: '2m', control: 0.6, dapagliflozin: 0.3, empagliflozin: 0.4 },
-    { label: '5m', control: 1.8, dapagliflozin: 1.1, empagliflozin: 1.3 },
-    { label: '8m', control: 3.2, dapagliflozin: 1.9, empagliflozin: 2.2 },
-    { label: '12m', control: 5.1, dapagliflozin: 2.8, empagliflozin: 3.2 },
-    { label: '16m', control: 7.4, dapagliflozin: 4.2, empagliflozin: 4.8 },
-    { label: '18m', control: 9.8, dapagliflozin: 5.7, empagliflozin: 6.4 }
-  ];
+  const cardiomyopathyData = [{
+    label: 'Baseline',
+    control: 0,
+    dapagliflozin: 0,
+    empagliflozin: 0
+  }, {
+    label: '2m',
+    control: 0.6,
+    dapagliflozin: 0.3,
+    empagliflozin: 0.4
+  }, {
+    label: '5m',
+    control: 1.8,
+    dapagliflozin: 1.1,
+    empagliflozin: 1.3
+  }, {
+    label: '8m',
+    control: 3.2,
+    dapagliflozin: 1.9,
+    empagliflozin: 2.2
+  }, {
+    label: '12m',
+    control: 5.1,
+    dapagliflozin: 2.8,
+    empagliflozin: 3.2
+  }, {
+    label: '16m',
+    control: 7.4,
+    dapagliflozin: 4.2,
+    empagliflozin: 4.8
+  }, {
+    label: '18m',
+    control: 9.8,
+    dapagliflozin: 5.7,
+    empagliflozin: 6.4
+  }];
 
   // EVENTOS TOTAIS - SOMATÓRIA REAL matemática de todas as condições
   const totalEventsData = heartFailureData.map((item, index) => ({
     label: item.label,
-    control: parseFloat((
-      heartFailureData[index].control + 
-      arrhythmiasData[index].control + 
-      hypertensionData[index].control + 
-      cardiomyopathyData[index].control
-    ).toFixed(1)),
-    dapagliflozin: parseFloat((
-      heartFailureData[index].dapagliflozin + 
-      arrhythmiasData[index].dapagliflozin + 
-      hypertensionData[index].dapagliflozin + 
-      cardiomyopathyData[index].dapagliflozin
-    ).toFixed(1)),
-    empagliflozin: parseFloat((
-      heartFailureData[index].empagliflozin + 
-      arrhythmiasData[index].empagliflozin + 
-      hypertensionData[index].empagliflozin + 
-      cardiomyopathyData[index].empagliflozin
-    ).toFixed(1))
+    control: parseFloat((heartFailureData[index].control + arrhythmiasData[index].control + hypertensionData[index].control + cardiomyopathyData[index].control).toFixed(1)),
+    dapagliflozin: parseFloat((heartFailureData[index].dapagliflozin + arrhythmiasData[index].dapagliflozin + hypertensionData[index].dapagliflozin + cardiomyopathyData[index].dapagliflozin).toFixed(1)),
+    empagliflozin: parseFloat((heartFailureData[index].empagliflozin + arrhythmiasData[index].empagliflozin + hypertensionData[index].empagliflozin + cardiomyopathyData[index].empagliflozin).toFixed(1))
   }));
 
   // Dados para gráfico de função renal
-  const renalData = [
-    { label: 'Baseline', control: 100, dapagliflozin: 100, empagliflozin: 100 },
-    { label: '6 meses', control: 95.2, dapagliflozin: 102.3, empagliflozin: 101.8 },
-    { label: '12 meses', control: 88.7, dapagliflozin: 106.8, empagliflozin: 105.9 },
-    { label: '18 meses', control: 82.1, dapagliflozin: 108.5, empagliflozin: 107.2 }
-  ];
+  const renalData = [{
+    label: 'Baseline',
+    control: 100,
+    dapagliflozin: 100,
+    empagliflozin: 100
+  }, {
+    label: '6 meses',
+    control: 95.2,
+    dapagliflozin: 102.3,
+    empagliflozin: 101.8
+  }, {
+    label: '12 meses',
+    control: 88.7,
+    dapagliflozin: 106.8,
+    empagliflozin: 105.9
+  }, {
+    label: '18 meses',
+    control: 82.1,
+    dapagliflozin: 108.5,
+    empagliflozin: 107.2
+  }];
 
   // Dados para mortalidade (sobrevida)
-  const mortalityData = [
-    { label: 'Baseline', control: 100, dapagliflozin: 100, empagliflozin: 100 },
-    { label: '6m', control: 98.8, dapagliflozin: 99.2, empagliflozin: 99.0 },
-    { label: '12m', control: 97.2, dapagliflozin: 98.1, empagliflozin: 97.8 },
-    { label: '18m', control: 95.4, dapagliflozin: 96.2, empagliflozin: 95.9 }
-  ];
-
-  return (
-    <div className="space-y-8">
+  const mortalityData = [{
+    label: 'Baseline',
+    control: 100,
+    dapagliflozin: 100,
+    empagliflozin: 100
+  }, {
+    label: '6m',
+    control: 98.8,
+    dapagliflozin: 99.2,
+    empagliflozin: 99.0
+  }, {
+    label: '12m',
+    control: 97.2,
+    dapagliflozin: 98.1,
+    empagliflozin: 97.8
+  }, {
+    label: '18m',
+    control: 95.4,
+    dapagliflozin: 96.2,
+    empagliflozin: 95.9
+  }];
+  return <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-primary">Evidências da Análise Populacional DECLARE-CANINE</h2>
-        <p className="text-muted-foreground text-lg bg-slate-50 p-3 rounded-md border">
+        <h2 className="font-bold text-primary text-xl text-center">Evidências da Análise Estatística Longitudinal - DualSGLT2-CANINE</h2>
+        <p className="text-muted-foreground bg-slate-50 p-3 rounded-md border text-base text-left">
           Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
         </p>
       </div>
@@ -155,76 +275,36 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
 
         <TabsContent value="cardiovascular" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PartialResultsChart
-              title="Insuficiência Cardíaca"
-              data={heartFailureData}
-              description="Novos casos de insuficiência cardíaca diagnosticada"
-              yAxisLabel="Incidência Cumulativa (%)"
-              chartType="line"
-              statisticalInfo={{
-                pValue: "p < 0.001",
-                hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
-                riskReduction: "34% redução do risco"
-              }}
-              formatter={(value) => `${value}%`}
-            />
+            <PartialResultsChart title="Insuficiência Cardíaca" data={heartFailureData} description="Novos casos de insuficiência cardíaca diagnosticada" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
+            pValue: "p < 0.001",
+            hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
+            riskReduction: "34% redução do risco"
+          }} formatter={value => `${value}%`} />
 
-            <PartialResultsChart
-              title="Arritmias"
-              data={arrhythmiasData}
-              description="Episódios de arritmias clinicamente significativas"
-              yAxisLabel="Incidência Cumulativa (%)"
-              chartType="line"
-              statisticalInfo={{
-                pValue: "p = 0.002",
-                hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
-                riskReduction: "28% redução do risco"
-              }}
-              formatter={(value) => `${value}%`}
-            />
+            <PartialResultsChart title="Arritmias" data={arrhythmiasData} description="Episódios de arritmias clinicamente significativas" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
+            pValue: "p = 0.002",
+            hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
+            riskReduction: "28% redução do risco"
+          }} formatter={value => `${value}%`} />
 
-            <PartialResultsChart
-              title="Hipertensão"
-              data={hypertensionData}
-              description="Diagnósticos de hipertensão arterial"
-              yAxisLabel="Incidência Cumulativa (%)"
-              chartType="line"
-              statisticalInfo={{
-                pValue: "p = 0.008",
-                hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
-                riskReduction: "22% redução do risco"
-              }}
-              formatter={(value) => `${value}%`}
-            />
+            <PartialResultsChart title="Hipertensão" data={hypertensionData} description="Diagnósticos de hipertensão arterial" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
+            pValue: "p = 0.008",
+            hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
+            riskReduction: "22% redução do risco"
+          }} formatter={value => `${value}%`} />
 
-            <PartialResultsChart
-              title="Cardiomiopatia"
-              data={cardiomyopathyData}
-              description="Casos de cardiomiopatia dilatada e hipertrófica"
-              yAxisLabel="Incidência Cumulativa (%)"
-              chartType="line"
-              statisticalInfo={{
-                pValue: "p = 0.045",
-                hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
-                riskReduction: "19% redução do risco"
-              }}
-              formatter={(value) => `${value}%`}
-            />
+            <PartialResultsChart title="Cardiomiopatia" data={cardiomyopathyData} description="Casos de cardiomiopatia dilatada e hipertrófica" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
+            pValue: "p = 0.045",
+            hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
+            riskReduction: "19% redução do risco"
+          }} formatter={value => `${value}%`} />
           </div>
 
-          <PartialResultsChart
-            title="Total de Eventos Cardiovasculares"
-            data={totalEventsData}
-            description="Somatória de todos os eventos cardiovasculares maiores"
-            yAxisLabel="Incidência Cumulativa (%)"
-            chartType="line"
-            statisticalInfo={{
-              pValue: "p < 0.001",
-              hazardRatio: "HR: 0.69 (IC95%: 0.61-0.78)",
-              riskReduction: "31% redução do risco"
-            }}
-            formatter={(value) => `${value}%`}
-          />
+          <PartialResultsChart title="Total de Eventos Cardiovasculares" data={totalEventsData} description="Somatória de todos os eventos cardiovasculares maiores" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
+          pValue: "p < 0.001",
+          hazardRatio: "HR: 0.69 (IC95%: 0.61-0.78)",
+          riskReduction: "31% redução do risco"
+        }} formatter={value => `${value}%`} />
 
           {/* Números em Risco - Cardiovascular */}
           <div className="bg-muted/50 border rounded-lg p-4">
@@ -232,19 +312,19 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
               <div className="text-center">
                 <div className="font-medium text-blue-600">Controle (n={tamanhoControle.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length-1].control, 'controle')} eventos ({totalEventsData[totalEventsData.length-1].control}%)</div>
+                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos ({totalEventsData[totalEventsData.length - 1].control}%)</div>
               </div>
               <div className="text-center">
                 <div className="font-medium text-green-600">Dapa (n={tamanhoDapa.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length-1].dapagliflozin, 'dapa')} eventos ({totalEventsData[totalEventsData.length-1].dapagliflozin}%)</div>
+                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos ({totalEventsData[totalEventsData.length - 1].dapagliflozin}%)</div>
               </div>
               <div className="text-center">
                 <div className="font-medium text-orange-600">Empa (n={tamanhoEmpa.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length-1].empagliflozin, 'empa')} eventos ({totalEventsData[totalEventsData.length-1].empagliflozin}%)</div>
+                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos ({totalEventsData[totalEventsData.length - 1].empagliflozin}%)</div>
               </div>
               <div className="text-center">
                 <div className="font-medium text-purple-600">Eventos Prevenidos</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length-1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length-1].dapagliflozin, 'dapa')} eventos (Dapa)</div>
+                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos (Dapa)</div>
               </div>
               <div className="text-center">
                 <div className="font-medium text-amber-600">NNT</div>
@@ -277,10 +357,10 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
               <div>
                 <strong>Números Absolutos:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Controle (n={tamanhoControle.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length-1].control, 'controle')} eventos</li>
-                  <li>Dapa (n={tamanhoDapa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length-1].dapagliflozin, 'dapa')} eventos</li>
-                  <li>Empa (n={tamanhoEmpa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length-1].empagliflozin, 'empa')} eventos</li>
-                  <li>Redução de risco absoluto (Dapa): {(totalEventsData[totalEventsData.length-1].control - totalEventsData[totalEventsData.length-1].dapagliflozin).toFixed(1)}%</li>
+                  <li>Controle (n={tamanhoControle.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos</li>
+                  <li>Dapa (n={tamanhoDapa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos</li>
+                  <li>Empa (n={tamanhoEmpa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos</li>
+                  <li>Redução de risco absoluto (Dapa): {(totalEventsData[totalEventsData.length - 1].control - totalEventsData[totalEventsData.length - 1].dapagliflozin).toFixed(1)}%</li>
                 </ul>
               </div>
             </div>
@@ -288,19 +368,11 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
         </TabsContent>
 
         <TabsContent value="renal" className="space-y-6">
-          <PartialResultsChart
-            title="Função Renal"
-            data={renalData}
-            description="Preservação da função renal (eGFR > 60 ml/min/1.73m²)"
-            yAxisLabel="Função Renal Preservada (%)"
-            chartType="line"
-            formatter={(value) => `${value}%`}
-            statisticalInfo={{
-              pValue: "p < 0.001",
-              hazardRatio: "HR: 0.72 (IC95%: 0.64-0.81)",
-              riskReduction: "28% redução do risco"
-            }}
-          />
+          <PartialResultsChart title="Função Renal" data={renalData} description="Preservação da função renal (eGFR > 60 ml/min/1.73m²)" yAxisLabel="Função Renal Preservada (%)" chartType="line" formatter={value => `${value}%`} statisticalInfo={{
+          pValue: "p < 0.001",
+          hazardRatio: "HR: 0.72 (IC95%: 0.64-0.81)",
+          riskReduction: "28% redução do risco"
+        }} />
           
           {/* Números em Risco - Renal */}
           <div className="bg-muted/50 border rounded-lg p-4">
@@ -308,19 +380,19 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-center">
               <div>
                 <div className="font-medium text-blue-600">Controle</div>
-                <div>{calcularAbsolutos(renalData[renalData.length-1].control, 'controle')} cães com função preservada</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} cães com função preservada</div>
               </div>
               <div>
                 <div className="font-medium text-green-600">Dapa</div>
-                <div>{calcularAbsolutos(renalData[renalData.length-1].dapagliflozin, 'dapa')} cães com função preservada</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa')} cães com função preservada</div>
               </div>
               <div>
                 <div className="font-medium text-orange-600">Empa</div>
-                <div>{calcularAbsolutos(renalData[renalData.length-1].empagliflozin, 'empa')} cães com função preservada</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].empagliflozin, 'empa')} cães com função preservada</div>
               </div>
               <div>
                 <div className="font-medium text-purple-600">Benefício Adicional (Dapa)</div>
-                <div>{calcularAbsolutos(renalData[renalData.length-1].dapagliflozin, 'dapa') - calcularAbsolutos(renalData[renalData.length-1].control, 'controle')} cães</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} cães</div>
               </div>
               <div>
                 <div className="font-medium text-amber-600">NNT Renal</div>
@@ -331,19 +403,11 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
         </TabsContent>
 
         <TabsContent value="mortalidade" className="space-y-6">
-          <PartialResultsChart
-            title="Mortalidade por Todas as Causas"
-            data={mortalityData}
-            description="Sobrevida durante o período de seguimento"
-            yAxisLabel="Sobrevida (%)"
-            chartType="line"
-            formatter={(value) => `${value}%`}
-            statisticalInfo={{
-              pValue: "p = 0.003",
-              hazardRatio: "HR: 0.78 (IC95%: 0.66-0.92)",
-              riskReduction: "22% redução do risco"
-            }}
-          />
+          <PartialResultsChart title="Mortalidade por Todas as Causas" data={mortalityData} description="Sobrevida durante o período de seguimento" yAxisLabel="Sobrevida (%)" chartType="line" formatter={value => `${value}%`} statisticalInfo={{
+          pValue: "p = 0.003",
+          hazardRatio: "HR: 0.78 (IC95%: 0.66-0.92)",
+          riskReduction: "22% redução do risco"
+        }} />
 
           {/* Números em Risco - Mortalidade */}
           <div className="bg-muted/50 border rounded-lg p-4">
@@ -351,19 +415,19 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-center">
               <div>
                 <div className="font-medium text-blue-600">Controle</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length-1].control, 'controle')} sobreviventes ({mortalityData[mortalityData.length-1].control}%)</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} sobreviventes ({mortalityData[mortalityData.length - 1].control}%)</div>
               </div>
               <div>
                 <div className="font-medium text-green-600">Dapa</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length-1].dapagliflozin, 'dapa')} sobreviventes ({mortalityData[mortalityData.length-1].dapagliflozin}%)</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa')} sobreviventes ({mortalityData[mortalityData.length - 1].dapagliflozin}%)</div>
               </div>
               <div>
                 <div className="font-medium text-orange-600">Empa</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length-1].empagliflozin, 'empa')} sobreviventes ({mortalityData[mortalityData.length-1].empagliflozin}%)</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].empagliflozin, 'empa')} sobreviventes ({mortalityData[mortalityData.length - 1].empagliflozin}%)</div>
               </div>
               <div>
                 <div className="font-medium text-purple-600">Vidas Salvas (Dapa)</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length-1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length-1].control, 'controle')} cães</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} cães</div>
               </div>
               <div>
                 <div className="font-medium text-amber-600">NNT Mortalidade</div>
@@ -396,10 +460,10 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
               <div>
                 <strong>Números em Risco:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Função renal preservada (Dapa): {calcularAbsolutos(renalData[renalData.length-1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(renalData[renalData.length-1].control, 'controle')} (Controle)</li>
-                  <li>Sobreviventes aos 18m (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length-1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(mortalityData[mortalityData.length-1].control, 'controle')} (Controle)</li>
-                  <li>Vidas salvas (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length-1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length-1].control, 'controle')}</li>
-                  <li>Diferença absoluta: {(mortalityData[mortalityData.length-1].dapagliflozin - mortalityData[mortalityData.length-1].control).toFixed(1)}%</li>
+                  <li>Função renal preservada (Dapa): {calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} (Controle)</li>
+                  <li>Sobreviventes aos 18m (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} (Controle)</li>
+                  <li>Vidas salvas (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')}</li>
+                  <li>Diferença absoluta: {(mortalityData[mortalityData.length - 1].dapagliflozin - mortalityData[mortalityData.length - 1].control).toFixed(1)}%</li>
                 </ul>
               </div>
             </div>
@@ -421,8 +485,6 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({ dados_amo
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default EvidenceChartsSection;
