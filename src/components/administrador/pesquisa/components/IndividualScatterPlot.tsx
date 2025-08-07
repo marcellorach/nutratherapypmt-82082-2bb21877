@@ -170,8 +170,24 @@ const generateAllTimePointsData = (
       const dogCharacteristics = generateDogCharacteristics(grupo, dogIndex);
       const progression = generateDogProgression(grupo, dogCharacteristics, dogIndex);
       
-      // Criar pontos para todos os timepoints
+      // Criar pontos para todos os timepoints com variação temporal realística
       aggregatedData.forEach((timeData, timePoint) => {
+        // Adicionar variação temporal realística (±15 dias em torno do timepoint alvo)
+        const targetDay = TIME_POINTS_DAYS[timePoint];
+        let actualDay = targetDay;
+        
+        // Para timepoints > 0, adicionar variação (exceto baseline que é sempre day 0)
+        if (timePoint > 0) {
+          const variation = (Math.random() - 0.5) * 30; // ±15 dias
+          actualDay = Math.max(targetDay - 15, targetDay + variation);
+          
+          // Garantir que não seja anterior ao timepoint anterior
+          if (timePoint > 1) {
+            const previousPointMinDay = TIME_POINTS_DAYS[timePoint - 1] + 7;
+            actualDay = Math.max(actualDay, previousPointMinDay);
+          }
+        }
+        
         dogData.push({
           id: `${dogId}_t${timePoint}`,
           dogId: dogId,
@@ -183,7 +199,7 @@ const generateAllTimePointsData = (
           peso: dogCharacteristics.peso,
           sexo: dogCharacteristics.sexo,
           timePoint: timePoint,
-          daysSinceStart: TIME_POINTS_DAYS[timePoint]
+          daysSinceStart: Math.round(actualDay)
         });
       });
     }
