@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps, LineChart, Line } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,8 +14,10 @@ interface DogDataPoint {
   idade: number;
   peso: number;
   sexo: string;
-  timePoint: number;
+  realDays: number; // Dias reais desde início do estudo
   timeLabel: string;
+  examDate: string; // Data real do exame
+  baseline: number; // Valor inicial individual
 }
 
 interface IndividualScatterPlotProps {
@@ -172,12 +174,17 @@ const generateAllTimePointsData = (
         continue;
       }
       
-      // Gerar pontos para todos os timepoints
+      // Gerar pontos para todos os timepoints com datas realísticas
       aggregatedData.forEach((timeData, timeIndex) => {
         const meanValue = grupo === 'controle' ? timeData.control :
                          grupo === 'dapagliflozina' ? timeData.dapagliflozin : timeData.empagliflozin;
         
         const value = calculateProgressionValue(dogCharacteristics, timeIndex, meanValue, grupo);
+        
+        // Gerar data real do exame (variação de ±7 dias do marco oficial)
+        const baseDays = timeIndex * 30; // Marco oficial: baseline, 1m, 2m, etc.
+        const realDays = baseDays + (Math.random() - 0.5) * 14; // ±7 dias de variação
+        const examDate = new Date(Date.now() - (210 - realDays) * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
         
         dogData.push({
           dogId,
@@ -187,8 +194,10 @@ const generateAllTimePointsData = (
           idade: dogCharacteristics.idade,
           peso: dogCharacteristics.peso,
           sexo: dogCharacteristics.sexo,
-          timePoint: timeIndex,
-          timeLabel: timeData.label
+          realDays: Math.max(0, realDays), // Garantir que não seja negativo
+          timeLabel: timeData.label,
+          examDate,
+          baseline: dogCharacteristics.baseline
         });
       });
     }
@@ -224,7 +233,11 @@ const CustomTooltip: React.FC<TooltipProps<number, string> & { highlightedDogId?
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-3 w-3" />
-            <span>Tempo: <span className="font-medium">{data.timeLabel}</span></span>
+            <span>Dia {data.realDays.toFixed(0)} ({data.timeLabel})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>📅</span>
+            <span>Exame: <span className="font-medium">{data.examDate}</span></span>
           </div>
           <div className="flex items-center gap-2">
             <span>🐕</span>
@@ -351,52 +364,59 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
       <CardContent>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }} data={allScatterData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 type="number" 
-                dataKey="timePoint" 
-                domain={[0, data.length - 1]}
-                ticks={data.map((_, index) => index)}
-                tickFormatter={(value) => data[value]?.label || ''}
+                dataKey="realDays"
+                domain={[0, 210]}
+                ticks={[0, 30, 60, 90, 120, 150, 180, 210]}
+                tickFormatter={(value) => {
+                  if (value === 0) return 'Baseline';
+                  return `${Math.floor(value / 30)}m`;
+                }}
                 tick={{ fontSize: 10 }}
-                label={{ value: 'Tempo', position: 'insideBottom', offset: -10 }}
+                label={{ value: 'Dias do Estudo', position: 'insideBottom', offset: -10 }}
               />
               <YAxis 
                 type="number" 
-                dataKey="value"
                 domain={[0, 100]}
                 label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
                 tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip highlightedDogId={highlightedDogId} />} />
               
-              {/* Scatter plots por grupo com destaque para cão selecionado */}
-              <Scatter 
-                name="Controle" 
-                data={allScatterData.filter(d => d.grupo === 'controle')} 
-                fill={grupoCores.controle}
-                fillOpacity={0.6}
-                stroke={grupoCores.controle}
-                strokeWidth={1}
-              />
-              <Scatter 
-                name="Dapagliflozina" 
-                data={allScatterData.filter(d => d.grupo === 'dapagliflozina')} 
-                fill={grupoCores.dapagliflozina}
-                fillOpacity={0.6}
-                stroke={grupoCores.dapagliflozina}
-                strokeWidth={1}
-              />
-              <Scatter 
-                name="Empagliflozina" 
-                data={allScatterData.filter(d => d.grupo === 'empagliflozina')} 
-                fill={grupoCores.empagliflozina}
-                fillOpacity={0.6}
-                stroke={grupoCores.empagliflozina}
-                strokeWidth={1}
-              />
-            </ScatterChart>
+              {/* Linhas individuais para cada cão */}
+              {Array.from(new Set(allScatterData.map(d => d.dogId))).map(dogId => {
+                const dogPoints = allScatterData.filter(d => d.dogId === dogId);
+                const sortedPoints = dogPoints.sort((a, b) => a.realDays - b.realDays);
+                const grupo = dogPoints[0]?.grupo;
+                const cor = grupoCores[grupo];
+                const isHighlighted = highlightedDogId === dogId;
+                
+                return (
+                  <Line
+                    key={dogId}
+                    type="monotone"
+                    dataKey="value"
+                    data={sortedPoints}
+                    stroke={cor}
+                    strokeWidth={isHighlighted ? 3 : 1.5}
+                    strokeOpacity={isHighlighted ? 1 : 0.6}
+                    dot={{ 
+                      fill: cor, 
+                      stroke: cor, 
+                      strokeWidth: isHighlighted ? 2 : 1,
+                      r: isHighlighted ? 6 : 3,
+                      fillOpacity: isHighlighted ? 1 : 0.8
+                    }}
+                    connectNulls={false}
+                    onMouseEnter={() => setHighlightedDogId(dogId)}
+                    onMouseLeave={() => setHighlightedDogId(null)}
+                  />
+                );
+              })}
+            </LineChart>
           </ResponsiveContainer>
         </div>
         
