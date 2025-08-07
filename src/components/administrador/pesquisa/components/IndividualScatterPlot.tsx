@@ -1,7 +1,9 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/feedback";
 import { Dog, Calendar, Weight, Stethoscope } from "lucide-react";
 
 interface DogDataPoint {
@@ -43,31 +45,87 @@ const COMMON_BREEDS = [
 const generateIndividualData = (
   aggregatedData: Array<{label: string; control: number; dapagliflozin: number; empagliflozin: number}>,
   sampleSizes: {controle: number; dapa: number; empa: number},
-  selectedTimePoint: number
+  selectedTimePoint: number,
+  selectedBreed?: string
 ): DogDataPoint[] => {
   const currentData = aggregatedData[selectedTimePoint];
   if (!currentData) return [];
 
   const dogData: DogDataPoint[] = [];
   
-  // Reduzir drasticamente o número de pontos para evitar travamento
-  const MAX_POINTS_PER_GROUP = 25; // Máximo 25 pontos por grupo
+  // Ajustar número máximo de pontos baseado se há filtro de raça
+  const MAX_POINTS_PER_GROUP = selectedBreed && selectedBreed !== 'todas' ? 80 : 25;
   
   // Função para gerar variabilidade individual baseada no valor médio
-  const generateIndividualVariation = (meanValue: number, groupSize: number) => {
-    const individuals: number[] = [];
+  const generateIndividualVariation = (meanValue: number, groupSize: number, grupo: string) => {
+    const individuals: { value: number; raca: string; idade: number; peso: number; sexo: string }[] = [];
     const variance = Math.max(0.5, meanValue * 0.15);
     const actualSize = Math.min(groupSize, MAX_POINTS_PER_GROUP);
     
+    // Distribuição realística de raças por tamanho da amostra
+    const getBreedDistribution = () => {
+      if (selectedBreed && selectedBreed !== 'todas') {
+        return [selectedBreed]; // Apenas a raça selecionada
+      }
+      
+      // Distribuição típica de raças em estudos veterinários
+      const breedWeights = {
+        'SRD': 0.25, // Sem raça definida - mais comum
+        'Labrador': 0.15,
+        'Golden Retriever': 0.12,
+        'Bulldog Francês': 0.08,
+        'Pastor Alemão': 0.08,
+        'Beagle': 0.06,
+        'Yorkshire': 0.05,
+        'Poodle': 0.05,
+        'Border Collie': 0.04,
+        'Rottweiler': 0.03,
+        'Boxer': 0.03,
+        'Cocker Spaniel': 0.02,
+        'Schnauzer': 0.02,
+        'Pinscher': 0.01,
+        'Shih Tzu': 0.01
+      };
+      
+      return COMMON_BREEDS.filter(breed => Math.random() < (breedWeights[breed] || 0.01));
+    };
+    
     for (let i = 0; i < actualSize; i++) {
-      // Distribuição normal aproximada mais simples
+      // Distribuição normal para valores
       const random1 = Math.random();
       const random2 = Math.random();
       const gaussian = Math.sqrt(-2 * Math.log(random1)) * Math.cos(2 * Math.PI * random2);
       
-      let value = meanValue + (gaussian * variance * 0.5); // Reduzir variância
+      let value = meanValue + (gaussian * variance * 0.5);
       value = Math.max(0, Math.min(value, 100));
-      individuals.push(value);
+      
+      // Selecionar raça
+      const availableBreeds = getBreedDistribution();
+      const raca = selectedBreed && selectedBreed !== 'todas' 
+        ? selectedBreed 
+        : availableBreeds[Math.floor(Math.random() * availableBreeds.length)] || 'SRD';
+      
+      // Características baseadas na raça e realismo veterinário
+      const getBreedCharacteristics = (breed: string) => {
+        const characteristics = {
+          'Labrador': { pesoMin: 25, pesoMax: 40, idadeMedia: 6 },
+          'Golden Retriever': { pesoMin: 25, pesoMax: 40, idadeMedia: 6 },
+          'Bulldog Francês': { pesoMin: 8, pesoMax: 15, idadeMedia: 4 },
+          'Yorkshire': { pesoMin: 2, pesoMax: 7, idadeMedia: 7 },
+          'Pastor Alemão': { pesoMin: 25, pesoMax: 45, idadeMedia: 5 },
+          'Beagle': { pesoMin: 10, pesoMax: 25, idadeMedia: 6 },
+          'Poodle': { pesoMin: 6, pesoMax: 30, idadeMedia: 6 },
+          'SRD': { pesoMin: 5, pesoMax: 35, idadeMedia: 5 }
+        };
+        return characteristics[breed] || characteristics['SRD'];
+      };
+      
+      const breedInfo = getBreedCharacteristics(raca);
+      const idade = Math.max(1, Math.min(15, Math.round(breedInfo.idadeMedia + (Math.random() - 0.5) * 6)));
+      const peso = Math.round(breedInfo.pesoMin + Math.random() * (breedInfo.pesoMax - breedInfo.pesoMin));
+      const sexo = Math.random() > 0.5 ? 'Macho' : 'Fêmea';
+      
+      individuals.push({ value, raca, idade, peso, sexo });
     }
     
     return individuals;
@@ -79,49 +137,49 @@ const generateIndividualData = (
   const maxEmpa = Math.min(sampleSizes.empa, MAX_POINTS_PER_GROUP);
 
   // Gerar dados para grupo controle
-  const controleValues = generateIndividualVariation(currentData.control, maxControle);
-  controleValues.forEach((value, index) => {
+  const controleValues = generateIndividualVariation(currentData.control, maxControle, 'controle');
+  controleValues.forEach((individual, index) => {
     dogData.push({
       id: `controle_${index + 1}`,
       grupo: 'controle',
-      value,
+      value: individual.value,
       month: currentData.label,
-      raca: COMMON_BREEDS[Math.floor(Math.random() * COMMON_BREEDS.length)],
-      idade: Math.floor(Math.random() * 12) + 1,
-      peso: Math.floor(Math.random() * 50) + 5,
-      sexo: Math.random() > 0.5 ? 'Macho' : 'Fêmea',
+      raca: individual.raca,
+      idade: individual.idade,
+      peso: individual.peso,
+      sexo: individual.sexo,
       timePoint: selectedTimePoint
     });
   });
 
   // Gerar dados para grupo dapagliflozina
-  const dapaValues = generateIndividualVariation(currentData.dapagliflozin, maxDapa);
-  dapaValues.forEach((value, index) => {
+  const dapaValues = generateIndividualVariation(currentData.dapagliflozin, maxDapa, 'dapagliflozina');
+  dapaValues.forEach((individual, index) => {
     dogData.push({
       id: `dapa_${index + 1}`,
       grupo: 'dapagliflozina',
-      value,
+      value: individual.value,
       month: currentData.label,
-      raca: COMMON_BREEDS[Math.floor(Math.random() * COMMON_BREEDS.length)],
-      idade: Math.floor(Math.random() * 12) + 1,
-      peso: Math.floor(Math.random() * 50) + 5,
-      sexo: Math.random() > 0.5 ? 'Macho' : 'Fêmea',
+      raca: individual.raca,
+      idade: individual.idade,
+      peso: individual.peso,
+      sexo: individual.sexo,
       timePoint: selectedTimePoint
     });
   });
 
   // Gerar dados para grupo empagliflozina
-  const empaValues = generateIndividualVariation(currentData.empagliflozin, maxEmpa);
-  empaValues.forEach((value, index) => {
+  const empaValues = generateIndividualVariation(currentData.empagliflozin, maxEmpa, 'empagliflozina');
+  empaValues.forEach((individual, index) => {
     dogData.push({
       id: `empa_${index + 1}`,
       grupo: 'empagliflozina',
-      value,
+      value: individual.value,
       month: currentData.label,
-      raca: COMMON_BREEDS[Math.floor(Math.random() * COMMON_BREEDS.length)],
-      idade: Math.floor(Math.random() * 12) + 1,
-      peso: Math.floor(Math.random() * 50) + 5,
-      sexo: Math.random() > 0.5 ? 'Macho' : 'Fêmea',
+      raca: individual.raca,
+      idade: individual.idade,
+      peso: individual.peso,
+      sexo: individual.sexo,
       timePoint: selectedTimePoint
     });
   });
@@ -182,15 +240,43 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
   sampleSizes
 }) => {
   const [selectedTimePoint, setSelectedTimePoint] = useState(data.length - 1);
+  const [selectedBreed, setSelectedBreed] = useState<string>('todas');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Memoizar a geração de dados para evitar recálculos desnecessários
   const scatterData = useMemo(() => {
-    return generateIndividualData(data, sampleSizes, selectedTimePoint);
-  }, [data, sampleSizes, selectedTimePoint]);
+    return generateIndividualData(data, sampleSizes, selectedTimePoint, selectedBreed);
+  }, [data, sampleSizes, selectedTimePoint, selectedBreed]);
+
+  // Obter contagem de cães por raça
+  const breedCounts = useMemo(() => {
+    const counts = {};
+    scatterData.forEach(dog => {
+      counts[dog.raca] = (counts[dog.raca] || 0) + 1;
+    });
+    return counts;
+  }, [scatterData]);
+
+  // Raças disponíveis ordenadas por frequência
+  const availableBreeds = useMemo(() => {
+    const uniqueBreeds = Array.from(new Set(scatterData.map(dog => dog.raca)));
+    return uniqueBreeds.sort((a, b) => (breedCounts[b] || 0) - (breedCounts[a] || 0));
+  }, [scatterData, breedCounts]);
 
   // Debounce da mudança de timepoint
   const handleTimePointChange = useCallback((index: number) => {
     setSelectedTimePoint(index);
+  }, []);
+
+  // Handler para mudança de raça com loading
+  const handleBreedChange = useCallback(async (breed: string) => {
+    setIsLoading(true);
+    
+    // Simular processamento (delay realístico)
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    setSelectedBreed(breed);
+    setIsLoading(false);
   }, []);
 
   const grupoCores = {
@@ -205,6 +291,34 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
         <CardTitle className="text-lg">{title} - Dados Individuais</CardTitle>
         <p className="text-sm text-muted-foreground">{description}</p>
         
+        {/* Seletor de Raça */}
+        <div className="flex items-center gap-4 pt-3 border-t border-border/50">
+          <div className="flex items-center gap-2">
+            <Dog className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Filtrar por raça:</span>
+          </div>
+          
+          <Select value={selectedBreed} onValueChange={handleBreedChange} disabled={isLoading}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Selecione uma raça" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border z-50">
+              <SelectItem value="todas">
+                Todas as raças ({scatterData.length} cães)
+              </SelectItem>
+              {availableBreeds.map((breed) => (
+                <SelectItem key={breed} value={breed}>
+                  {breed} ({breedCounts[breed] || 0} cães)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {isLoading && (
+            <LoadingSpinner className="text-primary" />
+          )}
+        </div>
+
         {/* Controles de tempo */}
         <div className="flex flex-wrap gap-1 pt-2">
           {data.map((item, index) => (
@@ -214,6 +328,7 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
               size="sm"
               onClick={() => handleTimePointChange(index)}
               className="h-7 px-2 text-xs"
+              disabled={isLoading}
             >
               {item.label}
             </Button>
@@ -271,20 +386,31 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
         
         {/* Estatísticas do ponto temporal selecionado */}
         <div className="mt-4 pt-4 border-t border-border">
+          {selectedBreed !== 'todas' && (
+            <div className="mb-3 p-2 bg-muted/30 rounded-lg">
+              <div className="text-sm font-medium text-center">
+                Visualizando apenas: <span className="text-primary">{selectedBreed}</span>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {scatterData.length} cães desta raça sendo exibidos
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="grid grid-cols-3 gap-4 text-center text-xs">
             <div>
               <div className="font-medium text-blue-600">Controle</div>
-              <div>{sampleSizes.controle.toLocaleString()} cães</div>
+              <div>{scatterData.filter(d => d.grupo === 'controle').length} cães</div>
               <div>Média: {data[selectedTimePoint]?.control.toFixed(1)}%</div>
             </div>
             <div>
               <div className="font-medium text-emerald-600">Dapagliflozina</div>
-              <div>{sampleSizes.dapa.toLocaleString()} cães</div>
+              <div>{scatterData.filter(d => d.grupo === 'dapagliflozina').length} cães</div>
               <div>Média: {data[selectedTimePoint]?.dapagliflozin.toFixed(1)}%</div>
             </div>
             <div>
               <div className="font-medium text-amber-600">Empagliflozina</div>
-              <div>{sampleSizes.empa.toLocaleString()} cães</div>
+              <div>{scatterData.filter(d => d.grupo === 'empagliflozina').length} cães</div>
               <div>Média: {data[selectedTimePoint]?.empagliflozin.toFixed(1)}%</div>
             </div>
           </div>
