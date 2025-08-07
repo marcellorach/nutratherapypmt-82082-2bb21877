@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps, LineChart, Line } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -364,7 +364,7 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
       <CardContent>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }} data={allScatterData}>
+            <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 type="number" 
@@ -386,37 +386,25 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
               />
               <Tooltip content={<CustomTooltip highlightedDogId={highlightedDogId} />} />
               
-              {/* Linhas individuais para cada cão */}
-              {Array.from(new Set(allScatterData.map(d => d.dogId))).map(dogId => {
-                const dogPoints = allScatterData.filter(d => d.dogId === dogId);
-                const sortedPoints = dogPoints.sort((a, b) => a.realDays - b.realDays);
-                const grupo = dogPoints[0]?.grupo;
-                const cor = grupoCores[grupo];
-                const isHighlighted = highlightedDogId === dogId;
-                
-                return (
-                  <Line
-                    key={dogId}
-                    type="monotone"
-                    dataKey="value"
-                    data={sortedPoints}
-                    stroke={cor}
-                    strokeWidth={isHighlighted ? 3 : 1.5}
-                    strokeOpacity={isHighlighted ? 1 : 0.6}
-                    dot={{ 
-                      fill: cor, 
-                      stroke: cor, 
-                      strokeWidth: isHighlighted ? 2 : 1,
-                      r: isHighlighted ? 6 : 3,
-                      fillOpacity: isHighlighted ? 1 : 0.8
-                    }}
-                    connectNulls={false}
-                    onMouseEnter={() => setHighlightedDogId(dogId)}
-                    onMouseLeave={() => setHighlightedDogId(null)}
+              {/* Scatter pontos para cada grupo */}
+              {['controle', 'dapagliflozina', 'empagliflozina'].map(grupo => {
+                const groupData = allScatterData.filter(d => d.grupo === grupo);
+                return groupData.map((point, index) => (
+                  <Scatter
+                    key={`${grupo}-${index}`}
+                    name={grupo} 
+                    data={[point]}
+                    fill={grupoCores[grupo]}
+                    stroke={grupoCores[grupo]}
+                    r={highlightedDogId === point.dogId ? 6 : 3}
+                    fillOpacity={highlightedDogId === point.dogId ? 1 : 0.7}
+                    strokeWidth={highlightedDogId === point.dogId ? 2 : 1}
+                    onMouseEnter={() => handleMouseEnter(point)}
+                    onMouseLeave={handleMouseLeave}
                   />
-                );
+                ));
               })}
-            </LineChart>
+            </ScatterChart>
           </ResponsiveContainer>
         </div>
         
