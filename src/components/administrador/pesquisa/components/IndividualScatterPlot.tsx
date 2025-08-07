@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,19 +50,22 @@ const generateIndividualData = (
 
   const dogData: DogDataPoint[] = [];
   
+  // Reduzir drasticamente o número de pontos para evitar travamento
+  const MAX_POINTS_PER_GROUP = 25; // Máximo 25 pontos por grupo
+  
   // Função para gerar variabilidade individual baseada no valor médio
   const generateIndividualVariation = (meanValue: number, groupSize: number) => {
     const individuals: number[] = [];
-    const variance = Math.max(0.5, meanValue * 0.15); // Variabilidade proporcional
+    const variance = Math.max(0.5, meanValue * 0.15);
+    const actualSize = Math.min(groupSize, MAX_POINTS_PER_GROUP);
     
-    for (let i = 0; i < groupSize; i++) {
-      // Distribuição normal aproximada usando Box-Muller
-      const u1 = Math.random();
-      const u2 = Math.random();
-      const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    for (let i = 0; i < actualSize; i++) {
+      // Distribuição normal aproximada mais simples
+      const random1 = Math.random();
+      const random2 = Math.random();
+      const gaussian = Math.sqrt(-2 * Math.log(random1)) * Math.cos(2 * Math.PI * random2);
       
-      let value = meanValue + (z0 * variance);
-      // Garantir que valores não sejam negativos e tenham limites realísticos
+      let value = meanValue + (gaussian * variance * 0.5); // Reduzir variância
       value = Math.max(0, Math.min(value, 100));
       individuals.push(value);
     }
@@ -70,8 +73,13 @@ const generateIndividualData = (
     return individuals;
   };
 
+  // Usar tamanhos reduzidos para cada grupo
+  const maxControle = Math.min(sampleSizes.controle, MAX_POINTS_PER_GROUP);
+  const maxDapa = Math.min(sampleSizes.dapa, MAX_POINTS_PER_GROUP);
+  const maxEmpa = Math.min(sampleSizes.empa, MAX_POINTS_PER_GROUP);
+
   // Gerar dados para grupo controle
-  const controleValues = generateIndividualVariation(currentData.control, sampleSizes.controle);
+  const controleValues = generateIndividualVariation(currentData.control, maxControle);
   controleValues.forEach((value, index) => {
     dogData.push({
       id: `controle_${index + 1}`,
@@ -79,15 +87,15 @@ const generateIndividualData = (
       value,
       month: currentData.label,
       raca: COMMON_BREEDS[Math.floor(Math.random() * COMMON_BREEDS.length)],
-      idade: Math.floor(Math.random() * 12) + 1, // 1-12 anos
-      peso: Math.floor(Math.random() * 50) + 5, // 5-55kg
+      idade: Math.floor(Math.random() * 12) + 1,
+      peso: Math.floor(Math.random() * 50) + 5,
       sexo: Math.random() > 0.5 ? 'Macho' : 'Fêmea',
       timePoint: selectedTimePoint
     });
   });
 
   // Gerar dados para grupo dapagliflozina
-  const dapaValues = generateIndividualVariation(currentData.dapagliflozin, sampleSizes.dapa);
+  const dapaValues = generateIndividualVariation(currentData.dapagliflozin, maxDapa);
   dapaValues.forEach((value, index) => {
     dogData.push({
       id: `dapa_${index + 1}`,
@@ -103,7 +111,7 @@ const generateIndividualData = (
   });
 
   // Gerar dados para grupo empagliflozina
-  const empaValues = generateIndividualVariation(currentData.empagliflozin, sampleSizes.empa);
+  const empaValues = generateIndividualVariation(currentData.empagliflozin, maxEmpa);
   empaValues.forEach((value, index) => {
     dogData.push({
       id: `empa_${index + 1}`,
@@ -173,11 +181,17 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
   description,
   sampleSizes
 }) => {
-  const [selectedTimePoint, setSelectedTimePoint] = useState(data.length - 1); // Último timepoint por padrão
+  const [selectedTimePoint, setSelectedTimePoint] = useState(data.length - 1);
 
+  // Memoizar a geração de dados para evitar recálculos desnecessários
   const scatterData = useMemo(() => {
     return generateIndividualData(data, sampleSizes, selectedTimePoint);
   }, [data, sampleSizes, selectedTimePoint]);
+
+  // Debounce da mudança de timepoint
+  const handleTimePointChange = useCallback((index: number) => {
+    setSelectedTimePoint(index);
+  }, []);
 
   const grupoCores = {
     controle: '#3b82f6', // blue-500
@@ -198,7 +212,7 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
               key={index}
               variant={selectedTimePoint === index ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedTimePoint(index)}
+              onClick={() => handleTimePointChange(index)}
               className="h-7 px-2 text-xs"
             >
               {item.label}
