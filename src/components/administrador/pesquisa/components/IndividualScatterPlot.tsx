@@ -290,6 +290,7 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
   comparisonMode = false
 }) => {
   const [selectedBreed, setSelectedBreed] = useState<string>(defaultBreed);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null); // Novo state para grupo selecionado
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredDogId, setHoveredDogId] = useState<string | null>(null);
   const [maxDogsPerGroup, setMaxDogsPerGroup] = useState<number>(100);
@@ -316,11 +317,22 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
     return generateAllTimePointsData(data, customSampleSizes);
   }, [data, sampleSizes, maxDogsPerGroup]);
 
-  // Filtrar dados por raça APENAS para visualização
+  // Filtrar dados por raça E grupo selecionado
   const filteredData = useMemo(() => {
-    if (selectedBreed === 'todas') return allTimePointsData;
-    return allTimePointsData.filter(dog => dog.raca === selectedBreed);
-  }, [allTimePointsData, selectedBreed]);
+    let filtered = allTimePointsData;
+    
+    // Filtrar por raça
+    if (selectedBreed !== 'todas') {
+      filtered = filtered.filter(dog => dog.raca === selectedBreed);
+    }
+    
+    // Filtrar por grupo se selecionado
+    if (selectedGroup) {
+      filtered = filtered.filter(dog => dog.grupo === selectedGroup);
+    }
+    
+    return filtered;
+  }, [allTimePointsData, selectedBreed, selectedGroup]);
 
   // Obter contagem de cães únicos por raça (otimizado com cache)
   const breedCounts = useMemo(() => {
@@ -362,6 +374,17 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
       setHoveredDogId(null);
     }
   }, [config.enableHover]);
+  
+  // Handler para clique nos cards de grupo
+  const handleGroupClick = useCallback((grupo: string) => {
+    if (selectedGroup === grupo) {
+      // Se já está selecionado, deselecionar (mostrar todos os grupos)
+      setSelectedGroup(null);
+    } else {
+      // Selecionar o grupo clicado
+      setSelectedGroup(grupo);
+    }
+  }, [selectedGroup]);
   
   // Calcular estatísticas de performance
   const performanceStats = useMemo(() => {
@@ -584,23 +607,66 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
             </div>
           )}
           
+          {selectedGroup && (
+            <div className="mb-3 p-2 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="text-sm font-medium text-center">
+                🎯 Visualizando apenas grupo: <span className="text-primary">{selectedGroup}</span>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Clique no mesmo card novamente para mostrar todos os grupos
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="grid grid-cols-3 gap-4 text-center text-xs">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-950/20 rounded">
-              <div className="font-medium" style={{ color: grupoCores.controle }}>Controle</div>
+            {/* Card Controle - Clicável */}
+            <div 
+              className={`p-2 rounded cursor-pointer transition-all hover:scale-105 ${
+                selectedGroup === 'controle' 
+                  ? 'bg-indigo-100 dark:bg-indigo-900/40 ring-2 ring-indigo-400' 
+                  : 'bg-indigo-50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
+              }`}
+              onClick={() => handleGroupClick('controle')}
+            >
+              <div className="font-medium" style={{ color: grupoCores.controle }}>
+                Controle {selectedGroup === 'controle' && '✓'}
+              </div>
               <div>{new Set(filteredData.filter(d => d.grupo === 'controle').map(d => d.dogId)).size} cães</div>
               <div className="text-xs text-muted-foreground">
                 {filteredData.filter(d => d.grupo === 'controle').length} pontos temporais
               </div>
             </div>
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-950/20 rounded">
-              <div className="font-medium" style={{ color: grupoCores.dapagliflozina }}>Dapagliflozina</div>
+            
+            {/* Card Dapagliflozina - Clicável */}
+            <div 
+              className={`p-2 rounded cursor-pointer transition-all hover:scale-105 ${
+                selectedGroup === 'dapagliflozina' 
+                  ? 'bg-emerald-100 dark:bg-emerald-900/40 ring-2 ring-emerald-400' 
+                  : 'bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+              }`}
+              onClick={() => handleGroupClick('dapagliflozina')}
+            >
+              <div className="font-medium" style={{ color: grupoCores.dapagliflozina }}>
+                Dapagliflozina {selectedGroup === 'dapagliflozina' && '✓'}
+              </div>
               <div>{new Set(filteredData.filter(d => d.grupo === 'dapagliflozina').map(d => d.dogId)).size} cães</div>
               <div className="text-xs text-muted-foreground">
                 {filteredData.filter(d => d.grupo === 'dapagliflozina').length} pontos temporais
               </div>
             </div>
-            <div className="p-2 bg-amber-50 dark:bg-amber-950/20 rounded">
-              <div className="font-medium" style={{ color: grupoCores.empagliflozina }}>Empagliflozina</div>
+            
+            {/* Card Empagliflozina - Clicável */}
+            <div 
+              className={`p-2 rounded cursor-pointer transition-all hover:scale-105 ${
+                selectedGroup === 'empagliflozina' 
+                  ? 'bg-amber-100 dark:bg-amber-900/40 ring-2 ring-amber-400' 
+                  : 'bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+              }`}
+              onClick={() => handleGroupClick('empagliflozina')}
+            >
+              <div className="font-medium" style={{ color: grupoCores.empagliflozina }}>
+                Empagliflozina {selectedGroup === 'empagliflozina' && '✓'}
+              </div>
               <div>{new Set(filteredData.filter(d => d.grupo === 'empagliflozina').map(d => d.dogId)).size} cães</div>
               <div className="text-xs text-muted-foreground">
                 {filteredData.filter(d => d.grupo === 'empagliflozina').length} pontos temporais
