@@ -3,8 +3,12 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/feedback";
-import { Dog, Calendar, Weight, Stethoscope } from "lucide-react";
+import { Dog, Calendar, Weight, Stethoscope, Users, Settings } from "lucide-react";
+import { useDebounce } from "@/hooks/performance/useDebounce";
+import { useOptimizedMultiState } from "@/hooks/performance/useOptimizedState";
 
 interface DogDataPoint {
   id: string;
@@ -57,8 +61,13 @@ const generateAllTimePointsData = (
 ): DogDataPoint[] => {
   const dogData: DogDataPoint[] = [];
   
-  // Número máximo de cães por grupo para performance
-  const MAX_DOGS_PER_GROUP = selectedBreed && selectedBreed !== 'todas' ? 15 : 8;
+  // Número máximo de cães por grupo baseado no filtro e configuração
+  const getMaxDogsPerGroup = (breed?: string) => {
+    if (breed && breed !== 'todas') return 200; // Raça específica: até 200
+    return 100; // Todas as raças: até 100 por grupo (300 total)
+  };
+  
+  const MAX_DOGS_PER_GROUP = getMaxDogsPerGroup(selectedBreed);
   
   // Função para gerar características consistentes do cão
   const generateDogCharacteristics = (grupo: string, dogIndex: number) => {
@@ -265,11 +274,28 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
   const [selectedBreed, setSelectedBreed] = useState<string>('todas');
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredDogId, setHoveredDogId] = useState<string | null>(null);
+  const [maxDogsPerGroup, setMaxDogsPerGroup] = useState<number>(100);
+  const [showControls, setShowControls] = useState(false);
+  
+  // Otimização: debounce do hover para reduzir re-renders
+  const debouncedHoveredDogId = useDebounce(hoveredDogId, 50);
+  
+  // Estado otimizado para configurações
+  const { state: config, updateField } = useOptimizedMultiState({
+    densityMode: false,
+    showStatistics: true,
+    enableHover: true
+  }, 100);
 
-  // Gerar todos os dados temporais de uma vez
+  // Gerar todos os dados temporais de uma vez com otimização
   const allTimePointsData = useMemo(() => {
-    return generateAllTimePointsData(data, sampleSizes, selectedBreed);
-  }, [data, sampleSizes, selectedBreed]);
+    const customSampleSizes = {
+      controle: Math.min(sampleSizes.controle, maxDogsPerGroup),
+      dapa: Math.min(sampleSizes.dapa, maxDogsPerGroup),
+      empa: Math.min(sampleSizes.empa, maxDogsPerGroup)
+    };
+    return generateAllTimePointsData(data, customSampleSizes, selectedBreed);
+  }, [data, sampleSizes, selectedBreed, maxDogsPerGroup]);
 
   // Filtrar dados por raça se selecionada
   const filteredData = useMemo(() => {
@@ -277,7 +303,7 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
     return allTimePointsData.filter(dog => dog.raca === selectedBreed);
   }, [allTimePointsData, selectedBreed]);
 
-  // Obter contagem de cães únicos por raça
+  // Obter contagem de cães únicos por raça (otimizado com cache)
   const breedCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     const uniqueDogs = new Set();
@@ -296,13 +322,34 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
     return uniqueBreeds.sort((a, b) => (breedCounts[b] || 0) - (breedCounts[a] || 0));
   }, [allTimePointsData, breedCounts]);
 
-  // Handler para mudança de raça com loading
+  // Handler para mudança de raça com loading otimizado
   const handleBreedChange = useCallback(async (breed: string) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Delay menor para grandes volumes
+    await new Promise(resolve => setTimeout(resolve, 150));
     setSelectedBreed(breed);
     setIsLoading(false);
   }, []);
+  
+  // Handler otimizado para hover
+  const handleMouseEnter = useCallback((data: any) => {
+    if (config.enableHover) {
+      setHoveredDogId(data.dogId);
+    }
+  }, [config.enableHover]);
+  
+  const handleMouseLeave = useCallback(() => {
+    if (config.enableHover) {
+      setHoveredDogId(null);
+    }
+  }, [config.enableHover]);
+  
+  // Calcular estatísticas de performance
+  const performanceStats = useMemo(() => {
+    const totalPoints = filteredData.length;
+    const uniqueDogs = new Set(filteredData.map(d => d.dogId)).size;
+    return { totalPoints, uniqueDogs };
+  }, [filteredData]);
 
   // Cores fixas para os grupos
   const grupoCores = {
@@ -317,31 +364,107 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
         <CardTitle className="text-lg">{title} - Dados Individuais</CardTitle>
         <p className="text-sm text-muted-foreground">{description}</p>
         
-        {/* Seletor de Raça */}
-        <div className="flex items-center gap-4 pt-3 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <Dog className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filtrar por raça:</span>
+        {/* Controles de Visualização */}
+        <div className="space-y-4 pt-3 border-t border-border/50">
+          {/* Filtros e Estatísticas de Performance */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Dog className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Filtrar por raça:</span>
+              </div>
+              
+              <Select value={selectedBreed} onValueChange={handleBreedChange} disabled={isLoading}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Selecione uma raça" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50">
+                  <SelectItem value="todas">
+                    Todas as raças ({Object.values(breedCounts).reduce((a: number, b: number) => a + b, 0)} cães)
+                  </SelectItem>
+                  {availableBreeds.map((breed) => (
+                    <SelectItem key={breed} value={breed}>
+                      {breed} ({breedCounts[breed] || 0} cães)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {isLoading && <LoadingSpinner className="text-primary" />}
+            </div>
+            
+            {/* Performance Stats */}
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">
+                <Users className="h-3 w-3 mr-1" />
+                {performanceStats.uniqueDogs} cães
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {performanceStats.totalPoints} pontos
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowControls(!showControls)}
+                className="h-8 w-8 p-0"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
-          <Select value={selectedBreed} onValueChange={handleBreedChange} disabled={isLoading}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Selecione uma raça" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border z-50">
-              <SelectItem value="todas">
-                Todas as raças ({Object.values(breedCounts).reduce((a: number, b: number) => a + b, 0)} cães)
-              </SelectItem>
-              {availableBreeds.map((breed) => (
-                <SelectItem key={breed} value={breed}>
-                  {breed} ({breedCounts[breed] || 0} cães)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {isLoading && (
-            <LoadingSpinner className="text-primary" />
+          {/* Controles Avançados */}
+          {showControls && (
+            <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Controle de Volume */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Máximo de cães por grupo: {maxDogsPerGroup}
+                  </label>
+                  <Slider
+                    value={[maxDogsPerGroup]}
+                    onValueChange={(value) => setMaxDogsPerGroup(value[0])}
+                    max={500}
+                    min={10}
+                    step={10}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>10</span>
+                    <span>500</span>
+                  </div>
+                </div>
+                
+                {/* Modo Densidade */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Visualização</label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={config.densityMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => updateField('densityMode', !config.densityMode)}
+                    >
+                      Modo Densidade
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Toggle Hover */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Interações</label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={config.enableHover ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => updateField('enableHover', !config.enableHover)}
+                    >
+                      Hover
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -378,43 +501,46 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
               
               <Tooltip content={<CustomTooltip />} />
               
-              {/* Scatter plots por grupo com destaque de hover */}
+              {/* Scatter plots por grupo com otimizações de performance */}
               <Scatter 
                 name="Controle" 
                 data={filteredData.filter(d => d.grupo === 'controle')} 
                 fill={grupoCores.controle}
-                fillOpacity={hoveredDogId ? 0.3 : 0.7}
+                fillOpacity={debouncedHoveredDogId ? 0.3 : (config.densityMode ? 0.5 : 0.7)}
                 stroke={grupoCores.controle}
-                strokeWidth={1}
-                onMouseEnter={(data) => setHoveredDogId(data.dogId)}
-                onMouseLeave={() => setHoveredDogId(null)}
+                strokeWidth={config.densityMode ? 0 : 1}
+                r={config.densityMode ? 2 : 4}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               />
               <Scatter 
                 name="Dapagliflozina" 
                 data={filteredData.filter(d => d.grupo === 'dapagliflozina')} 
                 fill={grupoCores.dapagliflozina}
-                fillOpacity={hoveredDogId ? 0.3 : 0.7}
+                fillOpacity={debouncedHoveredDogId ? 0.3 : (config.densityMode ? 0.5 : 0.7)}
                 stroke={grupoCores.dapagliflozina}
-                strokeWidth={1}
-                onMouseEnter={(data) => setHoveredDogId(data.dogId)}
-                onMouseLeave={() => setHoveredDogId(null)}
+                strokeWidth={config.densityMode ? 0 : 1}
+                r={config.densityMode ? 2 : 4}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               />
               <Scatter 
                 name="Empagliflozina" 
                 data={filteredData.filter(d => d.grupo === 'empagliflozina')} 
                 fill={grupoCores.empagliflozina}
-                fillOpacity={hoveredDogId ? 0.3 : 0.7}
+                fillOpacity={debouncedHoveredDogId ? 0.3 : (config.densityMode ? 0.5 : 0.7)}
                 stroke={grupoCores.empagliflozina}
-                strokeWidth={1}
-                onMouseEnter={(data) => setHoveredDogId(data.dogId)}
-                onMouseLeave={() => setHoveredDogId(null)}
+                strokeWidth={config.densityMode ? 0 : 1}
+                r={config.densityMode ? 2 : 4}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               />
               
-              {/* Destaque para o cão em hover */}
-              {hoveredDogId && (
+              {/* Destaque para o cão em hover (otimizado) */}
+              {debouncedHoveredDogId && config.enableHover && (
                 <Scatter 
                   name="Destacado"
-                  data={filteredData.filter(d => d.dogId === hoveredDogId)}
+                  data={filteredData.filter(d => d.dogId === debouncedHoveredDogId)}
                   fill="hsl(var(--primary))"
                   fillOpacity={1}
                   stroke="hsl(var(--primary))"
