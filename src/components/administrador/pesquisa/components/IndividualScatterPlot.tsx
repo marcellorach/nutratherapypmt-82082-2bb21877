@@ -56,27 +56,17 @@ const MIN_INTERVAL_BETWEEN_VISITS = 30;
 
 const generateAllTimePointsData = (
   aggregatedData: Array<{label: string; control: number; dapagliflozin: number; empagliflozin: number}>,
-  sampleSizes: {controle: number; dapa: number; empa: number},
-  selectedBreed?: string
+  sampleSizes: {controle: number; dapa: number; empa: number}
 ): DogDataPoint[] => {
   const dogData: DogDataPoint[] = [];
   
-  // Número máximo de cães por grupo baseado no filtro e configuração
-  const getMaxDogsPerGroup = (breed?: string) => {
-    if (breed && breed !== 'todas') return 200; // Raça específica: até 200
-    return 100; // Todas as raças: até 100 por grupo (300 total)
-  };
-  
-  const MAX_DOGS_PER_GROUP = getMaxDogsPerGroup(selectedBreed);
+  // Número máximo de cães por grupo (sempre 100 para dados completos)
+  const MAX_DOGS_PER_GROUP = 100;
   
   // Função para gerar características consistentes do cão
   const generateDogCharacteristics = (grupo: string, dogIndex: number) => {
-    // Distribuição realística de raças
+    // Distribuição realística de raças (sempre gerar todas as raças)
     const getRandomBreed = () => {
-      if (selectedBreed && selectedBreed !== 'todas') {
-        return selectedBreed;
-      }
-      
       const breedWeights = {
         'SRD': 0.25, 'Labrador': 0.15, 'Golden Retriever': 0.12, 'Bulldog Francês': 0.08,
         'Pastor Alemão': 0.08, 'Beagle': 0.06, 'Yorkshire': 0.05, 'Poodle': 0.05,
@@ -287,17 +277,18 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
     enableHover: true
   }, 100);
 
-  // Gerar todos os dados temporais de uma vez com otimização
+  // Gerar todos os dados temporais de uma vez (SEMPRE todos os dados)
   const allTimePointsData = useMemo(() => {
     const customSampleSizes = {
       controle: Math.min(sampleSizes.controle, maxDogsPerGroup),
       dapa: Math.min(sampleSizes.dapa, maxDogsPerGroup),
       empa: Math.min(sampleSizes.empa, maxDogsPerGroup)
     };
-    return generateAllTimePointsData(data, customSampleSizes, selectedBreed);
-  }, [data, sampleSizes, selectedBreed, maxDogsPerGroup]);
+    // Sempre gerar dados completos sem filtro de raça
+    return generateAllTimePointsData(data, customSampleSizes);
+  }, [data, sampleSizes, maxDogsPerGroup]);
 
-  // Filtrar dados por raça se selecionada
+  // Filtrar dados por raça APENAS para visualização
   const filteredData = useMemo(() => {
     if (selectedBreed === 'todas') return allTimePointsData;
     return allTimePointsData.filter(dog => dog.raca === selectedBreed);
