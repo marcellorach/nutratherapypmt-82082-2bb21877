@@ -44,8 +44,11 @@ const COMMON_BREEDS = [
   'Cocker Spaniel', 'Schnauzer', 'Pinscher', 'Shih Tzu'
 ];
 
-// Mapeamento dos dias desde o início para cada timepoint
-const TIME_POINTS_DAYS = [0, 60, 150, 240, 330, 420, 510]; // 0, 2m, 5m, 8m, 11m, 14m, 17m
+// Constantes para estudo observacional (18 meses = 540 dias)
+const STUDY_DURATION_DAYS = 540;
+const MIN_VISITS_PER_DOG = 2;
+const MAX_VISITS_PER_DOG = 8;
+const MIN_INTERVAL_BETWEEN_VISITS = 30;
 
 const generateAllTimePointsData = (
   aggregatedData: Array<{label: string; control: number; dapagliflozin: number; empagliflozin: number}>,
@@ -106,11 +109,25 @@ const generateAllTimePointsData = (
     return { raca, idade, peso, sexo };
   };
   
-  // Função para gerar progressão realística ao longo do tempo
-  const generateDogProgression = (grupo: string, dogCharacteristics: any, dogIndex: number) => {
-    const progression: number[] = [];
+  // Função para gerar dados de consultas aleatórias para estudo observacional
+  const generateRandomVisitData = (grupo: string, dogCharacteristics: any, dogIndex: number, aggregatedData: any[]) => {
+    const visitData: DogDataPoint[] = [];
     
-    // Baseline individual (nem todos começam em zero)
+    // Número aleatório de consultas por cão
+    const numVisits = Math.floor(Math.random() * (MAX_VISITS_PER_DOG - MIN_VISITS_PER_DOG + 1)) + MIN_VISITS_PER_DOG;
+    
+    // Gerar datas de consulta aleatórias
+    const visitDates: number[] = [];
+    for (let i = 0; i < numVisits; i++) {
+      let date;
+      do {
+        date = Math.floor(Math.random() * STUDY_DURATION_DAYS);
+      } while (visitDates.some(existing => Math.abs(existing - date) < MIN_INTERVAL_BETWEEN_VISITS));
+      visitDates.push(date);
+    }
+    visitDates.sort((a, b) => a - b);
+    
+    // Baseline individual baseado no grupo
     let baseline;
     if (grupo === 'controle') {
       baseline = Math.random() * 15; // 0-15% baseline variável
@@ -118,47 +135,65 @@ const generateAllTimePointsData = (
       baseline = Math.random() * 20; // 0-20% baseline variável para grupos tratamento
     }
     
-    // Fator de resposta individual (alguns respondem melhor)
-    const responseFactor = 0.5 + Math.random() * 1.0; // 0.5x a 1.5x resposta
-    
-    // Fator de idade (cães mais velhos podem ter progressão diferente)
+    // Fator de resposta individual
+    const responseFactor = 0.5 + Math.random() * 1.0;
     const ageFactor = dogCharacteristics.idade > 8 ? 0.8 : 1.0;
     
-    for (let timePoint = 0; timePoint < aggregatedData.length; timePoint++) {
-      const targetMean = grupo === 'controle' 
-        ? aggregatedData[timePoint].control
-        : grupo === 'dapagliflozina' 
-        ? aggregatedData[timePoint].dapagliflozin 
-        : aggregatedData[timePoint].empagliflozin;
+    // Determinar quando o tratamento começou (pode ser após a primeira consulta)
+    const treatmentStartDay = grupo === 'controle' ? -1 : Math.floor(Math.random() * (STUDY_DURATION_DAYS * 0.3));
+    
+    visitDates.forEach((visitDay, visitIndex) => {
+      // Calcular valor esperado baseado no tempo e se está em tratamento
+      let expectedValue = baseline;
       
-      let value;
-      if (timePoint === 0) {
-        // Baseline individual
-        value = baseline;
+      if (grupo !== 'controle' && visitDay >= treatmentStartDay) {
+        // Aplicar efeito do tratamento baseado no tempo desde início do tratamento
+        const daysSinceTreatment = visitDay - treatmentStartDay;
+        const treatmentProgress = Math.min(1, daysSinceTreatment / 180); // Efeito máximo em 6 meses
+        
+        // Usar dados agregados como referência para o efeito esperado
+        const timePointIndex = Math.min(
+          aggregatedData.length - 1,
+          Math.floor((visitDay / STUDY_DURATION_DAYS) * aggregatedData.length)
+        );
+        const targetMean = grupo === 'dapagliflozina' 
+          ? aggregatedData[timePointIndex].dapagliflozin 
+          : aggregatedData[timePointIndex].empagliflozin;
+        
+        const maxImprovement = targetMean - baseline;
+        expectedValue = baseline + (maxImprovement * treatmentProgress * responseFactor * ageFactor);
       } else {
-        // Progressão baseada no target mas com variabilidade individual
-        const idealProgression = targetMean - baseline;
-        const actualProgression = idealProgression * responseFactor * ageFactor;
-        
-        // Adicionar ruído temporal
-        const timeNoise = (Math.random() - 0.5) * 10;
-        value = baseline + actualProgression + timeNoise;
-        
-        // Garantir progressão monotônica para tratamentos (principalmente)
-        if (grupo !== 'controle' && timePoint > 0 && value < progression[timePoint - 1]) {
-          value = progression[timePoint - 1] + Math.random() * 3;
-        }
+        // Progressão natural da doença (pode piorar ligeiramente ao longo do tempo)
+        const naturalProgression = (visitDay / STUDY_DURATION_DAYS) * Math.random() * 5; // 0-5% piora
+        expectedValue = baseline + naturalProgression;
       }
       
+      // Adicionar variabilidade individual
+      const noise = (Math.random() - 0.5) * 15; // ±7.5%
+      let finalValue = expectedValue + noise;
+      
       // Limitar entre 0 e 100
-      value = Math.max(0, Math.min(100, value));
-      progression.push(value);
-    }
+      finalValue = Math.max(0, Math.min(100, finalValue));
+      
+      visitData.push({
+        id: `${grupo}_dog_${dogIndex + 1}_visit_${visitIndex}`,
+        dogId: `${grupo}_dog_${dogIndex + 1}`,
+        grupo: grupo as 'controle' | 'dapagliflozina' | 'empagliflozina',
+        value: finalValue,
+        month: `${Math.floor(visitDay / 30.44)}m ${Math.floor(visitDay % 30.44)}d`, // Aproximação mês/dia
+        raca: dogCharacteristics.raca,
+        idade: dogCharacteristics.idade,
+        peso: dogCharacteristics.peso,
+        sexo: dogCharacteristics.sexo,
+        timePoint: visitIndex,
+        daysSinceStart: visitDay
+      });
+    });
     
-    return progression;
+    return visitData;
   };
   
-  // Gerar dados para cada grupo
+  // Gerar dados para cada grupo com consultas aleatórias
   ['controle', 'dapagliflozina', 'empagliflozina'].forEach(grupo => {
     const groupSize = grupo === 'controle' ? sampleSizes.controle :
                      grupo === 'dapagliflozina' ? sampleSizes.dapa : sampleSizes.empa;
@@ -166,42 +201,9 @@ const generateAllTimePointsData = (
     const actualSize = Math.min(groupSize, MAX_DOGS_PER_GROUP);
     
     for (let dogIndex = 0; dogIndex < actualSize; dogIndex++) {
-      const dogId = `${grupo}_dog_${dogIndex + 1}`;
       const dogCharacteristics = generateDogCharacteristics(grupo, dogIndex);
-      const progression = generateDogProgression(grupo, dogCharacteristics, dogIndex);
-      
-      // Criar pontos para todos os timepoints com variação temporal realística
-      aggregatedData.forEach((timeData, timePoint) => {
-        // Adicionar variação temporal realística (±15 dias em torno do timepoint alvo)
-        const targetDay = TIME_POINTS_DAYS[timePoint];
-        let actualDay = targetDay;
-        
-        // Para timepoints > 0, adicionar variação (exceto baseline que é sempre day 0)
-        if (timePoint > 0) {
-          const variation = (Math.random() - 0.5) * 30; // ±15 dias
-          actualDay = Math.max(targetDay - 15, targetDay + variation);
-          
-          // Garantir que não seja anterior ao timepoint anterior
-          if (timePoint > 1) {
-            const previousPointMinDay = TIME_POINTS_DAYS[timePoint - 1] + 7;
-            actualDay = Math.max(actualDay, previousPointMinDay);
-          }
-        }
-        
-        dogData.push({
-          id: `${dogId}_t${timePoint}`,
-          dogId: dogId,
-          grupo: grupo as 'controle' | 'dapagliflozina' | 'empagliflozina',
-          value: progression[timePoint],
-          month: timeData.label,
-          raca: dogCharacteristics.raca,
-          idade: dogCharacteristics.idade,
-          peso: dogCharacteristics.peso,
-          sexo: dogCharacteristics.sexo,
-          timePoint: timePoint,
-          daysSinceStart: Math.round(actualDay)
-        });
-      });
+      const visitData = generateRandomVisitData(grupo, dogCharacteristics, dogIndex, aggregatedData);
+      dogData.push(...visitData);
     }
   });
   
@@ -349,19 +351,19 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
             <ScatterChart margin={{ top: 5, right: 30, left: 40, bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               
-              {/* Eixo X temporal fixo */}
+              {/* Eixo X temporal contínuo */}
               <XAxis 
                 type="number" 
                 dataKey="daysSinceStart"
-                domain={[0, 520]}
-                ticks={TIME_POINTS_DAYS}
+                domain={[0, STUDY_DURATION_DAYS]}
+                ticks={[0, 90, 180, 270, 360, 450, 540]}
                 tick={{ fontSize: 12 }}
                 tickFormatter={(value) => {
-                  const labels = ['Baseline', '2m', '5m', '8m', '11m', '14m', '17m'];
-                  const index = TIME_POINTS_DAYS.indexOf(value);
-                  return index >= 0 ? labels[index] : value.toString();
+                  if (value === 0) return '0m';
+                  const months = Math.round(value / 30.44);
+                  return `${months}m`;
                 }}
-                label={{ value: 'Tempo de Estudo', position: 'insideBottom', offset: -5 }}
+                label={{ value: 'Tempo de Estudo (meses)', position: 'insideBottom', offset: -5 }}
               />
               
               {/* Eixo Y fixo de 0-100% */}
