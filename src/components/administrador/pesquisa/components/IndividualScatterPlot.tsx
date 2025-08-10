@@ -110,6 +110,39 @@ const generateAllTimePointsData = (
     return { raca, idade, peso, sexo };
   };
   
+  // Função para interpolar valores dos dados agregados em qualquer ponto do tempo
+  const getGroupMedianAtTime = (grupo: string, daysSinceStart: number, aggregatedData: any[]) => {
+    if (!aggregatedData || aggregatedData.length === 0) return 0;
+    
+    // Converter dias em índice dos dados agregados (18 meses = 540 dias)
+    const timeRatio = daysSinceStart / STUDY_DURATION_DAYS;
+    const exactIndex = timeRatio * (aggregatedData.length - 1);
+    
+    // Interpolação linear entre pontos de dados
+    const lowerIndex = Math.floor(exactIndex);
+    const upperIndex = Math.min(lowerIndex + 1, aggregatedData.length - 1);
+    const interpolationRatio = exactIndex - lowerIndex;
+    
+    const lowerValue = aggregatedData[lowerIndex];
+    const upperValue = aggregatedData[upperIndex];
+    
+    // Obter valores para o grupo específico
+    const getGroupValue = (dataPoint: any) => {
+      switch (grupo) {
+        case 'controle': return dataPoint.control;
+        case 'dapagliflozina': return dataPoint.dapagliflozin;
+        case 'empagliflozina': return dataPoint.empagliflozin;
+        default: return dataPoint.control;
+      }
+    };
+    
+    const lowerGroupValue = getGroupValue(lowerValue);
+    const upperGroupValue = getGroupValue(upperValue);
+    
+    // Interpolação linear
+    return lowerGroupValue + (upperGroupValue - lowerGroupValue) * interpolationRatio;
+  };
+
   // Função para gerar dados de consultas aleatórias para estudo observacional
   const generateRandomVisitData = (grupo: string, dogCharacteristics: any, dogIndex: number, aggregatedData: any[]) => {
     const visitData: DogDataPoint[] = [];
@@ -128,50 +161,41 @@ const generateAllTimePointsData = (
     }
     visitDates.sort((a, b) => a - b);
     
-    // Baseline individual baseado no grupo
-    let baseline;
-    if (grupo === 'controle') {
-      baseline = Math.random() * 15; // 0-15% baseline variável
-    } else {
-      baseline = Math.random() * 20; // 0-20% baseline variável para grupos tratamento
-    }
+    // Baseline próximo de zero (como no gráfico agregado)
+    const baseline = Math.random() * 2; // 0-2% baseline próximo de zero
     
-    // Fator de resposta individual
-    const responseFactor = 0.5 + Math.random() * 1.0;
-    const ageFactor = dogCharacteristics.idade > 8 ? 0.8 : 1.0;
+    // Características individuais do cão que influenciam sua resposta
+    const individualResponseTendency = -0.5 + Math.random(); // -0.5 a +0.5 (respondedor ruim a bom)
+    const ageInfluence = dogCharacteristics.idade > 8 ? -0.2 : 0.1; // Cães mais velhos respondem ligeiramente pior
+    const breedInfluence = Math.random() * 0.2 - 0.1; // Variação leve por raça
     
-    // Determinar quando o tratamento começou (pode ser após a primeira consulta)
-    const treatmentStartDay = grupo === 'controle' ? -1 : Math.floor(Math.random() * (STUDY_DURATION_DAYS * 0.3));
+    // Fator de resposta individual combinado
+    const individualFactor = 1 + individualResponseTendency + ageInfluence + breedInfluence;
     
     visitDates.forEach((visitDay, visitIndex) => {
-      // Calcular valor esperado baseado no tempo e se está em tratamento
-      let expectedValue = baseline;
+      // Obter a mediana esperada do grupo para este tempo específico
+      const groupMedian = getGroupMedianAtTime(grupo, visitDay, aggregatedData);
       
-      if (grupo !== 'controle' && visitDay >= treatmentStartDay) {
-        // Aplicar efeito do tratamento baseado no tempo desde início do tratamento
-        const daysSinceTreatment = visitDay - treatmentStartDay;
-        const treatmentProgress = Math.min(1, daysSinceTreatment / 180); // Efeito máximo em 6 meses
-        
-        // Usar dados agregados como referência para o efeito esperado
-        const timePointIndex = Math.min(
-          aggregatedData.length - 1,
-          Math.floor((visitDay / STUDY_DURATION_DAYS) * aggregatedData.length)
-        );
-        const targetMean = grupo === 'dapagliflozina' 
-          ? aggregatedData[timePointIndex].dapagliflozin 
-          : aggregatedData[timePointIndex].empagliflozin;
-        
-        const maxImprovement = targetMean - baseline;
-        expectedValue = baseline + (maxImprovement * treatmentProgress * responseFactor * ageFactor);
+      // Valor esperado baseado na mediana do grupo, ajustado pelas características individuais
+      let expectedValue = baseline + (groupMedian - baseline) * Math.max(0.3, Math.min(1.7, individualFactor));
+      
+      // Adicionar variabilidade individual realística em torno da mediana
+      // A maioria dos pontos fica próxima da mediana, alguns são outliers
+      const random = Math.random();
+      let deviationMagnitude;
+      
+      if (random < 0.7) {
+        // 70% dos pontos ficam próximos à mediana (±3-8%)
+        deviationMagnitude = (Math.random() - 0.5) * 16; // ±8%
+      } else if (random < 0.9) {
+        // 20% dos pontos têm desvio moderado (±8-15%)
+        deviationMagnitude = (Math.random() - 0.5) * 30; // ±15%
       } else {
-        // Progressão natural da doença (pode piorar ligeiramente ao longo do tempo)
-        const naturalProgression = (visitDay / STUDY_DURATION_DAYS) * Math.random() * 5; // 0-5% piora
-        expectedValue = baseline + naturalProgression;
+        // 10% são outliers (±15-25%)
+        deviationMagnitude = (Math.random() - 0.5) * 50; // ±25%
       }
       
-      // Adicionar variabilidade individual
-      const noise = (Math.random() - 0.5) * 15; // ±7.5%
-      let finalValue = expectedValue + noise;
+      let finalValue = expectedValue + deviationMagnitude;
       
       // Limitar entre 0 e 100
       finalValue = Math.max(0, Math.min(100, finalValue));
