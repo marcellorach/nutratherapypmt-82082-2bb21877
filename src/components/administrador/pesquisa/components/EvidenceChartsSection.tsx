@@ -274,180 +274,184 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
           <TabsTrigger value="mortalidade">Mortalidade</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="cardiovascular" className="space-y-8">
-          {/* Hipertensão - Pilha Vertical */}
-          <div className="space-y-4">
-            <PartialResultsChart 
-              title="Hipertensão - Análise Geral" 
-              data={hypertensionData} 
-              description="Diagnósticos de hipertensão arterial" 
-              yAxisLabel="Incidência Cumulativa (%)" 
-              chartType="line" 
-              statisticalInfo={{
-                pValue: "p = 0.008",
-                hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
-                riskReduction: "22% redução do risco"
-              }} 
-              formatter={value => `${value}%`} 
-            />
-            <IndividualScatterPlot 
-              title="Hipertensão - Dados Individuais" 
-              data={hypertensionData} 
-              yAxisLabel="Incidência (%)"
-              description="Distribuição individual por animal"
-              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-            />
-          </div>
+        <TabsContent value="cardiovascular" className="space-y-6">
+          <Tabs defaultValue="hipertensao" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="hipertensao">Hipertensão</TabsTrigger>
+              <TabsTrigger value="insuf-cardiaca">Insuf. Cardíaca</TabsTrigger>
+              <TabsTrigger value="cardiomiopatia">Cardiomiopatia</TabsTrigger>
+              <TabsTrigger value="arritmias">Arritmias</TabsTrigger>
+              <TabsTrigger value="resumo-geral">Resumo Geral</TabsTrigger>
+            </TabsList>
 
-          {/* Separador visual */}
-          <div className="border-t border-border"></div>
+            <TabsContent value="hipertensao" className="space-y-4">
+              <PartialResultsChart 
+                title="Hipertensão - Análise Geral" 
+                data={hypertensionData} 
+                description="Diagnósticos de hipertensão arterial" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p = 0.008",
+                  hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
+                  riskReduction: "22% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              <IndividualScatterPlot 
+                title="Hipertensão - Dados Individuais" 
+                data={hypertensionData} 
+                yAxisLabel="Incidência (%)"
+                description="Distribuição individual por animal"
+                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+              />
+            </TabsContent>
 
-          {/* Insuficiência Cardíaca - Pilha Vertical */}
-          <div className="space-y-4">
-            <PartialResultsChart 
-              title="Insuficiência Cardíaca - Análise Geral" 
-              data={heartFailureData} 
-              description="Novos casos de insuficiência cardíaca diagnosticada" 
-              yAxisLabel="Incidência Cumulativa (%)" 
-              chartType="line" 
-              statisticalInfo={{
-                pValue: "p < 0.001",
-                hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
-                riskReduction: "34% redução do risco"
-              }} 
-              formatter={value => `${value}%`} 
-            />
-            <IndividualScatterPlot 
-              title="Insuficiência Cardíaca - Dados Individuais" 
-              data={heartFailureData} 
-              yAxisLabel="Incidência (%)"
-              description="Distribuição individual por animal"
-              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-            />
-          </div>
+            <TabsContent value="insuf-cardiaca" className="space-y-4">
+              <PartialResultsChart 
+                title="Insuficiência Cardíaca - Análise Geral" 
+                data={heartFailureData} 
+                description="Novos casos de insuficiência cardíaca diagnosticada" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p < 0.001",
+                  hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
+                  riskReduction: "34% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              <IndividualScatterPlot 
+                title="Insuficiência Cardíaca - Dados Individuais" 
+                data={heartFailureData} 
+                yAxisLabel="Incidência (%)"
+                description="Distribuição individual por animal"
+                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+              />
+            </TabsContent>
 
-          {/* Separador visual */}
-          <div className="border-t border-border"></div>
+            <TabsContent value="cardiomiopatia" className="space-y-4">
+              <PartialResultsChart 
+                title="Cardiomiopatia - Análise Geral" 
+                data={cardiomyopathyData} 
+                description="Casos de cardiomiopatia dilatada e hipertrófica" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p = 0.045",
+                  hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
+                  riskReduction: "19% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              <IndividualScatterPlot 
+                title="Cardiomiopatia - Dados Individuais" 
+                data={cardiomyopathyData} 
+                yAxisLabel="Incidência (%)"
+                description="Distribuição individual por animal"
+                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+              />
+            </TabsContent>
 
-          {/* Cardiomiopatia - Pilha Vertical */}
-          <div className="space-y-4">
-            <PartialResultsChart 
-              title="Cardiomiopatia - Análise Geral" 
-              data={cardiomyopathyData} 
-              description="Casos de cardiomiopatia dilatada e hipertrófica" 
-              yAxisLabel="Incidência Cumulativa (%)" 
-              chartType="line" 
-              statisticalInfo={{
-                pValue: "p = 0.045",
-                hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
-                riskReduction: "19% redução do risco"
-              }} 
-              formatter={value => `${value}%`} 
-            />
-            <IndividualScatterPlot 
-              title="Cardiomiopatia - Dados Individuais" 
-              data={cardiomyopathyData} 
-              yAxisLabel="Incidência (%)"
-              description="Distribuição individual por animal"
-              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-            />
-          </div>
+            <TabsContent value="arritmias" className="space-y-4">
+              <PartialResultsChart 
+                title="Arritmias - Análise Geral" 
+                data={arrhythmiasData} 
+                description="Episódios de arritmias clinicamente significativas" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p = 0.002",
+                  hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
+                  riskReduction: "28% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              <IndividualScatterPlot 
+                title="Arritmias - Dados Individuais" 
+                data={arrhythmiasData} 
+                yAxisLabel="Incidência (%)"
+                description="Distribuição individual por animal"
+                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+              />
+            </TabsContent>
 
-          {/* Separador visual */}
-          <div className="border-t border-border"></div>
+            <TabsContent value="resumo-geral" className="space-y-6">
+              <PartialResultsChart 
+                title="Total de Eventos Cardiovasculares" 
+                data={totalEventsData} 
+                description="Somatória de todos os eventos cardiovasculares maiores" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p < 0.001",
+                  hazardRatio: "HR: 0.69 (IC95%: 0.61-0.78)",
+                  riskReduction: "31% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
 
-          {/* Arritmias - Pilha Vertical */}
-          <div className="space-y-4">
-            <PartialResultsChart 
-              title="Arritmias - Análise Geral" 
-              data={arrhythmiasData} 
-              description="Episódios de arritmias clinicamente significativas" 
-              yAxisLabel="Incidência Cumulativa (%)" 
-              chartType="line" 
-              statisticalInfo={{
-                pValue: "p = 0.002",
-                hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
-                riskReduction: "28% redução do risco"
-              }} 
-              formatter={value => `${value}%`} 
-            />
-            <IndividualScatterPlot 
-              title="Arritmias - Dados Individuais" 
-              data={arrhythmiasData} 
-              yAxisLabel="Incidência (%)"
-              description="Distribuição individual por animal"
-              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-            />
-          </div>
-
-          {/* Separador visual */}
-          <div className="border-t border-border"></div>
-
-          <PartialResultsChart title="Total de Eventos Cardiovasculares" data={totalEventsData} description="Somatória de todos os eventos cardiovasculares maiores" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-          pValue: "p < 0.001",
-          hazardRatio: "HR: 0.69 (IC95%: 0.61-0.78)",
-          riskReduction: "31% redução do risco"
-        }} formatter={value => `${value}%`} />
-
-          {/* Números em Risco - Cardiovascular */}
-          <div className="bg-muted/50 border rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-3">Números em Risco (Eventos Cardiovasculares aos 18 meses)</h4>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-              <div className="text-center">
-                <div className="font-medium text-blue-600">Controle (n={tamanhoControle.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos ({totalEventsData[totalEventsData.length - 1].control}%)</div>
+              {/* Números em Risco - Cardiovascular */}
+              <div className="bg-muted/50 border rounded-lg p-4">
+                <h4 className="font-semibold text-sm mb-3">Números em Risco (Eventos Cardiovasculares aos 18 meses)</h4>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                  <div className="text-center">
+                    <div className="font-medium text-blue-600">Controle (n={tamanhoControle.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos ({totalEventsData[totalEventsData.length - 1].control}%)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-green-600">Dapa (n={tamanhoDapa.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos ({totalEventsData[totalEventsData.length - 1].dapagliflozin}%)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-orange-600">Empa (n={tamanhoEmpa.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos ({totalEventsData[totalEventsData.length - 1].empagliflozin}%)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-purple-600">Eventos Prevenidos</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos (Dapa)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-amber-600">NNT</div>
+                    <div>8 cães</div>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="font-medium text-green-600">Dapa (n={tamanhoDapa.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos ({totalEventsData[totalEventsData.length - 1].dapagliflozin}%)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium text-orange-600">Empa (n={tamanhoEmpa.toLocaleString()})</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos ({totalEventsData[totalEventsData.length - 1].empagliflozin}%)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium text-purple-600">Eventos Prevenidos</div>
-                <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos (Dapa)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium text-amber-600">NNT</div>
-                <div>8 cães</div>
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg border">
-            <h4 className="font-semibold text-lg mb-4 text-center">Resumo dos Resultados Cardiovasculares</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <strong>Benefícios Observados:</strong>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>34% redução em insuficiência cardíaca</li>
-                  <li>28% redução em arritmias</li>
-                  <li>22% redução em hipertensão</li>
-                  <li>19% redução em cardiomiopatia</li>
-                </ul>
+              <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg border">
+                <h4 className="font-semibold text-lg mb-4 text-center">Resumo dos Resultados Cardiovasculares</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <strong>Benefícios Observados:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li>34% redução em insuficiência cardíaca</li>
+                      <li>28% redução em arritmias</li>
+                      <li>22% redução em hipertensão</li>
+                      <li>19% redução em cardiomiopatia</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <strong>Significância Estatística:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li>Todos os endpoints primários: p ≤ 0.045</li>
+                      <li>NNT (Number Needed to Treat): 8-12 cães</li>
+                      <li>Tempo mediano para benefício: 8-12 meses</li>
+                      <li>Consistência entre subgrupos</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <strong>Números Absolutos:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li>Controle (n={tamanhoControle.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos</li>
+                      <li>Dapa (n={tamanhoDapa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos</li>
+                      <li>Empa (n={tamanhoEmpa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos</li>
+                      <li>Redução de risco absoluto (Dapa): {(totalEventsData[totalEventsData.length - 1].control - totalEventsData[totalEventsData.length - 1].dapagliflozin).toFixed(1)}%</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div>
-                <strong>Significância Estatística:</strong>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Todos os endpoints primários: p ≤ 0.045</li>
-                  <li>NNT (Number Needed to Treat): 8-12 cães</li>
-                  <li>Tempo mediano para benefício: 8-12 meses</li>
-                  <li>Consistência entre subgrupos</li>
-                </ul>
-              </div>
-              <div>
-                <strong>Números Absolutos:</strong>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Controle (n={tamanhoControle.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos</li>
-                  <li>Dapa (n={tamanhoDapa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos</li>
-                  <li>Empa (n={tamanhoEmpa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos</li>
-                  <li>Redução de risco absoluto (Dapa): {(totalEventsData[totalEventsData.length - 1].control - totalEventsData[totalEventsData.length - 1].dapagliflozin).toFixed(1)}%</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="renal" className="space-y-6">
