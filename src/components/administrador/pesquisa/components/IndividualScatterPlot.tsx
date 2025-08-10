@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/feedback";
-import { Dog, Calendar, Weight, Stethoscope, Users, Settings } from "lucide-react";
+import { Dog, Calendar, Weight, Stethoscope, Users, Settings, Target, X } from "lucide-react";
 import { useDebounce } from "@/hooks/performance/useDebounce";
 import { useOptimizedMultiState } from "@/hooks/performance/useOptimizedState";
 
@@ -609,11 +609,18 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
           
           {selectedGroup && (
             <div className="mb-3 p-2 bg-primary/10 rounded-lg border border-primary/20">
-              <div className="text-sm font-medium text-center">
-                🎯 Visualizando apenas grupo: <span className="text-primary">{selectedGroup}</span>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Clique no mesmo card novamente para mostrar todos os grupos
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Target className="h-4 w-4 text-primary" />
+                  <span>Visualizando apenas grupo: <span className="text-primary">{selectedGroup}</span></span>
                 </div>
+                <button
+                  onClick={() => setSelectedGroup(null)}
+                  className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors px-2 py-1 rounded hover:bg-primary/10"
+                >
+                  <X className="h-3 w-3" />
+                  Mostrar Todos
+                </button>
               </div>
             </div>
           )}
