@@ -274,58 +274,114 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
           <TabsTrigger value="mortalidade">Mortalidade</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="cardiovascular" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <PartialResultsChart title="Insuficiência Cardíaca" data={heartFailureData} description="Novos casos de insuficiência cardíaca diagnosticada" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p < 0.001",
-              hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
-              riskReduction: "34% redução do risco"
-            }} formatter={value => `${value}%`} />
-
-              <PartialResultsChart title="Hipertensão" data={hypertensionData} description="Diagnósticos de hipertensão arterial" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.008",
-              hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
-              riskReduction: "22% redução do risco"
-            }} formatter={value => `${value}%`} />
-            </div>
-            
-            <div className="space-y-6">
-              <IndividualScatterPlot 
-                title="Insuficiência Cardíaca" 
-                data={heartFailureData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
-                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-              />
-            </div>
+        <TabsContent value="cardiovascular" className="space-y-8">
+          {/* Hipertensão - Pilha Vertical */}
+          <div className="space-y-4">
+            <PartialResultsChart 
+              title="Hipertensão - Análise Geral" 
+              data={hypertensionData} 
+              description="Diagnósticos de hipertensão arterial" 
+              yAxisLabel="Incidência Cumulativa (%)" 
+              chartType="line" 
+              statisticalInfo={{
+                pValue: "p = 0.008",
+                hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
+                riskReduction: "22% redução do risco"
+              }} 
+              formatter={value => `${value}%`} 
+            />
+            <IndividualScatterPlot 
+              title="Hipertensão - Dados Individuais" 
+              data={hypertensionData} 
+              yAxisLabel="Incidência (%)"
+              description="Distribuição individual por animal"
+              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+            />
           </div>
-          
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <PartialResultsChart title="Arritmias" data={arrhythmiasData} description="Episódios de arritmias clinicamente significativas" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.002",
-              hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
-              riskReduction: "28% redução do risco"
-            }} formatter={value => `${value}%`} />
 
-              <PartialResultsChart title="Cardiomiopatia" data={cardiomyopathyData} description="Casos de cardiomiopatia dilatada e hipertrófica" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.045",
-              hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
-              riskReduction: "19% redução do risco"
-            }} formatter={value => `${value}%`} />
-            </div>
-            
-            <div className="space-y-6">
-              <IndividualScatterPlot 
-                title="Arritmias" 
-                data={arrhythmiasData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
-                sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
-              />
-            </div>
+          {/* Separador visual */}
+          <div className="border-t border-border"></div>
+
+          {/* Insuficiência Cardíaca - Pilha Vertical */}
+          <div className="space-y-4">
+            <PartialResultsChart 
+              title="Insuficiência Cardíaca - Análise Geral" 
+              data={heartFailureData} 
+              description="Novos casos de insuficiência cardíaca diagnosticada" 
+              yAxisLabel="Incidência Cumulativa (%)" 
+              chartType="line" 
+              statisticalInfo={{
+                pValue: "p < 0.001",
+                hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
+                riskReduction: "34% redução do risco"
+              }} 
+              formatter={value => `${value}%`} 
+            />
+            <IndividualScatterPlot 
+              title="Insuficiência Cardíaca - Dados Individuais" 
+              data={heartFailureData} 
+              yAxisLabel="Incidência (%)"
+              description="Distribuição individual por animal"
+              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+            />
           </div>
+
+          {/* Separador visual */}
+          <div className="border-t border-border"></div>
+
+          {/* Cardiomiopatia - Pilha Vertical */}
+          <div className="space-y-4">
+            <PartialResultsChart 
+              title="Cardiomiopatia - Análise Geral" 
+              data={cardiomyopathyData} 
+              description="Casos de cardiomiopatia dilatada e hipertrófica" 
+              yAxisLabel="Incidência Cumulativa (%)" 
+              chartType="line" 
+              statisticalInfo={{
+                pValue: "p = 0.045",
+                hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
+                riskReduction: "19% redução do risco"
+              }} 
+              formatter={value => `${value}%`} 
+            />
+            <IndividualScatterPlot 
+              title="Cardiomiopatia - Dados Individuais" 
+              data={cardiomyopathyData} 
+              yAxisLabel="Incidência (%)"
+              description="Distribuição individual por animal"
+              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+            />
+          </div>
+
+          {/* Separador visual */}
+          <div className="border-t border-border"></div>
+
+          {/* Arritmias - Pilha Vertical */}
+          <div className="space-y-4">
+            <PartialResultsChart 
+              title="Arritmias - Análise Geral" 
+              data={arrhythmiasData} 
+              description="Episódios de arritmias clinicamente significativas" 
+              yAxisLabel="Incidência Cumulativa (%)" 
+              chartType="line" 
+              statisticalInfo={{
+                pValue: "p = 0.002",
+                hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
+                riskReduction: "28% redução do risco"
+              }} 
+              formatter={value => `${value}%`} 
+            />
+            <IndividualScatterPlot 
+              title="Arritmias - Dados Individuais" 
+              data={arrhythmiasData} 
+              yAxisLabel="Incidência (%)"
+              description="Distribuição individual por animal"
+              sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
+            />
+          </div>
+
+          {/* Separador visual */}
+          <div className="border-t border-border"></div>
 
           <PartialResultsChart title="Total de Eventos Cardiovasculares" data={totalEventsData} description="Somatória de todos os eventos cardiovasculares maiores" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
           pValue: "p < 0.001",
