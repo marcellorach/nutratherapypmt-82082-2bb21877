@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PartialResultsChart from './PartialResultsChart';
-import IndividualScatterPlot from './IndividualScatterPlot';
+import MultipleScatterPlotComparison from './MultipleScatterPlotComparison';
 import { DadosAmostra } from '../types/sugestoes';
 interface EvidenceChartsSectionProps {
   dados_amostra: DadosAmostra;
@@ -298,7 +298,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
                 }} 
                 formatter={value => `${value}%`} 
               />
-              <IndividualScatterPlot 
+              <MultipleScatterPlotComparison 
                 title="Hipertensão - Dados Individuais" 
                 data={hypertensionData} 
                 yAxisLabel="Incidência (%)"
@@ -321,7 +321,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
                 }} 
                 formatter={value => `${value}%`} 
               />
-              <IndividualScatterPlot 
+              <MultipleScatterPlotComparison 
                 title="Insuficiência Cardíaca - Dados Individuais" 
                 data={heartFailureData} 
                 yAxisLabel="Incidência (%)"
@@ -344,7 +344,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
                 }} 
                 formatter={value => `${value}%`} 
               />
-              <IndividualScatterPlot 
+              <MultipleScatterPlotComparison 
                 title="Cardiomiopatia - Dados Individuais" 
                 data={cardiomyopathyData} 
                 yAxisLabel="Incidência (%)"
@@ -367,7 +367,7 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
                 }} 
                 formatter={value => `${value}%`} 
               />
-              <IndividualScatterPlot 
+              <MultipleScatterPlotComparison 
                 title="Arritmias - Dados Individuais" 
                 data={arrhythmiasData} 
                 yAxisLabel="Incidência (%)"

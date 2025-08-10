@@ -39,6 +39,8 @@ interface IndividualScatterPlotProps {
     dapa: number;
     empa: number;
   };
+  defaultBreed?: string;
+  comparisonMode?: boolean;
 }
 
 // Raças de cães mais comuns no estudo
@@ -259,9 +261,11 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
   data,
   yAxisLabel,
   description,
-  sampleSizes
+  sampleSizes,
+  defaultBreed = 'todas',
+  comparisonMode = false
 }) => {
-  const [selectedBreed, setSelectedBreed] = useState<string>('todas');
+  const [selectedBreed, setSelectedBreed] = useState<string>(defaultBreed);
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredDogId, setHoveredDogId] = useState<string | null>(null);
   const [maxDogsPerGroup, setMaxDogsPerGroup] = useState<number>(100);
@@ -404,8 +408,8 @@ const IndividualScatterPlot: React.FC<IndividualScatterPlotProps> = ({
             </div>
           </div>
           
-          {/* Controles Avançados */}
-          {showControls && (
+          {/* Controles Avançados - Ocultar em modo comparação para economizar espaço */}
+          {showControls && !comparisonMode && (
             <div className="bg-muted/30 rounded-lg p-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Controle de Volume */}
