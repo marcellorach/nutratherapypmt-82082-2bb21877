@@ -275,22 +275,23 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
         </TabsList>
 
         <TabsContent value="cardiovascular" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Coluna 1: Hipertensão (Geral) + Insuficiência Cardíaca (Individual) */}
             <div className="space-y-6">
-              <PartialResultsChart title="Insuficiência Cardíaca" data={heartFailureData} description="Novos casos de insuficiência cardíaca diagnosticada" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p < 0.001",
-              hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
-              riskReduction: "34% redução do risco"
-            }} formatter={value => `${value}%`} />
-
-              <PartialResultsChart title="Hipertensão" data={hypertensionData} description="Diagnósticos de hipertensão arterial" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.008",
-              hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
-              riskReduction: "22% redução do risco"
-            }} formatter={value => `${value}%`} />
-            </div>
-            
-            <div className="space-y-6">
+              <PartialResultsChart 
+                title="Hipertensão" 
+                data={hypertensionData} 
+                description="Diagnósticos de hipertensão arterial" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p = 0.008",
+                  hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
+                  riskReduction: "22% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              
               <IndividualScatterPlot 
                 title="Insuficiência Cardíaca" 
                 data={heartFailureData} 
@@ -299,24 +300,23 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
                 sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
               />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <PartialResultsChart title="Arritmias" data={arrhythmiasData} description="Episódios de arritmias clinicamente significativas" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.002",
-              hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
-              riskReduction: "28% redução do risco"
-            }} formatter={value => `${value}%`} />
-
-              <PartialResultsChart title="Cardiomiopatia" data={cardiomyopathyData} description="Casos de cardiomiopatia dilatada e hipertrófica" yAxisLabel="Incidência Cumulativa (%)" chartType="line" statisticalInfo={{
-              pValue: "p = 0.045",
-              hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
-              riskReduction: "19% redução do risco"
-            }} formatter={value => `${value}%`} />
-            </div>
             
+            {/* Coluna 2: Cardiomiopatia (Geral) + Arritmias (Individual) */}
             <div className="space-y-6">
+              <PartialResultsChart 
+                title="Cardiomiopatia" 
+                data={cardiomyopathyData} 
+                description="Casos de cardiomiopatia dilatada e hipertrófica" 
+                yAxisLabel="Incidência Cumulativa (%)" 
+                chartType="line" 
+                statisticalInfo={{
+                  pValue: "p = 0.045",
+                  hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
+                  riskReduction: "19% redução do risco"
+                }} 
+                formatter={value => `${value}%`} 
+              />
+              
               <IndividualScatterPlot 
                 title="Arritmias" 
                 data={arrhythmiasData} 
