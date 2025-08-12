@@ -29,7 +29,7 @@ export const useAnalysisSimulation = () => {
   }>({
     flowIndex: 0,
     isPaused: false,
-    totalTime: 90000, // 1.5 minutos
+    totalTime: 900000, // 15 minutos
     startTime: 0,
     elapsedBeforePause: 0,
   });
@@ -203,7 +203,7 @@ export const useAnalysisSimulation = () => {
     analysisRef.current = {
       flowIndex: 0,
       isPaused: false,
-      totalTime: 90000, // 1.5 minutos
+      totalTime: 900000, // 15 minutos
       startTime: Date.now(),
       elapsedBeforePause: 0
     };

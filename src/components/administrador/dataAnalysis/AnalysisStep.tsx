@@ -70,7 +70,7 @@ const AnalysisStep: React.FC = () => {
                 <Progress value={progress} className="h-2 w-full" />
                 {step === 'processing' && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Tempo estimado: 33 horas e 20 minutos</span>
+                    <span>Tempo estimado: 15 minutos</span>
                   </div>
                 )}
               </div>
