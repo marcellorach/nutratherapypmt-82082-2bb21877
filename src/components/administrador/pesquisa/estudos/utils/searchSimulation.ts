@@ -29,7 +29,7 @@ const authors = [
 
 const nutraceuticalTags = [
   'Curcumina', 
-  'NMN', 
+  'Alpha-AKG', 
   'Resveratrol', 
   'Luteína', 
   'Ômega-3', 

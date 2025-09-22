@@ -9,7 +9,7 @@ const DataAnalysisTab: React.FC = () => {
   const efficacyData = [
     { name: 'Curcumina', score: 4.2, contraindications: 2 },
     { name: 'Resveratrol', score: 3.8, contraindications: 1 },
-    { name: 'NMN', score: 4.5, contraindications: 0 },
+    { name: 'Alpha-AKG', score: 4.5, contraindications: 0 },
     { name: 'Coenzima Q10', score: 4.0, contraindications: 3 },
   ];
 

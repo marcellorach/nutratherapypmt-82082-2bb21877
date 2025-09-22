@@ -4,13 +4,13 @@ import { Nutraceutical } from "../../types";
 export const longevityNutraceuticals: Nutraceutical[] = [
   {
     id: "nut10",
-    name: "NMN (Nicotinamida Mononucleotídeo)",
-    description: "Precursor do NAD+, importante para o metabolismo celular e longevidade",
-    benefits: ["Aumento dos níveis de NAD+", "Melhora do metabolismo energético", "Suporte à longevidade celular"],
+    name: "Alpha-AKG (Alfa-Cetoglutarato)",
+    description: "Ácido orgânico do ciclo de Krebs, importante para o metabolismo energético e longevidade",
+    benefits: ["Suporte ao metabolismo energético celular", "Melhora da função mitocondrial", "Suporte à síntese de colágeno"],
     dosage: "1-2mg/kg/dia",
     contraindications: ["Gestação", "Lactação"],
     source: "Síntese laboratorial",
-    chemicalCompound: "C11H15N2O8P",
+    chemicalCompound: "C5H6O5",
     condition: "Envelhecimento celular",
     preventionConditions: [
       { name: "Envelhecimento precoce", efficacyScore: 3.2 }
@@ -21,13 +21,13 @@ export const longevityNutraceuticals: Nutraceutical[] = [
     supportConditions: [
       { name: "Metabolismo energético", efficacyScore: 3.5 }
     ],
-    activeIngredients: ["Nicotinamida Mononucleotídeo"],
+    activeIngredients: ["Alfa-Cetoglutarato"],
     scientificEvidence: {
       efficacyScore: 3.2,
       sustainabilityScore: 3.5,
       studies: [
         {
-          title: "NMN supplementation effects on aging biomarkers in dogs",
+          title: "Alpha-AKG supplementation effects on aging biomarkers in dogs",
           link: "https://doi.org/10.xxxx/yyyy",
           year: 2024
         }
