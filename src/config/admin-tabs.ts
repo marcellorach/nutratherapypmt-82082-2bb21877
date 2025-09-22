@@ -35,7 +35,7 @@ const EstudosPlanejadosTab = lazy(() => import('@/components/administrador/pesqu
 const EstudosAndamentoTab = lazy(() => import('@/components/administrador/pesquisa/EstudosAndamentoTab'));
 const EstudosConcluidosTab = lazy(() => import('@/components/administrador/pesquisa/EstudosConcluidosTab'));
 const SugestoesAITab = lazy(() => import('@/components/administrador/pesquisa/SugestoesAITab'));
-const OraBiomedicalTab = lazy(() => import('@/components/administrador/pesquisa/OraBiomedicalTab'));
+
 const PesquisaEstudosTab = lazy(() => import('@/components/administrador/pesquisa/PesquisaEstudosTab'));
 const ResearchSettingsTab = lazy(() => import('@/components/administrador/settings/ResearchSettingsTab'));
 const ModelosPreditivosTab = lazy(() => import('@/components/administrador/ModelosPreditivosTab'));
@@ -177,13 +177,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'research',
     component: SugestoesAITab,
     description: 'Sugestões de IA'
-  },
-  {
-    id: 'ora-biomedical',
-    label: 'Ora Biomedical',
-    group: 'research',
-    component: OraBiomedicalTab,
-    description: 'Integração Ora Biomedical'
   },
   {
     id: 'pesquisa-estudos',

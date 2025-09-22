@@ -106,7 +106,7 @@ export const useAnalysisSimulation = () => {
     { delay: 1800, action: () => addAgentMessage('pattern', 'Recebendo dados normalizados. Iniciando análise estatística com Claude-3 Opus...') },
     { delay: 1500, action: () => activateConnection('data', 'pattern') },
     { delay: 2000, action: () => addAgentMessage('pattern', 'Identificando clusters de condições de saúde por faixa etária e raça...') },
-    { delay: 1800, action: () => addAgentMessage('correlation', 'Preparando matriz de correlação com modelo Mistral Large...') },
+    { delay: 1800, action: () => addAgentMessage('correlation', 'Preparando matriz de correlação com modelo Claude-3 Opus...') },
     { delay: 2200, action: () => addAgentMessage('pattern', 'Detectados 7 padrões significativos de saúde em populações caninas e 5 em felinas.') },
     { delay: 1500, action: () => activateConnection('supervisor', 'recommendation') },
     { delay: 1800, action: () => addAgentMessage('correlation', 'Analisando correlações entre condições identificadas e histórico de tratamentos...') },

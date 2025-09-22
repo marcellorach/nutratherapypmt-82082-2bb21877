@@ -62,39 +62,5 @@
       "completed": "Concluídos",
       "planned": "Planejados"
     },
-    "oraBiomedical": {
-      "title": "Ora Biomedical",
-      "description": "Análise automatizada de compostos geroprotetores em C. elegans usando sistemas robóticos",
-      "activePartnership": "Parceria Ativa",
-      "liveDashboard": "Dashboard ao vivo",
-      "newStudy": "Novo estudo",
-      "totalStudies": "Estudos Totais",
-      "analyzedCompounds": "Compostos Analisados",
-      "successRate": "Taxa de Sucesso",
-      "studiesSubtitle": "Ensaios em C. elegans",
-      "compoundsSubtitle": "Testados em robôs",
-      "successSubtitle": "Efeitos positivos detectados",
-      "lastDays": "+3 nos últimos 30 dias",
-      "ofPlanned": "Dos 500 planejados",
-      "positiveEffect": "45 compostos com efeito positivo",
-      "priority": {
-        "high": "Prioridade Alta",
-        "medium": "Prioridade Média",
-        "low": "Prioridade Baixa"
-      },
-      "status": {
-        "ongoing": "Em Andamento",
-        "completed": "Concluído",
-        "planned": "Planejado"
-      },
-      "investigator": "Investigador",
-      "compounds": "Compostos",
-      "period": "Período",
-      "progress": "Progresso",
-      "positiveResults": "Resultados positivos",
-      "rate": "Taxa",
-      "viewDetails": "Ver detalhes",
-      "alerts": "alertas"
-    }
   }
 }

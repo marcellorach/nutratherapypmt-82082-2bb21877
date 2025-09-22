@@ -18,7 +18,7 @@ const MODELS = [
   { value: 'gpt-4o', label: 'GPT-4o - Alta performance' },
   { value: 'gpt-4-vision', label: 'GPT-4 Vision - Processamento de imagens' },
   { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Alta velocidade e performance' },
-  { value: 'ora-linuxvete', label: 'ORA Biomedical - Interpretação Veterinária' },
+  
 ];
 
 const SECTION_PROMPTS: Record<string, string> = {

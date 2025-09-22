@@ -31,7 +31,7 @@ export const agents: Agent[] = [
   { 
     id: 'correlation', 
     name: 'Agente de Correlação', 
-    model: 'Mistral Large',
+    model: 'Claude-3 Opus',
     color: 'bg-purple-100 border-purple-300', 
     icon: GitCompare, 
     description: 'Analisa relações entre condições e tratamentos' 

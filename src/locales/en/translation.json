@@ -62,39 +62,5 @@
       "completed": "Completed",
       "planned": "Planned"
     },
-    "oraBiomedical": {
-      "title": "Ora Biomedical",
-      "description": "Automated analysis of geroprotector compounds in C. elegans using robotic systems",
-      "activePartnership": "Active Partnership",
-      "liveDashboard": "Live Dashboard",
-      "newStudy": "New Study",
-      "totalStudies": "Total Studies",
-      "analyzedCompounds": "Analyzed Compounds",
-      "successRate": "Success Rate",
-      "studiesSubtitle": "C. elegans assays",
-      "compoundsSubtitle": "Tested in robots",
-      "successSubtitle": "Positive effects detected",
-      "lastDays": "+3 in the last 30 days",
-      "ofPlanned": "Of 500 planned",
-      "positiveEffect": "45 compounds with positive effect",
-      "priority": {
-        "high": "High Priority",
-        "medium": "Medium Priority",
-        "low": "Low Priority"
-      },
-      "status": {
-        "ongoing": "Ongoing",
-        "completed": "Completed",
-        "planned": "Planned"
-      },
-      "investigator": "Investigator",
-      "compounds": "Compounds",
-      "period": "Period",
-      "progress": "Progress",
-      "positiveResults": "Positive results",
-      "rate": "Rate",
-      "viewDetails": "View details",
-      "alerts": "alerts"
-    }
   }
 }

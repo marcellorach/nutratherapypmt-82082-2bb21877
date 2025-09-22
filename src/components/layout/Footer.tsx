@@ -52,17 +52,6 @@ const Footer: React.FC = () => {
               </div>
             </div>
             
-            {/* Mistral AI */}
-            <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex items-center space-x-2">
-                <img 
-                  src="/lovable-uploads/1a7e4474-434a-4b14-9905-18d52a577319.png" 
-                  alt="Mistral AI" 
-                  className="h-7 w-auto transition-all"
-                />
-                <span className="text-sm text-gray-600 font-medium">Mistral AI</span>
-              </div>
-            </div>
             
             {/* Google Co-Scientist - em breve */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
