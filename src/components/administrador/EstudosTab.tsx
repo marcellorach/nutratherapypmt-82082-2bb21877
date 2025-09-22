@@ -53,7 +53,7 @@ const estudosExemplo = [
 ];
 
 const EstudosTab: React.FC = () => {
-  const [mainTab, setMainTab] = useState<string>("gerenciar");
+  const [mainTab, setMainTab] = useState<string>("importar");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEstudo, setSelectedEstudo] = useState<any>(null);
