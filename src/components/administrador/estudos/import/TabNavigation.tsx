@@ -1,6 +1,5 @@
 
 import React from "react";
-import { useTranslation } from 'react-i18next';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Database } from "lucide-react";
 
@@ -10,8 +9,6 @@ interface TabNavigationProps {
 }
 
 const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
-  const { t } = useTranslation();
-  
   return (
     <div className="px-6 pt-4">
       <TabsList className="w-full justify-start">
@@ -21,7 +18,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
           onClick={() => onTabChange("file-upload")}
         >
           <Upload className="h-4 w-4" />
-          <span>{t('admin.import.tabs.fileUpload')}</span>
+          <span>Upload de Arquivos</span>
         </TabsTrigger>
         <TabsTrigger 
           value="import-history" 
@@ -29,7 +26,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
           onClick={() => onTabChange("import-history")}
         >
           <Database className="h-4 w-4" />
-          <span>{t('admin.import.tabs.history')}</span>
+          <span>Histórico</span>
         </TabsTrigger>
       </TabsList>
     </div>

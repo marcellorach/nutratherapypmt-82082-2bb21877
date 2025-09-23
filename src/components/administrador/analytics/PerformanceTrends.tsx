@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
@@ -13,8 +12,6 @@ interface PerformanceTrendsProps {
 }
 
 const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) => {
-  const { t } = useTranslation();
-  
   // Gerar dados temporais simulados baseados na eficácia atual
   const generateTrendData = () => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -48,9 +45,9 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t('analytics.charts.performanceTrends')}</CardTitle>
+          <CardTitle>Tendências de Performance</CardTitle>
           <CardDescription>
-            {t('analytics.description')}
+            Evolução temporal dos indicadores principais
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,9 +94,9 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('analytics.charts.competitiveBenchmark')}</CardTitle>
+          <CardTitle>Benchmark Competitivo</CardTitle>
           <CardDescription>
-            {t('analytics.description')}
+            Performance vs. média do mercado e melhor da classe
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,19 +151,19 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
           
           <div className="mt-4 grid grid-cols-3 gap-3">
             <div className="text-center">
-              <div className="text-sm font-medium text-green-600">{t('analytics.metrics.aboveAverage')}</div>
+              <div className="text-sm font-medium text-green-600">Acima da Média</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => d.atual > d.media).length}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-blue-600">{t('analytics.metrics.atAverage')}</div>
+              <div className="text-sm font-medium text-blue-600">Na Média</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => Math.abs(d.atual - d.media) <= 0.3).length}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-red-600">{t('analytics.metrics.belowAverage')}</div>
+              <div className="text-sm font-medium text-red-600">Abaixo da Média</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => d.atual < d.media - 0.3).length}
               </div>

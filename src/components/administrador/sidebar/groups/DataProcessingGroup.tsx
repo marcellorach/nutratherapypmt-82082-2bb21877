@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Import, Brain, BarChart3, Settings, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
@@ -13,8 +12,6 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
   currentStep, 
   handleStepClick 
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <>
       <SidebarMenuItem>
@@ -26,7 +23,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Import className={`h-4 w-4 mr-2 ${currentStep === "import" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.importData')}</span>
+              <span>Importar Dados</span>
             </div>
             {currentStep === "import" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -43,7 +40,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Brain className={`h-4 w-4 mr-2 ${currentStep === "analysis" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.multiAgentSimulation')}</span>
+              <span>Simulação Multi-Agente</span>
             </div>
             {currentStep === "analysis" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -60,7 +57,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <BarChart3 className={`h-4 w-4 mr-2 ${currentStep === "visualization" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.visualization')}</span>
+              <span>Visualização</span>
             </div>
             {currentStep === "visualization" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -77,7 +74,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Settings className={`h-4 w-4 mr-2 ${currentStep === "data-processing-settings" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.settings')}</span>
+              <span>Configurações</span>
             </div>
             {currentStep === "data-processing-settings" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

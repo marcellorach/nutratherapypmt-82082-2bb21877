@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,6 @@ interface TreatabilityMatrixProps {
 }
 
 const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
-  const { t } = useTranslation();
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   
   // Filtrar dados baseado nas condições selecionadas
@@ -43,20 +41,20 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
 
   return (
     <Card className="h-fit">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            {t('analytics.charts.treatabilityMatrix')}
-            <div className="h-2 w-2 bg-blue-500 rounded-full" />
-          </CardTitle>
-          <CardDescription>
-            {t('analytics.description')}
-          </CardDescription>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
+          Matriz de Tratabilidade por Condição
+          <div className="h-2 w-2 bg-blue-500 rounded-full" />
+        </CardTitle>
+        <CardDescription>
+          Distribuição de nutracêuticos por tipo de intervenção e condição de saúde
+        </CardDescription>
         
         {/* Seletor de Condições */}
         <div className="space-y-3 mt-4">
           <Select onValueChange={handleConditionSelect}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t('analytics.actions.selectConditions')} />
+              <SelectValue placeholder="Selecione condições para análise comparativa" />
             </SelectTrigger>
             <SelectContent>
               {data.map(item => (
@@ -118,9 +116,9 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
                     value === 'treatment' ? 'Tratamento' : 'Suporte'
                   }
                 />
-                <Bar dataKey="prevention" stackId="a" fill="#10b981" name={t('analytics.categories.prevention')} />
-                <Bar dataKey="treatment" stackId="a" fill="#3b82f6" name={t('analytics.categories.treatment')} />
-                <Bar dataKey="support" stackId="a" fill="#8b5cf6" name={t('analytics.categories.support')} />
+                <Bar dataKey="prevention" stackId="a" fill="#10b981" />
+                <Bar dataKey="treatment" stackId="a" fill="#3b82f6" />
+                <Bar dataKey="support" stackId="a" fill="#8b5cf6" />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -128,14 +126,14 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
         
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div className="p-3 bg-muted rounded-lg">
-            <div className="text-sm font-medium text-muted-foreground">{t('analytics.metrics.highestCoverage')}</div>
+            <div className="text-sm font-medium text-muted-foreground">Maior Cobertura</div>
             <div className="text-lg font-bold">
               {maxCoverage.condition} ({maxCoverage.coverage.toFixed(1)}%)
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm font-medium text-muted-foreground">
-              {t('analytics.metrics.conditionsCovered')}: {filteredData.length}/{data.length}
+              Condições Cobertas: {filteredData.length}/{data.length}
               {selectedConditions.length > 0 && (
                 <span className="ml-2 text-blue-600">(filtrado)</span>
               )}

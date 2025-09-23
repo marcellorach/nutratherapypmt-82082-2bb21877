@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
@@ -13,7 +12,6 @@ import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import { nutraceuticals } from '@/data';
 
 const AnalyticsTab: React.FC = () => {
-  const { t } = useTranslation();
   const { metrics, treatabilityData, prescriptionIntelligence, isLoading } = useAnalyticsData();
   
   // Dados para o gráfico de eficácia (mantendo compatibilidade)
@@ -59,19 +57,19 @@ const AnalyticsTab: React.FC = () => {
       {/* Header Principal */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{t('analytics.title')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics Inteligente</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            {t('analytics.description')}
+            Análise detalhada de tratabilidade, performance e inteligência de prescrição do seu ecossistema nutracêutico
           </p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={handleRefreshData} size="sm" className="shrink-0">
             <RefreshCw className="h-4 w-4 mr-2" />
-            {t('analytics.actions.refresh')}
+            Atualizar
           </Button>
           <Button onClick={handleExportReport} size="sm" className="shrink-0">
             <Download className="h-4 w-4 mr-2" />
-            {t('analytics.actions.export')}
+            Exportar
           </Button>
         </div>
       </div>
@@ -79,7 +77,7 @@ const AnalyticsTab: React.FC = () => {
       {/* KPIs Executivos */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold">{t('analytics.sections.executive')}</h2>
+          <h2 className="text-xl font-semibold">Visão Executiva</h2>
           <div className="h-px bg-border flex-1" />
         </div>
         <KPIGrid metrics={metrics} />
@@ -88,7 +86,7 @@ const AnalyticsTab: React.FC = () => {
       {/* Seção Principal de Análises */}
       <div className="space-y-8">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold">{t('analytics.sections.detailed')}</h2>
+          <h2 className="text-xl font-semibold">Análises Detalhadas</h2>
           <div className="h-px bg-border flex-1" />
         </div>
         
@@ -98,11 +96,11 @@ const AnalyticsTab: React.FC = () => {
           <Card className="h-fit">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
-                {t('analytics.charts.globalEfficacy')}
+                Eficácia Comparativa Global
                 <div className="h-2 w-2 bg-green-500 rounded-full" />
               </CardTitle>
               <CardDescription>
-                {t('analytics.description')}
+                Performance de nutracêuticos vs contraindicações com insights de mercado
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -140,11 +138,11 @@ const AnalyticsTab: React.FC = () => {
           <Card className="h-fit">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
-                {t('analytics.charts.discoveryPipeline')}
+                Pipeline de Descoberta
                 <div className="h-2 w-2 bg-purple-500 rounded-full" />
               </CardTitle>
               <CardDescription>
-                {t('analytics.description')}
+                Funil de desenvolvimento e validação de relações terapêuticas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -211,7 +209,7 @@ const AnalyticsTab: React.FC = () => {
       {/* Seção de Tendências - Full Width */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold">{t('analytics.sections.trends')}</h2>
+          <h2 className="text-xl font-semibold">Performance & Tendências</h2>
           <div className="h-px bg-border flex-1" />
         </div>
         <PerformanceTrends efficacyData={efficacyData} />

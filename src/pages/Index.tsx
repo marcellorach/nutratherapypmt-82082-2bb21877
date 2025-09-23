@@ -7,11 +7,9 @@ import { Heart, Book, UserCog, LogIn, ArrowRight, Microscope } from 'lucide-reac
 import { useAuth } from '@/contexts/AuthContext';
 import { useInitAdmin } from '@/hooks/useInitAdmin';
 import { Card, CardContent } from '@/components/ui/card';
-import { useTranslation } from 'react-i18next';
 
 const Index: React.FC = () => {
   const { user, hasRole } = useAuth();
-  const { t } = useTranslation();
   
   // Inicializar o usuário admin na primeira carga
   useInitAdmin();
@@ -23,21 +21,22 @@ const Index: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-5xl font-bold mb-4">NutraTherapy PET</h1>
           <p className="text-xl text-gray-700 mb-6">
-            {t('welcome.subtitle')}
+            Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5
           </p>
         </div>
         
         {!user ? (
           <div className="flex flex-col items-center justify-center mt-8">
             <div className="max-w-xl text-center mb-8">
-              <h2 className="text-2xl font-semibold mb-4">{t('welcome.accessPlatform')}</h2>
+              <h2 className="text-2xl font-semibold mb-4">Acesse a Plataforma</h2>
               <p className="text-gray-600 mb-6">
-                {t('welcome.loginDescription')}
+                Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET.
+                Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores.
               </p>
               <Link to="/auth">
                 <Button className="flex items-center gap-2 px-6 py-6 text-lg">
                   <LogIn size={20} />
-                  {t('buttons.enterPlatform')}
+                  Entrar na Plataforma
                 </Button>
               </Link>
             </div>
@@ -49,9 +48,9 @@ const Index: React.FC = () => {
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
                     <Book size={32} className="text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-medium mb-2">{t('areas.tutor.title')}</h3>
+                  <h3 className="text-xl font-medium mb-2">Para Tutores</h3>
                   <p className="text-gray-600">
-                    {t('areas.tutor.description')}
+                    Visualize recomendações personalizadas para seu pet, compreenda tratamentos e acompanhe a evolução.
                   </p>
                 </div>
               </Card>
@@ -61,9 +60,9 @@ const Index: React.FC = () => {
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
                     <Heart size={32} className="text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-medium mb-2">{t('areas.veterinarian.title')}</h3>
+                  <h3 className="text-xl font-medium mb-2">Para Veterinários</h3>
                   <p className="text-gray-600">
-                    {t('areas.veterinarian.description')}
+                    Acesse dados clínicos, consulte evidências científicas e crie planos de tratamento personalizados.
                   </p>
                 </div>
               </Card>
@@ -73,9 +72,9 @@ const Index: React.FC = () => {
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
                     <Microscope size={32} className="text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-medium mb-2">{t('areas.research.title')}</h3>
+                  <h3 className="text-xl font-medium mb-2">P&D + Base de Conhecimento</h3>
                   <p className="text-gray-600">
-                    {t('areas.research.description')}
+                    Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.
                   </p>
                 </div>
               </Card>
@@ -85,9 +84,9 @@ const Index: React.FC = () => {
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
                     <UserCog size={32} className="text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-medium mb-2">{t('areas.admin.title')}</h3>
+                  <h3 className="text-xl font-medium mb-2">Para Administradores</h3>
                   <p className="text-gray-600">
-                    {t('areas.admin.description')}
+                    Gerencie configurações do sistema, usuários e integrações da plataforma.
                   </p>
                 </div>
               </Card>
@@ -97,9 +96,9 @@ const Index: React.FC = () => {
           <div className="mt-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <div className="p-8 text-center border-b border-gray-100">
-                <h2 className="text-2xl font-bold mb-2">{t('welcome.title')}</h2>
+                <h2 className="text-2xl font-bold mb-2">Bem-vindo(a) de volta!</h2>
                 <p className="text-gray-600 mb-0">
-                  {t('welcome.loggedInAs')} <span className="font-medium">{user.email}</span>
+                  Você está conectado como <span className="font-medium">{user.email}</span>
                 </p>
               </div>
               
@@ -109,13 +108,13 @@ const Index: React.FC = () => {
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Book size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('areas.tutor.titleArea')}</h3>
+                    <h3 className="text-lg font-medium mb-3">Área do Tutor</h3>
                     <p className="text-gray-500 mb-4">
-                      {t('areas.tutor.descriptionArea')}
+                      Acompanhe planos de tratamento e recomendações para seu pet.
                     </p>
                     <Link to="/tutor">
                       <Button variant="outline" className="w-full flex items-center justify-center gap-1">
-                        {t('buttons.access')} <ArrowRight size={16} />
+                        Acessar <ArrowRight size={16} />
                       </Button>
                     </Link>
                   </div>
@@ -126,9 +125,9 @@ const Index: React.FC = () => {
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Heart size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('areas.veterinarian.titleArea')}</h3>
+                    <h3 className="text-lg font-medium mb-3">Área do Veterinário</h3>
                     <p className="text-gray-500 mb-4">
-                      {t('areas.veterinarian.descriptionArea')}
+                      Analise dados clínicos e crie planos de tratamento baseados em evidências.
                     </p>
                     <Link to="/veterinario">
                       <Button 
@@ -136,11 +135,11 @@ const Index: React.FC = () => {
                         className={`w-full flex items-center justify-center gap-1 ${!hasRole('veterinarian') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={!hasRole('veterinarian')}
                       >
-                        {t('buttons.access')} <ArrowRight size={16} />
+                        Acessar <ArrowRight size={16} />
                       </Button>
                     </Link>
                     {!hasRole('veterinarian') && (
-                      <p className="text-xs text-red-500 mt-2">{t('areas.veterinarian.restrictedAccess')}</p>
+                      <p className="text-xs text-red-500 mt-2">Acesso restrito para veterinários</p>
                     )}
                   </div>
                 </div>
@@ -150,9 +149,9 @@ const Index: React.FC = () => {
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Microscope size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('areas.research.titleArea')}</h3>
+                    <h3 className="text-lg font-medium mb-3">P&D + Base de Conhecimento</h3>
                     <p className="text-gray-500 mb-4">
-                      {t('areas.research.descriptionArea')}
+                      Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.
                     </p>
                     <Link to="/administrador">
                       <Button 
@@ -160,11 +159,11 @@ const Index: React.FC = () => {
                         className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={!hasRole('admin')}
                       >
-                        {t('buttons.access')} <ArrowRight size={16} />
+                        Acessar <ArrowRight size={16} />
                       </Button>
                     </Link>
                     {!hasRole('admin') && (
-                      <p className="text-xs text-red-500 mt-2">{t('areas.admin.restrictedAccess')}</p>
+                      <p className="text-xs text-red-500 mt-2">Acesso restrito para administradores</p>
                     )}
                   </div>
                 </div>
@@ -174,9 +173,9 @@ const Index: React.FC = () => {
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <UserCog size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('areas.admin.titleArea')}</h3>
+                    <h3 className="text-lg font-medium mb-3">Área do Administrador</h3>
                     <p className="text-gray-500 mb-4">
-                      {t('areas.admin.descriptionArea')}
+                      Gerencie configurações do sistema, usuários e integrações da plataforma.
                     </p>
                     <Link to="/administrador">
                       <Button 
@@ -184,11 +183,11 @@ const Index: React.FC = () => {
                         className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={!hasRole('admin')}
                       >
-                        {t('buttons.access')} <ArrowRight size={16} />
+                        Acessar <ArrowRight size={16} />
                       </Button>
                     </Link>
                     {!hasRole('admin') && (
-                      <p className="text-xs text-red-500 mt-2">{t('areas.admin.restrictedAccess')}</p>
+                      <p className="text-xs text-red-500 mt-2">Acesso restrito para administradores</p>
                     )}
                   </div>
                 </div>
@@ -196,23 +195,23 @@ const Index: React.FC = () => {
             </div>
             
             <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-medium mb-4">{t('system.information')}</h3>
+              <h3 className="text-lg font-medium mb-4">Informações do Sistema</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-md border border-gray-100">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('system.nutraceuticals')}</span>
+                    <span className="text-gray-600">Nutracêuticos Cadastrados</span>
                     <span className="text-lg font-medium">250+</span>
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-md border border-gray-100">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('system.studies')}</span>
+                    <span className="text-gray-600">Estudos Científicos</span>
                     <span className="text-lg font-medium">180+</span>
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-md border border-gray-100">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('system.conditions')}</span>
+                    <span className="text-gray-600">Condições Tratáveis</span>
                     <span className="text-lg font-medium">45+</span>
                   </div>
                 </div>

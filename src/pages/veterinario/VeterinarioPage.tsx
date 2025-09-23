@@ -106,7 +106,7 @@ const VeterinarioPage: React.FC = () => {
               
               {filteredPets.length === 0 && (
                 <div className="col-span-full text-center py-10">
-                  <p className="text-gray-500">{t('messages.noPetsFound')}</p>
+                  <p className="text-gray-500">Nenhum pet encontrado com esse termo.</p>
                 </div>
               )}
             </div>

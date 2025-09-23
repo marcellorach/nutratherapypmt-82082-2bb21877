@@ -1,170 +1,66 @@
+
 {
   "common": {
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "edit": "Edit",
-    "delete": "Delete",
-    "confirm": "Confirm",
-    "yes": "Yes",
-    "no": "No",
-    "search": "Search",
-    "filter": "Filter",
-    "export": "Export",
-    "import": "Import",
-    "add": "Add",
-    "remove": "Remove",
-    "view": "View",
-    "close": "Close",
-    "open": "Open"
+    "madeWith": "Made with",
+    "by": "by",
+    "home": "Home",
+    "veterinarian": "Veterinarian",
+    "tutor": "Tutor",
+    "researchDev": "R&D",
+    "logout": "Logout",
+    "settings": "Settings",
+    "generateRandomData": "Generate random data for example",
+    "learnMore": "Learn more",
+    "startNow": "Start now",
+    "backToPatients": "Back to patient list"
   },
   "home": {
     "title": "NutraTherapy",
-    "subtitle": "Intelligent Nutraceutical Platform for Pets",
-    "systemInfo": "System Information",
-    "nutraceuticals": "250+ Nutraceuticals",
-    "scientificStudies": "180+ Scientific Studies",
-    "treatableConditions": "45+ Treatable Conditions",
-    "dailyRecommendations": "Daily Recommendations"
+    "subtitle": "Mass personalized nutraceutical therapy platform and R&D",
+    "innovativeApproach": "Our innovative approach",
+    "forVeterinarians": "For Veterinarians",
+    "forVeterinariansDesc": "Access clinical data, consult AI for personalized recommendations, and view scientific evidence.",
+    "forTutors": "For Tutors",
+    "forTutorsDesc": "Receive simplified explanations about recommendations and track your pet's progress with personalized treatments.",
+    "advancedRD": "Advanced R&D",
+    "advancedRDDesc": "Access our research and development platform to manage scientific studies and nutraceuticals.",
+    "degenerativeDiseases": "Mitigation of degenerative diseases",
+    "scientificResearch": "Scientific Research",
+    "scientificResearchDesc": "Our platform integrates clinical study results and nutraceutical research to create evidence-based treatments.",
+    "individualizedTreatment": "Individualized Treatment",
+    "individualizedTreatmentDesc": "We combine specific clinical data from each pet with predictive models to create personalized treatment plans that maximize results.",
+    "methodology": "Methodology"
   },
   "navbar": {
-    "language": "Language",
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Logout",
-    "login": "Login"
+    "researchDev": "R&D Area",
+    "platform": "Nutraceutical research and development platform"
   },
   "veterinarian": {
-    "search": {
-      "placeholder": "Search pets by name, owner or ID...",
-      "noResults": "No pets found with this term"
-    },
-    "dashboard": {
-      "title": "Veterinary Dashboard",
-      "recentPatients": "Recent Patients",
-      "pendingRecommendations": "Pending Recommendations"
-    }
+    "portal": "Veterinarian Portal",
+    "portalDesc": "Manage clinical data and get personalized recommendations",
+    "searchPet": "Search pet...",
+    "newPet": "New Pet",
+    "patientsFound": "{{count}} patients found",
+    "patient_one": "{{count}} patient found",
+    "patient_other": "{{count}} patients found",
+    "filter": "Filter",
+    "treatmentPlan": "Treatment Plan:",
+    "createdOn": "Created on:",
+    "veterinarianNotes": "Veterinarian Notes",
+    "report": "Report",
+    "savePlan": "Save complete plan",
+    "savingPlan": "Saving plan...",
+    "newRecommendation": "New Recommendation",
+    "noPetSelected": "No pet selected",
+    "selectPetPrompt": "Select a pet in the \"Pets\" tab to see their recommendations.",
+    "noPlanExists": "doesn't have recommendations",
+    "createPlanPrompt": "Create a treatment plan for this pet."
   },
   "research": {
-    "suggestions": {
-      "title": "Research Suggestions",
-      "aiConfidence": "AI Confidence:",
-      "status": {
-        "new": "New",
-        "approved": "Approved",
-        "rejected": "Rejected",
-        "inAnalysis": "Under Analysis"
-      },
-      "origin": {
-        "ai": "AI Suggestion",
-        "scientificCommittee": "Scientific Committee Suggestion",
-        "external": "External Suggestion",
-        "unknown": "Unknown origin"
-      },
-      "fields": {
-        "reasoning": "AI Reasoning",
-        "suggestedPopulation": "Suggested Population",
-        "suggestedMethodology": "Suggested Methodology", 
-        "basedOn": "Based on:",
-        "suggestedMarkers": "Suggested Markers:"
-      },
-      "approvalChain": {
-        "inAnalysis": "Under analysis:",
-        "approvedByAll": "Approved by all committees"
-      },
-      "actions": {
-        "viewDetails": "View full details",
-        "approve": "Approve",
-        "reject": "Reject",
-        "startApproval": "Start approval",
-        "advanceApproval": "Advance to next stage"
-      },
-      "dialog": {
-        "aiReasoning": "AI Reasoning",
-        "overview": "Overview",
-        "evidence": "Evidence",
-        "resources": "Required Resources",
-        "noEvidenceData": "Evidence data not available for this suggestion.",
-        "noResourcesData": "Required resources not defined for this suggestion."
-      },
-      "approvalStages": {
-        "scientificSupervision": "Scientific Supervision",
-        "scientificCommittee": "Scientific Committee",
-        "ethicsCommittee": "Ethics Committee",
-        "direction": "Direction"
-      }
-    }
-  },
-  "auth": {
-    "login": "Login",
-    "register": "Register",
-    "email": "Email",
-    "password": "Password",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "confirmPassword": "Confirm password",
-    "forgotPassword": "Forgot password?",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
-    "loginHere": "Login here",
-    "registerHere": "Register here"
-  },
-  "buttons": {
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "submit": "Submit",
-    "continue": "Continue",
-    "finish": "Finish",
-    "access": "Access"
-  },
-  "messages": {
-    "success": "Operation completed successfully!",
-    "error": "An error occurred. Please try again.",
-    "warning": "Warning: Please check the entered data.",
-    "info": "Important information."
-  },
-  "placeholders": {
-    "enterEmail": "Enter your email",
-    "enterPassword": "Enter your password",
-    "enterName": "Enter your name",
-    "searchPets": "Search pets..."
-  },
-  "system": {
-    "nutraceuticals": "250+ Nutraceuticals",
-    "studies": "180+ Scientific Studies",
-    "conditions": "45+ Treatable Conditions"
-  },
-  "welcome": {
-    "title": "Welcome to NutraTherapy",
-    "subtitle": "Select your access area to continue"
-  },
-  "areas": {
-    "tutor": {
-      "title": "For Pet Owners",
-      "description": "View personalized recommendations for your pet, understand treatments and track progress.",
-      "titleArea": "Pet Owner Area",
-      "descriptionArea": "Follow treatment plans and recommendations for your pet."
-    },
-    "veterinarian": {
-      "title": "For Veterinarians",
-      "description": "Access clinical data, consult scientific evidence and create personalized treatment plans.",
-      "titleArea": "Veterinary Area",
-      "descriptionArea": "Analyze clinical data and create evidence-based treatment plans.",
-      "restrictedAccess": "Access restricted to veterinarians"
-    },
-    "research": {
-      "title": "R&D + Knowledge Base",
-      "description": "Access research tools, develop studies and manage the scientific knowledge base.",
-      "titleArea": "R&D + Knowledge Base",
-      "descriptionArea": "Access research tools, develop studies and manage the scientific knowledge base."
-    },
-    "admin": {
-      "title": "For Administrators",
-      "description": "Manage system settings, users and platform integrations.",
-      "titleArea": "Administrator Area",
-      "descriptionArea": "Manage system settings, users and platform integrations.",
-      "restrictedAccess": "Access restricted to administrators"
+    "tabs": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "planned": "Planned"
     }
   }
 }

@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { 
   Card, 
   CardContent, 
@@ -36,18 +35,16 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
   onReject, 
   onDetails 
 }) => {
-  const { t } = useTranslation();
-  
   const getStatusBadge = () => {
     switch (sugestao.status) {
       case 'nova':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">{t('research.suggestions.status.new')}</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Nova</Badge>;
       case 'aprovada':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{t('research.suggestions.status.approved')}</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Aprovada</Badge>;
       case 'rejeitada':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">{t('research.suggestions.status.rejected')}</Badge>;
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Rejeitada</Badge>;
       case 'em_analise':
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">{t('research.suggestions.status.inAnalysis')}</Badge>;
+        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">Em análise</Badge>;
       default:
         return null;
     }
@@ -59,22 +56,22 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
       case 'ia':
         return {
           icon: <Lightbulb className="h-5 w-5 text-amber-500" />,
-          text: t('research.suggestions.origin.ai')
+          text: "Sugestão da IA"
         };
       case 'comite_cientifico':
         return {
           icon: <Users className="h-5 w-5 text-indigo-500" />,
-          text: t('research.suggestions.origin.scientificCommittee')
+          text: "Sugestão do Comitê Científico"
         };
       case 'externa':
         return {
           icon: <User className="h-5 w-5 text-emerald-500" />,
-          text: t('research.suggestions.origin.external')
+          text: "Sugestão Externa"
         };
       default:
         return {
           icon: <Lightbulb className="h-5 w-5 text-gray-500" />,
-          text: t('research.suggestions.origin.unknown')
+          text: "Origem desconhecida"
         };
     }
   };
@@ -97,30 +94,30 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
           {getStatusBadge()}
         </div>
         <CardDescription>
-          {t('research.suggestions.aiConfidence')} <span className="font-medium">{sugestao.confianca}%</span>
+          Confiança da IA: <span className="font-medium">{sugestao.confianca}%</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
         {/* Raciocínio sempre visível */}
         <div>
-          <h4 className="text-sm font-medium mb-1">{t('research.suggestions.fields.reasoning')}</h4>
+          <h4 className="text-sm font-medium mb-1">Raciocínio</h4>
           <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
         </div>
 
         <div>
-          <h4 className="text-sm font-medium">{t('research.suggestions.fields.suggestedPopulation')}</h4>
+          <h4 className="text-sm font-medium">População Sugerida</h4>
           <p className="text-sm text-muted-foreground">{sugestao.populacao_sugerida}</p>
         </div>
         
         {/* Metodologia sempre visível */}
         <div>
-          <h4 className="text-sm font-medium">{t('research.suggestions.fields.suggestedMethodology')}</h4>
+          <h4 className="text-sm font-medium">Metodologia Sugerida</h4>
           <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
         </div>
         
         {/* Baseado em - sempre visível */}
         <div>
-          <h4 className="text-sm font-medium">{t('research.suggestions.fields.basedOn')}</h4>
+          <h4 className="text-sm font-medium">Baseado em:</h4>
           <ul className="text-sm text-muted-foreground list-disc ml-5">
             {sugestao.baseado_em.map((base, index) => (
               <li key={index}>{base}</li>
@@ -130,7 +127,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
         
         {/* Marcadores sugeridos - sempre visíveis */}
         <div>
-          <h4 className="text-sm font-medium">{t('research.suggestions.fields.suggestedMarkers')}</h4>
+          <h4 className="text-sm font-medium">Marcadores Sugeridos:</h4>
           <ul className="text-sm text-muted-foreground list-disc ml-5">
             {sugestao.marcadores_sugeridos.map((marcador, index) => (
               <li key={index}>{marcador}</li>
@@ -151,7 +148,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
                   return (
                     <div className="flex items-center text-amber-600 bg-amber-50 p-2 rounded-md">
                       <StageIcon className="h-4 w-4 mr-2" />
-                      <span className="text-xs font-medium">{t('research.suggestions.approvalChain.inAnalysis')} {stage.name}</span>
+                      <span className="text-xs font-medium">Em análise: {stage.name}</span>
                     </div>
                   );
                 }
@@ -159,7 +156,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
                 return (
                   <div className="flex items-center text-green-600 bg-green-50 p-2 rounded-md">
                     <Briefcase className="h-4 w-4 mr-2" />
-                    <span className="text-xs font-medium">{t('research.suggestions.approvalChain.approvedByAll')}</span>
+                    <span className="text-xs font-medium">Aprovada por todos os comitês</span>
                   </div>
                 );
               }
@@ -170,7 +167,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
       </CardContent>
       <CardFooter className="flex justify-between pt-0">
         <Button variant="outline" size="sm" onClick={onDetails}>
-          {t('research.suggestions.actions.viewDetails')}
+          Ver detalhes completos
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
         {sugestao.status === 'nova' && (
@@ -182,7 +179,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
               onClick={onReject}
             >
               <ThumbsDown className="mr-1 h-4 w-4" />
-              {t('research.suggestions.actions.reject')}
+              Rejeitar
             </Button>
             <Button 
               variant="ghost" 
@@ -191,7 +188,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
               onClick={onApprove}
             >
               <ThumbsUp className="mr-1 h-4 w-4" />
-              {t('research.suggestions.actions.approve')}
+              Aprovar
             </Button>
           </div>
         )}

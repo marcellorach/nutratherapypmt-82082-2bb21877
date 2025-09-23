@@ -1,170 +1,66 @@
+
 {
   "common": {
-    "loading": "Carregando...",
-    "save": "Salvar",
-    "cancel": "Cancelar",
-    "edit": "Editar",
-    "delete": "Excluir",
-    "confirm": "Confirmar",
-    "yes": "Sim",
-    "no": "Não",
-    "search": "Buscar",
-    "filter": "Filtrar",
-    "export": "Exportar",
-    "import": "Importar",
-    "add": "Adicionar",
-    "remove": "Remover",
-    "view": "Visualizar",
-    "close": "Fechar",
-    "open": "Abrir"
+    "madeWith": "Feito com",
+    "by": "por",
+    "home": "Início",
+    "veterinarian": "Veterinário",
+    "tutor": "Tutor",
+    "researchDev": "P&D",
+    "logout": "Sair",
+    "settings": "Configurações",
+    "generateRandomData": "Gerar dados aleatórios para exemplo",
+    "learnMore": "Saiba mais",
+    "startNow": "Comece agora",
+    "backToPatients": "Voltar para lista de pacientes"
   },
   "home": {
     "title": "NutraTherapy",
-    "subtitle": "Plataforma Inteligente de Nutracêuticos para Pets",
-    "systemInfo": "Informações do Sistema",
-    "nutraceuticals": "250+ Nutracêuticos",
-    "scientificStudies": "180+ Estudos Científicos", 
-    "treatableConditions": "45+ Condições Tratáveis",
-    "dailyRecommendations": "Recomendações Diárias"
+    "subtitle": "Plataforma de terapia nutraceutica personalizada em massa e P&D",
+    "innovativeApproach": "Nossa abordagem inovadora",
+    "forVeterinarians": "Para Veterinários",
+    "forVeterinariansDesc": "Acesse dados clínicos, consulte a IA para recomendações personalizadas e visualize evidências científicas.",
+    "forTutors": "Para Tutores",
+    "forTutorsDesc": "Receba explicações simplificadas sobre recomendações e acompanhe o progresso do seu pet com tratamentos personalizados.",
+    "advancedRD": "P&D Avançada",
+    "advancedRDDesc": "Acesse nossa plataforma de pesquisa e desenvolvimento para gerenciar estudos científicos e nutracêuticos.",
+    "degenerativeDiseases": "Mitigação de doenças degenerativas",
+    "scientificResearch": "Pesquisa Científica",
+    "scientificResearchDesc": "Nossa plataforma integra resultados de estudos clínicos e pesquisas em nutracêuticos para criar tratamentos baseados em evidências científicas sólidas.",
+    "individualizedTreatment": "Tratamento Individualizado",
+    "individualizedTreatmentDesc": "Combinamos dados clínicos específicos de cada pet com modelos preditivos para criar planos de tratamento personalizados que maximizam resultados.",
+    "methodology": "Metodologia"
   },
   "navbar": {
-    "language": "Idioma",
-    "profile": "Perfil",
-    "settings": "Configurações",
-    "logout": "Sair",
-    "login": "Entrar"
+    "researchDev": "Área de P&D",
+    "platform": "Plataforma de pesquisa e desenvolvimento de nutracêuticos"
   },
   "veterinarian": {
-    "search": {
-      "placeholder": "Buscar pets por nome, tutor ou ID...",
-      "noResults": "Nenhum pet encontrado com esse termo"
-    },
-    "dashboard": {
-      "title": "Dashboard Veterinário",
-      "recentPatients": "Pacientes Recentes",
-      "pendingRecommendations": "Recomendações Pendentes"
-    }
+    "portal": "Portal do Veterinário",
+    "portalDesc": "Gerencie dados clínicos e obtenha recomendações personalizadas",
+    "searchPet": "Buscar pet...",
+    "newPet": "Novo Pet",
+    "patientsFound": "{{count}} pacientes encontrados",
+    "patient_one": "{{count}} paciente encontrado",
+    "patient_other": "{{count}} pacientes encontrados",
+    "filter": "Filtrar",
+    "treatmentPlan": "Plano de Tratamento:",
+    "createdOn": "Criado em:",
+    "veterinarianNotes": "Notas do Veterinário",
+    "report": "Relatório",
+    "savePlan": "Salvar plano completo",
+    "savingPlan": "Salvando plano...",
+    "newRecommendation": "Nova Recomendação",
+    "noPetSelected": "Nenhum pet selecionado",
+    "selectPetPrompt": "Selecione um pet na aba \"Pets\" para ver suas recomendações.",
+    "noPlanExists": "não possui recomendações",
+    "createPlanPrompt": "Crie um plano de tratamento para este pet."
   },
   "research": {
-    "suggestions": {
-      "title": "Sugestões de Pesquisa",
-      "aiConfidence": "Confiança da IA:",
-      "status": {
-        "new": "Nova",
-        "approved": "Aprovada", 
-        "rejected": "Rejeitada",
-        "inAnalysis": "Em análise"
-      },
-      "origin": {
-        "ai": "Sugestão da IA",
-        "scientificCommittee": "Sugestão do Comitê Científico",
-        "external": "Sugestão Externa",
-        "unknown": "Origem desconhecida"
-      },
-      "fields": {
-        "reasoning": "Raciocínio",
-        "suggestedPopulation": "População Sugerida",
-        "suggestedMethodology": "Metodologia Sugerida",
-        "basedOn": "Baseado em:",
-        "suggestedMarkers": "Marcadores Sugeridos:"
-      },
-      "approvalChain": {
-        "inAnalysis": "Em análise:",
-        "approvedByAll": "Aprovada por todos os comitês"
-      },
-      "actions": {
-        "viewDetails": "Ver detalhes completos",
-        "approve": "Aprovar",
-        "reject": "Rejeitar",
-        "startApproval": "Iniciar aprovação",
-        "advanceApproval": "Avançar para próxima etapa"
-      },
-      "dialog": {
-        "aiReasoning": "Raciocínio da IA",
-        "overview": "Visão Geral",
-        "evidence": "Evidências",
-        "resources": "Recursos Necessários",
-        "noEvidenceData": "Dados de evidência não disponíveis para esta sugestão.",
-        "noResourcesData": "Recursos necessários não definidos para esta sugestão."
-      },
-      "approvalStages": {
-        "scientificSupervision": "Supervisão Científica",
-        "scientificCommittee": "Comitê Científico", 
-        "ethicsCommittee": "Comitê Ético",
-        "direction": "Direção"
-      }
-    }
-  },
-  "auth": {
-    "login": "Entrar",
-    "register": "Registrar",
-    "email": "E-mail",
-    "password": "Senha",
-    "firstName": "Nome",
-    "lastName": "Sobrenome",
-    "confirmPassword": "Confirmar senha",
-    "forgotPassword": "Esqueci minha senha",
-    "noAccount": "Não tem conta?",
-    "hasAccount": "Já tem conta?",
-    "loginHere": "Entre aqui",
-    "registerHere": "Registre-se aqui"
-  },
-  "buttons": {
-    "back": "Voltar",
-    "next": "Próximo",
-    "previous": "Anterior",
-    "submit": "Enviar",
-    "continue": "Continuar",
-    "finish": "Finalizar",
-    "access": "Acessar"
-  },
-  "messages": {
-    "success": "Operação realizada com sucesso!",
-    "error": "Ocorreu um erro. Tente novamente.",
-    "warning": "Atenção: Verifique os dados informados.",
-    "info": "Informação importante."
-  },
-  "placeholders": {
-    "enterEmail": "Digite seu e-mail",
-    "enterPassword": "Digite sua senha",
-    "enterName": "Digite seu nome",
-    "searchPets": "Buscar pets..."
-  },
-  "system": {
-    "nutraceuticals": "250+ Nutracêuticos",
-    "studies": "180+ Estudos Científicos", 
-    "conditions": "45+ Condições Tratáveis"
-  },
-  "welcome": {
-    "title": "Bem-vindo à NutraTherapy",
-    "subtitle": "Selecione sua área de acesso para continuar"
-  },
-  "areas": {
-    "tutor": {
-      "title": "Para Tutores",
-      "description": "Visualize recomendações personalizadas para seu pet, compreenda tratamentos e acompanhe a evolução.",
-      "titleArea": "Área do Tutor",
-      "descriptionArea": "Acompanhe planos de tratamento e recomendações para seu pet."
-    },
-    "veterinarian": {
-      "title": "Para Veterinários",
-      "description": "Acesse dados clínicos, consulte evidências científicas e crie planos de tratamento personalizados.",
-      "titleArea": "Área do Veterinário",
-      "descriptionArea": "Analise dados clínicos e crie planos de tratamento baseados em evidências.",
-      "restrictedAccess": "Acesso restrito para veterinários"
-    },
-    "research": {
-      "title": "P&D + Base de Conhecimento",
-      "description": "Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.",
-      "titleArea": "P&D + Base de Conhecimento",
-      "descriptionArea": "Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico."
-    },
-    "admin": {
-      "title": "Para Administradores",
-      "description": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
-      "titleArea": "Área do Administrador",
-      "descriptionArea": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
-      "restrictedAccess": "Acesso restrito para administradores"
+    "tabs": {
+      "ongoing": "Em Andamento",
+      "completed": "Concluídos",
+      "planned": "Planejados"
     }
   }
 }

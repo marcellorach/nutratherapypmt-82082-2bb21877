@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,7 +20,6 @@ interface SimulationInputs {
 }
 
 export const BusinessCaseSimulator: React.FC = () => {
-  const { t } = useTranslation();
   const { clientProfiles, marketOpportunities, roiScenarios } = useROIIntelligence();
   
   const [inputs, setInputs] = useState<SimulationInputs>({
@@ -119,10 +117,10 @@ export const BusinessCaseSimulator: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          {t('roi.simulator.title')}
+          Simulador de Business Case
         </CardTitle>
         <CardDescription>
-          {t('roi.simulator.description')}
+          Configure parâmetros e simule diferentes cenários de implementação
         </CardDescription>
       </CardHeader>
       
@@ -132,7 +130,7 @@ export const BusinessCaseSimulator: React.FC = () => {
           <div className="lg:col-span-1 space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="profile">{t('roi.simulator.clinicProfile')}</Label>
+                <Label htmlFor="profile">Perfil da Clínica</Label>
                 <Select 
                   value={inputs.clientProfile} 
                   onValueChange={(value) => setInputs(prev => ({ ...prev, clientProfile: value }))}
@@ -156,7 +154,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>{t('roi.simulator.initialInvestment')}</Label>
+                <Label>Investimento Inicial (R$)</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.investmentAmount]}
@@ -174,7 +172,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>{t('roi.simulator.timeHorizon')}</Label>
+                <Label>Horizonte Temporal (meses)</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.timeHorizon]}
@@ -192,7 +190,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>{t('roi.simulator.preventiveFocus')}</Label>
+                <Label>Foco Preventivo (%)</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.preventiveFocus]}
@@ -210,7 +208,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label htmlFor="risk">{t('roi.simulator.riskTolerance')}</Label>
+                <Label htmlFor="risk">Tolerância ao Risco</Label>
                 <Select 
                   value={inputs.riskTolerance} 
                   onValueChange={(value: any) => setInputs(prev => ({ ...prev, riskTolerance: value }))}
@@ -219,16 +217,16 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">{t('roi.simulator.riskLevels.low')}</SelectItem>
-                    <SelectItem value="medium">{t('roi.simulator.riskLevels.medium')}</SelectItem>
-                    <SelectItem value="high">{t('roi.simulator.riskLevels.high')}</SelectItem>
+                    <SelectItem value="low">Baixa - Conservador</SelectItem>
+                    <SelectItem value="medium">Média - Equilibrado</SelectItem>
+                    <SelectItem value="high">Alta - Agressivo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <Button onClick={simulateBusinessCase} className="w-full" size="lg">
                 <Play className="h-4 w-4 mr-2" />
-                {t('roi.simulator.simulate')}
+                Simular Business Case
               </Button>
             </div>
           </div>
@@ -238,10 +236,10 @@ export const BusinessCaseSimulator: React.FC = () => {
             {simulationResults ? (
               <Tabs defaultValue="summary" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="summary">{t('roi.simulator.tabs.summary')}</TabsTrigger>
-                  <TabsTrigger value="breakdown">{t('roi.simulator.tabs.breakdown')}</TabsTrigger>
-                  <TabsTrigger value="timeline">{t('roi.simulator.tabs.timeline')}</TabsTrigger>
-                  <TabsTrigger value="risks">{t('roi.simulator.tabs.risks')}</TabsTrigger>
+                  <TabsTrigger value="summary">Resumo</TabsTrigger>
+                  <TabsTrigger value="breakdown">Detalhamento</TabsTrigger>
+                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="risks">Riscos</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="summary" className="space-y-4">

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Beaker, FlaskConical, CheckCheck, Database, Lightbulb, ChevronRight } from "lucide-react";
 
@@ -10,8 +9,6 @@ interface ResearchGroupProps {
 }
 
 const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepClick }) => {
-  const { t } = useTranslation();
-  
   return (
     <>
       <SidebarMenuItem>
@@ -23,7 +20,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Beaker className={`h-4 w-4 mr-2 ${currentStep === "sugestoes-ai" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.studyProposition')}</span>
+              <span>Proposição de Estudos</span>
             </div>
             {currentStep === "sugestoes-ai" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -40,7 +37,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Beaker className={`h-4 w-4 mr-2 ${currentStep === "estudos-planejados" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.plannedStudies')}</span>
+              <span>Estudos Planejados</span>
             </div>
             {currentStep === "estudos-planejados" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -57,7 +54,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "estudos-andamento" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.ongoingStudies')}</span>
+              <span>Estudos em Andamento</span>
             </div>
             {currentStep === "estudos-andamento" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -74,7 +71,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <CheckCheck className={`h-4 w-4 mr-2 ${currentStep === "estudos-concluidos" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.completedStudies')}</span>
+              <span>Estudos Concluídos</span>
             </div>
             {currentStep === "estudos-concluidos" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -91,7 +88,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Lightbulb className={`h-4 w-4 mr-2 ${currentStep === "modelos" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.items.predictiveModels')}</span>
+              <span>Modelos Preditivos</span>
             </div>
             {currentStep === "modelos" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

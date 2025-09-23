@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Target, BarChart3, Activity, Shield, Zap } from "lucide-react";
 
@@ -17,46 +16,44 @@ interface KPIGridProps {
 }
 
 const KPIGrid: React.FC<KPIGridProps> = ({ metrics }) => {
-  const { t } = useTranslation();
-  
   const kpiCards = [
     {
-      title: t('analytics.kpis.activeNutraceuticals'),
+      title: "Nutracêuticos Ativos",
       value: metrics.totalNutraceuticals,
       icon: BarChart3,
       color: "text-blue-500",
       bgColor: "bg-blue-50"
     },
     {
-      title: t('analytics.kpis.averageEfficacy'),
+      title: "Eficácia Média",
       value: `${metrics.averageEfficacy.toFixed(1)}/5`,
       icon: TrendingUp,
       color: "text-green-500",
       bgColor: "bg-green-50"
     },
     {
-      title: t('analytics.kpis.treatabilityIndex'),
+      title: "Índice de Tratabilidade",
       value: `${metrics.treatabilityIndex.toFixed(1)}%`,
       icon: Target,
       color: "text-purple-500",
       bgColor: "bg-purple-50"
     },
     {
-      title: t('analytics.kpis.prescriptionCoverage'),
+      title: "Cobertura de Prescrição",
       value: `${metrics.prescriptionCoverage.toFixed(1)}%`,
       icon: Activity,
       color: "text-orange-500",
       bgColor: "bg-orange-50"
     },
     {
-      title: t('analytics.kpis.treatabilityIndex'),
+      title: "Índice de Sustentabilidade",
       value: `${metrics.sustainabilityIndex.toFixed(1)}/5`,
       icon: Shield,
       color: "text-teal-500",
       bgColor: "bg-teal-50"
     },
     {
-      title: t('analytics.kpis.therapeuticGaps'),
+      title: "Gaps Terapêuticos",
       value: metrics.therapeuticGaps,
       icon: Zap,
       color: "text-red-500",

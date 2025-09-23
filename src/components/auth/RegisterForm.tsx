@@ -8,21 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Lock, Mail, User } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { useTranslation } from 'react-i18next';
 
 // Schema de validação para registro
-const createRegisterSchema = (t: any) => z.object({
-  firstName: z.string().min(2, `${t('auth.firstName')} ${t('auth.minChars')} 2 ${t('auth.characters')}`),
-  lastName: z.string().min(2, `${t('auth.lastName')} ${t('auth.minChars')} 2 ${t('auth.characters')}`),
-  email: z.string().email(t('auth.invalidEmail')),
-  password: z.string().min(6, `${t('auth.password')} ${t('auth.minChars')} 6 ${t('auth.characters')}`),
-  confirmPassword: z.string().min(6, `${t('auth.password')} ${t('auth.minChars')} 6 ${t('auth.characters')}`),
+const registerSchema = z.object({
+  firstName: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
+  lastName: z.string().min(2, 'Sobrenome deve ter no mínimo 2 caracteres'),
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+  confirmPassword: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: t('auth.passwordsNotMatch'),
+  message: "As senhas não coincidem",
   path: ["confirmPassword"],
 });
 
-export type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>;
+export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   loading: boolean;
@@ -30,10 +29,8 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
-  const { t } = useTranslation();
-  
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(createRegisterSchema(t)),
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -49,7 +46,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
     } catch (error: any) {
       console.error('Erro no registro:', error);
       toast({
-        title: t('auth.registerError'),
+        title: 'Erro ao realizar cadastro',
         description: error.message,
         variant: 'destructive',
       });
@@ -65,12 +62,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('auth.firstName')}</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input 
-                      placeholder={t('placeholders.firstName')}
+                      placeholder="Nome" 
                       className="pl-10" 
                       {...field} 
                     />
@@ -86,10 +83,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('auth.lastName')}</FormLabel>
+                <FormLabel>Sobrenome</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder={t('placeholders.lastName')}
+                    placeholder="Sobrenome" 
                     {...field} 
                   />
                 </FormControl>
@@ -104,12 +101,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('auth.email')}</FormLabel>
+              <FormLabel>E-mail</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input 
-                    placeholder={t('placeholders.email')}
+                    placeholder="seu@email.com" 
                     className="pl-10" 
                     {...field} 
                   />
@@ -125,12 +122,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('auth.password')}</FormLabel>
+              <FormLabel>Senha</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input 
-                    placeholder={t('placeholders.password')}
+                    placeholder="Senha" 
                     type="password" 
                     className="pl-10" 
                     {...field} 
@@ -147,12 +144,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('auth.confirmPassword')}</FormLabel>
+              <FormLabel>Confirmar Senha</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input 
-                    placeholder={t('placeholders.confirmPassword')}
+                    placeholder="Confirme sua senha" 
                     type="password" 
                     className="pl-10" 
                     {...field} 
@@ -165,7 +162,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading, onRegister }) => {
         />
         
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? t('auth.loading') : t('auth.registerButton')}
+          {loading ? 'Processando...' : 'Cadastrar'}
         </Button>
       </form>
     </Form>
