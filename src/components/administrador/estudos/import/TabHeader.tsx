@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 
 interface TabHeaderProps {
@@ -8,12 +9,14 @@ interface TabHeaderProps {
 }
 
 const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, scispaceLogo }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="p-6 pb-0 flex items-center justify-between">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-1">Importar Estudos Científicos</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-1">{t('admin.import.title')}</h2>
         <p className="text-muted-foreground">
-          Importe estudos do SCISPACE, "análises integrativas" ou outras fontes
+          {t('admin.import.description')}
         </p>
       </div>
       {activeTab === 'scispace-api' && (

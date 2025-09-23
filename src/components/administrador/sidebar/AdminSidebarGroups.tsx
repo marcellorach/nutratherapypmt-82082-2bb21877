@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   SidebarGroup, 
   SidebarGroupContent, 
@@ -19,6 +20,7 @@ interface AdminSidebarGroupsProps {
 }
 
 const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, setCurrentStep }) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   
   const handleStepClick = (step: string) => {
@@ -31,7 +33,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Base Conhecimento/Relacional */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Base Conhecimento/Relacional
+          {t('admin.sidebar.groups.knowledgeBase')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -46,7 +48,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Processamento de Dados */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Processamento de Dados
+          {t('admin.sidebar.groups.dataProcessing')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -61,7 +63,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Ações */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Ações
+          {t('admin.sidebar.groups.actions')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -76,7 +78,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Pesquisa e Desenvolvimento */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Pesquisa e Desenvolvimento
+          {t('admin.sidebar.groups.research')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -91,7 +93,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Configuração */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Configuração
+          {t('admin.sidebar.groups.configuration')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>

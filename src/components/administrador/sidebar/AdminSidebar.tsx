@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -17,6 +18,7 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep }) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleSettingsClick = () => {
@@ -42,7 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentStep, setCurrentStep
             onClick={handleSettingsClick}
           >
             <Settings className="mr-2 h-4 w-4" />
-            Configurações
+            {t('admin.sidebar.items.settings')}
           </Button>
         </div>
       </SidebarFooter>

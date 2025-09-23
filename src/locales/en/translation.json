@@ -62,5 +62,84 @@
       "completed": "Completed",
       "planned": "Planned"
     }
+  },
+  "admin": {
+    "import": {
+      "title": "Import Scientific Studies",
+      "description": "Import studies from SCISPACE, \"integrative analyses\" or other sources",
+      "tabs": {
+        "fileUpload": "File Upload",
+        "history": "History"
+      }
+    },
+    "sidebar": {
+      "groups": {
+        "knowledgeBase": "Knowledge Base",
+        "dataProcessing": "Data Processing",
+        "actions": "Actions",
+        "research": "Research",
+        "configuration": "Configuration"
+      },
+      "items": {
+        "scientificStudies": "Scientific Studies",
+        "nutraceuticalDatabase": "Nutraceutical Database",
+        "nutraceuticals": "Nutraceuticals",
+        "relations": "Relations",
+        "clinicalRules": "Clinical Rules",
+        "manageOutcomes": "Manage Outcomes",
+        "settings": "Settings",
+        "importData": "Import Data",
+        "multiAgentSimulation": "Multi-Agent Simulation",
+        "visualization": "Visualization",
+        "studyProposition": "Study Proposition",
+        "plannedStudies": "Planned Studies",
+        "ongoingStudies": "Ongoing Studies",
+        "completedStudies": "Completed Studies",
+        "predictiveModels": "Predictive Models",
+        "knowledgeBaseConfig": "Knowledge Base",
+        "aiConfig": "AI Configuration",
+        "aiPrompts": "AI Prompts"
+      }
+    },
+    "tabs": {
+      "estudos": "Scientific Studies",
+      "nutraceuticos": "Nutraceuticals",
+      "nutraceu-gerenciamento": "Nutraceutical Management",
+      "relacoes": "Relations",
+      "regras": "Clinical Rules",
+      "outcomes-management": "Manage Outcomes",
+      "import": "Import Data",
+      "analysis": "Multi-Agent Analysis",
+      "visualization": "Data Visualization",
+      "analytics": "Analytics",
+      "study-proposition": "Study Proposition",
+      "planned-studies": "Planned Studies",
+      "ongoing-studies": "Ongoing Studies",
+      "completed-studies": "Completed Studies",
+      "predictive-models": "Predictive Models",
+      "knowledge-base-settings": "Knowledge Base Settings",
+      "data-processing-settings": "Data Processing Settings",
+      "config-ia": "AI Configuration",
+      "prompts": "AI Prompts"
+    },
+    "visualization": {
+      "title": "Data Visualization",
+      "description": "Analysis and visualization of identified patterns",
+      "period": "Period:",
+      "selectPeriod": "Select period",
+      "periods": {
+        "1m": "Last month",
+        "3m": "3 months",
+        "6m": "6 months",
+        "1y": "1 year",
+        "all": "All"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "conditions": "Health Conditions",
+        "treatments": "Treatments",
+        "nutraceuticals": "Nutraceuticals"
+      }
+    }
   }
 }

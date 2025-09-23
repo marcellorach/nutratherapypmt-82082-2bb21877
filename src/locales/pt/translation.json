@@ -62,5 +62,84 @@
       "completed": "Concluídos",
       "planned": "Planejados"
     }
+  },
+  "admin": {
+    "import": {
+      "title": "Importar Estudos Científicos",
+      "description": "Importe estudos do SCISPACE, \"análises integrativas\" ou outras fontes",
+      "tabs": {
+        "fileUpload": "Upload de Arquivos",
+        "history": "Histórico"
+      }
+    },
+    "sidebar": {
+      "groups": {
+        "knowledgeBase": "Base de Conhecimento",
+        "dataProcessing": "Processamento de Dados",
+        "actions": "Ações",
+        "research": "Pesquisa",
+        "configuration": "Configuração"
+      },
+      "items": {
+        "scientificStudies": "Estudos Científicos",
+        "nutraceuticalDatabase": "Banco de Nutracêuticos",
+        "nutraceuticals": "Nutracêuticos",
+        "relations": "Relações",
+        "clinicalRules": "Regras Clínicas",
+        "manageOutcomes": "Gerenciar Outcomes",
+        "settings": "Configurações",
+        "importData": "Importar Dados",
+        "multiAgentSimulation": "Simulação Multi-Agente",
+        "visualization": "Visualização",
+        "studyProposition": "Proposição de Estudos",
+        "plannedStudies": "Estudos Planejados",
+        "ongoingStudies": "Estudos em Andamento",
+        "completedStudies": "Estudos Concluídos",
+        "predictiveModels": "Modelos Preditivos",
+        "knowledgeBaseConfig": "Base de Conhecimento",
+        "aiConfig": "Config. de IA",
+        "aiPrompts": "Prompts da IA"
+      }
+    },
+    "tabs": {
+      "estudos": "Estudos Científicos",
+      "nutraceuticos": "Nutracêuticos",
+      "nutraceu-gerenciamento": "Gerenciamento de Nutracêuticos",
+      "relacoes": "Relações",
+      "regras": "Regras Clínicas",
+      "outcomes-management": "Gerenciar Outcomes",
+      "import": "Importar Dados",
+      "analysis": "Análise Multi-Agente",
+      "visualization": "Visualização de Dados",
+      "analytics": "Analytics",
+      "study-proposition": "Proposição de Estudos",
+      "planned-studies": "Estudos Planejados",
+      "ongoing-studies": "Estudos em Andamento",
+      "completed-studies": "Estudos Concluídos",
+      "predictive-models": "Modelos Preditivos",
+      "knowledge-base-settings": "Configurações da Base de Conhecimento",
+      "data-processing-settings": "Configurações de Processamento",
+      "config-ia": "Configuração de IA",
+      "prompts": "Prompts da IA"
+    },
+    "visualization": {
+      "title": "Visualização de Dados",
+      "description": "Análise e visualização dos padrões identificados",
+      "period": "Período:",
+      "selectPeriod": "Selecionar período",
+      "periods": {
+        "1m": "Último mês",
+        "3m": "3 meses",
+        "6m": "6 meses",
+        "1y": "1 ano",
+        "all": "Todos"
+      },
+      "tabs": {
+        "overview": "Visão Geral",
+        "conditions": "Condições de Saúde",
+        "treatments": "Tratamentos",
+        "nutraceuticals": "Nutracêuticos"
+      }
+    }
   }
 }
