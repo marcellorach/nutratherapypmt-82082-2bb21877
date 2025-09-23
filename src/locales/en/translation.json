@@ -1,324 +1,48 @@
-
 {
   "common": {
-    "madeWith": "Made with",
-    "by": "by",
-    "home": "Home",
-    "veterinarian": "Veterinarian",
-    "tutor": "Tutor",
-    "researchDev": "R&D",
-    "logout": "Logout",
-    "settings": "Settings",
-    "generateRandomData": "Generate random data for example",
-    "learnMore": "Learn more",
-    "startNow": "Start now",
-    "backToPatients": "Back to patient list"
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "add": "Add",
+    "remove": "Remove",
+    "view": "View",
+    "close": "Close",
+    "open": "Open"
   },
   "home": {
     "title": "NutraTherapy",
-    "subtitle": "Mass personalized nutraceutical therapy platform and R&D",
-    "innovativeApproach": "Our innovative approach",
-    "forVeterinarians": "For Veterinarians",
-    "forVeterinariansDesc": "Access clinical data, consult AI for personalized recommendations, and view scientific evidence.",
-    "forTutors": "For Tutors",
-    "forTutorsDesc": "Receive simplified explanations about recommendations and track your pet's progress with personalized treatments.",
-    "advancedRD": "Advanced R&D",
-    "advancedRDDesc": "Access our research and development platform to manage scientific studies and nutraceuticals.",
-    "degenerativeDiseases": "Mitigation of degenerative diseases",
-    "scientificResearch": "Scientific Research",
-    "scientificResearchDesc": "Our platform integrates clinical study results and nutraceutical research to create evidence-based treatments.",
-    "individualizedTreatment": "Individualized Treatment",
-    "individualizedTreatmentDesc": "We combine specific clinical data from each pet with predictive models to create personalized treatment plans that maximize results.",
-    "methodology": "Methodology"
+    "subtitle": "Intelligent Nutraceutical Platform for Pets",
+    "systemInfo": "System Information",
+    "nutraceuticals": "250+ Nutraceuticals",
+    "scientificStudies": "180+ Scientific Studies",
+    "treatableConditions": "45+ Treatable Conditions",
+    "dailyRecommendations": "Daily Recommendations"
   },
   "navbar": {
-    "researchDev": "R&D Area",
-    "platform": "Nutraceutical research and development platform"
+    "language": "Language",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login"
   },
   "veterinarian": {
-    "portal": "Veterinarian Portal",
-    "portalDesc": "Manage clinical data and get personalized recommendations",
-    "searchPet": "Search pet...",
-    "newPet": "New Pet",
-    "patientsFound": "{{count}} patients found",
-    "patient_one": "{{count}} patient found",
-    "patient_other": "{{count}} patients found",
-    "filter": "Filter",
-    "treatmentPlan": "Treatment Plan:",
-    "createdOn": "Created on:",
-    "veterinarianNotes": "Veterinarian Notes",
-    "report": "Report",
-    "savePlan": "Save complete plan",
-    "savingPlan": "Saving plan...",
-    "newRecommendation": "New Recommendation",
-    "noPetSelected": "No pet selected",
-    "selectPetPrompt": "Select a pet in the \"Pets\" tab to see their recommendations.",
-    "noPlanExists": "doesn't have recommendations",
-    "createPlanPrompt": "Create a treatment plan for this pet."
-  },
-  "research": {
-    "tabs": {
-      "ongoing": "Ongoing",
-      "completed": "Completed",
-      "planned": "Planned"
-    }
-  },
-  "admin": {
-    "import": {
-      "title": "Import Scientific Studies",
-      "description": "Import studies from SCISPACE, \"integrative analyses\" or other sources",
-      "tabs": {
-        "fileUpload": "File Upload",
-        "history": "History"
-      }
+    "search": {
+      "placeholder": "Search pets by name, owner or ID...",
+      "noResults": "No pets found with this term"
     },
-    "sidebar": {
-      "groups": {
-        "knowledgeBase": "Knowledge Base",
-        "dataProcessing": "Data Processing",
-        "actions": "Actions",
-        "research": "Research",
-        "configuration": "Configuration"
-      },
-      "items": {
-        "scientificStudies": "Scientific Studies",
-        "nutraceuticalDatabase": "Nutraceutical Database",
-        "nutraceuticals": "Nutraceuticals",
-        "relations": "Relations",
-        "clinicalRules": "Clinical Rules",
-        "manageOutcomes": "Manage Outcomes",
-        "settings": "Settings",
-        "importData": "Import Data",
-        "multiAgentSimulation": "Multi-Agent Simulation",
-        "visualization": "Visualization",
-        "studyProposition": "Study Proposition",
-        "plannedStudies": "Planned Studies",
-        "ongoingStudies": "Ongoing Studies",
-        "completedStudies": "Completed Studies",
-        "predictiveModels": "Predictive Models",
-        "knowledgeBaseConfig": "Knowledge Base",
-        "aiConfig": "AI Configuration",
-        "aiPrompts": "AI Prompts"
-      }
-    },
-    "tabs": {
-      "estudos": "Scientific Studies",
-      "nutraceuticos": "Nutraceuticals",
-      "nutraceu-gerenciamento": "Nutraceutical Management",
-      "relacoes": "Relations",
-      "regras": "Clinical Rules",
-      "outcomes-management": "Manage Outcomes",
-      "import": "Import Data",
-      "analysis": "Multi-Agent Analysis",
-      "visualization": "Data Visualization",
-      "analytics": "Analytics",
-      "study-proposition": "Study Proposition",
-      "planned-studies": "Planned Studies",
-      "ongoing-studies": "Ongoing Studies",
-      "completed-studies": "Completed Studies",
-      "predictive-models": "Predictive Models",
-      "knowledge-base-settings": "Knowledge Base Settings",
-      "data-processing-settings": "Data Processing Settings",
-      "config-ia": "AI Configuration",
-      "prompts": "AI Prompts"
-    },
-    "visualization": {
-      "title": "Data Visualization",
-      "description": "Analysis and visualization of identified patterns",
-      "period": "Period:",
-      "selectPeriod": "Select period",
-      "periods": {
-        "1m": "Last month",
-        "3m": "3 months",
-        "6m": "6 months",
-        "1y": "1 year",
-        "all": "All"
-      },
-      "tabs": {
-        "overview": "Overview",
-        "conditions": "Health Conditions",
-        "treatments": "Treatments",
-        "nutraceuticals": "Nutraceuticals"
-  },
-  "analytics": {
-    "title": "Intelligent Analytics",
-    "description": "Detailed analysis of treatability and prescription intelligence",
-    "sections": {
-      "executive": "Executive Overview",
-      "detailed": "Detailed Analysis",
-      "trends": "Performance & Trends"
-    },
-    "kpis": {
-      "activeNutraceuticals": "Active Nutraceuticals",
-      "averageEfficacy": "Average Efficacy",
-      "treatabilityIndex": "Treatability Index",
-      "prescriptionCoverage": "Prescription Coverage",
-      "therapeuticGaps": "Therapeutic Gaps",
-      "marketPenetration": "Market Penetration",
-      "clinicalEvidence": "Clinical Evidence",
-      "costEffectiveness": "Cost Effectiveness"
-    },
-    "charts": {
-      "globalEfficacy": "Global Comparative Efficacy",
-      "treatabilityMatrix": "Treatability Matrix by Condition",
-      "prescriptionIntelligence": "Prescription Intelligence",
-      "discoveryPipeline": "Discovery Pipeline",
-      "performanceTrends": "Performance Trends",
-      "competitiveBenchmark": "Competitive Benchmark"
-    },
-    "actions": {
-      "refresh": "Refresh Data",
-      "export": "Export Report",
-      "selectConditions": "Select conditions to filter",
-      "viewDetailed": "View Detailed Analysis"
-    },
-    "categories": {
-      "prevention": "Prevention",
-      "treatment": "Treatment",
-      "support": "Support"
-    },
-    "insights": {
-      "positioning": "Positioning Insights",
-      "topPerformers": "Top Performers",
-      "opportunities": "Opportunities",
-      "highValue": "High Value",
-      "highPerformance": "High Performance",
-      "sustainable": "Sustainable",
-      "reevaluate": "Reevaluate"
-    },
-    "metrics": {
-      "highestCoverage": "Highest Coverage",
-      "conditionsCovered": "Conditions Covered",
-      "aboveAverage": "Above Average",
-      "atAverage": "At Average",
-      "belowAverage": "Below Average",
-      "bestInClass": "Best in Class",
-      "marketAverage": "Market Average",
-      "currentPerformance": "Current Performance"
-    },
-    "stages": {
-      "discovery": "Discovery",
-      "research": "Research", 
-      "development": "Development",
-      "validation": "Validation",
-      "market": "Market"
-    }
-  },
-  "roi": {
-    "title": "ROI Intelligence & Business Case",
-    "description": "Advanced predictive analysis and scenario simulation for veterinary nutraceuticals",
-    "buttons": {
-      "exportReport": "Export Report",
-      "updateAnalysis": "Update Analysis",
-      "simulate": "Simulate Business Case"
-    },
-    "kpis": {
-      "totalROI": "Average Total ROI",
-      "totalROIDesc": "Average nutraceutical return",
-      "preventiveROI": "Preventive ROI",
-      "preventiveROIDesc": "Higher return in prevention",
-      "sustainabilityIndex": "Sustainability Index",
-      "sustainabilityIndexDesc": "Long-term viability",
-      "marketPenetration": "Market Penetration", 
-      "marketPenetrationDesc": "Available opportunities"
-    },
-    "tabs": {
-      "overview": "Executive Overview",
-      "opportunities": "Opportunities",
-      "predictive": "Predictive Analysis",
-      "simulator": "Simulator"
-    },
-    "summary": {
-      "title": "ROI Comparative Analysis",
-      "description": "Comparison between preventive approaches vs. reactive treatment",
-      "preventiveApproach": "Preventive Approach",
-      "reactivetreatment": "Reactive Treatment",
-      "averageROI": "Average ROI:",
-      "costPerPetYear": "Cost per Pet/Year:",
-      "caseReduction": "Case Reduction:",
-      "costPerCase": "Cost per Case:",
-      "incidenceRate": "Incidence Rate:",
-      "competitiveAdvantage": "Competitive Advantage",
-      "preventionAdvantage": "Prevention offers {{percent}}% superior ROI compared to reactive treatment"
-    },
-    "sustainability": {
-      "title": "Sustainability Metrics",
-      "avgCLV": "Average CLV (24m):",
-      "retentionRate": "Retention Rate:",
-      "avgPayback": "Average Payback:",
-      "contributionMargin": "Contribution Margin:"
-    },
-    "clinicalImpact": {
-      "title": "Clinical Impact",
-      "consultationReduction": "Consultation reduction:",
-      "emergencyReduction": "Emergency reduction:",
-      "qualityImprovement": "Quality of life improvement:",
-      "tutorSatisfaction": "Tutor satisfaction:"
-    },
-    "methodology": {
-      "title": "Methodology and Technical Parameters",
-      "description": "Detail of models and algorithms used in predictive analysis",
-      "calculationParameters": "Calculation Parameters",
-      "modelsUsed": "Models Used",
-      "parameters": {
-        "baseIncidenceRate": "Base incidence rate",
-        "protocolReduction": "Protocol reduction",
-        "avgTreatmentCost": "Average treatment cost",
-        "preventiveCost": "Preventive protocol cost"
-      }
-    },
-    "simulator": {
-      "title": "Business Case Simulator",
-      "description": "Configure parameters and simulate different implementation scenarios",
-      "clinicProfile": "Clinic Profile",
-      "initialInvestment": "Initial Investment (R$)",
-      "timeHorizon": "Time Horizon (months)",
-      "preventiveFocus": "Preventive Focus (%)",
-      "riskTolerance": "Risk Tolerance",
-      "riskLevels": {
-        "low": "Low - Conservative",
-        "medium": "Medium - Balanced",
-        "high": "High - Aggressive"
-      },
-      "results": {
-        "projectedROI": "Projected ROI",
-        "payback": "Payback",
-        "netProfit": "Net Profit",
-        "confidence": "Confidence", 
-        "months": "months"
-      },
-      "tabs": {
-        "summary": "Summary",
-        "breakdown": "Breakdown",
-        "timeline": "Timeline",
-        "risks": "Risks"
-      },
-      "breakdown": {
-        "costDistribution": "Cost Distribution",
-        "revenueDistribution": "Revenue Distribution",
-        "implementation": "Implementation",
-        "training": "Training",
-        "initialStock": "Initial Stock",
-        "marketing": "Marketing",
-        "prevention": "Prevention",
-        "treatment": "Treatment"
-      },
-      "timeline": {
-        "monthlyProjection": "Monthly Projection",
-        "revenue": "Revenue",
-        "costs": "Costs",
-        "profit": "Profit"
-      },
-      "riskAnalysis": {
-        "title": "Risk Analysis",
-        "riskLevel": "Risk Level:",
-        "mainFactors": "Main Risk Factors:",
-        "levels": {
-          "low": "Low",
-          "medium": "Medium", 
-          "high": "High"
-        }
-      }
+    "dashboard": {
+      "title": "Veterinary Dashboard",
+      "recentPatients": "Recent Patients",
+      "pendingRecommendations": "Pending Recommendations"
     }
   },
   "research": {
@@ -329,7 +53,7 @@
         "new": "New",
         "approved": "Approved",
         "rejected": "Rejected",
-        "inAnalysis": "Under analysis"
+        "inAnalysis": "Under Analysis"
       },
       "origin": {
         "ai": "AI Suggestion",
@@ -338,9 +62,9 @@
         "unknown": "Unknown origin"
       },
       "fields": {
-        "reasoning": "Reasoning",
+        "reasoning": "AI Reasoning",
         "suggestedPopulation": "Suggested Population",
-        "suggestedMethodology": "Suggested Methodology",
+        "suggestedMethodology": "Suggested Methodology", 
         "basedOn": "Based on:",
         "suggestedMarkers": "Suggested Markers:"
       },
@@ -378,65 +102,54 @@
     "password": "Password",
     "firstName": "First Name",
     "lastName": "Last Name",
-    "confirmPassword": "Confirm Password",
-    "loginButton": "Sign In",
-    "registerButton": "Create Account",
-    "loading": "Processing...",
-    "loginError": "Login error",
-    "registerError": "Registration error",
-    "invalidCredentials": "Invalid credentials. Please check your email and password.",
-    "minChars": "must have at least",
-    "characters": "characters",
-    "invalidEmail": "Invalid email",
-    "passwordsNotMatch": "Passwords do not match"
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginHere": "Login here",
+    "registerHere": "Register here"
   },
   "buttons": {
     "back": "Back",
-    "access": "Access",
-    "login": "Login",
-    "register": "Register",
-    "generateData": "Generate Random Data",
-    "enterPlatform": "Enter Platform"
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "continue": "Continue",
+    "finish": "Finish",
+    "access": "Access"
   },
   "messages": {
-    "loginSuccess": "Login successful!",
-    "registerSuccess": "Account created successfully!",
-    "noResults": "No results found",
-    "noPetsFound": "No pets found with this search term"
+    "success": "Operation completed successfully!",
+    "error": "An error occurred. Please try again.",
+    "warning": "Warning: Please check the entered data.",
+    "info": "Important information."
   },
   "placeholders": {
-    "searchPet": "Search pet...",
-    "email": "your@email.com",
-    "password": "Password",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "confirmPassword": "Confirm your password"
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "enterName": "Enter your name",
+    "searchPets": "Search pets..."
   },
   "system": {
-    "information": "System Information",
-    "nutraceuticals": "Registered Nutraceuticals",
-    "studies": "Scientific Studies",
-    "conditions": "Treatable Conditions",
-    "users": "Active Users"
+    "nutraceuticals": "250+ Nutraceuticals",
+    "studies": "180+ Scientific Studies",
+    "conditions": "45+ Treatable Conditions"
   },
   "welcome": {
-    "title": "Welcome back!",
-    "subtitle": "Scientific base of 267 studies stratified in 35 nutraceuticals, 95 interactions with veterinary conditions and efficacy index of 4.2/5",
-    "loggedInAs": "You are logged in as",
-    "accessPlatform": "Access Platform",
-    "loginDescription": "Login to access all NutraTherapy PET system features. Our platform offers personalized solutions for tutors, veterinarians and researchers."
+    "title": "Welcome to NutraTherapy",
+    "subtitle": "Select your access area to continue"
   },
   "areas": {
     "tutor": {
-      "title": "For Tutors",
+      "title": "For Pet Owners",
       "description": "View personalized recommendations for your pet, understand treatments and track progress.",
-      "titleArea": "Tutor Area",
+      "titleArea": "Pet Owner Area",
       "descriptionArea": "Follow treatment plans and recommendations for your pet."
     },
     "veterinarian": {
       "title": "For Veterinarians",
       "description": "Access clinical data, consult scientific evidence and create personalized treatment plans.",
-      "titleArea": "Veterinarian Area",
+      "titleArea": "Veterinary Area",
       "descriptionArea": "Analyze clinical data and create evidence-based treatment plans.",
       "restrictedAccess": "Access restricted to veterinarians"
     },

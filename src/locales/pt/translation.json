@@ -1,324 +1,48 @@
-
 {
   "common": {
-    "madeWith": "Feito com",
-    "by": "por",
-    "home": "Início",
-    "veterinarian": "Veterinário",
-    "tutor": "Tutor",
-    "researchDev": "P&D",
-    "logout": "Sair",
-    "settings": "Configurações",
-    "generateRandomData": "Gerar dados aleatórios para exemplo",
-    "learnMore": "Saiba mais",
-    "startNow": "Comece agora",
-    "backToPatients": "Voltar para lista de pacientes"
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "view": "Visualizar",
+    "close": "Fechar",
+    "open": "Abrir"
   },
   "home": {
     "title": "NutraTherapy",
-    "subtitle": "Plataforma de terapia nutraceutica personalizada em massa e P&D",
-    "innovativeApproach": "Nossa abordagem inovadora",
-    "forVeterinarians": "Para Veterinários",
-    "forVeterinariansDesc": "Acesse dados clínicos, consulte a IA para recomendações personalizadas e visualize evidências científicas.",
-    "forTutors": "Para Tutores",
-    "forTutorsDesc": "Receba explicações simplificadas sobre recomendações e acompanhe o progresso do seu pet com tratamentos personalizados.",
-    "advancedRD": "P&D Avançada",
-    "advancedRDDesc": "Acesse nossa plataforma de pesquisa e desenvolvimento para gerenciar estudos científicos e nutracêuticos.",
-    "degenerativeDiseases": "Mitigação de doenças degenerativas",
-    "scientificResearch": "Pesquisa Científica",
-    "scientificResearchDesc": "Nossa plataforma integra resultados de estudos clínicos e pesquisas em nutracêuticos para criar tratamentos baseados em evidências científicas sólidas.",
-    "individualizedTreatment": "Tratamento Individualizado",
-    "individualizedTreatmentDesc": "Combinamos dados clínicos específicos de cada pet com modelos preditivos para criar planos de tratamento personalizados que maximizam resultados.",
-    "methodology": "Metodologia"
+    "subtitle": "Plataforma Inteligente de Nutracêuticos para Pets",
+    "systemInfo": "Informações do Sistema",
+    "nutraceuticals": "250+ Nutracêuticos",
+    "scientificStudies": "180+ Estudos Científicos", 
+    "treatableConditions": "45+ Condições Tratáveis",
+    "dailyRecommendations": "Recomendações Diárias"
   },
   "navbar": {
-    "researchDev": "Área de P&D",
-    "platform": "Plataforma de pesquisa e desenvolvimento de nutracêuticos"
+    "language": "Idioma",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "login": "Entrar"
   },
   "veterinarian": {
-    "portal": "Portal do Veterinário",
-    "portalDesc": "Gerencie dados clínicos e obtenha recomendações personalizadas",
-    "searchPet": "Buscar pet...",
-    "newPet": "Novo Pet",
-    "patientsFound": "{{count}} pacientes encontrados",
-    "patient_one": "{{count}} paciente encontrado",
-    "patient_other": "{{count}} pacientes encontrados",
-    "filter": "Filtrar",
-    "treatmentPlan": "Plano de Tratamento:",
-    "createdOn": "Criado em:",
-    "veterinarianNotes": "Notas do Veterinário",
-    "report": "Relatório",
-    "savePlan": "Salvar plano completo",
-    "savingPlan": "Salvando plano...",
-    "newRecommendation": "Nova Recomendação",
-    "noPetSelected": "Nenhum pet selecionado",
-    "selectPetPrompt": "Selecione um pet na aba \"Pets\" para ver suas recomendações.",
-    "noPlanExists": "não possui recomendações",
-    "createPlanPrompt": "Crie um plano de tratamento para este pet."
-  },
-  "research": {
-    "tabs": {
-      "ongoing": "Em Andamento",
-      "completed": "Concluídos",
-      "planned": "Planejados"
-    }
-  },
-  "admin": {
-    "import": {
-      "title": "Importar Estudos Científicos",
-      "description": "Importe estudos do SCISPACE, \"análises integrativas\" ou outras fontes",
-      "tabs": {
-        "fileUpload": "Upload de Arquivos",
-        "history": "Histórico"
-      }
+    "search": {
+      "placeholder": "Buscar pets por nome, tutor ou ID...",
+      "noResults": "Nenhum pet encontrado com esse termo"
     },
-    "sidebar": {
-      "groups": {
-        "knowledgeBase": "Base de Conhecimento",
-        "dataProcessing": "Processamento de Dados",
-        "actions": "Ações",
-        "research": "Pesquisa",
-        "configuration": "Configuração"
-      },
-      "items": {
-        "scientificStudies": "Estudos Científicos",
-        "nutraceuticalDatabase": "Banco de Nutracêuticos",
-        "nutraceuticals": "Nutracêuticos",
-        "relations": "Relações",
-        "clinicalRules": "Regras Clínicas",
-        "manageOutcomes": "Gerenciar Outcomes",
-        "settings": "Configurações",
-        "importData": "Importar Dados",
-        "multiAgentSimulation": "Simulação Multi-Agente",
-        "visualization": "Visualização",
-        "studyProposition": "Proposição de Estudos",
-        "plannedStudies": "Estudos Planejados",
-        "ongoingStudies": "Estudos em Andamento",
-        "completedStudies": "Estudos Concluídos",
-        "predictiveModels": "Modelos Preditivos",
-        "knowledgeBaseConfig": "Base de Conhecimento",
-        "aiConfig": "Config. de IA",
-        "aiPrompts": "Prompts da IA"
-      }
-    },
-    "tabs": {
-      "estudos": "Estudos Científicos",
-      "nutraceuticos": "Nutracêuticos",
-      "nutraceu-gerenciamento": "Gerenciamento de Nutracêuticos",
-      "relacoes": "Relações",
-      "regras": "Regras Clínicas",
-      "outcomes-management": "Gerenciar Outcomes",
-      "import": "Importar Dados",
-      "analysis": "Análise Multi-Agente",
-      "visualization": "Visualização de Dados",
-      "analytics": "Analytics",
-      "study-proposition": "Proposição de Estudos",
-      "planned-studies": "Estudos Planejados",
-      "ongoing-studies": "Estudos em Andamento",
-      "completed-studies": "Estudos Concluídos",
-      "predictive-models": "Modelos Preditivos",
-      "knowledge-base-settings": "Configurações da Base de Conhecimento",
-      "data-processing-settings": "Configurações de Processamento",
-      "config-ia": "Configuração de IA",
-      "prompts": "Prompts da IA"
-    },
-    "visualization": {
-      "title": "Visualização de Dados",
-      "description": "Análise e visualização dos padrões identificados",
-      "period": "Período:",
-      "selectPeriod": "Selecionar período",
-      "periods": {
-        "1m": "Último mês",
-        "3m": "3 meses",
-        "6m": "6 meses",
-        "1y": "1 ano",
-        "all": "Todos"
-      },
-      "tabs": {
-        "overview": "Visão Geral",
-        "conditions": "Condições de Saúde",
-        "treatments": "Tratamentos",
-        "nutraceuticals": "Nutracêuticos"
-  },
-  "analytics": {
-    "title": "Analytics Inteligente",
-    "description": "Análise detalhada de tratabilidade e inteligência de prescrição",
-    "sections": {
-      "executive": "Visão Executiva",
-      "detailed": "Análises Detalhadas",
-      "trends": "Performance & Tendências"
-    },
-    "kpis": {
-      "activeNutraceuticals": "Nutracêuticos Ativos",
-      "averageEfficacy": "Eficácia Média",
-      "treatabilityIndex": "Índice de Tratabilidade",
-      "prescriptionCoverage": "Cobertura de Prescrição",
-      "therapeuticGaps": "Gaps Terapêuticos",
-      "marketPenetration": "Penetração de Mercado",
-      "clinicalEvidence": "Evidência Clínica",
-      "costEffectiveness": "Custo-Efetividade"
-    },
-    "charts": {
-      "globalEfficacy": "Eficácia Comparativa Global",
-      "treatabilityMatrix": "Matriz de Tratabilidade por Condição",
-      "prescriptionIntelligence": "Inteligência de Prescrição",
-      "discoveryPipeline": "Pipeline de Descoberta",
-      "performanceTrends": "Tendências de Performance",
-      "competitiveBenchmark": "Benchmark Competitivo"
-    },
-    "actions": {
-      "refresh": "Atualizar Dados",
-      "export": "Exportar Relatório",
-      "selectConditions": "Selecionar condições para filtrar",
-      "viewDetailed": "Ver Análise Detalhada"
-    },
-    "categories": {
-      "prevention": "Prevenção",
-      "treatment": "Tratamento",
-      "support": "Suporte"
-    },
-    "insights": {
-      "positioning": "Insights de Posicionamento",
-      "topPerformers": "Top Performers",
-      "opportunities": "Oportunidades",
-      "highValue": "Alto Valor",
-      "highPerformance": "Alta Performance",
-      "sustainable": "Sustentável",
-      "reevaluate": "Reavaliar"
-    },
-    "metrics": {
-      "highestCoverage": "Maior Cobertura",
-      "conditionsCovered": "Condições Cobertas",
-      "aboveAverage": "Acima da Média",
-      "atAverage": "Na Média",
-      "belowAverage": "Abaixo da Média",
-      "bestInClass": "Melhor da Classe",
-      "marketAverage": "Média do Mercado",
-      "currentPerformance": "Performance Atual"
-    },
-    "stages": {
-      "discovery": "Descoberta",
-      "research": "Pesquisa",
-      "development": "Desenvolvimento",
-      "validation": "Validação",
-      "market": "Mercado"
-    }
-  },
-  "roi": {
-    "title": "Inteligência de ROI & Business Case",
-    "description": "Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários",
-    "buttons": {
-      "exportReport": "Exportar Relatório",
-      "updateAnalysis": "Atualizar Análises",
-      "simulate": "Simular Business Case"
-    },
-    "kpis": {
-      "totalROI": "ROI Total Médio",
-      "totalROIDesc": "Retorno médio dos nutracêuticos",
-      "preventiveROI": "ROI Preventivo", 
-      "preventiveROIDesc": "Maior retorno em prevenção",
-      "sustainabilityIndex": "Índice Sustentabilidade",
-      "sustainabilityIndexDesc": "Viabilidade a longo prazo",
-      "marketPenetration": "Penetração Mercado",
-      "marketPenetrationDesc": "Oportunidades disponíveis"
-    },
-    "tabs": {
-      "overview": "Visão Executiva",
-      "opportunities": "Oportunidades", 
-      "predictive": "Análise Preditiva",
-      "simulator": "Simulador"
-    },
-    "summary": {
-      "title": "Análise Comparativa de ROI",
-      "description": "Comparação entre abordagens preventivas vs. tratamento reativo",
-      "preventiveApproach": "Abordagem Preventiva",
-      "reactivetreatment": "Tratamento Reativo",
-      "averageROI": "ROI Médio:",
-      "costPerPetYear": "Custo por Pet/Ano:",
-      "caseReduction": "Redução de Casos:",
-      "costPerCase": "Custo por Caso:",
-      "incidenceRate": "Taxa de Incidência:",
-      "competitiveAdvantage": "Vantagem Competitiva",
-      "preventionAdvantage": "Prevenção oferece ROI {{percent}}% superior ao tratamento reativo"
-    },
-    "sustainability": {
-      "title": "Métricas de Sustentabilidade",
-      "avgCLV": "CLV Médio (24m):",
-      "retentionRate": "Taxa de Retenção:",
-      "avgPayback": "Payback Médio:",
-      "contributionMargin": "Margem de Contribuição:"
-    },
-    "clinicalImpact": {
-      "title": "Impacto Clínico",
-      "consultationReduction": "Redução de consultas:",
-      "emergencyReduction": "Redução de emergências:",
-      "qualityImprovement": "Melhora qualidade de vida:",
-      "tutorSatisfaction": "Satisfação dos tutores:"
-    },
-    "methodology": {
-      "title": "Metodologia e Parâmetros Técnicos",
-      "description": "Detalhamento dos modelos e algoritmos utilizados nas análises preditivas",
-      "calculationParameters": "Parâmetros de Cálculo",
-      "modelsUsed": "Modelos Utilizados",
-      "parameters": {
-        "baseIncidenceRate": "Taxa base incidência",
-        "protocolReduction": "Redução com protocolo",
-        "avgTreatmentCost": "Custo médio tratamento",
-        "preventiveCost": "Custo protocolo preventivo"
-      }
-    },
-    "simulator": {
-      "title": "Simulador de Business Case",
-      "description": "Configure parâmetros e simule diferentes cenários de implementação",
-      "clinicProfile": "Perfil da Clínica",
-      "initialInvestment": "Investimento Inicial (R$)",
-      "timeHorizon": "Horizonte Temporal (meses)",
-      "preventiveFocus": "Foco Preventivo (%)",
-      "riskTolerance": "Tolerância ao Risco",
-      "riskLevels": {
-        "low": "Baixa - Conservador",
-        "medium": "Média - Equilibrado", 
-        "high": "Alta - Agressivo"
-      },
-      "results": {
-        "projectedROI": "ROI Projetado",
-        "payback": "Payback",
-        "netProfit": "Lucro Líquido",
-        "confidence": "Confiança",
-        "months": "meses"
-      },
-      "tabs": {
-        "summary": "Resumo",
-        "breakdown": "Detalhamento",
-        "timeline": "Timeline",
-        "risks": "Riscos"
-      },
-      "breakdown": {
-        "costDistribution": "Distribuição de Custos",
-        "revenueDistribution": "Distribuição de Receitas",
-        "implementation": "Implementação",
-        "training": "Treinamento",
-        "initialStock": "Estoque Inicial",
-        "marketing": "Marketing",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento"
-      },
-      "timeline": {
-        "monthlyProjection": "Projeção Mensal",
-        "revenue": "Receita",
-        "costs": "Custos", 
-        "profit": "Lucro"
-      },
-      "riskAnalysis": {
-        "title": "Análise de Riscos",
-        "riskLevel": "Nível de Risco:",
-        "mainFactors": "Principais Fatores de Risco:",
-        "levels": {
-          "low": "Baixo",
-          "medium": "Médio",
-          "high": "Alto"
-        }
-      }
+    "dashboard": {
+      "title": "Dashboard Veterinário",
+      "recentPatients": "Pacientes Recentes",
+      "pendingRecommendations": "Recomendações Pendentes"
     }
   },
   "research": {
@@ -378,53 +102,42 @@
     "password": "Senha",
     "firstName": "Nome",
     "lastName": "Sobrenome",
-    "confirmPassword": "Confirmar Senha",
-    "loginButton": "Entrar",
-    "registerButton": "Cadastrar",
-    "loading": "Processando...",
-    "loginError": "Erro ao fazer login",
-    "registerError": "Erro ao realizar cadastro",
-    "invalidCredentials": "Credenciais inválidas. Verifique seu e-mail e senha.",
-    "minChars": "deve ter no mínimo",
-    "characters": "caracteres",
-    "invalidEmail": "E-mail inválido",
-    "passwordsNotMatch": "As senhas não coincidem"
+    "confirmPassword": "Confirmar senha",
+    "forgotPassword": "Esqueci minha senha",
+    "noAccount": "Não tem conta?",
+    "hasAccount": "Já tem conta?",
+    "loginHere": "Entre aqui",
+    "registerHere": "Registre-se aqui"
   },
   "buttons": {
     "back": "Voltar",
-    "access": "Acessar",
-    "login": "Entrar",
-    "register": "Registrar",
-    "generateData": "Gerar Dados Aleatórios",
-    "enterPlatform": "Entrar na Plataforma"
+    "next": "Próximo",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "continue": "Continuar",
+    "finish": "Finalizar",
+    "access": "Acessar"
   },
   "messages": {
-    "loginSuccess": "Login realizado com sucesso!",
-    "registerSuccess": "Conta criada com sucesso!",
-    "noResults": "Nenhum resultado encontrado",
-    "noPetsFound": "Nenhum pet encontrado com esse termo"
+    "success": "Operação realizada com sucesso!",
+    "error": "Ocorreu um erro. Tente novamente.",
+    "warning": "Atenção: Verifique os dados informados.",
+    "info": "Informação importante."
   },
   "placeholders": {
-    "searchPet": "Pesquisar pet...",
-    "email": "seu@email.com",
-    "password": "Senha",
-    "firstName": "Nome",
-    "lastName": "Sobrenome",
-    "confirmPassword": "Confirme sua senha"
+    "enterEmail": "Digite seu e-mail",
+    "enterPassword": "Digite sua senha",
+    "enterName": "Digite seu nome",
+    "searchPets": "Buscar pets..."
   },
   "system": {
-    "information": "Informações do Sistema",
-    "nutraceuticals": "Nutracêuticos Cadastrados",
-    "studies": "Estudos Científicos",
-    "conditions": "Condições Tratáveis",
-    "users": "Usuários Ativos"
+    "nutraceuticals": "250+ Nutracêuticos",
+    "studies": "180+ Estudos Científicos", 
+    "conditions": "45+ Condições Tratáveis"
   },
   "welcome": {
-    "title": "Bem-vindo(a) de volta!",
-    "subtitle": "Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5",
-    "loggedInAs": "Você está conectado como",
-    "accessPlatform": "Acesse a Plataforma",
-    "loginDescription": "Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET. Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores."
+    "title": "Bem-vindo à NutraTherapy",
+    "subtitle": "Selecione sua área de acesso para continuar"
   },
   "areas": {
     "tutor": {
