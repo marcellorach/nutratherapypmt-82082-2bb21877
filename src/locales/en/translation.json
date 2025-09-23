@@ -360,6 +360,89 @@
         "direction": "Direction"
       }
     }
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "confirmPassword": "Confirm Password",
+    "loginButton": "Sign In",
+    "registerButton": "Create Account",
+    "loading": "Processing...",
+    "loginError": "Login error",
+    "registerError": "Registration error",
+    "invalidCredentials": "Invalid credentials. Please check your email and password.",
+    "minChars": "must have at least",
+    "characters": "characters",
+    "invalidEmail": "Invalid email",
+    "passwordsNotMatch": "Passwords do not match"
+  },
+  "buttons": {
+    "back": "Back",
+    "access": "Access",
+    "login": "Login",
+    "register": "Register",
+    "generateData": "Generate Random Data",
+    "enterPlatform": "Enter Platform"
+  },
+  "messages": {
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Account created successfully!",
+    "noResults": "No results found",
+    "noPetsFound": "No pets found with this search term"
+  },
+  "placeholders": {
+    "searchPet": "Search pet...",
+    "email": "your@email.com",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "confirmPassword": "Confirm your password"
+  },
+  "system": {
+    "information": "System Information",
+    "nutraceuticals": "Registered Nutraceuticals",
+    "studies": "Scientific Studies",
+    "conditions": "Treatable Conditions",
+    "users": "Active Users"
+  },
+  "welcome": {
+    "title": "Welcome back!",
+    "subtitle": "Scientific base of 267 studies stratified in 35 nutraceuticals, 95 interactions with veterinary conditions and efficacy index of 4.2/5",
+    "loggedInAs": "You are logged in as",
+    "accessPlatform": "Access Platform",
+    "loginDescription": "Login to access all NutraTherapy PET system features. Our platform offers personalized solutions for tutors, veterinarians and researchers."
+  },
+  "areas": {
+    "tutor": {
+      "title": "For Tutors",
+      "description": "View personalized recommendations for your pet, understand treatments and track progress.",
+      "titleArea": "Tutor Area",
+      "descriptionArea": "Follow treatment plans and recommendations for your pet."
+    },
+    "veterinarian": {
+      "title": "For Veterinarians",
+      "description": "Access clinical data, consult scientific evidence and create personalized treatment plans.",
+      "titleArea": "Veterinarian Area",
+      "descriptionArea": "Analyze clinical data and create evidence-based treatment plans.",
+      "restrictedAccess": "Access restricted to veterinarians"
+    },
+    "research": {
+      "title": "R&D + Knowledge Base",
+      "description": "Access research tools, develop studies and manage the scientific knowledge base.",
+      "titleArea": "R&D + Knowledge Base",
+      "descriptionArea": "Access research tools, develop studies and manage the scientific knowledge base."
+    },
+    "admin": {
+      "title": "For Administrators",
+      "description": "Manage system settings, users and platform integrations.",
+      "titleArea": "Administrator Area",
+      "descriptionArea": "Manage system settings, users and platform integrations.",
+      "restrictedAccess": "Access restricted to administrators"
+    }
   }
 }
   }

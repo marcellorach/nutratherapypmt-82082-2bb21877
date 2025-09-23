@@ -360,6 +360,89 @@
         "direction": "Direção"
       }
     }
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Registrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "confirmPassword": "Confirmar Senha",
+    "loginButton": "Entrar",
+    "registerButton": "Cadastrar",
+    "loading": "Processando...",
+    "loginError": "Erro ao fazer login",
+    "registerError": "Erro ao realizar cadastro",
+    "invalidCredentials": "Credenciais inválidas. Verifique seu e-mail e senha.",
+    "minChars": "deve ter no mínimo",
+    "characters": "caracteres",
+    "invalidEmail": "E-mail inválido",
+    "passwordsNotMatch": "As senhas não coincidem"
+  },
+  "buttons": {
+    "back": "Voltar",
+    "access": "Acessar",
+    "login": "Entrar",
+    "register": "Registrar",
+    "generateData": "Gerar Dados Aleatórios",
+    "enterPlatform": "Entrar na Plataforma"
+  },
+  "messages": {
+    "loginSuccess": "Login realizado com sucesso!",
+    "registerSuccess": "Conta criada com sucesso!",
+    "noResults": "Nenhum resultado encontrado",
+    "noPetsFound": "Nenhum pet encontrado com esse termo"
+  },
+  "placeholders": {
+    "searchPet": "Pesquisar pet...",
+    "email": "seu@email.com",
+    "password": "Senha",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "confirmPassword": "Confirme sua senha"
+  },
+  "system": {
+    "information": "Informações do Sistema",
+    "nutraceuticals": "Nutracêuticos Cadastrados",
+    "studies": "Estudos Científicos",
+    "conditions": "Condições Tratáveis",
+    "users": "Usuários Ativos"
+  },
+  "welcome": {
+    "title": "Bem-vindo(a) de volta!",
+    "subtitle": "Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5",
+    "loggedInAs": "Você está conectado como",
+    "accessPlatform": "Acesse a Plataforma",
+    "loginDescription": "Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET. Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores."
+  },
+  "areas": {
+    "tutor": {
+      "title": "Para Tutores",
+      "description": "Visualize recomendações personalizadas para seu pet, compreenda tratamentos e acompanhe a evolução.",
+      "titleArea": "Área do Tutor",
+      "descriptionArea": "Acompanhe planos de tratamento e recomendações para seu pet."
+    },
+    "veterinarian": {
+      "title": "Para Veterinários",
+      "description": "Acesse dados clínicos, consulte evidências científicas e crie planos de tratamento personalizados.",
+      "titleArea": "Área do Veterinário",
+      "descriptionArea": "Analise dados clínicos e crie planos de tratamento baseados em evidências.",
+      "restrictedAccess": "Acesso restrito para veterinários"
+    },
+    "research": {
+      "title": "P&D + Base de Conhecimento",
+      "description": "Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico.",
+      "titleArea": "P&D + Base de Conhecimento",
+      "descriptionArea": "Acesse ferramentas de pesquisa, desenvolva estudos e gerencie a base de conhecimento científico."
+    },
+    "admin": {
+      "title": "Para Administradores",
+      "description": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
+      "titleArea": "Área do Administrador",
+      "descriptionArea": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
+      "restrictedAccess": "Acesso restrito para administradores"
+    }
   }
 }
   }

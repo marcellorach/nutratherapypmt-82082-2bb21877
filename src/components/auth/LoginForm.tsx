@@ -10,14 +10,15 @@ import { Lock, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Schema de validação para login
-const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+const createLoginSchema = (t: any) => z.object({
+  email: z.string().email(t('auth.invalidEmail')),
+  password: z.string().min(6, `${t('auth.password')} ${t('auth.minChars')} 6 ${t('auth.characters')}`),
 });
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
+export type LoginFormValues = z.infer<ReturnType<typeof createLoginSchema>>;
 
 interface LoginFormProps {
   loading: boolean;
@@ -25,9 +26,10 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: {
       email: '',
       password: '',
@@ -43,9 +45,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
 
       if (error) {
         toast({
-          title: 'Erro ao fazer login',
+          title: t('auth.loginError'),
           description: error.message === 'Invalid login credentials' 
-            ? 'Credenciais inválidas. Verifique seu e-mail e senha.' 
+            ? t('auth.invalidCredentials')
             : error.message,
           variant: 'destructive',
         });
@@ -56,7 +58,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
       }
 
       toast({
-        title: 'Login realizado com sucesso!',
+        title: t('messages.loginSuccess'),
         variant: 'default',
       });
 
@@ -64,7 +66,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
     } catch (error: any) {
       console.error('Exceção no login:', error);
       toast({
-        title: 'Erro ao fazer login',
+        title: t('auth.loginError'),
         description: error.message,
         variant: 'destructive',
       });
@@ -79,12 +81,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>E-mail</FormLabel>
+              <FormLabel>{t('auth.email')}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input 
-                    placeholder="seu@email.com" 
+                    placeholder={t('placeholders.email')}
                     className="pl-10" 
                     {...field} 
                   />
@@ -100,12 +102,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Senha</FormLabel>
+              <FormLabel>{t('auth.password')}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input 
-                    placeholder="Senha" 
+                    placeholder={t('placeholders.password')}
                     type="password" 
                     className="pl-10" 
                     {...field} 
@@ -118,7 +120,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ loading }) => {
         />
         
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Processando...' : 'Entrar'}
+          {loading ? t('auth.loading') : t('auth.loginButton')}
         </Button>
       </form>
     </Form>
