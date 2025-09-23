@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -14,28 +15,30 @@ interface ExecutiveSummaryProps {
 }
 
 const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ roiMetrics }) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
-        <CardTitle>Análise Comparativa de ROI</CardTitle>
-        <CardDescription>Comparação entre abordagens preventivas vs. tratamento reativo</CardDescription>
+        <CardTitle>{t('roi.summary.title')}</CardTitle>
+        <CardDescription>{t('roi.summary.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="space-y-4">
             <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
-              <h4 className="font-semibold text-green-800 dark:text-green-300">Abordagem Preventiva</h4>
+              <h4 className="font-semibold text-green-800 dark:text-green-300">{t('roi.summary.preventiveApproach')}</h4>
               <div className="mt-2 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">ROI Médio:</span>
+                  <span className="text-sm">{t('roi.summary.averageROI')}</span>
                   <span className="font-bold text-green-600">{roiMetrics.preventiveROI}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Custo por Pet/Ano:</span>
+                  <span className="text-sm">{t('roi.summary.costPerPetYear')}</span>
                   <span className="font-medium">R$ 1.260</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Redução de Casos:</span>
+                  <span className="text-sm">{t('roi.summary.caseReduction')}</span>
                   <span className="font-medium">76%</span>
                 </div>
               </div>
@@ -44,18 +47,18 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ roiMetrics }) => {
           
           <div className="space-y-4">
             <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
-              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Tratamento Reativo</h4>
+              <h4 className="font-semibold text-orange-800 dark:text-orange-300">{t('roi.summary.reactivetreatment')}</h4>
               <div className="mt-2 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">ROI Médio:</span>
+                  <span className="text-sm">{t('roi.summary.averageROI')}</span>
                   <span className="font-bold text-orange-600">{roiMetrics.treatmentROI}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Custo por Caso:</span>
+                  <span className="text-sm">{t('roi.summary.costPerCase')}</span>
                   <span className="font-medium">R$ 3.840</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Taxa de Incidência:</span>
+                  <span className="text-sm">{t('roi.summary.incidenceRate')}</span>
                   <span className="font-medium">18%</span>
                 </div>
               </div>
@@ -66,9 +69,9 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ roiMetrics }) => {
         <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-semibold text-primary">Vantagem Competitiva</h4>
+              <h4 className="font-semibold text-primary">{t('roi.summary.competitiveAdvantage')}</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                Prevenção oferece ROI {roiMetrics.preventiveROI - roiMetrics.treatmentROI}% superior ao tratamento reativo
+                {t('roi.summary.preventionAdvantage', { percent: roiMetrics.preventiveROI - roiMetrics.treatmentROI })}
               </p>
             </div>
             <Badge className="bg-primary text-primary-foreground">

@@ -198,10 +198,167 @@
     },
     "stages": {
       "discovery": "Discovery",
-      "research": "Research",
+      "research": "Research", 
       "development": "Development",
       "validation": "Validation",
       "market": "Market"
+    }
+  },
+  "roi": {
+    "title": "ROI Intelligence & Business Case",
+    "description": "Advanced predictive analysis and scenario simulation for veterinary nutraceuticals",
+    "buttons": {
+      "exportReport": "Export Report",
+      "updateAnalysis": "Update Analysis",
+      "simulate": "Simulate Business Case"
+    },
+    "kpis": {
+      "totalROI": "Average Total ROI",
+      "totalROIDesc": "Average nutraceutical return",
+      "preventiveROI": "Preventive ROI",
+      "preventiveROIDesc": "Higher return in prevention",
+      "sustainabilityIndex": "Sustainability Index",
+      "sustainabilityIndexDesc": "Long-term viability",
+      "marketPenetration": "Market Penetration", 
+      "marketPenetrationDesc": "Available opportunities"
+    },
+    "tabs": {
+      "overview": "Executive Overview",
+      "opportunities": "Opportunities",
+      "predictive": "Predictive Analysis",
+      "simulator": "Simulator"
+    },
+    "summary": {
+      "title": "ROI Comparative Analysis",
+      "description": "Comparison between preventive approaches vs. reactive treatment",
+      "preventiveApproach": "Preventive Approach",
+      "reactivetreatment": "Reactive Treatment",
+      "averageROI": "Average ROI:",
+      "costPerPetYear": "Cost per Pet/Year:",
+      "caseReduction": "Case Reduction:",
+      "costPerCase": "Cost per Case:",
+      "incidenceRate": "Incidence Rate:",
+      "competitiveAdvantage": "Competitive Advantage",
+      "preventionAdvantage": "Prevention offers {{percent}}% superior ROI compared to reactive treatment"
+    },
+    "sustainability": {
+      "title": "Sustainability Metrics",
+      "avgCLV": "Average CLV (24m):",
+      "retentionRate": "Retention Rate:",
+      "avgPayback": "Average Payback:",
+      "contributionMargin": "Contribution Margin:"
+    },
+    "clinicalImpact": {
+      "title": "Clinical Impact",
+      "consultationReduction": "Consultation reduction:",
+      "emergencyReduction": "Emergency reduction:",
+      "qualityImprovement": "Quality of life improvement:",
+      "tutorSatisfaction": "Tutor satisfaction:"
+    },
+    "methodology": {
+      "title": "Methodology and Technical Parameters",
+      "description": "Detail of models and algorithms used in predictive analysis",
+      "calculationParameters": "Calculation Parameters",
+      "modelsUsed": "Models Used",
+      "parameters": {
+        "baseIncidenceRate": "Base incidence rate",
+        "protocolReduction": "Protocol reduction",
+        "avgTreatmentCost": "Average treatment cost",
+        "preventiveCost": "Preventive protocol cost"
+      }
+    },
+    "simulator": {
+      "title": "Business Case Simulator",
+      "description": "Configure parameters and simulate different implementation scenarios",
+      "clinicProfile": "Clinic Profile",
+      "initialInvestment": "Initial Investment (R$)",
+      "timeHorizon": "Time Horizon (months)",
+      "preventiveFocus": "Preventive Focus (%)",
+      "riskTolerance": "Risk Tolerance",
+      "riskLevels": {
+        "low": "Low - Conservative",
+        "medium": "Medium - Balanced",
+        "high": "High - Aggressive"
+      },
+      "results": {
+        "projectedROI": "Projected ROI",
+        "payback": "Payback",
+        "netProfit": "Net Profit",
+        "confidence": "Confidence", 
+        "months": "months"
+      },
+      "tabs": {
+        "summary": "Summary",
+        "breakdown": "Breakdown",
+        "timeline": "Timeline",
+        "risks": "Risks"
+      },
+      "breakdown": {
+        "costDistribution": "Cost Distribution",
+        "revenueDistribution": "Revenue Distribution",
+        "implementation": "Implementation",
+        "training": "Training",
+        "initialStock": "Initial Stock",
+        "marketing": "Marketing",
+        "prevention": "Prevention",
+        "treatment": "Treatment"
+      },
+      "timeline": {
+        "monthlyProjection": "Monthly Projection",
+        "revenue": "Revenue",
+        "costs": "Costs",
+        "profit": "Profit"
+      },
+      "riskAnalysis": {
+        "title": "Risk Analysis",
+        "riskLevel": "Risk Level:",
+        "mainFactors": "Main Risk Factors:",
+        "levels": {
+          "low": "Low",
+          "medium": "Medium", 
+          "high": "High"
+        }
+      }
+    }
+  },
+  "research": {
+    "suggestions": {
+      "title": "Research Suggestions",
+      "aiConfidence": "AI Confidence:",
+      "status": {
+        "new": "New",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "inAnalysis": "Under analysis"
+      },
+      "origin": {
+        "ai": "AI Suggestion",
+        "scientificCommittee": "Scientific Committee Suggestion",
+        "external": "External Suggestion",
+        "unknown": "Unknown origin"
+      },
+      "fields": {
+        "reasoning": "Reasoning",
+        "suggestedPopulation": "Suggested Population",
+        "suggestedMethodology": "Suggested Methodology",
+        "basedOn": "Based on:",
+        "suggestedMarkers": "Suggested Markers:"
+      },
+      "approvalChain": {
+        "inAnalysis": "Under analysis:",
+        "approvedByAll": "Approved by all committees"
+      },
+      "actions": {
+        "viewDetails": "View full details",
+        "reject": "Reject",
+        "approve": "Approve"
+      },
+      "approvalStages": {
+        "scientificSupervision": "Scientific Supervision",
+        "scientificCommittee": "Scientific Committee",
+        "ethicsCommittee": "Ethics Committee",
+        "direction": "Direction"
+      }
     }
   }
 }

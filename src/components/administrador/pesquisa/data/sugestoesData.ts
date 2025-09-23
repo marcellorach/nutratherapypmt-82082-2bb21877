@@ -10,6 +10,22 @@ export const approvalStages: ApprovalStage[] = [
   { id: 'direction', name: 'Direção', icon: Briefcase, color: 'green' }
 ];
 
+// Função para obter nomes traduzidos
+export const getApprovalStageTranslatedName = (stageId: string, t: any) => {
+  switch (stageId) {
+    case 'scientific_supervision':
+      return t('research.suggestions.approvalStages.scientificSupervision');
+    case 'scientific_committee':
+      return t('research.suggestions.approvalStages.scientificCommittee');
+    case 'ethics_committee':
+      return t('research.suggestions.approvalStages.ethicsCommittee');
+    case 'direction':
+      return t('research.suggestions.approvalStages.direction');
+    default:
+      return stageId;
+  }
+};
+
 // Mock data para sugestões de pesquisa da IA
 export const mockSugestoes: Sugestao[] = [
   {
