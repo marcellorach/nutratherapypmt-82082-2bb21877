@@ -350,8 +350,18 @@
       },
       "actions": {
         "viewDetails": "View full details",
+        "approve": "Approve",
         "reject": "Reject",
-        "approve": "Approve"
+        "startApproval": "Start approval",
+        "advanceApproval": "Advance to next stage"
+      },
+      "dialog": {
+        "aiReasoning": "AI Reasoning",
+        "overview": "Overview",
+        "evidence": "Evidence",
+        "resources": "Required Resources",
+        "noEvidenceData": "Evidence data not available for this suggestion.",
+        "noResourcesData": "Required resources not defined for this suggestion."
       },
       "approvalStages": {
         "scientificSupervision": "Scientific Supervision",
@@ -443,7 +453,5 @@
       "descriptionArea": "Manage system settings, users and platform integrations.",
       "restrictedAccess": "Access restricted to administrators"
     }
-  }
-}
   }
 }

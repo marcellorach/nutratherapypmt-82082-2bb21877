@@ -350,8 +350,18 @@
       },
       "actions": {
         "viewDetails": "Ver detalhes completos",
+        "approve": "Aprovar",
         "reject": "Rejeitar",
-        "approve": "Aprovar"
+        "startApproval": "Iniciar aprovação",
+        "advanceApproval": "Avançar para próxima etapa"
+      },
+      "dialog": {
+        "aiReasoning": "Raciocínio da IA",
+        "overview": "Visão Geral",
+        "evidence": "Evidências",
+        "resources": "Recursos Necessários",
+        "noEvidenceData": "Dados de evidência não disponíveis para esta sugestão.",
+        "noResourcesData": "Recursos necessários não definidos para esta sugestão."
       },
       "approvalStages": {
         "scientificSupervision": "Supervisão Científica",
@@ -443,7 +453,5 @@
       "descriptionArea": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
       "restrictedAccess": "Acesso restrito para administradores"
     }
-  }
-}
   }
 }
