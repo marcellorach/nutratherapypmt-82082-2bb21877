@@ -139,7 +139,71 @@
         "conditions": "Condições de Saúde",
         "treatments": "Tratamentos",
         "nutraceuticals": "Nutracêuticos"
-      }
+  },
+  "analytics": {
+    "title": "Analytics Inteligente",
+    "description": "Análise detalhada de tratabilidade e inteligência de prescrição",
+    "sections": {
+      "executive": "Visão Executiva",
+      "detailed": "Análises Detalhadas",
+      "trends": "Performance & Tendências"
+    },
+    "kpis": {
+      "activeNutraceuticals": "Nutracêuticos Ativos",
+      "averageEfficacy": "Eficácia Média",
+      "treatabilityIndex": "Índice de Tratabilidade",
+      "prescriptionCoverage": "Cobertura de Prescrição",
+      "therapeuticGaps": "Gaps Terapêuticos",
+      "marketPenetration": "Penetração de Mercado",
+      "clinicalEvidence": "Evidência Clínica",
+      "costEffectiveness": "Custo-Efetividade"
+    },
+    "charts": {
+      "globalEfficacy": "Eficácia Comparativa Global",
+      "treatabilityMatrix": "Matriz de Tratabilidade por Condição",
+      "prescriptionIntelligence": "Inteligência de Prescrição",
+      "discoveryPipeline": "Pipeline de Descoberta",
+      "performanceTrends": "Tendências de Performance",
+      "competitiveBenchmark": "Benchmark Competitivo"
+    },
+    "actions": {
+      "refresh": "Atualizar Dados",
+      "export": "Exportar Relatório",
+      "selectConditions": "Selecionar condições para filtrar",
+      "viewDetailed": "Ver Análise Detalhada"
+    },
+    "categories": {
+      "prevention": "Prevenção",
+      "treatment": "Tratamento",
+      "support": "Suporte"
+    },
+    "insights": {
+      "positioning": "Insights de Posicionamento",
+      "topPerformers": "Top Performers",
+      "opportunities": "Oportunidades",
+      "highValue": "Alto Valor",
+      "highPerformance": "Alta Performance",
+      "sustainable": "Sustentável",
+      "reevaluate": "Reavaliar"
+    },
+    "metrics": {
+      "highestCoverage": "Maior Cobertura",
+      "conditionsCovered": "Condições Cobertas",
+      "aboveAverage": "Acima da Média",
+      "atAverage": "Na Média",
+      "belowAverage": "Abaixo da Média",
+      "bestInClass": "Melhor da Classe",
+      "marketAverage": "Média do Mercado",
+      "currentPerformance": "Performance Atual"
+    },
+    "stages": {
+      "discovery": "Descoberta",
+      "research": "Pesquisa",
+      "development": "Desenvolvimento",
+      "validation": "Validação",
+      "market": "Mercado"
     }
+  }
+}
   }
 }

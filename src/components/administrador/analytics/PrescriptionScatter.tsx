@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -16,6 +17,8 @@ interface PrescriptionScatterProps {
 }
 
 const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
+  const { t } = useTranslation();
+  
   const scatterData = data.map(item => ({
     x: item.sustainability,
     y: item.efficacy,
@@ -52,9 +55,9 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Inteligência de Prescrição</CardTitle>
+        <CardTitle>{t('analytics.charts.prescriptionIntelligence')}</CardTitle>
         <CardDescription>
-          Matriz Sustentabilidade vs Eficácia (tamanho = evidências científicas)
+          {t('analytics.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -107,10 +110,10 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
         
         {/* Dados populados para demonstração */}
         <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-          <h4 className="text-sm font-medium mb-2">Insights de Posicionamento</h4>
+          <h4 className="text-sm font-medium mb-2">{t('analytics.insights.positioning')}</h4>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
-              <span className="font-medium">Top Performers:</span>
+              <span className="font-medium">{t('analytics.insights.topPerformers')}:</span>
               <div className="mt-1 space-y-1">
                 {scatterData
                   .filter(d => d.x >= 3.5 && d.y >= 3.5)
@@ -124,7 +127,7 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
               </div>
             </div>
             <div>
-              <span className="font-medium">Oportunidades:</span>
+              <span className="font-medium">{t('analytics.insights.opportunities')}:</span>
               <div className="mt-1 space-y-1">
                 {scatterData
                   .filter(d => d.x < 3 || d.y < 3)
@@ -142,19 +145,19 @@ const PrescriptionScatter: React.FC<PrescriptionScatterProps> = ({ data }) => {
         
         <div className="mt-4 grid grid-cols-4 gap-2">
           <div className="p-2 bg-green-50 rounded text-center">
-            <div className="text-xs font-medium text-green-700">Alto Valor</div>
+            <div className="text-xs font-medium text-green-700">{t('analytics.insights.highValue')}</div>
             <div className="text-xs text-green-600">Alta Efic. + Alta Sust.</div>
           </div>
           <div className="p-2 bg-blue-50 rounded text-center">
-            <div className="text-xs font-medium text-blue-700">Alta Performance</div>
+            <div className="text-xs font-medium text-blue-700">{t('analytics.insights.highPerformance')}</div>
             <div className="text-xs text-blue-600">Alta Efic. + Baixa Sust.</div>
           </div>
           <div className="p-2 bg-yellow-50 rounded text-center">
-            <div className="text-xs font-medium text-yellow-700">Sustentável</div>
+            <div className="text-xs font-medium text-yellow-700">{t('analytics.insights.sustainable')}</div>
             <div className="text-xs text-yellow-600">Baixa Efic. + Alta Sust.</div>
           </div>
           <div className="p-2 bg-red-50 rounded text-center">
-            <div className="text-xs font-medium text-red-700">Reavaliar</div>
+            <div className="text-xs font-medium text-red-700">{t('analytics.insights.reevaluate')}</div>
             <div className="text-xs text-red-600">Baixa Efic. + Baixa Sust.</div>
           </div>
         </div>
