@@ -1,19 +1,21 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <footer className="bg-gray-50 text-gray-700 border-t border-gray-200">
       <div className="container mx-auto px-4 py-6">
         {/* Copyright e descrição principal */}
         <div className="text-center text-sm mb-4">
-          NutraTherapy PET © {new Date().getFullYear()} - Sistema inteligente de recomendação de nutracêuticos para pets
+          {t('footer.copyright', { year: new Date().getFullYear() })}
         </div>
         
         {/* Seção Powered by com logos */}
         <div className="flex flex-col items-center space-y-3">
           <div className="text-xs text-gray-500 font-medium">
-            Powered by
+            {t('footer.poweredBy')}
           </div>
           
           <div className="flex items-center justify-center space-x-8 flex-wrap gap-y-3">
@@ -64,7 +66,7 @@ const Footer: React.FC = () => {
                   />
                   <span className="text-sm text-gray-600 font-medium">Co-Scientist</span>
                 </div>
-                <span className="text-xs text-gray-500 font-medium italic">em breve</span>
+                <span className="text-xs text-gray-500 font-medium italic">{t('footer.comingSoon')}</span>
               </div>
             </div>
           </div>

@@ -29,10 +29,10 @@ const Header: React.FC = () => {
               NutraTherapy
             </div>
             <div className="text-xs text-gray-600 font-light text-center">
-              Plataforma de terapia nutracêutica
+              {t('header.platformSubtitle')}
             </div>
             <div className="text-xs text-gray-600 font-light text-center">
-              personalizada em massa e P&D
+              {t('header.platformSubtitle2')}
             </div>
           </div>
         </Link>
@@ -49,10 +49,10 @@ const Header: React.FC = () => {
                 </span>
                 <span className="text-xs text-gray-500">
                   {userRoles.length > 0 && userRoles[0] === 'admin' 
-                    ? 'Administrador' 
+                    ? t('header.administrator')
                     : userRoles.length > 0 && userRoles[0] === 'veterinarian' 
-                      ? 'Veterinário' 
-                      : 'Tutor'}
+                      ? t('header.veterinarian')
+                      : t('header.tutor')}
                 </span>
               </div>
               <Avatar className="h-10 w-10 border-2 border-gray-200">
@@ -77,7 +77,7 @@ const Header: React.FC = () => {
                 className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border-gray-300 hover:border-gray-400 transition-all"
               >
                 <LogIn size={18} />
-                Entrar
+                {t('header.login')}
               </Button>
             </Link>
           )}
