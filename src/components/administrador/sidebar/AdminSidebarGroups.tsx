@@ -12,6 +12,7 @@ import ActionsGroup from './groups/ActionsGroup';
 import ResearchGroup from './groups/ResearchGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface AdminSidebarGroupsProps {
   currentStep: string;
@@ -20,6 +21,7 @@ interface AdminSidebarGroupsProps {
 
 const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, setCurrentStep }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   const handleStepClick = (step: string) => {
     setCurrentStep(step);
@@ -31,7 +33,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Base Conhecimento/Relacional */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Base Conhecimento/Relacional
+          {t('admin.sidebar.knowledgeBase.title')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -46,7 +48,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Processamento de Dados */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Processamento de Dados
+          {t('admin.sidebar.dataProcessing.title')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -61,7 +63,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Ações */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Ações
+          {t('admin.sidebar.actions.title')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -76,7 +78,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Pesquisa e Desenvolvimento */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Pesquisa e Desenvolvimento
+          {t('admin.sidebar.research.title')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -91,7 +93,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       {/* Configuração */}
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
-          Configuração
+          {t('admin.sidebar.configuration.title')}
         </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>

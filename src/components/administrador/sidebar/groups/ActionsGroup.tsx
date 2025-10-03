@@ -2,6 +2,7 @@
 import React from 'react';
 import { Zap, Gauge, Check, ChevronRight, Activity } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { useTranslation } from 'react-i18next';
 
 interface ActionsGroupProps {
   currentStep: string;
@@ -12,6 +13,8 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
   currentStep, 
   handleStepClick 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <>
       <SidebarMenuItem>
@@ -23,7 +26,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Zap className={`h-4 w-4 mr-2 ${currentStep === "analytics" ? "text-primary" : ""}`} />
-              <span>Analytics</span>
+              <span>{t('admin.sidebar.actions.analytics')}</span>
             </div>
             {currentStep === "analytics" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -40,7 +43,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Gauge className={`h-4 w-4 mr-2 ${currentStep === "custo-beneficio" ? "text-primary" : ""}`} />
-              <span>Análise de ROI</span>
+              <span>{t('admin.sidebar.actions.roiAnalysis')}</span>
             </div>
             {currentStep === "custo-beneficio" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -57,7 +60,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Check className={`h-4 w-4 mr-2 ${currentStep === "actions" ? "text-primary" : ""}`} />
-              <span>Ações em Massa</span>
+              <span>{t('admin.sidebar.actions.bulkActions')}</span>
             </div>
             {currentStep === "actions" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -74,7 +77,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Activity className={`h-4 w-4 mr-2 ${currentStep === "acompanhamento" ? "text-primary" : ""}`} />
-              <span>Acompanhamento</span>
+              <span>{t('admin.sidebar.actions.monitoring')}</span>
             </div>
             {currentStep === "acompanhamento" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

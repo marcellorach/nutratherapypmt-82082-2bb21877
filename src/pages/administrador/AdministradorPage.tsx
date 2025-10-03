@@ -6,11 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AdminLayout from '@/components/administrador/AdminLayout';
 import { adminTabsConfig, getTabConfig } from '@/config/admin-tabs';
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
+import { useTranslation } from 'react-i18next';
 
 const AdministradorPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [currentStep, setCurrentStep] = useState<string>(tabParam || "estudos");
+  const { t } = useTranslation();
   
   const handleStepChange = (newStep: string) => {
     setCurrentStep(newStep);
@@ -30,13 +32,13 @@ const AdministradorPage: React.FC = () => {
       // Fallback para tabs não configuradas ainda
       return (
         <div className="p-8 text-center">
-          <h2 className="text-xl font-bold text-gray-500">Tab não encontrada</h2>
-          <p className="text-gray-600 mt-2">A tab "{currentStep}" não foi encontrada na configuração.</p>
+          <h2 className="text-xl font-bold text-gray-500">{t('admin.errors.tabNotFound')}</h2>
+          <p className="text-gray-600 mt-2">{t('admin.errors.tabNotFoundDesc', { tab: currentStep })}</p>
           <Button 
             onClick={() => handleStepChange('estudos')} 
             className="mt-4"
           >
-            Voltar para Estudos
+            {t('admin.errors.backToStudies')}
           </Button>
         </div>
       );

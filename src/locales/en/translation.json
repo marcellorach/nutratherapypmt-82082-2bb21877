@@ -153,12 +153,45 @@
   },
   "admin": {
     "sidebar": {
-      "knowledgeBase": "Knowledge/Relational Base",
-      "dataProcessing": "Data Processing",
-      "actions": "Actions",
-      "researchDev": "Research and Development",
-      "configuration": "Configuration",
-      "settings": "Settings"
+      "knowledgeBase": {
+        "title": "Knowledge/Relational Base",
+        "studies": "Scientific Studies",
+        "nutraceuticalBank": "Nutraceutical Bank",
+        "nutraceuticals": "Nutraceuticals",
+        "relations": "Relations",
+        "clinicalRules": "Clinical Rules",
+        "manageOutcomes": "Manage Outcomes",
+        "settings": "Settings"
+      },
+      "dataProcessing": {
+        "title": "Data Processing",
+        "import": "Import Data",
+        "multiAgentSimulation": "Multi-Agent Simulation",
+        "visualization": "Visualization",
+        "settings": "Settings"
+      },
+      "actions": {
+        "title": "Actions",
+        "analytics": "Analytics",
+        "roiAnalysis": "ROI Analysis",
+        "bulkActions": "Bulk Actions",
+        "monitoring": "Monitoring"
+      },
+      "research": {
+        "title": "Research and Development",
+        "proposedStudies": "Study Proposals",
+        "plannedStudies": "Planned Studies",
+        "ongoingStudies": "Ongoing Studies",
+        "completedStudies": "Completed Studies",
+        "predictiveModels": "Predictive Models"
+      },
+      "configuration": {
+        "title": "Configuration",
+        "knowledgeBase": "Knowledge Base",
+        "aiConfig": "AI Config",
+        "aiPrompts": "AI Prompts"
+      },
+      "settingsButton": "Settings"
     },
     "studies": {
       "title": "Scientific Studies",
@@ -200,9 +233,11 @@
       "title": "Clinical Rules",
       "subtitle": "Define clinical rules and correlations"
     },
-    "notFound": "Tab not found",
-    "notFoundDesc": "The tab \"{{tab}}\" was not found in the configuration.",
-    "backToStudies": "Back to Studies"
+    "errors": {
+      "tabNotFound": "Tab not found",
+      "tabNotFoundDesc": "The tab \"{{tab}}\" was not found in the configuration.",
+      "backToStudies": "Back to Studies"
+    }
   },
   "footer": {
     "copyright": "NutraTherapy PET © {{year}} - Intelligent pet nutraceutical recommendation system",

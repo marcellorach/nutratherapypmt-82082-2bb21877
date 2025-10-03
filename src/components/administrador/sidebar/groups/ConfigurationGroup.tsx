@@ -2,6 +2,7 @@
 import React from 'react';
 import { Bot, Database, Cpu, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { useTranslation } from 'react-i18next';
 
 interface ConfigurationGroupProps {
   currentStep: string;
@@ -12,6 +13,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
   currentStep, 
   handleStepClick 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <>
       <SidebarMenuItem>
@@ -23,7 +26,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Database className={`h-4 w-4 mr-2 ${currentStep === "knowledge-base-settings" ? "text-primary" : ""}`} />
-              <span>Base de Conhecimento</span>
+              <span>{t('admin.sidebar.configuration.knowledgeBase')}</span>
             </div>
             {currentStep === "knowledge-base-settings" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -40,7 +43,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Cpu className={`h-4 w-4 mr-2 ${currentStep === "config-ia" ? "text-primary" : ""}`} />
-              <span>Config. de IA</span>
+              <span>{t('admin.sidebar.configuration.aiConfig')}</span>
             </div>
             {currentStep === "config-ia" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -57,7 +60,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Bot className={`h-4 w-4 mr-2 ${currentStep === "prompts" ? "text-primary" : ""}`} />
-              <span>Prompts da IA</span>
+              <span>{t('admin.sidebar.configuration.aiPrompts')}</span>
             </div>
             {currentStep === "prompts" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
