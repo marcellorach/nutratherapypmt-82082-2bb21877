@@ -422,5 +422,79 @@
       "deleted": "Nutracêutico excluído com sucesso.",
       "deleteError": "Erro ao excluir nutracêutico: {{message}}"
     }
+  },
+  "efficacyMatrix": {
+    "header": {
+      "title": "Relações Nutraceutico-Condição",
+      "description": "Visualize as relações entre nutracêuticos e suas condições de saúde associadas",
+      "searchPlaceholder": "Buscar nutracêutico...",
+      "filters": "Filtros",
+      "newRelation": "Nova Relação"
+    },
+    "filters": {
+      "advanced": "Filtros Avançados",
+      "efficacy": "Eficácia",
+      "evidenceLevel": "Nível de Evidência",
+      "studyCount": "Quantidade de Estudos",
+      "all": "Todas",
+      "allLevels": "Todos",
+      "allStudies": "Todos",
+      "highEfficacy": "Alta (80-100)",
+      "mediumHighEfficacy": "Média-Alta (60-79)",
+      "mediumEfficacy": "Média (40-59)",
+      "lowEfficacy": "Baixa (0-39)",
+      "highEvidence": "Alto (4-5)",
+      "mediumEvidence": "Médio (3-3.9)",
+      "lowEvidence": "Baixo (0-2.9)",
+      "studies10plus": "10+ estudos",
+      "studies5to9": "5-9 estudos",
+      "studies0to4": "0-4 estudos",
+      "clearFilters": "Limpar Filtros",
+      "selectEfficacy": "Selecionar nível de eficácia",
+      "selectEvidence": "Selecionar nível de evidência",
+      "selectStudies": "Selecionar quantidade de estudos"
+    },
+    "viewMode": {
+      "label": "Modo de Visualização",
+      "standard": "Padrão",
+      "compact": "Compacto",
+      "detailed": "Detalhado"
+    },
+    "actions": {
+      "favorites": "Favoritos",
+      "compare": "Comparar",
+      "export": "Exportar",
+      "remove": "Remover",
+      "favorite": "Favoritar"
+    },
+    "table": {
+      "nutraceutical": "Nutracêutico",
+      "averageEfficacy": "Eficácia Média",
+      "averageEfficacyTooltip": "Eficácia média de todos os tratamentos",
+      "noData": "–"
+    },
+    "legend": {
+      "highEfficacy": "Alta Eficácia (80-100)",
+      "mediumHighEfficacy": "Eficácia Média-Alta (60-79)",
+      "mediumEfficacy": "Eficácia Média (40-59)",
+      "limitedEfficacy": "Eficácia Limitada (<40)"
+    },
+    "dialog": {
+      "title": "Detalhes de Eficácia",
+      "nutraceutical": "Nutracêutico",
+      "condition": "Condição",
+      "efficacyScore": "Pontuação de Eficácia",
+      "evidenceLevel": "Nível de Evidência",
+      "studyCount": "Quantidade de Estudos",
+      "description": "Descrição",
+      "close": "Fechar"
+    },
+    "badges": {
+      "glucosamine": "Glucosamina",
+      "omega3": "Ômega 3",
+      "arthritis": "Artrite",
+      "inflammation": "Inflamação",
+      "highEfficacy": "Alta Eficácia"
+    }
   }
 }

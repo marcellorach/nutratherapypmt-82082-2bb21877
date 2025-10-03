@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Download, BarChart2, Star } from 'lucide-react';
@@ -35,17 +35,19 @@ export const EfficacyMatrixFilters: React.FC<EfficacyMatrixFiltersProps> = ({
   onComparisonModeChange,
   onExportData
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex items-center gap-2">
       <Select value={viewMode} onValueChange={onViewModeChange}>
         <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Modo de Visualização" />
+          <SelectValue placeholder={t('efficacyMatrix.viewMode.label')} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="standard">Padrão</SelectItem>
-            <SelectItem value="compact">Compacto</SelectItem>
-            <SelectItem value="detailed">Detalhado</SelectItem>
+            <SelectItem value="standard">{t('efficacyMatrix.viewMode.standard')}</SelectItem>
+            <SelectItem value="compact">{t('efficacyMatrix.viewMode.compact')}</SelectItem>
+            <SelectItem value="detailed">{t('efficacyMatrix.viewMode.detailed')}</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -57,7 +59,7 @@ export const EfficacyMatrixFilters: React.FC<EfficacyMatrixFiltersProps> = ({
         className="flex items-center"
       >
         <Star className={`mr-1 h-4 w-4 ${showOnlyFavorites ? "text-amber-400" : "text-gray-400"}`} />
-        Favoritos
+        {t('efficacyMatrix.actions.favorites')}
       </Button>
       
       <Button 
@@ -67,12 +69,12 @@ export const EfficacyMatrixFilters: React.FC<EfficacyMatrixFiltersProps> = ({
         className="flex items-center"
       >
         <BarChart2 className="mr-1 h-4 w-4" />
-        Comparar
+        {t('efficacyMatrix.actions.compare')}
       </Button>
       
       <Button variant="outline" size="sm" onClick={onExportData} className="flex items-center">
         <Download className="mr-1 h-4 w-4" />
-        Exportar
+        {t('efficacyMatrix.actions.export')}
       </Button>
     </div>
   );

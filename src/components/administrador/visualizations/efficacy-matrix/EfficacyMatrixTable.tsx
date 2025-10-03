@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Star, StarOff } from 'lucide-react';
@@ -49,13 +50,15 @@ export const EfficacyMatrixTable: React.FC<EfficacyMatrixTableProps> = ({
   getRowAverageEfficacy,
   getColumnAverageEfficacy
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="border rounded-md overflow-auto max-h-[600px] bg-white">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[180px] sticky left-0 bg-white z-10 border-r">
-              Nutracêutico
+              {t('efficacyMatrix.table.nutraceutical')}
             </TableHead>
             
             {viewMode === 'detailed' && (
@@ -63,10 +66,10 @@ export const EfficacyMatrixTable: React.FC<EfficacyMatrixTableProps> = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="cursor-help">Eficácia Média</div>
+                      <div className="cursor-help">{t('efficacyMatrix.table.averageEfficacy')}</div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Eficácia média de todos os tratamentos</p>
+                      <p>{t('efficacyMatrix.table.averageEfficacyTooltip')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -137,7 +140,7 @@ export const EfficacyMatrixTable: React.FC<EfficacyMatrixTableProps> = ({
                               <StarOff className="h-3 w-3 mr-1" /> :
                               <Star className="h-3 w-3 mr-1" />
                             }
-                            {favoriteRows.includes(nutraceutico.id) ? 'Remover' : 'Favoritar'}
+                            {favoriteRows.includes(nutraceutico.id) ? t('efficacyMatrix.actions.remove') : t('efficacyMatrix.actions.favorite')}
                           </Button>
                           
                           {comparisonItems && (
@@ -148,7 +151,7 @@ export const EfficacyMatrixTable: React.FC<EfficacyMatrixTableProps> = ({
                               className="text-xs px-2 py-0 h-6"
                             >
                               {comparisonItems.includes(nutraceutico.id) ? 
-                                'Remover' : 'Comparar'
+                                t('efficacyMatrix.actions.remove') : t('efficacyMatrix.actions.compare')
                               }
                             </Button>
                           )}
@@ -210,7 +213,7 @@ export const EfficacyMatrixTable: React.FC<EfficacyMatrixTableProps> = ({
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-300">–</span>
+                      <span className="text-gray-300">{t('efficacyMatrix.table.noData')}</span>
                     )}
                   </TableCell>
                 );

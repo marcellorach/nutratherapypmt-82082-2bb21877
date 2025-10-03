@@ -1,5 +1,5 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,8 @@ interface EfficacyMatrixProps {
 }
 
 const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoes, data }) => {
+  const { t } = useTranslation();
+  
   // Estados básicos
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'efficacy'>('name');
@@ -312,63 +314,63 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm">
                 <Filter className="mr-2 h-4 w-4" />
-                Filtros
+                {t('efficacyMatrix.header.filters')}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-medium">Filtros Avançados</h3>
+                  <h3 className="font-medium">{t('efficacyMatrix.filters.advanced')}</h3>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-600">Eficácia</label>
+                  <label className="text-sm text-gray-600">{t('efficacyMatrix.filters.efficacy')}</label>
                   <Select value={efficacyFilter} onValueChange={setEfficacyFilter}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecionar nível de eficácia" />
+                      <SelectValue placeholder={t('efficacyMatrix.filters.selectEfficacy')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="all">Todas</SelectItem>
-                        <SelectItem value="80-100">Alta (80-100)</SelectItem>
-                        <SelectItem value="60-79">Média-Alta (60-79)</SelectItem>
-                        <SelectItem value="40-59">Média (40-59)</SelectItem>
-                        <SelectItem value="0-39">Baixa (0-39)</SelectItem>
+                        <SelectItem value="all">{t('efficacyMatrix.filters.all')}</SelectItem>
+                        <SelectItem value="80-100">{t('efficacyMatrix.filters.highEfficacy')}</SelectItem>
+                        <SelectItem value="60-79">{t('efficacyMatrix.filters.mediumHighEfficacy')}</SelectItem>
+                        <SelectItem value="40-59">{t('efficacyMatrix.filters.mediumEfficacy')}</SelectItem>
+                        <SelectItem value="0-39">{t('efficacyMatrix.filters.lowEfficacy')}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-600">Nível de Evidência</label>
+                  <label className="text-sm text-gray-600">{t('efficacyMatrix.filters.evidenceLevel')}</label>
                   <Select value={evidenceFilter} onValueChange={setEvidenceFilter}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecionar nível de evidência" />
+                      <SelectValue placeholder={t('efficacyMatrix.filters.selectEvidence')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="4-5">Alto (4-5)</SelectItem>
-                        <SelectItem value="3-3.9">Médio (3-3.9)</SelectItem>
-                        <SelectItem value="0-2.9">Baixo (0-2.9)</SelectItem>
+                        <SelectItem value="all">{t('efficacyMatrix.filters.allLevels')}</SelectItem>
+                        <SelectItem value="4-5">{t('efficacyMatrix.filters.highEvidence')}</SelectItem>
+                        <SelectItem value="3-3.9">{t('efficacyMatrix.filters.mediumEvidence')}</SelectItem>
+                        <SelectItem value="0-2.9">{t('efficacyMatrix.filters.lowEvidence')}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-600">Quantidade de Estudos</label>
+                  <label className="text-sm text-gray-600">{t('efficacyMatrix.filters.studyCount')}</label>
                   <Select value={studyCountFilter} onValueChange={setStudyCountFilter}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecionar quantidade de estudos" />
+                      <SelectValue placeholder={t('efficacyMatrix.filters.selectStudies')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="10-999">10+ estudos</SelectItem>
-                        <SelectItem value="5-9">5-9 estudos</SelectItem>
-                        <SelectItem value="0-4">0-4 estudos</SelectItem>
+                        <SelectItem value="all">{t('efficacyMatrix.filters.allStudies')}</SelectItem>
+                        <SelectItem value="10-999">{t('efficacyMatrix.filters.studies10plus')}</SelectItem>
+                        <SelectItem value="5-9">{t('efficacyMatrix.filters.studies5to9')}</SelectItem>
+                        <SelectItem value="0-4">{t('efficacyMatrix.filters.studies0to4')}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -385,7 +387,7 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
                     }}
                     className="w-full"
                   >
-                    Limpar Filtros
+                    {t('efficacyMatrix.filters.clearFilters')}
                   </Button>
                 </div>
               </div>
@@ -396,13 +398,13 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
         <div className="flex items-center gap-2">
           <Select value={viewMode} onValueChange={(value) => setViewMode(value as any)}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Modo de Visualização" />
+              <SelectValue placeholder={t('efficacyMatrix.viewMode.label')} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="standard">Padrão</SelectItem>
-                <SelectItem value="compact">Compacto</SelectItem>
-                <SelectItem value="detailed">Detalhado</SelectItem>
+                <SelectItem value="standard">{t('efficacyMatrix.viewMode.standard')}</SelectItem>
+                <SelectItem value="compact">{t('efficacyMatrix.viewMode.compact')}</SelectItem>
+                <SelectItem value="detailed">{t('efficacyMatrix.viewMode.detailed')}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -414,7 +416,7 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
             className="flex items-center"
           >
             <Star className={`mr-1 h-4 w-4 ${showOnlyFavorites ? "text-amber-400" : "text-gray-400"}`} />
-            Favoritos
+            {t('efficacyMatrix.actions.favorites')}
           </Button>
           
           <Button 
@@ -429,12 +431,12 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
             className="flex items-center"
           >
             <BarChart2 className="mr-1 h-4 w-4" />
-            Comparar
+            {t('efficacyMatrix.actions.compare')}
           </Button>
           
           <Button variant="outline" size="sm" onClick={exportMatrixData} className="flex items-center">
             <Download className="mr-1 h-4 w-4" />
-            Exportar
+            {t('efficacyMatrix.actions.export')}
           </Button>
         </div>
       </div>
