@@ -1,4 +1,3 @@
-
 {
   "common": {
     "madeWith": "Made with",
@@ -12,24 +11,91 @@
     "generateRandomData": "Generate random data for example",
     "learnMore": "Learn more",
     "startNow": "Start now",
-    "backToPatients": "Back to patient list"
+    "backToPatients": "Back to patient list",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "close": "Close",
+    "confirm": "Confirm",
+    "access": "Access",
+    "poweredBy": "Powered by"
   },
   "home": {
-    "title": "NutraTherapy",
-    "subtitle": "Mass personalized nutraceutical therapy platform and R&D",
-    "innovativeApproach": "Our innovative approach",
-    "forVeterinarians": "For Veterinarians",
-    "forVeterinariansDesc": "Access clinical data, consult AI for personalized recommendations, and view scientific evidence.",
+    "title": "NutraTherapy PET",
+    "subtitle": "Scientific database of 267 studies stratified across 35 nutraceuticals, 95 interactions with veterinary conditions and efficacy index of 4.2/5",
+    "platformAccess": "Access the Platform",
+    "platformAccessDesc": "Log in to access all features of the NutraTherapy PET system. Our platform offers personalized solutions for tutors, veterinarians and researchers.",
+    "loginButton": "Enter Platform",
+    "welcomeBack": "Welcome back!",
+    "connectedAs": "You are connected as",
     "forTutors": "For Tutors",
-    "forTutorsDesc": "Receive simplified explanations about recommendations and track your pet's progress with personalized treatments.",
-    "advancedRD": "Advanced R&D",
-    "advancedRDDesc": "Access our research and development platform to manage scientific studies and nutraceuticals.",
-    "degenerativeDiseases": "Mitigation of degenerative diseases",
-    "scientificResearch": "Scientific Research",
-    "scientificResearchDesc": "Our platform integrates clinical study results and nutraceutical research to create evidence-based treatments.",
-    "individualizedTreatment": "Individualized Treatment",
-    "individualizedTreatmentDesc": "We combine specific clinical data from each pet with predictive models to create personalized treatment plans that maximize results.",
-    "methodology": "Methodology"
+    "forTutorsDesc": "View personalized recommendations for your pet, understand treatments and track progress.",
+    "forVeterinarians": "For Veterinarians",
+    "forVeterinariansDesc": "Access clinical data, consult scientific evidence and create personalized treatment plans.",
+    "forResearchDev": "R&D + Knowledge Base",
+    "forResearchDevDesc": "Access research tools, develop studies and manage the scientific knowledge base.",
+    "forAdmins": "For Administrators",
+    "forAdminsDesc": "Manage system settings, users and platform integrations.",
+    "tutorArea": "Tutor Area",
+    "tutorAreaDesc": "Track treatment plans and recommendations for your pet.",
+    "veterinarianArea": "Veterinarian Area",
+    "veterinarianAreaDesc": "Analyze clinical data and create evidence-based treatment plans.",
+    "researchArea": "R&D + Knowledge Base",
+    "researchAreaDesc": "Access research tools, develop studies and manage the scientific knowledge base.",
+    "adminArea": "Administrator Area",
+    "adminAreaDesc": "Manage system settings, users and platform integrations.",
+    "restrictedAccess": "Restricted access for {{role}}",
+    "systemInfo": "System Information",
+    "registeredNutraceuticals": "Registered Nutraceuticals",
+    "scientificStudies": "Scientific Studies",
+    "treatableConditions": "Treatable Conditions"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "loginDesc": "Access your NutraTherapy PET account",
+    "registerDesc": "Create your account on the NutraTherapy PET platform",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "enterButton": "Sign In",
+    "registerButton": "Register",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful",
+    "registerSuccessDesc": "Your account has been created successfully. You can now log in.",
+    "loginError": "Login error",
+    "registerError": "Registration error",
+    "invalidCredentials": "Invalid credentials. Please check your email and password.",
+    "placeholders": {
+      "email": "your@email.com",
+      "password": "Password",
+      "confirmPassword": "Confirm your password",
+      "firstName": "First Name",
+      "lastName": "Last Name"
+    }
+  },
+  "validation": {
+    "emailInvalid": "Invalid email",
+    "passwordMin": "Password must be at least 6 characters",
+    "passwordsDontMatch": "Passwords don't match",
+    "firstNameMin": "First name must be at least 2 characters",
+    "lastNameMin": "Last name must be at least 2 characters",
+    "required": "Required field"
   },
   "navbar": {
     "researchDev": "R&D Area",
@@ -56,11 +122,108 @@
     "noPlanExists": "doesn't have recommendations",
     "createPlanPrompt": "Create a treatment plan for this pet."
   },
-  "research": {
-    "tabs": {
-      "ongoing": "Ongoing",
-      "completed": "Completed",
-      "planned": "Planned"
-    }
+  "tutor": {
+    "greeting": "Hello, {{name}}!",
+    "subtitle": "Track your pets' nutraceutical treatment",
+    "noPetsRegistered": "You don't have any registered pets",
+    "noPetsContact": "Contact your veterinarian to get started.",
+    "noPlan": "No treatment plan",
+    "noPlanDesc": "This pet doesn't have a treatment plan yet.",
+    "therapeuticPlan": "Therapeutic Plan",
+    "history": "History",
+    "orders": "Orders",
+    "startDate": "Start date",
+    "activePlan": "Active plan",
+    "planStatus": "Plan status",
+    "approved": "Approved",
+    "kitSent": "Kit sent on {{date}}",
+    "nextRenewal": "Next renewal",
+    "quarterlyRenewal": "Quarterly renewal",
+    "recommendedNutraceuticals": "Recommended Nutraceuticals",
+    "recommendationReason": "Recommendation reason:",
+    "howToAdminister": "How to administer:",
+    "noPlanTitle": "No therapeutic plan",
+    "noPlanMessage": "This pet doesn't have a nutraceutical treatment plan yet.",
+    "scheduleConsultation": "Schedule consultation with veterinarian",
+    "historyTitle": "Treatment History",
+    "historyMessage": "Treatment history will be available after treatment begins.",
+    "ordersTitle": "Nutraceutical Orders",
+    "ordersMessage": "Order nutraceutical kits for your pet.",
+    "makeOrder": "Make Order"
+  },
+  "admin": {
+    "sidebar": {
+      "knowledgeBase": "Knowledge/Relational Base",
+      "dataProcessing": "Data Processing",
+      "actions": "Actions",
+      "researchDev": "Research and Development",
+      "configuration": "Configuration",
+      "settings": "Settings"
+    },
+    "studies": {
+      "title": "Scientific Studies",
+      "subtitle": "Manage and organize scientific studies on nutraceuticals",
+      "import": "Import Studies",
+      "list": "Studies List",
+      "tabs": {
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "planned": "Planned"
+      }
+    },
+    "nutraceuticals": {
+      "title": "Nutraceuticals",
+      "subtitle": "Manage nutraceuticals and their relationships",
+      "management": "Nutraceuticals Management",
+      "add": "Add Nutraceutical",
+      "edit": "Edit Nutraceutical",
+      "delete": "Delete Nutraceutical",
+      "relationships": "Manage Relationships"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "System analysis and metrics"
+    },
+    "roi": {
+      "title": "ROI & Business Case",
+      "subtitle": "Return on investment analysis"
+    },
+    "research": {
+      "title": "Research",
+      "subtitle": "Manage ongoing research and studies"
+    },
+    "predictiveModels": {
+      "title": "Predictive Models",
+      "subtitle": "Configure and manage AI models"
+    },
+    "clinicalRules": {
+      "title": "Clinical Rules",
+      "subtitle": "Define clinical rules and correlations"
+    },
+    "notFound": "Tab not found",
+    "notFoundDesc": "The tab \"{{tab}}\" was not found in the configuration.",
+    "backToStudies": "Back to Studies"
+  },
+  "footer": {
+    "copyright": "NutraTherapy PET © {{year}} - Intelligent pet nutraceutical recommendation system",
+    "poweredBy": "Powered by",
+    "comingSoon": "coming soon"
+  },
+  "header": {
+    "platformSubtitle": "Mass personalized nutraceutical",
+    "platformSubtitle2": "therapy platform and R&D",
+    "administrator": "Administrator",
+    "veterinarian": "Veterinarian",
+    "tutor": "Tutor",
+    "login": "Sign In"
+  },
+  "messages": {
+    "success": "Operation completed successfully",
+    "error": "Error performing operation",
+    "loading": "Loading data...",
+    "saved": "Data saved successfully",
+    "deleted": "Item deleted successfully",
+    "updated": "Item updated successfully",
+    "created": "Item created successfully"
   }
 }
