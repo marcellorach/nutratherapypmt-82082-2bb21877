@@ -261,6 +261,68 @@
     "updated": "Item updated successfully",
     "created": "Item created successfully"
   },
+  "relations": {
+    "title": "Nutraceutical-Condition Relations",
+    "description": "View the relationships between nutraceuticals and their associated health conditions",
+    "searchPlaceholder": "Search relations...",
+    "relationshipType": "Relationship type",
+    "allTypes": "All types",
+    "prevention": "Prevention",
+    "treatment": "Treatment",
+    "support": "Support",
+    "filters": "Filters",
+    "newRelation": "New Relation",
+    "visualization": {
+      "title": "Relations Visualization",
+      "demoDataLoaded": "Demo data loaded successfully",
+      "description": "Visualize relationships between nutraceuticals, health conditions, and scientific studies.",
+      "filterByEfficacy": "Filter by efficacy:",
+      "allEfficacies": "All efficacies",
+      "highEfficacy": "High efficacy (≥4)",
+      "mediumEfficacy": "Medium efficacy (3-4)",
+      "lowEfficacy": "Low efficacy (<3)"
+    },
+    "tabs": {
+      "network": "Relations Network",
+      "matrix": "Efficacy Matrix"
+    },
+    "network": {
+      "viewing": "Viewing",
+      "nodes": "nodes and",
+      "connections": "connections",
+      "scientificBase": "Scientific database of 267 studies stratified across 35 nutraceuticals, 95 interactions with veterinary conditions and efficacy index of 4.2/5",
+      "tip": "Tip: Hover over nodes to see more information. Click and drag to adjust the view."
+    },
+    "matrix": {
+      "matrixWith": "Matrix with",
+      "nutraceuticals": "nutraceuticals and",
+      "conditions": "conditions",
+      "tip": "Tip: Click on cells to see details about the relationship between the nutraceutical and the condition."
+    },
+    "noData": {
+      "title": "No data for visualization",
+      "description": "There is not enough data to display this visualization. Check if there are relationships between nutraceuticals and health conditions."
+    },
+    "loading": "Loading data...",
+    "legend": {
+      "title": "Legend",
+      "nutraceutical": "Nutraceutical",
+      "healthCondition": "Health Condition",
+      "scientificStudy": "Scientific Study",
+      "potentialConnection": "Potential Connection",
+      "synergy": "Synergy",
+      "high": "High",
+      "low": "Low",
+      "efficacyLevel": "Efficacy Level",
+      "aboutData": "About this data:",
+      "dataDescription": "The visualized data includes real records and demo data. Dashed lines represent potential connections based on pattern analysis, while solid lines indicate relationships proven by scientific studies.",
+      "colorDescription": "Connection colors indicate the level of evidence: green for high, blue for medium, orange for initial, and gray for potential/theoretical."
+    },
+    "error": {
+      "title": "Error loading data",
+      "description": "Could not load data for visualization. Please try again later."
+    }
+  },
   "nutraceuticals": {
     "management": {
       "title": "Nutraceutical Management",

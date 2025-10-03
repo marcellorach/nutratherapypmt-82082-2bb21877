@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import RelationsHeader from './RelationsHeader';
 import VisualizationCard from './VisualizationCard';
 import { prepareNetworkData, prepareMatrixData } from './utils';
@@ -9,6 +10,7 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const RelationsTab: React.FC = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [efficacyFilter, setEfficacyFilter] = useState<string>("all");
   const [relationView, setRelationView] = useState<string>('network');
@@ -78,9 +80,9 @@ const RelationsTab: React.FC = () => {
       <div className="space-y-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erro ao carregar dados</AlertTitle>
+          <AlertTitle>{t('relations.error.title')}</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar os dados para visualização. Por favor, tente novamente mais tarde.
+            {t('relations.error.description')}
           </AlertDescription>
         </Alert>
       </div>

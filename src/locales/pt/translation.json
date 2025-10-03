@@ -261,6 +261,68 @@
     "updated": "Item atualizado com sucesso",
     "created": "Item criado com sucesso"
   },
+  "relations": {
+    "title": "Relações Nutraceutico-Condição",
+    "description": "Visualize as relações entre nutracêuticos e suas condições de saúde associadas",
+    "searchPlaceholder": "Buscar relações...",
+    "relationshipType": "Tipo de relação",
+    "allTypes": "Todos os tipos",
+    "prevention": "Prevenção",
+    "treatment": "Tratamento",
+    "support": "Suporte",
+    "filters": "Filtros",
+    "newRelation": "Nova Relação",
+    "visualization": {
+      "title": "Visualização de Relações",
+      "demoDataLoaded": "Dados de demonstração carregados com sucesso",
+      "description": "Visualize relações entre nutracêuticos, condições de saúde e estudos científicos.",
+      "filterByEfficacy": "Filtrar por eficácia:",
+      "allEfficacies": "Todas eficácias",
+      "highEfficacy": "Alta eficácia (≥4)",
+      "mediumEfficacy": "Média eficácia (3-4)",
+      "lowEfficacy": "Baixa eficácia (<3)"
+    },
+    "tabs": {
+      "network": "Rede de Relações",
+      "matrix": "Matriz de Eficácia"
+    },
+    "network": {
+      "viewing": "Visualizando",
+      "nodes": "nós e",
+      "connections": "conexões",
+      "scientificBase": "Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5",
+      "tip": "Dica: Passe o mouse sobre os nós para ver mais informações. Clique e arraste para ajustar a visualização."
+    },
+    "matrix": {
+      "matrixWith": "Matriz com",
+      "nutraceuticals": "nutracêuticos e",
+      "conditions": "condições",
+      "tip": "Dica: Clique nas células para ver detalhes sobre a relação entre o nutracêutico e a condição."
+    },
+    "noData": {
+      "title": "Sem dados para visualização",
+      "description": "Não há dados suficientes para exibir esta visualização. Verifique se existem relações entre nutracêuticos e condições de saúde."
+    },
+    "loading": "Carregando dados...",
+    "legend": {
+      "title": "Legenda",
+      "nutraceutical": "Nutracêutico",
+      "healthCondition": "Condição de Saúde",
+      "scientificStudy": "Estudo Científico",
+      "potentialConnection": "Conexão Potencial",
+      "synergy": "Sinergia",
+      "high": "Alto",
+      "low": "Baixo",
+      "efficacyLevel": "Nível de Eficácia",
+      "aboutData": "Sobre estes dados:",
+      "dataDescription": "Os dados visualizados incluem registros reais e dados de demonstração. Linhas tracejadas representam conexões potenciais baseadas em análise de padrões, enquanto linhas sólidas indicam relacionamentos comprovados por estudos científicos.",
+      "colorDescription": "As cores das conexões indicam o nível de evidência: verde para alto, azul para médio, laranja para inicial e cinza para potencial/teórico."
+    },
+    "error": {
+      "title": "Erro ao carregar dados",
+      "description": "Não foi possível carregar os dados para visualização. Por favor, tente novamente mais tarde."
+    }
+  },
   "nutraceuticals": {
     "management": {
       "title": "Gerenciamento de Nutracêuticos",
