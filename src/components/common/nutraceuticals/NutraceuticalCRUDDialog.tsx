@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
+import { useTranslation } from 'react-i18next';
 
 // Importando componentes específicos
 import BasicInfoTab from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/tabs/BasicInfoTab';
@@ -40,6 +41,7 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
   onSuccess,
   mode = 'scientific'
 }) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { createNutraceutical, updateNutraceutical } = useNutraceuticalContext();
   
@@ -103,8 +105,8 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
       if (isEditMode) {
         result = await updateNutraceutical(nutraceutical.id, nutraceuticalData);
         toast({
-          title: "Sucesso",
-          description: "Nutracêutico atualizado com sucesso",
+          title: t('nutraceuticals.toast.success'),
+          description: t('nutraceuticals.toast.updated'),
         });
       } else {
         result = await createNutraceutical({
@@ -112,8 +114,8 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
           ...nutraceuticalData
         });
         toast({
-          title: "Sucesso",
-          description: "Nutracêutico criado com sucesso",
+          title: t('nutraceuticals.toast.success'),
+          description: t('nutraceuticals.toast.created'),
         });
       }
       
@@ -140,8 +142,8 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
     } catch (error) {
       console.error('Erro ao salvar nutracêutico:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar o nutracêutico. Verifique os dados e tente novamente.",
+        title: t('nutraceuticals.toast.error'),
+        description: t('nutraceuticals.toast.error'),
         variant: "destructive"
       });
     } finally {
@@ -171,18 +173,18 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
       }}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Editar Nutracêutico" : "Adicionar Novo Nutracêutico"}</DialogTitle>
+            <DialogTitle>{isEditMode ? t('nutraceuticals.dialog.editTitle') : t('nutraceuticals.dialog.addTitle')}</DialogTitle>
           </DialogHeader>
           
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className={`grid ${showRelationshipsTab ? 'grid-cols-2' : 'grid-cols-1'}`}>
-              <TabsTrigger value="basic-info">Informações Básicas</TabsTrigger>
+              <TabsTrigger value="basic-info">{t('nutraceuticals.dialog.tabs.basicInfo')}</TabsTrigger>
               {showRelationshipsTab && (
                 <TabsTrigger 
                   value="relationships" 
                   disabled={!isEditMode && !savedNutraceutical}
                 >
-                  Relacionamentos
+                  {t('nutraceuticals.dialog.tabs.relationships')}
                 </TabsTrigger>
               )}
             </TabsList>

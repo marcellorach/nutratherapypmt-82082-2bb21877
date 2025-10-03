@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 // Componentes comuns
 import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
@@ -14,6 +15,7 @@ import DeleteDialog from "./nutraceuticalManagement/DeleteDialog";
 import OutcomesDialog from "./nutraceuticalManagement/OutcomesDialog";
 
 const NutraceuticalManagementPanel: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const {
     nutraceuticals,
@@ -64,32 +66,32 @@ const NutraceuticalManagementPanel: React.FC = () => {
     try {
       await deleteNutraceutical(selectedNutraceutical.id);
       toast({
-        title: "Sucesso",
-        description: "Nutracêutico excluído com sucesso."
+        title: t('nutraceuticals.toast.success'),
+        description: t('nutraceuticals.toast.deleted')
       });
       setIsDeleteDialogOpen(false);
       setSelectedNutraceutical(null);
     } catch (error: any) {
       toast({
-        title: "Erro",
-        description: `Erro ao excluir nutracêutico: ${error.message}`,
+        title: t('nutraceuticals.toast.error'),
+        description: t('nutraceuticals.toast.deleteError', { message: error.message }),
         variant: "destructive"
       });
     }
   };
 
   const getOutcomeName = (outcomeId: string | null) => {
-    if (!outcomeId) return "Sem categoria";
+    if (!outcomeId) return t('nutraceuticals.management.noCategory');
     const outcome = outcomes.find(o => o.id === outcomeId);
-    return outcome?.name || "Categoria não encontrada";
+    return outcome?.name || t('nutraceuticals.management.categoryNotFound');
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Gerenciamento de Nutracêuticos</h3>
+        <h3 className="text-lg font-medium">{t('nutraceuticals.management.title')}</h3>
         <Button onClick={handleOpenCreateDialog}>
-          Novo Nutracêutico
+          {t('nutraceuticals.management.newButton')}
         </Button>
       </div>
       

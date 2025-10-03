@@ -260,5 +260,105 @@
     "deleted": "Item deleted successfully",
     "updated": "Item updated successfully",
     "created": "Item created successfully"
+  },
+  "nutraceuticals": {
+    "management": {
+      "title": "Nutraceutical Management",
+      "newButton": "New Nutraceutical",
+      "noCategory": "No category",
+      "categoryNotFound": "Category not found"
+    },
+    "search": {
+      "placeholder": "Search nutraceutical...",
+      "filterEfficacy": "Filter by efficacy",
+      "filterCondition": "Filter by condition",
+      "allEfficacies": "All efficacies",
+      "allConditions": "All conditions",
+      "efficacyHigh": "High (4-5)",
+      "efficacyMedium": "Medium (3)",
+      "efficacyLow": "Low (1-2)",
+      "clear": "Clear",
+      "refresh": "Refresh",
+      "add": "Add",
+      "new": "New"
+    },
+    "table": {
+      "name": "Name",
+      "description": "Description",
+      "outcomes": "Outcomes",
+      "actions": "Actions",
+      "notDefined": "Not defined",
+      "notFound": "No nutraceuticals found.",
+      "editTitle": "Edit",
+      "deleteTitle": "Delete",
+      "manageOutcomes": "Manage Outcomes"
+    },
+    "dialog": {
+      "addTitle": "Add New Nutraceutical",
+      "editTitle": "Edit Nutraceutical",
+      "tabs": {
+        "basicInfo": "Basic Information",
+        "relationships": "Relationships"
+      }
+    },
+    "form": {
+      "name": "Nutraceutical Name*",
+      "namePlaceholder": "Nutraceutical name",
+      "description": "Description",
+      "descriptionPlaceholder": "Nutraceutical description",
+      "dosage": "Dosage",
+      "dosagePlaceholder": "Ex: 500mg, 2 times a day",
+      "source": "Source",
+      "sourcePlaceholder": "Ex: Curcuma longa",
+      "chemicalCompound": "Chemical Compound",
+      "chemicalPlaceholder": "Chemical formula or compound name",
+      "contraindications": "Contraindications",
+      "contraindicationsPlaceholder": "Each contraindication on a separate line",
+      "contraindicationsHelp": "Enter each contraindication on a separate line.",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "creating": "Creating...",
+      "save": "Save Nutraceutical",
+      "create": "Create Nutraceutical"
+    },
+    "relationships": {
+      "title": "Relationships",
+      "manageButton": "Manage Relationships",
+      "studies": "Scientific Studies",
+      "conditions": "Health Conditions",
+      "noStudies": "No associated studies. Click \"Manage Relationships\" to add scientific studies.",
+      "noConditions": "No associated conditions. Click \"Manage Relationships\" to add health conditions.",
+      "studyNoTitle": "Study without title",
+      "studyNoJournal": "Journal not specified",
+      "conditionNoName": "Condition without name",
+      "conditionNoDescription": "No description",
+      "relevance": "Relevance",
+      "typePrevention": "Prevention",
+      "typeTreatment": "Treatment",
+      "typeSupport": "Support",
+      "finish": "Finish"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the nutraceutical",
+      "warning": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "outcomes": {
+      "title": "Manage Outcomes",
+      "description": "Manage the relationships of nutraceutical {{name}} with outcomes.",
+      "loading": "Loading...",
+      "placeholder": "Functionality will be refactored later.",
+      "close": "Close"
+    },
+    "toast": {
+      "success": "Success",
+      "error": "Error",
+      "created": "Nutraceutical created successfully",
+      "updated": "Nutraceutical updated successfully",
+      "deleted": "Nutraceutical deleted successfully.",
+      "deleteError": "Error deleting nutraceutical: {{message}}"
+    }
   }
 }

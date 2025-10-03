@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 interface BasicInfoTabProps {
   form: UseFormReturn<any>;
@@ -20,6 +21,8 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
   isEditMode,
   onCancel
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Form {...form}>
       <div className="space-y-4 py-4">
@@ -28,9 +31,9 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome do Nutracêutico*</FormLabel>
+              <FormLabel>{t('nutraceuticals.form.name')}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Nome do nutracêutico" />
+                <Input {...field} placeholder={t('nutraceuticals.form.namePlaceholder')} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -42,11 +45,11 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descrição</FormLabel>
+              <FormLabel>{t('nutraceuticals.form.description')}</FormLabel>
               <FormControl>
                 <Textarea 
                   {...field} 
-                  placeholder="Descrição do nutracêutico" 
+                  placeholder={t('nutraceuticals.form.descriptionPlaceholder')} 
                   className="min-h-[100px]"
                 />
               </FormControl>
@@ -61,9 +64,9 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             name="dosage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dosagem</FormLabel>
+                <FormLabel>{t('nutraceuticals.form.dosage')}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ex: 500mg, 2 vezes ao dia" />
+                  <Input {...field} placeholder={t('nutraceuticals.form.dosagePlaceholder')} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -75,9 +78,9 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             name="source"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fonte</FormLabel>
+                <FormLabel>{t('nutraceuticals.form.source')}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ex: Curcuma longa" />
+                  <Input {...field} placeholder={t('nutraceuticals.form.sourcePlaceholder')} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,9 +93,9 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
           name="chemical_compound"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Composto Químico</FormLabel>
+              <FormLabel>{t('nutraceuticals.form.chemicalCompound')}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Fórmula ou nome do composto químico" />
+                <Input {...field} placeholder={t('nutraceuticals.form.chemicalPlaceholder')} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,17 +107,17 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
           name="contraindications"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contraindicações</FormLabel>
+              <FormLabel>{t('nutraceuticals.form.contraindications')}</FormLabel>
               <FormControl>
                 <Textarea 
                   {...field} 
-                  placeholder="Cada contraindicação em uma linha" 
+                  placeholder={t('nutraceuticals.form.contraindicationsPlaceholder')} 
                   className="min-h-[80px]"
                 />
               </FormControl>
               <FormMessage />
               <p className="text-xs text-muted-foreground">
-                Digite cada contraindicação em uma linha separada.
+                {t('nutraceuticals.form.contraindicationsHelp')}
               </p>
             </FormItem>
           )}
@@ -127,16 +130,16 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Cancelar
+            {t('nutraceuticals.form.cancel')}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isEditMode ? 'Salvando...' : 'Criando...'}
+                {isEditMode ? t('nutraceuticals.form.saving') : t('nutraceuticals.form.creating')}
               </>
             ) : (
-              isEditMode ? 'Salvar Nutracêutico' : 'Criar Nutracêutico'
+              isEditMode ? t('nutraceuticals.form.save') : t('nutraceuticals.form.create')
             )}
           </Button>
         </div>

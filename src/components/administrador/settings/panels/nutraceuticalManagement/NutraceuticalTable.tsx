@@ -13,6 +13,7 @@ import { Edit, Trash2, List } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { NutraceuticalTableProps } from './types';
+import { useTranslation } from 'react-i18next';
 
 const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   filteredNutraceuticals,
@@ -22,6 +23,8 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   onOutcomesClick,
   getOutcomeName,
 }) => {
+  const { t } = useTranslation();
+  
   // Renderiza linhas de skeleton quando estiver carregando
   if (isLoading) {
     return (
@@ -29,10 +32,10 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Outcomes</TableHead>
-              <TableHead className="w-[150px]">Ações</TableHead>
+              <TableHead>{t('nutraceuticals.table.name')}</TableHead>
+              <TableHead>{t('nutraceuticals.table.description')}</TableHead>
+              <TableHead>{t('nutraceuticals.table.outcomes')}</TableHead>
+              <TableHead className="w-[150px]">{t('nutraceuticals.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,7 +58,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
     return (
       <div className="rounded-md border p-8 text-center">
         <p className="text-muted-foreground">
-          Nenhum nutracêutico encontrado.
+          {t('nutraceuticals.table.notFound')}
         </p>
       </div>
     );
@@ -67,10 +70,10 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead>Outcomes</TableHead>
-            <TableHead className="w-[150px]">Ações</TableHead>
+            <TableHead>{t('nutraceuticals.table.name')}</TableHead>
+            <TableHead>{t('nutraceuticals.table.description')}</TableHead>
+            <TableHead>{t('nutraceuticals.table.outcomes')}</TableHead>
+            <TableHead className="w-[150px]">{t('nutraceuticals.table.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -84,7 +87,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                     {getOutcomeName(nutra.outcome_id)}
                   </Badge>
                 ) : (
-                  <span className="text-muted-foreground text-sm">Não definido</span>
+                  <span className="text-muted-foreground text-sm">{t('nutraceuticals.table.notDefined')}</span>
                 )}
               </TableCell>
               <TableCell>
@@ -93,7 +96,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => onEditClick(nutra)}
-                    title="Editar"
+                    title={t('nutraceuticals.table.editTitle')}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -101,7 +104,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => onOutcomesClick(nutra)}
-                    title="Gerenciar Outcomes"
+                    title={t('nutraceuticals.table.manageOutcomes')}
                   >
                     <List className="h-4 w-4" />
                   </Button>
@@ -110,7 +113,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
                     size="icon"
                     className="text-destructive hover:text-destructive/90"
                     onClick={() => onDeleteClick(nutra)}
-                    title="Excluir"
+                    title={t('nutraceuticals.table.deleteTitle')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
