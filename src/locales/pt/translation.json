@@ -1347,6 +1347,45 @@
     "cancel": "Cancelar",
     "createAndTrain": "Criar e Treinar Modelo"
   },
+  "dataImport": {
+    "title": "Importação de Dados",
+    "description": "Importe dados de sistemas externos para análise",
+    "petlove": {
+      "title": "Importação do PetLove",
+      "description": "Importe dados de pets, tutores, exames e tratamentos do sistema PetLove para análise em massa.",
+      "success": {
+        "title": "Importação concluída com sucesso",
+        "totalRecords": "Total de registros:",
+        "petsCorrelated": "Pets correlacionados:",
+        "medicalRecords": "Prontuários correlacionados:",
+        "exams": "Exames laboratoriais correlacionados:",
+        "eligible": "Pets elegíveis para próxima etapa:"
+      },
+      "error": {
+        "title": "Erro na importação",
+        "description": "Ocorreu um erro durante a importação dos dados. Tente novamente."
+      },
+      "importing": "Importando...",
+      "importAgain": "Importar Novamente",
+      "startImport": "Iniciar Importação"
+    },
+    "sources": {
+      "title": "Fontes de Dados Disponíveis",
+      "connect": "Conectar",
+      "petlove": {
+        "name": "PetLove",
+        "description": "Histórico médico e exames"
+      },
+      "vetsmart": {
+        "name": "VetSmart",
+        "description": "Sistema de clínicas parceiras"
+      },
+      "petshop": {
+        "name": "PetShop Manager",
+        "description": "Dados de consumo e perfil"
+      }
+    }
+  },
   "import": {
     "title": "Importação de Dados",
     "subtitle": "Importe dados de nutracêuticos e estudos científicos",
