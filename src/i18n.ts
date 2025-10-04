@@ -22,15 +22,10 @@ i18next
   .init({
     resources,
     fallbackLng: 'pt',
-    debug: true, // Ativado para debug
+    debug: false,
     interpolation: {
       escapeValue: false
     }
   });
-
-// Log para verificar se as traduções foram carregadas
-console.log('i18n initialized with languages:', Object.keys(resources));
-console.log('Current language:', i18next.language);
-console.log('Sample translation (admin.sidebar.actions.analytics):', i18next.t('admin.sidebar.actions.analytics'));
 
 export default i18next;

@@ -277,6 +277,88 @@
       "tabNotFound": "Tab não encontrada",
       "tabNotFoundDesc": "A tab \"{{tab}}\" não foi encontrada na configuração.",
       "backToStudies": "Voltar para Estudos"
+    },
+    "tabs": {
+      "nutraceuticals": "Nutracêuticos",
+      "database": "Banco de Nutracêuticos",
+      "settings": "Configurações",
+      "dataAnalysis": "Análise de Dados",
+      "prompts": "Prompts",
+      "dataManagement": "Gestão de Dados"
+    },
+    "settings": {
+      "title": "Configurações do Sistema",
+      "description": "Gerencie nutracêuticos e configurações do sistema",
+      "saveButton": "Salvar Configurações",
+      "general": {
+        "title": "Configurações Gerais",
+        "description": "Configurações básicas do sistema de nutracêuticos",
+        "systemName": "Nome do Sistema",
+        "version": "Versão"
+      },
+      "data": {
+        "title": "Configurações de Dados",
+        "description": "Configurações relacionadas ao banco de dados e sincronização",
+        "backupInterval": "Intervalo de Backup (horas)",
+        "cacheTimeout": "Timeout de Cache (minutos)"
+      },
+      "messages": {
+        "saved": "Configurações salvas",
+        "savedDescription": "As configurações foram atualizadas com sucesso.",
+        "error": "Erro ao salvar configurações."
+      }
+    },
+    "prompts": {
+      "title": "Configuração de Prompts",
+      "generateExample": "Gerar Prompts Exemplo",
+      "newPrompt": "Novo Prompt",
+      "createTitle": "Criar Novo Prompt",
+      "createDescription": "Configure um novo prompt para a IA",
+      "form": {
+        "name": "Nome do Prompt",
+        "namePlaceholder": "Nome do prompt",
+        "category": "Categoria",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Descrição do prompt",
+        "content": "Conteúdo do Prompt",
+        "contentPlaceholder": "Digite o conteúdo do prompt...",
+        "save": "Salvar Prompt",
+        "cancel": "Cancelar",
+        "saveChanges": "Salvar",
+        "nameRequired": "Nome e conteúdo são obrigatórios."
+      },
+      "categories": {
+        "analysis": "Análise",
+        "clinical": "Clínico",
+        "evaluation": "Avaliação",
+        "recommendation": "Recomendação"
+      },
+      "status": {
+        "active": "Ativo",
+        "inactive": "Inativo"
+      },
+      "messages": {
+        "generated": "Prompts gerados",
+        "generatedDescription": "Novos prompts de exemplo foram adicionados.",
+        "saved": "Prompt salvo",
+        "savedDescription": "O prompt foi atualizado com sucesso.",
+        "created": "Prompt criado",
+        "createdDescription": "Novo prompt foi adicionado com sucesso.",
+        "removed": "Prompt removido",
+        "removedDescription": "O prompt foi excluído com sucesso.",
+        "error": "Erro"
+      },
+      "examples": {
+        "analysisName": "Análise de Nutracêuticos",
+        "analysisDescription": "Prompt para análise inicial de nutracêuticos",
+        "analysisContent": "Analise o seguinte nutracêutico considerando...",
+        "clinicalName": "Recomendações Clínicas",
+        "clinicalDescription": "Prompt para gerar recomendações clínicas",
+        "clinicalContent": "Com base nos dados clínicos apresentados...",
+        "evaluationName": "Avaliação de Eficácia",
+        "evaluationDescription": "Prompt para avaliar eficácia de composições",
+        "evaluationContent": "Avalie a eficácia da seguinte composição nutracêutica..."
+      }
     }
   },
   "footer": {
@@ -899,90 +981,6 @@
   },
   "veterinarian": {
     "noPetsFound": "Nenhum pet encontrado com esse termo."
-  },
-  "admin": {
-    "tabs": {
-      "nutraceuticals": "Nutracêuticos",
-      "database": "Banco de Nutracêuticos",
-      "settings": "Configurações",
-      "dataAnalysis": "Análise de Dados",
-      "prompts": "Prompts",
-      "dataManagement": "Gestão de Dados"
-    },
-    "settings": {
-      "title": "Configurações do Sistema",
-      "description": "Gerencie nutracêuticos e configurações do sistema",
-      "saveButton": "Salvar Configurações",
-      "general": {
-        "title": "Configurações Gerais",
-        "description": "Configurações básicas do sistema de nutracêuticos",
-        "systemName": "Nome do Sistema",
-        "version": "Versão"
-      },
-      "data": {
-        "title": "Configurações de Dados",
-        "description": "Configurações relacionadas ao banco de dados e sincronização",
-        "backupInterval": "Intervalo de Backup (horas)",
-        "cacheTimeout": "Timeout de Cache (minutos)"
-      },
-      "messages": {
-        "saved": "Configurações salvas",
-        "savedDescription": "As configurações foram atualizadas com sucesso.",
-        "error": "Erro ao salvar configurações."
-      }
-    },
-    "prompts": {
-      "title": "Configuração de Prompts",
-      "generateExample": "Gerar Prompts Exemplo",
-      "newPrompt": "Novo Prompt",
-      "createTitle": "Criar Novo Prompt",
-      "createDescription": "Configure um novo prompt para a IA",
-      "form": {
-        "name": "Nome do Prompt",
-        "namePlaceholder": "Nome do prompt",
-        "category": "Categoria",
-        "description": "Descrição",
-        "descriptionPlaceholder": "Descrição do prompt",
-        "content": "Conteúdo do Prompt",
-        "contentPlaceholder": "Digite o conteúdo do prompt...",
-        "save": "Salvar Prompt",
-        "cancel": "Cancelar",
-        "saveChanges": "Salvar",
-        "nameRequired": "Nome e conteúdo são obrigatórios."
-      },
-      "categories": {
-        "analysis": "Análise",
-        "clinical": "Clínico",
-        "evaluation": "Avaliação",
-        "recommendation": "Recomendação"
-      },
-      "status": {
-        "active": "Ativo",
-        "inactive": "Inativo"
-      },
-      "messages": {
-        "generated": "Prompts gerados",
-        "generatedDescription": "Novos prompts de exemplo foram adicionados.",
-        "saved": "Prompt salvo",
-        "savedDescription": "O prompt foi atualizado com sucesso.",
-        "created": "Prompt criado",
-        "createdDescription": "Novo prompt foi adicionado com sucesso.",
-        "removed": "Prompt removido",
-        "removedDescription": "O prompt foi excluído com sucesso.",
-        "error": "Erro"
-      },
-      "examples": {
-        "analysisName": "Análise de Nutracêuticos",
-        "analysisDescription": "Prompt para análise inicial de nutracêuticos",
-        "analysisContent": "Analise o seguinte nutracêutico considerando...",
-        "clinicalName": "Recomendações Clínicas",
-        "clinicalDescription": "Prompt para gerar recomendações clínicas",
-        "clinicalContent": "Com base nos dados clínicos apresentados...",
-        "evaluationName": "Avaliação de Eficácia",
-        "evaluationDescription": "Prompt para avaliar eficácia de composições",
-        "evaluationContent": "Avalie a eficácia da seguinte composição nutracêutica..."
-      }
-    }
   },
   "nutraceuticalDatabase": {
     "title": "Banco de Nutracêuticos",
