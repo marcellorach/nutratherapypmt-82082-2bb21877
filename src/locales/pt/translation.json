@@ -1853,6 +1853,38 @@
     }
   },
   "analytics": {
+    "title": "Intelligent Analytics",
+    "description": "Análise integrada de desempenho, eficácia e tratabilidade do portfólio nutracêutico",
+    "buttons": {
+      "update": "Atualizar",
+      "export": "Exportar Relatório"
+    },
+    "sections": {
+      "executive": "KPIs Executivos",
+      "detailed": "Análises Detalhadas",
+      "performance": "Tendências de Performance"
+    },
+    "efficacy": {
+      "title": "Análise de Eficácia Comparativa",
+      "description": "Ranking de nutracêuticos por evidência científica",
+      "highest": "Maior Eficácia",
+      "lowest": "Menor Contraindicações",
+      "contraindications": "contraindicações"
+    },
+    "pipeline": {
+      "title": "Pipeline de Descoberta",
+      "description": "Status dos nutracêuticos em validação e desenvolvimento",
+      "testing": "Em Testes Clínicos",
+      "testingDesc": "Fase de validação",
+      "development": "Em Desenvolvimento",
+      "developmentDesc": "Formulação e testes",
+      "validated": "Validados e Ativos",
+      "validatedDesc": "Aprovados para uso",
+      "validationRate": "Taxa de Validação",
+      "avgTime": "Tempo Médio",
+      "months": "meses",
+      "nextValidations": "Próximas Validações"
+    },
     "kpi": {
       "activeNutraceuticals": {
         "title": "Nutracêuticos Ativos",
