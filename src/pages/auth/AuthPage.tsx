@@ -20,8 +20,8 @@ const AuthPage: React.FC = () => {
     try {
       await signUp(values.email, values.password, values.firstName, values.lastName);
       toast({
-        title: 'Cadastro realizado',
-        description: 'Sua conta foi criada com sucesso. Agora você pode fazer login.',
+        title: t('auth.registerSuccess'),
+        description: t('auth.registerSuccessDesc'),
         variant: 'default',
       });
       setActiveTab('login');
@@ -42,19 +42,19 @@ const AuthPage: React.FC = () => {
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">
-              {activeTab === 'login' ? 'Login' : 'Cadastro'}
+              {activeTab === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
             </CardTitle>
             <CardDescription>
               {activeTab === 'login' 
-                ? 'Acesse sua conta NutraTherapy PET'
-                : 'Crie sua conta na plataforma NutraTherapy PET'}
+                ? t('auth.loginDesc')
+                : t('auth.registerDesc')}
             </CardDescription>
           </CardHeader>
           
           <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Cadastro</TabsTrigger>
+              <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
+              <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -72,9 +72,9 @@ const AuthPage: React.FC = () => {
           
           <CardFooter className="flex justify-center text-sm text-gray-500 pt-0">
             {activeTab === 'login' ? (
-              <p>Não possui uma conta? <Button variant="link" onClick={() => setActiveTab('register')} className="p-0 h-auto font-normal">Cadastre-se</Button></p>
+              <p>{t('auth.noAccount')} <Button variant="link" onClick={() => setActiveTab('register')} className="p-0 h-auto font-normal">{t('auth.signUp')}</Button></p>
             ) : (
-              <p>Já possui uma conta? <Button variant="link" onClick={() => setActiveTab('login')} className="p-0 h-auto font-normal">Faça login</Button></p>
+              <p>{t('auth.hasAccount')} <Button variant="link" onClick={() => setActiveTab('login')} className="p-0 h-auto font-normal">{t('auth.signIn')}</Button></p>
             )}
           </CardFooter>
         </Card>
