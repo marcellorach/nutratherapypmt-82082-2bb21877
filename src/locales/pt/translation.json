@@ -423,6 +423,98 @@
       "deleteError": "Erro ao excluir nutracêutico: {{message}}"
     }
   },
+  "studies": {
+    "header": {
+      "title": "Estudos Científicos",
+      "description": "Gerenciamento e análise de estudos sobre nutracêuticos",
+      "addStudy": "Adicionar Estudo",
+      "advancedFilters": "Filtros Avançados"
+    },
+    "search": {
+      "placeholder": "Buscar estudos por título, descrição ou journal..."
+    },
+    "tabs": {
+      "import": "Importar & Processar",
+      "manage": "Gerenciar Estudos"
+    },
+    "import": {
+      "title": "Importar Estudos Científicos",
+      "description": "Importe estudos do SCISPACE, \"análises integrativas\" ou outras fontes",
+      "sectionTitle": "Importar Estudos",
+      "uploadTab": "Upload de Arquivos",
+      "historyTab": "Histórico",
+      "selectFiles": "Selecionar Arquivos",
+      "supportedFormats": "Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF",
+      "filesForImport": "Arquivos para importação ({{count}})",
+      "importFiles": "Importar Arquivos",
+      "processing": "Processando arquivos...",
+      "noFiles": "Nenhum arquivo selecionado",
+      "selectAtLeastOne": "Selecione pelo menos um arquivo para importar.",
+      "importSuccess": "Importação concluída",
+      "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise NTAI.",
+      "importError": "Erro ao importar {{filename}}"
+    },
+    "history": {
+      "loading": "Carregando histórico...",
+      "updateList": "Atualizar lista",
+      "processWithAI": "Processar com IA",
+      "importDate": "Data / Hora",
+      "metaSummary": "Meta Sumário",
+      "baseStudies": "Base Estudos",
+      "status": "Status",
+      "actions": "Ações",
+      "noImports": "Nenhuma importação anterior registrada.",
+      "errorFetching": "Erro ao buscar histórico"
+    },
+    "ntai": {
+      "title": "Análise NTAI",
+      "badge": "Processamento Avançado",
+      "processing": "Processamento NTAI",
+      "model": "Modelo",
+      "temperature": "Temperature",
+      "status": "Status",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "promptsInfo": "Os prompts personalizados serão usados para extrair informações específicas dos estudos.",
+      "hideLog": "Ocultar Log",
+      "showLog": "Exibir Log",
+      "settings": "Configurações",
+      "infoTitle": "Informações do Processamento",
+      "availableStudies": "Estudos Disponíveis para Processamento",
+      "queueEmpty": "Nenhum item na fila de processamento",
+      "analysisResults": "Resultados da Análise",
+      "cardGenerated": "Card Gerado para Kanban",
+      "cardAdded": "Card adicionado ao kanban",
+      "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\". Você pode agora gerenciar este estudo no fluxo de trabalho."
+    },
+    "kanban": {
+      "newStudies": "Novos Estudos",
+      "inReview": "Em Curadoria",
+      "approved": "Aprovados",
+      "addNew": "Adicionar novo estudo",
+      "noStudies": "Nenhum estudo {{status}}",
+      "statusNew": "novo",
+      "statusReview": "em curadoria",
+      "statusApproved": "aprovado",
+      "startCuration": "Iniciar Curadoria",
+      "viewDetails": "Ver Detalhes"
+    },
+    "card": {
+      "ntaiAnalysis": "Análise NTAI",
+      "nutraceuticals": "Nutraceuticos",
+      "conditions": "Condições",
+      "interactions": "Interações",
+      "sideEffects": "Efeitos Colaterais"
+    },
+    "toast": {
+      "studyAdded": "Estudo adicionado com sucesso",
+      "studyAddedDesc": "O estudo foi enviado para o processo de curadoria.",
+      "stageAdvanced": "Estágio avançado",
+      "stageAdvancedDesc": "O estudo passou para o próximo estágio de aprovação.",
+      "selectStudies": "Selecione os estudos para processamento",
+      "selectStudiesDesc": "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
+    }
+  },
   "efficacyMatrix": {
     "header": {
       "title": "Relações Nutraceutico-Condição",

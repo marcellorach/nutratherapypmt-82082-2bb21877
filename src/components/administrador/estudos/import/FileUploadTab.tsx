@@ -6,18 +6,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import ImportFilePreview from './ImportFilePreview';
+import { useTranslation } from 'react-i18next';
 
 const FileUploadTab: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleImport = async () => {
     if (files.length === 0) {
       toast({
-        title: "Nenhum arquivo selecionado",
-        description: "Selecione pelo menos um arquivo para importar.",
+        title: t('studies.import.noFiles'),
+        description: t('studies.import.selectAtLeastOne'),
         variant: "destructive",
       });
       return;
@@ -105,7 +107,7 @@ const FileUploadTab: React.FC = () => {
       } catch (error: any) {
         console.error("Erro completo:", error);
         toast({
-          title: `Erro ao importar ${file.name}`,
+          title: t('studies.import.importError', { filename: file.name }),
           description: error.message,
           variant: "destructive",
         });
@@ -119,8 +121,8 @@ const FileUploadTab: React.FC = () => {
       setFiles([]);
       setProgress(0);
       toast({
-        title: "Importação concluída",
-        description: `${files.length} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise NTAI.`,
+        title: t('studies.import.importSuccess'),
+        description: t('studies.import.importSuccessDesc', { count: files.length }),
       });
     }, 800);
   };
@@ -145,7 +147,7 @@ const FileUploadTab: React.FC = () => {
               <span className="inline-block align-middle">
                 <Upload className="h-4 w-4" />
               </span>
-              <span className="inline-block align-middle">Selecionar Arquivos</span>
+              <span className="inline-block align-middle">{t('studies.import.selectFiles')}</span>
             </span>
             <input
               type="file"
@@ -158,17 +160,17 @@ const FileUploadTab: React.FC = () => {
           </label>
         </Button>
         <p className="text-sm text-gray-500">
-          Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF
+          {t('studies.import.supportedFormats')}
         </p>
       </div>
       {files.length > 0 && (
         <div className="mt-4 border rounded-md">
           <div className="p-3 bg-gray-50 border-b">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">Arquivos para importação ({files.length})</h3>
+              <h3 className="font-medium">{t('studies.import.filesForImport', { count: files.length })}</h3>
               {!importing && (
                 <Button size="sm" onClick={handleImport}>
-                  Importar Arquivos
+                  {t('studies.import.importFiles')}
                 </Button>
               )}
             </div>
@@ -177,7 +179,7 @@ const FileUploadTab: React.FC = () => {
             {importing ? (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Processando arquivos...</span>
+                  <span>{t('studies.import.processing')}</span>
                   <span>{progress}%</span>
                 </div>
                 <Progress value={progress} className="h-2" />

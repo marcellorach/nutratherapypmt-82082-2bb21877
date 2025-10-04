@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import EstudoCard from './cards/EstudoCard';
 import { Plus, FileText, ClipboardCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from 'react-i18next';
 
 interface EstudosColumnProps {
   title: string;
@@ -24,11 +25,19 @@ const EstudosColumn: React.FC<EstudosColumnProps> = ({
   buttonLabel,
   getNutraceuticalScore
 }) => {
+  const { t } = useTranslation();
+  
   const Icon = {
     new: FileText,
     review: ClipboardCheck,
     approved: FileText
   }[icon];
+  
+  const getEmptyMessage = () => {
+    if (icon === 'review') return t('studies.kanban.noStudies', { status: t('studies.kanban.statusReview') });
+    if (icon === 'approved') return t('studies.kanban.noStudies', { status: t('studies.kanban.statusApproved') });
+    return t('studies.kanban.noStudies', { status: t('studies.kanban.statusNew') });
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -58,7 +67,7 @@ const EstudosColumn: React.FC<EstudosColumnProps> = ({
             >
               <CardContent className="flex flex-col items-center justify-center py-6">
                 <Plus className="h-8 w-8 text-gray-400" />
-                <p className="text-gray-500 mt-2">Adicionar novo estudo</p>
+                <p className="text-gray-500 mt-2">{t('studies.kanban.addNew')}</p>
               </CardContent>
             </Card>
           )}
@@ -66,7 +75,7 @@ const EstudosColumn: React.FC<EstudosColumnProps> = ({
           {estudos.length === 0 && !onAddEstudo && (
             <div className="flex flex-col items-center justify-center h-40 text-gray-500">
               <Icon className="h-10 w-10 mb-2 opacity-30" />
-              <p>Nenhum estudo {icon === 'review' ? 'em curadoria' : icon === 'approved' ? 'aprovado' : 'novo'}</p>
+              <p>{getEmptyMessage()}</p>
             </div>
           )}
         </div>

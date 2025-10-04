@@ -423,6 +423,98 @@
       "deleteError": "Error deleting nutraceutical: {{message}}"
     }
   },
+  "studies": {
+    "header": {
+      "title": "Scientific Studies",
+      "description": "Management and analysis of studies on nutraceuticals",
+      "addStudy": "Add Study",
+      "advancedFilters": "Advanced Filters"
+    },
+    "search": {
+      "placeholder": "Search studies by title, description or journal..."
+    },
+    "tabs": {
+      "import": "Import & Process",
+      "manage": "Manage Studies"
+    },
+    "import": {
+      "title": "Import Scientific Studies",
+      "description": "Import studies from SCISPACE, \"integrative analyses\" or other sources",
+      "sectionTitle": "Import Studies",
+      "uploadTab": "File Upload",
+      "historyTab": "History",
+      "selectFiles": "Select Files",
+      "supportedFormats": "Supported formats: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF",
+      "filesForImport": "Files for import ({{count}})",
+      "importFiles": "Import Files",
+      "processing": "Processing files...",
+      "noFiles": "No file selected",
+      "selectAtLeastOne": "Select at least one file to import.",
+      "importSuccess": "Import completed",
+      "importSuccessDesc": "{{count}} study(ies) imported successfully. They can now be processed in NTAI Analysis.",
+      "importError": "Error importing {{filename}}"
+    },
+    "history": {
+      "loading": "Loading history...",
+      "updateList": "Update list",
+      "processWithAI": "Process with AI",
+      "importDate": "Date / Time",
+      "metaSummary": "Meta Summary",
+      "baseStudies": "Base Studies",
+      "status": "Status",
+      "actions": "Actions",
+      "noImports": "No previous imports registered.",
+      "errorFetching": "Error fetching history"
+    },
+    "ntai": {
+      "title": "NTAI Analysis",
+      "badge": "Advanced Processing",
+      "processing": "NTAI Processing",
+      "model": "Model",
+      "temperature": "Temperature",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "promptsInfo": "Custom prompts will be used to extract specific information from the studies.",
+      "hideLog": "Hide Log",
+      "showLog": "Show Log",
+      "settings": "Settings",
+      "infoTitle": "Processing Information",
+      "availableStudies": "Available Studies for Processing",
+      "queueEmpty": "No items in processing queue",
+      "analysisResults": "Analysis Results",
+      "cardGenerated": "Card Generated for Kanban",
+      "cardAdded": "Card added to kanban",
+      "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column. You can now manage this study in the workflow."
+    },
+    "kanban": {
+      "newStudies": "New Studies",
+      "inReview": "Under Review",
+      "approved": "Approved",
+      "addNew": "Add new study",
+      "noStudies": "No {{status}} studies",
+      "statusNew": "new",
+      "statusReview": "under review",
+      "statusApproved": "approved",
+      "startCuration": "Start Curation",
+      "viewDetails": "View Details"
+    },
+    "card": {
+      "ntaiAnalysis": "NTAI Analysis",
+      "nutraceuticals": "Nutraceuticals",
+      "conditions": "Conditions",
+      "interactions": "Interactions",
+      "sideEffects": "Side Effects"
+    },
+    "toast": {
+      "studyAdded": "Study added successfully",
+      "studyAddedDesc": "The study has been sent to the curation process.",
+      "stageAdvanced": "Stage advanced",
+      "stageAdvancedDesc": "The study has moved to the next approval stage.",
+      "selectStudies": "Select studies for processing",
+      "selectStudiesDesc": "Select imported studies and add them to the NTAI processing queue."
+    }
+  },
   "efficacyMatrix": {
     "header": {
       "title": "Nutraceutical-Condition Relations",

@@ -7,6 +7,7 @@ import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 
 interface EstudoCardProps {
   estudo: any;
@@ -18,9 +19,10 @@ interface EstudoCardProps {
 const EstudoCard: React.FC<EstudoCardProps> = ({ 
   estudo, 
   onView, 
-  buttonLabel = "Ver Detalhes",
+  buttonLabel,
   getNutraceuticalScore 
 }) => {
+  const { t } = useTranslation();
   // Dados de exemplo para as seções NTAI (em produção viriam do backend)
   const ntaiData = {
     nutraceuticos: estudo.nutraceuticals || [],
@@ -52,11 +54,11 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h4 className="text-sm font-semibold mb-3 text-purple-700">Análise NTAI</h4>
+          <h4 className="text-sm font-semibold mb-3 text-purple-700">{t('studies.card.ntaiAnalysis')}</h4>
           
           {/* Seção Nutraceuticos */}
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">Nutraceuticos</p>
+            <p className="text-xs text-gray-500 mb-1">{t('studies.card.nutraceuticals')}</p>
             <div className="flex flex-wrap gap-1">
               {ntaiData.nutraceuticos.map((nutra: string, idx: number) => (
                 <NutraceuticalTag 
@@ -70,7 +72,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
           {/* Seção Condições */}
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">Condições</p>
+            <p className="text-xs text-gray-500 mb-1">{t('studies.card.conditions')}</p>
             <div className="flex flex-wrap gap-1">
               {ntaiData.condicoes.map((condicao, idx) => (
                 <OutcomeTag 
@@ -84,7 +86,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
           {/* Seção Interações */}
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">Interações</p>
+            <p className="text-xs text-gray-500 mb-1">{t('studies.card.interactions')}</p>
             <div className="flex flex-wrap gap-1">
               {ntaiData.interacoesPositivas.map((interacao, idx) => (
                 <Badge 
@@ -111,7 +113,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
           {/* Seção Efeitos Colaterais */}
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">Efeitos Colaterais</p>
+            <p className="text-xs text-gray-500 mb-1">{t('studies.card.sideEffects')}</p>
             <div className="flex flex-wrap gap-1">
               {ntaiData.efeitosColaterais.map((efeito, idx) => (
                 <Badge 
@@ -133,7 +135,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
           size="sm"
           onClick={() => onView(estudo)}
         >
-          {buttonLabel}
+          {buttonLabel || t('studies.kanban.viewDetails')}
         </Button>
       </CardContent>
     </Card>

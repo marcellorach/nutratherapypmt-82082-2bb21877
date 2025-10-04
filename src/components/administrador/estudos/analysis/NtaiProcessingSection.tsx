@@ -10,8 +10,11 @@ import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
+import { useTranslation } from 'react-i18next';
 
 const NtaiProcessingSection: React.FC = () => {
+  const { t } = useTranslation();
+  
   const {
     processQueue,
     selectedItems,
@@ -39,45 +42,45 @@ const NtaiProcessingSection: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-600" />
-            <h3 className="text-lg font-medium">Processamento NTAI</h3>
+            <h3 className="text-lg font-medium">{t('studies.ntai.processing')}</h3>
             <Badge className="ml-2 bg-purple-100 text-purple-800" variant="outline">
               {aiConfigs.modelName || 'GPT-4o'}
             </Badge>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={toggleLogVisibility}>
-              {logVisible ? "Ocultar Log" : "Exibir Log"}
+              {logVisible ? t('studies.ntai.hideLog') : t('studies.ntai.showLog')}
             </Button>
             <Button variant="outline" size="sm" className="flex items-center gap-1">
               <Settings className="h-4 w-4" />
-              <span>Configurações</span>
+              <span>{t('studies.ntai.settings')}</span>
             </Button>
           </div>
         </div>
         
         {/* Mostra informações sobre o processamento atual */}
         <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-          <h4 className="text-sm font-medium mb-2">Informações do Processamento</h4>
+          <h4 className="text-sm font-medium mb-2">{t('studies.ntai.infoTitle')}</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">Modelo:</span> {aiConfigs.modelName || 'GPT-4o'}
+              <span className="text-gray-500">{t('studies.ntai.model')}:</span> {aiConfigs.modelName || 'GPT-4o'}
             </div>
             <div>
-              <span className="text-gray-500">Temperature:</span> {aiConfigs.temperature || '0.7'}
+              <span className="text-gray-500">{t('studies.ntai.temperature')}:</span> {aiConfigs.temperature || '0.7'}
             </div>
             <div>
-              <span className="text-gray-500">Status:</span> {processingActive ? 'Ativo' : 'Inativo'}
+              <span className="text-gray-500">{t('studies.ntai.status')}:</span> {processingActive ? t('studies.ntai.active') : t('studies.ntai.inactive')}
             </div>
           </div>
           <div className="mt-2 text-xs text-gray-500">
-            Os prompts personalizados serão usados para extrair informações específicas dos estudos.
+            {t('studies.ntai.promptsInfo')}
           </div>
         </div>
         
         {logVisible && <NtaiProcessingLog entries={logEntries} />}
         
         <div className="space-y-4">
-          <h4 className="text-sm font-medium">Estudos Disponíveis para Processamento</h4>
+          <h4 className="text-sm font-medium">{t('studies.ntai.availableStudies')}</h4>
           <NtaiStudySelectionTable 
             estudos={availableStudies}
             selectedItems={selectedItems}
@@ -110,7 +113,7 @@ const NtaiProcessingSection: React.FC = () => {
             </div>
           ) : (
             <div className="border rounded-md p-8 text-center text-gray-500">
-              Nenhum item na fila de processamento
+              {t('studies.ntai.queueEmpty')}
             </div>
           )}
         </div>
@@ -119,19 +122,18 @@ const NtaiProcessingSection: React.FC = () => {
         {analysisResult && (
           <div className="mt-8 border-t pt-4">
             <div className="flex items-center mb-4">
-              <h3 className="text-lg font-medium">Resultados da Análise</h3>
+              <h3 className="text-lg font-medium">{t('studies.ntai.analysisResults')}</h3>
               <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
               <Badge variant="outline" className="bg-green-50 text-green-700">
-                Card Gerado para Kanban
+                {t('studies.ntai.cardGenerated')}
               </Badge>
             </div>
             <NtaiAnalysisResults result={analysisResult} />
             
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <h4 className="text-sm font-medium text-green-800 mb-2">Card adicionado ao kanban</h4>
+              <h4 className="text-sm font-medium text-green-800 mb-2">{t('studies.ntai.cardAdded')}</h4>
               <p className="text-xs text-green-700">
-                O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna "Novos Estudos".
-                Você pode agora gerenciar este estudo no fluxo de trabalho.
+                {t('studies.ntai.cardAddedDesc')}
               </p>
             </div>
           </div>

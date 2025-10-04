@@ -11,6 +11,7 @@ import EstudoSearch from './estudos/EstudoSearch';
 import EstudosColumn from './estudos/EstudosColumn';
 import SciImportSection from './estudos/import/SciImportSection';
 import NtaiProcessingSection from './estudos/analysis/NtaiProcessingSection';
+import { useTranslation } from 'react-i18next';
 import './estudos/estudos.css';
 
 const estudosExemplo = [
@@ -53,6 +54,7 @@ const estudosExemplo = [
 ];
 
 const EstudosTab: React.FC = () => {
+  const { t } = useTranslation();
   const [mainTab, setMainTab] = useState<string>("importar");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -67,8 +69,8 @@ const EstudosTab: React.FC = () => {
   const handleEstudoAdicionado = () => {
     setDialogOpen(false);
     toast({
-      title: "Estudo adicionado com sucesso",
-      description: "O estudo foi enviado para o processo de curadoria.",
+      title: t('studies.toast.studyAdded'),
+      description: t('studies.toast.studyAddedDesc'),
     });
   };
 
@@ -79,8 +81,8 @@ const EstudosTab: React.FC = () => {
 
   const handleAdvanceApproval = (estudoId: string) => {
     toast({
-      title: "Estágio avançado",
-      description: "O estudo passou para o próximo estágio de aprovação.",
+      title: t('studies.toast.stageAdvanced'),
+      description: t('studies.toast.stageAdvancedDesc'),
     });
     setDetailDialogOpen(false);
   };
@@ -109,11 +111,11 @@ const EstudosTab: React.FC = () => {
           <TabsList className="mb-4 md:mb-0">
             <TabsTrigger value="importar" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
-              <span>Importar & Processar</span>
+              <span>{t('studies.tabs.import')}</span>
             </TabsTrigger>
             <TabsTrigger value="gerenciar" className="flex items-center gap-2">
               <ListCheck className="w-4 h-4" />
-              <span>Gerenciar Estudos</span>
+              <span>{t('studies.tabs.manage')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -127,15 +129,15 @@ const EstudosTab: React.FC = () => {
         <TabsContent value="importar" className="mt-0 space-y-6">
           <div className="flex items-center space-x-2 mb-2">
             <ArrowDown className="h-4 w-4 text-blue-600" />
-            <h3 className="text-lg font-medium">Importar Estudos</h3>
+            <h3 className="text-lg font-medium">{t('studies.import.sectionTitle')}</h3>
           </div>
           <SciImportSection />
           
           <div className="flex items-center space-x-2 mb-2 mt-8">
             <ArrowDown className="h-4 w-4 text-purple-600" />
-            <h3 className="text-lg font-medium">Análise NTAI</h3>
+            <h3 className="text-lg font-medium">{t('studies.ntai.title')}</h3>
             <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-              Processamento Avançado
+              {t('studies.ntai.badge')}
             </span>
           </div>
           <NtaiProcessingSection />
@@ -145,17 +147,17 @@ const EstudosTab: React.FC = () => {
           <div className="flex flex-col space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <EstudosColumn
-                title="Novos Estudos"
+                title={t('studies.kanban.newStudies')}
                 icon="new"
                 estudos={novoEstudos}
                 onViewEstudo={handleViewEstudo}
                 onAddEstudo={handleAddEstudo}
-                buttonLabel="Iniciar Curadoria"
+                buttonLabel={t('studies.kanban.startCuration')}
                 getNutraceuticalScore={getNutraceuticalScore}
               />
               
               <EstudosColumn
-                title="Em Curadoria"
+                title={t('studies.kanban.inReview')}
                 icon="review"
                 estudos={emRevEstudos}
                 onViewEstudo={handleViewEstudo}
@@ -163,7 +165,7 @@ const EstudosTab: React.FC = () => {
               />
               
               <EstudosColumn
-                title="Aprovados"
+                title={t('studies.kanban.approved')}
                 icon="approved"
                 estudos={aprovadosEstudos}
                 onViewEstudo={handleViewEstudo}

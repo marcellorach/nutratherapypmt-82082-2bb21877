@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 
 import TabHeader from './TabHeader';
 import TabNavigation from './TabNavigation';
@@ -15,6 +16,7 @@ const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a
 const SciImportSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("file-upload");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -29,8 +31,8 @@ const SciImportSection: React.FC = () => {
         ntaiSection.classList.remove('highlight-section');
       }, 2000);
       toast({
-        title: "Selecione os estudos para processamento",
-        description: "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
+        title: t('studies.toast.selectStudies'),
+        description: t('studies.toast.selectStudiesDesc')
       });
     }
   };

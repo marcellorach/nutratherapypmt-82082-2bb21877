@@ -5,6 +5,7 @@ import { Brain, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SciImportHistoryRow from './SciImportHistoryRow';
+import { useTranslation } from 'react-i18next';
 
 interface ImportHistoryRow {
   id: string;
@@ -24,6 +25,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
   const [importHistory, setImportHistory] = useState<ImportHistoryRow[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchHistory();
@@ -38,7 +40,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
       .then(({ data, error }) => {
         if (error) {
           toast({
-            title: "Erro ao buscar histórico",
+            title: t('studies.history.errorFetching'),
             description: error.message,
             variant: "destructive"
           });
@@ -53,12 +55,12 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
   return (
     <div className="py-2">
       {historyLoading ? (
-        <div className="text-center p-6 text-gray-400">Carregando histórico...</div>
+        <div className="text-center p-6 text-gray-400">{t('studies.history.loading')}</div>
       ) : (
         <>
           <div className="flex justify-between mb-2">
             <Button variant="outline" size="sm" onClick={fetchHistory}>
-              Atualizar lista
+              {t('studies.history.updateList')}
             </Button>
             
             <Button 
@@ -68,7 +70,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
               onClick={onProcessWithAI}
             >
               <Brain className="mr-1 h-4 w-4" />
-              Processar com IA
+              {t('studies.history.processWithAI')}
             </Button>
           </div>
           {importHistory && importHistory.length > 0 ? (
@@ -76,11 +78,11 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
               <table className="min-w-full text-xs">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-2 py-1">Data / Hora</th>
-                    <th className="px-2 py-1">Meta Sumário</th>
-                    <th className="px-2 py-1">Base Estudos</th>
-                    <th className="px-2 py-1">Status</th>
-                    <th className="px-2 py-1">Ações</th>
+                    <th className="px-2 py-1">{t('studies.history.importDate')}</th>
+                    <th className="px-2 py-1">{t('studies.history.metaSummary')}</th>
+                    <th className="px-2 py-1">{t('studies.history.baseStudies')}</th>
+                    <th className="px-2 py-1">{t('studies.history.status')}</th>
+                    <th className="px-2 py-1">{t('studies.history.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -96,7 +98,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ onProcessWithAI }) => {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              Nenhuma importação anterior registrada.
+              {t('studies.history.noImports')}
             </div>
           )}
         </>
