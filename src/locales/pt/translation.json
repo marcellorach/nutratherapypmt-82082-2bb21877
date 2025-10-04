@@ -312,6 +312,28 @@
     "support": "Suporte",
     "filters": "Filtros",
     "newRelation": "Nova Relação",
+    "tabs": {
+      "network": "Rede",
+      "matrix": "Matriz"
+    },
+    "loading": "Carregando dados...",
+    "noData": {
+      "title": "Sem dados para visualizar",
+      "description": "Não há relações carregadas. Adicione nutracêuticos e condições para visualizar as conexões."
+    },
+    "network": {
+      "viewing": "Visualizando",
+      "nodes": "nós",
+      "connections": "conexões",
+      "scientificBase": "Base científica",
+      "tip": "Clique em um nó para ver detalhes das conexões"
+    },
+    "matrix": {
+      "matrixWith": "Matriz com",
+      "nutraceuticals": "nutracêuticos",
+      "conditions": "condições",
+      "tip": "Clique em uma célula para ver detalhes da relação"
+    },
     "error": {
       "title": "Erro ao carregar dados",
       "description": "Não foi possível carregar os dados de relações. Tente novamente."

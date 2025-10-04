@@ -312,6 +312,28 @@
     "support": "Support",
     "filters": "Filters",
     "newRelation": "New Relation",
+    "tabs": {
+      "network": "Network",
+      "matrix": "Matrix"
+    },
+    "loading": "Loading data...",
+    "noData": {
+      "title": "No data to visualize",
+      "description": "No relationships loaded. Add nutraceuticals and conditions to visualize connections."
+    },
+    "network": {
+      "viewing": "Viewing",
+      "nodes": "nodes",
+      "connections": "connections",
+      "scientificBase": "Scientific base",
+      "tip": "Click on a node to see connection details"
+    },
+    "matrix": {
+      "matrixWith": "Matrix with",
+      "nutraceuticals": "nutraceuticals",
+      "conditions": "conditions",
+      "tip": "Click on a cell to see relationship details"
+    },
     "error": {
       "title": "Error loading data",
       "description": "Could not load relationship data. Please try again."
