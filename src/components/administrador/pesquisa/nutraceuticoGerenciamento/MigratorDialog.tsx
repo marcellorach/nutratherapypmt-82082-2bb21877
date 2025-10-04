@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 interface MigratorDialogProps {
   open: boolean;
@@ -25,14 +26,15 @@ const MigratorDialog: React.FC<MigratorDialogProps> = ({
   migrationResult,
   onStartMigration
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Migração de Dados</DialogTitle>
+          <DialogTitle>{t('nutraceuticalDatabase.migrator.title')}</DialogTitle>
           <DialogDescription>
-            Esta operação irá migrar os dados dos arquivos estáticos para o banco de dados Supabase.
-            Isso inclui todos os nutracêuticos, suas categorias, condições e relacionamentos.
+            {t('nutraceuticalDatabase.migrator.description')}
           </DialogDescription>
         </DialogHeader>
         
@@ -48,13 +50,13 @@ const MigratorDialog: React.FC<MigratorDialogProps> = ({
             onClick={() => onOpenChange(false)}
             disabled={isMigrating}
           >
-            Cancelar
+            {t('nutraceuticalDatabase.migrator.cancel')}
           </Button>
           <Button 
             onClick={onStartMigration}
             disabled={isMigrating}
           >
-            {isMigrating ? 'Migrando...' : 'Iniciar Migração'}
+            {isMigrating ? t('nutraceuticalDatabase.migrator.migrating') : t('nutraceuticalDatabase.migrator.start')}
           </Button>
         </DialogFooter>
       </DialogContent>

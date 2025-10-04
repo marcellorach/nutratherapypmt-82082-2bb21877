@@ -961,5 +961,45 @@
         "evaluationContent": "Evaluate the efficacy of the following nutraceutical composition..."
       }
     }
+  },
+  "nutraceuticalDatabase": {
+    "title": "Nutraceutical Database",
+    "description": "Manage and keep the nutraceuticals and scientific studies database up to date",
+    "lastUpdate": "Last updated on {{date}}",
+    "buttons": {
+      "addNutraceutical": "Add Nutraceutical",
+      "addStudy": "Add Study",
+      "refresh": "Refresh",
+      "exportData": "Export Data"
+    },
+    "stats": {
+      "totalNutraceuticals": "Total Nutraceuticals",
+      "outcomes": "Outcomes",
+      "healthConditions": "Health Conditions",
+      "scientificStudies": "Scientific Studies"
+    },
+    "messages": {
+      "deleted": "Nutraceutical deleted",
+      "deletedDescription": "The nutraceutical was successfully removed.",
+      "deleteError": "Error deleting",
+      "deleteErrorDescription": "Unable to delete nutraceutical: {{error}}",
+      "migrationComplete": "Migration complete",
+      "migrationError": "Migration error",
+      "migrationErrorDescription": "An unexpected error occurred during the migration process"
+    },
+    "migrator": {
+      "title": "Data Migration",
+      "description": "This operation will migrate data from static files to the Supabase database. This includes all nutraceuticals, their categories, conditions and relationships.",
+      "cancel": "Cancel",
+      "start": "Start Migration",
+      "migrating": "Migrating..."
+    },
+    "deleteDialog": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete this nutraceutical? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
   }
 }

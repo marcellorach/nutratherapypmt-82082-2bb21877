@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 interface DeleteDialogProps {
   open: boolean;
@@ -24,23 +25,27 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
   isDeleting,
   onConfirmDelete
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+          <AlertDialogTitle>{t('nutraceuticalDatabase.deleteDialog.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir este nutracêutico? Esta ação não pode ser desfeita.
+            {t('nutraceuticalDatabase.deleteDialog.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>
+            {t('nutraceuticalDatabase.deleteDialog.cancel')}
+          </AlertDialogCancel>
           <AlertDialogAction 
             onClick={onConfirmDelete} 
             disabled={isDeleting} 
             className="bg-red-600 hover:bg-red-700"
           >
-            {isDeleting ? 'Excluindo...' : 'Excluir'}
+            {isDeleting ? t('nutraceuticalDatabase.deleteDialog.deleting') : t('nutraceuticalDatabase.deleteDialog.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

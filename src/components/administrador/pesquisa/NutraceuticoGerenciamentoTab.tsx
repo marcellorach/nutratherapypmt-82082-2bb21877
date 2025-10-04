@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 // Componentes comuns
 import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
@@ -15,6 +16,7 @@ import MigratorDialog from './nutraceuticoGerenciamento/MigratorDialog';
 import DeleteDialog from './nutraceuticoGerenciamento/DeleteDialog';
 
 const NutraceuticoGerenciamentoTab: React.FC = () => {
+  const { t } = useTranslation();
   const {
     nutraceuticals,
     outcomes,
@@ -70,15 +72,15 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
     try {
       await deleteNutraceutical(nutraceuticalToDelete);
       toast({
-        title: "Nutracêutico excluído",
-        description: "O nutracêutico foi removido com sucesso.",
+        title: t('nutraceuticalDatabase.messages.deleted'),
+        description: t('nutraceuticalDatabase.messages.deletedDescription'),
       });
       setDeleteDialogOpen(false);
       setNutraceuticalToDelete(null);
     } catch (error: any) {
       toast({
-        title: "Erro ao excluir",
-        description: `Não foi possível excluir o nutracêutico: ${error.message}`,
+        title: t('nutraceuticalDatabase.messages.deleteError'),
+        description: t('nutraceuticalDatabase.messages.deleteErrorDescription', { error: error.message }),
         variant: "destructive",
       });
     } finally {
@@ -95,13 +97,13 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       if (result.success) {
         setHasMigratedData(true);
         toast({
-          title: "Migração concluída",
+          title: t('nutraceuticalDatabase.messages.migrationComplete'),
           description: result.message,
         });
         refreshData();
       } else {
         toast({
-          title: "Erro na migração",
+          title: t('nutraceuticalDatabase.messages.migrationError'),
           description: result.message,
           variant: "destructive",
         });
@@ -114,8 +116,8 @@ const NutraceuticoGerenciamentoTab: React.FC = () => {
       });
       
       toast({
-        title: "Erro na migração",
-        description: "Ocorreu um erro inesperado durante o processo de migração",
+        title: t('nutraceuticalDatabase.messages.migrationError'),
+        description: t('nutraceuticalDatabase.messages.migrationErrorDescription'),
         variant: "destructive",
       });
     } finally {

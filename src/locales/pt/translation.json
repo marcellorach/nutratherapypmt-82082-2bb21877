@@ -961,5 +961,45 @@
         "evaluationContent": "Avalie a eficácia da seguinte composição nutracêutica..."
       }
     }
+  },
+  "nutraceuticalDatabase": {
+    "title": "Banco de Nutracêuticos",
+    "description": "Gerencie e mantenha atualizado o banco de dados de nutracêuticos e estudos científicos",
+    "lastUpdate": "Última atualização em {{date}}",
+    "buttons": {
+      "addNutraceutical": "Adicionar Nutracêutico",
+      "addStudy": "Adicionar Estudo",
+      "refresh": "Atualizar",
+      "exportData": "Exportar Dados"
+    },
+    "stats": {
+      "totalNutraceuticals": "Total de Nutracêuticos",
+      "outcomes": "Outcomes",
+      "healthConditions": "Condições de Saúde",
+      "scientificStudies": "Estudos Científicos"
+    },
+    "messages": {
+      "deleted": "Nutracêutico excluído",
+      "deletedDescription": "O nutracêutico foi removido com sucesso.",
+      "deleteError": "Erro ao excluir",
+      "deleteErrorDescription": "Não foi possível excluir o nutracêutico: {{error}}",
+      "migrationComplete": "Migração concluída",
+      "migrationError": "Erro na migração",
+      "migrationErrorDescription": "Ocorreu um erro inesperado durante o processo de migração"
+    },
+    "migrator": {
+      "title": "Migração de Dados",
+      "description": "Esta operação irá migrar os dados dos arquivos estáticos para o banco de dados Supabase. Isso inclui todos os nutracêuticos, suas categorias, condições e relacionamentos.",
+      "cancel": "Cancelar",
+      "start": "Iniciar Migração",
+      "migrating": "Migrando..."
+    },
+    "deleteDialog": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja excluir este nutracêutico? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "deleting": "Excluindo..."
+    }
   }
 }

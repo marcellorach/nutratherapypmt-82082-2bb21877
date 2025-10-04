@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Beaker, Target, Heart, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StatsGridProps {
   nutraceuticals: any[];
@@ -17,6 +18,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({
   studies,
   isLoading
 }) => {
+  const { t } = useTranslation();
+  
   // Calcular números reais baseados nos dados
   const nutraceuticalCount = nutraceuticals.length;
   
@@ -33,25 +36,25 @@ const StatsGrid: React.FC<StatsGridProps> = ({
 
   const stats = [
     {
-      title: 'Total de Nutracêuticos',
+      title: t('nutraceuticalDatabase.stats.totalNutraceuticals'),
       value: nutraceuticalCount,
       icon: Beaker,
       color: 'text-blue-600'
     },
     {
-      title: 'Outcomes',
+      title: t('nutraceuticalDatabase.stats.outcomes'),
       value: outcomesCount,
       icon: Target,
       color: 'text-green-600'
     },
     {
-      title: 'Condições de Saúde',
+      title: t('nutraceuticalDatabase.stats.healthConditions'),
       value: conditionsCount,
       icon: Heart,
       color: 'text-purple-600'
     },
     {
-      title: 'Estudos Científicos',
+      title: t('nutraceuticalDatabase.stats.scientificStudies'),
       value: studiesCount,
       icon: FileText,
       color: 'text-amber-600'
