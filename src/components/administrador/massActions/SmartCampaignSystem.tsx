@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import ExecutionModule from './modules/ExecutionModule';
 import AnalyticsModule from './modules/AnalyticsModule';
 
 const SmartCampaignSystem: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { roiMetrics, marketOpportunities, clientProfiles } = useROIIntelligence();
   const [selectedModule, setSelectedModule] = useState('command');
@@ -22,51 +24,51 @@ const SmartCampaignSystem: React.FC = () => {
   const audienceSegments = useMemo(() => [
     {
       id: 'high-roi-urgent',
-      name: 'ROI Alto + Urgência Crítica',
+      name: t('bulkActions.segments.highRoiUrgent.name'),
       count: 142,
       roiPotential: 4.8,
       conversionRate: 0.73,
       priority: 'critical',
-      description: 'Pets com condições críticas e alto potencial de ROI',
+      description: t('bulkActions.segments.highRoiUrgent.description'),
       color: 'red'
     },
     {
       id: 'preventive-premium', 
-      name: 'Preventivo Premium',
+      name: t('bulkActions.segments.preventivePremium.name'),
       count: 287,
       roiPotential: 3.2,
       conversionRate: 0.45,
       priority: 'high',
-      description: 'Clientes premium interessados em prevenção',
+      description: t('bulkActions.segments.preventivePremium.description'),
       color: 'purple'
     },
     {
       id: 'expansion-opportunity',
-      name: 'Oportunidade de Expansão',
+      name: t('bulkActions.segments.expansionOpportunity.name'),
       count: 394,
       roiPotential: 2.6,
       conversionRate: 0.38,
       priority: 'medium',
-      description: 'Clientes atuais com potencial para novos protocolos',
+      description: t('bulkActions.segments.expansionOpportunity.description'),
       color: 'blue'
     },
     {
       id: 'nurturing-prospects',
-      name: 'Prospects em Nutrição',
+      name: t('bulkActions.segments.nurturingProspects.name'),
       count: 156,
       roiPotential: 2.1,
       conversionRate: 0.22,
       priority: 'low',
-      description: 'Novos prospects para educação e nurturing',
+      description: t('bulkActions.segments.nurturingProspects.description'),
       color: 'green'
     }
-  ], []);
+  ], [t]);
 
   const campaignTypes = useMemo(() => [
     {
       id: 'opportunity-gaps',
-      name: 'Campanhas de Oportunidades',
-      description: 'Baseadas nos gaps identificados no ROI',
+      name: t('bulkActions.campaignTypes.opportunityGaps.name'),
+      description: t('bulkActions.campaignTypes.opportunityGaps.description'),
       icon: Target,
       segments: ['high-roi-urgent', 'expansion-opportunity'],
       estimatedConversion: 0.68,
@@ -74,8 +76,8 @@ const SmartCampaignSystem: React.FC = () => {
     },
     {
       id: 'educational-vets',
-      name: 'Campanhas Educativas Veterinárias',
-      description: 'Educação sobre novas evidências científicas',
+      name: t('bulkActions.campaignTypes.educationalVets.name'),
+      description: t('bulkActions.campaignTypes.educationalVets.description'),
       icon: Brain,
       segments: ['preventive-premium', 'expansion-opportunity'],
       estimatedConversion: 0.42,
@@ -83,8 +85,8 @@ const SmartCampaignSystem: React.FC = () => {
     },
     {
       id: 'retention-loyalty',
-      name: 'Campanhas de Retenção',
-      description: 'Para clientes com risco de churn',
+      name: t('bulkActions.campaignTypes.retentionLoyalty.name'),
+      description: t('bulkActions.campaignTypes.retentionLoyalty.description'),
       icon: TrendingUp,
       segments: ['expansion-opportunity', 'nurturing-prospects'],
       estimatedConversion: 0.55,
@@ -92,14 +94,14 @@ const SmartCampaignSystem: React.FC = () => {
     },
     {
       id: 'upsell-premium',
-      name: 'Campanhas de Upsell',
-      description: 'Expansão de protocolos existentes',
+      name: t('bulkActions.campaignTypes.upsellPremium.name'),
+      description: t('bulkActions.campaignTypes.upsellPremium.description'),
       icon: Zap,
       segments: ['preventive-premium', 'expansion-opportunity'],
       estimatedConversion: 0.38,
       roi: 3.4
     }
-  ], []);
+  ], [t]);
 
   const simulateCampaignExecution = (campaignType: string, segments: string[]) => {
     setIsExecuting(true);
@@ -119,8 +121,8 @@ const SmartCampaignSystem: React.FC = () => {
           }, 0);
 
           toast({
-            title: "Campanha Executada com Sucesso",
-            description: `Campanha enviada para ${totalRecipients} destinatários com personalização por IA.`,
+            title: t('bulkActions.toast.campaignSuccess'),
+            description: t('bulkActions.toast.campaignSent', { count: totalRecipients }),
             duration: 5000,
           });
           return 100;
@@ -140,14 +142,14 @@ const SmartCampaignSystem: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            Sistema Inteligente de Campanhas
+            {t('bulkActions.title')}
           </h2>
           <p className="text-muted-foreground">
-            Central de comando para campanhas personalizadas por IA
+            {t('bulkActions.description')}
           </p>
         </div>
         <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white">
-          IA Ativa
+          {t('bulkActions.badges.aiActive')}
         </Badge>
       </div>
 
@@ -155,19 +157,19 @@ const SmartCampaignSystem: React.FC = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="command" className="flex items-center">
             <Command className="h-4 w-4 mr-2" />
-            Comando
+            {t('bulkActions.tabs.command')}
           </TabsTrigger>
           <TabsTrigger value="creation" className="flex items-center">
             <Brain className="h-4 w-4 mr-2" />
-            Criação
+            {t('bulkActions.tabs.creation')}
           </TabsTrigger>
           <TabsTrigger value="execution" className="flex items-center">
             <Send className="h-4 w-4 mr-2" />
-            Execução
+            {t('bulkActions.tabs.execution')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center">
             <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
+            {t('bulkActions.tabs.analytics')}
           </TabsTrigger>
         </TabsList>
 

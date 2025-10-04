@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,8 @@ const CreationModule: React.FC<CreationModuleProps> = ({
   onCampaignExecute, 
   isExecuting 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -47,19 +50,19 @@ const CreationModule: React.FC<CreationModuleProps> = ({
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">ROI Estimado</span>
+                  <span className="text-sm font-medium">{t('bulkActions.creation.estimatedROI')}</span>
                   <Badge className="bg-blue-100 text-blue-800">
                     {campaign.roi.toFixed(1)}x
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Taxa Conversão</span>
+                  <span className="text-sm font-medium">{t('bulkActions.creation.conversionRate')}</span>
                   <span className="text-sm font-bold">
                     {(campaign.estimatedConversion * 100).toFixed(0)}%
                   </span>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm font-medium">Segmentos Alvo:</span>
+                  <span className="text-sm font-medium">{t('bulkActions.creation.targetSegments')}</span>
                   <div className="flex flex-wrap gap-2">
                     {campaign.segments.map(segmentId => {
                       const segment = audienceSegments.find(s => s.id === segmentId);
@@ -69,7 +72,7 @@ const CreationModule: React.FC<CreationModuleProps> = ({
                           variant="outline" 
                           className={`text-${segment.color}-700 border-${segment.color}-300`}
                         >
-                          {segment.count} destinatários
+                          {segment.count} {t('bulkActions.creation.recipients')}
                         </Badge>
                       ) : null;
                     })}
@@ -81,7 +84,7 @@ const CreationModule: React.FC<CreationModuleProps> = ({
                   disabled={isExecuting}
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Criar Campanha
+                  {t('bulkActions.creation.createCampaign')}
                 </Button>
               </div>
             </CardContent>

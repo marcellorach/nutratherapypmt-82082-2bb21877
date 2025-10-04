@@ -2053,5 +2053,114 @@
         "description": "Configure the parameters and click 'Simulate' to see the full projection"
       }
     }
+  },
+  "bulkActions": {
+    "title": "Smart Campaign System",
+    "description": "Command center for AI-powered personalized campaigns",
+    "badges": {
+      "aiActive": "AI Active",
+      "active": "Active"
+    },
+    "tabs": {
+      "command": "Command",
+      "creation": "Creation",
+      "execution": "Execution",
+      "analytics": "Analytics"
+    },
+    "segments": {
+      "highRoiUrgent": {
+        "name": "High ROI + Critical Urgency",
+        "description": "Pets with critical conditions and high ROI potential"
+      },
+      "preventivePremium": {
+        "name": "Premium Preventive",
+        "description": "Premium clients interested in prevention"
+      },
+      "expansionOpportunity": {
+        "name": "Expansion Opportunity",
+        "description": "Current clients with potential for new protocols"
+      },
+      "nurturingProspects": {
+        "name": "Nurturing Prospects",
+        "description": "New prospects for education and nurturing"
+      }
+    },
+    "campaignTypes": {
+      "opportunityGaps": {
+        "name": "Opportunity Campaigns",
+        "description": "Based on identified ROI gaps"
+      },
+      "educationalVets": {
+        "name": "Veterinary Educational Campaigns",
+        "description": "Education on new scientific evidence"
+      },
+      "retentionLoyalty": {
+        "name": "Retention Campaigns",
+        "description": "For clients at risk of churn"
+      },
+      "upsellPremium": {
+        "name": "Upsell Campaigns",
+        "description": "Expansion of existing protocols"
+      }
+    },
+    "toast": {
+      "campaignSuccess": "Campaign Successfully Executed",
+      "campaignSent": "Campaign sent to {{count}} recipients with AI personalization."
+    },
+    "command": {
+      "globalPerformance": "Global Performance",
+      "avgROI": "Avg ROI",
+      "conversionRate": "Conversion Rate",
+      "activeCampaigns": "Active Campaigns",
+      "activeOpportunities": "Active Opportunities",
+      "highPotential": "High Potential",
+      "estimatedValue": "Estimated Value",
+      "segments": "Segments",
+      "aiPersonalization": "AI Personalization",
+      "activeAlgorithms": "Active Algorithms",
+      "precision": "Precision",
+      "optimization": "Optimization"
+    },
+    "creation": {
+      "estimatedROI": "Estimated ROI",
+      "conversionRate": "Conversion Rate",
+      "targetSegments": "Target Segments:",
+      "recipients": "recipients",
+      "createCampaign": "Create Campaign"
+    },
+    "execution": {
+      "inProgress": "Execution in Progress",
+      "personalizingMessages": "Personalizing messages with AI...",
+      "intelligentSegmentation": "Intelligent Segmentation",
+      "potentialROI": "Potential ROI:",
+      "conversion": "Conversion:",
+      "campaignSimulator": "Campaign Simulator",
+      "projectedResults": "Projected Results",
+      "totalSends": "Total Sends:",
+      "estimatedConversions": "Estimated Conversions:",
+      "expectedROI": "Expected ROI:",
+      "estimatedRevenue": "Estimated Revenue:",
+      "investmentScenarios": "Investment Scenarios",
+      "conservative": "Conservative (ROI {{roi}}x)",
+      "optimistic": "Optimistic (ROI {{roi}}x)",
+      "aggressive": "Aggressive (ROI {{roi}}x)"
+    },
+    "analytics": {
+      "sentCampaigns": "Sent Campaigns",
+      "openRate": "Open Rate",
+      "conversionRate": "Conversion Rate",
+      "avgROI": "Avg ROI",
+      "performanceBySegment": "Performance by Segment",
+      "conversion": "conversion",
+      "sent": "Sent:",
+      "potentialROI": "Potential ROI:",
+      "priority": "Priority:",
+      "priorities": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      }
+    }
   }
 }
