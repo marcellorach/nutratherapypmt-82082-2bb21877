@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, Share, Bookmark } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import EpidemiologicalTree from './components/EpidemiologicalTree';
 import NutraceuticalComparisonChart from './components/NutraceuticalComparisonChart';
 import PredictiveSimulator from './components/PredictiveSimulator';
@@ -37,6 +38,7 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
   isOpen,
   onClose
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("epidemiology");
 
   if (!condition) return null;
@@ -109,7 +111,7 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
             <div className="flex items-start justify-between">
               <div>
                 <DialogTitle className="text-2xl font-bold">
-                  Análise Detalhada: {condition.name}
+                  {t('visualization.detailedAnalysis.title', { name: condition.name })}
                 </DialogTitle>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary">
@@ -121,22 +123,22 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
                   <Badge 
                     variant={condition.treatabilityScore >= 45 ? "default" : "secondary"}
                   >
-                    Tratabilidade: {condition.treatabilityScore}%
+                    {t('visualization.detailedAnalysis.treatability')}: {condition.treatabilityScore}%
                   </Badge>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm">
                   <Share className="h-4 w-4 mr-2" />
-                  Compartilhar
+                  {t('visualization.detailedAnalysis.share')}
                 </Button>
                 <Button variant="outline" size="sm">
                   <Bookmark className="h-4 w-4 mr-2" />
-                  Salvar
+                  {t('visualization.detailedAnalysis.save')}
                 </Button>
                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
-                  Exportar PDF
+                  {t('visualization.detailedAnalysis.exportPdf')}
                 </Button>
               </div>
             </div>
@@ -145,10 +147,10 @@ const ConditionDetailedAnalysisModal: React.FC<ConditionDetailedAnalysisModalPro
           <div className="flex-1 min-h-0 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-4 flex-shrink-0 mx-6 mt-4">
-                <TabsTrigger value="epidemiology">Epidemiologia</TabsTrigger>
-                <TabsTrigger value="nutraceuticals">Nutracêuticos</TabsTrigger>
-                <TabsTrigger value="evidence">Evidências</TabsTrigger>
-                <TabsTrigger value="simulator">Simulador</TabsTrigger>
+                <TabsTrigger value="epidemiology">{t('visualization.detailedAnalysis.tabs.epidemiology')}</TabsTrigger>
+                <TabsTrigger value="nutraceuticals">{t('visualization.detailedAnalysis.tabs.nutraceuticals')}</TabsTrigger>
+                <TabsTrigger value="evidence">{t('visualization.detailedAnalysis.tabs.evidence')}</TabsTrigger>
+                <TabsTrigger value="simulator">{t('visualization.detailedAnalysis.tabs.simulator')}</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 min-h-0 mt-4">

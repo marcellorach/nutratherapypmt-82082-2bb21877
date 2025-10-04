@@ -9,6 +9,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Zap, TrendingUp, Clock, Target } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface SimulatorInputs {
   species: string;
@@ -26,6 +27,7 @@ interface PredictiveSimulatorProps {
 }
 
 const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nutraceuticals }) => {
+  const { t } = useTranslation();
   const [inputs, setInputs] = useState<SimulatorInputs>({
     species: '',
     breed: '',
@@ -67,7 +69,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
       const progressCurve = 1 - Math.exp(-month * 0.3);
       const monthlyImprovement = improvementExpected * progressCurve;
       timelineData.push({
-        month: `Mês ${month}`,
+        month: `${t('visualization.detailedAnalysis.simulator.month')} ${month}`,
         improvement: Math.round(monthlyImprovement),
         confidence: Math.max(60, 95 - month * 2)
       });
@@ -90,22 +92,22 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
     if (score > 4.0) {
       recommendations.push({
         type: 'success',
-        title: 'Prognóstico Excelente',
-        description: 'Combinação ideal para este perfil. Resultados esperados acima da média.',
+        title: t('visualization.detailedAnalysis.simulator.recommendations.excellentPrognosis'),
+        description: t('visualization.detailedAnalysis.simulator.recommendations.excellentDesc'),
         icon: Target
       });
     } else if (score > 3.0) {
       recommendations.push({
         type: 'info',
-        title: 'Prognóstico Bom',
-        description: 'Boa resposta esperada. Considere ajustes na dosagem.',
+        title: t('visualization.detailedAnalysis.simulator.recommendations.goodPrognosis'),
+        description: t('visualization.detailedAnalysis.simulator.recommendations.goodDesc'),
         icon: TrendingUp
       });
     } else {
       recommendations.push({
         type: 'warning',
-        title: 'Resposta Limitada',
-        description: 'Considere terapias complementares ou mudança de protocolo.',
+        title: t('visualization.detailedAnalysis.simulator.recommendations.limitedResponse'),
+        description: t('visualization.detailedAnalysis.simulator.recommendations.limitedDesc'),
         icon: Zap
       });
     }
@@ -113,8 +115,8 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
     if (inputs.comorbidities > 1) {
       recommendations.push({
         type: 'info',
-        title: 'Comorbidades Detectadas',
-        description: 'Monitoramento veterinário mais frequente recomendado.',
+        title: t('visualization.detailedAnalysis.simulator.recommendations.comorbiditiesDetected'),
+        description: t('visualization.detailedAnalysis.simulator.recommendations.comorbiditiesDesc'),
         icon: Clock
       });
     }
@@ -134,39 +136,39 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
         {/* Inputs do Simulador */}
         <Card>
           <CardHeader>
-            <CardTitle>Perfil do Animal</CardTitle>
+            <CardTitle>{t('visualization.detailedAnalysis.simulator.animalProfile')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Espécie</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.species')}</Label>
               <Select value={inputs.species} onValueChange={(value) => setInputs(prev => ({ ...prev, species: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a espécie" />
+                  <SelectValue placeholder={t('visualization.detailedAnalysis.simulator.selectSpecies')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="canine">Cão</SelectItem>
-                  <SelectItem value="feline">Gato</SelectItem>
+                  <SelectItem value="canine">{t('visualization.detailedAnalysis.simulator.dog')}</SelectItem>
+                  <SelectItem value="feline">{t('visualization.detailedAnalysis.simulator.cat')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Raça</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.breed')}</Label>
               <Select value={inputs.breed} onValueChange={(value) => setInputs(prev => ({ ...prev, breed: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a raça" />
+                  <SelectValue placeholder={t('visualization.detailedAnalysis.simulator.selectBreed')} />
                 </SelectTrigger>
                 <SelectContent>
                   {condition.breedsAffected.map((breed: string) => (
                     <SelectItem key={breed} value={breed}>{breed}</SelectItem>
                   ))}
-                  <SelectItem value="outros">Outras raças</SelectItem>
+                  <SelectItem value="outros">{t('visualization.detailedAnalysis.simulator.otherBreeds')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Idade: {inputs.age} anos</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.age')}: {inputs.age} {t('visualization.detailedAnalysis.simulator.years')}</Label>
               <Slider
                 value={[inputs.age]}
                 onValueChange={(value) => setInputs(prev => ({ ...prev, age: value[0] }))}
@@ -178,7 +180,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
             </div>
 
             <div>
-              <Label>Peso: {inputs.weight}kg</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.weight')}: {inputs.weight}{t('visualization.detailedAnalysis.simulator.kg')}</Label>
               <Slider
                 value={[inputs.weight]}
                 onValueChange={(value) => setInputs(prev => ({ ...prev, weight: value[0] }))}
@@ -190,21 +192,21 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
             </div>
 
             <div>
-              <Label>Severidade</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.severity')}</Label>
               <Select value={inputs.severity} onValueChange={(value) => setInputs(prev => ({ ...prev, severity: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a severidade" />
+                  <SelectValue placeholder={t('visualization.detailedAnalysis.simulator.selectSeverity')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mild">Leve</SelectItem>
-                  <SelectItem value="moderate">Moderado</SelectItem>
-                  <SelectItem value="severe">Grave</SelectItem>
+                  <SelectItem value="mild">{t('visualization.detailedAnalysis.simulator.mild')}</SelectItem>
+                  <SelectItem value="moderate">{t('visualization.detailedAnalysis.simulator.moderate')}</SelectItem>
+                  <SelectItem value="severe">{t('visualization.detailedAnalysis.simulator.severe')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Comorbidades: {inputs.comorbidities}</Label>
+              <Label>{t('visualization.detailedAnalysis.simulator.comorbidities')}: {inputs.comorbidities}</Label>
               <Slider
                 value={[inputs.comorbidities]}
                 onValueChange={(value) => setInputs(prev => ({ ...prev, comorbidities: value[0] }))}
@@ -220,7 +222,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
         {/* Seleção de Nutracêuticos */}
         <Card>
           <CardHeader>
-            <CardTitle>Protocolo Nutracêutico</CardTitle>
+            <CardTitle>{t('visualization.detailedAnalysis.simulator.nutraceuticalProtocol')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -260,7 +262,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
               disabled={isSimulating || inputs.selectedNutraceuticals.length === 0}
               className="w-full"
             >
-              {isSimulating ? 'Simulando...' : 'Executar Simulação'}
+              {isSimulating ? t('visualization.detailedAnalysis.simulator.simulating') : t('visualization.detailedAnalysis.simulator.runSimulation')}
             </Button>
           </CardContent>
         </Card>
@@ -276,7 +278,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
                 <div className="text-2xl font-bold" style={{ color: getScoreColor(prediction.improvementExpected) }}>
                   {prediction.improvementExpected}%
                 </div>
-                <p className="text-sm text-muted-foreground">Melhora Esperada</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.simulator.expectedImprovement')}</p>
               </CardContent>
             </Card>
 
@@ -285,7 +287,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
                 <div className="text-2xl font-bold text-primary">
                   {prediction.timeToResults.toFixed(1)}
                 </div>
-                <p className="text-sm text-muted-foreground">Meses p/ Resultados</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.simulator.monthsToResults')}</p>
               </CardContent>
             </Card>
 
@@ -294,7 +296,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
                 <div className="text-2xl font-bold text-chart-2">
                   {(prediction.overallScore * 20).toFixed(0)}%
                 </div>
-                <p className="text-sm text-muted-foreground">Score Global</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.simulator.globalScore')}</p>
               </CardContent>
             </Card>
 
@@ -303,7 +305,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
                 <div className="text-2xl font-bold text-chart-3">
                   {prediction.timeline[6]?.confidence}%
                 </div>
-                <p className="text-sm text-muted-foreground">Confiança (6m)</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.simulator.confidence6m')}</p>
               </CardContent>
             </Card>
           </div>
@@ -311,7 +313,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
           {/* Timeline de Evolução */}
           <Card>
             <CardHeader>
-              <CardTitle>Evolução Temporal Prevista</CardTitle>
+              <CardTitle>{t('visualization.detailedAnalysis.simulator.temporalEvolution')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -345,7 +347,7 @@ const PredictiveSimulator: React.FC<PredictiveSimulatorProps> = ({ condition, nu
           {/* Recomendações */}
           <Card>
             <CardHeader>
-              <CardTitle>Recomendações Personalizadas</CardTitle>
+              <CardTitle>{t('visualization.detailedAnalysis.simulator.personalizedRecommendations')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TreePine, Users, TrendingUp, AlertTriangle } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface EpidemiologyData {
   totalCases: number;
@@ -36,54 +37,55 @@ const COLORS = {
 };
 
 const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, data }) => {
+  const { t } = useTranslation();
   const [selectedView, setSelectedView] = useState<'origin' | 'severity' | 'comorbidities'>('origin');
 
   // Dados para gráfico de pizza - Origem
   const originData = [
-    { name: 'Genético', value: data.geneticOnly, percentage: data.geneticOnly },
-    { name: 'Genético + Ambiental', value: data.geneticEnvironmental, percentage: data.geneticEnvironmental },
-    { name: 'Ambiental', value: data.environmentalOnly, percentage: data.environmentalOnly }
+    { name: t('visualization.detailedAnalysis.epidemiology.genetic'), value: data.geneticOnly, percentage: data.geneticOnly },
+    { name: t('visualization.detailedAnalysis.epidemiology.geneticEnvironmental'), value: data.geneticEnvironmental, percentage: data.geneticEnvironmental },
+    { name: t('visualization.detailedAnalysis.epidemiology.environmental'), value: data.environmentalOnly, percentage: data.environmentalOnly }
   ];
 
   // Dados para gráfico de barras - Severidade por origem
   const severityByOriginData = [
     {
-      origin: 'Genético',
-      Assintomático: Math.round(data.severityDistribution.asymptomatic * 0.4),
-      Leve: Math.round(data.severityDistribution.mild * 0.3),
-      Moderado: Math.round(data.severityDistribution.moderate * 0.5),
-      Grave: Math.round(data.severityDistribution.severe * 0.7)
+      origin: t('visualization.detailedAnalysis.epidemiology.genetic'),
+      [t('visualization.detailedAnalysis.epidemiology.asymptomatic')]: Math.round(data.severityDistribution.asymptomatic * 0.4),
+      [t('visualization.detailedAnalysis.epidemiology.mild')]: Math.round(data.severityDistribution.mild * 0.3),
+      [t('visualization.detailedAnalysis.epidemiology.moderate')]: Math.round(data.severityDistribution.moderate * 0.5),
+      [t('visualization.detailedAnalysis.epidemiology.severe')]: Math.round(data.severityDistribution.severe * 0.7)
     },
     {
       origin: 'Gen. + Amb.',
-      Assintomático: Math.round(data.severityDistribution.asymptomatic * 0.35),
-      Leve: Math.round(data.severityDistribution.mild * 0.4),
-      Moderado: Math.round(data.severityDistribution.moderate * 0.35),
-      Grave: Math.round(data.severityDistribution.severe * 0.2)
+      [t('visualization.detailedAnalysis.epidemiology.asymptomatic')]: Math.round(data.severityDistribution.asymptomatic * 0.35),
+      [t('visualization.detailedAnalysis.epidemiology.mild')]: Math.round(data.severityDistribution.mild * 0.4),
+      [t('visualization.detailedAnalysis.epidemiology.moderate')]: Math.round(data.severityDistribution.moderate * 0.35),
+      [t('visualization.detailedAnalysis.epidemiology.severe')]: Math.round(data.severityDistribution.severe * 0.2)
     },
     {
-      origin: 'Ambiental',
-      Assintomático: Math.round(data.severityDistribution.asymptomatic * 0.25),
-      Leve: Math.round(data.severityDistribution.mild * 0.3),
-      Moderado: Math.round(data.severityDistribution.moderate * 0.15),
-      Grave: Math.round(data.severityDistribution.severe * 0.1)
+      origin: t('visualization.detailedAnalysis.epidemiology.environmental'),
+      [t('visualization.detailedAnalysis.epidemiology.asymptomatic')]: Math.round(data.severityDistribution.asymptomatic * 0.25),
+      [t('visualization.detailedAnalysis.epidemiology.mild')]: Math.round(data.severityDistribution.mild * 0.3),
+      [t('visualization.detailedAnalysis.epidemiology.moderate')]: Math.round(data.severityDistribution.moderate * 0.15),
+      [t('visualization.detailedAnalysis.epidemiology.severe')]: Math.round(data.severityDistribution.severe * 0.1)
     }
   ];
 
   // Dados para comorbidades
   const comorbiditiesData = [
-    { name: 'Sem comorbidades', value: data.comorbidities.none },
-    { name: '1 comorbidade', value: data.comorbidities.one },
-    { name: '2+ comorbidades', value: data.comorbidities.multiple }
+    { name: t('visualization.detailedAnalysis.epidemiology.noComorbidities'), value: data.comorbidities.none },
+    { name: t('visualization.detailedAnalysis.epidemiology.oneComorbidity'), value: data.comorbidities.one },
+    { name: t('visualization.detailedAnalysis.epidemiology.multipleComorbidities'), value: data.comorbidities.multiple }
   ];
 
   const getCurrentData = () => {
     switch (selectedView) {
       case 'origin': return originData;
       case 'severity': return Object.entries(data.severityDistribution).map(([key, value]) => ({
-        name: key === 'asymptomatic' ? 'Assintomático' : 
-              key === 'mild' ? 'Leve' : 
-              key === 'moderate' ? 'Moderado' : 'Grave',
+        name: key === 'asymptomatic' ? t('visualization.detailedAnalysis.epidemiology.asymptomatic') : 
+              key === 'mild' ? t('visualization.detailedAnalysis.epidemiology.mild') : 
+              key === 'moderate' ? t('visualization.detailedAnalysis.epidemiology.moderate') : t('visualization.detailedAnalysis.epidemiology.severe'),
         value
       }));
       case 'comorbidities': return comorbiditiesData;
@@ -109,7 +111,7 @@ const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, da
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Total de Casos</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.epidemiology.totalCases')}</p>
                 <p className="text-2xl font-bold">{data.totalCases}</p>
               </div>
             </div>
@@ -121,7 +123,7 @@ const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, da
             <div className="flex items-center space-x-2">
               <TreePine className="h-5 w-5 text-chart-2" />
               <div>
-                <p className="text-sm text-muted-foreground">Fator Genético</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.epidemiology.geneticFactor')}</p>
                 <p className="text-2xl font-bold">{data.geneticOnly + data.geneticEnvironmental}%</p>
               </div>
             </div>
@@ -133,7 +135,7 @@ const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, da
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-success" />
               <div>
-                <p className="text-sm text-muted-foreground">Casos Leves/Assint.</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.epidemiology.mildAsymptomatic')}</p>
                 <p className="text-2xl font-bold">{data.severityDistribution.asymptomatic + data.severityDistribution.mild}%</p>
               </div>
             </div>
@@ -145,7 +147,7 @@ const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, da
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <div>
-                <p className="text-sm text-muted-foreground">Com Comorbidades</p>
+                <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.epidemiology.withComorbidities')}</p>
                 <p className="text-2xl font-bold">{data.comorbidities.one + data.comorbidities.multiple}%</p>
               </div>
             </div>
@@ -155,27 +157,27 @@ const EpidemiologicalTree: React.FC<EpidemiologicalTreeProps> = ({ condition, da
 
       {/* Controles de visualização */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Visualizar por:</span>
+        <span className="text-sm font-medium">{t('visualization.detailedAnalysis.epidemiology.viewBy')}</span>
         <Button 
           variant={selectedView === 'origin' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => setSelectedView('origin')}
         >
-          Origem
+          {t('visualization.detailedAnalysis.epidemiology.origin')}
         </Button>
         <Button 
           variant={selectedView === 'severity' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => setSelectedView('severity')}
         >
-          Severidade
+          {t('visualization.detailedAnalysis.epidemiology.severity')}
         </Button>
         <Button 
           variant={selectedView === 'comorbidities' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => setSelectedView('comorbidities')}
         >
-          Comorbidades
+          {t('visualization.detailedAnalysis.epidemiology.comorbidities')}
         </Button>
       </div>
 
