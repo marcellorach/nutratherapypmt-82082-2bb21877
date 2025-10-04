@@ -419,6 +419,111 @@
       "manageDescription": "Associate health conditions with nutraceutical \"{{name}}\".",
       "close": "Close"
     },
+    "header": {
+      "title": "Nutraceuticals",
+      "subtitle": "Manage nutraceuticals and their relationships with health conditions",
+      "newButton": "New Nutraceutical",
+      "manageImportsButton": "Manage Imports",
+      "importButton": "Import Data",
+      "help": {
+        "title": "Help - Nutraceuticals",
+        "subtitle": "Learn how to manage and organize nutraceuticals in the system.",
+        "importTitle": "Data Import",
+        "importDesc": "Spreadsheet import allows you to load large volumes of nutraceutical data into the system. Supported formats: CSV and Excel.",
+        "associationsTitle": "Associations with Conditions",
+        "associationsDesc": "Each nutraceutical can have relationships with health conditions with different levels of efficacy for prevention, treatment or support."
+      }
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support",
+        "convergence": "Convergence",
+        "studies": "Studies",
+        "actions": "Actions"
+      },
+      "noData": "No nutraceuticals found",
+      "expanded": {
+        "description": "Description:",
+        "noDescription": "No description available",
+        "chemicalCompound": "Chemical Compound:",
+        "dosage": "Dosage:",
+        "convergenceTitle": "Study Convergence:",
+        "scientificBase": "Scientific Base:",
+        "studiesAnalyzed": "{{count}} scientific studies analyzed",
+        "contraindications": "Contraindications:",
+        "convergenceHigh": "High convergence - Studies agree",
+        "convergenceMedium": "Moderate convergence - Some studies diverge",
+        "convergenceLow": "Low convergence - Studies present conflicting results"
+      }
+    },
+    "legend": {
+      "title": "Scientific Evidence Legend",
+      "convergence": {
+        "title": "Study Convergence",
+        "high": "≥4.0 High",
+        "moderate": "2.0-3.9 Moderate",
+        "low": "<2.0 Low",
+        "description": "Measures the degree of agreement between different scientific studies"
+      },
+      "efficacy": {
+        "title": "Efficacy by Condition",
+        "high": "≥4.0 High",
+        "moderate": "2.0-3.9 Moderate",
+        "low": "<2.0 Low",
+        "description": "Specific efficacy for each health condition in the tags"
+      }
+    },
+    "import": {
+      "title": {
+        "upload": "Import Nutraceuticals and Studies",
+        "review": "Review Imported Data"
+      },
+      "description": {
+        "upload": "Import spreadsheets of nutraceutical data and scientific study PDFs for AI processing.",
+        "review": "Review the data extracted by AI before confirming the import."
+      },
+      "tabs": {
+        "spreadsheet": "Nutraceuticals Spreadsheet",
+        "studies": "Scientific Studies (PDF)"
+      },
+      "studies": {
+        "title": "Scientific Studies in PDF",
+        "description": "Upload PDFs of the scientific studies cited in the nutraceuticals spreadsheet. These studies will be imported for NTAI processing and automatically associated with nutraceuticals."
+      },
+      "toast": {
+        "success": "Import completed",
+        "successDesc": "Data successfully imported into the nutraceuticals database.",
+        "error": "Error",
+        "errorDesc": "Error processing scientific study files"
+      }
+    },
+    "manageImports": {
+      "title": "Manage Nutraceutical Imports",
+      "description": "View and manage recent imports. You can delete imports to remove duplicate or incorrect data.",
+      "table": {
+        "headers": {
+          "date": "Date/Time",
+          "name": "Name",
+          "source": "Source",
+          "nutraceuticals": "Nutraceuticals",
+          "actions": "Actions"
+        }
+      },
+      "noData": "No imports found.",
+      "loading": "Loading...",
+      "close": "Close",
+      "deleteAction": "Delete import",
+      "delete": {
+        "title": "Confirm deletion",
+        "description": "Are you sure you want to delete this import? This action will remove all nutraceuticals associated with this import and cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      }
+    },
     "toast": {
       "success": "Success",
       "error": "Error",

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { Nutraceutical } from "@/types";
 import HealthConditionTags from './table/HealthConditionTags';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticosExpandableTableProps {
   nutraceuticals: Nutraceutical[];
@@ -18,6 +19,7 @@ const NutraceuticosExpandableTable = ({
   onEditClick,
   onConditionClick
 }) => {
+  const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   
   const toggleRow = (id: string) => {
@@ -90,20 +92,20 @@ const NutraceuticosExpandableTable = ({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[50px] min-w-[50px]"></TableHead>
-                <TableHead className="w-[200px] min-w-[150px]">Nome</TableHead>
-                <TableHead className="w-[250px] min-w-[200px]">Prevenção</TableHead>
-                <TableHead className="w-[250px] min-w-[200px]">Tratamento</TableHead>
-                <TableHead className="w-[250px] min-w-[200px]">Suporte</TableHead>
-                <TableHead className="w-[90px] min-w-[90px] text-center">Convergência</TableHead>
-                <TableHead className="w-[80px] min-w-[80px] text-center">Estudos</TableHead>
-                <TableHead className="w-[100px] min-w-[100px] text-center">Ações</TableHead>
+                <TableHead className="w-[200px] min-w-[150px]">{t('nutraceuticals.table.headers.name')}</TableHead>
+                <TableHead className="w-[250px] min-w-[200px]">{t('nutraceuticals.table.headers.prevention')}</TableHead>
+                <TableHead className="w-[250px] min-w-[200px]">{t('nutraceuticals.table.headers.treatment')}</TableHead>
+                <TableHead className="w-[250px] min-w-[200px]">{t('nutraceuticals.table.headers.support')}</TableHead>
+                <TableHead className="w-[90px] min-w-[90px] text-center">{t('nutraceuticals.table.headers.convergence')}</TableHead>
+                <TableHead className="w-[80px] min-w-[80px] text-center">{t('nutraceuticals.table.headers.studies')}</TableHead>
+                <TableHead className="w-[100px] min-w-[100px] text-center">{t('nutraceuticals.table.headers.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {nutraceuticals.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Nenhum nutracêutico encontrado
+                    {t('nutraceuticals.table.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -197,16 +199,16 @@ const NutraceuticosExpandableTable = ({
                           <TableCell colSpan={8}>
                             <div className="p-4 space-y-4 max-w-full">
                               <div>
-                                <h4 className="font-medium mb-2">Descrição:</h4>
+                                <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.description')}</h4>
                                 <p className="text-sm text-muted-foreground break-words">
-                                  {nutraceutical.description || 'Sem descrição disponível'}
+                                  {nutraceutical.description || t('nutraceuticals.table.expanded.noDescription')}
                                 </p>
                               </div>
                               
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {nutraceutical.chemicalCompound && (
                                   <div>
-                                    <h4 className="font-medium mb-2">Composto Químico:</h4>
+                                    <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.chemicalCompound')}</h4>
                                     <p className="text-sm text-muted-foreground break-words">
                                       {nutraceutical.chemicalCompound}
                                     </p>
@@ -215,7 +217,7 @@ const NutraceuticosExpandableTable = ({
                                 
                                 {nutraceutical.dosage && (
                                   <div>
-                                    <h4 className="font-medium mb-2">Dosagem:</h4>
+                                    <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.dosage')}</h4>
                                     <p className="text-sm text-muted-foreground break-words">
                                       {nutraceutical.dosage}
                                     </p>
@@ -225,25 +227,25 @@ const NutraceuticosExpandableTable = ({
                               
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                  <h4 className="font-medium mb-2">Convergência de Estudos:</h4>
+                                  <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.convergenceTitle')}</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    {convergence >= 4.0 ? 'Alta convergência - Estudos concordam' : 
-                                     convergence >= 2.0 ? 'Convergência moderada - Alguns estudos divergem' : 
-                                     'Baixa convergência - Estudos apresentam resultados conflitantes'}
+                                    {convergence >= 4.0 ? t('nutraceuticals.table.expanded.convergenceHigh') : 
+                                     convergence >= 2.0 ? t('nutraceuticals.table.expanded.convergenceMedium') : 
+                                     t('nutraceuticals.table.expanded.convergenceLow')}
                                   </p>
                                 </div>
                                 
                                 <div>
-                                  <h4 className="font-medium mb-2">Base Científica:</h4>
+                                  <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.scientificBase')}</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    {studyCount} estudos científicos analisados
+                                    {t('nutraceuticals.table.expanded.studiesAnalyzed', { count: studyCount })}
                                   </p>
                                 </div>
                               </div>
                               
                               {nutraceutical.contraindications && nutraceutical.contraindications.length > 0 && (
                                 <div>
-                                  <h4 className="font-medium mb-2">Contraindicações:</h4>
+                                  <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.contraindications')}</h4>
                                   <ul className="text-sm text-muted-foreground list-disc list-inside">
                                     {nutraceutical.contraindications.map((contraindication, index) => (
                                       <li key={index} className="break-words">{contraindication}</li>

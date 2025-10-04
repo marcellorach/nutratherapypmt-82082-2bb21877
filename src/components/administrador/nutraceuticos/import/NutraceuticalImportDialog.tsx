@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import PdfUploadZone from '@/components/administrador/estudos/import/PdfUploadZone';
 import { StudyPdfFile } from '@/components/administrador/estudos/import/PdfFileItem';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticalImportDialogProps {
   open: boolean;
@@ -26,6 +27,7 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
   onOpenChange,
   onImportComplete
 }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<'upload' | 'review'>('upload');
   const [importResults, setImportResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('spreadsheet');
@@ -99,8 +101,8 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
       } catch (error) {
         console.error('Erro ao processar PDFs:', error);
         toast({
-          title: "Erro",
-          description: "Erro ao processar arquivos de estudos científicos",
+          title: t('nutraceuticals.import.toast.error'),
+          description: t('nutraceuticals.import.toast.errorDesc'),
           variant: "destructive"
         });
       }
@@ -112,8 +114,8 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
 
   const handleImportConfirm = () => {
     toast({
-      title: "Importação concluída",
-      description: "Dados importados com sucesso no banco de nutracêuticos.",
+      title: t('nutraceuticals.import.toast.success'),
+      description: t('nutraceuticals.import.toast.successDesc'),
     });
     
     if (onImportComplete) {
@@ -148,12 +150,12 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {step === 'upload' ? 'Importar Nutracêuticos e Estudos' : 'Revisar Dados Importados'}
+            {step === 'upload' ? t('nutraceuticals.import.title.upload') : t('nutraceuticals.import.title.review')}
           </DialogTitle>
           <DialogDescription>
             {step === 'upload' 
-              ? 'Importe planilhas de dados de nutracêuticos e PDFs de estudos científicos para processamento via IA.'
-              : 'Revise os dados extraídos pela IA antes de confirmar a importação.'
+              ? t('nutraceuticals.import.description.upload')
+              : t('nutraceuticals.import.description.review')
             }
           </DialogDescription>
         </DialogHeader>
@@ -162,8 +164,8 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
           {step === 'upload' && (
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="spreadsheet">Planilha de Nutracêuticos</TabsTrigger>
-                <TabsTrigger value="studies">Estudos Científicos (PDF)</TabsTrigger>
+                <TabsTrigger value="spreadsheet">{t('nutraceuticals.import.tabs.spreadsheet')}</TabsTrigger>
+                <TabsTrigger value="studies">{t('nutraceuticals.import.tabs.studies')}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="spreadsheet" className="py-4">
@@ -176,10 +178,9 @@ const NutraceuticalImportDialog: React.FC<NutraceuticalImportDialogProps> = ({
               <TabsContent value="studies" className="py-4">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-base font-medium mb-2">Estudos Científicos em PDF</h3>
+                    <h3 className="text-base font-medium mb-2">{t('nutraceuticals.import.studies.title')}</h3>
                     <p className="text-sm text-gray-500 mb-4">
-                      Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos.
-                      Estes estudos serão importados para processamento NTAI e associados automaticamente aos nutracêuticos.
+                      {t('nutraceuticals.import.studies.description')}
                     </p>
                   </div>
                   

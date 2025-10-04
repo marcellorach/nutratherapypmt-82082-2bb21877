@@ -16,6 +16,7 @@ import { useImportManager } from '@/hooks/nutraceuticals/useImportManager';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, 
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction 
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from 'react-i18next';
 
 // Interface para importação de nutracêuticos
 interface ImportRecord {
@@ -38,6 +39,7 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
   onOpenChange,
   onImportsDeleted
 }) => {
+  const { t } = useTranslation();
   const { imports, isLoading, fetchImports, deleteImport } = useImportManager();
   const [selectedImport, setSelectedImport] = useState<ImportRecord | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -88,9 +90,9 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Gerenciar Importações de Nutracêuticos</DialogTitle>
+            <DialogTitle>{t('nutraceuticals.manageImports.title')}</DialogTitle>
             <DialogDescription>
-              Visualize e gerencie as importações recentes. Você pode excluir importações para remover dados duplicados ou incorretos.
+              {t('nutraceuticals.manageImports.description')}
             </DialogDescription>
           </DialogHeader>
 
@@ -101,18 +103,18 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
               </div>
             ) : imports.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                Nenhuma importação encontrada.
+                {t('nutraceuticals.manageImports.noData')}
               </div>
             ) : (
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="text-left p-2 text-sm">Data/Hora</th>
-                      <th className="text-left p-2 text-sm">Nome</th>
-                      <th className="text-center p-2 text-sm">Fonte</th>
-                      <th className="text-center p-2 text-sm">Nutracêuticos</th>
-                      <th className="text-center p-2 text-sm">Ações</th>
+                      <th className="text-left p-2 text-sm">{t('nutraceuticals.manageImports.table.headers.date')}</th>
+                      <th className="text-left p-2 text-sm">{t('nutraceuticals.manageImports.table.headers.name')}</th>
+                      <th className="text-center p-2 text-sm">{t('nutraceuticals.manageImports.table.headers.source')}</th>
+                      <th className="text-center p-2 text-sm">{t('nutraceuticals.manageImports.table.headers.nutraceuticals')}</th>
+                      <th className="text-center p-2 text-sm">{t('nutraceuticals.manageImports.table.headers.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -130,7 +132,7 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
                             onClick={() => handleDeleteClick(importRecord)}
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Excluir importação</span>
+                            <span className="sr-only">{t('nutraceuticals.manageImports.deleteAction')}</span>
                           </Button>
                         </td>
                       </tr>
@@ -145,7 +147,7 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
               >
-                Fechar
+                {t('nutraceuticals.manageImports.close')}
               </Button>
             </div>
           </div>
@@ -155,14 +157,13 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>{t('nutraceuticals.manageImports.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Você tem certeza que deseja excluir esta importação? 
-              Esta ação removerá todos os nutracêuticos associados a esta importação e não pode ser desfeita.
+              {t('nutraceuticals.manageImports.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t('nutraceuticals.manageImports.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => {
                 e.preventDefault();
@@ -174,10 +175,10 @@ const ManageImportsDialog: React.FC<ManageImportsDialogProps> = ({
               {isDeleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Excluindo...
+                  {t('nutraceuticals.manageImports.delete.deleting')}
                 </>
               ) : (
-                'Excluir'
+                t('nutraceuticals.manageImports.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
