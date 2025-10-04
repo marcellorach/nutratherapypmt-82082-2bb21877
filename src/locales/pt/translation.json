@@ -27,6 +27,46 @@
     "access": "Acessar",
     "poweredBy": "Powered by"
   },
+  "tutor": {
+    "greeting": "Olá",
+    "subtitle": "Acompanhe o tratamento nutracêutico dos seus pets",
+    "noPets": "Você não possui pets cadastrados",
+    "noPetsDesc": "Entre em contato com o seu veterinário para começar.",
+    "noTreatmentPlan": "Sem plano de tratamento",
+    "noTreatmentPlanDesc": "Este pet ainda não possui um plano de tratamento.",
+    "noTreatmentPlanLong": "Este pet ainda não possui um plano de tratamento nutracêutico.",
+    "tabs": {
+      "plan": "Plano Terapêutico",
+      "history": "Histórico",
+      "orders": "Pedidos"
+    },
+    "plan": {
+      "startDate": "Data de início",
+      "active": "Plano ativo",
+      "status": "Status do plano",
+      "approved": "Aprovado",
+      "kitSent": "Kit enviado em",
+      "nextRenewal": "Próxima renovação",
+      "quarterlyRenewal": "Renovação trimestral",
+      "recommendedNutraceuticals": "Nutracêuticos Recomendados",
+      "reason": "Motivo da recomendação:",
+      "howToAdminister": "Como administrar:",
+      "scheduleConsultation": "Agendar consulta com veterinário"
+    },
+    "history": {
+      "title": "Histórico de Tratamentos",
+      "description": "O histórico de tratamentos estará disponível após o início do tratamento."
+    },
+    "orders": {
+      "title": "Pedidos de Nutracêuticos",
+      "description": "Faça pedidos de kits nutracêuticos para seu pet.",
+      "makeOrder": "Fazer Pedido"
+    },
+    "petInfo": {
+      "years": "anos",
+      "kg": "kg"
+    }
+  },
   "home": {
     "title": "NutraTherapy PET",
     "subtitle": "Base científica de 267 estudos estratificados em 35 nutracêuticos, 95 interações com condições veterinárias e índice de eficácia de 4.2/5",

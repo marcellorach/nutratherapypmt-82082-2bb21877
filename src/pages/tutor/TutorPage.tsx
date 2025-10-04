@@ -5,9 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle2, Clock, Info, ShoppingCart } from "lucide-react";
-import { owners, pets, treatmentPlans, nutraceuticals } from '@/data'; // Corrigindo a importação
+import { owners, pets, treatmentPlans, nutraceuticals } from '@/data';
+import { useTranslation } from 'react-i18next';
 
 const TutorPage: React.FC = () => {
+  const { t } = useTranslation();
+  
   // Simulando um tutor logado
   const tutor = owners[0];
   
@@ -25,15 +28,15 @@ const TutorPage: React.FC = () => {
     <Layout>
       <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Olá, {tutor.name}!</h1>
-          <p className="text-gray-600">Acompanhe o tratamento nutracêutico dos seus pets</p>
+          <h1 className="text-3xl font-bold">{t('tutor.greeting')}, {tutor.name}!</h1>
+          <p className="text-gray-600">{t('tutor.subtitle')}</p>
         </div>
         
         {tutorPets.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Você não possui pets cadastrados</h3>
-              <p className="text-gray-500 mb-6">Entre em contato com o seu veterinário para começar.</p>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('tutor.noPets')}</h3>
+              <p className="text-gray-500 mb-6">{t('tutor.noPetsDesc')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -61,7 +64,7 @@ const TutorPage: React.FC = () => {
                         {selectedPet.species === 'Cachorro' ? '🐕' : selectedPet.species === 'Gato' ? '🐈' : '🐾'}
                         {selectedPet.name}
                       </h2>
-                      <p className="text-gray-600 mb-4">{selectedPet.breed} • {selectedPet.age} anos • {selectedPet.weight} kg</p>
+                      <p className="text-gray-600 mb-4">{selectedPet.breed} • {selectedPet.age} {t('tutor.petInfo.years')} • {selectedPet.weight} {t('tutor.petInfo.kg')}</p>
                     </div>
                     
                     {!petPlan && (
@@ -69,8 +72,8 @@ const TutorPage: React.FC = () => {
                         <div className="flex items-start">
                           <Info className="h-5 w-5 text-amber-600 mr-2 mt-0.5" />
                           <div>
-                            <h3 className="font-medium text-amber-800">Sem plano de tratamento</h3>
-                            <p className="text-amber-700 text-sm">Este pet ainda não possui um plano de tratamento.</p>
+                            <h3 className="font-medium text-amber-800">{t('tutor.noTreatmentPlan')}</h3>
+                            <p className="text-amber-700 text-sm">{t('tutor.noTreatmentPlanDesc')}</p>
                           </div>
                         </div>
                       </div>
@@ -80,9 +83,9 @@ const TutorPage: React.FC = () => {
                 
                 <Tabs defaultValue="plano" className="w-full">
                   <TabsList className="mb-6">
-                    <TabsTrigger value="plano">Plano Terapêutico</TabsTrigger>
-                    <TabsTrigger value="historico">Histórico</TabsTrigger>
-                    <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+                    <TabsTrigger value="plano">{t('tutor.tabs.plan')}</TabsTrigger>
+                    <TabsTrigger value="historico">{t('tutor.tabs.history')}</TabsTrigger>
+                    <TabsTrigger value="pedidos">{t('tutor.tabs.orders')}</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="plano">
@@ -93,12 +96,12 @@ const TutorPage: React.FC = () => {
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg font-medium flex items-center gap-2">
                                 <Calendar className="h-5 w-5 text-primary" />
-                                Data de início
+                                {t('tutor.plan.startDate')}
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
                               <p className="text-2xl font-bold">{petPlan.createdAt}</p>
-                              <p className="text-gray-500 text-sm">Plano ativo</p>
+                              <p className="text-gray-500 text-sm">{t('tutor.plan.active')}</p>
                             </CardContent>
                           </Card>
                           
@@ -106,12 +109,12 @@ const TutorPage: React.FC = () => {
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg font-medium flex items-center gap-2">
                                 <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                Status do plano
+                                {t('tutor.plan.status')}
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-2xl font-bold text-green-500">Aprovado</p>
-                              <p className="text-gray-500 text-sm">Kit enviado em 10/04/2025</p>
+                              <p className="text-2xl font-bold text-green-500">{t('tutor.plan.approved')}</p>
+                              <p className="text-gray-500 text-sm">{t('tutor.plan.kitSent')} 10/04/2025</p>
                             </CardContent>
                           </Card>
                           
@@ -119,17 +122,17 @@ const TutorPage: React.FC = () => {
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg font-medium flex items-center gap-2">
                                 <Clock className="h-5 w-5 text-primary" />
-                                Próxima renovação
+                                {t('tutor.plan.nextRenewal')}
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
                               <p className="text-2xl font-bold">10/07/2025</p>
-                              <p className="text-gray-500 text-sm">Renovação trimestral</p>
+                              <p className="text-gray-500 text-sm">{t('tutor.plan.quarterlyRenewal')}</p>
                             </CardContent>
                           </Card>
                         </div>
                         
-                        <h3 className="text-xl font-bold mb-4">Nutracêuticos Recomendados</h3>
+                        <h3 className="text-xl font-bold mb-4">{t('tutor.plan.recommendedNutraceuticals')}</h3>
                         <div className="space-y-4">
                           {petPlan.recommendations.map(recommendation => {
                             const nutra = nutraceuticals.find(n => n.id === recommendation.nutraceuticalId);
@@ -144,12 +147,12 @@ const TutorPage: React.FC = () => {
                                 <CardContent>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                      <p className="font-medium mb-1">Motivo da recomendação:</p>
+                                      <p className="font-medium mb-1">{t('tutor.plan.reason')}</p>
                                       <p className="text-gray-600">{recommendation.reason}</p>
                                     </div>
                                     
                                     <div>
-                                      <p className="font-medium mb-1">Como administrar:</p>
+                                      <p className="font-medium mb-1">{t('tutor.plan.howToAdminister')}</p>
                                       <p className="text-gray-600">{recommendation.dosage}</p>
                                     </div>
                                   </div>
@@ -162,10 +165,10 @@ const TutorPage: React.FC = () => {
                     ) : (
                       <Card className="text-center py-12">
                         <CardContent>
-                          <h3 className="text-xl font-semibold text-gray-700 mb-2">Sem plano terapêutico</h3>
-                          <p className="text-gray-500 mb-6">Este pet ainda não possui um plano de tratamento nutracêutico.</p>
+                          <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('tutor.noTreatmentPlan')}</h3>
+                          <p className="text-gray-500 mb-6">{t('tutor.noTreatmentPlanLong')}</p>
                           <Button variant="outline">
-                            Agendar consulta com veterinário
+                            {t('tutor.plan.scheduleConsultation')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -175,8 +178,8 @@ const TutorPage: React.FC = () => {
                   <TabsContent value="historico">
                     <Card className="text-center py-12">
                       <CardContent>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">Histórico de Tratamentos</h3>
-                        <p className="text-gray-500 mb-6">O histórico de tratamentos estará disponível após o início do tratamento.</p>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('tutor.history.title')}</h3>
+                        <p className="text-gray-500 mb-6">{t('tutor.history.description')}</p>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -184,11 +187,11 @@ const TutorPage: React.FC = () => {
                   <TabsContent value="pedidos">
                     <Card className="text-center py-12">
                       <CardContent>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">Pedidos de Nutracêuticos</h3>
-                        <p className="text-gray-500 mb-6">Faça pedidos de kits nutracêuticos para seu pet.</p>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('tutor.orders.title')}</h3>
+                        <p className="text-gray-500 mb-6">{t('tutor.orders.description')}</p>
                         <Button className="flex items-center gap-2">
                           <ShoppingCart className="h-4 w-4" />
-                          Fazer Pedido
+                          {t('tutor.orders.makeOrder')}
                         </Button>
                       </CardContent>
                     </Card>

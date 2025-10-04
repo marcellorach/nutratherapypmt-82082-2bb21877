@@ -27,6 +27,46 @@
     "access": "Access",
     "poweredBy": "Powered by"
   },
+  "tutor": {
+    "greeting": "Hello",
+    "subtitle": "Track your pets' nutraceutical treatment",
+    "noPets": "You have no registered pets",
+    "noPetsDesc": "Contact your veterinarian to get started.",
+    "noTreatmentPlan": "No treatment plan",
+    "noTreatmentPlanDesc": "This pet does not have a treatment plan yet.",
+    "noTreatmentPlanLong": "This pet does not have a nutraceutical treatment plan yet.",
+    "tabs": {
+      "plan": "Treatment Plan",
+      "history": "History",
+      "orders": "Orders"
+    },
+    "plan": {
+      "startDate": "Start date",
+      "active": "Active plan",
+      "status": "Plan status",
+      "approved": "Approved",
+      "kitSent": "Kit sent on",
+      "nextRenewal": "Next renewal",
+      "quarterlyRenewal": "Quarterly renewal",
+      "recommendedNutraceuticals": "Recommended Nutraceuticals",
+      "reason": "Reason for recommendation:",
+      "howToAdminister": "How to administer:",
+      "scheduleConsultation": "Schedule consultation with veterinarian"
+    },
+    "history": {
+      "title": "Treatment History",
+      "description": "Treatment history will be available after treatment starts."
+    },
+    "orders": {
+      "title": "Nutraceutical Orders",
+      "description": "Order nutraceutical kits for your pet.",
+      "makeOrder": "Make Order"
+    },
+    "petInfo": {
+      "years": "years",
+      "kg": "kg"
+    }
+  },
   "home": {
     "title": "NutraTherapy PET",
     "subtitle": "Scientific database of 267 studies stratified across 35 nutraceuticals, 95 interactions with veterinary conditions and efficacy index of 4.2/5",
