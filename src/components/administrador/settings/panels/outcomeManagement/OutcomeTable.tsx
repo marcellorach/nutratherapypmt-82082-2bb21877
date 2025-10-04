@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from 'react-i18next';
 
 interface OutcomeTableProps {
   filteredOutcomes: any[];
@@ -25,6 +26,7 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
   onEditClick,
   onDeleteClick,
 }) => {
+  const { t } = useTranslation();
   // Renderiza linhas de skeleton quando estiver carregando
   if (isLoading) {
     return (
@@ -32,9 +34,9 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>{t('outcomeManagement.table.name')}</TableHead>
+              <TableHead>{t('outcomeManagement.table.description')}</TableHead>
+              <TableHead className="w-[100px]">{t('outcomeManagement.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -56,7 +58,7 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
     return (
       <div className="rounded-md border p-8 text-center">
         <p className="text-muted-foreground">
-          Nenhum outcome encontrado. Crie um novo outcome para começar.
+          {t('outcomeManagement.noOutcomesFound')}
         </p>
       </div>
     );
@@ -68,10 +70,10 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Família</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead className="w-[100px]">Ações</TableHead>
+            <TableHead>{t('outcomeManagement.table.name')}</TableHead>
+            <TableHead>{t('outcomeManagement.table.family')}</TableHead>
+            <TableHead>{t('outcomeManagement.table.description')}</TableHead>
+            <TableHead className="w-[100px]">{t('outcomeManagement.table.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -85,7 +87,7 @@ const OutcomeTable: React.FC<OutcomeTableProps> = ({
                     <span className="text-sm">{outcome.outcome_families.name}</span>
                   </div>
                 ) : (
-                  <span className="text-muted-foreground">Sem família</span>
+                  <span className="text-muted-foreground">{t('outcomeManagement.table.noFamily')}</span>
                 )}
               </TableCell>
               <TableCell>{outcome.description || "-"}</TableCell>

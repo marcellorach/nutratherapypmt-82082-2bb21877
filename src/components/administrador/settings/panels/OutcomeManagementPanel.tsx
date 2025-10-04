@@ -6,8 +6,10 @@ import OutcomeTable from "./outcomeManagement/OutcomeTable";
 import OutcomeFormDialog from "./outcomeManagement/OutcomeFormDialog";
 import OutcomeDeleteDialog from "./outcomeManagement/DeleteDialog";
 import { useOutcomeManagement } from "./outcomeManagement/useOutcomeManagement";
+import { useTranslation } from 'react-i18next';
 
 const OutcomeManagementPanel: React.FC = () => {
+  const { t } = useTranslation();
   const {
     searchTerm,
     setSearchTerm,
@@ -35,7 +37,11 @@ const OutcomeManagementPanel: React.FC = () => {
     <div className="space-y-6">
       <PanelHeader onCreateClick={handleOpenCreateDialog} />
       
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <SearchBar 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm}
+        placeholder={t('outcomeManagement.searchPlaceholder')}
+      />
       
       <OutcomeTable 
         filteredOutcomes={filteredOutcomes}

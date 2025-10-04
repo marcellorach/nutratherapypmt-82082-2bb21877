@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import FamilySelector from "./FamilySelector";
+import { useTranslation } from 'react-i18next';
 
 interface OutcomeFormDialogProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
   handleFamilyChange,
   submitAction,
 }) => {
+  const { t } = useTranslation();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submitAction();
@@ -47,12 +49,12 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isCreate ? "Criar Novo Outcome" : "Editar Outcome"}
+            {isCreate ? t('outcomeManagement.form.createTitle') : t('outcomeManagement.form.editTitle')}
           </DialogTitle>
           <DialogDescription>
             {isCreate 
-              ? "Preencha os campos abaixo para adicionar um novo outcome."
-              : "Edite os campos para atualizar o outcome."
+              ? t('outcomeManagement.form.createDescription')
+              : t('outcomeManagement.form.editDescription')
             }
           </DialogDescription>
         </DialogHeader>
@@ -61,7 +63,7 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
-                Nome
+                {t('outcomeManagement.form.nameLabel')}
               </Label>
               <Input
                 id="name"
@@ -75,20 +77,20 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
             
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="family" className="text-right">
-                Família
+                {t('outcomeManagement.form.familyLabel')}
               </Label>
               <div className="col-span-3">
                 <FamilySelector
                   value={formData.family_id}
                   onValueChange={handleFamilyChange}
-                  placeholder="Selecione uma família (opcional)"
+                  placeholder={t('outcomeManagement.form.familyPlaceholder')}
                 />
               </div>
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
-                Descrição
+                {t('outcomeManagement.form.descriptionLabel')}
               </Label>
               <Textarea
                 id="description"
@@ -103,10 +105,10 @@ const OutcomeFormDialog: React.FC<OutcomeFormDialogProps> = ({
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-              Cancelar
+              {t('outcomeManagement.form.cancel')}
             </Button>
             <Button type="submit">
-              {isCreate ? "Criar" : "Salvar"}
+              {isCreate ? t('outcomeManagement.form.create') : t('outcomeManagement.form.save')}
             </Button>
           </DialogFooter>
         </form>

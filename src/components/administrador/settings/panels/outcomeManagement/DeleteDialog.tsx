@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from 'react-i18next';
 
 interface DeleteDialogProps {
   isOpen: boolean;
@@ -23,13 +24,15 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
   name,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Excluir Outcome</DialogTitle>
+          <DialogTitle>{t('outcomeManagement.delete.title')}</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir o outcome "{name}"? Esta ação não pode ser desfeita.
+            {t('outcomeManagement.delete.description', { name })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -37,13 +40,13 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
             variant="outline" 
             onClick={() => setIsOpen(false)}
           >
-            Cancelar
+            {t('outcomeManagement.delete.cancel')}
           </Button>
           <Button 
             variant="destructive" 
             onClick={onConfirm}
           >
-            Excluir
+            {t('outcomeManagement.delete.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

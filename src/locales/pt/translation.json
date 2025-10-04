@@ -781,5 +781,42 @@
       "inflammation": "Inflamação",
       "highEfficacy": "Alta Eficácia"
     }
+  },
+  "outcomeManagement": {
+    "title": "Gerenciamento de Outcomes",
+    "newOutcome": "Novo Outcome",
+    "searchPlaceholder": "Pesquisar outcomes...",
+    "noOutcomesFound": "Nenhum outcome encontrado. Crie um novo outcome para começar.",
+    "table": {
+      "name": "Nome",
+      "family": "Família",
+      "description": "Descrição",
+      "actions": "Ações",
+      "noFamily": "Sem família"
+    },
+    "form": {
+      "createTitle": "Criar Novo Outcome",
+      "editTitle": "Editar Outcome",
+      "createDescription": "Preencha os campos abaixo para adicionar um novo outcome.",
+      "editDescription": "Edite os campos para atualizar o outcome.",
+      "nameLabel": "Nome",
+      "familyLabel": "Família",
+      "descriptionLabel": "Descrição",
+      "familyPlaceholder": "Selecione uma família (opcional)",
+      "cancel": "Cancelar",
+      "create": "Criar",
+      "save": "Salvar"
+    },
+    "delete": {
+      "title": "Excluir Outcome",
+      "description": "Tem certeza que deseja excluir o outcome \"{{name}}\"? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir"
+    },
+    "familySelector": {
+      "placeholder": "Selecione uma família",
+      "loading": "Carregando famílias...",
+      "noFamily": "Sem família"
+    }
   }
 }

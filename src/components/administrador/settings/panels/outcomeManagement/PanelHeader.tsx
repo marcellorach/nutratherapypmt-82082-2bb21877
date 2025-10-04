@@ -1,17 +1,20 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 interface PanelHeaderProps {
   onCreateClick: () => void;
 }
 
 const PanelHeader: React.FC<PanelHeaderProps> = ({ onCreateClick }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex items-center justify-between">
-      <h3 className="text-lg font-medium">Gerenciamento de Outcomes</h3>
+      <h3 className="text-lg font-medium">{t('outcomeManagement.title')}</h3>
       <Button onClick={onCreateClick}>
-        Novo Outcome
+        {t('outcomeManagement.newOutcome')}
       </Button>
     </div>
   );

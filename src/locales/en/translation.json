@@ -781,5 +781,42 @@
       "inflammation": "Inflammation",
       "highEfficacy": "High Efficacy"
     }
+  },
+  "outcomeManagement": {
+    "title": "Outcome Management",
+    "newOutcome": "New Outcome",
+    "searchPlaceholder": "Search outcomes...",
+    "noOutcomesFound": "No outcomes found. Create a new outcome to get started.",
+    "table": {
+      "name": "Name",
+      "family": "Family",
+      "description": "Description",
+      "actions": "Actions",
+      "noFamily": "No family"
+    },
+    "form": {
+      "createTitle": "Create New Outcome",
+      "editTitle": "Edit Outcome",
+      "createDescription": "Fill in the fields below to add a new outcome.",
+      "editDescription": "Edit the fields to update the outcome.",
+      "nameLabel": "Name",
+      "familyLabel": "Family",
+      "descriptionLabel": "Description",
+      "familyPlaceholder": "Select a family (optional)",
+      "cancel": "Cancel",
+      "create": "Create",
+      "save": "Save"
+    },
+    "delete": {
+      "title": "Delete Outcome",
+      "description": "Are you sure you want to delete the outcome \"{{name}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "familySelector": {
+      "placeholder": "Select a family",
+      "loading": "Loading families...",
+      "noFamily": "No family"
+    }
   }
 }

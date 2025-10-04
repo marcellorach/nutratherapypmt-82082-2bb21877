@@ -74,6 +74,7 @@ export interface DeleteDialogProps {
 export interface SearchBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  placeholder?: string;
 }
 
 export interface OutcomesDialogProps {
