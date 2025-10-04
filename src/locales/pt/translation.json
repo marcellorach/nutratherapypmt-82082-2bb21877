@@ -2110,47 +2110,6 @@
       "campaignSuccess": "Campanha concluída com sucesso!",
       "campaignSent": "{{count}} mensagens enviadas com sucesso"
     },
-    "audienceSegments": {
-      "highValue": {
-        "name": "Alto Valor",
-        "description": "Clientes com histórico de compras premium"
-      },
-      "atRisk": {
-        "name": "Em Risco",
-        "description": "Clientes inativos há mais de 90 dias"
-      },
-      "newCustomers": {
-        "name": "Novos Clientes",
-        "description": "Cadastrados nos últimos 30 dias"
-      },
-      "educational": {
-        "name": "Educacional",
-        "description": "Interessados em conteúdo sobre nutracêuticos"
-      }
-    },
-    "campaignTypes": {
-      "opportunity": {
-        "name": "Oportunidade de Upsell",
-        "description": "Identificação automática de oportunidades baseadas em histórico e necessidades"
-      },
-      "retention": {
-        "name": "Retenção Inteligente",
-        "description": "Reengajamento de clientes inativos com ofertas personalizadas"
-      },
-      "education": {
-        "name": "Educação Nutracêutica",
-        "description": "Campanhas educativas sobre benefícios e aplicações"
-      },
-      "crossSell": {
-        "name": "Cross-sell Estratégico",
-        "description": "Sugestões inteligentes de produtos complementares"
-      }
-    },
-    "toast": {
-      "inDevelopment": "Funcionalidade em desenvolvimento",
-      "campaignCreated": "Campanha criada! {{count}} pets serão notificados",
-      "campaignStarted": "Campanha iniciada com sucesso!"
-    },
     "command": {
       "globalPerformance": "Performance Global",
       "avgROI": "ROI Médio",
