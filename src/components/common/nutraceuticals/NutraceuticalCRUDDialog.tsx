@@ -14,17 +14,14 @@ import BasicInfoTab from '@/components/administrador/pesquisa/nutraceuticoGerenc
 import RelationshipsTab from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/tabs/RelationshipsTab';
 import ManageRelationshipsDialog from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
-// Schema de validação
-const nutraceuticalSchema = z.object({
-  name: z.string().min(1, 'O nome é obrigatório'),
-  description: z.string().optional(),
-  dosage: z.string().optional(),
-  source: z.string().optional(),
-  chemical_compound: z.string().optional(),
-  contraindications: z.string().optional()
-});
-
-type FormData = z.infer<typeof nutraceuticalSchema>;
+type FormData = {
+  name: string;
+  description?: string;
+  dosage?: string;
+  source?: string;
+  chemical_compound?: string;
+  contraindications?: string;
+};
 
 interface NutraceuticalCRUDDialogProps {
   open: boolean;
@@ -51,6 +48,16 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
   const [savedNutraceutical, setSavedNutraceutical] = useState<any>(null);
   
   const isEditMode = Boolean(nutraceutical);
+  
+  // Schema de validação com tradução
+  const nutraceuticalSchema = z.object({
+    name: z.string().min(1, t('nutraceuticals.validation.nameRequired')),
+    description: z.string().optional(),
+    dosage: z.string().optional(),
+    source: z.string().optional(),
+    chemical_compound: z.string().optional(),
+    contraindications: z.string().optional()
+  });
   
   const form = useForm<FormData>({
     resolver: zodResolver(nutraceuticalSchema),

@@ -784,39 +784,98 @@
   },
   "outcomeManagement": {
     "title": "Gerenciamento de Outcomes",
-    "newOutcome": "Novo Outcome",
-    "searchPlaceholder": "Pesquisar outcomes...",
-    "noOutcomesFound": "Nenhum outcome encontrado. Crie um novo outcome para começar.",
+    "addNew": "Novo Outcome",
+    "searchPlaceholder": "Buscar outcomes...",
     "table": {
       "name": "Nome",
-      "family": "Família",
       "description": "Descrição",
-      "actions": "Ações",
-      "noFamily": "Sem família"
+      "actions": "Ações"
     },
     "form": {
       "createTitle": "Criar Novo Outcome",
       "editTitle": "Editar Outcome",
-      "createDescription": "Preencha os campos abaixo para adicionar um novo outcome.",
-      "editDescription": "Edite os campos para atualizar o outcome.",
-      "nameLabel": "Nome",
-      "familyLabel": "Família",
-      "descriptionLabel": "Descrição",
-      "familyPlaceholder": "Selecione uma família (opcional)",
+      "createDescription": "Adicione um novo outcome ao sistema",
+      "editDescription": "Edite as informações do outcome",
+      "name": "Nome",
+      "family": "Família",
+      "description": "Descrição",
       "cancel": "Cancelar",
       "create": "Criar",
       "save": "Salvar"
     },
-    "delete": {
+    "deleteDialog": {
       "title": "Excluir Outcome",
-      "description": "Tem certeza que deseja excluir o outcome \"{{name}}\"? Esta ação não pode ser desfeita.",
+      "description": "Tem certeza que deseja excluir o outcome \"{name}\"? Esta ação não pode ser desfeita.",
       "cancel": "Cancelar",
-      "confirm": "Excluir"
+      "delete": "Excluir"
+    },
+    "messages": {
+      "notFound": "Nenhum outcome encontrado"
     },
     "familySelector": {
-      "placeholder": "Selecione uma família",
       "loading": "Carregando famílias...",
+      "placeholder": "Selecione uma família",
       "noFamily": "Sem família"
     }
+  },
+  "nutraceuticals": {
+    "validation": {
+      "nameRequired": "O nome é obrigatório"
+    },
+    "conditions": {
+      "title": "Gerenciar Condições",
+      "manageTitle": "Gerenciar Condições de Saúde",
+      "manageDescription": "Associe condições de saúde ao nutracêutico {{name}}",
+      "close": "Fechar",
+      "form": {
+        "healthCondition": "Condição de Saúde",
+        "relationshipType": "Tipo de Relação",
+        "efficacy": "Eficácia (1-5)",
+        "notes": "Notas ou Observações",
+        "selectCondition": "Selecione uma condição",
+        "selectRelationship": "Selecione o tipo",
+        "addNotes": "Adicione notas sobre esta associação...",
+        "addNewRelation": "Adicionar nova relação",
+        "associate": "Adicionar Relação",
+        "associating": "Associando..."
+      },
+      "relationshipTypes": {
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "tabs": {
+        "all": "Todas",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "messages": {
+        "allAssociated": "Todas as condições já foram associadas",
+        "noRelations": "Este nutracêutico não possui relações com condições de saúde",
+        "noRelationsFiltered": "Nenhuma relação de {{type}} encontrada.",
+        "associationSuccess": "Condição associada com sucesso",
+        "associationError": "Não foi possível associar a condição",
+        "removeSuccess": "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
+        "selectCondition": "Selecione uma condição de saúde",
+        "partialFunctionality": "Funcionalidade parcial"
+      },
+      "efficacyLevels": {
+        "veryLow": "Muito Baixa",
+        "low": "Baixa",
+        "moderate": "Moderada",
+        "high": "Alta",
+        "veryHigh": "Muito Alta"
+      },
+      "labels": {
+        "efficacyScore": "Eficácia: {{score}}",
+        "notes": "Notas:",
+        "existingRelations": "Relações Existentes"
+      },
+      "remove": "Remover"
+    }
+  },
+  "veterinarian": {
+    "noPetsFound": "Nenhum pet encontrado com esse termo."
   }
 }

@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticalCondition {
   id: string;
@@ -38,18 +39,19 @@ interface NutraceuticalConditionsEditorProps {
   onComplete: () => void;
 }
 
-const relationshipTypes = [
-  { id: 'prevention', label: 'Prevenção' },
-  { id: 'treatment', label: 'Tratamento' },
-  { id: 'support', label: 'Suporte' },
-];
-
 const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps> = ({
   nutraceutical,
   onComplete,
 }) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { conditions, isLoading: conditionsLoading, associateNutraceuticalToCondition } = useConditions();
+  
+  const relationshipTypes = [
+    { id: 'prevention', label: t('nutraceuticals.conditions.relationshipTypes.prevention') },
+    { id: 'treatment', label: t('nutraceuticals.conditions.relationshipTypes.treatment') },
+    { id: 'support', label: t('nutraceuticals.conditions.relationshipTypes.support') },
+  ];
   
   const [selectedConditionId, setSelectedConditionId] = useState<string>("");
   const [selectedRelationType, setSelectedRelationType] = useState<string>("prevention");
@@ -76,8 +78,8 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
   const handleAssociateCondition = async () => {
     if (!selectedConditionId) {
       toast({
-        title: "Erro",
-        description: "Selecione uma condição de saúde",
+        title: t('messages.error'),
+        description: t('nutraceuticals.conditions.messages.selectCondition'),
         variant: "destructive",
       });
       return;
@@ -117,13 +119,13 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
       setNotes("");
       
       toast({
-        title: "Sucesso",
-        description: "Condição associada com sucesso",
+        title: t('messages.success'),
+        description: t('nutraceuticals.conditions.messages.associationSuccess'),
       });
     } catch (error) {
       toast({
-        title: "Erro",
-        description: "Não foi possível associar a condição",
+        title: t('messages.error'),
+        description: t('nutraceuticals.conditions.messages.associationError'),
         variant: "destructive",
       });
       console.error(error);
@@ -138,8 +140,8 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
     setExistingRelations(prev => prev.filter(rel => rel.id !== relationId));
     
     toast({
-      title: "Funcionalidade parcial",
-      description: "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
+      title: t('nutraceuticals.conditions.messages.partialFunctionality'),
+      description: t('nutraceuticals.conditions.messages.removeSuccess'),
       variant: "default",
     });
   };
@@ -164,22 +166,22 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
   return (
     <div className="space-y-6">
       <div className="rounded-md border p-4 bg-slate-50">
-        <h4 className="font-semibold mb-4">Adicionar nova relação</h4>
+        <h4 className="font-semibold mb-4">{t('nutraceuticals.conditions.form.addNewRelation')}</h4>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <Label htmlFor="condition">Condição de Saúde</Label>
+            <Label htmlFor="condition">{t('nutraceuticals.conditions.form.healthCondition')}</Label>
             <Select 
               value={selectedConditionId} 
               onValueChange={setSelectedConditionId}
               disabled={availableConditions.length === 0 || isAdding}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione uma condição" />
+                <SelectValue placeholder={t('nutraceuticals.conditions.form.selectCondition')} />
               </SelectTrigger>
               <SelectContent>
                 {availableConditions.length === 0 ? (
                   <SelectItem value="no_conditions_available">
-                    Todas as condições já foram associadas
+                    {t('nutraceuticals.conditions.messages.allAssociated')}
                   </SelectItem>
                 ) : (
                   availableConditions.map((condition) => (
@@ -193,7 +195,7 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
           </div>
           
           <div>
-            <Label htmlFor="relationship">Tipo de Relação</Label>
+            <Label htmlFor="relationship">{t('nutraceuticals.conditions.form.relationshipType')}</Label>
             <Select 
               value={selectedRelationType} 
               onValueChange={setSelectedRelationType}
@@ -214,7 +216,7 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
           
           <div className="md:col-span-2">
             <div className="flex justify-between">
-              <Label htmlFor="efficacy">Eficácia (1-5): {efficacyScore}</Label>
+              <Label htmlFor="efficacy">{t('nutraceuticals.conditions.form.efficacy')}: {efficacyScore}</Label>
             </div>
             <Slider
               id="efficacy"
@@ -229,10 +231,10 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
           </div>
           
           <div className="md:col-span-2">
-            <Label htmlFor="notes">Notas ou Observações</Label>
+            <Label htmlFor="notes">{t('nutraceuticals.conditions.form.notes')}</Label>
             <Textarea
               id="notes"
-              placeholder="Adicione notas sobre esta relação entre nutracêutico e condição"
+              placeholder={t('nutraceuticals.conditions.form.addNotes')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={isAdding}
@@ -245,14 +247,14 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
               onClick={handleAssociateCondition} 
               disabled={!selectedConditionId || isAdding}
             >
-              Adicionar Relação
+              {t('nutraceuticals.conditions.form.associate')}
             </Button>
           </div>
         </div>
       </div>
       
       <div>
-        <h4 className="font-semibold mb-4">Relações Existentes</h4>
+        <h4 className="font-semibold mb-4">{t('nutraceuticals.conditions.labels.existingRelations')}</h4>
         {conditionsLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-12 w-full" />
@@ -260,16 +262,16 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
           </div>
         ) : existingRelations.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground border rounded-md">
-            Este nutracêutico não possui relações com condições de saúde
+            {t('nutraceuticals.conditions.messages.noRelations')}
           </div>
         ) : (
           <div className="space-y-4">
             <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
-                <TabsTrigger value="prevention">Prevenção</TabsTrigger>
-                <TabsTrigger value="treatment">Tratamento</TabsTrigger>
-                <TabsTrigger value="support">Suporte</TabsTrigger>
+                <TabsTrigger value="all">{t('nutraceuticals.conditions.tabs.all')}</TabsTrigger>
+                <TabsTrigger value="prevention">{t('nutraceuticals.conditions.tabs.prevention')}</TabsTrigger>
+                <TabsTrigger value="treatment">{t('nutraceuticals.conditions.tabs.treatment')}</TabsTrigger>
+                <TabsTrigger value="support">{t('nutraceuticals.conditions.tabs.support')}</TabsTrigger>
               </TabsList>
             </Tabs>
             
@@ -299,13 +301,13 @@ const NutraceuticalConditionsEditor: React.FC<NutraceuticalConditionsEditorProps
                       variant="outline" 
                       className={getEfficiencyColor(relation.efficacy_score)}
                     >
-                      Eficácia: {relation.efficacy_score}
+                      {t('nutraceuticals.conditions.labels.efficacyScore', { score: relation.efficacy_score })}
                     </Badge>
                   </div>
                   
                   {relation.notes && (
                     <div className="mt-1 text-sm text-muted-foreground border-t pt-2">
-                      <p className="font-medium text-xs mb-1">Notas:</p>
+                      <p className="font-medium text-xs mb-1">{t('nutraceuticals.conditions.labels.notes')}</p>
                       <p>{relation.notes}</p>
                     </div>
                   )}
