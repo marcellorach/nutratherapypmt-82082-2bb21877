@@ -183,39 +183,39 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                     <TableCell colSpan={8} className="bg-gray-50 p-4">
                       <div className="space-y-4">
                         <div>
-                          <h4 className="text-sm font-semibold">Descrição</h4>
+                          <h4 className="text-sm font-semibold">{t('visualization.conditions.table.expandedInfo.description')}</h4>
                           <p className="text-sm text-gray-600">{condition.description}</p>
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold">Raças mais afetadas</h4>
+                          <h4 className="text-sm font-semibold">{t('visualization.conditions.table.expandedInfo.affectedBreeds')}</h4>
                           <p className="text-sm text-gray-600">{condition.breedsAffected.join(', ')}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <h4 className="text-sm font-semibold">Pacotes de Tratamento</h4>
+                            <h4 className="text-sm font-semibold">{t('visualization.conditions.table.expandedInfo.treatmentPackages')}</h4>
                             {condition.id.startsWith('c9') || condition.id.startsWith('c10') ? (
                               <ul className="text-sm text-gray-600 list-disc pl-5">
-                                <li>Pack Longevidade Plus ({Math.round(condition.treatabilityScore * 0.9)}% eficácia)</li>
-                                <li>Pack Senolítico Avançado ({Math.round(condition.treatabilityScore * 0.85)}% eficácia)</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packLongevity')} ({Math.round(condition.treatabilityScore * 0.9)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packSenolytic')} ({Math.round(condition.treatabilityScore * 0.85)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
                               </ul>
                             ) : (
                               <ul className="text-sm text-gray-600 list-disc pl-5">
-                                <li>Pack {condition.name} Premium ({Math.round(condition.treatabilityScore * 0.9)}% eficácia)</li>
-                                <li>Pack Suporte {condition.name.split(' ')[0]} ({Math.round(condition.treatabilityScore * 0.8)}% eficácia)</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packPremium', { name: condition.name })} ({Math.round(condition.treatabilityScore * 0.9)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packSupport', { name: condition.name.split(' ')[0] })} ({Math.round(condition.treatabilityScore * 0.8)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
                               </ul>
                             )}
                           </div>
                           <div>
-                            <h4 className="text-sm font-semibold">Pacotes de Prevenção</h4>
+                            <h4 className="text-sm font-semibold">{t('visualization.conditions.table.expandedInfo.preventionPackages')}</h4>
                             {condition.id.startsWith('c9') || condition.id.startsWith('c10') ? (
                               <ul className="text-sm text-gray-600 list-disc pl-5">
-                                <li>Pack Anti-envelhecimento ({Math.round(condition.preventionScore * 0.9)}% eficácia)</li>
-                                <li>Pack Protetor Celular ({Math.round(condition.preventionScore * 0.85)}% eficácia)</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packAntiAging')} ({Math.round(condition.preventionScore * 0.9)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packCellProtector')} ({Math.round(condition.preventionScore * 0.85)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
                               </ul>
                             ) : (
                               <ul className="text-sm text-gray-600 list-disc pl-5">
-                                <li>Pack Preventivo {condition.name.split(' ')[0]} ({Math.round(condition.preventionScore * 0.9)}% eficácia)</li>
-                                <li>Pack Suporte Imune ({Math.round(condition.preventionScore * 0.8)}% eficácia)</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packPreventive', { name: condition.name.split(' ')[0] })} ({Math.round(condition.preventionScore * 0.9)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
+                                <li>{t('visualization.conditions.table.expandedInfo.packImmuneSupport')} ({Math.round(condition.preventionScore * 0.8)}% {t('visualization.conditions.table.expandedInfo.efficacy')})</li>
                               </ul>
                             )}
                           </div>
@@ -225,9 +225,9 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                             variant="outline" 
                             onClick={() => handleDetailedAnalysis(condition)}
                           >
-                            Ver Análise Detalhada
+                            {t('visualization.conditions.table.expandedInfo.viewDetailedAnalysis')}
                           </Button>
-                          <Button className="ml-2">Ver Pacotes Recomendados</Button>
+                          <Button className="ml-2">{t('visualization.conditions.table.expandedInfo.viewRecommendedPackages')}</Button>
                         </div>
                       </div>
                     </TableCell>

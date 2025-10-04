@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableBody,
@@ -42,6 +43,8 @@ const NutraceuticalPackagesTable: React.FC<NutraceuticalPackagesTableProps> = ({
   selectedPackages,
   onPackageSelectionToggle
 }) => {
+  const { t } = useTranslation();
+  
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -55,11 +58,11 @@ const NutraceuticalPackagesTable: React.FC<NutraceuticalPackagesTableProps> = ({
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'treatment':
-        return <Badge variant="outline" className="bg-purple-50 text-purple-700">Tratamento</Badge>;
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700">{t('visualization.treatments.table.types.treatment')}</Badge>;
       case 'prevention':
-        return <Badge variant="outline" className="bg-green-50 text-green-700">Prevenção</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700">{t('visualization.treatments.table.types.prevention')}</Badge>;
       case 'support':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Suporte</Badge>;
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">{t('visualization.treatments.table.types.support')}</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -68,11 +71,11 @@ const NutraceuticalPackagesTable: React.FC<NutraceuticalPackagesTableProps> = ({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700">Aprovado</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700">{t('visualization.treatments.table.status.approved')}</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">Pendente</Badge>;
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">{t('visualization.treatments.table.status.pending')}</Badge>;
       case 'draft':
-        return <Badge variant="outline" className="bg-gray-50 text-gray-700">Rascunho</Badge>;
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700">{t('visualization.treatments.table.status.draft')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -84,20 +87,20 @@ const NutraceuticalPackagesTable: React.FC<NutraceuticalPackagesTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
-            <TableHead>Nome</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Condição</TableHead>
-            <TableHead>Eficácia</TableHead>
-            <TableHead>Nutracêuticos</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.name')}</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.type')}</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.condition')}</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.efficacy')}</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.nutraceuticals')}</TableHead>
+            <TableHead>{t('visualization.treatments.table.headers.status')}</TableHead>
+            <TableHead className="text-right">{t('visualization.treatments.table.headers.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {packages.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                Nenhum pacote encontrado
+                {t('visualization.treatments.table.noPackages')}
               </TableCell>
             </TableRow>
           ) : (
