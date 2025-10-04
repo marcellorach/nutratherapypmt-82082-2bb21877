@@ -7,22 +7,25 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Brain, Save, Edit, Trash2 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const PromptConfigurationTab: React.FC = () => {
+  const { t } = useTranslation();
+  
   const [prompts, setPrompts] = useState([
     {
       id: '1',
-      name: 'Análise de Nutracêuticos',
-      description: 'Prompt para análise inicial de nutracêuticos',
-      content: 'Analise o seguinte nutracêutico considerando...',
+      name: t('admin.prompts.examples.analysisName'),
+      description: t('admin.prompts.examples.analysisDescription'),
+      content: t('admin.prompts.examples.analysisContent'),
       category: 'analysis',
       isActive: true
     },
     {
       id: '2',
-      name: 'Recomendações Clínicas',
-      description: 'Prompt para gerar recomendações clínicas',
-      content: 'Com base nos dados clínicos apresentados...',
+      name: t('admin.prompts.examples.clinicalName'),
+      description: t('admin.prompts.examples.clinicalDescription'),
+      content: t('admin.prompts.examples.clinicalContent'),
       category: 'clinical',
       isActive: true
     }
@@ -42,9 +45,9 @@ const PromptConfigurationTab: React.FC = () => {
     const randomPrompts = [
       {
         id: String(Date.now()),
-        name: 'Avaliação de Eficácia',
-        description: 'Prompt para avaliar eficácia de composições',
-        content: 'Avalie a eficácia da seguinte composição nutracêutica...',
+        name: t('admin.prompts.examples.evaluationName'),
+        description: t('admin.prompts.examples.evaluationDescription'),
+        content: t('admin.prompts.examples.evaluationContent'),
         category: 'evaluation',
         isActive: true
       }
@@ -52,8 +55,8 @@ const PromptConfigurationTab: React.FC = () => {
     
     setPrompts(prev => [...prev, ...randomPrompts]);
     toast({
-      title: "Prompts gerados",
-      description: "Novos prompts de exemplo foram adicionados.",
+      title: t('admin.prompts.messages.generated'),
+      description: t('admin.prompts.messages.generatedDescription'),
     });
   };
 
@@ -63,16 +66,16 @@ const PromptConfigurationTab: React.FC = () => {
     ));
     setEditingPrompt(null);
     toast({
-      title: "Prompt salvo",
-      description: "O prompt foi atualizado com sucesso.",
+      title: t('admin.prompts.messages.saved'),
+      description: t('admin.prompts.messages.savedDescription'),
     });
   };
 
   const handleCreatePrompt = () => {
     if (!newPrompt.name || !newPrompt.content) {
       toast({
-        title: "Erro",
-        description: "Nome e conteúdo são obrigatórios.",
+        title: t('admin.prompts.messages.error'),
+        description: t('admin.prompts.form.nameRequired'),
         variant: "destructive",
       });
       return;
@@ -89,23 +92,23 @@ const PromptConfigurationTab: React.FC = () => {
     setIsCreating(false);
     
     toast({
-      title: "Prompt criado",
-      description: "Novo prompt foi adicionado com sucesso.",
+      title: t('admin.prompts.messages.created'),
+      description: t('admin.prompts.messages.createdDescription'),
     });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Configuração de Prompts</h2>
+        <h2 className="text-xl font-bold">{t('admin.prompts.title')}</h2>
         <div className="flex gap-2">
           <Button variant="outline" onClick={generateRandomPrompts}>
             <Brain className="h-4 w-4 mr-2" />
-            Gerar Prompts Exemplo
+            {t('admin.prompts.generateExample')}
           </Button>
           <Button onClick={() => setIsCreating(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Novo Prompt
+            {t('admin.prompts.newPrompt')}
           </Button>
         </div>
       </div>
@@ -114,55 +117,55 @@ const PromptConfigurationTab: React.FC = () => {
       {isCreating && (
         <Card>
           <CardHeader>
-            <CardTitle>Criar Novo Prompt</CardTitle>
+            <CardTitle>{t('admin.prompts.createTitle')}</CardTitle>
             <CardDescription>
-              Configure um novo prompt para a IA
+              {t('admin.prompts.createDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="prompt-name">Nome do Prompt</Label>
+                <Label htmlFor="prompt-name">{t('admin.prompts.form.name')}</Label>
                 <Input
                   id="prompt-name"
                   value={newPrompt.name}
                   onChange={(e) => setNewPrompt(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Nome do prompt"
+                  placeholder={t('admin.prompts.form.namePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="prompt-category">Categoria</Label>
+                <Label htmlFor="prompt-category">{t('admin.prompts.form.category')}</Label>
                 <select
                   id="prompt-category"
                   className="w-full p-2 border rounded-md"
                   value={newPrompt.category}
                   onChange={(e) => setNewPrompt(prev => ({ ...prev, category: e.target.value }))}
                 >
-                  <option value="analysis">Análise</option>
-                  <option value="clinical">Clínico</option>
-                  <option value="evaluation">Avaliação</option>
-                  <option value="recommendation">Recomendação</option>
+                  <option value="analysis">{t('admin.prompts.categories.analysis')}</option>
+                  <option value="clinical">{t('admin.prompts.categories.clinical')}</option>
+                  <option value="evaluation">{t('admin.prompts.categories.evaluation')}</option>
+                  <option value="recommendation">{t('admin.prompts.categories.recommendation')}</option>
                 </select>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="prompt-description">Descrição</Label>
+              <Label htmlFor="prompt-description">{t('admin.prompts.form.description')}</Label>
               <Input
                 id="prompt-description"
                 value={newPrompt.description}
                 onChange={(e) => setNewPrompt(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição do prompt"
+                placeholder={t('admin.prompts.form.descriptionPlaceholder')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="prompt-content">Conteúdo do Prompt</Label>
+              <Label htmlFor="prompt-content">{t('admin.prompts.form.content')}</Label>
               <Textarea
                 id="prompt-content"
                 value={newPrompt.content}
                 onChange={(e) => setNewPrompt(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="Digite o conteúdo do prompt..."
+                placeholder={t('admin.prompts.form.contentPlaceholder')}
                 rows={6}
               />
             </div>
@@ -170,10 +173,10 @@ const PromptConfigurationTab: React.FC = () => {
             <div className="flex gap-2">
               <Button onClick={handleCreatePrompt}>
                 <Save className="h-4 w-4 mr-2" />
-                Salvar Prompt
+                {t('admin.prompts.form.save')}
               </Button>
               <Button variant="outline" onClick={() => setIsCreating(false)}>
-                Cancelar
+                {t('admin.prompts.form.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -190,9 +193,9 @@ const PromptConfigurationTab: React.FC = () => {
                   <CardTitle className="flex items-center gap-2">
                     {prompt.name}
                     <Badge variant={prompt.isActive ? "default" : "secondary"}>
-                      {prompt.isActive ? "Ativo" : "Inativo"}
+                      {prompt.isActive ? t('admin.prompts.status.active') : t('admin.prompts.status.inactive')}
                     </Badge>
-                    <Badge variant="outline">{prompt.category}</Badge>
+                    <Badge variant="outline">{t(`admin.prompts.categories.${prompt.category}`)}</Badge>
                   </CardTitle>
                   <CardDescription>{prompt.description}</CardDescription>
                 </div>
@@ -210,8 +213,8 @@ const PromptConfigurationTab: React.FC = () => {
                     onClick={() => {
                       setPrompts(prev => prev.filter(p => p.id !== prompt.id));
                       toast({
-                        title: "Prompt removido",
-                        description: "O prompt foi excluído com sucesso.",
+                        title: t('admin.prompts.messages.removed'),
+                        description: t('admin.prompts.messages.removedDescription'),
                       });
                     }}
                   >
@@ -235,10 +238,10 @@ const PromptConfigurationTab: React.FC = () => {
                   <div className="flex gap-2">
                     <Button onClick={() => handleSavePrompt(prompt.id, prompt.content)}>
                       <Save className="h-4 w-4 mr-2" />
-                      Salvar
+                      {t('admin.prompts.form.saveChanges')}
                     </Button>
                     <Button variant="outline" onClick={() => setEditingPrompt(null)}>
-                      Cancelar
+                      {t('admin.prompts.form.cancel')}
                     </Button>
                   </div>
                 </div>
