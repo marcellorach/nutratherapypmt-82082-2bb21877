@@ -126,7 +126,7 @@ const TreatmentsTab: React.FC = () => {
       
       <div className="flex flex-wrap gap-2 mb-2">
         <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
-          {t('visualization.treatments.badges.premiumArticular')}
+          {t('visualization.treatments.badges.jointPack')}
         </Badge>
         <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100">
           {t('visualization.treatments.badges.prevention')}
@@ -143,7 +143,7 @@ const TreatmentsTab: React.FC = () => {
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle>{t('visualization.treatments.table.title')}</CardTitle>
+              <CardTitle>{t('visualization.treatments.packagesCard.title')}</CardTitle>
               <div className="flex items-center space-x-4">
                 {selectedPackages.length > 0 && (
                   <Button 
@@ -180,11 +180,11 @@ const TreatmentsTab: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Checkbox id="selectAll" onCheckedChange={handleSelectAllPackages} />
                     <label htmlFor="selectAll" className="text-sm">
-                      {t('visualization.treatments.table.selectAll')}
+                      {t('visualization.treatments.packagesCard.selectAll')}
                     </label>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {filteredPackages.length} {t('visualization.treatments.table.availablePackages')}
+                    {filteredPackages.length} {t('visualization.treatments.packagesCard.availablePackages')}
                   </p>
                 </div>
                 
@@ -232,7 +232,7 @@ const TreatmentsTab: React.FC = () => {
               />
             ) : (
               <div className="text-center py-12 text-muted-foreground">
-                <p>{t('visualization.treatments.details.selectPackage')}</p>
+                <p>{t('visualization.treatments.detailsPanel.selectPackage')}</p>
               </div>
             )}
           </CardContent>
