@@ -152,16 +152,16 @@ const TreatmentsTab: React.FC = () => {
                     onClick={() => console.log('Enviar para revisão:', selectedPackages)}
                   >
                     <Send className="h-4 w-4" />
-                    {t('visualization.treatments.table.sendToReview')} ({selectedPackages.length})
+                    {t('visualization.treatments.packagesCard.sendToReview', { count: selectedPackages.length })}
                   </Button>
                 )}
                 <Button variant="outline" className="flex items-center gap-2">
                   <FileDown className="h-4 w-4" />
-                  {t('visualization.treatments.table.export')}
+                  {t('visualization.treatments.packagesCard.export')}
                 </Button>
                 <Button variant="outline" className="flex items-center gap-2">
                   <ArrowUpDown className="h-4 w-4" />
-                  {t('visualization.treatments.table.sort')}
+                  {t('visualization.treatments.packagesCard.sort')}
                 </Button>
               </div>
             </div>
@@ -184,7 +184,7 @@ const TreatmentsTab: React.FC = () => {
                     </label>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {filteredPackages.length} {t('visualization.treatments.packagesCard.availablePackages')}
+                    {t('visualization.treatments.packagesCard.availablePackages', { count: filteredPackages.length })}
                   </p>
                 </div>
                 
