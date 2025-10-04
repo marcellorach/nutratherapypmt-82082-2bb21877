@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,6 +16,8 @@ interface TreatabilityBarChartProps {
 }
 
 const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions, isLoading }) => {
+  const { t } = useTranslation();
+  
   // Preparar dados para o gráfico (top 10 condições)
   const chartData = conditions
     .sort((a, b) => b.treatabilityScore - a.treatabilityScore)
@@ -57,18 +60,18 @@ const TreatabilityBarChart: React.FC<TreatabilityBarChartProps> = ({ conditions,
             if (name === 'roi') {
               return [`${value}`, 'ROI'];
             }
-            return [`${value}%`, name === 'tratabilidade' ? 'Tratabilidade' : 'Prevenção'];
+            return [`${value}%`, name === 'tratabilidade' ? t('visualization.conditions.chart.treatability') : t('visualization.conditions.chart.prevention')];
           }}
-          labelFormatter={(label) => `Condição: ${label}`}
+          labelFormatter={(label) => `${t('visualization.conditions.chart.condition')}: ${label}`}
         />
         <Legend />
         <Bar 
-          name="Índice de Tratabilidade" 
+          name={t('visualization.conditions.chart.treatabilityIndex')}
           dataKey="tratabilidade" 
           fill="#10b981" 
         />
         <Bar 
-          name="Índice de Prevenção" 
+          name={t('visualization.conditions.chart.preventionIndex')}
           dataKey="prevenção" 
           fill="#8b5cf6" 
         />

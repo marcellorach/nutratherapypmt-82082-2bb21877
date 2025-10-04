@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
   conditions,
   isLoading
 }) => {
+  const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
   const [selectedCondition, setSelectedCondition] = React.useState<Condition | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -87,20 +89,20 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
-            <TableHead>Nome</TableHead>
-            <TableHead>Tratabilidade</TableHead>
-            <TableHead>Prevenção</TableHead>
-            <TableHead>ROI</TableHead>
-            <TableHead>Espécies Afetadas</TableHead>
-            <TableHead>Pacotes Recomendados</TableHead>
-            <TableHead className="w-[100px]">Ações</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.name')}</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.treatability')}</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.prevention')}</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.roi')}</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.affectedSpecies')}</TableHead>
+            <TableHead>{t('visualization.conditions.table.headers.recommendedPackages')}</TableHead>
+            <TableHead className="w-[100px]">{t('visualization.conditions.table.headers.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {conditions.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                Nenhuma condição encontrada
+                {t('visualization.conditions.table.noConditions')}
               </TableCell>
             </TableRow>
           ) : (

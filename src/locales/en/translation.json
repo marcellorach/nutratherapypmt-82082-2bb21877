@@ -1386,6 +1386,251 @@
       }
     }
   },
+  "visualization": {
+    "title": "Data Visualization",
+    "description": "Analysis and visualization of identified patterns",
+    "period": "Period:",
+    "selectPeriod": "Select period",
+    "periods": {
+      "1m": "Last month",
+      "3m": "3 months",
+      "6m": "6 months",
+      "1y": "1 year",
+      "all": "All"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "conditions": "Health Conditions",
+      "treatments": "Treatments",
+      "nutraceuticals": "Nutraceuticals"
+    },
+    "overview": {
+      "ageDistribution": {
+        "title": "Age Distribution",
+        "showPercentages": "Show Percentages",
+        "showAbsolute": "Show Absolute Values"
+      },
+      "breedDistribution": {
+        "title": "Species Distribution",
+        "titleBreed": "Breed Distribution - {{species}}",
+        "clickToView": "Click on a species to view breed distribution",
+        "clickBreedOrBack": "Click on a breed to see details or",
+        "backToSpecies": "go back to species view"
+      },
+      "healthMapping": {
+        "title": "Health Conditions Mapping",
+        "description": "Sankey diagram showing the distribution of health conditions by species and breed"
+      },
+      "species": {
+        "dogs": "Dogs",
+        "cats": "Cats",
+        "others": "Others"
+      },
+      "breeds": {
+        "srd": "Mixed Breed",
+        "goldenRetriever": "Golden Retriever",
+        "frenchBulldog": "French Bulldog",
+        "shihTzu": "Shih Tzu",
+        "poodle": "Poodle",
+        "labrador": "Labrador",
+        "germanShepherd": "German Shepherd",
+        "yorkshire": "Yorkshire",
+        "others": "Other breeds",
+        "siamese": "Siamese",
+        "persian": "Persian",
+        "maineCoon": "Maine Coon",
+        "ragdoll": "Ragdoll",
+        "bengal": "Bengal",
+        "rabbits": "Rabbits",
+        "hamsters": "Hamsters",
+        "birds": "Birds"
+      }
+    },
+    "conditions": {
+      "title": "Health Conditions",
+      "description": "Analysis of conditions treatable with nutraceutical packages",
+      "searchPlaceholder": "Search condition...",
+      "filters": {
+        "species": "Species",
+        "allSpecies": "All Species",
+        "canine": "Dogs",
+        "feline": "Cats",
+        "breed": "Breed",
+        "allBreeds": "All Breeds",
+        "golden": "Golden Retriever",
+        "labrador": "Labrador",
+        "bulldog": "French Bulldog",
+        "poodle": "Poodle",
+        "siamese": "Siamese",
+        "persian": "Persian",
+        "treatability": "Treatability",
+        "allLevels": "All Levels",
+        "high": "High (>75%)",
+        "medium": "Medium (50-75%)",
+        "low": "Low (<50%)",
+        "moreFilters": "More Filters",
+        "export": "Export"
+      },
+      "badges": {
+        "arthritis": "Arthritis",
+        "dermatitis": "Atopic Dermatitis",
+        "dogs": "Dogs",
+        "cats": "Cats",
+        "highTreatability": "High Treatability"
+      },
+      "stats": {
+        "totalConditions": "Total Analyzed Conditions",
+        "highTreatability": "High Treatability (>45%)",
+        "highPrevention": "High Prevention (>65%)",
+        "avgTreatability": "Average Treatability Index",
+        "avgPrevention": "Average Prevention Index",
+        "newConditions": "New longevity-related conditions:",
+        "cellularSenescence": "Cellular Senescence",
+        "generalMortality": "General Mortality",
+        "oxidativeStress": "Oxidative Stress",
+        "mitochondrialDysfunction": "Mitochondrial Dysfunction"
+      },
+      "chart": {
+        "title": "Treatability Index by Condition",
+        "treatabilityIndex": "Treatability Index",
+        "preventionIndex": "Prevention Index",
+        "treatability": "Treatability",
+        "prevention": "Prevention",
+        "condition": "Condition"
+      },
+      "table": {
+        "title": "Treatable Conditions",
+        "headers": {
+          "name": "Name",
+          "treatability": "Treatability",
+          "prevention": "Prevention",
+          "roi": "ROI",
+          "affectedSpecies": "Affected Species",
+          "recommendedPackages": "Recommended Packages",
+          "actions": "Actions"
+        },
+        "noConditions": "No conditions found",
+        "expandedInfo": {
+          "description": "Description",
+          "affectedBreeds": "Most affected breeds",
+          "treatmentPackages": "Treatment Packages",
+          "preventionPackages": "Prevention Packages",
+          "efficacy": "efficacy",
+          "packPremium": "{{name}} Premium Pack",
+          "packSupport": "{{name}} Support Pack",
+          "packPreventive": "Preventive {{name}} Pack",
+          "packImmuneSupport": "Immune Support Pack",
+          "packLongevity": "Longevity Plus Pack",
+          "packSenolytic": "Advanced Senolytic Pack",
+          "packAntiAging": "Anti-Aging Pack",
+          "packCellProtector": "Cell Protector Pack",
+          "viewDetailedAnalysis": "View Detailed Analysis",
+          "viewRecommendedPackages": "View Recommended Packages"
+        }
+      }
+    },
+    "treatments": {
+      "title": "Treatment Packages",
+      "description": "Nutraceutical packages for treatment and prevention of conditions",
+      "searchPlaceholder": "Search packages...",
+      "filters": {
+        "condition": "Condition",
+        "allConditions": "All Conditions",
+        "arthritis": "Arthritis",
+        "dermatitis": "Atopic Dermatitis",
+        "cardiac": "Heart Problems",
+        "species": "Species",
+        "allSpecies": "All Species",
+        "canine": "Dogs",
+        "feline": "Cats",
+        "packageType": "Package Type",
+        "allTypes": "All Types",
+        "treatment": "Treatment",
+        "prevention": "Prevention",
+        "support": "Support",
+        "moreFilters": "More Filters"
+      },
+      "badges": {
+        "jointPack": "Premium Joint Pack",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "highEfficacy": "High Efficacy"
+      },
+      "packagesCard": {
+        "title": "Nutraceutical Packages",
+        "selectAll": "Select All",
+        "availablePackages": "{{count}} available packages",
+        "sendToReview": "Send for Review ({{count}})",
+        "export": "Export",
+        "sort": "Sort"
+      },
+      "tabs": {
+        "recommended": "Recommended Packages",
+        "all": "All Packages",
+        "custom": "Custom",
+        "reviews": "Under Review",
+        "allInDevelopment": "All packages view in development",
+        "customInDevelopment": "Custom packages in development",
+        "reviewsInDevelopment": "Packages under review in development"
+      },
+      "detailsPanel": {
+        "title": "Package Details",
+        "selectPackage": "Select a package to view details",
+        "notAvailable": "Package details not available",
+        "id": "ID:",
+        "edit": "Edit",
+        "send": "Send",
+        "basicInfo": "Basic Information",
+        "condition": "Condition",
+        "targetSpecies": "Target Species",
+        "totalEfficacy": "Total Efficacy",
+        "composition": "Nutraceutical Composition ({{count}})",
+        "dosage": "Dosage:",
+        "mainSynergies": "Main Synergies",
+        "administrationInstructions": "Administration Instructions",
+        "contraindications": "Contraindications",
+        "downloadReport": "Download Complete Report"
+      },
+      "table": {
+        "headers": {
+          "name": "Name",
+          "type": "Type",
+          "condition": "Condition",
+          "efficacy": "Efficacy",
+          "nutraceuticals": "Nutraceuticals",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "types": {
+          "treatment": "Treatment",
+          "prevention": "Prevention",
+          "support": "Support"
+        },
+        "status": {
+          "approved": "Approved",
+          "pending": "Pending",
+          "draft": "Draft"
+        },
+        "noPackages": "No packages found"
+      },
+      "efficiency": {
+        "title": "Efficiency Metrics",
+        "avgTreatment": "Average Treatment Efficacy",
+        "avgTreatmentDesc": "Average of all treatment packages",
+        "avgPrevention": "Average Prevention Efficacy",
+        "avgPreventionDesc": "Average of all preventive packages",
+        "mostEfficient": "Most Efficient Condition",
+        "treatmentEfficacy": "Treatment efficacy:",
+        "efficacyTrend": "Efficacy Trend Over Time",
+        "month": "Month:",
+        "treatmentEfficacyLabel": "Treatment Efficacy",
+        "preventionEfficacyLabel": "Prevention Efficacy"
+      }
+    },
+    "nutraceuticals": {
+      "inDevelopment": "Nutraceuticals visualization component in development"
+    }
+  },
   "import": {
     "title": "Data Import",
     "subtitle": "Import nutraceutical and scientific study data",

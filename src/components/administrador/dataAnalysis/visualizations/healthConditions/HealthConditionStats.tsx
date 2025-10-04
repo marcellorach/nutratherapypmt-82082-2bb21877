@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -18,6 +19,8 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
   stats,
   isLoading
 }) => {
+  const { t } = useTranslation();
+  
   if (isLoading) {
     return (
       <Card>
@@ -37,7 +40,7 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
       <CardContent className="p-6 space-y-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Total de Condições Analisadas
+            {t('visualization.conditions.stats.totalConditions')}
           </p>
           <p className="text-3xl font-bold">{stats.totalConditions}</p>
         </div>
@@ -45,13 +48,13 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Alta Tratabilidade ({'>'}45%)
+              {t('visualization.conditions.stats.highTreatability')}
             </p>
             <p className="text-xl font-semibold text-green-600">{stats.highTreatability}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Alta Prevenção ({'>'}65%)
+              {t('visualization.conditions.stats.highPrevention')}
             </p>
             <p className="text-xl font-semibold text-purple-600">{stats.highPrevention}</p>
           </div>
@@ -59,7 +62,7 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
         
         <div className="pt-4 border-t">
           <p className="text-sm font-medium text-muted-foreground mb-2">
-            Índice Médio de Tratabilidade
+            {t('visualization.conditions.stats.avgTreatability')}
           </p>
           <div className="flex items-center">
             <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -74,7 +77,7 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
         
         <div>
           <p className="text-sm font-medium text-muted-foreground mb-2">
-            Índice Médio de Prevenção
+            {t('visualization.conditions.stats.avgPrevention')}
           </p>
           <div className="flex items-center">
             <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -89,13 +92,13 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
 
         <div className="pt-4 border-t">
           <p className="text-sm font-medium text-gray-700">
-            Novas condições relacionadas à longevidade:
+            {t('visualization.conditions.stats.newConditions')}
           </p>
           <ul className="text-sm text-gray-600 list-disc pl-5 mt-2">
-            <li>Senescência Celular</li>
-            <li>Mortalidade Geral</li>
-            <li>Estresse Oxidativo</li>
-            <li>Disfunção Mitocondrial</li>
+            <li>{t('visualization.conditions.stats.cellularSenescence')}</li>
+            <li>{t('visualization.conditions.stats.generalMortality')}</li>
+            <li>{t('visualization.conditions.stats.oxidativeStress')}</li>
+            <li>{t('visualization.conditions.stats.mitochondrialDysfunction')}</li>
           </ul>
         </div>
       </CardContent>

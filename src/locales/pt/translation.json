@@ -1386,6 +1386,251 @@
       }
     }
   },
+  "visualization": {
+    "title": "Visualização de Dados",
+    "description": "Análise e visualização dos padrões identificados",
+    "period": "Período:",
+    "selectPeriod": "Selecionar período",
+    "periods": {
+      "1m": "Último mês",
+      "3m": "3 meses",
+      "6m": "6 meses",
+      "1y": "1 ano",
+      "all": "Todos"
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "conditions": "Condições de Saúde",
+      "treatments": "Tratamentos",
+      "nutraceuticals": "Nutracêuticos"
+    },
+    "overview": {
+      "ageDistribution": {
+        "title": "Distribuição por Idade",
+        "showPercentages": "Mostrar Percentuais",
+        "showAbsolute": "Mostrar Valores Absolutos"
+      },
+      "breedDistribution": {
+        "title": "Distribuição por Espécie",
+        "titleBreed": "Distribuição de Raças - {{species}}",
+        "clickToView": "Clique em uma espécie para ver a distribuição por raças",
+        "clickBreedOrBack": "Clique em uma raça para ver detalhes ou",
+        "backToSpecies": "voltar para visão de espécies"
+      },
+      "healthMapping": {
+        "title": "Mapeamento de Condições de Saúde",
+        "description": "Diagrama de Sankey mostrando a distribuição de condições de saúde por espécie e raça"
+      },
+      "species": {
+        "dogs": "Cães",
+        "cats": "Gatos",
+        "others": "Outros"
+      },
+      "breeds": {
+        "srd": "SRD",
+        "goldenRetriever": "Golden Retriever",
+        "frenchBulldog": "Bulldog Francês",
+        "shihTzu": "Shih Tzu",
+        "poodle": "Poodle",
+        "labrador": "Labrador",
+        "germanShepherd": "Pastor Alemão",
+        "yorkshire": "Yorkshire",
+        "others": "Outras raças",
+        "siamese": "Siamês",
+        "persian": "Persa",
+        "maineCoon": "Maine Coon",
+        "ragdoll": "Ragdoll",
+        "bengal": "Bengal",
+        "rabbits": "Coelhos",
+        "hamsters": "Hamsters",
+        "birds": "Aves"
+      }
+    },
+    "conditions": {
+      "title": "Condições de Saúde",
+      "description": "Análise de condições tratáveis com pacotes de nutracêuticos",
+      "searchPlaceholder": "Buscar condição...",
+      "filters": {
+        "species": "Espécie",
+        "allSpecies": "Todas as Espécies",
+        "canine": "Cães",
+        "feline": "Gatos",
+        "breed": "Raça",
+        "allBreeds": "Todas as Raças",
+        "golden": "Golden Retriever",
+        "labrador": "Labrador",
+        "bulldog": "Bulldog Francês",
+        "poodle": "Poodle",
+        "siamese": "Siamês",
+        "persian": "Persa",
+        "treatability": "Tratabilidade",
+        "allLevels": "Todos os Níveis",
+        "high": "Alta (>75%)",
+        "medium": "Média (50-75%)",
+        "low": "Baixa (<50%)",
+        "moreFilters": "Mais Filtros",
+        "export": "Exportar"
+      },
+      "badges": {
+        "arthritis": "Artrite",
+        "dermatitis": "Dermatite Atópica",
+        "dogs": "Cães",
+        "cats": "Gatos",
+        "highTreatability": "Alta Tratabilidade"
+      },
+      "stats": {
+        "totalConditions": "Total de Condições Analisadas",
+        "highTreatability": "Alta Tratabilidade (>45%)",
+        "highPrevention": "Alta Prevenção (>65%)",
+        "avgTreatability": "Índice Médio de Tratabilidade",
+        "avgPrevention": "Índice Médio de Prevenção",
+        "newConditions": "Novas condições relacionadas à longevidade:",
+        "cellularSenescence": "Senescência Celular",
+        "generalMortality": "Mortalidade Geral",
+        "oxidativeStress": "Estresse Oxidativo",
+        "mitochondrialDysfunction": "Disfunção Mitocondrial"
+      },
+      "chart": {
+        "title": "Índice de Tratabilidade por Condição",
+        "treatabilityIndex": "Índice de Tratabilidade",
+        "preventionIndex": "Índice de Prevenção",
+        "treatability": "Tratabilidade",
+        "prevention": "Prevenção",
+        "condition": "Condição"
+      },
+      "table": {
+        "title": "Condições Tratáveis",
+        "headers": {
+          "name": "Nome",
+          "treatability": "Tratabilidade",
+          "prevention": "Prevenção",
+          "roi": "ROI",
+          "affectedSpecies": "Espécies Afetadas",
+          "recommendedPackages": "Pacotes Recomendados",
+          "actions": "Ações"
+        },
+        "noConditions": "Nenhuma condição encontrada",
+        "expandedInfo": {
+          "description": "Descrição",
+          "affectedBreeds": "Raças mais afetadas",
+          "treatmentPackages": "Pacotes de Tratamento",
+          "preventionPackages": "Pacotes de Prevenção",
+          "efficacy": "eficácia",
+          "packPremium": "Pack {{name}} Premium",
+          "packSupport": "Pack Suporte {{name}}",
+          "packPreventive": "Pack Preventivo {{name}}",
+          "packImmuneSupport": "Pack Suporte Imune",
+          "packLongevity": "Pack Longevidade Plus",
+          "packSenolytic": "Pack Senolítico Avançado",
+          "packAntiAging": "Pack Anti-envelhecimento",
+          "packCellProtector": "Pack Protetor Celular",
+          "viewDetailedAnalysis": "Ver Análise Detalhada",
+          "viewRecommendedPackages": "Ver Pacotes Recomendados"
+        }
+      }
+    },
+    "treatments": {
+      "title": "Pacotes de Tratamento",
+      "description": "Pacotes de nutracêuticos para tratamento e prevenção de condições",
+      "searchPlaceholder": "Buscar pacotes...",
+      "filters": {
+        "condition": "Condição",
+        "allConditions": "Todas as Condições",
+        "arthritis": "Artrite",
+        "dermatitis": "Dermatite Atópica",
+        "cardiac": "Problemas Cardíacos",
+        "species": "Espécie",
+        "allSpecies": "Todas as Espécies",
+        "canine": "Cães",
+        "feline": "Gatos",
+        "packageType": "Tipo de Pacote",
+        "allTypes": "Todos os Tipos",
+        "treatment": "Tratamento",
+        "prevention": "Prevenção",
+        "support": "Suporte",
+        "moreFilters": "Mais Filtros"
+      },
+      "badges": {
+        "jointPack": "Pack Articular Premium",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "highEfficacy": "Alta Eficácia"
+      },
+      "packagesCard": {
+        "title": "Pacotes de Nutracêuticos",
+        "selectAll": "Selecionar Todos",
+        "availablePackages": "{{count}} pacotes disponíveis",
+        "sendToReview": "Enviar para Revisão ({{count}})",
+        "export": "Exportar",
+        "sort": "Ordenar"
+      },
+      "tabs": {
+        "recommended": "Pacotes Recomendados",
+        "all": "Todos os Pacotes",
+        "custom": "Personalizados",
+        "reviews": "Em Revisão",
+        "allInDevelopment": "Visualização de todos os pacotes em desenvolvimento",
+        "customInDevelopment": "Pacotes personalizados em desenvolvimento",
+        "reviewsInDevelopment": "Pacotes em revisão em desenvolvimento"
+      },
+      "detailsPanel": {
+        "title": "Detalhes do Pacote",
+        "selectPackage": "Selecione um pacote para ver detalhes",
+        "notAvailable": "Detalhes do pacote não disponíveis",
+        "id": "ID:",
+        "edit": "Editar",
+        "send": "Enviar",
+        "basicInfo": "Informações Básicas",
+        "condition": "Condição",
+        "targetSpecies": "Espécies Alvo",
+        "totalEfficacy": "Eficácia Total",
+        "composition": "Composição Nutracêutica ({{count}})",
+        "dosage": "Dosagem:",
+        "mainSynergies": "Sinergias Principais",
+        "administrationInstructions": "Instruções de Administração",
+        "contraindications": "Contraindicações",
+        "downloadReport": "Baixar Relatório Completo"
+      },
+      "table": {
+        "headers": {
+          "name": "Nome",
+          "type": "Tipo",
+          "condition": "Condição",
+          "efficacy": "Eficácia",
+          "nutraceuticals": "Nutracêuticos",
+          "status": "Status",
+          "actions": "Ações"
+        },
+        "types": {
+          "treatment": "Tratamento",
+          "prevention": "Prevenção",
+          "support": "Suporte"
+        },
+        "status": {
+          "approved": "Aprovado",
+          "pending": "Pendente",
+          "draft": "Rascunho"
+        },
+        "noPackages": "Nenhum pacote encontrado"
+      },
+      "efficiency": {
+        "title": "Métricas de Eficiência",
+        "avgTreatment": "Eficácia Média de Tratamento",
+        "avgTreatmentDesc": "Média de todos os pacotes de tratamento",
+        "avgPrevention": "Eficácia Média de Prevenção",
+        "avgPreventionDesc": "Média de todos os pacotes preventivos",
+        "mostEfficient": "Condição Mais Eficiente",
+        "treatmentEfficacy": "Eficácia de tratamento:",
+        "efficacyTrend": "Tendência de Eficácia ao Longo do Tempo",
+        "month": "Mês:",
+        "treatmentEfficacyLabel": "Eficácia do Tratamento",
+        "preventionEfficacyLabel": "Eficácia da Prevenção"
+      }
+    },
+    "nutraceuticals": {
+      "inDevelopment": "Componente de visualização de nutracêuticos em desenvolvimento"
+    }
+  },
   "import": {
     "title": "Importação de Dados",
     "subtitle": "Importe dados de nutracêuticos e estudos científicos",

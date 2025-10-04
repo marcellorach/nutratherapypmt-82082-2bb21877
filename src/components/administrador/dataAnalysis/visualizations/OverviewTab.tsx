@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AgeDistributionChart from './AgeDistributionChart';
@@ -30,50 +31,50 @@ const detailedAgeData = [
   { name: '19+', value: 1, percent: 0.04 }
 ];
 
-// Dados de espécies e raças
-const speciesData = [
-  { name: 'Cães', value: 1560, percent: 66.7 },
-  { name: 'Gatos', value: 730, percent: 31.2 },
-  { name: 'Outros', value: 51, percent: 2.1 }
-];
-
-// Dados de raças para cada espécie
-const breedData = {
-  'Cães': [
-    { name: 'SRD', value: 645, percent: 41.3 },
-    { name: 'Golden Retriever', value: 187, percent: 12.0 },
-    { name: 'Bulldog Francês', value: 156, percent: 10.0 },
-    { name: 'Shih Tzu', value: 124, percent: 7.9 },
-    { name: 'Poodle', value: 98, percent: 6.3 },
-    { name: 'Labrador', value: 93, percent: 6.0 },
-    { name: 'Pastor Alemão', value: 78, percent: 5.0 },
-    { name: 'Yorkshire', value: 65, percent: 4.2 },
-    { name: 'Outras raças', value: 114, percent: 7.3 }
-  ],
-  'Gatos': [
-    { name: 'SRD', value: 543, percent: 74.4 },
-    { name: 'Siamês', value: 58, percent: 7.9 },
-    { name: 'Persa', value: 43, percent: 5.9 },
-    { name: 'Maine Coon', value: 36, percent: 4.9 },
-    { name: 'Ragdoll', value: 23, percent: 3.2 },
-    { name: 'Bengal', value: 15, percent: 2.1 },
-    { name: 'Outras raças', value: 12, percent: 1.6 }
-  ],
-  'Outros': [
-    { name: 'Coelhos', value: 28, percent: 54.9 },
-    { name: 'Hamsters', value: 12, percent: 23.5 },
-    { name: 'Aves', value: 8, percent: 15.7 },
-    { name: 'Outros', value: 3, percent: 5.9 }
-  ]
-};
-
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 const HOVER_COLORS = ['#4dabff', '#4ad9bf', '#ffca5b', '#ff9f71', '#a6a3e2', '#4a9fe5', '#ffab5e', '#6dbe6d', '#e45a5a', '#b595cf'];
 
 const OverviewTab: React.FC = () => {
+  const { t } = useTranslation();
   const [isAbsoluteValues, setIsAbsoluteValues] = useState(true);
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
   const [showBreedDistribution, setShowBreedDistribution] = useState(false);
+  
+  // Dados de espécies e raças
+  const speciesData = [
+    { name: t('visualization.overview.species.dogs'), value: 1560, percent: 66.7 },
+    { name: t('visualization.overview.species.cats'), value: 730, percent: 31.2 },
+    { name: t('visualization.overview.species.others'), value: 51, percent: 2.1 }
+  ];
+
+  const breedData: Record<string, any[]> = {
+    [t('visualization.overview.species.dogs')]: [
+      { name: t('visualization.overview.breeds.srd'), value: 645, percent: 41.3 },
+      { name: t('visualization.overview.breeds.goldenRetriever'), value: 187, percent: 12.0 },
+      { name: t('visualization.overview.breeds.frenchBulldog'), value: 156, percent: 10.0 },
+      { name: t('visualization.overview.breeds.shihTzu'), value: 124, percent: 7.9 },
+      { name: t('visualization.overview.breeds.poodle'), value: 98, percent: 6.3 },
+      { name: t('visualization.overview.breeds.labrador'), value: 93, percent: 6.0 },
+      { name: t('visualization.overview.breeds.germanShepherd'), value: 78, percent: 5.0 },
+      { name: t('visualization.overview.breeds.yorkshire'), value: 65, percent: 4.2 },
+      { name: t('visualization.overview.breeds.others'), value: 114, percent: 7.3 }
+    ],
+    [t('visualization.overview.species.cats')]: [
+      { name: t('visualization.overview.breeds.srd'), value: 543, percent: 74.4 },
+      { name: t('visualization.overview.breeds.siamese'), value: 58, percent: 7.9 },
+      { name: t('visualization.overview.breeds.persian'), value: 43, percent: 5.9 },
+      { name: t('visualization.overview.breeds.maineCoon'), value: 36, percent: 4.9 },
+      { name: t('visualization.overview.breeds.ragdoll'), value: 23, percent: 3.2 },
+      { name: t('visualization.overview.breeds.bengal'), value: 15, percent: 2.1 },
+      { name: t('visualization.overview.breeds.others'), value: 12, percent: 1.6 }
+    ],
+    [t('visualization.overview.species.others')]: [
+      { name: t('visualization.overview.breeds.rabbits'), value: 28, percent: 54.9 },
+      { name: t('visualization.overview.breeds.hamsters'), value: 12, percent: 23.5 },
+      { name: t('visualization.overview.breeds.birds'), value: 8, percent: 15.7 },
+      { name: t('visualization.overview.breeds.others'), value: 3, percent: 5.9 }
+    ]
+  };
   
   // Toggle para valores absolutos/percentuais
   const toggleValueType = () => {
@@ -96,9 +97,12 @@ const OverviewTab: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Distribuição por Idade</CardTitle>
+          <CardTitle>{t('visualization.overview.ageDistribution.title')}</CardTitle>
           <Button variant="outline" size="sm" onClick={toggleValueType}>
-            {isAbsoluteValues ? "Mostrar Percentuais" : "Mostrar Valores Absolutos"}
+            {isAbsoluteValues 
+              ? t('visualization.overview.ageDistribution.showPercentages')
+              : t('visualization.overview.ageDistribution.showAbsolute')
+            }
           </Button>
         </CardHeader>
         <CardContent>
@@ -112,8 +116,8 @@ const OverviewTab: React.FC = () => {
         <CardHeader>
           <CardTitle>
             {showBreedDistribution 
-              ? `Distribuição de Raças - ${selectedSpecies}` 
-              : "Distribuição por Espécie"}
+              ? t('visualization.overview.breedDistribution.titleBreed', { species: selectedSpecies })
+              : t('visualization.overview.breedDistribution.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -138,12 +142,13 @@ const OverviewTab: React.FC = () => {
           </div>
           <div className="mt-4 text-sm text-gray-500 text-center">
             {showBreedDistribution ? (
-              <p>Clique em uma raça para ver detalhes ou <button 
+              <p>{t('visualization.overview.breedDistribution.clickBreedOrBack')}{' '}
+              <button 
                 onClick={handleBackToSpecies}
                 className="text-blue-500 underline"
-              >voltar para visão de espécies</button></p>
+              >{t('visualization.overview.breedDistribution.backToSpecies')}</button></p>
             ) : (
-              <p>Clique em uma espécie para ver a distribuição por raças</p>
+              <p>{t('visualization.overview.breedDistribution.clickToView')}</p>
             )}
           </div>
         </CardContent>
@@ -151,14 +156,14 @@ const OverviewTab: React.FC = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Mapeamento de Condições de Saúde</CardTitle>
+          <CardTitle>{t('visualization.overview.healthMapping.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-96">
             <HealthConditionsSankey height={360} />
           </div>
           <div className="mt-2 text-xs text-center text-gray-500">
-            Diagrama de Sankey mostrando a distribuição de condições de saúde por espécie e raça
+            {t('visualization.overview.healthMapping.description')}
           </div>
         </CardContent>
       </Card>
