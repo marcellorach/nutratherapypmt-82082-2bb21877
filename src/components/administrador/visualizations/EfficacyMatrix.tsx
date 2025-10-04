@@ -482,19 +482,19 @@ const EfficacyMatrix: React.FC<EfficacyMatrixProps> = ({ nutraceuticos, condicoe
       <div className="flex flex-wrap gap-4 text-xs">
         <div className="flex items-center">
           <div className="w-3 h-3 bg-green-500 mr-1 rounded-sm opacity-20"></div>
-          <span>Alta Eficácia (80-100)</span>
+          <span>{t('efficacyMatrix.legend.highEfficacy')}</span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 bg-blue-500 mr-1 rounded-sm opacity-20"></div>
-          <span>Eficácia Média-Alta (60-79)</span>
+          <span>{t('efficacyMatrix.legend.mediumHighEfficacy')}</span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 bg-amber-500 mr-1 rounded-sm opacity-20"></div>
-          <span>Eficácia Média (40-59)</span>
+          <span>{t('efficacyMatrix.legend.mediumEfficacy')}</span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 bg-gray-500 mr-1 rounded-sm opacity-20"></div>
-          <span>Eficácia Limitada (&lt;40)</span>
+          <span>{t('efficacyMatrix.legend.limitedEfficacy')}</span>
         </div>
       </div>
       
