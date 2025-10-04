@@ -1,6 +1,6 @@
-
 import React from 'react';
 import StatsCard from './StatsCard';
+import { useTranslation } from 'react-i18next';
 
 interface StatsGridProps {
   nutraceuticalsCount: number;
@@ -13,22 +13,24 @@ const StatsGrid: React.FC<StatsGridProps> = ({
   conditionsCount, 
   relationsCount 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <StatsCard
-        title="Nutracêuticos"
+        title={t('import.results.stats.nutraceuticals.title')}
         value={nutraceuticalsCount}
-        description="nutracêuticos identificados"
+        description={t('import.results.stats.nutraceuticals.description')}
       />
       <StatsCard
-        title="Condições"
+        title={t('import.results.stats.conditions.title')}
         value={conditionsCount}
-        description="condições de saúde identificadas"
+        description={t('import.results.stats.conditions.description')}
       />
       <StatsCard
-        title="Relações"
+        title={t('import.results.stats.relations.title')}
         value={relationsCount}
-        description="relações nutracêutico-condição encontradas"
+        description={t('import.results.stats.relations.description')}
       />
     </div>
   );

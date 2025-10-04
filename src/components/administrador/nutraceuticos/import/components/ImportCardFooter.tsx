@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 interface ImportCardFooterProps {
   file: File | null;
@@ -17,6 +17,8 @@ const ImportCardFooter: React.FC<ImportCardFooterProps> = ({
   onCancel,
   onProcess
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <CardFooter className="flex justify-end">
       <Button
@@ -24,7 +26,7 @@ const ImportCardFooter: React.FC<ImportCardFooterProps> = ({
         className="mr-2"
         onClick={onCancel}
       >
-        Cancelar
+        {t('import.buttons.cancel')}
       </Button>
       <Button
         onClick={onProcess}
@@ -34,12 +36,12 @@ const ImportCardFooter: React.FC<ImportCardFooterProps> = ({
         {processing ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Processando...
+            {t('import.buttons.processing')}
           </>
         ) : (
           <>
             <Check className="h-4 w-4" />
-            {file ? 'Processar' : 'Selecione um arquivo'}
+            {file ? t('import.buttons.process') : t('import.buttons.selectFile')}
           </>
         )}
       </Button>

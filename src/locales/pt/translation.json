@@ -1346,5 +1346,82 @@
     "hyperparameters": "Hiperparâmetros",
     "cancel": "Cancelar",
     "createAndTrain": "Criar e Treinar Modelo"
+  },
+  "import": {
+    "title": "Importação de Dados",
+    "subtitle": "Importe dados de nutracêuticos e estudos científicos",
+    "buttons": {
+      "cancel": "Cancelar",
+      "process": "Processar",
+      "processing": "Processando...",
+      "selectFile": "Selecione um arquivo",
+      "confirm": "Confirmar Importação",
+      "confirming": "Importando...",
+      "confirmed": "Importado com Sucesso",
+      "exportReport": "Exportar Relatório",
+      "update": "Atualizar"
+    },
+    "nutraceuticals": {
+      "header": "Importar Dados de Nutracêuticos",
+      "dropzone": {
+        "drag": "Solte o arquivo aqui...",
+        "select": "Arraste e solte uma planilha Excel ou CSV, ou clique para selecionar",
+        "formats": "Formatos suportados: .xlsx, .xls, .csv"
+      },
+      "preview": {
+        "title": "Pré-visualização:",
+        "showing": "Mostrando {{count}} linhas"
+      },
+      "processing": {
+        "message": "Processando via IA...",
+        "withStudies": "Existem arquivos PDF de estudos científicos que serão associados durante o processamento."
+      },
+      "fileInfo": {
+        "spreadsheet": "Planilha"
+      }
+    },
+    "results": {
+      "summary": {
+        "title": "Dados Processados com Sucesso",
+        "description": "O arquivo <strong>{{fileName}}</strong> foi processado em {{date}}."
+      },
+      "stats": {
+        "nutraceuticals": {
+          "title": "Nutracêuticos",
+          "description": "Identificados"
+        },
+        "conditions": {
+          "title": "Condições",
+          "description": "Catalogadas"
+        },
+        "relations": {
+          "title": "Relações",
+          "description": "Mapeadas"
+        }
+      },
+      "warnings": {
+        "title": "Atenção:",
+        "noWarnings": "Nenhum aviso foi encontrado durante o processamento."
+      },
+      "nutraceuticalsList": {
+        "title": "Nutracêuticos Processados",
+        "name": "Nome",
+        "category": "Categoria",
+        "dosage": "Dosagem",
+        "chemicalCompound": "Composto Químico",
+        "source": "Origem",
+        "conditions": "Condições Relacionadas",
+        "noConditions": "Nenhuma condição relacionada"
+      },
+      "studyFiles": {
+        "title": "Estudos Científicos Associados",
+        "count": "{{count}} arquivo(s) PDF serão enviados",
+        "noFiles": "Nenhum arquivo de estudo foi associado a esta importação."
+      }
+    },
+    "error": {
+      "title": "Erro",
+      "generic": "Ocorreu um erro durante o processamento"
+    }
   }
 }

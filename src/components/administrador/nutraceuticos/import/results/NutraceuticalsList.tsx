@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticalDetailsProps {
   nutraceutical: any;
@@ -15,6 +15,8 @@ const NutraceuticalDetails: React.FC<NutraceuticalDetailsProps> = ({
   isExpanded, 
   onToggleExpand 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="py-3">
       <div 
@@ -42,21 +44,21 @@ const NutraceuticalDetails: React.FC<NutraceuticalDetailsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {nutraceutical.chemical_compound && (
               <div>
-                <p className="text-sm font-medium">Composto Químico</p>
+                <p className="text-sm font-medium">{t('import.results.nutraceuticalsList.chemicalCompound')}</p>
                 <p className="text-sm">{nutraceutical.chemical_compound}</p>
               </div>
             )}
             
             {nutraceutical.source && (
               <div>
-                <p className="text-sm font-medium">Origem</p>
+                <p className="text-sm font-medium">{t('import.results.nutraceuticalsList.source')}</p>
                 <p className="text-sm">{nutraceutical.source}</p>
               </div>
             )}
             
             {nutraceutical.dosage && (
               <div>
-                <p className="text-sm font-medium">Dosagem</p>
+                <p className="text-sm font-medium">{t('import.results.nutraceuticalsList.dosage')}</p>
                 <p className="text-sm">{nutraceutical.dosage}</p>
               </div>
             )}
@@ -64,7 +66,7 @@ const NutraceuticalDetails: React.FC<NutraceuticalDetailsProps> = ({
           
           {nutraceutical.conditions && nutraceutical.conditions.length > 0 && (
             <div className="mt-3">
-              <p className="text-sm font-medium mb-2">Condições Relacionadas</p>
+              <p className="text-sm font-medium mb-2">{t('import.results.nutraceuticalsList.conditions')}</p>
               <div className="flex flex-wrap gap-2">
                 {nutraceutical.conditions.map((condition: any, idx: number) => (
                   <Badge 
@@ -95,6 +97,7 @@ interface NutraceuticalsListProps {
 }
 
 const NutraceuticalsList: React.FC<NutraceuticalsListProps> = ({ nutraceuticals }) => {
+  const { t } = useTranslation();
   const [expandedNutraceutical, setExpandedNutraceutical] = useState<string | null>(null);
   
   const toggleExpand = (name: string) => {
@@ -104,7 +107,7 @@ const NutraceuticalsList: React.FC<NutraceuticalsListProps> = ({ nutraceuticals 
   return (
     <Card>
       <CardContent className="pt-6 px-6">
-        <h3 className="text-lg font-medium mb-4">Nutracêuticos Identificados</h3>
+        <h3 className="text-lg font-medium mb-4">{t('import.results.nutraceuticalsList.title')}</h3>
         <div className="divide-y">
           {nutraceuticals.map((nutra: any, idx: number) => (
             <NutraceuticalDetails 

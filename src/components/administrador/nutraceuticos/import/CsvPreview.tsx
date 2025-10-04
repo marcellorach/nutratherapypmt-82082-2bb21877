@@ -1,16 +1,18 @@
-
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CsvPreviewProps {
   previewData: any[] | null;
 }
 
 const CsvPreview: React.FC<CsvPreviewProps> = ({ previewData }) => {
+  const { t } = useTranslation();
+  
   if (!previewData || previewData.length === 0) return null;
 
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">Pré-visualização:</h3>
+      <h3 className="text-sm font-medium mb-2">{t('import.nutraceuticals.preview.title')}</h3>
       <div className="bg-gray-50 p-2 rounded-md overflow-x-auto">
         <table className="w-full text-xs border-collapse">
           <thead>
@@ -36,7 +38,7 @@ const CsvPreview: React.FC<CsvPreviewProps> = ({ previewData }) => {
         </table>
       </div>
       <p className="text-xs text-gray-500 mt-1">
-        Mostrando {previewData.length} linhas
+        {t('import.nutraceuticals.preview.showing', { count: previewData.length })}
       </p>
     </div>
   );

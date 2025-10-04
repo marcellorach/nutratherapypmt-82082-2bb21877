@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
 
 interface WarningsAlertProps {
   warnings: string[];
@@ -14,10 +14,12 @@ interface WarningsAlertProps {
 const WarningsAlert: React.FC<WarningsAlertProps> = ({ 
   warnings, 
   showIfEmpty = false,
-  title = "Atenção:",
+  title,
   variant = "warning",
   icon = <AlertTriangle className="h-4 w-4" />
 }) => {
+  const { t } = useTranslation();
+  
   if (!warnings || (warnings.length === 0 && !showIfEmpty)) return null;
 
   const getVariantClasses = () => {
@@ -40,11 +42,13 @@ const WarningsAlert: React.FC<WarningsAlertProps> = ({
     return <AlertTriangle className="h-4 w-4" />;
   };
 
+  const displayTitle = title || t('import.results.warnings.title');
+
   return (
     <Alert className={`${getVariantClasses()} border`}>
       <div className="flex items-center gap-2">
         {getIconComponent()}
-        <AlertTitle className="font-medium">{title}</AlertTitle>
+        <AlertTitle className="font-medium">{displayTitle}</AlertTitle>
       </div>
       <AlertDescription className="mt-3">
         {warnings.length > 0 ? (
@@ -54,7 +58,7 @@ const WarningsAlert: React.FC<WarningsAlertProps> = ({
             ))}
           </ul>
         ) : (
-          <p className="text-sm">Nenhum aviso foi encontrado durante o processamento.</p>
+          <p className="text-sm">{t('import.results.warnings.noWarnings')}</p>
         )}
       </AlertDescription>
     </Alert>

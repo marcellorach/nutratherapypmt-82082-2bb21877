@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DropZoneAreaProps {
   onDrop: (files: File[]) => void;
@@ -16,6 +16,8 @@ const DropZoneArea: React.FC<DropZoneAreaProps> = ({
   getInputProps,
   getRootProps
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div 
       {...getRootProps()} 
@@ -27,12 +29,12 @@ const DropZoneArea: React.FC<DropZoneAreaProps> = ({
       <Upload className="h-12 w-12 mx-auto text-gray-400" />
       <p className="mt-2 text-sm text-gray-600">
         {isDragActive
-          ? "Solte o arquivo aqui..."
-          : "Arraste e solte uma planilha Excel ou CSV, ou clique para selecionar"
+          ? t('import.nutraceuticals.dropzone.drag')
+          : t('import.nutraceuticals.dropzone.select')
         }
       </p>
       <p className="text-xs text-gray-500 mt-1">
-        Formatos suportados: .xlsx, .xls, .csv
+        {t('import.nutraceuticals.dropzone.formats')}
       </p>
     </div>
   );

@@ -1346,5 +1346,82 @@
     "hyperparameters": "Hyperparameters",
     "cancel": "Cancel",
     "createAndTrain": "Create and Train Model"
+  },
+  "import": {
+    "title": "Data Import",
+    "subtitle": "Import nutraceutical and scientific study data",
+    "buttons": {
+      "cancel": "Cancel",
+      "process": "Process",
+      "processing": "Processing...",
+      "selectFile": "Select a file",
+      "confirm": "Confirm Import",
+      "confirming": "Importing...",
+      "confirmed": "Successfully Imported",
+      "exportReport": "Export Report",
+      "update": "Update"
+    },
+    "nutraceuticals": {
+      "header": "Import Nutraceutical Data",
+      "dropzone": {
+        "drag": "Drop the file here...",
+        "select": "Drag and drop an Excel or CSV spreadsheet, or click to select",
+        "formats": "Supported formats: .xlsx, .xls, .csv"
+      },
+      "preview": {
+        "title": "Preview:",
+        "showing": "Showing {{count}} rows"
+      },
+      "processing": {
+        "message": "Processing via AI...",
+        "withStudies": "There are PDF files of scientific studies that will be associated during processing."
+      },
+      "fileInfo": {
+        "spreadsheet": "Spreadsheet"
+      }
+    },
+    "results": {
+      "summary": {
+        "title": "Data Successfully Processed",
+        "description": "The file <strong>{{fileName}}</strong> was processed on {{date}}."
+      },
+      "stats": {
+        "nutraceuticals": {
+          "title": "Nutraceuticals",
+          "description": "Identified"
+        },
+        "conditions": {
+          "title": "Conditions",
+          "description": "Catalogued"
+        },
+        "relations": {
+          "title": "Relations",
+          "description": "Mapped"
+        }
+      },
+      "warnings": {
+        "title": "Warning:",
+        "noWarnings": "No warnings were found during processing."
+      },
+      "nutraceuticalsList": {
+        "title": "Processed Nutraceuticals",
+        "name": "Name",
+        "category": "Category",
+        "dosage": "Dosage",
+        "chemicalCompound": "Chemical Compound",
+        "source": "Source",
+        "conditions": "Related Conditions",
+        "noConditions": "No related conditions"
+      },
+      "studyFiles": {
+        "title": "Associated Scientific Studies",
+        "count": "{{count}} PDF file(s) will be uploaded",
+        "noFiles": "No study files were associated with this import."
+      }
+    },
+    "error": {
+      "title": "Error",
+      "generic": "An error occurred during processing"
+    }
   }
 }

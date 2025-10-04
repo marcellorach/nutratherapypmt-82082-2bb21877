@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Check, X, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ActionFooterProps {
   onImport: () => void;
@@ -17,6 +17,8 @@ const ActionFooter: React.FC<ActionFooterProps> = ({
   isImporting = false,
   importSuccess = false
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <CardFooter className="border-t flex justify-end gap-2 p-4 bg-gray-50">
       <Button 
@@ -26,7 +28,7 @@ const ActionFooter: React.FC<ActionFooterProps> = ({
         disabled={isImporting}
       >
         <X className="h-4 w-4" />
-        <span>Cancelar</span>
+        <span>{t('import.buttons.cancel')}</span>
       </Button>
       <Button 
         onClick={onImport} 
@@ -36,17 +38,17 @@ const ActionFooter: React.FC<ActionFooterProps> = ({
         {isImporting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Importando...</span>
+            <span>{t('import.buttons.confirming')}</span>
           </>
         ) : importSuccess ? (
           <>
             <Check className="h-4 w-4" />
-            <span>Importado com Sucesso</span>
+            <span>{t('import.buttons.confirmed')}</span>
           </>
         ) : (
           <>
             <Check className="h-4 w-4" />
-            <span>Confirmar Importação</span>
+            <span>{t('import.buttons.confirm')}</span>
           </>
         )}
       </Button>
