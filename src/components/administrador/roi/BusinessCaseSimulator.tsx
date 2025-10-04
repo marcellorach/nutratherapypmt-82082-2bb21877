@@ -132,7 +132,7 @@ export const BusinessCaseSimulator: React.FC = () => {
           <div className="lg:col-span-1 space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="profile">Perfil da Clínica</Label>
+                <Label htmlFor="profile">{t('roi.simulator.inputs.clinicProfile')}</Label>
                 <Select 
                   value={inputs.clientProfile} 
                   onValueChange={(value) => setInputs(prev => ({ ...prev, clientProfile: value }))}
@@ -150,13 +150,13 @@ export const BusinessCaseSimulator: React.FC = () => {
                 </Select>
                 {selectedProfile && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {selectedProfile.description} • {selectedProfile.petVolume} pets/mês
+                    {selectedProfile.description} • {selectedProfile.petVolume} {t('roi.simulator.inputs.petsPerMonth')}
                   </p>
                 )}
               </div>
 
               <div>
-                <Label>Investimento Inicial (R$)</Label>
+                <Label>{t('roi.simulator.inputs.initialInvestment')}</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.investmentAmount]}
@@ -174,7 +174,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>Horizonte Temporal (meses)</Label>
+                <Label>{t('roi.simulator.inputs.timeHorizon')}</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.timeHorizon]}
@@ -192,7 +192,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>Foco Preventivo (%)</Label>
+                <Label>{t('roi.simulator.inputs.preventiveFocus')}</Label>
                 <div className="mt-2">
                   <Slider
                     value={[inputs.preventiveFocus]}
@@ -210,7 +210,7 @@ export const BusinessCaseSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label htmlFor="risk">Tolerância ao Risco</Label>
+                <Label htmlFor="risk">{t('roi.simulator.inputs.riskTolerance')}</Label>
                 <Select 
                   value={inputs.riskTolerance} 
                   onValueChange={(value: any) => setInputs(prev => ({ ...prev, riskTolerance: value }))}
@@ -219,9 +219,9 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Baixa - Conservador</SelectItem>
-                    <SelectItem value="medium">Média - Equilibrado</SelectItem>
-                    <SelectItem value="high">Alta - Agressivo</SelectItem>
+                    <SelectItem value="low">{t('roi.simulator.riskLevels.low')}</SelectItem>
+                    <SelectItem value="medium">{t('roi.simulator.riskLevels.medium')}</SelectItem>
+                    <SelectItem value="high">{t('roi.simulator.riskLevels.high')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -238,10 +238,10 @@ export const BusinessCaseSimulator: React.FC = () => {
             {simulationResults ? (
               <Tabs defaultValue="summary" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="summary">Resumo</TabsTrigger>
-                  <TabsTrigger value="breakdown">Detalhamento</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                  <TabsTrigger value="risks">Riscos</TabsTrigger>
+                  <TabsTrigger value="summary">{t('roi.simulator.tabs.summary')}</TabsTrigger>
+                  <TabsTrigger value="breakdown">{t('roi.simulator.tabs.breakdown')}</TabsTrigger>
+                  <TabsTrigger value="timeline">{t('roi.simulator.tabs.timeline')}</TabsTrigger>
+                  <TabsTrigger value="risks">{t('roi.simulator.tabs.risks')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="summary" className="space-y-4">
@@ -249,7 +249,7 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <Card>
                       <CardContent className="p-4">
                         <div className="text-center">
-                          <p className="text-sm text-muted-foreground">ROI Projetado</p>
+                          <p className="text-sm text-muted-foreground">{t('roi.simulator.metrics.projectedROI')}</p>
                           <p className={`text-3xl font-bold ${simulationResults.summary.roiPercentage > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {simulationResults.summary.roiPercentage}%
                           </p>
@@ -260,9 +260,9 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <Card>
                       <CardContent className="p-4">
                         <div className="text-center">
-                          <p className="text-sm text-muted-foreground">Payback</p>
+                          <p className="text-sm text-muted-foreground">{t('roi.simulator.metrics.payback')}</p>
                           <p className="text-3xl font-bold">
-                            {simulationResults.summary.paybackMonths} meses
+                            {simulationResults.summary.paybackMonths} {t('roi.simulator.metrics.months')}
                           </p>
                         </div>
                       </CardContent>
@@ -271,7 +271,7 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <Card>
                       <CardContent className="p-4">
                         <div className="text-center">
-                          <p className="text-sm text-muted-foreground">Lucro Líquido</p>
+                          <p className="text-sm text-muted-foreground">{t('roi.simulator.metrics.netProfit')}</p>
                           <p className={`text-3xl font-bold ${simulationResults.summary.netProfit > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             R$ {simulationResults.summary.netProfit.toLocaleString()}
                           </p>
@@ -282,7 +282,7 @@ export const BusinessCaseSimulator: React.FC = () => {
                     <Card>
                       <CardContent className="p-4">
                         <div className="text-center">
-                          <p className="text-sm text-muted-foreground">Confiança</p>
+                          <p className="text-sm text-muted-foreground">{t('roi.simulator.metrics.confidence')}</p>
                           <p className="text-3xl font-bold">
                             {Math.round(simulationResults.summary.confidenceScore)}%
                           </p>
@@ -296,14 +296,14 @@ export const BusinessCaseSimulator: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base">Distribuição de Custos</CardTitle>
+                        <CardTitle className="text-base">{t('roi.simulator.breakdown.costDistribution')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="h-48">
                           <ResponsiveContainer width="100%" height="100%">
                             <RechartsPieChart>
                               <Tooltip 
-                                formatter={(value: any) => [`R$ ${value.toLocaleString()}`, 'Valor']}
+                                formatter={(value: any) => [`R$ ${value.toLocaleString()}`, t('roi.simulator.breakdown.value')]}
                               />
                               <RechartsPieChart data={simulationResults.breakdown.costs}>
                                 {simulationResults.breakdown.costs.map((entry: any, index: number) => (
@@ -318,14 +318,14 @@ export const BusinessCaseSimulator: React.FC = () => {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base">Distribuição de Receitas</CardTitle>
+                        <CardTitle className="text-base">{t('roi.simulator.breakdown.revenueDistribution')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="h-48">
                           <ResponsiveContainer width="100%" height="100%">
                             <RechartsPieChart>
                               <Tooltip 
-                                formatter={(value: any) => [`R$ ${value.toLocaleString()}`, 'Valor']}
+                                formatter={(value: any) => [`R$ ${value.toLocaleString()}`, t('roi.simulator.breakdown.value')]}
                               />
                               <RechartsPieChart data={simulationResults.breakdown.revenue}>
                                 {simulationResults.breakdown.revenue.map((entry: any, index: number) => (
@@ -343,7 +343,7 @@ export const BusinessCaseSimulator: React.FC = () => {
                 <TabsContent value="timeline" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Projeção Mensal</CardTitle>
+                      <CardTitle className="text-base">{t('roi.simulator.timeline.monthlyProjection')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -355,11 +355,11 @@ export const BusinessCaseSimulator: React.FC = () => {
                             <Tooltip 
                               formatter={(value: any, name: string) => [
                                 `R$ ${value.toLocaleString()}`, 
-                                name === 'revenue' ? 'Receita' : name === 'costs' ? 'Custos' : 'Lucro'
+                                name === 'revenue' ? t('roi.simulator.timeline.revenue') : name === 'costs' ? t('roi.simulator.timeline.costs') : t('roi.simulator.timeline.profit')
                               ]}
                             />
-                            <Bar dataKey="revenue" fill="#10b981" name="Receita" />
-                            <Bar dataKey="costs" fill="#ef4444" name="Custos" />
+                            <Bar dataKey="revenue" fill="#10b981" name={t('roi.simulator.timeline.revenue')} />
+                            <Bar dataKey="costs" fill="#ef4444" name={t('roi.simulator.timeline.costs')} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -370,23 +370,23 @@ export const BusinessCaseSimulator: React.FC = () => {
                 <TabsContent value="risks" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Análise de Riscos</CardTitle>
+                      <CardTitle className="text-base">{t('roi.simulator.risks.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <span>Nível de Risco:</span>
+                          <span>{t('roi.simulator.risks.level')}:</span>
                           <Badge variant={
                             simulationResults.riskAnalysis.level === 'low' ? 'default' :
                             simulationResults.riskAnalysis.level === 'medium' ? 'secondary' : 'destructive'
                           }>
-                            {simulationResults.riskAnalysis.level === 'low' ? 'Baixo' :
-                             simulationResults.riskAnalysis.level === 'medium' ? 'Médio' : 'Alto'}
+                            {simulationResults.riskAnalysis.level === 'low' ? t('roi.simulator.risks.levels.low') :
+                             simulationResults.riskAnalysis.level === 'medium' ? t('roi.simulator.risks.levels.medium') : t('roi.simulator.risks.levels.high')}
                           </Badge>
                         </div>
                         
                         <div>
-                          <p className="font-medium mb-2">Principais Fatores de Risco:</p>
+                          <p className="font-medium mb-2">{t('roi.simulator.risks.mainFactors')}:</p>
                           <ul className="space-y-2">
                             {simulationResults.riskAnalysis.factors.map((factor: string, index: number) => (
                               <li key={index} className="flex items-start gap-2 text-sm">
@@ -406,7 +406,7 @@ export const BusinessCaseSimulator: React.FC = () => {
                 <div className="text-center">
                   <Calculator className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">
-                    Configure os parâmetros e execute a simulação para ver os resultados
+                    {t('roi.simulator.noSimulation.description')}
                   </p>
                 </div>
               </div>
