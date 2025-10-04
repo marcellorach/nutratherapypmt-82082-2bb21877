@@ -2055,14 +2055,60 @@
     }
   },
   "bulkActions": {
-    "title": "Ações em Massa Inteligentes",
+    "title": "Smart Bulk Actions",
     "description": "Crie e execute campanhas em massa com segmentação inteligente baseada em ROI e comportamento do cliente",
-    "badge": "campanhas ativas",
+    "badges": {
+      "aiActive": "IA Ativa",
+      "active": "Ativo"
+    },
     "tabs": {
       "command": "Comando",
       "creation": "Criação",
       "execution": "Execução",
       "analytics": "Analytics"
+    },
+    "segments": {
+      "highRoiUrgent": {
+        "name": "Alto ROI Urgente",
+        "description": "Pets com necessidades de alto impacto e ROI potencial crítico"
+      },
+      "preventivePremium": {
+        "name": "Prevenção Premium",
+        "description": "Perfil preventivo com alta propensão a planos completos"
+      },
+      "expansionOpportunity": {
+        "name": "Oportunidade de Expansão",
+        "description": "Base para cross-sell de nutracêuticos complementares"
+      },
+      "nurturingProspects": {
+        "name": "Prospectos em Nutrição",
+        "description": "Leads qualificados para educação e conversão"
+      }
+    },
+    "campaignTypes": {
+      "opportunityGaps": {
+        "name": "Lacunas de Oportunidade",
+        "description": "Identifique e preencha gaps terapêuticos com alta conversão"
+      },
+      "educationalVets": {
+        "name": "Educação Veterinária",
+        "description": "Conteúdo científico para capacitação de veterinários"
+      },
+      "retentionLoyalty": {
+        "name": "Retenção e Fidelidade",
+        "description": "Mantenha engajamento com benefícios exclusivos"
+      },
+      "upsellPremium": {
+        "name": "Upsell Premium",
+        "description": "Upgrade para composições avançadas de alta margem"
+      }
+    },
+    "toast": {
+      "inDevelopment": "Funcionalidade em desenvolvimento",
+      "campaignCreated": "Campanha criada! {{count}} pets serão notificados",
+      "campaignStarted": "Campanha iniciada com sucesso!",
+      "campaignSuccess": "Campanha concluída com sucesso!",
+      "campaignSent": "{{count}} mensagens enviadas com sucesso"
     },
     "audienceSegments": {
       "highValue": {
@@ -2110,6 +2156,8 @@
       "avgROI": "ROI Médio",
       "conversionRate": "Taxa de Conversão",
       "activeCampaigns": "Campanhas Ativas",
+      "activeOpportunities": "Oportunidades Ativas",
+      "highPotential": "Alto Potencial",
       "opportunities": "Oportunidades Detectadas",
       "estimatedValue": "Valor Estimado",
       "segments": "Segmentos",
@@ -2126,13 +2174,17 @@
       "createCampaign": "Criar Campanha"
     },
     "execution": {
+      "inProgress": "Campanha em Execução",
+      "personalizingMessages": "Personalizando mensagens",
       "executionStatus": "Status de Execução",
       "personalizationByAI": "Personalização por IA",
       "messagesPersonalizedWithAI": "mensagens personalizadas com IA",
       "intelligentSegmentation": "Segmentação Inteligente",
       "potentialROI": "ROI Potencial",
+      "conversion": "Conversão",
       "estimatedConversion": "Conversão Estimada",
       "campaignSimulator": "Simulador de Campanha",
+      "projectedResults": "Resultados Projetados",
       "totalSends": "Total de Envios",
       "estimatedConversions": "Conversões Estimadas",
       "expectedROI": "ROI Esperado",
@@ -2143,16 +2195,15 @@
       "aggressive": "Agressivo: {{roi}}% ROI"
     },
     "analytics": {
-      "kpis": {
-        "sentCampaigns": "Campanhas Enviadas",
-        "openRate": "Taxa de Abertura",
-        "conversionRate": "Taxa de Conversão",
-        "avgROI": "ROI Médio"
-      },
+      "sentCampaigns": "Campanhas Enviadas",
+      "openRate": "Taxa de Abertura",
+      "conversionRate": "Taxa de Conversão",
+      "avgROI": "ROI Médio",
       "performanceBySegment": "Performance por Segmento",
       "conversion": "Conversão",
       "sent": "Enviados",
       "potentialROI": "ROI Potencial",
+      "priority": "Prioridade",
       "priorities": {
         "critical": "Crítica",
         "high": "Alta",
