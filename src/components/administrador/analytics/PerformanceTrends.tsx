@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface PerformanceTrendsProps {
   efficacyData: Array<{
@@ -12,9 +13,12 @@ interface PerformanceTrendsProps {
 }
 
 const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) => {
+  const { t } = useTranslation();
+  
   // Gerar dados temporais simulados baseados na eficácia atual
   const generateTrendData = () => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+    const months = monthKeys.map(key => t(`analytics.trends.months.${key}`));
     const avgEfficacy = efficacyData.reduce((sum, item) => sum + item.score, 0) / efficacyData.length;
     
     return months.map((month, index) => {
@@ -43,13 +47,13 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Tendências de Performance</CardTitle>
-          <CardDescription>
-            Evolução temporal dos indicadores principais
-          </CardDescription>
-        </CardHeader>
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('analytics.trends.performance.title')}</CardTitle>
+        <CardDescription>
+          {t('analytics.trends.performance.description')}
+        </CardDescription>
+      </CardHeader>
         <CardContent>
           <div className="h-64 w-full">
             <ChartContainer config={{
@@ -63,27 +67,33 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
                   <XAxis dataKey="month" />
                   <YAxis domain={[0, 5]} />
                   <Tooltip />
-                  <Legend />
+                  <Legend 
+                    formatter={(value) => {
+                      const labels: { [key: string]: string } = {
+                        eficacia: t('analytics.trends.metrics.efficacy'),
+                        sustentabilidade: t('analytics.trends.metrics.sustainability'),
+                        satisfacao: t('analytics.trends.metrics.satisfaction')
+                      };
+                      return labels[value] || value;
+                    }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="eficacia" 
                     stroke="#3b82f6" 
                     strokeWidth={2}
-                    name="Eficácia"
                   />
                   <Line 
                     type="monotone" 
                     dataKey="sustentabilidade" 
                     stroke="#10b981" 
                     strokeWidth={2}
-                    name="Sustentabilidade"
                   />
                   <Line 
                     type="monotone" 
                     dataKey="satisfacao" 
                     stroke="#f59e0b" 
                     strokeWidth={2}
-                    name="Satisfação"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -94,9 +104,9 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
 
       <Card>
         <CardHeader>
-          <CardTitle>Benchmark Competitivo</CardTitle>
+          <CardTitle>{t('analytics.trends.benchmark.title')}</CardTitle>
           <CardDescription>
-            Performance vs. média do mercado e melhor da classe
+            {t('analytics.trends.benchmark.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,7 +128,16 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
                   />
                   <YAxis domain={[0, 5]} />
                   <Tooltip />
-                  <Legend />
+                  <Legend 
+                    formatter={(value) => {
+                      const labels: { [key: string]: string } = {
+                        melhorClasse: t('analytics.trends.metrics.bestInClass'),
+                        media: t('analytics.trends.metrics.average'),
+                        atual: t('analytics.trends.metrics.current')
+                      };
+                      return labels[value] || value;
+                    }}
+                  />
                   <Area
                     type="monotone"
                     dataKey="melhorClasse"
@@ -126,7 +145,6 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
                     stroke="#22c55e"
                     fill="#22c55e"
                     fillOpacity={0.1}
-                    name="Melhor da Classe"
                   />
                   <Area
                     type="monotone"
@@ -135,14 +153,12 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
                     stroke="#64748b"
                     fill="#64748b"
                     fillOpacity={0.2}
-                    name="Média do Mercado"
                   />
                   <Line 
                     type="monotone" 
                     dataKey="atual" 
                     stroke="#9b87f5" 
                     strokeWidth={3}
-                    name="Performance Atual"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -151,19 +167,19 @@ const PerformanceTrends: React.FC<PerformanceTrendsProps> = ({ efficacyData }) =
           
           <div className="mt-4 grid grid-cols-3 gap-3">
             <div className="text-center">
-              <div className="text-sm font-medium text-green-600">Acima da Média</div>
+              <div className="text-sm font-medium text-green-600">{t('analytics.trends.comparison.aboveAverage')}</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => d.atual > d.media).length}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-blue-600">Na Média</div>
+              <div className="text-sm font-medium text-blue-600">{t('analytics.trends.comparison.average')}</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => Math.abs(d.atual - d.media) <= 0.3).length}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-red-600">Abaixo da Média</div>
+              <div className="text-sm font-medium text-red-600">{t('analytics.trends.comparison.belowAverage')}</div>
               <div className="text-lg font-bold">
                 {benchmarkData.filter(d => d.atual < d.media - 0.3).length}
               </div>

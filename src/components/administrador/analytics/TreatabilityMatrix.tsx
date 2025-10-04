@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface TreatabilityData {
   condition: string;
@@ -18,6 +19,7 @@ interface TreatabilityMatrixProps {
 }
 
 const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   
   // Filtrar dados baseado nas condições selecionadas
@@ -43,18 +45,18 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
     <Card className="h-fit">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
-          Matriz de Tratabilidade por Condição
+          {t('analytics.treatability.title')}
           <div className="h-2 w-2 bg-blue-500 rounded-full" />
         </CardTitle>
         <CardDescription>
-          Distribuição de nutracêuticos por tipo de intervenção e condição de saúde
+          {t('analytics.treatability.description')}
         </CardDescription>
         
         {/* Seletor de Condições */}
         <div className="space-y-3 mt-4">
           <Select onValueChange={handleConditionSelect}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione condições para análise comparativa" />
+              <SelectValue placeholder={t('analytics.treatability.selectPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               {data.map(item => (
@@ -104,17 +106,24 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
                 />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [
-                    value, 
-                    name === 'prevention' ? 'Prevenção' :
-                    name === 'treatment' ? 'Tratamento' : 'Suporte'
-                  ]}
+                  formatter={(value, name) => {
+                    const labels: { [key: string]: string } = {
+                      prevention: t('analytics.treatability.types.prevention'),
+                      treatment: t('analytics.treatability.types.treatment'),
+                      support: t('analytics.treatability.types.support')
+                    };
+                    return [value, labels[name as string] || name];
+                  }}
                 />
                 <Legend 
-                  formatter={(value) => 
-                    value === 'prevention' ? 'Prevenção' :
-                    value === 'treatment' ? 'Tratamento' : 'Suporte'
-                  }
+                  formatter={(value) => {
+                    const labels: { [key: string]: string } = {
+                      prevention: t('analytics.treatability.types.prevention'),
+                      treatment: t('analytics.treatability.types.treatment'),
+                      support: t('analytics.treatability.types.support')
+                    };
+                    return labels[value] || value;
+                  }}
                 />
                 <Bar dataKey="prevention" stackId="a" fill="#10b981" />
                 <Bar dataKey="treatment" stackId="a" fill="#3b82f6" />
@@ -126,20 +135,20 @@ const TreatabilityMatrix: React.FC<TreatabilityMatrixProps> = ({ data }) => {
         
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div className="p-3 bg-muted rounded-lg">
-            <div className="text-sm font-medium text-muted-foreground">Maior Cobertura</div>
+            <div className="text-sm font-medium text-muted-foreground">{t('analytics.treatability.metrics.maxCoverage')}</div>
             <div className="text-lg font-bold">
               {maxCoverage.condition} ({maxCoverage.coverage.toFixed(1)}%)
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm font-medium text-muted-foreground">
-              Condições Cobertas: {filteredData.length}/{data.length}
+              {t('analytics.treatability.metrics.conditionsCovered')}: {filteredData.length}/{data.length}
               {selectedConditions.length > 0 && (
-                <span className="ml-2 text-blue-600">(filtrado)</span>
+                <span className="ml-2 text-blue-600">({t('analytics.treatability.metrics.filtered')})</span>
               )}
             </div>
             <div className="text-lg font-bold">
-              {filteredData.filter(d => d.coverage > 0).length} ativas
+              {filteredData.filter(d => d.coverage > 0).length} {t('analytics.treatability.metrics.active')}
             </div>
           </div>
         </div>

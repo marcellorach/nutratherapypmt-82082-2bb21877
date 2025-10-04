@@ -1851,5 +1851,118 @@
       "title": "Error",
       "generic": "An error occurred during processing"
     }
+  },
+  "analytics": {
+    "kpi": {
+      "activeNutraceuticals": {
+        "title": "Active Nutraceuticals",
+        "subtitle": "Active in system"
+      },
+      "averageEfficacy": {
+        "title": "Average Efficacy",
+        "subtitle": "Portfolio average score"
+      },
+      "treatabilityIndex": {
+        "title": "Treatability Index",
+        "subtitle": "Market coverage"
+      },
+      "prescriptionCoverage": {
+        "title": "Prescription Coverage",
+        "subtitle": "Operational effectiveness"
+      },
+      "sustainabilityIndex": {
+        "title": "Sustainability Index",
+        "subtitle": "Responsibility score"
+      },
+      "therapeuticGaps": {
+        "title": "Therapeutic Gaps",
+        "subtitle": "Improvement opportunities"
+      }
+    },
+    "treatability": {
+      "title": "Treatability Matrix by Condition",
+      "description": "Distribution of nutraceuticals by intervention type and health condition",
+      "selectPlaceholder": "Select conditions for comparative analysis",
+      "coverage": "coverage",
+      "types": {
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "metrics": {
+        "maxCoverage": "Highest Coverage",
+        "conditionsCovered": "Conditions Covered",
+        "active": "active",
+        "filtered": "filtered"
+      }
+    },
+    "prescription": {
+      "title": "Prescription Intelligence",
+      "description": "Sustainability vs Efficacy Matrix (size = scientific evidence)",
+      "axes": {
+        "sustainability": "Sustainability",
+        "efficacy": "Efficacy"
+      },
+      "tooltip": {
+        "efficacy": "Efficacy",
+        "sustainability": "Sustainability",
+        "conditions": "Conditions",
+        "studies": "Studies"
+      },
+      "insights": {
+        "title": "Positioning Insights",
+        "topPerformers": "Top Performers",
+        "opportunities": "Opportunities"
+      },
+      "categories": {
+        "highValue": {
+          "title": "High Value",
+          "desc": "High Eff. + High Sust."
+        },
+        "highPerformance": {
+          "title": "High Performance",
+          "desc": "High Eff. + Low Sust."
+        },
+        "sustainable": {
+          "title": "Sustainable",
+          "desc": "Low Eff. + High Sust."
+        },
+        "reevaluate": {
+          "title": "Reevaluate",
+          "desc": "Low Eff. + Low Sust."
+        }
+      }
+    },
+    "trends": {
+      "performance": {
+        "title": "Performance Trends",
+        "description": "Temporal evolution of key indicators"
+      },
+      "benchmark": {
+        "title": "Competitive Benchmark",
+        "description": "Performance vs. market average and best in class"
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun"
+      },
+      "metrics": {
+        "efficacy": "Efficacy",
+        "sustainability": "Sustainability",
+        "satisfaction": "Satisfaction",
+        "current": "Current Performance",
+        "average": "Market Average",
+        "bestInClass": "Best in Class"
+      },
+      "comparison": {
+        "aboveAverage": "Above Average",
+        "average": "Average",
+        "belowAverage": "Below Average"
+      }
+    }
   }
 }

@@ -1851,5 +1851,118 @@
       "title": "Erro",
       "generic": "Ocorreu um erro durante o processamento"
     }
+  },
+  "analytics": {
+    "kpi": {
+      "activeNutraceuticals": {
+        "title": "Nutracêuticos Ativos",
+        "subtitle": "Ativos no sistema"
+      },
+      "averageEfficacy": {
+        "title": "Eficácia Média",
+        "subtitle": "Score médio do portfólio"
+      },
+      "treatabilityIndex": {
+        "title": "Índice de Tratabilidade",
+        "subtitle": "Cobertura do mercado"
+      },
+      "prescriptionCoverage": {
+        "title": "Cobertura de Prescrição",
+        "subtitle": "Efetividade operacional"
+      },
+      "sustainabilityIndex": {
+        "title": "Índice de Sustentabilidade",
+        "subtitle": "Score de responsabilidade"
+      },
+      "therapeuticGaps": {
+        "title": "Gaps Terapêuticos",
+        "subtitle": "Oportunidades de melhoria"
+      }
+    },
+    "treatability": {
+      "title": "Matriz de Tratabilidade por Condição",
+      "description": "Distribuição de nutracêuticos por tipo de intervenção e condição de saúde",
+      "selectPlaceholder": "Selecione condições para análise comparativa",
+      "coverage": "cobertura",
+      "types": {
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "metrics": {
+        "maxCoverage": "Maior Cobertura",
+        "conditionsCovered": "Condições Cobertas",
+        "active": "ativas",
+        "filtered": "filtrado"
+      }
+    },
+    "prescription": {
+      "title": "Inteligência de Prescrição",
+      "description": "Matriz Sustentabilidade vs Eficácia (tamanho = evidências científicas)",
+      "axes": {
+        "sustainability": "Sustentabilidade",
+        "efficacy": "Eficácia"
+      },
+      "tooltip": {
+        "efficacy": "Eficácia",
+        "sustainability": "Sustentabilidade",
+        "conditions": "Condições",
+        "studies": "Estudos"
+      },
+      "insights": {
+        "title": "Insights de Posicionamento",
+        "topPerformers": "Top Performers",
+        "opportunities": "Oportunidades"
+      },
+      "categories": {
+        "highValue": {
+          "title": "Alto Valor",
+          "desc": "Alta Efic. + Alta Sust."
+        },
+        "highPerformance": {
+          "title": "Alta Performance",
+          "desc": "Alta Efic. + Baixa Sust."
+        },
+        "sustainable": {
+          "title": "Sustentável",
+          "desc": "Baixa Efic. + Alta Sust."
+        },
+        "reevaluate": {
+          "title": "Reavaliar",
+          "desc": "Baixa Efic. + Baixa Sust."
+        }
+      }
+    },
+    "trends": {
+      "performance": {
+        "title": "Tendências de Performance",
+        "description": "Evolução temporal dos indicadores principais"
+      },
+      "benchmark": {
+        "title": "Benchmark Competitivo",
+        "description": "Performance vs. média do mercado e melhor da classe"
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Fev",
+        "mar": "Mar",
+        "apr": "Abr",
+        "may": "Mai",
+        "jun": "Jun"
+      },
+      "metrics": {
+        "efficacy": "Eficácia",
+        "sustainability": "Sustentabilidade",
+        "satisfaction": "Satisfação",
+        "current": "Performance Atual",
+        "average": "Média do Mercado",
+        "bestInClass": "Melhor da Classe"
+      },
+      "comparison": {
+        "aboveAverage": "Acima da Média",
+        "average": "Na Média",
+        "belowAverage": "Abaixo da Média"
+      }
+    }
   }
 }
