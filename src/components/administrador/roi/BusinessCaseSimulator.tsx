@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +21,7 @@ interface SimulationInputs {
 }
 
 export const BusinessCaseSimulator: React.FC = () => {
+  const { t } = useTranslation();
   const { clientProfiles, marketOpportunities, roiScenarios } = useROIIntelligence();
   
   const [inputs, setInputs] = useState<SimulationInputs>({
@@ -54,15 +56,15 @@ export const BusinessCaseSimulator: React.FC = () => {
     
     // Breakdown de custos e receitas
     const costBreakdown = [
-      { name: 'Implementação', value: Math.round(inputs.investmentAmount * 0.4), color: '#8b5cf6' },
-      { name: 'Treinamento', value: Math.round(inputs.investmentAmount * 0.2), color: '#3b82f6' },
-      { name: 'Estoque Inicial', value: Math.round(inputs.investmentAmount * 0.3), color: '#10b981' },
-      { name: 'Marketing', value: Math.round(inputs.investmentAmount * 0.1), color: '#f59e0b' }
+      { name: t('roi.simulator.breakdown.implementation'), value: Math.round(inputs.investmentAmount * 0.4), color: '#8b5cf6' },
+      { name: t('roi.simulator.breakdown.training'), value: Math.round(inputs.investmentAmount * 0.2), color: '#3b82f6' },
+      { name: t('roi.simulator.breakdown.initialStock'), value: Math.round(inputs.investmentAmount * 0.3), color: '#10b981' },
+      { name: t('roi.simulator.breakdown.marketing'), value: Math.round(inputs.investmentAmount * 0.1), color: '#f59e0b' }
     ];
 
     const revenueBreakdown = [
-      { name: 'Prevenção', value: Math.round(projectedRevenue * (inputs.preventiveFocus / 100)), color: '#10b981' },
-      { name: 'Tratamento', value: Math.round(projectedRevenue * ((100 - inputs.preventiveFocus) / 100)), color: '#3b82f6' }
+      { name: t('roi.simulator.breakdown.prevention'), value: Math.round(projectedRevenue * (inputs.preventiveFocus / 100)), color: '#10b981' },
+      { name: t('roi.simulator.breakdown.treatment'), value: Math.round(projectedRevenue * ((100 - inputs.preventiveFocus) / 100)), color: '#3b82f6' }
     ];
 
     // Timeline mensal
@@ -117,10 +119,10 @@ export const BusinessCaseSimulator: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          Simulador de Business Case
+          {t('roi.simulator.title')}
         </CardTitle>
         <CardDescription>
-          Configure parâmetros e simule diferentes cenários de implementação
+          {t('roi.simulator.description')}
         </CardDescription>
       </CardHeader>
       
@@ -226,7 +228,7 @@ export const BusinessCaseSimulator: React.FC = () => {
 
               <Button onClick={simulateBusinessCase} className="w-full" size="lg">
                 <Play className="h-4 w-4 mr-2" />
-                Simular Business Case
+                {t('roi.simulator.simulateButton')}
               </Button>
             </div>
           </div>

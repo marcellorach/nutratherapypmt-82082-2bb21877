@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
-  Card, 
+  Card,
   CardContent, 
   CardDescription, 
   CardHeader, 
@@ -52,6 +53,7 @@ const ROIChart: React.FC = () => {
 
 
 const CustoBeneficioTab: React.FC = () => {
+  const { t } = useTranslation();
   const [periodoAnalise, setPeriodoAnalise] = useState("6");
   const [custoPeriodo, setCustoPeriodo] = useState([3500]);
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
@@ -64,20 +66,20 @@ const CustoBeneficioTab: React.FC = () => {
     <>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Inteligência de ROI & Business Case</h2>
+          <h2 className="text-xl font-bold text-foreground">{t('roi.title')}</h2>
           <p className="text-muted-foreground">
-            Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários
+            {t('roi.description')}
           </p>
         </div>
         
         <div className="flex items-center gap-2">
           <Button variant="outline" className="flex items-center gap-2">
             <AreaChart className="h-4 w-4" />
-            Exportar Relatório
+            {t('roi.buttons.exportReport')}
           </Button>
           <Button className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4" />
-            Atualizar Análises
+            {t('roi.buttons.updateAnalyses')}
           </Button>
         </div>
       </div>
@@ -85,40 +87,40 @@ const CustoBeneficioTab: React.FC = () => {
       {/* KPIs Executivos */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <KPICard 
-          title="ROI Total Médio" 
+          title={t('roi.kpis.totalROI.title')} 
           value={`${roiMetrics.totalROI}%`}
-          subtitle="Retorno médio dos nutracêuticos" 
-          trend={`${roiMetrics.averageROI > 250 ? '+' : ''}${Math.round((roiMetrics.averageROI - 250) / 2.5)}% vs meta`}
+          subtitle={t('roi.kpis.totalROI.subtitle')} 
+          trend={`${roiMetrics.averageROI > 250 ? '+' : ''}${Math.round((roiMetrics.averageROI - 250) / 2.5)}% ${t('roi.kpis.totalROI.trendVsMeta')}`}
           trendUp={roiMetrics.averageROI > 250}
           icon={<TrendingUp className="h-6 w-6" style={{ color: "hsl(var(--primary))" }} />} 
           color="hsl(var(--primary))"
         />
         
         <KPICard 
-          title="ROI Preventivo" 
+          title={t('roi.kpis.preventiveROI.title')} 
           value={`${roiMetrics.preventiveROI}%`}
-          subtitle="Maior retorno em prevenção" 
-          trend={`${roiMetrics.preventiveROI - roiMetrics.treatmentROI}% vs tratamento`}
+          subtitle={t('roi.kpis.preventiveROI.subtitle')} 
+          trend={`${roiMetrics.preventiveROI - roiMetrics.treatmentROI}% ${t('roi.kpis.preventiveROI.trendVsTreatment')}`}
           trendUp={true}
           icon={<Target className="h-6 w-6" style={{ color: "hsl(var(--success))" }} />} 
           color="hsl(var(--success))"
         />
         
         <KPICard 
-          title="Índice Sustentabilidade" 
+          title={t('roi.kpis.sustainabilityIndex.title')} 
           value={`${roiMetrics.sustainabilityIndex}%`}
-          subtitle="Viabilidade a longo prazo" 
-          trend="Alta consistência"
+          subtitle={t('roi.kpis.sustainabilityIndex.subtitle')} 
+          trend={t('roi.kpis.sustainabilityIndex.trendHigh')}
           trendUp={true}
           icon={<Gauge className="h-6 w-6" style={{ color: "hsl(var(--secondary))" }} />} 
           color="hsl(var(--secondary))"
         />
         
         <KPICard 
-          title="Penetração Mercado" 
+          title={t('roi.kpis.marketPenetration.title')} 
           value={`${roiMetrics.marketPenetration}%`}
-          subtitle="Oportunidades disponíveis" 
-          trend={`${marketOpportunities.length} condições mapeadas`}
+          subtitle={t('roi.kpis.marketPenetration.subtitle')} 
+          trend={`${marketOpportunities.length} ${t('roi.kpis.marketPenetration.conditionsMapped')}`}
           trendUp={true}
           icon={<BarChart4 className="h-6 w-6" style={{ color: "hsl(var(--accent))" }} />} 
           color="hsl(var(--accent))"
@@ -130,19 +132,19 @@ const CustoBeneficioTab: React.FC = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Visão Executiva
+            {t('roi.tabs.overview')}
           </TabsTrigger>
           <TabsTrigger value="opportunities" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
-            Oportunidades
+            {t('roi.tabs.opportunities')}
           </TabsTrigger>
           <TabsTrigger value="predictive" className="flex items-center gap-2">
             <AreaChart className="h-4 w-4" />
-            Análise Preditiva
+            {t('roi.tabs.predictive')}
           </TabsTrigger>
           <TabsTrigger value="simulator" className="flex items-center gap-2">
             <Calculator className="h-4 w-4" />
-            Simulador
+            {t('roi.tabs.simulator')}
           </TabsTrigger>
         </TabsList>
 
@@ -153,23 +155,23 @@ const CustoBeneficioTab: React.FC = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Métricas de Sustentabilidade</CardTitle>
+                  <CardTitle className="text-base">{t('roi.sustainability.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <div className="flex justify-between items-center">
-                    <span>CLV Médio (24m):</span>
+                    <span>{t('roi.sustainability.clvAverage')}:</span>
                     <span className="font-medium">R$ 4.800</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Taxa de Retenção:</span>
+                    <span>{t('roi.sustainability.retentionRate')}:</span>
                     <span className="font-medium text-green-600">89%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Payback Médio:</span>
-                    <span className="font-medium">8.3 meses</span>
+                    <span>{t('roi.sustainability.avgPayback')}:</span>
+                    <span className="font-medium">8.3 {t('roi.sustainability.months')}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Margem de Contribuição:</span>
+                    <span>{t('roi.sustainability.contributionMargin')}:</span>
                     <span className="font-medium">67%</span>
                   </div>
                 </CardContent>
@@ -177,23 +179,23 @@ const CustoBeneficioTab: React.FC = () => {
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Impacto Clínico</CardTitle>
+                  <CardTitle className="text-base">{t('roi.clinicalImpact.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <div className="flex justify-between items-center">
-                    <span>Redução de consultas:</span>
+                    <span>{t('roi.clinicalImpact.consultationReduction')}:</span>
                     <span className="font-medium">43%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Redução de emergências:</span>
+                    <span>{t('roi.clinicalImpact.emergencyReduction')}:</span>
                     <span className="font-medium">67%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Melhora qualidade de vida:</span>
+                    <span>{t('roi.clinicalImpact.qualityImprovement')}:</span>
                     <span className="font-medium text-green-600">72%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Satisfação dos tutores:</span>
+                    <span>{t('roi.clinicalImpact.tutorSatisfaction')}:</span>
                     <span className="font-medium">91%</span>
                   </div>
                 </CardContent>
@@ -226,37 +228,37 @@ const CustoBeneficioTab: React.FC = () => {
       {mostrarDetalhes && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Metodologia e Parâmetros Técnicos</CardTitle>
+            <CardTitle>{t('roi.methodology.title')}</CardTitle>
             <CardDescription>
-              Detalhamento dos modelos e algoritmos utilizados nas análises preditivas
+              {t('roi.methodology.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold mb-3">Parâmetros de Cálculo</h4>
+                <h4 className="font-semibold mb-3">{t('roi.methodology.parametersTitle')}</h4>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Parâmetro</TableHead>
-                      <TableHead>Valor</TableHead>
+                      <TableHead>{t('roi.methodology.parameter')}</TableHead>
+                      <TableHead>{t('roi.methodology.value')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>Taxa base incidência</TableCell>
+                      <TableCell>{t('roi.methodology.baseIncidenceRate')}</TableCell>
                       <TableCell>18.2%</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>Redução com protocolo</TableCell>
+                      <TableCell>{t('roi.methodology.protocolReduction')}</TableCell>
                       <TableCell>76.4%</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>Custo médio tratamento</TableCell>
+                      <TableCell>{t('roi.methodology.avgTreatmentCost')}</TableCell>
                       <TableCell>R$ 3.840</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>Custo protocolo preventivo</TableCell>
+                      <TableCell>{t('roi.methodology.preventiveProtocolCost')}</TableCell>
                       <TableCell>R$ 1.260</TableCell>
                     </TableRow>
                   </TableBody>
@@ -264,21 +266,21 @@ const CustoBeneficioTab: React.FC = () => {
               </div>
               
               <div>
-                <h4 className="font-semibold mb-3">Modelos Utilizados</h4>
+                <h4 className="font-semibold mb-3">{t('roi.methodology.modelsTitle')}</h4>
                 <div className="space-y-3">
                   <div className="p-3 bg-muted/30 rounded-lg">
-                    <p className="font-medium text-sm">Análise Preditiva</p>
+                    <p className="font-medium text-sm">{t('roi.methodology.predictiveAnalysis')}</p>
                     <p className="text-xs text-muted-foreground">Ensemble: XGBoost + Random Forest</p>
-                    <p className="text-xs text-muted-foreground">Acurácia: 91.2%</p>
+                    <p className="text-xs text-muted-foreground">{t('roi.methodology.accuracy')}: 91.2%</p>
                   </div>
                   <div className="p-3 bg-muted/30 rounded-lg">
-                    <p className="font-medium text-sm">Análise de Tendências</p>
+                    <p className="font-medium text-sm">{t('roi.methodology.trendAnalysis')}</p>
                     <p className="text-xs text-muted-foreground">LSTM + ARIMA</p>
                     <p className="text-xs text-muted-foreground">R²: 0.87</p>
                   </div>
                   <div className="p-3 bg-muted/30 rounded-lg">
-                    <p className="font-medium text-sm">Simulação Monte Carlo</p>
-                    <p className="text-xs text-muted-foreground">10,000 iterações</p>
+                    <p className="font-medium text-sm">{t('roi.methodology.monteCarloSimulation')}</p>
+                    <p className="text-xs text-muted-foreground">10,000 {t('roi.methodology.iterations')}</p>
                     <p className="text-xs text-muted-foreground">IC: 95%</p>
                   </div>
                 </div>

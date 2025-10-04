@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
   selectedCondition, 
   timeHorizon = 24 
 }) => {
+  const { t } = useTranslation();
   const { roiMetrics, marketOpportunities, isLoading } = useROIIntelligence();
   const [chartType, setChartType] = useState<'area' | 'line' | 'composed'>('area');
   const [viewMode, setViewMode] = useState<'roi' | 'cumulative' | 'comparison'>('roi');
@@ -35,7 +37,7 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
       const nutraceuticalCost = 1200 + (month * 80); // Crescimento menor para nutracêuticos
       
       return {
-        month: `Mês ${month}`,
+        month: `${t('roi.predictiveChart.month', { number: month })}`,
         monthNumber: month,
         roi: currentROI,
         cumulativeROI: Math.round(currentROI * month * 0.8),
@@ -82,15 +84,15 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
                     <p className="font-medium">{label}</p>
                     <div className="space-y-1 mt-2">
                       <p className="text-sm">
-                        <span className="text-muted-foreground">ROI:</span> 
+                        <span className="text-muted-foreground">{t('roi.predictiveChart.tooltip.roi')}:</span> 
                         <span className="font-medium ml-2">{data.roi}%</span>
                       </p>
                       <p className="text-sm">
-                        <span className="text-muted-foreground">Economia:</span> 
+                        <span className="text-muted-foreground">{t('roi.predictiveChart.tooltip.savings')}:</span> 
                         <span className="font-medium ml-2 text-green-600">R$ {data.savings.toLocaleString()}</span>
                       </p>
                       <p className="text-sm">
-                        <span className="text-muted-foreground">Confiança:</span> 
+                        <span className="text-muted-foreground">{t('roi.predictiveChart.tooltip.confidence')}:</span> 
                         <span className="font-medium ml-2">{data.confidence}%</span>
                       </p>
                     </div>
@@ -154,7 +156,7 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Análise Preditiva de ROI</CardTitle>
+          <CardTitle>{t('roi.predictiveChart.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 bg-muted/50 rounded animate-pulse" />
@@ -170,10 +172,10 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
           <div>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Análise Preditiva de ROI
+              {t('roi.predictiveChart.title')}
             </CardTitle>
             <CardDescription>
-              Projeção de retorno sobre investimento baseada em dados históricos e tendências
+              {t('roi.predictiveChart.description')}
             </CardDescription>
           </div>
           
@@ -183,9 +185,9 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="area">Área</SelectItem>
-                <SelectItem value="line">Linha</SelectItem>
-                <SelectItem value="composed">Composto</SelectItem>
+                <SelectItem value="area">{t('roi.predictiveChart.chartTypes.area')}</SelectItem>
+                <SelectItem value="line">{t('roi.predictiveChart.chartTypes.line')}</SelectItem>
+                <SelectItem value="composed">{t('roi.predictiveChart.chartTypes.composed')}</SelectItem>
               </SelectContent>
             </Select>
             
@@ -194,9 +196,9 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="roi">ROI Mensal</SelectItem>
-                <SelectItem value="cumulative">ROI Cumulativo</SelectItem>
-                <SelectItem value="comparison">Comparativo</SelectItem>
+                <SelectItem value="roi">{t('roi.predictiveChart.viewModes.monthly')}</SelectItem>
+                <SelectItem value="cumulative">{t('roi.predictiveChart.viewModes.cumulative')}</SelectItem>
+                <SelectItem value="comparison">{t('roi.predictiveChart.viewModes.comparison')}</SelectItem>
               </SelectContent>
             </Select>
             
@@ -211,22 +213,22 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
         {/* Métricas-chave */}
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">ROI Total Projetado</p>
+            <p className="text-sm text-muted-foreground">{t('roi.predictiveChart.metrics.projectedTotalROI')}</p>
             <p className="text-2xl font-bold text-green-600">{totalROI}%</p>
           </div>
           
           <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">Economia Total</p>
+            <p className="text-sm text-muted-foreground">{t('roi.predictiveChart.metrics.totalSavings')}</p>
             <p className="text-2xl font-bold">R$ {latestData?.savings.toLocaleString()}</p>
           </div>
           
           <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">Payback</p>
-            <p className="text-2xl font-bold">8.3 meses</p>
+            <p className="text-sm text-muted-foreground">{t('roi.predictiveChart.metrics.payback')}</p>
+            <p className="text-2xl font-bold">8.3 {t('roi.predictiveChart.metrics.months')}</p>
           </div>
           
           <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">Confiança Média</p>
+            <p className="text-sm text-muted-foreground">{t('roi.predictiveChart.metrics.avgConfidence')}</p>
             <p className="text-2xl font-bold">{Math.round(data.reduce((sum, d) => sum + d.confidence, 0) / data.length)}%</p>
           </div>
         </div>
@@ -243,20 +245,20 @@ export const PredictiveROIChart: React.FC<PredictiveROIChartProps> = ({
           <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="font-medium text-green-800 dark:text-green-300">Tendência Positiva</span>
+              <span className="font-medium text-green-800 dark:text-green-300">{t('roi.predictiveChart.insights.positiveTrend')}</span>
             </div>
             <p className="text-sm text-green-700 dark:text-green-400">
-              Projeção indica crescimento sustentável do ROI com pico no mês 18-20.
+              {t('roi.predictiveChart.insights.positiveTrendText')}
             </p>
           </div>
           
           <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-blue-800 dark:text-blue-300">Oportunidade</span>
+              <span className="font-medium text-blue-800 dark:text-blue-300">{t('roi.predictiveChart.insights.opportunity')}</span>
             </div>
             <p className="text-sm text-blue-700 dark:text-blue-400">
-              Maior retorno em cenários preventivos vs. tratamento reativo.
+              {t('roi.predictiveChart.insights.opportunityText')}
             </p>
           </div>
         </div>

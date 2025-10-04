@@ -1852,148 +1852,205 @@
       "generic": "Ocorreu um erro durante o processamento"
     }
   },
-  "analytics": {
-    "title": "Intelligent Analytics",
-    "description": "Análise integrada de desempenho, eficácia e tratabilidade do portfólio nutracêutico",
+  "roi": {
+    "title": "Inteligência de ROI & Business Case",
+    "description": "Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários",
     "buttons": {
-      "update": "Atualizar",
-      "export": "Exportar Relatório"
+      "exportReport": "Exportar Relatório",
+      "updateAnalyses": "Atualizar Análises"
     },
-    "sections": {
-      "executive": "KPIs Executivos",
-      "detailed": "Análises Detalhadas",
-      "performance": "Tendências de Performance"
-    },
-    "efficacy": {
-      "title": "Análise de Eficácia Comparativa",
-      "description": "Ranking de nutracêuticos por evidência científica",
-      "highest": "Maior Eficácia",
-      "lowest": "Menor Contraindicações",
-      "contraindications": "contraindicações"
-    },
-    "pipeline": {
-      "title": "Pipeline de Descoberta",
-      "description": "Status dos nutracêuticos em validação e desenvolvimento",
-      "testing": "Em Testes Clínicos",
-      "testingDesc": "Fase de validação",
-      "development": "Em Desenvolvimento",
-      "developmentDesc": "Formulação e testes",
-      "validated": "Validados e Ativos",
-      "validatedDesc": "Aprovados para uso",
-      "validationRate": "Taxa de Validação",
-      "avgTime": "Tempo Médio",
-      "months": "meses",
-      "nextValidations": "Próximas Validações"
-    },
-    "kpi": {
-      "activeNutraceuticals": {
-        "title": "Nutracêuticos Ativos",
-        "subtitle": "Ativos no sistema"
+    "kpis": {
+      "totalROI": {
+        "title": "ROI Total Médio",
+        "subtitle": "Retorno médio dos nutracêuticos",
+        "trendVsMeta": "vs meta"
       },
-      "averageEfficacy": {
-        "title": "Eficácia Média",
-        "subtitle": "Score médio do portfólio"
-      },
-      "treatabilityIndex": {
-        "title": "Índice de Tratabilidade",
-        "subtitle": "Cobertura do mercado"
-      },
-      "prescriptionCoverage": {
-        "title": "Cobertura de Prescrição",
-        "subtitle": "Efetividade operacional"
+      "preventiveROI": {
+        "title": "ROI Preventivo",
+        "subtitle": "Maior retorno em prevenção",
+        "trendVsTreatment": "vs tratamento"
       },
       "sustainabilityIndex": {
-        "title": "Índice de Sustentabilidade",
-        "subtitle": "Score de responsabilidade"
+        "title": "Índice Sustentabilidade",
+        "subtitle": "Viabilidade a longo prazo",
+        "trendHigh": "Alta consistência"
       },
-      "therapeuticGaps": {
-        "title": "Gaps Terapêuticos",
-        "subtitle": "Oportunidades de melhoria"
+      "marketPenetration": {
+        "title": "Penetração Mercado",
+        "subtitle": "Oportunidades disponíveis",
+        "conditionsMapped": "condições mapeadas"
       }
     },
-    "treatability": {
-      "title": "Matriz de Tratabilidade por Condição",
-      "description": "Distribuição de nutracêuticos por tipo de intervenção e condição de saúde",
-      "selectPlaceholder": "Selecione condições para análise comparativa",
-      "coverage": "cobertura",
-      "types": {
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
+    "tabs": {
+      "overview": "Visão Executiva",
+      "opportunities": "Oportunidades",
+      "predictive": "Análise Preditiva",
+      "simulator": "Simulador"
+    },
+    "sustainability": {
+      "title": "Métricas de Sustentabilidade",
+      "clvAverage": "CLV Médio (24m)",
+      "retentionRate": "Taxa de Retenção",
+      "avgPayback": "Payback Médio",
+      "contributionMargin": "Margem de Contribuição",
+      "months": "meses"
+    },
+    "clinicalImpact": {
+      "title": "Impacto Clínico",
+      "consultationReduction": "Redução de consultas",
+      "emergencyReduction": "Redução de emergências",
+      "qualityImprovement": "Melhora qualidade de vida",
+      "tutorSatisfaction": "Satisfação dos tutores"
+    },
+    "methodology": {
+      "title": "Metodologia e Parâmetros Técnicos",
+      "description": "Detalhamento dos modelos e algoritmos utilizados nas análises preditivas",
+      "parametersTitle": "Parâmetros de Cálculo",
+      "parameter": "Parâmetro",
+      "value": "Valor",
+      "baseIncidenceRate": "Taxa base incidência",
+      "protocolReduction": "Redução com protocolo",
+      "avgTreatmentCost": "Custo médio tratamento",
+      "preventiveProtocolCost": "Custo protocolo preventivo",
+      "modelsTitle": "Modelos Utilizados",
+      "predictiveAnalysis": "Análise Preditiva",
+      "trendAnalysis": "Análise de Tendências",
+      "monteCarloSimulation": "Simulação Monte Carlo",
+      "accuracy": "Acurácia",
+      "iterations": "iterações"
+    },
+    "executiveSummary": {
+      "title": "Análise Comparativa de ROI",
+      "description": "Comparação entre abordagens preventivas vs. tratamento reativo",
+      "preventiveApproach": "Abordagem Preventiva",
+      "reactiveTreatment": "Tratamento Reativo",
+      "avgROI": "ROI Médio",
+      "costPerPetYear": "Custo por Pet/Ano",
+      "caseReduction": "Redução de Casos",
+      "costPerCase": "Custo por Caso",
+      "incidenceRate": "Taxa de Incidência",
+      "competitiveAdvantage": "Vantagem Competitiva",
+      "preventionSuperior": "Prevenção oferece ROI {{difference}}% superior ao tratamento reativo"
+    },
+    "marketOpportunity": {
+      "title": "Matriz de Oportunidades de Mercado",
+      "description": "Análise de gaps terapêuticos e potencial de ROI por condição",
+      "sortBy": "Ordenar por",
+      "potentialROI": "ROI Potencial",
+      "marketGap": "Gap de Mercado",
+      "confidence": "Confiança",
+      "gap": "Gap",
+      "roi": "ROI",
+      "levels": {
+        "veryHigh": "Muito Alta",
+        "high": "Alta",
+        "medium": "Média",
+        "low": "Baixa"
+      },
+      "treatmentCost": "Custo Tratamento",
+      "preventionCost": "Custo Prevenção",
+      "savings": "Economia",
+      "riskReduction": "Redução Risco",
+      "recommendedNutraceuticals": "Nutracêuticos Recomendados",
+      "savingsVsTraditional": "Economia de {{percentage}}% vs tratamento tradicional",
+      "analyze": "Analisar →",
+      "interpretationTitle": "Interpretação da Matriz",
+      "interpretationText": "O Gap de Mercado indica a lacuna terapêutica existente, enquanto o ROI Potencial mostra o retorno esperado. Oportunidades \"Muito Alta\" combinam grande gap com alto ROI."
+    },
+    "predictiveChart": {
+      "title": "Análise Preditiva de ROI",
+      "description": "Projeção de retorno sobre investimento baseada em dados históricos e tendências",
+      "chartTypes": {
+        "area": "Área",
+        "line": "Linha",
+        "composed": "Composto"
+      },
+      "viewModes": {
+        "monthly": "ROI Mensal",
+        "cumulative": "ROI Cumulativo",
+        "comparison": "Comparativo"
+      },
+      "month": "Mês {{number}}",
+      "tooltip": {
+        "roi": "ROI",
+        "savings": "Economia",
+        "confidence": "Confiança"
       },
       "metrics": {
-        "maxCoverage": "Maior Cobertura",
-        "conditionsCovered": "Condições Cobertas",
-        "active": "ativas",
-        "filtered": "filtrado"
-      }
-    },
-    "prescription": {
-      "title": "Inteligência de Prescrição",
-      "description": "Matriz Sustentabilidade vs Eficácia (tamanho = evidências científicas)",
-      "axes": {
-        "sustainability": "Sustentabilidade",
-        "efficacy": "Eficácia"
-      },
-      "tooltip": {
-        "efficacy": "Eficácia",
-        "sustainability": "Sustentabilidade",
-        "conditions": "Condições",
-        "studies": "Estudos"
+        "projectedTotalROI": "ROI Total Projetado",
+        "totalSavings": "Economia Total",
+        "payback": "Payback",
+        "avgConfidence": "Confiança Média",
+        "months": "meses"
       },
       "insights": {
-        "title": "Insights de Posicionamento",
-        "topPerformers": "Top Performers",
-        "opportunities": "Oportunidades"
+        "positiveTrend": "Tendência Positiva",
+        "positiveTrendText": "Projeção indica crescimento sustentável do ROI com pico no mês 18-20.",
+        "opportunity": "Oportunidade",
+        "opportunityText": "Maior retorno em cenários preventivos vs. tratamento reativo."
       },
-      "categories": {
-        "highValue": {
-          "title": "Alto Valor",
-          "desc": "Alta Efic. + Alta Sust."
-        },
-        "highPerformance": {
-          "title": "Alta Performance",
-          "desc": "Alta Efic. + Baixa Sust."
-        },
-        "sustainable": {
-          "title": "Sustentável",
-          "desc": "Baixa Efic. + Alta Sust."
-        },
-        "reevaluate": {
-          "title": "Reavaliar",
-          "desc": "Baixa Efic. + Baixa Sust."
-        }
-      }
+      "downloadButton": "Baixar Gráfico"
     },
-    "trends": {
-      "performance": {
-        "title": "Tendências de Performance",
-        "description": "Evolução temporal dos indicadores principais"
+    "simulator": {
+      "title": "Simulador de Business Case",
+      "description": "Configure parâmetros e simule diferentes cenários de implementação",
+      "inputs": {
+        "clinicProfile": "Perfil da Clínica",
+        "initialInvestment": "Investimento Inicial (R$)",
+        "timeHorizon": "Horizonte Temporal (meses)",
+        "preventiveFocus": "Foco Preventivo (%)",
+        "riskTolerance": "Tolerância ao Risco",
+        "petsPerMonth": "pets/mês"
       },
-      "benchmark": {
-        "title": "Benchmark Competitivo",
-        "description": "Performance vs. média do mercado e melhor da classe"
+      "riskLevels": {
+        "low": "Baixa - Conservador",
+        "medium": "Média - Equilibrado",
+        "high": "Alta - Agressivo"
       },
-      "months": {
-        "jan": "Jan",
-        "feb": "Fev",
-        "mar": "Mar",
-        "apr": "Abr",
-        "may": "Mai",
-        "jun": "Jun"
+      "simulateButton": "Simular Business Case",
+      "tabs": {
+        "summary": "Resumo",
+        "breakdown": "Detalhamento",
+        "timeline": "Timeline",
+        "risks": "Riscos"
       },
       "metrics": {
-        "efficacy": "Eficácia",
-        "sustainability": "Sustentabilidade",
-        "satisfaction": "Satisfação",
-        "current": "Performance Atual",
-        "average": "Média do Mercado",
-        "bestInClass": "Melhor da Classe"
+        "projectedROI": "ROI Projetado",
+        "payback": "Payback",
+        "netProfit": "Lucro Líquido",
+        "confidence": "Confiança",
+        "months": "meses"
       },
-      "comparison": {
-        "aboveAverage": "Acima da Média",
-        "average": "Na Média",
-        "belowAverage": "Abaixo da Média"
+      "breakdown": {
+        "costDistribution": "Distribuição de Custos",
+        "revenueDistribution": "Distribuição de Receitas",
+        "implementation": "Implementação",
+        "training": "Treinamento",
+        "initialStock": "Estoque Inicial",
+        "marketing": "Marketing",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "value": "Valor"
+      },
+      "timeline": {
+        "monthlyProjection": "Projeção Mensal",
+        "revenue": "Receita",
+        "costs": "Custos",
+        "profit": "Lucro"
+      },
+      "risks": {
+        "title": "Análise de Riscos",
+        "level": "Nível de Risco",
+        "levels": {
+          "low": "Baixo",
+          "medium": "Médio",
+          "high": "Alto"
+        },
+        "mainFactors": "Principais Fatores de Risco"
+      },
+      "noSimulation": {
+        "title": "Pronto para Simular",
+        "description": "Configure os parâmetros e clique em 'Simular' para ver a projeção completa"
       }
     }
   }

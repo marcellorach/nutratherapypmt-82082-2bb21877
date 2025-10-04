@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ interface MarketOpportunityMatrixProps {
 }
 
 export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = ({ onOpportunitySelect }) => {
+  const { t } = useTranslation();
   const { marketOpportunities, isLoading } = useROIIntelligence();
   const [sortBy, setSortBy] = useState<'potentialROI' | 'marketGap' | 'confidenceScore'>('potentialROI');
 
@@ -28,10 +30,10 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
   });
 
   const getOpportunityLevel = (gap: number, roi: number) => {
-    if (gap > 70 && roi > 400) return { level: 'Muito Alta', color: 'bg-red-500', textColor: 'text-red-700' };
-    if (gap > 60 && roi > 300) return { level: 'Alta', color: 'bg-orange-500', textColor: 'text-orange-700' };
-    if (gap > 50 && roi > 200) return { level: 'Média', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
-    return { level: 'Baixa', color: 'bg-green-500', textColor: 'text-green-700' };
+    if (gap > 70 && roi > 400) return { level: t('roi.marketOpportunity.levels.veryHigh'), color: 'bg-red-500', textColor: 'text-red-700' };
+    if (gap > 60 && roi > 300) return { level: t('roi.marketOpportunity.levels.high'), color: 'bg-orange-500', textColor: 'text-orange-700' };
+    if (gap > 50 && roi > 200) return { level: t('roi.marketOpportunity.levels.medium'), color: 'bg-yellow-500', textColor: 'text-yellow-700' };
+    return { level: t('roi.marketOpportunity.levels.low'), color: 'bg-green-500', textColor: 'text-green-700' };
   };
 
   const getConfidenceColor = (confidence: number) => {
@@ -44,7 +46,7 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Matriz de Oportunidades de Mercado</CardTitle>
+          <CardTitle>{t('roi.marketOpportunity.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -64,22 +66,22 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
           <div>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Matriz de Oportunidades de Mercado
+              {t('roi.marketOpportunity.title')}
             </CardTitle>
             <CardDescription>
-              Análise de gaps terapêuticos e potencial de ROI por condição
+              {t('roi.marketOpportunity.description')}
             </CardDescription>
           </div>
           
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Ordenar por" />
+                <SelectValue placeholder={t('roi.marketOpportunity.sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="potentialROI">ROI Potencial</SelectItem>
-                <SelectItem value="marketGap">Gap de Mercado</SelectItem>
-                <SelectItem value="confidenceScore">Confiança</SelectItem>
+                <SelectItem value="potentialROI">{t('roi.marketOpportunity.potentialROI')}</SelectItem>
+                <SelectItem value="marketGap">{t('roi.marketOpportunity.marketGap')}</SelectItem>
+                <SelectItem value="confidenceScore">{t('roi.marketOpportunity.confidence')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -106,15 +108,15 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
-                          Gap: {opportunity.marketGap}%
+                          {t('roi.marketOpportunity.gap')}: {opportunity.marketGap}%
                         </span>
                         <span className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
-                          ROI: {opportunity.potentialROI}%
+                          {t('roi.marketOpportunity.roi')}: {opportunity.potentialROI}%
                         </span>
                         <span className={`flex items-center gap-1 ${getConfidenceColor(opportunity.confidenceScore)}`}>
                           <Activity className="h-3 w-3" />
-                          Confiança: {opportunity.confidenceScore}%
+                          {t('roi.marketOpportunity.confidence')}: {opportunity.confidenceScore}%
                         </span>
                       </div>
                     </div>
@@ -129,22 +131,22 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Custo Tratamento:</span>
+                        <span className="text-muted-foreground">{t('roi.marketOpportunity.treatmentCost')}:</span>
                         <span className="font-medium">R$ {opportunity.treatmentCost.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Custo Prevenção:</span>
+                        <span className="text-muted-foreground">{t('roi.marketOpportunity.preventionCost')}:</span>
                         <span className="font-medium text-green-600">R$ {opportunity.preventionCost.toLocaleString()}</span>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Economia:</span>
+                        <span className="text-muted-foreground">{t('roi.marketOpportunity.savings')}:</span>
                         <span className="font-medium text-green-600">R$ {savings.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Redução Risco:</span>
+                        <span className="text-muted-foreground">{t('roi.marketOpportunity.riskReduction')}:</span>
                         <span className="font-medium">{opportunity.riskReduction}%</span>
                       </div>
                     </div>
@@ -152,7 +154,7 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
                   
                   {opportunity.recommendedNutraceuticals.length > 0 && (
                     <div className="space-y-2">
-                      <span className="text-sm text-muted-foreground">Nutracêuticos Recomendados:</span>
+                      <span className="text-sm text-muted-foreground">{t('roi.marketOpportunity.recommendedNutraceuticals')}:</span>
                       <div className="flex flex-wrap gap-1">
                         {opportunity.recommendedNutraceuticals.map((nutr) => (
                           <Badge key={nutr} variant="outline" className="text-xs">
@@ -167,12 +169,12 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-muted-foreground">
-                        Economia de {savingsPercentage}% vs tratamento tradicional
+                        {t('roi.marketOpportunity.savingsVsTraditional', { percentage: savingsPercentage })}
                       </span>
                     </div>
                     
                     <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                      Analisar →
+                      {t('roi.marketOpportunity.analyze')}
                     </Button>
                   </div>
                 </CardContent>
@@ -185,10 +187,9 @@ export const MarketOpportunityMatrix: React.FC<MarketOpportunityMatrixProps> = (
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Interpretação da Matriz</p>
+              <p className="text-sm font-medium">{t('roi.marketOpportunity.interpretationTitle')}</p>
               <p className="text-xs text-muted-foreground">
-                O Gap de Mercado indica a lacuna terapêutica existente, enquanto o ROI Potencial 
-                mostra o retorno esperado. Oportunidades "Muito Alta" combinam grande gap com alto ROI.
+                {t('roi.marketOpportunity.interpretationText')}
               </p>
             </div>
           </div>
