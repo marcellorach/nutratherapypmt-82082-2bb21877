@@ -485,7 +485,26 @@
       "analysisResults": "Analysis Results",
       "cardGenerated": "Card Generated for Kanban",
       "cardAdded": "Card added to kanban",
-      "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column. You can now manage this study in the workflow."
+      "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column. You can now manage this study in the workflow.",
+      "table": {
+        "study": "Study",
+        "source": "Source",
+        "imported": "Imported",
+        "status": "Status",
+        "lessThanDay": "less than a day ago",
+        "unknownSource": "Unknown",
+        "studyPrefix": "Study",
+        "noStudies": "No studies available for processing",
+        "selectedCount_one": "{{count}} study selected",
+        "selectedCount_other": "{{count}} studies selected",
+        "addToQueue": "Add to NTAI Queue",
+        "statusNew": "New",
+        "statusSpecial": "Special",
+        "statusProcessed": "Processed",
+        "statusInReview": "Under Review",
+        "statusManual": "Manual",
+        "statusUnknown": "Unknown"
+      }
     },
     "kanban": {
       "newStudies": "New Studies",

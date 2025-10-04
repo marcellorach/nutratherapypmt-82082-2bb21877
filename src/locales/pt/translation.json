@@ -485,7 +485,26 @@
       "analysisResults": "Resultados da Análise",
       "cardGenerated": "Card Gerado para Kanban",
       "cardAdded": "Card adicionado ao kanban",
-      "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\". Você pode agora gerenciar este estudo no fluxo de trabalho."
+      "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\". Você pode agora gerenciar este estudo no fluxo de trabalho.",
+      "table": {
+        "study": "Estudo",
+        "source": "Fonte",
+        "imported": "Importado",
+        "status": "Status",
+        "lessThanDay": "há menos de um dia",
+        "unknownSource": "Desconhecida",
+        "studyPrefix": "Estudo",
+        "noStudies": "Nenhum estudo disponível para processamento",
+        "selectedCount_one": "{{count}} estudo selecionado",
+        "selectedCount_other": "{{count}} estudos selecionados",
+        "addToQueue": "Adicionar à Fila NTAI",
+        "statusNew": "Novo",
+        "statusSpecial": "Especial",
+        "statusProcessed": "Processado",
+        "statusInReview": "Em Revisão",
+        "statusManual": "Manual",
+        "statusUnknown": "Desconhecido"
+      }
     },
     "kanban": {
       "newStudies": "Novos Estudos",

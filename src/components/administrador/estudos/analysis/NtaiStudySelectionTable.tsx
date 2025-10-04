@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   onSelectAll,
   onAddToQueue,
 }) => {
+  const { t } = useTranslation();
+  
   // Função auxiliar para determinar o tipo de badge baseado no status
   const getBadgeVariant = (status: string) => {
     switch (status) {
@@ -32,12 +35,12 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   // Função auxiliar para formatar o texto do status
   const getStatusText = (status: string) => {
     switch (status) {
-      case "new": return "Novo";
-      case "especial": return "Especial";
-      case "processed": return "Processado";
-      case "in-review": return "Em Revisão";
-      case "manual": return "Manual";
-      default: return status || "Desconhecido";
+      case "new": return t('studies.ntai.table.statusNew');
+      case "especial": return t('studies.ntai.table.statusSpecial');
+      case "processed": return t('studies.ntai.table.statusProcessed');
+      case "in-review": return t('studies.ntai.table.statusInReview');
+      case "manual": return t('studies.ntai.table.statusManual');
+      default: return status || t('studies.ntai.table.statusUnknown');
     }
   };
 
@@ -55,7 +58,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
 
   // Formatar a data para exibir "há menos de um dia"
   const formatTimeAgo = () => {
-    return "há menos de um dia";
+    return t('studies.ntai.table.lessThanDay');
   };
 
   return (
@@ -71,10 +74,10 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 className="rounded"
               />
             </TableHead>
-            <TableHead>Estudo</TableHead>
-            <TableHead>Fonte</TableHead>
-            <TableHead>Importado</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t('studies.ntai.table.study')}</TableHead>
+            <TableHead>{t('studies.ntai.table.source')}</TableHead>
+            <TableHead>{t('studies.ntai.table.imported')}</TableHead>
+            <TableHead>{t('studies.ntai.table.status')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -94,13 +97,13 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{estudo.title || `Estudo ${estudo.id.substring(0, 8)}`}</div>
+                    <div className="font-medium">{estudo.title || `${t('studies.ntai.table.studyPrefix')} ${estudo.id.substring(0, 8)}`}</div>
                     {estudo.description && (
                       <div className="text-sm text-gray-500">{estudo.description}</div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{estudo.journal || estudo.meta_summary_filename || 'Desconhecida'}</TableCell>
+                <TableCell>{estudo.journal || estudo.meta_summary_filename || t('studies.ntai.table.unknownSource')}</TableCell>
                 <TableCell className="text-sm text-gray-500">
                   {formatTimeAgo()}
                 </TableCell>
@@ -114,7 +117,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                Nenhum estudo disponível para processamento
+                {t('studies.ntai.table.noStudies')}
               </TableCell>
             </TableRow>
           )}
@@ -123,14 +126,14 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
       
       <div className="p-2 bg-gray-50 border-t flex justify-between items-center">
         <span className="text-sm text-gray-500">
-          {selectedItems.length} {selectedItems.length === 1 ? 'estudo selecionado' : 'estudos selecionados'}
+          {t('studies.ntai.table.selectedCount', { count: selectedItems.length })}
         </span>
         <Button 
           size="sm" 
           onClick={handleAddToQueue}
           disabled={selectedItems.length === 0}
         >
-          Adicionar à Fila NTAI
+          {t('studies.ntai.table.addToQueue')}
         </Button>
       </div>
     </div>
