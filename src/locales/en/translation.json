@@ -2055,65 +2055,62 @@
     }
   },
   "bulkActions": {
-    "title": "Smart Campaign System",
-    "description": "Command center for AI-powered personalized campaigns",
-    "badges": {
-      "aiActive": "AI Active",
-      "active": "Active"
-    },
+    "title": "Smart Bulk Actions",
+    "description": "Create and execute bulk campaigns with intelligent segmentation based on ROI and customer behavior",
+    "badge": "active campaigns",
     "tabs": {
       "command": "Command",
       "creation": "Creation",
       "execution": "Execution",
       "analytics": "Analytics"
     },
-    "segments": {
-      "highRoiUrgent": {
-        "name": "High ROI + Critical Urgency",
-        "description": "Pets with critical conditions and high ROI potential"
+    "audienceSegments": {
+      "highValue": {
+        "name": "High Value",
+        "description": "Customers with premium purchase history"
       },
-      "preventivePremium": {
-        "name": "Premium Preventive",
-        "description": "Premium clients interested in prevention"
+      "atRisk": {
+        "name": "At Risk",
+        "description": "Customers inactive for more than 90 days"
       },
-      "expansionOpportunity": {
-        "name": "Expansion Opportunity",
-        "description": "Current clients with potential for new protocols"
+      "newCustomers": {
+        "name": "New Customers",
+        "description": "Registered in the last 30 days"
       },
-      "nurturingProspects": {
-        "name": "Nurturing Prospects",
-        "description": "New prospects for education and nurturing"
+      "educational": {
+        "name": "Educational",
+        "description": "Interested in nutraceutical content"
       }
     },
     "campaignTypes": {
-      "opportunityGaps": {
-        "name": "Opportunity Campaigns",
-        "description": "Based on identified ROI gaps"
+      "opportunity": {
+        "name": "Upsell Opportunity",
+        "description": "Automatic opportunity identification based on history and needs"
       },
-      "educationalVets": {
-        "name": "Veterinary Educational Campaigns",
-        "description": "Education on new scientific evidence"
+      "retention": {
+        "name": "Smart Retention",
+        "description": "Re-engagement of inactive customers with personalized offers"
       },
-      "retentionLoyalty": {
-        "name": "Retention Campaigns",
-        "description": "For clients at risk of churn"
+      "education": {
+        "name": "Nutraceutical Education",
+        "description": "Educational campaigns about benefits and applications"
       },
-      "upsellPremium": {
-        "name": "Upsell Campaigns",
-        "description": "Expansion of existing protocols"
+      "crossSell": {
+        "name": "Strategic Cross-sell",
+        "description": "Intelligent suggestions for complementary products"
       }
     },
     "toast": {
-      "campaignSuccess": "Campaign Successfully Executed",
-      "campaignSent": "Campaign sent to {{count}} recipients with AI personalization."
+      "inDevelopment": "Feature in development",
+      "campaignCreated": "Campaign created! {{count}} pets will be notified",
+      "campaignStarted": "Campaign started successfully!"
     },
     "command": {
       "globalPerformance": "Global Performance",
-      "avgROI": "Avg ROI",
+      "avgROI": "Average ROI",
       "conversionRate": "Conversion Rate",
       "activeCampaigns": "Active Campaigns",
-      "activeOpportunities": "Active Opportunities",
-      "highPotential": "High Potential",
+      "opportunities": "Detected Opportunities",
       "estimatedValue": "Estimated Value",
       "segments": "Segments",
       "aiPersonalization": "AI Personalization",
@@ -2124,43 +2121,144 @@
     "creation": {
       "estimatedROI": "Estimated ROI",
       "conversionRate": "Conversion Rate",
-      "targetSegments": "Target Segments:",
-      "recipients": "recipients",
+      "targetSegments": "Target Segments",
+      "recipients": "Recipients",
       "createCampaign": "Create Campaign"
     },
     "execution": {
-      "inProgress": "Execution in Progress",
-      "personalizingMessages": "Personalizing messages with AI...",
+      "executionStatus": "Execution Status",
+      "personalizationByAI": "AI Personalization",
+      "messagesPersonalizedWithAI": "AI-personalized messages",
       "intelligentSegmentation": "Intelligent Segmentation",
-      "potentialROI": "Potential ROI:",
-      "conversion": "Conversion:",
+      "potentialROI": "Potential ROI",
+      "estimatedConversion": "Estimated Conversion",
       "campaignSimulator": "Campaign Simulator",
-      "projectedResults": "Projected Results",
-      "totalSends": "Total Sends:",
-      "estimatedConversions": "Estimated Conversions:",
-      "expectedROI": "Expected ROI:",
-      "estimatedRevenue": "Estimated Revenue:",
+      "totalSends": "Total Sends",
+      "estimatedConversions": "Estimated Conversions",
+      "expectedROI": "Expected ROI",
+      "estimatedRevenue": "Estimated Revenue",
       "investmentScenarios": "Investment Scenarios",
-      "conservative": "Conservative (ROI {{roi}}x)",
-      "optimistic": "Optimistic (ROI {{roi}}x)",
-      "aggressive": "Aggressive (ROI {{roi}}x)"
+      "conservative": "Conservative: {{roi}}% ROI",
+      "optimistic": "Optimistic: {{roi}}% ROI",
+      "aggressive": "Aggressive: {{roi}}% ROI"
     },
     "analytics": {
-      "sentCampaigns": "Sent Campaigns",
-      "openRate": "Open Rate",
-      "conversionRate": "Conversion Rate",
-      "avgROI": "Avg ROI",
+      "kpis": {
+        "sentCampaigns": "Sent Campaigns",
+        "openRate": "Open Rate",
+        "conversionRate": "Conversion Rate",
+        "avgROI": "Average ROI"
+      },
       "performanceBySegment": "Performance by Segment",
-      "conversion": "conversion",
-      "sent": "Sent:",
-      "potentialROI": "Potential ROI:",
-      "priority": "Priority:",
+      "conversion": "Conversion",
+      "sent": "Sent",
+      "potentialROI": "Potential ROI",
       "priorities": {
         "critical": "Critical",
         "high": "High",
         "medium": "Medium",
         "low": "Low"
       }
+    }
+  },
+  "monitoring": {
+    "title": "Campaign Monitoring",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "campaigns": "Campaigns",
+      "analytics": "Analytics",
+      "reports": "Reports"
+    },
+    "campaigns": {
+      "title": "Campaign Management",
+      "newCampaign": "New Campaign",
+      "type": "Type",
+      "status": {
+        "active": "Active",
+        "paused": "Paused",
+        "finished": "Finished",
+        "scheduled": "Scheduled",
+        "running": "Running",
+        "completed": "Completed",
+        "draft": "Draft"
+      },
+      "metrics": {
+        "performance": "Performance",
+        "opening": "opening",
+        "conversion": "Conversion",
+        "converted": "converted",
+        "roi": "ROI",
+        "processed": "Processed",
+        "successRate": "Success Rate",
+        "savings": "Savings"
+      },
+      "actions": {
+        "pause": "Pause",
+        "reactivate": "Reactivate",
+        "analyze": "Analyze",
+        "execute": "Execute",
+        "details": "Details"
+      },
+      "types": {
+        "opportunities": "Opportunities",
+        "educational": "Educational",
+        "retention": "Retention",
+        "massUpdate": "Mass Update",
+        "batchAnalysis": "Batch Analysis",
+        "roiOptimization": "ROI Optimization"
+      },
+      "toast": {
+        "inDevelopment": "Feature in development",
+        "actionExecuted": "Action \"{{action}}\" executed for campaign {{campaignId}}",
+        "campaignStarted": "Campaign started successfully!",
+        "loadingDetails": "Loading campaign details...",
+        "executionStopped": "Execution stopped"
+      }
+    },
+    "analytics": {
+      "title": "Detailed Analytics",
+      "performanceByType": "Performance by Campaign Type",
+      "campaigns": "campaigns",
+      "trends": {
+        "title": "Performance Trends",
+        "avgOpenRate": "Average Open Rate",
+        "avgClickRate": "Average Click Rate",
+        "avgConversionRate": "Average Conversion Rate"
+      }
+    },
+    "reports": {
+      "title": "Executive Reports",
+      "generateReport": "Generate Full Report",
+      "reportGenerated": "Report generated successfully!",
+      "financialSummary": {
+        "title": "Financial Summary",
+        "totalInvestment": "Total Investment",
+        "generatedRevenue": "Generated Revenue",
+        "totalROI": "Total ROI"
+      },
+      "engagement": {
+        "title": "Engagement Metrics",
+        "totalReached": "Total Contacts Reached",
+        "totalEngagement": "Total Engagement",
+        "totalConversions": "Total Conversions"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "activeCampaignsCount": "{{count}} active campaigns",
+      "metrics": {
+        "activeCampaigns": "Active Campaigns",
+        "completed": "Completed",
+        "totalProcessed": "Total Processed",
+        "successRate": "Success Rate"
+      },
+      "activeExecution": {
+        "title": "Active Execution",
+        "progress": "Progress",
+        "currentStep": "Current step",
+        "pause": "Pause"
+      },
+      "recentCampaigns": "Recent Campaigns"
     }
   }
 }

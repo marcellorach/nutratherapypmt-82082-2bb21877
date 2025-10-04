@@ -2055,112 +2055,210 @@
     }
   },
   "bulkActions": {
-    "title": "Sistema Inteligente de Campanhas",
-    "description": "Central de comando para campanhas personalizadas por IA",
-    "badges": {
-      "aiActive": "IA Ativa",
-      "active": "Ativa"
-    },
+    "title": "Ações em Massa Inteligentes",
+    "description": "Crie e execute campanhas em massa com segmentação inteligente baseada em ROI e comportamento do cliente",
+    "badge": "campanhas ativas",
     "tabs": {
       "command": "Comando",
       "creation": "Criação",
       "execution": "Execução",
       "analytics": "Analytics"
     },
-    "segments": {
-      "highRoiUrgent": {
-        "name": "ROI Alto + Urgência Crítica",
-        "description": "Pets com condições críticas e alto potencial de ROI"
+    "audienceSegments": {
+      "highValue": {
+        "name": "Alto Valor",
+        "description": "Clientes com histórico de compras premium"
       },
-      "preventivePremium": {
-        "name": "Preventivo Premium",
-        "description": "Clientes premium interessados em prevenção"
+      "atRisk": {
+        "name": "Em Risco",
+        "description": "Clientes inativos há mais de 90 dias"
       },
-      "expansionOpportunity": {
-        "name": "Oportunidade de Expansão",
-        "description": "Clientes atuais com potencial para novos protocolos"
+      "newCustomers": {
+        "name": "Novos Clientes",
+        "description": "Cadastrados nos últimos 30 dias"
       },
-      "nurturingProspects": {
-        "name": "Prospects em Nutrição",
-        "description": "Novos prospects para educação e nurturing"
+      "educational": {
+        "name": "Educacional",
+        "description": "Interessados em conteúdo sobre nutracêuticos"
       }
     },
     "campaignTypes": {
-      "opportunityGaps": {
-        "name": "Campanhas de Oportunidades",
-        "description": "Baseadas nos gaps identificados no ROI"
+      "opportunity": {
+        "name": "Oportunidade de Upsell",
+        "description": "Identificação automática de oportunidades baseadas em histórico e necessidades"
       },
-      "educationalVets": {
-        "name": "Campanhas Educativas Veterinárias",
-        "description": "Educação sobre novas evidências científicas"
+      "retention": {
+        "name": "Retenção Inteligente",
+        "description": "Reengajamento de clientes inativos com ofertas personalizadas"
       },
-      "retentionLoyalty": {
-        "name": "Campanhas de Retenção",
-        "description": "Para clientes com risco de churn"
+      "education": {
+        "name": "Educação Nutracêutica",
+        "description": "Campanhas educativas sobre benefícios e aplicações"
       },
-      "upsellPremium": {
-        "name": "Campanhas de Upsell",
-        "description": "Expansão de protocolos existentes"
+      "crossSell": {
+        "name": "Cross-sell Estratégico",
+        "description": "Sugestões inteligentes de produtos complementares"
       }
     },
     "toast": {
-      "campaignSuccess": "Campanha Executada com Sucesso",
-      "campaignSent": "Campanha enviada para {{count}} destinatários com personalização por IA."
+      "inDevelopment": "Funcionalidade em desenvolvimento",
+      "campaignCreated": "Campanha criada! {{count}} pets serão notificados",
+      "campaignStarted": "Campanha iniciada com sucesso!"
     },
     "command": {
       "globalPerformance": "Performance Global",
       "avgROI": "ROI Médio",
-      "conversionRate": "Taxa Conversão",
+      "conversionRate": "Taxa de Conversão",
       "activeCampaigns": "Campanhas Ativas",
-      "activeOpportunities": "Oportunidades Ativas",
-      "highPotential": "Alto Potencial",
+      "opportunities": "Oportunidades Detectadas",
       "estimatedValue": "Valor Estimado",
       "segments": "Segmentos",
-      "aiPersonalization": "IA Personalização",
+      "aiPersonalization": "Personalização por IA",
       "activeAlgorithms": "Algoritmos Ativos",
       "precision": "Precisão",
       "optimization": "Otimização"
     },
     "creation": {
       "estimatedROI": "ROI Estimado",
-      "conversionRate": "Taxa Conversão",
-      "targetSegments": "Segmentos Alvo:",
-      "recipients": "destinatários",
+      "conversionRate": "Taxa de Conversão",
+      "targetSegments": "Segmentos Alvo",
+      "recipients": "Destinatários",
       "createCampaign": "Criar Campanha"
     },
     "execution": {
-      "inProgress": "Execução em Andamento",
-      "personalizingMessages": "Personalizando mensagens com IA...",
+      "executionStatus": "Status de Execução",
+      "personalizationByAI": "Personalização por IA",
+      "messagesPersonalizedWithAI": "mensagens personalizadas com IA",
       "intelligentSegmentation": "Segmentação Inteligente",
-      "potentialROI": "ROI Potencial:",
-      "conversion": "Conversão:",
-      "campaignSimulator": "Simulador de Campanhas",
-      "projectedResults": "Projeção de Resultados",
-      "totalSends": "Total de Envios:",
-      "estimatedConversions": "Conversões Estimadas:",
-      "expectedROI": "ROI Esperado:",
-      "estimatedRevenue": "Receita Estimada:",
+      "potentialROI": "ROI Potencial",
+      "estimatedConversion": "Conversão Estimada",
+      "campaignSimulator": "Simulador de Campanha",
+      "totalSends": "Total de Envios",
+      "estimatedConversions": "Conversões Estimadas",
+      "expectedROI": "ROI Esperado",
+      "estimatedRevenue": "Receita Estimada",
       "investmentScenarios": "Cenários de Investimento",
-      "conservative": "Conservador (ROI {{roi}}x)",
-      "optimistic": "Otimista (ROI {{roi}}x)",
-      "aggressive": "Agressivo (ROI {{roi}}x)"
+      "conservative": "Conservador: {{roi}}% ROI",
+      "optimistic": "Otimista: {{roi}}% ROI",
+      "aggressive": "Agressivo: {{roi}}% ROI"
     },
     "analytics": {
-      "sentCampaigns": "Campanhas Enviadas",
-      "openRate": "Taxa de Abertura",
-      "conversionRate": "Taxa de Conversão",
-      "avgROI": "ROI Médio",
+      "kpis": {
+        "sentCampaigns": "Campanhas Enviadas",
+        "openRate": "Taxa de Abertura",
+        "conversionRate": "Taxa de Conversão",
+        "avgROI": "ROI Médio"
+      },
       "performanceBySegment": "Performance por Segmento",
-      "conversion": "conversão",
-      "sent": "Enviados:",
-      "potentialROI": "ROI Potencial:",
-      "priority": "Prioridade:",
+      "conversion": "Conversão",
+      "sent": "Enviados",
+      "potentialROI": "ROI Potencial",
       "priorities": {
         "critical": "Crítica",
         "high": "Alta",
         "medium": "Média",
         "low": "Baixa"
       }
+    }
+  },
+  "monitoring": {
+    "title": "Acompanhamento de Campanhas",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "campaigns": "Campanhas",
+      "analytics": "Analytics",
+      "reports": "Relatórios"
+    },
+    "campaigns": {
+      "title": "Gestão de Campanhas",
+      "newCampaign": "Nova Campanha",
+      "type": "Tipo",
+      "status": {
+        "active": "Ativa",
+        "paused": "Pausada",
+        "finished": "Finalizada",
+        "scheduled": "Agendada",
+        "running": "Executando",
+        "completed": "Concluída",
+        "draft": "Rascunho"
+      },
+      "metrics": {
+        "performance": "Performance",
+        "opening": "abertura",
+        "conversion": "Conversão",
+        "converted": "convertido",
+        "roi": "ROI",
+        "processed": "Processados",
+        "successRate": "Taxa de Sucesso",
+        "savings": "Economia"
+      },
+      "actions": {
+        "pause": "Pausar",
+        "reactivate": "Reativar",
+        "analyze": "Analisar",
+        "execute": "Executar",
+        "details": "Detalhes"
+      },
+      "types": {
+        "opportunities": "Oportunidades",
+        "educational": "Educativa",
+        "retention": "Retenção",
+        "massUpdate": "Atualização em Massa",
+        "batchAnalysis": "Análise em Lote",
+        "roiOptimization": "Otimização de ROI"
+      },
+      "toast": {
+        "inDevelopment": "Funcionalidade em desenvolvimento",
+        "actionExecuted": "Ação \"{{action}}\" executada para a campanha {{campaignId}}",
+        "campaignStarted": "Campanha iniciada com sucesso!",
+        "loadingDetails": "Carregando detalhes da campanha...",
+        "executionStopped": "Execução interrompida"
+      }
+    },
+    "analytics": {
+      "title": "Analytics Detalhado",
+      "performanceByType": "Performance por Tipo de Campanha",
+      "campaigns": "campanhas",
+      "trends": {
+        "title": "Tendências de Performance",
+        "avgOpenRate": "Taxa de Abertura Média",
+        "avgClickRate": "Taxa de Clique Média",
+        "avgConversionRate": "Taxa de Conversão Média"
+      }
+    },
+    "reports": {
+      "title": "Relatórios Executivos",
+      "generateReport": "Gerar Relatório Completo",
+      "reportGenerated": "Relatório gerado com sucesso!",
+      "financialSummary": {
+        "title": "Resumo Financeiro",
+        "totalInvestment": "Investimento Total",
+        "generatedRevenue": "Receita Gerada",
+        "totalROI": "ROI Total"
+      },
+      "engagement": {
+        "title": "Métricas de Engajamento",
+        "totalReached": "Total de Contatos Alcançados",
+        "totalEngagement": "Engajamento Total",
+        "totalConversions": "Conversões Totais"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "activeCampaignsCount": "{{count}} campanhas ativas",
+      "metrics": {
+        "activeCampaigns": "Campanhas Ativas",
+        "completed": "Concluídas",
+        "totalProcessed": "Total Processado",
+        "successRate": "Taxa de Sucesso"
+      },
+      "activeExecution": {
+        "title": "Execução Ativa",
+        "progress": "Progresso",
+        "currentStep": "Etapa atual",
+        "pause": "Pausar"
+      },
+      "recentCampaigns": "Campanhas Recentes"
     }
   }
 }

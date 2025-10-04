@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ interface Campaign {
 }
 
 const AcompanhamentoTab: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedModule, setSelectedModule] = useState<'dashboard' | 'campanhas' | 'analytics' | 'relatorios'>('dashboard');
 
   // Mock data para demonstração
@@ -101,17 +103,17 @@ const AcompanhamentoTab: React.FC = () => {
   }, [campaigns]);
 
   const handleCampaignAction = (action: string, campaignId: string) => {
-    toast.success(`Ação "${action}" executada para a campanha ${campaignId}`);
+    toast.success(t('monitoring.campaigns.toast.actionExecuted', { action, campaignId }));
   };
 
 
   const CampanhasModule = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Gestão de Campanhas</h2>
-        <Button onClick={() => toast.success("Funcionalidade em desenvolvimento")}>
+        <h2 className="text-2xl font-bold">{t('monitoring.campaigns.title')}</h2>
+        <Button onClick={() => toast.success(t('monitoring.campaigns.toast.inDevelopment'))}>
           <Play className="h-4 w-4 mr-2" />
-          Nova Campanha
+          {t('monitoring.campaigns.newCampaign')}
         </Button>
       </div>
 
@@ -122,7 +124,7 @@ const AcompanhamentoTab: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold">{campaign.name}</h3>
-                  <p className="text-muted-foreground">Tipo: {campaign.type}</p>
+                  <p className="text-muted-foreground">{t('monitoring.campaigns.type')}: {campaign.type}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge 
@@ -142,39 +144,39 @@ const AcompanhamentoTab: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Performance</p>
+                  <p className="text-sm text-muted-foreground">{t('monitoring.campaigns.metrics.performance')}</p>
                   <p className="text-lg font-semibold">
-                    {((campaign.opened / campaign.sent) * 100).toFixed(1)}% abertura
+                    {((campaign.opened / campaign.sent) * 100).toFixed(1)}% {t('monitoring.campaigns.metrics.opening')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Conversão</p>
+                  <p className="text-sm text-muted-foreground">{t('monitoring.campaigns.metrics.conversion')}</p>
                   <p className="text-lg font-semibold">
-                    {((campaign.converted / campaign.sent) * 100).toFixed(1)}% convertido
+                    {((campaign.converted / campaign.sent) * 100).toFixed(1)}% {t('monitoring.campaigns.metrics.converted')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">ROI</p>
+                  <p className="text-sm text-muted-foreground">{t('monitoring.campaigns.metrics.roi')}</p>
                   <p className="text-lg font-semibold text-green-600">{campaign.roi}%</p>
                 </div>
               </div>
 
               <div className="flex justify-end gap-2">
                 {campaign.status === 'ativa' && (
-                  <Button size="sm" variant="outline" onClick={() => handleCampaignAction('pausar', campaign.id)}>
+                  <Button size="sm" variant="outline" onClick={() => handleCampaignAction(t('monitoring.campaigns.actions.pause'), campaign.id)}>
                     <Pause className="h-4 w-4 mr-1" />
-                    Pausar
+                    {t('monitoring.campaigns.actions.pause')}
                   </Button>
                 )}
                 {campaign.status === 'pausada' && (
-                  <Button size="sm" variant="outline" onClick={() => handleCampaignAction('reativar', campaign.id)}>
+                  <Button size="sm" variant="outline" onClick={() => handleCampaignAction(t('monitoring.campaigns.actions.reactivate'), campaign.id)}>
                     <Play className="h-4 w-4 mr-1" />
-                    Reativar
+                    {t('monitoring.campaigns.actions.reactivate')}
                   </Button>
                 )}
-                <Button size="sm" variant="outline" onClick={() => handleCampaignAction('analisar', campaign.id)}>
+                <Button size="sm" variant="outline" onClick={() => handleCampaignAction(t('monitoring.campaigns.actions.analyze'), campaign.id)}>
                   <BarChart3 className="h-4 w-4 mr-1" />
-                  Analisar
+                  {t('monitoring.campaigns.actions.analyze')}
                 </Button>
               </div>
             </CardContent>
@@ -186,12 +188,12 @@ const AcompanhamentoTab: React.FC = () => {
 
   const AnalyticsModule = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Analytics Detalhado</h2>
+      <h2 className="text-2xl font-bold">{t('monitoring.analytics.title')}</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Performance por Tipo de Campanha</CardTitle>
+            <CardTitle>{t('monitoring.analytics.performanceByType')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -203,8 +205,8 @@ const AcompanhamentoTab: React.FC = () => {
                   <div key={type} className="flex items-center justify-between p-3 border rounded">
                     <span className="font-medium">{type}</span>
                     <div className="text-right">
-                      <p className="font-semibold">{avgRoi.toFixed(0)}% ROI</p>
-                      <p className="text-sm text-muted-foreground">{typeCampaigns.length} campanhas</p>
+                      <p className="font-semibold">{avgRoi.toFixed(0)}% {t('monitoring.campaigns.metrics.roi')}</p>
+                      <p className="text-sm text-muted-foreground">{typeCampaigns.length} {t('monitoring.analytics.campaigns')}</p>
                     </div>
                   </div>
                 );
@@ -215,26 +217,26 @@ const AcompanhamentoTab: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Tendências de Performance</CardTitle>
+            <CardTitle>{t('monitoring.analytics.trends.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span>Taxa de Abertura Média</span>
+                <span>{t('monitoring.analytics.trends.avgOpenRate')}</span>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-green-500" />
                   <span className="font-semibold">42.3%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span>Taxa de Clique Média</span>
+                <span>{t('monitoring.analytics.trends.avgClickRate')}</span>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-green-500" />
                   <span className="font-semibold">12.8%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span>Taxa de Conversão Média</span>
+                <span>{t('monitoring.analytics.trends.avgConversionRate')}</span>
                 <div className="flex items-center gap-2">
                   <TrendingDown className="h-4 w-4 text-red-500" />
                   <span className="font-semibold">4.2%</span>
@@ -250,28 +252,28 @@ const AcompanhamentoTab: React.FC = () => {
   const RelatoriosModule = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Relatórios Executivos</h2>
-        <Button onClick={() => toast.success("Relatório gerado com sucesso!")}>
-          Gerar Relatório Completo
+        <h2 className="text-2xl font-bold">{t('monitoring.reports.title')}</h2>
+        <Button onClick={() => toast.success(t('monitoring.reports.reportGenerated'))}>
+          {t('monitoring.reports.generateReport')}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Resumo Financeiro</CardTitle>
+            <CardTitle>{t('monitoring.reports.financialSummary.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span>Investimento Total</span>
+              <span>{t('monitoring.reports.financialSummary.totalInvestment')}</span>
               <span className="font-semibold">R$ {totalMetrics.investment.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Receita Gerada</span>
+              <span>{t('monitoring.reports.financialSummary.generatedRevenue')}</span>
               <span className="font-semibold text-green-600">R$ {totalMetrics.revenue.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-lg">
-              <span>ROI Total</span>
+              <span>{t('monitoring.reports.financialSummary.totalROI')}</span>
               <span className="font-bold text-green-600">
                 {((totalMetrics.revenue / totalMetrics.investment) * 100).toFixed(0)}%
               </span>
@@ -281,19 +283,19 @@ const AcompanhamentoTab: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Métricas de Engajamento</CardTitle>
+            <CardTitle>{t('monitoring.reports.engagement.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span>Total de Contatos Alcançados</span>
+              <span>{t('monitoring.reports.engagement.totalReached')}</span>
               <span className="font-semibold">{totalMetrics.sent.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Engajamento Total</span>
+              <span>{t('monitoring.reports.engagement.totalEngagement')}</span>
               <span className="font-semibold">{totalMetrics.opened.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Conversões Totais</span>
+              <span>{t('monitoring.reports.engagement.totalConversions')}</span>
               <span className="font-semibold text-green-600">{totalMetrics.converted}</span>
             </div>
           </CardContent>
@@ -307,10 +309,10 @@ const AcompanhamentoTab: React.FC = () => {
       <div className="p-6">
         <Tabs value={selectedModule} onValueChange={(value) => setSelectedModule(value as any)}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="campanhas">Campanhas</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+            <TabsTrigger value="dashboard">{t('monitoring.tabs.dashboard')}</TabsTrigger>
+            <TabsTrigger value="campanhas">{t('monitoring.tabs.campaigns')}</TabsTrigger>
+            <TabsTrigger value="analytics">{t('monitoring.tabs.analytics')}</TabsTrigger>
+            <TabsTrigger value="relatorios">{t('monitoring.tabs.reports')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">

@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   SectionHeader, 
   MetricCard, 
@@ -27,106 +28,126 @@ const MetricsGrid = memo<{ metrics: any[] }>(({ metrics }) => (
 const ActiveExecutionCard = memo<{ 
   execution: any; 
   onStop: () => void;
-}>(({ execution, onStop }) => (
-  <Card className="bg-blue-50 border-blue-200">
-    <CardHeader>
-      <CardTitle className="flex items-center justify-between">
-        <span className="flex items-center gap-2 text-blue-700">
-          <Activity className="h-5 w-5" />
-          Execução Ativa
-        </span>
-        <Button size="sm" variant="outline" onClick={onStop}>
-          <Pause className="h-4 w-4 mr-2" />
-          Pausar
-        </Button>
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        <div>
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Progresso</span>
-            <span className="text-sm text-muted-foreground">
-              {execution.progress}%
-            </span>
+}>(({ execution, onStop }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <Card className="bg-blue-50 border-blue-200">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-blue-700">
+            <Activity className="h-5 w-5" />
+            {t('monitoring.dashboard.activeExecution.title')}
+          </span>
+          <Button size="sm" variant="outline" onClick={onStop}>
+            <Pause className="h-4 w-4 mr-2" />
+            {t('monitoring.dashboard.activeExecution.pause')}
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between mb-2">
+              <span className="text-sm font-medium">{t('monitoring.dashboard.activeExecution.progress')}</span>
+              <span className="text-sm text-muted-foreground">
+                {execution.progress}%
+              </span>
+            </div>
+            <Progress value={execution.progress} />
           </div>
-          <Progress value={execution.progress} />
+          <div>
+            <p className="text-sm text-muted-foreground">{t('monitoring.dashboard.activeExecution.currentStep')}:</p>
+            <p className="font-medium">{execution.currentStep}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Etapa atual:</p>
-          <p className="font-medium">{execution.currentStep}</p>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-));
+      </CardContent>
+    </Card>
+  );
+});
 
 const RecentCampaignsList = memo<{
   campaigns: any[];
   onAction: (action: string, campaignId: string) => void;
   canExecute: (id: string) => boolean;
-}>(({ campaigns, onAction, canExecute }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        <Clock className="h-5 w-5" />
-        Campanhas Recentes
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <StackLayout spacing="md">
-        {campaigns.map((campaign) => (
-          <CampaignListItem
-            key={campaign.id}
-            campaign={campaign}
-            onAction={onAction}
-            canExecute={canExecute(campaign.id)}
-          />
-        ))}
-      </StackLayout>
-    </CardContent>
-  </Card>
-));
+}>(({ campaigns, onAction, canExecute }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          {t('monitoring.dashboard.recentCampaigns')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <StackLayout spacing="md">
+          {campaigns.map((campaign) => (
+            <CampaignListItem
+              key={campaign.id}
+              campaign={campaign}
+              onAction={onAction}
+              canExecute={canExecute(campaign.id)}
+            />
+          ))}
+        </StackLayout>
+      </CardContent>
+    </Card>
+  );
+});
 
 const CampaignListItem = memo<{
   campaign: any;
   onAction: (action: string, campaignId: string) => void;
   canExecute: boolean;
 }>(({ campaign, onAction, canExecute }) => {
+  const { t } = useTranslation();
+  
   const metricsContent = campaign.metrics && (
     <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
       <div>
-        <span className="text-muted-foreground">Processados:</span>
+        <span className="text-muted-foreground">{t('monitoring.campaigns.metrics.processed')}:</span>
         <p className="font-medium">{campaign.metrics.totalProcessed || 0}</p>
       </div>
       <div>
-        <span className="text-muted-foreground">Taxa de Sucesso:</span>
+        <span className="text-muted-foreground">{t('monitoring.campaigns.metrics.successRate')}:</span>
         <p className="font-medium">{campaign.metrics.successRate || 0}%</p>
       </div>
       <div>
-        <span className="text-muted-foreground">Economia:</span>
+        <span className="text-muted-foreground">{t('monitoring.campaigns.metrics.savings')}:</span>
         <p className="font-medium">R$ {(campaign.metrics.estimatedSavings || 0).toLocaleString('pt-BR')}</p>
       </div>
     </div>
   );
 
+  const getCampaignTypeLabel = (type: string) => {
+    switch(type) {
+      case 'mass_update': return t('monitoring.campaigns.types.massUpdate');
+      case 'batch_analysis': return t('monitoring.campaigns.types.batchAnalysis');
+      default: return t('monitoring.campaigns.types.roiOptimization');
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch(status) {
+      case 'running': return t('monitoring.campaigns.status.running');
+      case 'completed': return t('monitoring.campaigns.status.completed');
+      default: return t('monitoring.campaigns.status.draft');
+    }
+  };
+
   return (
   <ListItem
     title={campaign.name}
-    subtitle={`${
-      campaign.type === 'mass_update' ? 'Atualização em Massa' :
-      campaign.type === 'batch_analysis' ? 'Análise em Lote' :
-      'Otimização de ROI'
-    } • ${campaign.createdAt.toLocaleDateString('pt-BR')}`}
+    subtitle={`${getCampaignTypeLabel(campaign.type)} • ${campaign.createdAt.toLocaleDateString('pt-BR')}`}
     status={
       <Badge variant={
         campaign.status === 'running' ? 'default' :
         campaign.status === 'completed' ? 'secondary' :
         'outline'
       }>
-        {campaign.status === 'running' ? 'Executando' :
-         campaign.status === 'completed' ? 'Concluída' :
-         'Rascunho'}
+        {getStatusLabel(campaign.status)}
       </Badge>
     }
     actions={
@@ -137,7 +158,7 @@ const CampaignListItem = memo<{
             onClick={() => onAction('execute', campaign.id)}
           >
             <Play className="h-4 w-4 mr-1" />
-            Executar
+            {t('monitoring.campaigns.actions.execute')}
           </Button>
         )}
         <Button 
@@ -146,7 +167,7 @@ const CampaignListItem = memo<{
           onClick={() => onAction('details', campaign.id)}
         >
           <Eye className="h-4 w-4 mr-1" />
-          Detalhes
+          {t('monitoring.campaigns.actions.details')}
         </Button>
       </div>
     }
@@ -158,6 +179,7 @@ const CampaignListItem = memo<{
 
 // Container Component (Logic + Presentation)
 export const DashboardModule = memo(() => {
+  const { t } = useTranslation();
   const {
     activeCampaigns,
     completedCampaigns,
@@ -172,30 +194,30 @@ export const DashboardModule = memo(() => {
   // Business Logic
   const metrics = React.useMemo(() => [
     {
-      title: 'Campanhas Ativas',
+      title: t('monitoring.dashboard.metrics.activeCampaigns'),
       value: activeCampaigns.length,
       icon: <Activity className="h-5 w-5" />,
       variant: 'default' as const
     },
     {
-      title: 'Concluídas',
+      title: t('monitoring.dashboard.metrics.completed'),
       value: completedCampaigns.length,
       icon: <CheckCircle className="h-5 w-5" />,
       variant: 'success' as const
     },
     {
-      title: 'Total Processado',
+      title: t('monitoring.dashboard.metrics.totalProcessed'),
       value: totalMetrics.totalProcessed.toLocaleString('pt-BR'),
       icon: <Target className="h-5 w-5" />,
       variant: 'default' as const
     },
     {
-      title: 'Taxa de Sucesso',
+      title: t('monitoring.dashboard.metrics.successRate'),
       value: `${totalMetrics.avgSuccessRate.toFixed(1)}%`,
       icon: <TrendingUp className="h-5 w-5" />,
       variant: 'success' as const
     }
-  ], [activeCampaigns.length, completedCampaigns.length, totalMetrics]);
+  ], [activeCampaigns.length, completedCampaigns.length, totalMetrics, t]);
 
   const recentCampaigns = React.useMemo(() => getRecentCampaigns(), [getRecentCampaigns]);
 
@@ -203,29 +225,29 @@ export const DashboardModule = memo(() => {
     switch (action) {
       case 'execute':
         executeCampaign(campaignId);
-        toast.success('Campanha iniciada com sucesso!');
+        toast.success(t('monitoring.campaigns.toast.campaignStarted'));
         break;
       case 'details':
-        toast.info('Carregando detalhes da campanha...');
+        toast.info(t('monitoring.campaigns.toast.loadingDetails'));
         break;
       default:
-        toast.info(`Ação ${action} executada`);
+        toast.info(t('monitoring.campaigns.toast.actionExecuted', { action, campaignId }));
     }
-  }, [executeCampaign]);
+  }, [executeCampaign, t]);
 
   const handleStopExecution = React.useCallback(() => {
     stopExecution();
-    toast.info('Execução interrompida');
-  }, [stopExecution]);
+    toast.info(t('monitoring.campaigns.toast.executionStopped'));
+  }, [stopExecution, t]);
 
   // Presentation
   return (
     <StackLayout spacing="lg">
       <SectionHeader
-        title="Dashboard"
+        title={t('monitoring.dashboard.title')}
         badge={
           <Badge variant="outline" className="text-sm">
-            {activeCampaigns.length} campanhas ativas
+            {t('monitoring.dashboard.activeCampaignsCount', { count: activeCampaigns.length })}
           </Badge>
         }
       />
