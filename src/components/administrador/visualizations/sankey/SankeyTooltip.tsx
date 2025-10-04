@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 
 interface SankeyTooltipProps {
@@ -9,52 +10,48 @@ interface SankeyTooltipProps {
 }
 
 const SankeyTooltip: React.FC<SankeyTooltipProps> = ({ active, payload, enhanced = false }) => {
+  const { t } = useTranslation();
+  
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
 
     if (data.source && data.target) {
       // É um link
-      return renderLinkTooltip(data, enhanced);
+      return renderLinkTooltip(data, enhanced, t);
     } else {
       // É um nó
-      return renderNodeTooltip(data, enhanced);
+      return renderNodeTooltip(data, enhanced, t);
     }
   }
 
   return null;
 };
 
-const renderLinkTooltip = (data: any, enhanced: boolean) => {
+const renderLinkTooltip = (data: any, enhanced: boolean, t: any) => {
   const sourceName = data.sourceName || (typeof data.source === 'object' ? data.source.name : '');
   const targetName = data.targetName || (typeof data.target === 'object' ? data.target.name : '');
-  const efficacyScore = data.efficacyScore || (data.value / 20); // Convertendo de volta para escala 0-5
+  const efficacyScore = data.efficacyScore || (data.value / 20);
   
-  let relationshipType = 'Outro';
-  switch (data.relationshipType) {
-    case 'prevention':
-      relationshipType = 'Prevenção';
-      break;
-    case 'treatment':
-      relationshipType = 'Tratamento';
-      break;
-    case 'support':
-      relationshipType = 'Suporte';
-      break;
-    case 'study':
-      relationshipType = 'Estudo';
-      break;
-    default:
-      relationshipType = 'Relação';
-  }
+  const getRelationshipType = (type: string) => {
+    switch (type) {
+      case 'prevention': return t('sankey.tooltip.prevention');
+      case 'treatment': return t('sankey.tooltip.treatment');
+      case 'support': return t('sankey.tooltip.support');
+      case 'study': return t('sankey.tooltip.study');
+      default: return t('sankey.tooltip.relation');
+    }
+  };
+
+  const relationshipType = getRelationshipType(data.relationshipType);
 
   let badgeColor = 'bg-gray-100 text-gray-700';
-  if (relationshipType === 'Prevenção') {
+  if (data.relationshipType === 'prevention') {
     badgeColor = 'bg-green-100 text-green-700';
-  } else if (relationshipType === 'Tratamento') {
+  } else if (data.relationshipType === 'treatment') {
     badgeColor = 'bg-blue-100 text-blue-700';
-  } else if (relationshipType === 'Suporte') {
+  } else if (data.relationshipType === 'support') {
     badgeColor = 'bg-amber-100 text-amber-700';
-  } else if (relationshipType === 'Estudo') {
+  } else if (data.relationshipType === 'study') {
     badgeColor = 'bg-purple-100 text-purple-700';
   }
 
@@ -70,13 +67,13 @@ const renderLinkTooltip = (data: any, enhanced: boolean) => {
         <Badge className={`${badgeColor} text-xs`}>{relationshipType}</Badge>
         {enhanced && data.treatabilityScore && (
           <Badge className="ml-1 bg-rose-100 text-rose-700 text-xs">
-            Trat: {data.treatabilityScore}/5
+            {t('sankey.tooltip.treatability')}: {data.treatabilityScore}/5
           </Badge>
         )}
       </div>
       
       <div className="flex items-center mb-1">
-        <span className="text-sm mr-2">Eficácia:</span>
+        <span className="text-sm mr-2">{t('sankey.tooltip.efficacy')}:</span>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="h-2 rounded-full"
@@ -91,38 +88,43 @@ const renderLinkTooltip = (data: any, enhanced: boolean) => {
       
       {data.studyCount && (
         <div className="text-xs text-gray-500">
-          Baseado em {data.studyCount} estudo{data.studyCount !== 1 ? 's' : ''}
+          {t('sankey.tooltip.basedOn')} {data.studyCount} {data.studyCount !== 1 ? t('sankey.tooltip.studyPlural') : t('sankey.tooltip.studySingular')}
         </div>
       )}
       
-      <div className="text-xs text-gray-500 mt-1">Clique para mais detalhes</div>
+      <div className="text-xs text-gray-500 mt-1">{t('sankey.tooltip.clickDetails')}</div>
     </div>
   );
 };
 
-const renderNodeTooltip = (data: any, enhanced: boolean) => {
-  let categoryLabel = data.category;
+const renderNodeTooltip = (data: any, enhanced: boolean, t: any) => {
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'nutraceutico': return t('sankey.tooltip.nutraceutical');
+      case 'condicao': return t('sankey.tooltip.condition');
+      case 'outcome': return t('sankey.tooltip.outcome');
+      case 'severidade': return t('sankey.tooltip.severity');
+      case 'tratabilidade': return t('sankey.tooltip.treatability');
+      default: return category;
+    }
+  };
+
   let categoryColor = 'bg-gray-100 text-gray-700';
   
   switch (data.category) {
     case 'nutraceutico':
-      categoryLabel = 'Nutracêutico';
       categoryColor = 'bg-blue-100 text-blue-700';
       break;
     case 'condicao':
-      categoryLabel = 'Condição';
       categoryColor = 'bg-green-100 text-green-700';
       break;
     case 'outcome':
-      categoryLabel = 'Outcome';
       categoryColor = 'bg-amber-100 text-amber-700';
       break;
     case 'severidade':
-      categoryLabel = 'Severidade';
       categoryColor = 'bg-purple-100 text-purple-700';
       break;
     case 'tratabilidade':
-      categoryLabel = 'Tratabilidade';
       categoryColor = 'bg-rose-100 text-rose-700';
       break;
   }
@@ -130,7 +132,7 @@ const renderNodeTooltip = (data: any, enhanced: boolean) => {
   return (
     <div className="bg-white p-3 border rounded shadow-md min-w-[200px] max-w-[300px]">
       <div className="font-medium text-base mb-1">{data.name}</div>
-      <Badge className={`${categoryColor} mb-2`}>{categoryLabel}</Badge>
+      <Badge className={`${categoryColor} mb-2`}>{getCategoryLabel(data.category)}</Badge>
       
       {data.description && (
         <p className="text-sm text-gray-600 mb-2 line-clamp-3">{data.description}</p>
@@ -138,7 +140,7 @@ const renderNodeTooltip = (data: any, enhanced: boolean) => {
       
       {enhanced && data.value && (
         <div className="text-xs flex items-center mb-1">
-          <span className="text-gray-600 mr-1">Relevância:</span>
+          <span className="text-gray-600 mr-1">{t('sankey.tooltip.relevance')}:</span>
           <div className="w-24 bg-gray-200 rounded-full h-1.5">
             <div
               className="h-1.5 rounded-full bg-blue-500"
@@ -159,7 +161,7 @@ const renderNodeTooltip = (data: any, enhanced: boolean) => {
         </div>
       )}
       
-      <div className="text-xs text-gray-500 mt-1">Clique para ver conexões</div>
+      <div className="text-xs text-gray-500 mt-1">{t('sankey.tooltip.clickConnections')}</div>
     </div>
   );
 };

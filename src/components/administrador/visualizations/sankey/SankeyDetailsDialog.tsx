@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,28 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
   selectedLink,
   selectedNode,
 }) => {
+  const { t } = useTranslation();
+  
   if (!selectedLink && !selectedNode) return null;
+
+  const getCategoryLabel = (category: string) => {
+    switch(category) {
+      case 'nutraceutico': return t('sankey.details.nutraceutical');
+      case 'condicao': return t('sankey.details.condition');
+      case 'outcome': return t('sankey.details.outcome');
+      case 'severidade': return t('sankey.details.severity');
+      default: return category;
+    }
+  };
+
+  const getRelationshipTypeLabel = (type: string) => {
+    switch(type) {
+      case 'prevention': return t('sankey.details.prevention');
+      case 'treatment': return t('sankey.details.treatment');
+      case 'support': return t('sankey.details.support');
+      default: return type;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -29,10 +51,10 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
               <span>{selectedNode.name}</span>
             ) : selectedLink ? (
               <span>
-                Relação: <span className="font-normal">{selectedLink.sourceName || 'Origem'}</span> → <span className="font-normal">{selectedLink.targetName || 'Destino'}</span>
+                {t('sankey.details.relationTitle')}: <span className="font-normal">{selectedLink.sourceName || t('sankey.details.source')}</span> → <span className="font-normal">{selectedLink.targetName || t('sankey.details.target')}</span>
               </span>
             ) : (
-              'Detalhes'
+              t('sankey.details.title')
             )}
           </DialogTitle>
           <DialogDescription>
@@ -44,25 +66,21 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
                 selectedNode.category === 'severidade' ? 'bg-purple-100 text-purple-700' :
                 'bg-gray-100 text-gray-700'
               }>
-                {selectedNode.category === 'nutraceutico' ? 'Nutracêutico' : 
-                 selectedNode.category === 'condicao' ? 'Condição de Saúde' : 
-                 selectedNode.category === 'outcome' ? 'Resultado' : 
-                 selectedNode.category === 'severidade' ? 'Severidade' : 
-                 selectedNode.category}
+                {getCategoryLabel(selectedNode.category)}
               </Badge>
             ) : selectedLink ? (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-gray-100 text-gray-700">
-                  Eficácia: {selectedLink.value}%
+                  {t('sankey.details.efficacy')}: {selectedLink.value}%
                 </Badge>
                 {selectedLink.studyCount && (
                   <Badge variant="outline" className="bg-blue-100 text-blue-700">
-                    {selectedLink.studyCount} Estudos
+                    {selectedLink.studyCount} {t('sankey.details.studies')}
                   </Badge>
                 )}
                 {selectedLink.evidenceLevel && (
                   <Badge variant="outline" className="bg-green-100 text-green-700">
-                    Evidência: {selectedLink.evidenceLevel}
+                    {t('sankey.details.evidence')}: {selectedLink.evidenceLevel}
                   </Badge>
                 )}
               </div>
@@ -73,43 +91,40 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
         <div className="py-4">
           {selectedNode ? (
             <div>
-              <h4 className="text-sm font-medium mb-1">Descrição</h4>
+              <h4 className="text-sm font-medium mb-1">{t('sankey.details.description')}</h4>
               <p className="text-sm text-gray-700 mb-4">
-                {selectedNode.description || `${selectedNode.name} é um ${selectedNode.category}.`}
+                {selectedNode.description || `${selectedNode.name} é um ${getCategoryLabel(selectedNode.category)}.`}
               </p>
             </div>
           ) : selectedLink ? (
             <div>
               {selectedLink.description ? (
                 <div className="mb-4">
-                  <h4 className="text-sm font-medium mb-1">Detalhes</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('sankey.details.description')}</h4>
                   <p className="text-sm text-gray-700">{selectedLink.description}</p>
                 </div>
               ) : null}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Origem</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('sankey.details.source')}</h4>
                   <div className="p-3 rounded-md bg-gray-50 text-sm">
-                    {selectedLink.sourceName || 'Origem'}
+                    {selectedLink.sourceName || t('sankey.details.source')}
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Destino</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('sankey.details.target')}</h4>
                   <div className="p-3 rounded-md bg-gray-50 text-sm">
-                    {selectedLink.targetName || 'Destino'}
+                    {selectedLink.targetName || t('sankey.details.target')}
                   </div>
                 </div>
               </div>
               
               {selectedLink.relationshipType && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-1">Tipo de Relação</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('sankey.details.relationshipType')}</h4>
                   <Badge variant="outline">
-                    {selectedLink.relationshipType === 'prevention' ? 'Prevenção' : 
-                     selectedLink.relationshipType === 'treatment' ? 'Tratamento' : 
-                     selectedLink.relationshipType === 'support' ? 'Suporte' : 
-                     selectedLink.relationshipType}
+                    {getRelationshipTypeLabel(selectedLink.relationshipType)}
                   </Badge>
                 </div>
               )}
@@ -119,7 +134,7 @@ const SankeyDetailsDialog: React.FC<SankeyDetailsDialogProps> = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+            {t('sankey.details.close')}
           </Button>
         </DialogFooter>
       </DialogContent>
