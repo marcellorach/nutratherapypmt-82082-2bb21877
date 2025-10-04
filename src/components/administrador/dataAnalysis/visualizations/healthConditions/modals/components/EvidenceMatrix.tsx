@@ -9,6 +9,7 @@ import { ExternalLink, Search, FileText, Award, Users, Brain } from "lucide-reac
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { scoreStudyQuality, scoreStudyRelevance } from '@/services/ntai/scoring';
+import { useTranslation } from 'react-i18next';
 interface Study {
   id: string;
   title: string;
@@ -29,6 +30,7 @@ interface EvidenceMatrixProps {
 const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
   condition
 }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
@@ -215,15 +217,15 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
   const getEffectSizeBadge = (size: number) => {
     if (size >= 1.8) return {
       variant: 'default' as const,
-      text: 'Alto'
+      text: t('visualization.detailedAnalysis.evidence.high')
     };
     if (size >= 1.3) return {
       variant: 'secondary' as const,
-      text: 'Moderado'
+      text: t('visualization.detailedAnalysis.evidence.moderate')
     };
     return {
       variant: 'outline' as const,
-      text: 'Baixo'
+      text: t('visualization.detailedAnalysis.evidence.low')
     };
   };
   return <div className="space-y-6">
@@ -233,7 +235,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
           <CardContent className="p-4 text-center">
             <FileText className="h-6 w-6 mx-auto mb-2 text-primary" />
             <div className="text-2xl font-bold">{studies.length}</div>
-            <p className="text-sm text-muted-foreground">Estudos Total</p>
+            <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.evidence.totalStudies')}</p>
           </CardContent>
         </Card>
 
@@ -241,7 +243,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
           <CardContent className="p-4 text-center">
             <Award className="h-6 w-6 mx-auto mb-2 text-green-600" />
             <div className="text-2xl font-bold">{studies.filter(s => s.type === 'RCT').length}</div>
-            <p className="text-sm text-muted-foreground">RCTs</p>
+            <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.evidence.rcts')}</p>
           </CardContent>
         </Card>
 
@@ -251,7 +253,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
             <div className="text-2xl font-bold">
               {studies.reduce((sum, s) => sum + s.sampleSize, 0)}
             </div>
-            <p className="text-sm text-muted-foreground">Animais Estudados</p>
+            <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.evidence.animalsStudied')}</p>
           </CardContent>
         </Card>
 
@@ -260,7 +262,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
             <div className="text-2xl font-bold text-primary">
               {(studies.reduce((sum, s) => sum + s.confidenceScore, 0) / studies.length).toFixed(1)}
             </div>
-            <p className="text-sm text-muted-foreground">Confiança Média</p>
+            <p className="text-sm text-muted-foreground">{t('visualization.detailedAnalysis.evidence.averageConfidence')}</p>
           </CardContent>
         </Card>
       </div>
@@ -270,7 +272,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
         {/* Literatura Existente */}
         <Card>
           <CardHeader>
-            <CardTitle>Distribuição por Qualidade de Evidência</CardTitle>
+            <CardTitle>{t('visualization.detailedAnalysis.evidence.qualityDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -294,7 +296,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
-              Evidências Esperadas (AI PL Nutra)
+              {t('visualization.detailedAnalysis.evidence.aiPredictions')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -308,11 +310,11 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
                     <Tooltip 
                       formatter={(value, name) => [
                         typeof value === 'number' ? value.toFixed(1) : value, 
-                        name === 'expectedEfficacy' ? 'Eficácia Esperada' : 'Confiança da Predição'
+                        name === 'expectedEfficacy' ? t('visualization.detailedAnalysis.evidence.expectedEfficacy') : t('visualization.detailedAnalysis.evidence.predictionConfidence')
                       ]}
                     />
-                    <Bar dataKey="expectedEfficacy" fill="hsl(var(--chart-2))" name="Eficácia Esperada" />
-                    <Bar dataKey="predictionConfidence" fill="hsl(var(--chart-3))" name="Confiança da Predição" />
+                    <Bar dataKey="expectedEfficacy" fill="hsl(var(--chart-2))" name={t('visualization.detailedAnalysis.evidence.expectedEfficacy')} />
+                    <Bar dataKey="predictionConfidence" fill="hsl(var(--chart-3))" name={t('visualization.detailedAnalysis.evidence.predictionConfidence')} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -343,7 +345,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar estudos por título ou autor..."
+                placeholder={t('visualization.detailedAnalysis.evidence.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -351,10 +353,10 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Tipo de estudo" />
+                <SelectValue placeholder={t('visualization.detailedAnalysis.evidence.studyType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="all">{t('visualization.detailedAnalysis.evidence.allTypes')}</SelectItem>
                 <SelectItem value="RCT">RCT</SelectItem>
                 <SelectItem value="Meta-análise">Meta-análise</SelectItem>
                 <SelectItem value="Observacional">Observacional</SelectItem>
@@ -363,12 +365,12 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
             </Select>
             <Select value={filterSpecies} onValueChange={setFilterSpecies}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="Espécie" />
+                <SelectValue placeholder={t('visualization.detailedAnalysis.evidence.species')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="caninos">Caninos</SelectItem>
-                <SelectItem value="felinos">Felinos</SelectItem>
+                <SelectItem value="all">{t('visualization.detailedAnalysis.evidence.allSpecies')}</SelectItem>
+                <SelectItem value="caninos">{t('visualization.detailedAnalysis.evidence.canines')}</SelectItem>
+                <SelectItem value="felinos">{t('visualization.detailedAnalysis.evidence.felines')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -378,19 +380,19 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
       {/* Tabela de estudos */}
       <Card>
         <CardHeader>
-          <CardTitle>Base de Evidências Científicas</CardTitle>
+          <CardTitle>{t('visualization.detailedAnalysis.evidence.scientificBase')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Estudo</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Amostra</TableHead>
-                <TableHead>Resultado</TableHead>
-                <TableHead>Confiança</TableHead>
-                <TableHead>Efeito</TableHead>
-                <TableHead>Acesso</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.study')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.type')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.sample')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.result')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.confidence')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.effect')}</TableHead>
+                <TableHead>{t('visualization.detailedAnalysis.evidence.access')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -437,7 +439,7 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
           </Table>
           
           {filteredStudies.length === 0 && <div className="text-center py-8 text-muted-foreground">
-              Nenhum estudo encontrado com os filtros aplicados.
+              {t('visualization.detailedAnalysis.evidence.noStudiesFound')}
             </div>}
         </CardContent>
       </Card>
