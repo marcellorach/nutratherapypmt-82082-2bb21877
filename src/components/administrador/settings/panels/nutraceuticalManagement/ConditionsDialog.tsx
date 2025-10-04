@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import NutraceuticalConditionsEditor from "../NutraceuticalConditionsEditor";
+import { useTranslation } from 'react-i18next';
 
 interface ConditionsDialogProps {
   isOpen: boolean;
@@ -24,15 +25,17 @@ const ConditionsDialog: React.FC<ConditionsDialogProps> = ({
   nutraceutical,
   onComplete,
 }) => {
+  const { t } = useTranslation();
+  
   if (!nutraceutical) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gerenciar Condições de Saúde</DialogTitle>
+          <DialogTitle>{t('nutraceuticals.conditions.manageTitle')}</DialogTitle>
           <DialogDescription>
-            Associe condições de saúde ao nutracêutico "{nutraceutical?.name}".
+            {t('nutraceuticals.conditions.manageDescription', { name: nutraceutical?.name })}
           </DialogDescription>
         </DialogHeader>
         
@@ -48,7 +51,7 @@ const ConditionsDialog: React.FC<ConditionsDialogProps> = ({
           <Button 
             onClick={() => setIsOpen(false)}
           >
-            Fechar
+            {t('nutraceuticals.conditions.close')}
           </Button>
         </DialogFooter>
       </DialogContent>

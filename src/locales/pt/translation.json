@@ -414,6 +414,11 @@
       "placeholder": "Funcionalidade será refatorada posteriormente.",
       "close": "Fechar"
     },
+    "conditions": {
+      "manageTitle": "Gerenciar Condições de Saúde",
+      "manageDescription": "Associe condições de saúde ao nutracêutico \"{{name}}\".",
+      "close": "Fechar"
+    },
     "toast": {
       "success": "Sucesso",
       "error": "Erro",

@@ -414,6 +414,11 @@
       "placeholder": "Functionality will be refactored later.",
       "close": "Close"
     },
+    "conditions": {
+      "manageTitle": "Manage Health Conditions",
+      "manageDescription": "Associate health conditions with nutraceutical \"{{name}}\".",
+      "close": "Close"
+    },
     "toast": {
       "success": "Success",
       "error": "Error",
