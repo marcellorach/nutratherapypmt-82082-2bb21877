@@ -315,6 +315,68 @@
         "notSpecified": "Not specified",
         "studyNotes": "Study Notes"
       },
+      "models": {
+        "dashboard": {
+          "title": "Predictive Models Overview",
+          "subtitle": "Track the evolution and performance of our proprietary models",
+          "totalModels": "Active Models",
+          "avgAccuracy": "Average Accuracy",
+          "totalSamples": "Total Samples",
+          "insights": "Insights",
+          "growthRate": "Growth",
+          "active": "Collecting",
+          "comparison": "Model Comparison",
+          "topModels": "Top 3 Models by Performance",
+          "samples": "samples",
+          "accuracy": "accuracy",
+          "recentInsights": "Recent Discoveries"
+        },
+        "status": {
+          "initial": "🌱 Initial",
+          "growing": "📈 Growing",
+          "mature": "✅ Mature",
+          "stateOfArt": "🎯 State of the Art"
+        },
+        "confidence": {
+          "high": "High Confidence",
+          "medium": "Medium Confidence",
+          "low": "Needs Data"
+        },
+        "tabs": {
+          "evolution": "Evolution",
+          "performance": "Performance",
+          "longitudinal": "Impact",
+          "insights": "Insights",
+          "comparison": "Comparison"
+        },
+        "evolution": {
+          "totalSamples": "Total Samples",
+          "growthRate": "Monthly Growth",
+          "currentAccuracy": "Current Accuracy",
+          "nextMilestone": "Next Milestone",
+          "accuracyOverTime": "Accuracy Evolution Over Time",
+          "dataGrowth": "Dataset Growth: Treatment vs Control"
+        },
+        "performance": {
+          "byCondition": "Performance by Health Condition",
+          "accuracy": "Accuracy",
+          "effectiveness": "Effectiveness",
+          "samples": "Samples"
+        },
+        "longitudinal": {
+          "correlation": "Correlation: Data Volume × Accuracy",
+          "description": "Visualize how increasing longitudinal data volume directly impacts model accuracy.",
+          "keyInsight": "Key Insight",
+          "insightText": "The model shows diminishing returns after ~20,000 samples, reaching a maturity plateau."
+        },
+        "insights": {
+          "noInsights": "No Insights Discovered Yet",
+          "waitingData": "Proprietary insights will be discovered as the model accumulates more data."
+        },
+        "comparison": {
+          "treatmentVsControl": "Treatment vs Control Over Time"
+        }
+      },
       "groups": {
         "treatment": "Treatment Group",
         "control": "Control Group",
