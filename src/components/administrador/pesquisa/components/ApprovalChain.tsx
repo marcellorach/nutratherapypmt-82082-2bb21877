@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
 import { ApprovalStage, ApprovalStep } from '../types/sugestoes';
 import { approvalStages } from '../data/sugestoesData';
+import { snakeToCamel } from '@/lib/utils';
 
 interface ApprovalChainProps {
   approvalChain: ApprovalStep[];
@@ -52,7 +53,7 @@ const ApprovalChain: React.FC<ApprovalChainProps> = ({ approvalChain }) => {
                     ${status === 'approved' ? 'text-green-500' : 
                       status === 'current' ? 'text-amber-500' : 'text-gray-400'}
                   `} />
-                  <span className="text-sm font-medium">{t(`studyProposals.approvalChain.stages.${stage.id.replace(/_/g, '')}` as any)}</span>
+                  <span className="text-sm font-medium">{t(`studyProposals.approvalChain.stages.${snakeToCamel(stage.id)}` as any)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className={`

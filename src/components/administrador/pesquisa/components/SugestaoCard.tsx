@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Sugestao } from '../types/sugestoes';
 import { approvalStages } from '../data/sugestoesData';
+import { snakeToCamel } from '@/lib/utils';
 
 interface SugestaoCardProps {
   sugestao: Sugestao;
@@ -151,7 +152,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
                   return (
                     <div className="flex items-center text-amber-600 bg-amber-50 p-2 rounded-md">
                       <StageIcon className="h-4 w-4 mr-2" />
-                      <span className="text-xs font-medium">{t('studyProposals.card.inAnalysisBy')}: {t(`studyProposals.approvalChain.stages.${stage.id.replace(/_/g, '')}` as any)}</span>
+                      <span className="text-xs font-medium">{t('studyProposals.card.inAnalysisBy')}: {t(`studyProposals.approvalChain.stages.${snakeToCamel(stage.id)}` as any)}</span>
                     </div>
                   );
                 }
