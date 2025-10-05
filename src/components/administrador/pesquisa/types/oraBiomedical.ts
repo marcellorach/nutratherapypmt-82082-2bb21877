@@ -15,6 +15,16 @@ export interface Publication {
   journalCategory?: 'veterinária' | 'biomédica' | 'geral';
 }
 
+export interface PreviousStudy {
+  id: string;
+  title_pt: string;
+  title_en: string;
+  description_pt: string;
+  description_en: string;
+  results_pt: string;
+  results_en: string;
+}
+
 export interface Study {
   id: string;
   title: string;
@@ -56,6 +66,13 @@ export interface Study {
     effect_pt?: string;
     effect_en?: string;
   };
+  hypotheses?: {
+    primary_pt: string;
+    primary_en: string;
+    secondary_pt: string[];
+    secondary_en: string[];
+  };
+  previousStudies?: PreviousStudy[];
 }
 
 export interface DataPoint {

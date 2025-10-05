@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Study } from '../types/oraBiomedical';
 import StudyDetailsDialog from './StudyDetailsDialog';
+import { useTranslation } from 'react-i18next';
 
 interface StudyCardProps {
   study: Study;
@@ -12,6 +13,7 @@ interface StudyCardProps {
 
 const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -23,27 +25,27 @@ const StudyCard: React.FC<StudyCardProps> = ({ study }) => {
               <p className="text-sm text-muted-foreground">{study.description}</p>
             </div>
             <Button variant="outline" onClick={() => setShowDetails(true)}>
-              Ver detalhes
+              {t('admin.studies.studyCard.viewDetails')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 text-sm">
             <div className="flex justify-between">
-              <span className="font-medium">Status:</span>
+              <span className="font-medium">{t('admin.studies.studyCard.status')}</span>
               <span>{study.status}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Início:</span>
+              <span className="font-medium">{t('admin.studies.studyCard.start')}</span>
               <span>{study.startDate}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Fim:</span>
-              <span>{study.endDate || 'Em andamento'}</span>
+              <span className="font-medium">{t('admin.studies.studyCard.end')}</span>
+              <span>{study.endDate || t('admin.studies.studyCard.ongoing')}</span>
             </div>
             {study.objective && (
               <div className="flex justify-between">
-                <span className="font-medium">Objetivo:</span>
+                <span className="font-medium">{t('admin.studies.studyCard.objective')}</span>
                 <span>{study.objective}</span>
               </div>
             )}

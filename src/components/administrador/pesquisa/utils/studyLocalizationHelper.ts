@@ -69,6 +69,36 @@ export function getLocalizedCompletedStudy(
       ...pub,
       journal: isEnglish && pub.journal_en ? pub.journal_en : (pub.journal_pt || pub.journal),
       title: isEnglish && pub.title_en ? pub.title_en : (pub.title_pt || pub.title)
-    }))
+    })),
+    hypotheses: study.hypotheses,
+    previousStudies: study.previousStudies
   };
+}
+
+export function getLocalizedHypothesis(
+  study: Study,
+  language: 'pt' | 'en'
+): { primary: string; secondary: string[] } | undefined {
+  if (!study.hypotheses) return undefined;
+  
+  const isEnglish = language === 'en';
+  return {
+    primary: isEnglish ? study.hypotheses.primary_en : study.hypotheses.primary_pt,
+    secondary: isEnglish ? study.hypotheses.secondary_en : study.hypotheses.secondary_pt
+  };
+}
+
+export function getLocalizedPreviousStudies(
+  study: Study,
+  language: 'pt' | 'en'
+): Array<{ id: string; title: string; description: string; results: string }> | undefined {
+  if (!study.previousStudies) return undefined;
+  
+  const isEnglish = language === 'en';
+  return study.previousStudies.map(prev => ({
+    id: prev.id,
+    title: isEnglish ? prev.title_en : prev.title_pt,
+    description: isEnglish ? prev.description_en : prev.description_pt,
+    results: isEnglish ? prev.results_en : prev.results_pt
+  }));
 }

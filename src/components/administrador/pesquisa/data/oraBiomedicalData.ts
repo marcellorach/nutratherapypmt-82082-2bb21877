@@ -235,6 +235,55 @@ export const completedStudies: Study[] = [
         journalType: "internacional",
         journalCategory: "veterinária"
       }
+    ],
+    hypotheses: {
+      primary_pt: "A modulação da via mTOR através de análogos de rapamicina resultará em extensão significativa do tempo de vida em C. elegans, com efeitos dose-dependentes e janela terapêutica ótima quando iniciado na fase de adulto jovem.",
+      primary_en: "mTOR pathway modulation through rapamycin analogs will result in significant lifespan extension in C. elegans, with dose-dependent effects and optimal therapeutic window when initiated in the young adult phase.",
+      secondary_pt: [
+        "Os efeitos de extensão de vida serão mais pronunciados em intervenções iniciadas precocemente",
+        "A modulação de mTOR resultará em melhora da resposta ao estresse oxidativo",
+        "Haverá trade-off entre taxa de reprodução e longevidade",
+        "A extensão de vida será acompanhada por melhora nos marcadores de healthspan",
+        "Os efeitos serão mediados por vias conservadas evolutivamente",
+        "A combinação com restrição calórica potencializará os efeitos"
+      ],
+      secondary_en: [
+        "Lifespan extension effects will be more pronounced in early-initiated interventions",
+        "mTOR modulation will result in improved oxidative stress response",
+        "There will be a trade-off between reproduction rate and longevity",
+        "Lifespan extension will be accompanied by improved healthspan markers",
+        "Effects will be mediated by evolutionarily conserved pathways",
+        "Combination with caloric restriction will potentiate the effects"
+      ]
+    },
+    previousStudies: [
+      {
+        id: "prev-1",
+        title_pt: "Efeitos da rapamicina em leveduras (2006)",
+        title_en: "Rapamycin effects in yeast (2006)",
+        description_pt: "Estudo pioneiro demonstrando extensão de vida em Saccharomyces cerevisiae",
+        description_en: "Pioneering study demonstrating lifespan extension in Saccharomyces cerevisiae",
+        results_pt: "Extensão de 20% na longevidade replicativa",
+        results_en: "20% extension in replicative longevity"
+      },
+      {
+        id: "prev-2",
+        title_pt: "Rapamicina em Drosophila (2009)",
+        title_en: "Rapamycin in Drosophila (2009)",
+        description_pt: "Investigação dos efeitos de mTOR em moscas da fruta",
+        description_en: "Investigation of mTOR effects in fruit flies",
+        results_pt: "Extensão significativa dependente de sexo e idade",
+        results_en: "Significant sex- and age-dependent extension"
+      },
+      {
+        id: "prev-3",
+        title_pt: "Via mTOR em C. elegans selvagem (2015)",
+        title_en: "mTOR pathway in wild-type C. elegans (2015)",
+        description_pt: "Caracterização detalhada da via mTOR em vermes não-mutantes",
+        description_en: "Detailed characterization of mTOR pathway in non-mutant worms",
+        results_pt: "Identificação de pontos de controle críticos para longevidade",
+        results_en: "Identification of critical control points for longevity"
+      }
     ]
   },
   {
@@ -317,6 +366,42 @@ export const completedStudies: Study[] = [
         authors: "PetMoreTime; Pet Love; Matt Kaemberlend, PhD; Dra. Paula Vieira",
         journalType: "internacional",
         journalCategory: "veterinária"
+      }
+    ],
+    hypotheses: {
+      primary_pt: "Compostos quelantes específicos para metais pesados reduzirão significativamente a toxicidade e o acúmulo desses metais em C. elegans, resultando em extensão do tempo de vida e melhora dos marcadores de saúde.",
+      primary_en: "Specific chelating compounds for heavy metals will significantly reduce toxicity and accumulation of these metals in C. elegans, resulting in lifespan extension and improved health markers.",
+      secondary_pt: [
+        "A redução de metais pesados melhorará a função mitocondrial",
+        "O tratamento quelante reduzirá marcadores de estresse oxidativo",
+        "Diferentes quelantes terão eficácia variável dependendo do metal alvo",
+        "A intervenção será mais eficaz quando iniciada antes do acúmulo crítico de metais"
+      ],
+      secondary_en: [
+        "Heavy metal reduction will improve mitochondrial function",
+        "Chelation therapy will reduce oxidative stress markers",
+        "Different chelators will have variable efficacy depending on target metal",
+        "Intervention will be more effective when initiated before critical metal accumulation"
+      ]
+    },
+    previousStudies: [
+      {
+        id: "prev-4",
+        title_pt: "Toxicidade de metais pesados em nematódeos (2018)",
+        title_en: "Heavy metal toxicity in nematodes (2018)",
+        description_pt: "Caracterização dos efeitos tóxicos de cádmio e chumbo em C. elegans",
+        description_en: "Characterization of toxic effects of cadmium and lead in C. elegans",
+        results_pt: "Acúmulo dose-dependente e redução de longevidade de até 40%",
+        results_en: "Dose-dependent accumulation and longevity reduction of up to 40%"
+      },
+      {
+        id: "prev-5",
+        title_pt: "Agentes quelantes em modelos celulares (2020)",
+        title_en: "Chelating agents in cellular models (2020)",
+        description_pt: "Teste de diversos quelantes em culturas celulares expostas a metais",
+        description_en: "Testing of various chelators in cell cultures exposed to metals",
+        results_pt: "Identificação de candidatos promissores com baixa toxicidade",
+        results_en: "Identification of promising candidates with low toxicity"
       }
     ]
   },
@@ -439,6 +524,55 @@ export const completedStudies: Study[] = [
         authors: "Matt Kaemberlend, PhD; Pet Love; Dra. Marina Souza; PetMoreTime; Fabiano Matheus, PhD",
         journalType: "internacional",
         journalCategory: "veterinária"
+      }
+    ],
+    hypotheses: {
+      primary_pt: "Extratos vegetais ricos em compostos fenólicos e flavonoides proporcionarão proteção significativa contra danos causados por radiação UV em C. elegans, resultando em redução de mortalidade e extensão do tempo de vida.",
+      primary_en: "Plant extracts rich in phenolic compounds and flavonoids will provide significant protection against UV radiation damage in C. elegans, resulting in reduced mortality and lifespan extension.",
+      secondary_pt: [
+        "A proteção UV será mediada por mecanismos antioxidantes diretos",
+        "Diferentes extratos vegetais terão eficácia variável baseada em composição química",
+        "A fotoproteção preservará a função mitocondrial",
+        "O tratamento preventivo será mais eficaz que o tratamento após exposição UV",
+        "Os efeitos protetores serão dose-dependentes",
+        "Sinergias entre diferentes compostos vegetais potencializarão a proteção"
+      ],
+      secondary_en: [
+        "UV protection will be mediated by direct antioxidant mechanisms",
+        "Different plant extracts will have variable efficacy based on chemical composition",
+        "Photoprotection will preserve mitochondrial function",
+        "Preventive treatment will be more effective than post-UV exposure treatment",
+        "Protective effects will be dose-dependent",
+        "Synergies between different plant compounds will potentiate protection"
+      ]
+    },
+    previousStudies: [
+      {
+        id: "prev-6",
+        title_pt: "Danos UV em C. elegans (2017)",
+        title_en: "UV damage in C. elegans (2017)",
+        description_pt: "Caracterização dos efeitos deletérios da radiação UV em nematódeos",
+        description_en: "Characterization of deleterious effects of UV radiation in nematodes",
+        results_pt: "Redução de 35% na longevidade e aumento de marcadores de estresse",
+        results_en: "35% reduction in longevity and increased stress markers"
+      },
+      {
+        id: "prev-7",
+        title_pt: "Flavonoides como fotoprotetores (2019)",
+        title_en: "Flavonoids as photoprotectors (2019)",
+        description_pt: "Avaliação de flavonoides purificados contra danos UV em culturas celulares",
+        description_en: "Evaluation of purified flavonoids against UV damage in cell cultures",
+        results_pt: "Redução significativa de danos ao DNA e apoptose",
+        results_en: "Significant reduction in DNA damage and apoptosis"
+      },
+      {
+        id: "prev-8",
+        title_pt: "Extratos vegetais em modelos de pele (2021)",
+        title_en: "Plant extracts in skin models (2021)",
+        description_pt: "Teste de extratos botânicos em modelos de pele artificial exposta a UV",
+        description_en: "Testing of botanical extracts in artificial skin models exposed to UV",
+        results_pt: "Proteção eficaz com extratos de chá verde e romã",
+        results_en: "Effective protection with green tea and pomegranate extracts"
       }
     ]
   }

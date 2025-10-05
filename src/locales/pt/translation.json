@@ -428,7 +428,19 @@
       "lifeExtension": "Extensão de Vida:",
       "pValue": "Valor p:",
       "statisticalPower": "Poder Estatístico:",
-      "effect": "Efeito:"
+      "effect": "Efeito:",
+      "primaryHypothesis": "Hipótese Principal",
+      "secondaryHypotheses": "Hipóteses Secundárias",
+      "relatedPreviousStudies": "Estudos Anteriores Relacionados",
+      "results": "Resultados:"
+    },
+    "studyCard": {
+      "viewDetails": "Ver detalhes",
+      "status": "Status:",
+      "start": "Início:",
+      "end": "Fim:",
+      "objective": "Objetivo:",
+      "ongoing": "Em andamento"
     }
     },
     "nutraceuticals": {

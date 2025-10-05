@@ -6,13 +6,16 @@ import { Study } from '../types/oraBiomedical';
 import DetailedStudyCharts from './DetailedStudyCharts';
 import PublicationStatus from './PublicationStatus';
 import { Card, CardContent } from "@/components/ui/card";
+import { getLocalizedHypothesis, getLocalizedPreviousStudies } from '../utils/studyLocalizationHelper';
 
 interface StudyDetailsDialogProps {
   study: Study;
 }
 
 const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const localizedHypotheses = getLocalizedHypothesis(study, i18n.language as 'pt' | 'en');
+  const localizedPreviousStudies = getLocalizedPreviousStudies(study, i18n.language as 'pt' | 'en');
 
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -145,26 +148,27 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
         <TabsContent value="hypotheses" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Hipóteses de Pesquisa</h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Hipótese Principal</h4>
-                  <p className="text-muted-foreground">
-                    A administração do composto X resultará em uma redução significativa na taxa de mortalidade por estresse oxidativo em C. elegans.
-                  </p>
+              <h3 className="text-lg font-semibold mb-4">{t('admin.studies.details.hypotheses')}</h3>
+              {localizedHypotheses ? (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">{t('admin.studies.details.primaryHypothesis')}</h4>
+                    <p className="text-muted-foreground">
+                      {localizedHypotheses.primary}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">{t('admin.studies.details.secondaryHypotheses')}</h4>
+                    <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                      {localizedHypotheses.secondary.map((hyp, idx) => (
+                        <li key={idx}>{hyp}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">Hipóteses Secundárias</h4>
-                  <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>O composto X atua diretamente nas vias de sinalização relacionadas ao estresse oxidativo</li>
-                    <li>A eficácia do tratamento é dose-dependente</li>
-                    <li>O tratamento não apresenta efeitos colaterais significativos na longevidade geral</li>
-                    <li>O momento de início da intervenção (precoce vs. meia-vida) afeta significativamente a eficácia</li>
-                    <li>A manutenção da saúde (≥30%) é mais prolongada nos grupos de intervenção</li>
-                    <li>A resistência ao estressor externo aplicado no dia 15 é aumentada nos grupos de intervenção</li>
-                  </ul>
-                </div>
-              </div>
+              ) : (
+                <p className="text-muted-foreground">{t('admin.studies.publications.noPublications')}</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -172,36 +176,24 @@ const StudyDetailsDialog: React.FC<StudyDetailsDialogProps> = ({ study }) => {
         <TabsContent value="previous" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Estudos Anteriores Relacionados</h3>
-              <div className="space-y-6">
-                <div className="border-b pb-4">
-                  <h4 className="font-medium mb-2">Estudo 2022-A</h4>
-                  <p className="text-muted-foreground mb-2">
-                    Identificação inicial dos mecanismos de ação do composto X em modelos celulares.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Resultados: Redução de 45% nos marcadores de estresse oxidativo
-                  </p>
+              <h3 className="text-lg font-semibold mb-4">{t('admin.studies.details.relatedPreviousStudies')}</h3>
+              {localizedPreviousStudies && localizedPreviousStudies.length > 0 ? (
+                <div className="space-y-6">
+                  {localizedPreviousStudies.map((prevStudy, idx) => (
+                    <div key={prevStudy.id} className={idx < localizedPreviousStudies.length - 1 ? "border-b pb-4" : "pb-4"}>
+                      <h4 className="font-medium mb-2">{prevStudy.title}</h4>
+                      <p className="text-muted-foreground mb-2">
+                        {prevStudy.description}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('admin.studies.details.results')} {prevStudy.results}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div className="border-b pb-4">
-                  <h4 className="font-medium mb-2">Estudo 2023-B</h4>
-                  <p className="text-muted-foreground mb-2">
-                    Análise preliminar da toxicidade e dosagem ótima em C. elegans.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Resultados: Estabelecimento da faixa terapêutica segura
-                  </p>
-                </div>
-                <div className="pb-4">
-                  <h4 className="font-medium mb-2">Metanálise 2023-C</h4>
-                  <p className="text-muted-foreground mb-2">
-                    Comparação dos efeitos de intervenções precoces versus intervenções tardias em modelos de nematódeos.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Resultados: Intervenções precoces demonstraram 20-35% maior eficácia na prevenção de declínio relacionado à idade
-                  </p>
-                </div>
-              </div>
+              ) : (
+                <p className="text-muted-foreground">{t('admin.studies.publications.noPublications')}</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
