@@ -64,8 +64,6 @@ const ModelosPreditivosTab = () => {
 
   return (
     <div className="space-y-6">
-      <ModelsDashboard />
-
       <Card className="p-6 border-border bg-card">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -176,6 +174,8 @@ const ModelosPreditivosTab = () => {
           </div>
         )}
       </Card>
+
+      <ModelsDashboard />
 
       <ModelDetailDialog
         model={selectedModel}
