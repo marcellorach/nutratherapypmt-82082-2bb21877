@@ -1,9 +1,14 @@
-
 export interface OngoingStudy {
   id: string;
-  title: string;
-  description: string;
-  objective: string;
+  title?: string;
+  title_pt?: string;
+  title_en?: string;
+  description?: string;
+  description_pt?: string;
+  description_en?: string;
+  objective?: string;
+  objective_pt?: string;
+  objective_en?: string;
   startDate: string;
   currentDay: number;
   totalDays: number;
@@ -15,11 +20,21 @@ export interface OngoingStudy {
   primaryInvestigator: string;
   breeds?: string[];
   ageRange?: string;
+  ageRange_pt?: string;
+  ageRange_en?: string;
   interventionType?: string;
+  interventionType_pt?: string;
+  interventionType_en?: string;
   notes?: string;
+  notes_pt?: string;
+  notes_en?: string;
   metrics?: {
-    title: string;
+    title?: string;
+    title_pt?: string;
+    title_en?: string;
     description?: string;
+    description_pt?: string;
+    description_en?: string;
     data: Array<{
       label: string;
       control: number;
@@ -27,7 +42,12 @@ export interface OngoingStudy {
     }>;
     yAxisLabel?: string;
     chartType?: 'line' | 'bar';
-    formatter?: string; // 'percent', 'number', etc.
+    formatter?: string;
   }[];
-  phases?: { name: string; day: number }[];
+  phases?: { 
+    name?: string;
+    name_pt?: string;
+    name_en?: string;
+    day: number;
+  }[];
 }

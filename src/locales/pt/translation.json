@@ -238,11 +238,58 @@
       "subtitle": "Gerencie e organize estudos científicos sobre nutracêuticos",
       "import": "Importar Estudos",
       "list": "Lista de Estudos",
-      "tabs": {
-        "ongoing": "Em Andamento",
-        "completed": "Concluídos",
-        "planned": "Planejados"
+    "tabs": {
+      "ongoing": "Em Andamento",
+      "completed": "Concluídos",
+      "planned": "Planejados"
+    },
+    "plannedStudies": {
+      "title": "Estudos Planejados",
+      "description": "Gerencie os estudos científicos em fase de planejamento.",
+      "listTitle": "Lista de Estudos",
+      "listDescription": "Estudos científicos em fase de planejamento e análise prévia.",
+      "newStudy": "Novo Estudo",
+      "editStudy": "Editar Estudo",
+      "addStudy": "Adicionar Estudo",
+      "table": {
+        "title": "Título",
+        "objective": "Objetivo",
+        "population": "População",
+        "duration": "Duração",
+        "status": "Status",
+        "actions": "Ações",
+        "recruited": "recrutados",
+        "dogs": "cães"
+      },
+      "form": {
+        "title": "Título",
+        "objective": "Objetivo",
+        "population": "População",
+        "duration": "Duração",
+        "status": "Status",
+        "save": "Salvar"
+      },
+      "status": {
+        "recruiting": "Recrutando",
+        "pendingApproval": "Aprovação pendente",
+        "planning": "Planejamento"
+      },
+      "messages": {
+        "studyRemoved": "Estudo removido",
+        "studyRemovedDesc": "O estudo foi removido com sucesso.",
+        "studyUpdated": "Estudo atualizado",
+        "studyUpdatedDesc": "As alterações foram salvas com sucesso.",
+        "studyAdded": "Estudo adicionado",
+        "studyAddedDesc": "O novo estudo foi adicionado com sucesso."
       }
+    },
+    "progress": {
+      "title": "Progresso do Estudo",
+      "currentDay": "Dia Atual:",
+      "of": "de",
+      "currentPhase": "Fase Atual:",
+      "schedule": "Cronograma"
+    }
     },
     "nutraceuticals": {
       "title": "Nutracêuticos",

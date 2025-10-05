@@ -238,11 +238,58 @@
       "subtitle": "Manage and organize scientific studies on nutraceuticals",
       "import": "Import Studies",
       "list": "Studies List",
-      "tabs": {
-        "ongoing": "Ongoing",
-        "completed": "Completed",
-        "planned": "Planned"
+    "tabs": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "planned": "Planned"
+    },
+    "plannedStudies": {
+      "title": "Planned Studies",
+      "description": "Manage scientific studies in planning phase.",
+      "listTitle": "Studies List",
+      "listDescription": "Scientific studies in planning and preliminary analysis phase.",
+      "newStudy": "New Study",
+      "editStudy": "Edit Study",
+      "addStudy": "Add Study",
+      "table": {
+        "title": "Title",
+        "objective": "Objective",
+        "population": "Population",
+        "duration": "Duration",
+        "status": "Status",
+        "actions": "Actions",
+        "recruited": "recruited",
+        "dogs": "dogs"
+      },
+      "form": {
+        "title": "Title",
+        "objective": "Objective",
+        "population": "Population",
+        "duration": "Duration",
+        "status": "Status",
+        "save": "Save"
+      },
+      "status": {
+        "recruiting": "Recruiting",
+        "pendingApproval": "Pending approval",
+        "planning": "Planning"
+      },
+      "messages": {
+        "studyRemoved": "Study removed",
+        "studyRemovedDesc": "The study was successfully removed.",
+        "studyUpdated": "Study updated",
+        "studyUpdatedDesc": "Changes were saved successfully.",
+        "studyAdded": "Study added",
+        "studyAddedDesc": "The new study was successfully added."
       }
+    },
+    "progress": {
+      "title": "Study Progress",
+      "currentDay": "Current Day:",
+      "of": "of",
+      "currentPhase": "Current Phase:",
+      "schedule": "Schedule"
+    }
     },
     "nutraceuticals": {
       "title": "Nutraceuticals",
