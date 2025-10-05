@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartLine, Heart, ChartBar, Info } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import { OngoingStudy } from '../types/studyTypes';
 import DogGroupVisualization from './DogGroupVisualization';
 import StudyProgressCard from './StudyProgressCard';
@@ -14,6 +15,7 @@ interface DetailedStudyPanelProps {
 }
 
 const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>("overview");
   
   const formatValue = (value: number, formatterType?: string) => {
@@ -39,22 +41,22 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
             <TabsList className="grid grid-cols-3">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
-                <span>Visão Geral</span>
+                <span>{t('admin.studies.ongoingStudies.tabs.overview')}</span>
               </TabsTrigger>
               <TabsTrigger value="metrics" className="flex items-center gap-2">
                 <ChartBar className="h-4 w-4" />
-                <span>Métricas</span>
+                <span>{t('admin.studies.ongoingStudies.tabs.metrics')}</span>
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <ChartLine className="h-4 w-4" />
-                <span>Tendências</span>
+                <span>{t('admin.studies.ongoingStudies.tabs.trends')}</span>
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="overview" className="pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium mb-2">População do Estudo</h3>
+                  <h3 className="text-sm font-medium mb-2">{t('admin.studies.ongoingStudies.overview.studyPopulation')}</h3>
                   <DogGroupVisualization 
                     treatmentCount={study.treatmentCount} 
                     controlCount={study.controlCount} 
@@ -62,19 +64,19 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
                   
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Raças:</span>
-                      <span className="text-sm">{study.breeds?.join(', ') || 'Não especificado'}</span>
+                      <span className="text-sm text-muted-foreground">{t('admin.studies.ongoingStudies.overview.breeds')}</span>
+                      <span className="text-sm">{study.breeds?.join(', ') || t('admin.studies.ongoingStudies.overview.notSpecified')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Faixa Etária:</span>
-                      <span className="text-sm">{study.ageRange || 'Não especificado'}</span>
+                      <span className="text-sm text-muted-foreground">{t('admin.studies.ongoingStudies.overview.ageRange')}</span>
+                      <span className="text-sm">{study.ageRange || t('admin.studies.ongoingStudies.overview.notSpecified')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Intervenção:</span>
-                      <span className="text-sm">{study.interventionType || 'Não especificado'}</span>
+                      <span className="text-sm text-muted-foreground">{t('admin.studies.ongoingStudies.overview.intervention')}</span>
+                      <span className="text-sm">{study.interventionType || t('admin.studies.ongoingStudies.overview.notSpecified')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Investigador Principal:</span>
+                      <span className="text-sm text-muted-foreground">{t('admin.studies.ongoingStudies.overview.primaryInvestigator')}</span>
                       <span className="text-sm">{study.primaryInvestigator}</span>
                     </div>
                   </div>
@@ -92,7 +94,7 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
                   <div className="flex items-start gap-2">
                     <Info className="h-4 w-4 text-blue-500 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-medium text-blue-800">Notas do Estudo</h4>
+                      <h4 className="text-sm font-medium text-blue-800">{t('admin.studies.ongoingStudies.overview.studyNotes')}</h4>
                       <p className="text-sm text-blue-700">{study.notes}</p>
                     </div>
                   </div>

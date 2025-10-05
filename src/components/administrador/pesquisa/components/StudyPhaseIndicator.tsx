@@ -3,6 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 type StudyPhase = 'recruitment' | 'baseline' | 'intervention' | 'evaluation' | 'analysis';
 
@@ -11,35 +12,37 @@ interface StudyPhaseProps {
   isActive?: boolean;
 }
 
-const phaseInfo = {
-  recruitment: {
-    label: 'Recrutamento',
-    color: 'bg-purple-100 text-purple-800',
-    description: 'Fase de seleção e recrutamento dos participantes do estudo.'
-  },
-  baseline: {
-    label: 'Linha de Base',
-    color: 'bg-blue-100 text-blue-800',
-    description: 'Coleta de dados iniciais e estabelecimento de métricas base.'
-  },
-  intervention: {
-    label: 'Intervenção',
-    color: 'bg-green-100 text-green-800',
-    description: 'Aplicação do tratamento ou intervenção nos grupos de estudo.'
-  },
-  evaluation: {
-    label: 'Avaliação',
-    color: 'bg-yellow-100 text-yellow-800',
-    description: 'Coleta e avaliação dos resultados parciais ou finais.'
-  },
-  analysis: {
-    label: 'Análise',
-    color: 'bg-orange-100 text-orange-800',
-    description: 'Análise estatística e interpretação dos dados coletados.'
-  }
-};
-
 const StudyPhaseIndicator: React.FC<StudyPhaseProps> = ({ phase, isActive = true }) => {
+  const { t } = useTranslation();
+  
+  const phaseInfo = {
+    recruitment: {
+      label: t('admin.studies.phases.recruitment'),
+      color: 'bg-purple-100 text-purple-800',
+      description: t('admin.studies.phases.recruitmentDesc')
+    },
+    baseline: {
+      label: t('admin.studies.phases.baseline'),
+      color: 'bg-blue-100 text-blue-800',
+      description: t('admin.studies.phases.baselineDesc')
+    },
+    intervention: {
+      label: t('admin.studies.phases.intervention'),
+      color: 'bg-green-100 text-green-800',
+      description: t('admin.studies.phases.interventionDesc')
+    },
+    evaluation: {
+      label: t('admin.studies.phases.evaluation'),
+      color: 'bg-yellow-100 text-yellow-800',
+      description: t('admin.studies.phases.evaluationDesc')
+    },
+    analysis: {
+      label: t('admin.studies.phases.analysis'),
+      color: 'bg-orange-100 text-orange-800',
+      description: t('admin.studies.phases.analysisDesc')
+    }
+  };
+  
   const { label, color, description } = phaseInfo[phase];
   
   return (

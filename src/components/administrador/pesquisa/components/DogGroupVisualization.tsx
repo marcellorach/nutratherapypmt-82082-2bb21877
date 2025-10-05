@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { PawPrint } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DogGroupVisualizationProps {
   count?: number; // Tornando opcional
@@ -18,14 +19,16 @@ const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
   treatmentCount,
   controlCount 
 }) => {
+  const { t } = useTranslation();
+  
   // Se o componente for chamado com treatmentCount e controlCount, renderiza os dois grupos
   if (treatmentCount !== undefined && controlCount !== undefined) {
     return (
       <div className="space-y-3">
         <div className="bg-blue-50 p-3 rounded-lg">
           <div className="mb-2 text-sm font-medium flex justify-between">
-            <span>Grupo de Tratamento</span>
-            <span className="font-semibold">{treatmentCount} cães</span>
+            <span>{t('admin.studies.ongoingStudies.groups.treatment')}</span>
+            <span className="font-semibold">{treatmentCount} {t('admin.studies.ongoingStudies.groups.dogs')}</span>
           </div>
           
           <div className="flex flex-wrap gap-1">
@@ -44,8 +47,8 @@ const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
         
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="mb-2 text-sm font-medium flex justify-between">
-            <span>Grupo de Controle</span>
-            <span className="font-semibold">{controlCount} cães</span>
+            <span>{t('admin.studies.ongoingStudies.groups.control')}</span>
+            <span className="font-semibold">{controlCount} {t('admin.studies.ongoingStudies.groups.dogs')}</span>
           </div>
           
           <div className="flex flex-wrap gap-1">
@@ -74,13 +77,13 @@ const DogGroupVisualization: React.FC<DogGroupVisualizationProps> = ({
   // Caso contrário, renderiza apenas um grupo conforme a chamada original
   const iconColor = type === 'treatment' ? 'text-blue-600' : 'text-gray-600';
   const bgColor = type === 'treatment' ? 'bg-blue-50' : 'bg-gray-50';
-  const groupName = groupLabel || (type === 'treatment' ? 'Grupo de Tratamento' : 'Grupo de Controle');
+  const groupName = groupLabel || (type === 'treatment' ? t('admin.studies.ongoingStudies.groups.treatment') : t('admin.studies.ongoingStudies.groups.control'));
   
   return (
     <div className={`${bgColor} p-3 rounded-lg`}>
       <div className="mb-2 text-sm font-medium flex justify-between">
         <span>{groupName}</span>
-        <span className="font-semibold">{count} cães</span>
+        <span className="font-semibold">{count} {t('admin.studies.ongoingStudies.groups.dogs')}</span>
       </div>
       
       <div className="flex flex-wrap gap-1">

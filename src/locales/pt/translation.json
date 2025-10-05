@@ -289,6 +289,49 @@
       "of": "de",
       "currentPhase": "Fase Atual:",
       "schedule": "Cronograma"
+    },
+    "ongoingStudies": {
+      "title": "Estudos em Andamento",
+      "stats": {
+        "totalDogs": "Total de Cães",
+        "totalDogsDesc": "Participantes ativos em estudos",
+        "activeStudies": "Estudos Ativos",
+        "activeStudiesDesc": "Pesquisas em andamento",
+        "averageProgress": "Progresso Médio",
+        "averageProgressDesc": "Percentual de conclusão",
+        "updatedDaily": "Atualizado diariamente"
+      },
+      "tabs": {
+        "overview": "Visão Geral",
+        "metrics": "Métricas",
+        "trends": "Tendências"
+      },
+      "overview": {
+        "studyPopulation": "População do Estudo",
+        "breeds": "Raças:",
+        "ageRange": "Faixa Etária:",
+        "intervention": "Intervenção:",
+        "primaryInvestigator": "Investigador Principal:",
+        "notSpecified": "Não especificado",
+        "studyNotes": "Notas do Estudo"
+      },
+      "groups": {
+        "treatment": "Grupo de Tratamento",
+        "control": "Grupo de Controle",
+        "dogs": "cães"
+      }
+    },
+    "phases": {
+      "recruitment": "Recrutamento",
+      "baseline": "Linha de Base",
+      "intervention": "Intervenção",
+      "evaluation": "Avaliação",
+      "analysis": "Análise",
+      "recruitmentDesc": "Fase de seleção e recrutamento dos participantes do estudo.",
+      "baselineDesc": "Coleta de dados iniciais e estabelecimento de métricas base.",
+      "interventionDesc": "Aplicação do tratamento ou intervenção nos grupos de estudo.",
+      "evaluationDesc": "Coleta e avaliação dos resultados parciais ou finais.",
+      "analysisDesc": "Análise estatística e interpretação dos dados coletados."
     }
     },
     "nutraceuticals": {

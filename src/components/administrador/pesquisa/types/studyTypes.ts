@@ -37,10 +37,14 @@ export interface OngoingStudy {
     description_en?: string;
     data: Array<{
       label: string;
+      label_pt?: string;
+      label_en?: string;
       control: number;
       treatment: number;
     }>;
     yAxisLabel?: string;
+    yAxisLabel_pt?: string;
+    yAxisLabel_en?: string;
     chartType?: 'line' | 'bar';
     formatter?: string;
   }[];

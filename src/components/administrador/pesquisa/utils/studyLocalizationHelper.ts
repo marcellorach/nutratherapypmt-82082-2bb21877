@@ -23,7 +23,12 @@ export function getLocalizedStudy(
     metrics: study.metrics?.map(metric => ({
       ...metric,
       title: isEnglish && metric.title_en ? metric.title_en : (metric.title_pt || metric.title || ''),
-      description: isEnglish && metric.description_en ? metric.description_en : (metric.description_pt || metric.description)
+      description: isEnglish && metric.description_en ? metric.description_en : (metric.description_pt || metric.description),
+      yAxisLabel: isEnglish && metric.yAxisLabel_en ? metric.yAxisLabel_en : (metric.yAxisLabel_pt || metric.yAxisLabel),
+      data: metric.data.map(dataPoint => ({
+        ...dataPoint,
+        label: isEnglish && dataPoint.label_en ? dataPoint.label_en : (dataPoint.label_pt || dataPoint.label)
+      }))
     })),
     phases: study.phases?.map(phase => ({
       ...phase,

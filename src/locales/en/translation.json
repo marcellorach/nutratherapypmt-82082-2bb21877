@@ -289,6 +289,49 @@
       "of": "of",
       "currentPhase": "Current Phase:",
       "schedule": "Schedule"
+    },
+    "ongoingStudies": {
+      "title": "Ongoing Studies",
+      "stats": {
+        "totalDogs": "Total Dogs",
+        "totalDogsDesc": "Active participants in studies",
+        "activeStudies": "Active Studies",
+        "activeStudiesDesc": "Ongoing research",
+        "averageProgress": "Average Progress",
+        "averageProgressDesc": "Completion percentage",
+        "updatedDaily": "Updated daily"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "metrics": "Metrics",
+        "trends": "Trends"
+      },
+      "overview": {
+        "studyPopulation": "Study Population",
+        "breeds": "Breeds:",
+        "ageRange": "Age Range:",
+        "intervention": "Intervention:",
+        "primaryInvestigator": "Primary Investigator:",
+        "notSpecified": "Not specified",
+        "studyNotes": "Study Notes"
+      },
+      "groups": {
+        "treatment": "Treatment Group",
+        "control": "Control Group",
+        "dogs": "dogs"
+      }
+    },
+    "phases": {
+      "recruitment": "Recruitment",
+      "baseline": "Baseline",
+      "intervention": "Intervention",
+      "evaluation": "Evaluation",
+      "analysis": "Analysis",
+      "recruitmentDesc": "Phase of selection and recruitment of study participants.",
+      "baselineDesc": "Initial data collection and establishment of baseline metrics.",
+      "interventionDesc": "Application of treatment or intervention in study groups.",
+      "evaluationDesc": "Collection and evaluation of partial or final results.",
+      "analysisDesc": "Statistical analysis and interpretation of collected data."
     }
     },
     "nutraceuticals": {
