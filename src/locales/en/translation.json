@@ -332,6 +332,103 @@
       "interventionDesc": "Application of treatment or intervention in study groups.",
       "evaluationDesc": "Collection and evaluation of partial or final results.",
       "analysisDesc": "Statistical analysis and interpretation of collected data."
+    },
+    "completedStudies": {
+      "title": "Completed Studies",
+      "finalizedStudies": "Finalized Studies",
+      "finalResults": "Final Results",
+      "totalPopulation": "Total Population:",
+      "studyDuration": "Study Duration:",
+      "lifeExtension": "Life Extension:",
+      "statisticalSignificance": "Statistical Significance:",
+      "experimentStatus": "Experiment Status:",
+      "completed": "Completed",
+      "inTreatmentGroup": "in treatment group",
+      "days": "days",
+      "cElegans": "C. elegans",
+      "organisms": "organisms"
+    },
+    "charts": {
+      "survivalRateFinal": "Final Survival Rate",
+      "survivalRateOngoing": "Survival Rate (Ongoing)",
+      "control": "Control",
+      "treatment": "Treatment",
+      "ageInAdultPhase": "Age in adult phase (days)",
+      "survival": "Survival",
+      "day": "Day",
+      "earlyIntervention": "Early Intervention",
+      "midLifeIntervention": "Mid-Life Intervention",
+      "survivalRate": "Survival Rate",
+      "healthMaintenanceRate": "Health Maintenance Rate",
+      "survivalRateWithStress": "Survival Rate with Stress",
+      "healthMaintenanceWithStress": "Health Maintenance with Stress",
+      "earlyAdultIntervention": "Intervention from early adult life",
+      "wormsWithHealth": "Worms with at least 30% health",
+      "stressorApplied": "Stressor applied on day 15",
+      "healthAfterStressor": "Health after stressor on day 15",
+      "midLifeInterventionStart": "Intervention started at mid-life",
+      "age": "Age (days)",
+      "rate": "Rate",
+      "noIntervention": "No Intervention",
+      "lowIntervention": "Low Intervention",
+      "highIntervention": "High Intervention"
+    },
+    "publications": {
+      "title": "Publication Status",
+      "submission": "submission",
+      "submissions": "submissions",
+      "noPublications": "No publications registered",
+      "status": {
+        "published": "published",
+        "accepted": "accepted",
+        "underReview": "under review",
+        "submitted": "submitted",
+        "rejected": "rejected",
+        "notSubmitted": "not submitted"
+      },
+      "type": {
+        "national": "National",
+        "international": "International"
+      },
+      "category": {
+        "biomedical": "biomedical",
+        "veterinary": "veterinary",
+        "general": "general"
+      },
+      "submittedOn": "Submitted:",
+      "publishedOn": "Published:",
+      "viewDoi": "View DOI"
+    },
+    "studyCategories": {
+      "geroproptetor": "geroprotector",
+      "metabolic": "metabolic",
+      "neuroprotector": "neuroprotector",
+      "antiInflammatory": "anti-inflammatory"
+    },
+    "details": {
+      "overview": "Overview",
+      "results": "Results",
+      "hypotheses": "Hypotheses",
+      "previousStudies": "Previous Studies",
+      "publications": "Publications",
+      "description": "Description",
+      "studyDetails": "Study Details",
+      "status": "Status:",
+      "start": "Start:",
+      "end": "End:",
+      "ongoing": "Ongoing",
+      "priority": "Priority:",
+      "metrics": "Metrics",
+      "progress": "Progress:",
+      "compounds": "Compounds:",
+      "positiveResults": "Positive Results:",
+      "population": "Population:",
+      "duration": "Duration:",
+      "quantitativeResults": "Quantitative Results",
+      "lifeExtension": "Life Extension:",
+      "pValue": "p-value:",
+      "statisticalPower": "Statistical Power:",
+      "effect": "Effect:"
     }
     },
     "nutraceuticals": {

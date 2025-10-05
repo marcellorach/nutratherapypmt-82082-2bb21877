@@ -332,6 +332,103 @@
       "interventionDesc": "Aplicação do tratamento ou intervenção nos grupos de estudo.",
       "evaluationDesc": "Coleta e avaliação dos resultados parciais ou finais.",
       "analysisDesc": "Análise estatística e interpretação dos dados coletados."
+    },
+    "completedStudies": {
+      "title": "Estudos Concluídos",
+      "finalizedStudies": "Estudos Finalizados",
+      "finalResults": "Resultados Finais",
+      "totalPopulation": "População Total:",
+      "studyDuration": "Duração do Estudo:",
+      "lifeExtension": "Extensão de Vida:",
+      "statisticalSignificance": "Significância Estatística:",
+      "experimentStatus": "Status do Experimento:",
+      "completed": "Concluído",
+      "inTreatmentGroup": "no grupo tratamento",
+      "days": "dias",
+      "cElegans": "C. elegans",
+      "organisms": "organismos"
+    },
+    "charts": {
+      "survivalRateFinal": "Taxa de Sobrevivência Final",
+      "survivalRateOngoing": "Taxa de Sobrevivência (Em Andamento)",
+      "control": "Controle",
+      "treatment": "Tratamento",
+      "ageInAdultPhase": "Idade na fase adulta (dias)",
+      "survival": "Sobrevivência",
+      "day": "Dia",
+      "earlyIntervention": "Intervenção Precoce",
+      "midLifeIntervention": "Intervenção Meia-Vida",
+      "survivalRate": "Taxa de Sobrevivência",
+      "healthMaintenanceRate": "Taxa de Manutenção de Saúde",
+      "survivalRateWithStress": "Taxa de Sobrevivência com Stress",
+      "healthMaintenanceWithStress": "Taxa de Manutenção de Saúde com Stress",
+      "earlyAdultIntervention": "Intervenção desde o início da vida adulta",
+      "wormsWithHealth": "Vermes com pelo menos 30% de saúde",
+      "stressorApplied": "Estressor aplicado no dia 15",
+      "healthAfterStressor": "Saúde após estressor no dia 15",
+      "midLifeInterventionStart": "Intervenção iniciada na meia-vida",
+      "age": "Idade (dias)",
+      "rate": "Taxa",
+      "noIntervention": "Sem Intervenção",
+      "lowIntervention": "Intervenção Baixa",
+      "highIntervention": "Intervenção Alta"
+    },
+    "publications": {
+      "title": "Status das Publicações",
+      "submission": "submissão",
+      "submissions": "submissões",
+      "noPublications": "Nenhuma publicação cadastrada",
+      "status": {
+        "published": "publicado",
+        "accepted": "aceito",
+        "underReview": "em revisão",
+        "submitted": "submetido",
+        "rejected": "negado",
+        "notSubmitted": "não submetido"
+      },
+      "type": {
+        "national": "Nacional",
+        "international": "Internacional"
+      },
+      "category": {
+        "biomedical": "biomédica",
+        "veterinary": "veterinária",
+        "general": "geral"
+      },
+      "submittedOn": "Submetido:",
+      "publishedOn": "Publicado:",
+      "viewDoi": "Ver DOI"
+    },
+    "studyCategories": {
+      "geroproptetor": "geroproptetor",
+      "metabolic": "metabólico",
+      "neuroprotector": "neuroprotetor",
+      "antiInflammatory": "antiinflamatório"
+    },
+    "details": {
+      "overview": "Visão Geral",
+      "results": "Resultados",
+      "hypotheses": "Hipóteses",
+      "previousStudies": "Estudos Anteriores",
+      "publications": "Publicações",
+      "description": "Descrição",
+      "studyDetails": "Detalhes do Estudo",
+      "status": "Status:",
+      "start": "Início:",
+      "end": "Término:",
+      "ongoing": "Em andamento",
+      "priority": "Prioridade:",
+      "metrics": "Métricas",
+      "progress": "Progresso:",
+      "compounds": "Compostos:",
+      "positiveResults": "Resultados Positivos:",
+      "population": "População:",
+      "duration": "Duração:",
+      "quantitativeResults": "Resultados Quantitativos",
+      "lifeExtension": "Extensão de Vida:",
+      "pValue": "Valor p:",
+      "statisticalPower": "Poder Estatístico:",
+      "effect": "Efeito:"
     }
     },
     "nutraceuticals": {

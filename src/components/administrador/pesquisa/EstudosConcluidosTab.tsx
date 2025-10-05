@@ -1,9 +1,11 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import StudyCard from './components/StudyCard';
 import MortalityChart from './components/MortalityChart';
 import { Study } from './types/oraBiomedical';
 import { completedStudies } from './data/oraBiomedicalData';
+import { getLocalizedCompletedStudy } from './utils/studyLocalizationHelper';
 
 // Dados completos do estudo de mortalidade
 const completedMortalityData = [
@@ -16,43 +18,48 @@ const completedMortalityData = [
 ];
 
 const EstudosConcluidosTab: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const localizedStudies = completedStudies.map(study => 
+    getLocalizedCompletedStudy(study, i18n.language as 'pt' | 'en')
+  );
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold tracking-tight">Estudos Concluídos</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t('admin.studies.completedStudies.title')}</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <MortalityChart data={completedMortalityData} isComplete={true} />
         
         <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Resultados Finais</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('admin.studies.completedStudies.finalResults')}</h3>
           <div className="grid gap-2 text-sm">
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">População Total:</span>
-              <span>100 C. elegans</span>
+              <span className="font-medium">{t('admin.studies.completedStudies.totalPopulation')}</span>
+              <span>100 {t('admin.studies.completedStudies.cElegans')}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">Duração do Estudo:</span>
-              <span>21 dias</span>
+              <span className="font-medium">{t('admin.studies.completedStudies.studyDuration')}</span>
+              <span>21 {t('admin.studies.completedStudies.days')}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">Extensão de Vida:</span>
-              <span>+23.5% no grupo tratamento</span>
+              <span className="font-medium">{t('admin.studies.completedStudies.lifeExtension')}</span>
+              <span>+23.5% {t('admin.studies.completedStudies.inTreatmentGroup')}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">Significância Estatística:</span>
+              <span className="font-medium">{t('admin.studies.completedStudies.statisticalSignificance')}</span>
               <span>p &lt; 0.001</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">Status do Experimento:</span>
-              <span className="text-green-600 font-medium">Concluído</span>
+              <span className="font-medium">{t('admin.studies.completedStudies.experimentStatus')}</span>
+              <span className="text-green-600 font-medium">{t('admin.studies.completedStudies.completed')}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="space-y-4 mt-8">
-        <h3 className="text-xl font-semibold">Estudos Finalizados</h3>
-        {completedStudies.map((study: Study) => (
+        <h3 className="text-xl font-semibold">{t('admin.studies.completedStudies.finalizedStudies')}</h3>
+        {localizedStudies.map((study: Study) => (
           <StudyCard key={study.id} study={study} />
         ))}
       </div>

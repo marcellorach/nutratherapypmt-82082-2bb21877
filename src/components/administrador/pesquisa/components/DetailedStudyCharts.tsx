@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +25,8 @@ interface DetailedStudyChartsProps {
 }
 
 const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, interventionData }) => {
+  const { t } = useTranslation();
+
   // Dados padrão para sobrevivência
   const defaultSurvivalData = [
     { age: 0, control: 1.0, lowIntervention: 1.0, highIntervention: 1.0 },
@@ -98,23 +101,23 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="age" 
-                label={{ value: 'Idade (dias)', position: 'bottom', offset: 0 }}
+                label={{ value: t('admin.studies.charts.age'), position: 'bottom', offset: 0 }}
               />
               <YAxis 
-                label={{ value: 'Taxa', angle: -90, position: 'insideLeft', offset: -5 }}
+                label={{ value: t('admin.studies.charts.rate'), angle: -90, position: 'insideLeft', offset: -5 }}
                 domain={[0, 1]} 
                 tickFormatter={(value) => `${Math.round(value * 100)}%`} 
               />
               <Tooltip 
                 formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
-                labelFormatter={(label) => `Dia ${label}`}
+                labelFormatter={(label) => `${t('admin.studies.charts.day')} ${label}`}
               />
               <Legend wrapperStyle={{ paddingTop: 10 }} />
               <Line 
                 type="monotone" 
                 dataKey="control" 
                 stroke="#000000" 
-                name="Sem Intervenção"
+                name={t('admin.studies.charts.noIntervention')}
                 strokeWidth={2}
                 dot={{ r: 2 }}
               />
@@ -122,7 +125,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
                 type="monotone" 
                 dataKey="lowIntervention" 
                 stroke="#22c55e" 
-                name="Intervenção Baixa"
+                name={t('admin.studies.charts.lowIntervention')}
                 strokeWidth={2}
                 dot={{ r: 2 }}
               />
@@ -130,7 +133,7 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
                 type="monotone" 
                 dataKey="highIntervention" 
                 stroke="#ef4444" 
-                name="Intervenção Alta"
+                name={t('admin.studies.charts.highIntervention')}
                 strokeWidth={2}
                 dot={{ r: 2 }}
               />
@@ -144,31 +147,31 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
   return (
     <Tabs defaultValue="early" className="w-full">
       <TabsList className="w-full justify-start mb-6">
-        <TabsTrigger value="early">Intervenção Precoce</TabsTrigger>
-        <TabsTrigger value="midlife">Intervenção Meia-Vida</TabsTrigger>
+        <TabsTrigger value="early">{t('admin.studies.charts.earlyIntervention')}</TabsTrigger>
+        <TabsTrigger value="midlife">{t('admin.studies.charts.midLifeIntervention')}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="early" className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {renderGraph(
             earlyData.survivalRate, 
-            "Taxa de Sobrevivência", 
-            "Intervenção desde o início da vida adulta"
+            t('admin.studies.charts.survivalRate'),
+            t('admin.studies.charts.earlyAdultIntervention')
           )}
           {renderGraph(
             earlyData.healthyRate, 
-            "Taxa de Manutenção de Saúde", 
-            "Vermes com pelo menos 30% de saúde"
+            t('admin.studies.charts.healthMaintenanceRate'),
+            t('admin.studies.charts.wormsWithHealth')
           )}
           {renderGraph(
             earlyData.stressResponseRate, 
-            "Taxa de Sobrevivência com Stress", 
-            "Estressor aplicado no dia 15"
+            t('admin.studies.charts.survivalRateWithStress'),
+            t('admin.studies.charts.stressorApplied')
           )}
           {renderGraph(
             earlyData.stressHealthyRate, 
-            "Taxa de Manutenção de Saúde com Stress", 
-            "Saúde após estressor no dia 15"
+            t('admin.studies.charts.healthMaintenanceWithStress'),
+            t('admin.studies.charts.healthAfterStressor')
           )}
         </div>
       </TabsContent>
@@ -177,23 +180,23 @@ const DetailedStudyCharts: React.FC<DetailedStudyChartsProps> = ({ isComplete, i
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {renderGraph(
             midLifeData.survivalRate, 
-            "Taxa de Sobrevivência", 
-            "Intervenção iniciada na meia-vida"
+            t('admin.studies.charts.survivalRate'),
+            t('admin.studies.charts.midLifeInterventionStart')
           )}
           {renderGraph(
             midLifeData.healthyRate, 
-            "Taxa de Manutenção de Saúde", 
-            "Vermes com pelo menos 30% de saúde"
+            t('admin.studies.charts.healthMaintenanceRate'),
+            t('admin.studies.charts.wormsWithHealth')
           )}
           {renderGraph(
             midLifeData.stressResponseRate, 
-            "Taxa de Sobrevivência com Stress", 
-            "Estressor aplicado no dia 15"
+            t('admin.studies.charts.survivalRateWithStress'),
+            t('admin.studies.charts.stressorApplied')
           )}
           {renderGraph(
             midLifeData.stressHealthyRate, 
-            "Taxa de Manutenção de Saúde com Stress", 
-            "Saúde após estressor no dia 15"
+            t('admin.studies.charts.healthMaintenanceWithStress'),
+            t('admin.studies.charts.healthAfterStressor')
           )}
         </div>
       </TabsContent>
