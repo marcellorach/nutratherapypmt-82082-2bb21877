@@ -3,8 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, TrendingUp } from "lucide-react";
-import { ModelsDashboard } from "./modelosPreditivos/components/ModelsDashboard";
+import { Search, Eye, TrendingUp, Database } from "lucide-react";
 import ModelDetailDialog from "./modelosPreditivos/components/ModelDetailDialog";
 import { predictiveModelsData } from "./modelosPreditivos/data/predictiveModelsData";
 import { PredictiveModel } from "./modelosPreditivos/types/predictiveModelTypes";
@@ -108,9 +107,10 @@ const ModelosPreditivosTab = () => {
                           <p className="text-xs text-muted-foreground">{modelo.algorithm}</p>
                         </div>
                         {hasRecentInsight(modelo) && (
-                          <Badge className="bg-warning/10 text-warning border-warning/20">
-                            Novo Insight
-                          </Badge>
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Database className="h-3.5 w-3.5" />
+                            <span className="text-xs">Dados recentes</span>
+                          </div>
                         )}
                       </div>
                     </td>
@@ -174,8 +174,6 @@ const ModelosPreditivosTab = () => {
           </div>
         )}
       </Card>
-
-      <ModelsDashboard />
 
       <ModelDetailDialog
         model={selectedModel}
