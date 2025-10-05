@@ -315,6 +315,68 @@
         "notSpecified": "Não especificado",
         "studyNotes": "Notas do Estudo"
       },
+      "models": {
+        "dashboard": {
+          "title": "Visão Geral dos Modelos Preditivos",
+          "subtitle": "Acompanhe a evolução e performance dos nossos modelos proprietários",
+          "totalModels": "Modelos Ativos",
+          "avgAccuracy": "Precisão Média",
+          "totalSamples": "Total Amostras",
+          "insights": "Insights",
+          "growthRate": "Crescimento",
+          "active": "Em Coleta",
+          "comparison": "Comparação de Modelos",
+          "topModels": "Top 3 Modelos por Performance",
+          "samples": "amostras",
+          "accuracy": "precisão",
+          "recentInsights": "Descobertas Recentes"
+        },
+        "status": {
+          "initial": "🌱 Inicial",
+          "growing": "📈 Crescendo",
+          "mature": "✅ Maduro",
+          "stateOfArt": "🎯 Estado da Arte"
+        },
+        "confidence": {
+          "high": "Alta Confiança",
+          "medium": "Média Confiança",
+          "low": "Requer Dados"
+        },
+        "tabs": {
+          "evolution": "Evolução",
+          "performance": "Performance",
+          "longitudinal": "Impacto",
+          "insights": "Insights",
+          "comparison": "Comparação"
+        },
+        "evolution": {
+          "totalSamples": "Total de Amostras",
+          "growthRate": "Crescimento Mensal",
+          "currentAccuracy": "Precisão Atual",
+          "nextMilestone": "Próxima Meta",
+          "accuracyOverTime": "Evolução de Precisão ao Longo do Tempo",
+          "dataGrowth": "Crescimento de Dataset: Tratamento vs Controle"
+        },
+        "performance": {
+          "byCondition": "Performance por Condição de Saúde",
+          "accuracy": "Precisão",
+          "effectiveness": "Efetividade",
+          "samples": "Amostras"
+        },
+        "longitudinal": {
+          "correlation": "Correlação: Volume de Dados × Precisão",
+          "description": "Visualize como o aumento no volume de dados longitudinais impacta diretamente a precisão do modelo.",
+          "keyInsight": "Insight Principal",
+          "insightText": "O modelo demonstra retornos decrescentes após ~20.000 amostras, atingindo patamar de maturidade."
+        },
+        "insights": {
+          "noInsights": "Nenhum Insight Descoberto Ainda",
+          "waitingData": "Insights proprietários serão descobertos conforme o modelo acumula mais dados."
+        },
+        "comparison": {
+          "treatmentVsControl": "Tratamento vs Controle ao Longo do Tempo"
+        }
+      },
       "groups": {
         "treatment": "Grupo de Tratamento",
         "control": "Grupo de Controle",
