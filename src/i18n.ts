@@ -22,7 +22,13 @@ i18next
   .init({
     resources,
     fallbackLng: 'pt',
+    lng: 'pt', // Força português como idioma padrão
     debug: false,
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng'
+    },
     interpolation: {
       escapeValue: false
     }
