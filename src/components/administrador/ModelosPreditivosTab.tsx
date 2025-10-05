@@ -103,6 +103,7 @@ const ModelosPreditivosTab = () => {
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-foreground">{modelo.algorithm}</p>
                             {hasRecentInsight(modelo) && (
                               <div className="flex items-center gap-1.5 text-muted-foreground">
                                 <Database className="h-3.5 w-3.5" />
@@ -131,7 +132,7 @@ const ModelosPreditivosTab = () => {
                           </div>
                           <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Calendar className="h-3 w-3" />
-                            <span className="text-xs">{new Date(modelo.trainedAt).toLocaleDateString('pt-BR')}</span>
+                            <span className="text-xs">Último treinamento em: {new Date(modelo.trainedAt).toLocaleDateString('pt-BR')}</span>
                           </div>
                         </div>
                       </div>
