@@ -2,8 +2,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Brain, Database, Lightbulb, TrendingUp, Target, Activity } from "lucide-react";
 import { useTranslation } from 'react-i18next';
-import { modelEvolutionData } from '../data/modelEvolutionData';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from 'recharts';
+import { predictiveModelsData } from '../data/predictiveModelsData';
 
 const ModelsDashboard: React.FC = () => {
   const { t } = useTranslation();

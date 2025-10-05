@@ -3,15 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from 'react-i18next';
-import { ModelEvolution } from '../types/evolutionTypes';
+import { PredictiveModel } from '../types/predictiveModelTypes';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Database, Target, Calendar, ArrowUp, ArrowRight, ArrowDown, Lightbulb, Activity } from 'lucide-react';
-import { Progress } from "@/components/ui/progress";
+import { TrendingUp, Database, Target, Calendar, Lightbulb, Activity, Users, AlertCircle } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { conditionPerformanceData } from '../data/modelEvolutionData';
+import { DataSourcesChart } from './DataSourcesChart';
 
 interface ModelDetailDialogProps {
-  model: ModelEvolution | null;
+  model: PredictiveModel | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
