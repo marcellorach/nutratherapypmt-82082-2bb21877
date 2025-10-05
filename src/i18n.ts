@@ -1,7 +1,5 @@
-
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Carrega traduções
 import translationEN from './locales/en/translation.json';
@@ -16,19 +14,18 @@ const resources = {
   }
 };
 
+// Limpa qualquer configuração de idioma anterior no localStorage
+if (typeof window !== 'undefined') {
+  localStorage.removeItem('i18nextLng');
+}
+
 i18next
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
+    lng: 'pt', // Força português como idioma fixo
     fallbackLng: 'pt',
-    lng: 'pt', // Força português como idioma padrão
     debug: false,
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-      lookupLocalStorage: 'i18nextLng'
-    },
     interpolation: {
       escapeValue: false
     }
