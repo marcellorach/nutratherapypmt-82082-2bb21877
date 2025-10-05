@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -15,11 +16,16 @@ interface MortalityChartProps {
 }
 
 const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = false }) => {
+  const { t } = useTranslation();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">
-          {isComplete ? "Taxa de Sobrevivência Final" : "Taxa de Sobrevivência (Em Andamento)"}
+          {isComplete 
+            ? t('admin.studies.charts.survivalRateFinal')
+            : t('admin.studies.charts.survivalRateOngoing')
+          }
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -38,14 +44,14 @@ const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = fals
               <XAxis
                 dataKey="age"
                 label={{ 
-                  value: 'Idade na fase adulta (dias)', 
+                  value: t('admin.studies.charts.ageInAdultPhase'), 
                   position: 'bottom',
                   offset: 0
                 }}
               />
               <YAxis
                 label={{ 
-                  value: 'Sobrevivência', 
+                  value: t('admin.studies.charts.survival'), 
                   angle: -90, 
                   position: 'insideLeft',
                   offset: 10
@@ -55,14 +61,14 @@ const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = fals
               />
               <Tooltip 
                 formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
-                labelFormatter={(label) => `Dia ${label}`}
+                labelFormatter={(label) => `${t('admin.studies.charts.day')} ${label}`}
               />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="control"
                 stroke="#222222"
-                name="Controle"
+                name={t('admin.studies.charts.control')}
                 strokeWidth={2}
                 dot={true}
               />
@@ -70,7 +76,7 @@ const MortalityChart: React.FC<MortalityChartProps> = ({ data, isComplete = fals
                 type="monotone"
                 dataKey="treatment"
                 stroke="#0EA5E9"
-                name="Tratamento"
+                name={t('admin.studies.charts.treatment')}
                 strokeWidth={2}
                 dot={true}
               />

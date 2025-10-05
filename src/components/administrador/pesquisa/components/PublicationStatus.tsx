@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ interface PublicationStatusProps {
 }
 
 const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) => {
+  const { t } = useTranslation();
+
   const getStatusIcon = (status: Publication['status']) => {
     switch (status) {
       case 'publicado':
@@ -57,6 +60,18 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
     }
   };
 
+  const getStatusText = (status: Publication['status']) => {
+    const statusMap: Record<Publication['status'], string> = {
+      'publicado': t('admin.studies.publications.status.published'),
+      'aceito': t('admin.studies.publications.status.accepted'),
+      'em revisão': t('admin.studies.publications.status.underReview'),
+      'submetido': t('admin.studies.publications.status.submitted'),
+      'negado': t('admin.studies.publications.status.rejected'),
+      'não submetido': t('admin.studies.publications.status.notSubmitted')
+    };
+    return statusMap[status];
+  };
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
     return new Date(dateStr).toLocaleDateString('pt-BR');
@@ -75,10 +90,10 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
 
   const getJournalTypeBadge = (type?: string) => {
     if (type === 'nacional') {
-      return <Badge variant="secondary" className="text-xs">Nacional</Badge>;
+      return <Badge variant="secondary" className="text-xs">{t('admin.studies.publications.type.national')}</Badge>;
     }
     if (type === 'internacional') {
-      return <Badge variant="outline" className="text-xs">Internacional</Badge>;
+      return <Badge variant="outline" className="text-xs">{t('admin.studies.publications.type.international')}</Badge>;
     }
     return null;
   };
@@ -88,10 +103,10 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <BookOpen className="h-5 w-5" />
-          Status das Publicações
+          {t('admin.studies.publications.title')}
         </h3>
         <div className="text-sm text-muted-foreground">
-          {publications.length} submissão{publications.length !== 1 ? 'ões' : ''}
+          {publications.length} {publications.length === 1 ? t('admin.studies.publications.submission') : t('admin.studies.publications.submissions')}
         </div>
       </div>
 
@@ -100,7 +115,7 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center text-muted-foreground">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhuma publicação cadastrada</p>
+              <p>{t('admin.studies.publications.noPublications')}</p>
             </div>
           </CardContent>
         </Card>
@@ -141,7 +156,7 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
                       variant="outline" 
                       className={getStatusColor(publication.status)}
                     >
-                      {publication.status}
+                      {getStatusText(publication.status)}
                     </Badge>
                   </div>
                 </div>
@@ -152,12 +167,12 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
                   <div className="space-y-1">
                     {publication.submissionDate && (
                       <p className="text-muted-foreground">
-                        <span className="font-medium">Submetido:</span> {formatDate(publication.submissionDate)}
+                        <span className="font-medium">{t('admin.studies.publications.submittedOn')}</span> {formatDate(publication.submissionDate)}
                       </p>
                     )}
                     {publication.publicationDate && (
                       <p className="text-muted-foreground">
-                        <span className="font-medium">Publicado:</span> {formatDate(publication.publicationDate)}
+                        <span className="font-medium">{t('admin.studies.publications.publishedOn')}</span> {formatDate(publication.publicationDate)}
                       </p>
                     )}
                   </div>
@@ -171,7 +186,7 @@ const PublicationStatus: React.FC<PublicationStatusProps> = ({ publications }) =
                         onClick={() => window.open(`https://doi.org/${publication.doi}`, '_blank')}
                       >
                         <ExternalLink className="h-3 w-3 mr-1" />
-                        DOI
+                        {t('admin.studies.publications.viewDoi')}
                       </Button>
                     )}
                   </div>
