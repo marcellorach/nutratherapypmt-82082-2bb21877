@@ -2270,5 +2270,254 @@
       },
       "recentCampaigns": "Campanhas Recentes"
     }
+  },
+  "studyProposals": {
+    "title": "Proposições de Estudos",
+    "description": "Avalie estudos científicos sugeridos com base em análise de dados e evidências.",
+    "filter": "Filtrar",
+    "requestNew": "Solicitar novas proposições",
+    "origin": {
+      "ai": "Sugestão da IA",
+      "scientificCommittee": "Sugestão do Comitê Científico",
+      "external": "Sugestão Externa",
+      "unknown": "Origem desconhecida"
+    },
+    "status": {
+      "new": "Nova",
+      "approved": "Aprovada",
+      "rejected": "Rejeitada",
+      "inAnalysis": "Em análise"
+    },
+    "card": {
+      "confidence": "Confiança da IA",
+      "reasoning": "Raciocínio",
+      "suggestedPopulation": "População Sugerida",
+      "suggestedMethodology": "Metodologia Sugerida",
+      "basedOn": "Baseado em",
+      "suggestedMarkers": "Marcadores Sugeridos",
+      "inAnalysisBy": "Em análise",
+      "approvedByAll": "Aprovada por todos os comitês",
+      "viewDetails": "Ver detalhes completos",
+      "reject": "Rejeitar",
+      "approve": "Aprovar"
+    },
+    "approvalChain": {
+      "title": "Cadeia de Aprovação",
+      "stages": {
+        "scientificSupervision": "Supervisão Científica",
+        "scientificCommittee": "Comitê Científico",
+        "ethicsCommittee": "Comitê Ético",
+        "direction": "Direção"
+      },
+      "statusLabels": {
+        "pending": "Pendente",
+        "approved": "Aprovado",
+        "inAnalysis": "Em análise"
+      }
+    },
+    "dialog": {
+      "aiReasoning": "Raciocínio da IA",
+      "startApproval": "Iniciar aprovação",
+      "advanceToNext": "Avançar para próxima etapa",
+      "tabs": {
+        "overview": "Visão Geral",
+        "evidence": "Evidências",
+        "resources": "Recursos Necessários"
+      },
+      "overview": {
+        "basedOn": "Baseado em",
+        "methodology": "Metodologia Sugerida",
+        "markers": "Marcadores Sugeridos"
+      },
+      "evidence": {
+        "title": "Evidências da Análise Estatística Longitudinal - DualSGLT2-CANINE",
+        "studyProtocol": "Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo",
+        "population": {
+          "title": "População da Análise",
+          "totalDogs": "Total de Cães",
+          "control": "Controle",
+          "dapagliflozin": "Dapagliflozina",
+          "empagliflozin": "Empagliflozina",
+          "months": "Meses de Captura de Dados",
+          "footer": "✓ Análise observacional • ✓ Taxa de acompanhamento >95% • ✓ Grupos comparáveis no baseline"
+        },
+        "tabs": {
+          "cardiovascular": "Cardiovascular",
+          "renal": "Função Renal",
+          "mortality": "Mortalidade"
+        },
+        "cardiovascular": {
+          "hypertension": "Hipertensão",
+          "heartFailure": "Insuf. Cardíaca",
+          "cardiomyopathy": "Cardiomiopatia",
+          "arrhythmias": "Arritmias",
+          "generalSummary": "Resumo Geral",
+          "analysis": {
+            "generalAnalysis": "Análise Geral",
+            "individualData": "Dados Individuais",
+            "description": {
+              "hypertension": "Diagnósticos de hipertensão arterial",
+              "heartFailure": "Novos casos de insuficiência cardíaca diagnosticada",
+              "cardiomyopathy": "Casos de cardiomiopatia dilatada e hipertrófica",
+              "arrhythmias": "Episódios de arritmias clinicamente significativas",
+              "totalEvents": "Somatória de todos os eventos cardiovasculares maiores",
+              "individualDistribution": "Distribuição individual por animal"
+            }
+          },
+          "yAxisLabel": {
+            "cumulativeIncidence": "Incidência Cumulativa (%)",
+            "incidence": "Incidência (%)"
+          },
+          "statistics": {
+            "riskReduction": "redução do risco"
+          },
+          "numbersAtRisk": {
+            "title": "Números em Risco (Eventos Cardiovasculares aos 18 meses)",
+            "control": "Controle",
+            "dapa": "Dapa",
+            "empa": "Empa",
+            "events": "eventos",
+            "eventsPrevented": "Eventos Prevenidos",
+            "nnt": "NNT",
+            "dogs": "cães"
+          },
+          "summary": {
+            "title": "Resumo dos Resultados Cardiovasculares",
+            "observedBenefits": "Benefícios Observados",
+            "benefits": {
+              "heartFailure": "{{percent}} redução em insuficiência cardíaca",
+              "arrhythmias": "{{percent}} redução em arritmias",
+              "hypertension": "{{percent}} redução em hipertensão",
+              "cardiomyopathy": "{{percent}} redução em cardiomiopatia"
+            },
+            "statisticalSignificance": "Significância Estatística",
+            "significance": {
+              "allEndpoints": "Todos os endpoints primários: p ≤ 0.045",
+              "nnt": "NNT (Number Needed to Treat): 8-12 cães",
+              "medianTime": "Tempo mediano para benefício: 8-12 meses",
+              "consistency": "Consistência entre subgrupos"
+            },
+            "absoluteNumbers": "Números Absolutos",
+            "absoluteData": {
+              "controlEvents": "Controle (n={{n}}): {{events}} eventos",
+              "dapaEvents": "Dapa (n={{n}}): {{events}} eventos",
+              "empaEvents": "Empa (n={{n}}): {{events}} eventos",
+              "absoluteRiskReduction": "Redução de risco absoluto (Dapa): {{percent}}%"
+            }
+          }
+        },
+        "renal": {
+          "title": "Função Renal",
+          "description": "Preservação da função renal (eGFR > 60 ml/min/1.73m²)",
+          "yAxisLabel": "Função Renal Preservada (%)",
+          "numbersAtRisk": {
+            "title": "Números em Risco (Função Renal aos 18 meses)",
+            "control": "Controle",
+            "dapa": "Dapa",
+            "empa": "Empa",
+            "withPreservedFunction": "cães com função preservada",
+            "additionalBenefit": "Benefício Adicional (Dapa)",
+            "nnt": "NNT Renal",
+            "dogs": "cães"
+          }
+        },
+        "mortality": {
+          "title": "Mortalidade por Todas as Causas",
+          "description": "Sobrevida durante o período de seguimento",
+          "yAxisLabel": "Sobrevida (%)",
+          "numbersAtRisk": {
+            "title": "Números em Risco (Sobrevida aos 18 meses)",
+            "control": "Controle",
+            "dapa": "Dapa",
+            "empa": "Empa",
+            "survivors": "sobreviventes",
+            "livesSaved": "Vidas Salvas (Dapa)",
+            "nnt": "NNT Mortalidade",
+            "dogs": "cães"
+          },
+          "summary": {
+            "title": "Resumo dos Resultados Renais e Mortalidade",
+            "renalProtection": "Proteção Renal",
+            "renal": {
+              "progressionReduction": "28% redução na progressão de doença renal",
+              "gfrPreservation": "Preservação da eGFR ao longo de 18 meses",
+              "diabetesIndependent": "Benefício independente do status diabético",
+              "allBreeds": "Efeito consistente em todas as raças"
+            },
+            "mortalityImpact": "Impacto na Mortalidade",
+            "mortality": {
+              "allCauseReduction": "22% redução na mortalidade por todas as causas",
+              "benefitFrom": "Benefício observado a partir do 8º mês",
+              "mainCauses": "Principais causas evitadas: cardiorrenais",
+              "nntToPrevents": "NNT para prevenir 1 morte: 15 cães"
+            },
+            "numbersAtRisk": "Números em Risco",
+            "numbers": {
+              "preservedRenal": "Função renal preservada (Dapa): {{dapa}} vs {{control}} (Controle)",
+              "survivors": "Sobreviventes aos 18m (Dapa): {{dapa}} vs {{control}} (Controle)",
+              "livesSaved": "Vidas salvas (Dapa): {{saved}}",
+              "absoluteDifference": "Diferença absoluta: {{percent}}%"
+            }
+          }
+        },
+        "statisticalSignificance": {
+          "title": "Significância Estatística Geral",
+          "allResults": "Todos os resultados apresentam significância estatística robusta (p ≤ 0.045) com intervalos de confiança de 95%",
+          "totalPopulation": "População total analisada",
+          "averageFollowup": "Seguimento médio",
+          "adherenceRate": "Taxa de aderência",
+          "design": "Design",
+          "designValue": "Randomizado, duplo-cego, controlado por placebo",
+          "dogs": "cães",
+          "months": "meses"
+        },
+        "noData": "Dados de evidência não disponíveis para esta sugestão."
+      },
+      "resources": {
+        "noResourcesDefined": "Recursos necessários não definidos para esta sugestão.",
+        "studyPopulation": {
+          "title": "População do Estudo",
+          "description": "Detalhes da amostra necessária para o estudo",
+          "totalDogs": "Total de Cães",
+          "ageRange": "Faixa Etária",
+          "months": "Meses",
+          "placeboTreatment": "Placebo/Tratamento",
+          "breedDistribution": "Distribuição por Porte",
+          "small": "Pequeno",
+          "medium": "Médio",
+          "large": "Grande",
+          "cardiacBreeds": "Raças com Predisposição Cardíaca",
+          "volunteers": "voluntários",
+          "totalCardiacVolunteers": "Total de voluntários com predisposição cardíaca",
+          "of": "de"
+        },
+        "examSchedule": {
+          "title": "Cronograma de Exames",
+          "description": "Bateria de exames necessária em cada fase do estudo",
+          "preStudy": "Pré-Estudo",
+          "duringStudy": "Durante Estudo",
+          "postStudy": "Pós-Estudo",
+          "followup": "Acompanhamento"
+        },
+        "estimatedCosts": {
+          "title": "Custos Estimados",
+          "description": "Breakdown detalhado dos custos do projeto",
+          "labExams": "Exames Laboratoriais",
+          "ultrasounds": "Ultrassons",
+          "medications": "Medicamentos",
+          "personnel": "Pessoal",
+          "totalCost": "Custo Total",
+          "costPerAnimalMonth": "Custo por Animal/Mês"
+        }
+      }
+    },
+    "toast": {
+      "sentForAnalysis": "Sugestão enviada para análise!",
+      "approvedAndSent": "Sugestão aprovada e enviada para",
+      "rejected": "Sugestão rejeitada",
+      "approvalAdvanced": "Aprovação avançada!",
+      "approvedBy": "Aprovado por {{stage}}",
+      "studyApproved": "Estudo aprovado por todos os comitês! Pronto para execução."
+    }
   }
 }

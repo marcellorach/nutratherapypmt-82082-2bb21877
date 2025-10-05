@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 import { ApprovalStage, ApprovalStep } from '../types/sugestoes';
 import { approvalStages } from '../data/sugestoesData';
 
@@ -9,6 +10,8 @@ interface ApprovalChainProps {
 }
 
 const ApprovalChain: React.FC<ApprovalChainProps> = ({ approvalChain }) => {
+  const { t } = useTranslation();
+  
   // Se não tiver cadeia de aprovação, retorna null
   if (!approvalChain || approvalChain.length === 0) {
     return null;
@@ -16,22 +19,22 @@ const ApprovalChain: React.FC<ApprovalChainProps> = ({ approvalChain }) => {
 
   return (
     <div className="mt-4">
-      <h4 className="text-sm font-medium mb-2">Cadeia de Aprovação</h4>
+      <h4 className="text-sm font-medium mb-2">{t('studyProposals.approvalChain.title')}</h4>
       <ul className="space-y-2">
         {approvalStages.map((stage) => {
           const approvalItem = approvalChain.find(item => item.stage === stage.id);
           let status: 'pending' | 'approved' | 'current' = 'pending';
-          let statusText = 'Pendente';
+          let statusText = t('studyProposals.approvalChain.statusLabels.pending');
           let date = '';
           
           if (approvalItem) {
             if (approvalItem.approved === true) {
               status = 'approved';
-              statusText = 'Aprovado';
+              statusText = t('studyProposals.approvalChain.statusLabels.approved');
               date = approvalItem.date || '';
             } else if (approvalItem.approved === null) {
               status = 'current';
-              statusText = 'Em análise';
+              statusText = t('studyProposals.approvalChain.statusLabels.inAnalysis');
             }
           }
           
@@ -49,7 +52,7 @@ const ApprovalChain: React.FC<ApprovalChainProps> = ({ approvalChain }) => {
                     ${status === 'approved' ? 'text-green-500' : 
                       status === 'current' ? 'text-amber-500' : 'text-gray-400'}
                   `} />
-                  <span className="text-sm font-medium">{stage.name}</span>
+                  <span className="text-sm font-medium">{t(`studyProposals.approvalChain.stages.${stage.id.replace(/_/g, '')}` as any)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className={`

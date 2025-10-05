@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from 'react-i18next';
 import PartialResultsChart from './PartialResultsChart';
 import MultipleScatterPlotComparison from './MultipleScatterPlotComparison';
 import { DadosAmostra } from '../types/sugestoes';
@@ -10,6 +11,8 @@ interface EvidenceChartsSectionProps {
 const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
   dados_amostra
 }) => {
+  const { t } = useTranslation();
+  
   // Tamanhos amostrais para cada grupo
   const tamanhoControle = 12173;
   const tamanhoDapa = 10941;
@@ -231,47 +234,47 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
   }];
   return <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="font-bold text-primary text-xl text-center">Evidências da Análise Estatística Longitudinal - DualSGLT2-CANINE</h2>
+        <h2 className="font-bold text-primary text-xl text-center">{t('studyProposals.dialog.evidence.title')}</h2>
         <p className="text-muted-foreground bg-slate-50 p-3 rounded-md border text-base text-left">
-          Evidências Epidemiológicas Longitudinais (protocolo DECLARE - NHI - 2019) do estudo <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
+          {t('studyProposals.dialog.evidence.studyProtocol')} <span className="text-purple-600 font-semibold">PetLove</span> - <span className="text-orange-800 font-semibold">PetMoreTime</span> "Duble SGLT2 {'>'}  @senolítico, @cardioprotetor, @nefraprotetor, &all cause mortality" n= {totalAnimais.toLocaleString()} - Tomada de dados assíncronas entre jan. 2016 até maio 2021
         </p>
       </div>
 
       {/* Informações Amostrais Destacadas */}
       <div className="bg-accent/50 border border-border rounded-lg p-6 space-y-4">
-        <h3 className="text-xl font-semibold text-center">População da Análise</h3>
+        <h3 className="text-xl font-semibold text-center">{t('studyProposals.dialog.evidence.population.title')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
           <div className="space-y-2">
             <div className="text-2xl font-bold text-primary">{totalAnimais.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Total de Cães</div>
+            <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.evidence.population.totalDogs')}</div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-bold text-blue-600">{tamanhoControle.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Controle (51%)</div>
+            <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.evidence.population.control')} (51%)</div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-bold text-green-600">{tamanhoDapa.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Dapagliflozina (46%)</div>
+            <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.evidence.population.dapagliflozin')} (46%)</div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-bold text-orange-600">{tamanhoEmpa.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Empagliflozina (3%)</div>
+            <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.evidence.population.empagliflozin')} (3%)</div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-bold text-purple-600">18</div>
-            <div className="text-sm text-muted-foreground">Meses de Captura de Dados</div>
+            <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.evidence.population.months')}</div>
           </div>
         </div>
         <div className="text-center text-sm text-muted-foreground mt-4">
-          ✓ Análise observacional • ✓ Taxa de acompanhamento {'>'}95% • ✓ Grupos comparáveis no baseline
+          {t('studyProposals.dialog.evidence.population.footer')}
         </div>
       </div>
 
       <Tabs defaultValue="cardiovascular" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="cardiovascular">Cardiovascular</TabsTrigger>
-          <TabsTrigger value="renal">Função Renal</TabsTrigger>
-          <TabsTrigger value="mortalidade">Mortalidade</TabsTrigger>
+          <TabsTrigger value="cardiovascular">{t('studyProposals.dialog.evidence.tabs.cardiovascular')}</TabsTrigger>
+          <TabsTrigger value="renal">{t('studyProposals.dialog.evidence.tabs.renal')}</TabsTrigger>
+          <TabsTrigger value="mortalidade">{t('studyProposals.dialog.evidence.tabs.mortality')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cardiovascular" className="space-y-6">

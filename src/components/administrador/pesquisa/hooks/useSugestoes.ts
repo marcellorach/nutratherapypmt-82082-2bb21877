@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 import { Sugestao } from '../types/sugestoes';
 import { mockSugestoes, approvalStages } from '../data/sugestoesData';
 
@@ -9,6 +10,7 @@ export const useSugestoes = () => {
   const [sugestaoSelecionada, setSugestaoSelecionada] = useState<Sugestao | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Atualizar dados quando mockSugestoes muda
   useEffect(() => {
@@ -35,8 +37,8 @@ export const useSugestoes = () => {
     }));
     
     toast({
-      title: "Sugestão enviada para análise",
-      description: "A sugestão foi aprovada e enviada para a Supervisão Científica.",
+      title: t('studyProposals.toast.sentForAnalysis'),
+      description: t('studyProposals.toast.approvedAndSent') + " " + t(`studyProposals.approvalChain.stages.scientificSupervision`),
     });
   };
   
@@ -45,8 +47,8 @@ export const useSugestoes = () => {
       s.id === id ? { ...s, status: 'rejeitada' as const } : s
     ));
     toast({
-      title: "Sugestão rejeitada",
-      description: "A sugestão foi arquivada.",
+      title: t('studyProposals.toast.rejected'),
+      description: t('studyProposals.toast.rejected'),
     });
   };
   
@@ -93,13 +95,13 @@ export const useSugestoes = () => {
             : approvalStages[0];
             
           toast({
-            title: "Aprovação avançada",
-            description: `A sugestão foi aprovada pelo ${currentStage.name} e avançou para a próxima etapa.`,
+            title: t('studyProposals.toast.approvalAdvanced'),
+            description: t('studyProposals.toast.approvedBy', { stage: t(`studyProposals.approvalChain.stages.${currentStage.id.replace(/_/g, '')}` as any) }),
           });
         } else {
           toast({
-            title: "Estudo aprovado!",
-            description: "Todas as etapas de aprovação foram concluídas. O estudo está aprovado para início.",
+            title: t('studyProposals.toast.studyApproved'),
+            description: t('studyProposals.toast.studyApproved'),
           });
         }
       }

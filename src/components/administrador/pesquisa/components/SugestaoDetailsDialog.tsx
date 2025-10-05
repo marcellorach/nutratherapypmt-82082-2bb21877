@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 import { 
   Lightbulb,
   ThumbsUp, 
@@ -47,6 +48,8 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
   onReject,
   onAdvanceApproval
 }) => {
+  const { t } = useTranslation();
+  
   if (!sugestao) return null;
 
   // Ícone e texto baseado na origem da sugestão
@@ -55,22 +58,22 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
       case 'ia':
         return {
           icon: <Lightbulb className="h-5 w-5 text-amber-500" />,
-          text: "Sugestão da IA"
+          text: t('studyProposals.origin.ai')
         };
       case 'comite_cientifico':
         return {
           icon: <Users className="h-5 w-5 text-indigo-500" />,
-          text: "Sugestão do Comitê Científico"
+          text: t('studyProposals.origin.scientificCommittee')
         };
       case 'externa':
         return {
           icon: <User className="h-5 w-5 text-emerald-500" />,
-          text: "Sugestão Externa"
+          text: t('studyProposals.origin.external')
         };
       default:
         return {
           icon: <Lightbulb className="h-5 w-5 text-gray-500" />,
-          text: "Origem desconhecida"
+          text: t('studyProposals.origin.unknown')
         };
     }
   };
@@ -91,13 +94,13 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
             {sugestao.titulo}
           </DialogTitle>
           <DialogDescription className="flex items-center">
-            Confiança da IA: <span className="font-medium ml-1">{sugestao.confianca}%</span>
+            {t('studyProposals.card.confidence')}: <span className="font-medium ml-1">{sugestao.confianca}%</span>
           </DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto space-y-4">
           <div>
-            <h4 className="text-sm font-medium mb-1">Raciocínio da IA</h4>
+            <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.aiReasoning')}</h4>
             <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
           </div>
           
@@ -107,14 +110,14 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
           {/* Conteúdo principal com tabs */}
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="evidence">Evidências</TabsTrigger>
-              <TabsTrigger value="recursos">Recursos Necessários</TabsTrigger>
+              <TabsTrigger value="overview">{t('studyProposals.dialog.tabs.overview')}</TabsTrigger>
+              <TabsTrigger value="evidence">{t('studyProposals.dialog.tabs.evidence')}</TabsTrigger>
+              <TabsTrigger value="recursos">{t('studyProposals.dialog.tabs.resources')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium mb-1">Baseado em</h4>
+                <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.basedOn')}</h4>
                 <ul className="text-sm text-muted-foreground list-disc ml-5">
                   {sugestao.baseado_em.map((base, index) => (
                     <li key={index}>{base}</li>
@@ -123,12 +126,12 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               </div>
               
               <div>
-                <h4 className="text-sm font-medium mb-1">Metodologia Sugerida</h4>
+                <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.methodology')}</h4>
                 <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
               </div>
               
               <div>
-                <h4 className="text-sm font-medium mb-1">Marcadores Sugeridos</h4>
+                <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.markers')}</h4>
                 <ul className="text-sm text-muted-foreground list-disc ml-5">
                   {sugestao.marcadores_sugeridos.map((marcador, index) => (
                     <li key={index}>{marcador}</li>
@@ -143,7 +146,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               ) : (
                 <div className="bg-muted p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">
-                    Dados de evidência não disponíveis para esta sugestão.
+                    {t('studyProposals.dialog.evidence.noData')}
                   </p>
                 </div>
               )}
@@ -155,7 +158,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               ) : (
                 <div className="bg-muted p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">
-                    Recursos necessários não definidos para esta sugestão.
+                    {t('studyProposals.dialog.resources.noResourcesDefined')}
                   </p>
                 </div>
               )}
@@ -175,7 +178,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
                 }}
               >
                 <ThumbsDown className="mr-1 h-4 w-4" />
-                Rejeitar
+                {t('studyProposals.card.reject')}
               </Button>
               <Button 
                 className="bg-green-600 hover:bg-green-700 text-white"
@@ -185,7 +188,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
                 }}
               >
                 <ThumbsUp className="mr-1 h-4 w-4" />
-                Iniciar aprovação
+                {t('studyProposals.dialog.startApproval')}
               </Button>
             </div>
           )}
@@ -196,7 +199,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               onClick={() => onAdvanceApproval(sugestao.id)}
             >
               <ChevronRight className="mr-1 h-4 w-4" />
-              Avançar para próxima etapa
+              {t('studyProposals.dialog.advanceToNext')}
             </Button>
           )}
         </DialogFooter>

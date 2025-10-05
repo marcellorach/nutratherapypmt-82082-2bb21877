@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 import { 
   Users, 
   Calendar, 
@@ -17,6 +18,7 @@ interface RecursosNecessariosSectionProps {
 }
 
 const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({ recursos }) => {
+  const { t } = useTranslation();
   const formatCurrency = (value: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
@@ -27,48 +29,48 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            População do Estudo
+            {t('studyProposals.dialog.resources.studyPopulation.title')}
           </CardTitle>
           <CardDescription>
-            Detalhes da amostra necessária para o estudo
+            {t('studyProposals.dialog.resources.studyPopulation.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">{recursos.populacao_estudo.total_caes}</div>
-              <div className="text-sm text-muted-foreground">Total de Cães</div>
+              <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.resources.studyPopulation.totalDogs')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-secondary">{recursos.populacao_estudo.idade}</div>
-              <div className="text-sm text-muted-foreground">Faixa Etária</div>
+              <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.resources.studyPopulation.ageRange')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-accent">{recursos.populacao_estudo.duracao_meses}</div>
-              <div className="text-sm text-muted-foreground">Meses</div>
+              <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.resources.studyPopulation.months')}</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-bold">
                 {recursos.populacao_estudo.grupo_placebo}/{recursos.populacao_estudo.grupo_tratamento}
               </div>
-              <div className="text-sm text-muted-foreground">Placebo/Tratamento</div>
+              <div className="text-sm text-muted-foreground">{t('studyProposals.dialog.resources.studyPopulation.placeboTreatment')}</div>
             </div>
           </div>
 
           <div>
             <h5 className="font-medium mb-2 flex items-center gap-2">
               <PieChart className="h-4 w-4" />
-              Distribuição por Porte
+              {t('studyProposals.dialog.resources.studyPopulation.breedDistribution')}
             </h5>
             <div className="flex gap-2 flex-wrap">
               <Badge variant="outline">
-                Pequeno: {recursos.populacao_estudo.distribuicao_racas.pequeno_porte}%
+                {t('studyProposals.dialog.resources.studyPopulation.small')}: {recursos.populacao_estudo.distribuicao_racas.pequeno_porte}%
               </Badge>
               <Badge variant="outline">
-                Médio: {recursos.populacao_estudo.distribuicao_racas.medio_porte}%
+                {t('studyProposals.dialog.resources.studyPopulation.medium')}: {recursos.populacao_estudo.distribuicao_racas.medio_porte}%
               </Badge>
               <Badge variant="outline">
-                Grande: {recursos.populacao_estudo.distribuicao_racas.grande_porte}%
+                {t('studyProposals.dialog.resources.studyPopulation.large')}: {recursos.populacao_estudo.distribuicao_racas.grande_porte}%
               </Badge>
             </div>
           </div>
@@ -77,7 +79,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div>
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-red-500" />
-                Raças com Predisposição Cardíaca
+                {t('studyProposals.dialog.resources.studyPopulation.cardiacBreeds')}
               </h5>
               <div className="space-y-2">
                 {recursos.populacao_estudo.racas_cardiacas.map((raca, index) => (
@@ -88,12 +90,12 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-red-600 dark:text-red-400">{raca.voluntarios}</div>
-                      <div className="text-xs text-muted-foreground">voluntários</div>
+                      <div className="text-xs text-muted-foreground">{t('studyProposals.dialog.resources.studyPopulation.volunteers')}</div>
                     </div>
                   </div>
                 ))}
                 <div className="text-xs text-muted-foreground mt-2 p-2 bg-amber-50 dark:bg-amber-950/20 rounded border border-amber-200 dark:border-amber-800">
-                  <strong>Total de voluntários com predisposição cardíaca:</strong> {recursos.populacao_estudo.racas_cardiacas.reduce((total, raca) => total + raca.voluntarios, 0)} de {recursos.populacao_estudo.total_caes} cães
+                  <strong>{t('studyProposals.dialog.resources.studyPopulation.totalCardiacVolunteers')}:</strong> {recursos.populacao_estudo.racas_cardiacas.reduce((total, raca) => total + raca.voluntarios, 0)} {t('studyProposals.dialog.resources.studyPopulation.of')} {recursos.populacao_estudo.total_caes} {t('studyProposals.dialog.resources.studyPopulation.totalDogs').toLowerCase()}
                 </div>
               </div>
             </div>
@@ -106,10 +108,10 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            Cronograma de Exames
+            {t('studyProposals.dialog.resources.examSchedule.title')}
           </CardTitle>
           <CardDescription>
-            Bateria de exames necessária em cada fase do estudo
+            {t('studyProposals.dialog.resources.examSchedule.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -117,7 +119,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div>
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-green-500" />
-                Pré-Estudo
+                {t('studyProposals.dialog.resources.examSchedule.preStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
                 {recursos.cronograma_exames.pre_estudo.map((exame, index) => (
@@ -132,7 +134,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div>
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" />
-                Durante Estudo
+                {t('studyProposals.dialog.resources.examSchedule.duringStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
                 {recursos.cronograma_exames.durante_estudo.map((exame, index) => (
@@ -147,7 +149,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div>
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-purple-500" />
-                Pós-Estudo
+                {t('studyProposals.dialog.resources.examSchedule.postStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
                 {recursos.cronograma_exames.pos_estudo.map((exame, index) => (
@@ -162,7 +164,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div>
               <h5 className="font-medium mb-2 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-amber-500" />
-                Acompanhamento
+                {t('studyProposals.dialog.resources.examSchedule.followup')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
                 {recursos.cronograma_exames.acompanhamento.map((exame, index) => (
@@ -182,10 +184,10 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            Custos Estimados
+            {t('studyProposals.dialog.resources.estimatedCosts.title')}
           </CardTitle>
           <CardDescription>
-            Breakdown detalhado dos custos do projeto
+            {t('studyProposals.dialog.resources.estimatedCosts.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -193,19 +195,19 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Exames Laboratoriais</span>
+                  <span className="text-sm">{t('studyProposals.dialog.resources.estimatedCosts.labExams')}</span>
                   <span className="font-medium">{formatCurrency(recursos.custos_estimados.exames_laboratoriais)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Ultrassons</span>
+                  <span className="text-sm">{t('studyProposals.dialog.resources.estimatedCosts.ultrasounds')}</span>
                   <span className="font-medium">{formatCurrency(recursos.custos_estimados.ultrassons)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Medicamentos</span>
+                  <span className="text-sm">{t('studyProposals.dialog.resources.estimatedCosts.medications')}</span>
                   <span className="font-medium">{formatCurrency(recursos.custos_estimados.medicamentos)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Pessoal</span>
+                  <span className="text-sm">{t('studyProposals.dialog.resources.estimatedCosts.personnel')}</span>
                   <span className="font-medium">{formatCurrency(recursos.custos_estimados.pessoal)}</span>
                 </div>
               </div>
@@ -214,7 +216,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 <div className="p-4 bg-primary/10 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <DollarSign className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium">Custo Total</span>
+                    <span className="text-sm font-medium">{t('studyProposals.dialog.resources.estimatedCosts.totalCost')}</span>
                   </div>
                   <div className="text-2xl font-bold text-primary">
                     {formatCurrency(recursos.custos_estimados.total)}
@@ -222,7 +224,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 </div>
 
                 <div className="p-4 bg-secondary/10 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Custo por Animal/Mês</div>
+                  <div className="text-sm text-muted-foreground mb-1">{t('studyProposals.dialog.resources.estimatedCosts.costPerAnimalMonth')}</div>
                   <div className="text-lg font-bold text-secondary">
                     {formatCurrency(recursos.custos_estimados.custo_por_animal_mes)}
                   </div>

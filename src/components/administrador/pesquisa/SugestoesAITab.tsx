@@ -1,11 +1,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, Filter } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import { useSugestoes } from './hooks/useSugestoes';
 import SugestaoCard from './components/SugestaoCard';
 import SugestaoDetailsDialog from './components/SugestaoDetailsDialog';
 
 const SugestoesAITab: React.FC = () => {
+  const { t } = useTranslation();
   const {
     sugestoes,
     sugestaoSelecionada,
@@ -22,19 +24,19 @@ const SugestoesAITab: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Proposições de Estudos</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('studyProposals.title')}</h2>
           <p className="text-muted-foreground">
-            Avalie estudos científicos sugeridos com base em análise de dados e evidências.
+            {t('studyProposals.description')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex items-center">
             <Filter className="mr-2 h-4 w-4" />
-            Filtrar
+            {t('studyProposals.filter')}
           </Button>
           <Button variant="outline" className="flex items-center">
             <Sparkles className="mr-2 h-4 w-4" />
-            Solicitar novas proposições
+            {t('studyProposals.requestNew')}
           </Button>
         </div>
       </div>
