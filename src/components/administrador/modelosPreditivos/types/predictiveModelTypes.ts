@@ -27,6 +27,7 @@ export interface PredictiveModel {
   modelId: string;
   modelName: string;
   algorithm: string;
+  algorithmShortName: string;
   status: 'state-of-art' | 'mature' | 'growing' | 'initial';
   currentAccuracy: number;
   trainedAt: string;

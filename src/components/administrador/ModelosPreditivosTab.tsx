@@ -103,7 +103,7 @@ const ModelosPreditivosTab = () => {
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-foreground">{modelo.algorithm}</p>
+                            <p className="font-medium text-foreground">{modelo.modelName}</p>
                             {hasRecentInsight(modelo) && (
                               <div className="flex items-center gap-1.5 text-muted-foreground">
                                 <Database className="h-3.5 w-3.5" />
@@ -116,7 +116,7 @@ const ModelosPreditivosTab = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="text-sm font-medium text-foreground">{modelo.modelName}</p>
+                      <p className="text-sm font-medium text-foreground">{modelo.algorithmShortName}</p>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
