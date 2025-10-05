@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, TrendingUp, Database } from "lucide-react";
+import { Search, Eye, TrendingUp, Database, Calendar } from "lucide-react";
 import ModelDetailDialog from "./modelosPreditivos/components/ModelDetailDialog";
 import { predictiveModelsData } from "./modelosPreditivos/data/predictiveModelsData";
 import { PredictiveModel } from "./modelosPreditivos/types/predictiveModelTypes";
@@ -103,7 +103,6 @@ const ModelosPreditivosTab = () => {
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-foreground">{modelo.modelName}</p>
                             {hasRecentInsight(modelo) && (
                               <div className="flex items-center gap-1.5 text-muted-foreground">
                                 <Database className="h-3.5 w-3.5" />
@@ -111,24 +110,28 @@ const ModelosPreditivosTab = () => {
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{modelo.description}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{modelo.description}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="text-sm font-medium text-foreground">{modelo.algorithm}</p>
+                      <p className="text-sm font-medium text-foreground">{modelo.modelName}</p>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 min-w-[120px]">
+                        <div className="flex-1 min-w-[140px]">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium text-foreground">{modelo.currentAccuracy}%</span>
                           </div>
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
                             <div
                               className="h-full bg-foreground transition-all"
                               style={{ width: `${modelo.currentAccuracy}%` }}
                             />
+                          </div>
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            <span className="text-xs">{new Date(modelo.trainedAt).toLocaleDateString('pt-BR')}</span>
                           </div>
                         </div>
                       </div>
