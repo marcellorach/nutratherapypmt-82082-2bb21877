@@ -88,46 +88,45 @@ const ModelosPreditivosTab = () => {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Modelo</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Performance</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Algoritmo</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Precisão</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Pets Monitorados</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Crescimento Mensal</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filteredModelos.map((modelo) => {
-                const statusBadge = getStatusBadge(modelo.status);
+            {filteredModelos.map((modelo) => {
                 return (
                   <tr key={modelo.modelId} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
-                        <div>
-                          <p className="font-medium text-foreground">{modelo.modelName}</p>
-                          <p className="text-xs text-muted-foreground">{modelo.algorithm}</p>
-                        </div>
-                        {hasRecentInsight(modelo) && (
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Database className="h-3.5 w-3.5" />
-                            <span className="text-xs">Dados recentes</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-foreground">{modelo.modelName}</p>
+                            {hasRecentInsight(modelo) && (
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Database className="h-3.5 w-3.5" />
+                                <span className="text-xs">Dados recentes</span>
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <p className="text-xs text-muted-foreground leading-relaxed">{modelo.description}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <Badge variant="outline" className={statusBadge.className}>
-                        {statusBadge.label}
-                      </Badge>
+                      <p className="text-sm font-medium text-foreground">{modelo.algorithm}</p>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-[120px]">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium text-foreground">{modelo.currentAccuracy}%</span>
                           </div>
                           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-brand-primary transition-all"
+                              className="h-full bg-foreground transition-all"
                               style={{ width: `${modelo.currentAccuracy}%` }}
                             />
                           </div>
