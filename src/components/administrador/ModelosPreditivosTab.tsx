@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, TrendingUp } from "lucide-react";
 import { ModelsDashboard } from "./modelosPreditivos/components/ModelsDashboard";
-import { ModelDetailDialog } from "./modelosPreditivos/components/ModelDetailDialog";
+import ModelDetailDialog from "./modelosPreditivos/components/ModelDetailDialog";
 import { predictiveModelsData } from "./modelosPreditivos/data/predictiveModelsData";
 import { PredictiveModel } from "./modelosPreditivos/types/predictiveModelTypes";
 
-export const ModelosPreditivosTab = () => {
+const ModelosPreditivosTab = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModel, setSelectedModel] = useState<PredictiveModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -185,3 +185,5 @@ export const ModelosPreditivosTab = () => {
     </div>
   );
 };
+
+export default ModelosPreditivosTab;

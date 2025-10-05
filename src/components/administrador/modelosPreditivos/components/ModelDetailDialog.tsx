@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { useTranslation } from 'react-i18next';
-import { PredictiveModel } from '../types/predictiveModelTypes';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Database, Target, Calendar, Lightbulb, Activity, Users, AlertCircle } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, Users, Target, Database, Lightbulb, AlertCircle } from "lucide-react";
+import { PredictiveModel } from '../types/predictiveModelTypes';
 import { DataSourcesChart } from './DataSourcesChart';
+import { useState } from "react";
 
 interface ModelDetailDialogProps {
   model: PredictiveModel | null;
@@ -15,470 +14,404 @@ interface ModelDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ModelDetailDialog: React.FC<ModelDetailDialogProps> = ({ model, open, onOpenChange }) => {
-  const { t, i18n } = useTranslation();
-  const [selectedTab, setSelectedTab] = useState('evolution');
+export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDialogProps) => {
+  const [selectedTab, setSelectedTab] = useState('overview');
 
   if (!model) return null;
 
-  const isPortuguese = i18n.language === 'pt';
-
-  // Preparar dados para gráfico de evolução
-  const evolutionChartData = model.snapshots.map(snapshot => ({
-    date: new Date(snapshot.date).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-    accuracy: snapshot.accuracy,
-    dataSamples: snapshot.dataPoints,
-    treatment: snapshot.treatmentSamples,
-    control: snapshot.controlSamples
-  }));
-
-  const getConfidenceBadge = (confidence: string) => {
-    const configs = {
-      high: { label: t('admin.models.confidence.high', 'Alta Confiança'), color: 'bg-green-100 text-green-700 border-green-200' },
-      medium: { label: t('admin.models.confidence.medium', 'Média Confiança'), color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-      low: { label: t('admin.models.confidence.low', 'Requer Dados'), color: 'bg-red-100 text-red-700 border-red-200' }
-    };
-    return configs[confidence as keyof typeof configs] || configs.low;
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'improving': return <ArrowUp className="h-3 w-3 text-green-600" />;
-      case 'stable': return <ArrowRight className="h-3 w-3 text-blue-600" />;
-      case 'declining': return <ArrowDown className="h-3 w-3 text-red-600" />;
-      default: return null;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'state-of-art':
+        return { label: 'Estado da Arte', className: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20' };
+      case 'mature':
+        return { label: 'Maduro', className: 'bg-success/10 text-success border-success/20' };
+      case 'growing':
+        return { label: 'Em Crescimento', className: 'bg-info/10 text-info border-info/20' };
+      case 'initial':
+        return { label: 'Fase Inicial', className: 'bg-warning/10 text-warning border-warning/20' };
+      default:
+        return { label: status, className: 'bg-muted text-muted-foreground' };
     }
   };
+
+  const getSignificanceBadge = (significance: string) => {
+    switch (significance) {
+      case 'high':
+        return <Badge className="bg-success/10 text-success border-success/20">Alta Significância</Badge>;
+      case 'medium':
+        return <Badge className="bg-warning/10 text-warning border-warning/20">Média Significância</Badge>;
+      case 'low':
+        return <Badge className="bg-muted/50 text-muted-foreground border-muted">Baixa Significância</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const statusBadge = getStatusBadge(model.status);
+  const milestoneProgress = ((model.nextMilestone.current / model.nextMilestone.target) * 100).toFixed(1);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">{model.modelName}</DialogTitle>
+          <div className="flex items-start justify-between">
+            <div>
+              <DialogTitle className="text-2xl mb-2">{model.modelName}</DialogTitle>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className={statusBadge.className}>
+                  {statusBadge.label}
+                </Badge>
+                <span className="text-sm text-muted-foreground">{model.algorithm}</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-brand-primary">{model.currentAccuracy}%</p>
+              <p className="text-xs text-muted-foreground">Acurácia Atual</p>
+            </div>
+          </div>
         </DialogHeader>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="evolution">
-              {t('admin.models.tabs.evolution', 'Evolução')}
-            </TabsTrigger>
-            <TabsTrigger value="performance">
-              {t('admin.models.tabs.performance', 'Performance')}
-            </TabsTrigger>
-            <TabsTrigger value="longitudinal">
-              {t('admin.models.tabs.longitudinal', 'Impacto')}
-            </TabsTrigger>
-            <TabsTrigger value="insights">
-              {t('admin.models.tabs.insights', 'Insights')}
-            </TabsTrigger>
-            <TabsTrigger value="comparison">
-              {t('admin.models.tabs.comparison', 'Comparação')}
-            </TabsTrigger>
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="evolution">Evolução</TabsTrigger>
+            <TabsTrigger value="sources">Fontes de Dados</TabsTrigger>
+            <TabsTrigger value="insights">Descobertas</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
           </TabsList>
 
-          {/* Tab 1: Evolução do Modelo */}
-          <TabsContent value="evolution" className="space-y-4">
-            {/* Mini Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="p-4">
+          {/* Visão Geral */}
+          <TabsContent value="overview" className="space-y-4">
+            <Card className="p-4 bg-muted/30 border-border">
+              <p className="text-sm text-foreground">{model.description}</p>
+            </Card>
+
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <Database className="h-4 w-4 text-primary" />
-                  <p className="text-sm text-muted-foreground">
-                    {t('admin.models.evolution.totalSamples', 'Total de Amostras')}
-                  </p>
+                  <Users className="h-4 w-4 text-info" />
+                  <p className="text-xs text-muted-foreground">Total Monitorados</p>
                 </div>
-                <p className="text-2xl font-bold">{model.totalSamples.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-foreground">{model.totalPetsMonitored.toLocaleString()}</p>
               </Card>
 
-              <Card className="p-4">
+              <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                  <p className="text-sm text-muted-foreground">
-                    {t('admin.models.evolution.growthRate', 'Crescimento Mensal')}
-                  </p>
+                  <Target className="h-4 w-4 text-success" />
+                  <p className="text-xs text-muted-foreground">Grupo Tratamento</p>
                 </div>
-                <p className="text-2xl font-bold text-green-600">+{model.monthlyGrowthRate}%</p>
+                <p className="text-2xl font-bold text-foreground">{model.treatmentGroup.toLocaleString()}</p>
               </Card>
 
-              <Card className="p-4">
+              <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="h-4 w-4 text-primary" />
-                  <p className="text-sm text-muted-foreground">
-                    {t('admin.models.evolution.currentAccuracy', 'Precisão Atual')}
-                  </p>
+                  <Database className="h-4 w-4 text-chart-3" />
+                  <p className="text-xs text-muted-foreground">Grupo Controle</p>
                 </div>
-                <p className="text-2xl font-bold text-primary">{model.currentAccuracy}%</p>
+                <p className="text-2xl font-bold text-foreground">{model.controlGroup.toLocaleString()}</p>
               </Card>
 
-              <Card className="p-4">
+              <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-4 w-4 text-purple-600" />
-                  <p className="text-sm text-muted-foreground">
-                    {t('admin.models.evolution.nextMilestone', 'Próxima Meta')}
-                  </p>
+                  <TrendingUp className="h-4 w-4 text-chart-5" />
+                  <p className="text-xs text-muted-foreground">Crescimento Mensal</p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">{model.nextMilestone.target.toLocaleString()}</p>
-                  <Progress 
-                    value={(model.nextMilestone.current / model.nextMilestone.target) * 100} 
-                    className="h-2"
-                  />
-                </div>
+                <p className="text-2xl font-bold text-success">+{model.monthlyGrowthRate}%</p>
               </Card>
             </div>
 
-            {/* Gráfico de Evolução */}
-            <Card className="p-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {t('admin.models.evolution.accuracyOverTime', 'Evolução de Precisão ao Longo do Tempo')}
-              </h4>
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={evolutionChartData}>
+            <Card className="p-4 border-border">
+              <h4 className="text-sm font-semibold text-foreground mb-3">Próximo Marco</h4>
+              <p className="text-sm text-muted-foreground mb-3">{model.nextMilestone.description}</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="font-medium text-foreground">{milestoneProgress}%</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-brand-primary transition-all"
+                    style={{ width: `${milestoneProgress}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{model.nextMilestone.current.toLocaleString()} pets</span>
+                  <span>Meta: {model.nextMilestone.target.toLocaleString()} pets</span>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Evolução Temporal */}
+          <TabsContent value="evolution" className="space-y-4">
+            <Card className="p-4 border-border">
+              <h4 className="text-sm font-semibold text-foreground mb-4">Evolução de Acurácia ao Longo do Tempo</h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={model.performanceHistory}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={11} />
-                  <YAxis 
-                    yAxisId="left"
-                    stroke="hsl(var(--primary))" 
-                    fontSize={11}
-                    domain={[60, 100]}
-                    label={{ value: 'Precisão (%)', angle: -90, position: 'insideLeft', fontSize: 11 }}
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { month: 'short' })}
                   />
                   <YAxis 
-                    yAxisId="right" 
-                    orientation="right"
-                    stroke="hsl(var(--muted-foreground))" 
-                    fontSize={11}
-                    label={{ value: 'Amostras', angle: 90, position: 'insideRight', fontSize: 11 }}
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 12 }}
+                    domain={[50, 100]}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
+                      backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
+                    labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR')}
                   />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Line 
-                    yAxisId="left"
+                  <Area 
                     type="monotone" 
                     dataKey="accuracy" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={3}
-                    name="Precisão (%)"
-                    dot={{ r: 4 }}
-                  />
-                  <Line 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="dataSamples" 
-                    stroke="hsl(var(--muted-foreground))" 
+                    stroke="hsl(var(--brand-primary))" 
+                    fill="hsl(var(--brand-primary) / 0.2)"
                     strokeWidth={2}
-                    strokeDasharray="5 5"
-                    name="Total Amostras"
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-
-            {/* Gráfico de Tratamento vs Controle */}
-            <Card className="p-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {t('admin.models.evolution.dataGrowth', 'Crescimento de Dataset: Tratamento vs Controle')}
-              </h4>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={evolutionChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={11} />
-                  <YAxis stroke="hsl(var(--foreground))" fontSize={11} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="treatment" 
-                    stackId="1"
-                    stroke="#10B981" 
-                    fill="#10B981"
-                    fillOpacity={0.6}
-                    name="Tratamento"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="control" 
-                    stackId="1"
-                    stroke="#3B82F6" 
-                    fill="#3B82F6"
-                    fillOpacity={0.6}
-                    name="Controle"
+                    name="Acurácia (%)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
-          </TabsContent>
 
-          {/* Tab 2: Performance por Condição */}
-          <TabsContent value="performance" className="space-y-4">
-            <Card className="p-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {t('admin.models.performance.byCondition', 'Performance por Condição de Saúde')}
-              </h4>
-              <div className="space-y-3">
-                {conditionPerformanceData.map((condition) => (
-                  <div 
-                    key={condition.conditionId} 
-                    className="p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h5 className="font-medium">
-                            {isPortuguese ? condition.conditionName_pt : condition.conditionName_en}
-                          </h5>
-                          {getTrendIcon(condition.trend)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">{condition.system}</p>
-                      </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`${getConfidenceBadge(condition.confidence).color} border`}
-                      >
-                        {getConfidenceBadge(condition.confidence).label}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {t('admin.models.performance.accuracy', 'Precisão')}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Progress value={condition.accuracy} className="h-2 flex-1" />
-                          <span className="text-sm font-medium">{condition.accuracy}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {t('admin.models.performance.effectiveness', 'Efetividade')}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Progress value={condition.treatmentEffectiveness} className="h-2 flex-1" />
-                          <span className="text-sm font-medium">{condition.treatmentEffectiveness}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {t('admin.models.performance.samples', 'Amostras')}
-                        </p>
-                        <p className="text-sm font-medium">{condition.sampleSize.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Tab 3: Impacto Longitudinal */}
-          <TabsContent value="longitudinal" className="space-y-4">
-            <Card className="p-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {t('admin.models.longitudinal.correlation', 'Correlação: Volume de Dados × Precisão')}
-              </h4>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t('admin.models.longitudinal.description', 'Visualize como o aumento no volume de dados longitudinais impacta diretamente a precisão do modelo.')}
-              </p>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={evolutionChartData}>
+            <Card className="p-4 border-border">
+              <h4 className="text-sm font-semibold text-foreground mb-4">Volume de Dados no Tempo</h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={model.performanceHistory}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
-                    dataKey="dataSamples" 
-                    stroke="hsl(var(--foreground))" 
-                    fontSize={11}
-                    label={{ value: 'Volume de Dados', position: 'insideBottom', offset: -5, fontSize: 11 }}
+                    dataKey="date" 
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { month: 'short' })}
                   />
                   <YAxis 
-                    stroke="hsl(var(--foreground))" 
-                    fontSize={11}
-                    domain={[60, 100]}
-                    label={{ value: 'Precisão (%)', angle: -90, position: 'insideLeft', fontSize: 11 }}
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
+                      backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
+                    labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR')}
+                    formatter={(value: number) => [value.toLocaleString(), 'Pets']}
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="accuracy" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={3}
-                    dot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                    dataKey="petsMonitored" 
+                    stroke="hsl(var(--chart-2))" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(var(--chart-2))', r: 4 }}
+                    name="Pets Monitorados"
                   />
                 </LineChart>
               </ResponsiveContainer>
+            </Card>
+          </TabsContent>
 
-              <div className="mt-6 p-4 bg-accent/50 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Activity className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <h5 className="font-medium mb-2">
-                      {t('admin.models.longitudinal.keyInsight', 'Insight Principal')}
-                    </h5>
-                    <p className="text-sm text-muted-foreground">
-                      {t('admin.models.longitudinal.insightText', 
-                        'O modelo demonstra retornos decrescentes após ~20.000 amostras, atingindo patamar de maturidade. Novos dados continuam refinando predições específicas, especialmente em subgrupos menos representados.'
-                      )}
-                    </p>
+          {/* Fontes de Dados */}
+          <TabsContent value="sources" className="space-y-4">
+            <Card className="p-4 border-border">
+              <h4 className="text-sm font-semibold text-foreground mb-4">Composição das Fontes de Dados</h4>
+              <DataSourcesChart dataSources={model.dataSources} />
+            </Card>
+
+            <div className="grid grid-cols-1 gap-3">
+              {model.dataSources.map((source, index) => (
+                <Card key={index} className="p-4 border-border">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: `hsl(var(--chart-${(index % 5) + 1}))` }} />
+                      <p className="font-medium text-foreground">{source.label}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-foreground">{source.percentage}%</p>
+                      <p className="text-xs text-muted-foreground">{source.sampleCount.toLocaleString()} pets</p>
+                    </div>
                   </div>
+                  <p className="text-sm text-muted-foreground">{source.description}</p>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Descobertas Degenerativas */}
+          <TabsContent value="insights" className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Lightbulb className="h-5 w-5 text-warning" />
+              <h4 className="text-sm font-semibold text-foreground">
+                Descobertas Proprietárias sobre Doenças Degenerativas
+              </h4>
+            </div>
+
+            <div className="space-y-4">
+              {model.degenerativeInsights.map((insight) => (
+                <Card key={insight.id} className="p-4 border-border">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h5 className="font-semibold text-foreground mb-2">{insight.title}</h5>
+                      {getSignificanceBadge(insight.significance)}
+                    </div>
+                    <Badge variant="outline" className="ml-2">
+                      {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}
+                    </Badge>
+                  </div>
+
+                  <p className="text-sm text-foreground mb-4">{insight.description}</p>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Condições Relacionadas</p>
+                      <div className="flex flex-wrap gap-1">
+                        {insight.relatedConditions.map((condition, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {condition}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Raças Analisadas</p>
+                      <div className="flex flex-wrap gap-1">
+                        {insight.relatedBreeds.slice(0, 3).map((breed, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {breed}
+                          </Badge>
+                        ))}
+                        {insight.relatedBreeds.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{insight.relatedBreeds.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-4 p-3 bg-muted/30 rounded-lg">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Amostra</p>
+                      <p className="text-sm font-semibold text-foreground">{insight.evidence.sampleSize.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">p-valor</p>
+                      <p className="text-sm font-semibold text-foreground">{insight.evidence.pValue.toFixed(4)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Tamanho de Efeito</p>
+                      <p className="text-sm font-semibold text-foreground">{(insight.evidence.effectSize * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">IC 95%</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        [{(insight.evidence.confidenceInterval[0] * 100).toFixed(1)}%, {(insight.evidence.confidenceInterval[1] * 100).toFixed(1)}%]
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Performance por Segmento */}
+          <TabsContent value="performance" className="space-y-4">
+            <Card className="p-4 border-border">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground mb-1">Performance Segmentada</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Análise detalhada da acurácia do modelo em diferentes segmentos populacionais e condições clínicas
+                  </p>
                 </div>
               </div>
             </Card>
-          </TabsContent>
 
-          {/* Tab 4: Insights Proprietários */}
-          <TabsContent value="insights" className="space-y-4">
-            {model.insights.length > 0 ? (
-              <div className="space-y-4">
-                {model.insights.map((insight) => (
-                  <Card key={insight.id} className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-lg ${
-                        insight.significance === 'high' ? 'bg-purple-100' :
-                        insight.significance === 'medium' ? 'bg-blue-100' : 'bg-gray-100'
-                      }`}>
-                        <Lightbulb className={`h-6 w-6 ${
-                          insight.significance === 'high' ? 'text-purple-700' :
-                          insight.significance === 'medium' ? 'text-blue-700' : 'text-gray-700'
-                        }`} />
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4 border-border">
+                <h5 className="text-sm font-semibold text-foreground mb-3">Por Faixa Etária</h5>
+                <div className="space-y-3">
+                  {[
+                    { range: '0-2 anos', accuracy: model.currentAccuracy - 5.2 },
+                    { range: '3-6 anos', accuracy: model.currentAccuracy - 2.1 },
+                    { range: '7-10 anos', accuracy: model.currentAccuracy + 1.8 },
+                    { range: '11+ anos', accuracy: model.currentAccuracy + 2.5 }
+                  ].map((segment, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{segment.range}</span>
+                        <span className="font-medium text-foreground">{segment.accuracy.toFixed(1)}%</span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-lg font-semibold">
-                            {isPortuguese ? insight.title_pt : insight.title_en}
-                          </h4>
-                          <Badge variant="outline" className={
-                            insight.significance === 'high' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                            insight.significance === 'medium' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                            'bg-gray-100 text-gray-700 border-gray-200'
-                          }>
-                            {insight.significance === 'high' ? 'Alto Impacto' :
-                             insight.significance === 'medium' ? 'Médio Impacto' : 'Baixo Impacto'}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {isPortuguese ? insight.description_pt : insight.description_en}
-                        </p>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Descoberto em</p>
-                            <p className="text-sm font-medium">
-                              {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Dados Necessários</p>
-                            <p className="text-sm font-medium">{insight.dataRequirement.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Amostras</p>
-                            <p className="text-sm font-medium">{insight.evidence.sampleSize}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">P-value</p>
-                            <p className="text-sm font-medium">{insight.evidence.pValue.toFixed(3)}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <p className="text-xs text-muted-foreground">Raças relacionadas:</p>
-                          {insight.relatedBreeds.map((breed, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {breed}
-                            </Badge>
-                          ))}
-                        </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-chart-2"
+                          style={{ width: `${segment.accuracy}%` }}
+                        />
                       </div>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="p-12 text-center">
-                <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h4 className="text-lg font-semibold mb-2">
-                  {t('admin.models.insights.noInsights', 'Nenhum Insight Descoberto Ainda')}
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  {t('admin.models.insights.waitingData', 
-                    'Insights proprietários serão descobertos conforme o modelo acumula mais dados longitudinais.'
-                  )}
-                </p>
+                  ))}
+                </div>
               </Card>
-            )}
-          </TabsContent>
 
-          {/* Tab 5: Comparação Tratamento/Controle */}
-          <TabsContent value="comparison" className="space-y-4">
-            <Card className="p-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {t('admin.models.comparison.treatmentVsControl', 'Tratamento vs Controle ao Longo do Tempo')}
-              </h4>
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={evolutionChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={11} />
-                  <YAxis stroke="hsl(var(--foreground))" fontSize={11} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="treatment" 
-                    stroke="#10B981" 
-                    strokeWidth={2}
-                    name="Grupo Tratamento"
-                    dot={{ r: 4 }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="control" 
-                    stroke="#3B82F6" 
-                    strokeWidth={2}
-                    name="Grupo Controle"
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <Card className="p-4 border-border">
+                <h5 className="text-sm font-semibold text-foreground mb-3">Por Porte</h5>
+                <div className="space-y-3">
+                  {[
+                    { size: 'Miniatura (<5kg)', accuracy: model.currentAccuracy - 3.1 },
+                    { size: 'Pequeno (5-10kg)', accuracy: model.currentAccuracy - 1.4 },
+                    { size: 'Médio (10-25kg)', accuracy: model.currentAccuracy + 0.8 },
+                    { size: 'Grande (25-45kg)', accuracy: model.currentAccuracy + 2.2 },
+                    { size: 'Gigante (>45kg)', accuracy: model.currentAccuracy + 1.1 }
+                  ].map((segment, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{segment.size}</span>
+                        <span className="font-medium text-foreground">{segment.accuracy.toFixed(1)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-chart-4"
+                          style={{ width: `${segment.accuracy}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <Card className="p-4 bg-green-50 border-green-200">
-                  <p className="text-sm text-muted-foreground mb-1">Grupo Tratamento</p>
-                  <p className="text-3xl font-bold text-green-700">{model.treatmentSamples.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {((model.treatmentSamples / model.totalSamples) * 100).toFixed(1)}% do total
-                  </p>
-                </Card>
-                <Card className="p-4 bg-blue-50 border-blue-200">
-                  <p className="text-sm text-muted-foreground mb-1">Grupo Controle</p>
-                  <p className="text-3xl font-bold text-blue-700">{model.controlSamples.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {((model.controlSamples / model.totalSamples) * 100).toFixed(1)}% do total
-                  </p>
-                </Card>
+            <Card className="p-4 border-border">
+              <h5 className="text-sm font-semibold text-foreground mb-3">Por Condição Degenerativa</h5>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { condition: 'Osteoartrite', accuracy: model.currentAccuracy + 3.2 },
+                  { condition: 'Declínio Cognitivo', accuracy: model.currentAccuracy + 1.8 },
+                  { condition: 'Cardiomiopatia', accuracy: model.currentAccuracy - 0.5 },
+                  { condition: 'Doença Renal Crônica', accuracy: model.currentAccuracy + 2.1 },
+                  { condition: 'Sarcopenia', accuracy: model.currentAccuracy - 1.2 },
+                  { condition: 'Degeneração Retiniana', accuracy: model.currentAccuracy - 2.8 }
+                ].map((segment, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{segment.condition}</span>
+                      <span className="font-medium text-foreground">{segment.accuracy.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-brand-primary"
+                        style={{ width: `${segment.accuracy}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </Card>
           </TabsContent>

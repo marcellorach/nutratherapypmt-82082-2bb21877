@@ -1,211 +1,207 @@
-import React from 'react';
 import { Card } from "@/components/ui/card";
-import { Brain, Database, Lightbulb, TrendingUp, Target, Activity } from "lucide-react";
-import { useTranslation } from 'react-i18next';
+import { Badge } from "@/components/ui/badge";
+import { Activity, TrendingUp, Users, Lightbulb, Target, Percent } from "lucide-react";
 import { predictiveModelsData } from '../data/predictiveModelsData';
 
-const ModelsDashboard: React.FC = () => {
-  const { t } = useTranslation();
-
+export const ModelsDashboard = () => {
   // Calcular métricas gerais
-  const totalModels = modelEvolutionData.length;
-  const averageAccuracy = (modelEvolutionData.reduce((sum, m) => sum + m.currentAccuracy, 0) / totalModels).toFixed(1);
-  const totalSamples = modelEvolutionData.reduce((sum, m) => sum + m.totalSamples, 0);
-  const totalInsights = modelEvolutionData.reduce((sum, m) => sum + m.insights.length, 0);
-  const avgGrowthRate = (modelEvolutionData.reduce((sum, m) => sum + m.monthlyGrowthRate, 0) / totalModels).toFixed(1);
-
-  // Top 3 modelos
-  const topModels = [...modelEvolutionData]
+  const totalModels = predictiveModelsData.length;
+  const activeModels = predictiveModelsData.filter(m => m.status !== 'initial').length;
+  const avgAccuracy = (predictiveModelsData.reduce((sum, m) => sum + m.currentAccuracy, 0) / totalModels).toFixed(1);
+  const totalPetsMonitored = predictiveModelsData.reduce((sum, m) => sum + m.totalPetsMonitored, 0);
+  const totalInsights = predictiveModelsData.reduce((sum, m) => sum + m.degenerativeInsights.length, 0);
+  const avgGrowthRate = (predictiveModelsData.reduce((sum, m) => sum + m.monthlyGrowthRate, 0) / totalModels).toFixed(1);
+  
+  // Top 3 modelos por acurácia
+  const topModels = [...predictiveModelsData]
     .sort((a, b) => b.currentAccuracy - a.currentAccuracy)
     .slice(0, 3);
-
-  // Últimos insights
-  const recentInsights = modelEvolutionData
-    .flatMap(m => m.insights.map(i => ({ ...i, modelName: m.modelName })))
+  
+  // Insights recentes (últimos 5)
+  const recentInsights = predictiveModelsData
+    .flatMap(model => 
+      model.degenerativeInsights.map(insight => ({
+        ...insight,
+        modelName: model.modelName
+      }))
+    )
     .sort((a, b) => new Date(b.discoveredAt).getTime() - new Date(a.discoveredAt).getTime())
     .slice(0, 5);
 
-  // Dados para radar chart
-  const radarData = modelEvolutionData.map(model => ({
-    model: model.modelName.split(' - ')[0],
-    'Precisão': model.currentAccuracy,
-    'Dados': (model.totalSamples / 1000), // normalizado para k
-    'Insights': model.insights.length * 10, // multiplicado para escala visual
-    'Crescimento': model.monthlyGrowthRate * 5 // multiplicado para escala visual
-  }));
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'state-of-art': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'mature': return 'bg-green-100 text-green-700 border-green-200';
-      case 'growing': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'initial': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'state-of-art':
+        return 'bg-brand-primary/10 text-brand-primary border-brand-primary/20';
+      case 'mature':
+        return 'bg-success/10 text-success border-success/20';
+      case 'growing':
+        return 'bg-info/10 text-info border-info/20';
+      case 'initial':
+        return 'bg-warning/10 text-warning border-warning/20';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   };
 
   const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      'state-of-art': t('admin.models.status.stateOfArt', '🎯 Estado da Arte'),
-      'mature': t('admin.models.status.mature', '✅ Maduro'),
-      'growing': t('admin.models.status.growing', '📈 Crescendo'),
-      'initial': t('admin.models.status.initial', '🌱 Inicial')
-    };
-    return labels[status] || status;
+    switch (status) {
+      case 'state-of-art':
+        return 'Estado da Arte';
+      case 'mature':
+        return 'Maduro';
+      case 'growing':
+        return 'Em Crescimento';
+      case 'initial':
+        return 'Fase Inicial';
+      default:
+        return status;
+    }
+  };
+
+  const getSignificanceBadge = (significance: string) => {
+    switch (significance) {
+      case 'high':
+        return <Badge className="bg-success/10 text-success border-success/20">Alta</Badge>;
+      case 'medium':
+        return <Badge className="bg-warning/10 text-warning border-warning/20">Média</Badge>;
+      case 'low':
+        return <Badge className="bg-muted/50 text-muted-foreground border-muted">Baixa</Badge>;
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="space-y-6 mb-8">
       {/* Header */}
       <div>
-        <h3 className="text-2xl font-semibold mb-2">
-          {t('admin.models.dashboard.title', 'Visão Geral dos Modelos Preditivos')}
-        </h3>
+        <h2 className="text-2xl font-semibold text-foreground mb-2">Dashboard de Modelos Preditivos</h2>
         <p className="text-muted-foreground">
-          {t('admin.models.dashboard.subtitle', 'Acompanhe a evolução e performance dos nossos modelos proprietários baseados em dados longitudinais')}
+          Visão executiva dos modelos de IA que evoluem com os dados da plataforma
         </p>
       </div>
 
-      {/* Summary Cards */}
+      {/* Métricas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Brain className="h-5 w-5 text-primary" />
+            <div className="p-2 rounded-lg bg-brand-primary/10">
+              <Activity className="h-4 w-4 text-brand-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.totalModels', 'Modelos Ativos')}
-              </p>
-              <p className="text-2xl font-bold">{totalModels}</p>
+              <p className="text-xs text-muted-foreground">Modelos Ativos</p>
+              <p className="text-2xl font-semibold text-foreground">{activeModels}/{totalModels}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Target className="h-5 w-5 text-green-700" />
+            <div className="p-2 rounded-lg bg-success/10">
+              <Target className="h-4 w-4 text-success" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.avgAccuracy', 'Precisão Média')}
-              </p>
-              <p className="text-2xl font-bold">{averageAccuracy}%</p>
+              <p className="text-xs text-muted-foreground">Precisão Média</p>
+              <p className="text-2xl font-semibold text-foreground">{avgAccuracy}%</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Database className="h-5 w-5 text-blue-700" />
+            <div className="p-2 rounded-lg bg-info/10">
+              <Users className="h-4 w-4 text-info" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.totalSamples', 'Total Amostras')}
-              </p>
-              <p className="text-2xl font-bold">{(totalSamples / 1000).toFixed(1)}k</p>
+              <p className="text-xs text-muted-foreground">Pets Monitorados</p>
+              <p className="text-2xl font-semibold text-foreground">{(totalPetsMonitored / 1000).toFixed(0)}k</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Lightbulb className="h-5 w-5 text-purple-700" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <Lightbulb className="h-4 w-4 text-warning" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.insights', 'Insights')}
-              </p>
-              <p className="text-2xl font-bold">{totalInsights}</p>
+              <p className="text-xs text-muted-foreground">Insights Degenerativos</p>
+              <p className="text-2xl font-semibold text-foreground">{totalInsights}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-orange-700" />
+            <div className="p-2 rounded-lg bg-chart-2/20">
+              <Percent className="h-4 w-4 text-chart-2" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.growthRate', 'Crescimento')}
-              </p>
-              <p className="text-2xl font-bold">+{avgGrowthRate}%</p>
+              <p className="text-xs text-muted-foreground">Taxa de Adesão</p>
+              <p className="text-2xl font-semibold text-foreground">87.3%</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-pink-100 rounded-lg">
-              <Activity className="h-5 w-5 text-pink-700" />
+            <div className="p-2 rounded-lg bg-chart-5/20">
+              <TrendingUp className="h-4 w-4 text-chart-5" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {t('admin.models.dashboard.active', 'Em Coleta')}
-              </p>
-              <p className="text-2xl font-bold">{totalModels}</p>
+              <p className="text-xs text-muted-foreground">Crescimento Mensal</p>
+              <p className="text-2xl font-semibold text-foreground">+{avgGrowthRate}%</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Radar Chart */}
-        <Card className="p-6">
-          <h4 className="text-lg font-semibold mb-4">
-            {t('admin.models.dashboard.comparison', 'Comparação de Modelos')}
-          </h4>
-          <ResponsiveContainer width="100%" height={300}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis 
-                dataKey="model" 
-                tick={{ fill: 'hsl(var(--foreground))', fontSize: 11 }}
-              />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-              <Radar 
-                name="Métricas" 
-                dataKey="Precisão" 
-                stroke="hsl(var(--primary))" 
-                fill="hsl(var(--primary))" 
-                fillOpacity={0.3}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-            </RadarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* Top Models */}
-        <Card className="p-6">
-          <h4 className="text-lg font-semibold mb-4">
-            {t('admin.models.dashboard.topModels', 'Top 3 Modelos por Performance')}
-          </h4>
+      {/* Grid: Top Modelos e Insights Recentes */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Top 3 Modelos */}
+        <Card className="lg:col-span-3 p-6 border-border bg-card">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Modelos por Performance</h3>
           <div className="space-y-4">
             {topModels.map((model, index) => (
-              <div key={model.modelId} className="flex items-center gap-4 p-3 bg-accent/50 rounded-lg">
-                <div className="text-2xl font-bold text-muted-foreground">
-                  #{index + 1}
+              <div key={model.modelId} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary font-semibold">
+                  {index + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">{model.modelName}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(model.status)}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-foreground">{model.modelName}</p>
+                    <Badge variant="outline" className={getStatusColor(model.status)}>
                       {getStatusLabel(model.status)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {(model.totalSamples / 1000).toFixed(1)}k {t('admin.models.dashboard.samples', 'amostras')}
-                    </span>
+                    </Badge>
                   </div>
+                  <p className="text-xs text-muted-foreground">{model.algorithm}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{model.currentAccuracy}%</p>
+                  <p className="text-2xl font-semibold text-foreground">{model.currentAccuracy}%</p>
+                  <p className="text-xs text-muted-foreground">{(model.totalPetsMonitored / 1000).toFixed(0)}k pets</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Insights Recentes */}
+        <Card className="lg:col-span-2 p-6 border-border bg-card">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Descobertas Recentes</h3>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
+            {recentInsights.map((insight) => (
+              <div key={insight.id} className="p-3 rounded-lg bg-muted/20 border border-border">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="text-sm font-medium text-foreground line-clamp-2">{insight.title}</p>
+                  {getSignificanceBadge(insight.significance)}
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">{insight.modelName}</p>
+                <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    {t('admin.models.dashboard.accuracy', 'precisão')}
+                    {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}
+                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    n={insight.evidence.sampleSize.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -213,53 +209,6 @@ const ModelsDashboard: React.FC = () => {
           </div>
         </Card>
       </div>
-
-      {/* Recent Insights */}
-      <Card className="p-6">
-        <h4 className="text-lg font-semibold mb-4">
-          {t('admin.models.dashboard.recentInsights', 'Descobertas Recentes')}
-        </h4>
-        <div className="space-y-3">
-          {recentInsights.map((insight) => (
-            <div key={insight.id} className="flex items-start gap-3 p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors">
-              <div className={`p-2 rounded-lg ${
-                insight.significance === 'high' ? 'bg-purple-100' :
-                insight.significance === 'medium' ? 'bg-blue-100' : 'bg-gray-100'
-              }`}>
-                <Lightbulb className={`h-4 w-4 ${
-                  insight.significance === 'high' ? 'text-purple-700' :
-                  insight.significance === 'medium' ? 'text-blue-700' : 'text-gray-700'
-                }`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{insight.title_pt}</p>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {insight.description_pt}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs text-muted-foreground">
-                    {insight.modelName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">•</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-                insight.significance === 'high' ? 'bg-purple-100 text-purple-700' :
-                insight.significance === 'medium' ? 'bg-blue-100 text-blue-700' :
-                'bg-gray-100 text-gray-700'
-              }`}>
-                {insight.significance === 'high' ? 'Alto Impacto' :
-                 insight.significance === 'medium' ? 'Médio Impacto' : 'Baixo Impacto'}
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
     </div>
   );
 };
-
-export default ModelsDashboard;
