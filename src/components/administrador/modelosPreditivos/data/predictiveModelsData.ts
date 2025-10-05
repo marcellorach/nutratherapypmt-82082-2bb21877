@@ -13,7 +13,7 @@ export const predictiveModelsData: PredictiveModel[] = [
     totalPetsMonitored: 287500,
     treatmentGroup: 201250,
     controlGroup: 86250,
-    monthlyGrowthRate: 8.2,
+    monthlyGrowthRate: 1.92,
     dataSources: [
       {
         type: 'clinical_monitoring',
@@ -263,7 +263,7 @@ export const predictiveModelsData: PredictiveModel[] = [
     totalPetsMonitored: 198200,
     treatmentGroup: 138740,
     controlGroup: 59460,
-    monthlyGrowthRate: 6.8,
+    monthlyGrowthRate: 0.83,
     dataSources: [
       {
         type: 'clinical_monitoring',
@@ -401,7 +401,7 @@ export const predictiveModelsData: PredictiveModel[] = [
     totalPetsMonitored: 142800,
     treatmentGroup: 99960,
     controlGroup: 42840,
-    monthlyGrowthRate: 9.5,
+    monthlyGrowthRate: 1.47,
     dataSources: [
       {
         type: 'clinical_monitoring',
@@ -539,7 +539,7 @@ export const predictiveModelsData: PredictiveModel[] = [
     totalPetsMonitored: 95600,
     treatmentGroup: 66920,
     controlGroup: 28680,
-    monthlyGrowthRate: 12.3,
+    monthlyGrowthRate: 0.21,
     dataSources: [
       {
         type: 'clinical_monitoring',

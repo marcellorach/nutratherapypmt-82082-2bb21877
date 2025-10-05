@@ -91,7 +91,7 @@ const ModelosPreditivosTab = () => {
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Algoritmo</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Precisão</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Pets Monitorados</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Crescimento Mensal</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Aprendizado Mensal</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Ações</th>
               </tr>
             </thead>
