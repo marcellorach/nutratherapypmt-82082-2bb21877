@@ -69,7 +69,7 @@ const ModelosPreditivosTab = () => {
       <Card className="p-6 border-border bg-card">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Modelos em Evolução</h3>
+            <h3 className="text-lg font-semibold text-foreground">Modelos Preditivos em Deep Learning</h3>
             <p className="text-sm text-muted-foreground">
               Acompanhe a performance e evolução de cada modelo preditivo
             </p>

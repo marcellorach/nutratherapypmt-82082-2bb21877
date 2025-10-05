@@ -146,6 +146,102 @@ export const predictiveModelsData: PredictiveModel[] = [
           effectSize: 0.19,
           confidenceInterval: [0.13, 0.25]
         }
+      },
+      {
+        id: 'ins-006',
+        discoveredAt: '2025-07-10',
+        title: 'Janela Terapêutica Crítica: Intervenção Nutracêutica Antes dos 6 Anos Previne 67% dos Casos de Osteoartrite Severa',
+        description: 'Análise longitudinal demonstra que início de protocolo com Glucosamina + Condroitina + MSM antes dos 6 anos em raças predispostas reduz incidência de osteoartrite severa (grau 3-4) em 67% até os 12 anos, comparado a início após os 8 anos.',
+        relatedConditions: ['Osteoartrite', 'Displasia Coxofemoral', 'Degeneração Articular Severa'],
+        relatedBreeds: ['Golden Retriever', 'Labrador', 'Pastor Alemão', 'Rottweiler', 'Mastiff'],
+        ageRange: '4-6 anos (intervenção)',
+        significance: 'high',
+        evidence: {
+          sampleSize: 9420,
+          pValue: 0.0001,
+          effectSize: 0.67,
+          confidenceInterval: [0.61, 0.73]
+        }
+      },
+      {
+        id: 'ins-007',
+        discoveredAt: '2025-06-28',
+        title: 'Sinergia Mitocondrial: NMN + CoQ10 + PQQ Revertem Declínio Energético em 52% dos Cães Seniores',
+        description: 'Protocolo combinado de precursores mitocondriais (NMN 250mg + CoQ10 100mg + PQQ 20mg) demonstra reversão parcial de declínio energético relacionado à idade em 52% dos cães 9+ anos, com melhora objetiva em testes de atividade física e marcadores metabólicos.',
+        relatedConditions: ['Sarcopenia', 'Declínio Energético', 'Envelhecimento Mitocondrial', 'Fadiga Senil'],
+        relatedBreeds: ['Todas as raças', 'Resposta mais pronunciada em raças de trabalho'],
+        ageRange: '9+ anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 5680,
+          pValue: 0.0009,
+          effectSize: 0.52,
+          confidenceInterval: [0.46, 0.58]
+        }
+      },
+      {
+        id: 'ins-008',
+        discoveredAt: '2025-06-15',
+        title: 'Modulação Epigenética: Resveratrol + NMN Retardam Envelhecimento Biológico em 3.2 Anos',
+        description: 'Combinação de Resveratrol (20mg/kg) + NMN (15mg/kg) demonstra retardo de envelhecimento biológico equivalente a 3.2 anos em análise de relógios epigenéticos (metilação de DNA), com impacto significativo em marcadores de senescência celular.',
+        relatedConditions: ['Envelhecimento Acelerado', 'Senescência Celular', 'Disfunção Mitocondrial'],
+        relatedBreeds: ['Todas as raças', 'Efeito mais pronunciado em raças longevas'],
+        ageRange: '7-11 anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 4120,
+          pValue: 0.0004,
+          effectSize: 3.2,
+          confidenceInterval: [2.8, 3.6]
+        }
+      },
+      {
+        id: 'ins-009',
+        discoveredAt: '2025-05-30',
+        title: 'Neuroproteção Sinérgica: Fosfolipídios + DHA + Fosfatidilserina Preservam Função Cognitiva em 71%',
+        description: 'Protocolo neurocognitivo avançado combinando fosfolipídios (400mg), DHA (600mg) e fosfatidilserina (100mg) preserva função cognitiva em 71% dos cães com declínio inicial, com melhora mensurável em testes de memória espacial e reconhecimento.',
+        relatedConditions: ['Declínio Cognitivo', 'Síndrome de Disfunção Cognitiva', 'Demência Senil', 'Perda de Memória'],
+        relatedBreeds: ['Poodle', 'Beagle', 'Cocker Spaniel', 'Schnauzer', 'Terriers'],
+        ageRange: '8-12 anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 7240,
+          pValue: 0.0002,
+          effectSize: 0.71,
+          confidenceInterval: [0.66, 0.76]
+        }
+      },
+      {
+        id: 'ins-010',
+        discoveredAt: '2025-05-12',
+        title: 'Renoproteção Avançada: Astaxantina + Omega-3 + NAC Estabilizam TFG em DRC Estágio 2',
+        description: 'Protocolo renoprotetor com Astaxantina (8mg), Omega-3 EPA/DHA (3g) e N-Acetilcisteína (600mg) estabiliza Taxa de Filtração Glomerular por período médio de 28 meses em cães com DRC estágio 2, versus 14 meses no grupo controle.',
+        relatedConditions: ['Doença Renal Crônica', 'Insuficiência Renal', 'Proteinúria', 'Azotemia'],
+        relatedBreeds: ['Cocker Spaniel', 'Shih Tzu', 'Yorkshire', 'Schnauzer'],
+        ageRange: '7+ anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 3960,
+          pValue: 0.0006,
+          effectSize: 0.48,
+          confidenceInterval: [0.41, 0.55]
+        }
+      },
+      {
+        id: 'ins-011',
+        discoveredAt: '2025-04-25',
+        title: 'Inflamação Sistêmica: Curcumina Fitossomal + Boswellia Reduzem PCR em 58% e Melhoram Qualidade de Vida',
+        description: 'Combinação antiinflamatória natural com Curcumina fitossomal (500mg) + Boswellia serrata (300mg) reduz Proteína C Reativa em 58% e melhora escores de qualidade de vida (mobilidade, disposição, apetite) em 64% dos cães com inflamação crônica relacionada à idade.',
+        relatedConditions: ['Inflamação Crônica', 'Inflammaging', 'Osteoartrite', 'Síndrome Metabólica'],
+        relatedBreeds: ['Todas as raças', 'Maior benefício em raças grandes e gigantes'],
+        ageRange: '6+ anos',
+        significance: 'medium',
+        evidence: {
+          sampleSize: 8840,
+          pValue: 0.0011,
+          effectSize: 0.58,
+          confidenceInterval: [0.52, 0.64]
+        }
       }
     ],
     nextMilestone: {
@@ -266,6 +362,22 @@ export const predictiveModelsData: PredictiveModel[] = [
           pValue: 0.0021,
           effectSize: 3200,
           confidenceInterval: [2800, 3600]
+        }
+      },
+      {
+        id: 'ins-cb-004',
+        discoveredAt: '2025-06-20',
+        title: 'Economia em Longo Prazo: Nutraterapia Preventiva Gera Economia de 43% em 5 Anos',
+        description: 'Análise longitudinal de 5 anos demonstra que investimento em nutraterapia preventiva desde os 5-6 anos gera economia total de 43% em custos veterinários acumulados, considerando prevenção de múltiplas condições degenerativas e redução de hospitalizações.',
+        relatedConditions: ['Prevenção Multissistêmica', 'Envelhecimento Saudável'],
+        relatedBreeds: ['Todas as raças'],
+        ageRange: '5+ anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 15200,
+          pValue: 0.0001,
+          effectSize: 8600,
+          confidenceInterval: [7900, 9300]
         }
       }
     ],
@@ -388,6 +500,22 @@ export const predictiveModelsData: PredictiveModel[] = [
           effectSize: 0.56,
           confidenceInterval: [0.48, 0.64]
         }
+      },
+      {
+        id: 'ins-seg-004',
+        discoveredAt: '2025-06-18',
+        title: 'Perfil Metabólico: Cães com Sobrepeso Respondem 38% Melhor a L-Carnitina + CLA',
+        description: 'Segmento de cães 7+ anos com sobrepeso (ECC 6-7) demonstra resposta 38% superior a protocolo com L-Carnitina (1g) + CLA (500mg) para preservação de massa magra e função metabólica, comparado a cães eutróficos.',
+        relatedConditions: ['Sarcopenia', 'Obesidade Sarcopênica', 'Síndrome Metabólica'],
+        relatedBreeds: ['Labrador', 'Beagle', 'Cocker', 'Dachshund'],
+        ageRange: '7+ anos',
+        significance: 'medium',
+        evidence: {
+          sampleSize: 4620,
+          pValue: 0.0024,
+          effectSize: 0.38,
+          confidenceInterval: [0.31, 0.45]
+        }
       }
     ],
     nextMilestone: {
@@ -508,6 +636,22 @@ export const predictiveModelsData: PredictiveModel[] = [
           pValue: 0.0015,
           effectSize: 0.76,
           confidenceInterval: [0.69, 0.83]
+        }
+      },
+      {
+        id: 'ins-prog-004',
+        discoveredAt: '2025-06-08',
+        title: 'Trajetória de Sarcopenia: Perda de Massa Muscular Acelera Exponencialmente Após os 10 Anos',
+        description: 'Análise revela que perda de massa muscular segue trajetória exponencial após os 10 anos (0.8%/mês vs 0.3%/mês antes dos 10 anos), mas protocolo com proteína + HMB + leucina reduz velocidade para 0.2%/mês, mantendo taxa pré-10 anos.',
+        relatedConditions: ['Sarcopenia', 'Perda de Massa Muscular', 'Fragilidade'],
+        relatedBreeds: ['Todas as raças', 'Mais pronunciado em raças grandes'],
+        ageRange: '10+ anos',
+        significance: 'high',
+        evidence: {
+          sampleSize: 6840,
+          pValue: 0.0003,
+          effectSize: 0.72,
+          confidenceInterval: [0.66, 0.78]
         }
       }
     ],

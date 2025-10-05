@@ -12,13 +12,8 @@ export const ModelsDashboard = () => {
   const totalInsights = predictiveModelsData.reduce((sum, m) => sum + m.degenerativeInsights.length, 0);
   const avgGrowthRate = (predictiveModelsData.reduce((sum, m) => sum + m.monthlyGrowthRate, 0) / totalModels).toFixed(1);
   
-  // Top 3 modelos por acurácia
-  const topModels = [...predictiveModelsData]
-    .sort((a, b) => b.currentAccuracy - a.currentAccuracy)
-    .slice(0, 3);
-  
-  // Insights recentes (últimos 5)
-  const recentInsights = predictiveModelsData
+  // Aprendizados recentes (últimos 11)
+  const recentLearnings = predictiveModelsData
     .flatMap(model => 
       model.degenerativeInsights.map(insight => ({
         ...insight,
@@ -26,7 +21,7 @@ export const ModelsDashboard = () => {
       }))
     )
     .sort((a, b) => new Date(b.discoveredAt).getTime() - new Date(a.discoveredAt).getTime())
-    .slice(0, 5);
+    .slice(0, 11);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -156,17 +151,14 @@ export const ModelsDashboard = () => {
         </Card>
       </div>
 
-      {/* Grid: Top Modelos e Insights Recentes */}
+      {/* Grid: Modelos Preditivos e Aprendizados Recentes */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Top 3 Modelos */}
+        {/* Modelos Preditivos em Deep Learning */}
         <Card className="lg:col-span-3 p-6 border-border bg-card">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Modelos por Performance</h3>
-          <div className="space-y-4">
-            {topModels.map((model, index) => (
-              <div key={model.modelId} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 border border-border">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary font-semibold">
-                  {index + 1}
-                </div>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Modelos Preditivos em Deep Learning</h3>
+          <div className="space-y-3">
+            {predictiveModelsData.map((model) => (
+              <div key={model.modelId} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 border border-border hover:bg-muted/50 transition-colors">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-medium text-foreground">{model.modelName}</p>
@@ -185,23 +177,24 @@ export const ModelsDashboard = () => {
           </div>
         </Card>
 
-        {/* Insights Recentes */}
+        {/* Aprendizados Recentes */}
         <Card className="lg:col-span-2 p-6 border-border bg-card">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Descobertas Recentes</h3>
-          <div className="space-y-4 max-h-[400px] overflow-y-auto">
-            {recentInsights.map((insight) => (
-              <div key={insight.id} className="p-3 rounded-lg bg-muted/20 border border-border">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Aprendizados Recentes</h3>
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+            {recentLearnings.map((learning) => (
+              <div key={learning.id} className="p-3 rounded-lg bg-muted/20 border border-border hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className="text-sm font-medium text-foreground line-clamp-2">{insight.title}</p>
-                  {getSignificanceBadge(insight.significance)}
+                  <p className="text-sm font-medium text-foreground line-clamp-2">{learning.title}</p>
+                  {getSignificanceBadge(learning.significance)}
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">{insight.modelName}</p>
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{learning.description}</p>
+                <p className="text-xs text-muted-foreground mb-1">{learning.modelName}</p>
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}
+                    {new Date(learning.discoveredAt).toLocaleDateString('pt-BR')}
                   </p>
                   <p className="text-xs font-medium text-muted-foreground">
-                    n={insight.evidence.sampleSize.toLocaleString()}
+                    n={learning.evidence.sampleSize.toLocaleString()}
                   </p>
                 </div>
               </div>
