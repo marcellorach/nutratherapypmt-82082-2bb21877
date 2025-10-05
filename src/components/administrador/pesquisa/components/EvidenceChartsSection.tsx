@@ -280,175 +280,175 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
         <TabsContent value="cardiovascular" className="space-y-6">
           <Tabs defaultValue="hipertensao" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="hipertensao">Hipertensão</TabsTrigger>
-              <TabsTrigger value="insuf-cardiaca">Insuf. Cardíaca</TabsTrigger>
-              <TabsTrigger value="cardiomiopatia">Cardiomiopatia</TabsTrigger>
-              <TabsTrigger value="arritmias">Arritmias</TabsTrigger>
-              <TabsTrigger value="resumo-geral">Resumo Geral</TabsTrigger>
+              <TabsTrigger value="hipertensao">{t('studyProposals.dialog.evidence.cardiovascular.hypertension')}</TabsTrigger>
+              <TabsTrigger value="insuf-cardiaca">{t('studyProposals.dialog.evidence.cardiovascular.heartFailure')}</TabsTrigger>
+              <TabsTrigger value="cardiomiopatia">{t('studyProposals.dialog.evidence.cardiovascular.cardiomyopathy')}</TabsTrigger>
+              <TabsTrigger value="arritmias">{t('studyProposals.dialog.evidence.cardiovascular.arrhythmias')}</TabsTrigger>
+              <TabsTrigger value="resumo-geral">{t('studyProposals.dialog.evidence.cardiovascular.generalSummary')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="hipertensao" className="space-y-4">
               <PartialResultsChart 
-                title="Hipertensão - Análise Geral" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.hypertension')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.generalAnalysis')}`}
                 data={hypertensionData} 
-                description="Diagnósticos de hipertensão arterial" 
-                yAxisLabel="Incidência Cumulativa (%)" 
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.hypertension')}
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.cumulativeIncidence')}
                 chartType="line" 
                 statisticalInfo={{
                   pValue: "p = 0.008",
                   hazardRatio: "HR: 0.78 (IC95%: 0.64-0.94)",
-                  riskReduction: "22% redução do risco"
+                  riskReduction: `22% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
                 }} 
                 formatter={value => `${value}%`} 
               />
               <MultipleScatterPlotComparison 
-                title="Hipertensão - Dados Individuais" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.hypertension')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.individualData')}`}
                 data={hypertensionData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.incidence')}
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.individualDistribution')}
                 sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
               />
             </TabsContent>
 
             <TabsContent value="insuf-cardiaca" className="space-y-4">
               <PartialResultsChart 
-                title="Insuficiência Cardíaca - Análise Geral" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.heartFailure')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.generalAnalysis')}`}
                 data={heartFailureData} 
-                description="Novos casos de insuficiência cardíaca diagnosticada" 
-                yAxisLabel="Incidência Cumulativa (%)" 
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.heartFailure')}
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.cumulativeIncidence')}
                 chartType="line" 
                 statisticalInfo={{
                   pValue: "p < 0.001",
                   hazardRatio: "HR: 0.66 (IC95%: 0.51-0.85)",
-                  riskReduction: "34% redução do risco"
+                  riskReduction: `34% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
                 }} 
                 formatter={value => `${value}%`} 
               />
               <MultipleScatterPlotComparison 
-                title="Insuficiência Cardíaca - Dados Individuais" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.heartFailure')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.individualData')}`}
                 data={heartFailureData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.incidence')}
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.individualDistribution')}
                 sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
               />
             </TabsContent>
 
             <TabsContent value="cardiomiopatia" className="space-y-4">
               <PartialResultsChart 
-                title="Cardiomiopatia - Análise Geral" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.cardiomyopathy')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.generalAnalysis')}`}
                 data={cardiomyopathyData} 
-                description="Casos de cardiomiopatia dilatada e hipertrófica" 
-                yAxisLabel="Incidência Cumulativa (%)" 
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.cardiomyopathy')}
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.cumulativeIncidence')}
                 chartType="line" 
                 statisticalInfo={{
                   pValue: "p = 0.045",
                   hazardRatio: "HR: 0.81 (IC95%: 0.66-0.99)",
-                  riskReduction: "19% redução do risco"
+                  riskReduction: `19% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
                 }} 
                 formatter={value => `${value}%`} 
               />
               <MultipleScatterPlotComparison 
-                title="Cardiomiopatia - Dados Individuais" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.cardiomyopathy')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.individualData')}`}
                 data={cardiomyopathyData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.incidence')}
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.individualDistribution')}
                 sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
               />
             </TabsContent>
 
             <TabsContent value="arritmias" className="space-y-4">
               <PartialResultsChart 
-                title="Arritmias - Análise Geral" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.arrhythmias')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.generalAnalysis')}`}
                 data={arrhythmiasData} 
-                description="Episódios de arritmias clinicamente significativas" 
-                yAxisLabel="Incidência Cumulativa (%)" 
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.arrhythmias')}
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.cumulativeIncidence')}
                 chartType="line" 
                 statisticalInfo={{
                   pValue: "p = 0.002",
                   hazardRatio: "HR: 0.72 (IC95%: 0.58-0.89)",
-                  riskReduction: "28% redução do risco"
+                  riskReduction: `28% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
                 }} 
                 formatter={value => `${value}%`} 
               />
               <MultipleScatterPlotComparison 
-                title="Arritmias - Dados Individuais" 
+                title={`${t('studyProposals.dialog.evidence.cardiovascular.arrhythmias')} - ${t('studyProposals.dialog.evidence.cardiovascular.analysis.individualData')}`}
                 data={arrhythmiasData} 
-                yAxisLabel="Incidência (%)"
-                description="Distribuição individual por animal"
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.incidence')}
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.individualDistribution')}
                 sampleSizes={{ controle: tamanhoControle, dapa: tamanhoDapa, empa: tamanhoEmpa }}
               />
             </TabsContent>
 
             <TabsContent value="resumo-geral" className="space-y-6">
               <PartialResultsChart 
-                title="Total de Eventos Cardiovasculares" 
+                title={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.totalEvents')}
                 data={totalEventsData} 
-                description="Somatória de todos os eventos cardiovasculares maiores" 
-                yAxisLabel="Incidência Cumulativa (%)" 
+                description={t('studyProposals.dialog.evidence.cardiovascular.analysis.description.totalEvents')}
+                yAxisLabel={t('studyProposals.dialog.evidence.cardiovascular.yAxisLabel.cumulativeIncidence')}
                 chartType="line" 
                 statisticalInfo={{
                   pValue: "p < 0.001",
                   hazardRatio: "HR: 0.69 (IC95%: 0.61-0.78)",
-                  riskReduction: "31% redução do risco"
+                  riskReduction: `31% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
                 }} 
                 formatter={value => `${value}%`} 
               />
 
               {/* Números em Risco - Cardiovascular */}
               <div className="bg-muted/50 border rounded-lg p-4">
-                <h4 className="font-semibold text-sm mb-3">Números em Risco (Eventos Cardiovasculares aos 18 meses)</h4>
+                <h4 className="font-semibold text-sm mb-3">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.title')}</h4>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
                   <div className="text-center">
-                    <div className="font-medium text-blue-600">Controle (n={tamanhoControle.toLocaleString()})</div>
-                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos ({totalEventsData[totalEventsData.length - 1].control}%)</div>
+                    <div className="font-medium text-blue-600">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.control')} (n={tamanhoControle.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} {t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.events')} ({totalEventsData[totalEventsData.length - 1].control}%)</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-medium text-green-600">Dapa (n={tamanhoDapa.toLocaleString()})</div>
-                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos ({totalEventsData[totalEventsData.length - 1].dapagliflozin}%)</div>
+                    <div className="font-medium text-green-600">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.dapa')} (n={tamanhoDapa.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} {t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.events')} ({totalEventsData[totalEventsData.length - 1].dapagliflozin}%)</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-medium text-orange-600">Empa (n={tamanhoEmpa.toLocaleString()})</div>
-                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos ({totalEventsData[totalEventsData.length - 1].empagliflozin}%)</div>
+                    <div className="font-medium text-orange-600">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.empa')} (n={tamanhoEmpa.toLocaleString()})</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} {t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.events')} ({totalEventsData[totalEventsData.length - 1].empagliflozin}%)</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-medium text-purple-600">Eventos Prevenidos</div>
-                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos (Dapa)</div>
+                    <div className="font-medium text-purple-600">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.eventsPrevented')}</div>
+                    <div>{calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') - calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} {t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.events')} ({t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.dapa')})</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-medium text-amber-600">NNT</div>
-                    <div>8 cães</div>
+                    <div className="font-medium text-amber-600">{t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.nnt')}</div>
+                    <div>8 {t('studyProposals.dialog.evidence.cardiovascular.numbersAtRisk.dogs')}</div>
                   </div>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg border">
-                <h4 className="font-semibold text-lg mb-4 text-center">Resumo dos Resultados Cardiovasculares</h4>
+                <h4 className="font-semibold text-lg mb-4 text-center">{t('studyProposals.dialog.evidence.cardiovascular.summary.title')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <strong>Benefícios Observados:</strong>
+                    <strong>{t('studyProposals.dialog.evidence.cardiovascular.summary.observedBenefits')}:</strong>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>34% redução em insuficiência cardíaca</li>
-                      <li>28% redução em arritmias</li>
-                      <li>22% redução em hipertensão</li>
-                      <li>19% redução em cardiomiopatia</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.benefits.heartFailure', { percent: '34%' })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.benefits.arrhythmias', { percent: '28%' })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.benefits.hypertension', { percent: '22%' })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.benefits.cardiomyopathy', { percent: '19%' })}</li>
                     </ul>
                   </div>
                   <div>
-                    <strong>Significância Estatística:</strong>
+                    <strong>{t('studyProposals.dialog.evidence.cardiovascular.summary.statisticalSignificance')}:</strong>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Todos os endpoints primários: p ≤ 0.045</li>
-                      <li>NNT (Number Needed to Treat): 8-12 cães</li>
-                      <li>Tempo mediano para benefício: 8-12 meses</li>
-                      <li>Consistência entre subgrupos</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.significance.allEndpoints')}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.significance.nnt')}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.significance.medianTime')}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.significance.consistency')}</li>
                     </ul>
                   </div>
                   <div>
-                    <strong>Números Absolutos:</strong>
+                    <strong>{t('studyProposals.dialog.evidence.cardiovascular.summary.absoluteNumbers')}:</strong>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Controle (n={tamanhoControle.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle')} eventos</li>
-                      <li>Dapa (n={tamanhoDapa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa')} eventos</li>
-                      <li>Empa (n={tamanhoEmpa.toLocaleString()}): {calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa')} eventos</li>
-                      <li>Redução de risco absoluto (Dapa): {(totalEventsData[totalEventsData.length - 1].control - totalEventsData[totalEventsData.length - 1].dapagliflozin).toFixed(1)}%</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.absoluteData.controlEvents', { n: tamanhoControle.toLocaleString(), events: calcularAbsolutos(totalEventsData[totalEventsData.length - 1].control, 'controle') })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.absoluteData.dapaEvents', { n: tamanhoDapa.toLocaleString(), events: calcularAbsolutos(totalEventsData[totalEventsData.length - 1].dapagliflozin, 'dapa') })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.absoluteData.empaEvents', { n: tamanhoEmpa.toLocaleString(), events: calcularAbsolutos(totalEventsData[totalEventsData.length - 1].empagliflozin, 'empa') })}</li>
+                      <li>{t('studyProposals.dialog.evidence.cardiovascular.summary.absoluteData.absoluteRiskReduction', { percent: (totalEventsData[totalEventsData.length - 1].control - totalEventsData[totalEventsData.length - 1].dapagliflozin).toFixed(1) })}</li>
                     </ul>
                   </div>
                 </div>
@@ -458,102 +458,128 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
         </TabsContent>
 
         <TabsContent value="renal" className="space-y-6">
-          <PartialResultsChart title="Função Renal" data={renalData} description="Preservação da função renal (eGFR > 60 ml/min/1.73m²)" yAxisLabel="Função Renal Preservada (%)" chartType="line" formatter={value => `${value}%`} statisticalInfo={{
-          pValue: "p < 0.001",
-          hazardRatio: "HR: 0.72 (IC95%: 0.64-0.81)",
-          riskReduction: "28% redução do risco"
-        }} />
+          <PartialResultsChart 
+            title={t('studyProposals.dialog.evidence.renal.title')}
+            data={renalData} 
+            description={t('studyProposals.dialog.evidence.renal.description')}
+            yAxisLabel={t('studyProposals.dialog.evidence.renal.yAxisLabel')}
+            chartType="line" 
+            formatter={value => `${value}%`} 
+            statisticalInfo={{
+              pValue: "p < 0.001",
+              hazardRatio: "HR: 0.72 (IC95%: 0.64-0.81)",
+              riskReduction: `28% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
+            }} 
+          />
           
           {/* Números em Risco - Renal */}
           <div className="bg-muted/50 border rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-3">Números em Risco (Função Renal aos 18 meses)</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.title')}</h4>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-center">
               <div>
-                <div className="font-medium text-blue-600">Controle</div>
-                <div>{calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} cães com função preservada</div>
+                <div className="font-medium text-blue-600">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.control')}</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} {t('studyProposals.dialog.evidence.renal.numbersAtRisk.withPreservedFunction')}</div>
               </div>
               <div>
-                <div className="font-medium text-green-600">Dapa</div>
-                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa')} cães com função preservada</div>
+                <div className="font-medium text-green-600">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.dapa')}</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa')} {t('studyProposals.dialog.evidence.renal.numbersAtRisk.withPreservedFunction')}</div>
               </div>
               <div>
-                <div className="font-medium text-orange-600">Empa</div>
-                <div>{calcularAbsolutos(renalData[renalData.length - 1].empagliflozin, 'empa')} cães com função preservada</div>
+                <div className="font-medium text-orange-600">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.empa')}</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].empagliflozin, 'empa')} {t('studyProposals.dialog.evidence.renal.numbersAtRisk.withPreservedFunction')}</div>
               </div>
               <div>
-                <div className="font-medium text-purple-600">Benefício Adicional (Dapa)</div>
-                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} cães</div>
+                <div className="font-medium text-purple-600">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.additionalBenefit')}</div>
+                <div>{calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} {t('studyProposals.dialog.evidence.renal.numbersAtRisk.dogs')}</div>
               </div>
               <div>
-                <div className="font-medium text-amber-600">NNT Renal</div>
-                <div>12 cães</div>
+                <div className="font-medium text-amber-600">{t('studyProposals.dialog.evidence.renal.numbersAtRisk.nnt')}</div>
+                <div>12 {t('studyProposals.dialog.evidence.renal.numbersAtRisk.dogs')}</div>
               </div>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="mortalidade" className="space-y-6">
-          <PartialResultsChart title="Mortalidade por Todas as Causas" data={mortalityData} description="Sobrevida durante o período de seguimento" yAxisLabel="Sobrevida (%)" chartType="line" formatter={value => `${value}%`} statisticalInfo={{
-          pValue: "p = 0.003",
-          hazardRatio: "HR: 0.78 (IC95%: 0.66-0.92)",
-          riskReduction: "22% redução do risco"
-        }} />
+          <PartialResultsChart 
+            title={t('studyProposals.dialog.evidence.mortality.title')}
+            data={mortalityData} 
+            description={t('studyProposals.dialog.evidence.mortality.description')}
+            yAxisLabel={t('studyProposals.dialog.evidence.mortality.yAxisLabel')}
+            chartType="line" 
+            formatter={value => `${value}%`} 
+            statisticalInfo={{
+              pValue: "p = 0.003",
+              hazardRatio: "HR: 0.78 (IC95%: 0.66-0.92)",
+              riskReduction: `22% ${t('studyProposals.dialog.evidence.cardiovascular.statistics.riskReduction')}`
+            }} 
+          />
 
           {/* Números em Risco - Mortalidade */}
           <div className="bg-muted/50 border rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-3">Números em Risco (Sobrevida aos 18 meses)</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.title')}</h4>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-center">
               <div>
-                <div className="font-medium text-blue-600">Controle</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} sobreviventes ({mortalityData[mortalityData.length - 1].control}%)</div>
+                <div className="font-medium text-blue-600">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.control')}</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} {t('studyProposals.dialog.evidence.mortality.numbersAtRisk.survivors')} ({mortalityData[mortalityData.length - 1].control}%)</div>
               </div>
               <div>
-                <div className="font-medium text-green-600">Dapa</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa')} sobreviventes ({mortalityData[mortalityData.length - 1].dapagliflozin}%)</div>
+                <div className="font-medium text-green-600">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.dapa')}</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa')} {t('studyProposals.dialog.evidence.mortality.numbersAtRisk.survivors')} ({mortalityData[mortalityData.length - 1].dapagliflozin}%)</div>
               </div>
               <div>
-                <div className="font-medium text-orange-600">Empa</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].empagliflozin, 'empa')} sobreviventes ({mortalityData[mortalityData.length - 1].empagliflozin}%)</div>
+                <div className="font-medium text-orange-600">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.empa')}</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].empagliflozin, 'empa')} {t('studyProposals.dialog.evidence.mortality.numbersAtRisk.survivors')} ({mortalityData[mortalityData.length - 1].empagliflozin}%)</div>
               </div>
               <div>
-                <div className="font-medium text-purple-600">Vidas Salvas (Dapa)</div>
-                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} cães</div>
+                <div className="font-medium text-purple-600">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.livesSaved')}</div>
+                <div>{calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} {t('studyProposals.dialog.evidence.mortality.numbersAtRisk.dogs')}</div>
               </div>
               <div>
-                <div className="font-medium text-amber-600">NNT Mortalidade</div>
-                <div>15 cães</div>
+                <div className="font-medium text-amber-600">{t('studyProposals.dialog.evidence.mortality.numbersAtRisk.nnt')}</div>
+                <div>15 {t('studyProposals.dialog.evidence.mortality.numbersAtRisk.dogs')}</div>
               </div>
             </div>
           </div>
 
           <div className="bg-gradient-to-r from-accent/10 to-primary/10 p-6 rounded-lg border">
-            <h4 className="font-semibold text-lg mb-4 text-center">Resumo dos Resultados Renais e Mortalidade</h4>
+            <h4 className="font-semibold text-lg mb-4 text-center">{t('studyProposals.dialog.evidence.mortality.summary.title')}</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <strong>Proteção Renal:</strong>
+                <strong>{t('studyProposals.dialog.evidence.mortality.summary.renalProtection')}:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>28% redução na progressão de doença renal</li>
-                  <li>Preservação da eGFR ao longo de 18 meses</li>
-                  <li>Benefício independente do status diabético</li>
-                  <li>Efeito consistente em todas as raças</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.renal.progressionReduction')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.renal.gfrPreservation')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.renal.diabetesIndependent')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.renal.allBreeds')}</li>
                 </ul>
               </div>
               <div>
-                <strong>Impacto na Mortalidade:</strong>
+                <strong>{t('studyProposals.dialog.evidence.mortality.summary.mortalityImpact')}:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>22% redução na mortalidade por todas as causas</li>
-                  <li>Benefício observado a partir do 8º mês</li>
-                  <li>Principais causas evitadas: cardiorrenais</li>
-                  <li>NNT para prevenir 1 morte: 15 cães</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.mortality.allCauseReduction')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.mortality.benefitFrom')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.mortality.mainCauses')}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.mortality.nntToPrevents')}</li>
                 </ul>
               </div>
               <div>
-                <strong>Números em Risco:</strong>
+                <strong>{t('studyProposals.dialog.evidence.mortality.summary.numbersAtRisk')}:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Função renal preservada (Dapa): {calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(renalData[renalData.length - 1].control, 'controle')} (Controle)</li>
-                  <li>Sobreviventes aos 18m (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa')} vs {calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')} (Controle)</li>
-                  <li>Vidas salvas (Dapa): {calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle')}</li>
-                  <li>Diferença absoluta: {(mortalityData[mortalityData.length - 1].dapagliflozin - mortalityData[mortalityData.length - 1].control).toFixed(1)}%</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.numbers.preservedRenal', { 
+                    dapa: calcularAbsolutos(renalData[renalData.length - 1].dapagliflozin, 'dapa'), 
+                    control: calcularAbsolutos(renalData[renalData.length - 1].control, 'controle') 
+                  })}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.numbers.survivors', { 
+                    dapa: calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa'), 
+                    control: calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle') 
+                  })}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.numbers.livesSaved', { 
+                    saved: calcularAbsolutos(mortalityData[mortalityData.length - 1].dapagliflozin, 'dapa') - calcularAbsolutos(mortalityData[mortalityData.length - 1].control, 'controle') 
+                  })}</li>
+                  <li>{t('studyProposals.dialog.evidence.mortality.summary.numbers.absoluteDifference', { 
+                    percent: (mortalityData[mortalityData.length - 1].dapagliflozin - mortalityData[mortalityData.length - 1].control).toFixed(1) 
+                  })}</li>
                 </ul>
               </div>
             </div>
@@ -562,16 +588,16 @@ const EvidenceChartsSection: React.FC<EvidenceChartsSectionProps> = ({
       </Tabs>
 
       <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border border-blue-200">
-        <h4 className="font-semibold text-lg mb-3 text-center">Significância Estatística Geral</h4>
+        <h4 className="font-semibold text-lg mb-3 text-center">{t('studyProposals.dialog.evidence.statisticalSignificance.title')}</h4>
         <div className="text-center space-y-2">
           <p className="text-sm font-medium">
-            Todos os resultados apresentam significância estatística robusta (p ≤ 0.045) com intervalos de confiança de 95%
+            {t('studyProposals.dialog.evidence.statisticalSignificance.allResults')}
           </p>
           <p className="text-xs text-muted-foreground">
-            População total analisada: <strong>{totalAnimais.toLocaleString()} cães</strong> • 
-            Seguimento médio: <strong>18 meses</strong> • 
-            Taxa de aderência: <strong>{'>'}95%</strong> • 
-            Design: <strong>Randomizado, duplo-cego, controlado por placebo</strong>
+            {t('studyProposals.dialog.evidence.statisticalSignificance.totalPopulation')}: <strong>{totalAnimais.toLocaleString()} {t('studyProposals.dialog.evidence.statisticalSignificance.dogs')}</strong> • 
+            {t('studyProposals.dialog.evidence.statisticalSignificance.averageFollowup')}: <strong>18 {t('studyProposals.dialog.evidence.statisticalSignificance.months')}</strong> • 
+            {t('studyProposals.dialog.evidence.statisticalSignificance.adherenceRate')}: <strong>{'>'}95%</strong> • 
+            {t('studyProposals.dialog.evidence.statisticalSignificance.design')}: <strong>{t('studyProposals.dialog.evidence.statisticalSignificance.designValue')}</strong>
           </p>
         </div>
       </div>
