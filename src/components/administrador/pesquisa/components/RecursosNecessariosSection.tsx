@@ -86,7 +86,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                   <div key={index} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
                     <div className="flex-1">
                       <div className="font-medium text-sm">{raca.raca}</div>
-                      <div className="text-xs text-muted-foreground">{raca.predisposicao}</div>
+                      <div className="text-xs text-muted-foreground">{raca.predisposicao_pt || raca.predisposicao}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-red-600 dark:text-red-400">{raca.voluntarios}</div>
@@ -122,7 +122,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 {t('studyProposals.dialog.resources.examSchedule.preStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
-                {recursos.cronograma_exames.pre_estudo.map((exame, index) => (
+                {(recursos.cronograma_exames.pre_estudo_pt || recursos.cronograma_exames.pre_estudo || []).map((exame, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                     {exame}
@@ -137,7 +137,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 {t('studyProposals.dialog.resources.examSchedule.duringStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
-                {recursos.cronograma_exames.durante_estudo.map((exame, index) => (
+                {(recursos.cronograma_exames.durante_estudo_pt || recursos.cronograma_exames.durante_estudo || []).map((exame, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                     {exame}
@@ -152,7 +152,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 {t('studyProposals.dialog.resources.examSchedule.postStudy')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
-                {recursos.cronograma_exames.pos_estudo.map((exame, index) => (
+                {(recursos.cronograma_exames.pos_estudo_pt || recursos.cronograma_exames.pos_estudo || []).map((exame, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                     {exame}
@@ -167,7 +167,7 @@ const RecursosNecessariosSection: React.FC<RecursosNecessariosSectionProps> = ({
                 {t('studyProposals.dialog.resources.examSchedule.followup')}
               </h5>
               <ul className="text-sm text-muted-foreground space-y-1">
-                {recursos.cronograma_exames.acompanhamento.map((exame, index) => (
+                {(recursos.cronograma_exames.acompanhamento_pt || recursos.cronograma_exames.acompanhamento || []).map((exame, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
                     {exame}

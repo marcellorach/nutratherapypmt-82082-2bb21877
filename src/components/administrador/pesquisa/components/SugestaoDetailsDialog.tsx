@@ -40,6 +40,8 @@ interface SugestaoDetailsDialogProps {
   onAdvanceApproval: (id: string) => void;
 }
 
+import { getLocalizedSugestao } from '../utils/localizationHelper';
+
 const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
   open,
   onOpenChange,
@@ -48,9 +50,11 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
   onReject,
   onAdvanceApproval
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   if (!sugestao) return null;
+  
+  const localizedSugestao = getLocalizedSugestao(sugestao, i18n.language);
 
   // Ícone e texto baseado na origem da sugestão
   const getOrigemInfo = () => {
@@ -91,7 +95,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
             </Badge>
           </div>
           <DialogTitle className="text-xl">
-            {sugestao.titulo}
+            {localizedSugestao.titulo}
           </DialogTitle>
           <DialogDescription className="flex items-center">
             {t('studyProposals.card.confidence')}: <span className="font-medium ml-1">{sugestao.confianca}%</span>
@@ -101,7 +105,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
         <div className="flex-1 overflow-y-auto space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.aiReasoning')}</h4>
-            <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
+            <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{localizedSugestao.raciocinio}</p>
           </div>
           
           {/* Cadeia de aprovação */}
@@ -119,7 +123,7 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               <div>
                 <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.basedOn')}</h4>
                 <ul className="text-sm text-muted-foreground list-disc ml-5">
-                  {sugestao.baseado_em.map((base, index) => (
+                  {localizedSugestao.baseado_em.map((base, index) => (
                     <li key={index}>{base}</li>
                   ))}
                 </ul>
@@ -127,13 +131,13 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
               
               <div>
                 <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.methodology')}</h4>
-                <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
+                <p className="text-sm text-muted-foreground">{localizedSugestao.metodologia}</p>
               </div>
               
               <div>
                 <h4 className="text-sm font-medium mb-1">{t('studyProposals.dialog.overview.markers')}</h4>
                 <ul className="text-sm text-muted-foreground list-disc ml-5">
-                  {sugestao.marcadores_sugeridos.map((marcador, index) => (
+                  {localizedSugestao.marcadores_sugeridos.map((marcador, index) => (
                     <li key={index}>{marcador}</li>
                   ))}
                 </ul>
@@ -141,8 +145,8 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
             </TabsContent>
 
             <TabsContent value="evidence" className="space-y-4">
-              {sugestao.dados_amostra ? (
-                <EvidenceChartsSection dados_amostra={sugestao.dados_amostra} />
+              {localizedSugestao.dados_amostra ? (
+                <EvidenceChartsSection dados_amostra={localizedSugestao.dados_amostra} />
               ) : (
                 <div className="bg-muted p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">
@@ -153,8 +157,8 @@ const SugestaoDetailsDialog: React.FC<SugestaoDetailsDialogProps> = ({
             </TabsContent>
 
             <TabsContent value="recursos" className="space-y-4">
-              {sugestao.recursos_necessarios ? (
-                <RecursosNecessariosSection recursos={sugestao.recursos_necessarios} />
+              {localizedSugestao.recursos_necessarios ? (
+                <RecursosNecessariosSection recursos={localizedSugestao.recursos_necessarios} />
               ) : (
                 <div className="bg-muted p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">

@@ -21,12 +21,15 @@ export interface DadosAmostra {
   total_caes: number;
   usuarios_tratamento: number;
   grupo_controle: number;
-  periodo_analise: string;
+  periodo_analise_pt: string;
+  periodo_analise_en?: string;
   resultados_observacionais: {
     reducao_eventos_cardiovasculares: string;
     melhora_funcao_renal: string;
     reducao_mortalidade: string;
   };
+  // Campos temporários para compatibilidade (deprecated)
+  periodo_analise?: string;
 }
 
 export interface RecursosNecessarios {
@@ -44,14 +47,26 @@ export interface RecursosNecessarios {
     racas_cardiacas?: {
       raca: string;
       voluntarios: number;
-      predisposicao: string;
+      predisposicao_pt: string;
+      predisposicao_en?: string;
+      // Campo temporário para compatibilidade (deprecated)
+      predisposicao?: string;
     }[];
   };
   cronograma_exames: {
-    pre_estudo: string[];
-    durante_estudo: string[];
-    pos_estudo: string[];
-    acompanhamento: string[];
+    pre_estudo_pt: string[];
+    pre_estudo_en?: string[];
+    durante_estudo_pt: string[];
+    durante_estudo_en?: string[];
+    pos_estudo_pt: string[];
+    pos_estudo_en?: string[];
+    acompanhamento_pt: string[];
+    acompanhamento_en?: string[];
+    // Campos temporários para compatibilidade (deprecated)
+    pre_estudo?: string[];
+    durante_estudo?: string[];
+    pos_estudo?: string[];
+    acompanhamento?: string[];
   };
   custos_estimados: {
     exames_laboratoriais: number;
@@ -65,16 +80,29 @@ export interface RecursosNecessarios {
 
 export interface Sugestao {
   id: string;
-  titulo: string;
+  titulo_pt: string;
+  titulo_en?: string;
   confianca: number;
-  baseado_em: string[];
-  populacao_sugerida: string;
-  metodologia: string;
-  marcadores_sugeridos: string[];
-  raciocinio: string;
+  baseado_em_pt: string[];
+  baseado_em_en?: string[];
+  populacao_sugerida_pt: string;
+  populacao_sugerida_en?: string;
+  metodologia_pt: string;
+  metodologia_en?: string;
+  marcadores_sugeridos_pt: string[];
+  marcadores_sugeridos_en?: string[];
+  raciocinio_pt: string;
+  raciocinio_en?: string;
   status: 'nova' | 'aprovada' | 'rejeitada' | 'em_analise';
   approvalChain: ApprovalStep[];
   origem: OrigemSugestao;
   dados_amostra?: DadosAmostra;
   recursos_necessarios?: RecursosNecessarios;
+  // Campos temporários para compatibilidade (deprecated)
+  titulo?: string;
+  baseado_em?: string[];
+  populacao_sugerida?: string;
+  metodologia?: string;
+  marcadores_sugeridos?: string[];
+  raciocinio?: string;
 }

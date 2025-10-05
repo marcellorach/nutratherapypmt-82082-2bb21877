@@ -31,13 +31,16 @@ interface SugestaoCardProps {
   onDetails: () => void;
 }
 
+import { getLocalizedSugestao } from '../utils/localizationHelper';
+
 const SugestaoCard: React.FC<SugestaoCardProps> = ({ 
   sugestao, 
   onApprove, 
   onReject, 
   onDetails 
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const localizedSugestao = getLocalizedSugestao(sugestao, i18n.language);
   
   const getStatusBadge = () => {
     switch (sugestao.status) {
@@ -92,7 +95,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
               <Badge variant="outline" className="mb-2 font-normal">
                 {origemInfo.text}
               </Badge>
-              <CardTitle className="text-lg leading-tight">{sugestao.titulo}</CardTitle>
+              <CardTitle className="text-lg leading-tight">{localizedSugestao.titulo}</CardTitle>
             </div>
           </div>
           {getStatusBadge()}
@@ -105,25 +108,25 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
         {/* Raciocínio sempre visível */}
         <div>
           <h4 className="text-sm font-medium mb-1">{t('studyProposals.card.reasoning')}</h4>
-          <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{sugestao.raciocinio}</p>
+          <p className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md border">{localizedSugestao.raciocinio}</p>
         </div>
 
         <div>
           <h4 className="text-sm font-medium">{t('studyProposals.card.suggestedPopulation')}</h4>
-          <p className="text-sm text-muted-foreground">{sugestao.populacao_sugerida}</p>
+          <p className="text-sm text-muted-foreground">{localizedSugestao.populacao_sugerida}</p>
         </div>
         
         {/* Metodologia sempre visível */}
         <div>
           <h4 className="text-sm font-medium">{t('studyProposals.card.suggestedMethodology')}</h4>
-          <p className="text-sm text-muted-foreground">{sugestao.metodologia}</p>
+          <p className="text-sm text-muted-foreground">{localizedSugestao.metodologia}</p>
         </div>
         
         {/* Baseado em - sempre visível */}
         <div>
           <h4 className="text-sm font-medium">{t('studyProposals.card.basedOn')}:</h4>
           <ul className="text-sm text-muted-foreground list-disc ml-5">
-            {sugestao.baseado_em.map((base, index) => (
+            {localizedSugestao.baseado_em.map((base, index) => (
               <li key={index}>{base}</li>
             ))}
           </ul>
@@ -133,7 +136,7 @@ const SugestaoCard: React.FC<SugestaoCardProps> = ({
         <div>
           <h4 className="text-sm font-medium">{t('studyProposals.card.suggestedMarkers')}:</h4>
           <ul className="text-sm text-muted-foreground list-disc ml-5">
-            {sugestao.marcadores_sugeridos.map((marcador, index) => (
+            {localizedSugestao.marcadores_sugeridos.map((marcador, index) => (
               <li key={index}>{marcador}</li>
             ))}
           </ul>
