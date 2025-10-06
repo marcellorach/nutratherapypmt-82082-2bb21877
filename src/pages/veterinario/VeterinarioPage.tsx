@@ -11,10 +11,10 @@ import RecommendationsList from './RecommendationsList';
 import { useTranslation } from 'react-i18next';
 
 const VeterinarioPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const { t } = useTranslation();
   
   // Filtrar apenas cães
   const allDogs = pets.filter(pet => pet.species === 'Cachorro');
