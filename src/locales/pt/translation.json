@@ -28,18 +28,27 @@
     "poweredBy": "Powered by"
   },
   "tutor": {
-    "greeting": "Olá",
+    "greeting": "Olá, {{name}}!",
     "subtitle": "Acompanhe o tratamento nutracêutico dos seus pets",
     "noPets": "Você não possui pets cadastrados",
     "noPetsDesc": "Entre em contato com o seu veterinário para começar.",
+    "noPetsRegistered": "Você não possui pets cadastrados",
+    "noPetsContact": "Entre em contato com o seu veterinário para começar.",
     "noTreatmentPlan": "Sem plano de tratamento",
     "noTreatmentPlanDesc": "Este pet ainda não possui um plano de tratamento.",
     "noTreatmentPlanLong": "Este pet ainda não possui um plano de tratamento nutracêutico.",
+    "noPlan": "Sem plano de tratamento",
+    "noPlanDesc": "Este pet ainda não possui um plano de tratamento.",
+    "noPlanTitle": "Sem plano terapêutico",
+    "noPlanMessage": "Este pet ainda não possui um plano de tratamento nutracêutico.",
     "tabs": {
       "plan": "Plano Terapêutico",
       "history": "Histórico",
       "orders": "Pedidos"
     },
+    "therapeuticPlan": "Plano Terapêutico",
+    "history": "Histórico",
+    "orders": "Pedidos",
     "plan": {
       "startDate": "Data de início",
       "active": "Plano ativo",
@@ -53,15 +62,31 @@
       "howToAdminister": "Como administrar:",
       "scheduleConsultation": "Agendar consulta com veterinário"
     },
+    "startDate": "Data de início",
+    "activePlan": "Plano ativo",
+    "planStatus": "Status do plano",
+    "approved": "Aprovado",
+    "kitSent": "Kit enviado em {{date}}",
+    "nextRenewal": "Próxima renovação",
+    "quarterlyRenewal": "Renovação trimestral",
+    "recommendedNutraceuticals": "Nutracêuticos Recomendados",
+    "recommendationReason": "Motivo da recomendação:",
+    "howToAdminister": "Como administrar:",
+    "scheduleConsultation": "Agendar consulta com veterinário",
     "history": {
       "title": "Histórico de Tratamentos",
       "description": "O histórico de tratamentos estará disponível após o início do tratamento."
     },
+    "historyTitle": "Histórico de Tratamentos",
+    "historyMessage": "O histórico de tratamentos estará disponível após o início do tratamento.",
     "orders": {
       "title": "Pedidos de Nutracêuticos",
       "description": "Faça pedidos de kits nutracêuticos para seu pet.",
       "makeOrder": "Fazer Pedido"
     },
+    "ordersTitle": "Pedidos de Nutracêuticos",
+    "ordersMessage": "Faça pedidos de kits nutracêuticos para seu pet.",
+    "makeOrder": "Fazer Pedido",
     "petInfo": {
       "years": "anos",
       "kg": "kg"
@@ -177,35 +202,6 @@
       "select": "Selecionar",
       "viewDetails": "Ver detalhes"
     }
-  },
-  "tutor": {
-    "greeting": "Olá, {{name}}!",
-    "subtitle": "Acompanhe o tratamento nutracêutico dos seus pets",
-    "noPetsRegistered": "Você não possui pets cadastrados",
-    "noPetsContact": "Entre em contato com o seu veterinário para começar.",
-    "noPlan": "Sem plano de tratamento",
-    "noPlanDesc": "Este pet ainda não possui um plano de tratamento.",
-    "therapeuticPlan": "Plano Terapêutico",
-    "history": "Histórico",
-    "orders": "Pedidos",
-    "startDate": "Data de início",
-    "activePlan": "Plano ativo",
-    "planStatus": "Status do plano",
-    "approved": "Aprovado",
-    "kitSent": "Kit enviado em {{date}}",
-    "nextRenewal": "Próxima renovação",
-    "quarterlyRenewal": "Renovação trimestral",
-    "recommendedNutraceuticals": "Nutracêuticos Recomendados",
-    "recommendationReason": "Motivo da recomendação:",
-    "howToAdminister": "Como administrar:",
-    "noPlanTitle": "Sem plano terapêutico",
-    "noPlanMessage": "Este pet ainda não possui um plano de tratamento nutracêutico.",
-    "scheduleConsultation": "Agendar consulta com veterinário",
-    "historyTitle": "Histórico de Tratamentos",
-    "historyMessage": "O histórico de tratamentos estará disponível após o início do tratamento.",
-    "ordersTitle": "Pedidos de Nutracêuticos",
-    "ordersMessage": "Faça pedidos de kits nutracêuticos para seu pet.",
-    "makeOrder": "Fazer Pedido"
   },
   "admin": {
     "sidebar": {

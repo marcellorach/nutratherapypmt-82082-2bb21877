@@ -25,10 +25,16 @@ i18next
     resources,
     lng: 'pt', // Força português como idioma fixo
     fallbackLng: 'pt',
-    debug: false,
+    debug: true, // Temporariamente ativado para diagnóstico
     interpolation: {
       escapeValue: false
-    }
+    },
+    // Configuração explícita de pluralização
+    pluralSeparator: '_',
+    contextSeparator: '_'
   });
+
+// Log para diagnóstico (remover após correção)
+console.log('i18next resources loaded:', i18next.options.resources);
 
 export default i18next;
