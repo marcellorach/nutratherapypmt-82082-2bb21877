@@ -51,11 +51,7 @@
         "highPrevention": "Alta Prevenção",
         "avgTreatability": "Média de Tratabilidade",
         "avgPrevention": "Média de Prevenção",
-        "newConditions": "Novas Condições Identificadas",
-        "cellularSenescence": "Senescência Celular",
-        "generalMortality": "Mortalidade Geral",
-        "oxidativeStress": "Estresse Oxidativo",
-        "mitochondrialDysfunction": "Disfunção Mitocondrial"
+        "newConditions": "Novas Condições Identificadas"
       },
       "table": {
         "title": "Condições de Saúde Analisadas",
