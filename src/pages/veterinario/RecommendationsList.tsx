@@ -15,7 +15,7 @@ interface RecommendationsListProps {
 const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }) => {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   // Se não houver pet selecionado, mostrar mensagem
   if (!selectedPet) {
