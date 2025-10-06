@@ -1584,29 +1584,67 @@
     "actions": "Actions",
     "details": "Details",
     "execute": "Execute",
-    "createTitle": "Create New Predictive Model",
-    "createDescription": "Configure a new model for predictive data analysis",
-    "basicInfo": "Basic Information",
-    "features": "Features",
-    "modelName": "Model Name",
-    "namePlaceholder": "Descriptive model name",
-    "modelDescription": "Description",
-    "descriptionPlaceholder": "Describe the model's function and purpose",
-    "selectAlgorithm": "Select an algorithm",
-    "inputFeatures": "Input Features",
-    "inputPlaceholder": "Add comma-separated features (breed, age, weight, etc)",
-    "outputVariable": "Output Variable",
-    "outputPlaceholder": "E.g.: efficacy, cost_benefit, disease_progression",
-    "normalization": "Normalization",
-    "encoding": "Encoding",
-    "dataSource": "Training Data Source",
-    "selectDataSource": "Select data source",
-    "filter": "Filter (optional)",
-    "trainTestSplit": "Train/Test Split",
-    "crossValidation": "Cross-Validation",
-    "hyperparameters": "Hyperparameters",
-    "cancel": "Cancel",
-    "createAndTrain": "Create and Train Model",
+    "table": {
+      "title": "Deep Learning Predictive Models",
+      "subtitle": "Track the performance and evolution of each predictive model",
+      "model": "Model",
+      "petsMonitored": "Pets Monitored",
+      "monthlyLearning": "Monthly Learning",
+      "recentData": "Recent data",
+      "lastTraining": "Last training on",
+      "treatment": "Treatment",
+      "control": "Control",
+      "viewEvolution": "View Evolution",
+      "noModels": "No models found"
+    },
+    "models": {
+      "efficacy-prediction": {
+        "name": "Nutraceutical Efficacy Prediction",
+        "description": "Predicts the efficacy of personalized nutraceutical compositions based on pet profile, clinical condition and treatment history.",
+        "milestone": "Reach 350,000 monitored pets for validation in rare subpopulations"
+      },
+      "cost-benefit-analysis": {
+        "name": "Cost-Benefit Analysis",
+        "description": "Models return on investment in nutritherapy considering reduction in veterinary costs, quality of life and longevity.",
+        "milestone": "Reach 250,000 pets for modeling by geographic region and local pricing"
+      },
+      "patient-segmentation": {
+        "name": "Treatability Segmentation",
+        "description": "Segments pets into groups by likelihood of response to specific nutraceutical protocols, enabling advanced personalization.",
+        "milestone": "Reach 300,000 pets for segmentation by multiple comorbidities"
+      },
+      "disease-progression": {
+        "name": "Disease Progression Prediction",
+        "description": "Predicts the progression rate of degenerative diseases with and without nutraceutical intervention, enabling personalized prognoses.",
+        "milestone": "Reach 200,000 pets with 24+ month follow-up for long-term predictions"
+      }
+    },
+    "dataSources": {
+      "clinical_monitoring": {
+        "label": "Clinical Monitoring",
+        "description": "Longitudinal data on clinical evolution reported by guardians and veterinarians"
+      },
+      "nutritherapy_monitoring": {
+        "label": "Nutritherapy Monitoring",
+        "description": "Data from pets on active nutraceutical supplementation protocol"
+      },
+      "control_group": {
+        "label": "Control Group",
+        "description": "Pets with same conditions without nutraceutical intervention"
+      },
+      "lab_exams": {
+        "label": "Laboratory Tests",
+        "description": "Biochemical markers and blood counts processed via OCR and structured"
+      },
+      "scientific_studies": {
+        "label": "Scientific Studies",
+        "description": "Knowledge base of veterinary studies processed by NTAI"
+      },
+      "anamnesis": {
+        "label": "Historical Anamnesis",
+        "description": "Historical anamnesis data with clinical tag extraction"
+      }
+    },
     "insights": {
       "sectionTitle": "Recent AI Scientific Discoveries",
       "sectionDescription": "Correlations and patterns identified by AI through analysis of thousands of clinical cases",
@@ -1637,6 +1675,68 @@
         "mediumEffect": "medium",
         "smallEffect": "small",
         "template": "A p-value of {{pValue}} indicates {{significance}} statistical significance. The effect size of {{effectSize}} suggests a {{effectMagnitude}} effect in clinical practice."
+      },
+      "discoveries": {
+        "ins-001": {
+          "title": "Osteoarthritis: Synergy between Omega-3 and Glucosamine in Large Breeds",
+          "description": "Golden Retriever and Labrador dogs aged 7-10 years with mild osteoarthritis show a 42% reduction in disease progression when supplemented with Omega-3 EPA/DHA (>2g/day) combined with Glucosamine (1500mg/day) versus control group."
+        },
+        "ins-002": {
+          "title": "Cognitive Decline: Antioxidant Complex Slows Progression by 38%",
+          "description": "Supplementation with antioxidant complex (Vitamin E 400IU + Selenium 50mcg + Resveratrol 20mg) demonstrates a 38% reduction in cognitive decline rate in elderly dogs (9+ years) compared to control group, measured by standardized behavioral tests."
+        },
+        "ins-003": {
+          "title": "Sarcopenia: Protein + HMB Preserve Muscle Mass in Seniors",
+          "description": "Combination of isolated protein (2g/kg/day) with HMB (3g/day) reduces muscle mass loss by 31% in senior dogs (8+ years) over 6 months, compared to standard diet control."
+        },
+        "ins-004": {
+          "title": "Chronic Kidney Disease: Omega-3 Slows Stage 2 Progression",
+          "description": "Omega-3 at therapeutic doses (EPA+DHA >3g/day) slows CKD stage 2 progression by 28% over 18 months, evidenced by stabilization of creatinine and serum urea."
+        },
+        "ins-005": {
+          "title": "Cardiac Degeneration: CoQ10 + Taurine Improve Ventricular Function",
+          "description": "Supplementation with Coenzyme Q10 (100mg/day) + Taurine (500mg/day) improves ventricular ejection fraction by 19% in dogs with early dilated cardiomyopathy, reducing risk of progression to congestive heart failure."
+        },
+        "ins-006": {
+          "title": "Critical Therapeutic Window: Nutraceutical Intervention Before Age 6 Prevents 67% of Severe Osteoarthritis Cases",
+          "description": "Longitudinal analysis demonstrates that starting protocol with Glucosamine + Chondroitin + MSM before age 6 in predisposed breeds reduces incidence of severe osteoarthritis (grade 3-4) by 67% by age 12, compared to starting after age 8."
+        },
+        "ins-007": {
+          "title": "Mitochondrial Synergy: NMN + CoQ10 + PQQ Reverse Energy Decline in 52% of Senior Dogs",
+          "description": "Combined protocol of mitochondrial precursors (NMN 250mg + CoQ10 100mg + PQQ 20mg) demonstrates partial reversal of age-related energy decline in 52% of dogs 9+ years, with objective improvement in physical activity tests and metabolic markers."
+        },
+        "ins-008": {
+          "title": "Epigenetic Modulation: Resveratrol + NMN Slow Biological Aging by 3.2 Years",
+          "description": "Combination of Resveratrol (20mg/kg) + NMN (15mg/kg) demonstrates biological aging delay equivalent to 3.2 years in epigenetic clock analysis (DNA methylation), with significant impact on cellular senescence markers."
+        },
+        "ins-009": {
+          "title": "Synergistic Neuroprotection: Phospholipids + DHA + Phosphatidylserine Preserve Cognitive Function in 71%",
+          "description": "Advanced neurocognitive protocol combining phospholipids (400mg), DHA (600mg) and phosphatidylserine (100mg) preserves cognitive function in 71% of dogs with early decline, with measurable improvement in spatial memory and recognition tests."
+        },
+        "ins-010": {
+          "title": "Advanced Renoprotection: Astaxanthin + Omega-3 + NAC Stabilize GFR in Stage 2 CKD",
+          "description": "Renoprotective protocol with Astaxanthin (8mg), Omega-3 EPA/DHA (3g) and N-Acetylcysteine (600mg) stabilizes Glomerular Filtration Rate for an average period of 28 months in dogs with stage 2 CKD, versus 14 months in control group."
+        },
+        "ins-011": {
+          "title": "Systemic Inflammation: Phytosomal Curcumin + Boswellia Reduce CRP by 58% and Improve Quality of Life",
+          "description": "Natural anti-inflammatory combination with Phytosomal Curcumin (500mg) + Boswellia serrata (300mg) reduces C-Reactive Protein by 58% and improves quality of life scores (mobility, disposition, appetite) in 64% of dogs with age-related chronic inflammation."
+        },
+        "ins-cb-001": {
+          "title": "Positive ROI in 89% of Osteoarthritis Prevention Cases",
+          "description": "Investment in preventive nutritherapy for osteoarthritis in predisposed breeds (7+ years) generates positive ROI in 89% of cases over 3 years, with average savings of R$4,200 in veterinary costs per pet."
+        },
+        "ins-cb-002": {
+          "title": "Cardiac Nutritherapy Reduces Emergency Costs by 64%",
+          "description": "Preventive protocol with CoQ10 + Taurine in cardiac breeds reduces frequency of cardiac emergency visits by 64%, generating average savings of R$6,800 over 2 years."
+        },
+        "ins-cb-003": {
+          "title": "Cognitive Decline Prevention Reduces Costs by 52%",
+          "description": "Early nutraceutical intervention (8+ years) for cognitive decline prevention reduces costs with behavioral management and specialized consultations by 52%, with average payback of 14 months."
+        },
+        "ins-cb-004": {
+          "title": "Long-Term Savings: Preventive Nutritherapy Generates 43% Savings in 5 Years",
+          "description": "5-year longitudinal analysis demonstrates that investment in preventive nutritherapy starting at 5-6 years generates total savings of 43% in accumulated veterinary costs, considering prevention of multiple degenerative conditions and reduction of hospitalizations."
+        }
       }
     }
   },

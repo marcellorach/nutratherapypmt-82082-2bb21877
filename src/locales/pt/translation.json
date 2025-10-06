@@ -1584,29 +1584,67 @@
     "actions": "Ações",
     "details": "Detalhes",
     "execute": "Executar",
-    "createTitle": "Criar Novo Modelo Preditivo",
-    "createDescription": "Configure um novo modelo para análise preditiva de dados",
-    "basicInfo": "Informações Básicas",
-    "features": "Características",
-    "modelName": "Nome do Modelo",
-    "namePlaceholder": "Nome descritivo do modelo",
-    "modelDescription": "Descrição",
-    "descriptionPlaceholder": "Descreva a função e objetivo do modelo",
-    "selectAlgorithm": "Selecione um algoritmo",
-    "inputFeatures": "Características de Entrada",
-    "inputPlaceholder": "Adicione características separadas por vírgula (raça, idade, peso, etc)",
-    "outputVariable": "Variável de Saída",
-    "outputPlaceholder": "Ex: eficácia, custo_benefício, progressão_doença",
-    "normalization": "Normalização",
-    "encoding": "Codificação",
-    "dataSource": "Fonte de Dados de Treinamento",
-    "selectDataSource": "Selecione a fonte de dados",
-    "filter": "Filtro (opcional)",
-    "trainTestSplit": "Divisão Treino/Teste",
-    "crossValidation": "Cross-Validation",
-    "hyperparameters": "Hiperparâmetros",
-    "cancel": "Cancelar",
-    "createAndTrain": "Criar e Treinar Modelo",
+    "table": {
+      "title": "Modelos Preditivos em Deep Learning",
+      "subtitle": "Acompanhe a performance e evolução de cada modelo preditivo",
+      "model": "Modelo",
+      "petsMonitored": "Pets Monitorados",
+      "monthlyLearning": "Aprendizado Mensal",
+      "recentData": "Dados recentes",
+      "lastTraining": "Último treinamento em",
+      "treatment": "Tratamento",
+      "control": "Controle",
+      "viewEvolution": "Ver Evolução",
+      "noModels": "Nenhum modelo encontrado"
+    },
+    "models": {
+      "efficacy-prediction": {
+        "name": "Previsão de Eficácia de Nutracêuticos",
+        "description": "Prevê a eficácia de composições nutracêuticas personalizadas com base em perfil do pet, condição clínica e histórico de tratamentos.",
+        "milestone": "Atingir 350.000 pets monitorados para validação em subpopulações raras"
+      },
+      "cost-benefit-analysis": {
+        "name": "Análise de Custo-Benefício",
+        "description": "Modela o retorno sobre investimento em nutraterapia considerando redução de custos veterinários, qualidade de vida e longevidade.",
+        "milestone": "Alcançar 250.000 pets para modelagem por região geográfica e precificação local"
+      },
+      "patient-segmentation": {
+        "name": "Segmentação por Tratabilidade",
+        "description": "Segmenta pets em grupos por probabilidade de resposta a protocolos nutracêuticos específicos, permitindo personalização avançada.",
+        "milestone": "Atingir 300.000 pets para segmentação por comorbidades múltiplas"
+      },
+      "disease-progression": {
+        "name": "Previsão de Progressão de Doenças",
+        "description": "Prevê velocidade de progressão de doenças degenerativas com e sem intervenção nutracêutica, permitindo prognósticos personalizados.",
+        "milestone": "Alcançar 200.000 pets com follow-up de 24+ meses para previsões de longo prazo"
+      }
+    },
+    "dataSources": {
+      "clinical_monitoring": {
+        "label": "Acompanhamento Clínico",
+        "description": "Dados longitudinais de evolução clínica reportados por tutores e veterinários"
+      },
+      "nutritherapy_monitoring": {
+        "label": "Monitoramento com Nutraterapia",
+        "description": "Dados de pets em protocolo ativo de suplementação nutracêutica"
+      },
+      "control_group": {
+        "label": "Grupo Controle",
+        "description": "Pets com mesmas condições sem intervenção nutracêutica"
+      },
+      "lab_exams": {
+        "label": "Exames Laboratoriais",
+        "description": "Marcadores bioquímicos e hemogramas processados via OCR e estruturados"
+      },
+      "scientific_studies": {
+        "label": "Estudos Científicos",
+        "description": "Base de conhecimento de estudos veterinários processados pela NTAI"
+      },
+      "anamnesis": {
+        "label": "Anamnese Histórica",
+        "description": "Dados históricos de anamnese com extração de tags clínicas"
+      }
+    },
     "insights": {
       "sectionTitle": "Descobertas Científicas Recentes da IA",
       "sectionDescription": "Correlações e padrões identificados pela IA através da análise de milhares de casos clínicos",
@@ -1637,6 +1675,68 @@
         "mediumEffect": "médio",
         "smallEffect": "pequeno",
         "template": "Um p-value de {{pValue}} indica uma significância estatística {{significance}}. O effect size de {{effectSize}} sugere um efeito {{effectMagnitude}} na prática clínica."
+      },
+      "discoveries": {
+        "ins-001": {
+          "title": "Osteoartrite: Sinergia entre Omega-3 e Glucosamina em Raças Grandes",
+          "description": "Cães Golden Retriever e Labrador com idade entre 7-10 anos e osteoartrite grau leve apresentam redução de 42% na progressão da doença quando suplementados com Omega-3 EPA/DHA (>2g/dia) combinado com Glucosamina (1500mg/dia) versus grupo controle."
+        },
+        "ins-002": {
+          "title": "Declínio Cognitivo: Complexo Antioxidante Retarda Progressão em 38%",
+          "description": "Suplementação com complexo antioxidante (Vitamina E 400UI + Selênio 50mcg + Resveratrol 20mg) demonstra redução de 38% na velocidade de declínio cognitivo em cães idosos (9+ anos) comparado ao grupo controle, medido por testes comportamentais padronizados."
+        },
+        "ins-003": {
+          "title": "Sarcopenia: Proteína + HMB Preservam Massa Muscular em Seniores",
+          "description": "Combinação de proteína isolada (2g/kg/dia) com HMB (3g/dia) reduz perda de massa muscular em 31% em cães seniores (8+ anos) ao longo de 6 meses, comparado ao controle com dieta padrão."
+        },
+        "ins-004": {
+          "title": "Doença Renal Crônica: Omega-3 Retarda Progressão em Estágio 2",
+          "description": "Omega-3 em doses terapêuticas (EPA+DHA >3g/dia) retarda progressão de DRC estágio 2 em 28% ao longo de 18 meses, evidenciado por estabilização de creatinina e ureia sérica."
+        },
+        "ins-005": {
+          "title": "Degeneração Cardíaca: CoQ10 + Taurina Melhoram Função Ventricular",
+          "description": "Suplementação com Coenzima Q10 (100mg/dia) + Taurina (500mg/dia) melhora fração de ejeção ventricular em 19% em cães com cardiomiopatia dilatada inicial, reduzindo risco de progressão para insuficiência cardíaca congestiva."
+        },
+        "ins-006": {
+          "title": "Janela Terapêutica Crítica: Intervenção Nutracêutica Antes dos 6 Anos Previne 67% dos Casos de Osteoartrite Severa",
+          "description": "Análise longitudinal demonstra que início de protocolo com Glucosamina + Condroitina + MSM antes dos 6 anos em raças predispostas reduz incidência de osteoartrite severa (grau 3-4) em 67% até os 12 anos, comparado a início após os 8 anos."
+        },
+        "ins-007": {
+          "title": "Sinergia Mitocondrial: NMN + CoQ10 + PQQ Revertem Declínio Energético em 52% dos Cães Seniores",
+          "description": "Protocolo combinado de precursores mitocondriais (NMN 250mg + CoQ10 100mg + PQQ 20mg) demonstra reversão parcial de declínio energético relacionado à idade em 52% dos cães 9+ anos, com melhora objetiva em testes de atividade física e marcadores metabólicos."
+        },
+        "ins-008": {
+          "title": "Modulação Epigenética: Resveratrol + NMN Retardam Envelhecimento Biológico em 3.2 Anos",
+          "description": "Combinação de Resveratrol (20mg/kg) + NMN (15mg/kg) demonstra retardo de envelhecimento biológico equivalente a 3.2 anos em análise de relógios epigenéticos (metilação de DNA), com impacto significativo em marcadores de senescência celular."
+        },
+        "ins-009": {
+          "title": "Neuroproteção Sinérgica: Fosfolipídios + DHA + Fosfatidilserina Preservam Função Cognitiva em 71%",
+          "description": "Protocolo neurocognitivo avançado combinando fosfolipídios (400mg), DHA (600mg) e fosfatidilserina (100mg) preserva função cognitiva em 71% dos cães com declínio inicial, com melhora mensurável em testes de memória espacial e reconhecimento."
+        },
+        "ins-010": {
+          "title": "Renoproteção Avançada: Astaxantina + Omega-3 + NAC Estabilizam TFG em DRC Estágio 2",
+          "description": "Protocolo renoprotetor com Astaxantina (8mg), Omega-3 EPA/DHA (3g) e N-Acetilcisteína (600mg) estabiliza Taxa de Filtração Glomerular por período médio de 28 meses em cães com DRC estágio 2, versus 14 meses no grupo controle."
+        },
+        "ins-011": {
+          "title": "Inflamação Sistêmica: Curcumina Fitossomal + Boswellia Reduzem PCR em 58% e Melhoram Qualidade de Vida",
+          "description": "Combinação antiinflamatória natural com Curcumina fitossomal (500mg) + Boswellia serrata (300mg) reduz Proteína C Reativa em 58% e melhora escores de qualidade de vida (mobilidade, disposição, apetite) em 64% dos cães com inflamação crônica relacionada à idade."
+        },
+        "ins-cb-001": {
+          "title": "ROI Positivo em 89% dos Casos de Prevenção de Osteoartrite",
+          "description": "Investimento em nutraterapia preventiva para osteoartrite em raças predispostas (7+ anos) gera ROI positivo em 89% dos casos ao longo de 3 anos, com economia média de R$4.200 em custos veterinários por pet."
+        },
+        "ins-cb-002": {
+          "title": "Nutraterapia Cardíaca Reduz Custos de Emergência em 64%",
+          "description": "Protocolo preventivo com CoQ10 + Taurina em raças cardiopatas reduz frequência de atendimentos de emergência cardíaca em 64%, gerando economia média de R$6.800 ao longo de 2 anos."
+        },
+        "ins-cb-003": {
+          "title": "Prevenção de Declínio Cognitivo Reduz Custos em 52%",
+          "description": "Intervenção nutracêutica precoce (8+ anos) para prevenção de declínio cognitivo reduz custos com manejo comportamental e consultas especializadas em 52%, com payback médio de 14 meses."
+        },
+        "ins-cb-004": {
+          "title": "Economia em Longo Prazo: Nutraterapia Preventiva Gera Economia de 43% em 5 Anos",
+          "description": "Análise longitudinal de 5 anos demonstra que investimento em nutraterapia preventiva desde os 5-6 anos gera economia total de 43% em custos veterinários acumulados, considerando prevenção de múltiplas condições degenerativas e redução de hospitalizações."
+        }
       }
     }
   },
