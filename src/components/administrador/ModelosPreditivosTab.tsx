@@ -5,13 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, TrendingUp, Database, Calendar } from "lucide-react";
 import ModelDetailDialog from "./modelosPreditivos/components/ModelDetailDialog";
+import InsightCard from "./modelosPreditivos/components/InsightCard";
+import InsightDetailDialog from "./modelosPreditivos/components/InsightDetailDialog";
 import { predictiveModelsData } from "./modelosPreditivos/data/predictiveModelsData";
-import { PredictiveModel } from "./modelosPreditivos/types/predictiveModelTypes";
+import { PredictiveModel, DegenerativeInsight } from "./modelosPreditivos/types/predictiveModelTypes";
 
 const ModelosPreditivosTab = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModel, setSelectedModel] = useState<PredictiveModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedInsight, setSelectedInsight] = useState<DegenerativeInsight | null>(null);
+  const [insightDialogOpen, setInsightDialogOpen] = useState(false);
 
   const filteredModelos = predictiveModelsData.filter((modelo) =>
     modelo.modelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,6 +64,14 @@ const ModelosPreditivosTab = () => {
     setSelectedModel(model);
     setDialogOpen(true);
   };
+
+  const handleViewInsightDetails = (insight: DegenerativeInsight) => {
+    setSelectedInsight(insight);
+    setInsightDialogOpen(true);
+  };
+
+  // Get all insights from the first model (Efficacy Prediction model)
+  const recentInsights = predictiveModelsData[0]?.degenerativeInsights || [];
 
   return (
     <div className="space-y-6">
@@ -180,6 +192,33 @@ const ModelosPreditivosTab = () => {
 
       <Card className="p-6 border-border bg-card">
         <div className="mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Descobertas Científicas Recentes da IA
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Correlações e padrões identificados pela IA através da análise de milhares de casos clínicos
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recentInsights.map((insight) => (
+            <InsightCard
+              key={insight.id}
+              insight={insight}
+              onViewDetails={() => handleViewInsightDetails(insight)}
+            />
+          ))}
+        </div>
+
+        {recentInsights.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Nenhuma descoberta recente disponível</p>
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-6 border-border bg-card">
+        <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">Fontes de Dados para Aprendizado</h3>
           <p className="text-sm text-muted-foreground">
             Principais inputs que alimentam os modelos preditivos
@@ -281,6 +320,12 @@ const ModelosPreditivosTab = () => {
         model={selectedModel}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+      />
+
+      <InsightDetailDialog
+        insight={selectedInsight}
+        open={insightDialogOpen}
+        onOpenChange={setInsightDialogOpen}
       />
     </div>
   );
