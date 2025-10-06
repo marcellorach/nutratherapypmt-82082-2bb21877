@@ -178,6 +178,105 @@ const ModelosPreditivosTab = () => {
         )}
       </Card>
 
+      <Card className="p-6 border-border bg-card">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Fontes de Dados para Aprendizado</h3>
+          <p className="text-sm text-muted-foreground">
+            Principais inputs que alimentam os modelos preditivos
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Exames Laboratoriais</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Hemograma, bioquímica, perfil metabólico</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Histórico Clínico</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Doenças prévias, cirurgias, tratamentos</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Análise Nutricional</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Composição da ração, deficiências identificadas</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Dados Genéticos</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Raça, predisposições hereditárias</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Comportamento e Atividade</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Nível de atividade física, padrões comportamentais</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Biometria</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Peso, altura, condição corporal</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Resposta a Tratamentos</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Eficácia de intervenções anteriores</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Idade e Expectativa</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Idade atual, expectativa de vida da raça</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Ambiente e Lifestyle</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Condições ambientais, rotina diária</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Imagens Diagnósticas</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Raio-X, ultrassom, tomografia</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-background hover:border-brand-primary/40 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <Database className="h-5 w-5 text-brand-primary" />
+              <h4 className="font-medium text-foreground">Biomarcadores</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">Marcadores inflamatórios, oxidativos</p>
+          </div>
+        </div>
+      </Card>
+
       <ModelDetailDialog
         model={selectedModel}
         open={dialogOpen}
