@@ -23,18 +23,32 @@ i18next
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'pt', // Força português como idioma fixo
-    fallbackLng: 'pt',
-    debug: true, // Temporariamente ativado para diagnóstico
+    lng: 'pt',
+    fallbackLng: false, // Não usar fallback, só PT existe
+    supportedLngs: ['pt'], // BLOQUEAR outros idiomas
+    load: 'languageOnly', // Ignorar regionalizações
+    debug: false,
     interpolation: {
       escapeValue: false
     },
-    // Configuração explícita de pluralização
     pluralSeparator: '_',
-    contextSeparator: '_'
+    contextSeparator: '_',
+    react: {
+      useSuspense: false // Evitar problemas de sincronização
+    }
+  })
+  .then(() => {
+    // FORÇAR português após inicialização
+    i18next.changeLanguage('pt');
+    console.log('i18next forçado para PT, idioma atual:', i18next.language);
   });
 
-// Log para diagnóstico (remover após correção)
-console.log('i18next resources loaded:', i18next.options.resources);
+// Proteção contra mudanças automáticas de idioma
+i18next.on('languageChanged', (lng) => {
+  if (lng !== 'pt') {
+    console.warn(`Tentativa de mudar idioma para ${lng} bloqueada`);
+    i18next.changeLanguage('pt');
+  }
+});
 
 export default i18next;
