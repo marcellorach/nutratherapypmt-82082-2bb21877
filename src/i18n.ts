@@ -14,17 +14,16 @@ const resources = {
   }
 };
 
-// Limpa qualquer configuração de idioma anterior no localStorage
-if (typeof window !== 'undefined') {
-  localStorage.removeItem('i18nextLng');
-}
+// Detecta o idioma salvo ou usa português como padrão
+const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
+const defaultLanguage = savedLanguage || 'pt';
 
 // Inicializa i18next de forma síncrona
 i18next
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'pt',
+    lng: defaultLanguage,
     fallbackLng: 'pt',
     debug: false,
     interpolation: {
