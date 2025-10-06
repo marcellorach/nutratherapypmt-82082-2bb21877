@@ -1606,7 +1606,39 @@
     "crossValidation": "Cross-Validation",
     "hyperparameters": "Hyperparameters",
     "cancel": "Cancel",
-    "createAndTrain": "Create and Train Model"
+    "createAndTrain": "Create and Train Model",
+    "insights": {
+      "sectionTitle": "Recent AI Scientific Discoveries",
+      "sectionDescription": "Correlations and patterns identified by AI through analysis of thousands of clinical cases",
+      "noInsights": "No recent discoveries available",
+      "viewDetails": "View Details",
+      "relatedConditions": "Related Conditions",
+      "affectedBreeds": "Affected Breeds",
+      "sample": "Sample",
+      "effectSize": "Effect Size",
+      "ageRange": "Age Range",
+      "fullDescription": "Full Description",
+      "scientificEvidence": "Scientific Evidence",
+      "sampleSize": "Sample Size",
+      "pValue": "P-value",
+      "confidenceInterval": "95% CI",
+      "interpretation": "Interpretation",
+      "discoveredOn": "Discovered on",
+      "significance": {
+        "high": "High Significance",
+        "medium": "Medium Significance",
+        "low": "Low Significance"
+      },
+      "interpretationText": {
+        "strongSignificance": "strong",
+        "moderateSignificance": "moderate",
+        "mildSignificance": "mild",
+        "largeEffect": "large",
+        "mediumEffect": "medium",
+        "smallEffect": "small",
+        "template": "A p-value of {{pValue}} indicates {{significance}} statistical significance. The effect size of {{effectSize}} suggests a {{effectMagnitude}} effect in clinical practice."
+      }
+    }
   },
   "dataImport": {
     "title": "Data Import",

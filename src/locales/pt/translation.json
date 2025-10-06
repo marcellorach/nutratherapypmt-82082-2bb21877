@@ -1606,7 +1606,39 @@
     "crossValidation": "Cross-Validation",
     "hyperparameters": "Hiperparâmetros",
     "cancel": "Cancelar",
-    "createAndTrain": "Criar e Treinar Modelo"
+    "createAndTrain": "Criar e Treinar Modelo",
+    "insights": {
+      "sectionTitle": "Descobertas Científicas Recentes da IA",
+      "sectionDescription": "Correlações e padrões identificados pela IA através da análise de milhares de casos clínicos",
+      "noInsights": "Nenhuma descoberta recente disponível",
+      "viewDetails": "Ver Detalhes",
+      "relatedConditions": "Condições Relacionadas",
+      "affectedBreeds": "Raças Afetadas",
+      "sample": "Amostra",
+      "effectSize": "Effect Size",
+      "ageRange": "Faixa Etária",
+      "fullDescription": "Descrição Completa",
+      "scientificEvidence": "Evidências Científicas",
+      "sampleSize": "Tamanho da Amostra",
+      "pValue": "P-value",
+      "confidenceInterval": "IC 95%",
+      "interpretation": "Interpretação",
+      "discoveredOn": "Descoberto em",
+      "significance": {
+        "high": "Alta Significância",
+        "medium": "Média Significância",
+        "low": "Baixa Significância"
+      },
+      "interpretationText": {
+        "strongSignificance": "forte",
+        "moderateSignificance": "moderada",
+        "mildSignificance": "leve",
+        "largeEffect": "grande",
+        "mediumEffect": "médio",
+        "smallEffect": "pequeno",
+        "template": "Um p-value de {{pValue}} indica uma significância estatística {{significance}}. O effect size de {{effectSize}} sugere um efeito {{effectMagnitude}} na prática clínica."
+      }
+    }
   },
   "dataImport": {
     "title": "Importação de Dados",

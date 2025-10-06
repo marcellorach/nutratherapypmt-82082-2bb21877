@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,21 +11,23 @@ interface InsightCardProps {
 }
 
 const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
+  const { t } = useTranslation();
+  
   const getSignificanceBadge = (significance: string) => {
     switch (significance) {
       case 'high':
         return {
-          label: 'Alta Significância',
+          label: t('predictiveModels.insights.significance.high'),
           className: 'bg-success/10 text-success border-success/20'
         };
       case 'medium':
         return {
-          label: 'Média Significância',
+          label: t('predictiveModels.insights.significance.medium'),
           className: 'bg-info/10 text-info border-info/20'
         };
       case 'low':
         return {
-          label: 'Baixa Significância',
+          label: t('predictiveModels.insights.significance.low'),
           className: 'bg-warning/10 text-warning border-warning/20'
         };
       default:
@@ -66,7 +69,9 @@ const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
         <div className="space-y-3 mb-4">
           {insight.relatedConditions.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-foreground mb-1.5">Condições Relacionadas</p>
+              <p className="text-xs font-medium text-foreground mb-1.5">
+                {t('predictiveModels.insights.relatedConditions')}
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {insight.relatedConditions.slice(0, 3).map((condition, idx) => (
                   <Badge key={idx} variant="outline" className="text-xs border-border">
@@ -84,7 +89,9 @@ const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
 
           {insight.relatedBreeds.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-foreground mb-1.5">Raças Afetadas</p>
+              <p className="text-xs font-medium text-foreground mb-1.5">
+                {t('predictiveModels.insights.affectedBreeds')}
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {insight.relatedBreeds.slice(0, 2).map((breed, idx) => (
                   <Badge key={idx} variant="secondary" className="text-xs">
@@ -105,7 +112,9 @@ const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <Users className="h-3 w-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Amostra</p>
+              <p className="text-xs text-muted-foreground">
+                {t('predictiveModels.insights.sample')}
+              </p>
             </div>
             <p className="text-sm font-semibold text-foreground">
               {insight.evidence.sampleSize.toLocaleString()}
@@ -114,7 +123,9 @@ const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingUp className="h-3 w-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Effect Size</p>
+              <p className="text-xs text-muted-foreground">
+                {t('predictiveModels.insights.effectSize')}
+              </p>
             </div>
             <p className="text-sm font-semibold text-foreground">
               {insight.evidence.effectSize.toFixed(2)}
@@ -128,7 +139,7 @@ const InsightCard = ({ insight, onViewDetails }: InsightCardProps) => {
           onClick={onViewDetails}
           className="w-full"
         >
-          Ver Detalhes
+          {t('predictiveModels.insights.viewDetails')}
         </Button>
       </CardContent>
     </Card>

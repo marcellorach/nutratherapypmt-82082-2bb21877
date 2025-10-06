@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { predictiveModelsData } from "./modelosPreditivos/data/predictiveModelsD
 import { PredictiveModel, DegenerativeInsight } from "./modelosPreditivos/types/predictiveModelTypes";
 
 const ModelosPreditivosTab = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModel, setSelectedModel] = useState<PredictiveModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -193,10 +195,10 @@ const ModelosPreditivosTab = () => {
       <Card className="p-6 border-border bg-card">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            Descobertas Científicas Recentes da IA
+            {t('predictiveModels.insights.sectionTitle')}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Correlações e padrões identificados pela IA através da análise de milhares de casos clínicos
+            {t('predictiveModels.insights.sectionDescription')}
           </p>
         </div>
 
@@ -212,7 +214,7 @@ const ModelosPreditivosTab = () => {
 
         {recentInsights.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Nenhuma descoberta recente disponível</p>
+            <p className="text-muted-foreground">{t('predictiveModels.insights.noInsights')}</p>
           </div>
         )}
       </Card>

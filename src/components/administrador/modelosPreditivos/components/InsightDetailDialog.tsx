@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -16,23 +17,25 @@ interface InsightDetailDialogProps {
 }
 
 const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialogProps) => {
+  const { t } = useTranslation();
+  
   if (!insight) return null;
 
   const getSignificanceBadge = (significance: string) => {
     switch (significance) {
       case 'high':
         return {
-          label: 'Alta Significância',
+          label: t('predictiveModels.insights.significance.high'),
           className: 'bg-success/10 text-success border-success/20'
         };
       case 'medium':
         return {
-          label: 'Média Significância',
+          label: t('predictiveModels.insights.significance.medium'),
           className: 'bg-info/10 text-info border-info/20'
         };
       case 'low':
         return {
-          label: 'Baixa Significância',
+          label: t('predictiveModels.insights.significance.low'),
           className: 'bg-warning/10 text-warning border-warning/20'
         };
       default:
@@ -44,6 +47,26 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
   };
 
   const significanceBadge = getSignificanceBadge(insight.significance);
+
+  // Gerar interpretação baseada nos dados
+  const getSignificanceLevel = (pValue: number) => {
+    if (pValue < 0.001) return t('predictiveModels.insights.interpretationText.strongSignificance');
+    if (pValue < 0.01) return t('predictiveModels.insights.interpretationText.moderateSignificance');
+    return t('predictiveModels.insights.interpretationText.mildSignificance');
+  };
+
+  const getEffectMagnitude = (effectSize: number) => {
+    if (effectSize >= 0.8) return t('predictiveModels.insights.interpretationText.largeEffect');
+    if (effectSize >= 0.5) return t('predictiveModels.insights.interpretationText.mediumEffect');
+    return t('predictiveModels.insights.interpretationText.smallEffect');
+  };
+
+  const interpretation = t('predictiveModels.insights.interpretationText.template', {
+    pValue: insight.evidence.pValue.toFixed(4),
+    significance: getSignificanceLevel(insight.evidence.pValue),
+    effectSize: insight.evidence.effectSize.toFixed(2),
+    effectMagnitude: getEffectMagnitude(insight.evidence.effectSize)
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,7 +81,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  <span>Descoberto em {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}</span>
+                  <span>{t('predictiveModels.insights.discoveredOn')} {new Date(insight.discoveredAt).toLocaleDateString('pt-BR')}</span>
                 </div>
                 <Badge className={significanceBadge.className}>
                   {significanceBadge.label}
@@ -73,7 +96,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
             <CardContent className="p-4">
               <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                 <Target className="h-4 w-4 text-brand-primary" />
-                Descrição Completa
+                {t('predictiveModels.insights.fullDescription')}
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {insight.description}
@@ -84,7 +107,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="border-border bg-card">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-foreground mb-3">Condições Relacionadas</h4>
+                <h4 className="font-semibold text-foreground mb-3">{t('predictiveModels.insights.relatedConditions')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {insight.relatedConditions.map((condition, idx) => (
                     <Badge key={idx} variant="outline" className="border-border">
@@ -97,7 +120,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
 
             <Card className="border-border bg-card">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-foreground mb-3">Raças Afetadas</h4>
+                <h4 className="font-semibold text-foreground mb-3">{t('predictiveModels.insights.affectedBreeds')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {insight.relatedBreeds.map((breed, idx) => (
                     <Badge key={idx} variant="secondary">
@@ -111,7 +134,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
 
           <Card className="border-border bg-card">
             <CardContent className="p-4">
-              <h4 className="font-semibold text-foreground mb-3">Faixa Etária</h4>
+              <h4 className="font-semibold text-foreground mb-3">{t('predictiveModels.insights.ageRange')}</h4>
               <p className="text-sm text-muted-foreground">{insight.ageRange}</p>
             </CardContent>
           </Card>
@@ -120,14 +143,14 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
             <CardContent className="p-4">
               <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-brand-primary" />
-                Evidências Científicas
+                {t('predictiveModels.insights.scientificEvidence')}
               </h4>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <div className="flex items-center gap-2 mb-1">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Tamanho da Amostra</p>
+                    <p className="text-xs text-muted-foreground">{t('predictiveModels.insights.sampleSize')}</p>
                   </div>
                   <p className="text-lg font-semibold text-foreground">
                     {insight.evidence.sampleSize.toLocaleString()}
@@ -137,7 +160,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <div className="flex items-center gap-2 mb-1">
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">p-Value</p>
+                    <p className="text-xs text-muted-foreground">{t('predictiveModels.insights.pValue')}</p>
                   </div>
                   <p className="text-lg font-semibold text-foreground">
                     {insight.evidence.pValue.toFixed(4)}
@@ -147,7 +170,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <div className="flex items-center gap-2 mb-1">
                     <Activity className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Effect Size</p>
+                    <p className="text-xs text-muted-foreground">{t('predictiveModels.insights.effectSize')}</p>
                   </div>
                   <p className="text-lg font-semibold text-foreground">
                     {insight.evidence.effectSize.toFixed(2)}
@@ -157,7 +180,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <div className="flex items-center gap-2 mb-1">
                     <Target className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">IC 95%</p>
+                    <p className="text-xs text-muted-foreground">{t('predictiveModels.insights.confidenceInterval')}</p>
                   </div>
                   <p className="text-sm font-semibold text-foreground">
                     [{insight.evidence.confidenceInterval[0].toFixed(2)}, {insight.evidence.confidenceInterval[1].toFixed(2)}]
@@ -167,8 +190,7 @@ const InsightDetailDialog = ({ insight, open, onOpenChange }: InsightDetailDialo
 
               <div className="mt-4 p-3 rounded-lg bg-brand-primary/5 border border-brand-primary/20">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Interpretação:</strong> Um p-value de {insight.evidence.pValue.toFixed(4)} indica uma {insight.evidence.pValue < 0.01 ? 'forte' : insight.evidence.pValue < 0.05 ? 'moderada' : 'leve'} significância estatística. 
-                  O effect size de {insight.evidence.effectSize.toFixed(2)} sugere um efeito {insight.evidence.effectSize > 0.8 ? 'grande' : insight.evidence.effectSize > 0.5 ? 'médio' : 'pequeno'} na prática clínica.
+                  <strong className="text-foreground">{t('predictiveModels.insights.interpretation')}:</strong> {interpretation}
                 </p>
               </div>
             </CardContent>
