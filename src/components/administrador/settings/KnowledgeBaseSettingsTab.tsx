@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Brush, Cpu, Database, BarChart } from "lucide-react";
-import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import EnginesPromptsPanel from './panels/EnginesPromptsPanel';
 import ConventionsPanel from './panels/ConventionsPanel';
 import UsagePanel from './panels/UsagePanel';
@@ -13,8 +12,7 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('engines');
   
   return (
-    <NutraceuticalProvider>
-      <div className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Configurações - Base de Conhecimento</h2>
@@ -56,7 +54,6 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
         </TabsContent>
       </Tabs>
     </div>
-    </NutraceuticalProvider>
   );
 };
 

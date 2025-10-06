@@ -28,27 +28,18 @@
     "poweredBy": "Powered by"
   },
   "tutor": {
-    "greeting": "Hello, {{name}}!",
+    "greeting": "Hello",
     "subtitle": "Track your pets' nutraceutical treatment",
     "noPets": "You have no registered pets",
     "noPetsDesc": "Contact your veterinarian to get started.",
-    "noPetsRegistered": "You don't have any registered pets",
-    "noPetsContact": "Contact your veterinarian to get started.",
     "noTreatmentPlan": "No treatment plan",
     "noTreatmentPlanDesc": "This pet does not have a treatment plan yet.",
     "noTreatmentPlanLong": "This pet does not have a nutraceutical treatment plan yet.",
-    "noPlan": "No treatment plan",
-    "noPlanDesc": "This pet doesn't have a treatment plan yet.",
-    "noPlanTitle": "No therapeutic plan",
-    "noPlanMessage": "This pet doesn't have a nutraceutical treatment plan yet.",
     "tabs": {
       "plan": "Treatment Plan",
       "history": "History",
       "orders": "Orders"
     },
-    "therapeuticPlan": "Therapeutic Plan",
-    "history": "History",
-    "orders": "Orders",
     "plan": {
       "startDate": "Start date",
       "active": "Active plan",
@@ -62,31 +53,15 @@
       "howToAdminister": "How to administer:",
       "scheduleConsultation": "Schedule consultation with veterinarian"
     },
-    "startDate": "Start date",
-    "activePlan": "Active plan",
-    "planStatus": "Plan status",
-    "approved": "Approved",
-    "kitSent": "Kit sent on {{date}}",
-    "nextRenewal": "Next renewal",
-    "quarterlyRenewal": "Quarterly renewal",
-    "recommendedNutraceuticals": "Recommended Nutraceuticals",
-    "recommendationReason": "Recommendation reason:",
-    "howToAdminister": "How to administer:",
-    "scheduleConsultation": "Schedule consultation with veterinarian",
     "history": {
       "title": "Treatment History",
       "description": "Treatment history will be available after treatment starts."
     },
-    "historyTitle": "Treatment History",
-    "historyMessage": "Treatment history will be available after treatment begins.",
     "orders": {
       "title": "Nutraceutical Orders",
       "description": "Order nutraceutical kits for your pet.",
       "makeOrder": "Make Order"
     },
-    "ordersTitle": "Nutraceutical Orders",
-    "ordersMessage": "Order nutraceutical kits for your pet.",
-    "makeOrder": "Make Order",
     "petInfo": {
       "years": "years",
       "kg": "kg"
@@ -171,9 +146,9 @@
     "portalDesc": "Manage clinical data and get personalized recommendations",
     "searchPet": "Search pet...",
     "newPet": "New Pet",
+    "patientsFound": "{{count}} patients found",
     "patient_one": "{{count}} patient found",
     "patient_other": "{{count}} patients found",
-    "noPetsFound": "No pets found",
     "filter": "Filter",
     "treatmentPlan": "Treatment Plan:",
     "createdOn": "Created on:",
@@ -185,23 +160,36 @@
     "noPetSelected": "No pet selected",
     "selectPetPrompt": "Select a pet in the \"Pets\" tab to see their recommendations.",
     "noPlanExists": "doesn't have recommendations",
-    "noPlanExistsDesc": "Create a treatment plan for this pet.",
-    "createPlanButton": "Create treatment plan"
+    "createPlanPrompt": "Create a treatment plan for this pet."
   },
-  "pet": {
-    "card": {
-      "plan": "PetLove Plan",
-      "awaitingReview_one": "Awaiting your review for {{count}} day",
-      "awaitingReview_other": "Awaiting your review for {{count}} days",
-      "age": "Age",
-      "weight": "Weight",
-      "years": "years",
-      "kg": "kg",
-      "chipNumber": "Chip Number",
-      "responsibleVet": "Responsible Veterinarian",
-      "select": "Select",
-      "viewDetails": "View details"
-    }
+  "tutor": {
+    "greeting": "Hello, {{name}}!",
+    "subtitle": "Track your pets' nutraceutical treatment",
+    "noPetsRegistered": "You don't have any registered pets",
+    "noPetsContact": "Contact your veterinarian to get started.",
+    "noPlan": "No treatment plan",
+    "noPlanDesc": "This pet doesn't have a treatment plan yet.",
+    "therapeuticPlan": "Therapeutic Plan",
+    "history": "History",
+    "orders": "Orders",
+    "startDate": "Start date",
+    "activePlan": "Active plan",
+    "planStatus": "Plan status",
+    "approved": "Approved",
+    "kitSent": "Kit sent on {{date}}",
+    "nextRenewal": "Next renewal",
+    "quarterlyRenewal": "Quarterly renewal",
+    "recommendedNutraceuticals": "Recommended Nutraceuticals",
+    "recommendationReason": "Recommendation reason:",
+    "howToAdminister": "How to administer:",
+    "noPlanTitle": "No therapeutic plan",
+    "noPlanMessage": "This pet doesn't have a nutraceutical treatment plan yet.",
+    "scheduleConsultation": "Schedule consultation with veterinarian",
+    "historyTitle": "Treatment History",
+    "historyMessage": "Treatment history will be available after treatment begins.",
+    "ordersTitle": "Nutraceutical Orders",
+    "ordersMessage": "Order nutraceutical kits for your pet.",
+    "makeOrder": "Make Order"
   },
   "admin": {
     "sidebar": {
