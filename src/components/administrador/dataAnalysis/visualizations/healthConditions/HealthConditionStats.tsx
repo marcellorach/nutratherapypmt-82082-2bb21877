@@ -11,6 +11,10 @@ interface HealthConditionStatsProps {
     highPrevention: number;
     averageTreatability: number;
     averagePrevention: number;
+    totalEligibleAnimals?: number;
+    totalEligibleTreatments?: number;
+    totalEligibleDogs?: number;
+    totalEligibleCats?: number;
   };
   isLoading: boolean;
 }
@@ -38,6 +42,36 @@ const HealthConditionStats: React.FC<HealthConditionStatsProps> = ({
   return (
     <Card>
       <CardContent className="p-6 space-y-4">
+        {stats.totalEligibleAnimals && stats.totalEligibleTreatments && (
+          <div className="pb-4 border-b">
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              Total de Animais Elegíveis
+            </p>
+            <p className="text-3xl font-bold text-primary">
+              {stats.totalEligibleAnimals.toLocaleString('pt-BR')}
+            </p>
+            <div className="flex gap-4 mt-2 text-sm">
+              <span className="text-blue-600 font-medium">
+                🐕 {stats.totalEligibleDogs?.toLocaleString('pt-BR')} cães
+              </span>
+              <span className="text-purple-600 font-medium">
+                🐈 {stats.totalEligibleCats?.toLocaleString('pt-BR')} gatos
+              </span>
+            </div>
+            <div className="mt-3 p-3 bg-green-50 rounded-lg">
+              <p className="text-sm font-medium text-green-900">
+                Total de Tratamentos Elegíveis
+              </p>
+              <p className="text-2xl font-bold text-green-700">
+                {stats.totalEligibleTreatments.toLocaleString('pt-BR')}
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                ~{(stats.totalEligibleTreatments / stats.totalEligibleAnimals).toFixed(1)}x tratamentos por animal
+              </p>
+            </div>
+          </div>
+        )}
+        
         <div>
           <p className="text-sm font-medium text-muted-foreground">
             {t('visualization.conditions.stats.totalConditions')}

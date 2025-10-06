@@ -24,6 +24,8 @@ interface Condition {
   speciesAffected: string[];
   breedsAffected: string[];
   recommendedPackages: number;
+  eligibleDogs?: number;
+  eligibleCats?: number;
 }
 
 interface HealthConditionsTableProps {
@@ -91,6 +93,8 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
             <TableHead className="w-[50px]"></TableHead>
             <TableHead>{t('visualization.conditions.table.headers.name')}</TableHead>
             <TableHead>{t('visualization.conditions.table.headers.treatability')}</TableHead>
+            <TableHead className="text-center">Cães Elegíveis</TableHead>
+            <TableHead className="text-center">Gatos Elegíveis</TableHead>
             <TableHead>{t('visualization.conditions.table.headers.prevention')}</TableHead>
             <TableHead>{t('visualization.conditions.table.headers.roi')}</TableHead>
             <TableHead>{t('visualization.conditions.table.headers.affectedSpecies')}</TableHead>
@@ -101,7 +105,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
         <TableBody>
           {conditions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                 {t('visualization.conditions.table.noConditions')}
               </TableCell>
             </TableRow>
@@ -133,6 +137,12 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                       </div>
                       <span className="ml-2 text-sm">{condition.treatabilityScore}%</span>
                     </div>
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {condition.eligibleDogs ? condition.eligibleDogs.toLocaleString('pt-BR') : '0'}
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {condition.eligibleCats ? condition.eligibleCats.toLocaleString('pt-BR') : '0'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
@@ -180,7 +190,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                 
                 {expandedRows[condition.id] && (
                   <TableRow>
-                    <TableCell colSpan={8} className="bg-gray-50 p-4">
+                    <TableCell colSpan={10} className="bg-gray-50 p-4">
                       <div className="space-y-4">
                         <div>
                           <h4 className="text-sm font-semibold">{t('visualization.conditions.table.expandedInfo.description')}</h4>

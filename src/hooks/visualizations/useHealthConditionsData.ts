@@ -12,7 +12,9 @@ const mockConditions = [
     roi: 2.3,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Golden Retriever', 'Labrador', 'Pastor Alemão', 'Siamês'],
-    recommendedPackages: 3
+    recommendedPackages: 3,
+    eligibleDogs: 24500,
+    eligibleCats: 12300
   },
   {
     id: 'c2',
@@ -23,7 +25,9 @@ const mockConditions = [
     roi: 1.5,
     speciesAffected: ['Cães'],
     breedsAffected: ['Bulldog Francês', 'Labrador', 'Shih Tzu', 'West Highland Terrier'],
-    recommendedPackages: 2
+    recommendedPackages: 2,
+    eligibleDogs: 28100,
+    eligibleCats: 0
   },
   {
     id: 'c3',
@@ -34,7 +38,9 @@ const mockConditions = [
     roi: 3.1,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Dachshund', 'Poodle', 'Siamês'],
-    recommendedPackages: 3
+    recommendedPackages: 3,
+    eligibleDogs: 18750,
+    eligibleCats: 14200
   },
   {
     id: 'c4',
@@ -45,7 +51,9 @@ const mockConditions = [
     roi: -0.7,
     speciesAffected: ['Cães'],
     breedsAffected: ['Cavalier King Charles Spaniel', 'Doberman', 'Boxer'],
-    recommendedPackages: 2
+    recommendedPackages: 2,
+    eligibleDogs: 15600,
+    eligibleCats: 0
   },
   {
     id: 'c5',
@@ -56,7 +64,9 @@ const mockConditions = [
     roi: -1.2,
     speciesAffected: ['Gatos', 'Cães'],
     breedsAffected: ['Persian', 'Maine Coon', 'Pastor Alemão'],
-    recommendedPackages: 2
+    recommendedPackages: 2,
+    eligibleDogs: 8900,
+    eligibleCats: 19400
   },
   {
     id: 'c6',
@@ -67,7 +77,9 @@ const mockConditions = [
     roi: 2.8,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Yorkshire', 'Chihuahua', 'Persa', 'Maltês'],
-    recommendedPackages: 2
+    recommendedPackages: 2,
+    eligibleDogs: 21300,
+    eligibleCats: 16800
   },
   {
     id: 'c7',
@@ -78,7 +90,9 @@ const mockConditions = [
     roi: 3.4,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Labrador', 'Beagle', 'Pug', 'British Shorthair'],
-    recommendedPackages: 3
+    recommendedPackages: 3,
+    eligibleDogs: 32450,
+    eligibleCats: 18200
   },
   {
     id: 'c8',
@@ -89,7 +103,9 @@ const mockConditions = [
     roi: 0.9,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Border Collie', 'Pastor Alemão', 'Siamês'],
-    recommendedPackages: 2
+    recommendedPackages: 2,
+    eligibleDogs: 19200,
+    eligibleCats: 11500
   },
   // Novas condições relacionadas à longevidade
   {
@@ -101,7 +117,9 @@ const mockConditions = [
     roi: 1.8,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
-    recommendedPackages: 4
+    recommendedPackages: 4,
+    eligibleDogs: 38000,
+    eligibleCats: 22000
   },
   {
     id: 'c10',
@@ -112,7 +130,9 @@ const mockConditions = [
     roi: -0.5,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
-    recommendedPackages: 4
+    recommendedPackages: 4,
+    eligibleDogs: 42000,
+    eligibleCats: 25000
   },
   {
     id: 'c11',
@@ -123,7 +143,9 @@ const mockConditions = [
     roi: 2.1,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças'],
-    recommendedPackages: 3
+    recommendedPackages: 3,
+    eligibleDogs: 35500,
+    eligibleCats: 20800
   },
   {
     id: 'c12',
@@ -134,7 +156,9 @@ const mockConditions = [
     roi: 0.3,
     speciesAffected: ['Cães', 'Gatos'],
     breedsAffected: ['Todas as raças', 'Raças grandes especialmente afetadas'],
-    recommendedPackages: 3
+    recommendedPackages: 3,
+    eligibleDogs: 29800,
+    eligibleCats: 17300
   }
 ];
 
@@ -218,12 +242,25 @@ export const useHealthConditionsData = ({
       conditions.reduce((acc, curr) => acc + curr.preventionScore, 0) / conditions.length
     );
     
+    // Calcular total de animais elegíveis (únicos)
+    const totalEligibleDogs = conditions.reduce((acc, curr) => acc + (curr.eligibleDogs || 0), 0);
+    const totalEligibleCats = conditions.reduce((acc, curr) => acc + (curr.eligibleCats || 0), 0);
+    const totalEligibleAnimals = totalEligibleDogs + totalEligibleCats;
+    
+    // Total de tratamentos elegíveis (considerando que um animal pode ter múltiplos tratamentos)
+    // Aproximadamente 2.2x o número de animais
+    const totalEligibleTreatments = Math.round(totalEligibleAnimals * 2.2);
+    
     return {
       totalConditions: conditions.length,
       highTreatability: highTreat,
       highPrevention: highPrev,
       averageTreatability: avgTreatability,
-      averagePrevention: avgPrevention
+      averagePrevention: avgPrevention,
+      totalEligibleAnimals,
+      totalEligibleTreatments,
+      totalEligibleDogs,
+      totalEligibleCats
     };
   }, [conditions]);
   
