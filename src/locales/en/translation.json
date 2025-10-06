@@ -162,6 +162,21 @@
     "noPlanExists": "doesn't have recommendations",
     "createPlanPrompt": "Create a treatment plan for this pet."
   },
+  "pet": {
+    "card": {
+      "plan": "PetLove Plan",
+      "awaitingReview_one": "Awaiting your review for {{count}} day",
+      "awaitingReview_other": "Awaiting your review for {{count}} days",
+      "age": "Age",
+      "weight": "Weight",
+      "years": "years",
+      "kg": "kg",
+      "chipNumber": "Chip Number",
+      "responsibleVet": "Responsible Veterinarian",
+      "select": "Select",
+      "viewDetails": "View details"
+    }
+  },
   "tutor": {
     "greeting": "Hello, {{name}}!",
     "subtitle": "Track your pets' nutraceutical treatment",

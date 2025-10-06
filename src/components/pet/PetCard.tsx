@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Info, Smartphone, Clock, AlertTriangle } from "lucide-react";
 import { Pet } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface PetCardProps {
   pet: Pet;
@@ -14,6 +14,8 @@ interface PetCardProps {
 }
 
 const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
+  const { t } = useTranslation();
+  
   // Fallbacks em caso de não haver dados
   const petImage = pet.imageUrl || `/lovable-uploads/11263f77-191e-4f66-bd55-da169a94c26f.png`;
   const fallbackImage = '🐕';
@@ -42,7 +44,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
         />
         {pet.petLovePlan && (
           <Badge className="absolute top-2 right-2 bg-white text-black border border-gray-300">
-            Plano PetLove: {pet.petLovePlan}
+            {t('pet.card.plan')}: {pet.petLovePlan}
           </Badge>
         )}
         
@@ -51,8 +53,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
             {pet.reviewDays >= 7 && <AlertTriangle size={14} />}
             <Clock size={14} />
             <span className="text-xs">
-              {pet.reviewDays === 1 ? 'Aguardando sua revisão há 1 dia' : 
-               `Aguardando sua revisão há ${pet.reviewDays} dias`}
+              {t('pet.card.awaitingReview', { count: pet.reviewDays })}
             </span>
           </div>
         )}
@@ -62,7 +63,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
         <CardTitle className="text-lg font-medium flex items-center justify-between">
           <span>{pet.name}</span>
           {pet.chipNumber && (
-            <span className="text-xs flex items-center gap-1 text-gray-500" title="Número do Chip">
+            <span className="text-xs flex items-center gap-1 text-gray-500" title={t('pet.card.chipNumber')}>
               <Smartphone size={12} />
               {pet.chipNumber}
             </span>
@@ -71,7 +72,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
         <CardDescription className="flex items-center justify-between">
           <span>{pet.breed}</span>
           {pet.veterinarianName && (
-            <span className="text-xs flex items-center gap-1 text-gray-500" title="Veterinário Responsável">
+            <span className="text-xs flex items-center gap-1 text-gray-500" title={t('pet.card.responsibleVet')}>
               <User size={12} />
               {pet.veterinarianName}
             </span>
@@ -81,8 +82,8 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
       
       <CardContent>
         <div className="space-y-1 text-sm">
-          <p><span className="font-semibold">Idade:</span> {pet.age} anos</p>
-          <p><span className="font-semibold">Peso:</span> {pet.weight} kg</p>
+          <p><span className="font-semibold">{t('pet.card.age')}:</span> {pet.age} {t('pet.card.years')}</p>
+          <p><span className="font-semibold">{t('pet.card.weight')}:</span> {pet.weight} {t('pet.card.kg')}</p>
         </div>
       </CardContent>
       
@@ -94,7 +95,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
             onClick={() => onSelect(pet)}
             className="border-gray-300 hover:border-gray-400"
           >
-            Selecionar
+            {t('pet.card.select')}
           </Button>
         )}
         
@@ -106,7 +107,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onSelect, onViewDetails }) => {
             className="text-gray-700"
           >
             <Info size={16} className="mr-1" />
-            Ver detalhes
+            {t('pet.card.viewDetails')}
           </Button>
         )}
       </CardFooter>
