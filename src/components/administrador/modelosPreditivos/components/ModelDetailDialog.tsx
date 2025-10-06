@@ -19,21 +19,6 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
 
   if (!model) return null;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'state-of-art':
-        return { label: 'Estado da Arte', className: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20' };
-      case 'mature':
-        return { label: 'Maduro', className: 'bg-success/10 text-success border-success/20' };
-      case 'growing':
-        return { label: 'Em Crescimento', className: 'bg-info/10 text-info border-info/20' };
-      case 'initial':
-        return { label: 'Fase Inicial', className: 'bg-warning/10 text-warning border-warning/20' };
-      default:
-        return { label: status, className: 'bg-muted text-muted-foreground' };
-    }
-  };
-
   const getSignificanceBadge = (significance: string) => {
     switch (significance) {
       case 'high':
@@ -47,7 +32,6 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
     }
   };
 
-  const statusBadge = getStatusBadge(model.status);
   const milestoneProgress = ((model.nextMilestone.current / model.nextMilestone.target) * 100).toFixed(1);
 
   return (
@@ -57,12 +41,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl mb-2">{model.modelName}</DialogTitle>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className={statusBadge.className}>
-                  {statusBadge.label}
-                </Badge>
-                <span className="text-sm text-muted-foreground">{model.algorithm}</span>
-              </div>
+              <span className="text-sm text-muted-foreground">{model.algorithm}</span>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-brand-primary">{model.currentAccuracy}%</p>
