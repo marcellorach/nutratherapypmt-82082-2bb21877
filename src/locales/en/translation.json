@@ -27,6 +27,49 @@
     "access": "Access",
     "poweredBy": "Powered by"
   },
+  "sampleGroup": {
+    "badge": "Group {{id}}",
+    "eligiblePets": "{{count}} eligible pets",
+    "dataBasedOn": "Data based on {{name}}"
+  },
+  "visualization": {
+    "conditions": {
+      "cellularSenescence": "Cellular Senescence",
+      "generalMortality": "General Mortality",
+      "oxidativeStress": "Oxidative Stress",
+      "mitochondrialDysfunction": "Mitochondrial Dysfunction",
+      "stats": {
+        "title": "Health Conditions Statistics",
+        "totalEligibleAnimals": "Total Eligible Animals",
+        "totalEligibleTreatments": "Total Eligible Treatments",
+        "dogs": "dogs",
+        "cats": "cats",
+        "eligiblePetsLabel": "eligible pets",
+        "basedOn": "Based on",
+        "totalConditions": "Total Conditions",
+        "highTreatability": "High Treatability",
+        "highPrevention": "High Prevention",
+        "avgTreatability": "Average Treatability",
+        "avgPrevention": "Average Prevention",
+        "newConditions": "New Conditions Identified",
+        "cellularSenescence": "Cellular Senescence",
+        "generalMortality": "General Mortality",
+        "oxidativeStress": "Oxidative Stress",
+        "mitochondrialDysfunction": "Mitochondrial Dysfunction"
+      },
+      "table": {
+        "title": "Analyzed Health Conditions",
+        "description": "Complete list of identified conditions and their treatment metrics",
+        "condition": "Condition",
+        "treatability": "Treatability",
+        "prevention": "Prevention",
+        "roi": "ROI",
+        "eligibleDogs": "Eligible Dogs",
+        "eligibleCats": "Eligible Cats",
+        "packages": "Packages"
+      }
+    }
+  },
   "tutor": {
     "greeting": "Hello",
     "subtitle": "Track your pets' nutraceutical treatment",
