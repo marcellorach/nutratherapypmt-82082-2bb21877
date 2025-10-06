@@ -14,7 +14,7 @@ const VeterinarioPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   
   // Filtrar apenas cães
   const allDogs = pets.filter(pet => pet.species === 'Cachorro');
