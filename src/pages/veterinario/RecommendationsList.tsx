@@ -15,12 +15,7 @@ interface RecommendationsListProps {
 const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }) => {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
-  const { t, i18n, ready } = useTranslation();
-  
-  // Aguarda traduções carregarem
-  if (!ready) {
-    return <div className="text-center py-12 animate-pulse">Carregando...</div>;
-  }
+  const { t, i18n } = useTranslation();
   
   // Se não houver pet selecionado, mostrar mensagem
   if (!selectedPet) {

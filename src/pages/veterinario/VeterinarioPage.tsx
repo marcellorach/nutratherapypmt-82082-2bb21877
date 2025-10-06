@@ -14,20 +14,7 @@ const VeterinarioPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const { t, i18n, ready } = useTranslation();
-  
-  // Aguarda traduções carregarem
-  if (!ready) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-6 px-4 flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-pulse text-muted-foreground">Carregando...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  const { t, i18n } = useTranslation();
   
   // Filtrar apenas cães
   const allDogs = pets.filter(pet => pet.species === 'Cachorro');
