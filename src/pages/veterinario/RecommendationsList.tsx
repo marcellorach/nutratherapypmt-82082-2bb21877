@@ -35,10 +35,10 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
         <h3 className="text-xl font-semibold text-gray-700 mb-2">{selectedPet.name} {t('veterinarian.noPlanExists')}</h3>
-        <p className="text-gray-500 mb-6">{t('veterinarian.createPlanPrompt')}</p>
+        <p className="text-gray-500 mb-6">{t('veterinarian.noPlanExistsDesc')}</p>
         <Button className="flex items-center gap-2">
           <PlusCircle size={16} />
-          {t('veterinarian.createPlanPrompt')}
+          {t('veterinarian.createPlanButton')}
         </Button>
       </div>
     );

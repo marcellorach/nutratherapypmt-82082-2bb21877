@@ -146,9 +146,9 @@
     "portalDesc": "Manage clinical data and get personalized recommendations",
     "searchPet": "Search pet...",
     "newPet": "New Pet",
-    "patientsFound": "{{count}} patients found",
     "patient_one": "{{count}} patient found",
     "patient_other": "{{count}} patients found",
+    "noPetsFound": "No pets found",
     "filter": "Filter",
     "treatmentPlan": "Treatment Plan:",
     "createdOn": "Created on:",
@@ -160,7 +160,8 @@
     "noPetSelected": "No pet selected",
     "selectPetPrompt": "Select a pet in the \"Pets\" tab to see their recommendations.",
     "noPlanExists": "doesn't have recommendations",
-    "createPlanPrompt": "Create a treatment plan for this pet."
+    "noPlanExistsDesc": "Create a treatment plan for this pet.",
+    "createPlanButton": "Create treatment plan"
   },
   "pet": {
     "card": {

@@ -146,9 +146,9 @@
     "portalDesc": "Gerencie dados clínicos e obtenha recomendações personalizadas",
     "searchPet": "Buscar pet...",
     "newPet": "Novo Pet",
-    "patientsFound": "{{count}} pacientes encontrados",
     "patient_one": "{{count}} paciente encontrado",
     "patient_other": "{{count}} pacientes encontrados",
+    "noPetsFound": "Nenhum pet encontrado",
     "filter": "Filtrar",
     "treatmentPlan": "Plano de Tratamento:",
     "createdOn": "Criado em:",
@@ -160,7 +160,8 @@
     "noPetSelected": "Nenhum pet selecionado",
     "selectPetPrompt": "Selecione um pet na aba \"Pets\" para ver suas recomendações.",
     "noPlanExists": "não possui recomendações",
-    "createPlanPrompt": "Crie um plano de tratamento para este pet."
+    "noPlanExistsDesc": "Crie um plano de tratamento para este pet.",
+    "createPlanButton": "Criar plano de tratamento"
   },
   "pet": {
     "card": {
