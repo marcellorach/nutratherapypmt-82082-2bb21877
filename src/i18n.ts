@@ -18,6 +18,15 @@ const resources = {
 const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
 const defaultLanguage = savedLanguage || 'pt';
 
+// Força reinicialização das traduções limpando cache do i18next
+if (typeof window !== 'undefined') {
+  const currentVersion = '1.0.1'; // Incrementar para forçar reload
+  const storedVersion = localStorage.getItem('i18n-version');
+  if (storedVersion !== currentVersion) {
+    localStorage.setItem('i18n-version', currentVersion);
+  }
+}
+
 // Inicializa i18next de forma síncrona
 i18next
   .use(initReactI18next)

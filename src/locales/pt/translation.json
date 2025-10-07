@@ -62,7 +62,14 @@
         "roi": "ROI",
         "eligibleDogs": "Cães Elegíveis",
         "eligibleCats": "Gatos Elegíveis",
-        "packages": "Pacotes"
+        "packages": "Pacotes",
+        "expandedRow": {
+          "description": "Descrição",
+          "affectedBreeds": "Raças Afetadas",
+          "recommendedPackages": "Pacotes Recomendados",
+          "viewDetailedAnalysis": "Ver Análise Detalhada",
+          "packagesCount": "{{count}} pacotes"
+        }
       }
     }
   },

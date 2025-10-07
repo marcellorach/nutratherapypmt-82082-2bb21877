@@ -174,24 +174,32 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                           <TableCell colSpan={8} className="bg-muted/50">
                             <div className="p-4 space-y-4">
                               <div>
-                                <h4 className="text-sm font-semibold mb-1">Descrição</h4>
+                                <h4 className="text-sm font-semibold mb-1">
+                                  {t('visualization.conditions.table.expandedRow.description')}
+                                </h4>
                                 <p className="text-sm text-muted-foreground">{condition.description}</p>
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold mb-1">Raças Afetadas</h4>
+                                <h4 className="text-sm font-semibold mb-1">
+                                  {t('visualization.conditions.table.expandedRow.affectedBreeds')}
+                                </h4>
                                 <p className="text-sm text-muted-foreground">
                                   {condition.breedsAffected.join(", ")}
                                 </p>
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold mb-1">Pacotes Recomendados</h4>
+                                <h4 className="text-sm font-semibold mb-1">
+                                  {t('visualization.conditions.table.expandedRow.recommendedPackages')}
+                                </h4>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {Array.isArray(condition.recommendedPackages) ? (
                                     condition.recommendedPackages.map((pkg, idx) => (
                                       <Badge key={idx} variant="outline">{pkg}</Badge>
                                     ))
                                   ) : (
-                                    <Badge variant="outline">{condition.recommendedPackages} pacotes</Badge>
+                                    <Badge variant="outline">
+                                      {t('visualization.conditions.table.expandedRow.packagesCount', { count: condition.recommendedPackages })}
+                                    </Badge>
                                   )}
                                 </div>
                               </div>
@@ -205,7 +213,7 @@ const HealthConditionsTable: React.FC<HealthConditionsTableProps> = ({
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Ver Análise Detalhada
+                                  {t('visualization.conditions.table.expandedRow.viewDetailedAnalysis')}
                                 </Button>
                               </div>
                             </div>
