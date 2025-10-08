@@ -1335,6 +1335,32 @@
       "detailed": "Análises Detalhadas",
       "performance": "Performance & Tendências"
     },
+    "kpi": {
+      "activeNutraceuticals": {
+        "title": "Nutracêuticos Ativos",
+        "subtitle": "Total em catálogo"
+      },
+      "averageEfficacy": {
+        "title": "Eficácia Média",
+        "subtitle": "Score consolidado"
+      },
+      "treatabilityIndex": {
+        "title": "Índice de Tratabilidade",
+        "subtitle": "Cobertura de condições"
+      },
+      "prescriptionCoverage": {
+        "title": "Cobertura Prescritiva",
+        "subtitle": "Pacientes cobertos"
+      },
+      "sustainabilityIndex": {
+        "title": "Índice de Sustentabilidade",
+        "subtitle": "Score de fornecimento"
+      },
+      "therapeuticGaps": {
+        "title": "Lacunas Terapêuticas",
+        "subtitle": "Condições descobertas"
+      }
+    },
     "kpis": {
       "activeNutraceuticals": "Nutracêuticos Ativos",
       "averageEfficacy": "Eficácia Média",

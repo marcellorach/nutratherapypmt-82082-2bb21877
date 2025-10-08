@@ -1335,6 +1335,32 @@
       "detailed": "Detailed Analysis",
       "performance": "Performance & Trends"
     },
+    "kpi": {
+      "activeNutraceuticals": {
+        "title": "Active Nutraceuticals",
+        "subtitle": "Total in catalog"
+      },
+      "averageEfficacy": {
+        "title": "Average Efficacy",
+        "subtitle": "Consolidated score"
+      },
+      "treatabilityIndex": {
+        "title": "Treatability Index",
+        "subtitle": "Condition coverage"
+      },
+      "prescriptionCoverage": {
+        "title": "Prescription Coverage",
+        "subtitle": "Patients covered"
+      },
+      "sustainabilityIndex": {
+        "title": "Sustainability Index",
+        "subtitle": "Supply score"
+      },
+      "therapeuticGaps": {
+        "title": "Therapeutic Gaps",
+        "subtitle": "Uncovered conditions"
+      }
+    },
     "kpis": {
       "activeNutraceuticals": "Active Nutraceuticals",
       "averageEfficacy": "Average Efficacy",
