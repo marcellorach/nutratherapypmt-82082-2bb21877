@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Link } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ActionButtonsProps {
   onEditClick?: () => void;
@@ -14,6 +15,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onDeleteClick,
   onManageRelationships
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex space-x-1">
       {onEditClick && (
@@ -21,7 +24,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           variant="ghost"
           size="icon"
           onClick={onEditClick}
-          title="Editar nutracêutico"
+          title={t('research.nutraceuticals.actions.edit')}
         >
           <Edit className="h-4 w-4" />
         </Button>
@@ -31,7 +34,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           variant="ghost"
           size="icon"
           onClick={onManageRelationships}
-          title="Gerenciar relações"
+          title={t('research.nutraceuticals.actions.manageRelations')}
         >
           <Link className="h-4 w-4" />
         </Button>
@@ -41,7 +44,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           variant="ghost"
           size="icon"
           onClick={onDeleteClick}
-          title="Excluir nutracêutico"
+          title={t('research.nutraceuticals.actions.delete')}
           className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
         >
           <Trash2 className="h-4 w-4" />

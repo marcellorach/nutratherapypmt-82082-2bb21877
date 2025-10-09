@@ -1278,6 +1278,57 @@
         "existingRelations": "Existing Relationships"
       },
       "remove": "Remove"
+    },
+    "relations": {
+      "tabs": {
+        "conditions": "Health Conditions",
+        "studies": "Scientific Studies"
+      },
+      "conditions": {
+        "addTitle": "Add New Relationship with Condition",
+        "selectPlaceholder": "Select a condition",
+        "relationType": "Relationship Type",
+        "efficacyScore": "Efficacy Score: {{score}}",
+        "addButton": "Add Relationship",
+        "existingTitle": "Existing Relationships",
+        "noRelations": "No relationships found."
+      },
+      "studies": {
+        "addTitle": "Add New Relationship with Study",
+        "selectPlaceholder": "Select a study",
+        "relevanceScore": "Relevance Score: {{score}}",
+        "relatedTitle": "Related Studies",
+        "noStudies": "No related studies."
+      },
+      "form": {
+        "healthCondition": "Health Condition",
+        "scientificStudy": "Scientific Study",
+        "relationshipType": "Relationship Type",
+        "notes": "Notes",
+        "notesPlaceholder": "Observations about this relationship..."
+      },
+      "relationshipTypes": {
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "labels": {
+        "efficacy": "Efficacy",
+        "relevance": "Relevance"
+      },
+      "messages": {
+        "successTitle": "Success",
+        "errorTitle": "Error",
+        "conditionAdded": "Relationship with condition added successfully.",
+        "conditionRemoved": "Relationship removed successfully.",
+        "studyAdded": "Relationship with study added successfully.",
+        "studyRemoved": "Relationship removed successfully.",
+        "selectCondition": "Select a health condition.",
+        "selectStudy": "Select a scientific study.",
+        "addError": "Unable to add the relationship.",
+        "removeError": "Unable to remove the relationship.",
+        "loadError": "Unable to load relationships."
+      }
     }
   },
   "veterinarian": {
@@ -1321,6 +1372,52 @@
       "cancel": "Cancel",
       "delete": "Delete",
       "deleting": "Deleting..."
+    }
+  },
+  "research": {
+    "nutraceuticals": {
+      "table": {
+        "footer": "{{filteredCount}} of {{totalCount}} nutraceuticals",
+        "headers": {
+          "name": "Name",
+          "outcome": "Outcome",
+          "outcomes": "Outcomes",
+          "studies": "Studies",
+          "actions": "Actions"
+        }
+      },
+      "search": {
+        "placeholder": "Search nutraceutical...",
+        "filters": "Filters"
+      },
+      "details": {
+        "title": "Details",
+        "description": "Description",
+        "chemicalCompound": "Chemical Compound",
+        "source": "Source",
+        "dosage": "Dosage",
+        "notDefined": "Not defined",
+        "notDefinedMale": "Not defined"
+      },
+      "actions": {
+        "edit": "Edit nutraceutical",
+        "delete": "Delete nutraceutical",
+        "manageRelations": "Manage relationships"
+      }
+    }
+  },
+  "studies": {
+    "import": {
+      "buttons": {
+        "next": "Next",
+        "back": "Back"
+      }
+    }
+  },
+  "recommendations": {
+    "card": {
+      "condition": "Condition",
+      "priority": "Priority"
     }
   },
   "analytics": {
