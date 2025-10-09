@@ -277,7 +277,8 @@
       "title": "Scientific Studies",
       "subtitle": "Manage and organize scientific studies on nutraceuticals",
       "import": "Import Studies",
-      "list": "Studies List",
+      "list": "Studies List"
+    },
     "tabs": {
       "ongoing": "Ongoing",
       "completed": "Completed",
@@ -1031,7 +1032,11 @@
       "selectAtLeastOne": "Select at least one file to import.",
       "importSuccess": "Import completed",
       "importSuccessDesc": "{{count}} study(ies) imported successfully. They can now be processed in NTAI Analysis.",
-      "importError": "Error importing {{filename}}"
+      "importError": "Error importing {{filename}}",
+      "buttons": {
+        "next": "Next",
+        "back": "Back"
+      }
     },
     "history": {
       "loading": "Loading history...",
@@ -1403,14 +1408,6 @@
         "edit": "Edit nutraceutical",
         "delete": "Delete nutraceutical",
         "manageRelations": "Manage relationships"
-      }
-    }
-  },
-  "studies": {
-    "import": {
-      "buttons": {
-        "next": "Next",
-        "back": "Back"
       }
     }
   },
