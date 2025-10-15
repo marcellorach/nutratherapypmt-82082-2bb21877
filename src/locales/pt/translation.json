@@ -273,6 +273,32 @@
       },
       "settingsButton": "Configurações"
     },
+    "multiAgentAnalysis": {
+      "title": "Análise de IA Multi-Agente",
+      "subtitle": "Processamento avançado de dados com sistema de agentes especializados",
+      "card": {
+        "title": "Sistema de Análise Colaborativa",
+        "description": "Este sistema utiliza múltiplos agentes especializados que colaboram entre si para analisar os dados de pets e gerar recomendações personalizadas de nutracêuticos.",
+        "status": {
+          "simulated": "Análise Simulada",
+          "completed": "Análise Completa"
+        }
+      },
+      "progress": {
+        "processing": "Processamento em andamento...",
+        "simulatedCompleted": "Análise SIMULADA concluída",
+        "completed": "Análise concluída",
+        "estimatedTime": "Tempo estimado: 15 minutos"
+      },
+      "buttons": {
+        "pause": "Pausar",
+        "pauseAndUseExample": "Pausar e usar dados de exemplo",
+        "continue": "Continuar",
+        "analyzing": "Analisando...",
+        "runAgain": "Executar Novamente",
+        "startAnalysis": "Iniciar Análise Multi-Agente"
+      }
+    },
     "studies": {
       "title": "Estudos Científicos",
       "subtitle": "Gerencie e organize estudos científicos sobre nutracêuticos",

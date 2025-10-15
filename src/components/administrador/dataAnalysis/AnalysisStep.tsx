@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, Zap, Network } from "lucide-react";
@@ -15,6 +16,7 @@ import AgentLegend from './AgentLegend';
 import AnalysisResult from './AnalysisResult';
 
 const AnalysisStep: React.FC = () => {
+  const { t } = useTranslation();
   const {
     analyzing,
     progress,
@@ -33,8 +35,8 @@ const AnalysisStep: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Análise de IA Multi-Agente</h2>
-          <p className="text-gray-600">Processamento avançado de dados com sistema de agentes especializados</p>
+          <h2 className="text-2xl font-bold">{t('admin.multiAgentAnalysis.title')}</h2>
+          <p className="text-gray-600">{t('admin.multiAgentAnalysis.subtitle')}</p>
         </div>
       </div>
       
@@ -43,19 +45,19 @@ const AnalysisStep: React.FC = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
               <Network className="mr-2 h-5 w-5 text-primary" />
-              Sistema de Análise Colaborativa
+              {t('admin.multiAgentAnalysis.card.title')}
             </CardTitle>
             {(step === 'completed' || step === 'simulated') && (
               <div className="flex items-center text-green-600 text-sm">
                 <CheckCircle className="mr-1 h-4 w-4" />
-                {step === 'simulated' ? 'Análise Simulada' : 'Análise Completa'}
+                {step === 'simulated' ? t('admin.multiAgentAnalysis.card.status.simulated') : t('admin.multiAgentAnalysis.card.status.completed')}
               </div>
             )}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-sm text-gray-600">
-            Este sistema utiliza múltiplos agentes especializados que colaboram entre si para analisar os dados de pets e gerar recomendações personalizadas de nutracêuticos.
+            {t('admin.multiAgentAnalysis.card.description')}
           </div>
           
           {step !== 'waiting' && (
@@ -63,14 +65,14 @@ const AnalysisStep: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">
-                    {step === 'processing' ? 'Processamento em andamento...' : step === 'simulated' ? 'Análise SIMULADA concluída' : 'Análise concluída'}
+                    {step === 'processing' ? t('admin.multiAgentAnalysis.progress.processing') : step === 'simulated' ? t('admin.multiAgentAnalysis.progress.simulatedCompleted') : t('admin.multiAgentAnalysis.progress.completed')}
                   </span>
                   <span className="text-sm font-medium">{Math.round(progress)}%</span>
                 </div>
                 <Progress value={progress} className="h-2 w-full" />
                 {step === 'processing' && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Tempo estimado: 15 minutos</span>
+                    <span>{t('admin.multiAgentAnalysis.progress.estimatedTime')}</span>
                   </div>
                 )}
               </div>
@@ -108,7 +110,7 @@ const AnalysisStep: React.FC = () => {
                 disabled={isPaused}
               >
                 <Pause className="mr-2 h-4 w-4" />
-                Pausar
+                {t('admin.multiAgentAnalysis.buttons.pause')}
               </Button>
             )}
             {step === 'processing' && (
@@ -116,7 +118,7 @@ const AnalysisStep: React.FC = () => {
                 variant="secondary"
                 onClick={useExampleData}
               >
-                Pausar e usar dados de exemplo
+                {t('admin.multiAgentAnalysis.buttons.pauseAndUseExample')}
               </Button>
             )}
           </div>
@@ -128,7 +130,7 @@ const AnalysisStep: React.FC = () => {
               isPaused ? (
                 <span className="flex items-center">
                   <Play className="mr-2 h-4 w-4" />
-                  Continuar
+                  {t('admin.multiAgentAnalysis.buttons.continue')}
                 </span>
               ) : (
                 <span className="flex items-center">
@@ -136,13 +138,13 @@ const AnalysisStep: React.FC = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Analisando...
+                  {t('admin.multiAgentAnalysis.buttons.analyzing')}
                 </span>
               )
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                {(step === 'completed' || step === 'simulated') ? 'Executar Novamente' : 'Iniciar Análise Multi-Agente'}
+                {(step === 'completed' || step === 'simulated') ? t('admin.multiAgentAnalysis.buttons.runAgain') : t('admin.multiAgentAnalysis.buttons.startAnalysis')}
               </>
             )}
           </Button>
