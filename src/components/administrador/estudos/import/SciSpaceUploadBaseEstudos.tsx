@@ -1,7 +1,6 @@
 
 import React from "react";
 import BaseStudiesUpload from "./BaseStudiesUpload";
-import { useTranslation } from 'react-i18next';
 
 interface SciSpaceUploadBaseEstudosProps {
   baseStudiesFile: File | null;
@@ -18,8 +17,6 @@ const SciSpaceUploadBaseEstudos: React.FC<SciSpaceUploadBaseEstudosProps> = ({
   onPrev,
   onNext
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <div>
       <BaseStudiesUpload
@@ -33,14 +30,14 @@ const SciSpaceUploadBaseEstudos: React.FC<SciSpaceUploadBaseEstudosProps> = ({
           onClick={onPrev}
           disabled={disabled}
         >
-          {t('studies.import.buttons.back')}
+          Voltar
         </button>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
           disabled={!baseStudiesFile || disabled}
           onClick={onNext}
         >
-          {t('studies.import.buttons.next')}
+          Próximo
         </button>
       </div>
     </div>

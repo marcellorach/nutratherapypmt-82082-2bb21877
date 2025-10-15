@@ -2,7 +2,6 @@
 import React from "react";
 import FilePreview from "./FilePreview";
 import SubmitImportButton from "./SubmitImportButton";
-import { useTranslation } from 'react-i18next';
 
 interface SciSpaceReviewAndSubmitProps {
   metaSummaryFile: File | null;
@@ -23,8 +22,6 @@ const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
   onPrev,
   onSubmit
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <div>
       <div className="mb-6 grid md:grid-cols-2 gap-6">
@@ -45,7 +42,7 @@ const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
           onClick={onPrev}
           disabled={loading}
         >
-          {t('studies.import.buttons.back')}
+          Voltar
         </button>
         <SubmitImportButton
           onClick={onSubmit}

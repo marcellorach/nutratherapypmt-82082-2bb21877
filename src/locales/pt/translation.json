@@ -277,8 +277,7 @@
       "title": "Estudos Científicos",
       "subtitle": "Gerencie e organize estudos científicos sobre nutracêuticos",
       "import": "Importar Estudos",
-      "list": "Lista de Estudos"
-    },
+      "list": "Lista de Estudos",
     "tabs": {
       "ongoing": "Em Andamento",
       "completed": "Concluídos",
@@ -1032,11 +1031,7 @@
       "selectAtLeastOne": "Selecione pelo menos um arquivo para importar.",
       "importSuccess": "Importação concluída",
       "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise NTAI.",
-      "importError": "Erro ao importar {{filename}}",
-      "buttons": {
-        "next": "Próximo",
-        "back": "Voltar"
-      }
+      "importError": "Erro ao importar {{filename}}"
     },
     "history": {
       "loading": "Carregando histórico...",
@@ -1283,57 +1278,6 @@
         "existingRelations": "Relações Existentes"
       },
       "remove": "Remover"
-    },
-    "relations": {
-      "tabs": {
-        "conditions": "Condições de Saúde",
-        "studies": "Estudos Científicos"
-      },
-      "conditions": {
-        "addTitle": "Adicionar Nova Relação com Condição",
-        "selectPlaceholder": "Selecione uma condição",
-        "relationType": "Tipo de Relação",
-        "efficacyScore": "Score de Eficácia: {{score}}",
-        "addButton": "Adicionar Relação",
-        "existingTitle": "Relações Existentes",
-        "noRelations": "Nenhuma relação encontrada."
-      },
-      "studies": {
-        "addTitle": "Adicionar Nova Relação com Estudo",
-        "selectPlaceholder": "Selecione um estudo",
-        "relevanceScore": "Score de Relevância: {{score}}",
-        "relatedTitle": "Estudos Relacionados",
-        "noStudies": "Nenhum estudo relacionado."
-      },
-      "form": {
-        "healthCondition": "Condição de Saúde",
-        "scientificStudy": "Estudo Científico",
-        "relationshipType": "Tipo de Relação",
-        "notes": "Notas",
-        "notesPlaceholder": "Observações sobre esta relação..."
-      },
-      "relationshipTypes": {
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "labels": {
-        "efficacy": "Eficácia",
-        "relevance": "Relevância"
-      },
-      "messages": {
-        "successTitle": "Sucesso",
-        "errorTitle": "Erro",
-        "conditionAdded": "Relação com condição adicionada com sucesso.",
-        "conditionRemoved": "Relação removida com sucesso.",
-        "studyAdded": "Relação com estudo adicionada com sucesso.",
-        "studyRemoved": "Relação removida com sucesso.",
-        "selectCondition": "Selecione uma condição de saúde.",
-        "selectStudy": "Selecione um estudo científico.",
-        "addError": "Não foi possível adicionar a relação.",
-        "removeError": "Não foi possível remover a relação.",
-        "loadError": "Não foi possível carregar as relações."
-      }
     }
   },
   "veterinarian": {
@@ -1377,44 +1321,6 @@
       "cancel": "Cancelar",
       "delete": "Excluir",
       "deleting": "Excluindo..."
-    }
-  },
-  "research": {
-    "nutraceuticals": {
-      "table": {
-        "footer": "{{filteredCount}} de {{totalCount}} nutracêuticos",
-        "headers": {
-          "name": "Nome",
-          "outcome": "Outcome",
-          "outcomes": "Outcomes",
-          "studies": "Estudos",
-          "actions": "Ações"
-        }
-      },
-      "search": {
-        "placeholder": "Buscar nutracêutico...",
-        "filters": "Filtros"
-      },
-      "details": {
-        "title": "Detalhes",
-        "description": "Descrição",
-        "chemicalCompound": "Composto Químico",
-        "source": "Origem",
-        "dosage": "Dosagem",
-        "notDefined": "Não definida",
-        "notDefinedMale": "Não definido"
-      },
-      "actions": {
-        "edit": "Editar nutracêutico",
-        "delete": "Excluir nutracêutico",
-        "manageRelations": "Gerenciar relações"
-      }
-    }
-  },
-  "recommendations": {
-    "card": {
-      "condition": "Condição",
-      "priority": "Prioridade"
     }
   },
   "analytics": {

@@ -1,7 +1,6 @@
 
 import React from "react";
 import MetaSummaryUpload from "./MetaSummaryUpload";
-import { useTranslation } from 'react-i18next';
 
 interface SciSpaceUploadMetaResumoProps {
   metaSummaryFiles: File[];
@@ -16,8 +15,6 @@ const SciSpaceUploadMetaResumo: React.FC<SciSpaceUploadMetaResumoProps> = ({
   disabled,
   onNext
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <div>
       <MetaSummaryUpload
@@ -31,7 +28,7 @@ const SciSpaceUploadMetaResumo: React.FC<SciSpaceUploadMetaResumoProps> = ({
           onClick={onNext}
           disabled={metaSummaryFiles.length === 0 || disabled}
         >
-          {t('studies.import.buttons.next')}
+          Próximo
         </button>
       </div>
     </div>

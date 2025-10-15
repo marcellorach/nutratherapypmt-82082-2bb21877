@@ -1,19 +1,16 @@
 
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useTranslation } from 'react-i18next';
 
 const TableHeaderComponent: React.FC = () => {
-  const { t } = useTranslation();
-  
   return (
     <TableHeader>
       <TableRow>
-        <TableHead>{t('research.nutraceuticals.table.headers.name')}</TableHead>
-        <TableHead>{t('research.nutraceuticals.table.headers.outcome')}</TableHead>
-        <TableHead>{t('research.nutraceuticals.table.headers.outcomes')}</TableHead>
-        <TableHead>{t('research.nutraceuticals.table.headers.studies')}</TableHead>
-        <TableHead>{t('research.nutraceuticals.table.headers.actions')}</TableHead>
+        <TableHead>Nome</TableHead>
+        <TableHead>Outcome</TableHead>
+        <TableHead>Outcomes</TableHead>
+        <TableHead>Estudos</TableHead>
+        <TableHead>Ações</TableHead>
       </TableRow>
     </TableHeader>
   );

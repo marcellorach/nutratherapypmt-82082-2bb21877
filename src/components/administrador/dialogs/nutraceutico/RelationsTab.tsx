@@ -11,7 +11,6 @@ import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 import { useStudies } from '@/hooks/nutraceuticals/useStudies';
 import { useToast } from '@/hooks/use-toast';
 import { nutraceuticalsService } from '@/services/nutraceuticals';
-import { useTranslation } from 'react-i18next';
 
 interface RelationsTabProps {
   nutraceutical: any;
@@ -19,7 +18,6 @@ interface RelationsTabProps {
 }
 
 const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) => {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const [healthConditions, setHealthConditions] = useState<any[]>([]);
   const [relatedStudies, setRelatedStudies] = useState<any[]>([]);
@@ -56,8 +54,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
     } catch (error) {
       console.error('Erro ao carregar relações de condições:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.loadError'),
+        title: "Erro",
+        description: "Não foi possível carregar as relações de condições.",
         variant: "destructive"
       });
     } finally {
@@ -75,8 +73,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
     } catch (error) {
       console.error('Erro ao carregar relações de estudos:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.loadError'),
+        title: "Erro",
+        description: "Não foi possível carregar as relações de estudos.",
         variant: "destructive"
       });
     } finally {
@@ -87,8 +85,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
   const handleAddConditionRelation = async () => {
     if (!selectedCondition) {
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.selectCondition'),
+        title: "Erro",
+        description: "Selecione uma condição de saúde.",
         variant: "destructive"
       });
       return;
@@ -105,8 +103,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
       });
 
       toast({
-        title: t('nutraceuticals.relations.messages.successTitle'),
-        description: t('nutraceuticals.relations.messages.conditionAdded')
+        title: "Sucesso",
+        description: "Relação com condição adicionada com sucesso."
       });
 
       // Reset form
@@ -120,8 +118,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
     } catch (error) {
       console.error('Erro ao adicionar relação:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.addError'),
+        title: "Erro",
+        description: "Não foi possível adicionar a relação.",
         variant: "destructive"
       });
     } finally {
@@ -134,16 +132,16 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
       setConditionsLoading(true);
       // Stub - implementar quando disponível
       toast({
-        title: t('nutraceuticals.relations.messages.successTitle'),
-        description: t('nutraceuticals.relations.messages.conditionRemoved')
+        title: "Sucesso",
+        description: "Relação removida com sucesso."
       });
       loadConditionRelations();
       onUpdate?.();
     } catch (error) {
       console.error('Erro ao remover relação:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.removeError'),
+        title: "Erro",
+        description: "Não foi possível remover a relação.",
         variant: "destructive"
       });
     } finally {
@@ -154,8 +152,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
   const handleAddStudyRelation = async () => {
     if (!selectedStudy) {
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.selectStudy'),
+        title: "Erro",
+        description: "Selecione um estudo científico.",
         variant: "destructive"
       });
       return;
@@ -170,8 +168,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
       });
 
       toast({
-        title: t('nutraceuticals.relations.messages.successTitle'),
-        description: t('nutraceuticals.relations.messages.studyAdded')
+        title: "Sucesso",
+        description: "Relação com estudo adicionada com sucesso."
       });
 
       // Reset form
@@ -184,8 +182,8 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
     } catch (error) {
       console.error('Erro ao adicionar relação:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.addError'),
+        title: "Erro",
+        description: "Não foi possível adicionar a relação.",
         variant: "destructive"
       });
     } finally {
@@ -198,16 +196,16 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
       setStudiesLoading(true);
       // Stub - implementar quando disponível
       toast({
-        title: t('nutraceuticals.relations.messages.successTitle'),
-        description: t('nutraceuticals.relations.messages.studyRemoved')
+        title: "Sucesso",
+        description: "Relação removida com sucesso."
       });
       loadStudyRelations();
       onUpdate?.();
     } catch (error) {
       console.error('Erro ao remover relação:', error);
       toast({
-        title: t('nutraceuticals.relations.messages.errorTitle'),
-        description: t('nutraceuticals.relations.messages.removeError'),
+        title: "Erro",
+        description: "Não foi possível remover a relação.",
         variant: "destructive"
       });
     } finally {
@@ -219,20 +217,20 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
     <div className="space-y-6">
       <Tabs defaultValue="conditions" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="conditions">{t('nutraceuticals.relations.tabs.conditions')}</TabsTrigger>
-          <TabsTrigger value="studies">{t('nutraceuticals.relations.tabs.studies')}</TabsTrigger>
+          <TabsTrigger value="conditions">Condições de Saúde</TabsTrigger>
+          <TabsTrigger value="studies">Estudos Científicos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="conditions" className="space-y-4">
           <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-4">{t('nutraceuticals.relations.conditions.addTitle')}</h4>
+            <h4 className="font-medium mb-4">Adicionar Nova Relação com Condição</h4>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">{t('nutraceuticals.relations.form.healthCondition')}</label>
+                <label className="text-sm font-medium">Condição de Saúde</label>
                 <Select value={selectedCondition} onValueChange={setSelectedCondition}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('nutraceuticals.relations.conditions.selectPlaceholder')} />
+                    <SelectValue placeholder="Selecione uma condição" />
                   </SelectTrigger>
                   <SelectContent>
                     {conditions?.map((condition: any) => (
@@ -245,22 +243,22 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
               </div>
 
               <div>
-                <label className="text-sm font-medium">{t('nutraceuticals.relations.form.relationshipType')}</label>
+                <label className="text-sm font-medium">Tipo de Relação</label>
                 <Select value={relationshipType} onValueChange={(value: any) => setRelationshipType(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="prevention">{t('nutraceuticals.relations.relationshipTypes.prevention')}</SelectItem>
-                    <SelectItem value="treatment">{t('nutraceuticals.relations.relationshipTypes.treatment')}</SelectItem>
-                    <SelectItem value="support">{t('nutraceuticals.relations.relationshipTypes.support')}</SelectItem>
+                    <SelectItem value="prevention">Prevenção</SelectItem>
+                    <SelectItem value="treatment">Tratamento</SelectItem>
+                    <SelectItem value="support">Suporte</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="mt-4">
-              <label className="text-sm font-medium">{t('nutraceuticals.relations.conditions.efficacyScore', { score: efficacyScore[0] })}</label>
+              <label className="text-sm font-medium">Score de Eficácia: {efficacyScore[0]}</label>
               <Slider
                 value={efficacyScore}
                 onValueChange={setEfficacyScore}
@@ -272,11 +270,11 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
             </div>
 
             <div className="mt-4">
-              <label className="text-sm font-medium">{t('nutraceuticals.relations.form.notes')}</label>
+              <label className="text-sm font-medium">Notas</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder={t('nutraceuticals.relations.form.notesPlaceholder')}
+                placeholder="Observações sobre esta relação..."
                 className="mt-1"
               />
             </div>
@@ -287,21 +285,21 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
               className="mt-4"
             >
               {conditionsLoading ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              {t('nutraceuticals.relations.conditions.addButton')}
+              Adicionar Relação
             </Button>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">{t('nutraceuticals.relations.conditions.existingTitle')}</h4>
+            <h4 className="font-medium mb-2">Relações Existentes</h4>
             {conditionsLoading ? (
               <div className="flex items-center justify-center p-4">
                 <Loader className="w-4 h-4 animate-spin mr-2" />
-                {t('common.loading')}
+                Carregando...
               </div>
             ) : (
               <div className="space-y-2">
                 {healthConditions.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">{t('nutraceuticals.relations.conditions.noRelations')}</p>
+                  <p className="text-muted-foreground text-sm">Nenhuma relação encontrada.</p>
                 ) : (
                   healthConditions.map((relation: any) => (
                     <div key={relation.id} className="flex items-center justify-between p-3 border rounded">
@@ -311,7 +309,7 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
                           {relation.relationship_type}
                         </Badge>
                         <span className="text-sm text-muted-foreground ml-2">
-                          {t('nutraceuticals.relations.labels.efficacy')}: {relation.efficacy_score}/5
+                          Eficácia: {relation.efficacy_score}/5
                         </span>
                       </div>
                       <Button
@@ -331,14 +329,14 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
 
         <TabsContent value="studies" className="space-y-4">
           <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-4">{t('nutraceuticals.relations.studies.addTitle')}</h4>
+            <h4 className="font-medium mb-4">Adicionar Nova Relação com Estudo</h4>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">{t('nutraceuticals.relations.form.scientificStudy')}</label>
+                <label className="text-sm font-medium">Estudo Científico</label>
                 <Select value={selectedStudy} onValueChange={setSelectedStudy}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('nutraceuticals.relations.studies.selectPlaceholder')} />
+                    <SelectValue placeholder="Selecione um estudo" />
                   </SelectTrigger>
                   <SelectContent>
                     {studies?.map((study: any) => (
@@ -351,7 +349,7 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
               </div>
 
               <div>
-                <label className="text-sm font-medium">{t('nutraceuticals.relations.studies.relevanceScore', { score: relevanceScore[0] })}</label>
+                <label className="text-sm font-medium">Score de Relevância: {relevanceScore[0]}</label>
                 <Slider
                   value={relevanceScore}
                   onValueChange={setRelevanceScore}
@@ -369,28 +367,28 @@ const RelationsTab: React.FC<RelationsTabProps> = ({ nutraceutical, onUpdate }) 
               className="mt-4"
             >
               {studiesLoading ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              {t('nutraceuticals.relations.conditions.addButton')}
+              Adicionar Relação
             </Button>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">{t('nutraceuticals.relations.studies.relatedTitle')}</h4>
+            <h4 className="font-medium mb-2">Estudos Relacionados</h4>
             {studiesLoading ? (
               <div className="flex items-center justify-center p-4">
                 <Loader className="w-4 h-4 animate-spin mr-2" />
-                {t('common.loading')}
+                Carregando...
               </div>
             ) : (
               <div className="space-y-2">
                 {relatedStudies.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">{t('nutraceuticals.relations.studies.noStudies')}</p>
+                  <p className="text-muted-foreground text-sm">Nenhum estudo relacionado.</p>
                 ) : (
                   relatedStudies.map((relation: any) => (
                     <div key={relation.id} className="flex items-center justify-between p-3 border rounded">
                       <div>
                         <span className="font-medium">{relation.study?.title}</span>
                         <span className="text-sm text-muted-foreground ml-2">
-                          {t('nutraceuticals.relations.labels.relevance')}: {relation.relevance_score}/5
+                          Relevância: {relation.relevance_score}/5
                         </span>
                       </div>
                       <Button
