@@ -793,11 +793,34 @@
     }
   },
   "nutraceuticals": {
+    "header": {
+      "title": "Nutraceuticals",
+      "subtitle": "Manage nutraceuticals and their relationships with health conditions",
+      "newButton": "New Nutraceutical",
+      "manageImportsButton": "Manage Imports"
+    },
     "management": {
       "title": "Nutraceutical Management",
       "newButton": "New Nutraceutical",
       "noCategory": "No category",
       "categoryNotFound": "Category not found"
+    },
+    "legend": {
+      "title": "Evidence Legend",
+      "convergence": {
+        "title": "Scientific Convergence",
+        "high": "High Convergence",
+        "moderate": "Moderate Convergence",
+        "low": "Low Convergence",
+        "description": "Degree of scientific consensus among different studies"
+      },
+      "efficacy": {
+        "title": "Clinical Efficacy",
+        "high": "High Efficacy",
+        "moderate": "Moderate Efficacy",
+        "low": "Low Efficacy",
+        "description": "Level of proven efficacy in clinical studies"
+      }
     },
     "search": {
       "placeholder": "Search nutraceutical...",
@@ -822,7 +845,20 @@
       "notFound": "No nutraceuticals found.",
       "editTitle": "Edit",
       "deleteTitle": "Delete",
-      "manageOutcomes": "Manage Outcomes"
+      "manageOutcomes": "Manage Outcomes",
+      "headers": {
+        "name": "Name",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "expanded": {
+        "description": "Description",
+        "chemicalCompound": "Chemical Compound",
+        "convergenceTitle": "Scientific Convergence",
+        "convergenceHigh": "High Convergence",
+        "contraindications": "Contraindications"
+      }
     },
     "dialog": {
       "addTitle": "Add New Nutraceutical",

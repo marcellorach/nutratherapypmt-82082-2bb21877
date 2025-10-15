@@ -793,11 +793,34 @@
     }
   },
   "nutraceuticals": {
+    "header": {
+      "title": "Nutracêuticos",
+      "subtitle": "Gerencie os nutracêuticos e suas relações com condições de saúde",
+      "newButton": "Novo Nutracêutico",
+      "manageImportsButton": "Gerenciar Importações"
+    },
     "management": {
       "title": "Gerenciamento de Nutracêuticos",
       "newButton": "Novo Nutracêutico",
       "noCategory": "Sem categoria",
       "categoryNotFound": "Categoria não encontrada"
+    },
+    "legend": {
+      "title": "Legenda de Evidências",
+      "convergence": {
+        "title": "Convergência Científica",
+        "high": "Alta Convergência",
+        "moderate": "Convergência Moderada",
+        "low": "Baixa Convergência",
+        "description": "Grau de consenso científico entre diferentes estudos"
+      },
+      "efficacy": {
+        "title": "Eficácia Clínica",
+        "high": "Alta Eficácia",
+        "moderate": "Eficácia Moderada",
+        "low": "Baixa Eficácia",
+        "description": "Nível de eficácia comprovada em estudos clínicos"
+      }
     },
     "search": {
       "placeholder": "Buscar nutracêutico...",
@@ -822,7 +845,20 @@
       "notFound": "Nenhum nutracêutico encontrado.",
       "editTitle": "Editar",
       "deleteTitle": "Excluir",
-      "manageOutcomes": "Gerenciar Outcomes"
+      "manageOutcomes": "Gerenciar Outcomes",
+      "headers": {
+        "name": "Nome",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "expanded": {
+        "description": "Descrição",
+        "chemicalCompound": "Composto Químico",
+        "convergenceTitle": "Convergência Científica",
+        "convergenceHigh": "Alta Convergência",
+        "contraindications": "Contraindicações"
+      }
     },
     "dialog": {
       "addTitle": "Adicionar Novo Nutracêutico",
