@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn } from "lucide-react";
+import { LogOut, LogIn, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -14,6 +14,7 @@ const Header: React.FC = () => {
 
   const isAuthenticated = !!user;
   const isVeterinarian = hasRole('veterinarian');
+  const isAdmin = hasRole('admin');
 
   return (
     <header className="w-full bg-white text-gray-800 p-6 border-b border-gray-200 shadow-sm fixed top-0 left-0 z-50">
@@ -43,6 +44,18 @@ const Header: React.FC = () => {
           
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              {isAdmin && (
+                <Link to="/administrador">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border-gray-300 hover:border-gray-400 transition-all"
+                  >
+                    <Settings size={16} />
+                    {t('header.administrator')}
+                  </Button>
+                </Link>
+              )}
               <div className="flex flex-col items-end">
                 <span className="font-medium text-sm text-gray-800">
                   {userProfile?.first_name} {userProfile?.last_name}
