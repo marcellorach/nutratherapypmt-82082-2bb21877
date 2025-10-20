@@ -1062,6 +1062,61 @@
       "updated": "Nutracêutico atualizado com sucesso",
       "deleted": "Nutracêutico excluído com sucesso.",
       "deleteError": "Erro ao excluir nutracêutico: {{message}}"
+    },
+    "validation": {
+      "nameRequired": "O nome é obrigatório"
+    },
+    "conditions": {
+      "title": "Gerenciar Condições",
+      "manageTitle": "Gerenciar Condições de Saúde",
+      "manageDescription": "Associe condições de saúde ao nutracêutico {{name}}",
+      "close": "Fechar",
+      "form": {
+        "healthCondition": "Condição de Saúde",
+        "relationshipType": "Tipo de Relação",
+        "efficacy": "Eficácia (1-5)",
+        "notes": "Notas ou Observações",
+        "selectCondition": "Selecione uma condição",
+        "selectRelationship": "Selecione o tipo",
+        "addNotes": "Adicione notas sobre esta associação...",
+        "addNewRelation": "Adicionar nova relação",
+        "associate": "Adicionar Relação",
+        "associating": "Associando..."
+      },
+      "relationshipTypes": {
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "tabs": {
+        "all": "Todas",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "messages": {
+        "allAssociated": "Todas as condições já foram associadas",
+        "noRelations": "Este nutracêutico não possui relações com condições de saúde",
+        "noRelationsFiltered": "Nenhuma relação de {{type}} encontrada.",
+        "associationSuccess": "Condição associada com sucesso",
+        "associationError": "Não foi possível associar a condição",
+        "removeSuccess": "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
+        "selectCondition": "Selecione uma condição de saúde",
+        "partialFunctionality": "Funcionalidade parcial"
+      },
+      "efficacyLevels": {
+        "veryLow": "Muito Baixa",
+        "low": "Baixa",
+        "moderate": "Moderada",
+        "high": "Alta",
+        "veryHigh": "Muito Alta"
+      },
+      "labels": {
+        "efficacyScore": "Eficácia: {{score}}",
+        "notes": "Notas:",
+        "existingRelations": "Relações Existentes"
+      },
+      "remove": "Remover"
     }
   },
   "studies": {
@@ -1283,63 +1338,6 @@
       "loading": "Carregando famílias...",
       "placeholder": "Selecione uma família",
       "noFamily": "Sem família"
-    }
-  },
-  "nutraceuticals": {
-    "validation": {
-      "nameRequired": "O nome é obrigatório"
-    },
-    "conditions": {
-      "title": "Gerenciar Condições",
-      "manageTitle": "Gerenciar Condições de Saúde",
-      "manageDescription": "Associe condições de saúde ao nutracêutico {{name}}",
-      "close": "Fechar",
-      "form": {
-        "healthCondition": "Condição de Saúde",
-        "relationshipType": "Tipo de Relação",
-        "efficacy": "Eficácia (1-5)",
-        "notes": "Notas ou Observações",
-        "selectCondition": "Selecione uma condição",
-        "selectRelationship": "Selecione o tipo",
-        "addNotes": "Adicione notas sobre esta associação...",
-        "addNewRelation": "Adicionar nova relação",
-        "associate": "Adicionar Relação",
-        "associating": "Associando..."
-      },
-      "relationshipTypes": {
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "tabs": {
-        "all": "Todas",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "messages": {
-        "allAssociated": "Todas as condições já foram associadas",
-        "noRelations": "Este nutracêutico não possui relações com condições de saúde",
-        "noRelationsFiltered": "Nenhuma relação de {{type}} encontrada.",
-        "associationSuccess": "Condição associada com sucesso",
-        "associationError": "Não foi possível associar a condição",
-        "removeSuccess": "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
-        "selectCondition": "Selecione uma condição de saúde",
-        "partialFunctionality": "Funcionalidade parcial"
-      },
-      "efficacyLevels": {
-        "veryLow": "Muito Baixa",
-        "low": "Baixa",
-        "moderate": "Moderada",
-        "high": "Alta",
-        "veryHigh": "Muito Alta"
-      },
-      "labels": {
-        "efficacyScore": "Eficácia: {{score}}",
-        "notes": "Notas:",
-        "existingRelations": "Relações Existentes"
-      },
-      "remove": "Remover"
     }
   },
   "veterinarian": {

@@ -1062,6 +1062,61 @@
       "updated": "Nutraceutical updated successfully",
       "deleted": "Nutraceutical deleted successfully.",
       "deleteError": "Error deleting nutraceutical: {{message}}"
+    },
+    "validation": {
+      "nameRequired": "Name is required"
+    },
+    "conditions": {
+      "title": "Manage Conditions",
+      "manageTitle": "Manage Health Conditions",
+      "manageDescription": "Associate health conditions with nutraceutical {{name}}",
+      "close": "Close",
+      "form": {
+        "healthCondition": "Health Condition",
+        "relationshipType": "Relationship Type",
+        "efficacy": "Efficacy (1-5)",
+        "notes": "Notes or Observations",
+        "selectCondition": "Select a condition",
+        "selectRelationship": "Select type",
+        "addNotes": "Add notes about this association...",
+        "addNewRelation": "Add new relationship",
+        "associate": "Add Relationship",
+        "associating": "Associating..."
+      },
+      "relationshipTypes": {
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "tabs": {
+        "all": "All",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "messages": {
+        "allAssociated": "All conditions have already been associated",
+        "noRelations": "This nutraceutical has no health condition relationships",
+        "noRelationsFiltered": "No {{type}} relationships found.",
+        "associationSuccess": "Condition associated successfully",
+        "associationError": "Unable to associate condition",
+        "removeSuccess": "Removal was simulated in the interface. Reload the page to see the real state.",
+        "selectCondition": "Select a health condition",
+        "partialFunctionality": "Partial functionality"
+      },
+      "efficacyLevels": {
+        "veryLow": "Very Low",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High",
+        "veryHigh": "Very High"
+      },
+      "labels": {
+        "efficacyScore": "Efficacy: {{score}}",
+        "notes": "Notes:",
+        "existingRelations": "Existing Relationships"
+      },
+      "remove": "Remove"
     }
   },
   "studies": {
@@ -1283,63 +1338,6 @@
       "loading": "Loading families...",
       "placeholder": "Select a family",
       "noFamily": "No family"
-    }
-  },
-  "nutraceuticals": {
-    "validation": {
-      "nameRequired": "Name is required"
-    },
-    "conditions": {
-      "title": "Manage Conditions",
-      "manageTitle": "Manage Health Conditions",
-      "manageDescription": "Associate health conditions with nutraceutical {{name}}",
-      "close": "Close",
-      "form": {
-        "healthCondition": "Health Condition",
-        "relationshipType": "Relationship Type",
-        "efficacy": "Efficacy (1-5)",
-        "notes": "Notes or Observations",
-        "selectCondition": "Select a condition",
-        "selectRelationship": "Select type",
-        "addNotes": "Add notes about this association...",
-        "addNewRelation": "Add new relationship",
-        "associate": "Add Relationship",
-        "associating": "Associating..."
-      },
-      "relationshipTypes": {
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support"
-      },
-      "tabs": {
-        "all": "All",
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support"
-      },
-      "messages": {
-        "allAssociated": "All conditions have already been associated",
-        "noRelations": "This nutraceutical has no health condition relationships",
-        "noRelationsFiltered": "No {{type}} relationships found.",
-        "associationSuccess": "Condition associated successfully",
-        "associationError": "Unable to associate condition",
-        "removeSuccess": "Removal was simulated in the interface. Reload the page to see the real state.",
-        "selectCondition": "Select a health condition",
-        "partialFunctionality": "Partial functionality"
-      },
-      "efficacyLevels": {
-        "veryLow": "Very Low",
-        "low": "Low",
-        "moderate": "Moderate",
-        "high": "High",
-        "veryHigh": "Very High"
-      },
-      "labels": {
-        "efficacyScore": "Efficacy: {{score}}",
-        "notes": "Notes:",
-        "existingRelations": "Existing Relationships"
-      },
-      "remove": "Remove"
     }
   },
   "veterinarian": {
