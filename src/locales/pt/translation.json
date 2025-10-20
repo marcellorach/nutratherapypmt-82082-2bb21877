@@ -759,6 +759,20 @@
       "viewMode": "Modo de Visualização",
       "networkView": "Rede",
       "matrixView": "Matriz"
+    },
+    "legend": {
+      "title": "Legenda",
+      "nutraceutical": "Nutracêutico",
+      "healthCondition": "Condição de Saúde",
+      "scientificStudy": "Estudo Científico",
+      "potentialConnection": "Conexão Potencial",
+      "synergy": "Sinergia",
+      "high": "Alta",
+      "low": "Baixa",
+      "efficacyLevel": "Nível de Eficácia",
+      "aboutData": "Sobre os dados",
+      "dataDescription": "Os dados representam conexões científicas entre nutracêuticos, condições de saúde e estudos publicados.",
+      "colorDescription": "As cores e tipos de linha indicam diferentes tipos de relações e seus níveis de evidência científica."
     }
   },
   "sankey": {
