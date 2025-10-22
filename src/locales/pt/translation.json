@@ -32,47 +32,6 @@
     "eligiblePets": "{{count}} pets elegíveis",
     "dataBasedOn": "Dados baseados no {{name}}"
   },
-  "visualization": {
-    "conditions": {
-      "cellularSenescence": "Senescência Celular",
-      "generalMortality": "Mortalidade Geral",
-      "oxidativeStress": "Estresse Oxidativo",
-      "mitochondrialDysfunction": "Disfunção Mitocondrial",
-      "stats": {
-        "title": "Estatísticas de Condições de Saúde",
-        "totalEligibleAnimals": "Total de Animais Elegíveis",
-        "totalEligibleTreatments": "Total de Tratamentos Elegíveis",
-        "dogs": "cães",
-        "cats": "gatos",
-        "eligiblePetsLabel": "pets elegíveis",
-        "basedOn": "Baseado no",
-        "totalConditions": "Total de Condições",
-        "highTreatability": "Alta Tratabilidade",
-        "highPrevention": "Alta Prevenção",
-        "avgTreatability": "Média de Tratabilidade",
-        "avgPrevention": "Média de Prevenção",
-        "newConditions": "Novas Condições Identificadas"
-      },
-      "table": {
-        "title": "Condições de Saúde Analisadas",
-        "description": "Lista completa de condições identificadas e suas métricas de tratamento",
-        "condition": "Condição",
-        "treatability": "Tratabilidade",
-        "prevention": "Prevenção",
-        "roi": "ROI",
-        "eligibleDogs": "Cães Elegíveis",
-        "eligibleCats": "Gatos Elegíveis",
-        "packages": "Pacotes",
-        "expandedRow": {
-          "description": "Descrição",
-          "affectedBreeds": "Raças Afetadas",
-          "recommendedPackages": "Pacotes Recomendados",
-          "viewDetailedAnalysis": "Ver Análise Detalhada",
-          "packagesCount": "{{count}} pacotes"
-        }
-      }
-    }
-  },
   "tutor": {
     "greeting": "Olá",
     "subtitle": "Acompanhe o tratamento nutracêutico dos seus pets",
@@ -1980,6 +1939,10 @@
       }
     },
     "conditions": {
+      "cellularSenescence": "Senescência Celular",
+      "generalMortality": "Mortalidade Geral",
+      "oxidativeStress": "Estresse Oxidativo",
+      "mitochondrialDysfunction": "Disfunção Mitocondrial",
       "title": "Condições de Saúde",
       "description": "Análise de condições tratáveis com pacotes de nutracêuticos",
       "searchPlaceholder": "Buscar condição...",
@@ -2012,16 +1975,19 @@
         "highTreatability": "Alta Tratabilidade"
       },
       "stats": {
-        "totalConditions": "Total de Condições Analisadas",
-        "highTreatability": "Alta Tratabilidade (>45%)",
-        "highPrevention": "Alta Prevenção (>65%)",
-        "avgTreatability": "Índice Médio de Tratabilidade",
-        "avgPrevention": "Índice Médio de Prevenção",
-        "newConditions": "Novas condições relacionadas à longevidade:",
-        "cellularSenescence": "Senescência Celular",
-        "generalMortality": "Mortalidade Geral",
-        "oxidativeStress": "Estresse Oxidativo",
-        "mitochondrialDysfunction": "Disfunção Mitocondrial"
+        "title": "Estatísticas de Condições de Saúde",
+        "totalEligibleAnimals": "Total de Animais Elegíveis",
+        "totalEligibleTreatments": "Total de Tratamentos Elegíveis",
+        "dogs": "cães",
+        "cats": "gatos",
+        "eligiblePetsLabel": "pets elegíveis",
+        "basedOn": "Baseado no",
+        "totalConditions": "Total de Condições",
+        "highTreatability": "Alta Tratabilidade",
+        "highPrevention": "Alta Prevenção",
+        "avgTreatability": "Média de Tratabilidade",
+        "avgPrevention": "Média de Prevenção",
+        "newConditions": "Novas Condições Identificadas"
       },
       "chart": {
         "title": "Índice de Tratabilidade por Condição",
@@ -2032,7 +1998,15 @@
         "condition": "Condição"
       },
       "table": {
-        "title": "Condições Tratáveis",
+        "title": "Condições de Saúde Analisadas",
+        "description": "Lista completa de condições identificadas e suas métricas de tratamento",
+        "condition": "Condição",
+        "treatability": "Tratabilidade",
+        "prevention": "Prevenção",
+        "roi": "ROI",
+        "eligibleDogs": "Cães Elegíveis",
+        "eligibleCats": "Gatos Elegíveis",
+        "packages": "Pacotes",
         "headers": {
           "name": "Nome",
           "treatability": "Tratabilidade",
@@ -2043,6 +2017,13 @@
           "actions": "Ações"
         },
         "noConditions": "Nenhuma condição encontrada",
+        "expandedRow": {
+          "description": "Descrição",
+          "affectedBreeds": "Raças Afetadas",
+          "recommendedPackages": "Pacotes Recomendados",
+          "viewDetailedAnalysis": "Ver Análise Detalhada",
+          "packagesCount": "{{count}} pacotes"
+        },
         "expandedInfo": {
           "description": "Descrição",
           "affectedBreeds": "Raças mais afetadas",
