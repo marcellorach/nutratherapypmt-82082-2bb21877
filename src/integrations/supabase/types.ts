@@ -125,6 +125,13 @@ export type Database = {
             foreignKeyName: "nutraceutical_benefits_nutraceutical_id_fkey"
             columns: ["nutraceutical_id"]
             isOneToOne: false
+            referencedRelation: "clean_seed_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_benefits_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
             referencedRelation: "nutraceuticals"
             referencedColumns: ["id"]
           },
@@ -167,6 +174,13 @@ export type Database = {
             columns: ["condition_id"]
             isOneToOne: false
             referencedRelation: "health_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_conditions_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "clean_seed_data"
             referencedColumns: ["id"]
           },
           {
@@ -253,6 +267,13 @@ export type Database = {
             foreignKeyName: "nutraceutical_outcomes_nutraceutical_id_fkey"
             columns: ["nutraceutical_id"]
             isOneToOne: false
+            referencedRelation: "clean_seed_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_outcomes_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
             referencedRelation: "nutraceuticals"
             referencedColumns: ["id"]
           },
@@ -298,6 +319,13 @@ export type Database = {
             foreignKeyName: "nutraceutical_scientific_metadata_nutraceutical_id_fkey"
             columns: ["nutraceutical_id"]
             isOneToOne: true
+            referencedRelation: "clean_seed_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_scientific_metadata_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: true
             referencedRelation: "nutraceuticals"
             referencedColumns: ["id"]
           },
@@ -329,6 +357,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "nutraceutical_studies_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "clean_seed_data"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "nutraceutical_studies_nutraceutical_id_fkey"
             columns: ["nutraceutical_id"]
@@ -627,17 +662,46 @@ export type Database = {
     Views: {
       clean_seed_data: {
         Row: {
+          chemical_compound: string | null
+          conditions: Json | null
           created_at: string | null
-          data_type: string | null
           description: string | null
+          dosage: string | null
           id: string | null
           name: string | null
+          source: string | null
+          studies: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          chemical_compound?: string | null
+          conditions?: never
+          created_at?: string | null
+          description?: string | null
+          dosage?: string | null
+          id?: string | null
+          name?: string | null
+          source?: string | null
+          studies?: never
+          updated_at?: string | null
+        }
+        Update: {
+          chemical_compound?: string | null
+          conditions?: never
+          created_at?: string | null
+          description?: string | null
+          dosage?: string | null
+          id?: string | null
+          name?: string | null
+          source?: string | null
+          studies?: never
+          updated_at?: string | null
         }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
