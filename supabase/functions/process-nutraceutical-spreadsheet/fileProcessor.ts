@@ -137,7 +137,7 @@ export function simulateProcessedData(fileContent: string, fileName: string) {
   const conditionsSet = new Set();
   
   nutraceuticals.forEach(n => {
-    n.conditions.forEach(c => {
+    n.conditions.forEach((c: any) => {
       conditionsSet.add(c.name.toLowerCase());
       relationsCount++;
       studiesCount += (c.studies?.length || 0);

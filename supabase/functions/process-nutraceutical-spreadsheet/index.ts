@@ -38,7 +38,7 @@ serve(async (req) => {
     const processedData = await processSpreadsheetWithAI(
       fileUrl, 
       fileName,
-      openAIApiKey,
+      openAIApiKey || null,
       processAiOutput,
       simulateProcessedData
     );

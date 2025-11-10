@@ -158,10 +158,11 @@ serve(async (req) => {
     );
     
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Erro no processamento do estudo:', error);
     
     return new Response(
-      JSON.stringify({ error: 'Processing failed', details: error.message }),
+      JSON.stringify({ error: 'Processing failed', details: errorMessage }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

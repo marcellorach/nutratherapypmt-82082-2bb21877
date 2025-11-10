@@ -39,7 +39,7 @@ serve(async (req) => {
       if (error) throw error;
 
       // Converter array para objeto para facilitar o uso no frontend
-      const configs = {};
+      const configs: Record<string, any> = {};
       data.forEach((item) => {
         configs[item.name] = item.value;
       });
@@ -92,8 +92,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   } catch (error) {
-    console.error('Erro:', error.message);
-    return new Response(JSON.stringify({ error: error.message }), { 
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Erro:', errorMessage);
+    return new Response(JSON.stringify({ error: errorMessage }), { 
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
