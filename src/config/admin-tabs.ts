@@ -46,6 +46,7 @@ const PromptsTab = lazy(() => import('@/components/administrador/PromptsTab'));
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
 const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/MicrobiomeAnalysisTab'));
+const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -104,6 +105,14 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: MicrobiomeAnalysisTab,
     description: 'Análise e visualização de microbioma intestinal'
+  },
+  {
+    id: 'database-migrations',
+    label: 'Database Migrations',
+    group: 'knowledge-base',
+    component: DatabaseMigrationsTab,
+    description: 'Migrations para análise individualizada por IA',
+    permissions: ['admin']
   },
 
   // Processamento de Dados
