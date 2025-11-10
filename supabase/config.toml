@@ -6,3 +6,6 @@ verify_jwt = true
 
 [functions.init-admin-user]
 verify_jwt = true
+
+[functions.run-migrations]
+verify_jwt = true

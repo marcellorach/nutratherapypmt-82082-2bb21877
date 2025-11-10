@@ -206,6 +206,8 @@ export default function DatabaseMigrationsTab() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [copied, setCopied] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkResults, setCheckResults] = useState<any>(null);
 
   const copyToClipboard = (text: string, migrationId: string) => {
     navigator.clipboard.writeText(text);
@@ -215,6 +217,50 @@ export default function DatabaseMigrationsTab() {
       description: "Cole no SQL Editor do Supabase"
     });
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const checkMigrations = async () => {
+    setIsChecking(true);
+    setCheckResults(null);
+    
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.functions.invoke('run-migrations');
+      
+      if (error) {
+        toast({
+          title: "Erro ao verificar migrations",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setCheckResults(data);
+      
+      const allApplied = data.results.every((r: any) => r.success);
+      
+      if (allApplied) {
+        toast({
+          title: "✅ Todas as migrations aplicadas",
+          description: `${data.summary.successful} de ${data.summary.total} migrations encontradas`
+        });
+      } else {
+        toast({
+          title: "⚠️ Migrations pendentes",
+          description: `${data.summary.failed} migration(s) precisam ser executadas manualmente`,
+          variant: "destructive"
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Erro ao verificar migrations",
+        description: err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   return (
@@ -236,6 +282,23 @@ export default function DatabaseMigrationsTab() {
 
       <div className="flex gap-4">
         <Button
+          onClick={checkMigrations}
+          disabled={isChecking}
+          className="gap-2"
+        >
+          {isChecking ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Verificando...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-4 w-4" />
+              Verificar Status das Migrations
+            </>
+          )}
+        </Button>
+        <Button
           variant="outline"
           onClick={() => window.open('https://supabase.com/dashboard/project/_/sql', '_blank')}
           className="gap-2"
@@ -251,6 +314,37 @@ export default function DatabaseMigrationsTab() {
           Regenerar Tipos
         </Button>
       </div>
+
+      {checkResults && (
+        <Card className={checkResults.success ? 'border-green-200 bg-green-50/50' : 'border-yellow-200 bg-yellow-50/50'}>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              {checkResults.success ? (
+                <><CheckCircle2 className="h-5 w-5 text-green-600" /> Status: Todas as migrations aplicadas</>
+              ) : (
+                <><AlertCircle className="h-5 w-5 text-yellow-600" /> Status: Algumas migrations pendentes</>
+              )}
+            </CardTitle>
+            <CardDescription>
+              {checkResults.summary.successful} de {checkResults.summary.total} migrations verificadas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {checkResults.results.map((result: any) => (
+              <div key={result.id} className="flex items-center gap-2 text-sm">
+                {result.success ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                )}
+                <span className="font-medium">Migration {result.id}:</span>
+                <span>{result.name}</span>
+                {result.message && <span className="text-muted-foreground">- {result.message}</span>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue={MIGRATIONS[0].id} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
