@@ -1,11 +1,1 @@
-
-project_id = "zqdfzzxiheyqfxrejmba"
-
-[functions.process-nutraceutical-spreadsheet]
-verify_jwt = true
-
-[functions.init-admin-user]
-verify_jwt = true
-
-[functions.run-migrations]
-verify_jwt = true
+project_id = "kytkpkimzwazhpnxahxt"
