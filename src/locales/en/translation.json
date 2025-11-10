@@ -200,6 +200,7 @@
         "relations": "Relations",
         "clinicalRules": "Clinical Rules",
         "manageOutcomes": "Manage Outcomes",
+        "migrations": "Database Migrations",
         "settings": "Settings"
       },
       "dataProcessing": {
