@@ -60,6 +60,20 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## 📚 Documentation
+
+This project includes comprehensive documentation to help you understand the architecture and current state:
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete technical architecture, data model, navigation structure, and system diagrams
+- **[STANFORD_DEMO.md](./docs/STANFORD_DEMO.md)** - Optimization plan for Stanford presentation, priority features, and demo strategy
+- **[CURRENT_STATE.md](./docs/CURRENT_STATE.md)** - Detailed breakdown of implemented vs. mocked functionalities and technical debt
+
+### Quick Links
+
+- **Tech Stack:** React 18.3 + TypeScript + Vite + Supabase + i18next
+- **Admin Tabs:** 27 tabs organized in 5 main groups (Knowledge Base, Data Processing, R&D, Predictive Analysis, Configuration)
+- **Languages:** Bilingual system (PT/EN) with complete i18n implementation
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/4f4d829d-5a80-4e09-b0a1-1d4be573f127) and click on Share -> Publish.
