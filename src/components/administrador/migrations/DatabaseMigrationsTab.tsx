@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Copy, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -206,62 +207,47 @@ export default function DatabaseMigrationsTab() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [copied, setCopied] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [checkResults, setCheckResults] = useState<any>(null);
+  const [completedMigrations, setCompletedMigrations] = useState<Set<string>>(new Set());
+
+  // Load completed migrations from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('completed-migrations');
+    if (saved) {
+      setCompletedMigrations(new Set(JSON.parse(saved)));
+    }
+  }, []);
+
+  const toggleMigrationComplete = (migrationId: string) => {
+    const newCompleted = new Set(completedMigrations);
+    if (newCompleted.has(migrationId)) {
+      newCompleted.delete(migrationId);
+    } else {
+      newCompleted.add(migrationId);
+    }
+    setCompletedMigrations(newCompleted);
+    localStorage.setItem('completed-migrations', JSON.stringify([...newCompleted]));
+    
+    // Show toast
+    if (newCompleted.has(migrationId)) {
+      toast({
+        title: "Migration marcada como concluída",
+        description: `Migration ${migrationId} foi registrada`
+      });
+    }
+  };
 
   const copyToClipboard = (text: string, migrationId: string) => {
     navigator.clipboard.writeText(text);
     setCopied(migrationId);
     toast({
       title: "SQL copiado",
-      description: "Cole no SQL Editor do Supabase"
+      description: "Cole no SQL Editor do Supabase e execute"
     });
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const checkMigrations = async () => {
-    setIsChecking(true);
-    setCheckResults(null);
-    
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('run-migrations');
-      
-      if (error) {
-        toast({
-          title: "Erro ao verificar migrations",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setCheckResults(data);
-      
-      const allApplied = data.results.every((r: any) => r.success);
-      
-      if (allApplied) {
-        toast({
-          title: "✅ Todas as migrations aplicadas",
-          description: `${data.summary.successful} de ${data.summary.total} migrations encontradas`
-        });
-      } else {
-        toast({
-          title: "⚠️ Migrations pendentes",
-          description: `${data.summary.failed} migration(s) precisam ser executadas manualmente`,
-          variant: "destructive"
-        });
-      }
-    } catch (err: any) {
-      toast({
-        title: "Erro ao verificar migrations",
-        description: err.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsChecking(false);
-    }
-  };
+  const allCompleted = MIGRATIONS.every(m => completedMigrations.has(m.id));
+  const completedCount = completedMigrations.size;
 
   return (
     <div className="space-y-6 p-6">
@@ -272,79 +258,73 @@ export default function DatabaseMigrationsTab() {
         </p>
       </div>
 
+      <Card className={allCompleted ? 'border-green-200 bg-green-50/50' : 'border-blue-200 bg-blue-50/50'}>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            {allCompleted ? (
+              <><CheckCircle2 className="h-5 w-5 text-green-600" /> Progresso: Todas as migrations concluídas!</>
+            ) : (
+              <><AlertCircle className="h-5 w-5 text-blue-600" /> Progresso: {completedCount} de {MIGRATIONS.length} migrations</>
+            )}
+          </CardTitle>
+          <CardDescription>
+            Marque cada migration após executá-la com sucesso no SQL Editor
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {MIGRATIONS.map((migration) => (
+            <div key={migration.id} className="flex items-start gap-3 p-3 border rounded-lg bg-background">
+              <Checkbox
+                id={`migration-${migration.id}`}
+                checked={completedMigrations.has(migration.id)}
+                onCheckedChange={() => toggleMigrationComplete(migration.id)}
+                className="mt-1"
+              />
+              <label
+                htmlFor={`migration-${migration.id}`}
+                className="flex-1 cursor-pointer"
+              >
+                <div className="font-medium">Migration {migration.id}: {migration.name}</div>
+                <div className="text-sm text-muted-foreground mt-1">{migration.description}</div>
+              </label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Instruções:</strong> Execute estas migrations no SQL Editor do Supabase na ordem apresentada.
-          Após executar todas, clique em "Cloud" → "Database" → "Generate Types" para atualizar os tipos TypeScript.
+          <strong>Como executar:</strong>
+          <ol className="list-decimal list-inside space-y-1 mt-2 text-sm">
+            <li>Clique em "Abrir SQL Editor" abaixo</li>
+            <li>Copie o SQL da Migration 001 e execute no SQL Editor</li>
+            <li>Verifique se não há erros, então marque o checkbox da Migration 001</li>
+            <li>Repita para as migrations 002 e 003 <strong>na ordem</strong></li>
+            <li>Após todas concluídas, clique em "Regenerar Tipos TypeScript"</li>
+          </ol>
         </AlertDescription>
       </Alert>
 
       <div className="flex gap-4">
         <Button
-          onClick={checkMigrations}
-          disabled={isChecking}
-          className="gap-2"
-        >
-          {isChecking ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Verificando...
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="h-4 w-4" />
-              Verificar Status das Migrations
-            </>
-          )}
-        </Button>
-        <Button
-          variant="outline"
+          variant={allCompleted ? "default" : "outline"}
           onClick={() => window.open('https://supabase.com/dashboard/project/_/sql', '_blank')}
           className="gap-2"
         >
           <ExternalLink className="h-4 w-4" />
           Abrir SQL Editor
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => window.open('/administrador?tab=knowledge-base-settings', '_self')}
-          className="gap-2"
-        >
-          Regenerar Tipos
-        </Button>
+        {allCompleted && (
+          <Button
+            onClick={() => window.open('/administrador?tab=knowledge-base-settings', '_self')}
+            className="gap-2"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Regenerar Tipos TypeScript
+          </Button>
+        )}
       </div>
-
-      {checkResults && (
-        <Card className={checkResults.success ? 'border-green-200 bg-green-50/50' : 'border-yellow-200 bg-yellow-50/50'}>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              {checkResults.success ? (
-                <><CheckCircle2 className="h-5 w-5 text-green-600" /> Status: Todas as migrations aplicadas</>
-              ) : (
-                <><AlertCircle className="h-5 w-5 text-yellow-600" /> Status: Algumas migrations pendentes</>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {checkResults.summary.successful} de {checkResults.summary.total} migrations verificadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {checkResults.results.map((result: any) => (
-              <div key={result.id} className="flex items-center gap-2 text-sm">
-                {result.success ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                )}
-                <span className="font-medium">Migration {result.id}:</span>
-                <span>{result.name}</span>
-                {result.message && <span className="text-muted-foreground">- {result.message}</span>}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       <Tabs defaultValue={MIGRATIONS[0].id} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
