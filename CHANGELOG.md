@@ -18,6 +18,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Total de tabs administrativas: 27 → 28 tabs
 - Grupo Knowledge Base: 7 → 8 tabs
 
+### Fixed
+- ✅ Implementado desenvolvimento bilíngue obrigatório no `DataManagementPanel` (39 textos traduzidos PT/EN)
+- ✅ Implementado desenvolvimento bilíngue obrigatório no `KnowledgeBaseSettingsTab` (6 textos traduzidos PT/EN)
+- ✅ Incrementada versão i18n para 1.0.13 (force reload de traduções via cache invalidation)
+- ✅ Adicionada estrutura completa `dataManagement` com 39 chaves em `pt/translation.json` e `en/translation.json`
+- ✅ Adicionada estrutura completa `admin.settings.knowledgeBase` com 6 chaves em ambos arquivos de tradução
+- ✅ Todos os textos hardcoded substituídos por chamadas `t()` com `useTranslation` hook
+
 ---
 
 ## [1.0.0] - 2025-11-10

@@ -165,6 +165,65 @@
     "lastNameMin": "Last name must be at least 2 characters",
     "required": "Required field"
   },
+  "dataManagement": {
+    "title": "Data Management",
+    "description": "Configure how data is loaded in the application",
+    "loading": "Loading settings...",
+    "dataMode": {
+      "label": "Data Mode",
+      "production": "Production",
+      "development": "Development",
+      "hybrid": "Hybrid",
+      "descriptions": {
+        "production": "Only real data from Supabase database",
+        "development": "Prioritizes mock data over database data",
+        "hybrid": "Combines database data with mock data (default)"
+      }
+    },
+    "seedData": {
+      "label": "Seed Data (Test)",
+      "includeSeedData": "Include seed data in queries",
+      "currentBatch": "Current batch:"
+    },
+    "actions": {
+      "label": "Management Actions",
+      "phase1": {
+        "title": "Phase 1: Stanford Demo Migration",
+        "description": "Populates database with ~150 nutraceuticals, ~30 conditions and relationships",
+        "step1": "Migrates data from",
+        "step2": "Creates categories and health conditions automatically",
+        "step3": "Establishes relationships with efficacy scores",
+        "batchId": "Batch ID:",
+        "running": "Running Migration... (Wait ~30-45s)",
+        "execute": "🚀 Execute Phase 1"
+      },
+      "generateSeeds": {
+        "title": "Generate Test Data",
+        "description": "Creates a new set of fictional data for development",
+        "generating": "Generating...",
+        "generate": "Generate Data"
+      },
+      "cleanSeeds": {
+        "title": "Clean Test Data",
+        "description": "Removes all data marked as 'seed' from database",
+        "cleaning": "Cleaning...",
+        "clean": "Clean Data"
+      }
+    },
+    "security": {
+      "title": "Secure System",
+      "description": "This system keeps existing mock data intact. Changes only affect how data is combined and displayed."
+    },
+    "toasts": {
+      "success": "Success",
+      "error": "Error",
+      "errorGenerating": "Error generating test data",
+      "phase1Success": "✅ Phase 1 Completed!",
+      "phase1Error": "❌ Migration Error",
+      "migrationError": "Failed to execute migration: {{error}}",
+      "unknownError": "Unknown error"
+    }
+  },
   "navbar": {
     "researchDev": "R&D Area",
     "platform": "Nutraceutical research and development platform"
@@ -232,6 +291,20 @@
         "aiPrompts": "AI Prompts"
       },
       "settingsButton": "Settings"
+    },
+    "settings": {
+      "knowledgeBase": {
+        "title": "Settings - Knowledge Base",
+        "subtitle": "Configure engines, prompts and conventions specific to the Knowledge Base",
+        "saveButton": "Save Settings",
+        "tabs": {
+          "enginesPrompts": "Engines & Prompts",
+          "conventions": "Conventions",
+          "nutraceuticals": "Nutraceuticals",
+          "usage": "API Usage",
+          "dataManagement": "Data Management"
+        }
+      }
     },
     "multiAgentAnalysis": {
       "title": "Multi-Agent AI Analysis",

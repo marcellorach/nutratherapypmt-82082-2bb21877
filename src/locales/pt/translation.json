@@ -165,6 +165,65 @@
     "lastNameMin": "Sobrenome deve ter no mínimo 2 caracteres",
     "required": "Campo obrigatório"
   },
+  "dataManagement": {
+    "title": "Gerenciamento de Dados",
+    "description": "Configure como os dados são carregados na aplicação",
+    "loading": "Carregando configurações...",
+    "dataMode": {
+      "label": "Modo de Dados",
+      "production": "Produção",
+      "development": "Desenvolvimento",
+      "hybrid": "Híbrido",
+      "descriptions": {
+        "production": "Apenas dados reais do banco Supabase",
+        "development": "Prioriza dados mock sobre dados do banco",
+        "hybrid": "Combina dados do banco com dados mock (padrão)"
+      }
+    },
+    "seedData": {
+      "label": "Dados de Teste (Seed)",
+      "includeSeedData": "Incluir dados de teste nas consultas",
+      "currentBatch": "Batch atual:"
+    },
+    "actions": {
+      "label": "Ações de Gerenciamento",
+      "phase1": {
+        "title": "Fase 1: Migração Stanford Demo",
+        "description": "Popula o banco com ~150 nutracêuticos, ~30 condições e relações",
+        "step1": "Migra dados de",
+        "step2": "Cria categorias e condições de saúde automaticamente",
+        "step3": "Estabelece relacionamentos com efficacy scores",
+        "batchId": "Batch ID:",
+        "running": "Executando Migração... (Aguarde ~30-45s)",
+        "execute": "🚀 Executar Fase 1"
+      },
+      "generateSeeds": {
+        "title": "Gerar Dados de Teste",
+        "description": "Cria um novo conjunto de dados fictícios para desenvolvimento",
+        "generating": "Gerando...",
+        "generate": "Gerar Dados"
+      },
+      "cleanSeeds": {
+        "title": "Limpar Dados de Teste",
+        "description": "Remove todos os dados marcados como 'seed' do banco",
+        "cleaning": "Limpando...",
+        "clean": "Limpar Dados"
+      }
+    },
+    "security": {
+      "title": "Sistema Seguro",
+      "description": "Este sistema mantém os dados mock existentes intactos. As mudanças afetam apenas como os dados são combinados e exibidos."
+    },
+    "toasts": {
+      "success": "Sucesso",
+      "error": "Erro",
+      "errorGenerating": "Erro ao gerar dados de teste",
+      "phase1Success": "✅ Fase 1 Concluída!",
+      "phase1Error": "❌ Erro na Migração",
+      "migrationError": "Falha ao executar migração: {{error}}",
+      "unknownError": "Erro desconhecido"
+    }
+  },
   "navbar": {
     "researchDev": "Área de P&D",
     "platform": "Plataforma de pesquisa e desenvolvimento de nutracêuticos"
@@ -232,6 +291,20 @@
         "aiPrompts": "Prompts da IA"
       },
       "settingsButton": "Configurações"
+    },
+    "settings": {
+      "knowledgeBase": {
+        "title": "Configurações - Base de Conhecimento",
+        "subtitle": "Configure engines, prompts e convenções específicas para a Base de Conhecimento",
+        "saveButton": "Salvar Configurações",
+        "tabs": {
+          "enginesPrompts": "Engines & Prompts",
+          "conventions": "Convenções",
+          "nutraceuticals": "Nutracêuticos",
+          "usage": "Uso de API",
+          "dataManagement": "Gerenciamento de Dados"
+        }
+      }
     },
     "multiAgentAnalysis": {
       "title": "Análise de IA Multi-Agente",

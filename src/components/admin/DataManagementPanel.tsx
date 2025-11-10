@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { toast } from '@/hooks/use-toast';
 
 export const DataManagementPanel = () => {
+  const { t } = useTranslation();
   const { settings, isLoading, updateSetting, cleanSeedData, generateNewSeedBatch } = useDataManagement();
   const [isGeneratingSeeds, setIsGeneratingSeeds] = useState(false);
   const [isCleaningSeeds, setIsCleaningSeeds] = useState(false);
@@ -29,20 +31,20 @@ export const DataManagementPanel = () => {
       
       if (result.success) {
         toast({
-          title: "Sucesso",
+          title: t('dataManagement.toasts.success'),
           description: result.message,
         });
       } else {
         toast({
-          title: "Erro",
+          title: t('dataManagement.toasts.error'),
           description: result.message,
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "Erro",
-        description: "Erro ao gerar dados de teste",
+        title: t('dataManagement.toasts.error'),
+        description: t('dataManagement.toasts.errorGenerating'),
         variant: "destructive"
       });
     } finally {
@@ -67,14 +69,14 @@ export const DataManagementPanel = () => {
       
       if (result.success) {
         toast({
-          title: "✅ Fase 1 Concluída!",
+          title: t('dataManagement.toasts.phase1Success'),
           description: result.message,
           duration: 6000,
         });
         console.log('✅ Migração concluída com sucesso:', result);
       } else {
         toast({
-          title: "❌ Erro na Migração",
+          title: t('dataManagement.toasts.phase1Error'),
           description: result.message,
           variant: "destructive",
           duration: 8000,
@@ -82,10 +84,10 @@ export const DataManagementPanel = () => {
         console.error('❌ Erro na migração:', result);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      const errorMessage = error instanceof Error ? error.message : t('dataManagement.toasts.unknownError');
       toast({
-        title: "❌ Erro na Migração",
-        description: `Falha ao executar migração: ${errorMessage}`,
+        title: t('dataManagement.toasts.phase1Error'),
+        description: t('dataManagement.toasts.migrationError', { error: errorMessage }),
         variant: "destructive",
         duration: 8000,
       });
@@ -101,7 +103,7 @@ export const DataManagementPanel = () => {
         <CardContent className="p-6">
           <div className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            Carregando configurações...
+            {t('dataManagement.loading')}
           </div>
         </CardContent>
       </Card>
@@ -111,11 +113,11 @@ export const DataManagementPanel = () => {
   const getModeDescription = (mode: DataMode) => {
     switch (mode) {
       case 'production':
-        return 'Apenas dados reais do banco Supabase';
+        return t('dataManagement.dataMode.descriptions.production');
       case 'development':
-        return 'Prioriza dados mock sobre dados do banco';
+        return t('dataManagement.dataMode.descriptions.development');
       case 'hybrid':
-        return 'Combina dados do banco com dados mock (padrão)';
+        return t('dataManagement.dataMode.descriptions.hybrid');
       default:
         return '';
     }
@@ -140,25 +142,25 @@ export const DataManagementPanel = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Gerenciamento de Dados
+            {t('dataManagement.title')}
           </CardTitle>
           <CardDescription>
-            Configure como os dados são carregados na aplicação
+            {t('dataManagement.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Modo de Dados */}
           <div className="space-y-3">
-            <Label>Modo de Dados</Label>
+            <Label>{t('dataManagement.dataMode.label')}</Label>
             <div className="flex items-center gap-3">
               <Select value={settings.data_mode} onValueChange={handleModeChange}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hybrid">Híbrido</SelectItem>
-                  <SelectItem value="production">Produção</SelectItem>
-                  <SelectItem value="development">Desenvolvimento</SelectItem>
+                  <SelectItem value="hybrid">{t('dataManagement.dataMode.hybrid')}</SelectItem>
+                  <SelectItem value="production">{t('dataManagement.dataMode.production')}</SelectItem>
+                  <SelectItem value="development">{t('dataManagement.dataMode.development')}</SelectItem>
                 </SelectContent>
               </Select>
               <Badge className={getModeColor(settings.data_mode)}>
@@ -174,17 +176,17 @@ export const DataManagementPanel = () => {
 
           {/* Configurações de Seed */}
           <div className="space-y-3">
-            <Label>Dados de Teste (Seed)</Label>
+            <Label>{t('dataManagement.seedData.label')}</Label>
             <div className="flex items-center space-x-2">
               <Switch
                 checked={settings.use_seed_data}
                 onCheckedChange={(checked) => updateSetting('use_seed_data', checked)}
               />
-              <Label>Incluir dados de teste nas consultas</Label>
+              <Label>{t('dataManagement.seedData.includeSeedData')}</Label>
             </div>
             {settings.current_seed_batch && (
               <p className="text-sm text-muted-foreground">
-                Batch atual: <code className="bg-muted px-1 rounded">{settings.current_seed_batch}</code>
+                {t('dataManagement.seedData.currentBatch')} <code className="bg-muted px-1 rounded">{settings.current_seed_batch}</code>
               </p>
             )}
           </div>
@@ -193,7 +195,7 @@ export const DataManagementPanel = () => {
 
           {/* Ações */}
           <div className="space-y-4">
-            <Label>Ações de Gerenciamento</Label>
+            <Label>{t('dataManagement.actions.label')}</Label>
             
             {/* Stanford Demo Migration - Destaque */}
             <Card className="border-2 border-primary bg-primary/5">
@@ -203,9 +205,9 @@ export const DataManagementPanel = () => {
                     <Database className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">Fase 1: Migração Stanford Demo</h3>
+                    <h3 className="font-bold text-lg">{t('dataManagement.actions.phase1.title')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Popula o banco com ~150 nutracêuticos, ~30 condições e relações
+                      {t('dataManagement.actions.phase1.description')}
                     </p>
                   </div>
                 </div>
@@ -213,19 +215,19 @@ export const DataManagementPanel = () => {
                 <div className="bg-background/50 rounded-lg p-4 mb-4 space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                    <span>Migra dados de <code className="bg-muted px-1 rounded">src/data/nutraceuticals/</code></span>
+                    <span>{t('dataManagement.actions.phase1.step1')} <code className="bg-muted px-1 rounded">src/data/nutraceuticals/</code></span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                    <span>Cria categorias e condições de saúde automaticamente</span>
+                    <span>{t('dataManagement.actions.phase1.step2')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                    <span>Estabelece relacionamentos com efficacy scores</span>
+                    <span>{t('dataManagement.actions.phase1.step3')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    <span>Batch ID: <code className="bg-muted px-1 rounded font-mono">stanford_demo</code></span>
+                    <span>{t('dataManagement.actions.phase1.batchId')} <code className="bg-muted px-1 rounded font-mono">stanford_demo</code></span>
                   </div>
                 </div>
 
@@ -238,12 +240,12 @@ export const DataManagementPanel = () => {
                   {isRunningStanfordMigration ? (
                     <>
                       <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                      Executando Migração... (Aguarde ~30-45s)
+                      {t('dataManagement.actions.phase1.running')}
                     </>
                   ) : (
                     <>
                       <Database className="h-5 w-5 mr-2" />
-                      🚀 Executar Fase 1
+                      {t('dataManagement.actions.phase1.execute')}
                     </>
                   )}
                 </Button>
@@ -255,10 +257,10 @@ export const DataManagementPanel = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <TestTube className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium">Gerar Dados de Teste</span>
+                    <span className="font-medium">{t('dataManagement.actions.generateSeeds.title')}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Cria um novo conjunto de dados fictícios para desenvolvimento
+                    {t('dataManagement.actions.generateSeeds.description')}
                   </p>
                   <Button 
                     onClick={handleGenerateSeeds}
@@ -269,12 +271,12 @@ export const DataManagementPanel = () => {
                     {isGeneratingSeeds ? (
                       <>
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Gerando...
+                        {t('dataManagement.actions.generateSeeds.generating')}
                       </>
                     ) : (
                       <>
                         <Database className="h-4 w-4 mr-2" />
-                        Gerar Dados
+                        {t('dataManagement.actions.generateSeeds.generate')}
                       </>
                     )}
                   </Button>
@@ -285,10 +287,10 @@ export const DataManagementPanel = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertTriangle className="h-4 w-4 text-red-600" />
-                    <span className="font-medium">Limpar Dados de Teste</span>
+                    <span className="font-medium">{t('dataManagement.actions.cleanSeeds.title')}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Remove todos os dados marcados como 'seed' do banco
+                    {t('dataManagement.actions.cleanSeeds.description')}
                   </p>
                   <Button 
                     onClick={handleCleanSeeds}
@@ -299,12 +301,12 @@ export const DataManagementPanel = () => {
                     {isCleaningSeeds ? (
                       <>
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Limpando...
+                        {t('dataManagement.actions.cleanSeeds.cleaning')}
                       </>
                     ) : (
                       <>
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Limpar Dados
+                        {t('dataManagement.actions.cleanSeeds.clean')}
                       </>
                     )}
                   </Button>
@@ -318,10 +320,9 @@ export const DataManagementPanel = () => {
             <div className="flex items-start gap-2">
               <Database className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-900">Sistema Seguro</h4>
+                <h4 className="font-medium text-blue-900">{t('dataManagement.security.title')}</h4>
                 <p className="text-sm text-blue-700 mt-1">
-                  Este sistema mantém os dados mock existentes intactos. 
-                  As mudanças afetam apenas como os dados são combinados e exibidos.
+                  {t('dataManagement.security.description')}
                 </p>
               </div>
             </div>
