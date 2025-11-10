@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Brush, Cpu, Database, BarChart } from "lucide-react";
+import { Brush, Cpu, Database, BarChart, HardDrive } from "lucide-react";
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import EnginesPromptsPanel from './panels/EnginesPromptsPanel';
 import ConventionsPanel from './panels/ConventionsPanel';
 import UsagePanel from './panels/UsagePanel';
 import NutraceuticalManagementPanel from './panels/NutraceuticalManagementPanel';
+import { DataManagementPanel } from '@/components/admin/DataManagementPanel';
 
 const KnowledgeBaseSettingsTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('engines');
@@ -24,7 +25,7 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="engines" className="flex items-center gap-2">
               <Cpu className="h-4 w-4" />
               <span>Engines & Prompts</span>
@@ -41,6 +42,10 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
               <BarChart className="h-4 w-4" />
               <span>Uso de API</span>
             </TabsTrigger>
+            <TabsTrigger value="data-management" className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4" />
+              <span>Data Management</span>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="engines" className="mt-6">
             <EnginesPromptsPanel section="knowledge-base" />
@@ -53,6 +58,9 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
           </TabsContent>
           <TabsContent value="usage" className="mt-6">
             <UsagePanel section="knowledge-base" />
+          </TabsContent>
+          <TabsContent value="data-management" className="mt-6">
+            <DataManagementPanel />
           </TabsContent>
         </Tabs>
       </div>
