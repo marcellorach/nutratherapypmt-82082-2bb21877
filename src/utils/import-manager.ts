@@ -59,14 +59,9 @@ export const NutraceuticalImportManager = {
       await this.deleteNutraceuticalRelations(importId);
       
       // 2. Excluir os nutracêuticos associados à importação
-      const { error: deleteNutraceuticalsError } = await supabase
-        .from('nutraceuticals')
-        .delete()
-        .eq('import_id', importId);
-
-      if (deleteNutraceuticalsError) {
-        throw deleteNutraceuticalsError;
-      }
+      // Nota: campo import_id não existe, usando estratégia alternativa
+      // Os nutracêuticos serão mantidos mas poderiam ser deletados manualmente se necessário
+      console.log('Importação deletada, nutracêuticos mantidos no sistema');
 
       // 3. Excluir o registro da importação
       const { error: deleteImportError } = await supabase
@@ -95,50 +90,10 @@ export const NutraceuticalImportManager = {
    */
   async deleteNutraceuticalRelations(importId: string) {
     try {
-      // Obter IDs dos nutracêuticos dessa importação
-      const { data: nutraceuticals, error: fetchError } = await supabase
-        .from('nutraceuticals')
-        .select('id')
-        .eq('import_id', importId);
-        
-      if (fetchError) throw fetchError;
-      
-      const nutraceuticalIds = nutraceuticals?.map(n => n.id) || [];
-      
-      if (nutraceuticalIds.length === 0) return;
-      
-      // Excluir relações em nutraceutical_conditions
-      const { error: conditionsError } = await supabase
-        .from('nutraceutical_conditions')
-        .delete()
-        .in('nutraceutical_id', nutraceuticalIds);
-        
-      if (conditionsError) throw conditionsError;
-      
-      // Excluir relações em nutraceutical_benefits
-      const { error: benefitsError } = await supabase
-        .from('nutraceutical_benefits')
-        .delete()
-        .in('nutraceutical_id', nutraceuticalIds);
-        
-      if (benefitsError) throw benefitsError;
-      
-      // Excluir relações em nutraceutical_scientific_metadata
-      const { error: metadataError } = await supabase
-        .from('nutraceutical_scientific_metadata')
-        .delete()
-        .in('nutraceutical_id', nutraceuticalIds);
-        
-      if (metadataError) throw metadataError;
-      
-      // Excluir relações em nutraceutical_studies
-      const { error: studiesError } = await supabase
-        .from('nutraceutical_studies')
-        .delete()
-        .in('nutraceutical_id', nutraceuticalIds);
-        
-      if (studiesError) throw studiesError;
-      
+      // Como não há campo import_id em nutraceuticals, 
+      // não há relações diretas para excluir neste momento
+      console.log('Relações mantidas (sem campo import_id)');
+      return;
     } catch (error) {
       console.error('Erro ao excluir relações de nutracêuticos:', error);
       throw error;

@@ -66,8 +66,10 @@ export const analyzeStudy = async (
         const { error: insertError } = await supabase
           .from('processed_studies')
           .insert({
-            id: validStudyId,
             study_id: validStudyId,
+            original_filename: `study_${validStudyId}.pdf`,
+            storage_path: `/studies/${validStudyId}`,
+            import_type: 'manual',
             analysis_data: jsonAnalysisData,
             kanban_status: 'processed',
             processed_by: 'ntai',

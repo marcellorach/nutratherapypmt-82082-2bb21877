@@ -14,10 +14,627 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_configurations: {
+        Row: {
+          config_key: string
+          config_value: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          config_key: string
+          config_value: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          config_key?: string
+          config_value?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      data_management_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      health_conditions: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          severity_level: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      nutraceutical_benefits: {
+        Row: {
+          benefit: string
+          created_at: string | null
+          id: string
+          nutraceutical_id: string
+        }
+        Insert: {
+          benefit: string
+          created_at?: string | null
+          id?: string
+          nutraceutical_id: string
+        }
+        Update: {
+          benefit?: string
+          created_at?: string | null
+          id?: string
+          nutraceutical_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_benefits_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutraceutical_conditions: {
+        Row: {
+          condition_id: string
+          created_at: string | null
+          efficacy_score: number | null
+          id: string
+          notes: string | null
+          nutraceutical_id: string
+          relationship_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          condition_id: string
+          created_at?: string | null
+          efficacy_score?: number | null
+          id?: string
+          notes?: string | null
+          nutraceutical_id: string
+          relationship_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          condition_id?: string
+          created_at?: string | null
+          efficacy_score?: number | null
+          id?: string
+          notes?: string | null
+          nutraceutical_id?: string
+          relationship_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_conditions_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "health_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_conditions_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutraceutical_imports: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          import_status: string | null
+          imported_by: string | null
+          name: string
+          source_data: Json | null
+          source_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          import_status?: string | null
+          imported_by?: string | null
+          name: string
+          source_data?: Json | null
+          source_type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          import_status?: string | null
+          imported_by?: string | null
+          name?: string
+          source_data?: Json | null
+          source_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      nutraceutical_outcomes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          efficacy_score: number | null
+          evidence_quality: string | null
+          id: string
+          name: string
+          nutraceutical_id: string
+          outcome_family_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          efficacy_score?: number | null
+          evidence_quality?: string | null
+          id?: string
+          name: string
+          nutraceutical_id: string
+          outcome_family_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          efficacy_score?: number | null
+          evidence_quality?: string | null
+          id?: string
+          name?: string
+          nutraceutical_id?: string
+          outcome_family_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_outcomes_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_outcomes_outcome_family_id_fkey"
+            columns: ["outcome_family_id"]
+            isOneToOne: false
+            referencedRelation: "outcome_families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutraceutical_scientific_metadata: {
+        Row: {
+          created_at: string | null
+          efficacy_score: number | null
+          evidence_quality: string | null
+          id: string
+          nutraceutical_id: string
+          safety_rating: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          efficacy_score?: number | null
+          evidence_quality?: string | null
+          id?: string
+          nutraceutical_id: string
+          safety_rating?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          efficacy_score?: number | null
+          evidence_quality?: string | null
+          id?: string
+          nutraceutical_id?: string
+          safety_rating?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_scientific_metadata_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: true
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutraceutical_studies: {
+        Row: {
+          created_at: string | null
+          id: string
+          nutraceutical_id: string
+          relevance_score: number | null
+          study_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nutraceutical_id: string
+          relevance_score?: number | null
+          study_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nutraceutical_id?: string
+          relevance_score?: number | null
+          study_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_studies_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_studies_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "scientific_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutraceuticals: {
+        Row: {
+          chemical_compound: string | null
+          created_at: string | null
+          description: string | null
+          dosage: string | null
+          id: string
+          name: string
+          outcome_id: string | null
+          source: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chemical_compound?: string | null
+          created_at?: string | null
+          description?: string | null
+          dosage?: string | null
+          id?: string
+          name: string
+          outcome_id?: string | null
+          source?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chemical_compound?: string | null
+          created_at?: string | null
+          description?: string | null
+          dosage?: string | null
+          id?: string
+          name?: string
+          outcome_id?: string | null
+          source?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      outcome_families: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      processed_studies: {
+        Row: {
+          analysis_data: Json | null
+          authors: string[] | null
+          created_at: string | null
+          description: string | null
+          error_message: string | null
+          id: string
+          import_type: string
+          journal: string | null
+          kanban_status: string | null
+          original_filename: string
+          processed_by: string | null
+          source_import_id: string | null
+          storage_path: string
+          study_id: string
+          title: string | null
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          analysis_data?: Json | null
+          authors?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: string
+          import_type?: string
+          journal?: string | null
+          kanban_status?: string | null
+          original_filename: string
+          processed_by?: string | null
+          source_import_id?: string | null
+          storage_path: string
+          study_id: string
+          title?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          analysis_data?: Json | null
+          authors?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: string
+          import_type?: string
+          journal?: string | null
+          kanban_status?: string | null
+          original_filename?: string
+          processed_by?: string | null
+          source_import_id?: string | null
+          storage_path?: string
+          study_id?: string
+          title?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processed_studies_source_import_id_fkey"
+            columns: ["source_import_id"]
+            isOneToOne: false
+            referencedRelation: "scispace_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scientific_studies: {
+        Row: {
+          abstract: string | null
+          authors: string[] | null
+          created_at: string | null
+          doi: string | null
+          id: string
+          journal: string | null
+          link: string | null
+          title: string
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          link?: string | null
+          title: string
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          link?: string | null
+          title?: string
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
+      scispace_imports: {
+        Row: {
+          base_studies_filename: string | null
+          base_studies_storage_path: string | null
+          consenso_comments: string | null
+          consenso_name: string | null
+          created_at: string | null
+          id: string
+          import_type: string
+          imported_at: string | null
+          imported_by: string | null
+          is_deleted: boolean | null
+          meta_summary_filename: string | null
+          meta_summary_storage_path: string | null
+          scispace_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_studies_filename?: string | null
+          base_studies_storage_path?: string | null
+          consenso_comments?: string | null
+          consenso_name?: string | null
+          created_at?: string | null
+          id?: string
+          import_type?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          is_deleted?: boolean | null
+          meta_summary_filename?: string | null
+          meta_summary_storage_path?: string | null
+          scispace_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_studies_filename?: string | null
+          base_studies_storage_path?: string | null
+          consenso_comments?: string | null
+          consenso_name?: string | null
+          created_at?: string | null
+          id?: string
+          import_type?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          is_deleted?: boolean | null
+          meta_summary_filename?: string | null
+          meta_summary_storage_path?: string | null
+          scispace_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      clean_seed_data: {
+        Row: {
+          created_at: string | null
+          data_type: string | null
+          description: string | null
+          id: string | null
+          name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

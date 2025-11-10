@@ -70,7 +70,7 @@ export const OutcomeFamiliesService = {
     const { data: outcomes } = await supabase
       .from('nutraceutical_outcomes')
       .select('id')
-      .eq('family_id', id)
+      .eq('outcome_family_id', id)
       .limit(1);
 
     if (outcomes && outcomes.length > 0) {
@@ -91,10 +91,10 @@ export const OutcomeFamiliesService = {
   },
 
   async getOutcomesByFamily(familyId: string): Promise<any[]> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('nutraceutical_outcomes')
       .select('*')
-      .eq('family_id', familyId)
+      .eq('outcome_family_id', familyId)
       .order('name');
 
     if (error) {

@@ -28,7 +28,7 @@ export const useNtaiConfig = () => {
         
         if (data && data.length > 0) {
           const configMap = data.reduce((acc: any, item: any) => {
-            acc[item.name] = item.value;
+            acc[item.config_key] = typeof item.config_value === 'string' ? item.config_value : JSON.stringify(item.config_value);
             return acc;
           }, {});
           
@@ -59,7 +59,7 @@ export const useNtaiConfig = () => {
       const { data, error } = await supabase
         .from('ai_configurations')
         .select('*')
-        .eq('name', key)
+        .eq('config_key', key)
         .maybeSingle();
         
       if (error) {
@@ -71,13 +71,13 @@ export const useNtaiConfig = () => {
         // Atualizar
         await supabase
           .from('ai_configurations')
-          .update({ value })
-          .eq('name', key);
+          .update({ config_value: value })
+          .eq('config_key', key);
       } else {
         // Criar novo
         await supabase
           .from('ai_configurations')
-          .insert([{ name: key, value }]);
+          .insert([{ config_key: key, config_value: value }]);
       }
     } catch (err) {
       console.error('Erro ao salvar configuração:', err);

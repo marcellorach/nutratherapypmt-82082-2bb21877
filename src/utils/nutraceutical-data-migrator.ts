@@ -79,21 +79,8 @@ export const NutraceuticalDataMigrator = {
         conditionMap
       );
 
-      // 4. Marcar os dados recém-inseridos como seed
-      await supabase
-        .from('nutraceuticals')
-        .update({ data_type: 'seed', batch_id: seedBatchId })
-        .gte('created_at', new Date(Date.now() - 60000).toISOString()); // Últimos 60 segundos
-
-      await supabase
-        .from('health_conditions')
-        .update({ data_type: 'seed', batch_id: seedBatchId })
-        .gte('created_at', new Date(Date.now() - 60000).toISOString());
-
-      await supabase
-        .from('scientific_studies')
-        .update({ data_type: 'seed', batch_id: seedBatchId })
-        .gte('created_at', new Date(Date.now() - 60000).toISOString());
+      // 4. Dados inseridos com sucesso (não há campos data_type ou batch_id nas tabelas)
+      console.log(`Dados seed inseridos com sucesso. Batch ID: ${seedBatchId}`);
       
       return {
         success: true,
