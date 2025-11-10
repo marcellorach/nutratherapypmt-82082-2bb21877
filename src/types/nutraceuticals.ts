@@ -29,6 +29,20 @@ export interface NutraceuticalCondition {
   efficacy_score: number;
   notes?: string;
   condition: HealthCondition;
+  
+  // Enhanced scientific metadata
+  study_convergence_score?: number;
+  confidence_interval_lower?: number;
+  confidence_interval_upper?: number;
+  sample_size_total?: number;
+  species_distribution?: Record<string, number>;
+  contraindications_conditions?: string[];
+  interaction_warnings?: string[];
+  adverse_events_reported?: string[];
+  last_reviewed_at?: string;
+  reviewed_by?: string;
+  curation_status?: 'draft' | 'reviewed' | 'verified' | 'published' | 'archived';
+  evidence_quality?: 'very-low' | 'low' | 'medium' | 'high' | 'very-high';
 }
 
 export interface NutraceuticalBenefit {
