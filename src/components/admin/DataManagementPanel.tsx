@@ -15,6 +15,7 @@ export const DataManagementPanel = () => {
   const { settings, isLoading, updateSetting, cleanSeedData, generateNewSeedBatch } = useDataManagement();
   const [isGeneratingSeeds, setIsGeneratingSeeds] = useState(false);
   const [isCleaningSeeds, setIsCleaningSeeds] = useState(false);
+  const [isRunningStanfordMigration, setIsRunningStanfordMigration] = useState(false);
 
   const handleModeChange = (mode: DataMode) => {
     updateSetting('data_mode', mode);
@@ -55,6 +56,42 @@ export const DataManagementPanel = () => {
       await cleanSeedData();
     } finally {
       setIsCleaningSeeds(false);
+    }
+  };
+
+  const handleStanfordMigration = async () => {
+    setIsRunningStanfordMigration(true);
+    try {
+      console.log('🚀 Iniciando Fase 1: Migração Stanford Demo...');
+      const result = await NutraceuticalDataMigrator.generateSeedData('stanford_demo');
+      
+      if (result.success) {
+        toast({
+          title: "✅ Fase 1 Concluída!",
+          description: result.message,
+          duration: 6000,
+        });
+        console.log('✅ Migração concluída com sucesso:', result);
+      } else {
+        toast({
+          title: "❌ Erro na Migração",
+          description: result.message,
+          variant: "destructive",
+          duration: 8000,
+        });
+        console.error('❌ Erro na migração:', result);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: "❌ Erro na Migração",
+        description: `Falha ao executar migração: ${errorMessage}`,
+        variant: "destructive",
+        duration: 8000,
+      });
+      console.error('❌ Erro crítico na migração:', error);
+    } finally {
+      setIsRunningStanfordMigration(false);
     }
   };
 
@@ -158,6 +195,61 @@ export const DataManagementPanel = () => {
           <div className="space-y-4">
             <Label>Ações de Gerenciamento</Label>
             
+            {/* Stanford Demo Migration - Destaque */}
+            <Card className="border-2 border-primary bg-primary/5">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <Database className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Fase 1: Migração Stanford Demo</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Popula o banco com ~150 nutracêuticos, ~30 condições e relações
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-background/50 rounded-lg p-4 mb-4 space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    <span>Migra dados de <code className="bg-muted px-1 rounded">src/data/nutraceuticals/</code></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    <span>Cria categorias e condições de saúde automaticamente</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    <span>Estabelece relacionamentos com efficacy scores</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    <span>Batch ID: <code className="bg-muted px-1 rounded font-mono">stanford_demo</code></span>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleStanfordMigration}
+                  disabled={isRunningStanfordMigration}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isRunningStanfordMigration ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Executando Migração... (Aguarde ~30-45s)
+                    </>
+                  ) : (
+                    <>
+                      <Database className="h-5 w-5 mr-2" />
+                      🚀 Executar Fase 1
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="border-dashed">
                 <CardContent className="p-4">
