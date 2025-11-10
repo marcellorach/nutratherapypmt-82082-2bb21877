@@ -45,6 +45,7 @@ const ConfiguracoesIATab = lazy(() => import('@/components/administrador/Configu
 const PromptsTab = lazy(() => import('@/components/administrador/PromptsTab'));
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
+const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/MicrobiomeAnalysisTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -96,6 +97,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: OutcomeManagementPanel,
     description: 'Gerenciamento de outcomes'
+  },
+  {
+    id: 'microbiome-analysis',
+    label: 'Análise de Microbioma',
+    group: 'knowledge-base',
+    component: MicrobiomeAnalysisTab,
+    description: 'Análise e visualização de microbioma intestinal'
   },
 
   // Processamento de Dados

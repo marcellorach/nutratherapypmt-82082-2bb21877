@@ -1,7 +1,7 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.0.0  
+**Versão:** 1.1.0  
 **Última Atualização:** 2025-11-10  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
@@ -396,7 +396,7 @@ Relaciona nutracêuticos com estudos científicos.
 
 ## 🧭 Estrutura de Navegação
 
-### 27 Tabs do Administrador
+### 28 Tabs do Administrador
 
 As tabs são organizadas em **5 grupos principais**, definidas em `src/config/admin-tabs.ts`:
 
@@ -404,19 +404,20 @@ As tabs são organizadas em **5 grupos principais**, definidas em `src/config/ad
 graph TB
     Admin[Administrador]
     
-    Admin --> KB[Knowledge Base<br/>7 tabs]
+    Admin --> KB[Knowledge Base<br/>8 tabs]
     Admin --> DP[Data Processing<br/>7 tabs]
     Admin --> RD[Research R&D<br/>6 tabs]
     Admin --> PA[Predictive Analysis<br/>3 tabs]
     Admin --> CF[Configuration<br/>4 tabs]
     
-    KB --> KB1[Nutraceuticals]
-    KB --> KB2[Health Conditions]
-    KB --> KB3[Scientific Studies]
-    KB --> KB4[Outcomes]
-    KB --> KB5[Outcomes Management]
-    KB --> KB6[Relations]
-    KB --> KB7[SciSpace Manager]
+    KB --> KB1[Estudos Científicos]
+    KB --> KB2[Nutracêuticos]
+    KB --> KB3[Gerenciamento]
+    KB --> KB4[Regras Clínicas]
+    KB --> KB5[Relações]
+    KB --> KB6[Configurações]
+    KB --> KB7[Outcomes]
+    KB --> KB8[Análise de Microbioma]
     
     DP --> DP1[NTAI Processing]
     DP --> DP2[Study Scoring]

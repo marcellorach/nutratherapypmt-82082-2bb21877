@@ -10,8 +10,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✅ Nova tab administrativa "Análise de Microbioma" no grupo Knowledge Base (funcionalidade mockada para demonstração)
 - Sistema de versionamento semântico para documentação
 - Headers de versão em todos os arquivos de documentação
+
+### Changed
+- Total de tabs administrativas: 27 → 28 tabs
+- Grupo Knowledge Base: 7 → 8 tabs
 
 ---
 

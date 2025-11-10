@@ -3025,6 +3025,26 @@
         }
       }
     },
+    "microbiome": {
+      "title": "Microbiome Analysis",
+      "description": "Analysis and visualization of pet intestinal microbiome data",
+      "generateData": "Generate Sample Data",
+      "samplesAnalyzed": "Samples Analyzed",
+      "noData": "No samples yet",
+      "speciesIdentified": "Species Identified",
+      "awaitingAnalysis": "Awaiting analysis",
+      "correlations": "Correlations Found",
+      "requiresData": "Requires data",
+      "about": "About this Feature",
+      "testDescription": "This tab was created as a test of the automatic documentation versioning system",
+      "functionalityTitle": "Planned Functionality",
+      "feature1": "Analysis of bacterial composition of intestinal microbiome",
+      "feature2": "Correlation between microbiome and health conditions",
+      "feature3": "Probiotic recommendations based on microbial profile",
+      "feature4": "Visualization of alpha and beta diversity",
+      "statusLabel": "Status:",
+      "statusMocked": "🟡 Mocked Functionality - Interface created for demonstration purposes"
+    },
     "toast": {
       "sentForAnalysis": "Suggestion sent for analysis!",
       "approvedAndSent": "Suggestion approved and sent to",
