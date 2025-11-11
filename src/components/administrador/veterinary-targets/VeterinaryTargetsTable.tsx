@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 interface VeterinaryTargetsTableProps {
   conditions: any[];
@@ -57,6 +58,7 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
   onEdit,
   onDelete
 }) => {
+  const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conditionToDelete, setConditionToDelete] = useState<string | null>(null);
@@ -111,7 +113,7 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
           <div className="relative flex-1">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar condição..."
+              placeholder={t('admin.veterinaryTargets.table.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -123,10 +125,10 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
             onValueChange={(value) => setSelectedCategory(value === 'all' ? null : value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Categoria" />
+              <SelectValue placeholder={t('admin.veterinaryTargets.table.categoryFilter')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas categorias</SelectItem>
+              <SelectItem value="all">{t('admin.veterinaryTargets.table.allCategories')}</SelectItem>
               {categories.map(cat => (
                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
               ))}
@@ -138,10 +140,10 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
             onValueChange={(value) => setSelectedSeverity(value === 'all' ? null : value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Severidade" />
+              <SelectValue placeholder={t('admin.veterinaryTargets.table.severityFilter')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas severidades</SelectItem>
+              <SelectItem value="all">{t('admin.veterinaryTargets.table.allSeverities')}</SelectItem>
               {severityLevels.map(sev => (
                 <SelectItem key={sev} value={sev}>{sev}</SelectItem>
               ))}
@@ -157,7 +159,7 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
           </div>
         ) : conditions.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p>Nenhuma condição encontrada.</p>
+            <p>{t('admin.veterinaryTargets.table.noConditionsFound')}</p>
           </div>
         ) : (
           <div className="rounded-md border">
@@ -165,10 +167,10 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]"></TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Severidade</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>{t('admin.veterinaryTargets.table.columnName')}</TableHead>
+                  <TableHead>{t('admin.veterinaryTargets.table.columnCategory')}</TableHead>
+                  <TableHead>{t('admin.veterinaryTargets.table.columnSeverity')}</TableHead>
+                  <TableHead className="text-right">{t('admin.veterinaryTargets.table.columnActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -218,9 +220,9 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                       <TableRow>
                         <TableCell colSpan={5} className="bg-muted/50">
                           <div className="py-4 px-2">
-                            <h4 className="font-semibold mb-2">Descrição:</h4>
+                            <h4 className="font-semibold mb-2">{t('admin.veterinaryTargets.table.expandedDescription')}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {condition.description || 'Sem descrição disponível.'}
+                              {condition.description || t('admin.veterinaryTargets.table.noDescription')}
                             </p>
                           </div>
                         </TableCell>
@@ -236,15 +238,15 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogTitle>{t('admin.veterinaryTargets.deleteDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir esta condição? Esta ação não pode ser desfeita.
+                {t('admin.veterinaryTargets.deleteDialog.description')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel>{t('admin.veterinaryTargets.deleteDialog.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={confirmDelete}>
-                Excluir
+                {t('admin.veterinaryTargets.deleteDialog.confirm')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

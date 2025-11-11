@@ -290,6 +290,70 @@
       },
       "settingsButton": "Configurações"
     },
+    "veterinaryTargets": {
+      "header": {
+        "title": "Alvos Veterinários",
+        "subtitle": "Gerencie condições de saúde tratáveis por nutracêuticos",
+        "newCondition": "Nova Condição",
+        "refresh": "Atualizar"
+      },
+      "stats": {
+        "totalConditions": "Total de Condições",
+        "conditionsRegistered": "Condições cadastradas",
+        "categories": "Categorias",
+        "distinctGroups": "Grupos distintos",
+        "highSeverity": "Alta Severidade",
+        "requireAttention": "Requerem atenção",
+        "severityLevels": "Níveis de Severidade",
+        "classifications": "Classificações"
+      },
+      "table": {
+        "searchPlaceholder": "Buscar condição...",
+        "categoryFilter": "Categoria",
+        "allCategories": "Todas categorias",
+        "severityFilter": "Severidade",
+        "allSeverities": "Todas severidades",
+        "noConditionsFound": "Nenhuma condição encontrada.",
+        "columnName": "Nome",
+        "columnCategory": "Categoria",
+        "columnSeverity": "Severidade",
+        "columnActions": "Ações",
+        "expandedDescription": "Descrição:",
+        "noDescription": "Sem descrição disponível."
+      },
+      "deleteDialog": {
+        "title": "Confirmar Exclusão",
+        "description": "Tem certeza que deseja excluir esta condição? Esta ação não pode ser desfeita.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir"
+      },
+      "crudDialog": {
+        "titleEdit": "Editar Condição",
+        "titleNew": "Nova Condição",
+        "descriptionEdit": "Atualize as informações da condição de saúde veterinária.",
+        "descriptionNew": "Adicione uma nova condição de saúde veterinária ao sistema.",
+        "nameLabel": "Nome da Condição *",
+        "namePlaceholder": "Ex: Artrite",
+        "descriptionLabel": "Descrição",
+        "descriptionPlaceholder": "Descreva a condição de saúde...",
+        "categoryLabel": "Categoria",
+        "categoryPlaceholder": "Ex: Articular",
+        "severityLabel": "Nível de Severidade",
+        "severityLow": "Baixa",
+        "severityModerate": "Moderada",
+        "severityHigh": "Alta",
+        "severityCritical": "Crítica"
+      },
+      "toast": {
+        "nameRequired": "Nome obrigatório",
+        "nameRequiredDescription": "Por favor, informe o nome da condição.",
+        "conditionUpdated": "Condição atualizada",
+        "conditionUpdatedDescription": "A condição foi atualizada com sucesso.",
+        "conditionCreated": "Condição criada",
+        "conditionCreatedDescription": "A nova condição foi criada com sucesso.",
+        "errorSaving": "Erro ao salvar"
+      }
+    },
     "multiAgentAnalysis": {
       "title": "Análise de IA Multi-Agente",
       "subtitle": "Processamento avançado de dados com sistema de agentes especializados",

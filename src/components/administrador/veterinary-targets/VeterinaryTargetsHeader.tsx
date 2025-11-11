@@ -22,7 +22,7 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
       <div>
         <h2 className="text-2xl font-bold">{t('admin.sidebar.knowledgeBase.veterinaryTargets')}</h2>
         <p className="text-muted-foreground">
-          Gerencie condições de saúde tratáveis por nutracêuticos
+          {t('admin.veterinaryTargets.header.subtitle')}
         </p>
       </div>
       
@@ -34,7 +34,7 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
           className="flex items-center gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {t('common.loading')}
+          {t('admin.veterinaryTargets.header.refresh')}
         </Button>
         
         <Button
@@ -42,7 +42,7 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
-          Nova Condição
+          {t('admin.veterinaryTargets.header.newCondition')}
         </Button>
       </div>
     </div>

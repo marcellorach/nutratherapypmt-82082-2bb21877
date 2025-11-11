@@ -69,8 +69,8 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
   const handleSave = async () => {
     if (!formData.name.trim()) {
       toast({
-        title: "Nome obrigatório",
-        description: "Por favor, informe o nome da condição.",
+        title: t('admin.veterinaryTargets.toast.nameRequired'),
+        description: t('admin.veterinaryTargets.toast.nameRequiredDescription'),
         variant: "destructive",
       });
       return;
@@ -88,8 +88,8 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
         if (error) throw error;
 
         toast({
-          title: "Condição atualizada",
-          description: "A condição foi atualizada com sucesso.",
+          title: t('admin.veterinaryTargets.toast.conditionUpdated'),
+          description: t('admin.veterinaryTargets.toast.conditionUpdatedDescription'),
         });
       } else {
         // Create
@@ -100,15 +100,15 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
         if (error) throw error;
 
         toast({
-          title: "Condição criada",
-          description: "A nova condição foi criada com sucesso.",
+          title: t('admin.veterinaryTargets.toast.conditionCreated'),
+          description: t('admin.veterinaryTargets.toast.conditionCreatedDescription'),
         });
       }
 
       onSuccess();
     } catch (error: any) {
       toast({
-        title: "Erro ao salvar",
+        title: t('admin.veterinaryTargets.toast.errorSaving'),
         description: error.message,
         variant: "destructive",
       });
@@ -122,51 +122,51 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {condition ? 'Editar Condição' : 'Nova Condição'}
+            {condition ? t('admin.veterinaryTargets.crudDialog.titleEdit') : t('admin.veterinaryTargets.crudDialog.titleNew')}
           </DialogTitle>
           <DialogDescription>
             {condition 
-              ? 'Atualize as informações da condição de saúde veterinária.'
-              : 'Adicione uma nova condição de saúde veterinária ao sistema.'
+              ? t('admin.veterinaryTargets.crudDialog.descriptionEdit')
+              : t('admin.veterinaryTargets.crudDialog.descriptionNew')
             }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome da Condição *</Label>
+            <Label htmlFor="name">{t('admin.veterinaryTargets.crudDialog.nameLabel')}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Artrite"
+              placeholder={t('admin.veterinaryTargets.crudDialog.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description">{t('admin.veterinaryTargets.crudDialog.descriptionLabel')}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descreva a condição de saúde..."
+              placeholder={t('admin.veterinaryTargets.crudDialog.descriptionPlaceholder')}
               rows={4}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="category">{t('admin.veterinaryTargets.crudDialog.categoryLabel')}</Label>
               <Input
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                placeholder="Ex: Articular"
+                placeholder={t('admin.veterinaryTargets.crudDialog.categoryPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="severity">Nível de Severidade</Label>
+              <Label htmlFor="severity">{t('admin.veterinaryTargets.crudDialog.severityLabel')}</Label>
               <Select
                 value={formData.severity_level}
                 onValueChange={(value) => setFormData({ ...formData, severity_level: value })}
@@ -175,10 +175,10 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Baixa</SelectItem>
-                  <SelectItem value="moderate">Moderada</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="critical">Crítica</SelectItem>
+                  <SelectItem value="low">{t('admin.veterinaryTargets.crudDialog.severityLow')}</SelectItem>
+                  <SelectItem value="moderate">{t('admin.veterinaryTargets.crudDialog.severityModerate')}</SelectItem>
+                  <SelectItem value="high">{t('admin.veterinaryTargets.crudDialog.severityHigh')}</SelectItem>
+                  <SelectItem value="critical">{t('admin.veterinaryTargets.crudDialog.severityCritical')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

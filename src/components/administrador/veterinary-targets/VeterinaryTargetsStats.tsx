@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, FolderTree, TrendingUp, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from 'react-i18next';
 
 interface VeterinaryTargetsStatsProps {
   conditions: any[];
@@ -13,6 +14,7 @@ const VeterinaryTargetsStats: React.FC<VeterinaryTargetsStatsProps> = ({
   conditions,
   isLoading
 }) => {
+  const { t } = useTranslation();
   const totalConditions = conditions.length;
   
   const categories = [...new Set(conditions.map(c => c.category).filter(Boolean))];
@@ -23,28 +25,28 @@ const VeterinaryTargetsStats: React.FC<VeterinaryTargetsStatsProps> = ({
 
   const stats = [
     {
-      title: 'Total de Condições',
+      title: t('admin.veterinaryTargets.stats.totalConditions'),
       value: totalConditions,
       icon: Target,
-      description: 'Condições cadastradas'
+      description: t('admin.veterinaryTargets.stats.conditionsRegistered')
     },
     {
-      title: 'Categorias',
+      title: t('admin.veterinaryTargets.stats.categories'),
       value: totalCategories,
       icon: FolderTree,
-      description: 'Grupos distintos'
+      description: t('admin.veterinaryTargets.stats.distinctGroups')
     },
     {
-      title: 'Alta Severidade',
+      title: t('admin.veterinaryTargets.stats.highSeverity'),
       value: highSeverity,
       icon: TrendingUp,
-      description: 'Requerem atenção'
+      description: t('admin.veterinaryTargets.stats.requireAttention')
     },
     {
-      title: 'Níveis de Severidade',
+      title: t('admin.veterinaryTargets.stats.severityLevels'),
       value: severityLevels.length,
       icon: Activity,
-      description: 'Classificações'
+      description: t('admin.veterinaryTargets.stats.classifications')
     }
   ];
 
