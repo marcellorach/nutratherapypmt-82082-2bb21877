@@ -10,6 +10,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✅ Tabela `nutraceutical_categories` no banco de dados com RLS policies
+- ✅ Trigger `updated_at` para `nutraceutical_categories`
+- ✅ Índice de performance em `nutraceutical_categories.name`
 - ✅ Nova tab administrativa "Análise de Microbioma" no grupo Knowledge Base (funcionalidade mockada para demonstração)
 - Sistema de versionamento semântico para documentação
 - Headers de versão em todos os arquivos de documentação
