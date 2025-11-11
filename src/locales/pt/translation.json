@@ -292,20 +292,6 @@
       },
       "settingsButton": "Configurações"
     },
-    "settings": {
-      "knowledgeBase": {
-        "title": "Configurações - Base de Conhecimento",
-        "subtitle": "Configure engines, prompts e convenções específicas para a Base de Conhecimento",
-        "saveButton": "Salvar Configurações",
-        "tabs": {
-          "enginesPrompts": "Engines & Prompts",
-          "conventions": "Convenções",
-          "nutraceuticals": "Nutracêuticos",
-          "usage": "Uso de API",
-          "dataManagement": "Gerenciamento de Dados"
-        }
-      }
-    },
     "multiAgentAnalysis": {
       "title": "Análise de IA Multi-Agente",
       "subtitle": "Processamento avançado de dados com sistema de agentes especializados",
@@ -650,6 +636,18 @@
       "title": "Configurações do Sistema",
       "description": "Gerencie nutracêuticos e configurações do sistema",
       "saveButton": "Salvar Configurações",
+      "knowledgeBase": {
+        "title": "Configurações - Base de Conhecimento",
+        "subtitle": "Configure engines, prompts e convenções específicas para a Base de Conhecimento",
+        "saveButton": "Salvar Configurações",
+        "tabs": {
+          "enginesPrompts": "Engines & Prompts",
+          "conventions": "Convenções",
+          "nutraceuticals": "Nutracêuticos",
+          "usage": "Uso de API",
+          "dataManagement": "Gerenciamento de Dados"
+        }
+      },
       "general": {
         "title": "Configurações Gerais",
         "description": "Configurações básicas do sistema de nutracêuticos",
