@@ -66,7 +66,14 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
   const getLocalizedField = (condition: any, field: 'name' | 'description' | 'category') => {
     const isEnglish = i18n.language === 'en';
     const enField = `${field}_en`;
-    return isEnglish && condition[enField] ? condition[enField] : condition[field];
+    const enValue = condition[enField];
+    
+    // Se estiver em inglês mas o valor contém "(translate)", use o valor em PT
+    if (isEnglish && enValue && !enValue.includes('(translate)')) {
+      return enValue;
+    }
+    
+    return condition[field];
   };
 
   const toggleRow = (id: string) => {
