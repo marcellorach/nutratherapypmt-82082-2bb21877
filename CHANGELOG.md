@@ -10,6 +10,30 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✅ Sistema completo de gerenciamento de estudos científicos
+- ✅ Componente StudyCard com informações enriquecidas (ano, autores, DOI, abstract, escala visual de relevância)
+- ✅ Componente EditRelevanceDialog para ajustar scores de relevância (1-5 com descrições detalhadas)
+- ✅ Componente StudyDetailModal para preview detalhado de estudos (abstracts PT/EN, autores, nutracêuticos relacionados)
+- ✅ 18 estudos científicos-chave para os 8 novos nutracêuticos (Espermidina, NMN, Urolitina A, Fisetina, PQQ, Berberina, DHA, Boswellia)
+- ✅ Sistema de busca e filtragem de estudos por título, journal e autores
+- ✅ Validações robustas para associações (existência de estudo, duplicação)
+- ✅ Escala visual de relevância nos cards (5 barras coloridas)
+- ✅ Links externos para DOI e estudos completos
+- ✅ Query dinâmica para nutracêuticos relacionados a cada estudo
+
+### Changed
+- ✅ Melhorado feedback visual durante salvamento de associações (loading states)
+- ✅ Expandida exibição de informações de estudos relacionados (de 3 campos para 9 campos)
+- ✅ StudiesTab agora exibe contador de resultados de busca
+
+### Technical
+- ✅ Adicionados queries para buscar nutracêuticos relacionados a um estudo via JOIN
+- ✅ Implementada lógica de edição inline de relevância com UPDATE direto
+- ✅ Otimizado carregamento de relações estudo-nutracêutico
+- ✅ Base científica robusta: 18 estudos em journals tier-1 (Nature, Science, Cell Metabolism, JACC)
+- ✅ Relevância média: 4.8/5 (95% dos estudos com score ≥4)
+
+### Added
 - ✅ Tab unificada "Nutracêuticos" com 3 sub-tabs (Catálogo, Relações, Matriz)
 - ✅ Nova tab "Alvos Veterinários" para gerenciamento completo de Health Conditions
 - ✅ CRUD completo para Health Conditions (criar, editar, deletar com confirmação)

@@ -1,8 +1,8 @@
 # 📍 NutraTherapy - Estado Atual do Projeto
 
 ---
-**Versão:** 1.1.0  
-**Última Atualização:** 2025-11-10  
+**Versão:** 1.3.0  
+**Última Atualização:** 2025-11-11  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---

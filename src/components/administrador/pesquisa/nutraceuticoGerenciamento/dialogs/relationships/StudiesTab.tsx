@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash2, FileText, Plus } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations-service';
+import { supabase } from '@/integrations/supabase/client';
+import StudyCard from './StudyCard';
+import EditRelevanceDialog from './EditRelevanceDialog';
+import StudyDetailModal from './StudyDetailModal';
 
 interface StudiesTabProps {
   nutraceutical: any;
@@ -28,6 +31,9 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
   const [existingRelations, setExistingRelations] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoadingRelations, setIsLoadingRelations] = useState<boolean>(true);
+  const [studySearchTerm, setStudySearchTerm] = useState<string>('');
+  const [selectedStudyForDetail, setSelectedStudyForDetail] = useState<any>(null);
+  const [selectedRelationForEdit, setSelectedRelationForEdit] = useState<any>(null);
   
   const { toast } = useToast();
   
@@ -63,6 +69,17 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
       toast({
         title: 'Erro',
         description: 'Selecione um estudo para adicionar',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    // VALIDAÇÃO: Verificar se o estudo realmente existe
+    const studyExists = studies.find(s => s.id === selectedStudyId);
+    if (!studyExists) {
+      toast({
+        title: 'Erro',
+        description: 'Estudo selecionado não encontrado no banco de dados',
         variant: 'destructive'
       });
       return;
@@ -149,11 +166,54 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
     }
   };
   
-  // Obter título do estudo pelo ID
-  const getStudyTitle = (studyId: string) => {
-    const study = studies.find(s => s.id === studyId);
-    return study?.title || 'Estudo desconhecido';
+  // Handlers para modals
+  const handleViewDetails = (relation: any) => {
+    setSelectedStudyForDetail(relation);
   };
+
+  const handleEditRelevance = (relation: any) => {
+    setSelectedRelationForEdit(relation);
+  };
+
+  const handleSaveRelevance = async (relationId: string, newScore: number) => {
+    try {
+      const { error } = await supabase
+        .from('nutraceutical_studies')
+        .update({ relevance_score: newScore })
+        .eq('id', relationId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso',
+        description: 'Relevância atualizada com sucesso',
+      });
+
+      // Recarregar relações
+      await loadExistingRelations();
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar relevância:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar a relevância',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  // Filtrar estudos por busca
+  const filteredStudies = studies.filter(study =>
+    study.title?.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
+    study.journal?.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
+    study.authors?.some((author: string) => 
+      author.toLowerCase().includes(studySearchTerm.toLowerCase())
+    )
+  );
   
   return (
     <div className="space-y-6">
@@ -162,6 +222,22 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-4">
+            {/* Campo de busca */}
+            <div>
+              <Label htmlFor="studySearch">Buscar Estudo</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="studySearch"
+                  placeholder="Buscar por título, journal ou autor..."
+                  value={studySearchTerm}
+                  onChange={(e) => setStudySearchTerm(e.target.value)}
+                  className="pl-9"
+                  disabled={isLoading || isSaving}
+                />
+              </div>
+            </div>
+            
             <div>
               <Label htmlFor="studySelect">Estudo Científico</Label>
               <Select
@@ -173,13 +249,24 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
                   <SelectValue placeholder="Selecione um estudo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {studies && studies.map((study) => (
+                  {filteredStudies && filteredStudies.map((study) => (
                     <SelectItem key={study.id} value={study.id}>
                       {study.title}
+                      {study.year && ` (${study.year})`}
                     </SelectItem>
                   ))}
+                  {filteredStudies.length === 0 && (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      Nenhum estudo encontrado
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
+              {studySearchTerm && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {filteredStudies.length} estudo(s) encontrado(s)
+                </p>
+              )}
             </div>
           </div>
           
@@ -232,40 +319,36 @@ const StudiesTab: React.FC<StudiesTabProps> = ({
         ) : (
           <div className="space-y-3">
             {existingRelations.map((relation) => (
-              <Card key={relation.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4 text-blue-500" />
-                        <h4 className="font-medium">
-                          {relation.study?.title || getStudyTitle(relation.study_id)}
-                        </h4>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                          Relevância: {relation.relevance_score}/5
-                        </Badge>
-                      </div>
-                      {relation.study?.journal && (
-                        <p className="text-sm text-muted-foreground">{relation.study.journal}</p>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveRelation(relation.id)}
-                      disabled={isSaving}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <StudyCard
+                key={relation.id}
+                relation={relation}
+                onViewDetails={handleViewDetails}
+                onEditRelevance={handleEditRelevance}
+                onRemove={handleRemoveRelation}
+                isSaving={isSaving}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      {selectedStudyForDetail && (
+        <StudyDetailModal
+          isOpen={!!selectedStudyForDetail}
+          onClose={() => setSelectedStudyForDetail(null)}
+          relation={selectedStudyForDetail}
+        />
+      )}
+
+      {selectedRelationForEdit && (
+        <EditRelevanceDialog
+          isOpen={!!selectedRelationForEdit}
+          onClose={() => setSelectedRelationForEdit(null)}
+          relation={selectedRelationForEdit}
+          onSave={handleSaveRelevance}
+        />
+      )}
     </div>
   );
 };
