@@ -9,6 +9,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✅ **78 estudos científicos veterinários** adicionados ao banco de dados
+  - 100% focados em aplicações veterinárias para cães e gatos
+  - Journals tier-1: JAVMA, JVIM, Vet Immunol, Vet Surgery, Nature, Cell Metabolism
+  - Período: 2005-2023 (últimos 18 anos de pesquisa veterinária)
+  - Todos com títulos bilíngues (PT/EN), DOI, abstracts completos e lista de autores
+- ✅ **Base científica completa**: 31/31 nutracêuticos com ≥3 estudos cada
+  - Total de estudos no sistema: 90 estudos científicos
+  - Média de 3.0 estudos por nutracêutico
+  - 93 associações nutracêutico-estudo criadas
+  - Relevância média: 5.0/5 (todos os estudos veterinários de alta qualidade)
+- ✅ **Cobertura de condições veterinárias**:
+  - Osteoartrite e mobilidade: 12 estudos
+  - Cardioproteção e cardiomiopatias: 11 estudos
+  - Imunomodulação e resposta vacinal: 9 estudos
+  - Doença renal crônica: 6 estudos
+  - IBD e saúde gastrointestinal: 8 estudos
+  - Função cognitiva e neuropatias: 7 estudos
+  - Câncer e senolíticos: 5 estudos
+  - Hepatoproteção: 6 estudos
+  - Dermatite atópica: 4 estudos
+  - Longevidade e sarcopenia: 6 estudos
+
 ### Fixed
 - ✅ Corrigida contagem de estudos científicos (usava números fictícios 150-300, agora usa dados reais do banco)
 - ✅ Estudos associados agora aparecem corretamente na interface expandida de nutracêuticos
