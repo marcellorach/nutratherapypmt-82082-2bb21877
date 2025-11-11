@@ -547,7 +547,8 @@
       "currentDay": "Dia Atual:",
       "of": "de",
       "currentPhase": "Fase Atual:",
-      "schedule": "Cronograma"
+      "schedule": "Cronograma",
+      "day": "Dia"
     },
     "ongoingStudies": {
       "title": "Estudos em Andamento",

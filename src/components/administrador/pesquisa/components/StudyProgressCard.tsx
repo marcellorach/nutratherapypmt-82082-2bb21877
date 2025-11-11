@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
 
 interface StudyProgressCardProps {
@@ -29,6 +30,18 @@ const StudyProgressCard: React.FC<StudyProgressCardProps> = ({
     if (isEnglish && phase.name_en) return phase.name_en;
     if (phase.name_pt) return phase.name_pt;
     return phase.name || '';
+  };
+  
+  // Helper para abreviar labels das fases (evita sobreposição)
+  const getPhaseLabel = (phase: StudyProgressCardProps['phases'][number]) => {
+    const monthMatch = phase.day.toString();
+    const months = Math.round(phase.day / 30);
+    
+    // Se for o dia 0, é baseline
+    if (phase.day === 0) return 'M0';
+    
+    // Para outros, usar formato M{número}
+    return `M${months}`;
   };
   
   // Determinar a fase atual
@@ -67,25 +80,36 @@ const StudyProgressCard: React.FC<StudyProgressCardProps> = ({
               <div className="absolute top-2 left-0 w-full h-0.5 bg-gray-200"></div>
               
               {/* Marcadores de fases */}
-              {phases.map((phase, index) => {
-                const position = `${(phase.day / totalDays) * 100}%`;
-                const isPast = currentDay >= phase.day;
-                
-                return (
-                  <div 
-                    key={index} 
-                    className="absolute flex flex-col items-center" 
-                    style={{ left: position, transform: 'translateX(-50%)' }}
-                  >
-                    <div 
-                      className={`w-2 h-2 rounded-full ${isPast ? 'bg-blue-500' : 'bg-gray-300'}`}
-                    ></div>
-                    <span className="text-xs mt-1 whitespace-nowrap">
-                      {getPhaseName(phase)}
-                    </span>
-                  </div>
-                );
-              })}
+              <TooltipProvider>
+                {phases.map((phase, index) => {
+                  const position = `${(phase.day / totalDays) * 100}%`;
+                  const isPast = currentDay >= phase.day;
+                  
+                  return (
+                    <Tooltip key={index}>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className="absolute flex flex-col items-center cursor-help" 
+                          style={{ left: position, transform: 'translateX(-50%)' }}
+                        >
+                          <div 
+                            className={`w-2.5 h-2.5 rounded-full transition-colors ${isPast ? 'bg-blue-500' : 'bg-gray-300'}`}
+                          ></div>
+                          <span className={`text-[10px] mt-1 font-medium ${isPast ? 'text-blue-600' : 'text-gray-500'}`}>
+                            {getPhaseLabel(phase)}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p className="text-xs font-medium">{getPhaseName(phase)}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {t('admin.studies.progress.day')} {phase.day}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </TooltipProvider>
             </div>
           </div>
         )}

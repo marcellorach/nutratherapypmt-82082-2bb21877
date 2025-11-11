@@ -10,6 +10,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 🎨 **Study Progress Timeline - Labels abreviados com tooltips**:
+  - Labels de fase agora usam formato compacto (M0, M2, M4, M6, M8, M10...) evitando sobreposição
+  - Tooltip mostra nome completo da fase + dia ao passar o mouse
+  - Marcadores visuais maiores (2.5px) com cores mais destacadas
+  - Labels coloridos dinamicamente: azul para fases passadas, cinza para futuras
+  - Cursor "help" indica interatividade dos marcadores
+  - Solução elegante que mantém timeline limpa e informativa
+- ✅ **i18n**: Versão incrementada para 1.3.9 (cache refresh)
+- 📚 **Traduções**: Adicionada chave `admin.studies.progress.day` (PT: "Dia" / EN: "Day")
+
+### Changed
 - 🎨 **Study Notes - Redesign da seção "Preliminary Results"**:
   - Consolidados múltiplos cards coloridos em um único card elegante azul/índigo
   - Estrutura visual simplificada: introdução + lista com bullets para resultados
