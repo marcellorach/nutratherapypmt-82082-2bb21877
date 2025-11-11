@@ -11,7 +11,14 @@ interface ExpandedContentProps {
 }
 
 const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
+  
+  // FALLBACK: Se i18n não está pronto ou retorna chave literal
+  const getText = (key: string, fallback: string): string => {
+    if (!ready) return fallback;
+    const translation = t(key);
+    return translation === key ? fallback : translation;
+  };
   
   if (!nutraceutical) return null;
   
@@ -30,7 +37,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
           {/* Condições relacionadas */}
           <div className="space-y-2">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm">{t('nutraceuticals.conditions.title')} ({nutraceutical.conditionCount || 0})</h4>
+              <h4 className="font-medium text-sm">{getText('nutraceuticals.conditions.title', 'Condições')} ({nutraceutical.conditionCount || 0})</h4>
             </div>
             <div className="max-h-48 overflow-y-auto">
               <ConditionsTable 
@@ -43,7 +50,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
         {/* Estudos Científicos */}
         <div className="mt-4">
           <div className="flex justify-between">
-            <h4 className="font-medium text-sm">{t('nutraceuticals.studies.title')} ({nutraceutical.studyCount || 0})</h4>
+            <h4 className="font-medium text-sm">{getText('nutraceuticals.studies.title', 'Estudos Científicos')} ({nutraceutical.studyCount || 0})</h4>
           </div>
           <div className="max-h-48 overflow-y-auto mt-2">
             <StudiesTable 

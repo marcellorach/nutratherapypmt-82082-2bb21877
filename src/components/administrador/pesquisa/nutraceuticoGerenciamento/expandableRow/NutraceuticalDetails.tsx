@@ -15,16 +15,24 @@ const NutraceuticalDetails: React.FC<NutraceuticalDetailsProps> = ({
   source,
   dosage
 }) => {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
+  
+  // FALLBACK: Se i18n não está pronto ou retorna chave literal
+  const getText = (key: string, fallback: string): string => {
+    if (!ready) return fallback;
+    const translation = t(key);
+    // Se retornou a própria chave, usar fallback
+    return translation === key ? fallback : translation;
+  };
   
   return (
     <div className="space-y-2">
-      <h4 className="font-medium text-sm">{t('nutraceuticals.details.title')}</h4>
+      <h4 className="font-medium text-sm">{getText('nutraceuticals.details.title', 'Detalhes')}</h4>
       <div className="text-sm">
-        <p><span className="font-medium">{t('nutraceuticals.details.description')}:</span> {description || t('nutraceuticals.details.notDefined')}</p>
-        <p><span className="font-medium">{t('nutraceuticals.details.compound')}:</span> {chemical_compound || t('nutraceuticals.details.notDefined')}</p>
-        <p><span className="font-medium">{t('nutraceuticals.details.source')}:</span> {source || t('nutraceuticals.details.notDefined')}</p>
-        <p><span className="font-medium">{t('nutraceuticals.details.dosage')}:</span> {dosage || t('nutraceuticals.details.notDefined')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.description', 'Descrição')}:</span> {description || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.compound', 'Composto Químico')}:</span> {chemical_compound || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.source', 'Origem')}:</span> {source || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.dosage', 'Dosagem')}:</span> {dosage || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
       </div>
     </div>
   );

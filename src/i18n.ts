@@ -20,26 +20,37 @@ const defaultLanguage = savedLanguage || 'pt';
 
 // Força reinicialização COMPLETA das traduções limpando cache do i18next
 if (typeof window !== 'undefined') {
-  const currentVersion = '1.1.5'; // Incrementar para forçar reload
+  const currentVersion = '1.1.6'; // Incrementar para forçar reload
   const storedVersion = localStorage.getItem('i18n-version');
   
-  if (storedVersion !== currentVersion) {
-    console.log('🔄 Limpando cache de traduções...');
+  // SEMPRE limpar na primeira carga (forçar)
+  const forceClean = !storedVersion || storedVersion !== currentVersion;
+  
+  if (forceClean) {
+    console.log('🔥 LIMPEZA FORÇADA DE CACHE I18N - Versão:', currentVersion);
     
-    // Limpar TUDO relacionado a i18n
-    localStorage.removeItem('i18nextLng');
-    localStorage.removeItem('language');
+    // 1. Limpar TUDO relacionado a i18n
+    const keysToRemove = ['i18nextLng', 'language', 'i18n-version'];
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // 2. Limpar TODOS os prefixos i18next*
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('i18next')) {
         localStorage.removeItem(key);
       }
     });
     
-    localStorage.setItem('i18n-version', currentVersion);
-    console.log('✅ Cache limpo - versão:', currentVersion);
+    // 3. Limpar sessionStorage também
+    sessionStorage.clear();
     
-    // Forçar reload da página para aplicar mudanças
-    window.location.reload();
+    // 4. Salvar nova versão
+    localStorage.setItem('i18n-version', currentVersion);
+    console.log('✅ Cache limpo - recarregando em 500ms...');
+    
+    // 5. Delay antes do reload para garantir que salvou
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   }
 }
 

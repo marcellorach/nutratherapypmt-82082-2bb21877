@@ -17,35 +17,42 @@ interface ConditionsTableProps {
 }
 
 const ConditionsTable: React.FC<ConditionsTableProps> = ({ conditions }) => {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
+  
+  // FALLBACK: Se i18n não está pronto ou retorna chave literal
+  const getText = (key: string, fallback: string): string => {
+    if (!ready) return fallback;
+    const translation = t(key);
+    return translation === key ? fallback : translation;
+  };
   
   // Função auxiliar para formatar o tipo de relação
   const formatRelationshipType = (type: string) => {
     const types: Record<string, string> = {
-      'prevention': t('nutraceuticals.conditions.types.prevention'),
-      'treatment': t('nutraceuticals.conditions.types.treatment'),
-      'support': t('nutraceuticals.conditions.types.support')
+      'prevention': getText('nutraceuticals.conditions.types.prevention', 'Prevenção'),
+      'treatment': getText('nutraceuticals.conditions.types.treatment', 'Tratamento'),
+      'support': getText('nutraceuticals.conditions.types.support', 'Suporte')
     };
     return types[type] || type;
   };
 
   if (!Array.isArray(conditions) || conditions.length === 0) {
-    return <p className="text-sm text-gray-500">{t('nutraceuticals.conditions.none')}</p>;
+    return <p className="text-sm text-gray-500">{getText('nutraceuticals.conditions.none', 'Nenhuma condição associada')}</p>;
   }
 
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b">
-          <th className="text-left py-1">{t('nutraceuticals.conditions.table.name')}</th>
-          <th className="text-left py-1">{t('nutraceuticals.conditions.table.type')}</th>
-          <th className="text-left py-1">{t('nutraceuticals.conditions.table.efficacy')}</th>
+          <th className="text-left py-1">{getText('nutraceuticals.conditions.table.name', 'Condição')}</th>
+          <th className="text-left py-1">{getText('nutraceuticals.conditions.table.type', 'Tipo')}</th>
+          <th className="text-left py-1">{getText('nutraceuticals.conditions.table.efficacy', 'Eficácia')}</th>
         </tr>
       </thead>
       <tbody>
         {conditions.map((relation: ConditionRelation) => (
           <tr key={relation.id} className="border-b border-gray-100">
-            <td className="py-1">{relation.condition?.name || t('nutraceuticals.conditions.unknown')}</td>
+            <td className="py-1">{relation.condition?.name || getText('nutraceuticals.conditions.unknown', 'Condição desconhecida')}</td>
             <td className="py-1">{formatRelationshipType(relation.relationship_type || "")}</td>
             <td className="py-1">
               <Badge variant="outline" className={`

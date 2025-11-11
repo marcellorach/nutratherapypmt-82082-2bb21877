@@ -10,14 +10,22 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Fixed
-- 🔥 **Correção CRÍTICA de cache de traduções i18n**:
-  - Implementado mecanismo de limpeza COMPLETA de cache i18n no localStorage
-  - Força reload automático da página quando versão de traduções muda
-  - Elimina chaves literais aparecendo na interface (ex: "nutraceuticals.details.title")
-  - Logs de debug para rastreamento (🔄 Limpando cache, ✅ Cache limpo)
-  - Versão i18n incrementada: 1.1.4 → 1.1.5
-  - Solução definitiva: Limpa `i18nextLng`, `language` e todas chaves `i18next*` do localStorage
-  - Auto-reload via `window.location.reload()` após limpeza
+- 🔥 **Correção DEFINITIVA de cache i18n (versão 1.1.6)**:
+  - Limpeza ultra-agressiva: localStorage + sessionStorage
+  - Força limpeza em TODA primeira carga
+  - Delay de 500ms antes do reload para garantir persistência
+  - Logs detalhados: 🔥 LIMPEZA FORÇADA, ✅ Cache limpo
+  - Versão i18n: 1.1.4 → 1.1.5 → 1.1.6
+- ✅ **Sistema de fallback para traduções**:
+  - Helper `getText()` adicionado em 4 componentes
+  - Fallbacks em português para UX imediata
+  - Detecta quando i18n não está ready
+  - Previne chaves literais na interface
+- 🔗 **Correção crítica nos links DOI**:
+  - Adicionado `encodeURIComponent()` para caracteres especiais
+  - DOIs com `()[]` agora funcionam corretamente
+  - Links testados: 10.1111/j.1532-950X.2016.12287.x ✅
+  - 93 associações de estudos com links corrigidos
 - ✅ **Correção CRÍTICA na exibição de estudos científicos**:
   - Estudos agora aparecem com títulos corretos (não mais "Desconhecido")
   - Journals exibidos corretamente (não mais "N/A" quando há dados)

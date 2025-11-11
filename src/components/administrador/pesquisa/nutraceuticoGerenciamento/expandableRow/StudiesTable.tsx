@@ -25,19 +25,26 @@ interface StudiesTableProps {
 }
 
 const StudiesTable: React.FC<StudiesTableProps> = ({ studies }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n, ready } = useTranslation();
+  
+  // FALLBACK: Se i18n não está pronto ou retorna chave literal
+  const getText = (key: string, fallback: string): string => {
+    if (!ready) return fallback;
+    const translation = t(key);
+    return translation === key ? fallback : translation;
+  };
   
   if (!Array.isArray(studies) || studies.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t('nutraceuticals.studies.none')}</p>;
+    return <p className="text-sm text-muted-foreground">{getText('nutraceuticals.studies.none', 'Nenhum estudo associado')}</p>;
   }
 
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b">
-          <th className="text-left py-2 font-semibold">{t('nutraceuticals.studies.table.title')}</th>
-          <th className="text-left py-2 font-semibold">{t('nutraceuticals.studies.table.journal')}</th>
-          <th className="text-left py-2 font-semibold">{t('nutraceuticals.studies.table.relevance')}</th>
+          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.title', 'Título')}</th>
+          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.journal', 'Journal')}</th>
+          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.relevance', 'Relevância')}</th>
         </tr>
       </thead>
       <tbody>
@@ -58,17 +65,17 @@ const StudiesTable: React.FC<StudiesTableProps> = ({ studies }) => {
               <td className="py-2">
                 {study?.doi ? (
                   <a 
-                    href={`https://doi.org/${study.doi}`} 
+                    href={`https://doi.org/${encodeURIComponent(study.doi)}`}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:underline flex items-center gap-1 group"
-                    title={t('nutraceuticals.studies.viewFull')}
+                    title={getText('nutraceuticals.studies.viewFull', 'Ver estudo completo')}
                   >
-                    <span>{title || t('nutraceuticals.studies.unknown')}</span>
+                    <span>{title || getText('nutraceuticals.studies.unknown', 'Estudo desconhecido')}</span>
                     <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />
                   </a>
                 ) : (
-                  <span className="text-foreground">{title || t('nutraceuticals.studies.unknown')}</span>
+                  <span className="text-foreground">{title || getText('nutraceuticals.studies.unknown', 'Estudo desconhecido')}</span>
                 )}
                 {study?.year && (
                   <span className="text-muted-foreground text-xs ml-2">({study.year})</span>
