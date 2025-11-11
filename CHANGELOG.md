@@ -21,6 +21,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Fixed
 - ✅ Implementada lógica completa de limpeza de dados no hook `useDataManagement` (função `cleanSeedData` agora funcional)
+- ✅ Adicionados toasts de feedback (sucesso/erro) na função cleanSeedData para melhor UX
 - ✅ Nova tab administrativa "Análise de Microbioma" no grupo Knowledge Base (funcionalidade mockada para demonstração)
 - Sistema de versionamento semântico para documentação
 - Headers de versão em todos os arquivos de documentação

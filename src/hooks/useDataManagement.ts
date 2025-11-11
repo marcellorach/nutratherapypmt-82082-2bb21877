@@ -1,5 +1,6 @@
 
 import { useState, useCallback } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 export type DataMode = 'production' | 'development' | 'hybrid';
 
@@ -144,8 +145,24 @@ export const useDataManagement = () => {
       // Resetar batch atual
       setSettings(prev => ({ ...prev, current_seed_batch: undefined }));
       
+      // Toast de sucesso
+      toast({
+        title: "✅ Limpeza concluída com sucesso!",
+        description: "Todos os dados seed foram removidos do banco de dados. Agora você pode executar a Fase 1 novamente.",
+        duration: 5000,
+      });
+      
     } catch (error) {
       console.error('❌ Erro crítico ao limpar dados:', error);
+      
+      // Toast de erro
+      toast({
+        title: "❌ Erro ao limpar dados",
+        description: error instanceof Error ? error.message : "Erro desconhecido ao limpar dados seed.",
+        variant: "destructive",
+        duration: 6000,
+      });
+      
       throw error;
     } finally {
       setIsLoading(false);
