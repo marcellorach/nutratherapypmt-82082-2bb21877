@@ -10,6 +10,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 📝 **Atualização massiva de textos da plataforma para apresentação profissional**:
+  - **Header**: Novo slogan conciso "Mass-personalized nutraceutical therapy platform & research"
+  - **Hero subtitle**: Incluídas estatísticas concretas "A scientific database built from 267 studies covering 35 nutraceuticals and 95 condition links, with an overall efficacy index of 4.2/5"
+  - **Welcome message**: Simplificado para "Welcome back! You're signed in as [email]"
+  - **Cards de áreas renomeados**:
+    - "Área do Tutor" → "Owner Portal" (EN) / "Portal do Tutor" (PT)
+    - "Área do Veterinário" → "Veterinarian Portal" (EN) / "Portal do Veterinário" (PT)
+    - Descrições expandidas com foco em funcionalidades específicas
+    - Botões com textos mais descritivos: "Go to Owner Portal", "Go to Vet Portal", "Open Admin"
+  - **Footer**: Atualizado para "NutraTherapy Pet © 2025 — Intelligent nutraceutical recommendation system for pets"
+  - Versão i18n: 1.2.4 → 1.2.5
+  - Todas as mudanças mantêm suporte bilíngue completo (PT/EN)
 - 🎨 **Redesign da página inicial**:
   - Card "R&D + Base de Conhecimento" renomeado para **"Painel de Controle"** (PT) / **"Control Panel"** (EN)
   - Descrição atualizada: "Central de gerenciamento da plataforma: pesquisa, base de conhecimento, configurações e administração do sistema"

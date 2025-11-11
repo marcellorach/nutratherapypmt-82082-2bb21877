@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Copyright e descrição principal */}
         <div className="text-center text-sm mb-4">
-          {t('footer.copyright', { year: new Date().getFullYear() })}
+          {t('footer.copyright')}
         </div>
         
         {/* Seção Powered by com logos */}

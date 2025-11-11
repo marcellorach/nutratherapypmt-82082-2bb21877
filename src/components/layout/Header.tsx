@@ -32,9 +32,6 @@ const Header: React.FC = () => {
             <div className="text-xs text-gray-600 font-light text-center">
               {t('header.platformSubtitle')}
             </div>
-            <div className="text-xs text-gray-600 font-light text-center">
-              {t('header.platformSubtitle2')}
-            </div>
           </div>
         </Link>
         

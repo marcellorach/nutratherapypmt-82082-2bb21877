@@ -103,7 +103,7 @@ const Index: React.FC = () => {
                     </p>
                     <Link to="/tutor">
                       <Button variant="outline" className="w-full flex items-center justify-center gap-1">
-                        {t('common.access')} <ArrowRight size={16} />
+                        {t('home.tutorAreaButton')} <ArrowRight size={16} />
                       </Button>
                     </Link>
                   </div>
@@ -124,11 +124,11 @@ const Index: React.FC = () => {
                         className={`w-full flex items-center justify-center gap-1 ${!hasRole('veterinarian') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={!hasRole('veterinarian')}
                       >
-                        {t('common.access')} <ArrowRight size={16} />
+                        {t('home.veterinarianAreaButton')} <ArrowRight size={16} />
                       </Button>
                     </Link>
                     {!hasRole('veterinarian') && (
-                      <p className="text-xs text-red-500 mt-2">{t('home.restrictedAccess', { role: t('common.veterinarian').toLowerCase() + 's' })}</p>
+                      <p className="text-xs text-red-500 mt-2">{t('home.veterinarianAreaRequest')}</p>
                     )}
                   </div>
                 </div>
@@ -148,11 +148,11 @@ const Index: React.FC = () => {
                         className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={!hasRole('admin')}
                       >
-                        {t('common.access')} <ArrowRight size={16} />
+                        {t('home.researchAreaButton')} <ArrowRight size={16} />
                       </Button>
                     </Link>
                     {!hasRole('admin') && (
-                      <p className="text-xs text-red-500 mt-2">{t('home.restrictedAccess', { role: t('common.researchDev').toLowerCase() })}</p>
+                      <p className="text-xs text-red-500 mt-2">{t('home.researchAreaRequest')}</p>
                     )}
                   </div>
                 </div>
