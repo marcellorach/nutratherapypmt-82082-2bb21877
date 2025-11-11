@@ -52,8 +52,8 @@ const AdminFooter: React.FC = () => {
             </div>
             
             
-            {/* Google Co-Scientist */}
-            <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
+            {/* Google Co-Scientist - temporariamente escondido */}
+            {/* <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex flex-col items-center space-y-1">
                 <div className="flex items-center space-x-2">
                   <img 
@@ -65,7 +65,7 @@ const AdminFooter: React.FC = () => {
                 </div>
                 <span className="text-xs text-gray-500 font-medium italic">em breve</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

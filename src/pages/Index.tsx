@@ -194,30 +194,6 @@ const Index: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-medium mb-4">{t('home.systemInfo')}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-md border border-gray-100">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('home.registeredNutraceuticals')}</span>
-                    <span className="text-lg font-medium">250+</span>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-md border border-gray-100">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('home.scientificStudies')}</span>
-                    <span className="text-lg font-medium">180+</span>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-md border border-gray-100">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('home.treatableConditions')}</span>
-                    <span className="text-lg font-medium">45+</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
