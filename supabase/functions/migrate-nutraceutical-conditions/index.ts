@@ -5,275 +5,352 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface CategorizationResult {
+  category: string;
+  category_en: string;
+  severity: string;
+}
+
+const categorizeCondition = (conditionName: string): CategorizationResult => {
+  const name = conditionName.toLowerCase();
+  
+  if (name.includes('artrite') || name.includes('articular') || name.includes('cartilagem') || 
+      name.includes('mobilidade') || name.includes('osteo') || name.includes('arthritis')) {
+    return { category: 'Musculoesquelética', category_en: 'Musculoskeletal', severity: 'high' };
+  }
+  
+  if (name.includes('cardiovascular') || name.includes('cardíaco') || name.includes('cardiomiopatia') || 
+      name.includes('aterosclerose') || name.includes('cardiac') || name.includes('cardiomyopathy')) {
+    return { category: 'Cardiovascular', category_en: 'Cardiovascular', severity: 'high' };
+  }
+  
+  if (name.includes('renal') || name.includes('nefro') || name.includes('proteinúria') ||
+      name.includes('kidney') || name.includes('nephro')) {
+    return { category: 'Renal', category_en: 'Renal', severity: 'high' };
+  }
+  
+  if (name.includes('imun') || name.includes('infecç') || name.includes('immune') ||
+      name.includes('infection')) {
+    return { category: 'Imunológica', category_en: 'Immunological', severity: 'medium' };
+  }
+  
+  if (name.includes('intestinal') || name.includes('digestiv') || name.includes('disbiose') ||
+      name.includes('gastrointestinal')) {
+    return { category: 'Digestiva', category_en: 'Digestive', severity: 'medium' };
+  }
+  
+  if (name.includes('hepát') || name.includes('fígado') || name.includes('hepat') ||
+      name.includes('liver')) {
+    return { category: 'Hepática', category_en: 'Hepatic', severity: 'high' };
+  }
+  
+  if (name.includes('dermat') || name.includes('pele') || name.includes('alérgica') ||
+      name.includes('skin') || name.includes('allergic')) {
+    return { category: 'Dermatológica', category_en: 'Dermatological', severity: 'medium' };
+  }
+  
+  if (name.includes('fadiga') || name.includes('energia') || name.includes('metabolismo') || 
+      name.includes('nutricional') || name.includes('fatigue') || name.includes('energy')) {
+    return { category: 'Metabólica', category_en: 'Metabolic', severity: 'low' };
+  }
+  
+  if (name.includes('câncer') || name.includes('tumor') || name.includes('cancer')) {
+    return { category: 'Oncológica', category_en: 'Oncological', severity: 'critical' };
+  }
+  
+  if (name.includes('ocular') || name.includes('olho') || name.includes('eye')) {
+    return { category: 'Oftalmológica', category_en: 'Ophthalmic', severity: 'medium' };
+  }
+  
+  if (name.includes('respiratór') || name.includes('alergia') || name.includes('respiratory')) {
+    return { category: 'Respiratória', category_en: 'Respiratory', severity: 'medium' };
+  }
+  
+  if (name.includes('oxidativ') || name.includes('antioxidante') || name.includes('oxidative')) {
+    return { category: 'Oxidativa', category_en: 'Oxidative', severity: 'medium' };
+  }
+  
+  if (name.includes('envelhecimento') || name.includes('telômero') || name.includes('epigenética') || 
+      name.includes('longevidade') || name.includes('aging') || name.includes('telomere')) {
+    return { category: 'Envelhecimento', category_en: 'Aging', severity: 'high' };
+  }
+  
+  if (name.includes('inflam') || name.includes('inflamm')) {
+    return { category: 'Inflamatória', category_en: 'Inflammatory', severity: 'high' };
+  }
+  
+  return { category: 'Geral', category_en: 'General', severity: 'medium' };
+};
+
 // Dados mockados de condições por nutracêutico
 const NUTRACEUTICAL_CONDITIONS_MAP: Record<string, {
-  prevention: Array<{ name: string; efficacyScore: number }>;
-  treatment: Array<{ name: string; efficacyScore: number }>;
-  support: Array<{ name: string; efficacyScore: number }>;
+  prevention: Array<{ name: string; name_en?: string; efficacyScore: number }>;
+  treatment: Array<{ name: string; name_en?: string; efficacyScore: number }>;
+  support: Array<{ name: string; name_en?: string; efficacyScore: number }>;
 }> = {
   'Glucosamina': {
     prevention: [
-      { name: 'Osteoartrite canina', efficacyScore: 3.2 },
-      { name: 'Problemas articulares', efficacyScore: 3.8 },
-      { name: 'Degeneração cartilaginosa', efficacyScore: 3.5 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 3.2 },
+      { name: 'Problemas articulares', name_en: 'Joint Problems', efficacyScore: 3.8 },
+      { name: 'Degeneração cartilaginosa', name_en: 'Cartilage Degeneration', efficacyScore: 3.5 }
     ],
     treatment: [
-      { name: 'Osteoartrite canina', efficacyScore: 4.2 },
-      { name: 'Problemas articulares', efficacyScore: 4.0 },
-      { name: 'Dor articular', efficacyScore: 3.9 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 4.2 },
+      { name: 'Problemas articulares', name_en: 'Joint Problems', efficacyScore: 4.0 },
+      { name: 'Dor articular', name_en: 'Joint Pain', efficacyScore: 3.9 }
     ],
     support: [
-      { name: 'Osteoartrite canina', efficacyScore: 3.7 },
-      { name: 'Mobilidade articular', efficacyScore: 4.0 },
-      { name: 'Saúde das cartilagens', efficacyScore: 3.8 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 3.7 },
+      { name: 'Mobilidade articular', name_en: 'Joint Mobility', efficacyScore: 4.0 },
+      { name: 'Saúde das cartilagens', name_en: 'Cartilage Health', efficacyScore: 3.8 }
     ]
   },
   'Condroitina': {
     prevention: [
-      { name: 'Osteoartrite canina', efficacyScore: 3.5 },
-      { name: 'Degeneração articular', efficacyScore: 3.7 },
-      { name: 'Problemas articulares', efficacyScore: 3.4 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 3.5 },
+      { name: 'Degeneração articular', name_en: 'Joint Degeneration', efficacyScore: 3.7 },
+      { name: 'Problemas articulares', name_en: 'Joint Problems', efficacyScore: 3.4 }
     ],
     treatment: [
-      { name: 'Osteoartrite canina', efficacyScore: 4.1 },
-      { name: 'Degeneração articular', efficacyScore: 3.9 },
-      { name: 'Dor articular', efficacyScore: 3.8 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 4.1 },
+      { name: 'Degeneração articular', name_en: 'Joint Degeneration', efficacyScore: 3.9 },
+      { name: 'Dor articular', name_en: 'Joint Pain', efficacyScore: 3.8 }
     ],
     support: [
-      { name: 'Osteoartrite canina', efficacyScore: 3.6 },
-      { name: 'Estrutura cartilaginosa', efficacyScore: 3.5 },
-      { name: 'Saúde articular', efficacyScore: 3.7 }
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 3.6 },
+      { name: 'Estrutura cartilaginosa', name_en: 'Cartilage Structure', efficacyScore: 3.5 },
+      { name: 'Saúde articular', name_en: 'Joint Health', efficacyScore: 3.7 }
     ]
   },
   'L-carnitina': {
     prevention: [
-      { name: 'Problemas cardíacos', efficacyScore: 3.8 },
-      { name: 'Cardiomiopatia', efficacyScore: 3.5 },
-      { name: 'Função cardíaca', efficacyScore: 3.6 }
+      { name: 'Problemas cardíacos', name_en: 'Heart Problems', efficacyScore: 3.8 },
+      { name: 'Cardiomiopatia', name_en: 'Cardiomyopathy', efficacyScore: 3.5 },
+      { name: 'Função cardíaca', name_en: 'Cardiac Function', efficacyScore: 3.6 }
     ],
     treatment: [
-      { name: 'Cardiomiopatia dilatada', efficacyScore: 4.3 },
-      { name: 'Função cardíaca', efficacyScore: 4.0 },
-      { name: 'Insuficiência cardíaca', efficacyScore: 3.9 }
+      { name: 'Cardiomiopatia dilatada', name_en: 'Dilated Cardiomyopathy', efficacyScore: 4.3 },
+      { name: 'Função cardíaca', name_en: 'Cardiac Function', efficacyScore: 4.0 },
+      { name: 'Insuficiência cardíaca', name_en: 'Heart Failure', efficacyScore: 3.9 }
     ],
     support: [
-      { name: 'Função cardíaca', efficacyScore: 4.0 },
-      { name: 'Metabolismo energético', efficacyScore: 3.8 },
-      { name: 'Saúde cardiovascular', efficacyScore: 3.7 }
+      { name: 'Função cardíaca', name_en: 'Cardiac Function', efficacyScore: 4.0 },
+      { name: 'Metabolismo energético', name_en: 'Energy Metabolism', efficacyScore: 3.8 },
+      { name: 'Saúde cardiovascular', name_en: 'Cardiovascular Health', efficacyScore: 3.7 }
     ]
   },
   'Equinácea': {
     prevention: [
-      { name: 'Infecções respiratórias', efficacyScore: 3.8 },
-      { name: 'Infecções recorrentes', efficacyScore: 3.5 },
-      { name: 'Sistema imunológico enfraquecido', efficacyScore: 3.7 }
+      { name: 'Infecções respiratórias', name_en: 'Respiratory Infections', efficacyScore: 3.8 },
+      { name: 'Infecções recorrentes', name_en: 'Recurrent Infections', efficacyScore: 3.5 },
+      { name: 'Sistema imunológico enfraquecido', name_en: 'Weakened Immune System', efficacyScore: 3.7 }
     ],
     treatment: [
-      { name: 'Infecções respiratórias', efficacyScore: 4.2 },
-      { name: 'Infecções recorrentes', efficacyScore: 3.9 }
+      { name: 'Infecções respiratórias', name_en: 'Respiratory Infections', efficacyScore: 4.2 },
+      { name: 'Infecções recorrentes', name_en: 'Recurrent Infections', efficacyScore: 3.9 }
     ],
     support: [
-      { name: 'Sistema imunológico', efficacyScore: 4.0 }
+      { name: 'Sistema imunológico', name_en: 'Immune System', efficacyScore: 4.0 }
     ]
   },
   'Quitosana': {
     prevention: [
-      { name: 'Obesidade canina', efficacyScore: 3.5 },
-      { name: 'Sobrepeso', efficacyScore: 3.6 }
+      { name: 'Obesidade canina', name_en: 'Canine Obesity', efficacyScore: 3.5 },
+      { name: 'Sobrepeso', name_en: 'Overweight', efficacyScore: 3.6 }
     ],
     treatment: [
-      { name: 'Obesidade canina', efficacyScore: 3.8 },
-      { name: 'Hipercolesterolemia', efficacyScore: 3.7 }
+      { name: 'Obesidade canina', name_en: 'Canine Obesity', efficacyScore: 3.8 },
+      { name: 'Hipercolesterolemia', name_en: 'Hypercholesterolemia', efficacyScore: 3.7 }
     ],
     support: [
-      { name: 'Controle de peso', efficacyScore: 3.9 },
-      { name: 'Saúde digestiva', efficacyScore: 3.5 }
+      { name: 'Controle de peso', name_en: 'Weight Control', efficacyScore: 3.9 },
+      { name: 'Saúde digestiva', name_en: 'Digestive Health', efficacyScore: 3.5 }
     ]
   },
   'Coenzima Q10': {
     prevention: [
-      { name: 'Problemas cardíacos', efficacyScore: 3.9 },
-      { name: 'Estresse oxidativo', efficacyScore: 3.7 }
+      { name: 'Problemas cardíacos', name_en: 'Heart Problems', efficacyScore: 3.9 },
+      { name: 'Estresse oxidativo', name_en: 'Oxidative Stress', efficacyScore: 3.7 }
     ],
     treatment: [
-      { name: 'Cardiomiopatia dilatada', efficacyScore: 4.1 },
-      { name: 'Insuficiência cardíaca', efficacyScore: 4.0 },
-      { name: 'Função cardíaca', efficacyScore: 3.9 }
+      { name: 'Cardiomiopatia dilatada', name_en: 'Dilated Cardiomyopathy', efficacyScore: 4.1 },
+      { name: 'Insuficiência cardíaca', name_en: 'Heart Failure', efficacyScore: 4.0 },
+      { name: 'Função cardíaca', name_en: 'Cardiac Function', efficacyScore: 3.9 }
     ],
     support: [
-      { name: 'Função cardíaca', efficacyScore: 4.0 },
-      { name: 'Energia celular', efficacyScore: 3.8 },
-      { name: 'Saúde cardiovascular', efficacyScore: 3.9 }
+      { name: 'Função cardíaca', name_en: 'Cardiac Function', efficacyScore: 4.0 },
+      { name: 'Energia celular', name_en: 'Cellular Energy', efficacyScore: 3.8 },
+      { name: 'Saúde cardiovascular', name_en: 'Cardiovascular Health', efficacyScore: 3.9 }
     ]
   },
   'EPA (Ácido eicosapentaenoico)': {
     prevention: [
-      { name: 'Inflamação crônica', efficacyScore: 3.9 },
-      { name: 'Problemas cardiovasculares', efficacyScore: 3.7 },
-      { name: 'Problemas articulares', efficacyScore: 3.6 }
+      { name: 'Inflamação crônica', name_en: 'Chronic Inflammation', efficacyScore: 3.9 },
+      { name: 'Problemas cardiovasculares', name_en: 'Cardiovascular Problems', efficacyScore: 3.7 },
+      { name: 'Problemas articulares', name_en: 'Joint Problems', efficacyScore: 3.6 }
     ],
     treatment: [
-      { name: 'Inflamação crônica', efficacyScore: 4.3 },
-      { name: 'Osteoartrite canina', efficacyScore: 4.1 },
-      { name: 'Dermatite atópica', efficacyScore: 4.0 }
+      { name: 'Inflamação crônica', name_en: 'Chronic Inflammation', efficacyScore: 4.3 },
+      { name: 'Osteoartrite canina', name_en: 'Canine Osteoarthritis', efficacyScore: 4.1 },
+      { name: 'Dermatite atópica', name_en: 'Atopic Dermatitis', efficacyScore: 4.0 }
     ],
     support: [
-      { name: 'Saúde cardiovascular', efficacyScore: 4.0 },
-      { name: 'Função cerebral', efficacyScore: 3.8 },
-      { name: 'Saúde da pele', efficacyScore: 3.9 }
+      { name: 'Saúde cardiovascular', name_en: 'Cardiovascular Health', efficacyScore: 4.0 },
+      { name: 'Função cerebral', name_en: 'Brain Function', efficacyScore: 3.8 },
+      { name: 'Saúde da pele', name_en: 'Skin Health', efficacyScore: 3.9 }
     ]
   },
   'Prebióticos': {
     prevention: [
-      { name: 'Disbiose intestinal', efficacyScore: 3.8 },
-      { name: 'Problemas digestivos', efficacyScore: 3.6 },
-      { name: 'Sistema imunológico enfraquecido', efficacyScore: 3.5 }
+      { name: 'Disbiose intestinal', name_en: 'Gut Dysbiosis', efficacyScore: 3.8 },
+      { name: 'Problemas digestivos', name_en: 'Digestive Problems', efficacyScore: 3.6 },
+      { name: 'Sistema imunológico enfraquecido', name_en: 'Weakened Immune System', efficacyScore: 3.5 }
     ],
     treatment: [
-      { name: 'Disbiose intestinal', efficacyScore: 4.1 },
-      { name: 'Diarreia crônica', efficacyScore: 3.9 },
-      { name: 'Constipação', efficacyScore: 3.7 }
+      { name: 'Disbiose intestinal', name_en: 'Gut Dysbiosis', efficacyScore: 4.1 },
+      { name: 'Diarreia crônica', name_en: 'Chronic Diarrhea', efficacyScore: 3.9 },
+      { name: 'Constipação', name_en: 'Constipation', efficacyScore: 3.7 }
     ],
     support: [
-      { name: 'Saúde digestiva', efficacyScore: 4.0 },
-      { name: 'Microbiota intestinal', efficacyScore: 4.2 },
-      { name: 'Sistema imunológico', efficacyScore: 3.8 }
+      { name: 'Saúde digestiva', name_en: 'Digestive Health', efficacyScore: 4.0 },
+      { name: 'Microbiota intestinal', name_en: 'Gut Microbiota', efficacyScore: 4.2 },
+      { name: 'Sistema imunológico', name_en: 'Immune System', efficacyScore: 3.8 }
     ]
   },
   'Vitamina E': {
     prevention: [
-      { name: 'Estresse oxidativo', efficacyScore: 3.9 },
-      { name: 'Problemas de pele', efficacyScore: 3.6 },
-      { name: 'Imunodeficiência', efficacyScore: 3.5 }
+      { name: 'Estresse oxidativo', name_en: 'Oxidative Stress', efficacyScore: 3.9 },
+      { name: 'Problemas de pele', name_en: 'Skin Problems', efficacyScore: 3.6 },
+      { name: 'Imunodeficiência', name_en: 'Immunodeficiency', efficacyScore: 3.5 }
     ],
     treatment: [
-      { name: 'Dermatite', efficacyScore: 3.8 },
-      { name: 'Estresse oxidativo', efficacyScore: 4.0 },
-      { name: 'Problemas musculares', efficacyScore: 3.7 }
+      { name: 'Dermatite', name_en: 'Dermatitis', efficacyScore: 3.8 },
+      { name: 'Estresse oxidativo', name_en: 'Oxidative Stress', efficacyScore: 4.0 },
+      { name: 'Problemas musculares', name_en: 'Muscle Problems', efficacyScore: 3.7 }
     ],
     support: [
-      { name: 'Saúde da pele', efficacyScore: 3.9 },
-      { name: 'Sistema imunológico', efficacyScore: 3.7 },
-      { name: 'Função celular', efficacyScore: 3.8 }
+      { name: 'Saúde da pele', name_en: 'Skin Health', efficacyScore: 3.9 },
+      { name: 'Sistema imunológico', name_en: 'Immune System', efficacyScore: 3.7 },
+      { name: 'Função celular', name_en: 'Cellular Function', efficacyScore: 3.8 }
     ]
   },
   'Silimarina': {
     prevention: [
-      { name: 'Danos hepáticos', efficacyScore: 3.9 }
+      { name: 'Danos hepáticos', name_en: 'Liver Damage', efficacyScore: 3.9 }
     ],
     treatment: [
-      { name: 'Hepatopatias crônicas e agudas', efficacyScore: 4.1 }
+      { name: 'Hepatopatias crônicas e agudas', name_en: 'Chronic and Acute Liver Disease', efficacyScore: 4.1 }
     ],
     support: [
-      { name: 'Função hepática', efficacyScore: 3.8 }
+      { name: 'Função hepática', name_en: 'Liver Function', efficacyScore: 3.8 }
     ]
   },
   'Própolis Verde': {
     prevention: [
-      { name: 'Infecções respiratórias', efficacyScore: 2.5 },
-      { name: 'Alergias sazonais', efficacyScore: 2.2 }
+      { name: 'Infecções respiratórias', name_en: 'Respiratory Infections', efficacyScore: 2.5 },
+      { name: 'Alergias sazonais', name_en: 'Seasonal Allergies', efficacyScore: 2.2 }
     ],
     treatment: [
-      { name: 'Infecções bacterianas leves', efficacyScore: 2.5 }
+      { name: 'Infecções bacterianas leves', name_en: 'Mild Bacterial Infections', efficacyScore: 2.5 }
     ],
     support: [
-      { name: 'Sistema imune', efficacyScore: 3.0 }
+      { name: 'Sistema imune', name_en: 'Immune System', efficacyScore: 3.0 }
     ]
   },
   'Pólen de Abelha': {
     prevention: [
-      { name: 'Deficiência nutricional', efficacyScore: 1.8 }
+      { name: 'Deficiência nutricional', name_en: 'Nutritional Deficiency', efficacyScore: 1.8 }
     ],
     treatment: [
-      { name: 'Fadiga', efficacyScore: 2.0 }
+      { name: 'Fadiga', name_en: 'Fatigue', efficacyScore: 2.0 }
     ],
     support: [
-      { name: 'Metabolismo', efficacyScore: 2.2 },
-      { name: 'Energia', efficacyScore: 2.5 }
+      { name: 'Metabolismo', name_en: 'Metabolism', efficacyScore: 2.2 },
+      { name: 'Energia', name_en: 'Energy', efficacyScore: 2.5 }
     ]
   },
   'Allicina': {
     prevention: [
-      { name: 'Cardiovascular', efficacyScore: 3.2 },
-      { name: 'Infecções', efficacyScore: 2.8 }
+      { name: 'Cardiovascular', name_en: 'Cardiovascular Disease', efficacyScore: 3.2 },
+      { name: 'Infecções', name_en: 'Infections', efficacyScore: 2.8 }
     ],
     treatment: [],
     support: [
-      { name: 'Saúde Cardiovascular', efficacyScore: 3.0 },
-      { name: 'Sistema imunológico', efficacyScore: 2.5 }
+      { name: 'Saúde Cardiovascular', name_en: 'Cardiovascular Health', efficacyScore: 3.0 },
+      { name: 'Sistema imunológico', name_en: 'Immune System', efficacyScore: 2.5 }
     ]
   },
   'Apigenina': {
     prevention: [
-      { name: 'Câncer', efficacyScore: 3.5 },
-      { name: 'Inflamação', efficacyScore: 3.2 }
+      { name: 'Câncer', name_en: 'Cancer', efficacyScore: 3.5 },
+      { name: 'Inflamação', name_en: 'Inflammation', efficacyScore: 3.2 }
     ],
     treatment: [],
     support: [
-      { name: 'Saúde Óssea', efficacyScore: 3.0 },
-      { name: 'Câncer Canino', efficacyScore: 3.0 },
-      { name: 'Sistema imunológico', efficacyScore: 2.8 }
+      { name: 'Saúde Óssea', name_en: 'Bone Health', efficacyScore: 3.0 },
+      { name: 'Câncer Canino', name_en: 'Canine Cancer', efficacyScore: 3.0 },
+      { name: 'Sistema imunológico', name_en: 'Immune System', efficacyScore: 2.8 }
     ]
   },
   'Beta-Glucanas': {
     prevention: [
-      { name: 'Infecções', efficacyScore: 3.8 },
-      { name: 'Câncer', efficacyScore: 3.2 }
+      { name: 'Infecções', name_en: 'Infections', efficacyScore: 3.8 },
+      { name: 'Câncer', name_en: 'Cancer', efficacyScore: 3.2 }
     ],
     treatment: [],
     support: [
-      { name: 'Suporte Imunológico', efficacyScore: 3.0 },
-      { name: 'Saúde intestinal', efficacyScore: 3.2 },
-      { name: 'Resposta imune', efficacyScore: 3.8 }
+      { name: 'Suporte Imunológico', name_en: 'Immune Support', efficacyScore: 3.0 },
+      { name: 'Saúde intestinal', name_en: 'Gut Health', efficacyScore: 3.2 },
+      { name: 'Resposta imune', name_en: 'Immune Response', efficacyScore: 3.8 }
     ]
   },
   'Ácido Alfa-Lipóico': {
     prevention: [
-      { name: 'Anti-envelhecimento', efficacyScore: 4.0 },
-      { name: 'Estresse oxidativo', efficacyScore: 3.8 }
+      { name: 'Anti-envelhecimento', name_en: 'Anti-aging', efficacyScore: 4.0 },
+      { name: 'Estresse oxidativo', name_en: 'Oxidative Stress', efficacyScore: 3.8 }
     ],
     treatment: [
-      { name: 'Artrite', efficacyScore: 1.0 },
-      { name: 'Cardiomiopatia dilatada', efficacyScore: 3.0 }
+      { name: 'Artrite', name_en: 'Arthritis', efficacyScore: 1.0 },
+      { name: 'Cardiomiopatia dilatada', name_en: 'Dilated Cardiomyopathy', efficacyScore: 3.0 }
     ],
     support: [
-      { name: 'Estresse Oxidativo', efficacyScore: 3.0 },
-      { name: 'Função antioxidante', efficacyScore: 3.5 }
+      { name: 'Estresse Oxidativo', name_en: 'Oxidative Stress', efficacyScore: 3.0 },
+      { name: 'Função antioxidante', name_en: 'Antioxidant Function', efficacyScore: 3.5 }
     ]
   },
   'Astaxantina': {
     prevention: [
-      { name: 'Disfunção renal', efficacyScore: 3.5 },
-      { name: 'Estresse oxidativo', efficacyScore: 4.2 }
+      { name: 'Disfunção renal', name_en: 'Renal Dysfunction', efficacyScore: 3.5 },
+      { name: 'Estresse oxidativo', name_en: 'Oxidative Stress', efficacyScore: 4.2 }
     ],
     treatment: [],
     support: [
-      { name: 'Saúde Ocular', efficacyScore: 3.0 },
-      { name: 'Estresse Oxidativo', efficacyScore: 3.0 },
-      { name: 'Função renal', efficacyScore: 3.2 }
+      { name: 'Saúde Ocular', name_en: 'Eye Health', efficacyScore: 3.0 },
+      { name: 'Estresse Oxidativo', name_en: 'Oxidative Stress', efficacyScore: 3.0 },
+      { name: 'Função renal', name_en: 'Renal Function', efficacyScore: 3.2 }
     ]
   },
   'Quercetina': {
     prevention: [
-      { name: 'Lesão renal', efficacyScore: 3.5 }
+      { name: 'Lesão renal', name_en: 'Kidney Injury', efficacyScore: 3.5 }
     ],
     treatment: [
-      { name: 'Nefropatia', efficacyScore: 3.2 }
+      { name: 'Nefropatia', name_en: 'Nephropathy', efficacyScore: 3.2 }
     ],
     support: [
-      { name: 'Função renal', efficacyScore: 3.8 }
+      { name: 'Função renal', name_en: 'Renal Function', efficacyScore: 3.8 }
     ]
   },
   'Astragalus': {
     prevention: [
-      { name: 'Disfunção renal', efficacyScore: 2.8 },
-      { name: 'Imunossupressão', efficacyScore: 3.8 }
+      { name: 'Disfunção renal', name_en: 'Renal Dysfunction', efficacyScore: 2.8 },
+      { name: 'Imunossupressão', name_en: 'Immunosuppression', efficacyScore: 3.8 }
     ],
     treatment: [],
     support: [
-      { name: 'Proteinúria', efficacyScore: 2.6 },
-      { name: 'Sistema imunológico renal', efficacyScore: 3.0 },
-      { name: 'Função imune', efficacyScore: 3.5 }
+      { name: 'Proteinúria', name_en: 'Proteinuria', efficacyScore: 2.6 },
+      { name: 'Sistema imunológico renal', name_en: 'Renal Immune System', efficacyScore: 3.0 },
+      { name: 'Função imune', name_en: 'Immune Function', efficacyScore: 3.5 }
     ]
   }
 };

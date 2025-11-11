@@ -23,7 +23,9 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
   const handleAutoTranslate = async () => {
     setIsTranslating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('translate-conditions');
+      toast.info('Iniciando tradução e categorização...');
+      
+      const { data, error } = await supabase.functions.invoke('translate-and-categorize-conditions');
       
       if (error) throw error;
       
@@ -31,11 +33,11 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
         toast.success(data.message);
         onRefresh();
       } else {
-        toast.error(data.error || 'Erro ao traduzir condições');
+        toast.error(data.error || 'Erro ao traduzir e categorizar condições');
       }
     } catch (error) {
       console.error('Erro ao chamar função de tradução:', error);
-      toast.error('Erro ao iniciar tradução automática');
+      toast.error('Erro ao iniciar tradução e categorização');
     } finally {
       setIsTranslating(false);
     }
@@ -58,7 +60,7 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
           className="flex items-center gap-2"
         >
           <Languages className={`h-4 w-4 ${isTranslating ? 'animate-pulse' : ''}`} />
-          {isTranslating ? 'Traduzindo...' : 'Traduzir para EN'}
+          {isTranslating ? 'Processando...' : '🌍 Traduzir e Categorizar'}
         </Button>
         
         <Button

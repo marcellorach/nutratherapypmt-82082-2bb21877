@@ -3,5 +3,8 @@ project_id = "kytkpkimzwazhpnxahxt"
 [functions.translate-conditions]
 verify_jwt = false
 
+[functions.translate-and-categorize-conditions]
+verify_jwt = false
+
 [functions.translate-text]
 verify_jwt = false

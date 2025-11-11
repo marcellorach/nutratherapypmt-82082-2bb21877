@@ -9,6 +9,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- 🌍 **Sistema completo de bilinguismo para condições veterinárias**:
+  - Todas condições agora criadas com name (PT) + name_en (EN) desde o início
+  - Interface 100% consistente independente do idioma selecionado (PT/EN)
+  - Sistema automático de tradução via Lovable AI (Gemini 2.5 Flash)
+  - Nova Edge Function `translate-and-categorize-conditions` para atualizar condições existentes
+
+- 📊 **Sistema inteligente de categorização de condições**:
+  - 14 categorias veterinárias profissionais definidas:
+    * Musculoesquelética, Cardiovascular, Renal, Imunológica
+    * Digestiva, Hepática, Dermatológica, Metabólica
+    * Oncológica, Oftalmológica, Respiratória, Oxidativa
+    * Envelhecimento, Inflamatória, Geral
+  - Categorização automática baseada em análise semântica do nome da condição
+  - Cada categoria possui nome bilíngue (PT/EN)
+  - Todas condições exibem categoria apropriada na tabela
+
+- 🎯 **Sistema de severity level para condições**:
+  - 4 níveis de gravidade clínica: low, medium, high, critical
+  - Atribuição automática baseada na categoria e tipo de condição
+  - Badges coloridos na interface para visualização rápida
+  - Facilita priorização e tomada de decisão clínica
+
 ### Fixed
 - 🐛 **CRÍTICO: Correção do efficacy_score na migração de condições**:
   - Removida multiplicação por 10 que violava check constraint do banco (0-10)
