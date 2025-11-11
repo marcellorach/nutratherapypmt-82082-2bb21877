@@ -21,7 +21,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Fixed
 - ✅ Implementado desenvolvimento bilíngue obrigatório no `DataManagementPanel` (39 textos traduzidos PT/EN)
 - ✅ Implementado desenvolvimento bilíngue obrigatório no `KnowledgeBaseSettingsTab` (6 textos traduzidos PT/EN)
-- ✅ Incrementada versão i18n para 1.0.13 (force reload de traduções via cache invalidation)
+- ✅ Incrementada versão i18n para 1.0.14 (force reload de traduções via cache invalidation)
+- ✅ Corrigida estrutura de chaves de tradução em `admin.settings.knowledgeBase` (removida duplicação)
 - ✅ Adicionada estrutura completa `dataManagement` com 39 chaves em `pt/translation.json` e `en/translation.json`
 - ✅ Adicionada estrutura completa `admin.settings.knowledgeBase` com 6 chaves em ambos arquivos de tradução
 - ✅ Todos os textos hardcoded substituídos por chamadas `t()` com `useTranslation` hook
