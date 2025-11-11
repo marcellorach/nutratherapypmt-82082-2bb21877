@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Zap, Gauge, Check, ChevronRight, Activity } from "lucide-react";
+import { Zap, Gauge, ChevronRight, Activity } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -53,23 +53,6 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "actions"} 
-          onClick={() => handleStepClick("actions")}
-          className={currentStep === "actions" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Check className={`h-4 w-4 mr-2 ${currentStep === "actions" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.actions.bulkActions')}</span>
-            </div>
-            {currentStep === "actions" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           isActive={currentStep === "acompanhamento"} 
           onClick={() => handleStepClick("acompanhamento")}
           className={currentStep === "acompanhamento" ? "bg-primary/10 text-primary" : ""}
@@ -77,9 +60,26 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Activity className={`h-4 w-4 mr-2 ${currentStep === "acompanhamento" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.actions.monitoring')}</span>
+              <span>{t('campaignManagement')}</span>
             </div>
             {currentStep === "acompanhamento" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "clinical-monitoring"} 
+          onClick={() => handleStepClick("clinical-monitoring")}
+          className={currentStep === "clinical-monitoring" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Activity className={`h-4 w-4 mr-2 ${currentStep === "clinical-monitoring" ? "text-primary" : ""}`} />
+              <span>{t('clinicalMonitoring.title')}</span>
+            </div>
+            {currentStep === "clinical-monitoring" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>

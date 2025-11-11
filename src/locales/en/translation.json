@@ -3323,5 +3323,62 @@
       "type": "Insight Type",
       "confidence": "Minimum Confidence"
     }
-  }
+  },
+  "clinicalMonitoring": {
+    "title": "Clinical Monitoring",
+    "subtitle": "Longitudinal tracking of pets in nutritherapy",
+    "tabs": {
+      "dashboard": "Overview",
+      "byCondition": "By Condition",
+      "timeline": "Timeline Evolution"
+    },
+    "metrics": {
+      "totalPets": "Total Monitored Pets",
+      "activeMonitoring": "Under active monitoring",
+      "averageFollowup": "Average Follow-up Time",
+      "months": "months",
+      "longitudinalData": "Longitudinal data",
+      "adherenceRate": "Protocol Adherence Rate",
+      "protocolCompliance": "Protocol compliance",
+      "responseRate": "Response Rate",
+      "positiveOutcomes": "Positive outcomes",
+      "treatmentStatus": "Treatment Status"
+    },
+    "status": {
+      "significant": "Significant Improvement",
+      "mild": "Mild Improvement",
+      "none": "No Improvement",
+      "insufficient": "Insufficient Data"
+    },
+    "breedDistribution": {
+      "title": "Distribution by Breed (Top 10)"
+    },
+    "condition": {
+      "cases": "cases",
+      "showMore": "View Details",
+      "showLess": "Hide Details",
+      "topBreeds": "Most Affected Breeds",
+      "commonNutraceuticals": "Most Used Nutraceuticals",
+      "timeToImprovement": "Average Time to Improvement",
+      "weeks": "weeks"
+    },
+    "timeline": {
+      "newPetsPerMonth": "New Pets per Month",
+      "newPets": "New Pets",
+      "responseRates": "Response Rates Over Time",
+      "dropoutRate": "Dropout Rate",
+      "dropouts": "Dropouts"
+    },
+    "filters": {
+      "title": "Filters",
+      "clear": "Clear Filters",
+      "breed": "Breed",
+      "condition": "Health Condition",
+      "responseStatus": "Response Status",
+      "region": "Region",
+      "showing": "Showing",
+      "pets": "pets"
+    }
+  },
+  "campaignManagement": "Campaign Management"
 }

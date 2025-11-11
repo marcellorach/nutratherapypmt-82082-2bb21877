@@ -32,6 +32,7 @@ const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/
 const VisualizationStep = lazy(() => import('@/components/administrador/dataAnalysis/VisualizationStep'));
 const ActionsStep = lazy(() => import('@/components/administrador/dataAnalysis/ActionsStep'));
 const AcompanhamentoTab = lazy(() => import('@/components/administrador/acompanhamento/AcompanhamentoTab'));
+const ClinicalMonitoringTab = lazy(() => import('@/components/administrador/clinical-monitoring/ClinicalMonitoringTab'));
 const DataProcessingSettingsTab = lazy(() => import('@/components/administrador/settings/DataProcessingSettingsTab'));
 const EstudosPlanejadosTab = lazy(() => import('@/components/administrador/pesquisa/EstudosPlanejadosTab'));
 const EstudosAndamentoTab = lazy(() => import('@/components/administrador/pesquisa/EstudosAndamentoTab'));
@@ -127,16 +128,23 @@ export const adminTabsConfig: AdminTabConfig[] = [
   {
     id: 'actions',
     label: 'Ações',
-    group: 'data-processing',
+    group: 'configuration',
     component: ActionsStep,
-    description: 'Ações e processamento'
+    description: 'Ações em lote e processamento'
   },
   {
     id: 'acompanhamento',
-    label: 'Acompanhamento',
+    label: 'Gestão de Campanhas',
     group: 'data-processing',
     component: AcompanhamentoTab,
-    description: 'Acompanhamento de campanhas'
+    description: 'Gestão de campanhas de marketing'
+  },
+  {
+    id: 'clinical-monitoring',
+    label: 'Monitoramento Clínico',
+    group: 'data-processing',
+    component: ClinicalMonitoringTab,
+    description: 'Monitoramento longitudinal de pets em nutraterapia'
   },
   {
     id: 'data-processing-settings',

@@ -9,6 +9,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✨ **Sistema de Monitoramento Clínico completo**:
+  - Nova tab "Monitoramento Clínico" com 12,847 pets em acompanhamento
+  - 9 condições de saúde: Artrite, Cardíaca, Renal, Hepática, Alergias, Ansiedade, **Obesidade**, **Diabetes**, **Câncer**
+  - Dashboard com métricas: tempo médio acompanhamento (8.3 meses), taxa adesão (76.2%)
+  - Distribuição realista: 32.4% melhora significativa, 21.8% leve, 18.7% sem melhora, 27.1% dados insuficientes
+  - Análise por condição com top raças, nutracêuticos usados, tempo para melhora
+  - Timeline evolutiva com novos pets/mês, taxas de resposta, dropouts
+  - Filtros: raça (50+), condição, status resposta, região
+  - Dados mock estatisticamente realistas para demo Stanford
+  - Arquivos: `mockClinicalData.ts`, `ClinicalMonitoringTab.tsx` + 6 componentes
+
+### Changed
+- 🔄 **Reorganização de navegação administrativa**:
+  - "Bulk Actions" movido de "Actions" → "Configuration"
+  - "Monitoring" renomeado para "Campaign Management" (PT: Gestão de Campanhas)
+  - Nova tab "Clinical Monitoring" adicionada ao grupo "Actions"
+  - ActionsGroup.tsx e ConfigurationGroup.tsx atualizados
+- 🌍 **Traduções bilíngues completas**: `clinicalMonitoring.*` e `campaignManagement` em PT/EN
+- 🔢 **Versão i18n incrementada**: 1.3.3 → 1.3.4
+
 ### Changed
 - 🎨 **Rebrand visual NTAI → RAG no frontend**:
   - **Badge removido**: Removido badge "Advanced Processing" / "Processamento Avançado" da seção de análise (EstudosTab.tsx linhas 136-142)

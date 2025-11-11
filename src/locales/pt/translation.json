@@ -3323,5 +3323,62 @@
       "type": "Tipo de Insight",
       "confidence": "Confiança Mínima"
     }
-  }
+  },
+  "clinicalMonitoring": {
+    "title": "Monitoramento Clínico",
+    "subtitle": "Acompanhamento longitudinal de pets em nutraterapia",
+    "tabs": {
+      "dashboard": "Visão Geral",
+      "byCondition": "Por Condição",
+      "timeline": "Evolução Temporal"
+    },
+    "metrics": {
+      "totalPets": "Total de Pets Monitorados",
+      "activeMonitoring": "Em acompanhamento ativo",
+      "averageFollowup": "Tempo Médio de Acompanhamento",
+      "months": "meses",
+      "longitudinalData": "Dados longitudinais",
+      "adherenceRate": "Taxa de Adesão ao Protocolo",
+      "protocolCompliance": "Conformidade com protocolo",
+      "responseRate": "Taxa de Resposta",
+      "positiveOutcomes": "Resultados positivos",
+      "treatmentStatus": "Status do Tratamento"
+    },
+    "status": {
+      "significant": "Melhora Significativa",
+      "mild": "Melhora Leve",
+      "none": "Sem Melhora",
+      "insufficient": "Sem Dados Suficientes"
+    },
+    "breedDistribution": {
+      "title": "Distribuição por Raça (Top 10)"
+    },
+    "condition": {
+      "cases": "casos",
+      "showMore": "Ver Detalhes",
+      "showLess": "Ocultar Detalhes",
+      "topBreeds": "Raças Mais Afetadas",
+      "commonNutraceuticals": "Nutracêuticos Mais Usados",
+      "timeToImprovement": "Tempo Médio para Melhora",
+      "weeks": "semanas"
+    },
+    "timeline": {
+      "newPetsPerMonth": "Novos Pets por Mês",
+      "newPets": "Novos Pets",
+      "responseRates": "Taxas de Resposta ao Longo do Tempo",
+      "dropoutRate": "Taxa de Abandono",
+      "dropouts": "Abandonos"
+    },
+    "filters": {
+      "title": "Filtros",
+      "clear": "Limpar Filtros",
+      "breed": "Raça",
+      "condition": "Condição de Saúde",
+      "responseStatus": "Status de Resposta",
+      "region": "Região",
+      "showing": "Mostrando",
+      "pets": "pets"
+    }
+  },
+  "campaignManagement": "Gestão de Campanhas"
 }

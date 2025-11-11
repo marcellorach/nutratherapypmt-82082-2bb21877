@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -63,6 +63,23 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <span>{t('admin.sidebar.configuration.aiPrompts')}</span>
             </div>
             {currentStep === "prompts" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "actions"} 
+          onClick={() => handleStepClick("actions")}
+          className={currentStep === "actions" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Check className={`h-4 w-4 mr-2 ${currentStep === "actions" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.actions.bulkActions')}</span>
+            </div>
+            {currentStep === "actions" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
