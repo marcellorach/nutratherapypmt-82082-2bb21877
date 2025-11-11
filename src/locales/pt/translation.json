@@ -385,6 +385,7 @@
       },
       "treatability": {
         "column": "Tratabilidade",
+        "pending": "A Catalogar",
         "none": "Não tratável",
         "low": "Baixa",
         "moderate": "Moderada",
@@ -397,7 +398,8 @@
         "treatment": "Tratamento",
         "prevention": "Prevenção",
         "support": "Suporte",
-        "avgEfficacy": "Eficácia Média"
+        "avgEfficacy": "Eficácia Média",
+        "noCatalogData": "Esta condição ainda não possui nutracêuticos catalogados."
       },
       "table": {
         "searchPlaceholder": "Buscar condição...",

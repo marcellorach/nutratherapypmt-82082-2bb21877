@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- ✅ Ajustado arredondamento de tratabilidade para múltiplos de 5 (5%, 10%, 15%...) para apresentação mais limpa e profissional
+- ✅ Implementado badge "A Catalogar" para condições sem nutracêuticos catalogados (mais claro e positivo que "0%")
+- ✅ Ajustados thresholds de tratabilidade: Baixa (0-35%), Moderada (40-65%), Boa (70-85%), Excelente (90-100%)
+- ✅ Seção expandida de detalhes agora mostra mensagem apropriada quando não há dados catalogados
+
 ### Added
 - 📊 **Nova coluna "Tratabilidade Média" na tabela de Alvos Veterinários**:
   - Cálculo baseado em efficacy scores e tipos de relacionamento (tratamento/prevenção/suporte)

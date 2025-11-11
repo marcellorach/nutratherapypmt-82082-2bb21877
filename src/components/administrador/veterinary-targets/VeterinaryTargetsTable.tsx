@@ -86,10 +86,12 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
     if (!avgEfficacy || nutraCount === 0) {
       return {
         percentage: 0,
-        level: 'none' as const,
+        level: 'pending' as const,
         color: 'text-gray-600',
-        bgColor: 'bg-gray-100',
-        label: t('admin.veterinaryTargets.treatability.none')
+        bgColor: 'bg-gray-50',
+        borderColor: 'border-gray-300',
+        label: t('admin.veterinaryTargets.treatability.pending'),
+        showCount: false
       };
     }
 
@@ -99,39 +101,48 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
     else if (preventionCount > 0) weight = 0.8;
     else if (supportCount > 0) weight = 0.6;
 
-    const percentage = Math.round((avgEfficacy / 5) * 100 * weight);
+    const rawPercentage = (avgEfficacy / 5) * 100 * weight;
+    const percentage = Math.round(rawPercentage / 5) * 5; // Arredonda para múltiplo de 5
 
-    if (percentage <= 30) {
+    if (percentage <= 35) {
       return {
         percentage,
         level: 'low' as const,
         color: 'text-red-700',
-        bgColor: 'bg-red-100',
-        label: t('admin.veterinaryTargets.treatability.low')
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        label: t('admin.veterinaryTargets.treatability.low'),
+        showCount: true
       };
-    } else if (percentage <= 60) {
+    } else if (percentage <= 65) {
       return {
         percentage,
         level: 'moderate' as const,
         color: 'text-amber-700',
-        bgColor: 'bg-amber-100',
-        label: t('admin.veterinaryTargets.treatability.moderate')
+        bgColor: 'bg-amber-50',
+        borderColor: 'border-amber-200',
+        label: t('admin.veterinaryTargets.treatability.moderate'),
+        showCount: true
       };
     } else if (percentage <= 85) {
       return {
         percentage,
         level: 'good' as const,
         color: 'text-green-700',
-        bgColor: 'bg-green-100',
-        label: t('admin.veterinaryTargets.treatability.good')
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+        label: t('admin.veterinaryTargets.treatability.good'),
+        showCount: true
       };
     } else {
       return {
         percentage,
         level: 'excellent' as const,
         color: 'text-blue-700',
-        bgColor: 'bg-blue-100',
-        label: t('admin.veterinaryTargets.treatability.excellent')
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200',
+        label: t('admin.veterinaryTargets.treatability.excellent'),
+        showCount: true
       };
     }
   };
@@ -276,17 +287,19 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                       <TableCell>
                         {(() => {
                           const treatability = calculateTreatability(condition);
-                          return (
+                          return treatability.showCount ? (
                             <div className="flex items-center gap-2">
-                              <div className={`px-2 py-1 rounded-md ${treatability.bgColor} ${treatability.color} text-xs font-semibold`}>
+                              <div className={`px-2.5 py-1 rounded-md border ${treatability.borderColor} ${treatability.bgColor} ${treatability.color} text-xs font-semibold`}>
                                 {treatability.percentage}%
                               </div>
-                              {condition.nutraceutical_count > 0 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {condition.nutraceutical_count} {t('admin.veterinaryTargets.treatability.nutraceuticals')}
-                                </Badge>
-                              )}
+                              <Badge variant="secondary" className="text-xs">
+                                {condition.nutraceutical_count} {t('admin.veterinaryTargets.treatability.nutraceuticals')}
+                              </Badge>
                             </div>
+                          ) : (
+                            <Badge variant="outline" className="text-xs text-gray-600 border-gray-300">
+                              {treatability.label}
+                            </Badge>
                           );
                         })()}
                       </TableCell>
@@ -319,7 +332,7 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                               </p>
                             </div>
                             
-                            {condition.nutraceutical_count > 0 && (
+                            {condition.nutraceutical_count > 0 ? (
                               <div>
                                 <h4 className="font-semibold mb-2 text-sm">
                                   {t('admin.veterinaryTargets.treatability.detailsTitle')}
@@ -358,6 +371,10 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                                     </span>
                                   </div>
                                 </div>
+                              </div>
+                            ) : (
+                              <div className="text-sm text-muted-foreground italic">
+                                {t('admin.veterinaryTargets.treatability.noCatalogData')}
                               </div>
                             )}
                           </div>

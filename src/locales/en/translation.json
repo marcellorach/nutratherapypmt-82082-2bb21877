@@ -385,6 +385,7 @@
       },
       "treatability": {
         "column": "Treatability",
+        "pending": "To Catalog",
         "none": "Not treatable",
         "low": "Low",
         "moderate": "Moderate",
@@ -397,7 +398,8 @@
         "treatment": "Treatment",
         "prevention": "Prevention",
         "support": "Support",
-        "avgEfficacy": "Average Efficacy"
+        "avgEfficacy": "Average Efficacy",
+        "noCatalogData": "This condition does not have catalogued nutraceuticals yet."
       },
       "table": {
         "searchPlaceholder": "Search condition...",
