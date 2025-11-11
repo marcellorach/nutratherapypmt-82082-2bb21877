@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- ✅ Corrigida contagem de estudos científicos (usava números fictícios 150-300, agora usa dados reais do banco)
+- ✅ Estudos associados agora aparecem corretamente na interface expandida de nutracêuticos
+- ✅ Substituídos 15+ textos hardcoded por traduções completas (PT/EN) em componentes de tabelas
+- ✅ Removida função `getRealisticStudyCount` que gerava contagens fictícias
+- ✅ Melhorado mapeamento de dados para garantir consistência entre `studies` e `nutraceutical_studies`
+
 ### Added
 - ✅ Sistema completo de gerenciamento de estudos científicos
 - ✅ Componente StudyCard com informações enriquecidas (ano, autores, DOI, abstract, escala visual de relevância)

@@ -115,25 +115,7 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
           .filter((b: any) => b && b.benefit)
           .map((b: any) => b.benefit) : [];
 
-      // Gerar número realista de estudos baseado no nome do nutracêutico
-      const getRealisticStudyCount = (name: string) => {
-        const lowerName = name.toLowerCase();
-        
-        // Nutracêuticos muito populares (150-300 estudos)
-        const popularNutraceuticals = ['ômega-3', 'omega-3', 'curcumina', 'resveratrol', 'coenzima q10', 'coq10'];
-        if (popularNutraceuticals.some(popular => lowerName.includes(popular))) {
-          return Math.floor(Math.random() * 150) + 150; // 150-300
-        }
-        
-        // Nutracêuticos médios (50-150 estudos)
-        const mediumNutraceuticals = ['vitamina', 'magnésio', 'zinco', 'selênio', 'probiótico'];
-        if (mediumNutraceuticals.some(medium => lowerName.includes(medium))) {
-          return Math.floor(Math.random() * 100) + 50; // 50-150
-        }
-        
-        // Nutracêuticos menos conhecidos (10-50 estudos)
-        return Math.floor(Math.random() * 40) + 10; // 10-50
-      };
+      // Helper removido - agora usamos a contagem real de estudos do banco
 
       // Calcular convergência baseada na variação dos scores de eficácia
       const calculateConvergence = (conditions: any[]) => {
@@ -154,7 +136,14 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
 
       // Adicionar contadores explícitos
       const outcomeCount = healthConditions.length;
-      const studyCount = getRealisticStudyCount(item.name || 'Nutracêutico');
+      // Usar contagem real de estudos do banco de dados
+      const studyCount = studies.length;
+      
+      console.log(`🔍 [MAPPER] ${item.name} - Estudos:`, {
+        total_raw: item.nutraceutical_studies?.length || 0,
+        total_mapped: studies.length,
+        studies_preview: studies.slice(0, 2).map(s => s.study?.title)
+      });
       const convergenceScore = calculateConvergence(healthConditions);
       
       const finalResult = {
@@ -182,10 +171,12 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         outcomeCount: outcomeCount,
         studyCount: studyCount,
         convergenceScore: convergenceScore,
+        // Adicionar estudos mapeados para compatibilidade com componentes UI
+        nutraceutical_studies: studies,
         outcome: null
       };
       
-      console.log(`✅ [MAPPER] ${item.name} mapeado com sucesso:`, {
+      console.log(`✅ [MAPPER] ${item.name} mapeado com sucesso - ${studyCount} estudos reais`, {
         totalConditions: finalResult.healthConditions.length,
         prevention: finalResult.preventionConditions.length,
         treatment: finalResult.treatmentConditions.length,

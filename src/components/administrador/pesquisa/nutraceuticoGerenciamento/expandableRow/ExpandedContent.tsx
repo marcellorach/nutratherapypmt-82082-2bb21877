@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TableRow, TableCell } from '@/components/ui/table';
 import NutraceuticalDetails from './NutraceuticalDetails';
 import ConditionsTable from './ConditionsTable';
@@ -10,6 +11,8 @@ interface ExpandedContentProps {
 }
 
 const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
+  const { t } = useTranslation();
+  
   if (!nutraceutical) return null;
   
   return (
@@ -27,7 +30,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
           {/* Condições relacionadas */}
           <div className="space-y-2">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm">Condições ({nutraceutical.conditionCount || 0})</h4>
+              <h4 className="font-medium text-sm">{t('nutraceuticals.conditions.title')} ({nutraceutical.conditionCount || 0})</h4>
             </div>
             <div className="max-h-48 overflow-y-auto">
               <ConditionsTable 
@@ -40,7 +43,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
         {/* Estudos Científicos */}
         <div className="mt-4">
           <div className="flex justify-between">
-            <h4 className="font-medium text-sm">Estudos ({nutraceutical.studyCount || 0})</h4>
+            <h4 className="font-medium text-sm">{t('nutraceuticals.studies.title')} ({nutraceutical.studyCount || 0})</h4>
           </div>
           <div className="max-h-48 overflow-y-auto mt-2">
             <StudiesTable 

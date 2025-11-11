@@ -1,4 +1,38 @@
 {
+  "nutraceuticals": {
+    "details": {
+      "title": "Details",
+      "description": "Description",
+      "compound": "Chemical Compound",
+      "source": "Source",
+      "dosage": "Dosage",
+      "notDefined": "Not defined"
+    },
+    "conditions": {
+      "title": "Conditions",
+      "none": "No associated conditions",
+      "unknown": "Unknown",
+      "types": {
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "table": {
+        "name": "Condition",
+        "type": "Relation",
+        "efficacy": "Efficacy"
+      }
+    },
+    "studies": {
+      "title": "Studies",
+      "none": "No associated studies",
+      "table": {
+        "title": "Title",
+        "journal": "Journal",
+        "relevance": "Relevance"
+      }
+    }
+  },
   "common": {
     "madeWith": "Made with",
     "by": "by",

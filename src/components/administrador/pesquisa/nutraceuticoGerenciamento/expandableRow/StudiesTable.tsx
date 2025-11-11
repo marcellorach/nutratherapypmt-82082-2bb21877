@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 
 interface StudyRelation {
@@ -16,17 +17,19 @@ interface StudiesTableProps {
 }
 
 const StudiesTable: React.FC<StudiesTableProps> = ({ studies }) => {
+  const { t } = useTranslation();
+  
   if (!Array.isArray(studies) || studies.length === 0) {
-    return <p className="text-sm text-gray-500">Nenhum estudo associado</p>;
+    return <p className="text-sm text-gray-500">{t('nutraceuticals.studies.none')}</p>;
   }
 
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b">
-          <th className="text-left py-1">Título</th>
-          <th className="text-left py-1">Journal</th>
-          <th className="text-left py-1">Relevância</th>
+          <th className="text-left py-1">{t('nutraceuticals.studies.table.title')}</th>
+          <th className="text-left py-1">{t('nutraceuticals.studies.table.journal')}</th>
+          <th className="text-left py-1">{t('nutraceuticals.studies.table.relevance')}</th>
         </tr>
       </thead>
       <tbody>
