@@ -10,6 +10,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✅ Tabela `nutraceutical_contraindications` no banco de dados com RLS policies
+- ✅ Trigger `updated_at` para `nutraceutical_contraindications`
+- ✅ Índice de performance em `nutraceutical_contraindications.nutraceutical_id`
+- ✅ Método `addContraindication` no serviço de nutracêuticos
+- ✅ Lógica para migração de contraindicações em `NutraceuticalMigrator`
 - ✅ Tabela `nutraceutical_categories` no banco de dados com RLS policies
 - ✅ Trigger `updated_at` para `nutraceutical_categories`
 - ✅ Índice de performance em `nutraceutical_categories.name`

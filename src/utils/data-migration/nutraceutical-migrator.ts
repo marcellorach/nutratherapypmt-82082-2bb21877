@@ -35,8 +35,7 @@ export const NutraceuticalMigrator = {
           description: nutra.description,
           dosage: nutra.dosage,
           source: nutra.source,
-          chemical_compound: nutra.chemicalCompound,
-          contraindications: nutra.contraindications || []
+          chemical_compound: nutra.chemicalCompound
         });
         
         if (!result.success || !result.data) {
@@ -88,6 +87,14 @@ export const NutraceuticalMigrator = {
         await nutraceuticalsService.addBenefit(nutraId, benefit);
       }
       console.log(`Adicionados ${nutraData.benefits.length} benefícios para ${nutraData.name}`);
+    }
+
+    // Adicionar contraindicações
+    if (nutraData.contraindications && nutraData.contraindications.length > 0) {
+      for (const contraindication of nutraData.contraindications) {
+        await nutraceuticalsService.addContraindication(nutraId, contraindication);
+      }
+      console.log(`Adicionadas ${nutraData.contraindications.length} contraindicações para ${nutraData.name}`);
     }
     
     // Adicionar metadados científicos seria implementado aqui

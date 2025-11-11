@@ -21,6 +21,7 @@ class NutraceuticalsService {
       .select(`
         *,
         nutraceutical_benefits(id, benefit),
+        nutraceutical_contraindications(id, contraindication, severity_level, notes),
         nutraceutical_scientific_metadata(*),
         nutraceutical_conditions(
           id, 
@@ -243,6 +244,33 @@ class NutraceuticalsService {
         .insert([{
           nutraceutical_id: nutraceuticalId,
           benefit
+        }]);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Erro desconhecido' 
+      };
+    }
+  }
+
+  async addContraindication(
+    nutraceuticalId: string, 
+    contraindication: string, 
+    severityLevel?: 'low' | 'medium' | 'high' | 'critical'
+  ): Promise<NutraceuticalMutationResult> {
+    try {
+      const { error } = await supabase
+        .from('nutraceutical_contraindications')
+        .insert([{
+          nutraceutical_id: nutraceuticalId,
+          contraindication,
+          severity_level: severityLevel
         }]);
 
       if (error) {

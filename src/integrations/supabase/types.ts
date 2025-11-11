@@ -216,6 +216,51 @@ export type Database = {
           },
         ]
       }
+      nutraceutical_contraindications: {
+        Row: {
+          contraindication: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          nutraceutical_id: string
+          severity_level: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contraindication: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          nutraceutical_id: string
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contraindication?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          nutraceutical_id?: string
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutraceutical_contraindications_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "clean_seed_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutraceutical_contraindications_nutraceutical_id_fkey"
+            columns: ["nutraceutical_id"]
+            isOneToOne: false
+            referencedRelation: "nutraceuticals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nutraceutical_imports: {
         Row: {
           created_at: string | null
