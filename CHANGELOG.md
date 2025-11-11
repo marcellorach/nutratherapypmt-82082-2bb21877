@@ -10,17 +10,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
-- ✅ Tabela `nutraceutical_contraindications` no banco de dados com RLS policies
-- ✅ Trigger `updated_at` para `nutraceutical_contraindications`
-- ✅ Índice de performance em `nutraceutical_contraindications.nutraceutical_id`
-- ✅ Método `addContraindication` no serviço de nutracêuticos
-- ✅ Lógica para migração de contraindicações em `NutraceuticalMigrator`
-- ✅ Tabela `nutraceutical_categories` no banco de dados com RLS policies
-- ✅ Trigger `updated_at` para `nutraceutical_categories`
-- ✅ Índice de performance em `nutraceutical_categories.name`
+- ✅ Tab unificada "Nutracêuticos" com 3 sub-tabs (Catálogo, Relações, Matriz)
+- ✅ Nova tab "Alvos Veterinários" para gerenciamento completo de Health Conditions
+- ✅ CRUD completo para Health Conditions (criar, editar, deletar com confirmação)
+- ✅ Componentes VeterinaryTargetsHeader, VeterinaryTargetsStats, VeterinaryTargetsTable, VeterinaryTargetCRUDDialog
+- ✅ Filtros avançados por categoria e severidade em Alvos Veterinários
+- ✅ Traduções bilíngues completas (PT/EN) para todas as novas funcionalidades
+- ✅ Sistema de tabs interno para organização de funcionalidades de nutracêuticos
+
+### Changed
+- ✅ Reorganização completa da estrutura do sidebar Knowledge Base
+- ✅ Unificação de tabs "Nutracêuticos" e "Banco de Nutracêuticos" em uma única tab unificada
+- ✅ Atualização do `admin-tabs.ts` removendo tabs redundantes e adicionando novas
+- ✅ Atualização do `KnowledgeBaseGroup.tsx` com nova estrutura de menu
+- ✅ Incremento da versão do i18n para 1.1.0 (force reload de traduções)
+- ✅ Total de tabs Knowledge Base: 8 → 6 tabs (eliminação de redundância)
 
 ### Removed
-- ✅ Removida tab "Database Migrations" do sidebar administrativo (migrations agora são automáticas via Supabase)
+- ✅ Removida tab "Database Migrations" do sidebar
+- ✅ Removida tab "Banco de Nutracêuticos" (agora sub-tab "Catálogo")
+- ✅ Removida tab "Regras Clínicas" (funcionalidade pouco utilizada)
+- ✅ Removida tab "Análise de Microbioma" (demo não essencial)
 
 ### Fixed
 - ✅ Implementada lógica completa de limpeza de dados no hook `useDataManagement` (função `cleanSeedData` agora funcional)

@@ -254,12 +254,10 @@
       "knowledgeBase": {
         "title": "Knowledge/Relational Base",
         "studies": "Scientific Studies",
-        "nutraceuticalBank": "Nutraceutical Bank",
-        "nutraceuticals": "Nutraceuticals",
+        "nutraceuticalsUnified": "Nutraceuticals",
+        "veterinaryTargets": "Veterinary Targets",
         "relations": "Relations",
-        "clinicalRules": "Clinical Rules",
         "manageOutcomes": "Manage Outcomes",
-        "migrations": "Database Migrations",
         "settings": "Settings"
       },
       "dataProcessing": {

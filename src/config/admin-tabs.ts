@@ -18,8 +18,8 @@ export interface AdminTabConfig {
 
 // Lazy loading dos componentes
 const EstudosTab = lazy(() => import('@/components/administrador/EstudosTab'));
-const NutraceuticosTab = lazy(() => import('@/components/administrador/NutraceuticosTab'));
-const NutraceuticoGerenciamentoTab = lazy(() => import('@/components/administrador/pesquisa/NutraceuticoGerenciamentoTab'));
+const NutraceuticalsUnifiedTab = lazy(() => import('@/components/administrador/NutraceuticalsUnifiedTab'));
+const VeterinaryTargetsTab = lazy(() => import('@/components/administrador/VeterinaryTargetsTab'));
 const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasClinicasTab'));
 const RelationsTab = lazy(() => import('@/components/administrador/visualizations/relations/RelationsTab'));
 const KnowledgeBaseSettingsTab = lazy(() => import('@/components/administrador/settings/KnowledgeBaseSettingsTab'));
@@ -58,25 +58,18 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Gestão de estudos científicos'
   },
   {
-    id: 'nutraceuticos',
+    id: 'nutraceuticals-unified',
     label: 'Nutracêuticos',
     group: 'knowledge-base',
-    component: NutraceuticosTab,
-    description: 'Catálogo de nutracêuticos'
+    component: NutraceuticalsUnifiedTab,
+    description: 'Gerenciamento completo de nutracêuticos e relações'
   },
   {
-    id: 'nutraceu-gerenciamento',
-    label: 'Gerenciamento',
+    id: 'veterinary-targets',
+    label: 'Alvos Veterinários',
     group: 'knowledge-base',
-    component: NutraceuticoGerenciamentoTab,
-    description: 'Gerenciamento avançado de nutracêuticos'
-  },
-  {
-    id: 'regras',
-    label: 'Regras Clínicas',
-    group: 'knowledge-base',
-    component: RegrasClinicasTab,
-    description: 'Regras clínicas e protocolos'
+    component: VeterinaryTargetsTab,
+    description: 'Condições de saúde gerenciáveis por nutracêuticos'
   },
   {
     id: 'relacoes',
@@ -86,13 +79,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Visualização de relações entre dados'
   },
   {
-    id: 'knowledge-base-settings',
-    label: 'Configurações',
-    group: 'knowledge-base',
-    component: KnowledgeBaseSettingsTab,
-    description: 'Configurações da base de conhecimento'
-  },
-  {
     id: 'outcomes-management',
     label: 'Outcomes',
     group: 'knowledge-base',
@@ -100,11 +86,11 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Gerenciamento de outcomes'
   },
   {
-    id: 'microbiome-analysis',
-    label: 'Análise de Microbioma',
+    id: 'knowledge-base-settings',
+    label: 'Configurações',
     group: 'knowledge-base',
-    component: MicrobiomeAnalysisTab,
-    description: 'Análise e visualização de microbioma intestinal'
+    component: KnowledgeBaseSettingsTab,
+    description: 'Configurações da base de conhecimento'
   },
 
   // Processamento de Dados

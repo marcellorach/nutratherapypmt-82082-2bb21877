@@ -3,11 +3,10 @@ import { Loader2 } from "lucide-react";
 
 // Lazy loading dos componentes principais do administrador
 export const AdminPainel = lazy(() => import('@/components/administrador/AdminPainel'));
-export const NutraceuticosTab = lazy(() => import('@/components/administrador/NutraceuticosTab'));
+export const NutraceuticalsUnifiedTab = lazy(() => import('@/components/administrador/NutraceuticalsUnifiedTab'));
 export const ConfiguracoesTab = lazy(() => import('@/components/administrador/ConfiguracoesTab'));
 export const DataAnalysisTab = lazy(() => import('@/components/administrador/dataAnalysis/DataAnalysisTab'));
 export const PromptConfigurationTab = lazy(() => import('@/components/administrador/PromptConfigurationTab'));
-export const NutraceuticoGerenciamentoTab = lazy(() => import('@/components/administrador/pesquisa/NutraceuticoGerenciamentoTab'));
 
 // Lazy loading dos módulos de acompanhamento
 export const AcompanhamentoTab = lazy(() => import('@/components/administrador/acompanhamento/AcompanhamentoTab'));

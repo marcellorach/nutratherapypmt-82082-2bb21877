@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Beaker, BookOpen, Database, Network, Settings, ListChecks, Microscope, ChevronRight, DatabaseZap } from "lucide-react";
+import { BookOpen, Beaker, Target, Network, ListChecks, Settings, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -34,40 +34,43 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "nutraceu-gerenciamento"} 
-          onClick={() => handleStepClick("nutraceu-gerenciamento")}
-          className={currentStep === "nutraceu-gerenciamento" ? "bg-primary/10 text-primary" : ""}
+          isActive={currentStep === "nutraceuticals-unified"} 
+          onClick={() => handleStepClick("nutraceuticals-unified")}
+          className={currentStep === "nutraceuticals-unified" ? "bg-primary/10 text-primary" : ""}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <Database className={`h-4 w-4 mr-2 ${currentStep === "nutraceu-gerenciamento" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.nutraceuticalBank')}</span>
+              <Beaker className={`h-4 w-4 mr-2 ${currentStep === "nutraceuticals-unified" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.nutraceuticalsUnified')}</span>
             </div>
-            {currentStep === "nutraceu-gerenciamento" && (
+            {currentStep === "nutraceuticals-unified" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "nutraceuticos"} 
-          onClick={() => handleStepClick("nutraceuticos")}
-          className={currentStep === "nutraceuticos" ? "bg-primary/10 text-primary" : ""}
+          isActive={currentStep === "veterinary-targets"} 
+          onClick={() => handleStepClick("veterinary-targets")}
+          className={currentStep === "veterinary-targets" ? "bg-primary/10 text-primary" : ""}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <Beaker className={`h-4 w-4 mr-2 ${currentStep === "nutraceuticos" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.nutraceuticals')}</span>
+              <Target className={`h-4 w-4 mr-2 ${currentStep === "veterinary-targets" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.veterinaryTargets')}</span>
             </div>
-            {currentStep === "nutraceuticos" && (
+            {currentStep === "veterinary-targets" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "relacoes"} 
@@ -85,23 +88,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "regras"} 
-          onClick={() => handleStepClick("regras")}
-          className={currentStep === "regras" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Microscope className={`h-4 w-4 mr-2 ${currentStep === "regras" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.clinicalRules')}</span>
-            </div>
-            {currentStep === "regras" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "outcomes-management"} 
@@ -119,6 +106,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "knowledge-base-settings"} 
