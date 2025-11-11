@@ -38,12 +38,12 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/veterinario" element={
-                  <ProtectedRoute requiredRole="veterinarian">
+                  <ProtectedRoute>
                     <VeterinarioPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/administrador" element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute>
                     <AdministradorPage />
                   </ProtectedRoute>
                 } />

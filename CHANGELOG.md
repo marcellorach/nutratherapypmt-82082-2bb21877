@@ -10,6 +10,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 🔓 **CRÍTICO: Acesso liberado para demo Stanford - Rotas desprotegidas**:
+  - Removida verificação de `requiredRole` nas rotas `/veterinario` e `/administrador`
+  - Agora **qualquer usuário autenticado** pode acessar todos os portais
+  - Veterinarian Portal: Não requer mais role 'veterinarian'
+  - Control Panel (Admin): Não requer mais role 'admin'
+  - Owner Portal: Continua em construção (under construction)
+  - ⚠️ **APROPRIADO PARA DEMO STANFORD (ambiente acadêmico controlado)**
+  - ⚠️ **NÃO USAR EM PRODUÇÃO**: Para produção futura, restaurar verificações de role e implementar RLS policies específicas por role
+  - Arquivo modificado: `src/App.tsx` (linhas 40-49)
+  - Comportamento: `ProtectedRoute` apenas verifica se `user !== null` (autenticação básica)
+  - Não autenticados: Continuam sendo redirecionados para `/auth`
+
 - 🔄 **Reorganização dos cards da homepage**:
   - Nova ordem (esquerda → direita): Control Panel → Veterinarian Portal → Owner Portal
   - Layout adaptado para destacar primeiro o painel administrativo/pesquisa
