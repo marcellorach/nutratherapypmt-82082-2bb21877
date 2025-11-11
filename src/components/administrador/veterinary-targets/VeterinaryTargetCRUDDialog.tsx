@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Languages } from 'lucide-react';
+import { useDebouncedCallback } from '@/hooks/performance/useDebounce';
 
 interface VeterinaryTargetCRUDDialogProps {
   open: boolean;
@@ -52,6 +53,69 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
     severity_level: 'moderate'
   });
 
+  const [translating, setTranslating] = useState({
+    name: false,
+    description: false,
+    category: false
+  });
+
+  // Track last manual edits to prevent overwriting user input
+  const lastManualEdit = useRef<{
+    pt: { name: number; description: number; category: number };
+    en: { name: number; description: number; category: number };
+  }>({
+    pt: { name: 0, description: 0, category: 0 },
+    en: { name: 0, description: 0, category: 0 }
+  });
+
+  // Auto-translate function with debounce
+  const translateField = useDebouncedCallback(
+    async (field: 'name' | 'description' | 'category', value: string, sourceLang: 'pt' | 'en') => {
+      if (!value.trim()) return;
+
+      const targetLang = sourceLang === 'pt' ? 'en' : 'pt';
+      const targetField = sourceLang === 'pt' ? `${field}_en` : field;
+      const currentTargetValue = formData[targetField as keyof typeof formData];
+
+      // Don't translate if target field was manually edited in the last 30 seconds
+      const targetLangKey = targetLang as 'pt' | 'en';
+      const timeSinceManualEdit = Date.now() - lastManualEdit.current[targetLangKey][field];
+      if (timeSinceManualEdit < 30000 && currentTargetValue) {
+        console.log(`Skipping translation: ${field} was manually edited ${timeSinceManualEdit}ms ago`);
+        return;
+      }
+
+      setTranslating(prev => ({ ...prev, [field]: true }));
+
+      try {
+        const { data, error } = await supabase.functions.invoke('translate-text', {
+          body: { 
+            text: value, 
+            sourceLang, 
+            targetLang,
+            context: field 
+          }
+        });
+
+        if (error) throw error;
+
+        if (data?.translatedText) {
+          setFormData(prev => ({ 
+            ...prev, 
+            [targetField]: data.translatedText 
+          }));
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        // Don't show toast for translation errors to avoid disrupting user experience
+      } finally {
+        setTranslating(prev => ({ ...prev, [field]: false }));
+      }
+    },
+    1500,
+    []
+  );
+
   useEffect(() => {
     if (condition) {
       setFormData({
@@ -74,6 +138,11 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
         severity_level: 'moderate'
       });
     }
+    // Reset manual edit tracking when dialog opens/closes
+    lastManualEdit.current = {
+      pt: { name: 0, description: 0, category: 0 },
+      en: { name: 0, description: 0, category: 0 }
+    };
   }, [condition, open]);
 
   const handleSave = async () => {
@@ -150,67 +219,151 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
           
           <TabsContent value="pt" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('admin.veterinaryTargets.crudDialog.nameLabel')}</Label>
+              <Label htmlFor="name" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.nameLabel')}
+                {translating.name && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, name: newValue });
+                  lastManualEdit.current.pt.name = Date.now();
+                  translateField('name', newValue, 'pt');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.namePlaceholder')}
               />
+              {translating.name && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Traduzindo automaticamente...
+                </span>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">{t('admin.veterinaryTargets.crudDialog.descriptionLabel')}</Label>
+              <Label htmlFor="description" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.descriptionLabel')}
+                {translating.description && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, description: newValue });
+                  lastManualEdit.current.pt.description = Date.now();
+                  translateField('description', newValue, 'pt');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.descriptionPlaceholder')}
                 rows={4}
               />
+              {translating.description && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Traduzindo automaticamente...
+                </span>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">{t('admin.veterinaryTargets.crudDialog.categoryLabel')}</Label>
+              <Label htmlFor="category" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.categoryLabel')}
+                {translating.category && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Input
                 id="category"
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, category: newValue });
+                  lastManualEdit.current.pt.category = Date.now();
+                  translateField('category', newValue, 'pt');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.categoryPlaceholder')}
               />
+              {translating.category && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Traduzindo automaticamente...
+                </span>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="en" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name_en">{t('admin.veterinaryTargets.crudDialog.nameEnLabel')}</Label>
+              <Label htmlFor="name_en" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.nameEnLabel')}
+                {translating.name && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Input
                 id="name_en"
                 value={formData.name_en}
-                onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, name_en: newValue });
+                  lastManualEdit.current.en.name = Date.now();
+                  translateField('name', newValue, 'en');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.nameEnPlaceholder')}
               />
+              {translating.name && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Translating automatically...
+                </span>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description_en">{t('admin.veterinaryTargets.crudDialog.descriptionEnLabel')}</Label>
+              <Label htmlFor="description_en" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.descriptionEnLabel')}
+                {translating.description && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Textarea
                 id="description_en"
                 value={formData.description_en}
-                onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, description_en: newValue });
+                  lastManualEdit.current.en.description = Date.now();
+                  translateField('description', newValue, 'en');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.descriptionEnPlaceholder')}
                 rows={4}
               />
+              {translating.description && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Translating automatically...
+                </span>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category_en">{t('admin.veterinaryTargets.crudDialog.categoryEnLabel')}</Label>
+              <Label htmlFor="category_en" className="flex items-center gap-2">
+                {t('admin.veterinaryTargets.crudDialog.categoryEnLabel')}
+                {translating.category && <Languages className="h-3 w-3 animate-pulse text-primary" />}
+              </Label>
               <Input
                 id="category_en"
                 value={formData.category_en}
-                onChange={(e) => setFormData({ ...formData, category_en: e.target.value })}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFormData({ ...formData, category_en: newValue });
+                  lastManualEdit.current.en.category = Date.now();
+                  translateField('category', newValue, 'en');
+                }}
                 placeholder={t('admin.veterinaryTargets.crudDialog.categoryEnPlaceholder')}
               />
+              {translating.category && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Translating automatically...
+                </span>
+              )}
             </div>
           </TabsContent>
         </Tabs>
