@@ -437,11 +437,11 @@
       }
     },
     "multiAgentAnalysis": {
-      "title": "Multi-Agent AI Analysis",
-      "subtitle": "Advanced data processing with specialized agent system",
+      "title": "RAG Analysis",
+      "subtitle": "Retrieval-Augmented Generation for personalized nutraceutical recommendations",
       "card": {
-        "title": "Collaborative Analysis System",
-        "description": "This system uses multiple specialized agents that collaborate with each other to analyze pet data and generate personalized nutraceutical recommendations.",
+        "title": "RAG Analysis System",
+        "description": "This system uses Retrieval-Augmented Generation (RAG) to retrieve relevant scientific knowledge and generate personalized nutraceutical recommendations based on pet data.",
         "status": {
           "simulated": "Simulated Analysis",
           "completed": "Complete Analysis"
@@ -459,7 +459,7 @@
         "continue": "Continue",
         "analyzing": "Analyzing...",
         "runAgain": "Run Again",
-        "startAnalysis": "Start Multi-Agent Analysis"
+        "startAnalysis": "Start RAG Analysis"
       }
     },
     "studies": {

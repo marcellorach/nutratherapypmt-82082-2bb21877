@@ -12,16 +12,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Changed
 - 🎨 **Rebrand visual NTAI → RAG no frontend**:
   - **Badge removido**: Removido badge "Advanced Processing" / "Processamento Avançado" da seção de análise (EstudosTab.tsx linhas 136-142)
-  - **Terminologia atualizada na UI**: Todas as strings visíveis mudaram de "NTAI" para "RAG" (Retrieval-Augmented Generation)
+  - **Terminologia atualizada na UI**: Todas as strings visíveis mudaram de "NTAI" e "Multi-Agent" para "RAG" (Retrieval-Augmented Generation)
   - **Traduções atualizadas**: 
-    - PT: "Análise NTAI" → "Análise RAG", "Processamento NTAI" → "Processamento RAG", "Adicionar à Fila NTAI" → "Adicionar à Fila RAG", "Simulação Multi-Agente" → "Simulação RAG"
-    - EN: "NTAI Analysis" → "RAG Analysis", "NTAI Processing" → "RAG Processing", "Add to NTAI Queue" → "Add to RAG Queue", "Multi-Agent Simulation" → "RAG Simulation"
-  - **Chaves de tradução**: `studies.ntai.*` → `studies.rag.*` + `admin.sidebar.dataProcessing.multiAgentSimulation` (6 arquivos)
-  - **Componentes atualizados**: EstudosTab (linha 138), NtaiProcessingSection (linha 45), NtaiProcessingLog (linha 25)
+    - PT: "Análise NTAI" → "Análise RAG", "Processamento NTAI" → "Processamento RAG", "Adicionar à Fila NTAI" → "Adicionar à Fila RAG", "Simulação Multi-Agente" → "Simulação RAG", "Análise de IA Multi-Agente" → "Análise RAG", "Sistema de Análise Colaborativa" → "Sistema de Análise RAG", "Iniciar Análise Multi-Agente" → "Iniciar Análise RAG"
+    - EN: "NTAI Analysis" → "RAG Analysis", "NTAI Processing" → "RAG Processing", "Add to NTAI Queue" → "Add to RAG Queue", "Multi-Agent Simulation" → "RAG Simulation", "Multi-Agent AI Analysis" → "RAG Analysis", "Collaborative Analysis System" → "RAG Analysis System", "Start Multi-Agent Analysis" → "Start RAG Analysis"
+  - **Chaves de tradução**: `studies.ntai.*` → `studies.rag.*` + `admin.sidebar.dataProcessing.multiAgentSimulation` + `admin.multiAgentAnalysis.*` (valores atualizados)
+  - **Componentes atualizados**: EstudosTab (linha 138), NtaiProcessingSection (linha 45), NtaiProcessingLog (linha 25), AnalysisStep (linhas 38-39, 48, 60, 147, 462)
   - **Menu administrativo**: "Multi-Agent Simulation" → "RAG Simulation" na sidebar (linha 340 PT/EN)
-  - **Versão i18n incrementada**: 1.0.1 → 1.3.1 (força reload de traduções)
-  - **Código interno preservado**: Nomes de arquivos, hooks, tipos e interfaces permanecem inalterados (`useNtaiProcessing`, `NtaiAnalysisResult`, etc.)
-  - **Impacto**: Mudança puramente visual - terminologia mais técnica e reconhecida pela comunidade de IA/ML
+  - **Página de análise**: Título, subtítulo, descrição do card e botão principal atualizados para refletir RAG
+  - **Versão i18n incrementada**: 1.0.1 → 1.3.2 (força reload de traduções)
+  - **Código interno preservado**: Nomes de arquivos, hooks, tipos e interfaces permanecem inalterados (`useNtaiProcessing`, `NtaiAnalysisResult`, `multiAgentAnalysis` key, etc.)
+  - **Impacto**: Mudança puramente visual - terminologia mais técnica e reconhecida pela comunidade de IA/ML (RAG é método padrão para LLMs com conhecimento externo)
 
 ### Removed
 - 🗑️ **Sistema de inicialização automática de admin removido**:
