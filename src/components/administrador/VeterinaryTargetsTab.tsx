@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useConditions } from '@/hooks/nutraceuticals/useConditions';
+import { useConditionsWithTreatability } from '@/hooks/nutraceuticals/useConditionsWithTreatability';
 import VeterinaryTargetsHeader from './veterinary-targets/VeterinaryTargetsHeader';
 import VeterinaryTargetsStats from './veterinary-targets/VeterinaryTargetsStats';
 import VeterinaryTargetsTable from './veterinary-targets/VeterinaryTargetsTable';
@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 const VeterinaryTargetsTab: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { conditions, isLoading, fetchConditions } = useConditions();
+  const { data: conditions = [], isLoading, refetch: fetchConditions } = useConditionsWithTreatability();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

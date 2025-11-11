@@ -379,7 +379,25 @@
         "highSeverity": "High Severity",
         "requireAttention": "Require attention",
         "severityLevels": "Severity Levels",
-        "classifications": "Classifications"
+        "classifications": "Classifications",
+        "avgTreatability": "Average Treatability",
+        "avgTreatabilityDesc": "Overall therapeutic arsenal"
+      },
+      "treatability": {
+        "column": "Treatability",
+        "none": "Not treatable",
+        "low": "Low",
+        "moderate": "Moderate",
+        "good": "Good",
+        "excellent": "Excellent",
+        "nutraceuticals": "nutraceuticals",
+        "noData": "No data",
+        "detailsTitle": "Treatability Details",
+        "totalNutraceuticals": "Total Nutraceuticals",
+        "treatment": "Treatment",
+        "prevention": "Prevention",
+        "support": "Support",
+        "avgEfficacy": "Average Efficacy"
       },
       "table": {
         "searchPlaceholder": "Search condition...",

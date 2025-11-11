@@ -22,6 +22,19 @@ const VeterinaryTargetsStats: React.FC<VeterinaryTargetsStatsProps> = ({
   
   const severityLevels = [...new Set(conditions.map(c => c.severity_level).filter(Boolean))];
   const highSeverity = conditions.filter(c => c.severity_level === 'high' || c.severity_level === 'critical').length;
+  
+  // Calculate average treatability
+  const conditionsWithNutra = conditions.filter(c => c.nutraceutical_count > 0);
+  const avgTreatability = conditionsWithNutra.length > 0
+    ? conditionsWithNutra.reduce((sum, c) => {
+        const avgEfficacy = c.avg_efficacy || 0;
+        let weight = 1.0;
+        if (c.treatment_count > 0) weight = 1.0;
+        else if (c.prevention_count > 0) weight = 0.8;
+        else if (c.support_count > 0) weight = 0.6;
+        return sum + ((avgEfficacy / 5) * 100 * weight);
+      }, 0) / conditionsWithNutra.length
+    : 0;
 
   const stats = [
     {
@@ -47,11 +60,17 @@ const VeterinaryTargetsStats: React.FC<VeterinaryTargetsStatsProps> = ({
       value: severityLevels.length,
       icon: Activity,
       description: t('admin.veterinaryTargets.stats.classifications')
+    },
+    {
+      title: t('admin.veterinaryTargets.stats.avgTreatability'),
+      value: `${avgTreatability.toFixed(1)}%`,
+      icon: Target,
+      description: t('admin.veterinaryTargets.stats.avgTreatabilityDesc')
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         

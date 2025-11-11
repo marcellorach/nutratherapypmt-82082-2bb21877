@@ -110,6 +110,45 @@ export type Database = {
         }
         Relationships: []
       }
+      health_conditions_backup_20251111: {
+        Row: {
+          category: string | null
+          category_en: string | null
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          id: string | null
+          name: string | null
+          name_en: string | null
+          severity_level: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          category_en?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string | null
+          name?: string | null
+          name_en?: string | null
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          category_en?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string | null
+          name?: string | null
+          name_en?: string | null
+          severity_level?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       nutraceutical_benefits: {
         Row: {
           benefit: string
@@ -815,6 +854,26 @@ export type Database = {
       }
     }
     Functions: {
+      get_conditions_with_treatability: {
+        Args: never
+        Returns: {
+          avg_efficacy: number
+          category: string
+          category_en: string
+          created_at: string
+          description: string
+          description_en: string
+          id: string
+          name: string
+          name_en: string
+          nutraceutical_count: number
+          prevention_count: number
+          severity_level: string
+          support_count: number
+          treatment_count: number
+          updated_at: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

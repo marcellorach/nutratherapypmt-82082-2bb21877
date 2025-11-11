@@ -76,6 +76,66 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
     return condition[field];
   };
 
+  const calculateTreatability = (condition: any) => {
+    const nutraCount = condition.nutraceutical_count || 0;
+    const avgEfficacy = condition.avg_efficacy || 0;
+    const treatmentCount = condition.treatment_count || 0;
+    const preventionCount = condition.prevention_count || 0;
+    const supportCount = condition.support_count || 0;
+
+    if (!avgEfficacy || nutraCount === 0) {
+      return {
+        percentage: 0,
+        level: 'none' as const,
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-100',
+        label: t('admin.veterinaryTargets.treatability.none')
+      };
+    }
+
+    // Peso baseado nos tipos de relacionamento
+    let weight = 1.0;
+    if (treatmentCount > 0) weight = 1.0;
+    else if (preventionCount > 0) weight = 0.8;
+    else if (supportCount > 0) weight = 0.6;
+
+    const percentage = Math.round((avgEfficacy / 5) * 100 * weight);
+
+    if (percentage <= 30) {
+      return {
+        percentage,
+        level: 'low' as const,
+        color: 'text-red-700',
+        bgColor: 'bg-red-100',
+        label: t('admin.veterinaryTargets.treatability.low')
+      };
+    } else if (percentage <= 60) {
+      return {
+        percentage,
+        level: 'moderate' as const,
+        color: 'text-amber-700',
+        bgColor: 'bg-amber-100',
+        label: t('admin.veterinaryTargets.treatability.moderate')
+      };
+    } else if (percentage <= 85) {
+      return {
+        percentage,
+        level: 'good' as const,
+        color: 'text-green-700',
+        bgColor: 'bg-green-100',
+        label: t('admin.veterinaryTargets.treatability.good')
+      };
+    } else {
+      return {
+        percentage,
+        level: 'excellent' as const,
+        color: 'text-blue-700',
+        bgColor: 'bg-blue-100',
+        label: t('admin.veterinaryTargets.treatability.excellent')
+      };
+    }
+  };
+
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(id)) {
@@ -180,10 +240,11 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]"></TableHead>
-                  <TableHead>{t('admin.veterinaryTargets.table.columnName')}</TableHead>
-                  <TableHead>{t('admin.veterinaryTargets.table.columnCategory')}</TableHead>
-                  <TableHead>{t('admin.veterinaryTargets.table.columnSeverity')}</TableHead>
-                  <TableHead className="text-right">{t('admin.veterinaryTargets.table.columnActions')}</TableHead>
+        <TableHead>{t('admin.veterinaryTargets.table.columnName')}</TableHead>
+        <TableHead>{t('admin.veterinaryTargets.table.columnCategory')}</TableHead>
+        <TableHead>{t('admin.veterinaryTargets.table.columnSeverity')}</TableHead>
+        <TableHead>{t('admin.veterinaryTargets.treatability.column')}</TableHead>
+        <TableHead className="text-right">{t('admin.veterinaryTargets.table.columnActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,6 +273,23 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                       <TableCell>
                         {getSeverityBadge(condition.severity_level)}
                       </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const treatability = calculateTreatability(condition);
+                          return (
+                            <div className="flex items-center gap-2">
+                              <div className={`px-2 py-1 rounded-md ${treatability.bgColor} ${treatability.color} text-xs font-semibold`}>
+                                {treatability.percentage}%
+                              </div>
+                              {condition.nutraceutical_count > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {condition.nutraceutical_count} {t('admin.veterinaryTargets.treatability.nutraceuticals')}
+                                </Badge>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -231,12 +309,57 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                     </TableRow>
                     {expandedRows.has(condition.id) && (
                       <TableRow>
-                        <TableCell colSpan={5} className="bg-muted/50">
-                          <div className="py-4 px-2">
-                            <h4 className="font-semibold mb-2">{t('admin.veterinaryTargets.table.expandedDescription')}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {getLocalizedField(condition, 'description') || t('admin.veterinaryTargets.table.noDescription')}
-                            </p>
+                        <TableCell colSpan={6} className="bg-muted/50">
+                          <div className="py-4 px-2 space-y-4">
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                <strong>{t('admin.veterinaryTargets.table.expandedDescription')}</strong>{' '}
+                                {getLocalizedField(condition, 'description') || 
+                                 t('admin.veterinaryTargets.table.noDescription')}
+                              </p>
+                            </div>
+                            
+                            {condition.nutraceutical_count > 0 && (
+                              <div>
+                                <h4 className="font-semibold mb-2 text-sm">
+                                  {t('admin.veterinaryTargets.treatability.detailsTitle')}
+                                </h4>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      {t('admin.veterinaryTargets.treatability.totalNutraceuticals')}:
+                                    </span>
+                                    <span className="ml-2 font-semibold">{condition.nutraceutical_count}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      {t('admin.veterinaryTargets.treatability.treatment')}:
+                                    </span>
+                                    <span className="ml-2 font-semibold">{condition.treatment_count || 0}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      {t('admin.veterinaryTargets.treatability.prevention')}:
+                                    </span>
+                                    <span className="ml-2 font-semibold">{condition.prevention_count || 0}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      {t('admin.veterinaryTargets.treatability.support')}:
+                                    </span>
+                                    <span className="ml-2 font-semibold">{condition.support_count || 0}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      {t('admin.veterinaryTargets.treatability.avgEfficacy')}:
+                                    </span>
+                                    <span className="ml-2 font-semibold">
+                                      {condition.avg_efficacy ? condition.avg_efficacy.toFixed(1) : '0'}/5
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

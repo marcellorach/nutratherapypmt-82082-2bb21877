@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- 📊 **Nova coluna "Tratabilidade Média" na tabela de Alvos Veterinários**:
+  - Cálculo baseado em efficacy scores e tipos de relacionamento (tratamento/prevenção/suporte)
+  - Badges coloridos indicando nível de tratabilidade (Baixa 🔴, Moderada 🟡, Boa 🟢, Excelente 🟦)
+  - Contagem de nutracêuticos disponíveis por condição
+  - Detalhamento expandido com métricas de tratamento, prevenção, suporte e eficácia média
+  - Card de estatística mostrando tratabilidade média geral do arsenal
+  - Nova função SQL `get_conditions_with_treatability()` para cálculo otimizado no banco
+  - Hook customizado `useConditionsWithTreatability` para busca de dados com métricas
+
 ### Changed
 - 🎨 **Backgrounds dos cards de estudos agora muito transparentes (30% opacidade) para visual mais clean**
 - 🎨 **Card "Next Steps" agora usa cor teal (verde-azulado) em vez de roxo para estética mais elegante e científica**
