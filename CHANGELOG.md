@@ -32,9 +32,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Removidas funções de registro manual (`handleRegister`)
 
 ### Removed
-- ❌ Removidos componentes `LoginForm` e `RegisterForm` do AuthPage
-- ❌ Removidas tabs de Login/Register (Tabs, TabsList, TabsTrigger)
-- ❌ Removido estado `activeTab` (não mais necessário)
+- ❌ **Componentes antigos de autenticação deletados**:
+  - Arquivo `src/components/auth/LoginForm.tsx` deletado (não mais utilizado)
+  - Arquivo `src/components/auth/RegisterForm.tsx` deletado (não mais utilizado)
+  - Removidos do AuthPage: tabs de Login/Register (Tabs, TabsList, TabsTrigger)
+  - Removido estado `activeTab` (não mais necessário)
+  - Código limpo: redução de ~300 linhas de código obsoleto
 
 ### Technical
 - ✅ Fluxo de autenticação: `signIn()` → se erro → `signUp()` automático
