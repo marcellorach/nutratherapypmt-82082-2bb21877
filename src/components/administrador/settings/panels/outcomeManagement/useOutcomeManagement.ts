@@ -15,7 +15,9 @@ export const useOutcomeManagement = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
+    name_en: "",
     description: "",
+    description_en: "",
     family_id: ""
   });
 
@@ -44,7 +46,9 @@ export const useOutcomeManagement = () => {
     setSelectedOutcome(outcome);
     setFormData({
       name: outcome.name || "",
+      name_en: outcome.name_en || "",
       description: outcome.description || "",
+      description_en: outcome.description_en || "",
       family_id: outcome.family_id || "none"
     });
     setIsEditDialogOpen(true);
@@ -61,7 +65,9 @@ export const useOutcomeManagement = () => {
     try {
       await createOutcome({
         name: formData.name,
+        name_en: formData.name_en,
         description: formData.description,
+        description_en: formData.description_en,
         family_id: formData.family_id === 'none' ? undefined : formData.family_id || undefined
       });
 
@@ -89,7 +95,9 @@ export const useOutcomeManagement = () => {
     try {
       await updateOutcome(selectedOutcome.id, {
         name: formData.name,
+        name_en: formData.name_en,
         description: formData.description,
+        description_en: formData.description_en,
         family_id: formData.family_id === 'none' ? undefined : formData.family_id || undefined
       });
 
@@ -136,7 +144,9 @@ export const useOutcomeManagement = () => {
   const resetFormData = () => {
     setFormData({
       name: "",
+      name_en: "",
       description: "",
+      description_en: "",
       family_id: "none"
     });
   };
@@ -176,6 +186,7 @@ export const useOutcomeManagement = () => {
     selectedOutcome,
     filteredOutcomes,
     formData,
+    setFormData,
     isLoading,
     handleEditClick,
     handleDeleteClick,

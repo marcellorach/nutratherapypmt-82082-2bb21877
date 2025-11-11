@@ -10,15 +10,19 @@ import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { useTranslation } from 'react-i18next';
 
 // Importando componentes específicos
-import BasicInfoTab from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/tabs/BasicInfoTab';
+import BasicInfoTabBilingual from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/tabs/BasicInfoTabBilingual';
 import RelationshipsTab from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/tabs/RelationshipsTab';
 import ManageRelationshipsDialog from '@/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/ManageRelationshipsDialog';
 
 type FormData = {
   name: string;
+  name_en?: string;
   description?: string;
+  description_en?: string;
   dosage?: string;
+  dosage_en?: string;
   source?: string;
+  source_en?: string;
   chemical_compound?: string;
 };
 
@@ -51,9 +55,13 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
   // Schema de validação com tradução
   const nutraceuticalSchema = z.object({
     name: z.string().min(1, t('nutraceuticals.validation.nameRequired')),
+    name_en: z.string().optional(),
     description: z.string().optional(),
+    description_en: z.string().optional(),
     dosage: z.string().optional(),
+    dosage_en: z.string().optional(),
     source: z.string().optional(),
+    source_en: z.string().optional(),
     chemical_compound: z.string().optional()
   });
   
@@ -61,9 +69,13 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
     resolver: zodResolver(nutraceuticalSchema),
     defaultValues: {
       name: '',
+      name_en: '',
       description: '',
+      description_en: '',
       dosage: '',
+      dosage_en: '',
       source: '',
+      source_en: '',
       chemical_compound: ''
     },
   });
@@ -72,9 +84,13 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
     if (isEditMode && nutraceutical) {
       form.reset({
         name: nutraceutical.name || '',
+        name_en: nutraceutical.name_en || '',
         description: nutraceutical.description || '',
+        description_en: nutraceutical.description_en || '',
         dosage: nutraceutical.dosage || '',
+        dosage_en: nutraceutical.dosage_en || '',
         source: nutraceutical.source || '',
+        source_en: nutraceutical.source_en || '',
         chemical_compound: nutraceutical.chemical_compound || ''
       });
     }
@@ -187,7 +203,7 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
             
             <form onSubmit={form.handleSubmit(handleSubmit)}>
               <TabsContent value="basic-info">
-                <BasicInfoTab 
+                <BasicInfoTabBilingual 
                   form={form}
                   isSubmitting={isSubmitting}
                   isEditMode={isEditMode}

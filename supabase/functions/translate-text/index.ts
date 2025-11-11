@@ -28,9 +28,30 @@ serve(async (req) => {
 
     // Define context-specific prompts for better translations
     const contextPrompts = {
+      // Health Conditions
       name: 'This is a veterinary health condition name. Translate it accurately, maintaining medical terminology.',
       description: 'This is a veterinary health condition description. Translate it clearly and professionally, maintaining medical accuracy.',
-      category: 'This is a veterinary health condition category. Translate it accurately and consistently with medical terminology.'
+      category: 'This is a veterinary health condition category. Translate it accurately and consistently with medical terminology.',
+      
+      // Nutraceuticals
+      nutraceutical_name: 'This is a nutraceutical compound name. Maintain scientific terminology and accuracy.',
+      nutraceutical_description: 'This is a nutraceutical description. Use precise scientific language while keeping it clear.',
+      nutraceutical_source: 'This is the natural source of a nutraceutical. Maintain botanical/chemical accuracy.',
+      dosage: 'These are dosage instructions. Maintain medical precision and clarity.',
+      source: 'This is the natural source of a nutraceutical. Maintain botanical/chemical accuracy.',
+      
+      // Scientific Studies
+      title: 'This is a scientific study title. Use formal academic language.',
+      abstract: 'This is a study abstract. Maintain technical precision and scientific terminology.',
+      journal: 'This is a journal name. Maintain proper nouns and official names.',
+      
+      // Outcomes & Families
+      outcome_name: 'This is a health outcome or goal name. Use clinical terminology.',
+      outcome_description: 'This is an outcome description. Use professional medical language.',
+      
+      // Categories & Benefits
+      category_name: 'This is a category name. Maintain consistent taxonomy and terminology.',
+      benefit: 'This is a health benefit description. Keep it clear, concise, and accurate.'
     };
 
     const contextPrompt = contextPrompts[context as keyof typeof contextPrompts] || contextPrompts.name;

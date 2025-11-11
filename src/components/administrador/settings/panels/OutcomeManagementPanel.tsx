@@ -3,7 +3,7 @@ import React from 'react';
 import PanelHeader from "./outcomeManagement/PanelHeader";
 import SearchBar from "./nutraceuticalManagement/SearchBar";
 import OutcomeTable from "./outcomeManagement/OutcomeTable";
-import OutcomeFormDialog from "./outcomeManagement/OutcomeFormDialog";
+import OutcomeFormDialogBilingual from "./outcomeManagement/OutcomeFormDialogBilingual";
 import OutcomeDeleteDialog from "./outcomeManagement/DeleteDialog";
 import { useOutcomeManagement } from "./outcomeManagement/useOutcomeManagement";
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ const OutcomeManagementPanel: React.FC = () => {
     selectedOutcome,
     filteredOutcomes,
     formData,
+    setFormData,
     isLoading,
     handleEditClick,
     handleDeleteClick,
@@ -51,22 +52,24 @@ const OutcomeManagementPanel: React.FC = () => {
       />
       
       {/* Diálogo de criar outcome */}
-      <OutcomeFormDialog
+      <OutcomeFormDialogBilingual
         isOpen={isCreateDialogOpen}
         setIsOpen={setIsCreateDialogOpen}
         isCreate={true}
         formData={formData}
+        setFormData={setFormData}
         handleFormChange={handleFormChange}
         handleFamilyChange={handleFamilyChange}
         submitAction={handleCreateSubmit}
       />
       
       {/* Diálogo de editar outcome */}
-      <OutcomeFormDialog
+      <OutcomeFormDialogBilingual
         isOpen={isEditDialogOpen}
         setIsOpen={setIsEditDialogOpen}
         isCreate={false}
         formData={formData}
+        setFormData={setFormData}
         handleFormChange={handleFormChange}
         handleFamilyChange={handleFamilyChange}
         submitAction={handleEditSubmit}

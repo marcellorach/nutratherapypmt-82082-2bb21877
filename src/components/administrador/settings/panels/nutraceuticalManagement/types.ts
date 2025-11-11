@@ -4,9 +4,13 @@ import { MouseEvent } from 'react';
 export interface Nutraceutical {
   id?: string;
   name: string;
+  name_en?: string;
   description?: string;
+  description_en?: string;
   source?: string;
+  source_en?: string;
   dosage?: string;
+  dosage_en?: string;
   chemical_compound?: string;
   contraindications?: string[];
 }

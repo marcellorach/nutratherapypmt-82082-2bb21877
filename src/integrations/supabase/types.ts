@@ -113,18 +113,21 @@ export type Database = {
       nutraceutical_benefits: {
         Row: {
           benefit: string
+          benefit_en: string | null
           created_at: string | null
           id: string
           nutraceutical_id: string
         }
         Insert: {
           benefit: string
+          benefit_en?: string | null
           created_at?: string | null
           id?: string
           nutraceutical_id: string
         }
         Update: {
           benefit?: string
+          benefit_en?: string | null
           created_at?: string | null
           id?: string
           nutraceutical_id?: string
@@ -150,22 +153,28 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          description_en: string | null
           id: string
           name: string
+          name_en: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           name: string
+          name_en?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           name?: string
+          name_en?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -463,33 +472,45 @@ export type Database = {
           chemical_compound: string | null
           created_at: string | null
           description: string | null
+          description_en: string | null
           dosage: string | null
+          dosage_en: string | null
           id: string
           name: string
+          name_en: string | null
           outcome_id: string | null
           source: string | null
+          source_en: string | null
           updated_at: string | null
         }
         Insert: {
           chemical_compound?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           dosage?: string | null
+          dosage_en?: string | null
           id?: string
           name: string
+          name_en?: string | null
           outcome_id?: string | null
           source?: string | null
+          source_en?: string | null
           updated_at?: string | null
         }
         Update: {
           chemical_compound?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           dosage?: string | null
+          dosage_en?: string | null
           id?: string
           name?: string
+          name_en?: string | null
           outcome_id?: string | null
           source?: string | null
+          source_en?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -499,9 +520,11 @@ export type Database = {
           color: string | null
           created_at: string | null
           description: string | null
+          description_en: string | null
           icon: string | null
           id: string
           name: string
+          name_en: string | null
           sort_order: number | null
           updated_at: string | null
         }
@@ -509,9 +532,11 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           icon?: string | null
           id?: string
           name: string
+          name_en?: string | null
           sort_order?: number | null
           updated_at?: string | null
         }
@@ -519,9 +544,11 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           icon?: string | null
           id?: string
           name?: string
+          name_en?: string | null
           sort_order?: number | null
           updated_at?: string | null
         }
@@ -625,37 +652,46 @@ export type Database = {
       scientific_studies: {
         Row: {
           abstract: string | null
+          abstract_en: string | null
           authors: string[] | null
           created_at: string | null
           doi: string | null
           id: string
           journal: string | null
+          journal_en: string | null
           link: string | null
           title: string
+          title_en: string | null
           updated_at: string | null
           year: number | null
         }
         Insert: {
           abstract?: string | null
+          abstract_en?: string | null
           authors?: string[] | null
           created_at?: string | null
           doi?: string | null
           id?: string
           journal?: string | null
+          journal_en?: string | null
           link?: string | null
           title: string
+          title_en?: string | null
           updated_at?: string | null
           year?: number | null
         }
         Update: {
           abstract?: string | null
+          abstract_en?: string | null
           authors?: string[] | null
           created_at?: string | null
           doi?: string | null
           id?: string
           journal?: string | null
+          journal_en?: string | null
           link?: string | null
           title?: string
+          title_en?: string | null
           updated_at?: string | null
           year?: number | null
         }
