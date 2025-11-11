@@ -102,27 +102,6 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
           )}
         />
         
-        <FormField
-          control={form.control}
-          name="contraindications"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('nutraceuticals.form.contraindications')}</FormLabel>
-              <FormControl>
-                <Textarea 
-                  {...field} 
-                  placeholder={t('nutraceuticals.form.contraindicationsPlaceholder')} 
-                  className="min-h-[80px]"
-                />
-              </FormControl>
-              <FormMessage />
-              <p className="text-xs text-muted-foreground">
-                {t('nutraceuticals.form.contraindicationsHelp')}
-              </p>
-            </FormItem>
-          )}
-        />
-        
         <div className="flex justify-end space-x-2 pt-4">
           <Button 
             type="button" 

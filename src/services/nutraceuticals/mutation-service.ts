@@ -14,8 +14,7 @@ export const NutraceuticalMutationService = {
     description,
     dosage,
     source,
-    chemical_compound,
-    contraindications
+    chemical_compound
   }) {
     try {
       // Usando type assertion para contornar a verificação de tipos do TypeScript
@@ -27,8 +26,7 @@ export const NutraceuticalMutationService = {
           description,
           dosage,
           source,
-          chemical_compound,
-          contraindications
+          chemical_compound
         }])
         .select()
         .single();
@@ -53,8 +51,7 @@ export const NutraceuticalMutationService = {
       description,
       dosage,
       source,
-      chemical_compound,
-      contraindications
+      chemical_compound
     }
   ) {
     try {
@@ -67,8 +64,7 @@ export const NutraceuticalMutationService = {
           description,
           dosage,
           source,
-          chemical_compound,
-          contraindications
+          chemical_compound
         })
         .eq('id', id)
         .select()

@@ -20,7 +20,6 @@ type FormData = {
   dosage?: string;
   source?: string;
   chemical_compound?: string;
-  contraindications?: string;
 };
 
 interface NutraceuticalCRUDDialogProps {
@@ -55,8 +54,7 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
     description: z.string().optional(),
     dosage: z.string().optional(),
     source: z.string().optional(),
-    chemical_compound: z.string().optional(),
-    contraindications: z.string().optional()
+    chemical_compound: z.string().optional()
   });
   
   const form = useForm<FormData>({
@@ -66,24 +64,18 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
       description: '',
       dosage: '',
       source: '',
-      chemical_compound: '',
-      contraindications: ''
+      chemical_compound: ''
     },
   });
 
   useEffect(() => {
     if (isEditMode && nutraceutical) {
-      const contraindicationsString = Array.isArray(nutraceutical.contraindications)
-        ? nutraceutical.contraindications.join('\n')
-        : nutraceutical.contraindications || '';
-        
       form.reset({
         name: nutraceutical.name || '',
         description: nutraceutical.description || '',
         dosage: nutraceutical.dosage || '',
         source: nutraceutical.source || '',
-        chemical_compound: nutraceutical.chemical_compound || '',
-        contraindications: contraindicationsString
+        chemical_compound: nutraceutical.chemical_compound || ''
       });
     }
   }, [isEditMode, nutraceutical, form]);
@@ -101,10 +93,7 @@ const NutraceuticalCRUDDialog: React.FC<NutraceuticalCRUDDialogProps> = ({
       setIsSubmitting(true);
       
       const nutraceuticalData = {
-        ...values,
-        contraindications: values.contraindications 
-          ? values.contraindications.split('\n').filter(item => item.trim() !== '') 
-          : []
+        ...values
       };
       
       let result;
