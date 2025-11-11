@@ -31,6 +31,23 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Mantém redirecionamento automático se já autenticado
   - Removidas funções de registro manual (`handleRegister`)
 
+### Changed
+- 🔓 **Acesso liberado para demo Stanford**:
+  - **Veterinarian Portal**: Removida validação de role (veterinarian) - todos os usuários logados podem acessar
+  - **Control Panel (Admin)**: Removida validação de role (admin) - todos os usuários logados podem acessar
+  - Removidos botões desabilitados e mensagens "Request access" dos portais liberados
+  
+- 🚧 **Owner Portal bloqueado temporariamente**:
+  - Card do "Owner Portal" na homepage marcado como "Under Construction"
+  - Botão desabilitado com estilo visual de bloqueio (opacity 60%, badge 🚧)
+  - Nova chave de tradução `home.underConstruction` (PT: "Em Construção" / EN: "Under Construction")
+  - Acesso ao `/tutor` será reabilitado em versão futura
+
+- 📝 **Placeholder do email simplificado para demo Stanford**:
+  - EN: `your.name@stanford.edu` → `yourname@stanford.edu` (sem ponto)
+  - PT: `seu.nome@stanford.edu` → `seunome@stanford.edu` (sem ponto)
+  - Reflete melhor a aceitação de qualquer formato de email na demo
+
 ### Removed
 - ❌ **Componentes antigos de autenticação deletados**:
   - Arquivo `src/components/auth/LoginForm.tsx` deletado (não mais utilizado)

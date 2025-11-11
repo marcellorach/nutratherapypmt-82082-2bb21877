@@ -92,7 +92,7 @@ const Index: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                <div className="p-6 hover:bg-gray-50 transition-colors">
+                <div className="p-6 bg-gray-50 transition-colors opacity-60">
                   <div className="flex flex-col items-center text-center">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Book size={28} className="text-gray-800" />
@@ -101,11 +101,16 @@ const Index: React.FC = () => {
                     <p className="text-gray-500 mb-4">
                       {t('home.tutorAreaDesc')}
                     </p>
-                    <Link to="/tutor">
-                      <Button variant="outline" className="w-full flex items-center justify-center gap-1">
-                        {t('home.tutorAreaButton')} <ArrowRight size={16} />
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="outline" 
+                      className="w-full flex items-center justify-center gap-1 opacity-50 cursor-not-allowed" 
+                      disabled
+                    >
+                      {t('home.tutorAreaButton')} <ArrowRight size={16} />
+                    </Button>
+                    <p className="text-xs text-orange-600 mt-2 font-medium">
+                      🚧 {t('home.underConstruction')}
+                    </p>
                   </div>
                 </div>
                 
@@ -121,15 +126,11 @@ const Index: React.FC = () => {
                     <Link to="/veterinario">
                       <Button 
                         variant="outline" 
-                        className={`w-full flex items-center justify-center gap-1 ${!hasRole('veterinarian') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={!hasRole('veterinarian')}
+                        className="w-full flex items-center justify-center gap-1"
                       >
                         {t('home.veterinarianAreaButton')} <ArrowRight size={16} />
                       </Button>
                     </Link>
-                    {!hasRole('veterinarian') && (
-                      <p className="text-xs text-red-500 mt-2">{t('home.veterinarianAreaRequest')}</p>
-                    )}
                   </div>
                 </div>
                 
@@ -145,15 +146,11 @@ const Index: React.FC = () => {
                     <Link to="/administrador">
                       <Button 
                         variant="outline" 
-                        className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={!hasRole('admin')}
+                        className="w-full flex items-center justify-center gap-1"
                       >
                         {t('home.researchAreaButton')} <ArrowRight size={16} />
                       </Button>
                     </Link>
-                    {!hasRole('admin') && (
-                      <p className="text-xs text-red-500 mt-2">{t('home.researchAreaRequest')}</p>
-                    )}
                   </div>
                 </div>
               </div>

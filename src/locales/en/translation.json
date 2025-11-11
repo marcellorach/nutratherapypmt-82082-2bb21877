@@ -182,7 +182,8 @@
     "systemInfo": "System Information",
     "registeredNutraceuticals": "Registered Nutraceuticals",
     "scientificStudies": "Scientific Studies",
-    "treatableConditions": "Treatable Conditions"
+    "treatableConditions": "Treatable Conditions",
+    "underConstruction": "Under Construction"
   },
   "auth": {
     "login": "Login",
@@ -219,7 +220,7 @@
       "title": "Stanford Demo Access",
       "description": "Enter your email to explore the NutraTherapy platform",
       "emailLabel": "Email",
-      "emailPlaceholder": "your.name@stanford.edu",
+      "emailPlaceholder": "yourname@stanford.edu",
       "accessButton": "Access Demo",
       "accessingDemo": "Accessing demo...",
       "welcomeMessage": "Welcome! Creating your demo account...",
