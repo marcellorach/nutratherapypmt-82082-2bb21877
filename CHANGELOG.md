@@ -10,6 +10,22 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 🎨 **Study Notes - Redesign da seção "Preliminary Results"**:
+  - Consolidados múltiplos cards coloridos em um único card elegante azul/índigo
+  - Estrutura visual simplificada: introdução + lista com bullets para resultados
+  - Removido grid de cards verdes individuais por categoria
+  - Mantidas seções "Current Limitations" (amarelo) e "Next Steps" (roxo) inalteradas
+  - Tipografia mais limpa: categorias em negrito, conteúdo em gray-700 para melhor legibilidade
+  - Design mais profissional e elegante, reduzindo poluição visual
+- 📊 **Population do Estudo Rapamycin + SGLT2i - Ajustado para dados reais**:
+  - Treatment Count: 10 → 6 cães (refletindo os 6 que realmente iniciaram o protocolo)
+  - Control Count: 10 → 2 cães (população controle atual)
+  - Total iniciado: 8 cães dos 20 planejados (6 tratamento + 2 controle)
+  - Visualização com paw prints agora mostra 6 🐾 no grupo tratamento e 2 🐾 no controle
+  - Alinhado com as notas do estudo: "Apenas 6 cães dos 20 planejados iniciaram o protocolo"
+- ✅ **i18n**: Versão incrementada para 1.3.8 (cache refresh)
+
+### Changed
 - ✅ **Study Notes**: Melhorada organização e estruturação das notas do estudo em andamento
   - Seção "Resultados Preliminares" com introdução destacada em card azul/índigo
   - Grid de resultados com cards verdes individuais para cada categoria (Perfil Lipídico, Função Renal, Cardioproteção, etc.)

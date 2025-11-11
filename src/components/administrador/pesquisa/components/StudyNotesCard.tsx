@@ -64,51 +64,44 @@ const StudyNotesCard: React.FC<StudyNotesCardProps> = ({ notes }) => {
 
   return (
     <div className="space-y-4 mt-4">
-      {/* Introduction */}
-      {parsedNotes.introduction && (
+      {/* Preliminary Results - Consolidated Card */}
+      {(parsedNotes.introduction || parsedNotes.results.length > 0) && (
         <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <div className="flex items-start gap-3">
             <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h4 className="text-sm font-semibold text-blue-900 mb-1">
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">
                 {t('admin.studies.ongoingStudies.notes.preliminaryResults')}
               </h4>
-              <p className="text-sm text-blue-800 leading-relaxed">
-                {parsedNotes.introduction}
-              </p>
+              
+              {parsedNotes.introduction && (
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                  {parsedNotes.introduction}
+                </p>
+              )}
+              
+              {parsedNotes.results.length > 0 && (
+                <ul className="space-y-2">
+                  {parsedNotes.results.map((result, index) => {
+                    const match = result.match(/\*\*(.+?)\*\*:\s*(.+)/);
+                    const category = match ? match[1] : '';
+                    const content = match ? match[2] : result;
+                    
+                    return (
+                      <li key={index} className="text-sm text-gray-700 leading-relaxed flex items-start gap-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        <span>
+                          {category && <strong className="text-gray-900">{category}:</strong>}
+                          {' '}{content}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
           </div>
         </Card>
-      )}
-
-      {/* Results Grid */}
-      {parsedNotes.results.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {parsedNotes.results.map((result, index) => {
-            // Extract category and content
-            const match = result.match(/\*\*(.+?)\*\*:\s*(.+)/);
-            const category = match ? match[1] : '';
-            const content = match ? match[2] : result;
-
-            return (
-              <Card key={index} className="p-3 bg-green-50 border-green-200">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div className="space-y-1">
-                    {category && (
-                      <h5 className="text-xs font-semibold text-green-900">
-                        {category}
-                      </h5>
-                    )}
-                    <p className="text-xs text-green-800 leading-relaxed">
-                      {content}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
       )}
 
       {/* Limitations */}
