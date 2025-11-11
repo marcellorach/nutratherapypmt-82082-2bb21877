@@ -10,6 +10,37 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✨ **Nova aba "A.I. Insights" na Base de Conhecimento**:
+  - Substitui aba "Relations" com funcionalidade mais estratégica
+  - Apresenta 3 tipos de insights: Descobertas Longitudinais, Novos Estudos, Análises de Eficácia
+  - Interface inspirada em sugestões de estudos com confidence score
+  - Tabs detalhadas: Overview, Evidence, Required Resources
+  - Mock data com 3 insights reais:
+    * Protocolo alternado SGLT2 (dapagliflozin/empagliflozin) para cardioproteção (18.347 cães)
+    * Validação de Glucosamina + Condroitina em 3.421 cães (67% melhoria)
+    * NMN reverte declínio cognitivo em cães seniores (Nature Aging, Dec 2024)
+  - Sistema de filtros (tipo, confiança mínima)
+  - Approval chains visuais para insights longitudinais
+  - Badges coloridos de confiança (verde >80%, azul 60-80%, amarelo <60%)
+  - Sistema escalável preparado para insights reais da IA no futuro
+
+### Removed
+- ❌ **Aba "Relations" removida**:
+  - Funcionalidade substituída por "A.I. Insights"
+  - Componente `RelationsTab` mantido no repositório mas não mais acessível via sidebar
+  - Import removido do `admin-tabs.ts`
+
+### Changed
+- 🔄 **Sidebar da Base de Conhecimento reorganizado**:
+  - "Relations" → "A.I. Insights" (ícone Sparkles)
+  - Nova posição entre "Veterinary Targets" e "Manage Outcomes"
+  - Atualizado `KnowledgeBaseGroup.tsx` com novo item de menu
+- 🌍 **Traduções bilíngues completas (PT/EN)**:
+  - Adicionada seção `aiInsights` em ambos arquivos de tradução
+  - 20+ chaves de tradução para interface completa
+  - Versão i18n: 1.1.9 → 1.2.0 (force reload)
+
+### Added
 - 🌍 **Sistema completo de bilinguismo para condições veterinárias**:
   - Todas condições agora criadas com name (PT) + name_en (EN) desde o início
   - Interface 100% consistente independente do idioma selecionado (PT/EN)

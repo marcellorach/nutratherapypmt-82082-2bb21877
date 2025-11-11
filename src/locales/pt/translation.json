@@ -310,7 +310,7 @@
         "studies": "Estudos Científicos",
         "nutraceuticalsUnified": "Nutracêuticos",
         "veterinaryTargets": "Alvos Veterinários",
-        "relations": "Relações",
+        "aiInsights": "Insights de IA",
         "manageOutcomes": "Gerenciar Outcomes",
         "settings": "Configurações"
       },
@@ -3248,6 +3248,31 @@
       "approvalAdvanced": "Aprovação avançada!",
       "approvedBy": "Aprovado por {{stage}}",
       "studyApproved": "Estudo aprovado por todos os comitês! Pronto para execução."
+    }
+  },
+  "aiInsights": {
+    "title": "Insights de IA",
+    "description": "Descobertas e análises inteligentes da plataforma",
+    "types": {
+      "longitudinalDiscovery": "Descoberta Longitudinal",
+      "newStudy": "Novo Estudo",
+      "efficacyAnalysis": "Análise de Eficácia"
+    },
+    "confidence": "Confiança da IA",
+    "tabs": {
+      "overview": "Visão Geral",
+      "evidence": "Evidências",
+      "resources": "Recursos Necessários"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalhes",
+      "approve": "Aprovar",
+      "reject": "Rejeitar"
+    },
+    "filters": {
+      "all": "Todos",
+      "type": "Tipo de Insight",
+      "confidence": "Confiança Mínima"
     }
   }
 }
