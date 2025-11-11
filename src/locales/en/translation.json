@@ -1,4 +1,21 @@
 {
+  "nutraceuticalsUnified": {
+    "title": "Unified Nutraceuticals",
+    "subtitle": "Search and manage nutraceuticals, relationships and visualizations",
+    "tabs": {
+      "catalog": "Catalog",
+      "relations": "Relations",
+      "matrix": "Matrix"
+    },
+    "migration": {
+      "button": "Migrate Conditions",
+      "running": "Migrating conditions...",
+      "success": "Conditions migrated successfully",
+      "successDesc": "{{count}} condition relationships were created for {{nutraCount}} nutraceuticals",
+      "error": "Migration error",
+      "errorDesc": "Failed to migrate conditions: {{error}}"
+    }
+  },
   "nutraceuticals": {
     "details": {
       "title": "Details",

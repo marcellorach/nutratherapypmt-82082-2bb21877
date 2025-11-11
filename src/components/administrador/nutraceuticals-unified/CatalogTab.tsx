@@ -4,6 +4,8 @@ import { useNutraceuticalContext } from '@/contexts/NutraceuticalContext';
 import { NutraceuticalDataMigrator } from '@/utils/nutraceutical-data-migrator';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 
 // Componentes comuns
 import NutraceuticalCRUDDialog from '@/components/common/nutraceuticals/NutraceuticalCRUDDialog';
@@ -34,6 +36,7 @@ const CatalogTab: React.FC = () => {
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationResult, setMigrationResult] = useState<any>(null);
   const [hasMigratedData, setHasMigratedData] = useState(nutraceuticals.length > 0);
+  const [isMigratingConditions, setIsMigratingConditions] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [nutraceuticalToDelete, setNutraceuticalToDelete] = useState<string | null>(null);
@@ -124,10 +127,57 @@ const CatalogTab: React.FC = () => {
       setIsMigrating(false);
     }
   };
+
+  const handleMigrateConditions = async () => {
+    setIsMigratingConditions(true);
+    try {
+      console.log('🔄 Chamando Edge Function migrate-nutraceutical-conditions...');
+      
+      const { data, error } = await supabase.functions.invoke('migrate-nutraceutical-conditions', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      console.log('✅ Resposta da Edge Function:', data);
+
+      if (data.success) {
+        toast({
+          title: t('nutraceuticalsUnified.migration.success'),
+          description: t('nutraceuticalsUnified.migration.successDesc', {
+            count: data.stats.totalRelationsCreated,
+            nutraCount: data.stats.nutraWithConditions
+          }),
+        });
+        refreshData();
+      } else {
+        throw new Error(data.error || 'Erro desconhecido');
+      }
+    } catch (err: any) {
+      console.error('❌ Erro ao migrar condições:', err);
+      toast({
+        title: t('nutraceuticalsUnified.migration.error'),
+        description: t('nutraceuticalsUnified.migration.errorDesc', { error: err.message }),
+        variant: "destructive",
+      });
+    } finally {
+      setIsMigratingConditions(false);
+    }
+  };
   
   return (
     <div className="space-y-6">
-      <PageHeaderWithActions refreshData={refreshData} />
+      <div className="flex items-center justify-between">
+        <PageHeaderWithActions refreshData={refreshData} />
+        <Button 
+          onClick={handleMigrateConditions}
+          disabled={isMigratingConditions}
+          variant="outline"
+          className="ml-auto"
+        >
+          {isMigratingConditions ? t('nutraceuticalsUnified.migration.running') : `🔗 ${t('nutraceuticalsUnified.migration.button')}`}
+        </Button>
+      </div>
       
       <StatsGrid
         nutraceuticals={nutraceuticals}

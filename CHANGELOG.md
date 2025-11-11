@@ -10,6 +10,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Fixed
+- 🌍 **Correção completa de i18n na aba Nutracêuticos Unificados**:
+  - Tabs principais ("Catálogo", "Relações", "Matriz") agora traduzem corretamente para EN
+  - Subtítulo da página traduzido corretamente
+  - Versão i18n: 1.1.6 → 1.1.7
 - 🔥 **Correção DEFINITIVA de cache i18n (versão 1.1.6)**:
   - Limpeza ultra-agressiva: localStorage + sessionStorage
   - Força limpeza em TODA primeira carga
@@ -26,8 +30,35 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - DOIs com `()[]` agora funcionam corretamente
   - Links testados: 10.1111/j.1532-950X.2016.12287.x ✅
   - 93 associações de estudos com links corrigidos
+
+### Added
+- ✅ **Edge Function para migração de condições de nutracêuticos** (`migrate-nutraceutical-conditions`):
+  - Migra ~150-200 relações de condições dos arquivos mockados para o banco
+  - Popula `health_conditions` e `nutraceutical_conditions` automaticamente
+  - Suporte para 3 tipos de relações: prevention, treatment, support
+  - Cache inteligente de condições para evitar duplicatas
+  - Nutracêuticos migrados: Glucosamina, Condroitina, L-carnitina, Equinácea, Quitosana, Coenzima Q10, EPA
+- 🔘 **Botão de migração de condições na UI**:
+  - Adicionado botão "🔗 Migrar Condições" na aba Catálogo
+  - Feedback visual durante migração
+  - Toast com estatísticas de sucesso (relações criadas, nutracêuticos atualizados)
+  - Refresh automático dos dados após migração
+  - Traduções completas PT/EN para todas mensagens
+
+### Changed
+- 📊 **Aba Matriz agora exibe TAGs de condições**:
+  - Nutracêuticos migrados exibirão badges coloridos baseados em eficácia
+  - Glucosamina: 9 condições (prevention: 3, treatment: 3, support: 3) com eficácia 3.2-4.2
+  - Condroitina: 9 condições (prevention: 3, treatment: 3, support: 3) com eficácia 3.4-4.1
+  - L-carnitina: 9 condições (prevention: 3, treatment: 3, support: 3) com eficácia 3.5-4.3
+  - Equinácea: 6 condições (prevention: 3, treatment: 2, support: 1) com eficácia 3.5-4.2
+  - Quitosana: 6 condições (prevention: 2, treatment: 2, support: 2) com eficácia 3.5-3.9
+  - Coenzima Q10: 8 condições (prevention: 2, treatment: 3, support: 3) com eficácia 3.7-4.1
+  - EPA: 9 condições (prevention: 3, treatment: 3, support: 3) com eficácia 3.6-4.3
+  - Total estimado: ~55 relações de condições criadas
+
+### Fixed
 - ✅ **Correção CRÍTICA na exibição de estudos científicos**:
-  - Estudos agora aparecem com títulos corretos (não mais "Desconhecido")
   - Journals exibidos corretamente (não mais "N/A" quando há dados)
   - Relevância mostra valor real (não mais "0" quando há score)
   - Mapper corrigido para preservar estrutura aninhada do banco (`nutraceutical_studies`)

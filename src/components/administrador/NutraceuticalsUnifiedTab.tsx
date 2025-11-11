@@ -18,7 +18,7 @@ const NutraceuticalsUnifiedTab: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold">{t('admin.sidebar.knowledgeBase.nutraceuticalsUnified')}</h2>
           <p className="text-muted-foreground">
-            {t('common.search')} e gerencie nutracêuticos, relações e visualizações
+            {t('nutraceuticalsUnified.subtitle')}
           </p>
         </div>
       </div>
@@ -26,13 +26,13 @@ const NutraceuticalsUnifiedTab: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="catalog">
-            🗂️ Catálogo
+            🗂️ {t('nutraceuticalsUnified.tabs.catalog')}
           </TabsTrigger>
           <TabsTrigger value="relations">
-            🔗 Relações
+            🔗 {t('nutraceuticalsUnified.tabs.relations')}
           </TabsTrigger>
           <TabsTrigger value="matrix">
-            📊 Matriz
+            📊 {t('nutraceuticalsUnified.tabs.matrix')}
           </TabsTrigger>
         </TabsList>
 
