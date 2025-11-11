@@ -1211,7 +1211,7 @@
       },
       "studies": {
         "title": "Estudos Científicos em PDF",
-        "description": "Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos. Estes estudos serão importados para processamento NTAI e associados automaticamente aos nutracêuticos."
+        "description": "Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos. Estes estudos serão importados para processamento RAG e associados automaticamente aos nutracêuticos."
       },
       "toast": {
         "success": "Importação concluída",
@@ -1336,7 +1336,7 @@
       "noFiles": "Nenhum arquivo selecionado",
       "selectAtLeastOne": "Selecione pelo menos um arquivo para importar.",
       "importSuccess": "Importação concluída",
-      "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise NTAI.",
+      "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise RAG.",
       "importError": "Erro ao importar {{filename}}"
     },
     "history": {
@@ -1351,10 +1351,9 @@
       "noImports": "Nenhuma importação anterior registrada.",
       "errorFetching": "Erro ao buscar histórico"
     },
-    "ntai": {
-      "title": "Análise NTAI",
-      "badge": "Processamento Avançado",
-      "processing": "Processamento NTAI",
+    "rag": {
+      "title": "Análise RAG",
+      "processing": "Processamento RAG",
       "model": "Modelo",
       "temperature": "Temperature",
       "status": "Status",
@@ -1382,7 +1381,7 @@
         "noStudies": "Nenhum estudo disponível para processamento",
         "selectedCount_one": "{{count}} estudo selecionado",
         "selectedCount_other": "{{count}} estudos selecionados",
-        "addToQueue": "Adicionar à Fila NTAI",
+        "addToQueue": "Adicionar à Fila RAG",
         "statusNew": "Novo",
         "statusSpecial": "Especial",
         "statusProcessed": "Processado",
@@ -1404,7 +1403,7 @@
       "viewDetails": "Ver Detalhes"
     },
     "card": {
-      "ntaiAnalysis": "Análise NTAI",
+      "ragAnalysis": "Análise RAG",
       "nutraceuticals": "Nutraceuticos",
       "conditions": "Condições",
       "interactions": "Interações",
@@ -1416,7 +1415,7 @@
       "stageAdvanced": "Estágio avançado",
       "stageAdvancedDesc": "O estudo passou para o próximo estágio de aprovação.",
       "selectStudies": "Selecione os estudos para processamento",
-      "selectStudiesDesc": "Selecione os estudos importados e adicione-os à fila de processamento NTAI."
+      "selectStudiesDesc": "Selecione os estudos importados e adicione-os à fila de processamento RAG."
     }
   },
   "efficacyMatrix": {
@@ -1953,7 +1952,7 @@
       },
       "scientific_studies": {
         "label": "Estudos Científicos",
-        "description": "Base de conhecimento de estudos veterinários processados pela NTAI"
+        "description": "Base de conhecimento de estudos veterinários processados pelo RAG"
       },
       "anamnesis": {
         "label": "Anamnese Histórica",

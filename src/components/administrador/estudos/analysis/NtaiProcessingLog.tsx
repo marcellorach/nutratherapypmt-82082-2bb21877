@@ -22,7 +22,7 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries }) => {
   return (
     <div className="border rounded-md mb-4" ref={scrollAreaRef}>
       <div className="bg-gray-100 px-3 py-2 border-b flex items-center justify-between">
-        <h4 className="text-sm font-medium">Log de Processamento NTAI</h4>
+        <h4 className="text-sm font-medium">Log de Processamento RAG</h4>
         <span className="text-xs text-gray-500">{entries.length} eventos</span>
       </div>
       

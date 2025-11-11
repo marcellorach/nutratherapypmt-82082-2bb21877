@@ -135,10 +135,7 @@ const EstudosTab: React.FC = () => {
           
           <div className="flex items-center space-x-2 mb-2 mt-8">
             <ArrowDown className="h-4 w-4 text-purple-600" />
-            <h3 className="text-lg font-medium">{t('studies.ntai.title')}</h3>
-            <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-              {t('studies.ntai.badge')}
-            </span>
+            <h3 className="text-lg font-medium">{t('studies.rag.title')}</h3>
           </div>
           <NtaiProcessingSection />
         </TabsContent>

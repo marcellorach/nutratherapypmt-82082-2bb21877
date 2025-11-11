@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- 🎨 **Rebrand visual NTAI → RAG no frontend**:
+  - **Badge removido**: Removido badge "Advanced Processing" / "Processamento Avançado" da seção de análise (EstudosTab.tsx linhas 136-142)
+  - **Terminologia atualizada na UI**: Todas as strings visíveis mudaram de "NTAI" para "RAG" (Retrieval-Augmented Generation)
+  - **Traduções atualizadas**: 
+    - PT: "Análise NTAI" → "Análise RAG", "Processamento NTAI" → "Processamento RAG", "Adicionar à Fila NTAI" → "Adicionar à Fila RAG"
+    - EN: "NTAI Analysis" → "RAG Analysis", "NTAI Processing" → "RAG Processing", "Add to NTAI Queue" → "Add to RAG Queue"
+  - **Chaves de tradução**: `studies.ntai.*` → `studies.rag.*` (5 arquivos)
+  - **Componentes atualizados**: EstudosTab (linha 138), NtaiProcessingSection (linha 45), NtaiProcessingLog (linha 25)
+  - **Versão i18n incrementada**: 1.0.1 → 1.0.2 (força reload de traduções)
+  - **Código interno preservado**: Nomes de arquivos, hooks, tipos e interfaces permanecem inalterados (`useNtaiProcessing`, `NtaiAnalysisResult`, etc.)
+  - **Impacto**: Mudança puramente visual - terminologia mais técnica e reconhecida pela comunidade de IA/ML
+
 ### Removed
 - 🗑️ **Sistema de inicialização automática de admin removido**:
   - Deletado `src/hooks/useInitAdmin.ts` (hook que expunha credenciais em toasts)

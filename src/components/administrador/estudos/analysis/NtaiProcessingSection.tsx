@@ -42,7 +42,7 @@ const NtaiProcessingSection: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-600" />
-            <h3 className="text-lg font-medium">{t('studies.ntai.processing')}</h3>
+            <h3 className="text-lg font-medium">{t('studies.rag.processing')}</h3>
             <Badge className="ml-2 bg-purple-100 text-purple-800" variant="outline">
               {aiConfigs.modelName || 'GPT-4o'}
             </Badge>
