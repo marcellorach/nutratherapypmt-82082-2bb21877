@@ -74,18 +74,18 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Condições de saúde gerenciáveis por nutracêuticos'
   },
   {
-    id: 'ai-insights',
-    label: 'A.I. Insights',
-    group: 'knowledge-base',
-    component: AIInsightsTab,
-    description: 'Descobertas e análises geradas pela IA'
-  },
-  {
     id: 'relacoes',
     label: 'Relações',
     group: 'knowledge-base',
     component: RelationsTab,
     description: 'Visualização de relações entre nutracêuticos e condições'
+  },
+  {
+    id: 'ai-insights',
+    label: 'A.I. Insights',
+    group: 'knowledge-base',
+    component: AIInsightsTab,
+    description: 'Descobertas e análises geradas pela IA'
   },
   {
     id: 'knowledge-base-settings',

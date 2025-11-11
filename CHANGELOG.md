@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- 🔄 **Reorganização da Base de Conhecimento**:
+  - "Relations" movido para antes de "A.I. Insights"
+  - Nova ordem: Estudos → Nutracêuticos → Alvos → **Relations** → **A.I. Insights** → Configurações
+  - Melhora a progressão lógica: primeiro visualiza relações, depois insights gerados pela IA
+
 ### Added
 - ✨ **Nova aba "A.I. Insights" na Base de Conhecimento**:
   - Apresenta 3 tipos de insights: Descobertas Longitudinais, Novos Estudos, Análises de Eficácia

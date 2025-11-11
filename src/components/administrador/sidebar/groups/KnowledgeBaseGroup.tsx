@@ -73,24 +73,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "ai-insights"} 
-          onClick={() => handleStepClick("ai-insights")}
-          className={currentStep === "ai-insights" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "ai-insights" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.aiInsights')}</span>
-            </div>
-            {currentStep === "ai-insights" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           isActive={currentStep === "relacoes"} 
           onClick={() => handleStepClick("relacoes")}
           className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
@@ -101,6 +83,24 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
             </div>
             {currentStep === "relacoes" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "ai-insights"} 
+          onClick={() => handleStepClick("ai-insights")}
+          className={currentStep === "ai-insights" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "ai-insights" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.aiInsights')}</span>
+            </div>
+            {currentStep === "ai-insights" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
