@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- 🔄 **Reorganização dos cards da homepage**:
+  - Nova ordem (esquerda → direita): Control Panel → Veterinarian Portal → Owner Portal
+  - Layout adaptado para destacar primeiro o painel administrativo/pesquisa
+  
+- 📝 **Descrição do Owner Portal atualizada**:
+  - PT: "Acompanhe os PETs que aderiram ao NutraTherapy e monitore seu plano de tratamento nutracêutico personalizado"
+  - EN: "Follow the PETs enrolled in NutraTherapy and monitor their personalized nutraceutical treatment plan"
+  - Reflete melhor o contexto de adesão ao programa e acompanhamento de planos personalizados
+  - Atualizada tanto na área logada (`tutorAreaDesc`) quanto não-logada (`forTutorsDesc`)
+
 ### Added
 - 🎓 **Sistema de Acesso Simplificado Stanford**:
   - Novo componente `StanfordDemoForm.tsx` para acesso demo simplificado
