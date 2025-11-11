@@ -3365,9 +3365,10 @@
     "timeline": {
       "newPetsPerMonth": "New Pets per Month",
       "newPets": "New Pets",
-      "responseRates": "Response Rates Over Time",
+      "responseRates": "Cumulative Response Rate Over Time",
       "dropoutRate": "Dropout Rate",
-      "dropouts": "Dropouts"
+      "dropouts": "Dropouts",
+      "explanation": "This graph shows the typical nutraceutical response evolution: initial growth (0-3 months), accelerated response (3-8 months), and stabilization plateau (8-12 months). The plateau indicates balance between new responders and stabilized cases."
     },
     "filters": {
       "title": "Filters",

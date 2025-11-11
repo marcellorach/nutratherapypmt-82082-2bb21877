@@ -421,23 +421,27 @@ export const generateTimelineData = (pets: Pet[]): TimelinePoint[] => {
   const timeline: TimelinePoint[] = [];
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   
+  // Realistic S-curve pattern: growth → acceleration → plateau
+  // Simulates cumulative response rate over 12 months of treatment
+  const baseSignificant = [45, 68, 92, 118, 142, 165, 185, 198, 205, 210, 207, 203];
+  const baseMild = [58, 72, 88, 105, 118, 128, 133, 136, 138, 132, 128, 125];
+  const baseNone = [38, 48, 58, 72, 85, 95, 102, 106, 108, 107, 105, 103];
+  
   for (let i = 11; i >= 0; i--) {
     const monthDate = new Date();
     monthDate.setMonth(monthDate.getMonth() - i);
+    const monthIndex = monthDate.getMonth();
     
-    const monthPets = pets.filter(pet => {
-      const petMonth = new Date(pet.treatmentStartDate);
-      return petMonth.getMonth() === monthDate.getMonth() && 
-             petMonth.getFullYear() === monthDate.getFullYear();
-    });
+    // Add realistic variability (±5%)
+    const variance = () => 1 + (Math.random() - 0.5) * 0.1;
     
     timeline.push({
-      month: months[monthDate.getMonth()],
-      newPets: monthPets.length,
-      significantResponse: Math.floor(monthPets.length * 0.32),
-      mildResponse: Math.floor(monthPets.length * 0.22),
-      noResponse: Math.floor(monthPets.length * 0.19),
-      dropouts: Math.floor(monthPets.length * 0.15)
+      month: months[monthIndex],
+      newPets: 75 + Math.floor(Math.random() * 30), // 75-105 new pets/month
+      significantResponse: Math.floor(baseSignificant[monthIndex] * variance()),
+      mildResponse: Math.floor(baseMild[monthIndex] * variance()),
+      noResponse: Math.floor(baseNone[monthIndex] * variance()),
+      dropouts: Math.floor(15 + (11 - i) * 1.2) // Dropout grows slowly
     });
   }
   

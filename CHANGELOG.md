@@ -28,7 +28,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Nova tab "Clinical Monitoring" adicionada ao grupo "Actions"
   - ActionsGroup.tsx e ConfigurationGroup.tsx atualizados
 - 🌍 **Traduções bilíngues completas**: `clinicalMonitoring.*` e `campaignManagement` em PT/EN
-- 🔢 **Versão i18n incrementada**: 1.3.3 → 1.3.4
+- 🔢 **Versão i18n incrementada**: `1.3.4` → `1.3.5` para refresh de cache
+
+### Fixed
+- 🔧 **Gráfico "Response Rates Over Time" corrigido para padrão clínico realista**:
+  - Substituída lógica de "novos pets por mês" por "taxa de resposta acumulada"
+  - Implementado padrão S-curve realista: crescimento (0-3m) → aceleração (3-8m) → plateau (8-12m)
+  - Adicionada variabilidade natural (±5%) para simular flutuações mensais
+  - Removida dependência problemática de dados de pets
+  - Adicionado tooltip explicativo com Alert component sobre padrão de resposta nutracêutica
+  - Título atualizado: PT "Taxa de Resposta Acumulada ao Longo do Tempo" / EN "Cumulative Response Rate Over Time"
 
 ### Changed
 - 🎨 **Rebrand visual NTAI → RAG no frontend**:

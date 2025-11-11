@@ -3365,9 +3365,10 @@
     "timeline": {
       "newPetsPerMonth": "Novos Pets por Mês",
       "newPets": "Novos Pets",
-      "responseRates": "Taxas de Resposta ao Longo do Tempo",
+      "responseRates": "Taxa de Resposta Acumulada ao Longo do Tempo",
       "dropoutRate": "Taxa de Abandono",
-      "dropouts": "Abandonos"
+      "dropouts": "Abandonos",
+      "explanation": "Este gráfico mostra a evolução típica de resposta à nutraterapia: crescimento inicial (0-3 meses), resposta acelerada (3-8 meses) e plateau de estabilização (8-12 meses). O plateau indica equilíbrio entre novos respondedores e casos estabilizados."
     },
     "filters": {
       "title": "Filtros",

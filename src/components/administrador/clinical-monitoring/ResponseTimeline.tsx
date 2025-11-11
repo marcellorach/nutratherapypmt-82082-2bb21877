@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { Info } from 'lucide-react';
 import { Pet, generateTimelineData } from '@/utils/mockClinicalData';
 
 interface ResponseTimelineProps {
@@ -44,6 +46,12 @@ const ResponseTimeline: React.FC<ResponseTimelineProps> = ({ pets }) => {
           <CardTitle>{t('clinicalMonitoring.timeline.responseRates')}</CardTitle>
         </CardHeader>
         <CardContent>
+          <Alert className="mb-4 bg-muted/50 border-muted">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              {t('clinicalMonitoring.timeline.explanation')}
+            </AlertDescription>
+          </Alert>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" />
