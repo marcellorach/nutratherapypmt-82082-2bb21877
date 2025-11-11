@@ -337,7 +337,7 @@
       "dataProcessing": {
         "title": "Processamento de Dados",
         "import": "Importar Dados",
-        "multiAgentSimulation": "Simulação Multi-Agente",
+        "multiAgentSimulation": "Simulação RAG",
         "visualization": "Visualização",
         "settings": "Configurações"
       },

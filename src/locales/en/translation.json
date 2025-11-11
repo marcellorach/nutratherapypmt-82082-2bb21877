@@ -337,7 +337,7 @@
       "dataProcessing": {
         "title": "Data Processing",
         "import": "Import Data",
-        "multiAgentSimulation": "Multi-Agent Simulation",
+        "multiAgentSimulation": "RAG Simulation",
         "visualization": "Visualization",
         "settings": "Settings"
       },
