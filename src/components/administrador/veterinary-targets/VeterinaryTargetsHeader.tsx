@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface VeterinaryTargetsHeaderProps {
   onAddNew: () => void;
@@ -16,6 +18,28 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
   isRefreshing
 }) => {
   const { t } = useTranslation();
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleAutoTranslate = async () => {
+    setIsTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-conditions');
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success(data.message);
+        onRefresh();
+      } else {
+        toast.error(data.error || 'Erro ao traduzir condições');
+      }
+    } catch (error) {
+      console.error('Erro ao chamar função de tradução:', error);
+      toast.error('Erro ao iniciar tradução automática');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -27,6 +51,16 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
       </div>
       
       <div className="flex gap-2">
+        <Button
+          variant="outline"
+          onClick={handleAutoTranslate}
+          disabled={isTranslating}
+          className="flex items-center gap-2"
+        >
+          <Languages className={`h-4 w-4 ${isTranslating ? 'animate-pulse' : ''}`} />
+          {isTranslating ? 'Traduzindo...' : 'Traduzir para EN'}
+        </Button>
+        
         <Button
           variant="outline"
           onClick={onRefresh}
