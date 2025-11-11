@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- ✅ **Correção CRÍTICA na exibição de estudos científicos**:
+  - Estudos agora aparecem com títulos corretos (não mais "Desconhecido")
+  - Journals exibidos corretamente (não mais "N/A" quando há dados)
+  - Relevância mostra valor real (não mais "0" quando há score)
+  - Mapper corrigido para preservar estrutura aninhada do banco (`nutraceutical_studies`)
+- ✅ **Enriquecimentos na tabela de estudos**:
+  - Títulos clicáveis com link direto para DOI externo
+  - Suporte completo a i18n (PT/EN) para títulos e journals
+  - Ano de publicação exibido ao lado do título quando disponível
+  - Ícone de link externo para melhor UX e indicação visual
+  - Modo dark adaptativo em badges de relevância
+- ✅ **Validação dos 90 estudos**: Todas as associações nutracêutico-estudo agora visíveis na interface
+
 ### Added
 - ✅ **78 estudos científicos veterinários** adicionados ao banco de dados
   - 100% focados em aplicações veterinárias para cães e gatos

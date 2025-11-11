@@ -26,6 +26,9 @@
     "studies": {
       "title": "Estudos",
       "none": "Nenhum estudo associado",
+      "unknown": "Estudo desconhecido",
+      "viewFull": "Ver estudo completo",
+      "externalLink": "Link externo",
       "table": {
         "title": "Título",
         "journal": "Journal",

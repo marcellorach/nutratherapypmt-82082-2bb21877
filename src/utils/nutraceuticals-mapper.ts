@@ -171,8 +171,8 @@ export const mapDbToUiFormat = (dbItems: any[]): Nutraceutical[] => {
         outcomeCount: outcomeCount,
         studyCount: studyCount,
         convergenceScore: convergenceScore,
-        // Adicionar estudos mapeados para compatibilidade com componentes UI
-        nutraceutical_studies: studies,
+        // ✅ CRÍTICO: Preservar formato original aninhado do banco para StudiesTable
+        nutraceutical_studies: item.nutraceutical_studies || [],
         outcome: null
       };
       
