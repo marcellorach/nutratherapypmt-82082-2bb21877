@@ -288,13 +288,8 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                         {(() => {
                           const treatability = calculateTreatability(condition);
                           return treatability.showCount ? (
-                            <div className="flex items-center gap-2">
-                              <div className={`px-2.5 py-1 rounded-md border ${treatability.borderColor} ${treatability.bgColor} ${treatability.color} text-xs font-semibold`}>
-                                {treatability.percentage}%
-                              </div>
-                              <Badge variant="secondary" className="text-xs">
-                                {condition.nutraceutical_count} {t('admin.veterinaryTargets.treatability.nutraceuticals')}
-                              </Badge>
+                            <div className={`px-2.5 py-1 rounded-md border ${treatability.borderColor} ${treatability.bgColor} ${treatability.color} text-xs font-semibold`}>
+                              {treatability.percentage}%
                             </div>
                           ) : (
                             <Badge variant="outline" className="text-xs text-gray-600 border-gray-300">

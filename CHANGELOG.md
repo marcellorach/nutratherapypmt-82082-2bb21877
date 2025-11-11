@@ -10,6 +10,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- ✅ Removidas badges de contagem de nutracêuticos da coluna "Tratabilidade Média" (mantém apenas porcentagem e "A Catalogar")
 - ✅ Ajustado arredondamento de tratabilidade para múltiplos de 5 (5%, 10%, 15%...) para apresentação mais limpa e profissional
 - ✅ Implementado badge "A Catalogar" para condições sem nutracêuticos catalogados (mais claro e positivo que "0%")
 - ✅ Ajustados thresholds de tratabilidade: Baixa (0-35%), Moderada (40-65%), Boa (70-85%), Excelente (90-100%)
