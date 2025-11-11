@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- 🌍 **Idioma padrão alterado para Inglês (EN)**:
+  - Aplicação agora inicia em inglês para novos usuários
+  - Fallback de traduções alterado de PT → EN
+  - Usuários que já definiram idioma manualmente mantêm sua escolha
+  - Versão i18n: 1.1.8 → 1.1.9
+
 ### Fixed
 - 🌍 **Correção DEFINITIVA de fallbacks i18n (PT → EN)**:
   - Todos fallbacks em `NutraceuticalDetails.tsx`, `StudiesTable.tsx`, `ConditionsTable.tsx`, `ExpandedContent.tsx` alterados de PT para EN

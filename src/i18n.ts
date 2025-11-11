@@ -14,13 +14,13 @@ const resources = {
   }
 };
 
-// Detecta o idioma salvo ou usa português como padrão
+// Detecta o idioma salvo ou usa inglês como padrão
 const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
-const defaultLanguage = savedLanguage || 'pt';
+const defaultLanguage = savedLanguage || 'en';
 
 // Força reinicialização COMPLETA das traduções limpando cache do i18next
 if (typeof window !== 'undefined') {
-  const currentVersion = '1.1.8'; // Incrementar para forçar reload
+  const currentVersion = '1.1.9'; // Incrementar para forçar reload
   const storedVersion = localStorage.getItem('i18n-version');
   
   // SEMPRE limpar na primeira carga (forçar)
@@ -60,7 +60,7 @@ i18next
   .init({
     resources,
     lng: defaultLanguage,
-    fallbackLng: 'pt',
+    fallbackLng: 'en',
     debug: false,
     interpolation: {
       escapeValue: false
