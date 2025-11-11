@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,8 +44,11 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
   
   const [formData, setFormData] = useState({
     name: '',
+    name_en: '',
     description: '',
+    description_en: '',
     category: '',
+    category_en: '',
     severity_level: 'moderate'
   });
 
@@ -52,15 +56,21 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
     if (condition) {
       setFormData({
         name: condition.name || '',
+        name_en: condition.name_en || '',
         description: condition.description || '',
+        description_en: condition.description_en || '',
         category: condition.category || '',
+        category_en: condition.category_en || '',
         severity_level: condition.severity_level || 'moderate'
       });
     } else {
       setFormData({
         name: '',
+        name_en: '',
         description: '',
+        description_en: '',
         category: '',
+        category_en: '',
         severity_level: 'moderate'
       });
     }
@@ -132,29 +142,34 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">{t('admin.veterinaryTargets.crudDialog.nameLabel')}</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder={t('admin.veterinaryTargets.crudDialog.namePlaceholder')}
-            />
-          </div>
+        <Tabs defaultValue="pt" className="py-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="pt">{t('admin.veterinaryTargets.crudDialog.tabPT')}</TabsTrigger>
+            <TabsTrigger value="en">{t('admin.veterinaryTargets.crudDialog.tabEN')}</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pt" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t('admin.veterinaryTargets.crudDialog.nameLabel')}</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder={t('admin.veterinaryTargets.crudDialog.namePlaceholder')}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">{t('admin.veterinaryTargets.crudDialog.descriptionLabel')}</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder={t('admin.veterinaryTargets.crudDialog.descriptionPlaceholder')}
-              rows={4}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">{t('admin.veterinaryTargets.crudDialog.descriptionLabel')}</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder={t('admin.veterinaryTargets.crudDialog.descriptionPlaceholder')}
+                rows={4}
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category">{t('admin.veterinaryTargets.crudDialog.categoryLabel')}</Label>
               <Input
@@ -164,25 +179,58 @@ const VeterinaryTargetCRUDDialog: React.FC<VeterinaryTargetCRUDDialogProps> = ({
                 placeholder={t('admin.veterinaryTargets.crudDialog.categoryPlaceholder')}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="en" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name_en">{t('admin.veterinaryTargets.crudDialog.nameEnLabel')}</Label>
+              <Input
+                id="name_en"
+                value={formData.name_en}
+                onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
+                placeholder={t('admin.veterinaryTargets.crudDialog.nameEnPlaceholder')}
+              />
+            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="severity">{t('admin.veterinaryTargets.crudDialog.severityLabel')}</Label>
-              <Select
-                value={formData.severity_level}
-                onValueChange={(value) => setFormData({ ...formData, severity_level: value })}
-              >
-                <SelectTrigger id="severity">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">{t('admin.veterinaryTargets.crudDialog.severityLow')}</SelectItem>
-                  <SelectItem value="moderate">{t('admin.veterinaryTargets.crudDialog.severityModerate')}</SelectItem>
-                  <SelectItem value="high">{t('admin.veterinaryTargets.crudDialog.severityHigh')}</SelectItem>
-                  <SelectItem value="critical">{t('admin.veterinaryTargets.crudDialog.severityCritical')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="description_en">{t('admin.veterinaryTargets.crudDialog.descriptionEnLabel')}</Label>
+              <Textarea
+                id="description_en"
+                value={formData.description_en}
+                onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
+                placeholder={t('admin.veterinaryTargets.crudDialog.descriptionEnPlaceholder')}
+                rows={4}
+              />
             </div>
-          </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category_en">{t('admin.veterinaryTargets.crudDialog.categoryEnLabel')}</Label>
+              <Input
+                id="category_en"
+                value={formData.category_en}
+                onChange={(e) => setFormData({ ...formData, category_en: e.target.value })}
+                placeholder={t('admin.veterinaryTargets.crudDialog.categoryEnPlaceholder')}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="space-y-2 border-t pt-4">
+          <Label htmlFor="severity">{t('admin.veterinaryTargets.crudDialog.severityLabel')}</Label>
+          <Select
+            value={formData.severity_level}
+            onValueChange={(value) => setFormData({ ...formData, severity_level: value })}
+          >
+            <SelectTrigger id="severity">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">{t('admin.veterinaryTargets.crudDialog.severityLow')}</SelectItem>
+              <SelectItem value="moderate">{t('admin.veterinaryTargets.crudDialog.severityModerate')}</SelectItem>
+              <SelectItem value="high">{t('admin.veterinaryTargets.crudDialog.severityHigh')}</SelectItem>
+              <SelectItem value="critical">{t('admin.veterinaryTargets.crudDialog.severityCritical')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <DialogFooter>

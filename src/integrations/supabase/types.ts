@@ -74,28 +74,37 @@ export type Database = {
       health_conditions: {
         Row: {
           category: string | null
+          category_en: string | null
           created_at: string | null
           description: string | null
+          description_en: string | null
           id: string
           name: string
+          name_en: string | null
           severity_level: string | null
           updated_at: string | null
         }
         Insert: {
           category?: string | null
+          category_en?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           name: string
+          name_en?: string | null
           severity_level?: string | null
           updated_at?: string | null
         }
         Update: {
           category?: string | null
+          category_en?: string | null
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           name?: string
+          name_en?: string | null
           severity_level?: string | null
           updated_at?: string | null
         }

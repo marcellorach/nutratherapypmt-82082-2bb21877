@@ -13,7 +13,7 @@ export const HealthConditionsService = {
     const client = supabase as any;
     const { data, error } = await client
       .from('health_conditions')
-      .select('*')
+      .select('id, name, name_en, description, description_en, category, category_en, severity_level, created_at, updated_at')
       .order('name');
 
     if (error) {
@@ -32,7 +32,7 @@ export const HealthConditionsService = {
     const client = supabase as any;
     const { data, error } = await client
       .from('health_conditions')
-      .select('*')
+      .select('id, name, name_en, description, description_en, category, category_en, severity_level, created_at, updated_at')
       .eq('id', id)
       .single();
 
@@ -47,12 +47,20 @@ export const HealthConditionsService = {
   /**
    * Cria uma nova condição de saúde
    */
-  async createCondition({ name, description }: { name: string, description: string }) {
+  async createCondition(data: { 
+    name: string; 
+    description?: string;
+    name_en?: string;
+    description_en?: string;
+    category?: string;
+    category_en?: string;
+    severity_level?: string;
+  }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
-    const { data, error } = await client
+    const { data: result, error } = await client
       .from('health_conditions')
-      .insert([{ name, description }])
+      .insert([data])
       .select()
       .single();
 
@@ -61,18 +69,26 @@ export const HealthConditionsService = {
       throw new Error('Não foi possível criar a condição de saúde');
     }
 
-    return data;
+    return result;
   },
 
   /**
    * Atualiza uma condição de saúde existente
    */
-  async updateCondition(id: string, { name, description }: { name: string, description: string }) {
+  async updateCondition(id: string, data: { 
+    name?: string; 
+    description?: string;
+    name_en?: string;
+    description_en?: string;
+    category?: string;
+    category_en?: string;
+    severity_level?: string;
+  }) {
     // Usando type assertion para contornar a verificação de tipos do TypeScript
     const client = supabase as any;
-    const { data, error } = await client
+    const { data: result, error } = await client
       .from('health_conditions')
-      .update({ name, description })
+      .update(data)
       .eq('id', id)
       .select()
       .single();
@@ -82,7 +98,7 @@ export const HealthConditionsService = {
       throw new Error('Não foi possível atualizar a condição de saúde');
     }
 
-    return data;
+    return result;
   },
 
   /**

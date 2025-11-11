@@ -58,10 +58,16 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
   onEdit,
   onDelete
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conditionToDelete, setConditionToDelete] = useState<string | null>(null);
+
+  const getLocalizedField = (condition: any, field: 'name' | 'description' | 'category') => {
+    const isEnglish = i18n.language === 'en';
+    const enField = `${field}_en`;
+    return isEnglish && condition[enField] ? condition[enField] : condition[field];
+  };
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -190,10 +196,10 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{condition.name}</TableCell>
+                      <TableCell className="font-medium">{getLocalizedField(condition, 'name')}</TableCell>
                       <TableCell>
                         {condition.category && (
-                          <Badge variant="outline">{condition.category}</Badge>
+                          <Badge variant="outline">{getLocalizedField(condition, 'category')}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -222,7 +228,7 @@ const VeterinaryTargetsTable: React.FC<VeterinaryTargetsTableProps> = ({
                           <div className="py-4 px-2">
                             <h4 className="font-semibold mb-2">{t('admin.veterinaryTargets.table.expandedDescription')}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {condition.description || t('admin.veterinaryTargets.table.noDescription')}
+                              {getLocalizedField(condition, 'description') || t('admin.veterinaryTargets.table.noDescription')}
                             </p>
                           </div>
                         </TableCell>
