@@ -22,8 +22,8 @@ const NutraceuticalsUnifiedTab = lazy(() => import('@/components/administrador/N
 const VeterinaryTargetsTab = lazy(() => import('@/components/administrador/VeterinaryTargetsTab'));
 const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasClinicasTab'));
 const AIInsightsTab = lazy(() => import('@/components/administrador/AIInsightsTab'));
+const RelationsTab = lazy(() => import('@/components/administrador/visualizations/relations/RelationsTab'));
 const KnowledgeBaseSettingsTab = lazy(() => import('@/components/administrador/settings/KnowledgeBaseSettingsTab'));
-const OutcomeManagementPanel = lazy(() => import('@/components/administrador/settings/panels/OutcomeManagementPanel'));
 const ImportStep = lazy(() => import('@/components/administrador/dataAnalysis/ImportStep'));
 const FontesTab = lazy(() => import('@/components/administrador/FontesTab'));
 const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/AnalysisStep'));
@@ -79,11 +79,11 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Descobertas e análises geradas pela IA'
   },
   {
-    id: 'outcomes-management',
-    label: 'Outcomes',
+    id: 'relacoes',
+    label: 'Relações',
     group: 'knowledge-base',
-    component: OutcomeManagementPanel,
-    description: 'Gerenciamento de outcomes'
+    component: RelationsTab,
+    description: 'Visualização de relações entre nutracêuticos e condições'
   },
   {
     id: 'knowledge-base-settings',

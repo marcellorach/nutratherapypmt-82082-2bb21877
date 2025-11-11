@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, ListChecks, Settings, ChevronRight } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -91,16 +91,16 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "outcomes-management"} 
-          onClick={() => handleStepClick("outcomes-management")}
-          className={currentStep === "outcomes-management" ? "bg-primary/10 text-primary" : ""}
+          isActive={currentStep === "relacoes"} 
+          onClick={() => handleStepClick("relacoes")}
+          className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <ListChecks className={`h-4 w-4 mr-2 ${currentStep === "outcomes-management" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.manageOutcomes')}</span>
+              <Network className={`h-4 w-4 mr-2 ${currentStep === "relacoes" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
             </div>
-            {currentStep === "outcomes-management" && (
+            {currentStep === "relacoes" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
