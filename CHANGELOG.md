@@ -10,6 +10,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 🎨 **Backgrounds dos cards de estudos agora muito transparentes (30% opacidade) para visual mais clean**
+- 🎨 **Card "Next Steps" agora usa cor teal (verde-azulado) em vez de roxo para estética mais elegante e científica**
+- ✅ **i18n**: Versão incrementada para 1.3.10 (cache refresh)
+
+### Changed
 - 🎨 **Study Progress Timeline - Labels abreviados com tooltips**:
   - Labels de fase agora usam formato compacto (M0, M2, M4, M6, M8, M10...) evitando sobreposição
   - Tooltip mostra nome completo da fase + dia ao passar o mouse

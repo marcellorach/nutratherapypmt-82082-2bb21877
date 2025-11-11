@@ -66,7 +66,7 @@ const StudyNotesCard: React.FC<StudyNotesCardProps> = ({ notes }) => {
     <div className="space-y-4 mt-4">
       {/* Preliminary Results - Consolidated Card */}
       {(parsedNotes.introduction || parsedNotes.results.length > 0) && (
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className="p-4 bg-blue-50/30 border-blue-200">
           <div className="flex items-start gap-3">
             <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
@@ -106,7 +106,7 @@ const StudyNotesCard: React.FC<StudyNotesCardProps> = ({ notes }) => {
 
       {/* Limitations */}
       {parsedNotes.limitations.length > 0 && (
-        <Card className="p-4 bg-amber-50 border-amber-200">
+        <Card className="p-4 bg-amber-50/30 border-amber-200">
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
             <div className="space-y-2 flex-1">
@@ -127,16 +127,16 @@ const StudyNotesCard: React.FC<StudyNotesCardProps> = ({ notes }) => {
 
       {/* Next Steps */}
       {parsedNotes.nextSteps.length > 0 && (
-        <Card className="p-4 bg-purple-50 border-purple-200">
+        <Card className="p-4 bg-teal-50/30 border-teal-200">
           <div className="flex items-start gap-3">
-            <FlaskConical className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+            <FlaskConical className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
             <div className="space-y-2 flex-1">
-              <h4 className="text-sm font-semibold text-purple-900">
+              <h4 className="text-sm font-semibold text-teal-900">
                 {t('admin.studies.ongoingStudies.notes.nextSteps')}
               </h4>
               <ul className="space-y-1.5">
                 {parsedNotes.nextSteps.map((step, index) => (
-                  <li key={index} className="text-xs text-purple-800 leading-relaxed pl-4 relative before:content-['•'] before:absolute before:left-0">
+                  <li key={index} className="text-xs text-teal-800 leading-relaxed pl-4 relative before:content-['•'] before:absolute before:left-0">
                     {step}
                   </li>
                 ))}
