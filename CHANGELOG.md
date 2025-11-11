@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - **Código interno preservado**: Nomes de arquivos, hooks, tipos e interfaces permanecem inalterados (`useNtaiProcessing`, `NtaiAnalysisResult`, `multiAgentAnalysis` key, etc.)
   - **Impacto**: Mudança puramente visual - terminologia mais técnica e reconhecida pela comunidade de IA/ML (RAG é método padrão para LLMs com conhecimento externo)
 
+### Changed
+- 🌍 **Internacionalização da tela de resultados da análise RAG**:
+  - **Componente atualizado**: `AnalysisResult.tsx` agora suporta PT/EN
+  - **Traduções adicionadas**: 
+    - `multiAgentAnalysis.result.*` em `pt/translation.json` e `en/translation.json`
+    - Título, descrição, seções de processamento, correlações, recomendações e próximos passos
+  - **Versão i18n incrementada**: 1.3.2 → 1.3.3
+  - **Impacto**: Tela de sucesso da análise RAG agora exibe em português e inglês conforme idioma selecionado
+
 ### Fixed
 - 🐛 **Corrigido erro de importação dinâmica do ActionsStep.tsx**:
   - **Problema**: "Failed to fetch dynamically imported module" causado por conflito de cache após reload forçado do i18n (versão 1.3.2)

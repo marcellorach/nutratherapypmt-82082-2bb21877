@@ -460,6 +460,36 @@
         "analyzing": "Analyzing...",
         "runAgain": "Run Again",
         "startAnalysis": "Start RAG Analysis"
+      },
+      "result": {
+        "title": "Analysis Successfully Completed",
+        "description": "The RAG analysis of the data has been successfully completed. The system retrieved relevant knowledge and generated high-quality insights and recommendations.",
+        "dataProcessing": {
+          "title": "Data Processing",
+          "petsProcessed": "pets processed",
+          "examsAnalyzed": "exams analyzed",
+          "breedsCategorized": "breeds categorized",
+          "conditionsIdentified": "clinical conditions identified"
+        },
+        "analysisCorrelations": {
+          "title": "Analysis and Correlations",
+          "healthPatternsIdentified": "health patterns identified",
+          "nutritionalGaps": "with nutritional gaps",
+          "treatmentsEvaluated": "treatments evaluated",
+          "significantCorrelations": "significant correlations"
+        },
+        "recommendations": {
+          "title": "Recommendations",
+          "generated": "recommendations generated",
+          "confidenceRate": "average confidence rate",
+          "scientificEvidence": "with scientific evidence",
+          "recurrentNutraceuticals": "recurrent nutraceuticals"
+        },
+        "nextSteps": {
+          "title": "Next Steps",
+          "viewDetailed": "View Detailed Analysis",
+          "sendToVet": "Send for Veterinary Review"
+        }
       }
     },
     "studies": {
