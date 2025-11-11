@@ -151,7 +151,7 @@
   },
   "home": {
     "title": "NutraTherapy PET",
-    "subtitle": "Base científica construída a partir de 267 estudos cobrindo 35 nutracêuticos e 95 relações com condições, com índice geral de eficácia de 4,2/5",
+    "subtitle": "Plataforma de terapia nutracêutica baseada em evidências, alimentada por 267 estudos revisados analisando 35 compostos ativos em 95 condições de saúde, alcançando índice de eficácia 4,2/5 através de recomendações personalizadas via IA",
     "platformAccess": "Acesse a Plataforma",
     "platformAccessDesc": "Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET. Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores.",
     "loginButton": "Entrar na Plataforma",
@@ -850,12 +850,13 @@
     }
   },
   "footer": {
-    "copyright": "NutraTherapy Pet © 2025 — Sistema inteligente de recomendação de nutracêuticos para pets",
+    "copyright": "NutraTherapy Pet © 2025 — Sistema inteligente e escalável de recomendação de nutracêuticos para pets",
     "poweredBy": "Powered by",
     "comingSoon": "em breve"
   },
   "header": {
-    "platformSubtitle": "Plataforma de terapia nutracêutica personalizada em massa e pesquisa",
+    "platformSubtitleLine1": "Plataforma de terapia nutracêutica personalizada em massa",
+    "platformSubtitleLine2": "e pesquisa",
     "administrator": "Administrador",
     "veterinarian": "Veterinário",
     "tutor": "Tutor",

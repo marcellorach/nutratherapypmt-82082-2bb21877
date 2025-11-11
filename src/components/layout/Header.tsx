@@ -30,7 +30,10 @@ const Header: React.FC = () => {
               NutraTherapy
             </div>
             <div className="text-xs text-gray-600 font-light text-center">
-              {t('header.platformSubtitle')}
+              {t('header.platformSubtitleLine1')}
+            </div>
+            <div className="text-xs text-gray-600 font-light text-center">
+              {t('header.platformSubtitleLine2')}
             </div>
           </div>
         </Link>

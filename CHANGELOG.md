@@ -10,6 +10,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 📝 **Refinamento de textos da plataforma**:
+  - **Footer**: Adicionado "scalable" antes de "intelligent" (destaque escalabilidade)
+  - **Hero subtitle**: Reescrito para melhor descrever atividades mantendo estatísticas (267 estudos, 35 compostos, 95 condições, índice 4.2/5)
+    - Ênfase em "evidence-based", "peer-reviewed", "AI-driven personalized recommendations"
+  - **Header slogan**: Quebrado em duas linhas para melhor legibilidade visual
+    - Linha 1: "Mass-personalized nutraceutical therapy platform"
+    - Linha 2: "& research"
+  - Todas as mudanças mantêm suporte bilíngue completo (PT/EN)
 - 📝 **Atualização massiva de textos da plataforma para apresentação profissional**:
   - **Header**: Novo slogan conciso "Mass-personalized nutraceutical therapy platform & research"
   - **Hero subtitle**: Incluídas estatísticas concretas "A scientific database built from 267 studies covering 35 nutraceuticals and 95 condition links, with an overall efficacy index of 4.2/5"
