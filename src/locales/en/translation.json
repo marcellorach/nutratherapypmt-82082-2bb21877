@@ -574,6 +574,11 @@
         "notSpecified": "Not specified",
         "studyNotes": "Study Notes"
       },
+      "notes": {
+        "preliminaryResults": "Preliminary Results",
+        "currentLimitations": "Current Limitations",
+        "nextSteps": "Next Steps"
+      },
       "models": {
         "dashboard": {
           "title": "Predictive Models Overview",

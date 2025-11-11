@@ -9,6 +9,7 @@ import DogGroupVisualization from './DogGroupVisualization';
 import StudyProgressCard from './StudyProgressCard';
 import PartialResultsChart from './PartialResultsChart';
 import StudyPhaseIndicator from './StudyPhaseIndicator';
+import StudyNotesCard from './StudyNotesCard';
 
 interface DetailedStudyPanelProps {
   study: OngoingStudy;
@@ -90,15 +91,7 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
               </div>
               
               {study.notes && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-                  <div className="flex items-start gap-2">
-                    <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-blue-800">{t('admin.studies.ongoingStudies.overview.studyNotes')}</h4>
-                      <p className="text-sm text-blue-700">{study.notes}</p>
-                    </div>
-                  </div>
-                </div>
+                <StudyNotesCard notes={study.notes} />
               )}
             </TabsContent>
             

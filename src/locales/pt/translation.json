@@ -574,6 +574,11 @@
         "notSpecified": "Não especificado",
         "studyNotes": "Notas do Estudo"
       },
+      "notes": {
+        "preliminaryResults": "Resultados Preliminares",
+        "currentLimitations": "Limitações Atuais",
+        "nextSteps": "Próximos Passos"
+      },
       "models": {
         "dashboard": {
           "title": "Visão Geral dos Modelos Preditivos",

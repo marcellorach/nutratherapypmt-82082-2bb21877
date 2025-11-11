@@ -10,6 +10,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- ✅ **Study Notes**: Melhorada organização e estruturação das notas do estudo em andamento
+  - Seção "Resultados Preliminares" com introdução destacada em card azul/índigo
+  - Grid de resultados com cards verdes individuais para cada categoria (Perfil Lipídico, Função Renal, Cardioproteção, etc.)
+  - Seção "Limitações Atuais" com card amarelo/âmbar e lista estruturada
+  - Seção "Próximos Passos" com card roxo e lista de ações futuras
+  - Ícones contextuais (TrendingUp, CheckCircle2, AlertTriangle, FlaskConical) para cada seção
+  - Parsing automático do texto das notas para extrair e organizar informações por categoria
+- ✅ **i18n**: Versão incrementada para 1.3.7 (cache refresh)
 - ✅ **Estudos em Andamento**: Substituído estudo mockado de Omega-3 por estudo clínico REAL em andamento - "Protocolo Rapamicina + SGLT2i para Longevidade e Saúde Multiorgânica Canina"
   - 20 cães planejados (6 já iniciados há 6 meses)
   - Protocolo: Rapamicina 0,3mg/kg + SGLT2i alternado (Dapagliflozina 0,1mg/kg / Empagliflozina 0,2mg/kg a cada 2 meses)
@@ -18,7 +26,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Múltiplos outcomes: cardioproteção, proteção renal, prevenção oncológica, efeito anti-inflamatório, longevidade
   - Preparação para integração futura com API Invoxia (wearables) para monitoramento contínuo de FC, HRV e atividade física
   - Notas clínicas detalhadas com limitações atuais (recrutamento em andamento) e próximos passos (telômeros, relógio epigenético)
-- ✅ **i18n**: Versão incrementada para 1.3.6 (cache refresh)
 
 ### Added
 - ✨ **Sistema de Monitoramento Clínico completo**:
