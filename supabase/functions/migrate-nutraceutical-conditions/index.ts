@@ -156,6 +156,125 @@ const NUTRACEUTICAL_CONDITIONS_MAP: Record<string, {
       { name: 'Sistema imunológico', efficacyScore: 3.7 },
       { name: 'Função celular', efficacyScore: 3.8 }
     ]
+  },
+  'Silimarina': {
+    prevention: [
+      { name: 'Danos hepáticos', efficacyScore: 3.9 }
+    ],
+    treatment: [
+      { name: 'Hepatopatias crônicas e agudas', efficacyScore: 4.1 }
+    ],
+    support: [
+      { name: 'Função hepática', efficacyScore: 3.8 }
+    ]
+  },
+  'Própolis Verde': {
+    prevention: [
+      { name: 'Infecções respiratórias', efficacyScore: 2.5 },
+      { name: 'Alergias sazonais', efficacyScore: 2.2 }
+    ],
+    treatment: [
+      { name: 'Infecções bacterianas leves', efficacyScore: 2.5 }
+    ],
+    support: [
+      { name: 'Sistema imune', efficacyScore: 3.0 }
+    ]
+  },
+  'Pólen de Abelha': {
+    prevention: [
+      { name: 'Deficiência nutricional', efficacyScore: 1.8 }
+    ],
+    treatment: [
+      { name: 'Fadiga', efficacyScore: 2.0 }
+    ],
+    support: [
+      { name: 'Metabolismo', efficacyScore: 2.2 },
+      { name: 'Energia', efficacyScore: 2.5 }
+    ]
+  },
+  'Allicina': {
+    prevention: [
+      { name: 'Cardiovascular', efficacyScore: 3.2 },
+      { name: 'Infecções', efficacyScore: 2.8 }
+    ],
+    treatment: [],
+    support: [
+      { name: 'Saúde Cardiovascular', efficacyScore: 3.0 },
+      { name: 'Sistema imunológico', efficacyScore: 2.5 }
+    ]
+  },
+  'Apigenina': {
+    prevention: [
+      { name: 'Câncer', efficacyScore: 3.5 },
+      { name: 'Inflamação', efficacyScore: 3.2 }
+    ],
+    treatment: [],
+    support: [
+      { name: 'Saúde Óssea', efficacyScore: 3.0 },
+      { name: 'Câncer Canino', efficacyScore: 3.0 },
+      { name: 'Sistema imunológico', efficacyScore: 2.8 }
+    ]
+  },
+  'Beta-Glucanas': {
+    prevention: [
+      { name: 'Infecções', efficacyScore: 3.8 },
+      { name: 'Câncer', efficacyScore: 3.2 }
+    ],
+    treatment: [],
+    support: [
+      { name: 'Suporte Imunológico', efficacyScore: 3.0 },
+      { name: 'Saúde intestinal', efficacyScore: 3.2 },
+      { name: 'Resposta imune', efficacyScore: 3.8 }
+    ]
+  },
+  'Ácido Alfa-Lipóico': {
+    prevention: [
+      { name: 'Anti-envelhecimento', efficacyScore: 4.0 },
+      { name: 'Estresse oxidativo', efficacyScore: 3.8 }
+    ],
+    treatment: [
+      { name: 'Artrite', efficacyScore: 1.0 },
+      { name: 'Cardiomiopatia dilatada', efficacyScore: 3.0 }
+    ],
+    support: [
+      { name: 'Estresse Oxidativo', efficacyScore: 3.0 },
+      { name: 'Função antioxidante', efficacyScore: 3.5 }
+    ]
+  },
+  'Astaxantina': {
+    prevention: [
+      { name: 'Disfunção renal', efficacyScore: 3.5 },
+      { name: 'Estresse oxidativo', efficacyScore: 4.2 }
+    ],
+    treatment: [],
+    support: [
+      { name: 'Saúde Ocular', efficacyScore: 3.0 },
+      { name: 'Estresse Oxidativo', efficacyScore: 3.0 },
+      { name: 'Função renal', efficacyScore: 3.2 }
+    ]
+  },
+  'Quercetina': {
+    prevention: [
+      { name: 'Lesão renal', efficacyScore: 3.5 }
+    ],
+    treatment: [
+      { name: 'Nefropatia', efficacyScore: 3.2 }
+    ],
+    support: [
+      { name: 'Função renal', efficacyScore: 3.8 }
+    ]
+  },
+  'Astragalus': {
+    prevention: [
+      { name: 'Disfunção renal', efficacyScore: 2.8 },
+      { name: 'Imunossupressão', efficacyScore: 3.8 }
+    ],
+    treatment: [],
+    support: [
+      { name: 'Proteinúria', efficacyScore: 2.6 },
+      { name: 'Sistema imunológico renal', efficacyScore: 3.0 },
+      { name: 'Função imune', efficacyScore: 3.5 }
+    ]
   }
 };
 
@@ -267,7 +386,7 @@ Deno.serve(async (req) => {
               nutraceutical_id: nutra.id,
               condition_id: conditionId,
               relationship_type: type,
-              efficacy_score: Math.round(condition.efficacyScore * 10) // 3.2 -> 32
+              efficacy_score: condition.efficacyScore // Valor direto 0-10
             });
 
           if (relationError) {

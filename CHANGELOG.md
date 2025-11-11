@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- 🐛 **CRÍTICO: Correção do efficacy_score na migração de condições**:
+  - Removida multiplicação por 10 que violava check constraint do banco (0-10)
+  - Edge Function agora salva valores corretos (era 32-45, agora 1.0-4.5)
+  - Migração de condições finalmente funcionando! 🎉
+
+### Added
+- ✅ **10 novos nutracêuticos no mapeamento de condições**:
+  - Silimarina (3 condições), Própolis Verde (4), Pólen de Abelha (4)
+  - Allicina (4), Apigenina (5), Beta-Glucanas (5)
+  - Ácido Alfa-Lipóico (6), Astaxantina (5), Quercetina (3), Astragalus (5)
+  - Total: ~126 relações de condições prontas para migração
+  - Aba Matriz agora exibirá TAGs para todos os 19 nutracêuticos
+
 ### Changed
 - 🌍 **Idioma padrão alterado para Inglês (EN)**:
   - Aplicação agora inicia em inglês para novos usuários
