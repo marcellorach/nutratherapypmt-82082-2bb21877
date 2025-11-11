@@ -18,12 +18,28 @@ const resources = {
 const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
 const defaultLanguage = savedLanguage || 'pt';
 
-// Força reinicialização das traduções limpando cache do i18next
+// Força reinicialização COMPLETA das traduções limpando cache do i18next
 if (typeof window !== 'undefined') {
-  const currentVersion = '1.1.4'; // Incrementar para forçar reload
+  const currentVersion = '1.1.5'; // Incrementar para forçar reload
   const storedVersion = localStorage.getItem('i18n-version');
+  
   if (storedVersion !== currentVersion) {
+    console.log('🔄 Limpando cache de traduções...');
+    
+    // Limpar TUDO relacionado a i18n
+    localStorage.removeItem('i18nextLng');
+    localStorage.removeItem('language');
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('i18next')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
     localStorage.setItem('i18n-version', currentVersion);
+    console.log('✅ Cache limpo - versão:', currentVersion);
+    
+    // Forçar reload da página para aplicar mudanças
+    window.location.reload();
   }
 }
 

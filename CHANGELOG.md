@@ -10,6 +10,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Fixed
+- 🔥 **Correção CRÍTICA de cache de traduções i18n**:
+  - Implementado mecanismo de limpeza COMPLETA de cache i18n no localStorage
+  - Força reload automático da página quando versão de traduções muda
+  - Elimina chaves literais aparecendo na interface (ex: "nutraceuticals.details.title")
+  - Logs de debug para rastreamento (🔄 Limpando cache, ✅ Cache limpo)
+  - Versão i18n incrementada: 1.1.4 → 1.1.5
+  - Solução definitiva: Limpa `i18nextLng`, `language` e todas chaves `i18next*` do localStorage
+  - Auto-reload via `window.location.reload()` após limpeza
 - ✅ **Correção CRÍTICA na exibição de estudos científicos**:
   - Estudos agora aparecem com títulos corretos (não mais "Desconhecido")
   - Journals exibidos corretamente (não mais "N/A" quando há dados)
