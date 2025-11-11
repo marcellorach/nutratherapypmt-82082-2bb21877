@@ -214,6 +214,19 @@
       "confirmPassword": "Confirme sua senha",
       "firstName": "Nome",
       "lastName": "Sobrenome"
+    },
+    "stanfordDemo": {
+      "title": "Acesso Demo Stanford",
+      "description": "Digite seu email para explorar a plataforma NutraTherapy",
+      "emailLabel": "Email",
+      "emailPlaceholder": "seu.nome@stanford.edu",
+      "accessButton": "Acessar Demo",
+      "accessingDemo": "Acessando demo...",
+      "welcomeMessage": "Bem-vindo! Criando sua conta demo...",
+      "alreadyExists": "Bem-vindo de volta! Fazendo login...",
+      "invalidEmail": "Por favor, digite um endereço de email válido",
+      "accessError": "Não foi possível acessar a demo. Tente novamente.",
+      "demoNote": "Contas demo usam autenticação simplificada para acesso ao curso"
     }
   },
   "validation": {

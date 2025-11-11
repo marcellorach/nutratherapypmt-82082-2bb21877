@@ -9,6 +9,41 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- 🎓 **Sistema de Acesso Simplificado Stanford**:
+  - Novo componente `StanfordDemoForm.tsx` para acesso demo simplificado
+  - Autenticação com email único + senha fixa (`@stanford@`)
+  - Login/signup automático: tenta login → se falhar, cria conta automaticamente
+  - Validação de email com feedback visual (zod schema)
+  - Interface minimalista: campo de email + botão de acesso
+  - Ícone GraduationCap (🎓) para identidade visual Stanford
+  - Toast notifications para feedback do usuário (bem-vindo, login existente, erros)
+  - Nota visual explicando autenticação simplificada para demo
+  - Traduções completas PT/EN para todas as mensagens (12 novas chaves)
+  - Versão i18n: 1.2.6 → 1.2.7
+
+### Changed
+- 🔄 **AuthPage simplificada para Demo Stanford**:
+  - Removidas tabs Login/Register (simplificação total)
+  - Interface direta: Card único com `StanfordDemoForm`
+  - Título: "Stanford Demo Access" (PT: "Acesso Demo Stanford")
+  - Descrição: "Enter your email to explore the NutraTherapy platform"
+  - Mantém redirecionamento automático se já autenticado
+  - Removidas funções de registro manual (`handleRegister`)
+
+### Removed
+- ❌ Removidos componentes `LoginForm` e `RegisterForm` do AuthPage
+- ❌ Removidas tabs de Login/Register (Tabs, TabsList, TabsTrigger)
+- ❌ Removido estado `activeTab` (não mais necessário)
+
+### Technical
+- ✅ Fluxo de autenticação: `signIn()` → se erro → `signUp()` automático
+- ✅ Nome extraído do email: `email.split('@')[0]` (parte antes do @)
+- ✅ Sobrenome fixo: "Stanford Demo" para todos os usuários demo
+- ✅ Senha fixa conhecida: `@stanford@` (OK para ambiente acadêmico controlado)
+- ✅ Loading states durante autenticação (botão desabilitado + spinner)
+- ✅ Todos os emails registrados automaticamente na tabela `profiles`
+
 ### Changed
 - 📝 **Refinamento de textos da plataforma**:
   - **Footer**: Adicionado "scalable" antes de "intelligent" (destaque escalabilidade)

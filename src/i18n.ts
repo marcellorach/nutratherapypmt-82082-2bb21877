@@ -20,7 +20,7 @@ const defaultLanguage = savedLanguage || 'en';
 
 // Força reinicialização COMPLETA das traduções limpando cache do i18next
 if (typeof window !== 'undefined') {
-  const currentVersion = '1.2.6'; // Incrementar para forçar reload
+  const currentVersion = '1.2.7'; // Incrementar para forçar reload
   const storedVersion = localStorage.getItem('i18n-version');
   
   // SEMPRE limpar na primeira carga (forçar)
