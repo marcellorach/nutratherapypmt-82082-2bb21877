@@ -35,16 +35,16 @@ const StudiesTable: React.FC<StudiesTableProps> = ({ studies }) => {
   };
   
   if (!Array.isArray(studies) || studies.length === 0) {
-    return <p className="text-sm text-muted-foreground">{getText('nutraceuticals.studies.none', 'Nenhum estudo associado')}</p>;
+    return <p className="text-sm text-muted-foreground">{getText('nutraceuticals.studies.none', 'No associated studies')}</p>;
   }
 
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b">
-          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.title', 'Título')}</th>
+          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.title', 'Title')}</th>
           <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.journal', 'Journal')}</th>
-          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.relevance', 'Relevância')}</th>
+          <th className="text-left py-2 font-semibold">{getText('nutraceuticals.studies.table.relevance', 'Relevance')}</th>
         </tr>
       </thead>
       <tbody>
@@ -69,13 +69,13 @@ const StudiesTable: React.FC<StudiesTableProps> = ({ studies }) => {
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:underline flex items-center gap-1 group"
-                    title={getText('nutraceuticals.studies.viewFull', 'Ver estudo completo')}
+                    title={getText('nutraceuticals.studies.viewFull', 'View full study')}
                   >
-                    <span>{title || getText('nutraceuticals.studies.unknown', 'Estudo desconhecido')}</span>
+                    <span>{title || getText('nutraceuticals.studies.unknown', 'Unknown study')}</span>
                     <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />
                   </a>
                 ) : (
-                  <span className="text-foreground">{title || getText('nutraceuticals.studies.unknown', 'Estudo desconhecido')}</span>
+                  <span className="text-foreground">{title || getText('nutraceuticals.studies.unknown', 'Unknown study')}</span>
                 )}
                 {study?.year && (
                   <span className="text-muted-foreground text-xs ml-2">({study.year})</span>

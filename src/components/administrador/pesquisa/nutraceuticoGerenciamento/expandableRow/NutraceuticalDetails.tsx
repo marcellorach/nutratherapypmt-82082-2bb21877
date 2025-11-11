@@ -27,12 +27,12 @@ const NutraceuticalDetails: React.FC<NutraceuticalDetailsProps> = ({
   
   return (
     <div className="space-y-2">
-      <h4 className="font-medium text-sm">{getText('nutraceuticals.details.title', 'Detalhes')}</h4>
+      <h4 className="font-medium text-sm">{getText('nutraceuticals.details.title', 'Details')}</h4>
       <div className="text-sm">
-        <p><span className="font-medium">{getText('nutraceuticals.details.description', 'Descrição')}:</span> {description || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
-        <p><span className="font-medium">{getText('nutraceuticals.details.compound', 'Composto Químico')}:</span> {chemical_compound || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
-        <p><span className="font-medium">{getText('nutraceuticals.details.source', 'Origem')}:</span> {source || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
-        <p><span className="font-medium">{getText('nutraceuticals.details.dosage', 'Dosagem')}:</span> {dosage || getText('nutraceuticals.details.notDefined', 'Não definida')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.description', 'Description')}:</span> {description || getText('nutraceuticals.details.notDefined', 'Not defined')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.compound', 'Chemical Compound')}:</span> {chemical_compound || getText('nutraceuticals.details.notDefined', 'Not defined')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.source', 'Source')}:</span> {source || getText('nutraceuticals.details.notDefined', 'Not defined')}</p>
+        <p><span className="font-medium">{getText('nutraceuticals.details.dosage', 'Dosage')}:</span> {dosage || getText('nutraceuticals.details.notDefined', 'Not defined')}</p>
       </div>
     </div>
   );

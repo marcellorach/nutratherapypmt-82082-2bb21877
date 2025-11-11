@@ -37,7 +37,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
           {/* Condições relacionadas */}
           <div className="space-y-2">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm">{getText('nutraceuticals.conditions.title', 'Condições')} ({nutraceutical.conditionCount || 0})</h4>
+              <h4 className="font-medium text-sm">{getText('nutraceuticals.conditions.title', 'Conditions')} ({nutraceutical.conditionCount || 0})</h4>
             </div>
             <div className="max-h-48 overflow-y-auto">
               <ConditionsTable 
@@ -50,7 +50,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({ nutraceutical }) => {
         {/* Estudos Científicos */}
         <div className="mt-4">
           <div className="flex justify-between">
-            <h4 className="font-medium text-sm">{getText('nutraceuticals.studies.title', 'Estudos Científicos')} ({nutraceutical.studyCount || 0})</h4>
+            <h4 className="font-medium text-sm">{getText('nutraceuticals.studies.title', 'Scientific Studies')} ({nutraceutical.studyCount || 0})</h4>
           </div>
           <div className="max-h-48 overflow-y-auto mt-2">
             <StudiesTable 

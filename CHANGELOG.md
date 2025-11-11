@@ -10,6 +10,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Fixed
+- 🌍 **Correção DEFINITIVA de fallbacks i18n (PT → EN)**:
+  - Todos fallbacks em `NutraceuticalDetails.tsx`, `StudiesTable.tsx`, `ConditionsTable.tsx`, `ExpandedContent.tsx` alterados de PT para EN
+  - Interface agora mostra inglês correto quando i18n falha ou não está pronto
+  - Fallbacks atualizados: 'Details', 'Description', 'Chemical Compound', 'Source', 'Dosage', 'Not defined', 'Title', 'Journal', 'Relevance', 'Unknown study', 'Condition', 'Type', 'Efficacy', 'Unknown condition', 'Conditions', 'Scientific Studies', 'No associated studies', 'No associated conditions'
+  - Versão i18n: 1.1.7 → 1.1.8
 - 🌍 **Correção completa de i18n na aba Nutracêuticos Unificados**:
   - Tabs principais ("Catálogo", "Relações", "Matriz") agora traduzem corretamente para EN
   - Subtítulo da página traduzido corretamente
@@ -32,6 +37,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - 93 associações de estudos com links corrigidos
 
 ### Added
+- ✅ **Dados mockados para Prebióticos e Vitamina E na Edge Function**:
+  - Prebióticos: 9 relações de condições (3 prevention: Disbiose intestinal 3.8, Problemas digestivos 3.6, Sistema imunológico enfraquecido 3.5 | 3 treatment: Disbiose intestinal 4.1, Diarreia crônica 3.9, Constipação 3.7 | 3 support: Saúde digestiva 4.0, Microbiota intestinal 4.2, Sistema imunológico 3.8)
+  - Vitamina E: 9 relações de condições (3 prevention: Estresse oxidativo 3.9, Problemas de pele 3.6, Imunodeficiência 3.5 | 3 treatment: Dermatite 3.8, Estresse oxidativo 4.0, Problemas musculares 3.7 | 3 support: Saúde da pele 3.9, Sistema imunológico 3.7, Função celular 3.8)
+  - Total de nutracêuticos cobertos: 9 (era 7)
+  - Total de relações de condições a migrar: ~75 (era ~55)
 - ✅ **Edge Function para migração de condições de nutracêuticos** (`migrate-nutraceutical-conditions`):
   - Migra ~150-200 relações de condições dos arquivos mockados para o banco
   - Popula `health_conditions` e `nutraceutical_conditions` automaticamente

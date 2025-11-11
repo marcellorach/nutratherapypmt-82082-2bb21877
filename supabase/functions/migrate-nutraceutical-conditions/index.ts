@@ -122,6 +122,40 @@ const NUTRACEUTICAL_CONDITIONS_MAP: Record<string, {
       { name: 'Função cerebral', efficacyScore: 3.8 },
       { name: 'Saúde da pele', efficacyScore: 3.9 }
     ]
+  },
+  'Prebióticos': {
+    prevention: [
+      { name: 'Disbiose intestinal', efficacyScore: 3.8 },
+      { name: 'Problemas digestivos', efficacyScore: 3.6 },
+      { name: 'Sistema imunológico enfraquecido', efficacyScore: 3.5 }
+    ],
+    treatment: [
+      { name: 'Disbiose intestinal', efficacyScore: 4.1 },
+      { name: 'Diarreia crônica', efficacyScore: 3.9 },
+      { name: 'Constipação', efficacyScore: 3.7 }
+    ],
+    support: [
+      { name: 'Saúde digestiva', efficacyScore: 4.0 },
+      { name: 'Microbiota intestinal', efficacyScore: 4.2 },
+      { name: 'Sistema imunológico', efficacyScore: 3.8 }
+    ]
+  },
+  'Vitamina E': {
+    prevention: [
+      { name: 'Estresse oxidativo', efficacyScore: 3.9 },
+      { name: 'Problemas de pele', efficacyScore: 3.6 },
+      { name: 'Imunodeficiência', efficacyScore: 3.5 }
+    ],
+    treatment: [
+      { name: 'Dermatite', efficacyScore: 3.8 },
+      { name: 'Estresse oxidativo', efficacyScore: 4.0 },
+      { name: 'Problemas musculares', efficacyScore: 3.7 }
+    ],
+    support: [
+      { name: 'Saúde da pele', efficacyScore: 3.9 },
+      { name: 'Sistema imunológico', efficacyScore: 3.7 },
+      { name: 'Função celular', efficacyScore: 3.8 }
+    ]
   }
 };
 
@@ -217,10 +251,16 @@ Deno.serve(async (req) => {
               console.log(`✅ Condição criada: ${condition.name}`);
             }
 
-            conditionCache.set(condition.name, conditionId);
+            if (conditionId) {
+              conditionCache.set(condition.name, conditionId);
+            }
           }
 
           // 4. Criar relação nutraceutical_conditions
+          if (!conditionId) {
+            console.error(`❌ Não foi possível obter ID da condição ${condition.name}`);
+            continue;
+          }
           const { error: relationError } = await supabase
             .from('nutraceutical_conditions')
             .insert({
@@ -266,7 +306,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
