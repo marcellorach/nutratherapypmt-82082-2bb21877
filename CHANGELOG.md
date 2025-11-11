@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed
+- ✅ **Estudos em Andamento**: Substituído estudo mockado de Omega-3 por estudo clínico REAL em andamento - "Protocolo Rapamicina + SGLT2i para Longevidade e Saúde Multiorgânica Canina"
+  - 20 cães planejados (6 já iniciados há 6 meses)
+  - Protocolo: Rapamicina 0,3mg/kg + SGLT2i alternado (Dapagliflozina 0,1mg/kg / Empagliflozina 0,2mg/kg a cada 2 meses)
+  - 21 métricas científicas rigorosas em 7 categorias: Exames Laboratoriais Básicos, Função Renal, Função Cardíaca, Biomarcadores de Envelhecimento, Marcadores Inflamatórios, Biomarcadores Oncológicos, Métricas de Wearable (preparação API Invoxia)
+  - Dados preliminares de 6 meses demonstram: redução de 28% no LDL, 50% na proteinúria, 40% no NT-proBNP, 43% na atividade mTOR, 54% na IL-6
+  - Múltiplos outcomes: cardioproteção, proteção renal, prevenção oncológica, efeito anti-inflamatório, longevidade
+  - Preparação para integração futura com API Invoxia (wearables) para monitoramento contínuo de FC, HRV e atividade física
+  - Notas clínicas detalhadas com limitações atuais (recrutamento em andamento) e próximos passos (telômeros, relógio epigenético)
+- ✅ **i18n**: Versão incrementada para 1.3.6 (cache refresh)
+
 ### Added
 - ✨ **Sistema de Monitoramento Clínico completo**:
   - Nova tab "Monitoramento Clínico" com 12,847 pets em acompanhamento

@@ -40,7 +40,9 @@ export interface OngoingStudy {
       label_pt?: string;
       label_en?: string;
       control: number;
-      treatment: number;
+      treatment?: number;
+      dapagliflozin?: number;
+      empagliflozin?: number;
     }>;
     yAxisLabel?: string;
     yAxisLabel_pt?: string;
