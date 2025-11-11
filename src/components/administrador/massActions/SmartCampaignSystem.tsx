@@ -6,12 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Target, Brain, Calculator, TrendingUp, Zap, Command, Send, BarChart3 } from "lucide-react";
 import { useROIIntelligence } from "@/hooks/roi/useROIIntelligence";
 
-// Módulos refatorados
+// Módulos refatorados do sistema de campanhas inteligentes
 import CommandModule from './modules/CommandModule';
 import CreationModule from './modules/CreationModule';
 import ExecutionModule from './modules/ExecutionModule';
 import AnalyticsModule from './modules/AnalyticsModule';
 
+/**
+ * SmartCampaignSystem - Sistema inteligente de campanhas em massa
+ * Utiliza IA para segmentação, personalização e otimização de ROI
+ */
 const SmartCampaignSystem: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();

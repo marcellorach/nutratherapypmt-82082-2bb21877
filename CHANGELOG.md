@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - **Código interno preservado**: Nomes de arquivos, hooks, tipos e interfaces permanecem inalterados (`useNtaiProcessing`, `NtaiAnalysisResult`, `multiAgentAnalysis` key, etc.)
   - **Impacto**: Mudança puramente visual - terminologia mais técnica e reconhecida pela comunidade de IA/ML (RAG é método padrão para LLMs com conhecimento externo)
 
+### Fixed
+- 🐛 **Corrigido erro de importação dinâmica do ActionsStep.tsx**:
+  - **Problema**: "Failed to fetch dynamically imported module" causado por conflito de cache após reload forçado do i18n (versão 1.3.2)
+  - **Solução**: Adicionados comentários JSDoc aos componentes ActionsStep e SmartCampaignSystem para forçar recompilação pelo Vite
+  - **Arquivos modificados**: 
+    - `src/components/administrador/dataAnalysis/ActionsStep.tsx` (linhas 4-7: documentação adicionada)
+    - `src/components/administrador/massActions/SmartCampaignSystem.tsx` (linhas 9, 15-18: comentários atualizados)
+  - **Causa raiz**: HMR (Hot Module Replacement) do Vite perdeu referência ao módulo após limpeza de cache do localStorage
+  - **Impacto**: Tab "Ações" (/administrador?tab=actions) agora carrega corretamente sem erro de módulo não encontrado
+
 ### Removed
 - 🗑️ **Sistema de inicialização automática de admin removido**:
   - Deletado `src/hooks/useInitAdmin.ts` (hook que expunha credenciais em toasts)
