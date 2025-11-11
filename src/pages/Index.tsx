@@ -5,16 +5,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, Book, UserCog, LogIn, ArrowRight, Microscope } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useInitAdmin } from '@/hooks/useInitAdmin';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 
 const Index: React.FC = () => {
   const { t } = useTranslation();
   const { user, hasRole } = useAuth();
-  
-  // Inicializar o usuário admin na primeira carga
-  useInitAdmin();
   
   return (
     <Layout>

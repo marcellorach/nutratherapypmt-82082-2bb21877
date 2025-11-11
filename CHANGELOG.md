@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Removed
+- 🗑️ **Sistema de inicialização automática de admin removido**:
+  - Deletado `src/hooks/useInitAdmin.ts` (hook que expunha credenciais em toasts)
+  - Removida chamada do hook de `src/pages/Index.tsx` (linhas 8 e 17)
+  - Deletada edge function `supabase/functions/init-admin-user/index.ts` (189 linhas de código morto)
+  - **Motivo da remoção**:
+    - ❌ Toasts expunham credenciais hardcoded (`mrachlyn@gmail.com / nutra12`)
+    - ❌ Gerava erros constantes nos logs (profiles.email não existe, violação de constraint unique)
+    - ❌ Não mais necessário após desproteger rotas (commit anterior - qualquer usuário autenticado tem acesso total)
+  - **Impacto**: Zero - sistema não era mais útil após remoção de `requiredRole` das rotas
+  - **Segurança**: Melhoria significativa - credenciais não são mais expostas na interface
+
 ### Changed
 - 🔓 **CRÍTICO: Acesso liberado para demo Stanford - Rotas desprotegidas**:
   - Removida verificação de `requiredRole` nas rotas `/veterinario` e `/administrador`
