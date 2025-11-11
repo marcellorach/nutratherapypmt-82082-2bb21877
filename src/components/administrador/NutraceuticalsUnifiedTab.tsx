@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from 'react-i18next';
+import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import CatalogTab from './nutraceuticals-unified/CatalogTab';
 import RelationsTab from './nutraceuticals-unified/RelationsTab';
 import MatrixTab from './nutraceuticals-unified/MatrixTab';
@@ -11,7 +12,8 @@ const NutraceuticalsUnifiedTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('catalog');
 
   return (
-    <div className="space-y-6">
+    <NutraceuticalProvider>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">{t('admin.sidebar.knowledgeBase.nutraceuticalsUnified')}</h2>
@@ -46,7 +48,8 @@ const NutraceuticalsUnifiedTab: React.FC = () => {
           <MatrixTab />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </NutraceuticalProvider>
   );
 };
 
