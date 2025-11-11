@@ -106,14 +106,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     component: MicrobiomeAnalysisTab,
     description: 'Análise e visualização de microbioma intestinal'
   },
-  {
-    id: 'database-migrations',
-    label: 'Database Migrations',
-    group: 'knowledge-base',
-    component: DatabaseMigrationsTab,
-    description: 'Migrations para análise individualizada por IA',
-    permissions: ['admin']
-  },
 
   // Processamento de Dados
   {

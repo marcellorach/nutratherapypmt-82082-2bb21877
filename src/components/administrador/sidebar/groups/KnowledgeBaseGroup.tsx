@@ -121,23 +121,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "database-migrations"} 
-          onClick={() => handleStepClick("database-migrations")}
-          className={currentStep === "database-migrations" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <DatabaseZap className={`h-4 w-4 mr-2 ${currentStep === "database-migrations" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.migrations')}</span>
-            </div>
-            {currentStep === "database-migrations" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           isActive={currentStep === "knowledge-base-settings"} 
           onClick={() => handleStepClick("knowledge-base-settings")}
           className={currentStep === "knowledge-base-settings" ? "bg-primary/10 text-primary" : ""}
