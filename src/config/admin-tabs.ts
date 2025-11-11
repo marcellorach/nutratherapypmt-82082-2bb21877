@@ -16,14 +16,16 @@ export interface AdminTabConfig {
   permissions?: string[];
 }
 
-// Lazy loading dos componentes
+// Lazy loading dos componentes (Base de Conhecimento)
 const EstudosTab = lazy(() => import('@/components/administrador/EstudosTab'));
 const NutraceuticalsUnifiedTab = lazy(() => import('@/components/administrador/NutraceuticalsUnifiedTab'));
 const VeterinaryTargetsTab = lazy(() => import('@/components/administrador/VeterinaryTargetsTab'));
-const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasClinicasTab'));
 const AIInsightsTab = lazy(() => import('@/components/administrador/AIInsightsTab'));
 const RelationsTab = lazy(() => import('@/components/administrador/visualizations/relations/RelationsTab'));
 const KnowledgeBaseSettingsTab = lazy(() => import('@/components/administrador/settings/KnowledgeBaseSettingsTab'));
+
+// Outros componentes
+const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasClinicasTab'));
 const ImportStep = lazy(() => import('@/components/administrador/dataAnalysis/ImportStep'));
 const FontesTab = lazy(() => import('@/components/administrador/FontesTab'));
 const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/AnalysisStep'));
