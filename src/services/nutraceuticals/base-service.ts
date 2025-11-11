@@ -14,7 +14,15 @@ export const NutraceuticalBaseService = {
     return client
       .from('nutraceuticals')
       .select(`
-        *,
+        id,
+        name,
+        description,
+        dosage,
+        source,
+        chemical_compound,
+        outcome_id,
+        created_at,
+        updated_at,
         outcome:outcome_id(*),
         nutraceutical_benefits(id, benefit),
         nutraceutical_scientific_metadata(*),
