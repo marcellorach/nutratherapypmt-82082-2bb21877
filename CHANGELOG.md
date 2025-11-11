@@ -10,6 +10,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed
+- 🎨 **Redesign da página inicial**:
+  - Card "R&D + Base de Conhecimento" renomeado para **"Painel de Controle"** (PT) / **"Control Panel"** (EN)
+  - Descrição atualizada: "Central de gerenciamento da plataforma: pesquisa, base de conhecimento, configurações e administração do sistema"
+  - Ícone alterado de Microscope (🔬) para UserCog (⚙️) para melhor representar o controle centralizado da plataforma
+  - Layout otimizado: grid alterado de 4 para 3 cards (mais limpo e balanceado)
 - 🔄 **Reorganização da Base de Conhecimento**:
   - "Relations" movido para antes de "A.I. Insights"
   - Nova ordem: Estudos → Nutracêuticos → Alvos → **Relations** → **A.I. Insights** → Configurações
@@ -27,6 +32,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Posição: Entre "A.I. Insights" e "Settings"
 
 ### Removed
+- ❌ **Card "Área do Administrador" removido da página inicial**:
+  - Eliminada duplicação desnecessária (ambos cards "R&D" e "Admin" redirecionavam para `/administrador`)
+  - Funcionalidades consolidadas no novo card "Painel de Controle"
+  - Interface mais limpa: 3 cards ao invés de 4
 - ❌ **Aba "Manage Outcomes" removida**:
   - Funcionalidade não essencial como aba standalone
   - Componente `OutcomeManagementPanel` mantido no código mas não acessível via navegação principal

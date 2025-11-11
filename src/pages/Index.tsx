@@ -43,7 +43,7 @@ const Index: React.FC = () => {
             </div>
             
             {/* Destaque dos benefícios */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
               <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
@@ -71,23 +71,11 @@ const Index: React.FC = () => {
               <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
-                    <Microscope size={32} className="text-gray-700" />
+                    <UserCog size={32} className="text-gray-700" />
                   </div>
                   <h3 className="text-xl font-medium mb-2">{t('home.forResearchDev')}</h3>
                   <p className="text-gray-600">
                     {t('home.forResearchDevDesc')}
-                  </p>
-                </div>
-              </Card>
-              
-              <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex flex-col items-center text-center">
-                  <div className="rounded-full bg-gray-50 p-3 mb-4">
-                    <UserCog size={32} className="text-gray-700" />
-                  </div>
-                  <h3 className="text-xl font-medium mb-2">{t('home.forAdmins')}</h3>
-                  <p className="text-gray-600">
-                    {t('home.forAdminsDesc')}
                   </p>
                 </div>
               </Card>
@@ -103,7 +91,7 @@ const Index: React.FC = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 <div className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center text-center">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
@@ -148,35 +136,11 @@ const Index: React.FC = () => {
                 <div className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center text-center">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
-                      <Microscope size={28} className="text-gray-800" />
+                      <UserCog size={28} className="text-gray-800" />
                     </div>
                     <h3 className="text-lg font-medium mb-3">{t('home.researchArea')}</h3>
                     <p className="text-gray-500 mb-4">
                       {t('home.researchAreaDesc')}
-                    </p>
-                    <Link to="/administrador">
-                      <Button 
-                        variant="outline" 
-                        className={`w-full flex items-center justify-center gap-1 ${!hasRole('admin') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={!hasRole('admin')}
-                      >
-                        {t('common.access')} <ArrowRight size={16} />
-                      </Button>
-                    </Link>
-                    {!hasRole('admin') && (
-                      <p className="text-xs text-red-500 mt-2">{t('home.restrictedAccess', { role: t('common.researchDev').toLowerCase() })}</p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="rounded-full bg-gray-100 p-3 mb-4">
-                      <UserCog size={28} className="text-gray-800" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-3">{t('home.adminArea')}</h3>
-                    <p className="text-gray-500 mb-4">
-                      {t('home.adminAreaDesc')}
                     </p>
                     <Link to="/administrador">
                       <Button 
