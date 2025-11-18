@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, ArrowRight, Settings, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
+import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
@@ -27,7 +28,6 @@ const NtaiProcessingSection: React.FC = () => {
     activeItemIndex,
     analysisResult,
     aiConfigs,
-    availableStudies,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
@@ -37,6 +37,12 @@ const NtaiProcessingSection: React.FC = () => {
     removeFromQueue,
     startProcessing,
   } = useNtaiProcessing();
+
+  const { availableStudies, refreshAvailableStudies } = useAvailableStudies();
+  
+  useEffect(() => {
+    refreshAvailableStudies();
+  }, []);
 
   type PipelineStageStatus = 'pending' | 'processing' | 'complete' | 'error';
   
@@ -62,6 +68,7 @@ const NtaiProcessingSection: React.FC = () => {
 
   const handleDeleteStudies = async () => {
     try {
+      // Deletar estudos e suas relações
       const { error } = await supabase
         .from('processed_studies')
         .delete()
@@ -74,8 +81,8 @@ const NtaiProcessingSection: React.FC = () => {
         description: t('studies.ntai.deleteSuccessDescription', { count: selectedItems.length }),
       });
 
-      // Reload available studies
-      window.location.reload();
+      // Recarregar lista de estudos
+      await refreshAvailableStudies();
     } catch (error) {
       console.error('Error deleting studies:', error);
       toast({
