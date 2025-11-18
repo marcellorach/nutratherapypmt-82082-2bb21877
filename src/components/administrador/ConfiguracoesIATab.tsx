@@ -14,6 +14,7 @@ const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
   const [claudeKey, setClaudeKey] = useState<string>("");
   const [grokKey, setGrokKey] = useState<string>("");
+  const [unstructuredKey, setUnstructuredKey] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -35,6 +36,7 @@ const ConfiguracoesIATab: React.FC = () => {
         setOpenaiKey(configs.openai_api_key || "");
         setClaudeKey(configs.claude_api_key || "");
         setGrokKey(configs.grok_api_key || "");
+        setUnstructuredKey(configs.unstructured_api_key || "");
       }
 
     } catch (error) {
@@ -48,6 +50,7 @@ const ConfiguracoesIATab: React.FC = () => {
       setOpenaiKey(localStorage.getItem('openai_api_key') || "");
       setClaudeKey(localStorage.getItem('claude_api_key') || "");
       setGrokKey(localStorage.getItem('grok_api_key') || "");
+      setUnstructuredKey(localStorage.getItem('unstructured_api_key') || "");
 
     } finally {
       setIsLoading(false);
@@ -69,6 +72,9 @@ const ConfiguracoesIATab: React.FC = () => {
       }
       if (key === 'grok_api_key' && value.length < 10) {
         throw new Error('Chave API do Grok deve ter pelo menos 10 caracteres');
+      }
+      if (key === 'unstructured_api_key' && value.length < 20) {
+        throw new Error('Chave API do Unstructured.io deve ter pelo menos 20 caracteres');
       }
 
       const response = await supabase.functions.invoke('ai-config', {
@@ -120,6 +126,17 @@ const ConfiguracoesIATab: React.FC = () => {
     }
   };
 
+  const saveUnstructuredKey = async (key: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('unstructured_api_key', key);
+      setUnstructuredKey(key);
+      localStorage.setItem('unstructured_api_key', key);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -141,10 +158,11 @@ const ConfiguracoesIATab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="openai" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="openai">OpenAI</TabsTrigger>
                 <TabsTrigger value="claude">Claude</TabsTrigger>
                 <TabsTrigger value="grok">Grok</TabsTrigger>
+                <TabsTrigger value="unstructured">Unstructured</TabsTrigger>
               </TabsList>
               
               <TabsContent value="openai" className="space-y-4 pt-4">
@@ -197,6 +215,26 @@ const ConfiguracoesIATab: React.FC = () => {
                 />
                 <div className="text-sm text-gray-500 mt-4">
                   <p>Chaves para a API do Grok podem ser obtidas na plataforma xAI.</p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="unstructured" className="space-y-4 pt-4">
+                <ApiKeyForm 
+                  serviceName="Unstructured.io" 
+                  saveKey={saveUnstructuredKey}
+                  initialKey={unstructuredKey}
+                  placeholder="usa-xxxxxxxxxxxx"
+                  isLoading={isLoading || isSaving}
+                />
+                <div className="text-sm text-gray-500 mt-4">
+                  <a 
+                    href="https://unstructured.io/api-key-hosted" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Obter uma chave API do Unstructured.io →
+                  </a>
                 </div>
               </TabsContent>
             </Tabs>

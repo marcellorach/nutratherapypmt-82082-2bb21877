@@ -1,65 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, RefreshCw, Key } from "lucide-react";
+import { Settings, RefreshCw } from "lucide-react";
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
 
 const ConfiguracoesTab: React.FC = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [unstructuredApiKey, setUnstructuredApiKey] = useState('');
   const { toast } = useToast();
-
-  useEffect(() => {
-    loadUnstructuredApiKey();
-  }, []);
-
-  const loadUnstructuredApiKey = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('ai_configurations')
-        .select('config_value')
-        .eq('config_key', 'unstructured_api_key')
-        .maybeSingle();
-      
-      if (data && !error) {
-        const configValue = data.config_value;
-        let keyValue = '';
-        
-        if (typeof configValue === 'string') {
-          keyValue = configValue;
-        } else if (configValue && typeof configValue === 'object' && 'key' in configValue) {
-          keyValue = String(configValue.key || '');
-        }
-        
-        setUnstructuredApiKey(keyValue);
-      }
-    } catch (error) {
-      console.error('Failed to load Unstructured API key:', error);
-    }
-  };
 
   const handleSaveSettings = async () => {
     setIsLoading(true);
     try {
-      // Save Unstructured API key
-      const { error } = await supabase
-        .from('ai_configurations')
-        .update({ 
-          config_value: { key: unstructuredApiKey },
-          updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'unstructured_api_key');
-
-      if (error) throw error;
-      
       toast({
         title: t('admin.settings.messages.saved'),
-        description: 'API key saved successfully',
+        description: 'Settings saved successfully',
       });
     } catch (error) {
       console.error('Save error:', error);
@@ -112,46 +70,6 @@ const ConfiguracoesTab: React.FC = () => {
                   disabled
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              NTAI Configuration
-            </CardTitle>
-            <CardDescription>
-              Configure API keys for document parsing and AI processing
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="unstructured-key">
-                Unstructured.io API Key
-                <span className="text-xs text-muted-foreground ml-2">
-                  (Required for PDF parsing)
-                </span>
-              </Label>
-              <Input 
-                id="unstructured-key"
-                type="password"
-                placeholder="Enter your Unstructured.io API key"
-                value={unstructuredApiKey}
-                onChange={(e) => setUnstructuredApiKey(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Get your free API key at{' '}
-                <a 
-                  href="https://unstructured.io" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  unstructured.io
-                </a>
-              </p>
             </div>
           </CardContent>
         </Card>

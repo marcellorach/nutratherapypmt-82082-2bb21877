@@ -34,14 +34,14 @@ serve(async (req) => {
       // Buscar todas as configurações
       const { data, error } = await supabase
         .from('ai_configurations')
-        .select('name, value');
+        .select('config_key, config_value');
 
       if (error) throw error;
 
       // Converter array para objeto para facilitar o uso no frontend
       const configs: Record<string, any> = {};
       data.forEach((item) => {
-        configs[item.name] = item.value;
+        configs[item.config_key] = item.config_value;
       });
 
       return new Response(JSON.stringify(configs), { 
@@ -57,22 +57,27 @@ serve(async (req) => {
         // Buscar configuração específica
         const { data, error } = await supabase
           .from('ai_configurations')
-          .select('value')
-          .eq('name', key)
+          .select('config_value')
+          .eq('config_key', key)
           .single();
 
         if (error) throw error;
         
-        return new Response(JSON.stringify({ value: data.value }), { 
+        return new Response(JSON.stringify({ value: data.config_value }), { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         });
 
       } else if (action === 'set' && key && value !== undefined) {
-        // Atualizar configuração
+        // Atualizar ou inserir configuração usando upsert
         const { data, error } = await supabase
           .from('ai_configurations')
-          .update({ value })
-          .eq('name', key)
+          .upsert({ 
+            config_key: key, 
+            config_value: value,
+            updated_at: new Date().toISOString()
+          }, { 
+            onConflict: 'config_key' 
+          })
           .select();
 
         if (error) throw error;
