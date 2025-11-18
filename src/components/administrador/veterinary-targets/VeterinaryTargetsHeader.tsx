@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 interface VeterinaryTargetsHeaderProps {
   onAddNew: () => void;
@@ -27,6 +29,12 @@ const VeterinaryTargetsHeader: React.FC<VeterinaryTargetsHeaderProps> = ({
       </div>
       
       <div className="flex gap-2">
+        <TabInfoButton
+          tabId="veterinary-targets"
+          title={t('admin.sidebar.knowledgeBase.veterinaryTargets')}
+          content={adminTabsInfo['veterinary-targets']}
+        />
+        
         <Button
           variant="outline"
           onClick={onRefresh}

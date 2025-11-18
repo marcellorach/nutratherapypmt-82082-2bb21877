@@ -10,6 +10,8 @@ import ConventionsPanel from './panels/ConventionsPanel';
 import UsagePanel from './panels/UsagePanel';
 import NutraceuticalManagementPanel from './panels/NutraceuticalManagementPanel';
 import { DataManagementPanel } from '@/components/admin/DataManagementPanel';
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 const KnowledgeBaseSettingsTab: React.FC = () => {
   const { t } = useTranslation();
@@ -23,7 +25,16 @@ const KnowledgeBaseSettingsTab: React.FC = () => {
             <h2 className="text-2xl font-bold">{t('admin.settings.knowledgeBase.title')}</h2>
             <p className="text-sm text-gray-500">{t('admin.settings.knowledgeBase.subtitle')}</p>
           </div>
-          <Button>{t('admin.settings.knowledgeBase.saveButton')}</Button>
+          
+          <div className="flex gap-2">
+            <TabInfoButton
+              tabId="knowledge-base-settings"
+              title={t('admin.settings.knowledgeBase.title')}
+              content={adminTabsInfo['knowledge-base-settings']}
+            />
+            
+            <Button>{t('admin.settings.knowledgeBase.saveButton')}</Button>
+          </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

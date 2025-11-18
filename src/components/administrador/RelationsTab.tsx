@@ -12,6 +12,8 @@ import EfficacyMatrix from './visualizations/EfficacyMatrix';
 import EnhancedSankeyDiagram from './visualizations/EnhancedSankeyDiagram';
 import { Badge } from "@/components/ui/badge";
 import { SankeyData, SankeyLink } from './visualizations/sankey/types';
+import TabInfoButton from './common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 // Dados de exemplo para o diagrama Sankey
 const exampleSankeyData: SankeyData = {
@@ -182,6 +184,12 @@ const RelationsTab: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <TabInfoButton
+            tabId="relations"
+            title="Relações Nutraceutico-Condição"
+            content={adminTabsInfo['relations']}
+          />
+          
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
             <Input
