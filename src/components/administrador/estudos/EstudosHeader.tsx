@@ -22,9 +22,9 @@ const EstudosHeader: React.FC<EstudosHeaderProps> = ({ onAddEstudo }) => {
       
       <div className="flex items-center gap-3">
         <TabInfoButton
-          tabId="studies"
+          tabId="estudos"
           title={t('studies.header.title')}
-          content={adminTabsInfo['studies']}
+          content={adminTabsInfo['estudos']}
         />
         
         <Button variant="outline" className="flex items-center">

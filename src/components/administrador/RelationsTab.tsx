@@ -185,9 +185,9 @@ const RelationsTab: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <TabInfoButton
-            tabId="relations"
+            tabId="relacoes"
             title="Relações Nutraceutico-Condição"
-            content={adminTabsInfo['relations']}
+            content={adminTabsInfo['relacoes']}
           />
           
           <div className="relative">
