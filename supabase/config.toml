@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.run-translation-audit]
 verify_jwt = true
+
+[functions.parse-study]
+verify_jwt = true
+
+[functions.extract-study-entities]
+verify_jwt = true

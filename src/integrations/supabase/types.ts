@@ -808,6 +808,50 @@ export type Database = {
         }
         Relationships: []
       }
+      study_extractions: {
+        Row: {
+          created_at: string | null
+          extracted_data: Json
+          extraction_quality_score: number | null
+          extraction_status: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          study_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          extracted_data: Json
+          extraction_quality_score?: number | null
+          extraction_status?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          study_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          extracted_data?: Json
+          extraction_quality_score?: number | null
+          extraction_status?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          study_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_extractions_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "processed_studies"
+            referencedColumns: ["study_id"]
+          },
+        ]
+      }
       translations: {
         Row: {
           created_at: string | null

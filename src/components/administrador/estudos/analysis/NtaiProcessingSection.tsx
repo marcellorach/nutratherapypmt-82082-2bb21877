@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, ArrowRight, Settings } from "lucide-react";
+import { Brain, ArrowRight, Settings, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import NtaiProcessCard from './NtaiProcessCard';
@@ -10,7 +10,10 @@ import NtaiProcessingLog from './NtaiProcessingLog';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
+import NtaiPipelineVisualization from './NtaiPipelineVisualization';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const NtaiProcessingSection: React.FC = () => {
   const { t } = useTranslation();
@@ -33,8 +36,81 @@ const NtaiProcessingSection: React.FC = () => {
   } = useNtaiProcessing();
 
   const [logVisible, setLogVisible] = React.useState(false);
+  const [processingStudy, setProcessingStudy] = useState<string | null>(null);
+  const [pipelineStages, setPipelineStages] = useState([
+    { name: 'Upload PDF', status: 'pending' as const, description: 'Upload study to storage' },
+    { name: 'Parse Document', status: 'pending' as const, description: 'Extract text with Unstructured' },
+    { name: 'AI Extraction', status: 'pending' as const, description: 'Extract entities with Lovable AI' },
+    { name: 'Quality Check', status: 'pending' as const, description: 'Validate extraction quality' },
+    { name: 'Ready for Review', status: 'pending' as const, description: 'Awaiting human curation' },
+  ]);
+  const { toast } = useToast();
   
   const toggleLogVisibility = () => setLogVisible(!logVisible);
+
+  const handleProcessWithAI = async (studyId: string, storagePath: string) => {
+    setProcessingStudy(studyId);
+    
+    // Reset pipeline
+    setPipelineStages(stages => stages.map(s => ({ ...s, status: 'pending' as const })));
+
+    try {
+      // Stage 1: Upload (already done, mark complete)
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 0 ? { ...s, status: 'complete' as const } : s
+      ));
+
+      // Stage 2: Parse with Unstructured
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 1 ? { ...s, status: 'processing' as const } : s
+      ));
+
+      const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-study', {
+        body: { studyId, storagePath }
+      });
+
+      if (parseError) throw new Error(`Parse failed: ${parseError.message}`);
+      
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 1 ? { ...s, status: 'complete' as const } : s
+      ));
+
+      // Stage 3: Extract with AI
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 2 ? { ...s, status: 'processing' as const } : s
+      ));
+
+      const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-study-entities', {
+        body: { studyId }
+      });
+
+      if (extractError) throw new Error(`Extraction failed: ${extractError.message}`);
+
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 2 ? { ...s, status: 'complete' as const } : 
+        i === 3 ? { ...s, status: 'complete' as const } : 
+        i === 4 ? { ...s, status: 'complete' as const } : s
+      ));
+
+      toast({
+        title: 'Processing Complete',
+        description: `Extracted ${extractData.counts.nutraceuticals} nutraceuticals, ${extractData.counts.conditions} conditions`,
+      });
+
+    } catch (error) {
+      console.error('Processing error:', error);
+      setPipelineStages(stages => stages.map((s, i) => 
+        s.status === 'processing' ? { ...s, status: 'error' as const } : s
+      ));
+      toast({
+        title: 'Processing Failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingStudy(null);
+    }
+  };
 
   return (
     <Card id="ntai-processing-section" className="transition-all">
@@ -78,6 +154,13 @@ const NtaiProcessingSection: React.FC = () => {
         </div>
         
         {logVisible && <NtaiProcessingLog entries={logEntries} />}
+        
+        {processingStudy && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium mb-3">Processing Pipeline</h4>
+            <NtaiPipelineVisualization stages={pipelineStages} />
+          </div>
+        )}
         
         <div className="space-y-4">
           <h4 className="text-sm font-medium">{t('studies.ntai.availableStudies')}</h4>
