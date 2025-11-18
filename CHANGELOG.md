@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✅ Documentação completa da arquitetura NTAI Knowledge Graph em `docs/NTAI_KNOWLEDGE_GRAPH_ARCHITECTURE.md` (~700 linhas)
+  - Modelo de dados expandido com 6 novas tabelas (mechanisms, study_findings GRADE, study_extractions, etc.)
+  - Workflow de ingestão: PDF → Unstructured API → LLM → Curadoria → KG
+  - Sistema RAG graph-aware: Top-down + Bottom-up + LLM synthesis
+  - 8 visualizações interativas "WOW" (Network Graph, Evidence Heatmap, Pipeline Dashboard, etc.)
+  - Roadmap de implementação de 6 fases (4-6 semanas)
+- ✅ Sistema de explicações científicas contextuais in-app para demonstração Stanford
+  - Componente reutilizável `TabInfoButton` com Dialog de 3 tabs (Visão Geral, Metodologia, Científica)
+  - Conteúdo científico completo para 6 abas do Knowledge/Relational Base
+  - ~50+ referências científicas com links PubMed/journals
+- ✅ Referência à documentação NTAI adicionada em `ARCHITECTURE.md` v1.5.0
+
 ### Changed
 - ✅ Removidas badges de contagem de nutracêuticos da coluna "Tratabilidade Média" (mantém apenas porcentagem e "A Catalogar")
 - ✅ Ajustado arredondamento de tratabilidade para múltiplos de 5 (5%, 10%, 15%...) para apresentação mais limpa e profissional

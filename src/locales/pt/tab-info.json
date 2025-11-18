@@ -1,0 +1,30 @@
+{
+  "admin": {
+    "tabInfo": {
+      "button": "Sobre esta Funcionalidade",
+      "description": "Documentação técnica e científica completa desta funcionalidade",
+      "tabs": {
+        "overview": "Visão Geral",
+        "methodology": "Lógica e Metodologia",
+        "scientific": "Fundamentação Científica"
+      },
+      "overview": {
+        "objective": "Objetivo",
+        "workflow": "Fluxo de Uso",
+        "benefits": "Benefícios"
+      },
+      "methodology": {
+        "calculations": "Cálculos e Fórmulas",
+        "example": "Exemplo",
+        "decisions": "Decisões de Design"
+      },
+      "scientific": {
+        "foundation": "Fundamentação",
+        "studies": "Estudos-Chave",
+        "keyFindings": "Principais Descobertas",
+        "viewStudy": "Ver estudo completo",
+        "references": "Referências Adicionais"
+      }
+    }
+  }
+}
