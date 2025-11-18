@@ -153,6 +153,32 @@ export const useNtaiQueue = () => {
       });
     }
   };
+
+  const removeFromQueue = (itemId: string) => {
+    const itemToRemove = processQueue.find(item => item.id === itemId);
+    
+    if (!itemToRemove) {
+      toast({
+        title: "Erro ao remover",
+        description: "Item não encontrado na fila.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProcessQueue(prev => prev.filter(item => item.id !== itemId));
+    
+    const statusText = itemToRemove.stage === 'idle' ? 'pendente' : 
+                       itemToRemove.stage === 'error' ? 'com erro' : 
+                       itemToRemove.stage === 'complete' ? 'processado' : 
+                       'em processamento';
+    
+    toast({
+      title: "🗑️ Item removido da fila",
+      description: `Estudo "${itemToRemove.title}" (${statusText}) foi removido.`,
+      duration: 3000,
+    });
+  };
   
   // Função para atualizar estudos com análise concluída no banco
   const updateProcessedStudy = async (studyId: string, analysisData: any) => {
@@ -193,6 +219,7 @@ export const useNtaiQueue = () => {
     clearCompleted,
     retryFailed,
     clearFailed,
+    removeFromQueue,
     updateProcessedStudy
   };
 };

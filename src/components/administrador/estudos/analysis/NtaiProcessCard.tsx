@@ -1,16 +1,45 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, AlertTriangle, FileText, Loader2 } from "lucide-react";
+import { Check, AlertTriangle, FileText, Loader2, X } from "lucide-react";
 import { ProcessingItem } from '@/types/ntai';
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NtaiProcessCardProps {
   item: ProcessingItem;
   isActive: boolean;
+  onRemove?: (itemId: string) => void;
 }
 
-const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => {
+const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRemove }) => {
+  const [showRemoveDialog, setShowRemoveDialog] = React.useState(false);
+
+  const handleRemoveClick = () => {
+    if (item.stage === 'idle' || item.stage === 'complete' || item.stage === 'error') {
+      onRemove?.(item.id);
+      return;
+    }
+    
+    if (item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing') {
+      setShowRemoveDialog(true);
+    }
+  };
+
+  const confirmRemove = () => {
+    onRemove?.(item.id);
+    setShowRemoveDialog(false);
+  };
+
   const getStatusIcon = () => {
     switch (item.stage) {
       case 'complete':
@@ -98,52 +127,89 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive }) => 
   };
 
   return (
-    <Card className={`shadow-sm transition-all ${getBorderClass()}`}>
-      <CardHeader className="py-3 px-4">
-        <CardTitle className="text-sm flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getStatusIcon()}
-            <span className="truncate max-w-[180px]">{item.title}</span>
+    <>
+      <Card className={`shadow-sm transition-all ${getBorderClass()}`} data-item-id={item.id}>
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-sm flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {getStatusIcon()}
+              <span className="truncate max-w-[180px]">{item.title}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs ${getStatusClass()}`}>
+                {getStatusText()}
+              </span>
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 p-0 hover:bg-red-100 text-gray-400 hover:text-red-600"
+                  onClick={handleRemoveClick}
+                  title="Remover da fila"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="py-2 px-4 space-y-3">
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-xs">
+              <span>{getStatusText()}</span>
+              <span>{item.progress}%</span>
+            </div>
+            <Progress value={item.progress} className={`h-2 ${item.stage === 'complete' ? 'bg-green-100' : ''}`} />
           </div>
-          <span className={`text-xs ${getStatusClass()}`}>
-            {getStatusText()}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="py-2 px-4 space-y-3">
-        <div className="space-y-1">
-          <div className="flex justify-between items-center text-xs">
-            <span>{getStatusText()}</span>
-            <span>{item.progress}%</span>
-          </div>
-          <Progress value={item.progress} className={`h-2 ${item.stage === 'complete' ? 'bg-green-100' : ''}`} />
-        </div>
-        
-        {item.sourceFile && (
+          
+          {item.sourceFile && (
+            <div className="text-xs text-gray-500">
+              Fonte: {item.sourceFile}
+            </div>
+          )}
+          
+          {/* Usamos a data atual sempre como "há menos de um dia" para simplificar */}
           <div className="text-xs text-gray-500">
-            Fonte: {item.sourceFile}
+            Importado: há menos de um dia
           </div>
-        )}
-        
-        {/* Usamos a data atual sempre como "há menos de um dia" para simplificar */}
-        <div className="text-xs text-gray-500">
-          Importado: há menos de um dia
-        </div>
-        
-        {item.error && (
-          <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-            {formatErrorMessage(item.error)}
-          </div>
-        )}
-        
-        {/* Adicionar um indicador visual para estudos processados */}
-        {item.stage === 'complete' && (
-          <div className="p-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">
-            Estudo processado com sucesso e disponível no sistema.
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          
+          {item.error && (
+            <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
+              {formatErrorMessage(item.error)}
+            </div>
+          )}
+          
+          {/* Adicionar um indicador visual para estudos processados */}
+          {item.stage === 'complete' && (
+            <div className="p-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">
+              Estudo processado com sucesso e disponível no sistema.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar processamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este estudo está sendo processado no momento. Tem certeza que deseja cancelar e removê-lo da fila?
+              <br />
+              <strong className="block mt-2">Esta ação não pode ser desfeita.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não, continuar processando</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmRemove}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Sim, cancelar e remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
