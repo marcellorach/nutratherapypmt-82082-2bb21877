@@ -109,6 +109,24 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       
       <SidebarMenuItem>
         <SidebarMenuButton 
+          isActive={currentStep === "processamento-ia"} 
+          onClick={() => handleStepClick("processamento-ia")}
+          className={currentStep === "processamento-ia" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "processamento-ia" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.aiProcessing')}</span>
+            </div>
+            {currentStep === "processamento-ia" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
+      <SidebarMenuItem>
+        <SidebarMenuButton 
           isActive={currentStep === "knowledge-base-settings"} 
           onClick={() => handleStepClick("knowledge-base-settings")}
           className={currentStep === "knowledge-base-settings" ? "bg-primary/10 text-primary" : ""}
