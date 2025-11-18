@@ -68,6 +68,10 @@ export const useProcessingLogic = (
       }
 
       try {
+        // ============================================
+        // ORDEM CORRETA: Unstructured → LLM → Salvar
+        // ============================================
+        
         // Buscar dados do estudo no banco
         const { data: studyData, error: studyError } = await supabase
           .from('processed_studies')
@@ -80,37 +84,75 @@ export const useProcessingLogic = (
         }
         
         if (!studyData) {
-          // Se não encontrar o estudo, usar dados simulados
-          addLogEntry(`[INFO] Usando dados simulados para: ${item.title}`);
-        }
-        
-        // Simular as etapas de processamento
-        for (const stage of ['extracting', 'analyzing', 'standardizing'] as ProcessingStage[]) {
-          updatedQueue[index] = { ...item, stage, progress: getProgressForStage(stage) };
-          setProcessQueue([...updatedQueue]);
-          await simulateStageProcessing(stage, item.title, addLogEntry);
+          throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
         }
 
-        addLogEntry(`Enviando para processamento com IA: ${item.title}`);
+        // ETAPA 1: EXTRAÇÃO DE TEXTO (Unstructured.io)
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`🔍 Extraindo texto com Unstructured.io: ${item.title}`);
         
-        const result = await ntaiService.analyzeStudy(
-          item.id,
-          studyData?.description || `Texto simulado de ${item.title} para análise de nutracêuticos veterinários.`,
-          aiConfigs.nutraceuticals_prompt,
-          aiConfigs.conditions_prompt
-        );
+        const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-study', {
+          body: { 
+            studyId: item.id, 
+            storagePath: studyData.storage_path 
+          }
+        });
+
+        if (parseError) {
+          throw new Error(`Erro no parsing: ${parseError.message}`);
+        }
+
+        if (!parseData?.parsedData) {
+          throw new Error('Parsing retornou dados vazios');
+        }
+
+        addLogEntry(`✅ Parsing concluído: ${parseData.sectionsCount} seções, ${parseData.tablesCount} tabelas`);
+
+        // ETAPA 2: ANÁLISE COM LLM (extract-study-entities)
+        updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`🧠 Analisando entidades com IA: ${item.title}`);
+        
+        const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-study-entities', {
+          body: { 
+            studyId: item.id
+          }
+        });
+
+        if (extractError) {
+          throw new Error(`Erro na extração de entidades: ${extractError.message}`);
+        }
+
+        addLogEntry(`✅ Entidades extraídas: ${extractData?.nutraceuticals?.length || 0} nutracêuticos, ${extractData?.conditions?.length || 0} condições`);
+
+        // ETAPA 3: PADRONIZAÇÃO E SALVAMENTO
+        updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`📊 Padronizando dados: ${item.title}`);
+
+        // Criar resultado consolidado (usando dados do extract-study-entities)
+        const result = {
+          studyId: item.id,
+          qualityScore: extractData?.qualityScore || 0,
+          relevanceScore: 0, // Não temos relevance score ainda
+          extractedNutraceuticals: extractData?.nutraceuticals || [],
+          extractedConditions: extractData?.conditions || [],
+          extractedInteractions: [], // extract-study-entities não retorna interactions
+          extractedSideEffects: [] // extract-study-entities não retorna sideEffects
+        };
         
         setAnalysisResult(result);
         
-        // Atualizar estudo no banco de dados
+        // Salvar análise completa no banco
         const updateSuccess = await updateProcessedStudy(item.id, result);
         if (!updateSuccess) {
-          addLogEntry(`[AVISO] Análise concluída, mas houve um erro ao salvar no banco de dados: ${item.title}`);
+          addLogEntry(`[AVISO] Análise concluída, mas houve erro ao salvar: ${item.title}`);
         }
         
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`Processamento NTAI concluído para: ${item.title}`);
+        addLogEntry(`✅ Processamento NTAI concluído para: ${item.title}`);
         
         toast({
           title: "Análise concluída",

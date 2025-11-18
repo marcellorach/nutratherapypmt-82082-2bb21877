@@ -140,6 +140,7 @@ serve(async (req) => {
         elementsCount: parsedElements.length,
         sectionsCount: structuredContent.sections.length,
         tablesCount: structuredContent.tables.length,
+        parsedData: structuredContent, // Incluir dados parseados na resposta
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -48,11 +48,11 @@ const NtaiProcessingSection: React.FC = () => {
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<any>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
-    { name: '📤 Upload PDF', status: 'pending', description: 'Upload study to storage' },
-    { name: '🔍 Parse Document', status: 'pending', description: 'Extract with Unstructured.io' },
-    { name: '🧠 AI Extraction', status: 'pending', description: 'Extract entities with AI' },
-    { name: '✓ Quality Check', status: 'pending', description: 'Validate extraction quality' },
-    { name: '📋 Ready', status: 'pending', description: 'Awaiting review' },
+    { name: '📤 Upload PDF', status: 'pending', description: 'Arquivo enviado para storage' },
+    { name: '🔍 Parse (Unstructured)', status: 'pending', description: 'Extração de texto e estrutura' },
+    { name: '🧠 AI Analysis (LLM)', status: 'pending', description: 'Identificação de entidades' },
+    { name: '✓ Quality Check', status: 'pending', description: 'Validação de qualidade' },
+    { name: '📋 Ready', status: 'pending', description: 'Aguardando revisão' },
   ]);
   const { toast } = useToast();
   
