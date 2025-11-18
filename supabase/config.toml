@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.translate-text]
 verify_jwt = false
+
+[functions.fix-missing-keys]
+verify_jwt = false
