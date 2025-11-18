@@ -13,6 +13,7 @@ const FileUploadTab: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [uploadedCount, setUploadedCount] = useState(0);
+  const [importedStudyIds, setImportedStudyIds] = useState<string[]>([]);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -53,6 +54,7 @@ const FileUploadTab: React.FC = () => {
     setImporting(true);
     setUploadProgress({});
     setUploadedCount(0);
+    const newImportedIds: string[] = [];
 
     try {
       let successCount = 0;
@@ -117,6 +119,7 @@ const FileUploadTab: React.FC = () => {
 
           if (dbError) throw dbError;
 
+          newImportedIds.push(studyId);
           successCount++;
           setUploadedCount(successCount);
           
@@ -130,9 +133,34 @@ const FileUploadTab: React.FC = () => {
 
       await Promise.all(uploadPromises);
 
+      setImportedStudyIds(newImportedIds);
+
+      // Emit custom event for other components to listen
+      const event = new CustomEvent('studyImported', { 
+        detail: { studyIds: newImportedIds, count: successCount } 
+      });
+      window.dispatchEvent(event);
+
+      // Enhanced toast with navigation button
       toast({
-        title: 'Importação concluída',
-        description: `${successCount} arquivo(s) importado(s) com sucesso`,
+        title: t('studies.import.importSuccess'),
+        description: t('studies.import.importSuccessDesc', { count: successCount }),
+        duration: 7000,
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              // Navigate to processing tab
+              const url = new URL(window.location.href);
+              url.searchParams.set('step', 'processamento-ia');
+              window.history.pushState({}, '', url);
+              window.location.reload();
+            }}
+          >
+            {t('studies.import.viewImported')}
+          </Button>
+        ),
       });
 
       // Aguardar 2s para mostrar progresso completo antes de limpar
