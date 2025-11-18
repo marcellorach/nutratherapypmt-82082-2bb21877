@@ -46,13 +46,20 @@ const TranslationAuditTab: React.FC = () => {
     setError(null);
     try {
       const response = await fetch('/translation-audit-report.json');
-      if (!response.ok) {
-        throw new Error('Report not found. Run audit script first.');
+      
+      // Check if the response is actually JSON (not HTML from Vite dev server)
+      const contentType = response.headers.get('content-type');
+      if (!response.ok || !contentType?.includes('application/json')) {
+        // Report doesn't exist yet - this is OK, not an error
+        setReport(null);
+        return;
       }
+      
       const data = await response.json();
       setReport(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load report');
+      // Handle JSON parse errors gracefully
+      setReport(null);
     } finally {
       setLoading(false);
     }
@@ -91,40 +98,46 @@ const TranslationAuditTab: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error}
-            <div className="mt-4">
-              <Button onClick={loadReport} variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {t('audit.retry')}
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   if (!report) {
     return (
-      <div className="p-6">
+      <div className="p-6 max-w-2xl mx-auto space-y-6">
         <Alert>
           <FileText className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-base">
             {t('audit.noReport')}
-            <div className="mt-4">
-              <Button onClick={loadReport} variant="outline" size="sm">
-                <Play className="h-4 w-4 mr-2" />
-                {t('audit.loadReport')}
-              </Button>
-            </div>
           </AlertDescription>
         </Alert>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Play className="h-5 w-5" />
+              {t('audit.howToRun.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                {t('audit.howToRun.description')}
+              </p>
+              <code className="block bg-muted p-3 rounded-md text-sm font-mono">
+                npm run audit:translations
+              </code>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p className="font-medium">{t('audit.howToRun.whatItDoes')}</p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>{t('audit.howToRun.check1')}</li>
+                <li>{t('audit.howToRun.check2')}</li>
+                <li>{t('audit.howToRun.check3')}</li>
+              </ul>
+            </div>
+            <Button onClick={loadReport} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {t('audit.checkForReport')}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

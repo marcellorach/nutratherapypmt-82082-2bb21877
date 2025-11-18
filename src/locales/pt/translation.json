@@ -243,6 +243,15 @@
     "refresh": "Atualizar",
     "allClear": "✅ Tudo certo! Nenhum problema de tradução encontrado.",
     "issuesFound": "{{count}} problema(s) de tradução encontrado(s). Revise abaixo.",
+    "checkForReport": "Verificar Relatório",
+    "howToRun": {
+      "title": "Como Executar a Auditoria",
+      "description": "Execute o comando abaixo no terminal para gerar o relatório de auditoria:",
+      "whatItDoes": "O que a auditoria verifica:",
+      "check1": "Textos hardcoded (não usando t())",
+      "check2": "Chaves de tradução faltando nos arquivos JSON",
+      "check3": "Traduções incompletas entre PT e EN"
+    },
     "summary": {
       "totalFiles": "Arquivos Analisados",
       "totalIssues": "Problemas Encontrados",

@@ -243,6 +243,15 @@
     "refresh": "Refresh",
     "allClear": "✅ All clear! No translation issues found.",
     "issuesFound": "{{count}} translation issue(s) found. Review below.",
+    "checkForReport": "Check for Report",
+    "howToRun": {
+      "title": "How to Run Audit",
+      "description": "Run the command below in your terminal to generate the audit report:",
+      "whatItDoes": "What the audit checks:",
+      "check1": "Hardcoded texts (not using t())",
+      "check2": "Missing translation keys in JSON files",
+      "check3": "Incomplete translations between PT and EN"
+    },
     "summary": {
       "totalFiles": "Files Scanned",
       "totalIssues": "Issues Found",
