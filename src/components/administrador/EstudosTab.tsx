@@ -11,6 +11,7 @@ import EstudoSearch from './estudos/EstudoSearch';
 import EstudosColumn from './estudos/EstudosColumn';
 import SciImportSection from './estudos/import/SciImportSection';
 import NtaiProcessingSection from './estudos/analysis/NtaiProcessingSection';
+import { UploadEstudoForm } from './estudos/UploadEstudoForm';
 import { useTranslation } from 'react-i18next';
 import './estudos/estudos.css';
 
@@ -128,6 +129,12 @@ const EstudosTab: React.FC = () => {
         
         <TabsContent value="importar" className="mt-0 space-y-6">
           <div className="flex items-center space-x-2 mb-2">
+            <FileText className="h-4 w-4 text-green-600" />
+            <h3 className="text-lg font-medium">Upload e Extração Automática (Gemini AI)</h3>
+          </div>
+          <UploadEstudoForm />
+          
+          <div className="flex items-center space-x-2 mb-2 mt-8">
             <ArrowDown className="h-4 w-4 text-blue-600" />
             <h3 className="text-lg font-medium">{t('studies.import.sectionTitle')}</h3>
           </div>
