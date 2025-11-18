@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from "@/components/ui/button";
@@ -96,165 +95,182 @@ const FileUploadTab: React.FC = () => {
 
           clearInterval(uploadInterval);
           
-        if (uploadError) {
-          console.error("Erro no upload:", uploadError);
-          throw uploadError;
-        }
-        
-        console.log("Upload bem-sucedido:", data);
+          if (storageError) throw storageError;
 
-        // Extrair título do nome do arquivo
-        const fileTitle = file.name.replace(/\.[^/.]+$/, ""); // Remove extensão
-        const formattedTitle = fileTitle
-          .replace(/_/g, ' ')
-          .replace(/-/g, ' ')
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ');
+          // Finalizar progresso
+          setUploadProgress(prev => ({ ...prev, [fileName]: 100 }));
 
-        // Registrar na tabela scispace_imports
-        const { data: importData, error: importError } = await supabase
-          .from("scispace_imports")
-          .insert([
-            {
-              meta_summary_filename: file.name,
-              meta_summary_storage_path: path,
-              base_studies_filename: file.name,
-              base_studies_storage_path: path,
+          // Criar registro em processed_studies
+          const { error: dbError } = await supabase
+            .from('processed_studies')
+            .insert({
+              study_id: studyId,
+              title: fileName.replace('.pdf', ''),
+              original_filename: fileName,
+              storage_path: storagePath,
               import_type: 'manual',
-              scispace_status: 'manual'
-            }
-          ])
-          .select()
-          .single();
-
-        if (importError) {
-          console.error("Erro ao registrar importação:", importError);
-          throw importError;
-        }
-        
-        console.log("Importação registrada:", importData);
-
-        // Registrar na tabela processed_studies com informações aprimoradas
-        const { error: processError } = await supabase
-          .from("processed_studies")
-          .insert([
-            {
-              study_id: path,
-              source_import_id: importData.id,
-              import_type: 'manual',
-              original_filename: file.name,
-              storage_path: path,
               kanban_status: 'new',
-              processed_by: 'manual-import',
-              title: formattedTitle,
-              description: `Estudo importado manualmente: ${formattedTitle}`,
+              source_import_id: importData.id,
+              description: 'Aguardando processamento',
               journal: 'Importação Manual'
-            }
-          ]);
+            });
 
-        if (processError) {
-          console.error("Erro ao registrar estudo processado:", processError);
-          throw processError;
+          if (dbError) throw dbError;
+
+          successCount++;
+          setUploadedCount(successCount);
+          
+          return { success: true, fileName };
+        } catch (fileError) {
+          console.error(`Erro ao importar ${fileName}:`, fileError);
+          setUploadProgress(prev => ({ ...prev, [fileName]: -1 }));
+          return { success: false, fileName, error: fileError };
         }
-
-        currentProgress = Math.round(((i + 1) / files.length) * 100);
-        setProgress(currentProgress);
-      } catch (error: any) {
-        console.error("Erro completo:", error);
-        toast({
-          title: t('studies.import.importError', { filename: file.name }),
-          description: error.message,
-          variant: "destructive",
-        });
-        setImporting(false);
-        return;
-      }
-    }
-
-    setTimeout(() => {
-      setImporting(false);
-      setFiles([]);
-      setProgress(0);
-      toast({
-        title: t('studies.import.importSuccess'),
-        description: t('studies.import.importSuccessDesc', { count: files.length }),
       });
-    }, 800);
-  };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+      await Promise.all(uploadPromises);
+
+      toast({
+        title: 'Importação concluída',
+        description: `${successCount} arquivo(s) importado(s) com sucesso`,
+      });
+
+      // Aguardar 2s para mostrar progresso completo antes de limpar
+      setTimeout(() => {
+        setSelectedFiles([]);
+        setUploadProgress({});
+        setUploadedCount(0);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Erro durante importação:', error);
+      toast({
+        title: 'Erro na importação',
+        description: error instanceof Error ? error.message : 'Tente novamente',
+        variant: "destructive"
+      });
+    } finally {
+      setImporting(false);
     }
-  };
-  
-  const removeFile = (index: number) => {
-    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="space-y-4 mt-4">
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" className="gap-2" asChild>
-          <label>
-            <span>
-              <span className="inline-block align-middle">
-                <Upload className="h-4 w-4" />
-              </span>
-              <span className="inline-block align-middle">{t('studies.import.selectFiles')}</span>
-            </span>
-            <input
-              type="file"
-              multiple
-              accept=".bib,.csv,.json,.pdf,.doc,.docx,.txt,.rtf"
-              className="hidden"
-              onChange={handleFileChange}
-              disabled={importing}
-            />
-          </label>
-        </Button>
-        <p className="text-sm text-gray-500">
-          {t('studies.import.supportedFormats')}
-        </p>
+    <div className="space-y-6">
+      <div
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+          isDragActive 
+            ? 'border-primary bg-primary/5' 
+            : 'border-border hover:border-primary/50'
+        }`}
+      >
+        <input {...getInputProps()} />
+        <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        {isDragActive ? (
+          <p className="text-lg font-medium text-primary">
+            Solte os arquivos aqui
+          </p>
+        ) : (
+          <>
+            <p className="text-lg font-medium mb-2">
+              Arraste PDFs aqui ou clique para selecionar
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Formatos suportados: PDF (máx. 20MB por arquivo)
+            </p>
+            <Button variant="outline" type="button">
+              <Upload className="mr-2 h-4 w-4" />
+              Selecionar Arquivos
+            </Button>
+          </>
+        )}
       </div>
-      {files.length > 0 && (
-        <div className="mt-4 border rounded-md">
-          <div className="p-3 bg-gray-50 border-b">
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium">{t('studies.import.filesForImport', { count: files.length })}</h3>
-              {!importing && (
-                <Button size="sm" onClick={handleImport}>
-                  {t('studies.import.importFiles')}
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="p-3">
-            {importing ? (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>{t('studies.import.processing')}</span>
-                  <span>{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {files.map((file, index) => (
-                  <ImportFilePreview
-                    key={file.name + index}
-                    file={file}
-                    index={index}
-                    onRemove={() => removeFile(index)}
-                  />
-                ))}
-              </ul>
+
+      {selectedFiles.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium">
+              {selectedFiles.length} {selectedFiles.length === 1 ? 'arquivo selecionado' : 'arquivos selecionados'}
+            </p>
+            {importing && (
+              <p className="text-sm text-muted-foreground">
+                {uploadedCount} / {selectedFiles.length} concluídos
+              </p>
             )}
           </div>
+          
+          {selectedFiles.map((file, index) => {
+            const progress = uploadProgress[file.name] || 0;
+            const hasError = progress === -1;
+            
+            return (
+              <div key={index} className="border rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <File className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {!importing && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                  
+                  {importing && progress === 100 && (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  )}
+                  
+                  {hasError && (
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                  )}
+                </div>
+                
+                {importing && !hasError && (
+                  <div className="space-y-1">
+                    <Progress value={progress} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground">
+                      {progress === 100 ? 'Concluído' : `Enviando... ${progress}%`}
+                    </p>
+                  </div>
+                )}
+                
+                {hasError && (
+                  <p className="text-xs text-destructive">
+                    Erro ao fazer upload. Tente novamente.
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleImport}
+          disabled={selectedFiles.length === 0 || importing}
+          className="min-w-[200px]"
+        >
+          {importing ? (
+            <>Importando {uploadedCount}/{selectedFiles.length}...</>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Importar {selectedFiles.length > 0 ? `${selectedFiles.length} arquivo(s)` : 'Arquivos'}
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
