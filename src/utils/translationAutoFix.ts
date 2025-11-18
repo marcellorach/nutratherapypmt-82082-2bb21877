@@ -98,10 +98,13 @@ function keyExists(obj: TranslationObject, key: string): boolean {
 }
 
 /**
- * Corrige missing keys automaticamente (client-side)
+ * Corrige missing keys automaticamente inserindo no banco de dados Supabase
  */
 export async function autoFixMissingKeys(): Promise<FixResult> {
-  console.log('🔧 Starting client-side auto-fix for missing keys...');
+  console.log('🔧 Starting database-backed auto-fix for missing keys...');
+  
+  // Importa supabase dinamicamente para evitar problemas de SSR
+  const { supabase } = await import('@/integrations/supabase/client');
   
   // 1. Carrega relatório de audit
   const reportResponse = await fetch('/translation-audit-report.json');
@@ -110,24 +113,16 @@ export async function autoFixMissingKeys(): Promise<FixResult> {
   }
   const report: AuditReport = await reportResponse.json();
   
-  // 2. Carrega arquivos de tradução atuais
-  const [ptResponse, enResponse] = await Promise.all([
-    fetch('/locales/pt/translation.json'),
-    fetch('/locales/en/translation.json')
-  ]);
+  // 2. Carrega traduções existentes do banco
+  const { data: existingTranslations } = await supabase
+    .from('translations')
+    .select('key, locale');
   
-  if (!ptResponse.ok || !enResponse.ok) {
-    throw new Error('Failed to load translation files');
-  }
+  const existingKeys = new Set(
+    existingTranslations?.map(t => `${t.key}::${t.locale}`) || []
+  );
   
-  const ptTranslations: TranslationObject = await ptResponse.json();
-  const enTranslations: TranslationObject = await enResponse.json();
-  
-  // 3. Cria cópias para modificação
-  const updatedPT = JSON.parse(JSON.stringify(ptTranslations));
-  const updatedEN = JSON.parse(JSON.stringify(enTranslations));
-  
-  // 4. Processa missing keys
+  // 3. Processa missing keys
   const missingKeyIssues = report.issues.filter(issue => issue.type === 'missing-key');
   console.log(`Found ${missingKeyIssues.length} missing keys to fix`);
   
@@ -138,10 +133,20 @@ export async function autoFixMissingKeys(): Promise<FixResult> {
   // Extrai chaves únicas (remove duplicatas)
   const uniqueKeys = [...new Set(missingKeyIssues.map(issue => issue.text))];
   
+  // Prepara batch de inserções
+  const translationsToInsert: Array<{
+    key: string;
+    locale: string;
+    value: string;
+  }> = [];
+  
   for (const key of uniqueKeys) {
-    // Verifica se já existe em ambos os locales
-    if (keyExists(updatedPT, key) && keyExists(updatedEN, key)) {
-      console.log(`⏭️  Skipped (already exists): ${key}`);
+    // Verifica se já existe no banco
+    const existsInPT = existingKeys.has(`${key}::pt`);
+    const existsInEN = existingKeys.has(`${key}::en`);
+    
+    if (existsInPT && existsInEN) {
+      console.log(`⏭️  Skipped (already exists in DB): ${key}`);
       skipped++;
       continue;
     }
@@ -149,64 +154,76 @@ export async function autoFixMissingKeys(): Promise<FixResult> {
     // Gera tradução automática
     const translation = generateTranslation(key);
     
-    // Adiciona nos dois locales
-    if (!keyExists(updatedPT, key)) {
-      addTranslationKey(updatedPT, key, translation.pt);
+    // Adiciona à lista de inserções
+    if (!existsInPT) {
+      translationsToInsert.push({
+        key,
+        locale: 'pt',
+        value: translation.pt
+      });
     }
-    if (!keyExists(updatedEN, key)) {
-      addTranslationKey(updatedEN, key, translation.en);
+    if (!existsInEN) {
+      translationsToInsert.push({
+        key,
+        locale: 'en',
+        value: translation.en
+      });
     }
     
-    console.log(`✅ Fixed: ${key}`);
+    console.log(`✅ Prepared: ${key}`);
     console.log(`   EN: "${translation.en}" | PT: "${translation.pt}"`);
     
     fixed++;
     fixedKeys.push(key);
   }
   
+  // 4. Insere todas as traduções no banco usando upsert
+  if (translationsToInsert.length > 0) {
+    console.log(`\n📤 Inserting ${translationsToInsert.length} translations into database...`);
+    
+    const { error: insertError } = await supabase
+      .from('translations')
+      .upsert(translationsToInsert, {
+        onConflict: 'key,locale',
+        ignoreDuplicates: false
+      });
+    
+    if (insertError) {
+      console.error('❌ Error inserting translations:', insertError);
+      throw new Error(`Failed to insert translations: ${insertError.message}`);
+    }
+    
+    console.log('✅ All translations inserted successfully!');
+    
+    // Incrementa versão para invalidar cache
+    const { error: versionError } = await supabase
+      .rpc('increment_translation_version');
+    
+    if (versionError) {
+      console.warn('⚠️ Warning: Could not increment version:', versionError.message);
+    }
+  }
+  
   console.log('\n' + '='.repeat(60));
-  console.log(`✅ Client-side auto-fix complete!`);
-  console.log(`   Fixed: ${fixed} keys`);
+  console.log(`✅ Database auto-fix complete!`);
+  console.log(`   Fixed: ${fixed} keys (${translationsToInsert.length} translations)`);
   console.log(`   Skipped: ${skipped} keys (already exist)`);
+  console.log(`   🔄 Translations will update automatically via realtime`);
   console.log('='.repeat(60));
   
   return { 
     fixed, 
     skipped, 
     keys: fixedKeys,
-    updatedPT,
-    updatedEN
+    updatedPT: {}, // Não mais necessário
+    updatedEN: {}  // Não mais necessário
   };
 }
 
 /**
- * Faz download dos arquivos de tradução atualizados
+ * DEPRECATED: Não mais necessário com sistema de banco de dados
+ * As traduções são atualizadas automaticamente via Supabase Realtime
  */
 export function downloadTranslationFiles(updatedPT: TranslationObject, updatedEN: TranslationObject): void {
-  // Download PT
-  const ptBlob = new Blob([JSON.stringify(updatedPT, null, 2)], { type: 'application/json' });
-  const ptUrl = URL.createObjectURL(ptBlob);
-  const ptLink = document.createElement('a');
-  ptLink.href = ptUrl;
-  ptLink.download = 'translation-pt.json';
-  document.body.appendChild(ptLink);
-  ptLink.click();
-  document.body.removeChild(ptLink);
-  URL.revokeObjectURL(ptUrl);
-  
-  // Download EN
-  const enBlob = new Blob([JSON.stringify(updatedEN, null, 2)], { type: 'application/json' });
-  const enUrl = URL.createObjectURL(enBlob);
-  const enLink = document.createElement('a');
-  enLink.href = enUrl;
-  enLink.download = 'translation-en.json';
-  document.body.appendChild(enLink);
-  enLink.click();
-  document.body.removeChild(enLink);
-  URL.revokeObjectURL(enUrl);
-  
-  console.log('📥 Translation files downloaded successfully!');
-  console.log('Please replace:');
-  console.log('  - src/locales/pt/translation.json');
-  console.log('  - src/locales/en/translation.json');
+  console.log('⚠️ downloadTranslationFiles está deprecated - traduções já estão no banco de dados');
 }
