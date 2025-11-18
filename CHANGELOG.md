@@ -22,6 +22,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - ~50+ referências científicas com links PubMed/journals
 - ✅ Referência à documentação NTAI adicionada em `ARCHITECTURE.md` v1.5.0
 
+### Fixed
+- 🐛 Corrigido sistema de traduções do `TabInfoButton` - chaves literais (`admin.tabInfo.*`) agora traduzem corretamente
+  - Mesclado conteúdo de `tab-info.json` em `translation.json` (PT e EN)
+  - Incrementada versão i18n para 1.3.15 (force cache clear)
+  - Botão e dialog agora exibem traduções em PT/EN corretamente
+
 ### Changed
 - ✅ Removidas badges de contagem de nutracêuticos da coluna "Tratabilidade Média" (mantém apenas porcentagem e "A Catalogar")
 - ✅ Ajustado arredondamento de tratabilidade para múltiplos de 5 (5%, 10%, 15%...) para apresentação mais limpa e profissional
