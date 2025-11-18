@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings, BookOpen, Database } from "lucide-react";
@@ -17,15 +16,15 @@ const AdminHeader: React.FC = () => {
       <div className="flex gap-2 mt-4 md:mt-0">
         <Button variant="outline">
           <Database className="mr-2 h-4 w-4" />
-          Base de Dados
+          {t('admin.header.database')}
         </Button>
         <Button variant="outline">
           <BookOpen className="mr-2 h-4 w-4" />
-          Biblioteca Científica
+          {t('admin.header.scientificLibrary')}
         </Button>
         <Button variant="outline">
           <Settings className="mr-2 h-4 w-4" />
-          {t('common.settings')}
+          {t('admin.header.settings')}
         </Button>
       </div>
     </div>

@@ -23,7 +23,10 @@
       "compound": "Chemical Compound",
       "source": "Source",
       "dosage": "Dosage",
-      "notDefined": "Not defined"
+      "notDefined": "Not defined",
+      "exportInfo": "Export information",
+      "viewFullStudies": "View full studies",
+      "efficacy": "Efficacy"
     },
     "conditions": {
       "title": "Conditions",
@@ -323,6 +326,11 @@
     "createPlanPrompt": "Create a treatment plan for this pet."
   },
   "admin": {
+    "header": {
+      "database": "Database",
+      "scientificLibrary": "Scientific Library",
+      "settings": "Settings"
+    },
     "sidebar": {
       "knowledgeBase": {
         "title": "Knowledge/Relational Base",
@@ -1438,6 +1446,47 @@
         "selectedCount_one": "{{count}} study selected",
         "selectedCount_other": "{{count}} studies selected",
         "addToQueue": "Add to RAG Queue",
+        "statusNew": "New",
+        "statusSpecial": "Special",
+        "statusProcessed": "Processed",
+        "statusInReview": "Under Review",
+        "statusManual": "Manual",
+        "statusUnknown": "Unknown"
+      }
+    },
+    "ntai": {
+      "processing": "NTAI Processing",
+      "model": "Model",
+      "temperature": "Temperature",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "promptsInfo": "Custom prompts will be used to extract specific information from the studies.",
+      "hideLog": "Hide Log",
+      "showLog": "Show Log",
+      "settings": "Settings",
+      "infoTitle": "NTAI Processing Information",
+      "availableStudies": "Available Studies for Processing",
+      "queueEmpty": "No items in processing queue",
+      "analysisResults": "NTAI Analysis Results",
+      "cardGenerated": "Card Generated for Kanban",
+      "cardAdded": "Card added to kanban",
+      "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column.",
+      "conditions": {
+        "title": "Identified Conditions and Efficacy",
+        "none": "No conditions identified."
+      },
+      "table": {
+        "study": "Study",
+        "source": "Source",
+        "imported": "Imported",
+        "status": "Status",
+        "lessThanDay": "less than a day ago",
+        "unknownSource": "Unknown",
+        "studyPrefix": "Study",
+        "noStudies": "No studies available for processing",
+        "selectedCount": "{{count}} studies selected",
+        "addToQueue": "Add to Queue",
         "statusNew": "New",
         "statusSpecial": "Special",
         "statusProcessed": "Processed",

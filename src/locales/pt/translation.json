@@ -23,7 +23,10 @@
       "compound": "Composto Químico",
       "source": "Origem",
       "dosage": "Dosagem",
-      "notDefined": "Não definida"
+      "notDefined": "Não definida",
+      "exportInfo": "Exportar informações",
+      "viewFullStudies": "Ver estudos completos",
+      "efficacy": "Eficácia"
     },
     "conditions": {
       "title": "Condições",
@@ -323,6 +326,11 @@
     "createPlanPrompt": "Crie um plano de tratamento para este pet."
   },
   "admin": {
+    "header": {
+      "database": "Base de Dados",
+      "scientificLibrary": "Biblioteca Científica",
+      "settings": "Configurações"
+    },
     "sidebar": {
       "knowledgeBase": {
         "title": "Base Conhecimento/Relacional",
@@ -1438,6 +1446,47 @@
         "selectedCount_one": "{{count}} estudo selecionado",
         "selectedCount_other": "{{count}} estudos selecionados",
         "addToQueue": "Adicionar à Fila RAG",
+        "statusNew": "Novo",
+        "statusSpecial": "Especial",
+        "statusProcessed": "Processado",
+        "statusInReview": "Em Revisão",
+        "statusManual": "Manual",
+        "statusUnknown": "Desconhecido"
+      }
+    },
+    "ntai": {
+      "processing": "Processamento NTAI",
+      "model": "Modelo",
+      "temperature": "Temperature",
+      "status": "Status",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "promptsInfo": "Os prompts personalizados serão usados para extrair informações específicas dos estudos.",
+      "hideLog": "Ocultar Log",
+      "showLog": "Exibir Log",
+      "settings": "Configurações",
+      "infoTitle": "Informações do Processamento NTAI",
+      "availableStudies": "Estudos Disponíveis para Processamento",
+      "queueEmpty": "Nenhum item na fila de processamento",
+      "analysisResults": "Resultados da Análise NTAI",
+      "cardGenerated": "Card Gerado para Kanban",
+      "cardAdded": "Card adicionado ao kanban",
+      "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\".",
+      "conditions": {
+        "title": "Condições Identificadas e Eficácia",
+        "none": "Nenhuma condição identificada."
+      },
+      "table": {
+        "study": "Estudo",
+        "source": "Fonte",
+        "imported": "Importado",
+        "status": "Status",
+        "lessThanDay": "há menos de um dia",
+        "unknownSource": "Desconhecida",
+        "studyPrefix": "Estudo",
+        "noStudies": "Nenhum estudo disponível para processamento",
+        "selectedCount": "{{count}} estudos selecionados",
+        "addToQueue": "Adicionar à Fila",
         "statusNew": "Novo",
         "statusSpecial": "Especial",
         "statusProcessed": "Processado",
