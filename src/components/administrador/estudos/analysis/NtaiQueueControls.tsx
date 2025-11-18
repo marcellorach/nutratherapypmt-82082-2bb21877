@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Play, RefreshCcw, Trash2, Loader2 } from "lucide-react";
 
 interface NtaiQueueControlsProps {
@@ -51,15 +52,27 @@ const NtaiQueueControls: React.FC<NtaiQueueControlsProps> = ({
         
         {hasFailedItems && (
           <>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onRetryFailed}
-              className="text-amber-600 border-amber-200 hover:bg-amber-50"
-            >
-              <RefreshCcw className="w-4 h-4 mr-1" />
-              Tentar Novamente
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={onRetryFailed}
+                    className="text-amber-600 border-amber-200 hover:bg-amber-50"
+                  >
+                    <RefreshCcw className="w-4 h-4 mr-1" />
+                    Tentar Novamente
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Tenta reprocessar estudos que falharam</p>
+                  <p className="text-xs text-muted-foreground">
+                    Recomendado aguardar 5-10min após falhas de DNS
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button 
               variant="outline" 
               size="sm"

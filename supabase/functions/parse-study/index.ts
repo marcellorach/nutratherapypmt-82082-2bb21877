@@ -82,14 +82,15 @@ serve(async (req) => {
     
     let unstructuredResponse;
     let lastError;
-    const maxRetries = 3;
+    const maxRetries = 10;
+    const initialDelay = 2000; // 2 seconds initial delay
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`Attempt ${attempt}/${maxRetries} to call Unstructured API...`);
+        console.log(`🔄 Attempt ${attempt}/${maxRetries} to call Unstructured API... (timeout: 60s)`);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
         
         unstructuredResponse = await fetch('https://api.unstructured.io/general/v0/general', {
           method: 'POST',
@@ -108,33 +109,48 @@ serve(async (req) => {
         }
         
         lastError = `HTTP ${unstructuredResponse.status}: ${await unstructuredResponse.text()}`;
-        console.error(`Attempt ${attempt} failed:`, lastError);
+        console.error(`❌ Attempt ${attempt} failed:`, lastError);
         
         if (attempt < maxRetries) {
-          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
-          console.log(`Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          // Delay exponencial: 2s, 4s, 8s, 16s, 32s, 60s (max)
+          const baseDelay = initialDelay * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 2000; // Randomiza 0-2s
+          const totalDelay = Math.min(baseDelay + jitter, 60000); // Máximo 60s
+          
+          console.log(`⏳ Waiting ${Math.round(totalDelay/1000)}s before retry ${attempt + 1}/${maxRetries}...`);
+          await new Promise(resolve => setTimeout(resolve, totalDelay));
         }
         
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
-        console.error(`Attempt ${attempt} failed with error:`, lastError);
+        console.error(`❌ Attempt ${attempt} failed with error:`, lastError);
         
         if (attempt < maxRetries) {
-          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
-          console.log(`Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          // Delay exponencial: 2s, 4s, 8s, 16s, 32s, 60s (max)
+          const baseDelay = initialDelay * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 2000; // Randomiza 0-2s
+          const totalDelay = Math.min(baseDelay + jitter, 60000); // Máximo 60s
+          
+          console.log(`⏳ Waiting ${Math.round(totalDelay/1000)}s before retry ${attempt + 1}/${maxRetries}...`);
+          await new Promise(resolve => setTimeout(resolve, totalDelay));
         }
       }
     }
     
     if (!unstructuredResponse) {
-      console.error('All retry attempts failed. Last error:', lastError);
+      console.error(`❌ All ${maxRetries} retry attempts failed. Last error:`, lastError);
+      
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to connect to Unstructured API after multiple attempts',
+          error: 'Problema temporário de conexão com Unstructured API',
+          errorType: 'DNS_RESOLUTION_FAILURE',
           details: lastError,
-          suggestion: 'This may be a temporary network issue. Please try again in a few minutes.'
+          isTemporary: true,
+          suggestion: 'Este é um problema conhecido do Deno Deploy. Recomendações:\n' +
+                      '1. Aguarde 5-10 minutos e tente novamente\n' +
+                      '2. Use o botão "Tentar Novamente" na interface\n' +
+                      '3. Se persistir, contate o suporte técnico',
+          technicalInfo: `Tentativas: ${maxRetries}, Última falha: ${lastError}`
         }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

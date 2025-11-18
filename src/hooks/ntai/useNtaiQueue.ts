@@ -118,6 +118,12 @@ export const useNtaiQueue = () => {
   };
 
   const retryFailed = () => {
+    const itemsToRetry = processQueue.filter(item => item.stage === 'error');
+    const hasDnsErrors = itemsToRetry.some(item => 
+      item.error?.includes('dns') || 
+      item.error?.includes('DNS')
+    );
+    
     setProcessQueue(prev => prev.map(item => 
       item.stage === 'error' 
         ? { ...item, stage: 'idle' as ProcessingStage, progress: 0, error: undefined }
@@ -125,9 +131,13 @@ export const useNtaiQueue = () => {
     ));
     
     toast({
-      title: "Itens com falha reiniciados",
-      description: "Os itens com erro foram reiniciados para novo processamento.",
-      variant: "default",
+      title: "♻️ Reprocessamento iniciado",
+      description: `${itemsToRetry.length} estudo(s) marcado(s) para nova tentativa.${
+        hasDnsErrors 
+          ? '\n⚠️ Falhas de DNS detectadas. Pode levar alguns minutos.'
+          : ''
+      }`,
+      duration: 5000,
     });
   };
 
