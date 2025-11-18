@@ -331,6 +331,30 @@
       "scientificLibrary": "Scientific Library",
       "settings": "Settings"
     },
+    "tabInfo": {
+      "button": "Information about this tab",
+      "description": "Understand the methodology, scientific foundations and objectives of this feature",
+      "tabs": {
+        "overview": "Overview",
+        "methodology": "Methodology",
+        "scientific": "Scientific Foundations"
+      },
+      "overview": {
+        "objective": "Objective",
+        "workflow": "Workflow",
+        "benefits": "Benefits"
+      },
+      "methodology": {
+        "decisions": "Methodological Decisions"
+      },
+      "scientific": {
+        "foundation": "Scientific Foundations",
+        "studies": "Reference Studies",
+        "keyFindings": "Key Findings",
+        "viewStudy": "View study",
+        "references": "References"
+      }
+    },
     "sidebar": {
       "knowledgeBase": {
         "title": "Knowledge/Relational Base",
