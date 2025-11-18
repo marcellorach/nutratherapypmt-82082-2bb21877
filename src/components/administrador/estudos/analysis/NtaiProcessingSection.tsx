@@ -11,6 +11,7 @@ import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
 import NtaiPipelineVisualization from './NtaiPipelineVisualization';
+import ParsedDataViewer from './ParsedDataViewer';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -45,12 +46,13 @@ const NtaiProcessingSection: React.FC = () => {
   
   const [logVisible, setLogVisible] = React.useState(false);
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
+  const [parsedData, setParsedData] = useState<any>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
-    { name: 'Upload PDF', status: 'pending', description: 'Upload study to storage' },
-    { name: 'Parse Document', status: 'pending', description: 'Extract text with Unstructured' },
-    { name: 'AI Extraction', status: 'pending', description: 'Extract entities with Lovable AI' },
-    { name: 'Quality Check', status: 'pending', description: 'Validate extraction quality' },
-    { name: 'Ready for Review', status: 'pending', description: 'Awaiting human curation' },
+    { name: '📤 Upload PDF', status: 'pending', description: 'Upload study to storage' },
+    { name: '🔍 Parse Document', status: 'pending', description: 'Extract with Unstructured.io' },
+    { name: '🧠 AI Extraction', status: 'pending', description: 'Extract entities with AI' },
+    { name: '✓ Quality Check', status: 'pending', description: 'Validate extraction quality' },
+    { name: '📋 Ready', status: 'pending', description: 'Awaiting review' },
   ]);
   const { toast } = useToast();
   
@@ -78,6 +80,11 @@ const NtaiProcessingSection: React.FC = () => {
       });
 
       if (parseError) throw new Error(`Parse failed: ${parseError.message}`);
+      
+      // Armazenar dados do parsing
+      if (parseData?.parsedData) {
+        setParsedData(parseData.parsedData);
+      }
       
       setPipelineStages(stages => stages.map((s, i) => 
         i === 1 ? { ...s, status: 'complete' as const } : s

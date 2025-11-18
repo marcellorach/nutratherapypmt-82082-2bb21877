@@ -1,44 +1,100 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, File, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
-import ImportFilePreview from './ImportFilePreview';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 
 const FileUploadTab: React.FC = () => {
-  const [files, setFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [importing, setImporting] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadedCount, setUploadedCount] = useState(0);
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const handleImport = async () => {
-    if (files.length === 0) {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const pdfFiles = acceptedFiles.filter(file => file.type === 'application/pdf');
+    
+    if (pdfFiles.length < acceptedFiles.length) {
       toast({
-        title: t('studies.import.noFiles'),
-        description: t('studies.import.selectAtLeastOne'),
-        variant: "destructive",
+        title: 'Arquivos inválidos',
+        description: 'Apenas arquivos PDF são aceitos',
+        variant: "destructive"
+      });
+    }
+    
+    setSelectedFiles(prev => [...prev, ...pdfFiles]);
+  }, [toast]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'application/pdf': ['.pdf'] },
+    maxSize: 20 * 1024 * 1024, // 20MB
+  });
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleImport = async () => {
+    if (selectedFiles.length === 0) {
+      toast({
+        title: 'Nenhum arquivo selecionado',
+        description: 'Selecione pelo menos um arquivo para importar',
+        variant: "destructive"
       });
       return;
     }
-    setImporting(true);
 
-    let currentProgress = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const path = `scispace/manual-import/${Date.now()}-${file.name}`;
-      
-      try {
-        // Teste de conectividade com o bucket
-        console.log("Iniciando upload para:", path);
-        
-        // Upload do arquivo
-        const { data, error: uploadError } = await supabase.storage
-          .from("scispace")
-          .upload(path, file);
+    setImporting(true);
+    setUploadProgress({});
+    setUploadedCount(0);
+
+    try {
+      let successCount = 0;
+
+      // Criar registro de importação no banco
+      const { data: importData, error: importError } = await supabase
+        .from('scispace_imports')
+        .insert({
+          import_type: 'manual',
+          scispace_status: 'completed'
+        })
+        .select()
+        .single();
+
+      if (importError) throw importError;
+
+      // Upload paralelo com progresso individual
+      const uploadPromises = selectedFiles.map(async (file) => {
+        const fileName = file.name;
+        const studyId = uuidv4();
+        const storagePath = `studies/${studyId}_${fileName}`;
+
+        try {
+          // Simular progresso de upload
+          const uploadInterval = setInterval(() => {
+            setUploadProgress(prev => {
+              const current = prev[fileName] || 0;
+              if (current >= 90) {
+                clearInterval(uploadInterval);
+                return prev;
+              }
+              return { ...prev, [fileName]: Math.min(current + 10, 90) };
+            });
+          }, 200);
+
+          // Upload para Storage
+          const { error: storageError } = await supabase.storage
+            .from('study_pdfs')
+            .upload(storagePath, file);
+
+          clearInterval(uploadInterval);
           
         if (uploadError) {
           console.error("Erro no upload:", uploadError);
