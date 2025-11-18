@@ -331,6 +331,30 @@
       "scientificLibrary": "Biblioteca Científica",
       "settings": "Configurações"
     },
+    "tabInfo": {
+      "button": "Informações sobre esta aba",
+      "description": "Entenda a metodologia, fundamentos científicos e objetivos desta funcionalidade",
+      "tabs": {
+        "overview": "Visão Geral",
+        "methodology": "Metodologia",
+        "scientific": "Fundamentos Científicos"
+      },
+      "overview": {
+        "objective": "Objetivo",
+        "workflow": "Fluxo de Trabalho",
+        "benefits": "Benefícios"
+      },
+      "methodology": {
+        "decisions": "Decisões Metodológicas"
+      },
+      "scientific": {
+        "foundation": "Fundamentos Científicos",
+        "studies": "Estudos de Referência",
+        "keyFindings": "Principais Descobertas",
+        "viewStudy": "Ver estudo",
+        "references": "Referências"
+      }
+    },
     "sidebar": {
       "knowledgeBase": {
         "title": "Base Conhecimento/Relacional",
