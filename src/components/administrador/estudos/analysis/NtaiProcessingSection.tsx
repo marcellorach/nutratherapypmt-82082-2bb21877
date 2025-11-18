@@ -60,6 +60,32 @@ const NtaiProcessingSection: React.FC = () => {
   
   const toggleLogVisibility = () => setLogVisible(!logVisible);
 
+  const handleDeleteStudies = async () => {
+    try {
+      const { error } = await supabase
+        .from('processed_studies')
+        .delete()
+        .in('id', selectedItems);
+
+      if (error) throw error;
+
+      toast({
+        title: t('studies.ntai.deleteSuccess'),
+        description: t('studies.ntai.deleteSuccessDescription', { count: selectedItems.length }),
+      });
+
+      // Reload available studies
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting studies:', error);
+      toast({
+        title: t('studies.ntai.deleteError'),
+        description: t('studies.ntai.deleteErrorDescription'),
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleProcessWithAI = async (studyId: string, storagePath: string) => {
     setProcessingStudy(studyId);
     
@@ -187,6 +213,7 @@ const NtaiProcessingSection: React.FC = () => {
             onToggleSelection={toggleItemSelection}
             onSelectAll={() => handleSelectAll(availableStudies)}
             onAddToQueue={addToQueue}
+            onDelete={handleDeleteStudies}
           />
         </div>
         

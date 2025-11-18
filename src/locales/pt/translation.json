@@ -1536,6 +1536,10 @@
       "cardGenerated": "Card Gerado para Kanban",
       "cardAdded": "Card adicionado ao kanban",
       "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\".",
+      "deleteSuccess": "Estudos deletados com sucesso",
+      "deleteSuccessDescription": "{{count}} estudos foram removidos do banco de dados",
+      "deleteError": "Erro ao deletar estudos",
+      "deleteErrorDescription": "Ocorreu um erro ao tentar deletar os estudos selecionados",
       "conditions": {
         "title": "Condições Identificadas e Eficácia",
         "none": "Nenhuma condição identificada."
@@ -1551,6 +1555,7 @@
         "noStudies": "Nenhum estudo disponível para processamento",
         "selectedCount": "{{count}} estudos selecionados",
         "addToQueue": "Adicionar à Fila",
+        "deleteSelected": "Deletar Selecionados",
         "statusNew": "Novo",
         "statusSpecial": "Especial",
         "statusProcessed": "Processado",
