@@ -30,16 +30,19 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
 }) => {
   const { toast } = useToast();
   
+  // Normalize initialKey to always be a string
+  const normalizedKey = typeof initialKey === 'string' ? initialKey : '';
+  
   const form = useForm<z.infer<typeof apiKeySchema>>({
     resolver: zodResolver(apiKeySchema),
     defaultValues: {
-      apiKey: initialKey,
+      apiKey: normalizedKey,
     },
   });
 
   useEffect(() => {
-    form.reset({ apiKey: initialKey });
-  }, [initialKey, form]);
+    form.reset({ apiKey: normalizedKey });
+  }, [normalizedKey, form]);
 
   const onSubmit = async (values: z.infer<typeof apiKeySchema>) => {
     try {
@@ -57,7 +60,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     }
   };
 
-  const hasInitialKey = initialKey.trim() !== "";
+  const hasInitialKey = normalizedKey.trim() !== "";
 
   return (
     <Form {...form}>
