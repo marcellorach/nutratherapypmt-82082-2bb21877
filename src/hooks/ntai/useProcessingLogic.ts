@@ -19,7 +19,6 @@ export const useProcessingLogic = (
   const { toast } = useToast();
 
   const startProcessing = async () => {
-    // Verificar se há itens para processar e se não há processamento ativo
     if (processQueue.length === 0) {
       toast({
         title: "Nenhum item na fila",
@@ -29,7 +28,6 @@ export const useProcessingLogic = (
       return;
     }
     
-    // Verificar se já há processamento em andamento
     if (processQueue.some(item => 
       item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing')) {
       toast({
@@ -68,11 +66,6 @@ export const useProcessingLogic = (
       }
 
       try {
-        // ============================================
-        // ORDEM CORRETA: Unstructured → LLM → Salvar
-        // ============================================
-        
-        // Buscar dados do estudo no banco
         const { data: studyData, error: studyError } = await supabase
           .from('processed_studies')
           .select('*')
@@ -87,124 +80,125 @@ export const useProcessingLogic = (
           throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
         }
 
-        // ETAPA 1: EXTRAÇÃO DE TEXTO (Unstructured.io)
+        // ETAPA 1: EXTRAÇÃO (Gemini → Fallback Unstructured)
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`🔍 Extraindo texto com Unstructured.io: ${item.title}`);
         
-        const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-study', {
-          body: { 
-            studyId: item.id, 
-            storagePath: studyData.storage_path 
+        let parseData: any = null;
+        let usedGemini = false;
+        
+        try {
+          addLogEntry(`🤖 Tentando Gemini File API: ${item.title}`);
+          
+          const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
+            body: { 
+              studyId: item.id,
+              fileUrl: studyData.storage_path,
+              fileName: studyData.original_filename
+            }
+          });
+          
+          if (geminiError) throw geminiError;
+          
+          if (geminiData && geminiData.success) {
+            parseData = geminiData;
+            usedGemini = true;
+            addLogEntry(`✅ Gemini OK: ${geminiData.nutraceuticalsCount || 0} nutracêuticos`);
+          } else {
+            throw new Error('Gemini sem dados válidos');
           }
-        });
-
-        if (parseError) {
-          const errorMsg = parseError.message || String(parseError);
-          const isDnsError = errorMsg.includes('dns error') || 
-                             errorMsg.includes('Name or service not known') ||
-                             errorMsg.includes('DNS_RESOLUTION_FAILURE');
+        } catch (geminiErr: any) {
+          addLogEntry(`⚠️ Gemini falhou: ${geminiErr.message}`);
+          addLogEntry(`🔄 Fallback Unstructured.io...`);
           
-          addLogEntry(`[ERRO] Parsing: ${errorMsg}`);
+          const { data: unstructuredData, error: unstructuredError } = await supabase.functions.invoke('parse-study', {
+            body: { 
+              studyId: item.id, 
+              storagePath: studyData.storage_path 
+            }
+          });
           
-          if (isDnsError) {
-            addLogEntry('[INFO] ⚠️ Erro de DNS detectado - Este é um problema temporário de infraestrutura');
-            addLogEntry('[INFO] 💡 Use "Tentar Novamente" em alguns minutos ou aguarde estabilização');
+          if (unstructuredError) {
+            const errorMsg = unstructuredError.message || String(unstructuredError);
+            addLogEntry(`[ERRO] Ambos falharam: ${errorMsg}`);
+            updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+            setProcessQueue([...updatedQueue]);
+            processNextItem(index + 1);
+            return;
           }
           
-          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
-          setProcessQueue([...updatedQueue]);
-          processNextItem(index + 1);
-          return;
+          parseData = unstructuredData;
+          addLogEntry(`✅ Unstructured OK`);
         }
 
-        if (!parseData) {
-          throw new Error('Serviço de parsing não retornou resposta');
+        if (!parseData || parseData.error) {
+          throw new Error('Parsing falhou');
         }
+        
+        addLogEntry(`📊 ${usedGemini ? 'Gemini ✨' : 'Unstructured'}`);
 
-        if (parseData.error) {
-          throw new Error(`Erro no parsing: ${parseData.error} - ${parseData.details || ''}`);
-        }
-
-        if (!parseData.parsedData && !parseData.success) {
-          throw new Error('Parsing não retornou dados estruturados');
-        }
-
-        addLogEntry(`✅ Parsing concluído: ${parseData.sectionsCount || 0} seções, ${parseData.tablesCount || 0} tabelas`);
-
-        // ETAPA 2: ANÁLISE COM LLM (extract-study-entities)
+        // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`🧠 Analisando entidades com IA: ${item.title}`);
+        addLogEntry(`🧠 Analisando: ${item.title}`);
         
         const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-study-entities', {
-          body: { 
-            studyId: item.id
-          }
+          body: { studyId: item.id }
         });
 
         if (extractError) {
-          throw new Error(`Erro na extração de entidades: ${extractError.message}`);
+          throw new Error(`Erro extração: ${extractError.message}`);
         }
 
-        addLogEntry(`✅ Entidades extraídas: ${extractData?.nutraceuticals?.length || 0} nutracêuticos, ${extractData?.conditions?.length || 0} condições`);
+        addLogEntry(`✅ ${extractData?.nutraceuticals?.length || 0} nutracêuticos extraídos`);
 
-        // ETAPA 3: PADRONIZAÇÃO E SALVAMENTO
+        // ETAPA 3: SALVAMENTO
         updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`📊 Padronizando dados: ${item.title}`);
 
-        // Criar resultado consolidado (usando dados do extract-study-entities)
         const result = {
           studyId: item.id,
           qualityScore: extractData?.qualityScore || 0,
-          relevanceScore: 0, // Não temos relevance score ainda
+          relevanceScore: 0,
           extractedNutraceuticals: extractData?.nutraceuticals || [],
           extractedConditions: extractData?.conditions || [],
-          extractedInteractions: [], // extract-study-entities não retorna interactions
-          extractedSideEffects: [] // extract-study-entities não retorna sideEffects
+          extractedInteractions: [],
+          extractedSideEffects: []
         };
         
         setAnalysisResult(result);
-        
-        // Salvar análise completa no banco
-        const updateSuccess = await updateProcessedStudy(item.id, result);
-        if (!updateSuccess) {
-          addLogEntry(`[AVISO] Análise concluída, mas houve erro ao salvar: ${item.title}`);
-        }
+        await updateProcessedStudy(item.id, result);
         
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`✅ Processamento NTAI concluído para: ${item.title}`);
+        addLogEntry(`✅ Concluído: ${item.title}`);
         
         toast({
           title: "Análise concluída",
-          description: `Processamento de '${item.title}' finalizado com sucesso.`,
+          description: `'${item.title}' processado.`,
           variant: "default",
         });
 
       } catch (error: any) {
-        addLogEntry(`[ERRO] Falha no processamento para: ${item.title} - ${error.message}`);
+        addLogEntry(`[ERRO] ${item.title}: ${error.message}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
           stage: 'error' as ProcessingStage, 
           progress: 50,
-          error: `Erro: ${error.message}`
+          error: error.message
         };
         setProcessQueue([...updatedQueue]);
         
         toast({
-          title: "Erro no processamento",
-          description: `Falha ao processar '${item.title}': ${error.message}`,
+          title: "Erro",
+          description: error.message,
           variant: "destructive",
         });
       }
 
-      // Aguardar um momento antes de processar o próximo item
       setTimeout(() => processNextItem(index + 1), 1000);
     };
     
-    // Iniciar o processamento pelo primeiro item
     processNextItem(0);
   };
 

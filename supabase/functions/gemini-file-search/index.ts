@@ -33,16 +33,12 @@ serve(async (req) => {
   try {
     const { fileUrl, studyId, fileName } = await req.json();
     
-    console.log('🚀 Iniciando processamento completo do PDF');
-    console.log('📄 File URL:', fileUrl);
-    console.log('🆔 Study ID:', studyId);
+    console.log('🚀 Gemini File API - Study:', studyId);
     
-    // Criar cliente Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Buscar chave do Google Gemini
     const { data: configData, error: configError } = await supabase
       .from('ai_configurations')
       .select('config_value')
@@ -50,24 +46,22 @@ serve(async (req) => {
       .single();
 
     if (configError || !configData?.config_value) {
-      throw new Error('GOOGLE_AI_API_KEY não configurada');
+      throw new Error('Google API key não configurada');
     }
 
     const GOOGLE_AI_API_KEY = configData.config_value as string;
 
-    // 1. Download do arquivo do Supabase Storage
-    console.log('📥 Baixando arquivo do storage...');
+    console.log('📥 Download...');
     const { data: fileData, error: downloadError } = await supabase
       .storage
       .from('study_pdfs')
       .download(fileUrl.split('/study_pdfs/')[1]);
 
     if (downloadError || !fileData) {
-      throw new Error(`Erro ao baixar arquivo: ${downloadError?.message}`);
+      throw new Error(`Download erro: ${downloadError?.message}`);
     }
 
-    // 2. Upload para Gemini File API
-    console.log('⬆️ Fazendo upload para Gemini File API...');
+    console.log('⬆️ Upload Gemini...');
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
@@ -75,32 +69,25 @@ serve(async (req) => {
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GOOGLE_AI_API_KEY}`,
       {
         method: 'POST',
-        headers: {
-          'X-Goog-Upload-Protocol': 'multipart',
-        },
+        headers: { 'X-Goog-Upload-Protocol': 'multipart' },
         body: createMultipartBody(uint8Array, fileName || 'study.pdf', 'application/pdf'),
       }
     );
 
     if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      throw new Error(`Erro no upload Gemini: ${errorText}`);
+      throw new Error('Upload Gemini falhou');
     }
 
     const uploadResult = await uploadResponse.json();
     const fileUri = uploadResult.file.uri;
-    console.log('✅ Upload concluído:', fileUri);
 
-    // 3. Aguardar processamento do arquivo
-    console.log('⏳ Aguardando processamento...');
+    console.log('⏳ Aguardando...');
     await waitForFileProcessing(fileUri, GOOGLE_AI_API_KEY);
 
-    // 4. Extrair dados estruturados com Gemini
-    console.log('🤖 Extraindo dados com IA...');
+    console.log('🤖 Extraindo...');
     const extractedData = await extractStructuredData(fileUri, GOOGLE_AI_API_KEY);
 
-    // 5. Salvar na tabela processed_studies
-    console.log('💾 Salvando dados no banco...');
+    console.log('💾 Salvando...');
     const { data: savedStudy, error: saveError } = await supabase
       .from('processed_studies')
       .update({
@@ -114,38 +101,35 @@ serve(async (req) => {
           conditions: extractedData.conditions,
           doi: extractedData.doi,
           extracted_at: new Date().toISOString(),
+          method: 'gemini'
         },
-        kanban_status: 'extracted',
+        kanban_status: 'parsed'
       })
       .eq('study_id', studyId)
       .select()
       .single();
 
-    if (saveError) {
-      throw new Error(`Erro ao salvar estudo: ${saveError.message}`);
-    }
+    if (saveError) throw new Error('Erro salvar');
 
-    console.log('✅ Processamento completo!');
+    console.log('✅ OK');
 
     return new Response(
       JSON.stringify({ 
         success: true,
         studyId,
-        extractedData,
-        message: 'Estudo processado com sucesso'
+        parsedData: savedStudy.analysis_data,
+        nutraceuticalsCount: extractedData.nutraceuticals?.length || 0,
+        conditionsCount: extractedData.conditions?.length || 0,
+        method: 'gemini'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('❌ Erro:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Erro' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
@@ -153,15 +137,11 @@ serve(async (req) => {
 function createMultipartBody(fileData: Uint8Array, fileName: string, mimeType: string): Blob {
   const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
   const chunks: Uint8Array[] = [];
-  
   const textEncoder = new TextEncoder();
-  chunks.push(textEncoder.encode(`--${boundary}\r\n`));
-  chunks.push(textEncoder.encode(`Content-Disposition: form-data; name="metadata"\r\n`));
-  chunks.push(textEncoder.encode(`Content-Type: application/json\r\n\r\n`));
+  
+  chunks.push(textEncoder.encode(`--${boundary}\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n`));
   chunks.push(textEncoder.encode(JSON.stringify({ file: { displayName: fileName } })));
-  chunks.push(textEncoder.encode(`\r\n--${boundary}\r\n`));
-  chunks.push(textEncoder.encode(`Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`));
-  chunks.push(textEncoder.encode(`Content-Type: ${mimeType}\r\n\r\n`));
+  chunks.push(textEncoder.encode(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: ${mimeType}\r\n\r\n`));
   chunks.push(fileData);
   chunks.push(textEncoder.encode(`\r\n--${boundary}--\r\n`));
 
@@ -177,52 +157,24 @@ function createMultipartBody(fileData: Uint8Array, fileName: string, mimeType: s
 }
 
 async function waitForFileProcessing(fileUri: string, apiKey: string): Promise<void> {
-  const maxAttempts = 30;
-  let attempts = 0;
-  
-  while (attempts < maxAttempts) {
+  for (let i = 0; i < 30; i++) {
     const fileName = fileUri.split('/').pop();
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`
-    );
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`);
     
-    if (!response.ok) {
-      throw new Error('Erro ao verificar status do arquivo');
-    }
+    if (!response.ok) throw new Error('Status check falhou');
     
     const fileStatus = await response.json();
     
-    if (fileStatus.state === 'ACTIVE') {
-      console.log('✅ Arquivo processado e ativo');
-      return;
-    }
+    if (fileStatus.state === 'ACTIVE') return;
+    if (fileStatus.state === 'FAILED') throw new Error('Processamento falhou');
     
-    if (fileStatus.state === 'FAILED') {
-      throw new Error('Processamento do arquivo falhou no Gemini');
-    }
-    
-    console.log(`⏳ Status: ${fileStatus.state}, aguardando...`);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    attempts++;
   }
   
-  throw new Error('Timeout: arquivo não ficou ativo');
+  throw new Error('Timeout');
 }
 
 async function extractStructuredData(fileUri: string, apiKey: string): Promise<ExtractedStudyData> {
-  const prompt = `Analise este estudo científico em PDF e extraia as seguintes informações de forma estruturada:
-
-1. Título do estudo
-2. Lista de autores
-3. Ano de publicação
-4. Nome do journal/revista
-5. Abstract/resumo
-6. DOI (se disponível)
-7. Lista de nutraceuticals/suplementos mencionados com seus efeitos e dosagens
-8. Lista de condições de saúde estudadas e o tipo de relação (treatment, prevention, support)
-
-Seja preciso e extraia apenas informações explicitamente mencionadas no documento.`;
-
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
     {
@@ -230,9 +182,8 @@ Seja preciso e extraia apenas informações explicitamente mencionadas no docume
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
-          role: 'user',
           parts: [
-            { text: prompt },
+            { text: 'Extraia: título, autores, ano, journal, abstract, DOI, nutracêuticos (nome, dosagem, efeitos), condições de saúde (nome, tipo de relação, eficácia).' },
             { fileData: { mimeType: 'application/pdf', fileUri } }
           ]
         }],
@@ -243,55 +194,21 @@ Seja preciso e extraia apenas informações explicitamente mencionadas no docume
             properties: {
               title: { type: 'string' },
               authors: { type: 'array', items: { type: 'string' } },
-              year: { type: 'integer', nullable: true },
-              journal: { type: 'string', nullable: true },
-              abstract: { type: 'string', nullable: true },
-              doi: { type: 'string', nullable: true },
-              nutraceuticals: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    dosage: { type: 'string', nullable: true },
-                    effects: { type: 'string' }
-                  },
-                  required: ['name', 'effects']
-                }
-              },
-              conditions: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    relationship_type: { 
-                      type: 'string',
-                      enum: ['treatment', 'prevention', 'support']
-                    },
-                    efficacy_description: { type: 'string' }
-                  },
-                  required: ['name', 'relationship_type', 'efficacy_description']
-                }
-              }
-            },
-            required: ['title', 'authors']
+              year: { type: 'integer' },
+              journal: { type: 'string' },
+              abstract: { type: 'string' },
+              doi: { type: 'string' },
+              nutraceuticals: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, dosage: { type: 'string' }, effects: { type: 'string' } } } },
+              conditions: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, relationship_type: { type: 'string' }, efficacy_description: { type: 'string' } } } }
+            }
           }
         }
       })
     }
   );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Erro na extração: ${errorText}`);
-  }
+  if (!response.ok) throw new Error('Gemini API erro');
 
   const result = await response.json();
-  const extractedText = result.candidates[0].content.parts[0].text;
-  const extractedData = JSON.parse(extractedText);
-
-  console.log('📊 Dados extraídos:', JSON.stringify(extractedData, null, 2));
-  
-  return extractedData;
+  return JSON.parse(result.candidates[0].content.parts[0].text);
 }
