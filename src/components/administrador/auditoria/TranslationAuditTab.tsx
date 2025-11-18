@@ -40,6 +40,8 @@ const TranslationAuditTab: React.FC = () => {
   const [report, setReport] = useState<AuditReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fixing, setFixing] = useState(false);
+  const [fixResult, setFixResult] = useState<{ fixed: number; skipped: number } | null>(null);
 
   const loadReport = async () => {
     setLoading(true);
@@ -68,6 +70,37 @@ const TranslationAuditTab: React.FC = () => {
   useEffect(() => {
     loadReport();
   }, []);
+
+  const handleAutoFix = async () => {
+    setFixing(true);
+    setError(null);
+    setFixResult(null);
+    
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data, error: funcError } = await supabase.functions.invoke('fix-missing-keys');
+      
+      if (funcError) {
+        throw new Error(funcError.message);
+      }
+      
+      if (data.success) {
+        setFixResult({ fixed: data.fixed, skipped: data.skipped });
+        // Recarrega o relatório após 1 segundo para dar tempo do audit rodar
+        setTimeout(() => {
+          loadReport();
+        }, 1000);
+      } else {
+        throw new Error(data.error || 'Failed to fix keys');
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Error during auto-fix: ${errorMsg}`);
+    } finally {
+      setFixing(false);
+    }
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -156,11 +189,52 @@ const TranslationAuditTab: React.FC = () => {
             {t('audit.description')}
           </p>
         </div>
-        <Button onClick={loadReport} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          {t('audit.refresh')}
-        </Button>
+        <div className="flex gap-2">
+          {report.summary.missingKeys > 0 && (
+            <Button 
+              onClick={handleAutoFix}
+              disabled={fixing}
+              variant="default"
+              size="sm"
+              className="gap-2"
+            >
+              {fixing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Fixing...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Auto-Fix Missing Keys ({report.summary.missingKeys})
+                </>
+              )}
+            </Button>
+          )}
+          <Button onClick={loadReport} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {t('audit.refresh')}
+          </Button>
+        </div>
       </div>
+
+      {/* Success/Error Messages */}
+      {fixResult && (
+        <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-900 dark:text-green-100">
+            ✅ Auto-fix complete! Fixed <strong>{fixResult.fixed}</strong> missing keys. 
+            {fixResult.skipped > 0 && ` Skipped ${fixResult.skipped} keys (already exist).`}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
