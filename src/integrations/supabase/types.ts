@@ -787,6 +787,36 @@ export type Database = {
         }
         Relationships: []
       }
+      translations: {
+        Row: {
+          created_at: string | null
+          id: string
+          key: string
+          locale: string
+          updated_at: string | null
+          value: string
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key: string
+          locale: string
+          updated_at?: string | null
+          value: string
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key?: string
+          locale?: string
+          updated_at?: string | null
+          value?: string
+          version?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -874,6 +904,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

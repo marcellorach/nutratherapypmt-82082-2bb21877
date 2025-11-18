@@ -51,6 +51,7 @@ const DesignConventionsTab = lazy(() => import('@/components/administrador/Desig
 const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/MicrobiomeAnalysisTab'));
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
+const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -257,6 +258,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: TranslationAuditTab,
     description: 'Audit and monitor translation coverage'
+  },
+  {
+    id: 'translation-manager',
+    label: 'Gerenciar Traduções',
+    group: 'configuration',
+    component: TranslationManager,
+    description: 'Editar traduções diretamente no banco de dados'
   }
 ];
 

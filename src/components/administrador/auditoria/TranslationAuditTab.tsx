@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -37,6 +38,7 @@ interface AuditReport {
 
 const TranslationAuditTab: React.FC = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [report, setReport] = useState<AuditReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,17 +80,19 @@ const TranslationAuditTab: React.FC = () => {
     
     try {
       // Importa a função client-side
-      const { autoFixMissingKeys, downloadTranslationFiles } = await import('@/utils/translationAutoFix');
+      const { autoFixMissingKeys } = await import('@/utils/translationAutoFix');
       
-      // Executa auto-fix no browser
+      // Executa auto-fix no banco de dados
       const result = await autoFixMissingKeys();
       
       setFixResult({ fixed: result.fixed, skipped: result.skipped });
       
-      // Faz download dos arquivos atualizados
-      downloadTranslationFiles(result.updatedPT, result.updatedEN);
+      toast({
+        title: "✅ Auto-Fix Completo",
+        description: `${result.fixed} chaves adicionadas ao banco de dados. As traduções serão atualizadas automaticamente para todos os usuários.`,
+      });
       
-      // Aguarda 2 segundos e recarrega relatório (usuário precisa substituir arquivos manualmente)
+      // Aguarda 2 segundos e recarrega relatório
       setTimeout(() => {
         loadReport();
       }, 2000);
@@ -96,6 +100,11 @@ const TranslationAuditTab: React.FC = () => {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error during auto-fix: ${errorMsg}`);
+      toast({
+        title: "Erro no Auto-Fix",
+        description: errorMsg,
+        variant: "destructive",
+      });
     } finally {
       setFixing(false);
     }
@@ -222,10 +231,23 @@ const TranslationAuditTab: React.FC = () => {
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-900 dark:text-green-100">
-            ✅ Auto-fix complete! Fixed <strong>{fixResult.fixed}</strong> missing keys. 
-            {fixResult.skipped > 0 && ` Skipped ${fixResult.skipped} keys (already exist).`}
-            <br />
-            <strong>📥 Downloaded files:</strong> Replace <code>src/locales/pt/translation.json</code> and <code>src/locales/en/translation.json</code> with the downloaded files, then refresh.
+            <div className="space-y-2">
+              <div className="font-semibold">
+                ✅ Auto-Fix Concluído com Sucesso!
+              </div>
+              <div>
+                • {fixResult.fixed} chaves adicionadas ao banco de dados<br />
+                • {fixResult.skipped} chaves já existiam<br />
+              </div>
+              <div className="mt-3 p-3 bg-green-100 dark:bg-green-900 rounded">
+                <strong>🔄 Atualizações em Tempo Real Ativadas</strong>
+                <div className="mt-2 text-sm">
+                  As traduções foram salvas no banco de dados e serão automaticamente 
+                  atualizadas para todos os usuários através do Supabase Realtime.
+                  Não é necessário fazer deploy ou substituir arquivos manualmente!
+                </div>
+              </div>
+            </div>
           </AlertDescription>
         </Alert>
       )}
