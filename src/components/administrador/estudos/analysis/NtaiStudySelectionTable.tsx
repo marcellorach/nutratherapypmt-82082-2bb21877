@@ -11,6 +11,7 @@ interface NtaiStudySelectionTableProps {
   onToggleSelection: (id: string) => void;
   onSelectAll: () => void;
   onAddToQueue: () => void;
+  onDelete: () => void;
 }
 
 const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
@@ -19,6 +20,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   onToggleSelection,
   onSelectAll,
   onAddToQueue,
+  onDelete,
 }) => {
   const { t } = useTranslation();
   
@@ -128,13 +130,23 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
         <span className="text-sm text-gray-500">
           {t('studies.ntai.table.selectedCount', { count: selectedItems.length })}
         </span>
-        <Button 
-          size="sm" 
-          onClick={handleAddToQueue}
-          disabled={selectedItems.length === 0}
-        >
-          {t('studies.ntai.table.addToQueue')}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            onClick={handleAddToQueue}
+            disabled={selectedItems.length === 0}
+          >
+            {t('studies.ntai.table.addToQueue')}
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={onDelete}
+            disabled={selectedItems.length === 0}
+            variant="destructive"
+          >
+            {t('studies.ntai.table.deleteSelected')}
+          </Button>
+        </div>
       </div>
     </div>
   );
