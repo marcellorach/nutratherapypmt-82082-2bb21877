@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ApiKeyForm from './configuracoes/ApiKeyForm';
 import ConsumoPainel from './configuracoes/ConsumoPainel';
 import ConfiguracoesAvisosIA from './configuracoes/ConfiguracoesAvisosIA';
+import ApiStatusItem from './configuracoes/ApiStatusItem';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -219,7 +220,32 @@ const ConfiguracoesIATab: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="unstructured" className="space-y-4 pt-4">
-                <ApiKeyForm 
+                {/* Card explicativo sobre Unstructured */}
+                <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      📘 Como funciona o Unstructured.io
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-foreground">
+                      <strong>Diferente das LLMs:</strong> Unstructured.io é um serviço de <strong>parsing de documentos</strong>, não uma IA generativa.
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Extrai texto, tabelas e imagens de PDFs</li>
+                      <li>Identifica estrutura (títulos, parágrafos, listas)</li>
+                      <li>NÃO aceita prompts customizados</li>
+                      <li>Usado ANTES de enviar dados para OpenAI/Claude</li>
+                    </ul>
+                    <div className="mt-4 p-2 bg-background rounded border border-blue-300 dark:border-blue-800">
+                      <p className="text-xs font-mono text-foreground">
+                        PDF → <strong>Unstructured</strong> → JSON estruturado → <strong>OpenAI</strong> → Análise
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <ApiKeyForm
                   serviceName="Unstructured.io" 
                   saveKey={saveUnstructuredKey}
                   initialKey={unstructuredKey}
@@ -257,6 +283,37 @@ const ConfiguracoesIATab: React.FC = () => {
               <span className="ml-2">Atualizar</span>
             </Button>
           </CardFooter>
+        </Card>
+
+        {/* Painel de Status das APIs */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Status das Conexões</CardTitle>
+            <CardDescription>Verifique se suas chaves API estão funcionando</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <ApiStatusItem 
+              service="OpenAI" 
+              isConfigured={!!openaiKey} 
+              icon="🤖"
+            />
+            <ApiStatusItem 
+              service="Claude" 
+              isConfigured={!!claudeKey} 
+              icon="🧠"
+            />
+            <ApiStatusItem 
+              service="Grok" 
+              isConfigured={!!grokKey} 
+              icon="⚡"
+            />
+            <ApiStatusItem 
+              service="Unstructured" 
+              isConfigured={!!unstructuredKey} 
+              icon="📄"
+              description="Parsing de PDFs e documentos"
+            />
+          </CardContent>
         </Card>
         
         <ConsumoPainel />

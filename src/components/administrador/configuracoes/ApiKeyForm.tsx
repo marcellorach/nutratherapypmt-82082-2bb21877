@@ -90,7 +90,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
           disabled={isLoading}
         >
           {hasInitialKey ? (
-            "Chave API da OpenAI salva"
+            "✓ Chave API configurada"
           ) : (
             isLoading ? (
               <>
