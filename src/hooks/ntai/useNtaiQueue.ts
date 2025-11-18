@@ -130,6 +130,19 @@ export const useNtaiQueue = () => {
       variant: "default",
     });
   };
+
+  const clearFailed = () => {
+    const failedCount = processQueue.filter(item => item.stage === 'error').length;
+    setProcessQueue(prev => prev.filter(item => item.stage !== 'error'));
+    
+    if (failedCount > 0) {
+      toast({
+        title: "Estudos com erro removidos",
+        description: `${failedCount} estudo(s) com erro foram removidos da fila.`,
+        variant: "default",
+      });
+    }
+  };
   
   // Função para atualizar estudos com análise concluída no banco
   const updateProcessedStudy = async (studyId: string, analysisData: any) => {
@@ -169,6 +182,7 @@ export const useNtaiQueue = () => {
     addToQueue,
     clearCompleted,
     retryFailed,
+    clearFailed,
     updateProcessedStudy
   };
 };

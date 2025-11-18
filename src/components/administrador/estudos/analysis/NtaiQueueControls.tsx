@@ -10,6 +10,7 @@ interface NtaiQueueControlsProps {
   hasFailedItems: boolean;
   onClearCompleted: () => void;
   onRetryFailed: () => void;
+  onClearFailed: () => void;
   onStartProcessing: () => void;
 }
 
@@ -20,6 +21,7 @@ const NtaiQueueControls: React.FC<NtaiQueueControlsProps> = ({
   hasFailedItems,
   onClearCompleted,
   onRetryFailed,
+  onClearFailed,
   onStartProcessing
 }) => {
   return (
@@ -48,15 +50,26 @@ const NtaiQueueControls: React.FC<NtaiQueueControlsProps> = ({
         )}
         
         {hasFailedItems && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={onRetryFailed}
-            className="text-amber-600 border-amber-200 hover:bg-amber-50"
-          >
-            <RefreshCcw className="w-4 h-4 mr-1" />
-            Tentar Novamente
-          </Button>
+          <>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onRetryFailed}
+              className="text-amber-600 border-amber-200 hover:bg-amber-50"
+            >
+              <RefreshCcw className="w-4 h-4 mr-1" />
+              Tentar Novamente
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onClearFailed}
+              className="text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Remover com Erro
+            </Button>
+          </>
         )}
         
         <Button 

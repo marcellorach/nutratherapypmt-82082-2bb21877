@@ -77,15 +77,68 @@ serve(async (req) => {
     formData.append('extract_images_in_pdf', 'true');
     formData.append('infer_table_structure', 'true');
 
-    // Call Unstructured API
+    // Call Unstructured API with retry logic
     console.log('Calling Unstructured API...');
-    const unstructuredResponse = await fetch('https://api.unstructured.io/general/v0/general', {
-      method: 'POST',
-      headers: {
-        'unstructured-api-key': unstructuredApiKey,
-      },
-      body: formData,
-    });
+    
+    let unstructuredResponse;
+    let lastError;
+    const maxRetries = 3;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Attempt ${attempt}/${maxRetries} to call Unstructured API...`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
+        unstructuredResponse = await fetch('https://api.unstructured.io/general/v0/general', {
+          method: 'POST',
+          headers: {
+            'unstructured-api-key': unstructuredApiKey,
+          },
+          body: formData,
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (unstructuredResponse.ok) {
+          console.log('Unstructured API call successful');
+          break;
+        }
+        
+        lastError = `HTTP ${unstructuredResponse.status}: ${await unstructuredResponse.text()}`;
+        console.error(`Attempt ${attempt} failed:`, lastError);
+        
+        if (attempt < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+          console.log(`Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
+        console.error(`Attempt ${attempt} failed with error:`, lastError);
+        
+        if (attempt < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+          console.log(`Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    if (!unstructuredResponse) {
+      console.error('All retry attempts failed. Last error:', lastError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to connect to Unstructured API after multiple attempts',
+          details: lastError,
+          suggestion: 'This may be a temporary network issue. Please try again in a few minutes.'
+        }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!unstructuredResponse.ok) {
       const errorText = await unstructuredResponse.text();
