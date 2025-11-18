@@ -36,6 +36,7 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
     clearFailed,
+    removeFromQueue,
     updateProcessedStudy
   } = useNtaiQueue();
 
@@ -111,6 +112,7 @@ export const useNtaiProcessing = () => {
     clearCompleted,
     retryFailed,
     clearFailed,
+    removeFromQueue,
     startProcessing,
     clearSelection,
     updateAiConfig,

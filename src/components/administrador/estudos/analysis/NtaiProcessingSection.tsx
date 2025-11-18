@@ -34,6 +34,7 @@ const NtaiProcessingSection: React.FC = () => {
     clearCompleted,
     retryFailed,
     clearFailed,
+    removeFromQueue,
     startProcessing,
   } = useNtaiProcessing();
 
@@ -208,6 +209,7 @@ const NtaiProcessingSection: React.FC = () => {
                   key={`${item.id}-${index}`} 
                   item={item} 
                   isActive={index === activeItemIndex}
+                  onRemove={removeFromQueue}
                 />
               ))}
             </div>
