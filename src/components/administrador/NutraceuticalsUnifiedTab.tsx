@@ -6,6 +6,8 @@ import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import CatalogTab from './nutraceuticals-unified/CatalogTab';
 import RelationsTab from './nutraceuticals-unified/RelationsTab';
 import MatrixTab from './nutraceuticals-unified/MatrixTab';
+import TabInfoButton from './common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 const NutraceuticalsUnifiedTab: React.FC = () => {
   const { t } = useTranslation();
@@ -21,6 +23,12 @@ const NutraceuticalsUnifiedTab: React.FC = () => {
             {t('nutraceuticalsUnified.subtitle')}
           </p>
         </div>
+        
+        <TabInfoButton
+          tabId="nutraceuticals-unified"
+          title={t('admin.sidebar.knowledgeBase.nutraceuticalsUnified')}
+          content={adminTabsInfo['nutraceuticals-unified']}
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

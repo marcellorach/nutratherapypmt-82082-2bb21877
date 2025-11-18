@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Filter, Plus } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 interface EstudosHeaderProps {
   onAddEstudo: () => void;
@@ -19,6 +21,12 @@ const EstudosHeader: React.FC<EstudosHeaderProps> = ({ onAddEstudo }) => {
       </div>
       
       <div className="flex items-center gap-3">
+        <TabInfoButton
+          tabId="studies"
+          title={t('studies.header.title')}
+          content={adminTabsInfo['studies']}
+        />
+        
         <Button variant="outline" className="flex items-center">
           <Filter className="mr-2 h-4 w-4" />
           {t('studies.header.advancedFilters')}

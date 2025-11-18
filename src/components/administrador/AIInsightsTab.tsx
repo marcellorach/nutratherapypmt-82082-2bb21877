@@ -8,6 +8,8 @@ import InsightCard from './ai-insights/InsightCard';
 import InsightDetailsDialog from './ai-insights/InsightDetailsDialog';
 import { mockInsights } from './ai-insights/mockInsights';
 import { AIInsight } from './ai-insights/types';
+import TabInfoButton from './common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 const AIInsightsTab: React.FC = () => {
   const { t } = useTranslation();
@@ -40,6 +42,12 @@ const AIInsightsTab: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <TabInfoButton
+            tabId="ai-insights"
+            title={t('aiInsights.title')}
+            content={adminTabsInfo['ai-insights']}
+          />
+          
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder={t('aiInsights.filters.type')} />
