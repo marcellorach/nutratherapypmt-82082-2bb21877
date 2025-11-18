@@ -233,6 +233,36 @@
       "demoNote": "Contas demo usam autenticação simplificada para acesso ao curso"
     }
   },
+  "audit": {
+    "title": "Auditoria de Traduções",
+    "description": "Monitore a cobertura e qualidade das traduções em todo o sistema",
+    "loading": "Carregando relatório...",
+    "retry": "Tentar Novamente",
+    "noReport": "Nenhum relatório disponível. Execute o script de auditoria primeiro.",
+    "loadReport": "Carregar Relatório",
+    "refresh": "Atualizar",
+    "allClear": "✅ Tudo certo! Nenhum problema de tradução encontrado.",
+    "issuesFound": "{{count}} problema(s) de tradução encontrado(s). Revise abaixo.",
+    "summary": {
+      "totalFiles": "Arquivos Analisados",
+      "totalIssues": "Problemas Encontrados",
+      "missingKeys": "Chaves Faltando",
+      "hardcoded": "Textos Hardcoded"
+    },
+    "tabs": {
+      "missingKeys": "Chaves Faltando",
+      "missingKeysDesc": "Chamadas t() usando chaves que não existem nos arquivos de tradução",
+      "hardcoded": "Textos Hardcoded",
+      "hardcodedDesc": "Textos visíveis que não estão usando o sistema de tradução",
+      "incomplete": "Traduções Incompletas",
+      "incompleteDesc": "Chaves que existem em um idioma mas não no outro"
+    },
+    "footer": {
+      "title": "Como Executar Auditoria",
+      "command": "Execute o comando",
+      "lastRun": "Última execução"
+    }
+  },
   "validation": {
     "emailInvalid": "E-mail inválido",
     "passwordMin": "A senha deve ter no mínimo 6 caracteres",
@@ -392,7 +422,8 @@
         "title": "Configuração",
         "knowledgeBase": "Base de Conhecimento",
         "aiConfig": "Config. de IA",
-        "aiPrompts": "Prompts da IA"
+        "aiPrompts": "Prompts da IA",
+        "translationAudit": "Auditoria de Traduções"
       },
       "settingsButton": "Configurações"
     },
