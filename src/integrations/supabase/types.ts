@@ -44,6 +44,27 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          report_data: Json
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          report_data: Json
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          report_data?: Json
+        }
+        Relationships: []
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
