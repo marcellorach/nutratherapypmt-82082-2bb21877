@@ -259,8 +259,8 @@ function printReport(report: AuditReport) {
 const report = generateReport();
 printReport(report);
 
-// Save report to file
-const reportPath = path.join(__dirname, '../translation-audit-report.json');
+// Save report to file (in public/ so Vite can serve it)
+const reportPath = path.join(__dirname, '../public/translation-audit-report.json');
 fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 console.log(`\n📝 Full report saved to: ${reportPath}`);
 
