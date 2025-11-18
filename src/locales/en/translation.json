@@ -233,6 +233,36 @@
       "demoNote": "Demo accounts use simplified authentication for course access"
     }
   },
+  "audit": {
+    "title": "Translation Audit",
+    "description": "Monitor translation coverage and quality across the system",
+    "loading": "Loading report...",
+    "retry": "Retry",
+    "noReport": "No report available. Run the audit script first.",
+    "loadReport": "Load Report",
+    "refresh": "Refresh",
+    "allClear": "✅ All clear! No translation issues found.",
+    "issuesFound": "{{count}} translation issue(s) found. Review below.",
+    "summary": {
+      "totalFiles": "Files Scanned",
+      "totalIssues": "Issues Found",
+      "missingKeys": "Missing Keys",
+      "hardcoded": "Hardcoded Texts"
+    },
+    "tabs": {
+      "missingKeys": "Missing Keys",
+      "missingKeysDesc": "t() calls using keys that don't exist in translation files",
+      "hardcoded": "Hardcoded Texts",
+      "hardcodedDesc": "Visible texts that are not using the translation system",
+      "incomplete": "Incomplete Translations",
+      "incompleteDesc": "Keys that exist in one language but not the other"
+    },
+    "footer": {
+      "title": "How to Run Audit",
+      "command": "Run the command",
+      "lastRun": "Last run"
+    }
+  },
   "validation": {
     "emailInvalid": "Invalid email",
     "passwordMin": "Password must be at least 6 characters",
@@ -392,7 +422,8 @@
         "title": "Configuration",
         "knowledgeBase": "Knowledge Base",
         "aiConfig": "AI Config",
-        "aiPrompts": "AI Prompts"
+        "aiPrompts": "AI Prompts",
+        "translationAudit": "Translation Audit"
       },
       "settingsButton": "Settings"
     },
