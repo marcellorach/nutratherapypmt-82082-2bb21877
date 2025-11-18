@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.translate-text]
 verify_jwt = false
+
+[functions.run-translation-audit]
+verify_jwt = true

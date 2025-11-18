@@ -44,28 +44,83 @@ const TranslationAuditTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [fixing, setFixing] = useState(false);
   const [fixResult, setFixResult] = useState<{ fixed: number; skipped: number } | null>(null);
+  const [generating, setGenerating] = useState(false);
 
+  // Load latest report from database
   const loadReport = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/translation-audit-report.json');
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      // Check if the response is actually JSON (not HTML from Vite dev server)
-      const contentType = response.headers.get('content-type');
-      if (!response.ok || !contentType?.includes('application/json')) {
-        // Report doesn't exist yet - this is OK, not an error
-        setReport(null);
+      // Get latest report from database
+      const { data, error } = await supabase
+        .from('audit_reports')
+        .select('report_data, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        // No report found - try loading from static file as fallback
+        const response = await fetch('/translation-audit-report.json');
+        const contentType = response.headers.get('content-type');
+        
+        if (response.ok && contentType?.includes('application/json')) {
+          const staticData = await response.json();
+          setReport(staticData);
+        } else {
+          setReport(null);
+        }
         return;
       }
+
+      // Parse JSONB data
+      const reportData = typeof data.report_data === 'string' 
+        ? JSON.parse(data.report_data) 
+        : data.report_data;
       
-      const data = await response.json();
-      setReport(data);
+      setReport(reportData as AuditReport);
     } catch (err) {
-      // Handle JSON parse errors gracefully
+      console.error('Error loading report:', err);
       setReport(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Generate new report via Edge Function
+  const handleGenerateReport = async () => {
+    setGenerating(true);
+    setError(null);
+    
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Call edge function to generate report
+      const { data, error } = await supabase.functions.invoke('run-translation-audit');
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setReport(data.report);
+        toast({
+          title: "✅ Relatório Gerado",
+          description: `Audit concluído. ${data.report.summary.totalIssues} problemas encontrados.`,
+        });
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
+    } catch (err: any) {
+      console.error('Error generating report:', err);
+      setError(err.message);
+      toast({
+        title: "Erro ao Gerar Relatório",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -89,12 +144,12 @@ const TranslationAuditTab: React.FC = () => {
       
       toast({
         title: "✅ Auto-Fix Completo",
-        description: `${result.fixed} chaves adicionadas ao banco de dados. As traduções serão atualizadas automaticamente para todos os usuários.`,
+        description: `${result.fixed} chaves adicionadas ao banco de dados. Gerando novo relatório...`,
       });
       
-      // Aguarda 2 segundos e recarrega relatório
-      setTimeout(() => {
-        loadReport();
+      // Aguarda 2 segundos e gera novo relatório
+      setTimeout(async () => {
+        await handleGenerateReport();
       }, 2000);
       
     } catch (err) {
@@ -173,10 +228,25 @@ const TranslationAuditTab: React.FC = () => {
                 <li>{t('audit.howToRun.check3')}</li>
               </ul>
             </div>
-            <Button onClick={loadReport} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t('audit.checkForReport')}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleGenerateReport} disabled={generating} variant="default" className="flex-1">
+                {generating ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Gerando Relatório...
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Gerar Relatório (Banco de Dados)
+                  </>
+                )}
+              </Button>
+              <Button onClick={loadReport} variant="outline" className="flex-1">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t('audit.checkForReport')}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -198,6 +268,25 @@ const TranslationAuditTab: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            onClick={handleGenerateReport}
+            disabled={generating}
+            variant="secondary"
+            size="sm"
+            className="gap-2"
+          >
+            {generating ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Gerar Relatório
+              </>
+            )}
+          </Button>
           {report.summary.missingKeys > 0 && (
             <Button 
               onClick={handleAutoFix}
