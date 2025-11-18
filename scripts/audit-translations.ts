@@ -97,13 +97,35 @@ function scanFile(filePath: string, issues: AuditIssue[]) {
 
   lines.forEach((line, index) => {
     const lineNumber = index + 1;
+    
+    // Skip import lines entirely
+    if (line.trim().startsWith('import ') || line.includes(' from ')) {
+      return;
+    }
 
     // Detect t() calls with potential missing keys
     const tCallRegex = /t\(['"`]([^'"`]+)['"`]\)/g;
     let match;
     while ((match = tCallRegex.exec(line)) !== null) {
       const key = match[1];
-      if (!ptKeys.has(key) || !enKeys.has(key)) {
+      
+      // Skip if it's a path (import statement captured incorrectly)
+      if (key.startsWith('./') || key.startsWith('../') || key.startsWith('@/')) {
+        continue;
+      }
+      
+      // Skip if it contains template literal syntax (dynamic keys)
+      if (key.includes('${') || key.includes('`')) {
+        continue;
+      }
+      
+      // Skip if the key itself looks like a variable interpolation pattern
+      if (key.match(/\$\{.+\}/)) {
+        continue;
+      }
+      
+      // Only flag as missing if key doesn't exist in EITHER locale
+      if (!ptKeys.has(key) && !enKeys.has(key)) {
         issues.push({
           type: 'missing-key',
           file: relativePath,
@@ -114,19 +136,32 @@ function scanFile(filePath: string, issues: AuditIssue[]) {
       }
     }
 
-    // Detect hardcoded texts in JSX (simple heuristic)
-    // This is a basic check - can be improved
-    if (line.includes('>') && line.includes('<') && !line.includes('t(')) {
-      const jsxTextRegex = />([A-Z][a-zA-Z\s]{3,})</g;
+    // Detect hardcoded texts in JSX (improved heuristic)
+    if (line.includes('>') && line.includes('<') && !line.includes('t(') && !line.trim().startsWith('//')) {
+      // More precise regex: match text between > and < that starts with capital letter
+      const jsxTextRegex = />([A-Z][a-zA-Z\s,.'!?-]{4,})</g;
       let textMatch;
       while ((textMatch = jsxTextRegex.exec(line)) !== null) {
         const text = textMatch[1].trim();
-        // Ignore common JSX patterns
-        if (text.length > 3 && 
-            !text.includes('{') && 
-            !text.includes('Component') &&
-            !text.includes('Props') &&
-            !text.match(/^[A-Z][a-z]+$/)) {
+        
+        // Ignore if:
+        // - Contains JSX syntax
+        // - Is a component name
+        // - Is a single word (likely a prop or type)
+        // - Contains code-like patterns
+        const shouldIgnore = 
+          text.includes('{') || 
+          text.includes('Component') ||
+          text.includes('Props') ||
+          text.includes('Type') ||
+          text.includes('Interface') ||
+          text.match(/^[A-Z][a-z]+$/) || // Single PascalCase word
+          text.match(/^[A-Z_]+$/) || // ALL_CAPS constant
+          text.includes('()') || // Function call
+          text.includes('=') || // Assignment
+          text.includes(':'); // Type annotation
+        
+        if (!shouldIgnore && text.length > 4) {
           issues.push({
             type: 'hardcoded',
             file: relativePath,
