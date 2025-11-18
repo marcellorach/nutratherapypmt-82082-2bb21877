@@ -14,11 +14,23 @@ serve(async (req) => {
   try {
     const { fileUrl, studyId } = await req.json();
     
-    // Pegar chave do Supabase Secret
-    const GOOGLE_AI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY');
-    if (!GOOGLE_AI_API_KEY) {
-      throw new Error('GOOGLE_AI_API_KEY não configurada');
+    // Criar cliente Supabase para buscar a chave da tabela ai_configurations
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Buscar chave do Google Gemini da tabela ai_configurations
+    const { data: configData, error: configError } = await supabase
+      .from('ai_configurations')
+      .select('config_value')
+      .eq('config_key', 'googleGeminiKey')
+      .single();
+
+    if (configError || !configData?.config_value) {
+      throw new Error('GOOGLE_AI_API_KEY não configurada na tabela ai_configurations');
     }
+
+    const GOOGLE_AI_API_KEY = configData.config_value as string;
 
     console.log('🚀 Iniciando processamento Gemini File Search');
     console.log('📄 File URL:', fileUrl);
