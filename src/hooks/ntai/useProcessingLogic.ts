@@ -100,14 +100,29 @@ export const useProcessingLogic = (
         });
 
         if (parseError) {
-          throw new Error(`Erro no parsing: ${parseError.message}`);
+          const errorMsg = parseError.message || 'Erro desconhecido';
+          
+          // Verificar se é erro de DNS/rede
+          if (errorMsg.includes('dns error') || errorMsg.includes('Name or service not known')) {
+            throw new Error('Erro de conexão: Não foi possível conectar ao serviço de parsing. Tente novamente em alguns minutos.');
+          }
+          
+          throw new Error(`Erro no parsing: ${errorMsg}`);
         }
 
-        if (!parseData?.parsedData) {
-          throw new Error('Parsing retornou dados vazios');
+        if (!parseData) {
+          throw new Error('Serviço de parsing não retornou resposta');
         }
 
-        addLogEntry(`✅ Parsing concluído: ${parseData.sectionsCount} seções, ${parseData.tablesCount} tabelas`);
+        if (parseData.error) {
+          throw new Error(`Erro no parsing: ${parseData.error} - ${parseData.details || ''}`);
+        }
+
+        if (!parseData.parsedData && !parseData.success) {
+          throw new Error('Parsing não retornou dados estruturados');
+        }
+
+        addLogEntry(`✅ Parsing concluído: ${parseData.sectionsCount || 0} seções, ${parseData.tablesCount || 0} tabelas`);
 
         // ETAPA 2: ANÁLISE COM LLM (extract-study-entities)
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };

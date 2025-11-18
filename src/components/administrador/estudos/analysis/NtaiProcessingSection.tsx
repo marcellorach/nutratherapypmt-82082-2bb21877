@@ -33,6 +33,7 @@ const NtaiProcessingSection: React.FC = () => {
     addToQueue,
     clearCompleted,
     retryFailed,
+    clearFailed,
     startProcessing,
   } = useNtaiProcessing();
 
@@ -189,15 +190,16 @@ const NtaiProcessingSection: React.FC = () => {
         </div>
         
         <div className="space-y-4">
-          <NtaiQueueControls 
-            queueLength={processQueue.length}
-            processingActive={processingActive}
-            hasCompletedItems={processQueue.some(item => item.stage === 'complete')}
-            hasFailedItems={processQueue.some(item => item.stage === 'error')}
-            onClearCompleted={clearCompleted}
-            onRetryFailed={retryFailed}
-            onStartProcessing={startProcessing}
-          />
+        <NtaiQueueControls 
+          queueLength={processQueue.length}
+          processingActive={processingActive}
+          hasCompletedItems={processQueue.some(item => item.stage === 'complete')}
+          hasFailedItems={processQueue.some(item => item.stage === 'error')}
+          onClearCompleted={clearCompleted}
+          onRetryFailed={retryFailed}
+          onClearFailed={clearFailed}
+          onStartProcessing={startProcessing}
+        />
           
           {processQueue.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
