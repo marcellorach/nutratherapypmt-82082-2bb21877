@@ -35,14 +35,22 @@ const NtaiProcessingSection: React.FC = () => {
     startProcessing,
   } = useNtaiProcessing();
 
+  type PipelineStageStatus = 'pending' | 'processing' | 'complete' | 'error';
+  
+  interface PipelineStage {
+    name: string;
+    status: PipelineStageStatus;
+    description: string;
+  }
+  
   const [logVisible, setLogVisible] = React.useState(false);
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
-  const [pipelineStages, setPipelineStages] = useState([
-    { name: 'Upload PDF', status: 'pending' as const, description: 'Upload study to storage' },
-    { name: 'Parse Document', status: 'pending' as const, description: 'Extract text with Unstructured' },
-    { name: 'AI Extraction', status: 'pending' as const, description: 'Extract entities with Lovable AI' },
-    { name: 'Quality Check', status: 'pending' as const, description: 'Validate extraction quality' },
-    { name: 'Ready for Review', status: 'pending' as const, description: 'Awaiting human curation' },
+  const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
+    { name: 'Upload PDF', status: 'pending', description: 'Upload study to storage' },
+    { name: 'Parse Document', status: 'pending', description: 'Extract text with Unstructured' },
+    { name: 'AI Extraction', status: 'pending', description: 'Extract entities with Lovable AI' },
+    { name: 'Quality Check', status: 'pending', description: 'Validate extraction quality' },
+    { name: 'Ready for Review', status: 'pending', description: 'Awaiting human curation' },
   ]);
   const { toast } = useToast();
   
