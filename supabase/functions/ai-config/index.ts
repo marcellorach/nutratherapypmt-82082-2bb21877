@@ -31,12 +31,16 @@ serve(async (req) => {
 
     // Verificar se estamos lidando com GET ou POST
     if (req.method === 'GET') {
+      console.log('GET request - fetching all configs');
       // Buscar todas as configurações
       const { data, error } = await supabase
         .from('ai_configurations')
         .select('config_key, config_value');
 
-      if (error) throw error;
+      if (error) {
+        console.error('GET error:', JSON.stringify(error, null, 2));
+        throw new Error(`Database error: ${error.message || error.code || JSON.stringify(error)}`);
+      }
 
       // Converter array para objeto para facilitar o uso no frontend
       const configs: Record<string, any> = {};
@@ -54,6 +58,7 @@ serve(async (req) => {
       const { action, key, value } = requestData;
 
       if (action === 'get' && key) {
+        console.log('POST get action - fetching key:', key);
         // Buscar configuração específica
         const { data, error } = await supabase
           .from('ai_configurations')
@@ -61,13 +66,17 @@ serve(async (req) => {
           .eq('config_key', key)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('POST get error:', JSON.stringify(error, null, 2));
+          throw new Error(`Database error: ${error.message || error.code || JSON.stringify(error)}`);
+        }
         
         return new Response(JSON.stringify({ value: data.config_value }), { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         });
 
       } else if (action === 'set' && key && value !== undefined) {
+        console.log('POST set action - key:', key, 'value:', typeof value);
         // Atualizar ou inserir configuração usando upsert
         const { data, error } = await supabase
           .from('ai_configurations')
@@ -80,7 +89,10 @@ serve(async (req) => {
           })
           .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('POST set error:', JSON.stringify(error, null, 2));
+          throw new Error(`Database error: ${error.message || error.code || JSON.stringify(error)}`);
+        }
         
         return new Response(JSON.stringify({ success: true }), { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -97,9 +109,13 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Erro:', errorMessage);
-    return new Response(JSON.stringify({ error: errorMessage }), { 
+    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error('Catch block error:', errorMessage);
+    console.error('Full error object:', error);
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : undefined 
+    }), { 
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
