@@ -16,6 +16,7 @@ const ConfiguracoesIATab: React.FC = () => {
   const [claudeKey, setClaudeKey] = useState<string>("");
   const [grokKey, setGrokKey] = useState<string>("");
   const [unstructuredKey, setUnstructuredKey] = useState<string>("");
+  const [googleGeminiKey, setGoogleGeminiKey] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -38,6 +39,7 @@ const ConfiguracoesIATab: React.FC = () => {
         setClaudeKey(configs.claude_api_key || "");
         setGrokKey(configs.grok_api_key || "");
         setUnstructuredKey(configs.unstructured_api_key || "");
+        setGoogleGeminiKey(configs.google_gemini_api_key || "");
       }
 
     } catch (error) {
@@ -52,6 +54,7 @@ const ConfiguracoesIATab: React.FC = () => {
       setClaudeKey(localStorage.getItem('claude_api_key') || "");
       setGrokKey(localStorage.getItem('grok_api_key') || "");
       setUnstructuredKey(localStorage.getItem('unstructured_api_key') || "");
+      setGoogleGeminiKey(localStorage.getItem('google_gemini_api_key') || "");
 
     } finally {
       setIsLoading(false);
@@ -76,6 +79,9 @@ const ConfiguracoesIATab: React.FC = () => {
       }
       if (key === 'unstructured_api_key' && value.length < 20) {
         throw new Error('Chave API do Unstructured.io deve ter pelo menos 20 caracteres');
+      }
+      if (key === 'google_gemini_api_key' && value.length < 30) {
+        throw new Error('Chave API do Google Gemini deve ter pelo menos 30 caracteres');
       }
 
       const response = await supabase.functions.invoke('ai-config', {
@@ -138,6 +144,17 @@ const ConfiguracoesIATab: React.FC = () => {
     }
   };
 
+  const saveGoogleGeminiKey = async (key: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('google_gemini_api_key', key);
+      setGoogleGeminiKey(key);
+      localStorage.setItem('google_gemini_api_key', key);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -159,10 +176,11 @@ const ConfiguracoesIATab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="openai" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="openai">OpenAI</TabsTrigger>
                 <TabsTrigger value="claude">Claude</TabsTrigger>
                 <TabsTrigger value="grok">Grok</TabsTrigger>
+                <TabsTrigger value="google-gemini">Google Gemini</TabsTrigger>
                 <TabsTrigger value="unstructured">Unstructured</TabsTrigger>
               </TabsList>
               
@@ -217,6 +235,50 @@ const ConfiguracoesIATab: React.FC = () => {
                 <div className="text-sm text-gray-500 mt-4">
                   <p>Chaves para a API do Grok podem ser obtidas na plataforma xAI.</p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="google-gemini" className="space-y-4 pt-4">
+                <ApiKeyForm 
+                  serviceName="Google Gemini" 
+                  saveKey={saveGoogleGeminiKey}
+                  initialKey={googleGeminiKey}
+                  placeholder="AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  isLoading={isLoading || isSaving}
+                />
+                <div className="text-sm text-gray-500 mt-4">
+                  <a 
+                    href="https://aistudio.google.com/app/apikey" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Obter uma chave API do Google AI Studio →
+                  </a>
+                </div>
+                
+                <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mt-4">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      🔍 Para que serve o Google Gemini?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-foreground">
+                      <strong>Processamento NTAI Lab:</strong> Usa <strong>Gemini File Search</strong> para análise contextual de PDFs científicos.
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Upload direto de PDFs para o Google AI</li>
+                      <li>RAG automático (sem precisar de vector database)</li>
+                      <li>Extração estruturada de entidades com citations</li>
+                      <li>Substitui pipeline complexo (Unstructured + Embeddings + Vector DB)</li>
+                    </ul>
+                    <div className="mt-4 p-2 bg-background rounded border border-purple-300 dark:border-purple-800">
+                      <p className="text-xs font-mono text-foreground">
+                        📄 PDF → 🔍 Gemini File Search → 📊 JSON estruturado → 💾 Supabase
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               
               <TabsContent value="unstructured" className="space-y-4 pt-4">
@@ -306,6 +368,12 @@ const ConfiguracoesIATab: React.FC = () => {
               service="Grok" 
               isConfigured={!!grokKey} 
               icon="⚡"
+            />
+            <ApiStatusItem 
+              service="Google Gemini" 
+              isConfigured={!!googleGeminiKey} 
+              icon="🔍"
+              description="File Search + Structured Output"
             />
             <ApiStatusItem 
               service="Unstructured" 
