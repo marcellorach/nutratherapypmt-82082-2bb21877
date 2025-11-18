@@ -1465,7 +1465,12 @@
       "selectAtLeastOne": "Selecione pelo menos um arquivo para importar.",
       "importSuccess": "Importação concluída",
       "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise RAG.",
-      "importError": "Erro ao importar {{filename}}"
+      "importError": "Erro ao importar {{filename}}",
+      "viewImported": "Ver estudos importados ⬇️",
+      "nextSteps": "Próximos passos",
+      "nextStepsGuide": "Role para baixo e selecione o estudo, depois clique em 'Add to Queue' para processar com IA",
+      "newBadge": "NOVO",
+      "pendingStudies": "{{count}} estudos aguardando processamento"
     },
     "history": {
       "loading": "Carregando histórico...",

@@ -18,6 +18,7 @@ export interface AdminTabConfig {
 
 // Lazy loading dos componentes (Base de Conhecimento)
 const EstudosTab = lazy(() => import('@/components/administrador/EstudosTab'));
+const ProcessamentoIATab = lazy(() => import('@/components/administrador/ProcessamentoIATab'));
 const NutraceuticalsUnifiedTab = lazy(() => import('@/components/administrador/NutraceuticalsUnifiedTab'));
 const VeterinaryTargetsTab = lazy(() => import('@/components/administrador/VeterinaryTargetsTab'));
 const AIInsightsTab = lazy(() => import('@/components/administrador/AIInsightsTab'));
@@ -61,6 +62,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: EstudosTab,
     description: 'Gestão de estudos científicos'
+  },
+  {
+    id: 'processamento-ia',
+    label: 'Processar com IA',
+    group: 'knowledge-base',
+    component: ProcessamentoIATab,
+    description: 'Processamento de estudos com IA'
   },
   {
     id: 'nutraceuticals-unified',

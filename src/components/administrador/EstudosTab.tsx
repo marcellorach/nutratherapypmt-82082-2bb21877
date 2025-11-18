@@ -10,7 +10,6 @@ import EstudosHeader from './estudos/EstudosHeader';
 import EstudoSearch from './estudos/EstudoSearch';
 import EstudosColumn from './estudos/EstudosColumn';
 import SciImportSection from './estudos/import/SciImportSection';
-import NtaiProcessingSection from './estudos/analysis/NtaiProcessingSection';
 import { UploadEstudoForm } from './estudos/UploadEstudoForm';
 import { useTranslation } from 'react-i18next';
 import './estudos/estudos.css';
@@ -139,12 +138,6 @@ const EstudosTab: React.FC = () => {
             <h3 className="text-lg font-medium">{t('studies.import.sectionTitle')}</h3>
           </div>
           <SciImportSection />
-          
-          <div className="flex items-center space-x-2 mb-2 mt-8">
-            <ArrowDown className="h-4 w-4 text-purple-600" />
-            <h3 className="text-lg font-medium">{t('studies.rag.title')}</h3>
-          </div>
-          <NtaiProcessingSection />
         </TabsContent>
         
         <TabsContent value="gerenciar" className="mt-0 space-y-6">
