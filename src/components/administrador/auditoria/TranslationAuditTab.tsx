@@ -77,23 +77,22 @@ const TranslationAuditTab: React.FC = () => {
     setFixResult(null);
     
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
+      // Importa a função client-side
+      const { autoFixMissingKeys, downloadTranslationFiles } = await import('@/utils/translationAutoFix');
       
-      const { data, error: funcError } = await supabase.functions.invoke('fix-missing-keys');
+      // Executa auto-fix no browser
+      const result = await autoFixMissingKeys();
       
-      if (funcError) {
-        throw new Error(funcError.message);
-      }
+      setFixResult({ fixed: result.fixed, skipped: result.skipped });
       
-      if (data.success) {
-        setFixResult({ fixed: data.fixed, skipped: data.skipped });
-        // Recarrega o relatório após 1 segundo para dar tempo do audit rodar
-        setTimeout(() => {
-          loadReport();
-        }, 1000);
-      } else {
-        throw new Error(data.error || 'Failed to fix keys');
-      }
+      // Faz download dos arquivos atualizados
+      downloadTranslationFiles(result.updatedPT, result.updatedEN);
+      
+      // Aguarda 2 segundos e recarrega relatório (usuário precisa substituir arquivos manualmente)
+      setTimeout(() => {
+        loadReport();
+      }, 2000);
+      
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error during auto-fix: ${errorMsg}`);
@@ -225,6 +224,8 @@ const TranslationAuditTab: React.FC = () => {
           <AlertDescription className="text-green-900 dark:text-green-100">
             ✅ Auto-fix complete! Fixed <strong>{fixResult.fixed}</strong> missing keys. 
             {fixResult.skipped > 0 && ` Skipped ${fixResult.skipped} keys (already exist).`}
+            <br />
+            <strong>📥 Downloaded files:</strong> Replace <code>src/locales/pt/translation.json</code> and <code>src/locales/en/translation.json</code> with the downloaded files, then refresh.
           </AlertDescription>
         </Alert>
       )}
