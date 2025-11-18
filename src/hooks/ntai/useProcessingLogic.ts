@@ -100,14 +100,22 @@ export const useProcessingLogic = (
         });
 
         if (parseError) {
-          const errorMsg = parseError.message || 'Erro desconhecido';
+          const errorMsg = parseError.message || String(parseError);
+          const isDnsError = errorMsg.includes('dns error') || 
+                             errorMsg.includes('Name or service not known') ||
+                             errorMsg.includes('DNS_RESOLUTION_FAILURE');
           
-          // Verificar se é erro de DNS/rede
-          if (errorMsg.includes('dns error') || errorMsg.includes('Name or service not known')) {
-            throw new Error('Erro de conexão: Não foi possível conectar ao serviço de parsing. Tente novamente em alguns minutos.');
+          addLogEntry(`[ERRO] Parsing: ${errorMsg}`);
+          
+          if (isDnsError) {
+            addLogEntry('[INFO] ⚠️ Erro de DNS detectado - Este é um problema temporário de infraestrutura');
+            addLogEntry('[INFO] 💡 Use "Tentar Novamente" em alguns minutos ou aguarde estabilização');
           }
           
-          throw new Error(`Erro no parsing: ${errorMsg}`);
+          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+          setProcessQueue([...updatedQueue]);
+          processNextItem(index + 1);
+          return;
         }
 
         if (!parseData) {
