@@ -52,15 +52,13 @@ const NtaiProcessingSection: React.FC = () => {
     description: string;
   }
   
-  const [logVisible, setLogVisible] = React.useState(false);
+  const [logVisible, setLogVisible] = React.useState(true);
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<any>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
-    { name: '📤 Upload PDF', status: 'pending', description: 'Arquivo enviado para storage' },
-    { name: '🔍 Parse (Unstructured)', status: 'pending', description: 'Extração de texto e estrutura' },
-    { name: '🧠 AI Analysis (LLM)', status: 'pending', description: 'Identificação de entidades' },
-    { name: '✓ Quality Check', status: 'pending', description: 'Validação de qualidade' },
-    { name: '📋 Ready', status: 'pending', description: 'Aguardando revisão' },
+    { name: '📤 Upload', status: 'pending', description: 'Arquivo no storage Supabase' },
+    { name: '🤖 Gemini AI', status: 'pending', description: 'Análise com Google Gemini 2.5 Flash' },
+    { name: '✅ Completo', status: 'pending', description: 'Dados extraídos e salvos' },
   ]);
   const { toast } = useToast();
   
@@ -167,10 +165,10 @@ const NtaiProcessingSection: React.FC = () => {
       <CardContent className="p-6 space-y-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-600" />
-            <h3 className="text-lg font-medium">{t('studies.rag.processing')}</h3>
-            <Badge className="ml-2 bg-purple-100 text-purple-800" variant="outline">
-              {aiConfigs.modelName || 'GPT-4o'}
+            <Brain className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-medium">Processamento com IA</h3>
+            <Badge className="ml-2 bg-blue-50 text-blue-700 border-blue-200" variant="outline">
+              🤖 Gemini 2.5 Flash
             </Badge>
           </div>
           <div className="flex gap-2">
@@ -185,21 +183,18 @@ const NtaiProcessingSection: React.FC = () => {
         </div>
         
         {/* Mostra informações sobre o processamento atual */}
-        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-          <h4 className="text-sm font-medium mb-2">{t('studies.ntai.infoTitle')}</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+          <h4 className="text-sm font-medium mb-2 text-blue-900">Informações do Processamento</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">{t('studies.ntai.model')}:</span> {aiConfigs.modelName || 'GPT-4o'}
+              <span className="text-blue-600 font-medium">Modelo:</span> <span className="text-blue-900">Google Gemini 2.5 Flash</span>
             </div>
             <div>
-              <span className="text-gray-500">{t('studies.ntai.temperature')}:</span> {aiConfigs.temperature || '0.7'}
-            </div>
-            <div>
-              <span className="text-gray-500">{t('studies.ntai.status')}:</span> {processingActive ? t('studies.ntai.active') : t('studies.ntai.inactive')}
+              <span className="text-blue-600 font-medium">Status:</span> <span className="text-blue-900">{processingActive ? 'Processando' : 'Inativo'}</span>
             </div>
           </div>
-          <div className="mt-2 text-xs text-gray-500">
-            {t('studies.ntai.promptsInfo')}
+          <div className="mt-2 text-xs text-blue-700">
+            Extrai automaticamente nutracêuticos, condições de saúde e metadados dos estudos científicos usando IA generativa.
           </div>
         </div>
         
