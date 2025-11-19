@@ -42,26 +42,52 @@ serve(async (req) => {
     const { data: configData, error: configError } = await supabase
       .from('ai_configurations')
       .select('config_value')
-      .eq('config_key', 'googleGeminiKey')
+      .eq('config_key', 'google_gemini_api_key')
       .single();
 
+    console.log('🔑 Google Gemini API Key encontrada?', !!configData?.config_value);
+
     if (configError || !configData?.config_value) {
-      throw new Error('Google API key não configurada');
+      console.error('❌ Erro ao buscar chave:', configError?.message);
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Google Gemini API key não encontrada na configuração',
+          errorCode: 'GEMINI_API_KEY_MISSING',
+          hint: 'Configure a chave em Configurações de IA'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
     const GOOGLE_AI_API_KEY = configData.config_value as string;
 
-    console.log('📥 Download...');
+    console.log('📥 Download do PDF do storage...');
     const { data: fileData, error: downloadError } = await supabase
       .storage
       .from('study_pdfs')
       .download(fileUrl.split('/study_pdfs/')[1]);
 
     if (downloadError || !fileData) {
-      throw new Error(`Download erro: ${downloadError?.message}`);
+      console.error('❌ Erro no download:', downloadError?.message);
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: `Erro ao baixar PDF: ${downloadError?.message}`,
+          errorCode: 'STORAGE_DOWNLOAD_ERROR'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
+    console.log('✅ PDF baixado com sucesso');
 
-    console.log('⬆️ Upload Gemini...');
+    console.log('⬆️ Upload para Gemini File API...');
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
@@ -75,17 +101,36 @@ serve(async (req) => {
     );
 
     if (!uploadResponse.ok) {
-      throw new Error('Upload Gemini falhou');
+      const errorText = await uploadResponse.text();
+      console.error('❌ Erro no upload para Gemini:', errorText);
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: `Erro ao fazer upload para Gemini: ${uploadResponse.statusText}`,
+          errorCode: 'GEMINI_UPLOAD_ERROR',
+          details: errorText
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
+    console.log('✅ Upload para Gemini concluído');
 
     const uploadResult = await uploadResponse.json();
     const fileUri = uploadResult.file.uri;
 
-    console.log('⏳ Aguardando...');
+    console.log('⏳ Aguardando processamento do Gemini...');
     await waitForFileProcessing(fileUri, GOOGLE_AI_API_KEY);
+    console.log('✅ Arquivo processado pelo Gemini');
 
-    console.log('🤖 Extraindo...');
+    console.log('🤖 Extraindo dados estruturados...');
     const extractedData = await extractStructuredData(fileUri, GOOGLE_AI_API_KEY);
+    console.log('✅ Extração concluída:', {
+      nutraceuticals: extractedData.nutraceuticals?.length || 0,
+      conditions: extractedData.conditions?.length || 0
+    });
 
     console.log('💾 Salvando...');
     const { data: savedStudy, error: saveError } = await supabase
@@ -109,9 +154,22 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (saveError) throw new Error('Erro salvar');
+    if (saveError) {
+      console.error('❌ Erro ao salvar no banco:', saveError.message);
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: `Erro ao salvar dados extraídos: ${saveError.message}`,
+          errorCode: 'DATABASE_SAVE_ERROR'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
-    console.log('✅ OK');
+    console.log('✅ Processamento completo - Estudo salvo com sucesso');
 
     return new Response(
       JSON.stringify({ 
@@ -126,9 +184,14 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('❌', error);
+    console.error('❌ Erro geral no processamento:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Erro' }),
+      JSON.stringify({ 
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido no processamento',
+        errorCode: 'PROCESSING_ERROR',
+        timestamp: new Date().toISOString()
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -207,8 +270,18 @@ async function extractStructuredData(fileUri: string, apiKey: string): Promise<E
     }
   );
 
-  if (!response.ok) throw new Error('Gemini API erro');
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Erro na API Gemini:', errorText);
+    throw new Error(`Gemini API erro: ${response.statusText} - ${errorText}`);
+  }
 
   const result = await response.json();
+  
+  if (!result.candidates || !result.candidates[0]?.content?.parts?.[0]?.text) {
+    console.error('❌ Resposta inválida do Gemini:', result);
+    throw new Error('Resposta inválida do Gemini - estrutura não reconhecida');
+  }
+  
   return JSON.parse(result.candidates[0].content.parts[0].text);
 }
