@@ -34,6 +34,35 @@ serve(async (req) => {
     const { fileUrl, studyId, fileName } = await req.json();
     
     console.log('🚀 Gemini File API - Study:', studyId);
+    console.log('📦 Request payload:', { fileUrl, studyId, fileName });
+    
+    if (!fileUrl) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'fileUrl não foi fornecido',
+          errorCode: 'MISSING_FILE_URL'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    if (!studyId) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'studyId não foi fornecido',
+          errorCode: 'MISSING_STUDY_ID'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -66,10 +95,21 @@ serve(async (req) => {
     const GOOGLE_AI_API_KEY = configData.config_value as string;
 
     console.log('📥 Download do PDF do storage...');
+    console.log('📍 Storage path:', fileUrl);
+    
+    // Extract the correct path from the fileUrl
+    // fileUrl can be either a full URL or just the storage path
+    let storagePath = fileUrl;
+    if (fileUrl.includes('/study_pdfs/')) {
+      storagePath = fileUrl.split('/study_pdfs/')[1];
+    }
+    
+    console.log('📂 Extracted storage path:', storagePath);
+    
     const { data: fileData, error: downloadError } = await supabase
       .storage
       .from('study_pdfs')
-      .download(fileUrl.split('/study_pdfs/')[1]);
+      .download(storagePath);
 
     if (downloadError || !fileData) {
       console.error('❌ Erro no download:', downloadError?.message);
