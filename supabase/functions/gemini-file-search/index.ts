@@ -131,9 +131,16 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
+    // 📊 Log 1: Informações do arquivo baixado
+    console.log('📊 Tamanho do arquivo:', uint8Array.length, 'bytes', `(~${(uint8Array.length / 1024 / 1024).toFixed(2)} MB)`);
+    console.log('🔢 Primeiros 20 bytes do PDF:', Array.from(uint8Array.slice(0, 20)).map(b => b.toString(16).padStart(2, '0')).join(' '));
+    
     // Gemini Files API requires multipart/related format (not multipart/form-data)
     const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2, 15);
     const textEncoder = new TextEncoder();
+    
+    // 🔖 Log 2: Boundary gerado
+    console.log('🔖 Boundary gerado:', boundary);
     
     // Build multipart/related body manually
     const parts: Uint8Array[] = [];
@@ -144,6 +151,11 @@ serve(async (req) => {
         displayName: fileName || 'study.pdf'
       }
     });
+    
+    // 📝 Log 3: Metadata
+    console.log('📝 Metadata JSON:', metadata);
+    console.log('📏 Tamanho da metadata:', metadata.length, 'bytes');
+    
     parts.push(textEncoder.encode(`--${boundary}\r\n`));
     parts.push(textEncoder.encode('Content-Type: application/json; charset=utf-8\r\n\r\n'));
     parts.push(textEncoder.encode(metadata));
@@ -167,6 +179,30 @@ serve(async (req) => {
       offset += part.length;
     }
     
+    // 📦 Log 4: Body multipart montado
+    console.log('📦 Body multipart montado:');
+    console.log('  - Tamanho total:', totalLength, 'bytes');
+    console.log('  - Número de partes:', parts.length);
+    console.log('  - Tamanhos das partes:', parts.map(p => p.length).join(', '));
+    
+    // Preview do body (primeiros 500 caracteres)
+    const bodyPreview = new TextDecoder('utf-8', { fatal: false }).decode(body.slice(0, 500));
+    console.log('👀 Preview do body (primeiros 500 chars):');
+    console.log(bodyPreview);
+    
+    // Final do body (últimos 100 bytes)
+    const bodyEnd = new TextDecoder('utf-8', { fatal: false }).decode(body.slice(-100));
+    console.log('🔚 Final do body (últimos 100 chars):');
+    console.log(bodyEnd);
+    
+    // 🚀 Log 5: Informações da requisição
+    console.log('🚀 Fazendo upload para Gemini Files API...');
+    console.log('🌐 URL:', 'https://generativelanguage.googleapis.com/upload/v1beta/files');
+    console.log('📤 Headers:', {
+      'Content-Type': `multipart/related; boundary=${boundary}`,
+      'Content-Length': body.length
+    });
+    
     const uploadResponse = await fetch(
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GOOGLE_AI_API_KEY}`,
       {
@@ -178,15 +214,31 @@ serve(async (req) => {
       }
     );
 
+    // 📥 Log 6: Resposta do Gemini
+    console.log('📥 Resposta do Gemini:');
+    console.log('  - Status:', uploadResponse.status, uploadResponse.statusText);
+    console.log('  - Headers:', Object.fromEntries(uploadResponse.headers.entries()));
+
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
-      console.error('❌ Erro no upload para Gemini:', errorText);
+      console.error('❌ Erro detalhado do Gemini:', errorText);
+      console.error('🔍 Detalhes da requisição que falhou:');
+      console.error('  - Boundary usado:', boundary);
+      console.error('  - Tamanho do body:', body.length);
+      console.error('  - Content-Type enviado:', `multipart/related; boundary=${boundary}`);
+      
       return new Response(
         JSON.stringify({ 
           success: false,
           error: `Erro ao fazer upload para Gemini: ${uploadResponse.statusText}`,
           errorCode: 'GEMINI_UPLOAD_ERROR',
-          details: errorText
+          details: errorText,
+          debugInfo: {
+            boundary,
+            bodySize: body.length,
+            partsCount: parts.length,
+            contentType: `multipart/related; boundary=${boundary}`
+          }
         }),
         { 
           status: 500, 
