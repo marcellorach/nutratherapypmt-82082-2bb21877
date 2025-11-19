@@ -84,7 +84,8 @@ export const useProcessingLogic = (
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
         setProcessQueue([...updatedQueue]);
         
-        addLogEntry(`🤖 Processando com Gemini: ${item.title}`);
+        addLogEntry(`📤 Enviando para Google Gemini File API: ${item.title}`);
+        addLogEntry(`⏳ Aguardando processamento do PDF (pode levar até 60s)...`);
         
         const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
           body: { 
@@ -96,7 +97,7 @@ export const useProcessingLogic = (
         
         if (geminiError) {
           const errorMsg = geminiError.message || String(geminiError);
-          addLogEntry(`❌ Erro Gemini: ${errorMsg}`);
+          addLogEntry(`❌ Erro Google Gemini: ${errorMsg}`);
           updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
@@ -104,7 +105,7 @@ export const useProcessingLogic = (
         }
         
         if (!geminiData || !geminiData.success) {
-          const errorMsg = 'Gemini retornou dados inválidos';
+          const errorMsg = 'Google Gemini retornou dados inválidos';
           addLogEntry(`❌ ${errorMsg}`);
           updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
           setProcessQueue([...updatedQueue]);
@@ -112,7 +113,8 @@ export const useProcessingLogic = (
           return;
         }
         
-        addLogEntry(`✅ Gemini OK: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
+        addLogEntry(`✅ Processamento completo: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
+        addLogEntry(`💾 Dados salvos no banco de dados`);
 
         // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };

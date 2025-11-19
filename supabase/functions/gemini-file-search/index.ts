@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,29 +9,312 @@ const corsHeaders = {
 interface ExtractedStudyData {
   title: string;
   authors: string[];
-  year: number | null;
-  journal: string | null;
-  abstract: string | null;
-  doi: string | null;
+  year?: number;
+  journal?: string;
+  abstract?: string;
+  doi?: string;
   nutraceuticals: Array<{
     name: string;
-    dosage: string | null;
+    dosage?: string;
     effects: string;
   }>;
   conditions: Array<{
     name: string;
     relationship_type: string;
-    efficacy_description: string;
+    efficacy_description?: string;
   }>;
 }
 
-interface ToolCall {
-  id: string;
-  type: string;
-  function: {
-    name: string;
-    arguments: string;
+interface GeminiFile {
+  name: string;
+  uri: string;
+  mimeType: string;
+  state: string;
+}
+
+async function uploadToGeminiFileAPI(
+  pdfBlob: Blob, 
+  fileName: string, 
+  apiKey: string
+): Promise<GeminiFile> {
+  console.log('📤 Iniciando upload para Gemini File API...');
+  console.log('📊 Tamanho do arquivo:', pdfBlob.size, 'bytes');
+  
+  const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
+  const uploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+  
+  const metadata = {
+    file: {
+      display_name: fileName
+    }
   };
+  
+  const pdfBytes = new Uint8Array(await pdfBlob.arrayBuffer());
+  
+  // Construir corpo multipart/related
+  const encoder = new TextEncoder();
+  const parts: Uint8Array[] = [];
+  
+  // Parte 1: Metadata JSON
+  parts.push(encoder.encode(`--${boundary}\r\n`));
+  parts.push(encoder.encode('Content-Type: application/json; charset=UTF-8\r\n\r\n'));
+  parts.push(encoder.encode(JSON.stringify(metadata) + '\r\n'));
+  
+  // Parte 2: PDF binário
+  parts.push(encoder.encode(`--${boundary}\r\n`));
+  parts.push(encoder.encode('Content-Type: application/pdf\r\n\r\n'));
+  parts.push(pdfBytes);
+  parts.push(encoder.encode('\r\n'));
+  
+  // Finalizar
+  parts.push(encoder.encode(`--${boundary}--\r\n`));
+  
+  // Concatenar todas as partes
+  const totalLength = parts.reduce((acc, part) => acc + part.length, 0);
+  const body = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const part of parts) {
+    body.set(part, offset);
+    offset += part.length;
+  }
+  
+  console.log('📤 Enviando', totalLength, 'bytes para Gemini...');
+  
+  const response = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': `multipart/related; boundary=${boundary}`,
+    },
+    body: body,
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Upload falhou:', response.status, errorText);
+    throw new Error(`Upload falhou: ${response.status} - ${errorText}`);
+  }
+  
+  const result = await response.json();
+  console.log('✅ Upload completo:', result.file.name);
+  console.log('📊 URI:', result.file.uri);
+  console.log('📊 Estado inicial:', result.file.state);
+  
+  return result.file;
+}
+
+async function waitForFileActive(
+  fileName: string, 
+  apiKey: string, 
+  maxAttempts = 30
+): Promise<void> {
+  console.log('⏳ Aguardando processamento do arquivo...');
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`,
+      { method: 'GET' }
+    );
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Status check falhou: ${response.status} - ${errorText}`);
+    }
+    
+    const fileInfo = await response.json();
+    console.log(`📊 Tentativa ${attempt}/${maxAttempts} - Estado: ${fileInfo.state}`);
+    
+    if (fileInfo.state === 'ACTIVE') {
+      console.log('✅ Arquivo pronto para análise');
+      return;
+    }
+    
+    if (fileInfo.state === 'FAILED') {
+      console.error('❌ Processamento falhou:', fileInfo);
+      throw new Error('Processamento do arquivo falhou no Gemini');
+    }
+    
+    // Aguardar 2 segundos antes da próxima tentativa
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  
+  throw new Error(`Timeout: arquivo não ficou ACTIVE após ${maxAttempts * 2} segundos`);
+}
+
+async function analyzeWithGemini(
+  fileUri: string, 
+  fileName: string, 
+  apiKey: string
+): Promise<ExtractedStudyData> {
+  console.log('🧠 Analisando documento com Gemini...');
+  console.log('📄 Arquivo:', fileName);
+  console.log('🔗 URI:', fileUri);
+  
+  const systemPrompt = `Você é um especialista em análise de estudos científicos sobre nutracêuticos para pets.
+
+Analise este documento PDF e extraia com MÁXIMA PRECISÃO:
+
+1. **Metadados**: título completo, lista de autores, ano de publicação, nome do journal, abstract, DOI
+2. **Nutracêuticos**: todos os compostos/substâncias mencionados com seus nomes científicos, dosagens utilizadas e efeitos observados
+3. **Condições de saúde**: todas as doenças/condições abordadas, especificando o tipo de relação (tratamento/prevenção/suporte) e descrição da eficácia
+
+Seja preciso e completo. Se algum dado não estiver disponível, retorne string vazia ou array vazio conforme apropriado.`;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              fileData: {
+                mimeType: 'application/pdf',
+                fileUri: fileUri
+              }
+            },
+            { text: systemPrompt }
+          ]
+        }],
+        tools: [{
+          functionDeclarations: [{
+            name: 'extract_study_data',
+            description: 'Extrai dados estruturados de um estudo científico veterinário sobre nutracêuticos',
+            parameters: {
+              type: 'object',
+              required: ['title', 'authors', 'nutraceuticals', 'conditions'],
+              properties: {
+                title: { 
+                  type: 'string', 
+                  description: 'Título completo do estudo científico' 
+                },
+                authors: { 
+                  type: 'array', 
+                  items: { type: 'string' },
+                  description: 'Lista completa de autores do estudo'
+                },
+                year: { 
+                  type: 'integer',
+                  description: 'Ano de publicação do estudo'
+                },
+                journal: { 
+                  type: 'string',
+                  description: 'Nome do periódico científico onde foi publicado'
+                },
+                abstract: { 
+                  type: 'string',
+                  description: 'Resumo/abstract do estudo'
+                },
+                doi: { 
+                  type: 'string',
+                  description: 'DOI (Digital Object Identifier) do artigo'
+                },
+                nutraceuticals: {
+                  type: 'array',
+                  description: 'Lista de todos os nutracêuticos/compostos mencionados no estudo',
+                  items: {
+                    type: 'object',
+                    required: ['name', 'effects'],
+                    properties: {
+                      name: { 
+                        type: 'string',
+                        description: 'Nome do nutracêutico/composto (científico ou comum)'
+                      },
+                      dosage: { 
+                        type: 'string',
+                        description: 'Dosagem utilizada no estudo (com unidades)'
+                      },
+                      effects: { 
+                        type: 'string',
+                        description: 'Efeitos observados/reportados no estudo'
+                      }
+                    }
+                  }
+                },
+                conditions: {
+                  type: 'array',
+                  description: 'Lista de condições de saúde abordadas no estudo',
+                  items: {
+                    type: 'object',
+                    required: ['name', 'relationship_type'],
+                    properties: {
+                      name: { 
+                        type: 'string',
+                        description: 'Nome da condição de saúde/doença'
+                      },
+                      relationship_type: { 
+                        type: 'string',
+                        enum: ['treatment', 'prevention', 'support'],
+                        description: 'Tipo de relação: tratamento, prevenção ou suporte'
+                      },
+                      efficacy_description: { 
+                        type: 'string',
+                        description: 'Descrição da eficácia observada no estudo'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }]
+        }],
+        toolConfig: {
+          functionCallingConfig: {
+            mode: 'ANY',
+            allowedFunctionNames: ['extract_study_data']
+          }
+        }
+      })
+    }
+  );
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Gemini API erro:', response.status, errorText);
+    throw new Error(`Gemini API erro: ${response.status} - ${errorText}`);
+  }
+  
+  const result = await response.json();
+  console.log('📊 Resposta recebida da IA');
+  
+  // Extrair dados do function call
+  const candidate = result.candidates?.[0];
+  if (!candidate) {
+    console.error('❌ Nenhum candidato na resposta:', JSON.stringify(result, null, 2));
+    throw new Error('Resposta da IA não contém candidatos');
+  }
+  
+  const functionCall = candidate?.content?.parts?.[0]?.functionCall;
+  
+  if (!functionCall || functionCall.name !== 'extract_study_data') {
+    console.error('❌ Function call inválido:', JSON.stringify(candidate, null, 2));
+    throw new Error('Resposta da IA não contém function call esperado');
+  }
+  
+  console.log('✅ Dados extraídos com sucesso');
+  console.log('📊 Nutracêuticos encontrados:', functionCall.args.nutraceuticals?.length || 0);
+  console.log('📊 Condições encontradas:', functionCall.args.conditions?.length || 0);
+  
+  return functionCall.args as ExtractedStudyData;
+}
+
+async function deleteGeminiFile(fileName: string, apiKey: string): Promise<void> {
+  try {
+    console.log('🗑️ Deletando arquivo do Gemini...');
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`,
+      { method: 'DELETE' }
+    );
+    
+    if (response.ok) {
+      console.log('✅ Arquivo deletado com sucesso');
+    } else {
+      console.warn('⚠️ Falha ao deletar arquivo (não crítico):', response.status);
+    }
+  } catch (error) {
+    console.warn('⚠️ Erro ao deletar arquivo (não crítico):', error);
+  }
 }
 
 serve(async (req) => {
@@ -40,17 +323,22 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Iniciando processamento com Google Gemini File API');
+    console.log('📥 Recebendo requisição...');
+    
     const { fileUrl, studyId, fileName } = await req.json();
     
-    console.log('🚀 Gemini File API - Study:', studyId);
-    console.log('📦 Request payload:', { fileUrl, studyId, fileName });
-    
-    if (!fileUrl) {
+    console.log('📋 Parâmetros recebidos:');
+    console.log('  - studyId:', studyId);
+    console.log('  - fileName:', fileName);
+    console.log('  - fileUrl:', fileUrl);
+
+    if (!fileUrl || !studyId || !fileName) {
+      console.error('❌ Parâmetros obrigatórios ausentes');
       return new Response(
         JSON.stringify({ 
-          success: false,
-          error: 'fileUrl não foi fornecido',
-          errorCode: 'MISSING_FILE_URL'
+          success: false, 
+          error: 'Parâmetros obrigatórios ausentes: fileUrl, studyId, fileName' 
         }),
         { 
           status: 400, 
@@ -58,294 +346,137 @@ serve(async (req) => {
         }
       );
     }
-    
-    if (!studyId) {
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'studyId não foi fornecido',
-          errorCode: 'MISSING_STUDY_ID'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-    
+
+    // Inicializar Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    console.log('🔑 Lovable AI API Key disponível?', !!LOVABLE_API_KEY);
+    // Buscar Google Gemini API Key da tabela ai_configurations
+    console.log('🔑 Buscando Google Gemini API Key da configuração...');
+    const { data: configData, error: configError } = await supabase
+      .from('ai_configurations')
+      .select('config_value')
+      .eq('config_key', 'google_gemini_api_key')
+      .single();
 
-    if (!LOVABLE_API_KEY) {
-      console.error('❌ LOVABLE_API_KEY não encontrada');
+    if (configError || !configData?.config_value) {
+      console.error('❌ Chave não encontrada na tabela ai_configurations:', configError);
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: 'Lovable AI não está configurado',
-          errorCode: 'LOVABLE_API_KEY_MISSING'
+          error: 'Google Gemini API Key não configurada. Configure em Admin > Configurações IA > Google Gemini',
+          errorCode: 'GEMINI_API_KEY_MISSING'
         }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('📥 Download do PDF do storage...');
-    console.log('📍 Storage path:', fileUrl);
-    
-    // Extract the correct path from the fileUrl
-    // fileUrl can be either a full URL or just the storage path
-    let storagePath = fileUrl;
-    if (fileUrl.includes('/study_pdfs/')) {
-      storagePath = fileUrl.split('/study_pdfs/')[1];
-    }
-    
-    console.log('📂 Extracted storage path:', storagePath);
-    
-    const { data: fileData, error: downloadError } = await supabase
-      .storage
+    const GOOGLE_GEMINI_KEY = String(configData.config_value);
+    console.log('✅ Chave encontrada (primeiros 10 caracteres):', GOOGLE_GEMINI_KEY.substring(0, 10) + '...');
+
+    // Download do PDF do Supabase Storage
+    console.log('📥 Baixando PDF do Supabase Storage...');
+    const storagePath = fileUrl.replace(/^.*\/object\/public\/study_pdfs\//, '');
+    console.log('📂 Storage path extraído:', storagePath);
+
+    const { data: fileData, error: downloadError } = await supabase.storage
       .from('study_pdfs')
       .download(storagePath);
 
-    if (downloadError || !fileData) {
-      console.error('❌ Erro no download:', downloadError?.message);
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: `Erro ao baixar PDF: ${downloadError?.message}`,
-          errorCode: 'STORAGE_DOWNLOAD_ERROR'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    if (downloadError) {
+      console.error('❌ Erro no download:', downloadError);
+      throw new Error(`Erro no download: ${downloadError.message}`);
     }
+    
     console.log('✅ PDF baixado com sucesso');
+    console.log('📊 Tamanho do arquivo:', fileData.size, 'bytes', `(~${(fileData.size / 1024 / 1024).toFixed(2)} MB)`);
 
-    console.log('🤖 Convertendo PDF para base64...');
-    const arrayBuffer = await fileData.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
+    // ========== FLUXO PRINCIPAL ==========
     
-    // Converter para base64 em chunks para evitar stack overflow
-    let base64Pdf = '';
-    const chunkSize = 32768; // 32KB chunks
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize);
-      base64Pdf += String.fromCharCode.apply(null, Array.from(chunk));
-    }
-    base64Pdf = btoa(base64Pdf);
-    
-    console.log('📊 Tamanho do PDF:', uint8Array.length, 'bytes', `(~${(uint8Array.length / 1024 / 1024).toFixed(2)} MB)`);
-    console.log('📊 Tamanho base64:', base64Pdf.length, 'caracteres');
+    // 1. Upload para Gemini File API
+    const uploadedFile = await uploadToGeminiFileAPI(fileData, fileName, GOOGLE_GEMINI_KEY);
 
-    console.log('🤖 Chamando Lovable AI para extrair dados estruturados...');
-    const extractedData = await extractWithLovableAI(base64Pdf, fileName || 'study.pdf', LOVABLE_API_KEY);
-    console.log('✅ Extração concluída:', {
-      nutraceuticals: extractedData.nutraceuticals?.length || 0,
-      conditions: extractedData.conditions?.length || 0
-    });
+    // 2. Aguardar processamento
+    await waitForFileActive(uploadedFile.name, GOOGLE_GEMINI_KEY);
 
-    console.log('💾 Salvando...');
-    const { data: savedStudy, error: saveError } = await supabase
+    // 3. Análise com generateContent + Function Calling
+    const extractedData = await analyzeWithGemini(
+      uploadedFile.uri, 
+      fileName, 
+      GOOGLE_GEMINI_KEY
+    );
+
+    // 4. Salvar no banco Supabase
+    console.log('💾 Salvando dados extraídos no banco...');
+    const { error: updateError } = await supabase
       .from('processed_studies')
       .update({
-        title: extractedData.title,
-        authors: extractedData.authors,
-        year: extractedData.year,
-        journal: extractedData.journal,
-        description: extractedData.abstract,
+        title: extractedData.title || null,
+        authors: extractedData.authors || [],
+        year: extractedData.year || null,
+        journal: extractedData.journal || null,
+        description: extractedData.abstract || null,
         analysis_data: {
-          nutraceuticals: extractedData.nutraceuticals,
-          conditions: extractedData.conditions,
-          doi: extractedData.doi,
-          extracted_at: new Date().toISOString(),
-          method: 'gemini'
+          ...extractedData,
+          processed_at: new Date().toISOString(),
+          gemini_file_uri: uploadedFile.uri
         },
         kanban_status: 'parsed'
       })
-      .eq('study_id', studyId)
-      .select()
-      .single();
+      .eq('study_id', studyId);
 
-    if (saveError) {
-      console.error('❌ Erro ao salvar no banco:', saveError.message);
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: `Erro ao salvar dados extraídos: ${saveError.message}`,
-          errorCode: 'DATABASE_SAVE_ERROR'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    if (updateError) {
+      console.error('❌ Erro ao salvar no banco:', updateError);
+      throw updateError;
     }
+    
+    console.log('✅ Dados salvos com sucesso no banco');
 
-    console.log('✅ Processamento completo - Estudo salvo com sucesso');
+    // 5. Cleanup (deletar arquivo do Gemini)
+    await deleteGeminiFile(uploadedFile.name, GOOGLE_GEMINI_KEY);
 
+    // ========== SUCESSO ==========
+    console.log('🎉 Processamento completo!');
+    
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
-        studyId,
-        parsedData: savedStudy.analysis_data,
+        studyId: studyId,
         nutraceuticalsCount: extractedData.nutraceuticals?.length || 0,
         conditionsCount: extractedData.conditions?.length || 0,
-        method: 'gemini'
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
-  } catch (error) {
-    console.error('❌ Erro geral no processamento:', error);
-    return new Response(
-      JSON.stringify({ 
-        success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido no processamento',
-        errorCode: 'PROCESSING_ERROR',
+        data: {
+          title: extractedData.title,
+          authors: extractedData.authors,
+          year: extractedData.year,
+          journal: extractedData.journal,
+          nutraceuticals: extractedData.nutraceuticals,
+          conditions: extractedData.conditions
+        },
+        message: 'Estudo processado com sucesso usando Google Gemini File API',
         timestamp: new Date().toISOString()
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+
+  } catch (error: any) {
+    console.error('❌ Erro fatal:', error);
+    console.error('Stack trace:', error.stack);
+    
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Erro desconhecido',
+        errorType: error.constructor.name,
+        timestamp: new Date().toISOString()
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
     );
   }
 });
-
-async function extractWithLovableAI(base64Pdf: string, fileName: string, apiKey: string): Promise<ExtractedStudyData> {
-  console.log('🔧 Montando payload para Lovable AI...');
-  
-  const systemPrompt = `Você é um especialista em análise de estudos científicos sobre nutracêuticos e saúde animal.
-Extraia as seguintes informações do PDF fornecido:
-
-1. Título do estudo
-2. Lista de autores
-3. Ano de publicação
-4. Nome do journal/revista
-5. Abstract/resumo
-6. DOI (se disponível)
-7. Lista de nutracêuticos mencionados (nome, dosagem recomendada, efeitos observados)
-8. Lista de condições de saúde estudadas (nome da condição, tipo de relação com nutracêutico, descrição de eficácia)
-
-Retorne APENAS dados estruturados, sem texto adicional.`;
-
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: 'Analise este estudo científico e extraia as informações estruturadas conforme solicitado.' },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:application/pdf;base64,${base64Pdf}`
-              }
-            }
-          ]
-        }
-      ],
-      tools: [{
-        type: 'function',
-        function: {
-          name: 'extract_study_data',
-          description: 'Extrai dados estruturados de um estudo científico',
-          parameters: {
-            type: 'object',
-            required: ['title', 'authors', 'nutraceuticals', 'conditions'],
-            properties: {
-              title: { 
-                type: 'string',
-                description: 'Título completo do estudo'
-              },
-              authors: { 
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Lista de autores do estudo'
-              },
-              year: { 
-                type: 'integer',
-                description: 'Ano de publicação'
-              },
-              journal: { 
-                type: 'string',
-                description: 'Nome da revista/journal'
-              },
-              abstract: { 
-                type: 'string',
-                description: 'Resumo ou abstract do estudo'
-              },
-              doi: { 
-                type: 'string',
-                description: 'DOI do estudo (se disponível)'
-              },
-              nutraceuticals: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  required: ['name', 'effects'],
-                  properties: {
-                    name: { type: 'string', description: 'Nome do nutracêutico' },
-                    dosage: { type: 'string', description: 'Dosagem recomendada' },
-                    effects: { type: 'string', description: 'Efeitos observados' }
-                  }
-                },
-                description: 'Lista de nutracêuticos mencionados no estudo'
-              },
-              conditions: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  required: ['name', 'relationship_type', 'efficacy_description'],
-                  properties: {
-                    name: { type: 'string', description: 'Nome da condição de saúde' },
-                    relationship_type: { type: 'string', description: 'Tipo de relação (tratamento, prevenção, suporte)' },
-                    efficacy_description: { type: 'string', description: 'Descrição da eficácia observada' }
-                  }
-                },
-                description: 'Lista de condições de saúde estudadas'
-              }
-            }
-          }
-        }
-      }],
-      tool_choice: { type: 'function', function: { name: 'extract_study_data' } }
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('❌ Erro no Lovable AI:', response.status, errorText);
-    throw new Error(`Lovable AI erro: ${response.statusText} - ${errorText}`);
-  }
-
-  const result = await response.json();
-  console.log('📦 Resposta do Lovable AI:', JSON.stringify(result, null, 2));
-
-  if (!result.choices?.[0]?.message?.tool_calls?.[0]) {
-    console.error('❌ Resposta inválida do Lovable AI:', result);
-    throw new Error('Lovable AI não retornou tool calls esperados');
-  }
-
-  const toolCall = result.choices[0].message.tool_calls[0] as ToolCall;
-  const extractedData = JSON.parse(toolCall.function.arguments) as ExtractedStudyData;
-  
-  console.log('✅ Dados extraídos com sucesso:', {
-    title: extractedData.title,
-    nutraceuticals: extractedData.nutraceuticals?.length || 0,
-    conditions: extractedData.conditions?.length || 0
-  });
-
-  return extractedData;
-}
