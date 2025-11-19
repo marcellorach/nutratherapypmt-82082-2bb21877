@@ -251,14 +251,34 @@ serve(async (req) => {
     console.log('✅ Upload para Gemini concluído');
 
     const uploadResult = await uploadResponse.json();
-    const fileUri = uploadResult.file.uri;
+    console.log('📦 Resposta completa do upload:', JSON.stringify(uploadResult, null, 2));
+    
+    // CRÍTICO: Gemini retorna file.name (ex: "files/abc123"), não file.uri
+    if (!uploadResult.file || !uploadResult.file.name) {
+      console.error('❌ Resposta inválida do Gemini - estrutura inesperada:', uploadResult);
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Resposta inválida do Gemini: campo file.name não encontrado',
+          errorCode: 'GEMINI_INVALID_RESPONSE',
+          debugInfo: uploadResult
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    const geminiFileName = uploadResult.file.name; // Ex: "files/abc123"
+    console.log(`✅ Arquivo carregado no Gemini: ${geminiFileName}`);
 
     console.log('⏳ Aguardando processamento do Gemini...');
-    await waitForFileProcessing(fileUri, GOOGLE_AI_API_KEY);
+    await waitForFileProcessing(geminiFileName, GOOGLE_AI_API_KEY);
     console.log('✅ Arquivo processado pelo Gemini');
 
     console.log('🤖 Extraindo dados estruturados...');
-    const extractedData = await extractStructuredData(fileUri, GOOGLE_AI_API_KEY);
+    const extractedData = await extractStructuredData(geminiFileName, GOOGLE_AI_API_KEY);
     console.log('✅ Extração concluída:', {
       nutraceuticals: extractedData.nutraceuticals?.length || 0,
       conditions: extractedData.conditions?.length || 0
