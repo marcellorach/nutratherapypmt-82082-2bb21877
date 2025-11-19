@@ -131,15 +131,50 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    // Use FormData for correct multipart formatting
-    const formData = new FormData();
-    formData.append('file', new Blob([uint8Array], { type: 'application/pdf' }), fileName || 'study.pdf');
+    // Gemini Files API requires multipart/related format (not multipart/form-data)
+    const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2, 15);
+    const textEncoder = new TextEncoder();
+    
+    // Build multipart/related body manually
+    const parts: Uint8Array[] = [];
+    
+    // Part 1: JSON metadata
+    const metadata = JSON.stringify({
+      file: {
+        displayName: fileName || 'study.pdf'
+      }
+    });
+    parts.push(textEncoder.encode(`--${boundary}\r\n`));
+    parts.push(textEncoder.encode('Content-Type: application/json; charset=utf-8\r\n\r\n'));
+    parts.push(textEncoder.encode(metadata));
+    parts.push(textEncoder.encode('\r\n'));
+    
+    // Part 2: PDF file
+    parts.push(textEncoder.encode(`--${boundary}\r\n`));
+    parts.push(textEncoder.encode('Content-Type: application/pdf\r\n\r\n'));
+    parts.push(uint8Array);
+    parts.push(textEncoder.encode('\r\n'));
+    
+    // Final boundary
+    parts.push(textEncoder.encode(`--${boundary}--\r\n`));
+    
+    // Combine all parts
+    const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
+    const body = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const part of parts) {
+      body.set(part, offset);
+      offset += part.length;
+    }
     
     const uploadResponse = await fetch(
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GOOGLE_AI_API_KEY}`,
       {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: body,
       }
     );
 
@@ -239,8 +274,6 @@ serve(async (req) => {
     );
   }
 });
-
-// FormData handles multipart body creation automatically
 
 async function waitForFileProcessing(fileUri: string, apiKey: string): Promise<void> {
   for (let i = 0; i < 30; i++) {
