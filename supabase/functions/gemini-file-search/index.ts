@@ -27,6 +27,7 @@ interface ExtractedStudyData {
 
 interface GeminiFile {
   name: string;
+  displayName?: string;
   uri: string;
   mimeType: string;
   state: string;
@@ -142,6 +143,305 @@ async function waitForFileActive(
   }
   
   throw new Error(`Timeout: arquivo não ficou ACTIVE após ${maxAttempts * 2} segundos`);
+}
+
+// Obter ou criar File Search Store (corpus vetorizado)
+async function getOrCreateFileSearchStore(apiKey: string): Promise<string> {
+  console.log('🗄️ Verificando File Search Store...');
+  
+  const listUrl = `https://generativelanguage.googleapis.com/v1beta/corpora?key=${apiKey}`;
+  const listResponse = await fetch(listUrl);
+  
+  if (!listResponse.ok) {
+    console.log('⚠️ Erro ao listar stores, criando novo...');
+  } else {
+    const stores = await listResponse.json();
+    const existingStore = stores.corpora?.find(
+      (s: any) => s.displayName === 'petnutra_studies'
+    );
+    
+    if (existingStore) {
+      console.log('✅ Store encontrado:', existingStore.name);
+      return existingStore.name;
+    }
+  }
+  
+  console.log('📦 Criando novo File Search Store...');
+  const createUrl = `https://generativelanguage.googleapis.com/v1beta/corpora?key=${apiKey}`;
+  const createResponse = await fetch(createUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      displayName: 'petnutra_studies',
+      description: 'Corpus vetorizado de estudos científicos sobre nutracêuticos'
+    })
+  });
+  
+  if (!createResponse.ok) {
+    const errorText = await createResponse.text();
+    throw new Error(`Erro ao criar store: ${errorText}`);
+  }
+  
+  const newStore = await createResponse.json();
+  console.log('✅ Store criado:', newStore.name);
+  return newStore.name;
+}
+
+// Adicionar arquivo ao corpus vetorizado
+async function addFileToCorpus(
+  corpusName: string,
+  uploadedFile: GeminiFile,
+  apiKey: string
+): Promise<void> {
+  console.log('📚 Adicionando arquivo ao corpus vetorizado...');
+  
+  const url = `https://generativelanguage.googleapis.com/v1beta/${corpusName}/documents?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      displayName: uploadedFile.displayName || 'Study Document',
+      file: uploadedFile.name
+    })
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Erro ao adicionar ao corpus: ${errorText}`);
+  }
+  
+  const document = await response.json();
+  console.log('✅ Arquivo adicionado ao corpus:', document.name);
+  
+  // Aguardar indexação/vetorização
+  console.log('⏳ Aguardando vetorização (5s)...');
+  await new Promise(resolve => setTimeout(resolve, 5000));
+}
+
+// Extração com File Search (queries semânticas focadas)
+async function extractWithFileSearch(
+  corpusName: string,
+  apiKey: string
+): Promise<ExtractedStudyData> {
+  console.log('🔍 Extraindo dados com File Search...');
+  
+  const extractedData: ExtractedStudyData = {
+    title: '',
+    authors: [],
+    year: undefined,
+    journal: '',
+    abstract: '',
+    doi: '',
+    nutraceuticals: [],
+    conditions: []
+  };
+
+  // Query 1: Metadados básicos
+  console.log('🔍 Query 1/3: Metadados básicos...');
+  const metadataPrompt = `Analise este estudo científico e extraia os metadados:
+- Título completo do estudo
+- Lista de autores (separados por vírgula)
+- Ano de publicação
+- Nome do journal/periódico
+- Abstract/resumo
+- DOI (se disponível)
+
+Retorne no formato JSON estruturado.`;
+
+  try {
+    const metadataResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ 
+            role: 'user', 
+            parts: [{ text: metadataPrompt }] 
+          }],
+          tools: [{
+            retrieval: {
+              vertexAiSearch: {
+                datastore: corpusName
+              }
+            }
+          }],
+          generationConfig: {
+            temperature: 0.1
+          }
+        })
+      }
+    );
+
+    if (metadataResponse.ok) {
+      const metadataResult = await metadataResponse.json();
+      const metadataText = metadataResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      console.log('📄 Metadata extraída:', metadataText.substring(0, 200));
+      
+      // Parse do texto retornado
+      const lines = metadataText.split('\n');
+      for (const line of lines) {
+        const lower = line.toLowerCase();
+        if ((lower.includes('título') || lower.includes('title')) && line.includes(':')) {
+          extractedData.title = line.split(':').slice(1).join(':').trim();
+        } else if ((lower.includes('autor') || lower.includes('author')) && line.includes(':')) {
+          const authorsText = line.split(':').slice(1).join(':').trim();
+          extractedData.authors = authorsText.split(',').map((a: string) => a.trim()).filter((a: string) => a);
+        } else if ((lower.includes('ano') || lower.includes('year')) && line.includes(':')) {
+          const yearMatch = line.match(/\d{4}/);
+          if (yearMatch) extractedData.year = parseInt(yearMatch[0]);
+        } else if ((lower.includes('journal') || lower.includes('periódico')) && line.includes(':')) {
+          extractedData.journal = line.split(':').slice(1).join(':').trim();
+        } else if (lower.includes('doi') && line.includes(':')) {
+          extractedData.doi = line.split(':').slice(1).join(':').trim();
+        }
+      }
+    }
+  } catch (e) {
+    console.error('❌ Erro em Query 1:', e);
+  }
+
+  // Query 2: Nutracêuticos (busca semântica focada)
+  console.log('🔍 Query 2/3: Nutracêuticos...');
+  const nutraceuticalsPrompt = `Liste TODOS os nutracêuticos, suplementos, compostos ativos ou ingredientes mencionados neste estudo científico.
+
+Para cada um, extraia:
+- Nome científico ou comum do composto
+- Dosagem/quantidade utilizada (com unidades, ex: "500mg/dia", "2g diários")
+- Efeitos/resultados observados no estudo
+
+Busque em TODO o documento: introdução, materiais e métodos, resultados, discussão, tabelas e figuras.
+
+Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar nutracêuticos, indique claramente.`;
+
+  try {
+    const nutraceuticalsResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ 
+            role: 'user', 
+            parts: [{ text: nutraceuticalsPrompt }] 
+          }],
+          tools: [{
+            retrieval: {
+              vertexAiSearch: {
+                datastore: corpusName
+              }
+            }
+          }],
+          generationConfig: {
+            temperature: 0.1
+          }
+        })
+      }
+    );
+
+    if (nutraceuticalsResponse.ok) {
+      const nutraceuticalsResult = await nutraceuticalsResponse.json();
+      const nutraceuticalsText = nutraceuticalsResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      console.log('💊 Nutracêuticos extraídos:', nutraceuticalsText.substring(0, 300));
+      
+      // Parse de bullet points
+      const bulletPoints = nutraceuticalsText.split('\n').filter((l: string) => 
+        l.trim().startsWith('-') || l.trim().startsWith('*') || /^\d+\./.test(l.trim())
+      );
+      
+      if (bulletPoints.length > 0) {
+        extractedData.nutraceuticals = bulletPoints.map((bp: string) => {
+          const cleaned = bp.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
+          const parts = cleaned.split(/[:\-]/);
+          return {
+            name: parts[0]?.trim() || cleaned,
+            dosage: parts[1]?.includes('mg') || parts[1]?.includes('g') || parts[1]?.includes('ml') 
+              ? parts[1].trim() 
+              : '',
+            effects: parts.length > 2 ? parts.slice(2).join(':').trim() : parts[1]?.trim() || ''
+          };
+        });
+      }
+    }
+  } catch (e) {
+    console.error('❌ Erro em Query 2:', e);
+  }
+
+  // Query 3: Condições de saúde
+  console.log('🔍 Query 3/3: Condições de saúde...');
+  const conditionsPrompt = `Liste TODAS as condições de saúde, doenças ou problemas médicos abordados neste estudo científico.
+
+Para cada condição:
+- Nome da condição ou doença
+- Tipo de relação com os compostos estudados: "treatment" (tratamento), "prevention" (prevenção) ou "support" (suporte)
+- Descrição breve da eficácia observada
+
+Busque em TODO o documento.
+
+Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar condições, indique claramente.`;
+
+  try {
+    const conditionsResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ 
+            role: 'user', 
+            parts: [{ text: conditionsPrompt }] 
+          }],
+          tools: [{
+            retrieval: {
+              vertexAiSearch: {
+                datastore: corpusName
+              }
+            }
+          }],
+          generationConfig: {
+            temperature: 0.1
+          }
+        })
+      }
+    );
+
+    if (conditionsResponse.ok) {
+      const conditionsResult = await conditionsResponse.json();
+      const conditionsText = conditionsResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      console.log('🏥 Condições extraídas:', conditionsText.substring(0, 300));
+      
+      // Parse de bullet points
+      const bulletPoints = conditionsText.split('\n').filter((l: string) => 
+        l.trim().startsWith('-') || l.trim().startsWith('*') || /^\d+\./.test(l.trim())
+      );
+      
+      if (bulletPoints.length > 0) {
+        extractedData.conditions = bulletPoints.map((bp: string) => {
+          const cleaned = bp.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
+          const lower = cleaned.toLowerCase();
+          
+          let relationshipType = 'treatment';
+          if (lower.includes('prevention') || lower.includes('prevenção') || lower.includes('preventivo')) {
+            relationshipType = 'prevention';
+          } else if (lower.includes('support') || lower.includes('suporte') || lower.includes('manutenção')) {
+            relationshipType = 'support';
+          }
+          
+          const parts = cleaned.split(/[:\-]/);
+          return {
+            name: parts[0]?.trim() || cleaned,
+            relationship_type: relationshipType,
+            efficacy_description: parts.slice(1).join(':').trim() || ''
+          };
+        });
+      }
+    }
+  } catch (e) {
+    console.error('❌ Erro em Query 3:', e);
+  }
+
+  console.log(`✅ Extração File Search completa: ${extractedData.nutraceuticals.length} nutracêuticos, ${extractedData.conditions.length} condições`);
+  return extractedData;
 }
 
 async function analyzeWithGemini(
@@ -415,7 +715,7 @@ serve(async (req) => {
     console.log('✅ PDF baixado com sucesso');
     console.log('📊 Tamanho do arquivo:', fileData.size, 'bytes', `(~${(fileData.size / 1024 / 1024).toFixed(2)} MB)`);
 
-    // ========== FLUXO PRINCIPAL ==========
+    // ========== FLUXO PRINCIPAL COM FILE SEARCH ==========
     
     // 1. Upload para Gemini File API
     const uploadedFile = await uploadToGeminiFileAPI(fileData, fileName, GOOGLE_GEMINI_KEY);
@@ -423,12 +723,14 @@ serve(async (req) => {
     // 2. Aguardar processamento
     await waitForFileActive(uploadedFile.name, GOOGLE_GEMINI_KEY);
 
-    // 3. Análise com generateContent + Function Calling
-    const extractedData = await analyzeWithGemini(
-      uploadedFile.uri, 
-      fileName, 
-      GOOGLE_GEMINI_KEY
-    );
+    // 3. ✨ NOVO: Obter ou criar File Search Store (corpus vetorizado)
+    const corpusName = await getOrCreateFileSearchStore(GOOGLE_GEMINI_KEY);
+    
+    // 4. ✨ NOVO: Adicionar arquivo ao corpus (vetorização automática)
+    await addFileToCorpus(corpusName, uploadedFile, GOOGLE_GEMINI_KEY);
+    
+    // 5. ✨ NOVO: Extração com File Search (queries semânticas focadas)
+    const extractedData = await extractWithFileSearch(corpusName, GOOGLE_GEMINI_KEY);
 
     // 4. Salvar no banco Supabase
     console.log('💾 Salvando dados extraídos no banco...');
@@ -456,8 +758,11 @@ serve(async (req) => {
     
     console.log('✅ Dados salvos com sucesso no banco');
 
-    // 5. Cleanup (deletar arquivo do Gemini)
-    await deleteGeminiFile(uploadedFile.name, GOOGLE_GEMINI_KEY);
+    // 6. Cleanup: NÃO deletar arquivo para manter corpus vetorizado
+    // Comentado para reutilização do corpus vetorizado em futuras consultas
+    // console.log('🗑️ Deletando arquivo do Gemini File API...');
+    // await deleteGeminiFile(uploadedFile.name, GOOGLE_GEMINI_KEY);
+    console.log('✅ Arquivo mantido no corpus vetorizado para reutilização');
 
     // ========== SUCESSO ==========
     console.log('🎉 Processamento completo!');
