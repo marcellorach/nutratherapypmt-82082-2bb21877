@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Database, FileText, FileCode, ArrowDown, ArrowUp, ListCheck, Filter } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
 import EstudosHeader from './estudos/EstudosHeader';
@@ -14,45 +15,6 @@ import { UploadEstudoForm } from './estudos/UploadEstudoForm';
 import { useTranslation } from 'react-i18next';
 import './estudos/estudos.css';
 
-const estudosExemplo = [
-  {
-    id: "1",
-    title: "Journal of Veterinary Medicine, 2023",
-    description: "Estudo sobre ômega 3 e 6 em cães",
-    journal: "Journal of Veterinary Medicine",
-    year: "2023",
-    status: "new",
-    abstract: "Este estudo examina os efeitos de suplementação de ômega 3 e 6 em cães com problemas articulares. Os resultados mostram melhora significativa na mobilidade após 8 semanas de tratamento.",
-    nutraceuticals: ["Ômega 3", "Ômega 6"],
-    sampleSize: 120,
-    qualityScore: 4.2,
-  },
-  {
-    id: "2",
-    title: "Animal Care Journal, 2023",
-    description: "Eficácia de glucosamina em cães idosos",
-    journal: "Animal Care Journal",
-    year: "2023",
-    status: "in-review",
-    abstract: "Estudo controlado randomizado avaliando a eficácia de glucosamina em cães idosos com osteoartrite. O grupo de tratamento mostrou melhora de 42% nos escores de dor em comparação com o placebo.",
-    nutraceuticals: ["Glucosamina", "Condroitina"],
-    sampleSize: 85,
-    qualityScore: 3.8,
-  },
-  {
-    id: "3",
-    title: "Veterinary Research, 2023",
-    description: "Nutracêuticos para saúde articular",
-    journal: "Veterinary Research",
-    year: "2023",
-    status: "approved",
-    abstract: "Meta-análise de 17 estudos sobre o uso de nutracêuticos para saúde articular em cães. A análise demonstra benefícios consistentes com tratamento prolongado de combinações específicas de suplementos.",
-    nutraceuticals: ["MSM", "Glucosamina", "Condroitina", "Extrato de Mexilhão de Lábio Verde"],
-    sampleSize: 940,
-    qualityScore: 4.5,
-  },
-];
-
 const EstudosTab: React.FC = () => {
   const { t } = useTranslation();
   const [mainTab, setMainTab] = useState<string>("importar");
@@ -60,7 +22,57 @@ const EstudosTab: React.FC = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEstudo, setSelectedEstudo] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [estudos, setEstudos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Fetch estudos from database
+  useEffect(() => {
+    fetchEstudos();
+    
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('processed_studies_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'processed_studies'
+        },
+        () => {
+          fetchEstudos();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchEstudos = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('processed_studies')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setEstudos(data || []);
+    } catch (error) {
+      console.error('Error fetching studies:', error);
+      toast({
+        title: "Erro ao carregar estudos",
+        description: "Não foi possível carregar os estudos do banco de dados.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleAddEstudo = () => {
     setDialogOpen(true);
@@ -68,6 +80,7 @@ const EstudosTab: React.FC = () => {
   
   const handleEstudoAdicionado = () => {
     setDialogOpen(false);
+    fetchEstudos(); // Refresh list
     toast({
       title: t('studies.toast.studyAdded'),
       description: t('studies.toast.studyAddedDesc'),
@@ -87,15 +100,16 @@ const EstudosTab: React.FC = () => {
     setDetailDialogOpen(false);
   };
 
-  const filteredEstudos = estudosExemplo.filter(estudo => 
-    estudo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    estudo.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    estudo.journal.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEstudos = estudos.filter(estudo => 
+    (estudo.title && estudo.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (estudo.description && estudo.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (estudo.original_filename && estudo.original_filename.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (estudo.journal && estudo.journal.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const novoEstudos = filteredEstudos.filter(estudo => estudo.status === "new");
-  const emRevEstudos = filteredEstudos.filter(estudo => estudo.status === "in-review");
-  const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.status === "approved");
+  const novoEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "new");
+  const emRevEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "parsed" || estudo.kanban_status === "review");
+  const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "approved");
   
   const getNutraceuticalScore = (name: string): number => {
     const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;

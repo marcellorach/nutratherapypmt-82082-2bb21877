@@ -1,13 +1,16 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
+import { useGeminiProcessing } from '@/hooks/useGeminiProcessing';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EstudoCardProps {
   estudo: any;
@@ -23,117 +26,178 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   getNutraceuticalScore 
 }) => {
   const { t } = useTranslation();
-  // Dados de exemplo para as seções NTAI (em produção viriam do backend)
-  const ntaiData = {
-    nutraceuticos: estudo.nutraceuticals || [],
-    condicoes: [
-      { nome: "Artrite Canina", score: 4.5 },
-      { nome: "Inflamação Articular", score: 3.8 }
-    ],
-    interacoesPositivas: [
-      { nome: "Glucosamina", score: 4.0 },
-      { nome: "MSM", score: 3.8 }
-    ],
-    interacoesNegativas: [
-      { nome: "Anti-inflamatórios", score: 2.5 }
-    ],
-    efeitosColaterais: [
-      { nome: "Sonolência Leve", score: 2.0 },
-      { nome: "Alteração Apetite", score: 1.8 }
-    ]
+  const { processStudy, processing, progress } = useGeminiProcessing();
+  const [localEstudo, setLocalEstudo] = useState(estudo);
+  const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+
+  // Update local estudo when prop changes
+  useEffect(() => {
+    setLocalEstudo(estudo);
+  }, [estudo]);
+
+  // Check if study needs processing (uploaded but not processed)
+  const needsProcessing = localEstudo.kanban_status === 'new' && !localEstudo.analysis_data;
+  const isProcessing = processing[localEstudo.id] || false;
+  const currentProgress = progress[localEstudo.id] || 0;
+
+  const handleGeminiProcess = async () => {
+    setProcessingStatus('processing');
+    try {
+      await processStudy(localEstudo.id, localEstudo.storage_path, localEstudo.original_filename);
+      
+      // Fetch updated study data
+      const { data: updatedStudy, error } = await supabase
+        .from('processed_studies')
+        .select('*')
+        .eq('id', localEstudo.id)
+        .single();
+
+      if (!error && updatedStudy) {
+        setLocalEstudo(updatedStudy);
+        setProcessingStatus('success');
+      }
+    } catch (error) {
+      console.error('Error processing study:', error);
+      setProcessingStatus('error');
+    }
   };
 
+  // Extract data from Gemini analysis or use defaults
+  const analysisData = localEstudo.analysis_data as any;
+  const nutraceuticals = analysisData?.nutraceuticals || localEstudo.nutraceuticals || [];
+  const conditions = analysisData?.conditions || [];
+  const hasAnalysisData = !!analysisData && (nutraceuticals.length > 0 || conditions.length > 0);
+
   return (
-    <Card>
+    <Card className={needsProcessing && !isProcessing ? 'border-2 border-yellow-500 bg-yellow-50/30' : ''}>
       <CardHeader>
         <div className="flex items-center justify-between mb-2">
-          <CardTitle>{estudo.title}</CardTitle>
-          <EvidenceTag score={estudo.qualityScore} showLabel={false} />
+          <div className="flex items-center gap-2 flex-1">
+            <CardTitle className="text-base">{localEstudo.title || localEstudo.original_filename}</CardTitle>
+            {localEstudo.qualityScore && (
+              <EvidenceTag score={localEstudo.qualityScore} showLabel={false} />
+            )}
+          </div>
+          {needsProcessing && !isProcessing && (
+            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              Aguardando IA
+            </Badge>
+          )}
+          {isProcessing && (
+            <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Processando
+            </Badge>
+          )}
+          {processingStatus === 'success' && (
+            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              Concluído
+            </Badge>
+          )}
+          {processingStatus === 'error' && (
+            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Erro
+            </Badge>
+          )}
         </div>
-        <CardDescription>{estudo.description}</CardDescription>
+        <CardDescription>{localEstudo.description || 'Estudo científico importado'}</CardDescription>
+        
+        {/* Progress Bar durante processamento */}
+        {isProcessing && (
+          <div className="mt-3 space-y-2">
+            <Progress value={currentProgress} className="h-2" />
+            <p className="text-xs text-blue-600">
+              🤖 Gemini AI analisando documento... {currentProgress}%
+            </p>
+          </div>
+        )}
+        
+        {/* Alert de necessidade de processamento */}
+        {needsProcessing && !isProcessing && (
+          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800 font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Este estudo precisa ser processado pelo Gemini AI para extrair dados estruturados
+            </p>
+            <Button
+              onClick={handleGeminiProcess}
+              size="sm"
+              className="mt-2 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Processar com Gemini AI
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <h4 className="text-sm font-semibold mb-3 text-purple-700">{t('studies.card.ntaiAnalysis')}</h4>
-          
-          {/* Seção Nutraceuticos */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">{t('studies.card.nutraceuticals')}</p>
-            <div className="flex flex-wrap gap-1">
-              {ntaiData.nutraceuticos.map((nutra: string, idx: number) => (
-                <NutraceuticalTag 
-                  key={idx} 
-                  name={nutra} 
-                  score={getNutraceuticalScore(nutra)} 
-                />
-              ))}
-            </div>
-          </div>
+        {/* Only show analysis data if study has been processed */}
+        {hasAnalysisData && (
+          <div>
+            <h4 className="text-sm font-semibold mb-3 text-purple-700 flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t('studies.card.ntaiAnalysis')}
+            </h4>
+            
+            {/* Seção Nutraceuticos */}
+            {nutraceuticals.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">{t('studies.card.nutraceuticals')}</p>
+                <div className="flex flex-wrap gap-1">
+                  {nutraceuticals.map((nutra: any, idx: number) => (
+                    <NutraceuticalTag 
+                      key={idx} 
+                      name={typeof nutra === 'string' ? nutra : nutra.name} 
+                      score={getNutraceuticalScore(typeof nutra === 'string' ? nutra : nutra.name)} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Seção Condições */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">{t('studies.card.conditions')}</p>
-            <div className="flex flex-wrap gap-1">
-              {ntaiData.condicoes.map((condicao, idx) => (
-                <OutcomeTag 
-                  key={idx}
-                  outcome={condicao.nome}
-                  score={condicao.score}
-                />
-              ))}
-            </div>
+            {/* Seção Condições */}
+            {conditions.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">{t('studies.card.conditions')}</p>
+                <div className="flex flex-wrap gap-1">
+                  {conditions.map((condition: any, idx: number) => (
+                    <Badge 
+                      key={idx}
+                      variant="outline" 
+                      className="bg-purple-50 text-purple-700 border-purple-200"
+                    >
+                      {condition.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Seção Interações */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">{t('studies.card.interactions')}</p>
-            <div className="flex flex-wrap gap-1">
-              {ntaiData.interacoesPositivas.map((interacao, idx) => (
-                <Badge 
-                  key={`pos-${idx}`}
-                  variant="outline" 
-                  className="bg-green-50 text-green-700 border-green-200 flex items-center"
-                >
-                  <ArrowUp className="w-3 h-3 mr-1" />
-                  {interacao.nome} ({interacao.score.toFixed(1)})
-                </Badge>
-              ))}
-              {ntaiData.interacoesNegativas.map((interacao, idx) => (
-                <Badge 
-                  key={`neg-${idx}`}
-                  variant="outline" 
-                  className="bg-red-50 text-red-700 border-red-200 flex items-center"
-                >
-                  <ArrowDown className="w-3 h-3 mr-1" />
-                  {interacao.nome} ({interacao.score.toFixed(1)})
-                </Badge>
-              ))}
-            </div>
+        {/* Show metadata if available */}
+        {(localEstudo.authors || localEstudo.year || localEstudo.journal) && (
+          <div className="text-xs text-gray-600 space-y-1">
+            {localEstudo.authors && (
+              <p><strong>Autores:</strong> {Array.isArray(localEstudo.authors) ? localEstudo.authors.join(', ') : localEstudo.authors}</p>
+            )}
+            {localEstudo.year && (
+              <p><strong>Ano:</strong> {localEstudo.year}</p>
+            )}
+            {localEstudo.journal && (
+              <p><strong>Journal:</strong> {localEstudo.journal}</p>
+            )}
           </div>
-
-          {/* Seção Efeitos Colaterais */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">{t('studies.card.sideEffects')}</p>
-            <div className="flex flex-wrap gap-1">
-              {ntaiData.efeitosColaterais.map((efeito, idx) => (
-                <Badge 
-                  key={idx}
-                  variant="outline" 
-                  className="bg-amber-50 text-amber-700 border-amber-200 flex items-center"
-                >
-                  <ArrowRight className="w-3 h-3 mr-1" />
-                  {efeito.nome} ({efeito.score.toFixed(1)})
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
 
         <Button 
           variant="outline" 
           className="w-full" 
           size="sm"
-          onClick={() => onView(estudo)}
+          onClick={() => onView(localEstudo)}
         >
           {buttonLabel || t('studies.kanban.viewDetails')}
         </Button>
