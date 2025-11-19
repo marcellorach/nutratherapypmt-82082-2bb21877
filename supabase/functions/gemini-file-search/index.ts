@@ -330,21 +330,42 @@ serve(async (req) => {
 });
 
 async function waitForFileProcessing(fileUri: string, apiKey: string): Promise<void> {
-  for (let i = 0; i < 30; i++) {
-    const fileName = fileUri.split('/').pop();
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`);
+  const maxAttempts = 30;
+  const delayMs = 2000;
+  
+  console.log(`⏳ Verificando status do arquivo Gemini: ${fileUri}`);
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/${fileUri}?key=${apiKey}`,
+      { method: 'GET' }
+    );
     
-    if (!response.ok) throw new Error('Status check falhou');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Erro no status check (tentativa ${attempt}/${maxAttempts}):`, errorText);
+      throw new Error(`Status check falhou: ${response.statusText}`);
+    }
     
     const fileStatus = await response.json();
+    console.log(`📊 Status do arquivo (tentativa ${attempt}/${maxAttempts}):`, fileStatus.state);
     
-    if (fileStatus.state === 'ACTIVE') return;
-    if (fileStatus.state === 'FAILED') throw new Error('Processamento falhou');
+    if (fileStatus.state === 'ACTIVE') {
+      console.log('✅ Arquivo ATIVO e pronto para processamento');
+      return;
+    }
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (fileStatus.state === 'FAILED') {
+      console.error('❌ Processamento do arquivo falhou no Gemini');
+      throw new Error('Gemini file processing failed');
+    }
+    
+    // Aguardar antes da próxima tentativa
+    await new Promise(resolve => setTimeout(resolve, delayMs));
   }
   
-  throw new Error('Timeout');
+  console.error('❌ Timeout aguardando processamento do arquivo');
+  throw new Error('Timeout waiting for Gemini file processing');
 }
 
 async function extractStructuredData(fileUri: string, apiKey: string): Promise<ExtractedStudyData> {

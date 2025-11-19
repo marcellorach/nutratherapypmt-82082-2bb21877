@@ -80,62 +80,39 @@ export const useProcessingLogic = (
           throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
         }
 
-        // ETAPA 1: EXTRAÇÃO (Gemini → Fallback Unstructured)
+        // ETAPA 1: EXTRAÇÃO COM GEMINI
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
         setProcessQueue([...updatedQueue]);
         
-        let parseData: any = null;
-        let usedGemini = false;
+        addLogEntry(`🤖 Processando com Gemini: ${item.title}`);
         
-        try {
-          addLogEntry(`🤖 Tentando Gemini File API: ${item.title}`);
-          
-          const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
-            body: { 
-              studyId: item.id,
-              fileUrl: studyData.storage_path,
-              fileName: studyData.original_filename
-            }
-          });
-          
-          if (geminiError) throw geminiError;
-          
-          if (geminiData && geminiData.success) {
-            parseData = geminiData;
-            usedGemini = true;
-            addLogEntry(`✅ Gemini OK: ${geminiData.nutraceuticalsCount || 0} nutracêuticos`);
-          } else {
-            throw new Error('Gemini sem dados válidos');
+        const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
+          body: { 
+            studyId: item.id,
+            fileUrl: studyData.storage_path,
+            fileName: studyData.original_filename
           }
-        } catch (geminiErr: any) {
-          addLogEntry(`⚠️ Gemini falhou: ${geminiErr.message}`);
-          addLogEntry(`🔄 Fallback Unstructured.io...`);
-          
-          const { data: unstructuredData, error: unstructuredError } = await supabase.functions.invoke('parse-study', {
-            body: { 
-              studyId: item.id, 
-              storagePath: studyData.storage_path 
-            }
-          });
-          
-          if (unstructuredError) {
-            const errorMsg = unstructuredError.message || String(unstructuredError);
-            addLogEntry(`[ERRO] Ambos falharam: ${errorMsg}`);
-            updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
-            setProcessQueue([...updatedQueue]);
-            processNextItem(index + 1);
-            return;
-          }
-          
-          parseData = unstructuredData;
-          addLogEntry(`✅ Unstructured OK`);
-        }
-
-        if (!parseData || parseData.error) {
-          throw new Error('Parsing falhou');
+        });
+        
+        if (geminiError) {
+          const errorMsg = geminiError.message || String(geminiError);
+          addLogEntry(`❌ Erro Gemini: ${errorMsg}`);
+          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+          setProcessQueue([...updatedQueue]);
+          processNextItem(index + 1);
+          return;
         }
         
-        addLogEntry(`📊 ${usedGemini ? 'Gemini ✨' : 'Unstructured'}`);
+        if (!geminiData || !geminiData.success) {
+          const errorMsg = 'Gemini retornou dados inválidos';
+          addLogEntry(`❌ ${errorMsg}`);
+          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+          setProcessQueue([...updatedQueue]);
+          processNextItem(index + 1);
+          return;
+        }
+        
+        addLogEntry(`✅ Gemini OK: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
 
         // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
