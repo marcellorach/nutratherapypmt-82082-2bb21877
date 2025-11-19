@@ -172,14 +172,15 @@ async function getOrCreateFileSearchStore(apiKey: string): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      displayName: 'petnutra_studies',
-      description: 'Corpus vetorizado de estudos científicos sobre nutracêuticos'
+      displayName: 'petnutra_studies'
     })
   });
   
   if (!createResponse.ok) {
     const errorText = await createResponse.text();
-    throw new Error(`Erro ao criar store: ${errorText}`);
+    console.error('❌ Status:', createResponse.status);
+    console.error('❌ Resposta completa:', errorText);
+    throw new Error(`Erro ao criar store (${createResponse.status}): ${errorText}`);
   }
   
   const newStore = await createResponse.json();
