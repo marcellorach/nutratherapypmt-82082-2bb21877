@@ -1448,7 +1448,8 @@
       "placeholder": "Search studies by title, description or journal..."
     },
     "tabs": {
-      "import": "Import & Process",
+      "import": "Import",
+      "importAndProcess": "Import & Process",
       "manage": "Manage Studies"
     },
     "import": {
@@ -1457,6 +1458,7 @@
       "sectionTitle": "Import Studies",
       "uploadTab": "File Upload",
       "historyTab": "History",
+      "aiProcessingTab": "AI Processing",
       "selectFiles": "Select Files",
       "supportedFormats": "Supported formats: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF",
       "filesForImport": "Files for import ({{count}})",
@@ -1484,6 +1486,10 @@
       "actions": "Actions",
       "noImports": "No previous imports registered.",
       "errorFetching": "Error fetching history"
+    },
+    "aiProcessing": {
+      "title": "Processing with Gemini AI",
+      "description": "Select imported studies below and process them to extract structured information"
     },
     "rag": {
       "title": "RAG Analysis",

@@ -125,7 +125,7 @@ const EstudosTab: React.FC = () => {
           <TabsList className="mb-4 md:mb-0">
             <TabsTrigger value="importar" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
-              <span>{t('studies.tabs.import')}</span>
+              <span>{t('studies.tabs.importAndProcess')}</span>
             </TabsTrigger>
             <TabsTrigger value="gerenciar" className="flex items-center gap-2">
               <ListCheck className="w-4 h-4" />

@@ -10,6 +10,7 @@ import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import HistoryTab from './HistoryTab';
+import AIProcessingTab from './AIProcessingTab';
 
 const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
@@ -54,6 +55,10 @@ const SciImportSection: React.FC = () => {
           
           <TabsContent value="import-history">
             <HistoryTab onProcessWithAI={handleProcessWithAI} />
+          </TabsContent>
+
+          <TabsContent value="ai-processing">
+            <AIProcessingTab />
           </TabsContent>
         </div>
       </Tabs>

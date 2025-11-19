@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Database } from "lucide-react";
+import { Upload, Database, Brain } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
 interface TabNavigationProps {
@@ -30,6 +30,14 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
         >
           <Database className="h-4 w-4" />
           <span>{t('studies.import.historyTab')}</span>
+        </TabsTrigger>
+        <TabsTrigger 
+          value="ai-processing" 
+          className="flex items-center gap-1"
+          onClick={() => onTabChange("ai-processing")}
+        >
+          <Brain className="h-4 w-4" />
+          <span>{t('studies.import.aiProcessingTab')}</span>
         </TabsTrigger>
       </TabsList>
     </div>

@@ -131,12 +131,15 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
+    // Use FormData for correct multipart formatting
+    const formData = new FormData();
+    formData.append('file', new Blob([uint8Array], { type: 'application/pdf' }), fileName || 'study.pdf');
+    
     const uploadResponse = await fetch(
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GOOGLE_AI_API_KEY}`,
       {
         method: 'POST',
-        headers: { 'X-Goog-Upload-Protocol': 'multipart' },
-        body: createMultipartBody(uint8Array, fileName || 'study.pdf', 'application/pdf'),
+        body: formData,
       }
     );
 
@@ -237,27 +240,7 @@ serve(async (req) => {
   }
 });
 
-function createMultipartBody(fileData: Uint8Array, fileName: string, mimeType: string): Blob {
-  const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
-  const chunks: Uint8Array[] = [];
-  const textEncoder = new TextEncoder();
-  
-  chunks.push(textEncoder.encode(`--${boundary}\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n`));
-  chunks.push(textEncoder.encode(JSON.stringify({ file: { displayName: fileName } })));
-  chunks.push(textEncoder.encode(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: ${mimeType}\r\n\r\n`));
-  chunks.push(fileData);
-  chunks.push(textEncoder.encode(`\r\n--${boundary}--\r\n`));
-
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-  const combined = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    combined.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return new Blob([combined], { type: `multipart/related; boundary=${boundary}` });
-}
+// FormData handles multipart body creation automatically
 
 async function waitForFileProcessing(fileUri: string, apiKey: string): Promise<void> {
   for (let i = 0; i < 30; i++) {

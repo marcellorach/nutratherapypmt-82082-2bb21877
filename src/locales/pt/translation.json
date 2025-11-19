@@ -1448,7 +1448,8 @@
       "placeholder": "Buscar estudos por título, descrição ou journal..."
     },
     "tabs": {
-      "import": "Importar & Processar",
+      "import": "Importar",
+      "importAndProcess": "Importar & Processar",
       "manage": "Gerenciar Estudos"
     },
     "import": {
@@ -1457,6 +1458,7 @@
       "sectionTitle": "Importar Estudos",
       "uploadTab": "Upload de Arquivos",
       "historyTab": "Histórico",
+      "aiProcessingTab": "Processamento IA",
       "selectFiles": "Selecionar Arquivos",
       "supportedFormats": "Formatos suportados: BibTeX (.bib), CSV, JSON, PDF, DOC, DOCX, TXT, RTF",
       "filesForImport": "Arquivos para importação ({{count}})",
@@ -1484,6 +1486,10 @@
       "actions": "Ações",
       "noImports": "Nenhuma importação anterior registrada.",
       "errorFetching": "Erro ao buscar histórico"
+    },
+    "aiProcessing": {
+      "title": "Processamento com Gemini AI",
+      "description": "Selecione estudos importados abaixo e processe-os para extrair informações estruturadas"
     },
     "rag": {
       "title": "Análise RAG",
