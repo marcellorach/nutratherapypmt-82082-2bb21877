@@ -157,12 +157,14 @@ serve(async (req) => {
     console.log('📏 Tamanho da metadata:', metadata.length, 'bytes');
     
     parts.push(textEncoder.encode(`--${boundary}\r\n`));
+    parts.push(textEncoder.encode('Content-Disposition: form-data; name="metadata"\r\n'));
     parts.push(textEncoder.encode('Content-Type: application/json; charset=utf-8\r\n\r\n'));
     parts.push(textEncoder.encode(metadata));
     parts.push(textEncoder.encode('\r\n'));
     
     // Part 2: PDF file
     parts.push(textEncoder.encode(`--${boundary}\r\n`));
+    parts.push(textEncoder.encode(`Content-Disposition: form-data; name="file"; filename="${fileName || 'study.pdf'}"\r\n`));
     parts.push(textEncoder.encode('Content-Type: application/pdf\r\n\r\n'));
     parts.push(uint8Array);
     parts.push(textEncoder.encode('\r\n'));
