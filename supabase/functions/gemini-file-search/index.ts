@@ -40,8 +40,14 @@ async function uploadToGeminiFileAPI(
   console.log('📤 Iniciando upload para Gemini File API...');
   console.log('📊 Tamanho do arquivo:', pdfBlob.size, 'bytes');
   
-  const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
-  const uploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+  // Converter blob para bytes
+  const pdfBytes = new Uint8Array(await pdfBlob.arrayBuffer());
+  
+  // Método 1: Tentar com resumable upload (método oficial)
+  console.log('📤 Iniciando resumable upload...');
+  
+  // Passo 1: Iniciar o upload e obter upload URL
+  const startUploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
   
   const metadata = {
     file: {
@@ -49,52 +55,50 @@ async function uploadToGeminiFileAPI(
     }
   };
   
-  const pdfBytes = new Uint8Array(await pdfBlob.arrayBuffer());
-  
-  // Construir corpo multipart/related
-  const encoder = new TextEncoder();
-  const parts: Uint8Array[] = [];
-  
-  // Parte 1: Metadata JSON
-  parts.push(encoder.encode(`--${boundary}\r\n`));
-  parts.push(encoder.encode('Content-Type: application/json; charset=UTF-8\r\n\r\n'));
-  parts.push(encoder.encode(JSON.stringify(metadata) + '\r\n'));
-  
-  // Parte 2: PDF binário
-  parts.push(encoder.encode(`--${boundary}\r\n`));
-  parts.push(encoder.encode('Content-Type: application/pdf\r\n\r\n'));
-  parts.push(pdfBytes);
-  parts.push(encoder.encode('\r\n'));
-  
-  // Finalizar
-  parts.push(encoder.encode(`--${boundary}--\r\n`));
-  
-  // Concatenar todas as partes
-  const totalLength = parts.reduce((acc, part) => acc + part.length, 0);
-  const body = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const part of parts) {
-    body.set(part, offset);
-    offset += part.length;
-  }
-  
-  console.log('📤 Enviando', totalLength, 'bytes para Gemini...');
-  
-  const response = await fetch(uploadUrl, {
+  const initResponse = await fetch(startUploadUrl, {
     method: 'POST',
     headers: {
-      'Content-Type': `multipart/related; boundary=${boundary}`,
+      'X-Goog-Upload-Protocol': 'resumable',
+      'X-Goog-Upload-Command': 'start',
+      'X-Goog-Upload-Header-Content-Length': String(pdfBytes.length),
+      'X-Goog-Upload-Header-Content-Type': 'application/pdf',
+      'Content-Type': 'application/json',
     },
-    body: body,
+    body: JSON.stringify(metadata),
   });
   
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('❌ Upload falhou:', response.status, errorText);
-    throw new Error(`Upload falhou: ${response.status} - ${errorText}`);
+  if (!initResponse.ok) {
+    const errorText = await initResponse.text();
+    console.error('❌ Falha ao iniciar upload:', initResponse.status, errorText);
+    throw new Error(`Falha ao iniciar upload: ${initResponse.status} - ${errorText}`);
   }
   
-  const result = await response.json();
+  // Obter o upload URL do header
+  const uploadUrl = initResponse.headers.get('X-Goog-Upload-URL');
+  if (!uploadUrl) {
+    throw new Error('Upload URL não retornada pelo servidor');
+  }
+  
+  console.log('✅ Upload URL obtida, enviando arquivo...');
+  
+  // Passo 2: Fazer upload do arquivo
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Length': String(pdfBytes.length),
+      'X-Goog-Upload-Offset': '0',
+      'X-Goog-Upload-Command': 'upload, finalize',
+    },
+    body: pdfBytes,
+  });
+  
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    console.error('❌ Upload falhou:', uploadResponse.status, errorText);
+    throw new Error(`Upload falhou: ${uploadResponse.status} - ${errorText}`);
+  }
+  
+  const result = await uploadResponse.json();
   console.log('✅ Upload completo:', result.file.name);
   console.log('📊 URI:', result.file.uri);
   console.log('📊 Estado inicial:', result.file.state);
