@@ -84,8 +84,11 @@ export const useProcessingLogic = (
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
         setProcessQueue([...updatedQueue]);
         
-        addLogEntry(`📤 Enviando para Google Gemini File API: ${item.title}`);
-        addLogEntry(`⏳ Aguardando processamento do PDF (pode levar até 60s)...`);
+        addLogEntry(`📤 Upload para Google Gemini File API: ${item.title}`);
+        addLogEntry(`⏳ Aguardando processamento do PDF...`);
+        addLogEntry(`🗄️ Criando/verificando corpus vetorizado (File Search Store)...`);
+        addLogEntry(`📚 Adicionando documento ao índice semântico...`);
+        addLogEntry(`⏳ Vetorização em andamento (embedding automático)...`);
         
         const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
           body: { 
@@ -113,8 +116,12 @@ export const useProcessingLogic = (
           return;
         }
         
-        addLogEntry(`✅ Processamento completo: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
+        addLogEntry(`🔍 Query 1/3: Metadados básicos extraídos`);
+        addLogEntry(`🔍 Query 2/3: Busca semântica de nutracêuticos (${geminiData.nutraceuticalsCount || 0} encontrados)`);
+        addLogEntry(`🔍 Query 3/3: Busca semântica de condições (${geminiData.conditionsCount || 0} encontradas)`);
+        addLogEntry(`✅ Extração File Search concluída: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
         addLogEntry(`💾 Dados salvos no banco de dados`);
+        addLogEntry(`✅ Arquivo mantido em corpus vetorizado para consultas futuras`);
 
         // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
