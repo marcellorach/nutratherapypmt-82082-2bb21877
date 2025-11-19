@@ -153,15 +153,34 @@ async function analyzeWithGemini(
   console.log('📄 Arquivo:', fileName);
   console.log('🔗 URI:', fileUri);
   
-  const systemPrompt = `Você é um especialista em análise de estudos científicos sobre nutracêuticos para pets.
+  const systemPrompt = `Você é um especialista em extração de dados de estudos científicos sobre nutracêuticos e saúde.
 
-Analise este documento PDF e extraia com MÁXIMA PRECISÃO:
+IMPORTANTE: Analise TODO o conteúdo do PDF e extraia TODOS os dados encontrados.
 
-1. **Metadados**: título completo, lista de autores, ano de publicação, nome do journal, abstract, DOI
-2. **Nutracêuticos**: todos os compostos/substâncias mencionados com seus nomes científicos, dosagens utilizadas e efeitos observados
-3. **Condições de saúde**: todas as doenças/condições abordadas, especificando o tipo de relação (tratamento/prevenção/suporte) e descrição da eficácia
+TAREFA:
+1. **Metadados básicos**: Extraia título completo, todos os autores listados, ano de publicação, nome do periódico/journal, abstract/resumo, DOI (se disponível)
 
-Seja preciso e completo. Se algum dado não estiver disponível, retorne string vazia ou array vazio conforme apropriado.`;
+2. **Nutracêuticos/Compostos**: Liste TODAS as substâncias, compostos, suplementos ou ingredientes ativos mencionados no estudo (ex: resveratrol, curcumina, ômega-3, vitamina D, etc.). Para cada um, extraia:
+   - Nome científico ou comum
+   - Dosagem/quantidade utilizada (com unidades)
+   - Efeitos/resultados observados no estudo
+
+3. **Condições de Saúde**: Liste TODAS as doenças, condições médicas ou problemas de saúde mencionados (ex: diabetes, obesidade, inflamação, doenças cardiovasculares, etc.). Para cada condição:
+   - Nome da condição
+   - Tipo de relação: "treatment" (tratamento ativo), "prevention" (prevenção), ou "support" (suporte/manutenção)
+   - Descrição da eficácia observada
+
+INSTRUÇÕES CRÍTICAS:
+- Leia o PDF COMPLETO, não apenas o abstract
+- Se o estudo menciona múltiplos compostos, liste TODOS
+- Se o estudo aborda várias condições de saúde, liste TODAS
+- Seja DETALHADO nos arrays de nutracêuticos e condições
+- NÃO retorne arrays vazios se houver dados no PDF
+- Se não encontrar um campo específico, use string vazia ("") ou null
+
+EXEMPLO DE RESPOSTA ESPERADA:
+- Se o PDF fala sobre "resveratrol para longevidade", retorne pelo menos 1 nutracêutico e 1 condição
+- Se menciona "vitamina D, magnésio e zinco", retorne 3 nutracêuticos`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
