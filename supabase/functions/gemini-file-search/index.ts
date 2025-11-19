@@ -195,20 +195,38 @@ async function addFileToCorpus(
   apiKey: string
 ): Promise<void> {
   console.log('📚 Adicionando arquivo ao corpus vetorizado...');
+  console.log('📋 Corpus:', corpusName);
+  console.log('📋 Arquivo:', uploadedFile.name);
+  console.log('📋 Display Name:', uploadedFile.displayName);
   
   const url = `https://generativelanguage.googleapis.com/v1beta/${corpusName}/documents?key=${apiKey}`;
+  
+  const payload = {
+    document: {
+      displayName: uploadedFile.displayName || 'Study Document',
+      customMetadata: [
+        { key: 'source', stringValue: 'petnutra' }
+      ]
+    },
+    fileUri: uploadedFile.name
+  };
+  
+  console.log('📤 Payload:', JSON.stringify(payload, null, 2));
+  
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      displayName: uploadedFile.displayName || 'Study Document',
-      file: uploadedFile.name
-    })
+    body: JSON.stringify(payload)
   });
+  
+  console.log('📊 Status da resposta:', response.status);
   
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Erro ao adicionar ao corpus: ${errorText}`);
+    console.error('❌ Status HTTP:', response.status);
+    console.error('❌ Headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+    console.error('❌ Corpo da resposta:', errorText);
+    throw new Error(`Erro ao adicionar ao corpus (${response.status}): ${errorText || 'Sem mensagem de erro'}`);
   }
   
   const document = await response.json();
