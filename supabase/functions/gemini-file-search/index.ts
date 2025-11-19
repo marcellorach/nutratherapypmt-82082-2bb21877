@@ -148,7 +148,7 @@ serve(async (req) => {
     // Part 1: JSON metadata
     const metadata = JSON.stringify({
       file: {
-        displayName: fileName || 'study.pdf'
+        display_name: fileName || 'study.pdf'
       }
     });
     
