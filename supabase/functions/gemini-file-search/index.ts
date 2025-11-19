@@ -131,7 +131,15 @@ serve(async (req) => {
     console.log('🤖 Convertendo PDF para base64...');
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    const base64Pdf = btoa(String.fromCharCode(...uint8Array));
+    
+    // Converter para base64 em chunks para evitar stack overflow
+    let base64Pdf = '';
+    const chunkSize = 32768; // 32KB chunks
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      base64Pdf += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    base64Pdf = btoa(base64Pdf);
     
     console.log('📊 Tamanho do PDF:', uint8Array.length, 'bytes', `(~${(uint8Array.length / 1024 / 1024).toFixed(2)} MB)`);
     console.log('📊 Tamanho base64:', base64Pdf.length, 'caracteres');
