@@ -199,42 +199,21 @@ async function addFileToCorpus(
   console.log('📋 Arquivo:', uploadedFile.name);
   console.log('📋 Display Name:', uploadedFile.displayName);
   
-  // Verificar se o corpus existe antes de tentar adicionar
-  console.log('🔍 Verificando existência do corpus...');
-  const checkUrl = `https://generativelanguage.googleapis.com/v1beta/${corpusName}?key=${apiKey}`;
-  const checkResponse = await fetch(checkUrl);
+  // Usar a nova API de File Search: importFile
+  console.log('📚 Importando arquivo para o File Search Store usando a nova API...');
   
-  if (!checkResponse.ok) {
-    console.error('❌ Corpus não encontrado ou inacessível:', checkResponse.status);
-    const errorText = await checkResponse.text();
-    console.error('❌ Detalhes:', errorText);
-    
-    // Listar corpora disponíveis
-    console.log('🔍 Listando corpora disponíveis...');
-    const listUrl = `https://generativelanguage.googleapis.com/v1beta/corpora?key=${apiKey}`;
-    const listResponse = await fetch(listUrl);
-    if (listResponse.ok) {
-      const corporaList = await listResponse.json();
-      console.log('📋 Corpora disponíveis:', JSON.stringify(corporaList, null, 2));
-    }
-    
-    throw new Error(`Corpus não existe ou não está acessível (${checkResponse.status}): ${errorText}`);
-  }
+  // Converter formato "corpora/xxx" para "fileSearchStores/xxx" se necessário
+  const fileSearchStoreName = corpusName.replace(/^corpora\//, 'fileSearchStores/');
+  console.log('📋 File Search Store:', fileSearchStoreName);
   
-  const corpusInfo = await checkResponse.json();
-  console.log('✅ Corpus verificado:', corpusInfo.name);
-  
-  // Adicionar documento ao corpus
-  const url = `https://generativelanguage.googleapis.com/v1beta/${corpusName}/documents?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/${fileSearchStoreName}:importFile?key=${apiKey}`;
   
   const payload = {
-    document: {
-      displayName: uploadedFile.displayName || 'Study Document',
-      customMetadata: [
-        { key: 'source', stringValue: 'petnutra' }
-      ]
-    },
-    fileUri: uploadedFile.name
+    fileName: uploadedFile.name,
+    customMetadata: [{
+      key: 'source',
+      stringValue: 'petnutra'
+    }]
   };
   
   console.log('📤 URL completa:', url);
@@ -253,15 +232,42 @@ async function addFileToCorpus(
     console.error('❌ Status HTTP:', response.status);
     console.error('❌ Headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
     console.error('❌ Corpo da resposta:', errorText);
-    throw new Error(`Erro ao adicionar ao corpus (${response.status}): ${errorText || 'Sem mensagem de erro'}`);
+    throw new Error(`Erro ao importar arquivo (${response.status}): ${errorText || 'Sem mensagem de erro'}`);
   }
   
-  const document = await response.json();
-  console.log('✅ Arquivo adicionado ao corpus:', document.name);
+  // A resposta é uma Operation que precisa ser monitorada
+  const operation = await response.json();
+  console.log('✅ Operação de importação iniciada:', operation.name);
   
-  // Aguardar indexação/vetorização
-  console.log('⏳ Aguardando vetorização (5s)...');
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  // Aguardar a operação completar (simplificado - polling a cada 2 segundos)
+  console.log('⏳ Aguardando conclusão da importação...');
+  let finalOperation = operation;
+  let attempts = 0;
+  const maxAttempts = 60; // 2 minutos máximo
+  
+  while (!finalOperation.done && attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    attempts++;
+    
+    const checkUrl = `https://generativelanguage.googleapis.com/v1beta/${operation.name}?key=${apiKey}`;
+    const checkResponse = await fetch(checkUrl);
+    
+    if (checkResponse.ok) {
+      finalOperation = await checkResponse.json();
+      console.log(`📊 Tentativa ${attempts}/${maxAttempts} - Status: ${finalOperation.done ? 'Concluído' : 'Em andamento'}`);
+    }
+  }
+  
+  if (!finalOperation.done) {
+    throw new Error('Timeout aguardando conclusão da importação');
+  }
+  
+  if (finalOperation.error) {
+    console.error('❌ Erro na importação:', finalOperation.error);
+    throw new Error(`Erro na importação: ${JSON.stringify(finalOperation.error)}`);
+  }
+  
+  console.log('✅ Arquivo importado com sucesso ao File Search Store');
 }
 
 // Extração com File Search (queries semânticas focadas)
