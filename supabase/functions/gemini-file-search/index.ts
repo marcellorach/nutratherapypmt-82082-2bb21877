@@ -275,7 +275,11 @@ async function extractWithFileSearch(
   fileSearchStoreName: string,
   apiKey: string
 ): Promise<ExtractedStudyData> {
+  const MODEL_NAME = 'gemini-2.5-flash';
   console.log('🔍 Extraindo dados com File Search...');
+  console.log(`📋 File Search Store: ${fileSearchStoreName}`);
+  console.log(`🤖 Modelo AI: ${MODEL_NAME} (suporta File Search)`);
+  console.log(`🛠️ Tecnologia: Google File Search API`);
   
   const extractedData: ExtractedStudyData = {
     title: '',
@@ -301,8 +305,10 @@ async function extractWithFileSearch(
 Retorne no formato JSON estruturado.`;
 
   try {
+    console.log(`🤖 [Query 1/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
+    
     const metadataResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -312,8 +318,8 @@ Retorne no formato JSON estruturado.`;
             parts: [{ text: metadataPrompt }] 
           }],
           tools: [{
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName]
+            file_search: {
+              file_search_store_names: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -365,8 +371,10 @@ Busque em TODO o documento: introdução, materiais e métodos, resultados, disc
 Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar nutracêuticos, indique claramente.`;
 
   try {
+    console.log(`🤖 [Query 2/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
+    
     const nutraceuticalsResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -376,8 +384,8 @@ Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar nutra
             parts: [{ text: nutraceuticalsPrompt }] 
           }],
           tools: [{
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName]
+            file_search: {
+              file_search_store_names: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -429,8 +437,10 @@ Busque em TODO o documento.
 Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar condições, indique claramente.`;
 
   try {
+    console.log(`🤖 [Query 3/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
+    
     const conditionsResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -440,8 +450,8 @@ Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar condi
             parts: [{ text: conditionsPrompt }] 
           }],
           tools: [{
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName]
+            file_search: {
+              file_search_store_names: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -775,10 +785,35 @@ serve(async (req) => {
     // 4. ✨ NOVO: Adicionar arquivo ao corpus (vetorização automática)
     await addFileToCorpus(corpusName, uploadedFile, GOOGLE_GEMINI_KEY);
     
+    // ⏳ Aguardar indexação completa do documento
+    console.log('⏳ Aguardando 10s para indexação completa do documento...');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    
     // 5. ✨ NOVO: Extração com File Search (queries semânticas focadas)
-    // Converter formato "corpora/xxx" para "fileSearchStores/xxx"
+    console.log('🔍 Iniciando extração com File Search API...');
     const fileSearchStoreName = corpusName.replace(/^corpora\//, 'fileSearchStores/');
+    
+    const startTime = Date.now();
     const extractedData = await extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY);
+    const duration = Date.now() - startTime;
+    
+    // 📊 Registrar uso da API
+    console.log('📊 Registrando uso da API...');
+    await supabase.from('api_usage_logs').insert({
+      api_provider: 'google_gemini',
+      model: 'gemini-2.5-flash',
+      operation: 'file_search_extraction',
+      tokens_input: null, // File Search não reporta tokens
+      tokens_output: null,
+      cost_usd: null, // Calcular baseado em pricing se necessário
+      metadata: {
+        study_id: studyId,
+        duration_ms: duration,
+        nutraceuticals_found: extractedData.nutraceuticals?.length || 0,
+        conditions_found: extractedData.conditions?.length || 0,
+        file_name: fileName
+      }
+    });
 
     // 4. Salvar no banco Supabase
     console.log('💾 Salvando dados extraídos no banco...');

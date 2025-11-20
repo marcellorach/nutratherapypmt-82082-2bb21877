@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.gemini-file-search]
 verify_jwt = false
+
+[functions.ai-config]
+verify_jwt = true
+
+[functions.api-usage-stats]
+verify_jwt = true
