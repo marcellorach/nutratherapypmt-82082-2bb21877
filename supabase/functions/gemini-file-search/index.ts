@@ -199,6 +199,32 @@ async function addFileToCorpus(
   console.log('📋 Arquivo:', uploadedFile.name);
   console.log('📋 Display Name:', uploadedFile.displayName);
   
+  // Verificar se o corpus existe antes de tentar adicionar
+  console.log('🔍 Verificando existência do corpus...');
+  const checkUrl = `https://generativelanguage.googleapis.com/v1beta/${corpusName}?key=${apiKey}`;
+  const checkResponse = await fetch(checkUrl);
+  
+  if (!checkResponse.ok) {
+    console.error('❌ Corpus não encontrado ou inacessível:', checkResponse.status);
+    const errorText = await checkResponse.text();
+    console.error('❌ Detalhes:', errorText);
+    
+    // Listar corpora disponíveis
+    console.log('🔍 Listando corpora disponíveis...');
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/corpora?key=${apiKey}`;
+    const listResponse = await fetch(listUrl);
+    if (listResponse.ok) {
+      const corporaList = await listResponse.json();
+      console.log('📋 Corpora disponíveis:', JSON.stringify(corporaList, null, 2));
+    }
+    
+    throw new Error(`Corpus não existe ou não está acessível (${checkResponse.status}): ${errorText}`);
+  }
+  
+  const corpusInfo = await checkResponse.json();
+  console.log('✅ Corpus verificado:', corpusInfo.name);
+  
+  // Adicionar documento ao corpus
   const url = `https://generativelanguage.googleapis.com/v1beta/${corpusName}/documents?key=${apiKey}`;
   
   const payload = {
@@ -211,6 +237,7 @@ async function addFileToCorpus(
     fileUri: uploadedFile.name
   };
   
+  console.log('📤 URL completa:', url);
   console.log('📤 Payload:', JSON.stringify(payload, null, 2));
   
   const response = await fetch(url, {
