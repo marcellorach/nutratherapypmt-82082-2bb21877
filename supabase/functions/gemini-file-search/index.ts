@@ -272,7 +272,7 @@ async function addFileToCorpus(
 
 // Extração com File Search (queries semânticas focadas)
 async function extractWithFileSearch(
-  corpusName: string,
+  fileSearchStoreName: string,
   apiKey: string
 ): Promise<ExtractedStudyData> {
   console.log('🔍 Extraindo dados com File Search...');
@@ -312,10 +312,8 @@ Retorne no formato JSON estruturado.`;
             parts: [{ text: metadataPrompt }] 
           }],
           tools: [{
-            retrieval: {
-              vertexAiSearch: {
-                datastore: corpusName
-              }
+            fileSearch: {
+              fileSearchStoreNames: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -378,10 +376,8 @@ Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar nutra
             parts: [{ text: nutraceuticalsPrompt }] 
           }],
           tools: [{
-            retrieval: {
-              vertexAiSearch: {
-                datastore: corpusName
-              }
+            fileSearch: {
+              fileSearchStoreNames: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -444,10 +440,8 @@ Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar condi
             parts: [{ text: conditionsPrompt }] 
           }],
           tools: [{
-            retrieval: {
-              vertexAiSearch: {
-                datastore: corpusName
-              }
+            fileSearch: {
+              fileSearchStoreNames: [fileSearchStoreName]
             }
           }],
           generationConfig: {
@@ -782,7 +776,9 @@ serve(async (req) => {
     await addFileToCorpus(corpusName, uploadedFile, GOOGLE_GEMINI_KEY);
     
     // 5. ✨ NOVO: Extração com File Search (queries semânticas focadas)
-    const extractedData = await extractWithFileSearch(corpusName, GOOGLE_GEMINI_KEY);
+    // Converter formato "corpora/xxx" para "fileSearchStores/xxx"
+    const fileSearchStoreName = corpusName.replace(/^corpora\//, 'fileSearchStores/');
+    const extractedData = await extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY);
 
     // 4. Salvar no banco Supabase
     console.log('💾 Salvando dados extraídos no banco...');
