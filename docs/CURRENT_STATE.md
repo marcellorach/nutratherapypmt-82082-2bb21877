@@ -1,8 +1,8 @@
 # 📍 NutraTherapy - Estado Atual do Projeto
 
 ---
-**Versão:** 1.3.0  
-**Última Atualização:** 2025-11-11  
+**Versão:** 1.4.0  
+**Última Atualização:** 2025-11-20  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
@@ -103,7 +103,7 @@ Imagine uma casa:
 #### **27 Tabs Administrativas**
 Todas as tabs estão criadas com lazy loading e funcionando:
 
-**📚 Knowledge Base (8 tabs)**
+**📚 Knowledge Base (7 tabs)**
 - ✅ Estudos Científicos - CRUD completo
 - ✅ Nutracêuticos - CRUD completo
 - ✅ Gerenciamento - CRUD avançado

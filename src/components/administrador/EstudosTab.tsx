@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Database, FileText, FileCode, ArrowDown, ArrowUp, ListCheck, Filter } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
@@ -141,9 +142,14 @@ const EstudosTab: React.FC = () => {
         </div>
         
         <TabsContent value="importar" className="mt-0 space-y-6">
-          <div className="flex items-center space-x-2 mb-2">
-            <FileText className="h-4 w-4 text-green-600" />
-            <h3 className="text-lg font-medium">Upload e Extração Automática (Gemini AI)</h3>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4 text-green-600" />
+              <h3 className="text-lg font-medium">Upload e Extração Automática (Gemini AI)</h3>
+            </div>
+            <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+              {t('common.recommended')}
+            </Badge>
           </div>
           <UploadEstudoForm />
           
