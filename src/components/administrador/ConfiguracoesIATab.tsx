@@ -49,13 +49,6 @@ const ConfiguracoesIATab: React.FC = () => {
         title: "Erro ao carregar configurações",
         description: "Não foi possível carregar as chaves API. Tente novamente mais tarde."
       });
-      
-      setOpenaiKey(localStorage.getItem('openai_api_key') || "");
-      setClaudeKey(localStorage.getItem('claude_api_key') || "");
-      setGrokKey(localStorage.getItem('grok_api_key') || "");
-      setUnstructuredKey(localStorage.getItem('unstructured_api_key') || "");
-      setGoogleGeminiKey(localStorage.getItem('google_gemini_api_key') || "");
-
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +98,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('openai_api_key', key);
       setOpenaiKey(key);
-      localStorage.setItem('openai_api_key', key);
     } finally {
       setIsSaving(false);
     }
@@ -116,7 +108,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('claude_api_key', key);
       setClaudeKey(key);
-      localStorage.setItem('claude_api_key', key);
     } finally {
       setIsSaving(false);
     }
@@ -127,7 +118,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('grok_api_key', key);
       setGrokKey(key);
-      localStorage.setItem('grok_api_key', key);
     } finally {
       setIsSaving(false);
     }
@@ -138,7 +128,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('unstructured_api_key', key);
       setUnstructuredKey(key);
-      localStorage.setItem('unstructured_api_key', key);
     } finally {
       setIsSaving(false);
     }
@@ -149,7 +138,6 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('google_gemini_api_key', key);
       setGoogleGeminiKey(key);
-      localStorage.setItem('google_gemini_api_key', key);
     } finally {
       setIsSaving(false);
     }

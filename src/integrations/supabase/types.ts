@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      api_usage_logs: {
+        Row: {
+          api_provider: string
+          cost_usd: number | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          model: string
+          operation: string
+          tokens_input: number | null
+          tokens_output: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_provider: string
+          cost_usd?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          model: string
+          operation: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_provider?: string
+          cost_usd?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          model?: string
+          operation?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audit_reports: {
         Row: {
           created_at: string | null
