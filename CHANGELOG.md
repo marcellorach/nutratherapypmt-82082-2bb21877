@@ -9,6 +9,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Removed
+- ❌ **Tab duplicada "AI Processing" removida do menu lateral**
+  - Deletado arquivo `src/components/administrador/ProcessamentoIATab.tsx` (componente redundante)
+  - Removida entrada `processamento-ia` de `src/config/admin-tabs.ts`
+  - Removido import do `ProcessamentoIATab` em `admin-tabs.ts`
+  - **Funcionalidade mantida**: AI Processing agora acessível APENAS via Scientific Studies → Import & Process → AI Processing (sub-tab)
+  - **Motivo**: Eliminação de duplicação crítica que causava confusão de navegação e potenciais conflitos de estado
+
+### Changed
+- 🔄 **Arquitetura de processamento de IA simplificada**:
+  - AI Processing consolidado em uma única localização dentro de Scientific Studies
+  - Badge "Recomendado" adicionado na seção "Upload e Extração Automática (Gemini AI)" para orientação visual
+  - Navegação contextual mantida: botões "Process with AI" continuam funcionando corretamente
+  - Contagem de tabs: 28 → 27 tabs administrativas (8 Knowledge Base → 7 Knowledge Base)
+- 📚 **Documentação atualizada**:
+  - `ARCHITECTURE.md` v1.4.0: Seção de navegação atualizada (27 tabs, 7 no Knowledge Base)
+  - `CURRENT_STATE.md` v1.4.0: Correção de arquitetura registrada
+  - Scientific Studies agora explicitamente lista sub-tabs (Import & Process com AI Processing)
+
 ### Added
 - ✅ Documentação completa da arquitetura NTAI Knowledge Graph em `docs/NTAI_KNOWLEDGE_GRAPH_ARCHITECTURE.md` (~700 linhas)
   - Modelo de dados expandido com 6 novas tabelas (mechanisms, study_findings GRADE, study_extractions, etc.)
