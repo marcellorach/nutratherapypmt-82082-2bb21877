@@ -114,15 +114,30 @@ export const useProcessingLogic = (
           return;
         }
 
-        // ETAPA 1: EXTRAÇÃO COM GEMINI
-        updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
+        // ETAPA 1: EXTRAÇÃO COM GEMINI (6 sub-etapas com retry automático)
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 10 };
         setProcessQueue([...updatedQueue]);
+        addLogEntry(`📥 [1/6] Baixando PDF do storage: ${item.title}`);
         
-        addLogEntry(`📤 Upload para Google Gemini File API: ${item.title}`);
-        addLogEntry(`⏳ Aguardando processamento do PDF...`);
-        addLogEntry(`🗄️ Criando/verificando corpus vetorizado (File Search Store)...`);
-        addLogEntry(`📚 Adicionando documento ao índice semântico...`);
-        addLogEntry(`⏳ Vetorização em andamento (embedding automático)...`);
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 20 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`📤 [2/6] Enviando para Gemini File API...`);
+        
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 35 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`⏳ [3/6] Aguardando processamento (pode levar até 2min)...`);
+        
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 50 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`🗄️ [4/6] Configurando File Search Store...`);
+        
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 65 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`📚 [5/6] Vetorizando documento (embedding)...`);
+        
+        updatedQueue[index] = { ...item, stage: 'extracting', progress: 80 };
+        setProcessQueue([...updatedQueue]);
+        addLogEntry(`🔍 [6/6] Extraindo dados científicos com AI...`);
         
         const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
           body: { 
@@ -134,44 +149,66 @@ export const useProcessingLogic = (
         
         if (geminiError) {
           const errorMsg = geminiError.message || String(geminiError);
-          addLogEntry(`❌ Erro Google Gemini: ${errorMsg}`);
-          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+          addLogEntry(`❌ [ERRO] Gemini File Search falhou: ${errorMsg}`);
+          
+          // Mensagens contextuais de erro
+          if (errorMsg.includes('timeout')) {
+            addLogEntry(`💡 Dica: PDF muito grande ou rede lenta. Tente novamente.`);
+          } else if (errorMsg.includes('quota') || errorMsg.includes('rate')) {
+            addLogEntry(`💡 Dica: Limite de API atingido. Aguarde alguns minutos.`);
+          } else if (errorMsg.includes('Extração falhou')) {
+            addLogEntry(`💡 Dica: PDF pode estar corrompido ou sem texto extraível.`);
+          }
+          
+          updatedQueue[index] = { 
+            ...item, 
+            stage: 'error', 
+            progress: 0, 
+            error: `Gemini File Search falhou: ${errorMsg}. A função já tentou 3x automaticamente.`
+          };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
         }
         
         if (!geminiData || !geminiData.success) {
-          const errorMsg = 'Google Gemini retornou dados inválidos';
-          addLogEntry(`❌ ${errorMsg}`);
+          const errorMsg = geminiData?.error || 'Google Gemini retornou dados inválidos';
+          addLogEntry(`❌ [ERRO] Resposta inválida do Gemini: ${errorMsg}`);
           updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
         }
         
-        addLogEntry(`🔍 Query 1/3: Metadados básicos extraídos`);
-        addLogEntry(`🔍 Query 2/3: Busca semântica de nutracêuticos (${geminiData.nutraceuticalsCount || 0} encontrados)`);
-        addLogEntry(`🔍 Query 3/3: Busca semântica de condições (${geminiData.conditionsCount || 0} encontradas)`);
-        addLogEntry(`✅ Extração File Search concluída: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
-        addLogEntry(`💾 Dados salvos no banco de dados`);
-        addLogEntry(`✅ Arquivo mantido em corpus vetorizado para consultas futuras`);
-
-        // VALIDAÇÃO CRÍTICA: Verificar se gemini-file-search populou analysis_data
-        const { data: updatedStudyData, error: checkError } = await supabase
+        addLogEntry(`✅ [SUCESSO] Gemini concluído: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
+        addLogEntry(`📊 [INFO] ${geminiData.metadata?.retries_used || 'Retry automático ativo'}`);
+        
+        // VALIDAÇÃO CRÍTICA: Verificar se analysis_data foi salvo corretamente
+        addLogEntry(`🔍 [VALIDAÇÃO] Verificando integridade dos dados salvos...`);
+        const { data: validationData, error: validationError } = await supabase
           .from('processed_studies')
-          .select('analysis_data')
+          .select('analysis_data, title')
           .eq('id', item.id)
           .single();
         
-        if (checkError || !updatedStudyData?.analysis_data) {
-          const errorMsg = 'Gemini File Search não salvou dados no analysis_data';
-          addLogEntry(`❌ ${errorMsg}`);
-          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+        if (validationError || !validationData?.analysis_data) {
+          const errorMsg = 'CRITICAL: Gemini File Search não salvou dados em analysis_data (NULL detectado após processamento).';
+          addLogEntry(`❌ [ERRO CRÍTICO] ${errorMsg}`);
+          addLogEntry(`💡 [RECOMENDAÇÃO] Use "Resetar e Reprocessar" - o erro pode ser temporário`);
+          
+          updatedQueue[index] = { 
+            ...item, 
+            stage: 'error', 
+            progress: 0, 
+            error: errorMsg 
+          };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
         }
+        
+        const dataSize = JSON.stringify(validationData.analysis_data).length;
+        addLogEntry(`✅ [VALIDAÇÃO APROVADA] analysis_data confirmado (${(dataSize / 1024).toFixed(1)} KB)`);
 
         // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
