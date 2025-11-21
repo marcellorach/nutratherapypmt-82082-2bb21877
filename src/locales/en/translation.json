@@ -1525,6 +1525,8 @@
       "importSuccessDesc": "{{count}} study(ies) imported successfully. They can now be processed in RAG Analysis.",
       "importError": "Error importing {{filename}}",
       "viewImported": "View imported studies ⬇️",
+      "successInline": "{{count}} study(ies) imported successfully",
+      "successInlineDesc": "They can now be processed in RAG Analysis",
       "fileNameSanitized": "Name adjusted for compatibility",
       "invalidCharactersRemoved": "Special characters were removed from file name",
       "nextSteps": "Next steps",

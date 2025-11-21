@@ -43,55 +43,63 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Fetch study data
+    // Fetch study data and extraction
     console.log('📚 Buscando dados do estudo...');
     const { data: study, error: studyError } = await supabase
       .from('processed_studies')
-      .select(`
-        id,
-        title,
-        description,
-        journal,
-        year,
-        authors,
-        analysis_data,
-        storage_path
-      `)
+      .select('*, study_extractions(*)')
       .eq('id', studyId)
-      .maybeSingle();
+      .single();
 
     if (studyError || !study) {
       console.error('❌ Erro ao buscar estudo:', studyError);
-      console.error(`❌ StudyId buscado: ${studyId}`);
-      console.error(`❌ Erro completo:`, JSON.stringify(studyError, null, 2));
       return new Response(
-        JSON.stringify({ 
-          error: 'Study not found', 
-          studyId,
-          details: studyError?.message || 'Estudo não encontrado no banco de dados'
-        }),
+        JSON.stringify({ error: 'Study not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch extraction data
-    const { data: extraction } = await supabase
-      .from('study_extractions')
-      .select('extracted_data, extraction_quality_score')
-      .eq('study_id', studyId)
-      .maybeSingle();
+    // Extract document text for literal citations
+    let documentText = '';
+    const extractionData = study.study_extractions?.[0]?.extracted_data;
+    
+    if (extractionData) {
+      // Try to get full text from various fields
+      if (extractionData.full_text) {
+        documentText = extractionData.full_text;
+      } else if (extractionData.abstract) {
+        documentText = extractionData.abstract;
+      } else if (extractionData.sections) {
+        // Concatenate all sections
+        documentText = Object.entries(extractionData.sections)
+          .map(([section, content]) => `### ${section}\n${content}`)
+          .join('\n\n');
+      } else if (extractionData.findings) {
+        documentText = Array.isArray(extractionData.findings) 
+          ? extractionData.findings.join('\n\n')
+          : JSON.stringify(extractionData.findings);
+      }
+    }
+    
+    // If no text from extraction, use analysis_data
+    if (!documentText && study.analysis_data) {
+      if (typeof study.analysis_data === 'object') {
+        documentText = JSON.stringify(study.analysis_data, null, 2);
+      } else {
+        documentText = String(study.analysis_data);
+      }
+    }
+    
+    // Limit document text to prevent token overflow (keep first 4000 chars for context)
+    const documentContext = documentText.substring(0, 4000) || 'No document text available';
 
     console.log('✅ Dados do estudo carregados');
     console.log(`📊 Title: ${study.title}`);
-    console.log(`📊 Has analysis_data: ${!!study.analysis_data}`);
-    console.log(`📊 Has extraction: ${!!extraction}`);
-    if (extraction) {
-      console.log(`📊 Extraction quality: ${extraction.extraction_quality_score}`);
-    }
+    console.log(`📊 Document text length: ${documentText.length}`);
+    console.log(`📊 Context length: ${documentContext.length}`);
 
     // Build context for AI
     const analysisData = study.analysis_data as any;
-    const extractionData = extraction?.extracted_data as any;
 
     let contextParts: string[] = [
       `**Título**: ${study.title}`,
@@ -136,15 +144,9 @@ serve(async (req) => {
       });
     }
 
-    // Add full text if available
-    if (analysisData?.parsedContent) {
-      const textContent = typeof analysisData.parsedContent === 'string' 
-        ? analysisData.parsedContent 
-        : JSON.stringify(analysisData.parsedContent);
-      
-      if (textContent.length > 500) {
-        contextParts.push(`\n**Contexto Adicional**:\n${textContent.slice(0, 3000)}...`);
-      }
+    // Add original document text for citations
+    if (documentContext && documentContext !== 'No document text available') {
+      contextParts.push(`\n**TEXTO ORIGINAL DO DOCUMENTO (para citações literais)**:\n---\n${documentContext}\n---`);
     }
 
     const fullContext = contextParts.join('\n');
@@ -191,12 +193,18 @@ serve(async (req) => {
 - [Pergunta específica 2]
 - [Pergunta específica 3]
 
+**REGRA CRÍTICA PARA CITAÇÕES:**
+- SEMPRE use trechos LITERAIS do "TEXTO ORIGINAL DO DOCUMENTO" fornecido acima
+- Formato obrigatório: [Citação: "texto exato copiado do documento" - Seção/Contexto]
+- NUNCA invente ou parafrase citações - copie palavra por palavra do texto original
+- Se não houver trecho relevante no texto fornecido, NÃO inclua citação
+- Cada citação DEVE ser uma frase ou parágrafo que apareça no texto original acima
+
 **Diretrizes de formatação obrigatórias:**
 - Use emojis para destacar seções principais (🔬 📊 ⚙️ ⚠️ 💡 📈)
 - Use **negrito** para termos-chave e nomes de nutracêuticos
 - Use listas numeradas (1. 2. 3.) para achados sequenciais ou hierárquicos
 - Use listas com bullet (- ) para mecanismos, características e perguntas
-- SEMPRE adicione [Citação: texto extraído do estudo - Seção/Tabela/Figura X] após informações específicas
 - Separe seções principais com --- (linha horizontal)
 - Para scores de eficácia, use formato: **Eficácia**: 4/5 (será renderizado como barra de progresso)
 - Destaque nutracêuticos específicos em \`backticks\` para badges visuais
@@ -204,7 +212,7 @@ serve(async (req) => {
 **Limites estritos:**
 - NÃO invente informações que não estão no estudo
 - Se não souber, diga claramente: "⚠️ Esta informação não está presente neste estudo"
-- Todas as citações devem ser texto real extraído do estudo fornecido`
+- Todas as citações devem ser texto real extraído do documento original fornecido`
       },
       {
         role: 'user',
@@ -308,7 +316,7 @@ serve(async (req) => {
           studyTitle: study.title,
           nutraceuticalsCount: nutraceuticals.length,
           conditionsCount: conditions.length,
-          extractionQuality: extraction?.extraction_quality_score,
+          extractionQuality: study.study_extractions?.[0]?.extraction_quality_score,
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -15,6 +15,7 @@ const FileUploadTab: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [uploadedCount, setUploadedCount] = useState(0);
   const [importedStudyIds, setImportedStudyIds] = useState<string[]>([]);
+  const [successMessage, setSuccessMessage] = useState<{ count: number; studyIds: string[] } | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -142,26 +143,10 @@ const FileUploadTab: React.FC = () => {
       });
       window.dispatchEvent(event);
 
-      // Enhanced toast with navigation button
-      toast({
-        title: t('studies.import.importSuccess'),
-        description: t('studies.import.importSuccessDesc', { count: successCount }),
-        duration: 7000,
-        action: (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              // Navigate to processing tab
-              const url = new URL(window.location.href);
-              url.searchParams.set('step', 'processamento-ia');
-              window.history.pushState({}, '', url);
-              window.location.reload();
-            }}
-          >
-            {t('studies.import.viewImported')}
-          </Button>
-        ),
+      // Show inline success message
+      setSuccessMessage({
+        count: successCount,
+        studyIds: newImportedIds
       });
 
       // Aguardar 2s para mostrar progresso completo antes de limpar
@@ -170,6 +155,11 @@ const FileUploadTab: React.FC = () => {
         setUploadProgress({});
         setUploadedCount(0);
       }, 2000);
+
+      // Auto-dismiss success message after 10 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 10000);
 
     } catch (error) {
       console.error('Erro durante importação:', error);
@@ -185,6 +175,37 @@ const FileUploadTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {successMessage && (
+        <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div>
+                <p className="font-medium text-green-900 dark:text-green-100">
+                  {t('studies.import.successInline', { count: successMessage.count })}
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  {t('studies.import.successInlineDesc')}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('step', 'processamento-ia');
+                window.history.pushState({}, '', url);
+                window.location.reload();
+              }}
+              className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/20"
+            >
+              {t('studies.import.viewImported')}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${

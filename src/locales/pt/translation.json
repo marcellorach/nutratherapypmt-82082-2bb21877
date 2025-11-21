@@ -1525,6 +1525,8 @@
       "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise RAG.",
       "importError": "Erro ao importar {{filename}}",
       "viewImported": "Ver estudos importados ⬇️",
+      "successInline": "{{count}} estudo(s) importado(s) com sucesso",
+      "successInlineDesc": "Eles já podem ser processados na Análise RAG",
       "fileNameSanitized": "Nome ajustado para compatibilidade",
       "invalidCharactersRemoved": "Caracteres especiais foram removidos do nome",
       "nextSteps": "Próximos passos",

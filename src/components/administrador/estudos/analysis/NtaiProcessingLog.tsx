@@ -35,6 +35,39 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
       }
     }
   }, [entries]);
+
+  // Parse timestamp from log entry
+  const parseTimestamp = (entry: string): Date | null => {
+    const match = entry.match(/\[(\d{1,2}:\d{2}:\d{2}\s*[AP]M)\]/i);
+    if (!match) return null;
+    
+    const timeStr = match[1].trim();
+    const [time, period] = timeStr.split(/\s+/);
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    
+    const date = new Date();
+    let hour24 = hours;
+    if (period.toUpperCase() === 'PM' && hours !== 12) hour24 += 12;
+    if (period.toUpperCase() === 'AM' && hours === 12) hour24 = 0;
+    
+    date.setHours(hour24, minutes, seconds, 0);
+    return date;
+  };
+
+  // Calculate durations between consecutive entries
+  const entriesWithDurations = entries.map((entry, index) => {
+    if (index === 0) return { entry, duration: null };
+    
+    const currentTime = parseTimestamp(entry);
+    const previousTime = parseTimestamp(entries[index - 1]);
+    
+    if (!currentTime || !previousTime) return { entry, duration: null };
+    
+    const durationMs = currentTime.getTime() - previousTime.getTime();
+    const durationS = (durationMs / 1000).toFixed(1);
+    
+    return { entry, duration: `${durationS}s` };
+  });
   
   return (
     <div className="border rounded-md mb-4" ref={scrollAreaRef}>
@@ -87,17 +120,22 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
       </div>
       
       <ScrollArea className="h-[200px] p-3">
-        {entries.length > 0 ? (
+        {entriesWithDurations.length > 0 ? (
           <div className="space-y-1 font-mono text-xs">
-            {entries.map((entry, index) => {
+            {entriesWithDurations.map(({ entry, duration }, index) => {
               const isError = entry.includes('[ERRO]');
               
               return (
                 <div 
                   key={index} 
-                  className={`px-2 py-1 rounded ${isError ? 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-400' : ''}`}
+                  className={`px-2 py-1 rounded flex items-center justify-between gap-2 ${isError ? 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-400' : ''}`}
                 >
-                  {entry}
+                  <span className="flex-1">{entry}</span>
+                  {duration && (
+                    <span className="text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
+                      {duration}
+                    </span>
+                  )}
                 </div>
               );
             })}
