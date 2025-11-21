@@ -30,6 +30,7 @@ serve(async (req) => {
 
     console.log(`💬 Chat request for study: ${studyId}`);
     console.log(`❓ Question: ${question}`);
+    console.log(`📚 Conversation history length: ${conversationHistory.length}`);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -61,8 +62,14 @@ serve(async (req) => {
 
     if (studyError || !study) {
       console.error('❌ Erro ao buscar estudo:', studyError);
+      console.error(`❌ StudyId buscado: ${studyId}`);
+      console.error(`❌ Erro completo:`, JSON.stringify(studyError, null, 2));
       return new Response(
-        JSON.stringify({ error: 'Study not found' }),
+        JSON.stringify({ 
+          error: 'Study not found', 
+          studyId,
+          details: studyError?.message || 'Estudo não encontrado no banco de dados'
+        }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -75,6 +82,12 @@ serve(async (req) => {
       .maybeSingle();
 
     console.log('✅ Dados do estudo carregados');
+    console.log(`📊 Title: ${study.title}`);
+    console.log(`📊 Has analysis_data: ${!!study.analysis_data}`);
+    console.log(`📊 Has extraction: ${!!extraction}`);
+    if (extraction) {
+      console.log(`📊 Extraction quality: ${extraction.extraction_quality_score}`);
+    }
 
     // Build context for AI
     const analysisData = study.analysis_data as any;
@@ -137,6 +150,10 @@ serve(async (req) => {
     const fullContext = contextParts.join('\n');
     
     console.log(`📊 Contexto construído: ${fullContext.length} caracteres`);
+    console.log(`📊 Nutracêuticos no contexto: ${nutraceuticals.length}`);
+    console.log(`📊 Condições no contexto: ${conditions.length}`);
+    console.log(`📊 Achados no contexto: ${findings.length}`);
+    console.log(`📊 Mecanismos no contexto: ${mechanisms.length}`);
 
     // Build messages for AI
     const messages = [
@@ -209,6 +226,8 @@ serve(async (req) => {
     const answer = aiData.choices[0].message.content;
 
     console.log('✅ Resposta gerada com sucesso');
+    console.log(`📝 Tamanho da resposta: ${answer.length} caracteres`);
+    console.log(`📝 Primeiros 200 chars: ${answer.slice(0, 200)}...`);
 
     // Save to chat history
     const authHeader = req.headers.get('authorization');

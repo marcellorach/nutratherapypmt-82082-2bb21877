@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- ✅ **Edge Functions Deployment**: Forçado deploy de `document-chat` e `extract-study-entities` para garantir versões atualizadas no servidor
+- ✅ **Chat com Documento - Logging Detalhado**: Adicionados logs extensivos em toda pipeline de chat para facilitar debugging
+  - Log de studyId, question, conversation history na entrada
+  - Log de dados carregados (study, extraction, analysis_data)
+  - Log de contexto construído (contagens de nutracêuticos, condições, achados)
+  - Log de resposta da AI (tamanho, preview)
+  - Log de erros detalhados no frontend e backend
+- ✅ **Chat com Documento - Tratamento de Erros**: Melhorado feedback para usuários em casos de erro
+  - Mensagens específicas para rate limiting (429)
+  - Mensagens específicas para estudo não encontrado (404)
+  - Exibição de detalhes técnicos quando disponíveis
+  - Sugestões de ação para o usuário
+- ✅ **Extract Study Entities - Fallbacks Robustos**: Mantidos fallbacks para usar dados do Gemini File Search quando AI retorna vazio
+- ✅ **Extract Study Entities - Status Correto**: Confirmado uso de `kanban_status: 'processed'` (não 'reviewed')
+
+### Improved
+- 📊 **Observabilidade**: Sistema agora possui logging completo do fluxo de processamento e chat
+- 🎯 **UX de Erros**: Mensagens de erro mais claras e acionáveis para usuários
+
 ### Added - 2025-11-21 16:45 BRT
 - ✅ **REVOLUCIONÁRIO: Sistema completo de Chat com Documento usando Lovable AI**
   - Nova edge function `document-chat` com Gemini 2.5 Flash para conversação contextual
