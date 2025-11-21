@@ -9,7 +9,49 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✅ **Service Layer**: Criado `StudyResetService.ts` centralizando operações de reset, cleanup e diagnóstico
+  - `resetStudy()`: Reseta estudo específico para reprocessamento
+  - `resetAllErroredStudies()`: Reseta todos estudos com erro em batch
+  - `cleanOldImports()`: Remove importações antigas mantendo N mais recentes (padrão: 5)
+  - `removeDuplicateStudies()`: Remove estudos duplicados por título
+  - `checkSystemHealth()`: Retorna estatísticas completas do sistema (taxa de sucesso, tempo médio, alertas)
+  - `getProblematicStudies()`: Lista estudos com erro ou analysis_data NULL
+- ✅ **Emergency Actions Panel**: Novo componente `EmergencyActionsPanel.tsx` com 4 ações críticas:
+  - 🗑️ Limpar Importações Antigas (manter últimas 5)
+  - 🔄 Resetar Estudos com Erro (batch reset)
+  - 🧹 Remover Duplicatas (detecta por título)
+  - 📊 Verificar Saúde do Sistema (dashboard rápido)
+  - Accordion expansível com confirmação via `BulkCleanupDialog`
+- ✅ **Diagnostics Dashboard**: Novo componente `DiagnosticsTab.tsx` com:
+  - 📊 Cards de métricas em tempo real (total estudos, taxa sucesso, tempo médio, importações)
+  - 🔴 Tabela de estudos problemáticos com checkbox para seleção múltipla
+  - 🔄 Botões de reset individual e em massa
+  - ✅ Estado vazio bonito quando não há problemas
+  - ⚠️ Alertas visuais quando importações > 10
+- ✅ **Inline Reset Button**: `NtaiProcessCard.tsx` agora detecta erros críticos e mostra botão "🔄 Resetar e Reprocessar"
+  - Detecta automaticamente erros de "Insufficient text extracted" ou "analysis_data NULL"
+  - Executa reset via `StudyResetService` e re-adiciona à fila automaticamente
+  - Spinner durante operação de reset
+- ✅ **Enhanced Processing Log**: `NtaiProcessingLog.tsx` com melhorias:
+  - Filtro "Mostrar Apenas Erros" / "Mostrar Tudo"
+  - Botões de ação rápida "🔄 Tentar Novamente" em entradas de erro
+  - Contexto expandido de erros com ID e título do estudo
+
+### Changed
+- ✅ **Zero Manual SQL**: Todas operações de cleanup agora via interface (não precisa mais de SQL manual)
+- ✅ **Actionable Error Messages**: Mensagens de erro agora têm botões clicáveis ao invés de instruções SQL
+- ✅ **Better Error Context**: Erros mostram ícone, título, problema e ações sugeridas
+- ✅ **Removed SQL from UI**: Nenhuma mensagem de erro mostra SQL (substituído por ações inline)
+- ✅ i18n version incremented to 1.3.32 with new translation keys:
+  - `studies.emergency.*`: Traduções para painel de emergência
+  - `studies.diagnostics.*`: Traduções para dashboard de diagnóstico
+  - `studies.ntai.*`: Traduções para erros contextuais e ações de reset
+
 ### Fixed
+- ✅ **UX Issue**: Usuário não conseguia executar SQL de erro "Insufficient text extracted"
+- ✅ **Critical Workflow**: Implementado fluxo completo de reset sem precisar acessar backend manualmente
+- ✅ **Error Messages**: Removido SQL de todas mensagens de erro (confuso para usuários não-técnicos)
 - 🔥 **CRITICAL**: Validação robusta no pipeline de extração de estudos para prevenir erro "Insufficient text extracted (0 chars)"
   - Edge function `extract-study-entities` agora valida se `analysis_data` existe antes de processar
   - Mensagens de erro 400 (Bad Request) detalhadas com recomendações quando `analysis_data` está ausente ou inválido
@@ -17,37 +59,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - `useProcessingLogic.ts` agora valida se PDF existe (`storage_path`) antes de chamar gemini-file-search
   - `useProcessingLogic.ts` valida se gemini-file-search populou `analysis_data` antes de chamar extract-study-entities
   - Previne processamento de estudos sem dados, evitando erros 500 desnecessários
-
-### Changed
-- 📊 **Pipeline Validation**: Adicionadas 5 camadas de validação no pipeline de processamento
-  1. Validação de PDF existe (`storage_path` não vazio)
-  2. Validação de `analysis_data` existe após gemini-file-search
-  3. Validação de estrutura do `analysis_data` (chaves esperadas presentes)
-  4. Validação de comprimento mínimo de texto extraído (100 chars)
-  5. Preview de texto extraído para debugging nos logs
-- 🔍 **Error Reporting**: Respostas de erro agora incluem `recommendation` field com próximos passos sugeridos
-
-### Added
-- ✅ Bulk cleanup functionality for SciSpace imports with "Keep Last 5" and "Delete Selected" actions
-- ✅ Checkbox selection system for import history management  
-- ✅ BulkCleanupDialog component for confirming mass deletion operations
-- ✅ Visual warnings when import history exceeds 5 items
-- ✅ Automatic filtering of already processed studies in processing queue
-- ✅ Toast notifications showing count of ignored/already-processed studies
-- ✅ Comprehensive SQL cleanup instructions with safety guidelines in `docs/SQL_CLEANUP_INSTRUCTIONS.md`
-
-### Changed
-- ✅ Enhanced HistoryTab with cleanup buttons and batch selection controls
-- ✅ Improved re-processing prevention in useProcessingLogic.ts with status check
-- ✅ Updated useNtaiQueue.ts to query and filter processed studies before adding to queue
-- ✅ Better error messages in NtaiProcessCard for already-processed studies
-- ✅ SciImportHistoryRow now supports checkbox selection and visual selection state
-- ✅ i18n version incremented to 1.3.30
-
-### Fixed
-- ✅ **CRITICAL BUG FIX**: Studies showing "already processed" error prevented re-processing workflow
-- ✅ Accumulation of 36+ SciSpace imports cluttering UI resolved with cleanup tools
-- ✅ Duplicate processing attempts now detected and prevented at queue level
 - ✅ **CRITICAL BUG FIX**: Corrigido pipeline de extração de texto de PDFs processados
   - `extract-study-entities` agora suporta estrutura do `parse-study` (Unstructured API: elements, sections, tables)
   - `document-chat` também atualizado para processar corretamente documentos do parse-study

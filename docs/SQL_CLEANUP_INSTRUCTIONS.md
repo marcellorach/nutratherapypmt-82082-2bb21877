@@ -1,7 +1,30 @@
 # SQL Instructions: Bulk Cleanup and Management
 
-## Context
-This document provides SQL queries for bulk cleanup operations, preventing re-processing issues, and managing accumulated imports.
+## ⚠️ NOTA IMPORTANTE
+
+**Você não precisa mais executar SQL manualmente!**
+
+Use o **Painel de Ações de Emergência** na interface administrativa para todas as operações de limpeza e reset:
+
+- 🗑️ **Limpar Importações Antigas** → Mantém apenas as 5 mais recentes
+- 🔄 **Resetar Estudos com Erro** → Reprocessa estudos que falharam
+- 🧹 **Remover Duplicatas** → Limpa estudos com títulos repetidos
+- 📊 **Verificar Saúde do Sistema** → Dashboard completo de diagnóstico
+
+**Dashboard de Diagnóstico** também disponível com:
+- Métricas em tempo real (total estudos, taxa de sucesso, tempo médio)
+- Tabela de estudos problemáticos com reset individual ou em massa
+- Seleção múltipla com checkboxes para ações em batch
+
+---
+
+## Context (Legacy SQL Documentation)
+
+Este documento fornece consultas SQL para operações de bulk cleanup, prevenção de re-processamento e gestão de importações acumuladas.
+
+**IMPORTANTE**: As queries SQL abaixo são fornecidas apenas como referência técnica. Para uso diário, utilize sempre a interface administrativa.
+
+---
 
 ## 🚨 QUICK CLEANUP: Remove Accumulated Imports
 
