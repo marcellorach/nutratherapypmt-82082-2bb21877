@@ -80,6 +80,26 @@ export const useProcessingLogic = (
           throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
         }
 
+        // PREVENIR RE-PROCESSAMENTO: Verificar se já foi processado
+        if (studyData.kanban_status === 'processed' && studyData.analysis_data) {
+          addLogEntry(`⚠️ Estudo já processado: ${item.title}`);
+          updatedQueue[index] = { 
+            ...item, 
+            stage: 'complete', 
+            progress: 100 
+          };
+          setProcessQueue([...updatedQueue]);
+          
+          toast({
+            title: "Estudo já processado",
+            description: `'${item.title}' já possui análise. Use "Resetar" para reprocessar.`,
+            variant: "default",
+          });
+          
+          processNextItem(index + 1);
+          return;
+        }
+
         // ETAPA 1: EXTRAÇÃO COM GEMINI
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 30 };
         setProcessQueue([...updatedQueue]);

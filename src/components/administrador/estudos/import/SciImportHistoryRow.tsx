@@ -16,9 +16,16 @@ interface SciImportHistoryRowProps {
     scispace_status: string | null;
   };
   onDeleted: () => void;
+  isSelected?: boolean;
+  onToggleSelect?: (itemId: string) => void;
 }
 
-const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ item, onDeleted }) => {
+const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ 
+  item, 
+  onDeleted, 
+  isSelected = false,
+  onToggleSelect 
+}) => {
   const [deleting, setDeleting] = useState(false);
 
   const formatDate = (dateString: string | null) => {
@@ -79,7 +86,17 @@ const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({ item, onDelet
   };
 
   return (
-    <tr className="hover:bg-gray-50">
+    <tr className={`hover:bg-muted/50 ${isSelected ? 'bg-blue-50' : ''}`}>
+      {onToggleSelect && (
+        <td className="px-2 py-1">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggleSelect(item.id)}
+            className="cursor-pointer"
+          />
+        </td>
+      )}
       <td className="px-2 py-1 text-xs">{formatDate(item.imported_at)}</td>
       <td className="px-2 py-1 text-xs">{item.meta_summary_filename}</td>
       <td className="px-2 py-1 text-xs">{item.base_studies_filename}</td>

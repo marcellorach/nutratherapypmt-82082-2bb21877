@@ -1546,6 +1546,24 @@
       "noImports": "No previous imports registered.",
       "errorFetching": "Error fetching history"
     },
+    "cleanup": {
+      "cleanOldImports": "Clean Old",
+      "deleteSelected": "Delete Selected ({{count}})",
+      "tooManyImports": "⚠️ {{count}} accumulated imports. Consider cleaning old ones.",
+      "cleanOldImportsTitle": "Clean Old Imports",
+      "cleanOldImportsDesc": "This action will keep only the 5 most recent imports and remove all others, including associated studies.",
+      "deleteSelectedTitle": "Delete Selected Imports",
+      "deleteSelectedDesc": "This action will permanently remove the selected imports and all associated studies.",
+      "itemsAffected": "{{count}} item(s) will be affected",
+      "irreversible": "⚠️ This action cannot be undone!",
+      "confirmAction": "Yes, confirm deletion",
+      "success": "Cleanup completed",
+      "oldImportsRemoved": "{{count}} old imports were removed",
+      "selectedRemoved": "{{count}} selected imports were removed",
+      "error": "Cleanup error",
+      "nothingToClean": "Nothing to clean",
+      "lessThan5": "You have less than 5 imports. No action needed."
+    },
     "aiProcessing": {
       "title": "Processing with Gemini AI",
       "description": "Select imported studies below and process them to extract structured information"

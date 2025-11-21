@@ -110,9 +110,9 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
       return "Erro de conexão com o servidor. Verifique sua conexão com a internet.";
     }
     
-    // Erro de status
-    if (error.includes("status")) {
-      return "Erro ao atualizar status do estudo para 'processado'.";
+    // Erro de status ou já processado
+    if (error.includes("status") || error.includes("already") || error.includes("já")) {
+      return "Estudo já foi processado anteriormente. Use o botão 'Resetar' para reprocessar.";
     }
     
     return error;
