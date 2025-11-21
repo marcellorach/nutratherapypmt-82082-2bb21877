@@ -54,6 +54,7 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
 
   const loadChatHistory = async () => {
     try {
+      console.log('📚 Carregando histórico do chat para studyId:', studyId);
       const { data, error } = await supabase
         .from('study_chat_history')
         .select('question, answer, created_at')
@@ -61,7 +62,12 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
         .order('created_at', { ascending: true })
         .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao carregar histórico:', error);
+        throw error;
+      }
+      
+      console.log(`✅ Histórico carregado: ${data?.length || 0} entradas`);
 
       if (data && data.length > 0) {
         const history: ChatMessage[] = [];
@@ -110,6 +116,10 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
     setMessages(prev => [...prev, userMessage]);
 
     try {
+      console.log('🚀 Enviando mensagem para document-chat...');
+      console.log('📝 StudyId:', studyId);
+      console.log('❓ Question:', question);
+      
       const { data, error } = await supabase.functions.invoke('document-chat', {
         body: {
           studyId,
@@ -121,9 +131,15 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro na invocação da edge function:', error);
+        throw error;
+      }
+
+      console.log('✅ Resposta recebida da edge function:', data);
 
       if (!data?.success) {
+        console.error('❌ Resposta indica falha:', data);
         throw new Error(data?.error || 'Failed to get response');
       }
 
@@ -146,20 +162,32 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
       });
 
     } catch (error: any) {
-      console.error('Chat error:', error);
+      console.error('❌ Chat error completo:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error details:', error.details);
+      
+      let errorContent = '❌ Desculpe, ocorreu um erro ao processar sua pergunta.\n\n';
+      
+      if (error.message?.includes('Rate limit exceeded') || error.message?.includes('429')) {
+        errorContent += '🔄 **Limite de requisições atingido**\n\nPor favor, aguarde alguns segundos e tente novamente.';
+      } else if (error.message?.includes('Study not found') || error.message?.includes('404')) {
+        errorContent += '📚 **Estudo não encontrado**\n\nO estudo pode não ter sido processado ainda. Por favor, aguarde o processamento completo ou tente reprocessar.';
+      } else if (error.details?.studyId) {
+        errorContent += `🔍 **Detalhes do erro:**\n- StudyId: ${error.details.studyId}\n- Erro: ${error.details.details || error.message}`;
+      } else {
+        errorContent += `⚠️ ${error.message || 'Erro desconhecido'}\n\nPor favor, tente novamente em alguns instantes.`;
+      }
       
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: `❌ Desculpe, ocorreu um erro ao processar sua pergunta.\n\n${error.message === 'Rate limit exceeded. Please try again later.' 
-          ? 'Limite de requisições atingido. Por favor, aguarde alguns segundos e tente novamente.' 
-          : 'Por favor, tente novamente.'}`,
+        content: errorContent,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
 
       toast({
         title: t('chat.error', 'Erro'),
-        description: error.message,
+        description: error.message || 'Falha ao processar pergunta',
         variant: 'destructive'
       });
     } finally {
