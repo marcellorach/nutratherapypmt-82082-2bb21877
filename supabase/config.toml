@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.api-usage-stats]
 verify_jwt = true
+
+[functions.document-chat]
+verify_jwt = true

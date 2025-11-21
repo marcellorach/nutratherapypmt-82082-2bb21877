@@ -3,13 +3,15 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle, BarChart3 } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
 import VisaoGeralTab from '../estudos/detalhes/tabs/VisaoGeralTab';
 import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
+import DocumentChatInterface from '../estudos/chat/DocumentChatInterface';
+import EnhancedStudyVisualization from '../estudos/visualization/EnhancedStudyVisualization';
 
 interface EstudoDetailDialogProps {
   open: boolean;
@@ -65,10 +67,18 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4">
+          <TabsList className="grid grid-cols-6">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="analysis">Análise IA</TabsTrigger>
             <TabsTrigger value="conditions">Condições</TabsTrigger>
+            <TabsTrigger value="visualizations">
+              <BarChart3 className="h-4 w-4 mr-1" />
+              Visualizações
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Chat
+            </TabsTrigger>
             <TabsTrigger value="approval">Aprovação</TabsTrigger>
           </TabsList>
 
@@ -82,6 +92,20 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
 
           <TabsContent value="conditions">
             <EstudoDetailSections estudo={estudo} />
+          </TabsContent>
+
+          <TabsContent value="visualizations">
+            <EnhancedStudyVisualization 
+              study={estudo}
+              extractedData={estudo.analysis_data}
+            />
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <DocumentChatInterface 
+              studyId={estudo.id}
+              studyTitle={estudo.title}
+            />
           </TabsContent>
 
           <TabsContent value="approval">

@@ -8,6 +8,9 @@ import NtaiConditionsTab from './results/NtaiConditionsTab';
 import NtaiInteractionsTab from './results/NtaiInteractionsTab';
 import NtaiSideEffectsTab from './results/NtaiSideEffectsTab';
 import EvidenceTag from '../../tags/EvidenceTag';
+import EnhancedStudyVisualization from '../visualization/EnhancedStudyVisualization';
+import DocumentChatInterface from '../chat/DocumentChatInterface';
+import { MessageCircle, BarChart3 } from 'lucide-react';
 
 interface NtaiAnalysisResultsProps {
   result: NtaiAnalysisResult;
@@ -37,7 +40,7 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="nutraceuticals">
             Nutracêuticos ({result.extractedNutraceuticals.length})
           </TabsTrigger>
@@ -49,6 +52,14 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
           </TabsTrigger>
           <TabsTrigger value="side-effects">
             Efeitos Colaterais ({result.extractedSideEffects.length})
+          </TabsTrigger>
+          <TabsTrigger value="visualizations">
+            <BarChart3 className="h-4 w-4 mr-1" />
+            Visualizações
+          </TabsTrigger>
+          <TabsTrigger value="chat">
+            <MessageCircle className="h-4 w-4 mr-1" />
+            Chat
           </TabsTrigger>
         </TabsList>
         <TabsContent value="nutraceuticals" className="p-4 border rounded-md">
@@ -62,6 +73,22 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
         </TabsContent>
         <TabsContent value="side-effects" className="p-4 border rounded-md">
           <NtaiSideEffectsTab sideEffects={result.extractedSideEffects} />
+        </TabsContent>
+        <TabsContent value="visualizations" className="p-4 border rounded-md">
+          <EnhancedStudyVisualization 
+            study={{ 
+              id: result.studyId,
+              analysis_data: result,
+              created_at: new Date().toISOString()
+            }}
+            extractedData={result}
+          />
+        </TabsContent>
+        <TabsContent value="chat" className="p-4 border rounded-md">
+          <DocumentChatInterface 
+            studyId={result.studyId}
+            studyTitle={`Estudo ${result.studyId.substring(0, 8)}`}
+          />
         </TabsContent>
       </Tabs>
     </div>

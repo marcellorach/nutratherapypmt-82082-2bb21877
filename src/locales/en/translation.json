@@ -1,4 +1,51 @@
 {
+  "chat": {
+    "title": "Chat with Document",
+    "inputPlaceholder": "Type your question...",
+    "thinking": "Analyzing document...",
+    "suggestions": "Suggested questions:",
+    "responseReceived": "Response received",
+    "error": "Error",
+    "copied": "Copied",
+    "copiedDesc": "Message copied to clipboard",
+    "exported": "Exported",
+    "exportedDesc": "Chat exported as Markdown",
+    "export": "Export chat",
+    "clear": "Clear chat"
+  },
+  "viz": {
+    "tabs": {
+      "timeline": "Timeline",
+      "network": "Network",
+      "distribution": "Distribution"
+    },
+    "timeline": {
+      "title": "Processing Timeline",
+      "upload": "Upload",
+      "fileSearch": "File Search",
+      "extraction": "Extraction",
+      "analysis": "Analysis"
+    },
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "pending": "Pending"
+    },
+    "stats": {
+      "nutraceuticals": "Nutraceuticals",
+      "conditions": "Conditions",
+      "mechanisms": "Mechanisms",
+      "findings": "Findings"
+    },
+    "network": {
+      "title": "Relationship Network: Nutraceuticals → Conditions",
+      "description": "Visualization of connections between nutraceuticals and health conditions",
+      "noData": "Insufficient data for visualization"
+    },
+    "distribution": {
+      "title": "Efficacy Distribution"
+    }
+  },
   "nutraceuticalsUnified": {
     "title": "Unified Nutraceuticals",
     "subtitle": "Search and manage nutraceuticals, relationships and visualizations",

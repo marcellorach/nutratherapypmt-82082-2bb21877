@@ -248,10 +248,10 @@ Include both primary and secondary nutraceuticals mentioned.`
     }
 
     // Update processed_studies status using PRIMARY KEY (id)
-    console.log(`🔄 Atualizando status do estudo para 'reviewed'...`);
+    console.log(`🔄 Atualizando status do estudo para 'processed'...`);
     const { error: updateError } = await supabase
       .from('processed_studies')
-      .update({ kanban_status: 'reviewed' })
+      .update({ kanban_status: 'processed' })
       .eq('id', studyId);
     
     if (updateError) {
