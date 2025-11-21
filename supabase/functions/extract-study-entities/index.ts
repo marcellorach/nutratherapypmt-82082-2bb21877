@@ -60,9 +60,14 @@ serve(async (req) => {
 
     const parsedContent = studyData.analysis_data;
     
+    console.log('📊 Estrutura do analysis_data:', JSON.stringify(parsedContent).slice(0, 500) + '...');
+    console.log('📊 Campos presentes:', Object.keys(parsedContent || {}).join(', '));
+    
     // Prepare text content for LLM
     const textContent = extractTextContent(parsedContent);
     
+    console.log(`📊 Tamanho do texto enviado para AI: ${textContent.length} chars`);
+    console.log('📊 Primeiros 1000 chars do texto:', textContent.slice(0, 1000));
     console.log(`Extracting entities from study ${studyId} using Lovable AI`);
 
     // Call Lovable AI with tool calling for structured extraction
@@ -78,12 +83,24 @@ serve(async (req) => {
           {
             role: 'system',
             content: `You are a scientific data extraction specialist for veterinary nutraceutical research. 
-Extract structured information from scientific studies with high precision.
-Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and clinical findings.`
+
+CONTEXT: You will receive text content that may include:
+- Abstract and full text from a scientific study
+- Previously identified nutraceuticals and health conditions (if any)
+
+YOUR TASK:
+1. Extract ALL nutraceuticals mentioned (compounds, herbs, supplements, vitamins, minerals)
+2. Extract ALL health conditions/diseases addressed in the study
+3. Extract mechanisms of action explaining how treatments work
+4. Extract key clinical findings and results
+
+Be COMPREHENSIVE - include all relevant entities, not just the main ones.
+Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, efficacy, and clinical findings.
+Include both primary and secondary nutraceuticals mentioned.`
           },
           {
             role: 'user',
-            content: `Extract all relevant scientific entities from this veterinary study:\n\nTitle: ${studyData.title}\n\nContent:\n${textContent}`
+            content: `Extract all relevant scientific entities from this veterinary study:\n\n${textContent}`
           }
         ],
         tools: [{
@@ -180,6 +197,31 @@ Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and 
 
     const extractedData = JSON.parse(toolCall.function.arguments);
     
+    console.log('📊 Extração retornada pela AI:', JSON.stringify(extractedData, null, 2));
+    console.log(`📊 Nutracêuticos extraídos: ${extractedData.nutraceuticals?.length || 0}`);
+    console.log(`📊 Condições extraídas: ${extractedData.conditions?.length || 0}`);
+    
+    // FALLBACK: If AI returned empty but gemini already had data, use gemini's extraction
+    if (extractedData.nutraceuticals.length === 0 && parsedContent.nutraceuticals?.length > 0) {
+      console.log('⚠️ AI retornou nutracêuticos vazios, usando dados do Gemini File Search');
+      extractedData.nutraceuticals = parsedContent.nutraceuticals.map((n: any) => ({
+        name: n.name,
+        dosage: n.dosage || '',
+        efficacy_score: 3
+      }));
+    }
+
+    if (extractedData.conditions.length === 0 && parsedContent.conditions?.length > 0) {
+      console.log('⚠️ AI retornou condições vazias, usando dados do Gemini File Search');
+      extractedData.conditions = parsedContent.conditions.map((c: any) => ({
+        name: c.name,
+        severity: 'moderate',
+        treatability_score: 3
+      }));
+    }
+    
+    console.log(`✅ Dados finais: ${extractedData.nutraceuticals?.length || 0} nutracêuticos, ${extractedData.conditions?.length || 0} condições`);
+    
     // Calculate extraction quality score
     const qualityScore = calculateQualityScore(extractedData);
 
@@ -206,10 +248,10 @@ Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and 
     }
 
     // Update processed_studies status using PRIMARY KEY (id)
-    console.log(`🔄 Atualizando status do estudo para 'extracted'...`);
+    console.log(`🔄 Atualizando status do estudo para 'reviewed'...`);
     const { error: updateError } = await supabase
       .from('processed_studies')
-      .update({ kanban_status: 'extracted' })
+      .update({ kanban_status: 'reviewed' })
       .eq('id', studyId);
     
     if (updateError) {
@@ -247,20 +289,60 @@ Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and 
 
 // Helper to extract text from parsed content
 function extractTextContent(parsedContent: any): string {
-  if (!parsedContent || !parsedContent.sections) {
-    return '';
+  if (!parsedContent) return '';
+  
+  // Support new structure from gemini-file-search (ExtractedStudyData)
+  if (parsedContent.abstract || parsedContent.nutraceuticals) {
+    let text = '';
+    if (parsedContent.title) text += `Title: ${parsedContent.title}\n\n`;
+    if (parsedContent.abstract) text += `Abstract: ${parsedContent.abstract}\n\n`;
+    if (parsedContent.authors?.length) text += `Authors: ${parsedContent.authors.join(', ')}\n\n`;
+    if (parsedContent.year) text += `Year: ${parsedContent.year}\n\n`;
+    if (parsedContent.journal) text += `Journal: ${parsedContent.journal}\n\n`;
+    
+    // Include nutraceuticals already extracted by gemini
+    if (parsedContent.nutraceuticals?.length) {
+      text += '\n\nNutraceuticals found in study:\n';
+      parsedContent.nutraceuticals.forEach((n: any) => {
+        text += `- ${n.name}`;
+        if (n.dosage) text += ` (Dosage: ${n.dosage})`;
+        if (n.effects) text += `: ${n.effects}`;
+        text += '\n';
+      });
+    }
+    
+    // Include conditions already extracted
+    if (parsedContent.conditions?.length) {
+      text += '\n\nHealth conditions addressed:\n';
+      parsedContent.conditions.forEach((c: any) => {
+        text += `- ${c.name} (${c.relationship_type})`;
+        if (c.efficacy_description) text += `: ${c.efficacy_description}`;
+        text += '\n';
+      });
+    }
+    
+    console.log(`📊 Texto extraído do Gemini: ${text.length} chars`);
+    return text.slice(0, 50000);
   }
-
-  return parsedContent.sections
-    .map((section: any) => {
-      const title = section.title || '';
-      const content = section.content
-        ?.map((c: any) => c.text || '')
-        .join('\n') || '';
-      return `${title}\n${content}`;
-    })
-    .join('\n\n')
-    .slice(0, 50000); // Limit to ~50k chars for context window
+  
+  // Fallback: old structure with sections (compatibility)
+  if (parsedContent.sections) {
+    const text = parsedContent.sections
+      .map((section: any) => {
+        const title = section.title || '';
+        const content = section.content
+          ?.map((c: any) => c.text || '')
+          .join('\n') || '';
+        return `${title}\n${content}`;
+      })
+      .join('\n\n')
+      .slice(0, 50000);
+    console.log(`📊 Texto extraído (estrutura antiga): ${text.length} chars`);
+    return text;
+  }
+  
+  console.warn('⚠️ Estrutura de parsedContent desconhecida');
+  return '';
 }
 
 // Calculate extraction quality score
