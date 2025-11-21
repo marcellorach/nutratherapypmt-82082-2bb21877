@@ -230,7 +230,7 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
                 <div className="h-[400px]">
                   <NetworkGraph
                     data={networkData}
-                    height={400}
+                    height="400"
                     showControls={true}
                     showLegend={true}
                   />
