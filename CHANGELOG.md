@@ -9,6 +9,62 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-11-21 16:45 BRT
+- ✅ **REVOLUCIONÁRIO: Sistema completo de Chat com Documento usando Lovable AI**
+  - Nova edge function `document-chat` com Gemini 2.5 Flash para conversação contextual
+  - Interface de chat moderna com histórico persistente em tempo real
+  - Sugestões de perguntas inteligentes contextuais baseadas no conteúdo do estudo
+  - Citações automáticas com referências precisas ao documento
+  - Export de conversas em formato Markdown (.md)
+  - Tabela `study_chat_history` para persistência com RLS policies
+  - Suporte a histórico de conversação (últimas 6 mensagens para contexto)
+  - Rate limiting gracioso (429) com mensagens amigáveis ao usuário
+  - Componente `DocumentChatInterface.tsx` (330 linhas)
+  - Integração completa: copia mensagens, limpa chat, mostra timestamps
+
+- ✅ **VISUALIZAÇÕES AVANÇADAS: Sistema rico de visualizações científicas**
+  - Timeline animada do processamento com 4 fases (Upload → File Search → Extração → Análise)
+  - Network Graph interativo com vis-network (Nutracêuticos ↔ Condições)
+  - Distribuição de eficácia com barras de progresso coloridas por score (verde ≥80%, azul ≥60%, amarelo ≥40%, vermelho <40%)
+  - Cards estatísticos com ícones temáticos e cores personalizadas
+  - Sistema de tabs: Timeline, Network Graph, Distribuição
+  - Suporte a dados parciais, estados de loading e mensagens de "dados insuficientes"
+  - Componente `EnhancedStudyVisualization.tsx` (291 linhas)
+  - Integração com biblioteca vis-network para grafos de relações complexas
+
+- ✅ **INTEGRAÇÕES COMPLETAS: Expansão de interfaces administrativas**
+  - `NtaiAnalysisResults`: Novas abas "📊 Visualizações" e "💬 Chat" (4 → 6 abas)
+  - `EstudoDetailDialog`: Novas abas "📊 Visualizações" e "💬 Chat" (4 → 6 abas)
+  - Ícones lucide-react (MessageCircle, BarChart3) para melhor UX
+  - Navegação fluida entre análise tradicional, visualização avançada e chat interativo
+  - Props passadas corretamente: `studyId`, `studyTitle`, `extractedData`
+
+- ✅ **COMPONENTES REUTILIZÁVEIS**:
+  - `DocumentChatInterface.tsx`: Chat completo com mensagens, scrolling automático, sugestões, copy, export
+  - `EnhancedStudyVisualization.tsx`: Container de visualizações com múltiplas abas e stats cards
+  - Suporte total a internacionalização (PT/EN)
+  - Responsive design para mobile e desktop
+
+### Fixed - 2025-11-21 16:45 BRT
+- ✅ **CRÍTICO: Corrigido erro de constraint `processed_studies_kanban_status_check`**
+  - **Problema**: `extract-study-entities` tentava definir `kanban_status = 'reviewed'` (valor inválido)
+  - **Constraint permite**: `['new', 'processing', 'processed', 'error']`
+  - **Solução**: Mudado de `'reviewed'` para `'processed'` em `extract-study-entities/index.ts` (linha 254)
+  - **Impacto**: Workflow de extração agora completa sem erro de DB constraint
+  - **Logs atualizados**: "Atualizando status do estudo para 'processed'..."
+
+### Changed - 2025-11-21 16:45 BRT
+- 🌍 **Traduções bilíngues completas (PT/EN)**:
+  - `chat.*`: title, inputPlaceholder, thinking, suggestions, responseReceived, error, copied, exported, etc. (12 chaves)
+  - `viz.tabs.*`: timeline, network, distribution
+  - `viz.timeline.*`: title, upload, fileSearch, extraction, analysis
+  - `viz.status.*`: completed, inProgress, pending
+  - `viz.stats.*`: nutraceuticals, conditions, mechanisms, findings
+  - `viz.network.*`: title, description, noData
+  - `viz.distribution.*`: title
+- 🔄 **Versão i18n**: 1.3.25 → 1.3.26 (force cache reload)
+- ⚙️ **Supabase config.toml**: Adicionada configuração `[functions.document-chat]` com `verify_jwt = true`
+
 ### Fixed - 2025-11-21 16:00 BRT
 - **CRÍTICO: Corrigido erro InvalidKey ao fazer upload de PDFs com espaços ou caracteres especiais**
   - **Problema identificado**: Supabase Storage rejeita nomes de arquivo com espaços e caracteres especiais (—, –, etc.)

@@ -850,6 +850,47 @@ export type Database = {
         }
         Relationships: []
       }
+      study_chat_history: {
+        Row: {
+          answer: string
+          context_used: Json | null
+          created_at: string | null
+          id: string
+          question: string
+          study_id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          answer: string
+          context_used?: Json | null
+          created_at?: string | null
+          id?: string
+          question: string
+          study_id: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          answer?: string
+          context_used?: Json | null
+          created_at?: string | null
+          id?: string
+          question?: string
+          study_id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_chat_history_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_extractions: {
         Row: {
           created_at: string | null

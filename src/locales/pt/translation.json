@@ -1,4 +1,51 @@
 {
+  "chat": {
+    "title": "Chat com Documento",
+    "inputPlaceholder": "Digite sua pergunta...",
+    "thinking": "Analisando documento...",
+    "suggestions": "Perguntas sugeridas:",
+    "responseReceived": "Resposta recebida",
+    "error": "Erro",
+    "copied": "Copiado",
+    "copiedDesc": "Mensagem copiada para área de transferência",
+    "exported": "Exportado",
+    "exportedDesc": "Chat exportado como Markdown",
+    "export": "Exportar chat",
+    "clear": "Limpar chat"
+  },
+  "viz": {
+    "tabs": {
+      "timeline": "Timeline",
+      "network": "Rede",
+      "distribution": "Distribuição"
+    },
+    "timeline": {
+      "title": "Linha do Tempo do Processamento",
+      "upload": "Upload",
+      "fileSearch": "File Search",
+      "extraction": "Extração",
+      "analysis": "Análise"
+    },
+    "status": {
+      "completed": "Concluído",
+      "inProgress": "Em andamento",
+      "pending": "Pendente"
+    },
+    "stats": {
+      "nutraceuticals": "Nutracêuticos",
+      "conditions": "Condições",
+      "mechanisms": "Mecanismos",
+      "findings": "Achados"
+    },
+    "network": {
+      "title": "Rede de Relações: Nutracêuticos → Condições",
+      "description": "Visualização das conexões entre nutracêuticos e condições de saúde",
+      "noData": "Dados insuficientes para visualização"
+    },
+    "distribution": {
+      "title": "Distribuição de Eficácia"
+    }
+  },
   "nutraceuticalsUnified": {
     "title": "Nutracêuticos Unificados",
     "subtitle": "Pesquise e gerencie nutracêuticos, relações e visualizações",
