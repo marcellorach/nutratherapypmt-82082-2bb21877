@@ -80,6 +80,20 @@ export const useProcessingLogic = (
           throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
         }
 
+        // VALIDAÇÃO CRÍTICA: Verificar se o estudo tem PDF
+        if (!studyData.storage_path || studyData.storage_path.trim() === '') {
+          addLogEntry(`❌ Estudo sem arquivo PDF: ${item.title}`);
+          updatedQueue[index] = { 
+            ...item, 
+            stage: 'error', 
+            progress: 0,
+            error: 'Arquivo PDF não encontrado no storage'
+          };
+          setProcessQueue([...updatedQueue]);
+          processNextItem(index + 1);
+          return;
+        }
+
         // PREVENIR RE-PROCESSAMENTO: Verificar se já foi processado
         if (studyData.kanban_status === 'processed' && studyData.analysis_data) {
           addLogEntry(`⚠️ Estudo já processado: ${item.title}`);
@@ -142,6 +156,22 @@ export const useProcessingLogic = (
         addLogEntry(`✅ Extração File Search concluída: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
         addLogEntry(`💾 Dados salvos no banco de dados`);
         addLogEntry(`✅ Arquivo mantido em corpus vetorizado para consultas futuras`);
+
+        // VALIDAÇÃO CRÍTICA: Verificar se gemini-file-search populou analysis_data
+        const { data: updatedStudyData, error: checkError } = await supabase
+          .from('processed_studies')
+          .select('analysis_data')
+          .eq('id', item.id)
+          .single();
+        
+        if (checkError || !updatedStudyData?.analysis_data) {
+          const errorMsg = 'Gemini File Search não salvou dados no analysis_data';
+          addLogEntry(`❌ ${errorMsg}`);
+          updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
+          setProcessQueue([...updatedQueue]);
+          processNextItem(index + 1);
+          return;
+        }
 
         // ETAPA 2: ANÁLISE
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
