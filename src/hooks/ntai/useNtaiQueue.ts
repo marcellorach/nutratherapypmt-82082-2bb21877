@@ -53,7 +53,7 @@ export const useNtaiQueue = () => {
     loadPendingStudies();
   }, []);
 
-  const addToQueue = (estudos: AvailableStudy[], selectedIds: string[]) => {
+  const addToQueue = async (estudos: AvailableStudy[], selectedIds: string[]) => {
     console.log('Função addToQueue chamada com:', { estudos, selectedIds });
     
     if (selectedIds.length === 0) {
@@ -65,8 +65,25 @@ export const useNtaiQueue = () => {
       return;
     }
 
-    // Filtrar apenas os estudos que estão selecionados
-    const estudosSelecionados = estudos.filter(estudo => selectedIds.includes(estudo.id));
+    // PREVENIR RE-PROCESSAMENTO: Verificar quais estudos já foram processados
+    const { data: processedCheck, error: checkError } = await supabase
+      .from('processed_studies')
+      .select('id, kanban_status, title')
+      .in('id', selectedIds);
+    
+    if (checkError) {
+      console.error('Erro ao verificar estudos processados:', checkError);
+    }
+
+    const alreadyProcessed = processedCheck?.filter(s => s.kanban_status === 'processed') || [];
+    const studyIdsToProcess = selectedIds.filter(id => 
+      !alreadyProcessed.some(p => p.id === id)
+    );
+
+    // Filtrar apenas os estudos que estão selecionados e não foram processados
+    const estudosSelecionados = estudos.filter(estudo => 
+      studyIdsToProcess.includes(estudo.id)
+    );
     
     if (estudosSelecionados.length === 0) {
       toast({
@@ -101,11 +118,22 @@ export const useNtaiQueue = () => {
 
     setProcessQueue(prev => [...prev, ...newItems]);
     
-    toast({
-      title: "Estudos adicionados à fila",
-      description: `${newItems.length} estudo(s) adicionado(s) para processamento NTAI.`,
-      variant: "default",
-    });
+    const ignoredCount = alreadyProcessed.length;
+    const addedCount = newItems.length;
+
+    if (ignoredCount > 0) {
+      toast({
+        title: "Estudos adicionados à fila",
+        description: `${addedCount} estudo(s) adicionado(s). ${ignoredCount} já processado(s) foram ignorados.`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Estudos adicionados à fila",
+        description: `${addedCount} estudo(s) adicionado(s) para processamento NTAI.`,
+        variant: "default",
+      });
+    }
   };
 
   const clearCompleted = () => {

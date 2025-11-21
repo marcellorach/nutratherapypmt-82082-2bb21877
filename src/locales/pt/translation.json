@@ -1546,6 +1546,24 @@
       "noImports": "Nenhuma importação anterior registrada.",
       "errorFetching": "Erro ao buscar histórico"
     },
+    "cleanup": {
+      "cleanOldImports": "Limpar Antigas",
+      "deleteSelected": "Excluir Selecionadas ({{count}})",
+      "tooManyImports": "⚠️ {{count}} importações acumuladas. Considere limpar as antigas.",
+      "cleanOldImportsTitle": "Limpar Importações Antigas",
+      "cleanOldImportsDesc": "Esta ação irá manter apenas as 5 importações mais recentes e remover todas as outras, incluindo estudos associados.",
+      "deleteSelectedTitle": "Excluir Importações Selecionadas",
+      "deleteSelectedDesc": "Esta ação irá remover permanentemente as importações selecionadas e todos os estudos associados.",
+      "itemsAffected": "{{count}} item(ns) será(ão) afetado(s)",
+      "irreversible": "⚠️ Esta ação não pode ser desfeita!",
+      "confirmAction": "Sim, confirmar exclusão",
+      "success": "Limpeza concluída",
+      "oldImportsRemoved": "{{count}} importações antigas foram removidas",
+      "selectedRemoved": "{{count}} importações selecionadas foram removidas",
+      "error": "Erro na limpeza",
+      "nothingToClean": "Nada para limpar",
+      "lessThan5": "Você tem menos de 5 importações. Nenhuma ação necessária."
+    },
     "aiProcessing": {
       "title": "Processamento com Gemini AI",
       "description": "Selecione estudos importados abaixo e processe-os para extrair informações estruturadas"

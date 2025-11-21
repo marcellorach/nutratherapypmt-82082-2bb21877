@@ -9,7 +9,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✅ Bulk cleanup functionality for SciSpace imports with "Keep Last 5" and "Delete Selected" actions
+- ✅ Checkbox selection system for import history management  
+- ✅ BulkCleanupDialog component for confirming mass deletion operations
+- ✅ Visual warnings when import history exceeds 5 items
+- ✅ Automatic filtering of already processed studies in processing queue
+- ✅ Toast notifications showing count of ignored/already-processed studies
+- ✅ Comprehensive SQL cleanup instructions with safety guidelines in `docs/SQL_CLEANUP_INSTRUCTIONS.md`
+
+### Changed
+- ✅ Enhanced HistoryTab with cleanup buttons and batch selection controls
+- ✅ Improved re-processing prevention in useProcessingLogic.ts with status check
+- ✅ Updated useNtaiQueue.ts to query and filter processed studies before adding to queue
+- ✅ Better error messages in NtaiProcessCard for already-processed studies
+- ✅ SciImportHistoryRow now supports checkbox selection and visual selection state
+- ✅ i18n version incremented to 1.3.30
+
 ### Fixed
+- ✅ **CRITICAL BUG FIX**: Studies showing "already processed" error prevented re-processing workflow
+- ✅ Accumulation of 36+ SciSpace imports cluttering UI resolved with cleanup tools
+- ✅ Duplicate processing attempts now detected and prevented at queue level
 - ✅ **CRITICAL BUG FIX**: Corrigido pipeline de extração de texto de PDFs processados
   - `extract-study-entities` agora suporta estrutura do `parse-study` (Unstructured API: elements, sections, tables)
   - `document-chat` também atualizado para processar corretamente documentos do parse-study

@@ -1,6 +1,79 @@
-# SQL Instructions: Clean Up Incorrect Study Extractions
+# SQL Instructions: Bulk Cleanup and Management
 
 ## Context
+This document provides SQL queries for bulk cleanup operations, preventing re-processing issues, and managing accumulated imports.
+
+## 🚨 QUICK CLEANUP: Remove Accumulated Imports
+
+### Option 1: Keep Last 5 Imports Only (Recommended)
+```sql
+-- Delete all except the 5 most recent imports
+DELETE FROM scispace_imports
+WHERE id NOT IN (
+  SELECT id 
+  FROM scispace_imports 
+  ORDER BY imported_at DESC NULLS LAST 
+  LIMIT 5
+);
+
+-- Verify: Should show only 5 imports
+SELECT COUNT(*) as total_imports FROM scispace_imports;
+```
+
+### Option 2: Keep Imports from Last 7 Days
+```sql
+-- Delete imports older than 7 days
+DELETE FROM scispace_imports
+WHERE imported_at < NOW() - INTERVAL '7 days';
+```
+
+### Option 3: Delete ALL Imports (Use with Caution!)
+```sql
+-- WARNING: This deletes all import history
+DELETE FROM scispace_imports;
+
+-- Reset auto-increment if needed
+ALTER SEQUENCE scispace_imports_id_seq RESTART WITH 1;
+```
+
+---
+
+## 🔄 PREVENT RE-PROCESSING: Clean Errored Studies
+
+### Reset Studies with Errors (for Re-processing)
+```sql
+-- Find studies with error status
+SELECT id, title, original_filename, error_message, kanban_status
+FROM processed_studies
+WHERE kanban_status = 'error'
+   OR error_message IS NOT NULL;
+
+-- Reset them to 'new' status for re-processing
+UPDATE processed_studies
+SET 
+  kanban_status = 'new',
+  error_message = NULL,
+  analysis_data = NULL
+WHERE kanban_status = 'error'
+   OR error_message IS NOT NULL;
+```
+
+### Delete Studies with Errors (Permanent Removal)
+```sql
+-- WARNING: This permanently deletes errored studies
+DELETE FROM study_extractions
+WHERE study_id IN (
+  SELECT id FROM processed_studies WHERE kanban_status = 'error'
+);
+
+DELETE FROM processed_studies
+WHERE kanban_status = 'error';
+```
+
+---
+
+## 🧹 CLEANUP INCORRECT EXTRACTIONS
+
 After the bug fix in `extract-study-entities`, some studies may have incorrect extraction data (e.g., Turmeric study showing probiotic data instead).
 
 ## Steps to Clean and Re-process
@@ -90,29 +163,199 @@ SET kanban_status = 'new'
 WHERE id = '2da2d739-5a2d-4546-a954-65e3d13b4ad3';
 ```
 
-## Validation Queries
+## 📊 AUDIT & MONITORING QUERIES
 
-After re-processing, verify the data is correct:
-
+### Check Processing Status Distribution
 ```sql
--- Check extraction content
 SELECT 
-  ps.title,
-  se.extracted_data->'nutraceuticals' as extracted_nutraceuticals,
-  se.extracted_data->'conditions' as extracted_conditions,
-  se.extraction_quality_score
-FROM processed_studies ps
-JOIN study_extractions se ON ps.id = se.study_id
-WHERE ps.id = '<study_id>';
+  kanban_status,
+  COUNT(*) as count,
+  COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() as percentage
+FROM processed_studies
+GROUP BY kanban_status
+ORDER BY count DESC;
 ```
 
-## Safety Notes
+### Find Duplicate Studies (Same Title)
+```sql
+SELECT 
+  title,
+  COUNT(*) as duplicate_count,
+  ARRAY_AGG(id) as study_ids,
+  ARRAY_AGG(kanban_status) as statuses
+FROM processed_studies
+WHERE title IS NOT NULL
+GROUP BY title
+HAVING COUNT(*) > 1
+ORDER BY duplicate_count DESC;
+```
 
-- **ALWAYS backup your data before running DELETE queries**
-- Test queries on a single study first before batch operations
-- Use transactions for complex operations:
-  ```sql
-  BEGIN;
-  -- your queries here
-  COMMIT; -- or ROLLBACK if something looks wrong
-  ```
+### Check Studies Processed Today
+```sql
+SELECT 
+  id,
+  title,
+  kanban_status,
+  created_at,
+  updated_at
+FROM processed_studies
+WHERE updated_at::date = CURRENT_DATE
+ORDER BY updated_at DESC;
+```
+
+### Identify Studies Ready for Re-processing
+```sql
+-- Studies that are 'new' but have been in the system for a while
+SELECT 
+  id,
+  title,
+  original_filename,
+  created_at,
+  kanban_status
+FROM processed_studies
+WHERE kanban_status = 'new'
+  AND created_at < NOW() - INTERVAL '1 day'
+ORDER BY created_at DESC;
+```
+
+---
+
+## 🔒 SAFETY BEST PRACTICES
+
+### 1. Always Use Transactions for Bulk Operations
+```sql
+BEGIN;
+
+-- Your DELETE/UPDATE queries here
+
+-- Review changes before committing
+SELECT COUNT(*) FROM processed_studies;
+SELECT COUNT(*) FROM scispace_imports;
+
+-- If everything looks good:
+COMMIT;
+
+-- If something is wrong:
+-- ROLLBACK;
+```
+
+### 2. Create Backups Before Major Cleanups
+```sql
+-- Backup processed_studies to a temporary table
+CREATE TABLE processed_studies_backup AS 
+SELECT * FROM processed_studies;
+
+-- Backup scispace_imports
+CREATE TABLE scispace_imports_backup AS 
+SELECT * FROM scispace_imports;
+
+-- To restore if needed:
+-- DROP TABLE processed_studies;
+-- ALTER TABLE processed_studies_backup RENAME TO processed_studies;
+```
+
+### 3. Test Queries with SELECT First
+```sql
+-- Instead of DELETE, run SELECT first to see what will be deleted
+SELECT id, title, kanban_status 
+FROM processed_studies 
+WHERE kanban_status = 'error';
+
+-- Only after confirming, run the DELETE
+-- DELETE FROM processed_studies WHERE kanban_status = 'error';
+```
+
+---
+
+## 📝 COMMON CLEANUP SCENARIOS
+
+### Scenario 1: "I have 36+ old imports cluttering the UI"
+**Solution**: Use Option 1 (Keep Last 5 Imports)
+
+### Scenario 2: "Study keeps showing 'already processed' error"
+**Solution**: Reset specific study to 'new' status
+```sql
+UPDATE processed_studies
+SET kanban_status = 'new', analysis_data = NULL
+WHERE id = '<study_id>';
+```
+
+### Scenario 3: "I want to start fresh with all studies"
+**Solution**: Reset all studies (WARNING: Nuclear option)
+```sql
+BEGIN;
+DELETE FROM study_extractions;
+UPDATE processed_studies SET kanban_status = 'new', analysis_data = NULL;
+COMMIT;
+```
+
+### Scenario 4: "Remove studies from a specific import batch"
+```sql
+-- Find the import batch ID first
+SELECT id, consenso_name, imported_at, COUNT(*) as study_count
+FROM scispace_imports si
+LEFT JOIN processed_studies ps ON ps.source_import_id = si.id
+GROUP BY si.id
+ORDER BY imported_at DESC;
+
+-- Delete studies from specific import
+DELETE FROM processed_studies
+WHERE source_import_id = '<import_id>';
+
+-- Then delete the import record
+DELETE FROM scispace_imports
+WHERE id = '<import_id>';
+```
+
+---
+
+## 🔍 Validation Queries
+
+After cleanup operations, verify the results:
+
+```sql
+-- Overall system health check
+SELECT 
+  'Total Studies' as metric,
+  COUNT(*) as count
+FROM processed_studies
+UNION ALL
+SELECT 
+  'Processed Studies',
+  COUNT(*) 
+FROM processed_studies 
+WHERE kanban_status = 'processed'
+UNION ALL
+SELECT 
+  'Studies with Errors',
+  COUNT(*) 
+FROM processed_studies 
+WHERE kanban_status = 'error'
+UNION ALL
+SELECT 
+  'Pending Studies',
+  COUNT(*) 
+FROM processed_studies 
+WHERE kanban_status = 'new'
+UNION ALL
+SELECT 
+  'Total Imports',
+  COUNT(*) 
+FROM scispace_imports
+UNION ALL
+SELECT 
+  'Total Extractions',
+  COUNT(*) 
+FROM study_extractions;
+```
+
+---
+
+## ⚠️ CRITICAL WARNINGS
+
+1. **NEVER** run DELETE queries in production without testing in development first
+2. **ALWAYS** create backups before bulk operations
+3. **ALWAYS** use transactions (BEGIN/COMMIT/ROLLBACK)
+4. **TEST** with SELECT before running DELETE/UPDATE
+5. **VERIFY** results after operations with validation queries
+6. **DOCUMENT** what you changed and why (in this file or changelog)
