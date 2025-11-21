@@ -11,7 +11,13 @@
     "exported": "Exportado",
     "exportedDesc": "Chat exportado como Markdown",
     "export": "Exportar chat",
-    "clear": "Limpar chat"
+    "clear": "Limpar chat",
+    "citation": "Citação",
+    "viewInDocument": "Ver no documento",
+    "mainFindings": "Principais Achados",
+    "mechanisms": "Mecanismos de Ação",
+    "considerations": "Considerações Importantes",
+    "relatedQuestions": "Perguntas Relacionadas"
   },
   "viz": {
     "tabs": {
