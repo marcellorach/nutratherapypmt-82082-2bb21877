@@ -81,13 +81,56 @@ serve(async (req) => {
       }
     }
     
-    // If no text from extraction, use analysis_data
+    // If no text from extraction, use analysis_data with improved structure support
     if (!documentText && study.analysis_data) {
-      if (typeof study.analysis_data === 'object') {
-        documentText = JSON.stringify(study.analysis_data, null, 2);
-      } else {
-        documentText = String(study.analysis_data);
+      const analysisData = study.analysis_data as any;
+      
+      console.log('📊 analysis_data structure:', Object.keys(analysisData));
+      
+      // PRIORIDADE 1: Estrutura do parse-study (Unstructured API)
+      if (analysisData.elements || analysisData.sections || analysisData.tables) {
+        if (Array.isArray(analysisData.elements)) {
+          console.log(`📄 Extracting from ${analysisData.elements.length} elements`);
+          documentText = analysisData.elements
+            .map((el: any) => el.text || '')
+            .filter((t: string) => t.trim())
+            .join('\n\n')
+            .substring(0, 4000);
+        }
+        else if (Array.isArray(analysisData.sections)) {
+          console.log(`📚 Extracting from ${analysisData.sections.length} sections`);
+          documentText = analysisData.sections
+            .map((section: any) => {
+              const title = section.title || '';
+              const content = Array.isArray(section.content)
+                ? section.content.map((c: any) => c.text || '').join('\n')
+                : (section.text || '');
+              return `### ${title}\n${content}`;
+            })
+            .join('\n\n')
+            .substring(0, 4000);
+        }
       }
+      // PRIORIDADE 2: Estrutura do gemini-file-search
+      else if (analysisData.full_text) {
+        console.log('📄 Extracting from full_text');
+        documentText = analysisData.full_text.substring(0, 4000);
+      }
+      else if (analysisData.abstract) {
+        console.log('📄 Extracting from abstract');
+        documentText = analysisData.abstract;
+      }
+      else if (analysisData.findings) {
+        console.log('📄 Extracting from findings');
+        documentText = analysisData.findings.substring(0, 4000);
+      }
+      // Fallback: stringify JSON
+      else {
+        console.log('📄 Fallback: stringifying analysis_data');
+        documentText = JSON.stringify(analysisData, null, 2);
+      }
+      
+      console.log(`✅ Extracted ${documentText.length} chars for chat context`);
     }
     
     // Limit document text to prevent token overflow (keep first 4000 chars for context)

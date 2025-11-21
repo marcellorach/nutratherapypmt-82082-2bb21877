@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- ✅ **CRITICAL BUG FIX**: Corrigido pipeline de extração de texto de PDFs processados
+  - `extract-study-entities` agora suporta estrutura do `parse-study` (Unstructured API: elements, sections, tables)
+  - `document-chat` também atualizado para processar corretamente documentos do parse-study
+  - Prevenção de alucinação da IA: validação de texto extraído antes de enviar para análise
+  - Logging detalhado para debug: tamanho do texto, estrutura detectada, preview dos primeiros 200 chars
+
 ### Added
 - ✅ Inline success confirmation in File Upload panel (replacing toast)
 - ✅ Duration display for each RAG processing log step (shows time taken between consecutive log entries)
