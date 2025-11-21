@@ -66,9 +66,17 @@ serve(async (req) => {
     // Prepare text content for LLM
     const textContent = extractTextContent(parsedContent);
     
-    console.log(`📊 Tamanho do texto enviado para AI: ${textContent.length} chars`);
-    console.log('📊 Primeiros 1000 chars do texto:', textContent.slice(0, 1000));
-    console.log(`Extracting entities from study ${studyId} using Lovable AI`);
+    // VALIDAÇÃO CRÍTICA: Verificar se temos texto para processar
+    if (!textContent || textContent.trim().length < 100) {
+      console.error('❌ VALIDATION FAILED: Insufficient text extracted');
+      console.error(`Text length: ${textContent.length} chars`);
+      console.error(`analysis_data keys: ${Object.keys(parsedContent || {})}`);
+      throw new Error(`Insufficient text extracted from study (${textContent.length} chars). The document may not have been parsed correctly. Please check the analysis_data field in processed_studies.`);
+    }
+    
+    console.log(`✅ VALIDATION PASSED: ${textContent.length} chars of text ready for AI`);
+    console.log('📊 Primeiros 500 chars do texto:', textContent.slice(0, 500));
+    console.log(`📤 Calling Lovable AI for entity extraction...`);
 
     // Call Lovable AI with tool calling for structured extraction
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -289,10 +297,56 @@ Include both primary and secondary nutraceuticals mentioned.`
 
 // Helper to extract text from parsed content
 function extractTextContent(parsedContent: any): string {
-  if (!parsedContent) return '';
+  if (!parsedContent) {
+    console.log('⚠️ No parsedContent provided');
+    return '';
+  }
   
-  // Support new structure from gemini-file-search (ExtractedStudyData)
-  if (parsedContent.abstract || parsedContent.nutraceuticals) {
+  console.log('📊 Detecting parsedContent structure:', Object.keys(parsedContent));
+  
+  // PRIORIDADE 1: Estrutura do parse-study (Unstructured API)
+  if (parsedContent.elements || parsedContent.sections || parsedContent.tables) {
+    let text = '';
+    
+    // Extrair de "elements" (formato raw do Unstructured API)
+    if (Array.isArray(parsedContent.elements)) {
+      console.log(`📄 Extracting from ${parsedContent.elements.length} elements`);
+      text = parsedContent.elements
+        .map((el: any) => el.text || '')
+        .filter((t: string) => t.trim())
+        .join('\n\n');
+    }
+    
+    // Ou extrair de "sections" (formato estruturado do parse-study)
+    else if (Array.isArray(parsedContent.sections)) {
+      console.log(`📚 Extracting from ${parsedContent.sections.length} sections`);
+      text = parsedContent.sections
+        .map((section: any) => {
+          const title = section.title || '';
+          const content = Array.isArray(section.content)
+            ? section.content.map((c: any) => c.text || '').join('\n')
+            : (section.text || '');
+          return `### ${title}\n${content}`;
+        })
+        .join('\n\n');
+    }
+    
+    // Incluir tabelas se existirem
+    if (Array.isArray(parsedContent.tables) && parsedContent.tables.length > 0) {
+      console.log(`📊 Including ${parsedContent.tables.length} tables`);
+      text += '\n\n### TABLES\n' + parsedContent.tables
+        .map((t: any) => t.text || '')
+        .join('\n\n');
+    }
+    
+    console.log(`✅ Extracted ${text.length} chars from parse-study structure`);
+    console.log(`📝 Preview: ${text.substring(0, 200)}...`);
+    return text.slice(0, 50000);
+  }
+  
+  // PRIORIDADE 2: Estrutura do gemini-file-search (ExtractedStudyData)
+  if (parsedContent.abstract || parsedContent.nutraceuticals || parsedContent.conditions) {
+    console.log('🤖 Using gemini-file-search structure');
     let text = '';
     if (parsedContent.title) text += `Title: ${parsedContent.title}\n\n`;
     if (parsedContent.abstract) text += `Abstract: ${parsedContent.abstract}\n\n`;
@@ -321,27 +375,12 @@ function extractTextContent(parsedContent: any): string {
       });
     }
     
-    console.log(`📊 Texto extraído do Gemini: ${text.length} chars`);
+    console.log(`✅ Extracted ${text.length} chars from gemini structure`);
     return text.slice(0, 50000);
   }
   
-  // Fallback: old structure with sections (compatibility)
-  if (parsedContent.sections) {
-    const text = parsedContent.sections
-      .map((section: any) => {
-        const title = section.title || '';
-        const content = section.content
-          ?.map((c: any) => c.text || '')
-          .join('\n') || '';
-        return `${title}\n${content}`;
-      })
-      .join('\n\n')
-      .slice(0, 50000);
-    console.log(`📊 Texto extraído (estrutura antiga): ${text.length} chars`);
-    return text;
-  }
-  
-  console.warn('⚠️ Estrutura de parsedContent desconhecida');
+  console.error('❌ Unknown parsedContent structure - cannot extract text');
+  console.error('Available keys:', Object.keys(parsedContent));
   return '';
 }
 
