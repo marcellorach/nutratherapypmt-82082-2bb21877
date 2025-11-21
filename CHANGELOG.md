@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-11-21 15:20 BRT
+- **CRÍTICO: Correção de estrutura de dados em extract-study-entities**
+  - Corrigido `extractTextContent()` para suportar estrutura atual do `gemini-file-search` (ExtractedStudyData)
+  - Adicionado fallback para usar dados já extraídos pelo Gemini quando AI retornar arrays vazios
+  - Corrigido kanban_status de 'extracted' (inválido) para 'reviewed' (válido)
+  - Melhorados prompts da AI para extração mais abrangente e precisa
+  - Adicionado logging detalhado em todas as etapas de extração
+  - Agora a extração identifica corretamente nutracêuticos e condições de saúde
+  - Implementada compatibilidade com estruturas antigas (sections) e novas (flat format)
+
 ### Fixed - 2025-11-21 (Critical Bug: Study Extraction 404)
 - **🐛 [CRÍTICO] Corrigido erro 404 "Study not found" na extração de estudos**
   - **Problema identificado**: `extract-study-entities` edge function usava `.eq('study_id', studyId)` para buscar em `processed_studies`, mas o parâmetro recebido é o `id` (UUID, primary key), não o `study_id` (TEXT)
