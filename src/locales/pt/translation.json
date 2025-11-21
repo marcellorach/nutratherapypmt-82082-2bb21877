@@ -1472,6 +1472,8 @@
       "importSuccessDesc": "{{count}} estudo(s) importado(s) com sucesso. Eles já podem ser processados na Análise RAG.",
       "importError": "Erro ao importar {{filename}}",
       "viewImported": "Ver estudos importados ⬇️",
+      "fileNameSanitized": "Nome ajustado para compatibilidade",
+      "invalidCharactersRemoved": "Caracteres especiais foram removidos do nome",
       "nextSteps": "Próximos passos",
       "nextStepsGuide": "Role para baixo e selecione o estudo, depois clique em 'Add to Queue' para processar com IA",
       "newBadge": "NOVO",

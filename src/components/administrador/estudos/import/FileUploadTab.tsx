@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
+import { createSafeStoragePath, sanitizeFileName } from '@/utils/fileNameSanitizer';
 
 const FileUploadTab: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -75,7 +76,7 @@ const FileUploadTab: React.FC = () => {
       const uploadPromises = selectedFiles.map(async (file) => {
         const fileName = file.name;
         const studyId = uuidv4();
-        const storagePath = `studies/${studyId}_${fileName}`;
+        const storagePath = createSafeStoragePath(studyId, fileName);
 
         try {
           // Simular progresso de upload
@@ -238,6 +239,12 @@ const FileUploadTab: React.FC = () => {
                     <File className="h-5 w-5 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{file.name}</p>
+                      {sanitizeFileName(file.name) !== file.name && (
+                        <p className="text-xs text-yellow-600 flex items-center gap-1 mt-0.5">
+                          <AlertCircle className="h-3 w-3" />
+                          {t('studies.import.fileNameSanitized')}: {sanitizeFileName(file.name)}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>

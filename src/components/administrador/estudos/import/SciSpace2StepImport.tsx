@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeFileName } from "@/utils/fileNameSanitizer";
 import SciSpaceStepSelect from "./SciSpaceStepSelect";
 import SciSpaceUploadMetaResumo from "./SciSpaceUploadMetaResumo";
 import SciSpaceUploadBaseEstudos from "./SciSpaceUploadBaseEstudos";
@@ -40,14 +41,16 @@ const SciSpace2StepImport: React.FC = () => {
     try {
       const metaSummaryPaths = await Promise.all(
         metaSummaryFiles.map(async (file) => {
-          const path = `scispace/${Date.now()}-${file.name}`;
+          const sanitizedName = sanitizeFileName(file.name);
+          const path = `scispace/${Date.now()}-${sanitizedName}`;
           const { error } = await supabase.storage.from("scispace").upload(path, file);
           if (error) throw error;
           return { filename: file.name, path };
         })
       );
 
-      const baseStudiesPath = `scispace/${Date.now()}-${baseStudiesFile.name}`;
+      const sanitizedBaseName = sanitizeFileName(baseStudiesFile.name);
+      const baseStudiesPath = `scispace/${Date.now()}-${sanitizedBaseName}`;
       const { error: baseError } = await supabase.storage.from("scispace").upload(baseStudiesPath, baseStudiesFile);
       if (baseError) {
         throw new Error(`Erro ao fazer upload do arquivo base: ${baseError.message}`);
