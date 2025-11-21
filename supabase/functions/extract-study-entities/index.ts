@@ -56,6 +56,28 @@ serve(async (req) => {
       );
     }
     
+    // VALIDAÇÃO CRÍTICA: Verificar se analysis_data existe
+    if (!studyData.analysis_data || typeof studyData.analysis_data !== 'object') {
+      console.error(`❌ CRITICAL: Study ${studyId} has no analysis_data`);
+      console.error(`Study title: ${studyData.title}`);
+      console.error(`analysis_data value:`, studyData.analysis_data);
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Study not ready for extraction',
+          details: 'The study must be processed by gemini-file-search first. The analysis_data field is missing or invalid. Please ensure the PDF was successfully uploaded and processed.',
+          studyId,
+          title: studyData.title,
+          hasAnalysisData: false,
+          recommendation: 'Process this study with gemini-file-search before extraction'
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'} (study_id: ${studyData.study_id})`);
 
     const parsedContent = studyData.analysis_data;
@@ -63,15 +85,55 @@ serve(async (req) => {
     console.log('📊 Estrutura do analysis_data:', JSON.stringify(parsedContent).slice(0, 500) + '...');
     console.log('📊 Campos presentes:', Object.keys(parsedContent || {}).join(', '));
     
+    // Validar estrutura do analysis_data
+    const analysisDataKeys = Object.keys(parsedContent);
+    const hasParseStudyStructure = analysisDataKeys.includes('elements') || analysisDataKeys.includes('sections');
+    const hasGeminiStructure = analysisDataKeys.includes('abstract') || analysisDataKeys.includes('nutraceuticals') || analysisDataKeys.includes('full_text');
+    
+    if (!hasParseStudyStructure && !hasGeminiStructure) {
+      console.error(`❌ Invalid analysis_data structure`);
+      console.error(`Available keys: ${analysisDataKeys.join(', ')}`);
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid analysis_data structure',
+          details: 'The analysis_data field does not contain expected keys (elements, sections, abstract, nutraceuticals, or full_text). The study may not have been processed correctly.',
+          studyId,
+          availableKeys: analysisDataKeys,
+          recommendation: 'Re-process this study with gemini-file-search or parse-study'
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     // Prepare text content for LLM
     const textContent = extractTextContent(parsedContent);
     
     // VALIDAÇÃO CRÍTICA: Verificar se temos texto para processar
     if (!textContent || textContent.trim().length < 100) {
       console.error('❌ VALIDATION FAILED: Insufficient text extracted');
-      console.error(`Text length: ${textContent.length} chars`);
-      console.error(`analysis_data keys: ${Object.keys(parsedContent || {})}`);
-      throw new Error(`Insufficient text extracted from study (${textContent.length} chars). The document may not have been parsed correctly. Please check the analysis_data field in processed_studies.`);
+      console.error(`Text length: ${textContent?.length || 0} chars`);
+      console.error(`analysis_data keys: ${analysisDataKeys.join(', ')}`);
+      console.error(`Text preview:`, textContent?.substring(0, 200));
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Extraction failed',
+          details: `Insufficient text extracted from study (${textContent?.length || 0} chars). The document may not have been parsed correctly. Please check the analysis_data field in processed_studies.`,
+          studyId,
+          textLength: textContent?.length || 0,
+          analysisDataKeys,
+          textPreview: textContent?.substring(0, 200) || '',
+          recommendation: 'Check if the PDF was properly parsed. You may need to re-upload the PDF and process again.'
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     console.log(`✅ VALIDATION PASSED: ${textContent.length} chars of text ready for AI`);

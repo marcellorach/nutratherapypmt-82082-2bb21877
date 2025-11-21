@@ -9,6 +9,24 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- 🔥 **CRITICAL**: Validação robusta no pipeline de extração de estudos para prevenir erro "Insufficient text extracted (0 chars)"
+  - Edge function `extract-study-entities` agora valida se `analysis_data` existe antes de processar
+  - Mensagens de erro 400 (Bad Request) detalhadas com recomendações quando `analysis_data` está ausente ou inválido
+  - Validação da estrutura do `analysis_data` (parse-study vs gemini-file-search) com lista de chaves esperadas
+  - `useProcessingLogic.ts` agora valida se PDF existe (`storage_path`) antes de chamar gemini-file-search
+  - `useProcessingLogic.ts` valida se gemini-file-search populou `analysis_data` antes de chamar extract-study-entities
+  - Previne processamento de estudos sem dados, evitando erros 500 desnecessários
+
+### Changed
+- 📊 **Pipeline Validation**: Adicionadas 5 camadas de validação no pipeline de processamento
+  1. Validação de PDF existe (`storage_path` não vazio)
+  2. Validação de `analysis_data` existe após gemini-file-search
+  3. Validação de estrutura do `analysis_data` (chaves esperadas presentes)
+  4. Validação de comprimento mínimo de texto extraído (100 chars)
+  5. Preview de texto extraído para debugging nos logs
+- 🔍 **Error Reporting**: Respostas de erro agora incluem `recommendation` field com próximos passos sugeridos
+
 ### Added
 - ✅ Bulk cleanup functionality for SciSpace imports with "Keep Last 5" and "Delete Selected" actions
 - ✅ Checkbox selection system for import history management  
