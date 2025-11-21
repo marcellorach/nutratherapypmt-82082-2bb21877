@@ -24,6 +24,10 @@ export const useNtaiLogs = () => {
 
   const clearLogs = () => {
     setLogEntries([]);
+    toast({
+      title: "Log limpo",
+      description: "Todos os registros do log foram removidos.",
+    });
   };
   
   const exportLogs = () => {
@@ -38,6 +42,11 @@ export const useNtaiLogs = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Log exportado",
+      description: "O arquivo de log foi baixado com sucesso.",
+    });
   };
 
   return { 

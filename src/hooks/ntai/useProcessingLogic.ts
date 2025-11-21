@@ -43,7 +43,7 @@ export const useProcessingLogic = (
     setAnalysisResult(null);
     
     addLogEntry('Iniciando processamento com configurações:');
-    addLogEntry(`Modelo: ${aiConfigs.modelName || 'padrão'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
+    addLogEntry(`🤖 Modelo: ${aiConfigs.modelName || 'gemini-2.5-flash'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
     
     const processNextItem = async (index: number) => {
       if (index >= updatedQueue.length) {

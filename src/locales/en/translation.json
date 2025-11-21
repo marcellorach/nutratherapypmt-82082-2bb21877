@@ -73,6 +73,7 @@
     "back": "Back",
     "save": "Save",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
     "add": "Add",
@@ -1553,6 +1554,11 @@
       "deleteSuccessDescription": "{{count}} studies were removed from the database",
       "deleteError": "Error deleting studies",
       "deleteErrorDescription": "An error occurred while trying to delete the selected studies",
+      "clearLog": "Clear Log",
+      "exportLog": "Export Log",
+      "clearLogConfirm": "Are you sure you want to clear the log? This action cannot be undone.",
+      "logCleared": "Log cleared successfully",
+      "logExported": "Log exported as .txt file",
       "conditions": {
         "title": "Identified Conditions and Efficacy",
         "none": "No conditions identified."

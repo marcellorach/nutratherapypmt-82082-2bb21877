@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useNtaiConfig = () => {
   const [aiConfigs, setAiConfigs] = useState({
-    modelName: "GPT-4o",
+    modelName: "gemini-2.5-flash",
     temperature: "0.7",
     nutraceuticals_prompt: "Extrair todos os nutracêuticos mencionados no estudo e suas aplicações.",
     conditions_prompt: "Identificar todas as condições de saúde abordadas no estudo."

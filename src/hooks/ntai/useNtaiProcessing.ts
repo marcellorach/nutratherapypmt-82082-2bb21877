@@ -66,7 +66,7 @@ export const useNtaiProcessing = () => {
   const [logEntries, setLogEntries] = useState<string[]>([
     // Log entries para mostrar histórico de processamento
     "[10:25:30] Iniciando processamento com configurações:",
-    "[10:25:30] Modelo: GPT-4o, Temperature: 0.7",
+    "[10:25:30] 🤖 Modelo: gemini-2.5-flash, Temperature: 0.7",
     "[10:25:31] Extraindo texto para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
     "[10:25:33] Extraindo texto de documento PDF: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
     "[10:25:36] Analisando conteúdo para: The effects of sulforaphane on canine osteosarcoma proliferation and invasion",
@@ -139,7 +139,7 @@ export const useNtaiProcessing = () => {
   ]);
   
   const [aiConfigs, setAiConfigs] = useState({
-    modelName: "GPT-4o",
+    modelName: "gemini-2.5-flash",
     temperature: "0.7",
     nutraceuticals_prompt: "Extrair todos os nutracêuticos mencionados no estudo e suas aplicações.",
     conditions_prompt: "Identificar todas as condições de saúde abordadas no estudo."
@@ -220,7 +220,7 @@ export const useNtaiProcessing = () => {
     setAnalysisResult(null);
     
     addLogEntry('Iniciando processamento com configurações:');
-    addLogEntry(`Modelo: ${aiConfigs.modelName || 'padrão'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
+    addLogEntry(`🤖 Modelo: ${aiConfigs.modelName || 'gemini-2.5-flash'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
     
     const processNextItem = async (index: number) => {
       if (index >= updatedQueue.length) {

@@ -25,6 +25,8 @@ const NtaiProcessingSection: React.FC = () => {
     selectedItems,
     processingActive,
     logEntries,
+    clearLogs,
+    exportLogs,
     activeItemIndex,
     analysisResult,
     aiConfigs,
@@ -198,7 +200,13 @@ const NtaiProcessingSection: React.FC = () => {
           </div>
         </div>
         
-        {logVisible && <NtaiProcessingLog entries={logEntries} />}
+        {logVisible && (
+          <NtaiProcessingLog 
+            entries={logEntries} 
+            onClearLog={clearLogs}
+            onExportLog={exportLogs}
+          />
+        )}
         
         {processingStudy && (
           <div className="mb-6">
