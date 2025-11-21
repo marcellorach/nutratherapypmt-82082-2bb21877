@@ -73,6 +73,7 @@
     "back": "Voltar",
     "save": "Salvar",
     "cancel": "Cancelar",
+    "confirm": "Confirmar",
     "delete": "Excluir",
     "edit": "Editar",
     "add": "Adicionar",
@@ -1553,6 +1554,11 @@
       "deleteSuccessDescription": "{{count}} estudos foram removidos do banco de dados",
       "deleteError": "Erro ao deletar estudos",
       "deleteErrorDescription": "Ocorreu um erro ao tentar deletar os estudos selecionados",
+      "clearLog": "Limpar Log",
+      "exportLog": "Exportar Log",
+      "clearLogConfirm": "Tem certeza que deseja limpar o log? Esta ação não pode ser desfeita.",
+      "logCleared": "Log limpo com sucesso",
+      "logExported": "Log exportado como arquivo .txt",
       "conditions": {
         "title": "Condições Identificadas e Eficácia",
         "none": "Nenhuma condição identificada."
