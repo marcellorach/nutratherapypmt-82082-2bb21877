@@ -9,6 +9,36 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-11-21 16:00 BRT
+- **CRÍTICO: Corrigido erro InvalidKey ao fazer upload de PDFs com espaços ou caracteres especiais**
+  - **Problema identificado**: Supabase Storage rejeita nomes de arquivo com espaços e caracteres especiais (—, –, etc.)
+  - **Solução implementada**:
+    1. ✅ Criada função utilitária `sanitizeFileName()` em `src/utils/fileNameSanitizer.ts`
+       - Substitui espaços por underscores
+       - Converte em-dashes (—) para hífens (-)
+       - Remove caracteres especiais mantendo legibilidade
+       - Normaliza caracteres unicode (remove acentos)
+       - Limita tamanho do nome (max 200 chars)
+    2. ✅ Criada função `createSafeStoragePath()` para combinar UUID + nome sanitizado
+    3. ✅ Atualizado `FileUploadTab.tsx`:
+       - Upload usa `createSafeStoragePath()` (linha 78)
+       - Mostra aviso visual quando nome é sanitizado (linhas 241-246)
+    4. ✅ Atualizado `SciSpace2StepImport.tsx`:
+       - Meta sumário sanitizado (linha 43)
+       - Base de estudos sanitizada (linha 50)
+    5. ✅ Traduções bilíngues completas:
+       - `studies.import.fileNameSanitized` (PT/EN)
+       - `studies.import.invalidCharactersRemoved` (PT/EN)
+    6. ✅ Versão i18n incrementada: 1.3.24 → 1.3.25
+  - **Impacto**: Upload de PDFs com nomes complexos agora funciona (ex: "Turmeric and Curcumin—Health-Promoting Properties in Humans versus Dogs.pdf" → "Turmeric_and_Curcumin-Health-Promoting_Properties_in_Humans_versus_Dogs.pdf")
+  - **Arquivos afetados**:
+    - `src/utils/fileNameSanitizer.ts` (NOVO - 36 linhas)
+    - `src/components/administrador/estudos/import/FileUploadTab.tsx` (linhas 10, 78, 241-246)
+    - `src/components/administrador/estudos/import/SciSpace2StepImport.tsx` (linhas 5, 43, 50)
+    - `src/locales/pt/translation.json` (linhas 1475-1476)
+    - `src/locales/en/translation.json` (linhas 1475-1476)
+    - `src/i18n.ts` (linha 23: versão 1.3.25)
+
 ### Fixed - 2025-11-21 15:20 BRT
 - **CRÍTICO: Correção de estrutura de dados em extract-study-entities**
   - Corrigido `extractTextContent()` para suportar estrutura atual do `gemini-file-search` (ExtractedStudyData)
