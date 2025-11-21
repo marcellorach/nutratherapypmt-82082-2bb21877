@@ -890,7 +890,7 @@ export type Database = {
             columns: ["study_id"]
             isOneToOne: true
             referencedRelation: "processed_studies"
-            referencedColumns: ["study_id"]
+            referencedColumns: ["id"]
           },
         ]
       }

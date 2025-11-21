@@ -34,20 +34,29 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get parsed study content
+    // Get parsed study content using PRIMARY KEY (id)
+    console.log(`🔍 Buscando estudo com ID: ${studyId}`);
     const { data: studyData, error: studyError } = await supabase
       .from('processed_studies')
-      .select('analysis_data, title')
-      .eq('study_id', studyId)
+      .select('analysis_data, title, study_id')
+      .eq('id', studyId)
       .maybeSingle();
     
     if (studyError || !studyData) {
-      console.error('Failed to get study:', studyError);
+      console.error(`❌ Estudo não encontrado. ID buscado: ${studyId}`);
+      console.error('Erro Supabase:', JSON.stringify(studyError, null, 2));
       return new Response(
-        JSON.stringify({ error: 'Study not found or not parsed yet' }),
+        JSON.stringify({ 
+          error: 'Study not found or not parsed yet',
+          studyId,
+          searchedColumn: 'id (PRIMARY KEY)',
+          details: studyError 
+        }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'} (study_id: ${studyData.study_id})`);
 
     const parsedContent = studyData.analysis_data;
     
@@ -174,11 +183,12 @@ Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and 
     // Calculate extraction quality score
     const qualityScore = calculateQualityScore(extractedData);
 
-    // Save to study_extractions table
+    // Save to study_extractions table (study_id now expects UUID = processed_studies.id)
+    console.log(`💾 Salvando extração com study_id (UUID): ${studyId}`);
     const { data: extraction, error: insertError } = await supabase
       .from('study_extractions')
       .upsert({
-        study_id: studyId,
+        study_id: studyId, // Now correctly using UUID (processed_studies.id)
         extracted_data: extractedData,
         extraction_status: 'pending_review',
         extraction_quality_score: qualityScore,
@@ -195,11 +205,18 @@ Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, and 
       );
     }
 
-    // Update processed_studies status
-    await supabase
+    // Update processed_studies status using PRIMARY KEY (id)
+    console.log(`🔄 Atualizando status do estudo para 'extracted'...`);
+    const { error: updateError } = await supabase
       .from('processed_studies')
       .update({ kanban_status: 'extracted' })
-      .eq('study_id', studyId);
+      .eq('id', studyId);
+    
+    if (updateError) {
+      console.error('❌ Erro ao atualizar status kanban:', updateError);
+    } else {
+      console.log('✅ Status kanban atualizado com sucesso');
+    }
 
     return new Response(
       JSON.stringify({ 
