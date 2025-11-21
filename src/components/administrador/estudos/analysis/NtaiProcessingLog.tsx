@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Trash2, Download } from "lucide-react";
+import { Trash2, Download, RotateCcw, Eye, XCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +20,13 @@ interface NtaiProcessingLogProps {
   entries: string[];
   onClearLog?: () => void;
   onExportLog?: () => void;
+  onRetryError?: (entry: string) => void;
 }
 
-const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearLog, onExportLog }) => {
+const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearLog, onExportLog, onRetryError }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   
   // Auto-scroll to bottom when new entries are added
   useEffect(() => {
@@ -68,6 +70,11 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
     
     return { entry, duration: `${durationS}s` };
   });
+
+  // Filtrar apenas erros se necessário
+  const filteredEntries = showOnlyErrors
+    ? entriesWithDurations.filter(({ entry }) => entry.includes('[ERRO]') || entry.includes('❌'))
+    : entriesWithDurations;
   
   return (
     <div className="border rounded-md mb-4" ref={scrollAreaRef}>
@@ -75,6 +82,14 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
         <div className="flex items-center gap-2">
           <h4 className="text-sm font-medium">Log de Processamento RAG</h4>
           <span className="text-xs text-gray-500">{entries.length} eventos</span>
+          <Button
+            variant={showOnlyErrors ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setShowOnlyErrors(!showOnlyErrors)}
+            className="h-6 px-2 text-xs"
+          >
+            {showOnlyErrors ? t('studies.ntai.showAll') : t('studies.ntai.showErrorsOnly')}
+          </Button>
         </div>
         <div className="flex gap-1">
           {onExportLog && (
@@ -120,21 +135,38 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
       </div>
       
       <ScrollArea className="h-[200px] p-3">
-        {entriesWithDurations.length > 0 ? (
+        {filteredEntries.length > 0 ? (
           <div className="space-y-1 font-mono text-xs">
-            {entriesWithDurations.map(({ entry, duration }, index) => {
-              const isError = entry.includes('[ERRO]');
+            {filteredEntries.map(({ entry, duration }, index) => {
+              const isError = entry.includes('[ERRO]') || entry.includes('❌');
+              const hasActionable = isError && onRetryError;
               
               return (
                 <div 
                   key={index} 
-                  className={`px-2 py-1 rounded flex items-center justify-between gap-2 ${isError ? 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-400' : ''}`}
+                  className={`px-2 py-1 rounded ${isError ? 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-400' : ''}`}
                 >
-                  <span className="flex-1">{entry}</span>
-                  {duration && (
-                    <span className="text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
-                      {duration}
-                    </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex-1">{entry}</span>
+                    {duration && (
+                      <span className="text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
+                        {duration}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {hasActionable && (
+                    <div className="flex gap-1 mt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onRetryError?.(entry)}
+                        className="h-6 px-2 text-xs hover:bg-blue-100 dark:hover:bg-blue-900"
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        {t('studies.ntai.retry')}
+                      </Button>
+                    </div>
                   )}
                 </div>
               );
@@ -142,7 +174,9 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
           </div>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-            Log vazio. Inicie um processamento para ver registros.
+            {showOnlyErrors 
+              ? t('studies.ntai.noErrors')
+              : t('studies.ntai.noLogs')}
           </div>
         )}
       </ScrollArea>
