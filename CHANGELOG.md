@@ -9,6 +9,33 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-11-21 (Critical Bug: Study Extraction 404)
+- **🐛 [CRÍTICO] Corrigido erro 404 "Study not found" na extração de estudos**
+  - **Problema identificado**: `extract-study-entities` edge function usava `.eq('study_id', studyId)` para buscar em `processed_studies`, mas o parâmetro recebido é o `id` (UUID, primary key), não o `study_id` (TEXT)
+  - **Causa raiz**: Inconsistência entre schema do banco e lógica da edge function
+  - **Solução implementada**:
+    1. ✅ Migração DB: Alterado `study_extractions.study_id` de TEXT → UUID com foreign key para `processed_studies.id`
+    2. ✅ Corrigido `extract-study-entities/index.ts`: Mudado todas as queries de `.eq('study_id', ...)` para `.eq('id', ...)`
+    3. ✅ Adicionados logs detalhados de debug para rastreamento (🔍 busca, ✅ sucesso, ❌ erro, 💾 salvamento)
+  - **Impacto**: Workflow completo de processamento de estudos (upload → gemini-file-search → extract-study-entities → study_extractions) agora funciona corretamente
+  - **Arquivos afetados**:
+    - `supabase/functions/extract-study-entities/index.ts` (linhas 38-42, 44-53, 175-184, 199-206)
+    - Migration: `study_extractions.study_id` tipo alterado + foreign key constraint corrigida
+
+### Changed
+- **🔧 Corrigido nome do modelo de IA exibido nos logs**
+  - Alterado de "GPT-4o" para "gemini-2.5-flash" em todos os estados iniciais
+  - Arquivos: `useNtaiConfig.ts`, `useNtaiProcessing.ts`, `useProcessingLogic.ts`
+  - Adicionado emoji 🤖 nos logs de modelo para melhor identificação
+
+### Added
+- **✨ Botões de Limpar e Exportar Log no painel NTAI**
+  - Botão "Limpar Log" com confirmação via AlertDialog
+  - Botão "Exportar Log" para download em formato .txt
+  - Feedback via toast notifications
+  - Traduções PT/EN completas
+  - Arquivos: `NtaiProcessingLog.tsx`, `NtaiProcessingSection.tsx`, `useNtaiLogs.ts`
+
 ### Removed
 - ❌ **Tab duplicada "AI Processing" removida do menu lateral**
   - Deletado arquivo `src/components/administrador/ProcessamentoIATab.tsx` (componente redundante)
