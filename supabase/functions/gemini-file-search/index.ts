@@ -696,6 +696,32 @@ async function deleteGeminiFile(fileName: string, apiKey: string): Promise<void>
   }
 }
 
+// RETRY CONFIGURATION WITH EXPONENTIAL BACKOFF
+const MAX_RETRIES = 2;
+const INITIAL_BACKOFF_MS = 2000;
+
+async function retryWithExponentialBackoff<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  attempt: number = 1
+): Promise<T> {
+  try {
+    console.log(`🔄 [${operationName}] Tentativa ${attempt}/${MAX_RETRIES + 1}`);
+    return await operation();
+  } catch (error) {
+    if (attempt > MAX_RETRIES) {
+      console.error(`❌ [${operationName}] Todas as ${MAX_RETRIES + 1} tentativas falharam`);
+      throw error;
+    }
+    
+    const backoffTime = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
+    console.log(`⏳ [${operationName}] Aguardando ${backoffTime}ms antes de retry ${attempt + 1}...`);
+    await new Promise(resolve => setTimeout(resolve, backoffTime));
+    
+    return retryWithExponentialBackoff(operation, operationName, attempt + 1);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -771,122 +797,174 @@ serve(async (req) => {
     console.log('✅ PDF baixado com sucesso');
     console.log('📊 Tamanho do arquivo:', fileData.size, 'bytes', `(~${(fileData.size / 1024 / 1024).toFixed(2)} MB)`);
 
-    // ========== FLUXO PRINCIPAL COM FILE SEARCH ==========
+    // ========== FLUXO PRINCIPAL COM FILE SEARCH E RETRY AUTOMÁTICO ==========
+    console.log('📋 ============================================');
+    console.log('📋 INICIANDO PIPELINE COM 6 ETAPAS + RETRY');
+    console.log('📋 ============================================');
     
-    // 1. Upload para Gemini File API
-    const uploadedFile = await uploadToGeminiFileAPI(fileData, fileName, GOOGLE_GEMINI_KEY);
+    // 1. Upload para Gemini File API com retry
+    console.log('📤 ETAPA 1/6: Upload para Gemini File API...');
+    const uploadedFile = await retryWithExponentialBackoff(
+      () => uploadToGeminiFileAPI(fileData, fileName, GOOGLE_GEMINI_KEY),
+      'Upload to Gemini File API'
+    );
+    console.log('✅ ETAPA 1/6 CONCLUÍDA');
 
-    // 2. Aguardar processamento
-    await waitForFileActive(uploadedFile.name, GOOGLE_GEMINI_KEY);
+    // 2. Aguardar processamento com retry
+    console.log('⏳ ETAPA 2/6: Aguardando processamento do arquivo...');
+    await retryWithExponentialBackoff(
+      () => waitForFileActive(uploadedFile.name, GOOGLE_GEMINI_KEY),
+      'Wait for File Active'
+    );
+    console.log('✅ ETAPA 2/6 CONCLUÍDA');
 
-    // 3. ✨ NOVO: Obter ou criar File Search Store (corpus vetorizado)
-    const corpusName = await getOrCreateFileSearchStore(GOOGLE_GEMINI_KEY);
+    // 3. Obter ou criar File Search Store com retry
+    console.log('🗄️ ETAPA 3/6: Configurando File Search Store...');
+    const corpusName = await retryWithExponentialBackoff(
+      () => getOrCreateFileSearchStore(GOOGLE_GEMINI_KEY),
+      'Get or Create File Search Store'
+    );
+    console.log('✅ ETAPA 3/6 CONCLUÍDA');
     
-    // 4. ✨ NOVO: Adicionar arquivo ao corpus (vetorização automática)
-    await addFileToCorpus(corpusName, uploadedFile, GOOGLE_GEMINI_KEY);
+    // 4. Adicionar arquivo ao corpus com retry
+    console.log('📚 ETAPA 4/6: Adicionando ao corpus vetorizado...');
+    await retryWithExponentialBackoff(
+      () => addFileToCorpus(corpusName, uploadedFile, GOOGLE_GEMINI_KEY),
+      'Add File to Corpus'
+    );
+    console.log('✅ ETAPA 4/6 CONCLUÍDA');
     
     // ⏳ Aguardar indexação completa do documento
     console.log('⏳ Aguardando 10s para indexação completa do documento...');
     await new Promise(resolve => setTimeout(resolve, 10000));
     
-    // 5. ✨ NOVO: Extração com File Search (queries semânticas focadas)
-    console.log('🔍 Iniciando extração com File Search API...');
+    // 5. Extração com File Search com retry
+    console.log('🔍 ETAPA 5/6: Extraindo dados com AI File Search...');
     const fileSearchStoreName = corpusName.replace(/^corpora\//, 'fileSearchStores/');
     
     const startTime = Date.now();
-    const extractedData = await extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY);
+    const extractedData = await retryWithExponentialBackoff(
+      () => extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY),
+      'Extract Data with File Search'
+    );
     const duration = Date.now() - startTime;
+    console.log('✅ ETAPA 5/6 CONCLUÍDA');
+    console.log(`⏱️ Tempo de extração: ${(duration / 1000).toFixed(1)}s`);
     
-    // 📊 Registrar uso da API
-    console.log('📊 Registrando uso da API...');
-    await supabase.from('api_usage_logs').insert({
-      api_provider: 'google_gemini',
-      model: 'gemini-2.5-flash',
-      operation: 'file_search_extraction',
-      tokens_input: null, // File Search não reporta tokens
-      tokens_output: null,
-      cost_usd: null, // Calcular baseado em pricing se necessário
-      metadata: {
-        study_id: studyId,
-        duration_ms: duration,
-        nutraceuticals_found: extractedData.nutraceuticals?.length || 0,
-        conditions_found: extractedData.conditions?.length || 0,
-        file_name: fileName
-      }
-    });
-
-    // 4. Salvar no banco Supabase
-    console.log('💾 Salvando dados extraídos no banco...');
-    const { error: updateError } = await supabase
-      .from('processed_studies')
-      .update({
-        title: extractedData.title || null,
-        authors: extractedData.authors || [],
-        year: extractedData.year || null,
-        journal: extractedData.journal || null,
-        description: extractedData.abstract || null,
-        analysis_data: {
-          ...extractedData,
-          processed_at: new Date().toISOString(),
-          gemini_file_uri: uploadedFile.uri
-        },
-        kanban_status: 'parsed'
-      })
-      .eq('study_id', studyId);
-
-    if (updateError) {
-      console.error('❌ Erro ao salvar no banco:', updateError);
-      throw updateError;
+    // 6. Salvar no banco com validação e retry
+    console.log('💾 ETAPA 6/6: Salvando no banco de dados...');
+    console.log('📊 Dados a serem salvos:');
+    console.log('  - Título:', extractedData.title || '(vazio)');
+    console.log('  - Autores:', extractedData.authors.length);
+    console.log('  - Nutracêuticos:', extractedData.nutraceuticals.length);
+    console.log('  - Condições:', extractedData.conditions.length);
+    
+    // VALIDAÇÃO: Verificar se temos dados mínimos
+    if (!extractedData.title && extractedData.nutraceuticals.length === 0 && extractedData.conditions.length === 0) {
+      console.error('❌ VALIDAÇÃO FALHOU: Nenhum dado relevante foi extraído');
+      throw new Error('Extração falhou: nenhum dado relevante encontrado no PDF');
     }
     
-    console.log('✅ Dados salvos com sucesso no banco');
-
-    // 6. Cleanup: NÃO deletar arquivo para manter corpus vetorizado
-    // Comentado para reutilização do corpus vetorizado em futuras consultas
-    // console.log('🗑️ Deletando arquivo do Gemini File API...');
-    // await deleteGeminiFile(uploadedFile.name, GOOGLE_GEMINI_KEY);
-    console.log('✅ Arquivo mantido no corpus vetorizado para reutilização');
-
-    // ========== SUCESSO ==========
-    console.log('🎉 Processamento completo!');
+    await retryWithExponentialBackoff(
+      async () => {
+        const result = await supabase
+          .from('processed_studies')
+          .update({
+            title: extractedData.title || null,
+            authors: extractedData.authors.length > 0 ? extractedData.authors : null,
+            year: extractedData.year || null,
+            journal: extractedData.journal || null,
+            analysis_data: extractedData as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', studyId);
+        
+        if (result.error) throw result.error;
+        return result;
+      },
+      'Save to Database'
+    );
     
+    // VALIDAÇÃO PÓS-SAVE: Verificar se realmente salvou
+    console.log('🔍 Validando dados salvos...');
+    const { data: savedData, error: verifyError } = await supabase
+      .from('processed_studies')
+      .select('analysis_data')
+      .eq('id', studyId)
+      .single();
+    
+    if (verifyError || !savedData?.analysis_data) {
+      console.error('❌ VALIDAÇÃO PÓS-SAVE FALHOU: analysis_data não foi salvo');
+      throw new Error('Falha na validação: dados não foram persistidos no banco');
+    }
+    
+    console.log('✅ ETAPA 6/6 CONCLUÍDA: Dados confirmados no banco');
+    console.log('🎉 ============================================');
+    console.log('🎉 PIPELINE COMPLETO COM SUCESSO');
+    console.log('🎉 ============================================');
+    
+    // 📊 Registrar uso da API
+    try {
+      await supabase.from('api_usage_logs').insert({
+        api_provider: 'google_gemini',
+        model: 'gemini-2.5-flash',
+        operation: 'file_search_extraction',
+        tokens_input: 0,
+        tokens_output: 0,
+        cost_usd: 0,
+        metadata: {
+          studyId,
+          duration_seconds: duration / 1000,
+          nutraceuticals_count: extractedData.nutraceuticals.length,
+          conditions_count: extractedData.conditions.length,
+        }
+      });
+    } catch (logError) {
+      console.warn('⚠️ Falha ao registrar uso (não crítico):', logError);
+    }
+
+    // Deletar arquivo após processamento (opcional)
+    try {
+      await deleteGeminiFile(uploadedFile.name, GOOGLE_GEMINI_KEY);
+    } catch (delError) {
+      console.warn('⚠️ Falha ao deletar arquivo (não crítico):', delError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
-        studyId: studyId,
-        nutraceuticalsCount: extractedData.nutraceuticals?.length || 0,
-        conditionsCount: extractedData.conditions?.length || 0,
-        data: {
-          title: extractedData.title,
-          authors: extractedData.authors,
-          year: extractedData.year,
-          journal: extractedData.journal,
-          nutraceuticals: extractedData.nutraceuticals,
-          conditions: extractedData.conditions
-        },
-        message: 'Estudo processado com sucesso usando Google Gemini File API',
-        timestamp: new Date().toISOString()
+        studyId,
+        nutraceuticalsCount: extractedData.nutraceuticals.length,
+        conditionsCount: extractedData.conditions.length,
+        message: 'Pipeline completo com retry automático em todas as etapas',
+        metadata: {
+          duration_seconds: duration / 1000,
+          retries_used: 'automatic retry enabled for all steps'
+        }
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: any) {
-    console.error('❌ Erro fatal:', error);
-    console.error('Stack trace:', error.stack);
+  } catch (error) {
+    console.error('💥 ============================================');
+    console.error('💥 ERRO FATAL NO PROCESSAMENTO');
+    console.error('💥 ============================================');
+    console.error('❌ Tipo:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('❌ Mensagem:', error instanceof Error ? error.message : String(error));
+    console.error('❌ Stack:', error instanceof Error ? error.stack : 'N/A');
+    console.error('💥 ============================================');
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
     
     return new Response(
-      JSON.stringify({
+      JSON.stringify({ 
         success: false,
-        error: error.message || 'Erro desconhecido',
-        errorType: error.constructor.name,
-        timestamp: new Date().toISOString()
+        error: errorMessage,
+        recommendation: 'Verifique os logs detalhados. Se o erro persistir após 3 retries automáticos, verifique: 1) Tamanho do PDF (<20MB), 2) Formato válido, 3) Quota da API Gemini'
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }
