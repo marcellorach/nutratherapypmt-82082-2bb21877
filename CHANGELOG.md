@@ -10,6 +10,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added
+- ✅ Inline success confirmation in File Upload panel (replacing toast)
+- ✅ Duration display for each RAG processing log step (shows time taken between consecutive log entries)
+- ✅ Real document context extraction for AI chat citations (extracts full_text, abstract, sections from study data)
+- ✅ Literal text quotes from original documents in AI responses (enforces exact quotes in citations)
 - ✨ **Renderização avançada de Markdown no chat**: Mensagens da IA agora são renderizadas com formatação completa, incluindo títulos, listas, negrito, itálico, code blocks e links
 - 🎨 **Componente CitationCard**: Citações científicas são destacadas visualmente em cards especiais com ícones e formatação diferenciada
 - 🏷️ **Badges para nutracêuticos**: Nutracêuticos mencionados no texto são automaticamente convertidos em badges clicáveis
@@ -19,9 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - 📦 **Dependências**: Adicionadas bibliotecas `react-markdown`, `remark-gfm`, `rehype-sanitize`, `rehype-raw` para renderização rica de markdown
 
 ### Changed
-- 🎨 **Mensagens do assistente**: Agora usam MarkdownMessage ao invés de texto simples para renderização rica com componentes visuais especiais
-- 📚 **Prompt da IA**: Reestruturado completamente com formato obrigatório de resposta, uso de emojis por seção, e diretrizes explícitas de citação
-- 🌍 **i18n**: Versão incrementada para 1.3.27 com novas chaves de tradução (citation, viewInDocument, mainFindings, mechanisms, considerations, relatedQuestions)
+- ✅ File upload success feedback changed from toast to inline message panel with navigation button
+- ✅ RAG processing log now calculates and displays duration (in seconds) between consecutive steps
+- ✅ AI chat prompt enhanced to use literal document text for accurate citations (enforces exact quotes)
+- ✅ Document context extraction improved to include full_text, abstract, sections, and findings from study data
+- ✅ Citation format enforced to use exact quotes from original document text (no paraphrasing allowed)
+- ✅ i18n version incremented to 1.3.28
+
+### Removed
+- ✅ Toast notification removed from file upload success flow (replaced with inline panel)
 
 ### Fixed
 - ✅ **Edge Functions Deployment**: Forçado deploy de `document-chat` e `extract-study-entities` para garantir versões atualizadas no servidor
