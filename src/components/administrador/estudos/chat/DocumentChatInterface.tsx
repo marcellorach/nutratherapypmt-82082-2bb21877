@@ -16,6 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { MarkdownMessage } from './MarkdownMessage';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -291,10 +292,14 @@ const DocumentChatInterface: React.FC<DocumentChatInterfaceProps> = ({
                 >
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
-                      <div className="text-sm whitespace-pre-wrap break-words">
-                        {message.content}
-                      </div>
-                      <div className="text-xs opacity-70 mt-1">
+                      {message.role === 'assistant' ? (
+                        <MarkdownMessage content={message.content} />
+                      ) : (
+                        <div className="text-sm whitespace-pre-wrap break-words">
+                          {message.content}
+                        </div>
+                      )}
+                      <div className="text-xs opacity-70 mt-2">
                         {message.timestamp.toLocaleTimeString('pt-BR', { 
                           hour: '2-digit', 
                           minute: '2-digit' 

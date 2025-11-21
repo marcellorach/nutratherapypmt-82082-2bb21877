@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✨ **Renderização avançada de Markdown no chat**: Mensagens da IA agora são renderizadas com formatação completa, incluindo títulos, listas, negrito, itálico, code blocks e links
+- 🎨 **Componente CitationCard**: Citações científicas são destacadas visualmente em cards especiais com ícones e formatação diferenciada
+- 🏷️ **Badges para nutracêuticos**: Nutracêuticos mencionados no texto são automaticamente convertidos em badges clicáveis
+- 📊 **Barras de progresso para scores**: Scores de eficácia (formato X/Y) são renderizados como barras de progresso visuais com percentual
+- 📝 **Prompt estruturado para IA**: Sistema prompt melhorado com diretrizes claras de formatação, uso de emojis, e formato obrigatório de resposta em seções
+- 🔍 **Citações contextualizadas**: Suporte para citações no formato [Citação: texto - Seção X] que são extraídas e renderizadas em cards separados
+- 📦 **Dependências**: Adicionadas bibliotecas `react-markdown`, `remark-gfm`, `rehype-sanitize`, `rehype-raw` para renderização rica de markdown
+
+### Changed
+- 🎨 **Mensagens do assistente**: Agora usam MarkdownMessage ao invés de texto simples para renderização rica com componentes visuais especiais
+- 📚 **Prompt da IA**: Reestruturado completamente com formato obrigatório de resposta, uso de emojis por seção, e diretrizes explícitas de citação
+- 🌍 **i18n**: Versão incrementada para 1.3.27 com novas chaves de tradução (citation, viewInDocument, mainFindings, mechanisms, considerations, relatedQuestions)
+
 ### Fixed
 - ✅ **Edge Functions Deployment**: Forçado deploy de `document-chat` e `extract-study-entities` para garantir versões atualizadas no servidor
 - ✅ **Chat com Documento - Logging Detalhado**: Adicionados logs extensivos em toda pipeline de chat para facilitar debugging
