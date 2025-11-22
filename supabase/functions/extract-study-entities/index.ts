@@ -340,11 +340,11 @@ Include both primary and secondary nutraceuticals mentioned.`
       relevanceScore: qualityScore,
       extractedNutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
         name: n.name || 'Unknown',
-        confidence: n.efficacy_score || 3
+        confidence: n.efficacy_score ?? 3
       })),
       extractedConditions: (extractedData.conditions || []).map((c: any) => ({
         name: c.name || 'Unknown',
-        confidence: c.treatability_score || 3
+        confidence: c.treatability_score ?? 3
       })),
       extractedInteractions: (extractedData.mechanisms || []).map((m: any) => ({
         nutraceutical: m.nutraceutical || 'Unknown',
@@ -355,7 +355,7 @@ Include both primary and secondary nutraceuticals mentioned.`
       nutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
         name: n.name,
         dosage: n.dosage || '',
-        relevance: n.efficacy_score || 3
+        relevance: n.efficacy_score ?? 3
       }))
     };
     
