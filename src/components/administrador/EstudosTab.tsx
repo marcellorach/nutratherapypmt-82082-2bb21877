@@ -101,6 +101,11 @@ const EstudosTab: React.FC = () => {
     setDetailDialogOpen(false);
   };
 
+  const handleDeleteEstudo = (estudoId: string) => {
+    // Refresh the list after deletion
+    fetchEstudos();
+  };
+
   const filteredEstudos = estudos.filter(estudo => 
     (estudo.title && estudo.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (estudo.description && estudo.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -171,6 +176,7 @@ const EstudosTab: React.FC = () => {
                 onAddEstudo={handleAddEstudo}
                 buttonLabel={t('studies.kanban.startCuration')}
                 getNutraceuticalScore={getNutraceuticalScore}
+                onDeleteEstudo={handleDeleteEstudo}
               />
               
               <EstudosColumn
@@ -179,6 +185,7 @@ const EstudosTab: React.FC = () => {
                 estudos={emRevEstudos}
                 onViewEstudo={handleViewEstudo}
                 getNutraceuticalScore={getNutraceuticalScore}
+                onDeleteEstudo={handleDeleteEstudo}
               />
               
               <EstudosColumn
@@ -187,6 +194,7 @@ const EstudosTab: React.FC = () => {
                 estudos={aprovadosEstudos}
                 onViewEstudo={handleViewEstudo}
                 getNutraceuticalScore={getNutraceuticalScore}
+                onDeleteEstudo={handleDeleteEstudo}
               />
             </div>
           </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
@@ -11,24 +11,39 @@ import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 import { useGeminiProcessing } from '@/hooks/useGeminiProcessing';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface EstudoCardProps {
   estudo: any;
   onView: (estudo: any) => void;
   buttonLabel?: string;
   getNutraceuticalScore: (name: string) => number;
+  onDelete?: (estudoId: string) => void;
 }
 
 const EstudoCard: React.FC<EstudoCardProps> = ({ 
   estudo, 
   onView, 
   buttonLabel,
-  getNutraceuticalScore 
+  getNutraceuticalScore,
+  onDelete 
 }) => {
   const { t } = useTranslation();
   const { processStudy, processing, progress } = useGeminiProcessing();
   const [localEstudo, setLocalEstudo] = useState(estudo);
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Update local estudo when prop changes
   useEffect(() => {
@@ -62,6 +77,37 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // Delete from study_extractions first (if exists)
+      await supabase
+        .from('study_extractions')
+        .delete()
+        .eq('study_id', localEstudo.id);
+
+      // Delete the study
+      const { error } = await supabase
+        .from('processed_studies')
+        .delete()
+        .eq('id', localEstudo.id);
+
+      if (error) throw error;
+
+      toast.success(t('studies.card.deleteSuccess') || 'Study deleted successfully');
+      
+      // Notify parent component if callback provided
+      if (onDelete) {
+        onDelete(localEstudo.id);
+      }
+    } catch (error) {
+      console.error('Error deleting study:', error);
+      toast.error(t('studies.card.deleteError') || 'Error deleting study');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Extract data from Gemini analysis or use defaults
   const analysisData = localEstudo.analysis_data as any;
   const nutraceuticals = analysisData?.nutraceuticals || localEstudo.nutraceuticals || [];
@@ -78,30 +124,66 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               <EvidenceTag score={localEstudo.qualityScore} showLabel={false} />
             )}
           </div>
-          {needsProcessing && !isProcessing && (
-            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Aguardando IA
-            </Badge>
-          )}
-          {isProcessing && (
-            <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Processando
-            </Badge>
-          )}
-          {processingStatus === 'success' && (
-            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Concluído
-            </Badge>
-          )}
-          {processingStatus === 'error' && (
-            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              Erro
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Delete Button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={isDeleting}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                >
+                  {isDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('studies.card.deleteTitle') || 'Delete Study?'}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('studies.card.deleteDescription') || 'This action cannot be undone. This will permanently delete the study and all its extracted data.'}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel') || 'Cancel'}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {t('common.delete') || 'Delete'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            {needsProcessing && !isProcessing && (
+              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                Aguardando IA
+              </Badge>
+            )}
+            {isProcessing && (
+              <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Processando
+              </Badge>
+            )}
+            {processingStatus === 'success' && (
+              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Concluído
+              </Badge>
+            )}
+            {processingStatus === 'error' && (
+              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                Erro
+              </Badge>
+            )}
+          </div>
         </div>
         <CardDescription>{localEstudo.description || 'Estudo científico importado'}</CardDescription>
         

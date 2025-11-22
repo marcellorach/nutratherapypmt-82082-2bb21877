@@ -1672,10 +1672,15 @@
     },
     "card": {
       "ragAnalysis": "Análise RAG",
+      "ntaiAnalysis": "Análise NTAI",
       "nutraceuticals": "Nutraceuticos",
       "conditions": "Condições",
       "interactions": "Interações",
-      "sideEffects": "Efeitos Colaterais"
+      "sideEffects": "Efeitos Colaterais",
+      "deleteTitle": "Deletar Estudo?",
+      "deleteDescription": "Esta ação não pode ser desfeita. Isso irá deletar permanentemente o estudo e todos os seus dados extraídos.",
+      "deleteSuccess": "Estudo deletado com sucesso",
+      "deleteError": "Erro ao deletar estudo"
     },
     "toast": {
       "studyAdded": "Estudo adicionado com sucesso",
