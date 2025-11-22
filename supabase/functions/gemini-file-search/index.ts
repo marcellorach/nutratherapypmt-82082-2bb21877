@@ -17,11 +17,14 @@ interface ExtractedStudyData {
     name: string;
     dosage?: string;
     effects: string;
+    efficacy_score?: number;
   }>;
   conditions: Array<{
     name: string;
     relationship_type: string;
     efficacy_description?: string;
+    treatability_score?: number;
+    severity?: string;
   }>;
 }
 
@@ -270,44 +273,128 @@ async function addFileToCorpus(
   console.log('✅ Arquivo importado com sucesso ao File Search Store');
 }
 
-// Extração com File Search (queries semânticas focadas)
+// Extração com File Search usando Structured Output (Function Calling)
 async function extractWithFileSearch(
   fileSearchStoreName: string,
   apiKey: string
 ): Promise<ExtractedStudyData> {
   const MODEL_NAME = 'gemini-2.5-flash';
-  console.log('🔍 Extraindo dados com File Search...');
+  console.log('🔍 Extraindo dados com File Search + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
-  console.log(`🤖 Modelo AI: ${MODEL_NAME} (suporta File Search)`);
-  console.log(`🛠️ Tecnologia: Google File Search API`);
+  console.log(`🤖 Modelo AI: ${MODEL_NAME} (suporta File Search + Function Calling)`);
+  console.log(`🛠️ Tecnologia: Tool Calling para JSON estruturado garantido`);
   
-  const extractedData: ExtractedStudyData = {
-    title: '',
-    authors: [],
-    year: undefined,
-    journal: '',
-    abstract: '',
-    doi: '',
-    nutraceuticals: [],
-    conditions: []
+  // Definir schema de função para structured output
+  const extractionFunction = {
+    name: 'extract_study_data',
+    description: 'Extrair dados estruturados de um estudo científico sobre nutracêuticos',
+    parameters: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Título completo do estudo científico'
+        },
+        authors: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Lista de autores do estudo'
+        },
+        year: {
+          type: 'integer',
+          description: 'Ano de publicação'
+        },
+        journal: {
+          type: 'string',
+          description: 'Nome do periódico/journal onde foi publicado'
+        },
+        abstract: {
+          type: 'string',
+          description: 'Resumo/abstract do estudo'
+        },
+        doi: {
+          type: 'string',
+          description: 'DOI do estudo, se disponível'
+        },
+        nutraceuticals: {
+          type: 'array',
+          description: 'Lista de todos os nutracêuticos, suplementos ou compostos ativos mencionados',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Nome científico ou comum do nutracêutico'
+              },
+              dosage: {
+                type: 'string',
+                description: 'Dosagem utilizada com unidades (ex: 500mg/dia, 2g diários)'
+              },
+              effects: {
+                type: 'string',
+                description: 'Efeitos ou resultados observados no estudo'
+              },
+              efficacy_score: {
+                type: 'integer',
+                description: 'Score de eficácia de 1-5 baseado nos resultados'
+              }
+            },
+            required: ['name', 'effects']
+          }
+        },
+        conditions: {
+          type: 'array',
+          description: 'Lista de condições de saúde, doenças ou problemas médicos abordados',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Nome da condição ou doença'
+              },
+              relationship_type: {
+                type: 'string',
+                enum: ['treatment', 'prevention', 'support'],
+                description: 'Tipo de relação: treatment (tratamento), prevention (prevenção) ou support (suporte)'
+              },
+              efficacy_description: {
+                type: 'string',
+                description: 'Descrição da eficácia observada'
+              },
+              treatability_score: {
+                type: 'integer',
+                description: 'Score de tratabilidade de 1-5'
+              },
+              severity: {
+                type: 'string',
+                enum: ['low', 'medium', 'high'],
+                description: 'Severidade da condição'
+              }
+            },
+            required: ['name', 'relationship_type']
+          }
+        }
+      },
+      required: ['title', 'authors', 'nutraceuticals', 'conditions']
+    }
   };
 
-  // Query 1: Metadados básicos
-  console.log('🔍 Query 1/3: Metadados básicos...');
-  const metadataPrompt = `Analise este estudo científico e extraia os metadados:
-- Título completo do estudo
-- Lista de autores (separados por vírgula)
-- Ano de publicação
-- Nome do journal/periódico
-- Abstract/resumo
-- DOI (se disponível)
+  const prompt = `Analise este estudo científico COMPLETO sobre nutracêuticos e extraia TODOS os dados estruturados.
 
-Retorne no formato JSON estruturado.`;
+IMPORTANTE: 
+- Busque em TODO o documento: introdução, métodos, resultados, discussão, tabelas, figuras
+- Para nutracêuticos: inclua compostos ativos, suplementos, ingredientes testados
+- Para condições: inclua doenças, problemas de saúde, outcomes clínicos estudados
+- Seja exaustivo: extraia TODOS os compostos e TODAS as condições mencionadas
+- Se não encontrar dosagem específica, deixe o campo em branco
+- Avalie eficácia e severidade baseado nos resultados apresentados
+
+Retorne os dados usando a função extract_study_data.`;
 
   try {
-    console.log(`🤖 [Query 1/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
+    console.log('📤 Enviando query com Tool Calling para extração estruturada...');
     
-    const metadataResponse = await fetch(
+    const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
@@ -315,13 +402,24 @@ Retorne no formato JSON estruturado.`;
         body: JSON.stringify({
           contents: [{ 
             role: 'user', 
-            parts: [{ text: metadataPrompt }] 
+            parts: [{ text: prompt }] 
           }],
-          tools: [{
-            file_search: {
-              file_search_store_names: [fileSearchStoreName]
+          tools: [
+            {
+              file_search: {
+                file_search_store_names: [fileSearchStoreName]
+              }
+            },
+            {
+              function_declarations: [extractionFunction]
             }
-          }],
+          ],
+          tool_config: {
+            function_calling_config: {
+              mode: 'ANY',
+              allowed_function_names: ['extract_study_data']
+            }
+          },
           generationConfig: {
             temperature: 0.1
           }
@@ -329,175 +427,68 @@ Retorne no formato JSON estruturado.`;
       }
     );
 
-    if (metadataResponse.ok) {
-      const metadataResult = await metadataResponse.json();
-      const metadataText = metadataResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      console.log('📄 Metadata extraída:', metadataText.substring(0, 200));
-      
-      // Parse do texto retornado
-      const lines = metadataText.split('\n');
-      for (const line of lines) {
-        const lower = line.toLowerCase();
-        if ((lower.includes('título') || lower.includes('title')) && line.includes(':')) {
-          extractedData.title = line.split(':').slice(1).join(':').trim();
-        } else if ((lower.includes('autor') || lower.includes('author')) && line.includes(':')) {
-          const authorsText = line.split(':').slice(1).join(':').trim();
-          extractedData.authors = authorsText.split(',').map((a: string) => a.trim()).filter((a: string) => a);
-        } else if ((lower.includes('ano') || lower.includes('year')) && line.includes(':')) {
-          const yearMatch = line.match(/\d{4}/);
-          if (yearMatch) extractedData.year = parseInt(yearMatch[0]);
-        } else if ((lower.includes('journal') || lower.includes('periódico')) && line.includes(':')) {
-          extractedData.journal = line.split(':').slice(1).join(':').trim();
-        } else if (lower.includes('doi') && line.includes(':')) {
-          extractedData.doi = line.split(':').slice(1).join(':').trim();
-        }
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Erro na API do Gemini:', response.status, errorText);
+      throw new Error(`Erro na API: ${response.status} - ${errorText}`);
     }
-  } catch (e) {
-    console.error('❌ Erro em Query 1:', e);
-  }
 
-  // Query 2: Nutracêuticos (busca semântica focada)
-  console.log('🔍 Query 2/3: Nutracêuticos...');
-  const nutraceuticalsPrompt = `Liste TODOS os nutracêuticos, suplementos, compostos ativos ou ingredientes mencionados neste estudo científico.
-
-Para cada um, extraia:
-- Nome científico ou comum do composto
-- Dosagem/quantidade utilizada (com unidades, ex: "500mg/dia", "2g diários")
-- Efeitos/resultados observados no estudo
-
-Busque em TODO o documento: introdução, materiais e métodos, resultados, discussão, tabelas e figuras.
-
-Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar nutracêuticos, indique claramente.`;
-
-  try {
-    console.log(`🤖 [Query 2/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
+    const result = await response.json();
+    console.log('📊 Resposta recebida do Gemini');
     
-    const nutraceuticalsResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ 
-            role: 'user', 
-            parts: [{ text: nutraceuticalsPrompt }] 
-          }],
-          tools: [{
-            file_search: {
-              file_search_store_names: [fileSearchStoreName]
-            }
-          }],
-          generationConfig: {
-            temperature: 0.1
-          }
-        })
-      }
+    // Extrair dados do function call
+    const functionCall = result.candidates?.[0]?.content?.parts?.find(
+      (part: any) => part.functionCall?.name === 'extract_study_data'
     );
 
-    if (nutraceuticalsResponse.ok) {
-      const nutraceuticalsResult = await nutraceuticalsResponse.json();
-      const nutraceuticalsText = nutraceuticalsResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      console.log('💊 Nutracêuticos extraídos:', nutraceuticalsText.substring(0, 300));
-      
-      // Parse de bullet points
-      const bulletPoints = nutraceuticalsText.split('\n').filter((l: string) => 
-        l.trim().startsWith('-') || l.trim().startsWith('*') || /^\d+\./.test(l.trim())
-      );
-      
-      if (bulletPoints.length > 0) {
-        extractedData.nutraceuticals = bulletPoints.map((bp: string) => {
-          const cleaned = bp.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
-          const parts = cleaned.split(/[:\-]/);
-          return {
-            name: parts[0]?.trim() || cleaned,
-            dosage: parts[1]?.includes('mg') || parts[1]?.includes('g') || parts[1]?.includes('ml') 
-              ? parts[1].trim() 
-              : '',
-            effects: parts.length > 2 ? parts.slice(2).join(':').trim() : parts[1]?.trim() || ''
-          };
-        });
-      }
+    if (!functionCall) {
+      console.error('❌ Gemini não retornou function call esperado');
+      console.log('📊 Resposta completa:', JSON.stringify(result, null, 2));
+      throw new Error('Gemini não usou a função extract_study_data. Resposta inesperada.');
     }
-  } catch (e) {
-    console.error('❌ Erro em Query 2:', e);
-  }
 
-  // Query 3: Condições de saúde
-  console.log('🔍 Query 3/3: Condições de saúde...');
-  const conditionsPrompt = `Liste TODAS as condições de saúde, doenças ou problemas médicos abordados neste estudo científico.
+    const extractedArgs = functionCall.functionCall.args;
+    console.log('✅ Dados estruturados extraídos via Tool Calling');
+    console.log(`📊 Nutracêuticos: ${extractedArgs.nutraceuticals?.length || 0}`);
+    console.log(`📊 Condições: ${extractedArgs.conditions?.length || 0}`);
+    console.log(`📊 Título: ${extractedArgs.title?.substring(0, 50) || 'N/A'}...`);
 
-Para cada condição:
-- Nome da condição ou doença
-- Tipo de relação com os compostos estudados: "treatment" (tratamento), "prevention" (prevenção) ou "support" (suporte)
-- Descrição breve da eficácia observada
+    // Mapear dados estruturados para o formato esperado
+    const extractedData: ExtractedStudyData = {
+      title: extractedArgs.title || '',
+      authors: extractedArgs.authors || [],
+      year: extractedArgs.year || undefined,
+      journal: extractedArgs.journal || '',
+      abstract: extractedArgs.abstract || '',
+      doi: extractedArgs.doi || '',
+      nutraceuticals: (extractedArgs.nutraceuticals || []).map((n: any) => ({
+        name: n.name,
+        dosage: n.dosage || '',
+        effects: n.effects,
+        efficacy_score: n.efficacy_score
+      })),
+      conditions: (extractedArgs.conditions || []).map((c: any) => ({
+        name: c.name,
+        relationship_type: c.relationship_type,
+        efficacy_description: c.efficacy_description || '',
+        treatability_score: c.treatability_score,
+        severity: c.severity
+      }))
+    };
 
-Busque em TODO o documento.
-
-Retorne uma lista DETALHADA em formato de bullet points. Se não encontrar condições, indique claramente.`;
-
-  try {
-    console.log(`🤖 [Query 3/3] Usando modelo: ${MODEL_NAME} com Google File Search`);
-    
-    const conditionsResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ 
-            role: 'user', 
-            parts: [{ text: conditionsPrompt }] 
-          }],
-          tools: [{
-            file_search: {
-              file_search_store_names: [fileSearchStoreName]
-            }
-          }],
-          generationConfig: {
-            temperature: 0.1
-          }
-        })
-      }
-    );
-
-    if (conditionsResponse.ok) {
-      const conditionsResult = await conditionsResponse.json();
-      const conditionsText = conditionsResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      console.log('🏥 Condições extraídas:', conditionsText.substring(0, 300));
-      
-      // Parse de bullet points
-      const bulletPoints = conditionsText.split('\n').filter((l: string) => 
-        l.trim().startsWith('-') || l.trim().startsWith('*') || /^\d+\./.test(l.trim())
-      );
-      
-      if (bulletPoints.length > 0) {
-        extractedData.conditions = bulletPoints.map((bp: string) => {
-          const cleaned = bp.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '');
-          const lower = cleaned.toLowerCase();
-          
-          let relationshipType = 'treatment';
-          if (lower.includes('prevention') || lower.includes('prevenção') || lower.includes('preventivo')) {
-            relationshipType = 'prevention';
-          } else if (lower.includes('support') || lower.includes('suporte') || lower.includes('manutenção')) {
-            relationshipType = 'support';
-          }
-          
-          const parts = cleaned.split(/[:\-]/);
-          return {
-            name: parts[0]?.trim() || cleaned,
-            relationship_type: relationshipType,
-            efficacy_description: parts.slice(1).join(':').trim() || ''
-          };
-        });
-      }
+    // Validação crítica
+    if (extractedData.nutraceuticals.length === 0 && extractedData.conditions.length === 0) {
+      console.warn('⚠️ WARNING: Nenhum nutracêutico ou condição foi extraído!');
+      console.log('📊 Dados extraídos completos:', JSON.stringify(extractedData, null, 2));
+      throw new Error('Extração vazia: 0 nutracêuticos e 0 condições. Documento pode estar vazio ou ilegível.');
     }
-  } catch (e) {
-    console.error('❌ Erro em Query 3:', e);
-  }
 
-  console.log(`✅ Extração File Search completa: ${extractedData.nutraceuticals.length} nutracêuticos, ${extractedData.conditions.length} condições`);
-  return extractedData;
+    console.log('✅ Extração File Search completa com structured output garantido');
+    return extractedData;
+  } catch (error) {
+    console.error('❌ Erro ao extrair dados com Gemini File Search:', error);
+    throw new Error(`Falha na extração estruturada: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 async function analyzeWithGemini(
