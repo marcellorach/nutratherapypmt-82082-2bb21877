@@ -104,7 +104,7 @@ const FileUploadTab: React.FC = () => {
           // Finalizar progresso
           setUploadProgress(prev => ({ ...prev, [fileName]: 100 }));
 
-          // Criar registro em processed_studies
+          // Criar registro em processed_studies com analysis_data vazio estruturado
           const { error: dbError } = await supabase
             .from('processed_studies')
             .insert({
@@ -116,7 +116,16 @@ const FileUploadTab: React.FC = () => {
               kanban_status: 'new',
               source_import_id: importData.id,
               description: 'Aguardando processamento',
-              journal: 'Importação Manual'
+              journal: 'Importação Manual',
+              analysis_data: {
+                studyId: studyId,
+                qualityScore: 0,
+                relevanceScore: 0,
+                extractedNutraceuticals: [],
+                extractedConditions: [],
+                extractedInteractions: [],
+                extractedSideEffects: []
+              }
             });
 
           if (dbError) throw dbError;
