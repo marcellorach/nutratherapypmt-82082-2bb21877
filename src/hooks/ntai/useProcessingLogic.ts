@@ -183,6 +183,22 @@ export const useProcessingLogic = (
         addLogEntry(`✅ [SUCESSO] Gemini concluído: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
         addLogEntry(`📊 [INFO] ${geminiData.metadata?.retries_used || 'Retry automático ativo'}`);
         
+        // VETORIZAÇÃO AUTOMÁTICA: Gerar embeddings para RAG
+        addLogEntry(`🔢 [AUTO-VETORIZAÇÃO] Iniciando vetorização para RAG...`);
+        try {
+          const { data: vectorData, error: vectorError } = await supabase.functions.invoke('vectorize-study', {
+            body: { studyId: item.id }
+          });
+          
+          if (vectorError) {
+            addLogEntry(`⚠️ [ALERTA] Vetorização falhou: ${vectorError.message} (estudo ainda pode ser usado sem busca semântica)`);
+          } else {
+            addLogEntry(`✅ [VETORIZAÇÃO] ${vectorData.chunksProcessed || 0} embeddings criados para busca semântica`);
+          }
+        } catch (vectorErr: any) {
+          addLogEntry(`⚠️ [ALERTA] Erro na vetorização: ${vectorErr.message} (não crítico)`);
+        }
+        
         // VALIDAÇÃO CRÍTICA: Verificar se analysis_data foi salvo corretamente
         addLogEntry(`🔍 [VALIDAÇÃO] Verificando integridade dos dados salvos...`);
         const { data: validationData, error: validationError } = await supabase
