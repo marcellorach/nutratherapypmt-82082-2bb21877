@@ -871,6 +871,33 @@ serve(async (req) => {
     
     await retryWithExponentialBackoff(
       async () => {
+        // Preparar full_text_content para RAG
+        const extractedDataAny = extractedData as any;
+        let fullTextContent = '';
+        
+        if (extractedDataAny.full_text) {
+          fullTextContent = extractedDataAny.full_text;
+        } else if (extractedData.abstract) {
+          fullTextContent = extractedData.abstract;
+        } else if (extractedDataAny.sections) {
+          fullTextContent = Object.entries(extractedDataAny.sections)
+            .map(([section, content]) => `### ${section}\n${content}`)
+            .join('\n\n');
+        }
+        
+        const fullTextMetadata = {
+          sections: extractedDataAny.sections ? Object.keys(extractedDataAny.sections) : [],
+          word_count: fullTextContent ? fullTextContent.split(/\s+/).length : 0,
+          char_count: fullTextContent.length,
+          has_abstract: !!extractedData.abstract,
+          has_full_text: !!extractedDataAny.full_text,
+          extracted_at: new Date().toISOString()
+        };
+        
+        console.log('💾 Salvando com RAG support...');
+        console.log(`   - full_text_content: ${fullTextContent.length} chars`);
+        console.log(`   - word_count: ${fullTextMetadata.word_count}`);
+        
         const result = await supabase
           .from('processed_studies')
           .update({
@@ -879,6 +906,8 @@ serve(async (req) => {
             year: extractedData.year || null,
             journal: extractedData.journal || null,
             analysis_data: extractedData as any,
+            full_text_content: fullTextContent || null,
+            full_text_metadata: fullTextMetadata,
             updated_at: new Date().toISOString()
           })
           .eq('id', studyId);

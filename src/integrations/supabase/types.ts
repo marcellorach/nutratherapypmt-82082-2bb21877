@@ -212,6 +212,87 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_knowledge_edges: {
+        Row: {
+          created_at: string | null
+          evidence_count: number | null
+          id: string
+          metadata: Json | null
+          relationship_strength: number | null
+          relationship_type: string
+          source_entity_id: string
+          supporting_study_ids: string[] | null
+          target_entity_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          evidence_count?: number | null
+          id?: string
+          metadata?: Json | null
+          relationship_strength?: number | null
+          relationship_type: string
+          source_entity_id: string
+          supporting_study_ids?: string[] | null
+          target_entity_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          evidence_count?: number | null
+          id?: string
+          metadata?: Json | null
+          relationship_strength?: number | null
+          relationship_type?: string
+          source_entity_id?: string
+          supporting_study_ids?: string[] | null
+          target_entity_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_knowledge_edges_source_entity_id_fkey"
+            columns: ["source_entity_id"]
+            isOneToOne: false
+            referencedRelation: "medical_knowledge_graph"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_knowledge_edges_target_entity_id_fkey"
+            columns: ["target_entity_id"]
+            isOneToOne: false
+            referencedRelation: "medical_knowledge_graph"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_knowledge_graph: {
+        Row: {
+          created_at: string | null
+          entity_metadata: Json | null
+          entity_name: string
+          entity_type: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_metadata?: Json | null
+          entity_name: string
+          entity_type: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_metadata?: Json | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       nutraceutical_benefits: {
         Row: {
           benefit: string
@@ -663,6 +744,8 @@ export type Database = {
           created_at: string | null
           description: string | null
           error_message: string | null
+          full_text_content: string | null
+          full_text_metadata: Json | null
           id: string
           import_type: string
           journal: string | null
@@ -682,6 +765,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           error_message?: string | null
+          full_text_content?: string | null
+          full_text_metadata?: Json | null
           id?: string
           import_type?: string
           journal?: string | null
@@ -701,6 +786,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           error_message?: string | null
+          full_text_content?: string | null
+          full_text_metadata?: Json | null
           id?: string
           import_type?: string
           journal?: string | null
@@ -891,6 +978,47 @@ export type Database = {
           },
         ]
       }
+      study_embeddings: {
+        Row: {
+          chunk_index: number
+          chunk_metadata: Json | null
+          chunk_text: string
+          created_at: string | null
+          embedding: string | null
+          id: string
+          study_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          chunk_index: number
+          chunk_metadata?: Json | null
+          chunk_text: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          study_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          chunk_index?: number
+          chunk_metadata?: Json | null
+          chunk_text?: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          study_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_embeddings_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_extractions: {
         Row: {
           created_at: string | null
@@ -1054,6 +1182,22 @@ export type Database = {
       }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
+      search_study_chunks: {
+        Args: {
+          match_count?: number
+          match_study_id?: string
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          chunk_id: string
+          chunk_index: number
+          chunk_metadata: Json
+          chunk_text: string
+          similarity: number
+          study_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
