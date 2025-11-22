@@ -59,6 +59,81 @@ serve(async (req) => {
       );
     }
 
+    // ============================================
+    // NOVO: RAG com Busca Vetorial Semântica
+    // ============================================
+    let vectorContext = '';
+    let relevantChunks: any[] = [];
+    
+    try {
+      console.log('🔍 Iniciando busca vetorial semântica...');
+      
+      // 1. Gerar embedding da pergunta do usuário
+      console.log('🔢 Gerando embedding da pergunta...');
+      const questionEmbeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/text-embedding-004',
+          input: question
+        }),
+      });
+
+      if (questionEmbeddingResponse.ok) {
+        const questionEmbeddingData = await questionEmbeddingResponse.json();
+        const questionEmbedding = questionEmbeddingData.data[0].embedding;
+        
+        // 2. Buscar chunks mais relevantes usando similaridade cosseno
+        console.log('🔍 Buscando chunks relevantes via pgvector...');
+        const { data: chunks, error: searchError } = await supabase.rpc(
+          'search_study_chunks',
+          {
+            query_embedding: JSON.stringify(questionEmbedding),
+            match_study_id: studyId,
+            match_threshold: 0.65, // Threshold mais baixo para capturar mais contexto
+            match_count: 5
+          }
+        );
+
+        if (!searchError && chunks && chunks.length > 0) {
+          relevantChunks = chunks;
+          console.log(`✅ Encontrados ${chunks.length} chunks relevantes via RAG`);
+          
+          // Construir contexto com chunks relevantes
+          vectorContext = '\n\n**CONTEXTO VETORIAL (RAG) - Trechos Mais Relevantes do Estudo Completo**:\n\n';
+          vectorContext += chunks
+            .map((chunk: any, i: number) => {
+              const similarity = (chunk.similarity * 100).toFixed(1);
+              return `[Chunk ${i + 1} | Similaridade: ${similarity}% | Índice: ${chunk.chunk_index}]\n${chunk.chunk_text}`;
+            })
+            .join('\n\n---\n\n');
+          
+          console.log(`📊 Contexto vetorial: ${vectorContext.length} caracteres`);
+        } else {
+          console.warn('⚠️ Nenhum chunk relevante encontrado ou erro na busca:', searchError);
+        }
+      } else {
+        console.warn('⚠️ Erro ao gerar embedding da pergunta:', questionEmbeddingResponse.status);
+      }
+    } catch (ragError) {
+      console.warn('⚠️ Erro no processo RAG (continuando com fallback):', ragError);
+    }
+
+    // ============================================
+    // Fallback: Contexto Estruturado (Tags)
+    // ============================================
+
+    if (studyError || !study) {
+      console.error('❌ Erro ao buscar estudo:', studyError);
+      return new Response(
+        JSON.stringify({ error: 'Study not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Extract document text for literal citations
     let documentText = '';
     const extractionData = study.study_extractions?.[0]?.extracted_data;
@@ -187,14 +262,17 @@ serve(async (req) => {
       });
     }
 
-    // Add original document text for citations
-    if (documentContext && documentContext !== 'No document text available') {
+    // Priorizar contexto vetorial RAG, depois fallback para texto estruturado
+    if (vectorContext) {
+      contextParts.push(vectorContext);
+    } else if (documentContext && documentContext !== 'No document text available') {
       contextParts.push(`\n**TEXTO ORIGINAL DO DOCUMENTO (para citações literais)**:\n---\n${documentContext}\n---`);
     }
 
     const fullContext = contextParts.join('\n');
     
     console.log(`📊 Contexto construído: ${fullContext.length} caracteres`);
+    console.log(`📊 RAG chunks: ${relevantChunks.length}`);
     console.log(`📊 Nutracêuticos no contexto: ${nutraceuticals.length}`);
     console.log(`📊 Condições no contexto: ${conditions.length}`);
     console.log(`📊 Achados no contexto: ${findings.length}`);
