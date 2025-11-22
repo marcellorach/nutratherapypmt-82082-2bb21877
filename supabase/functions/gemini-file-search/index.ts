@@ -287,56 +287,56 @@ async function extractWithFileSearch(
   // Definir schema de função para structured output
   const extractionFunction = {
     name: 'extract_study_data',
-    description: 'Extrair dados estruturados de um estudo científico sobre nutracêuticos',
+    description: 'Extract structured data from a scientific study about nutraceuticals. ALL extracted data MUST be in English.',
     parameters: {
       type: 'object',
       properties: {
         title: {
           type: 'string',
-          description: 'Título completo do estudo científico'
+          description: 'Complete title of the scientific study'
         },
         authors: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Lista de autores do estudo'
+          description: 'List of study authors'
         },
         year: {
           type: 'integer',
-          description: 'Ano de publicação'
+          description: 'Year of publication'
         },
         journal: {
           type: 'string',
-          description: 'Nome do periódico/journal onde foi publicado'
+          description: 'Name of the journal/periodical where it was published'
         },
         abstract: {
           type: 'string',
-          description: 'Resumo/abstract do estudo'
+          description: 'Abstract/summary of the study'
         },
         doi: {
           type: 'string',
-          description: 'DOI do estudo, se disponível'
+          description: 'DOI of the study, if available'
         },
         nutraceuticals: {
           type: 'array',
-          description: 'Lista de todos os nutracêuticos, suplementos ou compostos ativos mencionados',
+          description: 'List of ALL nutraceuticals, supplements or active compounds mentioned in the study (MUST be in English)',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
-                description: 'Nome científico ou comum do nutracêutico'
+                description: 'Scientific or common name of the nutraceutical IN ENGLISH (e.g., Curcumin, not Curcumina)'
               },
               dosage: {
                 type: 'string',
-                description: 'Dosagem utilizada com unidades (ex: 500mg/dia, 2g diários)'
+                description: 'Dosage used with units (e.g., 500mg/day, 2g daily)'
               },
               effects: {
                 type: 'string',
-                description: 'Efeitos ou resultados observados no estudo'
+                description: 'Effects or results observed in the study IN ENGLISH'
               },
               efficacy_score: {
                 type: 'integer',
-                description: 'Score de eficácia de 1-5 baseado nos resultados'
+                description: 'Efficacy score 1-5 based on results and statistical significance'
               }
             },
             required: ['name', 'effects']
@@ -344,31 +344,31 @@ async function extractWithFileSearch(
         },
         conditions: {
           type: 'array',
-          description: 'Lista de condições de saúde, doenças ou problemas médicos abordados',
+          description: 'List of ALL health conditions, diseases or medical problems addressed (MUST be in English)',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
-                description: 'Nome da condição ou doença'
+                description: 'Name of the condition or disease IN ENGLISH (e.g., Cognitive Function, not Função Cognitiva)'
               },
               relationship_type: {
                 type: 'string',
                 enum: ['treatment', 'prevention', 'support'],
-                description: 'Tipo de relação: treatment (tratamento), prevention (prevenção) ou support (suporte)'
+                description: 'Type of relationship: treatment, prevention or support'
               },
               efficacy_description: {
                 type: 'string',
-                description: 'Descrição da eficácia observada'
+                description: 'Description of the observed efficacy IN ENGLISH'
               },
               treatability_score: {
                 type: 'integer',
-                description: 'Score de tratabilidade de 1-5'
+                description: 'Treatability score 1-5 based on study results'
               },
               severity: {
                 type: 'string',
                 enum: ['low', 'medium', 'high'],
-                description: 'Severidade da condição'
+                description: 'Severity level of the condition'
               }
             },
             required: ['name', 'relationship_type']
@@ -379,17 +379,30 @@ async function extractWithFileSearch(
     }
   };
 
-  const prompt = `Analise este estudo científico COMPLETO sobre nutracêuticos e extraia TODOS os dados estruturados.
+  const prompt = `You are a scientific data extraction AI specialized in nutraceuticals research.
 
-IMPORTANTE: 
-- Busque em TODO o documento: introdução, métodos, resultados, discussão, tabelas, figuras
-- Para nutracêuticos: inclua compostos ativos, suplementos, ingredientes testados
-- Para condições: inclua doenças, problemas de saúde, outcomes clínicos estudados
-- Seja exaustivo: extraia TODOS os compostos e TODAS as condições mencionadas
-- Se não encontrar dosagem específica, deixe o campo em branco
-- Avalie eficácia e severidade baseado nos resultados apresentados
+🔴 CRITICAL INSTRUCTION: Extract ALL data in ENGLISH only, regardless of the source document's language.
+If the document is in Portuguese, Spanish, French, or any other language, you MUST TRANSLATE all extracted terms to English.
 
-Retorne os dados usando a função extract_study_data.`;
+Analyze this COMPLETE scientific study and extract ALL structured data:
+
+IMPORTANT:
+- Search the ENTIRE document: introduction, methods, results, discussion, tables, figures, references
+- For nutraceuticals: include active compounds, supplements, tested ingredients, phytochemicals
+- For conditions: include diseases, health problems, clinical outcomes, physiological states studied
+- Be exhaustive: extract ALL compounds and ALL conditions mentioned
+- If specific dosage is not found, leave the field blank
+- Evaluate efficacy and severity based on presented results and statistical significance
+- Use standardized scientific nomenclature in English
+
+🌍 TRANSLATION REQUIREMENTS (MANDATORY):
+- Nutraceutical names: ALWAYS in English (e.g., "Curcumina" → "Curcumin", "Cúrcuma" → "Turmeric")
+- Condition names: ALWAYS in English (e.g., "Função Cognitiva" → "Cognitive Function", "Inflamação Crônica" → "Chronic Inflammation")
+- Effects/mechanisms: ALWAYS in English (e.g., "anti-inflamatório" → "anti-inflammatory")
+- Dosage units: Use standard notation (mg, g, IU, etc.)
+- Technical/scientific terms: Use standard English nomenclature (e.g., "estresse oxidativo" → "oxidative stress")
+
+Return the data using the extract_study_data function with all fields in English.`;
 
   try {
     console.log('📤 Enviando query com Tool Calling para extração estruturada...');
