@@ -14,6 +14,7 @@ interface EstudosColumnProps {
   onAddEstudo?: () => void;
   buttonLabel?: string;
   getNutraceuticalScore: (name: string) => number;
+  onDeleteEstudo?: (estudoId: string) => void;
 }
 
 const EstudosColumn: React.FC<EstudosColumnProps> = ({ 
@@ -23,7 +24,8 @@ const EstudosColumn: React.FC<EstudosColumnProps> = ({
   onViewEstudo,
   onAddEstudo,
   buttonLabel,
-  getNutraceuticalScore
+  getNutraceuticalScore,
+  onDeleteEstudo
 }) => {
   const { t } = useTranslation();
   
@@ -57,6 +59,7 @@ const EstudosColumn: React.FC<EstudosColumnProps> = ({
               onView={onViewEstudo}
               buttonLabel={buttonLabel}
               getNutraceuticalScore={getNutraceuticalScore}
+              onDelete={onDeleteEstudo}
             />
           ))}
           

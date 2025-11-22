@@ -1672,10 +1672,15 @@
     },
     "card": {
       "ragAnalysis": "RAG Analysis",
+      "ntaiAnalysis": "NTAI Analysis",
       "nutraceuticals": "Nutraceuticals",
       "conditions": "Conditions",
       "interactions": "Interactions",
-      "sideEffects": "Side Effects"
+      "sideEffects": "Side Effects",
+      "deleteTitle": "Delete Study?",
+      "deleteDescription": "This action cannot be undone. This will permanently delete the study and all its extracted data.",
+      "deleteSuccess": "Study deleted successfully",
+      "deleteError": "Error deleting study"
     },
     "toast": {
       "studyAdded": "Study added successfully",
