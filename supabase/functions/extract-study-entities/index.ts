@@ -331,36 +331,78 @@ Include both primary and secondary nutraceuticals mentioned.`
     }
 
     // CRÍTICO: Atualizar analysis_data com estrutura que o frontend espera
-    console.log(`📊 Atualizando analysis_data em processed_studies com estrutura do frontend...`);
+    console.log(`📊 Preparando frontendData para atualizar analysis_data...`);
+    
+    // Mapear para estrutura NtaiAnalysisResult exata
     const frontendData = {
       studyId: studyId,
       qualityScore: qualityScore,
-      relevanceScore: qualityScore, // Usar o mesmo score como relevância
+      relevanceScore: qualityScore,
       extractedNutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
-        name: n.name,
+        name: n.name || 'Unknown',
         confidence: n.efficacy_score || 3
       })),
       extractedConditions: (extractedData.conditions || []).map((c: any) => ({
-        name: c.name,
+        name: c.name || 'Unknown',
         confidence: c.treatability_score || 3
       })),
       extractedInteractions: (extractedData.mechanisms || []).map((m: any) => ({
-        nutraceutical: m.nutraceutical || '',
-        interaction: m.mechanism || '',
+        nutraceutical: m.nutraceutical || 'Unknown',
+        interaction: m.mechanism || 'Unknown mechanism',
         confidence: 3
       })),
-      extractedSideEffects: [] // Pode ser populado no futuro se necessário
+      extractedSideEffects: [], // Empty array for now, can be populated in future
+      nutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
+        name: n.name,
+        dosage: n.dosage || '',
+        relevance: n.efficacy_score || 3
+      }))
     };
-
-    const { error: updateDataError } = await supabase
+    
+    console.log('🔍 DEBUG - frontendData ANTES do UPDATE:');
+    console.log(`   - studyId: ${frontendData.studyId}`);
+    console.log(`   - qualityScore: ${frontendData.qualityScore}`);
+    console.log(`   - extractedNutraceuticals: ${frontendData.extractedNutraceuticals.length} items`);
+    console.log(`   - extractedConditions: ${frontendData.extractedConditions.length} items`);
+    console.log(`   - extractedInteractions: ${frontendData.extractedInteractions.length} items`);
+    
+    if (frontendData.extractedNutraceuticals.length > 0) {
+      console.log('   📋 Primeiro nutracêutico:', JSON.stringify(frontendData.extractedNutraceuticals[0]));
+    }
+    if (frontendData.extractedConditions.length > 0) {
+      console.log('   📋 Primeira condição:', JSON.stringify(frontendData.extractedConditions[0]));
+    }
+    
+    console.log('💾 Executando UPDATE no Supabase...');
+    const { data: updateResult, error: updateDataError } = await supabase
       .from('processed_studies')
       .update({ analysis_data: frontendData })
-      .eq('id', studyId);
+      .eq('id', studyId)
+      .select('analysis_data');
     
     if (updateDataError) {
-      console.error('❌ Erro ao atualizar analysis_data:', updateDataError);
+      console.error('❌ ERRO ao atualizar analysis_data:');
+      console.error('   Error code:', updateDataError.code);
+      console.error('   Error message:', updateDataError.message);
+      console.error('   Error details:', JSON.stringify(updateDataError, null, 2));
     } else {
-      console.log(`✅ analysis_data atualizado: ${frontendData.extractedNutraceuticals.length} nutracêuticos, ${frontendData.extractedConditions.length} condições`);
+      console.log('✅ analysis_data atualizado COM SUCESSO');
+      console.log(`   - ${frontendData.extractedNutraceuticals.length} nutracêuticos salvos`);
+      console.log(`   - ${frontendData.extractedConditions.length} condições salvas`);
+      
+      if (updateResult && updateResult[0]) {
+        const savedData = updateResult[0].analysis_data as any;
+        console.log('🔍 VERIFICAÇÃO - Dados salvos no banco:');
+        console.log(`   - extractedNutraceuticals no banco: ${savedData.extractedNutraceuticals?.length || 0} items`);
+        console.log(`   - extractedConditions no banco: ${savedData.extractedConditions?.length || 0} items`);
+        
+        if (savedData.extractedNutraceuticals?.length !== frontendData.extractedNutraceuticals.length) {
+          console.error('⚠️ DISCREPÂNCIA: Número de nutracêuticos no banco difere do enviado!');
+        }
+        if (savedData.extractedConditions?.length !== frontendData.extractedConditions.length) {
+          console.error('⚠️ DISCREPÂNCIA: Número de condições no banco difere do enviado!');
+        }
+      }
     }
 
     return new Response(
