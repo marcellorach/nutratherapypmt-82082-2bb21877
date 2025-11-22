@@ -330,6 +330,39 @@ Include both primary and secondary nutraceuticals mentioned.`
       console.log('✅ Status kanban atualizado com sucesso');
     }
 
+    // CRÍTICO: Atualizar analysis_data com estrutura que o frontend espera
+    console.log(`📊 Atualizando analysis_data em processed_studies com estrutura do frontend...`);
+    const frontendData = {
+      studyId: studyId,
+      qualityScore: qualityScore,
+      relevanceScore: qualityScore, // Usar o mesmo score como relevância
+      extractedNutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
+        name: n.name,
+        confidence: n.efficacy_score || 3
+      })),
+      extractedConditions: (extractedData.conditions || []).map((c: any) => ({
+        name: c.name,
+        confidence: c.treatability_score || 3
+      })),
+      extractedInteractions: (extractedData.mechanisms || []).map((m: any) => ({
+        nutraceutical: m.nutraceutical || '',
+        interaction: m.mechanism || '',
+        confidence: 3
+      })),
+      extractedSideEffects: [] // Pode ser populado no futuro se necessário
+    };
+
+    const { error: updateDataError } = await supabase
+      .from('processed_studies')
+      .update({ analysis_data: frontendData })
+      .eq('id', studyId);
+    
+    if (updateDataError) {
+      console.error('❌ Erro ao atualizar analysis_data:', updateDataError);
+    } else {
+      console.log(`✅ analysis_data atualizado: ${frontendData.extractedNutraceuticals.length} nutracêuticos, ${frontendData.extractedConditions.length} condições`);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
