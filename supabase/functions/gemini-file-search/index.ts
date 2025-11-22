@@ -871,26 +871,48 @@ serve(async (req) => {
     
     await retryWithExponentialBackoff(
       async () => {
-        // Preparar full_text_content para RAG
+        // Preparar full_text_content para RAG com fallbacks extensivos
         const extractedDataAny = extractedData as any;
         let fullTextContent = '';
+        let extractionMethod = 'none';
         
-        if (extractedDataAny.full_text) {
+        // Prioridade 1: Full text completo do Gemini
+        if (extractedDataAny.full_text && extractedDataAny.full_text.length > 500) {
           fullTextContent = extractedDataAny.full_text;
-        } else if (extractedData.abstract) {
-          fullTextContent = extractedData.abstract;
-        } else if (extractedDataAny.sections) {
+          extractionMethod = 'gemini_full_text';
+        } 
+        // Prioridade 2: Concatenar sections se disponível
+        else if (extractedDataAny.sections && Object.keys(extractedDataAny.sections).length > 0) {
           fullTextContent = Object.entries(extractedDataAny.sections)
             .map(([section, content]) => `### ${section}\n${content}`)
             .join('\n\n');
+          extractionMethod = 'gemini_sections';
+        }
+        // Prioridade 3: Combinar title + abstract + findings
+        else if (extractedData.abstract || extractedData.title) {
+          const parts = [];
+          if (extractedData.title) parts.push(`# ${extractedData.title}`);
+          if (extractedData.abstract) parts.push(`\n## Abstract\n${extractedData.abstract}`);
+          if (extractedDataAny.findings) {
+            parts.push('\n## Key Findings\n' + JSON.stringify(extractedDataAny.findings, null, 2));
+          }
+          if (extractedDataAny.mechanisms) {
+            parts.push('\n## Mechanisms\n' + JSON.stringify(extractedDataAny.mechanisms, null, 2));
+          }
+          fullTextContent = parts.join('\n');
+          extractionMethod = 'structured_data';
         }
         
+        console.log(`📄 Full text extraction method: ${extractionMethod}, length: ${fullTextContent.length} chars`);
+        
         const fullTextMetadata = {
+          extraction_method: extractionMethod,
           sections: extractedDataAny.sections ? Object.keys(extractedDataAny.sections) : [],
           word_count: fullTextContent ? fullTextContent.split(/\s+/).length : 0,
           char_count: fullTextContent.length,
           has_abstract: !!extractedData.abstract,
           has_full_text: !!extractedDataAny.full_text,
+          has_sections: !!extractedDataAny.sections,
           extracted_at: new Date().toISOString()
         };
         

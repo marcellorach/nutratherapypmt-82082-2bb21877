@@ -44,11 +44,51 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   const [localEstudo, setLocalEstudo] = useState(estudo);
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [embeddingsCount, setEmbeddingsCount] = useState<number | null>(null);
+  const [checkingEmbeddings, setCheckingEmbeddings] = useState(false);
 
   // Update local estudo when prop changes
   useEffect(() => {
     setLocalEstudo(estudo);
+    // Check vectorization status
+    checkVectorizationStatus();
   }, [estudo]);
+
+  const checkVectorizationStatus = async () => {
+    if (!localEstudo.id) return;
+    setCheckingEmbeddings(true);
+    try {
+      const { count, error } = await supabase
+        .from('study_embeddings')
+        .select('*', { count: 'exact', head: true })
+        .eq('study_id', localEstudo.id);
+      
+      if (!error) {
+        setEmbeddingsCount(count || 0);
+      }
+    } catch (error) {
+      console.error('Error checking embeddings:', error);
+    } finally {
+      setCheckingEmbeddings(false);
+    }
+  };
+
+  const handleVectorize = async () => {
+    try {
+      toast.loading('Vetorizando estudo...', { id: 'vectorize' });
+      const { data, error } = await supabase.functions.invoke('vectorize-study', {
+        body: { studyId: localEstudo.id }
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`${data.chunksProcessed} embeddings criados!`, { id: 'vectorize' });
+      await checkVectorizationStatus();
+    } catch (error: any) {
+      console.error('Error vectorizing:', error);
+      toast.error('Erro ao vetorizar estudo', { id: 'vectorize' });
+    }
+  };
 
   // Check if study needs processing (uploaded but not processed)
   const needsProcessing = localEstudo.kanban_status === 'new' && !localEstudo.analysis_data;
@@ -181,6 +221,28 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 Erro
+              </Badge>
+            )}
+            {/* Vectorization Status Badge */}
+            {embeddingsCount !== null && embeddingsCount > 0 && (
+              <Badge 
+                variant="outline" 
+                className="bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1 cursor-help"
+                title={`${embeddingsCount} chunks vetorizados para busca semântica`}
+              >
+                <CheckCircle2 className="h-3 w-3" />
+                RAG: {embeddingsCount}
+              </Badge>
+            )}
+            {embeddingsCount === 0 && localEstudo.kanban_status === 'processed' && (
+              <Badge 
+                variant="outline" 
+                className="bg-amber-100 text-amber-800 border-amber-300 flex items-center gap-1 cursor-pointer hover:bg-amber-200"
+                onClick={handleVectorize}
+                title="Clique para vetorizar e habilitar busca semântica"
+              >
+                <AlertCircle className="h-3 w-3" />
+                Sem RAG
               </Badge>
             )}
           </div>
