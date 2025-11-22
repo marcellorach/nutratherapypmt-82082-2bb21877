@@ -223,7 +223,15 @@ export const useProcessingLogic = (
           throw new Error(`Erro extração: ${extractError.message}`);
         }
 
-        addLogEntry(`✅ ${extractData?.nutraceuticals?.length || 0} nutracêuticos extraídos`);
+        addLogEntry(`✅ ${extractData?.extractedNutraceuticals?.length || 0} nutracêuticos extraídos`);
+        
+        // 🔍 DEBUG - Dados recebidos de extract-study-entities
+        console.log('🔍 DEBUG - Dados recebidos de extract-study-entities:');
+        console.log(`   - extractedNutraceuticals: ${extractData?.extractedNutraceuticals?.length || 0} items`);
+        console.log(`   - extractedConditions: ${extractData?.extractedConditions?.length || 0} items`);
+        if (extractData?.extractedNutraceuticals && extractData.extractedNutraceuticals.length > 0) {
+          console.log(`   - Exemplo nutraceutical:`, extractData.extractedNutraceuticals[0]);
+        }
 
         // ETAPA 3: SALVAMENTO
         updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
@@ -232,11 +240,11 @@ export const useProcessingLogic = (
         const result = {
           studyId: item.id,
           qualityScore: extractData?.qualityScore || 0,
-          relevanceScore: 0,
-          extractedNutraceuticals: extractData?.nutraceuticals || [],
-          extractedConditions: extractData?.conditions || [],
-          extractedInteractions: [],
-          extractedSideEffects: []
+          relevanceScore: extractData?.relevanceScore || 0,
+          extractedNutraceuticals: extractData?.extractedNutraceuticals || [],
+          extractedConditions: extractData?.extractedConditions || [],
+          extractedInteractions: extractData?.extractedInteractions || [],
+          extractedSideEffects: extractData?.extractedSideEffects || []
         };
         
         setAnalysisResult(result);

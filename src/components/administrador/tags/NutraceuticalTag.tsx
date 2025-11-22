@@ -17,7 +17,7 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
   showScore = true,
   className = ""
 }) => {
-  const level = getEvidenceLevel(score);
+  const level = getEvidenceLevel(score ?? 0);
   
   return (
     <TooltipProvider>
@@ -33,11 +33,16 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
             }}
           >
             <span>{name}</span>
-            {showScore && <span className="ml-1 font-semibold">({score.toFixed(1)})</span>}
+            {showScore && score !== undefined && !isNaN(score) && (
+              <span className="ml-1 font-semibold">({score.toFixed(1)})</span>
+            )}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{name}</span> - Pontuação: {score.toFixed(1)}</p>
+          <p>
+            <span className="font-medium">{name}</span>
+            {score !== undefined && !isNaN(score) && ` - Pontuação: ${score.toFixed(1)}`}
+          </p>
           <p className="text-xs text-gray-500 mt-1">Qualidade científica, segurança e potencial terapêutico</p>
         </TooltipContent>
       </Tooltip>
