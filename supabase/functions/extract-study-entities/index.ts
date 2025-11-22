@@ -411,9 +411,16 @@ Include both primary and secondary nutraceuticals mentioned.`
         studyId,
         extractionId: extraction?.id,
         qualityScore,
+        relevanceScore: frontendData.relevanceScore,
+        // ✅ INCLUIR ARRAYS COMPLETOS (não só contagens!)
+        extractedNutraceuticals: frontendData.extractedNutraceuticals,
+        extractedConditions: frontendData.extractedConditions,
+        extractedInteractions: frontendData.extractedInteractions,
+        extractedSideEffects: frontendData.extractedSideEffects,
+        nutraceuticals: frontendData.nutraceuticals,
         counts: {
-          nutraceuticals: extractedData.nutraceuticals?.length || 0,
-          conditions: extractedData.conditions?.length || 0,
+          nutraceuticals: frontendData.extractedNutraceuticals.length,
+          conditions: frontendData.extractedConditions.length,
           mechanisms: extractedData.mechanisms?.length || 0,
           findings: extractedData.findings?.length || 0,
         }
