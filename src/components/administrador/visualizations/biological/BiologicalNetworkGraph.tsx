@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import 'vis-network/styles/vis-network.css';
@@ -17,65 +17,96 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
+  const [showNutraceuticals, setShowNutraceuticals] = useState(true);
+  const [showMechanisms, setShowMechanisms] = useState(true);
+  const [showOutcomes, setShowOutcomes] = useState(true);
+  const [showSideEffects, setShowSideEffects] = useState(true);
 
   useEffect(() => {
     if (!containerRef.current || data.nodes.length === 0) return;
 
+    // Filtrar nós baseado nos filtros ativos
+    const filteredNodes = data.nodes.filter(node => {
+      if (node.type === 'nutraceutical' && !showNutraceuticals) return false;
+      if (node.type === 'mechanism' && !showMechanisms) return false;
+      if (node.type === 'outcome' && !showOutcomes) return false;
+      if (node.type === 'side_effect' && !showSideEffects) return false;
+      return true;
+    });
+
+    const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+    const filteredLinks = data.links.filter(link => 
+      filteredNodeIds.has(link.from) && filteredNodeIds.has(link.to)
+    );
+
     // Estilos por tipo de nó
-    const nodeStyles = {
-      nutraceutical: {
-        shape: 'box',
-        color: { background: '#fbbf24', border: '#f59e0b', highlight: { background: '#fcd34d', border: '#f97316' } },
-        font: { size: 18, face: 'Inter, sans-serif', bold: true, color: '#78350f' },
-        size: 40,
-        borderWidth: 3,
-        margin: 10
-      },
-      mechanism: {
-        shape: 'ellipse',
-        color: { background: '#93c5fd', border: '#3b82f6', highlight: { background: '#bfdbfe', border: '#2563eb' } },
-        font: { size: 14, color: '#1e3a8a' },
-        size: 30,
-        borderWidth: 2
-      },
-      effect: {
-        shape: 'box',
-        color: { background: '#c7d2fe', border: '#818cf8', highlight: { background: '#e0e7ff', border: '#6366f1' } },
-        font: { size: 13, color: '#4c1d95' },
-        size: 25,
-        borderWidth: 2,
-        margin: 8
-      },
-      outcome: {
-        shape: 'box',
-        color: { background: '#cbd5e1', border: '#64748b', highlight: { background: '#e2e8f0', border: '#475569' } },
-        font: { size: 13, color: '#334155' },
-        size: 25,
-        borderWidth: 2,
-        margin: 8,
-        shapeProperties: { borderRadius: 10 }
-      },
-      side_effect: {
-        shape: 'diamond',
-        color: { background: '#fca5a5', border: '#ef4444', highlight: { background: '#fecaca', border: '#dc2626' } },
-        font: { size: 12, color: '#7f1d1d' },
-        size: 20,
-        borderWidth: 2
-      }
+    const getNodeStyle = (node: any) => {
+      const isVirtual = node.label.includes('(ref)');
+      
+      const baseStyles = {
+        nutraceutical: {
+          shape: 'box',
+          color: { 
+            background: isVirtual ? '#fde68a' : '#fbbf24', 
+            border: isVirtual ? '#fbbf24' : '#f59e0b', 
+            highlight: { background: '#fcd34d', border: '#f97316' } 
+          },
+          font: { size: isVirtual ? 14 : 18, face: 'Inter, sans-serif', bold: true, color: '#78350f' },
+          size: isVirtual ? 30 : 40,
+          borderWidth: isVirtual ? 2 : 3,
+          margin: 10,
+          shapeProperties: {
+            borderDashes: isVirtual ? [5, 5] : false
+          }
+        },
+        mechanism: {
+          shape: 'ellipse',
+          color: { background: '#93c5fd', border: '#3b82f6', highlight: { background: '#bfdbfe', border: '#2563eb' } },
+          font: { size: 14, color: '#1e3a8a' },
+          size: 30,
+          borderWidth: 2
+        },
+        effect: {
+          shape: 'box',
+          color: { background: '#c7d2fe', border: '#818cf8', highlight: { background: '#e0e7ff', border: '#6366f1' } },
+          font: { size: 13, color: '#4c1d95' },
+          size: 25,
+          borderWidth: 2,
+          margin: 8
+        },
+        outcome: {
+          shape: 'box',
+          color: { background: '#cbd5e1', border: '#64748b', highlight: { background: '#e2e8f0', border: '#475569' } },
+          font: { size: 13, color: '#334155' },
+          size: 25,
+          borderWidth: 2,
+          margin: 8,
+          shapeProperties: { borderRadius: 10 }
+        },
+        side_effect: {
+          shape: 'diamond',
+          color: { background: '#fca5a5', border: '#ef4444', highlight: { background: '#fecaca', border: '#dc2626' } },
+          font: { size: 12, color: '#7f1d1d' },
+          size: 20,
+          borderWidth: 2
+        }
+      };
+      
+      return baseStyles[node.type];
     };
 
     // Preparar nós com estilos
-    const visNodes = data.nodes.map(node => ({
+    const visNodes = filteredNodes.map(node => ({
       id: node.id,
       label: node.label,
       title: node.title || node.label,
       level: node.layer,
-      ...nodeStyles[node.type],
+      ...getNodeStyle(node),
       value: node.value
     }));
 
     // Preparar arestas com estilos por tipo
-    const visEdges = data.links.map(link => {
+    const visEdges = filteredLinks.map(link => {
       let edgeStyle: any = {};
       
       switch (link.type) {
@@ -184,7 +215,12 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
         networkRef.current = null;
       }
     };
-  }, [data]);
+  }, [data, showNutraceuticals, showMechanisms, showOutcomes, showSideEffects]);
+
+  const nutraCount = data.nodes.filter(n => n.type === 'nutraceutical').length;
+  const mechCount = data.nodes.filter(n => n.type === 'mechanism').length;
+  const outcomeCount = data.nodes.filter(n => n.type === 'outcome').length;
+  const sideEffectCount = data.nodes.filter(n => n.type === 'side_effect').length;
 
   if (data.nodes.length === 0) {
     return (
@@ -196,11 +232,56 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
 
   return (
     <div className="space-y-3">
+      {/* Filtros Interativos */}
+      <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg border">
+        <span className="font-semibold text-sm">Filtros:</span>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={showNutraceuticals} 
+            onChange={(e) => setShowNutraceuticals(e.target.checked)}
+            className="w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm">🟡 Nutracêuticos ({nutraCount})</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={showMechanisms} 
+            onChange={(e) => setShowMechanisms(e.target.checked)}
+            className="w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm">🔵 Mecanismos ({mechCount})</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={showOutcomes} 
+            onChange={(e) => setShowOutcomes(e.target.checked)}
+            className="w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm">🔘 Outcomes ({outcomeCount})</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={showSideEffects} 
+            onChange={(e) => setShowSideEffects(e.target.checked)}
+            className="w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm">🔶 Efeitos Colaterais ({sideEffectCount})</span>
+        </label>
+      </div>
+
+      {/* Legenda */}
       <Alert className="bg-blue-50 border-blue-200">
         <Info className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-sm text-blue-800">
-          <strong>Legenda:</strong> 🟡 Nutracêutico | 🔵 Mecanismo/Pathway | 🔘 Outcome | 🔶 Efeito Colateral | 
-          🟢 Estimulação (→) | 🔴 Inibição (⊣) | 🟣 Modulação (⊸)
+          <strong>Legenda de Setas:</strong> 
+          🟢 Estimulação/Aumento (→) | 
+          🔴 Inibição/Redução (⊣) | 
+          🟣 Modulação (⊸ tracejado)<br/>
+          <strong>Nós tracejados</strong> = Dados inferidos de interações mencionadas
         </AlertDescription>
       </Alert>
       
