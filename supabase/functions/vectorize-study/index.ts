@@ -69,10 +69,10 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Get Lovable AI key for embeddings
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    // Get Google AI key for embeddings
+    const GOOGLE_AI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY');
+    if (!GOOGLE_AI_API_KEY) {
+      throw new Error('GOOGLE_AI_API_KEY not configured');
     }
 
     // 1. Buscar texto completo do estudo
@@ -103,8 +103,8 @@ serve(async (req) => {
       throw new Error('Nenhum chunk gerado do texto');
     }
 
-    // 3. Gerar embeddings para cada chunk usando Gemini
-    console.log('🔢 Gerando embeddings com Gemini...');
+    // 3. Gerar embeddings para cada chunk usando Google Gemini API
+    console.log('🔢 Gerando embeddings com Google Gemini API (text-embedding-004)...');
     const embeddingsData = [];
     let successCount = 0;
     let errorCount = 0;
@@ -113,17 +113,21 @@ serve(async (req) => {
       try {
         console.log(`   Processing chunk ${i + 1}/${chunks.length}...`);
         
-        const response = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/text-embedding-004',
-            input: chunks[i]
-          }),
-        });
+        const response = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': GOOGLE_AI_API_KEY,
+            },
+            body: JSON.stringify({
+              content: {
+                parts: [{ text: chunks[i] }]
+              }
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -133,7 +137,7 @@ serve(async (req) => {
         }
 
         const embeddingResult = await response.json();
-        const embedding = embeddingResult.data[0].embedding;
+        const embedding = embeddingResult.embedding?.values;
 
         if (!embedding || !Array.isArray(embedding)) {
           console.error(`❌ Embedding inválido retornado para chunk ${i + 1}`);
@@ -194,7 +198,8 @@ serve(async (req) => {
           vectorized: true,
           vectorized_at: new Date().toISOString(),
           chunks_count: embeddingsData.length,
-          embedding_model: 'google/text-embedding-004'
+          embedding_model: 'text-embedding-004',
+          embedding_provider: 'Google AI'
         }
       })
       .eq('id', studyId);
@@ -215,7 +220,8 @@ serve(async (req) => {
           text_length: study.full_text_content.length,
           chunks_generated: chunks.length,
           embeddings_saved: embeddingsData.length,
-          embedding_model: 'google/text-embedding-004',
+          embedding_model: 'text-embedding-004',
+          embedding_provider: 'Google AI',
           embedding_dimension: 768
         }
       }),
