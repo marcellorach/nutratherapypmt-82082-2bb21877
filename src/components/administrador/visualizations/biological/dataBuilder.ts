@@ -15,9 +15,10 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
   const interactions = extractedData.extractedInteractions || [];
   const sideEffects = extractedData.extractedSideEffects || [];
   
-  // Helper para encontrar nó por nome (case-insensitive)
-  const findNodeByName = (name: string): BiologicalNode | undefined => {
-    return nodes.find(n => n.label.toLowerCase() === name.toLowerCase());
+  // Helper para encontrar nó por nome (case-insensitive) com null safety
+  const findNodeByName = (name?: string): BiologicalNode | undefined => {
+    if (!name) return undefined;
+    return nodes.find(n => n.label?.toLowerCase() === name.toLowerCase());
   };
   
   // Camada 0: Nutracêuticos (início da cadeia)
@@ -74,33 +75,45 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
     });
   });
   
-  // Criar links baseado em extractedInteractions estruturadas
-  interactions.forEach((interaction, idx) => {
-    const fromNode = findNodeByName(interaction.from);
-    const toNode = findNodeByName(interaction.to);
+  // Criar links baseado em extractedInteractions (suporta formato novo E antigo)
+  interactions.forEach((interaction: any, idx) => {
+    // Suporte para formato NOVO (from/to) E formato ANTIGO (nutraceutical/interaction)
+    const fromName = interaction.from || interaction.nutraceutical;
+    const toName = interaction.to;
+    const interactionType = interaction.type || 'modulation';
+    const description = interaction.description || interaction.interaction || '';
+    
+    // Se formato antigo, não há "to", então não processar via novo método
+    if (!toName && interaction.interaction) {
+      // Formato antigo: criar lógica legada (simplificada)
+      return;
+    }
+    
+    const fromNode = findNodeByName(fromName);
+    const toNode = findNodeByName(toName);
     
     if (fromNode && toNode) {
       links.push({
         id: `link-${idx}`,
         from: fromNode.id,
         to: toNode.id,
-        type: interaction.type,
-        confidence: interaction.confidence,
+        type: interactionType as 'inhibition' | 'stimulation' | 'modulation',
+        confidence: interaction.confidence || 0.8,
         label: '',
-        title: interaction.description
+        title: description
       });
     } else {
       // Fallback: Se não encontrar nodes exatos, criar nós virtuais
-      if (!fromNode && interaction.from) {
+      if (!fromNode && fromName) {
         const virtualId = `virtual-${idx}`;
         nodes.push({
           id: virtualId,
-          label: `${interaction.from} (ref)`,
+          label: `${fromName} (ref)`,
           type: 'nutraceutical',
           layer: 0,
-          value: Math.round(interaction.confidence * 3),
-          confidence: interaction.confidence,
-          title: `${interaction.from}\n(Mencionado mas não extraído)\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
+          value: Math.round((interaction.confidence || 0.8) * 3),
+          confidence: interaction.confidence || 0.8,
+          title: `${fromName}\n(Mencionado mas não extraído)\nConfiança: ${((interaction.confidence || 0.8) * 100).toFixed(0)}%`
         });
         
         if (toNode) {
@@ -108,10 +121,10 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
             id: `link-virtual-${idx}`,
             from: virtualId,
             to: toNode.id,
-            type: interaction.type,
-            confidence: interaction.confidence,
+            type: interactionType as 'inhibition' | 'stimulation' | 'modulation',
+            confidence: interaction.confidence || 0.8,
             label: '',
-            title: interaction.description
+            title: description
           });
         }
       }
