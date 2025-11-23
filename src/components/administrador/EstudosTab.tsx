@@ -93,12 +93,29 @@ const EstudosTab: React.FC = () => {
     setDetailDialogOpen(true);
   };
 
-  const handleAdvanceApproval = (estudoId: string) => {
-    toast({
-      title: t('studies.toast.stageAdvanced'),
-      description: t('studies.toast.stageAdvancedDesc'),
-    });
-    setDetailDialogOpen(false);
+  const handleAdvanceApproval = async (estudoId: string) => {
+    try {
+      const { error } = await supabase
+        .from('processed_studies')
+        .update({ kanban_status: 'approved' })
+        .eq('id', estudoId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('studies.toast.stageAdvanced'),
+        description: t('studies.toast.stageAdvancedDesc'),
+      });
+      setDetailDialogOpen(false);
+      fetchEstudos();
+    } catch (error) {
+      console.error('Error approving study:', error);
+      toast({
+        title: "Erro ao aprovar estudo",
+        description: "Não foi possível atualizar o status do estudo.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteEstudo = (estudoId: string) => {
