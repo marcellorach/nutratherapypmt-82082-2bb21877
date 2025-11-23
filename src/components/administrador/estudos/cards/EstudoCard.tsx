@@ -150,8 +150,10 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
   // Extract data from Gemini analysis or use defaults
   const analysisData = localEstudo.analysis_data as any;
-  const nutraceuticals = analysisData?.nutraceuticals || localEstudo.nutraceuticals || [];
-  const conditions = analysisData?.conditions || [];
+  const nutraceuticals = analysisData?.extractedNutraceuticals || [];
+  const conditions = analysisData?.extractedConditions || [];
+  const interactions = analysisData?.extractedInteractions || [];
+  const sideEffects = analysisData?.extractedSideEffects || [];
   const hasAnalysisData = !!analysisData && (nutraceuticals.length > 0 || conditions.length > 0);
 
   return (
@@ -316,6 +318,52 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                       {condition.name}
                     </Badge>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Seção Interações Positivas */}
+            {interactions.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Interações Positivas</p>
+                <div className="flex flex-wrap gap-1">
+                  {interactions.slice(0, 3).map((interaction: any, idx: number) => (
+                    <Badge 
+                      key={idx}
+                      variant="outline" 
+                      className="bg-green-50 text-green-700 border-green-200 text-xs"
+                    >
+                      🟢 {interaction.nutraceutical}: {interaction.interaction.substring(0, 30)}...
+                    </Badge>
+                  ))}
+                  {interactions.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{interactions.length - 3} mais
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Seção Efeitos Colaterais */}
+            {sideEffects.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Efeitos Colaterais</p>
+                <div className="flex flex-wrap gap-1">
+                  {sideEffects.slice(0, 2).map((effect: any, idx: number) => (
+                    <Badge 
+                      key={idx}
+                      variant="outline" 
+                      className="bg-amber-50 text-amber-700 border-amber-200 text-xs"
+                    >
+                      ⚠️ {effect.name} ({effect.severity})
+                    </Badge>
+                  ))}
+                  {sideEffects.length > 2 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{sideEffects.length - 2} mais
+                    </Badge>
+                  )}
                 </div>
               </div>
             )}

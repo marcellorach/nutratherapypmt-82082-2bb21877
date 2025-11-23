@@ -114,9 +114,81 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
         from: `mech-${firstMechIdx}`,
         to: `cond-${idx}`,
         type: 'modulation',
-        confidence: cond.confidence * 0.8, // Reduzir confiança para links inferidos
+        confidence: cond.confidence * 0.8,
         label: '',
         title: `Relação inferida → ${cond.name}`
+      });
+    }
+    
+    // Se ainda não há conexões, criar conexão direta com nutracêuticos
+    if (relevantMechs.length === 0 && mechanismMap.size === 0) {
+      nutraceuticals.forEach((nutra, nIdx) => {
+        links.push({
+          id: `link-direct-${nIdx}-${idx}`,
+          from: `nutra-${nIdx}`,
+          to: `cond-${idx}`,
+          type: 'modulation',
+          confidence: (nutra.confidence + cond.confidence) / 2,
+          label: '',
+          title: `${nutra.name} → ${cond.name} (relação inferida do contexto)`
+        });
+      });
+    }
+  });
+  
+  // Adicionar nós virtuais para nutracêuticos mencionados em interações mas não extraídos
+  interactions.forEach((interaction, iIdx) => {
+    const hasMatchingNutra = nutraceuticals.some(n => 
+      n.name.toLowerCase() === interaction.nutraceutical.toLowerCase()
+    );
+    
+    if (!hasMatchingNutra) {
+      const virtualNutraId = `virtual-nutra-${iIdx}`;
+      nodes.push({
+        id: virtualNutraId,
+        label: `${interaction.nutraceutical} (ref)`,
+        type: 'nutraceutical',
+        layer: 0,
+        value: Math.round(interaction.confidence * 3),
+        confidence: interaction.confidence,
+        title: `${interaction.nutraceutical}\n(Mencionado em interação)\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
+      });
+      
+      const target = extractMolecularTarget(interaction.interaction) || 
+                     truncateLabel(interaction.interaction, 30);
+      const mechId = `mech-virtual-${iIdx}`;
+      
+      nodes.push({
+        id: mechId,
+        label: target,
+        type: 'mechanism',
+        layer: 1,
+        value: Math.round(interaction.confidence * 5),
+        confidence: interaction.confidence,
+        title: `${target}\n${truncateLabel(interaction.interaction, 80)}\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
+      });
+      
+      const linkType = classifyInteractionType(interaction.interaction);
+      links.push({
+        id: `link-virtual-${iIdx}`,
+        from: virtualNutraId,
+        to: mechId,
+        type: linkType,
+        confidence: interaction.confidence,
+        label: '',
+        title: truncateLabel(interaction.interaction, 100)
+      });
+      
+      conditions.forEach((cond, cIdx) => {
+        links.push({
+          id: `link-virtual-cond-${iIdx}-${cIdx}`,
+          from: mechId,
+          to: `cond-${cIdx}`,
+          type: 'modulation',
+          confidence: interaction.confidence * 0.7,
+          label: '',
+          title: `${target} → ${cond.name}`
+        });
       });
     }
   });
