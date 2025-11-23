@@ -63,56 +63,73 @@ serve(async (req) => {
       }
     }
 
-    // Implementar o modo de simulação para fins de desenvolvimento
-    // Em um ambiente de produção, esta parte seria substituída por chamadas reais à OpenAI
+    // Implementar extração estruturada multi-camadas
+    // Simula dados extraídos seguindo estrutura hierárquica de 4 camadas:
+    // Layer 0: Nutraceuticals
+    // Layer 1: Molecular Mechanisms (pathways, enzymes, receptors)
+    // Layer 2: Intermediate Biological Effects
+    // Layer 3: Final Clinical Outcomes
     
-    // Simulação de dados de nutracêuticos
-    const nutraceuticals = {
-      nutraceuticals: [
-        { name: "Glucosamina", confidence: 0.95 },
-        { name: "Condroitina", confidence: 0.92 },
-        { name: "MSM (Metilsulfonilmetano)", confidence: 0.88 },
-        { name: "Ômega 3", confidence: 0.78 }
-      ]
-    };
-
-    // Simulação de dados de condições
-    const conditions = {
-      conditions: [
-        { name: "Osteoartrite", efficacyScore: 4.2, confidence: 0.95 },
-        { name: "Displasia articular", efficacyScore: 3.8, confidence: 0.87 },
-        { name: "Dor crônica", efficacyScore: 3.5, confidence: 0.82 }
-      ]
-    };
-
-    // Simulação de dados de interações
-    const interactions = {
-      interactions: [
-        { name: "Anti-inflamatórios não esteroides", score: 4.0, type: "positive", confidence: 0.92 },
-        { name: "Anticoagulantes", score: 2.3, type: "negative", confidence: 0.85 }
-      ]
-    };
-
-    // Simulação de avaliação de qualidade
-    const quality = {
-      qualityScore: 4.2,
-      relevanceScore: 4.5,
-      summary: "Estudo bem estruturado com metodologia robusta, apresentando evidências significativas sobre o uso de nutracêuticos para saúde articular em cães. As dosagens e protocolos são claramente descritos."
-    };
-
-    // Consolidar todos os resultados
     const analysisResult = {
       studyId,
-      extractedNutraceuticals: nutraceuticals.nutraceuticals,
-      extractedConditions: conditions.conditions,
-      extractedInteractions: interactions.interactions,
-      extractedSideEffects: [
-        { name: "Distúrbios gastrointestinais leves", severity: "low", confidence: 0.76 },
-        { name: "Alterações na coagulação", severity: "moderate", confidence: 0.65 }
+      extractedNutraceuticals: [
+        { name: "Curcumin", confidence: 0.95, dosage: "500-1000mg/day", form: "curcuminoids" },
+        { name: "Glucosamine", confidence: 0.92, dosage: "1500mg/day" },
+        { name: "Omega-3 (EPA/DHA)", confidence: 0.88, form: "fish oil" },
+        { name: "MSM", confidence: 0.85 }
       ],
-      qualityScore: quality.qualityScore,
-      relevanceScore: quality.relevanceScore,
-      summary: quality.summary,
+      extractedMechanisms: [
+        { name: "NF-κB pathway", type: "pathway" as const, confidence: 0.95 },
+        { name: "COX-2 expression", type: "enzyme" as const, confidence: 0.92 },
+        { name: "Nrf2 activation", type: "pathway" as const, confidence: 0.88 },
+        { name: "BDNF signaling", type: "pathway" as const, confidence: 0.85 },
+        { name: "mTOR pathway", type: "pathway" as const, confidence: 0.82 },
+        { name: "Antioxidant enzymes", type: "enzyme" as const, confidence: 0.90 }
+      ],
+      extractedEffects: [
+        { name: "↓ IL-1β & TNF-α", type: "intermediate" as const, confidence: 0.93 },
+        { name: "↓ Prostaglandins", type: "intermediate" as const, confidence: 0.91 },
+        { name: "↑ Antioxidant capacity", type: "intermediate" as const, confidence: 0.89 },
+        { name: "↓ Oxidative stress markers", type: "intermediate" as const, confidence: 0.87 },
+        { name: "↑ Neurotrophin levels", type: "intermediate" as const, confidence: 0.84 },
+        { name: "↓ Cell apoptosis", type: "intermediate" as const, confidence: 0.86 }
+      ],
+      extractedConditions: [
+        { name: "↓ Chronic Inflammation", confidence: 0.95 },
+        { name: "↓ Joint Pain", confidence: 0.92 },
+        { name: "↓ Oxidative Damage", confidence: 0.89 },
+        { name: "Improved Mobility", confidence: 0.88 },
+        { name: "Neuroprotection", confidence: 0.85 }
+      ],
+      extractedInteractions: [
+        { from: "Curcumin", to: "NF-κB pathway", type: "inhibition" as const, confidence: 0.95, description: "Curcumin inhibits NF-κB activation" },
+        { from: "NF-κB pathway", to: "↓ IL-1β & TNF-α", type: "stimulation" as const, confidence: 0.93, description: "Inhibited NF-κB reduces pro-inflammatory cytokines" },
+        { from: "↓ IL-1β & TNF-α", to: "↓ Chronic Inflammation", type: "stimulation" as const, confidence: 0.92, description: "Reduced cytokines decrease inflammation" },
+        
+        { from: "Curcumin", to: "COX-2 expression", type: "inhibition" as const, confidence: 0.92, description: "Curcumin suppresses COX-2 enzyme" },
+        { from: "COX-2 expression", to: "↓ Prostaglandins", type: "stimulation" as const, confidence: 0.91, description: "Reduced COX-2 decreases prostaglandin synthesis" },
+        { from: "↓ Prostaglandins", to: "↓ Joint Pain", type: "stimulation" as const, confidence: 0.90, description: "Lower prostaglandins reduce pain signaling" },
+        
+        { from: "Curcumin", to: "Nrf2 activation", type: "stimulation" as const, confidence: 0.88, description: "Curcumin activates Nrf2 pathway" },
+        { from: "Nrf2 activation", to: "Antioxidant enzymes", type: "stimulation" as const, confidence: 0.89, description: "Nrf2 upregulates antioxidant genes" },
+        { from: "Antioxidant enzymes", to: "↑ Antioxidant capacity", type: "stimulation" as const, confidence: 0.90, description: "Enhanced enzymes boost antioxidant defense" },
+        { from: "↑ Antioxidant capacity", to: "↓ Oxidative Damage", type: "stimulation" as const, confidence: 0.88, description: "Higher antioxidants neutralize free radicals" },
+        
+        { from: "Omega-3 (EPA/DHA)", to: "BDNF signaling", type: "stimulation" as const, confidence: 0.85, description: "Omega-3 enhances BDNF production" },
+        { from: "BDNF signaling", to: "↑ Neurotrophin levels", type: "stimulation" as const, confidence: 0.84, description: "Increased BDNF supports neuronal health" },
+        { from: "↑ Neurotrophin levels", to: "Neuroprotection", type: "stimulation" as const, confidence: 0.83, description: "Neurotrophins protect brain function" },
+        
+        { from: "Glucosamine", to: "mTOR pathway", type: "modulation" as const, confidence: 0.82, description: "Glucosamine modulates cellular autophagy via mTOR" },
+        { from: "mTOR pathway", to: "↓ Cell apoptosis", type: "modulation" as const, confidence: 0.81, description: "mTOR regulation affects cell survival" },
+        { from: "↓ Cell apoptosis", to: "Improved Mobility", type: "stimulation" as const, confidence: 0.80, description: "Preserved cells maintain joint integrity" }
+      ],
+      extractedSideEffects: [
+        { name: "Mild GI discomfort", description: "Occasional stomach upset", severity: "low", confidence: 0.76 },
+        { name: "Altered coagulation", description: "Potential interaction with anticoagulants", severity: "moderate", confidence: 0.65 }
+      ],
+      qualityScore: 4.2,
+      relevanceScore: 4.5,
+      summary: "Comprehensive study demonstrating multi-layered biological mechanisms of nutraceuticals. Shows detailed molecular pathways (NF-κB, COX-2, Nrf2, BDNF) leading to measurable clinical outcomes through intermediate biological effects.",
       processedAt: new Date().toISOString()
     };
 

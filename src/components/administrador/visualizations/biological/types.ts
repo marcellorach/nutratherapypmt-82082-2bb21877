@@ -6,6 +6,10 @@ export interface BiologicalNode {
   value?: number;
   confidence?: number;
   title?: string;
+  metadata?: {
+    mechanismType?: 'pathway' | 'enzyme' | 'receptor' | 'mediator';
+    effectType?: 'intermediate' | 'direct';
+  };
 }
 
 export interface BiologicalLink {
@@ -24,17 +28,37 @@ export interface BiologicalNetworkData {
 }
 
 export interface ExtractedData {
-  extractedNutraceuticals?: Array<{ name: string; confidence: number }>;
-  extractedConditions?: Array<{ name: string; confidence: number }>;
+  extractedNutraceuticals?: Array<{ 
+    name: string; 
+    confidence: number;
+    dosage?: string;
+    form?: string;
+  }>;
+  extractedMechanisms?: Array<{ 
+    name: string; 
+    type: 'pathway' | 'enzyme' | 'receptor' | 'mediator'; 
+    confidence: number;
+  }>;
+  extractedEffects?: Array<{ 
+    name: string; 
+    type: 'intermediate' | 'direct'; 
+    confidence: number;
+  }>;
+  extractedConditions?: Array<{ 
+    name: string; 
+    confidence: number;
+  }>;
   extractedInteractions?: Array<{ 
-    nutraceutical: string; 
-    interaction: string; 
-    confidence: number 
+    from: string;
+    to: string;
+    type: 'inhibition' | 'stimulation' | 'modulation';
+    confidence: number;
+    description: string;
   }>;
   extractedSideEffects?: Array<{ 
     name: string; 
     description: string;
     severity: string;
-    confidence: number 
+    confidence: number;
   }>;
 }
