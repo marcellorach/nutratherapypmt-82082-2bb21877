@@ -19,12 +19,37 @@ interface ExtractedStudyData {
     effects: string;
     efficacy_score?: number;
   }>;
+  mechanisms: Array<{
+    name: string;
+    type: 'pathway' | 'mediator' | 'enzyme' | 'receptor' | 'gene' | 'protein';
+    description: string;
+    confidence?: number;
+  }>;
+  biological_effects: Array<{
+    name: string;
+    type: 'intermediate' | 'biomarker' | 'physiological';
+    description: string;
+    confidence?: number;
+  }>;
   conditions: Array<{
     name: string;
     relationship_type: string;
     efficacy_description?: string;
     treatability_score?: number;
     severity?: string;
+  }>;
+  interactions: Array<{
+    from: string;
+    to: string;
+    type: 'inhibition' | 'stimulation' | 'modulation';
+    description: string;
+    confidence?: number;
+  }>;
+  side_effects: Array<{
+    name: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high';
+    confidence?: number;
   }>;
 }
 
@@ -287,7 +312,7 @@ async function extractWithFileSearch(
   // Definir schema de função para structured output
   const extractionFunction = {
     name: 'extract_study_data',
-    description: 'Extract structured data from a scientific study about nutraceuticals. ALL extracted data MUST be in English.',
+    description: 'Extract the COMPLETE hierarchical chain from a scientific study about nutraceuticals: Nutraceutical → Molecular Mechanism → Biological Effect → Clinical Outcome. ALL extracted data MUST be in English.',
     parameters: {
       type: 'object',
       properties: {
@@ -324,7 +349,7 @@ async function extractWithFileSearch(
             properties: {
               name: {
                 type: 'string',
-                description: 'Scientific or common name of the nutraceutical IN ENGLISH (e.g., Curcumin, not Curcumina)'
+                description: 'Scientific or common name of the nutraceutical IN ENGLISH (e.g., Curcumin, not Curcumina; Turmeric, not Cúrcuma)'
               },
               dosage: {
                 type: 'string',
@@ -342,15 +367,69 @@ async function extractWithFileSearch(
             required: ['name', 'effects']
           }
         },
-        conditions: {
+        mechanisms: {
           type: 'array',
-          description: 'List of ALL health conditions, diseases or medical problems addressed (MUST be in English)',
+          description: 'List of ALL molecular mechanisms, pathways, enzymes, receptors involved (MUST be in English). Examples: COX-2 pathway, NF-κB activation, PPAR-γ, TNF-α signaling, mTOR pathway',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
-                description: 'Name of the condition or disease IN ENGLISH (e.g., Cognitive Function, not Função Cognitiva)'
+                description: 'Name of the molecular mechanism IN ENGLISH. Use standard nomenclature with direction indicators (e.g., "↓ COX-2 pathway" for inhibition, "↑ Proteoglycans" for stimulation)'
+              },
+              type: {
+                type: 'string',
+                enum: ['pathway', 'mediator', 'enzyme', 'receptor', 'gene', 'protein'],
+                description: 'Type of molecular mechanism'
+              },
+              description: {
+                type: 'string',
+                description: 'How this mechanism works in the context of the study IN ENGLISH'
+              },
+              confidence: {
+                type: 'number',
+                description: 'Confidence score 0-5 based on evidence strength in the study'
+              }
+            },
+            required: ['name', 'type', 'description']
+          }
+        },
+        biological_effects: {
+          type: 'array',
+          description: 'List of ALL intermediate biological effects, biomarkers, physiological changes (MUST be in English). Examples: cytokine levels (IL-6, TNF-α), oxidative stress markers, tissue changes, cellular responses',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the biological effect IN ENGLISH. Use direction indicators (e.g., "↓ IL-6 & TNF-α" for reduction, "↑ Joint lubrication" for increase)'
+              },
+              type: {
+                type: 'string',
+                enum: ['intermediate', 'biomarker', 'physiological'],
+                description: 'Type of biological effect'
+              },
+              description: {
+                type: 'string',
+                description: 'Description of the effect and its significance IN ENGLISH'
+              },
+              confidence: {
+                type: 'number',
+                description: 'Confidence score 0-5 based on evidence strength'
+              }
+            },
+            required: ['name', 'type', 'description']
+          }
+        },
+        conditions: {
+          type: 'array',
+          description: 'List of ALL health conditions, diseases or clinical outcomes addressed (MUST be in English)',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the condition or disease IN ENGLISH (e.g., Canine Arthritis, Osteoarthritis, Joint Inflammation)'
               },
               relationship_type: {
                 type: 'string',
@@ -373,36 +452,152 @@ async function extractWithFileSearch(
             },
             required: ['name', 'relationship_type']
           }
+        },
+        interactions: {
+          type: 'array',
+          description: 'List of ALL hierarchical interactions forming the biological chain. Map the COMPLETE flow: Nutraceutical → Mechanism → Effect → Outcome. Each step must be explicit.',
+          items: {
+            type: 'object',
+            properties: {
+              from: {
+                type: 'string',
+                description: 'Name of the source entity (nutraceutical, mechanism, or effect) - MUST match exactly the name used in the corresponding array'
+              },
+              to: {
+                type: 'string',
+                description: 'Name of the target entity (mechanism, effect, or condition) - MUST match exactly the name used in the corresponding array'
+              },
+              type: {
+                type: 'string',
+                enum: ['inhibition', 'stimulation', 'modulation'],
+                description: 'Type of interaction: inhibition (blocks/reduces), stimulation (activates/increases), modulation (regulates/modifies)'
+              },
+              description: {
+                type: 'string',
+                description: 'Description of how the interaction works IN ENGLISH'
+              },
+              confidence: {
+                type: 'number',
+                description: 'Confidence score 0-5 based on evidence in the study'
+              }
+            },
+            required: ['from', 'to', 'type', 'description']
+          }
+        },
+        side_effects: {
+          type: 'array',
+          description: 'List of ALL adverse effects, side effects or safety concerns mentioned (MUST be in English)',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the side effect IN ENGLISH (e.g., Mild Drowsiness, Appetite Changes)'
+              },
+              description: {
+                type: 'string',
+                description: 'Description of the side effect IN ENGLISH'
+              },
+              severity: {
+                type: 'string',
+                enum: ['low', 'medium', 'high'],
+                description: 'Severity level'
+              },
+              confidence: {
+                type: 'number',
+                description: 'Confidence score 0-5 based on evidence'
+              }
+            },
+            required: ['name', 'description', 'severity']
+          }
         }
       },
-      required: ['title', 'authors', 'nutraceuticals', 'conditions']
+      required: ['title', 'authors', 'nutraceuticals', 'mechanisms', 'biological_effects', 'conditions', 'interactions']
     }
   };
 
-  const prompt = `You are a scientific data extraction AI specialized in nutraceuticals research.
+  const prompt = `You are a scientific data extraction AI specialized in mapping COMPLETE BIOLOGICAL CHAINS in nutraceuticals research.
 
 🔴 CRITICAL INSTRUCTION: Extract ALL data in ENGLISH only, regardless of the source document's language.
 If the document is in Portuguese, Spanish, French, or any other language, you MUST TRANSLATE all extracted terms to English.
 
-Analyze this COMPLETE scientific study and extract ALL structured data:
+🎯 YOUR MISSION: Map the ENTIRE HIERARCHICAL CHAIN from this study:
 
-IMPORTANT:
-- Search the ENTIRE document: introduction, methods, results, discussion, tables, figures, references
-- For nutraceuticals: include active compounds, supplements, tested ingredients, phytochemicals
-- For conditions: include diseases, health problems, clinical outcomes, physiological states studied
-- Be exhaustive: extract ALL compounds and ALL conditions mentioned
-- If specific dosage is not found, leave the field blank
-- Evaluate efficacy and severity based on presented results and statistical significance
-- Use standardized scientific nomenclature in English
+LAYER 0 to LAYER 1 to LAYER 2 to LAYER 3
+Nutraceutical to Molecular Mechanism to Biological Effect to Clinical Outcome
+
+📋 EXTRACTION REQUIREMENTS:
+
+1️⃣ NUTRACEUTICALS (Layer 0 - Starting point):
+   - Extract ALL active compounds, supplements, phytochemicals tested
+   - Examples: Curcumin, Omega-3, Resveratrol, Turmeric Extract, etc.
+   - Translate to English: "Curcumina" becomes "Curcumin", "Cúrcuma" becomes "Turmeric"
+
+2️⃣ MOLECULAR MECHANISMS (Layer 1 - How it works):
+   - Extract ALL molecular pathways, enzymes, receptors, genes involved
+   - Examples: "decrease COX-2 pathway", "decrease NF-kB activation", "increase PPAR-gamma", "increase Proteoglycans synthesis", "mTOR inhibition"
+   - Include signaling cascades: MAPK, PI3K/Akt, JAK/STAT, etc.
+   - Use direction indicators: decrease for inhibition/reduction, increase for activation/increase
+   - Translate all: "inibição de COX-2" becomes "decrease COX-2 pathway"
+
+3️⃣ BIOLOGICAL EFFECTS (Layer 2 - What changes):
+   - Extract ALL intermediate effects, biomarkers, physiological changes
+   - Examples: "decrease IL-6 and TNF-alpha", "decrease Oxidative stress", "increase Joint lubrication", "decrease Cartilage degradation"
+   - Include cytokines (IL-1beta, IL-6, TNF-alpha), ROS levels, tissue changes
+   - Use direction indicators consistently
+   - Translate all: "redução de citocinas" becomes "decrease IL-6 and TNF-alpha"
+
+4️⃣ CLINICAL OUTCOMES (Layer 3 - Final result):
+   - Extract ALL health conditions, diseases, clinical improvements
+   - Examples: "Canine Arthritis", "Osteoarthritis", "Joint Inflammation", "Cognitive Decline"
+   - Translate all: "Artrite Canina" becomes "Canine Arthritis"
+
+5️⃣ INTERACTIONS (The connections - MOST CRITICAL):
+   - Map the COMPLETE biological chain step by step
+   - MANDATORY: Create explicit connections for EACH step of the cascade
+   
+   Example for Turmeric/Curcumin study:
+   - Curcumin connects to decrease COX-2 pathway (type: inhibition)
+   - decrease COX-2 pathway connects to decrease IL-6 and TNF-alpha (type: stimulation - pathway inhibition leads to cytokine reduction)
+   - decrease IL-6 and TNF-alpha connects to Canine Arthritis (type: stimulation - cytokine reduction improves condition)
+   - Curcumin connects to decrease NF-kB activation (type: inhibition)
+   - decrease NF-kB activation connects to decrease Oxidative stress (type: stimulation)
+   - decrease Oxidative stress connects to Joint Inflammation (type: stimulation)
+   
+   Type definitions:
+   * inhibition: X blocks/reduces/inhibits Y (e.g., Curcumin inhibits COX-2)
+   * stimulation: X activates/increases/leads to Y (e.g., COX-2 inhibition leads to reduced cytokines)
+   * modulation: X regulates/modifies Y (e.g., bidirectional effects)
+
+6️⃣ SIDE EFFECTS (Safety data):
+   - Extract ALL adverse effects, safety concerns, contraindications mentioned
+   - Examples: "Mild Drowsiness", "Appetite Changes", "GI Discomfort"
+   - Include severity based on study data
+   - Translate all: "Sonolência Leve" becomes "Mild Drowsiness"
+
+🔍 SEARCH STRATEGY:
+- Read ENTIRE document: abstract, introduction, methods, results, discussion, tables, figures
+- Look for mechanism sections: "mechanism of action", "molecular pathways", "signaling"
+- Check results for biomarkers: cytokines, inflammatory markers, oxidative stress markers
+- Examine discussion for mechanistic explanations
+- Extract from tables/figures showing pathway diagrams or mechanism illustrations
 
 🌍 TRANSLATION REQUIREMENTS (MANDATORY):
-- Nutraceutical names: ALWAYS in English (e.g., "Curcumina" → "Curcumin", "Cúrcuma" → "Turmeric")
-- Condition names: ALWAYS in English (e.g., "Função Cognitiva" → "Cognitive Function", "Inflamação Crônica" → "Chronic Inflammation")
-- Effects/mechanisms: ALWAYS in English (e.g., "anti-inflamatório" → "anti-inflammatory")
-- Dosage units: Use standard notation (mg, g, IU, etc.)
-- Technical/scientific terms: Use standard English nomenclature (e.g., "estresse oxidativo" → "oxidative stress")
+- ALL names, descriptions, effects MUST be in English
+- Use standard scientific nomenclature
+- Preserve technical terms accuracy (e.g., "NF-kB" not "NF-kb")
+- Use standard units (mg, g, micromolar, etc.)
 
-Return the data using the extract_study_data function with all fields in English.`;
+⚠️ CRITICAL RULES:
+1. Extract AT LEAST 3-5 items for EACH category (nutraceuticals, mechanisms, effects, conditions)
+2. Create AT LEAST 5-10 interactions mapping the complete chain
+3. Names in interactions MUST match EXACTLY the names in their respective arrays
+4. Every nutraceutical should connect to at least one mechanism
+5. Every mechanism should connect to at least one biological effect
+6. Every biological effect should connect to at least one clinical outcome
+7. Use confidence scores based on statistical significance (p<0.05 = high confidence)
+
+Return using extract_study_data function with all arrays fully populated.`;
 
   try {
     console.log('📤 Enviando query com Tool Calling para extração estruturada...');
@@ -463,7 +658,11 @@ Return the data using the extract_study_data function with all fields in English
     const extractedArgs = functionCall.functionCall.args;
     console.log('✅ Dados estruturados extraídos via Tool Calling');
     console.log(`📊 Nutracêuticos: ${extractedArgs.nutraceuticals?.length || 0}`);
+    console.log(`📊 Mecanismos: ${extractedArgs.mechanisms?.length || 0}`);
+    console.log(`📊 Efeitos Biológicos: ${extractedArgs.biological_effects?.length || 0}`);
     console.log(`📊 Condições: ${extractedArgs.conditions?.length || 0}`);
+    console.log(`📊 Interações: ${extractedArgs.interactions?.length || 0}`);
+    console.log(`📊 Efeitos Colaterais: ${extractedArgs.side_effects?.length || 0}`);
     console.log(`📊 Título: ${extractedArgs.title?.substring(0, 50) || 'N/A'}...`);
 
     // Mapear dados estruturados para o formato esperado
@@ -480,20 +679,60 @@ Return the data using the extract_study_data function with all fields in English
         effects: n.effects,
         efficacy_score: n.efficacy_score
       })),
+      mechanisms: (extractedArgs.mechanisms || []).map((m: any) => ({
+        name: m.name,
+        type: m.type,
+        description: m.description,
+        confidence: m.confidence || 0.8
+      })),
+      biological_effects: (extractedArgs.biological_effects || []).map((e: any) => ({
+        name: e.name,
+        type: e.type,
+        description: e.description,
+        confidence: e.confidence || 0.8
+      })),
       conditions: (extractedArgs.conditions || []).map((c: any) => ({
         name: c.name,
         relationship_type: c.relationship_type,
         efficacy_description: c.efficacy_description || '',
         treatability_score: c.treatability_score,
         severity: c.severity
+      })),
+      interactions: (extractedArgs.interactions || []).map((i: any) => ({
+        from: i.from,
+        to: i.to,
+        type: i.type,
+        description: i.description,
+        confidence: i.confidence || 0.8
+      })),
+      side_effects: (extractedArgs.side_effects || []).map((s: any) => ({
+        name: s.name,
+        description: s.description,
+        severity: s.severity,
+        confidence: s.confidence || 0.8
       }))
     };
 
-    // Validação crítica
-    if (extractedData.nutraceuticals.length === 0 && extractedData.conditions.length === 0) {
-      console.warn('⚠️ WARNING: Nenhum nutracêutico ou condição foi extraído!');
+    // Validação crítica - agora mais flexível
+    const totalExtracted = extractedData.nutraceuticals.length + 
+                          extractedData.mechanisms.length + 
+                          extractedData.biological_effects.length + 
+                          extractedData.conditions.length;
+    
+    if (totalExtracted === 0) {
+      console.warn('⚠️ WARNING: Nenhum dado foi extraído do documento!');
       console.log('📊 Dados extraídos completos:', JSON.stringify(extractedData, null, 2));
-      throw new Error('Extração vazia: 0 nutracêuticos e 0 condições. Documento pode estar vazio ou ilegível.');
+      throw new Error('Extração vazia: 0 nutracêuticos, 0 mecanismos, 0 efeitos e 0 condições. Documento pode estar vazio ou ilegível.');
+    }
+    
+    // Warning se faltar dados intermediários mas houver nutraceuticals e conditions
+    if (extractedData.nutraceuticals.length > 0 && extractedData.conditions.length > 0) {
+      if (extractedData.mechanisms.length === 0 || extractedData.biological_effects.length === 0) {
+        console.warn('⚠️ WARNING: Extração incompleta - faltam mecanismos ou efeitos biológicos intermediários');
+      }
+      if (extractedData.interactions.length === 0) {
+        console.warn('⚠️ WARNING: Nenhuma interação hierárquica foi extraída - visualização não terá conexões');
+      }
     }
 
     console.log('✅ Extração File Search completa com structured output garantido');
@@ -916,6 +1155,32 @@ serve(async (req) => {
           extracted_at: new Date().toISOString()
         };
         
+        // Preparar analysis_data com formato compatível com visualização
+        const analysisData = {
+          ...extractedData,
+          // Adicionar aliases para compatibilidade com componentes existentes
+          extractedNutraceuticals: extractedData.nutraceuticals.map(n => ({
+            name: n.name,
+            confidence: n.efficacy_score || 4.0
+          })),
+          extractedMechanisms: extractedData.mechanisms.map(m => ({
+            name: m.name,
+            type: m.type,
+            confidence: m.confidence || 0.8
+          })),
+          extractedEffects: extractedData.biological_effects.map(e => ({
+            name: e.name,
+            type: e.type,
+            confidence: e.confidence || 0.8
+          })),
+          extractedConditions: extractedData.conditions.map(c => ({
+            name: c.name,
+            confidence: c.treatability_score || 4.0
+          })),
+          extractedInteractions: extractedData.interactions,
+          extractedSideEffects: extractedData.side_effects
+        };
+        
         console.log('💾 Salvando com RAG support...');
         console.log(`   - full_text_content: ${fullTextContent.length} chars`);
         console.log(`   - word_count: ${fullTextMetadata.word_count}`);
@@ -927,7 +1192,7 @@ serve(async (req) => {
             authors: extractedData.authors.length > 0 ? extractedData.authors : null,
             year: extractedData.year || null,
             journal: extractedData.journal || null,
-            analysis_data: extractedData as any,
+            analysis_data: analysisData as any,
             full_text_content: fullTextContent || null,
             full_text_metadata: fullTextMetadata,
             updated_at: new Date().toISOString()
