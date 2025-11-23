@@ -11,6 +11,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import NetworkGraph from '../../visualizations/NetworkGraph';
+import BiologicalNetworkGraph from '../../visualizations/biological/BiologicalNetworkGraph';
+import { buildBiologicalNetworkData } from '../../visualizations/biological/dataBuilder';
 import { useTranslation } from 'react-i18next';
 
 interface EnhancedStudyVisualizationProps {
@@ -25,46 +27,68 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
   const { t } = useTranslation();
   const [activeViz, setActiveViz] = useState('timeline');
 
-  // Extract data for visualizations
-  const nutraceuticals = extractedData?.nutraceuticals || study.analysis_data?.nutraceuticals || [];
-  const conditions = extractedData?.conditions || study.analysis_data?.conditions || [];
+  // Extract data for visualizations (CORRIGIDO - usar campos corretos)
+  const nutraceuticals = extractedData?.extractedNutraceuticals || 
+                        study.analysis_data?.extractedNutraceuticals || [];
+  const conditions = extractedData?.extractedConditions || 
+                    study.analysis_data?.extractedConditions || [];
+  const interactions = extractedData?.extractedInteractions || 
+                      study.analysis_data?.extractedInteractions || [];
+  const sideEffects = extractedData?.extractedSideEffects || 
+                     study.analysis_data?.extractedSideEffects || [];
   const findings = extractedData?.findings || study.analysis_data?.findings || [];
   const mechanisms = extractedData?.mechanisms || study.analysis_data?.mechanisms || [];
 
-  // Build network graph data
+  // Build biological network data (hierárquico e científico)
+  const biologicalNetworkData = buildBiologicalNetworkData({
+    extractedNutraceuticals: nutraceuticals,
+    extractedConditions: conditions,
+    extractedInteractions: interactions,
+    extractedSideEffects: sideEffects
+  });
+
+  // Legacy network data (mantido para compatibilidade)
   const buildNetworkData = () => {
     const nodes: any[] = [];
     const links: any[] = [];
     
-    // Add nutraceutical nodes
     nutraceuticals.forEach((nutra: any, idx: number) => {
       nodes.push({
         id: `nutra-${idx}`,
         label: nutra.name || nutra,
         group: 'nutraceutical',
-        value: nutra.efficacy_score || 3,
+        value: Math.round((nutra.confidence || 0.5) * 5),
+        title: `Confiança: ${((nutra.confidence || 0.5) * 100).toFixed(0)}%`
       });
     });
 
-    // Add condition nodes
     conditions.forEach((cond: any, idx: number) => {
       nodes.push({
         id: `cond-${idx}`,
         label: cond.name || cond,
         group: 'condition',
-        value: cond.treatability_score || 3,
+        value: Math.round((cond.confidence || 0.5) * 5),
+        title: `Confiança: ${((cond.confidence || 0.5) * 100).toFixed(0)}%`
       });
     });
 
-    // Create links between nutraceuticals and conditions
-    nutraceuticals.forEach((nutra: any, nIdx: number) => {
-      conditions.slice(0, 2).forEach((cond: any, cIdx: number) => {
+    interactions.forEach((interaction: any, idx: number) => {
+      const nutraIdx = nutraceuticals.findIndex((n: any) => 
+        n.name === interaction.nutraceutical
+      );
+      const condIdx = conditions.findIndex((c: any) =>
+        interaction.interaction.toLowerCase().includes(c.name.toLowerCase())
+      );
+      
+      if (nutraIdx >= 0 && condIdx >= 0) {
         links.push({
-          source: `nutra-${nIdx}`,
-          target: `cond-${cIdx}`,
-          value: Math.random() * 5 + 1, // Random weight for demo
+          source: `nutra-${nutraIdx}`,
+          target: `cond-${condIdx}`,
+          value: Math.round((interaction.confidence || 0.5) * 5),
+          label: interaction.interaction.substring(0, 30) + '...',
+          title: interaction.interaction
         });
-      });
+      }
     });
 
     return { nodes, links };
@@ -219,22 +243,18 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                {t('viz.network.title', 'Rede de Relações: Nutracêuticos → Condições')}
+                {t('viz.network.title', 'Diagrama Biológico Hierárquico Multi-Camadas')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {t('viz.network.description', 'Visualização das conexões entre nutracêuticos e condições de saúde')}
+                {t('viz.network.description', 'Visualização científica das cascatas moleculares: Nutracêuticos → Mecanismos → Efeitos → Outcomes')}
               </p>
             </CardHeader>
             <CardContent>
-              {networkData.nodes.length > 0 ? (
-                <div className="h-[400px]">
-                  <NetworkGraph
-                    data={networkData}
-                    height="400"
-                    showControls={true}
-                    showLegend={true}
-                  />
-                </div>
+              {biologicalNetworkData.nodes.length > 0 ? (
+                <BiologicalNetworkGraph
+                  data={biologicalNetworkData}
+                  height="600px"
+                />
               ) : (
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   {t('viz.network.noData', 'Dados insuficientes para visualização')}
@@ -254,8 +274,9 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
             <CardContent>
               <div className="space-y-4">
                 {nutraceuticals.slice(0, 8).map((nutra: any, idx: number) => {
-                  const score = nutra.efficacy_score || 3;
-                  const percentage = (score / 5) * 100;
+                  const confidence = nutra.confidence || 0.5;
+                  const score = confidence * 5;
+                  const percentage = confidence * 100;
                   
                   return (
                     <div key={idx}>
