@@ -114,7 +114,7 @@ const EstudosTab: React.FC = () => {
   );
 
   const novoEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "new");
-  const emRevEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "parsed" || estudo.kanban_status === "review");
+  const emRevEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "parsed" || estudo.kanban_status === "review" || estudo.kanban_status === "processed");
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "approved");
   
   const getNutraceuticalScore = (name: string): number => {
