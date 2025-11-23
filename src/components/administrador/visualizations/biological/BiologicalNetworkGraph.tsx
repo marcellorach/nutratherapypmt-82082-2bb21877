@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import 'vis-network/styles/vis-network.css';
-import { BiologicalNetworkData } from './types';
+import { BiologicalNetworkData, BiologicalNode } from './types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -40,18 +40,22 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
     );
 
     // Estilos por tipo de nó
-    const getNodeStyle = (node: any) => {
-      const isVirtual = node.label.includes('(ref)');
+    const getNodeStyle = (node: BiologicalNode) => {
+      const isVirtual = node.label?.includes('(ref)') || false;
       
       const baseStyles = {
         nutraceutical: {
           shape: 'box',
           color: { 
-            background: isVirtual ? '#fde68a' : '#fbbf24', 
-            border: isVirtual ? '#fbbf24' : '#f59e0b', 
-            highlight: { background: '#fcd34d', border: '#f97316' } 
+            background: isVirtual ? '#fde68a' : '#fbbf24',
+            border: isVirtual ? '#fbbf24' : '#f59e0b'
           },
-          font: { size: isVirtual ? 14 : 18, face: 'Inter, sans-serif', bold: true, color: '#78350f' },
+          font: { 
+            size: isVirtual ? 14 : 18,
+            face: 'Inter, sans-serif', 
+            bold: true, 
+            color: '#78350f' 
+          },
           size: isVirtual ? 30 : 40,
           borderWidth: isVirtual ? 2 : 3,
           margin: 10,

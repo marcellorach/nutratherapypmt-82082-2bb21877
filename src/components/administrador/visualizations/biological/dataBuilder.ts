@@ -1,17 +1,24 @@
 import { BiologicalNode, BiologicalLink, BiologicalNetworkData, ExtractedData } from './types';
-import { classifyInteractionType, extractMolecularTarget, truncateLabel } from './utils';
 
 /**
- * Constrói dados hierárquicos para visualização biológica
+ * Constrói dados hierárquicos para visualização biológica multi-camadas
+ * Estrutura: Nutracêuticos → Mecanismos Moleculares → Efeitos Intermediários → Outcomes Clínicos
  */
 export function buildBiologicalNetworkData(extractedData: ExtractedData): BiologicalNetworkData {
   const nodes: BiologicalNode[] = [];
   const links: BiologicalLink[] = [];
-  
+
   const nutraceuticals = extractedData.extractedNutraceuticals || [];
+  const mechanisms = extractedData.extractedMechanisms || [];
+  const effects = extractedData.extractedEffects || [];
   const conditions = extractedData.extractedConditions || [];
   const interactions = extractedData.extractedInteractions || [];
   const sideEffects = extractedData.extractedSideEffects || [];
+  
+  // Helper para encontrar nó por nome (case-insensitive)
+  const findNodeByName = (name: string): BiologicalNode | undefined => {
+    return nodes.find(n => n.label.toLowerCase() === name.toLowerCase());
+  };
   
   // Camada 0: Nutracêuticos (início da cadeia)
   nutraceuticals.forEach((nutra, idx) => {
@@ -22,61 +29,39 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
       layer: 0,
       value: Math.round(nutra.confidence * 5),
       confidence: nutra.confidence,
-      title: `${nutra.name}\nConfiança: ${(nutra.confidence * 100).toFixed(0)}%`
+      title: `${nutra.name}${nutra.dosage ? `\nDosagem: ${nutra.dosage}` : ''}${nutra.form ? `\nForma: ${nutra.form}` : ''}\nConfiança: ${(nutra.confidence * 100).toFixed(0)}%`
     });
   });
   
-  // Camada 1: Mecanismos/Pathways (intermediários)
-  const mechanismMap = new Map<string, number>(); // target -> nodeIdx
-  
-  interactions.forEach((interaction, iIdx) => {
-    const nutraIdx = nutraceuticals.findIndex(n => 
-      n.name.toLowerCase() === interaction.nutraceutical.toLowerCase()
-    );
-    
-    if (nutraIdx === -1) return;
-    
-    // Extrair alvo molecular
-    const target = extractMolecularTarget(interaction.interaction) || 
-                   truncateLabel(interaction.interaction, 30);
-    
-    // Criar ou reusar nó de mecanismo
-    let mechNodeId: string;
-    if (mechanismMap.has(target)) {
-      mechNodeId = `mech-${mechanismMap.get(target)}`;
-    } else {
-      const mechIdx = mechanismMap.size;
-      mechanismMap.set(target, mechIdx);
-      mechNodeId = `mech-${mechIdx}`;
-      
-      nodes.push({
-        id: mechNodeId,
-        label: target,
-        type: 'mechanism',
-        layer: 1,
-        value: Math.round(interaction.confidence * 5),
-        confidence: interaction.confidence,
-        title: `${target}\n${truncateLabel(interaction.interaction, 80)}\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
-      });
-    }
-    
-    // Link nutracêutico → mecanismo
-    const linkType = classifyInteractionType(interaction.interaction);
-    links.push({
-      id: `link-nutra-mech-${iIdx}`,
-      from: `nutra-${nutraIdx}`,
-      to: mechNodeId,
-      type: linkType,
-      confidence: interaction.confidence,
-      label: '',
-      title: truncateLabel(interaction.interaction, 100)
+  // Camada 1: Mecanismos Moleculares (pathways, enzymes, receptors)
+  mechanisms.forEach((mech, idx) => {
+    nodes.push({
+      id: `mech-${idx}`,
+      label: mech.name,
+      type: 'mechanism',
+      layer: 1,
+      value: Math.round(mech.confidence * 5),
+      confidence: mech.confidence,
+      title: `${mech.name} (${mech.type})\nConfiança: ${(mech.confidence * 100).toFixed(0)}%`,
+      metadata: { mechanismType: mech.type }
     });
   });
-  
-  // Camada 2: Efeitos intermediários (se houver descrições detalhadas)
-  // Por enquanto vamos pular essa camada e ir direto para outcomes
-  
-  // Camada 3: Outcomes finais (condições de saúde)
+
+  // Camada 2: Efeitos Biológicos Intermediários
+  effects.forEach((effect, idx) => {
+    nodes.push({
+      id: `effect-${idx}`,
+      label: effect.name,
+      type: 'effect',
+      layer: 2,
+      value: Math.round(effect.confidence * 5),
+      confidence: effect.confidence,
+      title: `${effect.name} (${effect.type} effect)\nConfiança: ${(effect.confidence * 100).toFixed(0)}%`,
+      metadata: { effectType: effect.type }
+    });
+  });
+
+  // Camada 3: Condições/Outcomes Clínicos Finais
   conditions.forEach((cond, idx) => {
     nodes.push({
       id: `cond-${idx}`,
@@ -85,129 +70,70 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
       layer: 3,
       value: Math.round(cond.confidence * 5),
       confidence: cond.confidence,
-      title: `${cond.name}\nConfiança: ${(cond.confidence * 100).toFixed(0)}%`
+      title: `Outcome: ${cond.name}\nConfiança: ${(cond.confidence * 100).toFixed(0)}%`
     });
+  });
+  
+  // Criar links baseado em extractedInteractions estruturadas
+  interactions.forEach((interaction, idx) => {
+    const fromNode = findNodeByName(interaction.from);
+    const toNode = findNodeByName(interaction.to);
     
-    // Conectar mecanismos relevantes às condições (baseado em matching de texto)
-    const relevantMechs = Array.from(mechanismMap.entries()).filter(([target]) =>
-      target.toLowerCase().includes(cond.name.toLowerCase()) ||
-      cond.name.toLowerCase().includes(target.toLowerCase())
-    );
-    
-    relevantMechs.forEach(([target, mechIdx]) => {
+    if (fromNode && toNode) {
       links.push({
-        id: `link-mech-cond-${mechIdx}-${idx}`,
-        from: `mech-${mechIdx}`,
-        to: `cond-${idx}`,
-        type: 'modulation',
-        confidence: cond.confidence,
+        id: `link-${idx}`,
+        from: fromNode.id,
+        to: toNode.id,
+        type: interaction.type,
+        confidence: interaction.confidence,
         label: '',
-        title: `${target} → ${cond.name}`
+        title: interaction.description
       });
-    });
-    
-    // Se não há conexões, conectar a todos os mecanismos (fallback)
-    if (relevantMechs.length === 0 && mechanismMap.size > 0) {
-      const firstMechIdx = 0;
-      links.push({
-        id: `link-mech-cond-fallback-${idx}`,
-        from: `mech-${firstMechIdx}`,
-        to: `cond-${idx}`,
-        type: 'modulation',
-        confidence: cond.confidence * 0.8,
-        label: '',
-        title: `Relação inferida → ${cond.name}`
-      });
-    }
-    
-    // Se ainda não há conexões, criar conexão direta com nutracêuticos
-    if (relevantMechs.length === 0 && mechanismMap.size === 0) {
-      nutraceuticals.forEach((nutra, nIdx) => {
-        links.push({
-          id: `link-direct-${nIdx}-${idx}`,
-          from: `nutra-${nIdx}`,
-          to: `cond-${idx}`,
-          type: 'modulation',
-          confidence: (nutra.confidence + cond.confidence) / 2,
-          label: '',
-          title: `${nutra.name} → ${cond.name} (relação inferida do contexto)`
+    } else {
+      // Fallback: Se não encontrar nodes exatos, criar nós virtuais
+      if (!fromNode && interaction.from) {
+        const virtualId = `virtual-${idx}`;
+        nodes.push({
+          id: virtualId,
+          label: `${interaction.from} (ref)`,
+          type: 'nutraceutical',
+          layer: 0,
+          value: Math.round(interaction.confidence * 3),
+          confidence: interaction.confidence,
+          title: `${interaction.from}\n(Mencionado mas não extraído)\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
         });
-      });
+        
+        if (toNode) {
+          links.push({
+            id: `link-virtual-${idx}`,
+            from: virtualId,
+            to: toNode.id,
+            type: interaction.type,
+            confidence: interaction.confidence,
+            label: '',
+            title: interaction.description
+          });
+        }
+      }
     }
   });
   
-  // Adicionar nós virtuais para nutracêuticos mencionados em interações mas não extraídos
-  interactions.forEach((interaction, iIdx) => {
-    const hasMatchingNutra = nutraceuticals.some(n => 
-      n.name.toLowerCase() === interaction.nutraceutical.toLowerCase()
-    );
-    
-    if (!hasMatchingNutra) {
-      const virtualNutraId = `virtual-nutra-${iIdx}`;
-      nodes.push({
-        id: virtualNutraId,
-        label: `${interaction.nutraceutical} (ref)`,
-        type: 'nutraceutical',
-        layer: 0,
-        value: Math.round(interaction.confidence * 3),
-        confidence: interaction.confidence,
-        title: `${interaction.nutraceutical}\n(Mencionado em interação)\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
-      });
-      
-      const target = extractMolecularTarget(interaction.interaction) || 
-                     truncateLabel(interaction.interaction, 30);
-      const mechId = `mech-virtual-${iIdx}`;
-      
-      nodes.push({
-        id: mechId,
-        label: target,
-        type: 'mechanism',
-        layer: 1,
-        value: Math.round(interaction.confidence * 5),
-        confidence: interaction.confidence,
-        title: `${target}\n${truncateLabel(interaction.interaction, 80)}\nConfiança: ${(interaction.confidence * 100).toFixed(0)}%`
-      });
-      
-      const linkType = classifyInteractionType(interaction.interaction);
-      links.push({
-        id: `link-virtual-${iIdx}`,
-        from: virtualNutraId,
-        to: mechId,
-        type: linkType,
-        confidence: interaction.confidence,
-        label: '',
-        title: truncateLabel(interaction.interaction, 100)
-      });
-      
-      conditions.forEach((cond, cIdx) => {
-        links.push({
-          id: `link-virtual-cond-${iIdx}-${cIdx}`,
-          from: mechId,
-          to: `cond-${cIdx}`,
-          type: 'modulation',
-          confidence: interaction.confidence * 0.7,
-          label: '',
-          title: `${target} → ${cond.name}`
-        });
-      });
-    }
-  });
-  
-  // Efeitos colaterais (diamantes vermelhos, desconectados ou conectados aos nutracêuticos)
+  // Efeitos colaterais (diamantes vermelhos, conectados aos nutracêuticos)
   sideEffects.forEach((effect, idx) => {
     const sideEffectId = `side-${idx}`;
     nodes.push({
       id: sideEffectId,
       label: effect.name,
       type: 'side_effect',
-      layer: 2, // Mesmo nível de mecanismos, mas visualmente separado
-      value: effect.severity === 'high' ? 5 : effect.severity === 'medium' ? 3 : 1,
+      layer: 2, // Mesmo nível que efeitos intermediários
+      value: effect.severity === 'high' ? 5 : effect.severity === 'moderate' ? 3 : 1,
       confidence: effect.confidence,
       title: `${effect.name}\n${effect.description}\nSeveridade: ${effect.severity}\nConfiança: ${(effect.confidence * 100).toFixed(0)}%`
     });
     
     // Conectar aos nutracêuticos relacionados
     nutraceuticals.forEach((nutra, nIdx) => {
+      // Conectar se o nome do nutracêutico estiver na descrição do efeito colateral
       if (effect.description?.toLowerCase().includes(nutra.name.toLowerCase())) {
         links.push({
           id: `link-nutra-side-${nIdx}-${idx}`,
