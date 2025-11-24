@@ -13,6 +13,7 @@ interface ExtractedStudyData {
   journal?: string;
   abstract?: string;
   doi?: string;
+  full_text?: string; // ✅ NOVO: Texto completo do PDF para RAG
   nutraceuticals: Array<{
     name: string;
     dosage?: string;
@@ -340,6 +341,10 @@ async function extractWithFileSearch(
         doi: {
           type: 'string',
           description: 'DOI of the study, if available'
+        },
+        full_text: {
+          type: 'string',
+          description: 'COMPLETE full text content of the entire PDF document. Extract ALL text from all sections: Introduction, Methods, Results, Discussion, Conclusion, References, Tables, Figures captions. This is CRITICAL for RAG (Retrieval Augmented Generation) and must contain the complete document text, not just abstract or summary.'
         },
         nutraceuticals: {
           type: 'array',
@@ -1110,48 +1115,105 @@ serve(async (req) => {
     
     await retryWithExponentialBackoff(
       async () => {
-        // Preparar full_text_content para RAG com fallbacks extensivos
-        const extractedDataAny = extractedData as any;
+        // Preparar full_text_content para RAG
         let fullTextContent = '';
         let extractionMethod = 'none';
         
-        // Prioridade 1: Full text completo do Gemini
-        if (extractedDataAny.full_text && extractedDataAny.full_text.length > 500) {
-          fullTextContent = extractedDataAny.full_text;
-          extractionMethod = 'gemini_full_text';
-        } 
-        // Prioridade 2: Concatenar sections se disponível
-        else if (extractedDataAny.sections && Object.keys(extractedDataAny.sections).length > 0) {
-          fullTextContent = Object.entries(extractedDataAny.sections)
-            .map(([section, content]) => `### ${section}\n${content}`)
-            .join('\n\n');
-          extractionMethod = 'gemini_sections';
+        // Prioridade 1: Full text completo do Gemini (NOVO - direto do schema)
+        if (extractedData.full_text && extractedData.full_text.length > 500) {
+          fullTextContent = extractedData.full_text;
+          extractionMethod = 'gemini_full_text_extraction';
+          console.log('✅ Usando full_text direto do Gemini (melhor qualidade para RAG)');
         }
-        // Prioridade 3: Combinar title + abstract + findings
-        else if (extractedData.abstract || extractedData.title) {
+        // Prioridade 2: Construir texto completo a partir dos dados estruturados
+        else {
+          console.warn('⚠️ full_text não extraído pelo Gemini, construindo a partir de dados estruturados');
           const parts = [];
-          if (extractedData.title) parts.push(`# ${extractedData.title}`);
-          if (extractedData.abstract) parts.push(`\n## Abstract\n${extractedData.abstract}`);
-          if (extractedDataAny.findings) {
-            parts.push('\n## Key Findings\n' + JSON.stringify(extractedDataAny.findings, null, 2));
+          
+          // Metadados básicos
+          if (extractedData.title) parts.push(`# ${extractedData.title}\n`);
+          if (extractedData.authors.length > 0) parts.push(`**Authors:** ${extractedData.authors.join(', ')}\n`);
+          if (extractedData.year) parts.push(`**Year:** ${extractedData.year}\n`);
+          if (extractedData.journal) parts.push(`**Journal:** ${extractedData.journal}\n`);
+          if (extractedData.doi) parts.push(`**DOI:** ${extractedData.doi}\n`);
+          
+          // Abstract
+          if (extractedData.abstract) {
+            parts.push(`\n## Abstract\n${extractedData.abstract}\n`);
           }
-          if (extractedDataAny.mechanisms) {
-            parts.push('\n## Mechanisms\n' + JSON.stringify(extractedDataAny.mechanisms, null, 2));
+          
+          // Nutracêuticos com detalhes
+          if (extractedData.nutraceuticals.length > 0) {
+            parts.push('\n## Nutraceuticals Studied\n');
+            extractedData.nutraceuticals.forEach(n => {
+              parts.push(`\n### ${n.name}`);
+              if (n.dosage) parts.push(`- Dosage: ${n.dosage}`);
+              parts.push(`- Effects: ${n.effects}`);
+              if (n.efficacy_score) parts.push(`- Efficacy Score: ${n.efficacy_score}/5`);
+            });
           }
+          
+          // Mecanismos moleculares
+          if (extractedData.mechanisms.length > 0) {
+            parts.push('\n## Molecular Mechanisms\n');
+            extractedData.mechanisms.forEach(m => {
+              parts.push(`\n### ${m.name} (${m.type})`);
+              parts.push(`${m.description}`);
+            });
+          }
+          
+          // Efeitos biológicos
+          if (extractedData.biological_effects.length > 0) {
+            parts.push('\n## Biological Effects\n');
+            extractedData.biological_effects.forEach(e => {
+              parts.push(`\n### ${e.name} (${e.type})`);
+              parts.push(`${e.description}`);
+            });
+          }
+          
+          // Condições de saúde
+          if (extractedData.conditions.length > 0) {
+            parts.push('\n## Health Conditions Addressed\n');
+            extractedData.conditions.forEach(c => {
+              parts.push(`\n### ${c.name}`);
+              parts.push(`- Relationship: ${c.relationship_type}`);
+              if (c.efficacy_description) parts.push(`- Efficacy: ${c.efficacy_description}`);
+              if (c.treatability_score) parts.push(`- Treatability Score: ${c.treatability_score}/5`);
+            });
+          }
+          
+          // Interações (cadeia biológica)
+          if (extractedData.interactions.length > 0) {
+            parts.push('\n## Biological Pathway Interactions\n');
+            extractedData.interactions.forEach(i => {
+              parts.push(`\n**${i.from}** → [${i.type}] → **${i.to}**`);
+              parts.push(`${i.description}`);
+            });
+          }
+          
+          // Efeitos colaterais
+          if (extractedData.side_effects.length > 0) {
+            parts.push('\n## Side Effects\n');
+            extractedData.side_effects.forEach(s => {
+              parts.push(`\n### ${s.name} (${s.severity} severity)`);
+              parts.push(`${s.description}`);
+            });
+          }
+          
           fullTextContent = parts.join('\n');
-          extractionMethod = 'structured_data';
+          extractionMethod = 'structured_data_enhanced';
         }
         
         console.log(`📄 Full text extraction method: ${extractionMethod}, length: ${fullTextContent.length} chars`);
         
         const fullTextMetadata = {
           extraction_method: extractionMethod,
-          sections: extractedDataAny.sections ? Object.keys(extractedDataAny.sections) : [],
+          sections: [], // Removido extractedDataAny
           word_count: fullTextContent ? fullTextContent.split(/\s+/).length : 0,
           char_count: fullTextContent.length,
           has_abstract: !!extractedData.abstract,
-          has_full_text: !!extractedDataAny.full_text,
-          has_sections: !!extractedDataAny.sections,
+          has_full_text: !!extractedData.full_text,
+          has_sections: false, // Removido extractedDataAny
           extracted_at: new Date().toISOString()
         };
         
