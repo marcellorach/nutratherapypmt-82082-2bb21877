@@ -428,6 +428,11 @@
     "tabInfo": {
       "button": "Informações sobre esta aba",
       "description": "Entenda a metodologia, fundamentos científicos e objetivos desta funcionalidade",
+      "lastUpdate": "Última Atualização",
+      "keyExcerpts": {
+        "title": "Citações-Chave dos Papers",
+        "viewPaper": "Ver paper"
+      },
       "tabs": {
         "overview": "Visão Geral",
         "methodology": "Metodologia",
@@ -439,10 +444,18 @@
         "benefits": "Benefícios"
       },
       "methodology": {
+        "comparisonTable": "Quadro Comparativo",
+        "architectureDiagram": "Diagrama de Arquitetura",
+        "calculations": "Cálculos e Fórmulas",
+        "example": "Exemplo",
         "decisions": "Decisões Metodológicas"
       },
       "scientific": {
         "foundation": "Fundamentos Científicos",
+        "implementationStatus": "Status de Implementação",
+        "implemented": "Implementado",
+        "inProgress": "Em Progresso",
+        "planned": "Planejado",
         "studies": "Estudos de Referência",
         "keyFindings": "Principais Descobertas",
         "viewStudy": "Ver estudo",
