@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { getConfigValue } from './utils.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -302,18 +303,27 @@ async function addFileToCorpus(
 // Extração com File Search usando Structured Output (Function Calling)
 async function extractWithFileSearch(
   fileSearchStoreName: string,
-  apiKey: string
+  apiKey: string,
+  supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  const MODEL_NAME = 'gemini-2.5-flash';
+  // ✅ ATUALIZADO: Usar Gemini 3 Pro Preview
+  const MODEL_NAME = 'google/gemini-3-pro-preview';
   console.log('🔍 Extraindo dados com File Search + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
-  console.log(`🤖 Modelo AI: ${MODEL_NAME} (suporta File Search + Function Calling)`);
+  console.log(`🤖 Modelo AI: ${MODEL_NAME} (Gemini 3 Pro Preview)`);
   console.log(`🛠️ Tecnologia: Tool Calling para JSON estruturado garantido`);
   
-  // Definir schema de função para structured output
+  // ✅ NOVO: Buscar prompts configuráveis da ai_configurations
+  console.log('📝 Carregando prompts customizados...');
+  const systemPrompt = await getConfigValue(supabaseClient, 'prompt_extraction_stage1_system') || 
+    'You are a scientific extraction AI specialized in veterinary nutraceuticals. Extract ALL entities comprehensively.';
+  const userPrompt = await getConfigValue(supabaseClient, 'prompt_extraction_stage1_user') || 
+    'Analyze this scientific study and extract ALL nutraceuticals, conditions, mechanisms, and relationships.';
+  
+  // Definir schema expandido para structured output
   const extractionFunction = {
     name: 'extract_study_data',
-    description: 'Extract the COMPLETE hierarchical chain from a scientific study about nutraceuticals: Nutraceutical → Molecular Mechanism → Biological Effect → Clinical Outcome. ALL extracted data MUST be in English.',
+    description: systemPrompt,
     parameters: {
       type: 'object',
       properties: {
@@ -1092,7 +1102,7 @@ serve(async (req) => {
     
     const startTime = Date.now();
     const extractedData = await retryWithExponentialBackoff(
-      () => extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY),
+      () => extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY, supabase),
       'Extract Data with File Search'
     );
     const duration = Date.now() - startTime;
