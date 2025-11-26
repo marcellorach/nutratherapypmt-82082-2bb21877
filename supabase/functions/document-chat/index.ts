@@ -440,7 +440,14 @@ serve(async (req) => {
           extractionQuality: study.study_extractions?.[0]?.extraction_quality_score,
         }
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        } 
+      }
     );
 
   } catch (error) {
