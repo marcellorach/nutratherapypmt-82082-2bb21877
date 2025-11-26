@@ -9,16 +9,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { RefreshCw } from "lucide-react";
 
-const apiKeySchema = z.object({
-  apiKey: z.string().min(10, "A chave API deve ter pelo menos 10 caracteres")
-});
-
 interface ApiKeyFormProps {
   serviceName: string;
   saveKey: (key: string) => Promise<void>;
   initialKey?: string;
   placeholder?: string;
   isLoading: boolean;
+  minLength?: number;
 }
 
 const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ 
@@ -26,12 +23,18 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
   saveKey, 
   initialKey = "", 
   placeholder = "sk-...",
-  isLoading 
+  isLoading,
+  minLength = 10
 }) => {
   const { toast } = useToast();
   
   // Normalize initialKey to always be a string
   const normalizedKey = typeof initialKey === 'string' ? initialKey : '';
+  
+  // Create schema with dynamic minLength
+  const apiKeySchema = z.object({
+    apiKey: z.string().min(minLength, `A chave API deve ter pelo menos ${minLength} caracteres`)
+  });
   
   const form = useForm<z.infer<typeof apiKeySchema>>({
     resolver: zodResolver(apiKeySchema),
