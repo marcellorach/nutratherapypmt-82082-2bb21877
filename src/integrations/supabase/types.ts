@@ -107,6 +107,72 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_discoveries: {
+        Row: {
+          approval_chain: Json | null
+          discovered_at: string | null
+          discovery_score: number | null
+          evidence_multiplier: number | null
+          head_entity_id: string | null
+          head_entity_name: string
+          head_entity_type: string
+          id: string
+          novelty_factor: number | null
+          predicted_relation: string
+          status: string | null
+          supporting_paths: Json | null
+          tail_entity_id: string | null
+          tail_entity_name: string
+          tail_entity_type: string
+          transe_score: number | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_notes: string | null
+        }
+        Insert: {
+          approval_chain?: Json | null
+          discovered_at?: string | null
+          discovery_score?: number | null
+          evidence_multiplier?: number | null
+          head_entity_id?: string | null
+          head_entity_name: string
+          head_entity_type: string
+          id?: string
+          novelty_factor?: number | null
+          predicted_relation: string
+          status?: string | null
+          supporting_paths?: Json | null
+          tail_entity_id?: string | null
+          tail_entity_name: string
+          tail_entity_type: string
+          transe_score?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_notes?: string | null
+        }
+        Update: {
+          approval_chain?: Json | null
+          discovered_at?: string | null
+          discovery_score?: number | null
+          evidence_multiplier?: number | null
+          head_entity_id?: string | null
+          head_entity_name?: string
+          head_entity_type?: string
+          id?: string
+          novelty_factor?: number | null
+          predicted_relation?: string
+          status?: string | null
+          supporting_paths?: Json | null
+          tail_entity_id?: string | null
+          tail_entity_name?: string
+          tail_entity_type?: string
+          transe_score?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_notes?: string | null
+        }
+        Relationships: []
+      }
       breed_groups: {
         Row: {
           created_at: string | null
@@ -1264,6 +1330,83 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      triplet_extractions: {
+        Row: {
+          approval_chain: Json | null
+          auto_approved: boolean | null
+          created_at: string | null
+          curation_status: string | null
+          extraction_confidence: number | null
+          id: string
+          kg_match_score: number | null
+          llm_confidence: number | null
+          object_id: string | null
+          object_name: string
+          object_type: string
+          predicate: string
+          review_date: string | null
+          review_notes: string | null
+          reviewed_by: string | null
+          study_id: string | null
+          subject_id: string | null
+          subject_name: string
+          subject_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_chain?: Json | null
+          auto_approved?: boolean | null
+          created_at?: string | null
+          curation_status?: string | null
+          extraction_confidence?: number | null
+          id?: string
+          kg_match_score?: number | null
+          llm_confidence?: number | null
+          object_id?: string | null
+          object_name: string
+          object_type: string
+          predicate: string
+          review_date?: string | null
+          review_notes?: string | null
+          reviewed_by?: string | null
+          study_id?: string | null
+          subject_id?: string | null
+          subject_name: string
+          subject_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_chain?: Json | null
+          auto_approved?: boolean | null
+          created_at?: string | null
+          curation_status?: string | null
+          extraction_confidence?: number | null
+          id?: string
+          kg_match_score?: number | null
+          llm_confidence?: number | null
+          object_id?: string | null
+          object_name?: string
+          object_type?: string
+          predicate?: string
+          review_date?: string | null
+          review_notes?: string | null
+          reviewed_by?: string | null
+          study_id?: string | null
+          subject_id?: string | null
+          subject_name?: string
+          subject_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "triplet_extractions_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
