@@ -37,68 +37,67 @@ export const KnowledgeGraphViewer: React.FC = () => {
     try {
       setLoading(true);
 
-      // Buscar triplets aprovados e sincronizados
-      const { data: triplets, error } = await supabase
-        .from('triplet_extractions')
-        .select('*')
-        .eq('curation_status', 'approved')
-        .eq('synced_to_neo4j', true);
+      // Consultar Neo4j diretamente via graph-rag-search
+      const { data, error } = await supabase.functions.invoke('graph-rag-search', {
+        body: {
+          queryType: 'cypher',
+          cypherQuery: `
+            MATCH (n)-[r]->(m)
+            RETURN n, r, m
+            LIMIT 500
+          `
+        }
+      });
 
       if (error) throw error;
 
-      if (!triplets || triplets.length === 0) {
-        toast.info('No approved triplets synced to Neo4j yet');
+      if (!data?.success || !data?.data) {
+        toast.info('No graph data available from Neo4j');
         setGraphData({ nodes: [], links: [] });
         return;
       }
 
-      // Construir grafo a partir dos triplets
+      const graphResult = data.data;
       const nodeMap = new Map<string, any>();
       const links: any[] = [];
 
-      triplets.forEach((triplet: any) => {
-        // Adicionar nó subject
-        const subjectId = `${triplet.subject_type}-${triplet.subject_name}`;
-        if (!nodeMap.has(subjectId)) {
-          nodeMap.set(subjectId, {
-            id: subjectId,
-            label: triplet.subject_name,
-            type: triplet.subject_type,
-            group: triplet.subject_type,
+      // Processar nós do Neo4j
+      graphResult.nodes.forEach((node: any) => {
+        const nodeId = node.id;
+        if (!nodeMap.has(nodeId)) {
+          nodeMap.set(nodeId, {
+            id: nodeId,
+            label: node.properties.name || node.properties.title || node.id,
+            type: node.type,
+            group: node.type,
             value: 1,
-            title: `${triplet.subject_type}: ${triplet.subject_name}`
+            title: `${node.type}: ${node.properties.name || node.id}`,
+            properties: node.properties
           });
         } else {
-          const node = nodeMap.get(subjectId);
-          node.value += 1;
+          const existing = nodeMap.get(nodeId);
+          existing.value += 1;
         }
+      });
 
-        // Adicionar nó object
-        const objectId = `${triplet.object_type}-${triplet.object_name}`;
-        if (!nodeMap.has(objectId)) {
-          nodeMap.set(objectId, {
-            id: objectId,
-            label: triplet.object_name,
-            type: triplet.object_type,
-            group: triplet.object_type,
-            value: 1,
-            title: `${triplet.object_type}: ${triplet.object_name}`
+      // Processar relações do Neo4j
+      graphResult.relationships.forEach((rel: any) => {
+        const sourceNode = nodeMap.get(rel.source);
+        const targetNode = nodeMap.get(rel.target);
+        
+        if (sourceNode && targetNode) {
+          const confidence = rel.properties?.confidence || rel.properties?.extraction_confidence || 0.8;
+          links.push({
+            from: rel.source,
+            to: rel.target,
+            label: rel.type,
+            title: `${rel.type} (Neo4j)`,
+            value: confidence,
+            color: getEdgeColor(confidence),
+            width: 2 + confidence * 2,
+            properties: rel.properties
           });
-        } else {
-          const node = nodeMap.get(objectId);
-          node.value += 1;
         }
-
-        // Adicionar link
-        links.push({
-          from: subjectId,
-          to: objectId,
-          label: triplet.predicate,
-          title: `${triplet.predicate} (Confidence: ${(triplet.extraction_confidence * 100).toFixed(0)}%)`,
-          value: triplet.extraction_confidence,
-          color: getEdgeColor(triplet.extraction_confidence),
-          width: 2 + triplet.extraction_confidence * 2
-        });
       });
 
       // Converter mapa para array
@@ -124,8 +123,9 @@ export const KnowledgeGraphViewer: React.FC = () => {
 
       setGraphData({ nodes, links });
       setStats(stats);
+      toast.success(`Loaded ${nodes.length} nodes from Neo4j`);
     } catch (error: any) {
-      toast.error('Error loading graph data');
+      toast.error('Error loading graph data from Neo4j');
       console.error('Error:', error);
     } finally {
       setLoading(false);
