@@ -60,7 +60,7 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
         variant="outline"
         size="sm"
         onClick={() => setOpen(true)}
-        className="gap-2"
+        className="gap-2 bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-200 dark:border-amber-700"
       >
         <BookOpen className="h-4 w-4" />
         {t('admin.tabInfo.button')}

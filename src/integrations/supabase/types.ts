@@ -107,6 +107,148 @@ export type Database = {
         }
         Relationships: []
       }
+      breed_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          id: string
+          name: string
+          name_en: string
+          species_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name: string
+          name_en: string
+          species_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name?: string
+          name_en?: string
+          species_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "breed_groups_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      breed_predispositions: {
+        Row: {
+          breed_id: string
+          condition_id: string
+          created_at: string | null
+          evidence_grade: string
+          id: string
+          notes: string | null
+          risk_factor: number
+          supporting_study_ids: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          breed_id: string
+          condition_id: string
+          created_at?: string | null
+          evidence_grade: string
+          id?: string
+          notes?: string | null
+          risk_factor: number
+          supporting_study_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          breed_id?: string
+          condition_id?: string
+          created_at?: string | null
+          evidence_grade?: string
+          id?: string
+          notes?: string | null
+          risk_factor?: number
+          supporting_study_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "breed_predispositions_breed_id_fkey"
+            columns: ["breed_id"]
+            isOneToOne: false
+            referencedRelation: "breeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "breed_predispositions_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "health_conditions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      breeds: {
+        Row: {
+          average_lifespan_years: number | null
+          average_weight_kg: number | null
+          breed_group_id: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          id: string
+          name: string
+          name_en: string
+          size_category: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          average_lifespan_years?: number | null
+          average_weight_kg?: number | null
+          breed_group_id: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name: string
+          name_en: string
+          size_category?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          average_lifespan_years?: number | null
+          average_weight_kg?: number | null
+          breed_group_id?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name?: string
+          name_en?: string
+          size_category?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "breeds_breed_group_id_fkey"
+            columns: ["breed_group_id"]
+            isOneToOne: false
+            referencedRelation: "breed_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
@@ -933,6 +1075,36 @@ export type Database = {
           meta_summary_filename?: string | null
           meta_summary_storage_path?: string | null
           scispace_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      species: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          id: string
+          name: string
+          name_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name: string
+          name_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          name?: string
+          name_en?: string
           updated_at?: string | null
         }
         Relationships: []
