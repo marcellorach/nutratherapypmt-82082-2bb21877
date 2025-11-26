@@ -17,6 +17,9 @@ const ConfiguracoesIATab: React.FC = () => {
   const [grokKey, setGrokKey] = useState<string>("");
   const [unstructuredKey, setUnstructuredKey] = useState<string>("");
   const [googleGeminiKey, setGoogleGeminiKey] = useState<string>("");
+  const [neo4jUri, setNeo4jUri] = useState<string>("");
+  const [neo4jUsername, setNeo4jUsername] = useState<string>("");
+  const [neo4jPassword, setNeo4jPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -40,6 +43,9 @@ const ConfiguracoesIATab: React.FC = () => {
         setGrokKey(configs.grok_api_key || "");
         setUnstructuredKey(configs.unstructured_api_key || "");
         setGoogleGeminiKey(configs.google_gemini_api_key || "");
+        setNeo4jUri(configs.neo4j_uri || "");
+        setNeo4jUsername(configs.neo4j_username || "");
+        setNeo4jPassword(configs.neo4j_password || "");
       }
 
     } catch (error) {
@@ -75,6 +81,15 @@ const ConfiguracoesIATab: React.FC = () => {
       }
       if (key === 'google_gemini_api_key' && value.length < 30) {
         throw new Error('Chave API do Google Gemini deve ter pelo menos 30 caracteres');
+      }
+      if (key === 'neo4j_uri' && !value.startsWith('neo4j+s://') && !value.startsWith('neo4j://')) {
+        throw new Error('URI do Neo4j deve começar com "neo4j+s://" ou "neo4j://"');
+      }
+      if (key === 'neo4j_username' && value.length < 1) {
+        throw new Error('Username do Neo4j não pode estar vazio');
+      }
+      if (key === 'neo4j_password' && value.length < 8) {
+        throw new Error('Password do Neo4j deve ter pelo menos 8 caracteres');
       }
 
       const response = await supabase.functions.invoke('ai-config', {
@@ -143,6 +158,36 @@ const ConfiguracoesIATab: React.FC = () => {
     }
   };
 
+  const saveNeo4jUri = async (uri: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('neo4j_uri', uri);
+      setNeo4jUri(uri);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveNeo4jUsername = async (username: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('neo4j_username', username);
+      setNeo4jUsername(username);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveNeo4jPassword = async (password: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('neo4j_password', password);
+      setNeo4jPassword(password);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -164,11 +209,12 @@ const ConfiguracoesIATab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="openai" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="openai">OpenAI</TabsTrigger>
                 <TabsTrigger value="claude">Claude</TabsTrigger>
                 <TabsTrigger value="grok">Grok</TabsTrigger>
                 <TabsTrigger value="google-gemini">Google Gemini</TabsTrigger>
+                <TabsTrigger value="neo4j">Neo4j</TabsTrigger>
                 <TabsTrigger value="unstructured">Unstructured</TabsTrigger>
               </TabsList>
               
@@ -267,6 +313,65 @@ const ConfiguracoesIATab: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="neo4j" className="space-y-4 pt-4">
+                <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mb-4">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      🔵 Para que serve o Neo4j?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-foreground">
+                      <strong>Knowledge Graph para GraphRAG veterinário:</strong> Armazena e consulta triplas estruturadas (Nutraceutical → TREATS → Condition).
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Grafo hierárquico 3-tier (documento → chunk → entidade)</li>
+                      <li>U-Retrieval: Top-down (summaries) + Bottom-up (detalhes)</li>
+                      <li>Validação de triplas via KGARevion pattern (Generate-Review-Revise)</li>
+                      <li>Complementa pgvector (Supabase) para hybrid search</li>
+                      <li>Predisposições raciais: (:Breed)-[:PREDISPOSED_TO]→(:Condition)</li>
+                    </ul>
+                    <div className="mt-4 p-2 bg-background rounded border border-purple-300 dark:border-purple-800">
+                      <p className="text-xs font-mono text-foreground">
+                        📊 Triple Graph + 🔍 Vector Search = 🎯 GraphRAG Híbrido
+                      </p>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-4">
+                      <a 
+                        href="https://neo4j.com/cloud/platform/aura-graph-database/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        Criar instância gratuita no Neo4j AuraDB →
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <ApiKeyForm 
+                  serviceName="Neo4j URI" 
+                  saveKey={saveNeo4jUri}
+                  initialKey={neo4jUri}
+                  placeholder="neo4j+s://xxxxx.databases.neo4j.io"
+                  isLoading={isLoading || isSaving}
+                />
+                <ApiKeyForm 
+                  serviceName="Neo4j Username" 
+                  saveKey={saveNeo4jUsername}
+                  initialKey={neo4jUsername}
+                  placeholder="neo4j"
+                  isLoading={isLoading || isSaving}
+                />
+                <ApiKeyForm 
+                  serviceName="Neo4j Password" 
+                  saveKey={saveNeo4jPassword}
+                  initialKey={neo4jPassword}
+                  placeholder="••••••••••••"
+                  isLoading={isLoading || isSaving}
+                />
               </TabsContent>
               
               <TabsContent value="unstructured" className="space-y-4 pt-4">
@@ -368,6 +473,12 @@ const ConfiguracoesIATab: React.FC = () => {
               isConfigured={!!unstructuredKey} 
               icon="📄"
               description="Parsing de PDFs e documentos"
+            />
+            <ApiStatusItem 
+              service="Neo4j" 
+              isConfigured={!!neo4jUri && !!neo4jUsername && !!neo4jPassword} 
+              icon="🔵"
+              description="GraphRAG + Knowledge Graph"
             />
           </CardContent>
         </Card>

@@ -1,0 +1,41 @@
+{
+  "admin": {
+    "iaConfig": {
+      "neo4j": {
+        "title": "Neo4j GraphRAG",
+        "description": "Knowledge Graph for veterinary GraphRAG",
+        "uri": {
+          "label": "Connection URI",
+          "placeholder": "neo4j+s://xxxxx.databases.neo4j.io"
+        },
+        "username": {
+          "label": "Username",
+          "placeholder": "neo4j"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "••••••••••••"
+        }
+      }
+    },
+    "breeds": {
+      "species": {
+        "canine": "Canine",
+        "feline": "Feline"
+      },
+      "groups": {
+        "brachycephalic": "Brachycephalic",
+        "giant": "Giant",
+        "small": "Small",
+        "retriever": "Retriever",
+        "shepherd": "Shepherd",
+        "terrier": "Terrier",
+        "toy": "Toy",
+        "sporting": "Sporting",
+        "working": "Working",
+        "oriental": "Oriental",
+        "persian": "Persian"
+      }
+    }
+  }
+}
