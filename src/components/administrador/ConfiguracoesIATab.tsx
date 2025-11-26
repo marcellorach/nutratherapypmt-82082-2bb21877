@@ -11,6 +11,8 @@ import ConsumoPainel from './configuracoes/ConsumoPainel';
 import ConfiguracoesAvisosIA from './configuracoes/ConfiguracoesAvisosIA';
 import ApiStatusItem from './configuracoes/ApiStatusItem';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
+import ConfigurationsSummary from './configuracoes/ConfigurationsSummary';
+import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -658,6 +660,10 @@ const ConfiguracoesIATab: React.FC = () => {
             />
           </CardContent>
         </Card>
+        
+        <ConfigurationsSummary />
+        
+        <Neo4jStatusCard />
         
         <ConsumoPainel />
       </div>

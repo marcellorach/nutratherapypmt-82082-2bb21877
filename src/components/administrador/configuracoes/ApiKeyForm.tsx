@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { RefreshCw, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -37,6 +37,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
   showVisualValidation = false
 }) => {
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult>({ 
     isValid: false, 
     status: 'idle' 
@@ -139,16 +140,28 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
                   <Input
                     {...field}
                     placeholder={placeholder}
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="off"
                     disabled={isLoading}
                     className={showVisualValidation ? getValidationColor() : ''}
                   />
-                  {showVisualValidation && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {getValidationIcon()}
-                    </div>
-                  )}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {showVisualValidation && getValidationIcon()}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </FormControl>
               {showVisualValidation && validationResult.message && (
