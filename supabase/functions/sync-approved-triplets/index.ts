@@ -28,7 +28,7 @@ interface Neo4jCredentials {
 }
 
 /**
- * Executa query Cypher no Neo4j via REST API
+ * Executa query Cypher no Neo4j via Query API v2
  */
 async function executeCypherQuery(
   cypher: string,
@@ -37,7 +37,7 @@ async function executeCypherQuery(
 ): Promise<any> {
   const authHeader = 'Basic ' + btoa(`${credentials.username}:${credentials.password}`);
   
-  const response = await fetch(`${credentials.uri}/db/neo4j/tx/commit`, {
+  const response = await fetch(`${credentials.uri}/db/neo4j/query/v2`, {
     method: 'POST',
     headers: {
       'Authorization': authHeader,
@@ -45,10 +45,8 @@ async function executeCypherQuery(
       'Accept': 'application/json',
     },
     body: JSON.stringify({
-      statements: [{
-        statement: cypher,
-        parameters: params
-      }]
+      statement: cypher,
+      parameters: params
     })
   });
 

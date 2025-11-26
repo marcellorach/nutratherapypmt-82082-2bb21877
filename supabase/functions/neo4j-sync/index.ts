@@ -66,7 +66,7 @@ interface SyncResult {
 }
 
 /**
- * Executa Cypher query no Neo4j via REST API
+ * Executa Cypher query no Neo4j via Query API v2
  */
 async function executeCypherQuery(
   cypher: string,
@@ -75,9 +75,7 @@ async function executeCypherQuery(
 ): Promise<any> {
   const authHeader = `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`;
   
-  // Usar endpoint HTTP do Neo4j (não bolt)
-  const httpUri = credentials.uri.replace('neo4j+s://', 'https://').replace('neo4j://', 'http://');
-  const url = `${httpUri}/db/neo4j/tx/commit`;
+  const url = `${credentials.uri}/db/neo4j/query/v2`;
   
   console.log('🔍 Executando Cypher query...');
   console.log('📋 URL:', url);
@@ -91,10 +89,8 @@ async function executeCypherQuery(
       'Accept': 'application/json',
     },
     body: JSON.stringify({
-      statements: [{
-        statement: cypher,
-        parameters: params
-      }]
+      statement: cypher,
+      parameters: params
     })
   });
   
@@ -105,12 +101,6 @@ async function executeCypherQuery(
   }
   
   const result = await response.json();
-  
-  if (result.errors && result.errors.length > 0) {
-    console.error('❌ Neo4j errors:', result.errors);
-    throw new Error(`Neo4j errors: ${JSON.stringify(result.errors)}`);
-  }
-  
   console.log('✅ Cypher query executada com sucesso');
   return result;
 }
