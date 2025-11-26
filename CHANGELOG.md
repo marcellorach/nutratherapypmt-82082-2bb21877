@@ -9,6 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-11-26
+- ✅ **Sistema Completo de Curadoria para Knowledge Graph**: Implementação total do workflow de validação humana
+  - **Tabelas Supabase**: 
+    - `triplet_extractions`: Armazena triplets (subject-predicate-object) extraídos por IA de estudos científicos com scores (kg_match_score, llm_confidence, extraction_confidence), workflow de curadoria (pending/approved/rejected/needs_review), approval_chain JSON, e RLS policies para admins/veterinários
+    - `auto_discoveries`: Armazena links preditos por TransE com scores (transe_score, evidence_multiplier, novelty_factor, discovery_score), supporting_paths JSON, workflow de aprovação científica (suggested/under_review/validated/rejected), e RLS policies
+  - **Componentes React**:
+    - `TripletCurationQueue.tsx`: Interface de curadoria com filtros (status, confidence, search), ações (Approve/Reject/Request Expert Review), visualização de scores (KG Match, LLM Conf., Overall), e notas de revisão
+    - `AutoDiscoveryReview.tsx`: Interface de validação de Auto-Discoveries com breakdown de scores (TransE, Evidence Mult., Novelty), visualização de supporting paths do KG, e ações (Validate/Reject/Request Review)
+    - `CurationDashboard.tsx`: Dashboard centralizado com métricas (pending, approved, validated, approval/validation rates), tabs para Triplets e Discoveries, e overview cards
+  - **Edge Function**: `sync-approved-triplets` para sincronizar triplets aprovados com Neo4j AuraDB via REST API (MERGE nodes, CREATE relationships com metadata)
+  - **Traduções Bilíngues**: Novas chaves PT/EN completas para todo sistema de curadoria (`curation.triplets.*`, `curation.discoveries.*`, `curation.dashboard.*`)
+  - **Documentação**: Atualizado `supabase/config.toml` com nova função, `ARCHITECTURE.md` v1.8.0 com seção de Curadoria, e `CHANGELOG.md`
+  - **Lógica de Auto-Aprovação**: Thresholds documentados (confidence ≥ 0.85, kg_match_score = 1.0, GRADE High/Moderate)
+  - **Workflow Completo**: AI Extraction → Human Curation → Neo4j Sync → Knowledge Graph Update
+
 ### Added
 - ✅ **Tab "Estudos" v2.1.0 - Conteúdo Científico Completo**: Quadro comparativo expandido (16 features: MedGraphRAG vs KGARevion vs NTAI), diagrama ASCII completo da arquitetura NTAI (~100 linhas, 5 fases: Ingestion→Validation→Storage→Retrieval→Synthesis), e todas as 6 fórmulas matemáticas com exemplos clínicos detalhados (~20 linhas cada):
   - **Fórmula 1**: Triple Graph Construction (MedGraphRAG) - 4 níveis hierárquicos (Doc→Chunk→Entity→Mechanism)
