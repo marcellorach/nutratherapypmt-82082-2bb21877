@@ -10,6 +10,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added - 2025-11-26
+- ✨ **TabInfoButton Expandido**: Interface estendida para conteúdo científico avançado (version, lastUpdate, keyExcerpts, comparisonTable, architectureDiagram, implementationStatus)
+- 📚 **Conteúdo Científico Completo Tab "Estudos"**: Citações MedGraphRAG/KGARevion, quadro comparativo 12+ features, diagrama ASCII arquitetura, 6 fórmulas matemáticas (Synergy Score, Pathway Discovery, Treatment Efficacy), status implementação
+- 🌍 **Traduções Bilíngues PT/EN**: Novas chaves para conteúdo científico (keyExcerpts, comparisonTable, implementationStatus)
+- 📖 **Renderização Avançada**: Citações com links, tabelas HTML comparativas, diagramas ASCII, status com emojis coloridos
+
+### Changed - 2025-11-26
+- 📝 **ARCHITECTURE.md**: Atualizado para v1.7.0 (Auto-Discovery, Synergy Scoring, Pet Graph)
+- 📝 **docs/GRAPHRAG_ARCHITECTURE.md**: Atualizado para v2.0.0 (conteúdo científico completo)
+- 🔢 **i18n versão**: Incrementado para 1.3.34 (force cache clear)
+
+### Added - 2025-11-26
 - ✅ **FASE 0 GraphRAG**: Documentação completa da arquitetura híbrida Neo4j + Supabase (`docs/GRAPHRAG_ARCHITECTURE.md`)
 - ✅ **FASE 1 GraphRAG (PARCIAL)**: Edge function `neo4j-sync` implementada (aguardando credenciais Neo4j)
 - ✅ `ARCHITECTURE.md` v1.5.0: Nova seção "Arquitetura GraphRAG Híbrida"

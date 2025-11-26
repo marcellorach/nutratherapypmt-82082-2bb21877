@@ -22,7 +22,30 @@ export interface ScientificStudy {
   keyFindings: string;
 }
 
+export interface KeyExcerpt {
+  source: string;
+  quote: string;
+  url: string;
+}
+
+export interface ComparisonTable {
+  headers: string[];
+  rows: {
+    feature: string;
+    values: string[];
+  }[];
+}
+
+export interface ImplementationStatus {
+  implemented: string[];
+  inProgress: string[];
+  planned: string[];
+}
+
 export interface TabInfoContent {
+  version?: string;
+  lastUpdate?: string;
+  keyExcerpts?: KeyExcerpt[];
   overview: {
     objective: string;
     workflow: string[];
@@ -30,6 +53,8 @@ export interface TabInfoContent {
   };
   methodology: {
     description: string;
+    comparisonTable?: ComparisonTable;
+    architectureDiagram?: string;
     calculations?: {
       name: string;
       formula: string;
@@ -39,6 +64,7 @@ export interface TabInfoContent {
   };
   scientific: {
     foundation: string;
+    implementationStatus?: ImplementationStatus;
     studies: ScientificStudy[];
     references: string[];
   };
@@ -69,8 +95,20 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="text-2xl">{title}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl">{title}</DialogTitle>
+              {content.version && (
+                <Badge variant="outline" className="ml-2">
+                  v{content.version}
+                </Badge>
+              )}
+            </div>
             <DialogDescription>
+              {content.lastUpdate && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {t('admin.tabInfo.lastUpdate')}: {content.lastUpdate}
+                </div>
+              )}
               {t('admin.tabInfo.description')}
             </DialogDescription>
           </DialogHeader>
@@ -83,6 +121,29 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
             </TabsList>
 
             <ScrollArea className="h-[60vh] mt-4">
+              {/* Key Excerpts Section (if available) */}
+              {content.keyExcerpts && content.keyExcerpts.length > 0 && (
+                <div className="mb-6 p-4 border rounded-lg bg-muted/30">
+                  <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.keyExcerpts.title')}</h3>
+                  <div className="space-y-3">
+                    {content.keyExcerpts.map((excerpt, idx) => (
+                      <div key={idx} className="border-l-4 border-primary pl-4 py-2">
+                        <div className="text-xs font-semibold text-muted-foreground mb-1">{excerpt.source}</div>
+                        <blockquote className="text-sm italic mb-2">&ldquo;{excerpt.quote}&rdquo;</blockquote>
+                        <a
+                          href={excerpt.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {t('admin.tabInfo.keyExcerpts.viewPaper')} →
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-4">
                 <div>
@@ -114,6 +175,48 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 <div>
                   <p className="text-sm text-muted-foreground mb-4">{content.methodology.description}</p>
                 </div>
+
+                {/* Comparison Table (if available) */}
+                {content.methodology.comparisonTable && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.comparisonTable')}</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border">
+                        <thead>
+                          <tr className="bg-muted">
+                            {content.methodology.comparisonTable.headers.map((header, idx) => (
+                              <th key={idx} className="border p-2 text-left font-semibold">
+                                {header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {content.methodology.comparisonTable.rows.map((row, idx) => (
+                            <tr key={idx} className="border-b hover:bg-muted/50">
+                              <td className="border p-2 font-medium">{row.feature}</td>
+                              {row.values.map((value, vIdx) => (
+                                <td key={vIdx} className="border p-2">
+                                  {value}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Architecture Diagram (if available) */}
+                {content.methodology.architectureDiagram && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.architectureDiagram')}</h3>
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+                      <code>{content.methodology.architectureDiagram}</code>
+                    </pre>
+                  </div>
+                )}
 
                 {content.methodology.calculations && content.methodology.calculations.length > 0 && (
                   <div>
@@ -148,6 +251,54 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.scientific.foundation')}</h3>
                   <p className="text-sm text-muted-foreground">{content.scientific.foundation}</p>
                 </div>
+
+                {/* Implementation Status (if available) */}
+                {content.scientific.implementationStatus && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.scientific.implementationStatus')}</h3>
+                    <div className="space-y-4">
+                      {/* Implemented */}
+                      {content.scientific.implementationStatus.implemented.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
+                            ✅ {t('admin.tabInfo.scientific.implemented')}
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1">
+                            {content.scientific.implementationStatus.implemented.map((item, idx) => (
+                              <li key={idx} className="text-sm text-muted-foreground">{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* In Progress */}
+                      {content.scientific.implementationStatus.inProgress.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 mb-2">
+                            🔄 {t('admin.tabInfo.scientific.inProgress')}
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1">
+                            {content.scientific.implementationStatus.inProgress.map((item, idx) => (
+                              <li key={idx} className="text-sm text-muted-foreground">{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Planned */}
+                      {content.scientific.implementationStatus.planned.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">
+                            ⏳ {t('admin.tabInfo.scientific.planned')}
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1">
+                            {content.scientific.implementationStatus.planned.map((item, idx) => (
+                              <li key={idx} className="text-sm text-muted-foreground">{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.scientific.studies')}</h3>

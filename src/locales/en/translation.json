@@ -428,6 +428,11 @@
     "tabInfo": {
       "button": "Information about this tab",
       "description": "Understand the methodology, scientific foundations and objectives of this feature",
+      "lastUpdate": "Last Update",
+      "keyExcerpts": {
+        "title": "Key Excerpts from Papers",
+        "viewPaper": "View paper"
+      },
       "tabs": {
         "overview": "Overview",
         "methodology": "Methodology",
@@ -439,10 +444,18 @@
         "benefits": "Benefits"
       },
       "methodology": {
+        "comparisonTable": "Comparison Table",
+        "architectureDiagram": "Architecture Diagram",
+        "calculations": "Calculations and Formulas",
+        "example": "Example",
         "decisions": "Methodological Decisions"
       },
       "scientific": {
         "foundation": "Scientific Foundations",
+        "implementationStatus": "Implementation Status",
+        "implemented": "Implemented",
+        "inProgress": "In Progress",
+        "planned": "Planned",
         "studies": "Reference Studies",
         "keyFindings": "Key Findings",
         "viewStudy": "View study",

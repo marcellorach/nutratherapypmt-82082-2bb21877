@@ -1,9 +1,9 @@
 # 🧠 GraphRAG - Arquitetura Híbrida Neo4j + Supabase + Gemini 3 Pro Preview
 
 ---
-**Versão:** 1.0.0  
+**Versão:** 2.0.0  
 **Última Atualização:** 2025-11-26  
-**Status:** 🟡 Em Implementação (Fase 0 → Fase 1)  
+**Status:** 🟡 Em Implementação (Fase 1 - Conteúdo Científico Completo)  
 **Responsável:** AI Assistant  
 ---
 
