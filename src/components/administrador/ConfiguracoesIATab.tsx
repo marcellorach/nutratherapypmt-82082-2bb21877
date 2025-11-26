@@ -10,6 +10,7 @@ import ApiKeyForm, { ValidationResult } from './configuracoes/ApiKeyForm';
 import ConsumoPainel from './configuracoes/ConsumoPainel';
 import ConfiguracoesAvisosIA from './configuracoes/ConfiguracoesAvisosIA';
 import ApiStatusItem from './configuracoes/ApiStatusItem';
+import PromptEditor from './configuracoes/PromptEditor';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -20,6 +21,8 @@ const ConfiguracoesIATab: React.FC = () => {
   const [neo4jUri, setNeo4jUri] = useState<string>("");
   const [neo4jUsername, setNeo4jUsername] = useState<string>("");
   const [neo4jPassword, setNeo4jPassword] = useState<string>("");
+  const [promptSystemTriplet, setPromptSystemTriplet] = useState<string>("");
+  const [promptUserTriplet, setPromptUserTriplet] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
@@ -47,6 +50,8 @@ const ConfiguracoesIATab: React.FC = () => {
         setNeo4jUri(configs.neo4j_uri || "");
         setNeo4jUsername(configs.neo4j_username || "");
         setNeo4jPassword(configs.neo4j_password || "");
+        setPromptSystemTriplet(configs.prompt_triplet_extraction_system || "");
+        setPromptUserTriplet(configs.prompt_triplet_extraction_user || "");
       }
 
     } catch (error) {
@@ -342,13 +347,14 @@ const ConfiguracoesIATab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="openai" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="openai">OpenAI</TabsTrigger>
                 <TabsTrigger value="claude">Claude</TabsTrigger>
                 <TabsTrigger value="grok">Grok</TabsTrigger>
                 <TabsTrigger value="google-gemini">Google Gemini</TabsTrigger>
                 <TabsTrigger value="neo4j">Neo4j</TabsTrigger>
                 <TabsTrigger value="unstructured">Unstructured</TabsTrigger>
+                <TabsTrigger value="prompts">Prompts</TabsTrigger>
               </TabsList>
               
               <TabsContent value="openai" className="space-y-4 pt-4">
@@ -583,6 +589,78 @@ const ConfiguracoesIATab: React.FC = () => {
                     Obter uma chave API do Unstructured.io →
                   </a>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="prompts" className="space-y-6 pt-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold mb-2">🤖 Prompts de Extração de Triplets</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Configure os prompts usados pelo Gemini 3 Pro Preview para extrair triplets estruturados dos estudos científicos.
+                  </p>
+                </div>
+
+                <PromptEditor
+                  title="System Prompt"
+                  description="Instrução principal do sistema que define o comportamento do modelo"
+                  configKey="prompt_triplet_extraction_system"
+                  initialValue={promptSystemTriplet}
+                  defaultValue={`You are a scientific knowledge extraction expert specialized in veterinary nutraceuticals. Your task is to generate structured triplets (Subject, Predicate, Object) from scientific study data.
+
+Rules:
+1. Extract only factual relationships explicitly stated or strongly implied in the study
+2. Use standardized predicates: TREATS, PREVENTS, REDUCES, INCREASES, CAUSES, INHIBITS, ACTIVATES, MODULATES
+3. Each triplet must have: subject_type, subject_name, predicate, object_type, object_name
+4. Provide confidence scores (0-1) for: llm_confidence
+5. Entity types: Nutraceutical, Condition, Mechanism, Effect, Outcome
+6. subject_name and object_name must be precise, standardized terms (avoid synonyms)
+
+Format your response as valid JSON array of triplets with this structure:
+{
+  "triplets": [
+    {
+      "subject_type": "Nutraceutical",
+      "subject_name": "Curcumin",
+      "predicate": "TREATS",
+      "object_type": "Condition",
+      "object_name": "Osteoarthritis",
+      "llm_confidence": 0.92
+    }
+  ]
+}`}
+                  placeholder="Defina as instruções do sistema..."
+                />
+
+                <PromptEditor
+                  title="User Prompt Template"
+                  description="Template do prompt enviado ao modelo (use variáveis para dados dinâmicos)"
+                  configKey="prompt_triplet_extraction_user"
+                  initialValue={promptUserTriplet}
+                  defaultValue={`Extract knowledge triplets from this study:
+
+Title: {{TITLE}}
+
+Extracted Entities:
+- Nutraceuticals: {{NUTRACEUTICALS}}
+- Conditions: {{CONDITIONS}}
+- Mechanisms: {{MECHANISMS}}
+- Effects: {{EFFECTS}}
+
+Generate structured triplets representing the relationships between these entities. Focus on therapeutic relationships (TREATS, PREVENTS, REDUCES) and mechanistic relationships (ACTIVATES, INHIBITS, MODULATES).`}
+                  placeholder="Defina o template do prompt do usuário..."
+                  variables={['{{TITLE}}', '{{NUTRACEUTICALS}}', '{{CONDITIONS}}', '{{MECHANISMS}}', '{{EFFECTS}}']}
+                />
+
+                <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                  <CardHeader>
+                    <CardTitle className="text-sm">ℹ️ Como funciona?</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-xs space-y-2 text-muted-foreground">
+                    <p>1. <strong>Sistema:</strong> Define o comportamento geral do modelo</p>
+                    <p>2. <strong>User Template:</strong> Contexto específico de cada estudo (variáveis substituídas automaticamente)</p>
+                    <p>3. <strong>Modelo:</strong> Gemini 3 Pro Preview (temperatura 0.1 para máxima precisão)</p>
+                    <p>4. <strong>Validação:</strong> KG Match Score verifica entidades contra banco de dados</p>
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
           </CardContent>

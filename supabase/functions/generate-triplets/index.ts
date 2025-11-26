@@ -57,29 +57,54 @@ serve(async (req) => {
     const extractedMechanisms = analysisData.extractedMechanisms || [];
     const extractedEffects = analysisData.extractedEffects || [];
 
-    // Prompt para o modelo gerar triplets estruturados
-    const systemPrompt = `You are a scientific knowledge extraction expert. Your task is to generate structured triplets (Subject, Predicate, Object) from scientific study data.
+    // Buscar prompts configuráveis do banco de dados
+    const { data: systemPromptConfig } = await supabase
+      .from('ai_configurations')
+      .select('config_value')
+      .eq('config_key', 'prompt_triplet_extraction_system')
+      .single();
+
+    const { data: userPromptConfig } = await supabase
+      .from('ai_configurations')
+      .select('config_value')
+      .eq('config_key', 'prompt_triplet_extraction_user')
+      .single();
+
+    // Default prompts caso não existam no banco
+    const DEFAULT_SYSTEM_PROMPT = `You are a scientific knowledge extraction expert specialized in veterinary nutraceuticals. Your task is to generate structured triplets (Subject, Predicate, Object) from scientific study data.
 
 Rules:
-1. Extract only factual relationships explicitly stated or strongly implied
+1. Extract only factual relationships explicitly stated or strongly implied in the study
 2. Use standardized predicates: TREATS, PREVENTS, REDUCES, INCREASES, CAUSES, INHIBITS, ACTIVATES, MODULATES
 3. Each triplet must have: subject_type, subject_name, predicate, object_type, object_name
-4. Provide confidence scores (0-1) for: llm_confidence, kg_match_score, extraction_confidence
+4. Provide confidence scores (0-1) for: llm_confidence
 5. Entity types: Nutraceutical, Condition, Mechanism, Effect, Outcome
+6. subject_name and object_name must be precise, standardized terms (avoid synonyms)
 
 Format your response as valid JSON array of triplets.`;
 
-    const userPrompt = `Extract knowledge triplets from this study:
+    const DEFAULT_USER_PROMPT = `Extract knowledge triplets from this study:
 
-Title: ${study.title}
+Title: {{TITLE}}
 
 Extracted Entities:
-- Nutraceuticals: ${extractedNutraceuticals.map((n: any) => n.name).join(', ')}
-- Conditions: ${extractedConditions.map((c: any) => c.name).join(', ')}
-- Mechanisms: ${extractedMechanisms.map((m: any) => m.name).join(', ')}
-- Effects: ${extractedEffects.map((e: any) => e.name).join(', ')}
+- Nutraceuticals: {{NUTRACEUTICALS}}
+- Conditions: {{CONDITIONS}}
+- Mechanisms: {{MECHANISMS}}
+- Effects: {{EFFECTS}}
 
-Generate structured triplets representing the relationships between these entities.`;
+Generate structured triplets representing the relationships between these entities. Focus on therapeutic relationships (TREATS, PREVENTS, REDUCES) and mechanistic relationships (ACTIVATES, INHIBITS, MODULATES).`;
+
+    const systemPrompt = systemPromptConfig?.config_value || DEFAULT_SYSTEM_PROMPT;
+    let userPrompt = userPromptConfig?.config_value || DEFAULT_USER_PROMPT;
+
+    // Substituir variáveis no prompt do usuário
+    userPrompt = userPrompt
+      .replace('{{TITLE}}', study.title || 'N/A')
+      .replace('{{NUTRACEUTICALS}}', extractedNutraceuticals.map((n: any) => n.name).join(', ') || 'None')
+      .replace('{{CONDITIONS}}', extractedConditions.map((c: any) => c.name).join(', ') || 'None')
+      .replace('{{MECHANISMS}}', extractedMechanisms.map((m: any) => m.name).join(', ') || 'None')
+      .replace('{{EFFECTS}}', extractedEffects.map((e: any) => e.name).join(', ') || 'None');
 
     // Chamar Lovable AI
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
@@ -91,12 +116,12 @@ Generate structured triplets representing the relationships between these entiti
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-3-pro-preview',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.2,
+        temperature: 0.1,
         response_format: { type: "json_object" }
       }),
     });
@@ -119,27 +144,65 @@ Generate structured triplets representing the relationships between these entiti
       throw new Error('Invalid AI response format');
     }
 
-    // Inserir triplets no banco de dados
-    const tripletsToInsert = triplets.map((t: any) => ({
-      study_id: studyId,
-      subject_type: t.subject_type || 'Unknown',
-      subject_name: t.subject_name,
-      subject_id: null, // Será preenchido pelo matching posterior
-      predicate: t.predicate,
-      object_type: t.object_type || 'Unknown',
-      object_name: t.object_name,
-      object_id: null,
-      llm_confidence: t.llm_confidence || 0.7,
-      kg_match_score: t.kg_match_score || 0.5,
-      extraction_confidence: t.extraction_confidence || ((t.llm_confidence + t.kg_match_score) / 2),
-      curation_status: (t.extraction_confidence || 0.7) >= 0.9 ? 'approved' : 'pending',
-      auto_approved: (t.extraction_confidence || 0.7) >= 0.9,
-      synced_to_neo4j: false
+    // Calcular KG Match Score real verificando se entidades existem no banco
+    const tripletsWithScores = await Promise.all(triplets.map(async (t: any) => {
+      let subjectMatchScore = 0;
+      let objectMatchScore = 0;
+
+      // Verificar se subject_name existe em nutraceuticals
+      if (t.subject_type === 'Nutraceutical' && t.subject_name) {
+        const { data: nutriMatch } = await supabase
+          .from('nutraceuticals')
+          .select('id, name, name_en')
+          .or(`name.ilike.%${t.subject_name}%,name_en.ilike.%${t.subject_name}%`)
+          .limit(1)
+          .single();
+        
+        if (nutriMatch) {
+          subjectMatchScore = 1.0;
+          t.subject_id = nutriMatch.id;
+        }
+      }
+
+      // Verificar se object_name existe em health_conditions
+      if (t.object_type === 'Condition' && t.object_name) {
+        const { data: condMatch } = await supabase
+          .from('health_conditions')
+          .select('id, name, name_en')
+          .or(`name.ilike.%${t.object_name}%,name_en.ilike.%${t.object_name}%`)
+          .limit(1)
+          .single();
+        
+        if (condMatch) {
+          objectMatchScore = 1.0;
+          t.object_id = condMatch.id;
+        }
+      }
+
+      const kgMatchScore = (subjectMatchScore + objectMatchScore) / 2;
+      const extractionConfidence = ((t.llm_confidence || 0.7) + kgMatchScore) / 2;
+
+      return {
+        study_id: studyId,
+        subject_type: t.subject_type || 'Unknown',
+        subject_name: t.subject_name,
+        subject_id: t.subject_id || null,
+        predicate: t.predicate,
+        object_type: t.object_type || 'Unknown',
+        object_name: t.object_name,
+        object_id: t.object_id || null,
+        llm_confidence: t.llm_confidence || 0.7,
+        kg_match_score: kgMatchScore,
+        extraction_confidence: extractionConfidence,
+        curation_status: extractionConfidence >= 0.9 ? 'approved' : 'pending',
+        auto_approved: extractionConfidence >= 0.9,
+        synced_to_neo4j: false
+      };
     }));
 
     const { data: insertedTriplets, error: insertError } = await supabase
       .from('triplet_extractions')
-      .insert(tripletsToInsert)
+      .insert(tripletsWithScores)
       .select();
 
     if (insertError) {
