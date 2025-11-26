@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-11-26
+- ✅ **Neo4j Aura Compatibility**: Corrigido endpoint em todas edge functions para usar Query API v2 (`/db/neo4j/query/v2`) compatível com Neo4j Aura, substituindo o endpoint HTTP Transaction API antigo (`/db/neo4j/tx/commit`) que retornava erro 403 Forbidden
+- ✅ Edge functions corrigidas: `ai-config` (teste de conexão), `sync-approved-triplets`, `neo4j-sync`
+- ✅ Formato de requisição atualizado para Query API v2: `{ statement: "...", parameters: {...} }` ao invés do formato antigo com `statements` array
+
 ### Added - 2025-11-26
 - ✅ **Endpoint de Teste de Conexão Neo4j**: Adicionado action 'test-neo4j' na edge function `ai-config` que valida credenciais executando query simples (`RETURN 1`)
 - ✅ **Botão "Testar Conexão Neo4j"** na interface de configuração com loading state e validação de campos obrigatórios

@@ -91,11 +91,10 @@ serve(async (req) => {
             });
           }
 
-          // Testar conexão executando query simples
+          // Testar conexão executando query simples usando Query API v2
           const authHeader = 'Basic ' + btoa(`${config.neo4j_username}:${config.neo4j_password}`);
-          const httpUri = config.neo4j_uri.replace('neo4j+s://', 'https://').replace('neo4j://', 'http://');
           
-          const testResponse = await fetch(`${httpUri}/db/neo4j/tx/commit`, {
+          const testResponse = await fetch(`${config.neo4j_uri}/db/neo4j/query/v2`, {
             method: 'POST',
             headers: {
               'Authorization': authHeader,
@@ -103,10 +102,8 @@ serve(async (req) => {
               'Accept': 'application/json',
             },
             body: JSON.stringify({
-              statements: [{
-                statement: 'RETURN 1 as test',
-                parameters: {}
-              }]
+              statement: 'RETURN 1 as test',
+              parameters: {}
             })
           });
 
