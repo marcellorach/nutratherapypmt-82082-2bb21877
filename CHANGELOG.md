@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-11-26
+- ✅ **FASE 0 GraphRAG**: Documentação completa da arquitetura híbrida Neo4j + Supabase (`docs/GRAPHRAG_ARCHITECTURE.md`)
+- ✅ **FASE 1 GraphRAG (PARCIAL)**: Edge function `neo4j-sync` implementada (aguardando credenciais Neo4j)
+- ✅ `ARCHITECTURE.md` v1.5.0: Nova seção "Arquitetura GraphRAG Híbrida"
+- ✅ `docs/CURRENT_STATE.md` v1.5.0: Status GraphRAG atualizado
+
 ### Added
 - ✅ **Service Layer**: Criado `StudyResetService.ts` centralizando operações de reset, cleanup e diagnóstico
   - `resetStudy()`: Reseta estudo específico para reprocessamento
