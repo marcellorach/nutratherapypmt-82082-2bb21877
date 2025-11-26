@@ -613,6 +613,13 @@ Interpretation:
         { title: 'KGARevion: Knowledge Graph Error Detection and Correction', authors: 'Su et al.', year: 2025, journal: 'ICLR 2025', url: 'https://openreview.net/forum?id=OOq3W1MEVT', keyFindings: 'GRRA cycle achieves 87% factual error elimination through iterative generation, KG verification, and automated revision.' },
         { title: 'VeNom: Veterinary Nomenclature Ontology', authors: 'VIN Foundation', year: 2023, journal: 'BMC Veterinary Research', url: 'https://bmcvetres.biomedcentral.com/', keyFindings: 'Standardized nomenclature for veterinary medicine enabling interoperability between clinical systems.' },
         { title: 'GRADE Handbook for Grading Evidence', authors: 'GRADE Working Group', year: 2013, journal: 'GRADE Working Group', url: 'https://gdt.gradepro.org/app/handbook/handbook.html', keyFindings: 'Framework for rating quality of evidence and strength of recommendations in systematic reviews and guidelines.' }
+      ],
+      references: [
+        'MedGraphRAG Paper: arxiv.org/abs/2408.04187',
+        'KGARevion Paper (ICLR 2025): openreview.net/forum?id=OOq3W1MEVT',
+        'Neo4j GraphRAG: neo4j.com/blog/graphrag-life-sciences',
+        'VeNom Veterinary Nomenclature: vin.com/venom',
+        'GRADE Working Group: gradepro.org'
       ]
     },
   }
