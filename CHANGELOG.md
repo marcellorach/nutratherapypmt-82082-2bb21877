@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added
+- ✅ **Tab "Estudos" v2.1.0 - Conteúdo Científico Completo**: Quadro comparativo expandido (16 features: MedGraphRAG vs KGARevion vs NTAI), diagrama ASCII completo da arquitetura NTAI (~100 linhas, 5 fases: Ingestion→Validation→Storage→Retrieval→Synthesis), e todas as 6 fórmulas matemáticas com exemplos clínicos detalhados (~20 linhas cada):
+  - **Fórmula 1**: Triple Graph Construction (MedGraphRAG) - 4 níveis hierárquicos (Doc→Chunk→Entity→Mechanism)
+  - **Fórmula 2**: U-Retrieval Score - Busca bidirecional (Top-down Graph Cypher + Bottom-up Vector pgvector, α=0.6)
+  - **Fórmula 3**: KGARevion Confidence Score - Sistema GRRA de validação (KG_match×0.5 + LLM×0.3 + GRADE×0.2)
+  - **Fórmula 4**: Synergy Score (NTAI Original) ⭐ - Quantificação de sinergia por pathways compartilhados (escala 0-5, threshold≥3.5)
+  - **Fórmula 5**: Pathway Discovery Score (NTAI + TransE) ⭐ - Auto-descoberta de novos tratamentos via TransE embeddings
+  - **Fórmula 6**: Treatment Efficacy Score (NTAI Original) ⭐ - Rastreamento temporal de eficácia por breed/outcome
+  - Cada fórmula inclui exemplo expandido com dados clínicos reais (Curcumin, Resveratrol, Berberine, Labrador Retriever)
+  - Atualizado `src/data/admin-tabs-info.ts` (estudos v2.1.0)
+  - Incrementada versão i18n para `1.3.35` em `src/i18n.ts`
+
 ### Added - 2025-11-26
 - ✨ **TabInfoButton Expandido**: Interface estendida para conteúdo científico avançado (version, lastUpdate, keyExcerpts, comparisonTable, architectureDiagram, implementationStatus)
 - 📚 **Conteúdo Científico Completo Tab "Estudos"**: Citações MedGraphRAG/KGARevion, quadro comparativo 12+ features, diagrama ASCII arquitetura, 6 fórmulas matemáticas (Synergy Score, Pathway Discovery, Treatment Efficacy), status implementação
