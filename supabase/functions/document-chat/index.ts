@@ -123,6 +123,85 @@ serve(async (req) => {
     }
 
     // ============================================
+    // NOVO: GraphRAG com Neo4j
+    // ============================================
+    let graphContext = '';
+    
+    try {
+      console.log('🔍 Iniciando GraphRAG com Neo4j...');
+      
+      // 1. Extrair entidades da pergunta usando Gemini
+      console.log('🔢 Extraindo entidades da pergunta...');
+      const entityExtractionPrompt = `Extract medical entities from this question. Return ONLY a valid JSON object, no markdown, no code blocks.
+
+Question: "${question}"
+
+Return format:
+{
+  "nutraceuticals": ["entity1", "entity2"],
+  "conditions": ["entity1", "entity2"]
+}`;
+
+      const entityResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-3-pro-preview',
+          messages: [{ role: 'user', content: entityExtractionPrompt }],
+          temperature: 0.1,
+        }),
+      });
+
+      if (entityResponse.ok) {
+        const entityData = await entityResponse.json();
+        let entityText = entityData.choices[0]?.message?.content || '{}';
+        
+        // Remove markdown code blocks se presentes
+        entityText = entityText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        console.log('📊 Entidades extraídas (raw):', entityText);
+        
+        try {
+          const entities = JSON.parse(entityText);
+          console.log('✅ Entidades parseadas:', entities);
+          
+          // 2. Buscar contexto do grafo no Neo4j
+          if (entities.nutraceuticals?.length > 0 || entities.conditions?.length > 0) {
+            const searchEntity = entities.nutraceuticals?.[0] || entities.conditions?.[0];
+            
+            console.log('🔍 Consultando Neo4j para:', searchEntity);
+            const { data: graphData, error: graphError } = await supabase.functions.invoke('graph-rag-search', {
+              body: {
+                queryType: 'context',
+                sourceEntity: searchEntity,
+                maxDepth: 2
+              }
+            });
+
+            if (!graphError && graphData?.success && graphData?.data) {
+              const graphResult = graphData.data;
+              console.log(`✅ Neo4j retornou ${graphResult.nodes?.length || 0} nós e ${graphResult.relationships?.length || 0} relações`);
+              
+              if (graphResult.context) {
+                graphContext = `\n\n**CONTEXTO DO KNOWLEDGE GRAPH (Neo4j)**:\n\n${graphResult.context}`;
+                console.log(`📊 GraphRAG context: ${graphContext.length} caracteres`);
+              }
+            } else {
+              console.warn('⚠️ Erro ao buscar contexto do Neo4j:', graphError);
+            }
+          }
+        } catch (parseError) {
+          console.warn('⚠️ Erro ao parsear entidades JSON:', parseError);
+        }
+      }
+    } catch (graphRagError) {
+      console.warn('⚠️ Erro no processo GraphRAG (continuando com fallback):', graphRagError);
+    }
+
+    // ============================================
     // Fallback: Contexto Estruturado (Tags)
     // ============================================
 
@@ -262,10 +341,16 @@ serve(async (req) => {
       });
     }
 
-    // Priorizar contexto vetorial RAG, depois fallback para texto estruturado
+    // Priorizar contexto vetorial RAG, depois GraphRAG, depois fallback para texto estruturado
     if (vectorContext) {
       contextParts.push(vectorContext);
-    } else if (documentContext && documentContext !== 'No document text available') {
+    }
+    
+    if (graphContext) {
+      contextParts.push(graphContext);
+    }
+    
+    if (!vectorContext && !graphContext && documentContext && documentContext !== 'No document text available') {
       contextParts.push(`\n**TEXTO ORIGINAL DO DOCUMENTO (para citações literais)**:\n---\n${documentContext}\n---`);
     }
 
@@ -273,6 +358,7 @@ serve(async (req) => {
     
     console.log(`📊 Contexto construído: ${fullContext.length} caracteres`);
     console.log(`📊 RAG chunks: ${relevantChunks.length}`);
+    console.log(`📊 GraphRAG ativo: ${graphContext ? 'Sim' : 'Não'}`);
     console.log(`📊 Nutracêuticos no contexto: ${nutraceuticals.length}`);
     console.log(`📊 Condições no contexto: ${conditions.length}`);
     console.log(`📊 Achados no contexto: ${findings.length}`);
@@ -285,10 +371,11 @@ serve(async (req) => {
         content: `Você é um assistente especializado em estudos científicos veterinários sobre nutracêuticos.
 
 **Suas responsabilidades:**
-1. Responder perguntas baseadas EXCLUSIVAMENTE no estudo fornecido
+1. Responder perguntas baseadas EXCLUSIVAMENTE no estudo fornecido e no conhecimento científico do Knowledge Graph
 2. Citar partes específicas do estudo quando relevante usando o formato [Citação: texto - Seção X]
-3. Ser preciso e técnico, mas acessível
-4. Indicar claramente quando algo NÃO está presente no estudo
+3. Se houver informações do Knowledge Graph (Neo4j), integre-as naturalmente, mencionando que vem de "dados conectados de outros estudos"
+4. Ser preciso e técnico, mas acessível
+5. Indicar claramente quando algo NÃO está presente no estudo nem no Knowledge Graph
 
 **Formato OBRIGATÓRIO das respostas em Markdown:**
 

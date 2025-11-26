@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.generate-triplets]
 verify_jwt = true
+
+[functions.graph-rag-search]
+verify_jwt = true
