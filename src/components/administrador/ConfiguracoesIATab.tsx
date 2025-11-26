@@ -403,6 +403,7 @@ const ConfiguracoesIATab: React.FC = () => {
                   initialKey={neo4jUsername}
                   placeholder="neo4j"
                   isLoading={isLoading || isSaving}
+                  minLength={3}
                 />
                 <ApiKeyForm 
                   serviceName="Neo4j Password" 
