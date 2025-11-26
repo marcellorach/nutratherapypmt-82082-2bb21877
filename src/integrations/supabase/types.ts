@@ -1352,6 +1352,8 @@ export type Database = {
           subject_id: string | null
           subject_name: string
           subject_type: string
+          synced_at: string | null
+          synced_to_neo4j: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -1374,6 +1376,8 @@ export type Database = {
           subject_id?: string | null
           subject_name: string
           subject_type: string
+          synced_at?: string | null
+          synced_to_neo4j?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -1396,6 +1400,8 @@ export type Database = {
           subject_id?: string | null
           subject_name?: string
           subject_type?: string
+          synced_at?: string | null
+          synced_to_neo4j?: boolean | null
           updated_at?: string | null
         }
         Relationships: [

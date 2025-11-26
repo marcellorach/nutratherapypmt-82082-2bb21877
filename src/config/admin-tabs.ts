@@ -54,6 +54,10 @@ const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migr
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
 
+// Knowledge Graph & Curation
+const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
+const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
+
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
   {
@@ -90,6 +94,20 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: AIInsightsTab,
     description: 'Descobertas e análises geradas pela IA'
+  },
+  {
+    id: 'triplet-curation',
+    label: 'Curadoria de Triplets',
+    group: 'knowledge-base',
+    component: TripletCurationBoard,
+    description: 'Sistema Kanban para revisão e aprovação de triplets extraídos'
+  },
+  {
+    id: 'knowledge-graph',
+    label: 'Knowledge Graph',
+    group: 'knowledge-base',
+    component: KnowledgeGraphViewer,
+    description: 'Visualização 3D do grafo de conhecimento médico'
   },
   {
     id: 'knowledge-base-settings',
