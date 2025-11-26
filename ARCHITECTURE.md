@@ -1,8 +1,8 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.4.0  
-**Última Atualização:** 2025-11-20  
+**Versão:** 1.5.0  
+**Última Atualização:** 2025-11-26  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
@@ -11,11 +11,12 @@
 
 1. [Visão Geral do Sistema](#visão-geral-do-sistema)
 2. [Arquitetura Técnica](#arquitetura-técnica)
-3. [Modelo de Dados](#modelo-de-dados)
-4. [Estrutura de Navegação](#estrutura-de-navegação)
-5. [Serviços e Padrões](#serviços-e-padrões)
-6. [Configurações Importantes](#configurações-importantes)
-7. [Sistema de Design](#sistema-de-design)
+3. [Arquitetura GraphRAG Híbrida](#arquitetura-graphrag-híbrida)
+4. [Modelo de Dados](#modelo-de-dados)
+5. [Estrutura de Navegação](#estrutura-de-navegação)
+6. [Serviços e Padrões](#serviços-e-padrões)
+7. [Configurações Importantes](#configurações-importantes)
+8. [Sistema de Design](#sistema-de-design)
 
 ---
 
@@ -149,6 +150,114 @@ graph TB
     style EdgeFn fill:#fff9c4
     style OpenAI fill:#ffccbc
 ```
+
+---
+
+## 🔬 Arquitetura GraphRAG Híbrida
+
+### Visão Geral
+
+O NutraTherapy implementa uma **arquitetura GraphRAG híbrida** que combina:
+
+- **Neo4j AuraDB**: Graph database para relações hierárquicas complexas (Nutraceutical → Mechanism → Effect → Condition)
+- **Supabase pgvector**: Vector database para busca semântica em chunks de texto
+- **Gemini 3 Pro Preview**: LLM padrão para extração hierárquica e síntese com reasoning multi-hop
+
+Esta arquitetura é inspirada nos papers **MedGraphRAG** e **KGARevion** (2024) e permite:
+- **Multi-hop queries** (caminhos de 1-3 saltos no grafo)
+- **Reasoning sobre relações causais** (INHIBITS, STIMULATES, TREATS)
+- **Agregação de evidências** de múltiplos estudos científicos
+- **Busca híbrida**: estrutura (grafo) + semântica (vetores)
+
+### Diagrama GraphRAG
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        UI[Chat Interface]
+        Toggle[Toggle GraphRAG Mode]
+        GraphViz[Graph Visualization]
+    end
+    
+    subgraph "Edge Functions"
+        GFS[gemini-file-search<br/>Gemini 3 Pro Preview]
+        NS[neo4j-sync]
+        GRS[graph-rag-search<br/>U-Retrieval]
+    end
+    
+    subgraph "Databases"
+        NEO4J[(Neo4j AuraDB<br/>Graph Storage)]
+        PG[(pgvector<br/>Vector Search)]
+    end
+    
+    UI --> Toggle
+    Toggle -- GraphRAG ON --> GRS
+    
+    GFS --> NS
+    NS --> NEO4J
+    
+    GRS --> NEO4J
+    GRS --> PG
+    
+    style NEO4J fill:#c8e6c9,stroke:#4caf50,stroke-width:3px
+    style PG fill:#bbdefb,stroke:#2196f3,stroke-width:3px
+    style GRS fill:#ffccbc,stroke:#ff5722,stroke-width:3px
+```
+
+### Pipeline GraphRAG
+
+**Ingestão (PDF → Knowledge Graph)**:
+```
+PDF Upload → gemini-file-search (Gemini 3) → 
+  1. neo4j-sync (Neo4j nodes + edges)
+  2. vectorize-study (pgvector embeddings)
+```
+
+**Consulta (Query → Answer)**:
+```
+User Query → Entity Extraction (Gemini 3) →
+  1. Neo4j Cypher (multi-hop subgraph)
+  2. pgvector search (semantic chunks)
+  → Combine contexts → Gemini 3 Pro Preview synthesis → Answer + Graph
+```
+
+### Modelo de Dados Neo4j
+
+**Nodes**:
+- `:Nutraceutical` (ex: Curcumin, Omega-3)
+- `:Mechanism` (ex: ↓ COX-2 pathway)
+- `:Effect` (ex: ↓ IL-6 & TNF-α)
+- `:Condition` (ex: Canine Arthritis)
+- `:Study` (metadados do estudo)
+
+**Edges**:
+- `[:INHIBITS]` (Nutraceutical → Mechanism)
+- `[:STIMULATES]` (Nutraceutical → Mechanism)
+- `[:MEDIATES]` (Mechanism → Effect)
+- `[:IMPROVES]` (Effect → Condition)
+- `[:TREATS]` (Nutraceutical → Condition)
+- `[:CITED_IN]` (entidades → Study)
+- `[:SUPPORTS]` (Study → Condition)
+
+**Exemplo de Caminho Completo**:
+```
+Curcumin -[:INHIBITS]-> ↓ COX-2 pathway -[:MEDIATES]-> 
+  ↓ IL-6 & TNF-α -[:IMPROVES]-> Canine Arthritis
+```
+
+### Status de Implementação
+
+| Componente | Status | Documentação |
+|------------|--------|--------------|
+| Documentação completa | ✅ Concluída | `docs/GRAPHRAG_ARCHITECTURE.md` |
+| neo4j-sync edge function | ✅ Implementada | `supabase/functions/neo4j-sync/` |
+| Neo4j AuraDB setup | ⏳ Aguardando credenciais | Requer criação de instância pelo usuário |
+| graph-rag-search | ⏳ Pendente | Fase 3 do roadmap |
+| UI Graph Visualization | ⏳ Pendente | Fase 4 do roadmap |
+
+**Próximos Passos**: Ver `docs/GRAPHRAG_ARCHITECTURE.md` para roadmap completo (Fases 0-5, estimativa 11-16 dias).
+
+---
 
 ### Estrutura de Pastas
 
