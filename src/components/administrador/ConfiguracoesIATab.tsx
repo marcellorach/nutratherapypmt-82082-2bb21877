@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ApiKeyForm from './configuracoes/ApiKeyForm';
+import ApiKeyForm, { ValidationResult } from './configuracoes/ApiKeyForm';
 import ConsumoPainel from './configuracoes/ConsumoPainel';
 import ConfiguracoesAvisosIA from './configuracoes/ConfiguracoesAvisosIA';
 import ApiStatusItem from './configuracoes/ApiStatusItem';
@@ -187,6 +187,100 @@ const ConfiguracoesIATab: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Validadores customizados para Neo4j
+  const validateNeo4jUri = (value: string): ValidationResult => {
+    if (!value || value.trim() === '') {
+      return { isValid: false, status: 'idle' };
+    }
+    
+    if (value.startsWith('neo4j+s://') || value.startsWith('neo4j://')) {
+      // Verifica formato do domínio
+      const domain = value.replace(/^neo4j\+?s?:\/\//, '');
+      if (domain.includes('.databases.neo4j.io')) {
+        return { 
+          isValid: true, 
+          status: 'valid', 
+          message: '✓ Formato correto do Neo4j Aura' 
+        };
+      }
+      return { 
+        isValid: true, 
+        status: 'warning', 
+        message: '⚠ URI válida mas não parece ser Neo4j Aura' 
+      };
+    }
+    
+    return { 
+      isValid: false, 
+      status: 'invalid', 
+      message: '✗ URI deve começar com neo4j+s:// ou neo4j://' 
+    };
+  };
+
+  const validateNeo4jUsername = (value: string): ValidationResult => {
+    if (!value || value.trim() === '') {
+      return { isValid: false, status: 'idle' };
+    }
+    
+    if (value.length < 3) {
+      return { 
+        isValid: false, 
+        status: 'invalid', 
+        message: '✗ Username muito curto (mínimo 3 caracteres)' 
+      };
+    }
+    
+    if (value === 'neo4j') {
+      return { 
+        isValid: true, 
+        status: 'valid', 
+        message: '✓ Username padrão Neo4j' 
+      };
+    }
+    
+    if (value.includes(' ') || value.includes('@')) {
+      return { 
+        isValid: false, 
+        status: 'invalid', 
+        message: '✗ Username não deve conter espaços ou @' 
+      };
+    }
+    
+    return { 
+      isValid: true, 
+      status: 'valid', 
+      message: '✓ Formato válido' 
+    };
+  };
+
+  const validateNeo4jPassword = (value: string): ValidationResult => {
+    if (!value || value.trim() === '') {
+      return { isValid: false, status: 'idle' };
+    }
+    
+    if (value.length < 8) {
+      return { 
+        isValid: false, 
+        status: 'invalid', 
+        message: '✗ Password deve ter pelo menos 8 caracteres' 
+      };
+    }
+    
+    if (value.length >= 16) {
+      return { 
+        isValid: true, 
+        status: 'valid', 
+        message: '✓ Password forte' 
+      };
+    }
+    
+    return { 
+      isValid: true, 
+      status: 'warning', 
+      message: '⚠ Password válida mas curta (recomendado 16+ caracteres)' 
+    };
   };
 
   const testNeo4jConnection = async () => {
@@ -396,6 +490,8 @@ const ConfiguracoesIATab: React.FC = () => {
                   initialKey={neo4jUri}
                   placeholder="neo4j+s://xxxxx.databases.neo4j.io"
                   isLoading={isLoading || isSaving}
+                  validator={validateNeo4jUri}
+                  showVisualValidation={true}
                 />
                 <ApiKeyForm 
                   serviceName="Neo4j Username" 
@@ -404,6 +500,8 @@ const ConfiguracoesIATab: React.FC = () => {
                   placeholder="neo4j"
                   isLoading={isLoading || isSaving}
                   minLength={3}
+                  validator={validateNeo4jUsername}
+                  showVisualValidation={true}
                 />
                 <ApiKeyForm 
                   serviceName="Neo4j Password" 
@@ -411,6 +509,8 @@ const ConfiguracoesIATab: React.FC = () => {
                   initialKey={neo4jPassword}
                   placeholder="••••••••••••"
                   isLoading={isLoading || isSaving}
+                  validator={validateNeo4jPassword}
+                  showVisualValidation={true}
                 />
                 
                 <div className="mt-6 pt-6 border-t border-border">

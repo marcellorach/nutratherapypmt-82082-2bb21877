@@ -1,13 +1,19 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+
+export interface ValidationResult {
+  isValid: boolean;
+  status: 'valid' | 'invalid' | 'warning' | 'idle';
+  message?: string;
+}
 
 interface ApiKeyFormProps {
   serviceName: string;
@@ -16,6 +22,8 @@ interface ApiKeyFormProps {
   placeholder?: string;
   isLoading: boolean;
   minLength?: number;
+  validator?: (value: string) => ValidationResult;
+  showVisualValidation?: boolean;
 }
 
 const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ 
@@ -24,9 +32,15 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
   initialKey = "", 
   placeholder = "sk-...",
   isLoading,
-  minLength = 10
+  minLength = 10,
+  validator,
+  showVisualValidation = false
 }) => {
   const { toast } = useToast();
+  const [validationResult, setValidationResult] = useState<ValidationResult>({ 
+    isValid: false, 
+    status: 'idle' 
+  });
   
   // Normalize initialKey to always be a string
   const normalizedKey = typeof initialKey === 'string' ? initialKey : '';
@@ -43,9 +57,25 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
     },
   });
 
+  // Watch field value for real-time validation
+  const currentValue = form.watch('apiKey');
+
+  useEffect(() => {
+    if (showVisualValidation && validator && currentValue) {
+      const result = validator(currentValue);
+      setValidationResult(result);
+    } else if (!currentValue) {
+      setValidationResult({ isValid: false, status: 'idle' });
+    }
+  }, [currentValue, validator, showVisualValidation]);
+
   useEffect(() => {
     form.reset({ apiKey: normalizedKey });
-  }, [normalizedKey, form]);
+    if (showVisualValidation && validator && normalizedKey) {
+      const result = validator(normalizedKey);
+      setValidationResult(result);
+    }
+  }, [normalizedKey, form, validator, showVisualValidation]);
 
   const onSubmit = async (values: z.infer<typeof apiKeySchema>) => {
     try {
@@ -65,6 +95,36 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
 
   const hasInitialKey = normalizedKey.trim() !== "";
 
+  const getValidationIcon = () => {
+    if (!showVisualValidation || validationResult.status === 'idle') return null;
+    
+    switch (validationResult.status) {
+      case 'valid':
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+      case 'invalid':
+        return <XCircle className="h-5 w-5 text-red-600" />;
+      case 'warning':
+        return <AlertCircle className="h-5 w-5 text-yellow-600" />;
+      default:
+        return null;
+    }
+  };
+
+  const getValidationColor = () => {
+    if (!showVisualValidation) return '';
+    
+    switch (validationResult.status) {
+      case 'valid':
+        return 'border-green-500 focus-visible:ring-green-500';
+      case 'invalid':
+        return 'border-red-500 focus-visible:ring-red-500';
+      case 'warning':
+        return 'border-yellow-500 focus-visible:ring-yellow-500';
+      default:
+        return '';
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -75,14 +135,31 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
             <FormItem>
               <FormLabel>Chave API para {serviceName}</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder={placeholder}
-                  type="password"
-                  autoComplete="off"
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    {...field}
+                    placeholder={placeholder}
+                    type="password"
+                    autoComplete="off"
+                    disabled={isLoading}
+                    className={showVisualValidation ? getValidationColor() : ''}
+                  />
+                  {showVisualValidation && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {getValidationIcon()}
+                    </div>
+                  )}
+                </div>
               </FormControl>
+              {showVisualValidation && validationResult.message && (
+                <FormDescription className={
+                  validationResult.status === 'valid' ? 'text-green-600' :
+                  validationResult.status === 'invalid' ? 'text-red-600' :
+                  validationResult.status === 'warning' ? 'text-yellow-600' : ''
+                }>
+                  {validationResult.message}
+                </FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
