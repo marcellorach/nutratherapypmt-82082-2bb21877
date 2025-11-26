@@ -591,19 +591,8 @@ const ConfiguracoesIATab: React.FC = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="prompts" className="space-y-6 pt-4">
               <TabsContent value="prompts" className="space-y-4 pt-4">
                 <ExtractionPromptsEditor />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-                    <p>1. <strong>Sistema:</strong> Define o comportamento geral do modelo</p>
-                    <p>2. <strong>User Template:</strong> Contexto específico de cada estudo (variáveis substituídas automaticamente)</p>
-                    <p>3. <strong>Modelo:</strong> Gemini 3 Pro Preview (temperatura 0.1 para máxima precisão)</p>
-                    <p>4. <strong>Validação:</strong> KG Match Score verifica entidades contra banco de dados</p>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
           </CardContent>
