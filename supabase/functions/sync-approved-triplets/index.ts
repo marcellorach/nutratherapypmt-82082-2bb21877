@@ -125,6 +125,36 @@ async function syncTripletToNeo4j(
 }
 
 /**
+ * Busca credenciais Neo4j da tabela ai_configurations
+ */
+async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
+  const { data, error } = await supabase
+    .from('ai_configurations')
+    .select('config_key, config_value')
+    .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password']);
+  
+  if (error || !data || data.length < 3) {
+    console.error('Failed to fetch Neo4j credentials from database:', error);
+    return null;
+  }
+  
+  const config: Record<string, string> = {};
+  data.forEach((item: any) => { 
+    config[item.config_key] = item.config_value; 
+  });
+  
+  if (!config.neo4j_uri || !config.neo4j_username || !config.neo4j_password) {
+    return null;
+  }
+  
+  return {
+    uri: config.neo4j_uri,
+    username: config.neo4j_username,
+    password: config.neo4j_password
+  };
+}
+
+/**
  * Edge Function principal
  */
 serve(async (req) => {
@@ -134,17 +164,20 @@ serve(async (req) => {
   }
 
   try {
-    // Verificar credenciais Neo4j
-    const neo4jUri = Deno.env.get('NEO4J_URI');
-    const neo4jUsername = Deno.env.get('NEO4J_USERNAME');
-    const neo4jPassword = Deno.env.get('NEO4J_PASSWORD');
+    // Inicializar Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (!neo4jUri || !neo4jUsername || !neo4jPassword) {
-      console.error('Neo4j credentials not configured');
+    // Buscar credenciais Neo4j da tabela ai_configurations
+    const credentials = await getNeo4jCredentials(supabase);
+    
+    if (!credentials) {
+      console.error('Neo4j credentials not configured in database');
       return new Response(
         JSON.stringify({ 
           error: 'Neo4j credentials not configured',
-          message: 'Please set NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD environment variables'
+          message: 'Please configure NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD in AI Configuration tab'
         }),
         { 
           status: 500, 
@@ -152,17 +185,6 @@ serve(async (req) => {
         }
       );
     }
-
-    const credentials: Neo4jCredentials = {
-      uri: neo4jUri,
-      username: neo4jUsername,
-      password: neo4jPassword
-    };
-
-    // Inicializar Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Buscar triplets aprovados não sincronizados
     const { data: triplets, error: fetchError } = await supabase

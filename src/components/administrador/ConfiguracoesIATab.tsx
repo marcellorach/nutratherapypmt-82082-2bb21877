@@ -22,6 +22,7 @@ const ConfiguracoesIATab: React.FC = () => {
   const [neo4jPassword, setNeo4jPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const { toast } = useToast();
 
   const fetchKeys = async () => {
@@ -185,6 +186,44 @@ const ConfiguracoesIATab: React.FC = () => {
       setNeo4jPassword(password);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const testNeo4jConnection = async () => {
+    setIsTesting(true);
+    try {
+      const response = await supabase.functions.invoke('ai-config', {
+        method: 'POST',
+        body: { action: 'test-neo4j' }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const result = response.data;
+
+      if (result.success) {
+        toast({
+          title: "✅ Conexão bem-sucedida!",
+          description: `Conectado ao Neo4j: ${result.uri}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "❌ Falha na conexão",
+          description: result.error || "Não foi possível conectar ao Neo4j",
+        });
+      }
+    } catch (error: any) {
+      console.error("Erro ao testar conexão Neo4j:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro no teste de conexão",
+        description: error.message || "Ocorreu um erro ao testar a conexão",
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -372,6 +411,32 @@ const ConfiguracoesIATab: React.FC = () => {
                   placeholder="••••••••••••"
                   isLoading={isLoading || isSaving}
                 />
+                
+                <div className="mt-6 pt-6 border-t border-border">
+                  <Button 
+                    onClick={testNeo4jConnection}
+                    disabled={isTesting || !neo4jUri || !neo4jUsername || !neo4jPassword}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    {isTesting ? (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Testando conexão...
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Testar Conexão Neo4j
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    {!neo4jUri || !neo4jUsername || !neo4jPassword 
+                      ? "Configure todas as credenciais antes de testar" 
+                      : "Clique para verificar se as credenciais estão corretas"}
+                  </p>
+                </div>
               </TabsContent>
               
               <TabsContent value="unstructured" className="space-y-4 pt-4">

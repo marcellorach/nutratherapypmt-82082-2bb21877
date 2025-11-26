@@ -10,6 +10,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Added - 2025-11-26
+- ✅ **Endpoint de Teste de Conexão Neo4j**: Adicionado action 'test-neo4j' na edge function `ai-config` que valida credenciais executando query simples (`RETURN 1`)
+- ✅ **Botão "Testar Conexão Neo4j"** na interface de configuração com loading state e validação de campos obrigatórios
+
+### Changed - 2025-11-26
+- ✅ **Unificação de Credenciais Neo4j**: Edge functions `sync-approved-triplets` e `neo4j-sync` agora buscam credenciais da tabela `ai_configurations` ao invés de secrets do Supabase
+- ✅ **Gerenciamento Centralizado**: Todas as credenciais de APIs externas (OpenAI, Claude, Neo4j, etc.) gerenciadas no mesmo local (AI Configuration tab)
+
+### Added - 2025-11-26
 - ✅ **Sistema Completo de Curadoria para Knowledge Graph**: Implementação total do workflow de validação humana
   - **Tabelas Supabase**: 
     - `triplet_extractions`: Armazena triplets (subject-predicate-object) extraídos por IA de estudos científicos com scores (kg_match_score, llm_confidence, extraction_confidence), workflow de curadoria (pending/approved/rejected/needs_review), approval_chain JSON, e RLS policies para admins/veterinários

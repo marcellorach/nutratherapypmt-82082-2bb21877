@@ -12,7 +12,7 @@ const corsHeaders = {
 
 // Definição de tipos para as requisições
 interface ConfigRequest {
-  action: 'get' | 'set';
+  action: 'get' | 'set' | 'test-neo4j';
   key?: string;
   value?: string;
 }
@@ -56,6 +56,107 @@ serve(async (req) => {
       // Obter dados da solicitação
       const requestData: ConfigRequest = await req.json();
       const { action, key, value } = requestData;
+
+      // Endpoint de teste de conexão Neo4j
+      if (action === 'test-neo4j') {
+        console.log('Testing Neo4j connection...');
+        
+        try {
+          // Buscar credenciais Neo4j do banco
+          const { data: credentials, error: credError } = await supabase
+            .from('ai_configurations')
+            .select('config_key, config_value')
+            .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password']);
+
+          if (credError || !credentials || credentials.length < 3) {
+            return new Response(JSON.stringify({ 
+              success: false,
+              error: 'Neo4j credentials not configured. Please configure URI, Username, and Password first.',
+              configured: false
+            }), { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            });
+          }
+
+          const config: Record<string, string> = {};
+          credentials.forEach((item) => { config[item.config_key] = item.config_value; });
+
+          if (!config.neo4j_uri || !config.neo4j_username || !config.neo4j_password) {
+            return new Response(JSON.stringify({ 
+              success: false,
+              error: 'Incomplete Neo4j credentials',
+              configured: false
+            }), { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            });
+          }
+
+          // Testar conexão executando query simples
+          const authHeader = 'Basic ' + btoa(`${config.neo4j_username}:${config.neo4j_password}`);
+          const httpUri = config.neo4j_uri.replace('neo4j+s://', 'https://').replace('neo4j://', 'http://');
+          
+          const testResponse = await fetch(`${httpUri}/db/neo4j/tx/commit`, {
+            method: 'POST',
+            headers: {
+              'Authorization': authHeader,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+              statements: [{
+                statement: 'RETURN 1 as test',
+                parameters: {}
+              }]
+            })
+          });
+
+          if (!testResponse.ok) {
+            const errorText = await testResponse.text();
+            return new Response(JSON.stringify({ 
+              success: false,
+              error: `Connection failed: ${testResponse.status} - ${errorText}`,
+              configured: true,
+              connected: false
+            }), { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            });
+          }
+
+          const result = await testResponse.json();
+          
+          if (result.errors && result.errors.length > 0) {
+            return new Response(JSON.stringify({ 
+              success: false,
+              error: `Neo4j errors: ${JSON.stringify(result.errors)}`,
+              configured: true,
+              connected: false
+            }), { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            });
+          }
+
+          return new Response(JSON.stringify({ 
+            success: true,
+            message: 'Successfully connected to Neo4j!',
+            configured: true,
+            connected: true,
+            uri: config.neo4j_uri
+          }), { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          });
+
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: `Connection test failed: ${errorMessage}`,
+            configured: true,
+            connected: false
+          }), { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          });
+        }
+      }
 
       if (action === 'get' && key) {
         console.log('POST get action - fetching key:', key);
