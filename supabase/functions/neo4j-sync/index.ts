@@ -383,6 +383,48 @@ async function syncToNeo4j(
   };
 }
 
+/**
+ * Busca credenciais Neo4j da tabela ai_configurations
+ */
+async function getNeo4jCredentials(): Promise<Neo4jCredentials | null> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Criar cliente temporário apenas para buscar credenciais
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase
+      .from('ai_configurations')
+      .select('config_key, config_value')
+      .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password']);
+    
+    if (error || !data || data.length < 3) {
+      console.error('❌ Failed to fetch Neo4j credentials from database:', error);
+      return null;
+    }
+    
+    const config: Record<string, string> = {};
+    data.forEach((item: any) => { 
+      config[item.config_key] = item.config_value; 
+    });
+    
+    if (!config.neo4j_uri || !config.neo4j_username || !config.neo4j_password) {
+      return null;
+    }
+    
+    return {
+      uri: config.neo4j_uri,
+      username: config.neo4j_username,
+      password: config.neo4j_password
+    };
+  } catch (error) {
+    console.error('❌ Error fetching Neo4j credentials:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -390,16 +432,14 @@ serve(async (req) => {
   }
   
   try {
-    // Validar secrets Neo4j
-    const NEO4J_URI = Deno.env.get('NEO4J_URI');
-    const NEO4J_USERNAME = Deno.env.get('NEO4J_USERNAME');
-    const NEO4J_PASSWORD = Deno.env.get('NEO4J_PASSWORD');
+    // Buscar credenciais Neo4j da tabela ai_configurations
+    const credentials = await getNeo4jCredentials();
     
-    if (!NEO4J_URI || !NEO4J_USERNAME || !NEO4J_PASSWORD) {
+    if (!credentials) {
       console.error('❌ Credenciais Neo4j não configuradas');
       return new Response(
         JSON.stringify({ 
-          error: 'Neo4j credentials not configured. Please set NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD secrets in Supabase.',
+          error: 'Neo4j credentials not configured. Please configure them in AI Configuration tab.',
           success: false
         }),
         {
@@ -408,12 +448,6 @@ serve(async (req) => {
         }
       );
     }
-    
-    const credentials: Neo4jCredentials = {
-      uri: NEO4J_URI,
-      username: NEO4J_USERNAME,
-      password: NEO4J_PASSWORD
-    };
     
     // Parse request body
     const { studyId, extractedData } = await req.json();
