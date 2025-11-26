@@ -98,10 +98,15 @@ const ConfigurationsSummary: React.FC = () => {
 
   const maskValue = (value: string, isSensitive: boolean, isVisible: boolean) => {
     if (!value) return 'Não configurado';
-    if (!isSensitive) return value;
     if (isVisible) return value;
     
-    // Mostrar apenas primeiros e últimos caracteres
+    if (!isSensitive) {
+      // Para campos não-sensíveis, mostrar parcialmente (início e fim)
+      if (value.length <= 15) return value;
+      return `${value.substring(0, 10)}...${value.substring(value.length - 8)}`;
+    }
+    
+    // Máscara completa para valores sensíveis
     if (value.length <= 8) return '••••••••';
     return `${value.substring(0, 4)}${'•'.repeat(Math.min(20, value.length - 8))}${value.substring(value.length - 4)}`;
   };
@@ -194,7 +199,7 @@ const ConfigurationsSummary: React.FC = () => {
                     )}
                   </div>
                 </div>
-                {config.isConfigured && config.isSensitive && (
+                {config.isConfigured && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -234,7 +239,7 @@ const ConfigurationsSummary: React.FC = () => {
                     )}
                   </div>
                 </div>
-                {config.isConfigured && config.isSensitive && (
+                {config.isConfigured && (
                   <Button
                     variant="ghost"
                     size="icon"
