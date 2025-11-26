@@ -269,10 +269,15 @@ const ExtractionPromptsEditor: React.FC = () => {
             
             <Button
               variant="secondary"
-              onClick={() => toast({ title: "🚧 Em breve", description: "Teste de prompts será implementado em breve." })}
+              onClick={() => {
+                toast({ 
+                  title: "🔬 Teste de Prompts", 
+                  description: "Navegue até a aba 'Estudos' para fazer upload de um PDF e testar a extração com os prompts atuais."
+                });
+              }}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Testar Prompts com PDF
+              <TestTube className="h-4 w-4 mr-2" />
+              Testar com Estudo Real
             </Button>
           </div>
         </CardContent>

@@ -49,17 +49,28 @@ interface GraphRAGResult {
 async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
   const { data, error } = await supabase
     .from('ai_configurations')
-    .select('config_value')
-    .eq('config_key', 'neo4j_credentials')
-    .eq('is_active', true)
-    .single();
+    .select('config_key, config_value')
+    .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password'])
+    .eq('is_active', true);
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     console.error('Failed to get Neo4j credentials:', error);
     return null;
   }
 
-  return data.config_value as Neo4jCredentials;
+  const credentials: Partial<Neo4jCredentials> = {};
+  data.forEach((row: any) => {
+    if (row.config_key === 'neo4j_uri') credentials.uri = row.config_value;
+    if (row.config_key === 'neo4j_username') credentials.username = row.config_value;
+    if (row.config_key === 'neo4j_password') credentials.password = row.config_value;
+  });
+
+  if (!credentials.uri || !credentials.username || !credentials.password) {
+    console.error('Incomplete Neo4j credentials');
+    return null;
+  }
+
+  return credentials as Neo4jCredentials;
 }
 
 async function executeCypherQuery(
