@@ -14,7 +14,8 @@ import NtaiClinicalTab from './results/NtaiClinicalTab';
 import EvidenceTag from '../../tags/EvidenceTag';
 import EnhancedStudyVisualization from '../visualization/EnhancedStudyVisualization';
 import DocumentChatInterface from '../chat/DocumentChatInterface';
-import { MessageCircle, BarChart3, Atom, Sparkles, Pill, Activity } from 'lucide-react';
+import NtaiTripletsStatsTab from './results/NtaiTripletsStatsTab';
+import { MessageCircle, BarChart3, Atom, Sparkles, Pill, Activity, Network } from 'lucide-react';
 
 interface NtaiAnalysisResultsProps {
   result: NtaiAnalysisResult;
@@ -44,7 +45,7 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid grid-cols-5 w-full mb-2">
+        <TabsList className="grid grid-cols-6 w-full mb-2">
           <TabsTrigger value="stage1">
             Stage 1: Entidades
           </TabsTrigger>
@@ -55,6 +56,10 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
           <TabsTrigger value="stage3">
             <Pill className="h-4 w-4 mr-1" />
             Stage 3: Clínico
+          </TabsTrigger>
+          <TabsTrigger value="triplets">
+            <Network className="h-4 w-4 mr-1" />
+            Triplets
           </TabsTrigger>
           <TabsTrigger value="visualizations">
             <BarChart3 className="h-4 w-4 mr-1" />
@@ -143,6 +148,10 @@ const NtaiAnalysisResults: React.FC<NtaiAnalysisResultsProps> = ({ result }) => 
               />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        <TabsContent value="triplets" className="p-4 border rounded-md">
+          <NtaiTripletsStatsTab studyId={result.studyId} />
         </TabsContent>
 
         <TabsContent value="visualizations" className="p-4 border rounded-md">
