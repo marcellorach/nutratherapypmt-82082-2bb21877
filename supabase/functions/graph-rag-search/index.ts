@@ -80,7 +80,15 @@ async function executeCypherQuery(
 ): Promise<any> {
   const auth = btoa(`${credentials.username}:${credentials.password}`);
   
-  const response = await fetch(`${credentials.uri}/db/neo4j/tx/commit`, {
+  // Converter URI neo4j+s:// para https:// para Query API v2
+  const httpUri = credentials.uri
+    .replace('neo4j+s://', 'https://')
+    .replace('neo4j://', 'http://');
+  const queryEndpoint = `${httpUri}/db/neo4j/query/v2`;
+  
+  console.log(`🔗 Conectando ao Neo4j Query API v2: ${queryEndpoint}`);
+  
+  const response = await fetch(queryEndpoint, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${auth}`,
@@ -88,25 +96,32 @@ async function executeCypherQuery(
       'Accept': 'application/json',
     },
     body: JSON.stringify({
-      statements: [{
-        statement: cypher,
-        parameters: params
-      }]
+      statement: cypher,
+      parameters: params
     })
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Neo4j query failed: ${error}`);
+    console.error(`❌ Neo4j Query API v2 failed (${response.status}):`, error);
+    throw new Error(`Neo4j query failed (${response.status}): ${error}`);
   }
 
   const result = await response.json();
   
+  // Query API v2 retorna formato diferente: { data: { values: [...] }, errors: [...] }
   if (result.errors && result.errors.length > 0) {
+    console.error('❌ Neo4j errors:', result.errors);
     throw new Error(`Neo4j errors: ${JSON.stringify(result.errors)}`);
   }
 
-  return result.results[0];
+  // Adaptar formato do Query API v2 para formato esperado
+  return {
+    data: result.data?.values?.map((row: any) => ({
+      row,
+      graph: result.data?.graph || { nodes: [], relationships: [] }
+    })) || []
+  };
 }
 
 function formatGraphData(neo4jResult: any): GraphRAGResult {

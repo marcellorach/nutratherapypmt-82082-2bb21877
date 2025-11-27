@@ -4,7 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Database, FileText, FileCode, ArrowDown, ArrowUp, ListCheck, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Database, FileText, FileCode, ArrowDown, ArrowUp, ListCheck, Filter, RefreshCcw } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
@@ -159,6 +160,16 @@ const EstudosTab: React.FC = () => {
 
           {mainTab === "gerenciar" && (
             <div className="flex items-center gap-2">
+              <Button 
+                onClick={fetchEstudos} 
+                variant="outline" 
+                size="sm"
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Atualizando...' : 'Atualizar'}
+              </Button>
               <EstudoSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             </div>
           )}
