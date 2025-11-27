@@ -307,10 +307,10 @@ async function extractWithFileSearch(
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
   // ✅ MIGRADO PARA LOVABLE AI GATEWAY
-  const MODEL_NAME = 'google/gemini-2.5-flash'; // Modelo otimizado para extração estruturada
+  const MODEL_NAME = 'google/gemini-3-pro-preview'; // Gemini 3 Pro Preview - Modelo de última geração
   console.log('🔍 Extraindo dados com Lovable AI Gateway + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
-  console.log(`🤖 Modelo AI: ${MODEL_NAME} (via Lovable AI Gateway)`);
+  console.log(`🤖 Modelo AI: ${MODEL_NAME} (Gemini 3 Pro Preview via Lovable AI Gateway)`);
   console.log(`🛠️ Tecnologia: Tool Calling para JSON estruturado garantido`);
   
   // ✅ NOVO: Buscar prompts configuráveis da ai_configurations
