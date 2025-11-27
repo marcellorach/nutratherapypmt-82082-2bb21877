@@ -153,6 +153,7 @@ const EstudosTab: React.FC = () => {
             <TabsTrigger value="gerenciar" className="flex items-center gap-2">
               <ListCheck className="w-4 h-4" />
               <span>{t('studies.tabs.manage')}</span>
+              <Badge variant="secondary" className="ml-2">{estudos.length}</Badge>
             </TabsTrigger>
           </TabsList>
 

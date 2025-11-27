@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Plus, Trash2, Edit2, Save, X, Wand2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Brain, Plus, Trash2, Edit2, Save, X, Wand2, Layers } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 
 interface Prompt {
   id: string;
@@ -270,12 +272,24 @@ const PromptConfigurationTab: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-xl font-bold">Configuração de Prompts da IA</h2>
-          <p className="text-muted-foreground">Gerencie os prompts utilizados pelo sistema de IA</p>
-        </div>
+    <Tabs defaultValue="recomendacoes" className="w-full">
+      <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsTrigger value="recomendacoes" className="flex items-center gap-2">
+          <Brain className="h-4 w-4" />
+          Prompts de Recomendação
+        </TabsTrigger>
+        <TabsTrigger value="extracao" className="flex items-center gap-2">
+          <Layers className="h-4 w-4" />
+          Prompts de Extração
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="recomendacoes">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold">Prompts de Recomendação de IA</h2>
+            <p className="text-muted-foreground">Configure os prompts para recomendações personalizadas</p>
+          </div>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
@@ -457,8 +471,13 @@ const PromptConfigurationTab: React.FC = () => {
             </Card>
           ))
         )}
-      </div>
-    </>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="extracao">
+        <ExtractionPromptsEditor />
+      </TabsContent>
+    </Tabs>
   );
 };
 
