@@ -189,6 +189,80 @@ serve(async (req) => {
       .update({ kanban_status: 'processed' })
       .eq('id', studyId);
 
+    // ==================== CRIAR TRIPLETS AUTOMATICAMENTE ====================
+    console.log('🔗 Criando triplets para curadoria no Knowledge Graph...');
+    const triplets = [];
+
+    // Triplets de nutracêuticos → condições
+    for (const nutra of extractedData.nutraceuticals || []) {
+      for (const condition of extractedData.conditions || []) {
+        triplets.push({
+          study_id: studyId,
+          subject_name: nutra.name,
+          subject_type: 'Nutraceutical',
+          predicate: 'TREATS',
+          object_name: condition.name,
+          object_type: 'Condition',
+          extraction_confidence: (nutra.efficacy_score || 3) / 5,
+          llm_confidence: (nutra.efficacy_score || 3) / 5,
+          kg_match_score: 0.75,
+          curation_status: 'pending',
+          auto_approved: false,
+        });
+      }
+    }
+
+    // Triplets de nutracêuticos → mecanismos moleculares
+    for (const mech of extractedData.molecular_mechanisms || []) {
+      if (mech.target) {
+        triplets.push({
+          study_id: studyId,
+          subject_name: mech.target,
+          subject_type: 'Nutraceutical',
+          predicate: 'HAS_MECHANISM',
+          object_name: mech.name,
+          object_type: 'Mechanism',
+          extraction_confidence: 0.8,
+          llm_confidence: 0.8,
+          kg_match_score: 0.7,
+          curation_status: 'pending',
+          auto_approved: false,
+        });
+      }
+    }
+
+    // Triplets de sinergias (nutracêutico ↔ nutracêutico)
+    for (const syn of extractedData.synergies || []) {
+      triplets.push({
+        study_id: studyId,
+        subject_name: syn.compound1,
+        subject_type: 'Nutraceutical',
+        predicate: syn.synergy_type?.toUpperCase().replace('_', ' ') || 'SYNERGIZES_WITH',
+        object_name: syn.compound2,
+        object_type: 'Nutraceutical',
+        extraction_confidence: 0.75,
+        llm_confidence: 0.75,
+        kg_match_score: 0.65,
+        curation_status: 'pending',
+        auto_approved: false,
+      });
+    }
+
+    // Inserir triplets no banco
+    if (triplets.length > 0) {
+      const { error: tripletError } = await supabase
+        .from('triplet_extractions')
+        .insert(triplets);
+      
+      if (tripletError) {
+        console.error('⚠️ Erro ao criar triplets:', tripletError);
+      } else {
+        console.log(`✅ ${triplets.length} triplets criados com sucesso para curadoria`);
+      }
+    } else {
+      console.log('ℹ️ Nenhum triplet para criar (dados insuficientes)');
+    }
+
     // Preparar frontendData com TODOS os stages
     const frontendData = {
       studyId: studyId,
