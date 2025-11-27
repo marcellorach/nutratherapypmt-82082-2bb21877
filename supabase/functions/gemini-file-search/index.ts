@@ -306,11 +306,11 @@ async function extractWithFileSearch(
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ ATUALIZADO: Usar Gemini 3 Pro Preview
-  const MODEL_NAME = 'google/gemini-3-pro-preview';
-  console.log('🔍 Extraindo dados com File Search + Structured Output...');
+  // ✅ MIGRADO PARA LOVABLE AI GATEWAY
+  const MODEL_NAME = 'google/gemini-2.5-flash'; // Modelo otimizado para extração estruturada
+  console.log('🔍 Extraindo dados com Lovable AI Gateway + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
-  console.log(`🤖 Modelo AI: ${MODEL_NAME} (Gemini 3 Pro Preview)`);
+  console.log(`🤖 Modelo AI: ${MODEL_NAME} (via Lovable AI Gateway)`);
   console.log(`🛠️ Tecnologia: Tool Calling para JSON estruturado garantido`);
   
   // ✅ NOVO: Buscar prompts configuráveis da ai_configurations
@@ -615,36 +615,44 @@ Nutraceutical to Molecular Mechanism to Biological Effect to Clinical Outcome
 Return using extract_study_data function with all arrays fully populated.`;
 
   try {
-    console.log('📤 Enviando query com Tool Calling para extração estruturada...');
+    console.log('📤 Enviando query com Tool Calling via Lovable AI Gateway...');
     
+    // ✅ Buscar LOVABLE_API_KEY em vez de Google API key
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY não configurada');
+    }
+    
+    // ✅ Formato OpenAI-compatible para Lovable AI Gateway
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`,
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${lovableApiKey}`
+        },
         body: JSON.stringify({
-          contents: [{ 
-            role: 'user', 
-            parts: [{ text: prompt }] 
-          }],
-          tools: [
-            {
-              file_search: {
-                file_search_store_names: [fileSearchStoreName]
-              }
+          model: MODEL_NAME,
+          messages: [
+            { 
+              role: 'system', 
+              content: systemPrompt 
             },
-            {
-              function_declarations: [extractionFunction]
+            { 
+              role: 'user', 
+              content: prompt 
             }
           ],
-          tool_config: {
-            function_calling_config: {
-              mode: 'ANY',
-              allowed_function_names: ['extract_study_data']
+          tools: [
+            {
+              type: 'function',
+              function: extractionFunction
             }
-          },
-          generationConfig: {
-            temperature: 0.1
+          ],
+          tool_choice: {
+            type: 'function',
+            function: { name: 'extract_study_data' }
           }
         })
       }
@@ -652,25 +660,32 @@ Return using extract_study_data function with all arrays fully populated.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Erro na API do Gemini:', response.status, errorText);
+      console.error('❌ Erro no Lovable AI Gateway:', response.status, errorText);
+      
+      // ✅ Tratamento específico de erros do Lovable AI
+      if (response.status === 429) {
+        throw new Error('Rate limit excedido no Lovable AI. Aguarde alguns minutos.');
+      }
+      if (response.status === 402) {
+        throw new Error('Créditos insuficientes no Lovable AI. Adicione créditos em Settings → Workspace → Usage.');
+      }
+      
       throw new Error(`Erro na API: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('📊 Resposta recebida do Gemini');
+    console.log('📊 Resposta recebida do Lovable AI Gateway');
     
-    // Extrair dados do function call
-    const functionCall = result.candidates?.[0]?.content?.parts?.find(
-      (part: any) => part.functionCall?.name === 'extract_study_data'
-    );
+    // ✅ Formato OpenAI para extração do function call
+    const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!functionCall) {
-      console.error('❌ Gemini não retornou function call esperado');
+    if (!toolCall || toolCall.function?.name !== 'extract_study_data') {
+      console.error('❌ AI não retornou function call esperado');
       console.log('📊 Resposta completa:', JSON.stringify(result, null, 2));
-      throw new Error('Gemini não usou a função extract_study_data. Resposta inesperada.');
+      throw new Error('AI não usou a função extract_study_data. Resposta inesperada.');
     }
 
-    const extractedArgs = functionCall.functionCall.args;
+    const extractedArgs = JSON.parse(toolCall.function.arguments);
     console.log('✅ Dados estruturados extraídos via Tool Calling');
     console.log(`📊 Nutracêuticos: ${extractedArgs.nutraceuticals?.length || 0}`);
     console.log(`📊 Mecanismos: ${extractedArgs.mechanisms?.length || 0}`);
