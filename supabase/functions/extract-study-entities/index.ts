@@ -34,7 +34,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get parsed study content using PRIMARY KEY (id)
+    // Get parsed study content
     console.log(`🔍 Buscando estudo com ID: ${studyId}`);
     const { data: studyData, error: studyError } = await supabase
       .from('processed_studies')
@@ -42,238 +42,105 @@ serve(async (req) => {
       .eq('id', studyId)
       .maybeSingle();
     
-    if (studyError || !studyData) {
-      console.error(`❌ Estudo não encontrado. ID buscado: ${studyId}`);
-      console.error('Erro Supabase:', JSON.stringify(studyError, null, 2));
+    if (studyError || !studyData || !studyData.analysis_data) {
+      console.error(`❌ Estudo não encontrado ou sem dados`);
       return new Response(
-        JSON.stringify({ 
-          error: 'Study not found or not parsed yet',
-          studyId,
-          searchedColumn: 'id (PRIMARY KEY)',
-          details: studyError 
-        }),
+        JSON.stringify({ error: 'Study not found or not parsed yet', studyId }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    // VALIDAÇÃO CRÍTICA: Verificar se analysis_data existe
-    if (!studyData.analysis_data || typeof studyData.analysis_data !== 'object') {
-      console.error(`❌ CRITICAL: Study ${studyId} has no analysis_data`);
-      console.error(`Study title: ${studyData.title}`);
-      console.error(`analysis_data value:`, studyData.analysis_data);
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Study not ready for extraction',
-          details: 'The study must be processed by gemini-file-search first. The analysis_data field is missing or invalid. Please ensure the PDF was successfully uploaded and processed.',
-          studyId,
-          title: studyData.title,
-          hasAnalysisData: false,
-          recommendation: 'Process this study with gemini-file-search before extraction'
-        }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'} (study_id: ${studyData.study_id})`);
+    console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'}`);
 
     const parsedContent = studyData.analysis_data;
-    
-    console.log('📊 Estrutura do analysis_data:', JSON.stringify(parsedContent).slice(0, 500) + '...');
-    console.log('📊 Campos presentes:', Object.keys(parsedContent || {}).join(', '));
-    
-    // Validar estrutura do analysis_data
-    const analysisDataKeys = Object.keys(parsedContent);
-    const hasParseStudyStructure = analysisDataKeys.includes('elements') || analysisDataKeys.includes('sections');
-    const hasGeminiStructure = analysisDataKeys.includes('abstract') || analysisDataKeys.includes('nutraceuticals') || analysisDataKeys.includes('full_text');
-    
-    if (!hasParseStudyStructure && !hasGeminiStructure) {
-      console.error(`❌ Invalid analysis_data structure`);
-      console.error(`Available keys: ${analysisDataKeys.join(', ')}`);
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid analysis_data structure',
-          details: 'The analysis_data field does not contain expected keys (elements, sections, abstract, nutraceuticals, or full_text). The study may not have been processed correctly.',
-          studyId,
-          availableKeys: analysisDataKeys,
-          recommendation: 'Re-process this study with gemini-file-search or parse-study'
-        }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    // Prepare text content for LLM
     const textContent = extractTextContent(parsedContent);
     
-    // VALIDAÇÃO CRÍTICA: Verificar se temos texto para processar
     if (!textContent || textContent.trim().length < 100) {
-      console.error('❌ VALIDATION FAILED: Insufficient text extracted');
-      console.error(`Text length: ${textContent?.length || 0} chars`);
-      console.error(`analysis_data keys: ${analysisDataKeys.join(', ')}`);
-      console.error(`Text preview:`, textContent?.substring(0, 200));
+      console.error('❌ Texto insuficiente extraído');
+      return new Response(
+        JSON.stringify({ error: 'Insufficient text extracted', studyId }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log(`✅ ${textContent.length} chars de texto pronto para extração em 3 stages`);
+    
+    // Buscar prompts configuráveis do banco
+    console.log('🔍 Buscando prompts de extração configuráveis...');
+    const { data: promptConfigs } = await supabase
+      .from('ai_configurations')
+      .select('config_key, config_value')
+      .like('config_key', 'prompt_extraction%');
+    
+    const prompts = {
+      stage1System: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage1_system')?.config_value as string || getDefaultStage1SystemPrompt(),
+      stage1User: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage1_user')?.config_value as string || getDefaultStage1UserPrompt(),
+      stage2System: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage2_system')?.config_value as string || getDefaultStage2SystemPrompt(),
+      stage2User: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage2_user')?.config_value as string || getDefaultStage2UserPrompt(),
+      stage3System: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage3_system')?.config_value as string || getDefaultStage3SystemPrompt(),
+      stage3User: promptConfigs?.find(p => p.config_key === 'prompt_extraction_stage3_user')?.config_value as string || getDefaultStage3UserPrompt(),
+    };
+    
+    console.log('✅ Prompts carregados (configuráveis ou defaults)');
+
+    // ==================== STAGE 1: Basic Entities ====================
+    console.log('🔵 [STAGE 1/3] Extraindo entidades básicas (nutracêuticos, condições)...');
+    const stage1Result = await callLovableAI(
+      prompts.stage1System,
+      prompts.stage1User.replace('{{TEXT_CONTENT}}', textContent),
+      getStage1Tools()
+    );
+    
+    const stage1Data = stage1Result ? JSON.parse(stage1Result.function.arguments) : { nutraceuticals: [], conditions: [], mechanisms: [], findings: [] };
+    console.log(`✅ Stage 1: ${stage1Data.nutraceuticals?.length || 0} nutracêuticos, ${stage1Data.conditions?.length || 0} condições`);
+
+    // ==================== STAGE 2: Molecular Mechanisms ====================
+    console.log('🟢 [STAGE 2/3] Extraindo mecanismos moleculares, sinergias e relações...');
+    const stage2Result = await callLovableAI(
+      prompts.stage2System,
+      prompts.stage2User.replace('{{TEXT_CONTENT}}', textContent).replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || [])),
+      getStage2Tools()
+    );
+    
+    const stage2Data = stage2Result ? JSON.parse(stage2Result.function.arguments) : { molecular_mechanisms: [], synergies: [], hierarchical_relations: [] };
+    console.log(`✅ Stage 2: ${stage2Data.molecular_mechanisms?.length || 0} mecanismos, ${stage2Data.synergies?.length || 0} sinergias`);
+
+    // ==================== STAGE 3: Clinical Context ====================
+    console.log('🟡 [STAGE 3/3] Extraindo contexto clínico (dosagens, efeitos colaterais)...');
+    const stage3Result = await callLovableAI(
+      prompts.stage3System,
+      prompts.stage3User.replace('{{TEXT_CONTENT}}', textContent).replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || [])),
+      getStage3Tools()
+    );
+    
+    const stage3Data = stage3Result ? JSON.parse(stage3Result.function.arguments) : { dosages: [], side_effects: [], contraindications: [], clinical_outcomes: [] };
+    console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
+
+    // Combinar dados de todos os stages
+    const extractedData = {
+      // Stage 1
+      nutraceuticals: stage1Data.nutraceuticals || [],
+      conditions: stage1Data.conditions || [],
+      mechanisms: stage1Data.mechanisms || [],
+      findings: stage1Data.findings || [],
+      study_quality: stage1Data.study_quality || {},
       
-      return new Response(
-        JSON.stringify({ 
-          error: 'Extraction failed',
-          details: `Insufficient text extracted from study (${textContent?.length || 0} chars). The document may not have been parsed correctly. Please check the analysis_data field in processed_studies.`,
-          studyId,
-          textLength: textContent?.length || 0,
-          analysisDataKeys,
-          textPreview: textContent?.substring(0, 200) || '',
-          recommendation: 'Check if the PDF was properly parsed. You may need to re-upload the PDF and process again.'
-        }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    console.log(`✅ VALIDATION PASSED: ${textContent.length} chars of text ready for AI`);
-    console.log('📊 Primeiros 500 chars do texto:', textContent.slice(0, 500));
-    console.log(`📤 Calling Lovable AI for entity extraction...`);
+      // Stage 2
+      molecular_mechanisms: stage2Data.molecular_mechanisms || [],
+      synergies: stage2Data.synergies || [],
+      hierarchical_relations: stage2Data.hierarchical_relations || [],
+      
+      // Stage 3
+      dosages: stage3Data.dosages || [],
+      side_effects: stage3Data.side_effects || [],
+      contraindications: stage3Data.contraindications || [],
+      clinical_outcomes: stage3Data.clinical_outcomes || [],
+      study_assessment: stage3Data.study_assessment || {},
+    };
 
-    // Call Lovable AI with tool calling for structured extraction
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a scientific data extraction specialist for veterinary nutraceutical research. 
-
-CONTEXT: You will receive text content that may include:
-- Abstract and full text from a scientific study
-- Previously identified nutraceuticals and health conditions (if any)
-
-YOUR TASK:
-1. Extract ALL nutraceuticals mentioned (compounds, herbs, supplements, vitamins, minerals)
-2. Extract ALL health conditions/diseases addressed in the study
-3. Extract mechanisms of action explaining how treatments work
-4. Extract key clinical findings and results
-
-Be COMPREHENSIVE - include all relevant entities, not just the main ones.
-Focus on: nutraceuticals, health conditions, mechanisms of action, dosages, efficacy, and clinical findings.
-Include both primary and secondary nutraceuticals mentioned.`
-          },
-          {
-            role: 'user',
-            content: `Extract all relevant scientific entities from this veterinary study:\n\n${textContent}`
-          }
-        ],
-        tools: [{
-          type: 'function',
-          function: {
-            name: 'extract_study_entities',
-            description: 'Extract structured scientific entities from a veterinary nutraceutical study',
-            parameters: {
-              type: 'object',
-              properties: {
-                nutraceuticals: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string', description: 'Name of the nutraceutical compound' },
-                      dosage: { type: 'string', description: 'Recommended dosage' },
-                      efficacy_score: { type: 'number', description: 'Efficacy score 1-5' },
-                    },
-                    required: ['name']
-                  }
-                },
-                conditions: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string', description: 'Health condition name' },
-                      severity: { type: 'string', enum: ['low', 'moderate', 'high', 'critical'] },
-                      treatability_score: { type: 'number', description: 'Treatability score 1-5' },
-                    },
-                    required: ['name']
-                  }
-                },
-                mechanisms: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      mechanism: { type: 'string', description: 'Biological mechanism of action' },
-                      nutraceutical: { type: 'string', description: 'Related nutraceutical' },
-                    },
-                    required: ['mechanism']
-                  }
-                },
-                findings: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      finding: { type: 'string', description: 'Key clinical finding' },
-                      significance: { type: 'string', enum: ['low', 'moderate', 'high'] },
-                      evidence_level: { type: 'string', enum: ['weak', 'moderate', 'strong'] },
-                    },
-                    required: ['finding']
-                  }
-                },
-                study_quality: {
-                  type: 'object',
-                  properties: {
-                    sample_size: { type: 'number' },
-                    study_type: { type: 'string' },
-                    quality_score: { type: 'number', description: 'Quality score 1-5' },
-                  }
-                }
-              },
-              required: ['nutraceuticals', 'conditions', 'mechanisms', 'findings']
-            }
-          }
-        }],
-        tool_choice: { type: 'function', function: { name: 'extract_study_entities' } }
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('Lovable AI error:', aiResponse.status, errorText);
-      return new Response(
-        JSON.stringify({ error: 'AI extraction failed', details: errorText }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const aiResult = await aiResponse.json();
-    
-    // Parse tool call result
-    const toolCall = aiResult.choices[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      return new Response(
-        JSON.stringify({ error: 'AI did not return structured extraction' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const extractedData = JSON.parse(toolCall.function.arguments);
-    
-    console.log('📊 Extração retornada pela AI:', JSON.stringify(extractedData, null, 2));
-    console.log(`📊 Nutracêuticos extraídos: ${extractedData.nutraceuticals?.length || 0}`);
-    console.log(`📊 Condições extraídas: ${extractedData.conditions?.length || 0}`);
-    
-    // FALLBACK: If AI returned empty but gemini already had data, use gemini's extraction
+    // Fallback: usar dados do Gemini se AI retornou vazio
     if (extractedData.nutraceuticals.length === 0 && parsedContent.nutraceuticals?.length > 0) {
-      console.log('⚠️ AI retornou nutracêuticos vazios, usando dados do Gemini File Search');
+      console.log('⚠️ Usando fallback: dados do Gemini File Search');
       extractedData.nutraceuticals = parsedContent.nutraceuticals.map((n: any) => ({
         name: n.name,
         dosage: n.dosage || '',
@@ -282,7 +149,6 @@ Include both primary and secondary nutraceuticals mentioned.`
     }
 
     if (extractedData.conditions.length === 0 && parsedContent.conditions?.length > 0) {
-      console.log('⚠️ AI retornou condições vazias, usando dados do Gemini File Search');
       extractedData.conditions = parsedContent.conditions.map((c: any) => ({
         name: c.name,
         severity: 'moderate',
@@ -290,17 +156,17 @@ Include both primary and secondary nutraceuticals mentioned.`
       }));
     }
     
-    console.log(`✅ Dados finais: ${extractedData.nutraceuticals?.length || 0} nutracêuticos, ${extractedData.conditions?.length || 0} condições`);
+    console.log(`✅ EXTRAÇÃO COMPLETA: 3 stages executados`);
     
-    // Calculate extraction quality score
+    // Calculate quality score
     const qualityScore = calculateQualityScore(extractedData);
 
-    // Save to study_extractions table (study_id now expects UUID = processed_studies.id)
-    console.log(`💾 Salvando extração com study_id (UUID): ${studyId}`);
+    // Save to study_extractions
+    console.log(`💾 Salvando extração completa (3 stages)...`);
     const { data: extraction, error: insertError } = await supabase
       .from('study_extractions')
       .upsert({
-        study_id: studyId, // Now correctly using UUID (processed_studies.id)
+        study_id: studyId,
         extracted_data: extractedData,
         extraction_status: 'pending_review',
         extraction_quality_score: qualityScore,
@@ -317,27 +183,19 @@ Include both primary and secondary nutraceuticals mentioned.`
       );
     }
 
-    // Update processed_studies status using PRIMARY KEY (id)
-    console.log(`🔄 Atualizando status do estudo para 'processed'...`);
-    const { error: updateError } = await supabase
+    // Update processed_studies status
+    await supabase
       .from('processed_studies')
       .update({ kanban_status: 'processed' })
       .eq('id', studyId);
-    
-    if (updateError) {
-      console.error('❌ Erro ao atualizar status kanban:', updateError);
-    } else {
-      console.log('✅ Status kanban atualizado com sucesso');
-    }
 
-    // CRÍTICO: Atualizar analysis_data com estrutura que o frontend espera
-    console.log(`📊 Preparando frontendData para atualizar analysis_data...`);
-    
-    // Mapear para estrutura NtaiAnalysisResult exata
+    // Preparar frontendData com TODOS os stages
     const frontendData = {
       studyId: studyId,
       qualityScore: qualityScore,
       relevanceScore: qualityScore,
+      
+      // Stage 1
       extractedNutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
         name: n.name || 'Unknown',
         confidence: n.efficacy_score ?? 3
@@ -351,59 +209,36 @@ Include both primary and secondary nutraceuticals mentioned.`
         interaction: m.mechanism || 'Unknown mechanism',
         confidence: 3
       })),
-      extractedSideEffects: [], // Empty array for now, can be populated in future
+      extractedSideEffects: [],
       nutraceuticals: (extractedData.nutraceuticals || []).map((n: any) => ({
         name: n.name,
         dosage: n.dosage || '',
         relevance: n.efficacy_score ?? 3
-      }))
+      })),
+      
+      // Stage 2
+      molecularMechanisms: extractedData.molecular_mechanisms || [],
+      synergies: extractedData.synergies || [],
+      hierarchicalRelations: extractedData.hierarchical_relations || [],
+      
+      // Stage 3
+      dosages: extractedData.dosages || [],
+      detailedSideEffects: extractedData.side_effects || [],
+      contraindications: extractedData.contraindications || [],
+      clinicalOutcomes: extractedData.clinical_outcomes || [],
+      studyAssessment: extractedData.study_assessment || {},
+      
+      // Metadata
+      extractionStages: ['stage1_entities', 'stage2_mechanisms', 'stage3_clinical']
     };
     
-    console.log('🔍 DEBUG - frontendData ANTES do UPDATE:');
-    console.log(`   - studyId: ${frontendData.studyId}`);
-    console.log(`   - qualityScore: ${frontendData.qualityScore}`);
-    console.log(`   - extractedNutraceuticals: ${frontendData.extractedNutraceuticals.length} items`);
-    console.log(`   - extractedConditions: ${frontendData.extractedConditions.length} items`);
-    console.log(`   - extractedInteractions: ${frontendData.extractedInteractions.length} items`);
-    
-    if (frontendData.extractedNutraceuticals.length > 0) {
-      console.log('   📋 Primeiro nutracêutico:', JSON.stringify(frontendData.extractedNutraceuticals[0]));
-    }
-    if (frontendData.extractedConditions.length > 0) {
-      console.log('   📋 Primeira condição:', JSON.stringify(frontendData.extractedConditions[0]));
-    }
-    
-    console.log('💾 Executando UPDATE no Supabase...');
-    const { data: updateResult, error: updateDataError } = await supabase
+    console.log('💾 Atualizando analysis_data com dados dos 3 stages...');
+    await supabase
       .from('processed_studies')
       .update({ analysis_data: frontendData })
-      .eq('id', studyId)
-      .select('analysis_data');
+      .eq('id', studyId);
     
-    if (updateDataError) {
-      console.error('❌ ERRO ao atualizar analysis_data:');
-      console.error('   Error code:', updateDataError.code);
-      console.error('   Error message:', updateDataError.message);
-      console.error('   Error details:', JSON.stringify(updateDataError, null, 2));
-    } else {
-      console.log('✅ analysis_data atualizado COM SUCESSO');
-      console.log(`   - ${frontendData.extractedNutraceuticals.length} nutracêuticos salvos`);
-      console.log(`   - ${frontendData.extractedConditions.length} condições salvas`);
-      
-      if (updateResult && updateResult[0]) {
-        const savedData = updateResult[0].analysis_data as any;
-        console.log('🔍 VERIFICAÇÃO - Dados salvos no banco:');
-        console.log(`   - extractedNutraceuticals no banco: ${savedData.extractedNutraceuticals?.length || 0} items`);
-        console.log(`   - extractedConditions no banco: ${savedData.extractedConditions?.length || 0} items`);
-        
-        if (savedData.extractedNutraceuticals?.length !== frontendData.extractedNutraceuticals.length) {
-          console.error('⚠️ DISCREPÂNCIA: Número de nutracêuticos no banco difere do enviado!');
-        }
-        if (savedData.extractedConditions?.length !== frontendData.extractedConditions.length) {
-          console.error('⚠️ DISCREPÂNCIA: Número de condições no banco difere do enviado!');
-        }
-      }
-    }
+    console.log('✅ analysis_data atualizado com SUCESSO (3 stages)');
 
     return new Response(
       JSON.stringify({ 
@@ -412,138 +247,347 @@ Include both primary and secondary nutraceuticals mentioned.`
         extractionId: extraction?.id,
         qualityScore,
         relevanceScore: frontendData.relevanceScore,
-        // ✅ INCLUIR ARRAYS COMPLETOS (não só contagens!)
         extractedNutraceuticals: frontendData.extractedNutraceuticals,
         extractedConditions: frontendData.extractedConditions,
         extractedInteractions: frontendData.extractedInteractions,
         extractedSideEffects: frontendData.extractedSideEffects,
-        nutraceuticals: frontendData.nutraceuticals,
-        counts: {
-          nutraceuticals: frontendData.extractedNutraceuticals.length,
-          conditions: frontendData.extractedConditions.length,
-          mechanisms: extractedData.mechanisms?.length || 0,
-          findings: extractedData.findings?.length || 0,
-        }
+        // Stage 2
+        molecularMechanisms: frontendData.molecularMechanisms,
+        synergies: frontendData.synergies,
+        // Stage 3
+        dosages: frontendData.dosages,
+        detailedSideEffects: frontendData.detailedSideEffects,
+        clinicalOutcomes: frontendData.clinicalOutcomes,
+        extractionStages: frontendData.extractionStages
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Error in extract-study-entities function:', error);
-    
+  } catch (error: any) {
+    console.error('Error in extract-study-entities:', error);
     return new Response(
-      JSON.stringify({ error: 'Extraction failed', details: errorMessage }),
+      JSON.stringify({ error: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
-// Helper to extract text from parsed content
-function extractTextContent(parsedContent: any): string {
-  if (!parsedContent) {
-    console.log('⚠️ No parsedContent provided');
-    return '';
+// Helper: Call Lovable AI Gateway
+async function callLovableAI(systemPrompt: string, userPrompt: string, tools: any[]) {
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-3-pro-preview',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      tools,
+      tool_choice: { type: 'function', function: { name: tools[0].function.name } }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Lovable AI error:', response.status, errorText);
+    throw new Error(`AI extraction failed: ${errorText}`);
   }
-  
-  console.log('📊 Detecting parsedContent structure:', Object.keys(parsedContent));
-  
-  // PRIORIDADE 1: Estrutura do parse-study (Unstructured API)
-  if (parsedContent.elements || parsedContent.sections || parsedContent.tables) {
-    let text = '';
-    
-    // Extrair de "elements" (formato raw do Unstructured API)
-    if (Array.isArray(parsedContent.elements)) {
-      console.log(`📄 Extracting from ${parsedContent.elements.length} elements`);
-      text = parsedContent.elements
-        .map((el: any) => el.text || '')
-        .filter((t: string) => t.trim())
-        .join('\n\n');
-    }
-    
-    // Ou extrair de "sections" (formato estruturado do parse-study)
-    else if (Array.isArray(parsedContent.sections)) {
-      console.log(`📚 Extracting from ${parsedContent.sections.length} sections`);
-      text = parsedContent.sections
-        .map((section: any) => {
-          const title = section.title || '';
-          const content = Array.isArray(section.content)
-            ? section.content.map((c: any) => c.text || '').join('\n')
-            : (section.text || '');
-          return `### ${title}\n${content}`;
-        })
-        .join('\n\n');
-    }
-    
-    // Incluir tabelas se existirem
-    if (Array.isArray(parsedContent.tables) && parsedContent.tables.length > 0) {
-      console.log(`📊 Including ${parsedContent.tables.length} tables`);
-      text += '\n\n### TABLES\n' + parsedContent.tables
-        .map((t: any) => t.text || '')
-        .join('\n\n');
-    }
-    
-    console.log(`✅ Extracted ${text.length} chars from parse-study structure`);
-    console.log(`📝 Preview: ${text.substring(0, 200)}...`);
-    return text.slice(0, 50000);
-  }
-  
-  // PRIORIDADE 2: Estrutura do gemini-file-search (ExtractedStudyData)
-  if (parsedContent.abstract || parsedContent.nutraceuticals || parsedContent.conditions) {
-    console.log('🤖 Using gemini-file-search structure');
-    let text = '';
-    if (parsedContent.title) text += `Title: ${parsedContent.title}\n\n`;
-    if (parsedContent.abstract) text += `Abstract: ${parsedContent.abstract}\n\n`;
-    if (parsedContent.authors?.length) text += `Authors: ${parsedContent.authors.join(', ')}\n\n`;
-    if (parsedContent.year) text += `Year: ${parsedContent.year}\n\n`;
-    if (parsedContent.journal) text += `Journal: ${parsedContent.journal}\n\n`;
-    
-    // Include nutraceuticals already extracted by gemini
-    if (parsedContent.nutraceuticals?.length) {
-      text += '\n\nNutraceuticals found in study:\n';
-      parsedContent.nutraceuticals.forEach((n: any) => {
-        text += `- ${n.name}`;
-        if (n.dosage) text += ` (Dosage: ${n.dosage})`;
-        if (n.effects) text += `: ${n.effects}`;
-        text += '\n';
-      });
-    }
-    
-    // Include conditions already extracted
-    if (parsedContent.conditions?.length) {
-      text += '\n\nHealth conditions addressed:\n';
-      parsedContent.conditions.forEach((c: any) => {
-        text += `- ${c.name} (${c.relationship_type})`;
-        if (c.efficacy_description) text += `: ${c.efficacy_description}`;
-        text += '\n';
-      });
-    }
-    
-    console.log(`✅ Extracted ${text.length} chars from gemini structure`);
-    return text.slice(0, 50000);
-  }
-  
-  console.error('❌ Unknown parsedContent structure - cannot extract text');
-  console.error('Available keys:', Object.keys(parsedContent));
-  return '';
+
+  const result = await response.json();
+  return result.choices[0]?.message?.tool_calls?.[0] || null;
 }
 
-// Calculate extraction quality score
+// Helper: Extract text from parsed content
+function extractTextContent(parsedContent: any): string {
+  if (parsedContent.full_text && typeof parsedContent.full_text === 'string') {
+    return parsedContent.full_text;
+  }
+  
+  if (parsedContent.abstract && typeof parsedContent.abstract === 'string') {
+    return parsedContent.abstract;
+  }
+  
+  if (Array.isArray(parsedContent.elements)) {
+    return parsedContent.elements
+      .filter((el: any) => el.type === 'text' || el.type === 'paragraph')
+      .map((el: any) => el.content)
+      .join('\n\n');
+  }
+  
+  if (Array.isArray(parsedContent.sections)) {
+    return parsedContent.sections
+      .map((section: any) => {
+        let text = section.title ? `# ${section.title}\n\n` : '';
+        if (section.content) text += section.content;
+        return text;
+      })
+      .join('\n\n');
+  }
+  
+  return JSON.stringify(parsedContent);
+}
+
+// Helper: Calculate quality score
 function calculateQualityScore(extracted: any): number {
   let score = 0;
+  const weights = {
+    nutraceuticals: 20,
+    conditions: 20,
+    mechanisms: 15,
+    findings: 10,
+    molecular_mechanisms: 10,
+    synergies: 10,
+    dosages: 10,
+    side_effects: 5
+  };
   
-  // Check completeness
-  if (extracted.nutraceuticals?.length > 0) score += 25;
-  if (extracted.conditions?.length > 0) score += 25;
-  if (extracted.mechanisms?.length > 0) score += 20;
-  if (extracted.findings?.length > 0) score += 20;
+  if (extracted.nutraceuticals?.length > 0) score += weights.nutraceuticals;
+  if (extracted.conditions?.length > 0) score += weights.conditions;
+  if (extracted.mechanisms?.length > 0) score += weights.mechanisms;
+  if (extracted.findings?.length > 0) score += weights.findings;
+  if (extracted.molecular_mechanisms?.length > 0) score += weights.molecular_mechanisms;
+  if (extracted.synergies?.length > 0) score += weights.synergies;
+  if (extracted.dosages?.length > 0) score += weights.dosages;
+  if (extracted.side_effects?.length > 0) score += weights.side_effects;
   
-  // Check detail level
-  const hasDetailedNutraceuticals = extracted.nutraceuticals?.some((n: any) => n.dosage || n.efficacy_score);
-  if (hasDetailedNutraceuticals) score += 5;
-  
-  const hasDetailedConditions = extracted.conditions?.some((c: any) => c.severity || c.treatability_score);
-  if (hasDetailedConditions) score += 5;
+  return Math.min(5, Math.round((score / 100) * 5));
+}
 
-  return Math.min(score, 100);
+// ==================== STAGE 1 TOOLS ====================
+function getStage1Tools() {
+  return [{
+    type: 'function',
+    function: {
+      name: 'extract_study_entities',
+      description: 'Extract basic scientific entities from veterinary study',
+      parameters: {
+        type: 'object',
+        properties: {
+          nutraceuticals: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                dosage: { type: 'string' },
+                efficacy_score: { type: 'number' },
+              },
+              required: ['name']
+            }
+          },
+          conditions: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                severity: { type: 'string', enum: ['low', 'moderate', 'high', 'critical'] },
+                treatability_score: { type: 'number' },
+              },
+              required: ['name']
+            }
+          },
+          mechanisms: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                mechanism: { type: 'string' },
+                nutraceutical: { type: 'string' },
+              },
+              required: ['mechanism']
+            }
+          },
+          findings: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                finding: { type: 'string' },
+                significance: { type: 'string', enum: ['low', 'moderate', 'high'] },
+              },
+              required: ['finding']
+            }
+          },
+          study_quality: {
+            type: 'object',
+            properties: {
+              sample_size: { type: 'number' },
+              study_type: { type: 'string' },
+              quality_score: { type: 'number' },
+            }
+          }
+        },
+        required: ['nutraceuticals', 'conditions']
+      }
+    }
+  }];
+}
+
+// ==================== STAGE 2 TOOLS ====================
+function getStage2Tools() {
+  return [{
+    type: 'function',
+    function: {
+      name: 'extract_mechanisms',
+      description: 'Extract molecular mechanisms, pathways, synergies, and interactions',
+      parameters: {
+        type: 'object',
+        properties: {
+          molecular_mechanisms: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                type: { type: 'string', enum: ['pathway', 'enzyme', 'receptor', 'gene', 'protein', 'mediator'] },
+                action: { type: 'string', enum: ['inhibition', 'activation', 'modulation'] },
+                target: { type: 'string' },
+                downstream_effects: { type: 'array', items: { type: 'string' } },
+                category: { type: 'string', enum: ['inflammatory', 'oxidative_stress', 'metabolic', 'immunomodulatory', 'neuroprotective', 'other'] }
+              },
+              required: ['name', 'action']
+            }
+          },
+          synergies: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                compound1: { type: 'string' },
+                compound2: { type: 'string' },
+                synergy_type: { type: 'string', enum: ['bioavailability_enhancement', 'efficacy_enhancement', 'antagonism', 'potentiation', 'additive'] },
+                effect: { type: 'string' },
+                magnitude: { type: 'number' }
+              },
+              required: ['compound1', 'compound2', 'effect']
+            }
+          },
+          hierarchical_relations: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                from: { type: 'string' },
+                from_type: { type: 'string', enum: ['nutraceutical', 'mechanism', 'effect', 'condition'] },
+                to: { type: 'string' },
+                to_type: { type: 'string', enum: ['nutraceutical', 'mechanism', 'effect', 'condition'] },
+                relation_type: { type: 'string' }
+              },
+              required: ['from', 'from_type', 'to', 'to_type', 'relation_type']
+            }
+          }
+        },
+        required: ['molecular_mechanisms']
+      }
+    }
+  }];
+}
+
+// ==================== STAGE 3 TOOLS ====================
+function getStage3Tools() {
+  return [{
+    type: 'function',
+    function: {
+      name: 'extract_clinical_context',
+      description: 'Extract dosages, side effects, contraindications, and clinical outcomes',
+      parameters: {
+        type: 'object',
+        properties: {
+          dosages: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                compound: { type: 'string' },
+                amount: { type: 'number' },
+                unit: { type: 'string' },
+                frequency: { type: 'string' },
+                duration: { type: 'string' },
+                species: { type: 'string', enum: ['human', 'canine', 'feline', 'equine', 'other'] },
+                condition: { type: 'string' },
+                route: { type: 'string', enum: ['oral', 'topical', 'intravenous', 'subcutaneous', 'other'] }
+              },
+              required: ['compound', 'amount', 'unit']
+            }
+          },
+          side_effects: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                description: { type: 'string' },
+                severity: { type: 'string', enum: ['mild', 'moderate', 'severe', 'life_threatening'] },
+                frequency: { type: 'string', enum: ['very_common', 'common', 'uncommon', 'rare', 'very_rare', 'unknown'] },
+                dose_dependent: { type: 'boolean' },
+                reversibility: { type: 'string', enum: ['reversible', 'irreversible', 'unknown'] }
+              },
+              required: ['name', 'severity']
+            }
+          },
+          contraindications: {
+            type: 'array',
+            items: { type: 'string' }
+          },
+          clinical_outcomes: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                outcome: { type: 'string' },
+                outcome_type: { type: 'string', enum: ['primary', 'secondary'] },
+                p_value: { type: 'string' },
+                effect_size: { type: 'string' },
+                significance: { type: 'string', enum: ['significant', 'not_significant', 'not_reported'] }
+              },
+              required: ['outcome']
+            }
+          },
+          study_assessment: {
+            type: 'object',
+            properties: {
+              sample_size: { type: 'number' },
+              study_duration: { type: 'string' },
+              randomization: { type: 'boolean' },
+              blinding: { type: 'string', enum: ['single', 'double', 'triple', 'none'] },
+              placebo_controlled: { type: 'boolean' },
+              quality_score: { type: 'number' },
+              limitations: { type: 'array', items: { type: 'string' } }
+            }
+          }
+        },
+        required: ['dosages', 'side_effects']
+      }
+    }
+  }];
+}
+
+// ==================== DEFAULT PROMPTS ====================
+function getDefaultStage1SystemPrompt(): string {
+  return `You are a veterinary nutraceutical research expert. Extract basic entities: nutraceuticals, health conditions, mechanisms, and findings. Be comprehensive.`;
+}
+
+function getDefaultStage1UserPrompt(): string {
+  return `Extract all nutraceuticals, conditions, mechanisms, and key findings from this study:\n\n{{TEXT_CONTENT}}`;
+}
+
+function getDefaultStage2SystemPrompt(): string {
+  return `You are a molecular biology expert. Extract detailed molecular mechanisms, synergies between compounds, and hierarchical relationships. Focus on pathways, enzymes, receptors, and interaction types.`;
+}
+
+function getDefaultStage2UserPrompt(): string {
+  return `Based on these nutraceuticals: {{STAGE1_NUTRACEUTICALS}}\n\nExtract molecular mechanisms, synergies, and hierarchical relations from:\n\n{{TEXT_CONTENT}}`;
+}
+
+function getDefaultStage3SystemPrompt(): string {
+  return `You are a clinical veterinary expert. Extract precise dosages, side effects, contraindications, and clinical outcomes. Include species-specific information.`;
+}
+
+function getDefaultStage3UserPrompt(): string {
+  return `Based on these nutraceuticals: {{STAGE1_NUTRACEUTICALS}}\n\nExtract dosages, side effects, contraindications, and clinical outcomes from:\n\n{{TEXT_CONTENT}}`;
 }

@@ -1,8 +1,75 @@
 
+// Stage 2 - Molecular Mechanisms
+export interface MolecularMechanism {
+  name: string;
+  type: 'pathway' | 'enzyme' | 'receptor' | 'gene' | 'protein' | 'mediator';
+  action: 'inhibition' | 'activation' | 'modulation';
+  target?: string;
+  downstream_effects?: string[];
+  category?: 'inflammatory' | 'oxidative_stress' | 'metabolic' | 'immunomodulatory' | 'neuroprotective' | 'other';
+}
+
+export interface Synergy {
+  compound1: string;
+  compound2: string;
+  synergy_type: 'bioavailability_enhancement' | 'efficacy_enhancement' | 'antagonism' | 'potentiation' | 'additive';
+  effect: string;
+  magnitude?: number;
+}
+
+export interface HierarchicalRelation {
+  from: string;
+  from_type: 'nutraceutical' | 'mechanism' | 'effect' | 'condition';
+  to: string;
+  to_type: 'nutraceutical' | 'mechanism' | 'effect' | 'condition';
+  relation_type: string;
+}
+
+// Stage 3 - Clinical Context
+export interface ContextualDosage {
+  compound: string;
+  amount: number;
+  unit: string;
+  frequency?: string;
+  duration?: string;
+  species?: 'human' | 'canine' | 'feline' | 'equine' | 'other';
+  condition?: string;
+  route?: 'oral' | 'topical' | 'intravenous' | 'subcutaneous' | 'other';
+}
+
+export interface DetailedSideEffect {
+  name: string;
+  description?: string;
+  severity: 'mild' | 'moderate' | 'severe' | 'life_threatening';
+  frequency?: 'very_common' | 'common' | 'uncommon' | 'rare' | 'very_rare' | 'unknown';
+  dose_dependent?: boolean;
+  reversibility?: 'reversible' | 'irreversible' | 'unknown';
+}
+
+export interface ClinicalOutcome {
+  outcome: string;
+  outcome_type: 'primary' | 'secondary';
+  p_value?: string;
+  effect_size?: string;
+  significance?: 'significant' | 'not_significant' | 'not_reported';
+}
+
+export interface StudyAssessment {
+  sample_size?: number;
+  study_duration?: string;
+  randomization?: boolean;
+  blinding?: 'single' | 'double' | 'triple' | 'none';
+  placebo_controlled?: boolean;
+  quality_score?: number;
+  limitations?: string[];
+}
+
 export interface NtaiAnalysisResult {
   studyId: string;
   qualityScore: number;
   relevanceScore: number;
+  
+  // Stage 1 - Basic Entities
   nutraceuticals?: Array<{
     name: string;
     description?: string;
@@ -37,6 +104,21 @@ export interface NtaiAnalysisResult {
     severity: string;
     confidence: number;
   }>;
+  
+  // Stage 2 - Molecular Mechanisms & Relations
+  molecularMechanisms?: MolecularMechanism[];
+  synergies?: Synergy[];
+  hierarchicalRelations?: HierarchicalRelation[];
+  
+  // Stage 3 - Clinical Context
+  dosages?: ContextualDosage[];
+  detailedSideEffects?: DetailedSideEffect[];
+  contraindications?: string[];
+  clinicalOutcomes?: ClinicalOutcome[];
+  studyAssessment?: StudyAssessment;
+  
+  // Metadata
+  extractionStages?: string[];
 }
 
 export interface SankeyData {

@@ -239,15 +239,24 @@ export const useProcessingLogic = (
           throw new Error(`Erro extração: ${extractError.message}`);
         }
 
-        addLogEntry(`✅ ${extractData?.extractedNutraceuticals?.length || 0} nutracêuticos extraídos`);
+        // Extração em 3 stages
+        const stages = extractData?.extractionStages || [];
+        addLogEntry(`✅ Extração completa: ${stages.length} stages executados`);
+        addLogEntry(`📊 Stage 1: ${extractData?.extractedNutraceuticals?.length || 0} nutracêuticos, ${extractData?.extractedConditions?.length || 0} condições`);
         
-        // 🔍 DEBUG - Dados recebidos de extract-study-entities
-        console.log('🔍 DEBUG - Dados recebidos de extract-study-entities:');
-        console.log(`   - extractedNutraceuticals: ${extractData?.extractedNutraceuticals?.length || 0} items`);
-        console.log(`   - extractedConditions: ${extractData?.extractedConditions?.length || 0} items`);
-        if (extractData?.extractedNutraceuticals && extractData.extractedNutraceuticals.length > 0) {
-          console.log(`   - Exemplo nutraceutical:`, extractData.extractedNutraceuticals[0]);
+        if (extractData?.molecularMechanisms || extractData?.synergies) {
+          addLogEntry(`🧬 Stage 2: ${extractData?.molecularMechanisms?.length || 0} mecanismos, ${extractData?.synergies?.length || 0} sinergias`);
         }
+        
+        if (extractData?.dosages || extractData?.detailedSideEffects) {
+          addLogEntry(`💊 Stage 3: ${extractData?.dosages?.length || 0} dosagens, ${extractData?.detailedSideEffects?.length || 0} efeitos colaterais`);
+        }
+        
+        console.log('🔍 DEBUG - Extração 3 stages completa:', {
+          stage1: `${extractData?.extractedNutraceuticals?.length || 0} nutracêuticos`,
+          stage2: `${extractData?.molecularMechanisms?.length || 0} mecanismos`,
+          stage3: `${extractData?.dosages?.length || 0} dosagens`
+        });
 
         // ETAPA 3: SALVAMENTO
         updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
@@ -257,10 +266,23 @@ export const useProcessingLogic = (
           studyId: item.id,
           qualityScore: extractData?.qualityScore || 0,
           relevanceScore: extractData?.relevanceScore || 0,
+          // Stage 1
           extractedNutraceuticals: extractData?.extractedNutraceuticals || [],
           extractedConditions: extractData?.extractedConditions || [],
           extractedInteractions: extractData?.extractedInteractions || [],
-          extractedSideEffects: extractData?.extractedSideEffects || []
+          extractedSideEffects: extractData?.extractedSideEffects || [],
+          // Stage 2
+          molecularMechanisms: extractData?.molecularMechanisms || [],
+          synergies: extractData?.synergies || [],
+          hierarchicalRelations: extractData?.hierarchicalRelations || [],
+          // Stage 3
+          dosages: extractData?.dosages || [],
+          detailedSideEffects: extractData?.detailedSideEffects || [],
+          contraindications: extractData?.contraindications || [],
+          clinicalOutcomes: extractData?.clinicalOutcomes || [],
+          studyAssessment: extractData?.studyAssessment || {},
+          // Metadata
+          extractionStages: extractData?.extractionStages || []
         };
         
         setAnalysisResult(result);
