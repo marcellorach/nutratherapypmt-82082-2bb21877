@@ -1651,6 +1651,25 @@
         "title": "Condições Identificadas e Eficácia",
         "none": "Nenhuma condição identificada."
       },
+      "triplets": {
+        "title": "Triplets Extraídos",
+        "total": "Total",
+        "byType": "Por Tipo de Relação",
+        "byStatus": "Por Status",
+        "confidence": "Confiança",
+        "avgConfidence": "Confiança Média",
+        "pending": "Pendentes",
+        "approved": "Aprovados",
+        "rejected": "Rejeitados",
+        "treats": "Trata",
+        "hasMechanism": "Mecanismo",
+        "synergizes": "Sinergia",
+        "subject": "Sujeito",
+        "predicate": "Predicado",
+        "object": "Objeto",
+        "noTriplets": "Nenhum triplet extraído ainda. Processe o estudo para gerar triplets.",
+        "distribution": "Distribuição por Tipo"
+      },
       "table": {
         "study": "Estudo",
         "source": "Fonte",
