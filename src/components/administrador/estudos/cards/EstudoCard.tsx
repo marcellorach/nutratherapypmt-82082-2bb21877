@@ -333,7 +333,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                       variant="outline" 
                       className="bg-green-50 text-green-700 border-green-200 text-xs"
                     >
-                      🟢 {interaction.nutraceutical}: {interaction.interaction.substring(0, 30)}...
+                      🟢 {interaction.nutraceutical || 'N/A'}: {(interaction.interaction || interaction.effect || '').substring(0, 30)}...
                     </Badge>
                   ))}
                   {interactions.length > 3 && (
