@@ -1506,6 +1506,43 @@
     }
   },
   "studies": {
+    "vetGraphRAG": {
+      "title": "VetGraphRAG",
+      "subtitle": "Knowledge Extraction Pipeline",
+      "description": "Sistema híbrido de extração e construção de grafo de conhecimento veterinário a partir de estudos científicos"
+    },
+    "pipeline": {
+      "title": "Pipeline de Processamento",
+      "step1": { "name": "Upload PDF", "desc": "Envio do estudo científico" },
+      "step2": { "name": "Extração IA", "desc": "Processamento com Gemini AI" },
+      "step3": { "name": "Triplets", "desc": "Extração de entidades e relações" },
+      "step4": { "name": "Knowledge Graph", "desc": "Indexação em Neo4j + Vector Store" }
+    },
+    "systemStatus": {
+      "sectionTitle": "Status dos Sistemas",
+      "title": "Status dos Sistemas",
+      "check": "Verificar",
+      "checking": "Verificando...",
+      "database": "Banco de Dados",
+      "databaseDesc": "Supabase conectado e operacional",
+      "neo4j": "Knowledge Graph",
+      "neo4jConnected": "Neo4j conectado e operacional",
+      "neo4jNotConfigured": "Neo4j não configurado",
+      "llm": "IA Generativa",
+      "llmGeminiConfigured": "Gemini AI configurado",
+      "llmLovableAI": "Lovable AI disponível",
+      "llmNotConfigured": "Nenhum LLM configurado",
+      "storage": "Armazenamento",
+      "storageConnected": "Storage conectado e acessível",
+      "storageNotAccessible": "Storage não acessível",
+      "connected": "Conectado",
+      "disconnected": "Desconectado",
+      "allReady": "Todos prontos",
+      "someOffline": "Alguns offline"
+    },
+    "uploadSection": {
+      "sectionTitle": "Upload de Estudos"
+    },
     "upload": {
       "title": "🤖 GEMINI AI - Upload de PDF",
       "description": "Sistema de extração automática com Inteligência Artificial",
