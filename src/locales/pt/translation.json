@@ -1506,6 +1506,12 @@
     }
   },
   "studies": {
+    "upload": {
+      "title": "🤖 GEMINI AI - Upload de PDF",
+      "description": "Sistema de extração automática com Inteligência Artificial",
+      "dropzone": "Arraste PDFs aqui ou clique para selecionar",
+      "formats": "Suporta arquivos PDF até 20MB"
+    },
     "header": {
       "title": "Estudos Científicos",
       "description": "Gerenciamento e análise de estudos sobre nutracêuticos",
@@ -3812,5 +3818,27 @@
       "discoveriesTab": "Descobertas"
     }
   },
-  "campaignManagement": "Gestão de Campanhas"
+  "campaignManagement": "Gestão de Campanhas",
+  "systemStatus": {
+    "title": "Status dos Sistemas",
+    "database": "Banco de Dados",
+    "databaseDesc": "Lovable Cloud conectado",
+    "neo4j": "Knowledge Graph",
+    "neo4jNotConfigured": "Neo4j não configurado",
+    "neo4jConnectionFailed": "Falha na conexão com Neo4j",
+    "neo4jConnected": "Neo4j conectado e operacional",
+    "neo4jError": "Erro ao verificar Neo4j",
+    "llm": "IA Generativa",
+    "llmGeminiConfigured": "Google Gemini configurado",
+    "llmLovableAI": "Lovable AI disponível",
+    "llmError": "Erro ao verificar LLM",
+    "storage": "Armazenamento",
+    "storageConnected": "Storage ativo",
+    "storageError": "Erro ao acessar storage",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "checking": "Verificando...",
+    "allReady": "Todos prontos",
+    "someOffline": "Alguns offline"
+  }
 }
