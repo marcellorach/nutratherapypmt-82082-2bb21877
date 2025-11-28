@@ -37,7 +37,14 @@ async function executeCypherQuery(
 ): Promise<any> {
   const authHeader = 'Basic ' + btoa(`${credentials.username}:${credentials.password}`);
   
-  const response = await fetch(`${credentials.uri}/db/neo4j/query/v2`, {
+  // Converter URI neo4j+s:// para https:// (neo4j:// para http://)
+  const httpUri = credentials.uri
+    .replace('neo4j+s://', 'https://')
+    .replace('neo4j://', 'http://');
+  
+  console.log(`🔗 Neo4j sync: ${httpUri}/db/neo4j/query/v2`);
+  
+  const response = await fetch(`${httpUri}/db/neo4j/query/v2`, {
     method: 'POST',
     headers: {
       'Authorization': authHeader,
