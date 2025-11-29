@@ -51,7 +51,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Network className="h-16 w-16 text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">{t('ntai.triplets.noTriplets')}</p>
+        <p className="text-muted-foreground">{t('admin.ntai.triplets.noTriplets')}</p>
       </div>
     );
   }
@@ -101,7 +101,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('ntai.triplets.total')}
+              {t('admin.ntai.triplets.total')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -112,7 +112,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('ntai.triplets.pending')}
+              {t('admin.ntai.triplets.pending')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -123,7 +123,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('ntai.triplets.approved')}
+              {t('admin.ntai.triplets.approved')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -135,7 +135,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              {t('ntai.triplets.avgConfidence')}
+              {t('admin.ntai.triplets.avgConfidence')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -147,7 +147,7 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
       {/* Distribution Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('ntai.triplets.distribution')}</CardTitle>
+          <CardTitle>{t('admin.ntai.triplets.distribution')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
@@ -165,19 +165,19 @@ const NtaiTripletsStatsTab: React.FC<NtaiTripletsStatsTabProps> = ({ studyId }) 
       {/* Triplets Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('ntai.triplets.title')}</CardTitle>
+          <CardTitle>{t('admin.ntai.triplets.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b">
                 <tr className="text-left">
-                  <th className="pb-2 font-medium">{t('ntai.triplets.subject')}</th>
+                  <th className="pb-2 font-medium">{t('admin.ntai.triplets.subject')}</th>
                   <th className="pb-2 font-medium text-center">→</th>
-                  <th className="pb-2 font-medium">{t('ntai.triplets.predicate')}</th>
+                  <th className="pb-2 font-medium">{t('admin.ntai.triplets.predicate')}</th>
                   <th className="pb-2 font-medium text-center">→</th>
-                  <th className="pb-2 font-medium">{t('ntai.triplets.object')}</th>
-                  <th className="pb-2 font-medium text-center">{t('ntai.triplets.confidence')}</th>
+                  <th className="pb-2 font-medium">{t('admin.ntai.triplets.object')}</th>
+                  <th className="pb-2 font-medium text-center">{t('admin.ntai.triplets.confidence')}</th>
                   <th className="pb-2 font-medium text-center">Status</th>
                 </tr>
               </thead>
