@@ -1545,21 +1545,24 @@
     },
     "dataArchitecture": {
       "title": "Arquitetura do Knowledge Graph",
-      "sourceLabel": "Entidades Fonte",
-      "predicateLabel": "Predicados",
-      "targetLabel": "Entidades Alvo",
       "entities": {
         "nutraceutical": "Nutracêutico",
-        "drug": "Fármaco",
-        "breed": "Raça",
         "condition": "Condição",
         "mechanism": "Mecanismo",
+        "breed": "Raça",
         "species": "Espécie"
+      },
+      "examples": {
+        "nutraceutical": "Curcumina",
+        "condition": "Artrite",
+        "mechanism": "Anti-inflamatório",
+        "breed": "Labrador",
+        "species": "Canino"
       },
       "relations": {
         "treats": "TRATA",
         "modulates": "MODULA",
-        "prevents": "PREVINE",
+        "predisposedTo": "PREDISPOSTO",
         "affects": "AFETA"
       },
       "tripletExplanation": "Subject → Predicate → Object (ex: Curcumina TRATA Artrite)"

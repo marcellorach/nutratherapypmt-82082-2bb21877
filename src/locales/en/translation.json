@@ -1545,21 +1545,24 @@
     },
     "dataArchitecture": {
       "title": "Knowledge Graph Architecture",
-      "sourceLabel": "Source Entities",
-      "predicateLabel": "Predicates",
-      "targetLabel": "Target Entities",
       "entities": {
         "nutraceutical": "Nutraceutical",
-        "drug": "Drug",
-        "breed": "Breed",
         "condition": "Condition",
         "mechanism": "Mechanism",
+        "breed": "Breed",
         "species": "Species"
+      },
+      "examples": {
+        "nutraceutical": "Curcumin",
+        "condition": "Arthritis",
+        "mechanism": "Anti-inflammatory",
+        "breed": "Labrador",
+        "species": "Canine"
       },
       "relations": {
         "treats": "TREATS",
         "modulates": "MODULATES",
-        "prevents": "PREVENTS",
+        "predisposedTo": "PREDISPOSED",
         "affects": "AFFECTS"
       },
       "tripletExplanation": "Subject → Predicate → Object (e.g., Curcumin TREATS Arthritis)"
