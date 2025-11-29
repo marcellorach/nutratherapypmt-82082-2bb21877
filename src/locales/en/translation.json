@@ -1543,6 +1543,27 @@
     "uploadSection": {
       "sectionTitle": "Study Upload"
     },
+    "dataArchitecture": {
+      "title": "Knowledge Graph Architecture",
+      "sourceLabel": "Source Entities",
+      "predicateLabel": "Predicates",
+      "targetLabel": "Target Entities",
+      "entities": {
+        "nutraceutical": "Nutraceutical",
+        "drug": "Drug",
+        "breed": "Breed",
+        "condition": "Condition",
+        "mechanism": "Mechanism",
+        "species": "Species"
+      },
+      "relations": {
+        "treats": "TREATS",
+        "modulates": "MODULATES",
+        "prevents": "PREVENTS",
+        "affects": "AFFECTS"
+      },
+      "tripletExplanation": "Subject → Predicate → Object (e.g., Curcumin TREATS Arthritis)"
+    },
     "upload": {
       "title": "🤖 GEMINI AI - PDF Upload",
       "description": "Automatic extraction system with Artificial Intelligence",
