@@ -2,17 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, ArrowRight, Settings, Zap } from "lucide-react";
+import { Brain, ArrowRight, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
 import NtaiProcessCard from './NtaiProcessCard';
-import NtaiProcessingLog from './NtaiProcessingLog';
+import NtaiActiveProcessingCard from './NtaiActiveProcessingCard';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
 import NtaiPipelineVisualization from './NtaiPipelineVisualization';
-import ParsedDataViewer from './ParsedDataViewer';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +29,7 @@ const NtaiProcessingSection: React.FC = () => {
     activeItemIndex,
     analysisResult,
     aiConfigs,
+    calculatedProgress,
     toggleItemSelection,
     handleSelectAll,
     addToQueue,
@@ -54,17 +54,13 @@ const NtaiProcessingSection: React.FC = () => {
     description: string;
   }
   
-  const [logVisible, setLogVisible] = React.useState(true);
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
-  const [parsedData, setParsedData] = useState<any>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
     { name: '📤 Upload', status: 'pending', description: 'Arquivo no storage Supabase' },
     { name: '🤖 Gemini AI', status: 'pending', description: 'Análise com Google Gemini 2.5 Flash' },
     { name: '✅ Completo', status: 'pending', description: 'Dados extraídos e salvos' },
   ]);
   const { toast } = useToast();
-  
-  const toggleLogVisibility = () => setLogVisible(!logVisible);
 
   const handleDeleteStudies = async () => {
     try {
@@ -116,12 +112,7 @@ const NtaiProcessingSection: React.FC = () => {
 
       if (parseError) throw new Error(`Parse failed: ${parseError.message}`);
       
-      // Armazenar dados do parsing
-      if (parseData?.parsedData) {
-        setParsedData(parseData.parsedData);
-      }
-      
-      setPipelineStages(stages => stages.map((s, i) => 
+      setPipelineStages(stages => stages.map((s, i) =>
         i === 1 ? { ...s, status: 'complete' as const } : s
       ));
 
@@ -173,15 +164,10 @@ const NtaiProcessingSection: React.FC = () => {
               🤖 Gemini 2.5 Flash
             </Badge>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={toggleLogVisibility}>
-              {logVisible ? t('studies.ntai.hideLog') : t('studies.ntai.showLog')}
-            </Button>
-            <Button variant="outline" size="sm" className="flex items-center gap-1">
-              <Settings className="h-4 w-4" />
-              <span>{t('studies.ntai.settings')}</span>
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" className="flex items-center gap-1">
+            <Settings className="h-4 w-4" />
+            <span>{t('studies.ntai.settings')}</span>
+          </Button>
         </div>
         
         {/* Mostra informações sobre o processamento atual */}
@@ -199,14 +185,6 @@ const NtaiProcessingSection: React.FC = () => {
             Extrai automaticamente nutracêuticos, condições de saúde e metadados dos estudos científicos usando IA generativa.
           </div>
         </div>
-        
-        {logVisible && (
-          <NtaiProcessingLog 
-            entries={logEntries} 
-            onClearLog={clearLogs}
-            onExportLog={exportLogs}
-          />
-        )}
         
         {processingStudy && (
           <div className="mb-6">
@@ -239,18 +217,32 @@ const NtaiProcessingSection: React.FC = () => {
           onStartProcessing={startProcessing}
         />
           
+          {/* Active Processing Card - Full Width with Integrated Log */}
+          {processingActive && activeItemIndex >= 0 && processQueue[activeItemIndex] && (
+            <NtaiActiveProcessingCard
+              item={processQueue[activeItemIndex]}
+              logEntries={logEntries}
+              calculatedProgress={calculatedProgress}
+              onClearLog={clearLogs}
+              onExportLog={exportLogs}
+            />
+          )}
+
+          {/* Queue cards for non-active items */}
           {processQueue.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {processQueue.map((item, index) => (
-                <NtaiProcessCard 
-                  key={`${item.id}-${index}`} 
-                  item={item} 
-                  isActive={index === activeItemIndex}
-                  onRemove={removeFromQueue}
-                />
-              ))}
+              {processQueue
+                .filter((_, index) => !(processingActive && index === activeItemIndex))
+                .map((item, index) => (
+                  <NtaiProcessCard 
+                    key={`${item.id}-${index}`} 
+                    item={item} 
+                    isActive={false}
+                    onRemove={removeFromQueue}
+                  />
+                ))}
             </div>
-          ) : (
+          ) : !processingActive && (
             <div className="border rounded-md p-8 text-center text-gray-500">
               {t('studies.ntai.queueEmpty')}
             </div>

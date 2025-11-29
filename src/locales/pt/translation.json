@@ -1755,7 +1755,23 @@
         "statusInReview": "Em Revisão",
         "statusManual": "Manual",
         "statusUnknown": "Desconhecido"
-      }
+      },
+      "liveLog": "Log em Tempo Real",
+      "events": "eventos",
+      "waitingLogs": "Aguardando início do processamento...",
+      "statusExtracting": "Extraindo dados do PDF...",
+      "statusAnalyzing": "Analisando com IA...",
+      "statusStandardizing": "Padronizando dados...",
+      "statusProcessing": "Processando...",
+      "progressLabel": "Progresso da extração",
+      "source": "Fonte",
+      "manualImport": "Importação Manual",
+      "importedAgo": "Importado: há menos de um dia",
+      "showAll": "Mostrar Todos",
+      "showErrorsOnly": "Apenas Erros",
+      "noErrors": "Nenhum erro registrado",
+      "noLogs": "Nenhum log disponível",
+      "retry": "Tentar novamente"
     },
     "kanban": {
       "newStudies": "Novos Estudos",
