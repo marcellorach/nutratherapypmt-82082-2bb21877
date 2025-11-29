@@ -60,6 +60,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Estatísticas detalhadas: nodeTypes, relationshipTypes, mechanismPathsCreated
   - Inferência de tipo para nós não tipados baseado em posição na cadeia
 
+- ✅ **FASE 5: Integração Frontend VetGraphRAG** - Pipeline completo
+  - `NtaiProcessingSection.tsx`: Pipeline expandido de 3→4 stages (Upload → Gemini AI → Triplets → Complete)
+  - `handleProcessWithAI`: Chama `generate-triplets` automaticamente após `extract-study-entities`
+  - `handleRegenerateVetGraphRAG`: Nova função para regenerar triplets de estudos existentes
+  - `NtaiStudySelectionTable.tsx`: Nova coluna "VetGraphRAG" com botão de regeneração por estudo
+  - `TripletCurationBoard.tsx`: Exibição completa de campos hierárquicos:
+    - Badges coloridas para `subject_layer` e `object_layer` (L0-L4)
+    - Badge de `evidence_level` (high/moderate/low/very_low)
+    - Badge de `intensity` com percentual
+    - Badge de `species_context` com espécies validadas
+    - Exibição de `mechanism_path` como cadeia (Compound → Target → Mechanism → Effect → Outcome)
+    - Exibição de `relationship_category`
+
 ### Changed - 2025-11-29
 - 📝 **ARCHITECTURE.md v1.9.0**: Seção GraphRAG completamente reescrita com modelo VetGraphRAG de 5 camadas
 - 📝 **Diagrama Mermaid**: Novo diagrama mostrando hierarquia L0→L4 com tipos de relacionamento
