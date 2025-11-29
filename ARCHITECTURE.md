@@ -1,8 +1,8 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.8.0  
-**Última Atualização:** 2025-11-26  
+**Versão:** 1.9.0  
+**Última Atualização:** 2025-11-29  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
@@ -221,41 +221,98 @@ User Query → Entity Extraction (Gemini 3) →
   → Combine contexts → Gemini 3 Pro Preview synthesis → Answer + Graph
 ```
 
-### Modelo de Dados Neo4j
+### Modelo de Dados Neo4j - VetGraphRAG (5 Camadas Hierárquicas)
 
-**Nodes**:
-- `:Nutraceutical` (ex: Curcumin, Omega-3)
-- `:Mechanism` (ex: ↓ COX-2 pathway)
-- `:Effect` (ex: ↓ IL-6 & TNF-α)
-- `:Condition` (ex: Canine Arthritis)
-- `:Study` (metadados do estudo)
+O sistema utiliza um modelo hierárquico de 5 camadas inspirado no **MedGraphRAG** e **Biolink Model**:
 
-**Edges**:
-- `[:INHIBITS]` (Nutraceutical → Mechanism)
-- `[:STIMULATES]` (Nutraceutical → Mechanism)
-- `[:MEDIATES]` (Mechanism → Effect)
-- `[:IMPROVES]` (Effect → Condition)
-- `[:TREATS]` (Nutraceutical → Condition)
-- `[:CITED_IN]` (entidades → Study)
-- `[:SUPPORTS]` (Study → Condition)
-
-**Exemplo de Caminho Completo**:
+```mermaid
+graph LR
+    subgraph "Layer 0 - Compounds"
+        N[Nutraceutical]
+        D[Drug]
+        CC[ChemicalCompound]
+    end
+    
+    subgraph "Layer 1 - Targets"
+        P[Pathway]
+        R[Receptor]
+        E[Enzyme]
+        GP[GeneProtein]
+    end
+    
+    subgraph "Layer 2 - Mechanisms"
+        M[Mechanism]
+        SC[SignalingCascade]
+    end
+    
+    subgraph "Layer 3 - Effects"
+        BE[BiologicalEffect]
+        SE[SideEffect]
+    end
+    
+    subgraph "Layer 4 - Outcomes"
+        CO[ClinicalOutcome]
+        C[Condition]
+        DIS[Disease]
+    end
+    
+    N -->|INHIBITS/ACTIVATES| P
+    N -->|BINDS_TO| R
+    P -->|TRIGGERS| M
+    M -->|PRODUCES| BE
+    BE -->|TREATS| C
+    N -->|SYNERGIZES_WITH| N
 ```
-Curcumin -[:INHIBITS]-> ↓ COX-2 pathway -[:MEDIATES]-> 
-  ↓ IL-6 & TNF-α -[:IMPROVES]-> Canine Arthritis
+
+**Node Types (16+)**:
+- **Layer 0**: `Nutraceutical`, `Drug`, `ChemicalCompound`
+- **Layer 1**: `Pathway`, `Receptor`, `Enzyme`, `GeneProtein`
+- **Layer 2**: `Mechanism`, `SignalingCascade`
+- **Layer 3**: `BiologicalEffect`, `SideEffect`
+- **Layer 4**: `ClinicalOutcome`, `Condition`, `Disease`
+- **Context**: `Breed`, `Species`, `AgeGroup`, `Study`
+
+**Relationship Types (20+)**:
+
+| Categoria | Predicados | Propriedades |
+|-----------|------------|--------------|
+| **Direct Action** | `INHIBITS`, `ACTIVATES`, `MODULATES`, `BINDS_TO`, `BLOCKS` | `intensity`, `IC50`, `Ki`, `confidence` |
+| **Cascade** | `TRIGGERS`, `PARTICIPATES_IN`, `REGULATES`, `PRODUCES`, `LEADS_TO` | `cascade_order`, `time_to_effect` |
+| **Therapeutic** | `TREATS`, `PREVENTS`, `SUPPORTS`, `AMELIORATES`, `MANAGES` | `efficacy_score`, `evidence_level`, `NNT` |
+| **Adverse** | `WORSENS`, `CONTRAINDICATED_FOR`, `CAUSES_SIDE_EFFECT` | `severity`, `frequency` |
+| **Interactions** | `SYNERGIZES_WITH`, `ANTAGONIZES`, `ENHANCES_BIOAVAILABILITY` | `synergy_score`, `mechanism` |
+| **Context** | `PREDISPOSED_IN`, `COMMON_IN`, `CITED_IN`, `STUDIED_IN` | `risk_factor`, `prevalence` |
+
+**Exemplo de Caminho Hierárquico Completo**:
+```
+Curcumin [L0] -[:INHIBITS {IC50: "10 μM"}]-> NF-κB pathway [L1]
+  -[:TRIGGERS]-> Anti-inflammatory cascade [L2]
+  -[:PRODUCES]-> Reduced joint inflammation [L3]
+  -[:TREATS {efficacy: 0.78, evidence: "high"}]-> Osteoarthritis [L4]
 ```
 
-### Status de Implementação
+### Tabelas Supabase para Modelo Hierárquico
+
+| Tabela | Descrição | Campos Chave |
+|--------|-----------|--------------|
+| `pathway_nodes` | Layer 1 - Alvos moleculares | `name`, `pathway_type`, `kegg_id`, `reactome_id` |
+| `mechanism_nodes` | Layer 2 - Mecanismos | `name`, `mechanism_type`, `molecular_target`, `action_type` |
+| `biological_effect_nodes` | Layer 3 - Efeitos | `name`, `effect_type`, `effect_category`, `onset_time` |
+| `hierarchical_edges` | Relações entre layers | `source_id`, `target_id`, `relationship`, `intensity`, `evidence_level` |
+| `triplet_extractions` | Triplets extraídos com layers | `subject_layer`, `object_layer`, `mechanism_path`, `synergy_data` |
+
+### Status de Implementação VetGraphRAG
 
 | Componente | Status | Documentação |
 |------------|--------|--------------|
-| Documentação completa | ✅ Concluída | `docs/GRAPHRAG_ARCHITECTURE.md` |
-| neo4j-sync edge function | ✅ Implementada | `supabase/functions/neo4j-sync/` |
-| Neo4j AuraDB setup | ⏳ Aguardando credenciais | Requer criação de instância pelo usuário |
-| graph-rag-search | ⏳ Pendente | Fase 3 do roadmap |
-| UI Graph Visualization | ⏳ Pendente | Fase 4 do roadmap |
+| **Fase 1**: SQL Migrations (ENUMs, tabelas) | ✅ Concluída | 7 migrations aplicadas |
+| **Fase 2**: Neo4j Schema (Cypher) | ✅ Concluída | `docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher` |
+| **Fase 3**: generate-triplets (hierarchical) | ✅ Concluída | Extração L0→L4, 20+ predicados |
+| **Fase 4**: sync-approved-triplets | ✅ Concluída | Labels dinâmicos, edges enriquecidas |
+| graph-rag-search (U-Retrieval) | ⏳ Pendente | Próxima fase |
+| UI Graph Visualization | ⏳ Pendente | Visualização interativa |
 
-**Próximos Passos**: Ver `docs/GRAPHRAG_ARCHITECTURE.md` para roadmap completo (Fases 0-5, estimativa 11-16 dias).
+**Referência**: Ver `docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher` para schema completo.
 
 ---
 
