@@ -1543,6 +1543,27 @@
     "uploadSection": {
       "sectionTitle": "Upload de Estudos"
     },
+    "dataArchitecture": {
+      "title": "Arquitetura do Knowledge Graph",
+      "sourceLabel": "Entidades Fonte",
+      "predicateLabel": "Predicados",
+      "targetLabel": "Entidades Alvo",
+      "entities": {
+        "nutraceutical": "Nutracêutico",
+        "drug": "Fármaco",
+        "breed": "Raça",
+        "condition": "Condição",
+        "mechanism": "Mecanismo",
+        "species": "Espécie"
+      },
+      "relations": {
+        "treats": "TRATA",
+        "modulates": "MODULA",
+        "prevents": "PREVINE",
+        "affects": "AFETA"
+      },
+      "tripletExplanation": "Subject → Predicate → Object (ex: Curcumina TRATA Artrite)"
+    },
     "upload": {
       "title": "🤖 GEMINI AI - Upload de PDF",
       "description": "Sistema de extração automática com Inteligência Artificial",

@@ -1,8 +1,9 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Upload, Workflow, Settings, FileUp } from 'lucide-react';
+import { Workflow, Settings, Network } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SystemStatusBar } from './SystemStatusBar';
 import { PipelineSteps } from './PipelineSteps';
+import DataArchitectureDiagram from './DataArchitectureDiagram';
 
 export const UploadEstudoForm = () => {
   const { t } = useTranslation();
@@ -41,19 +42,15 @@ export const UploadEstudoForm = () => {
           <SystemStatusBar />
         </div>
 
-        {/* Seção 3: Upload de Estudos */}
+        {/* Seção 3: Arquitetura de Dados */}
         <div className="border rounded-lg p-4 bg-muted/20">
           <div className="flex items-center gap-2 mb-3">
-            <FileUp className="h-4 w-4 text-muted-foreground" />
+            <Network className="h-4 w-4 text-muted-foreground" />
             <h3 className="text-sm font-medium text-muted-foreground">
-              {t('studies.uploadSection.sectionTitle')}
+              {t('studies.dataArchitecture.title')}
             </h3>
           </div>
-          <div className="p-6 border-2 border-dashed border-border rounded-lg text-center bg-background/50 hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer">
-            <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm font-medium">{t('studies.upload.dropzone')}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t('studies.upload.formats')}</p>
-          </div>
+          <DataArchitectureDiagram />
         </div>
       </CardContent>
     </Card>
