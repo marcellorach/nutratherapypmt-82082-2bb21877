@@ -21,8 +21,8 @@ export const useProcessingLogic = (
   const startProcessing = async () => {
     if (processQueue.length === 0) {
       toast({
-        title: "Nenhum item na fila",
-        description: "Adicione estudos à fila antes de iniciar o processamento.",
+        title: "No items in queue",
+        description: "Add studies to the queue before starting processing.",
         variant: "destructive",
       });
       return;
@@ -31,8 +31,8 @@ export const useProcessingLogic = (
     if (processQueue.some(item => 
       item.stage === 'extracting' || item.stage === 'analyzing' || item.stage === 'standardizing')) {
       toast({
-        title: "Processamento em andamento",
-        description: "Aguarde a conclusão do processamento atual.",
+        title: "Processing in progress",
+        description: "Please wait for the current processing to complete.",
         variant: "destructive",
       });
       return;
@@ -42,16 +42,16 @@ export const useProcessingLogic = (
     const updatedQueue = [...processQueue];
     setAnalysisResult(null);
     
-    addLogEntry('Iniciando processamento com configurações:');
-    addLogEntry(`🤖 Modelo: ${aiConfigs.modelName || 'gemini-2.5-flash'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
+    addLogEntry('Starting processing with configurations:');
+    addLogEntry(`🤖 Model: ${aiConfigs.modelName || 'gemini-3-pro-preview'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
     
     const processNextItem = async (index: number) => {
       if (index >= updatedQueue.length) {
         setProcessingActive(false);
         setActiveItemIndex(-1);
         toast({
-          title: "Processamento concluído",
-          description: "Todos os estudos foram processados com sucesso.",
+          title: "Processing complete",
+          description: "All studies have been processed successfully.",
           variant: "default",
         });
         return;
@@ -73,30 +73,30 @@ export const useProcessingLogic = (
           .maybeSingle();
           
         if (studyError) {
-          throw new Error(`Erro ao buscar dados do estudo: ${studyError.message}`);
+          throw new Error(`Error fetching study data: ${studyError.message}`);
         }
         
         if (!studyData) {
-          throw new Error(`Estudo não encontrado no banco de dados: ${item.id}`);
+          throw new Error(`Study not found in database: ${item.id}`);
         }
 
-        // VALIDAÇÃO CRÍTICA: Verificar se o estudo tem PDF
+        // CRITICAL VALIDATION: Check if study has PDF
         if (!studyData.storage_path || studyData.storage_path.trim() === '') {
-          addLogEntry(`❌ Estudo sem arquivo PDF: ${item.title}`);
+          addLogEntry(`❌ Study without PDF file: ${item.title}`);
           updatedQueue[index] = { 
             ...item, 
             stage: 'error', 
             progress: 0,
-            error: 'Arquivo PDF não encontrado no storage'
+            error: 'PDF file not found in storage'
           };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
         }
 
-        // PREVENIR RE-PROCESSAMENTO: Verificar se já foi processado
+        // PREVENT RE-PROCESSING: Check if already processed
         if (studyData.kanban_status === 'processed' && studyData.analysis_data) {
-          addLogEntry(`⚠️ Estudo já processado: ${item.title}`);
+          addLogEntry(`⚠️ Study already processed: ${item.title}`);
           updatedQueue[index] = { 
             ...item, 
             stage: 'complete', 
@@ -105,8 +105,8 @@ export const useProcessingLogic = (
           setProcessQueue([...updatedQueue]);
           
           toast({
-            title: "Estudo já processado",
-            description: `'${item.title}' já possui análise. Use "Resetar" para reprocessar.`,
+            title: "Study already processed",
+            description: `'${item.title}' already has analysis. Use "Reset" to reprocess.`,
             variant: "default",
           });
           
@@ -114,30 +114,30 @@ export const useProcessingLogic = (
           return;
         }
 
-        // ETAPA 1: EXTRAÇÃO COM GEMINI (6 sub-etapas com retry automático)
+        // STAGE 1: EXTRACTION WITH GEMINI (6 sub-stages with auto retry)
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 10 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`📥 [1/6] Baixando PDF do storage: ${item.title}`);
+        addLogEntry(`📥 [1/6] Downloading PDF from storage: ${item.title}`);
         
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 20 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`📤 [2/6] Enviando para Gemini File API...`);
+        addLogEntry(`📤 [2/6] Sending to Gemini File API...`);
         
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 35 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`⏳ [3/6] Aguardando processamento (pode levar até 2min)...`);
+        addLogEntry(`⏳ [3/6] Waiting for processing (may take up to 2min)...`);
         
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 50 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`🗄️ [4/6] Configurando File Search Store...`);
+        addLogEntry(`🗄️ [4/6] Configuring File Search Store...`);
         
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 65 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`📚 [5/6] Vetorizando documento (embedding)...`);
+        addLogEntry(`📚 [5/6] Vectorizing document (embedding)...`);
         
         updatedQueue[index] = { ...item, stage: 'extracting', progress: 80 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`🔍 [6/6] Extraindo dados científicos com AI...`);
+        addLogEntry(`🔍 [6/6] Extracting scientific data with AI...`);
         
         const { data: geminiData, error: geminiError } = await supabase.functions.invoke('gemini-file-search', {
           body: { 
@@ -149,22 +149,22 @@ export const useProcessingLogic = (
         
         if (geminiError) {
           const errorMsg = geminiError.message || String(geminiError);
-          addLogEntry(`❌ [ERRO] Gemini File Search falhou: ${errorMsg}`);
+          addLogEntry(`❌ [ERROR] Gemini File Search failed: ${errorMsg}`);
           
-          // Mensagens contextuais de erro
+          // Contextual error messages
           if (errorMsg.includes('timeout')) {
-            addLogEntry(`💡 Dica: PDF muito grande ou rede lenta. Tente novamente.`);
+            addLogEntry(`💡 Tip: PDF too large or slow network. Try again.`);
           } else if (errorMsg.includes('quota') || errorMsg.includes('rate')) {
-            addLogEntry(`💡 Dica: Limite de API atingido. Aguarde alguns minutos.`);
+            addLogEntry(`💡 Tip: API limit reached. Wait a few minutes.`);
           } else if (errorMsg.includes('Extração falhou')) {
-            addLogEntry(`💡 Dica: PDF pode estar corrompido ou sem texto extraível.`);
+            addLogEntry(`💡 Tip: PDF may be corrupted or without extractable text.`);
           }
           
           updatedQueue[index] = { 
             ...item, 
             stage: 'error', 
             progress: 0, 
-            error: `Gemini File Search falhou: ${errorMsg}. A função já tentou 3x automaticamente.`
+            error: `Gemini File Search failed: ${errorMsg}. Function already retried 3x automatically.`
           };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
@@ -172,35 +172,35 @@ export const useProcessingLogic = (
         }
         
         if (!geminiData || !geminiData.success) {
-          const errorMsg = geminiData?.error || 'Google Gemini retornou dados inválidos';
-          addLogEntry(`❌ [ERRO] Resposta inválida do Gemini: ${errorMsg}`);
+          const errorMsg = geminiData?.error || 'Google Gemini returned invalid data';
+          addLogEntry(`❌ [ERROR] Invalid Gemini response: ${errorMsg}`);
           updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
         }
         
-        addLogEntry(`✅ [SUCESSO] Gemini concluído: ${geminiData.nutraceuticalsCount || 0} nutracêuticos, ${geminiData.conditionsCount || 0} condições`);
-        addLogEntry(`📊 [INFO] ${geminiData.metadata?.retries_used || 'Retry automático ativo'}`);
+        addLogEntry(`✅ [SUCCESS] Gemini completed: ${geminiData.nutraceuticalsCount || 0} nutraceuticals, ${geminiData.conditionsCount || 0} conditions`);
+        addLogEntry(`📊 [INFO] ${geminiData.metadata?.retries_used || 'Auto retry active'}`);
         
-        // VETORIZAÇÃO AUTOMÁTICA: Gerar embeddings para RAG
-        addLogEntry(`🔢 [AUTO-VETORIZAÇÃO] Iniciando vetorização para RAG...`);
+        // AUTO-VECTORIZATION: Generate embeddings for RAG
+        addLogEntry(`🔢 [AUTO-VECTORIZATION] Starting vectorization for RAG...`);
         try {
           const { data: vectorData, error: vectorError } = await supabase.functions.invoke('vectorize-study', {
             body: { studyId: item.id }
           });
           
           if (vectorError) {
-            addLogEntry(`⚠️ [ALERTA] Vetorização falhou: ${vectorError.message} (estudo ainda pode ser usado sem busca semântica)`);
+            addLogEntry(`⚠️ [WARNING] Vectorization failed: ${vectorError.message} (study can still be used without semantic search)`);
           } else {
-            addLogEntry(`✅ [VETORIZAÇÃO] ${vectorData.chunksProcessed || 0} embeddings criados para busca semântica`);
+            addLogEntry(`✅ [VECTORIZATION] ${vectorData.chunksProcessed || 0} embeddings created for semantic search`);
           }
         } catch (vectorErr: any) {
-          addLogEntry(`⚠️ [ALERTA] Erro na vetorização: ${vectorErr.message} (não crítico)`);
+          addLogEntry(`⚠️ [WARNING] Vectorization error: ${vectorErr.message} (not critical)`);
         }
         
-        // VALIDAÇÃO CRÍTICA: Verificar se analysis_data foi salvo corretamente
-        addLogEntry(`🔍 [VALIDAÇÃO] Verificando integridade dos dados salvos...`);
+        // CRITICAL VALIDATION: Check if analysis_data was saved correctly
+        addLogEntry(`🔍 [VALIDATION] Checking saved data integrity...`);
         const { data: validationData, error: validationError } = await supabase
           .from('processed_studies')
           .select('analysis_data, title')
@@ -208,9 +208,9 @@ export const useProcessingLogic = (
           .single();
         
         if (validationError || !validationData?.analysis_data) {
-          const errorMsg = 'CRITICAL: Gemini File Search não salvou dados em analysis_data (NULL detectado após processamento).';
-          addLogEntry(`❌ [ERRO CRÍTICO] ${errorMsg}`);
-          addLogEntry(`💡 [RECOMENDAÇÃO] Use "Resetar e Reprocessar" - o erro pode ser temporário`);
+          const errorMsg = 'CRITICAL: Gemini File Search did not save data to analysis_data (NULL detected after processing).';
+          addLogEntry(`❌ [CRITICAL ERROR] ${errorMsg}`);
+          addLogEntry(`💡 [RECOMMENDATION] Use "Reset and Reprocess" - the error may be temporary`);
           
           updatedQueue[index] = { 
             ...item, 
@@ -224,32 +224,32 @@ export const useProcessingLogic = (
         }
         
         const dataSize = JSON.stringify(validationData.analysis_data).length;
-        addLogEntry(`✅ [VALIDAÇÃO APROVADA] analysis_data confirmado (${(dataSize / 1024).toFixed(1)} KB)`);
+        addLogEntry(`✅ [VALIDATION PASSED] analysis_data confirmed (${(dataSize / 1024).toFixed(1)} KB}`);
 
-        // ETAPA 2: ANÁLISE
+        // STAGE 2: ANALYSIS
         updatedQueue[index] = { ...item, stage: 'analyzing', progress: 60 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`🧠 Analisando: ${item.title}`);
+        addLogEntry(`🧠 Analyzing: ${item.title}`);
         
         const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-study-entities', {
           body: { studyId: item.id }
         });
 
         if (extractError) {
-          throw new Error(`Erro extração: ${extractError.message}`);
+          throw new Error(`Extraction error: ${extractError.message}`);
         }
 
-        // Extração em 3 stages
+        // 3-stage extraction
         const stages = extractData?.extractionStages || [];
-        addLogEntry(`✅ Extração completa: ${stages.length} stages executados`);
-        addLogEntry(`📊 Stage 1: ${extractData?.extractedNutraceuticals?.length || 0} nutracêuticos, ${extractData?.extractedConditions?.length || 0} condições`);
+        addLogEntry(`✅ Extraction complete: ${stages.length} stages executed`);
+        addLogEntry(`📊 Stage 1: ${extractData?.extractedNutraceuticals?.length || 0} nutraceuticals, ${extractData?.extractedConditions?.length || 0} conditions`);
         
         if (extractData?.molecularMechanisms || extractData?.synergies) {
-          addLogEntry(`🧬 Stage 2: ${extractData?.molecularMechanisms?.length || 0} mecanismos, ${extractData?.synergies?.length || 0} sinergias`);
+          addLogEntry(`🧬 Stage 2: ${extractData?.molecularMechanisms?.length || 0} mechanisms, ${extractData?.synergies?.length || 0} synergies`);
         }
         
         if (extractData?.dosages || extractData?.detailedSideEffects) {
-          addLogEntry(`💊 Stage 3: ${extractData?.dosages?.length || 0} dosagens, ${extractData?.detailedSideEffects?.length || 0} efeitos colaterais`);
+          addLogEntry(`💊 Stage 3: ${extractData?.dosages?.length || 0} dosages, ${extractData?.detailedSideEffects?.length || 0} side effects`);
         }
         
         console.log('🔍 DEBUG - Extração 3 stages completa:', {
@@ -258,7 +258,7 @@ export const useProcessingLogic = (
           stage3: `${extractData?.dosages?.length || 0} dosagens`
         });
 
-        // ETAPA 3: SALVAMENTO
+        // STAGE 3: SAVING
         updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
         setProcessQueue([...updatedQueue]);
 
@@ -290,16 +290,16 @@ export const useProcessingLogic = (
         
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);
-        addLogEntry(`✅ Concluído: ${item.title}`);
+        addLogEntry(`✅ Completed: ${item.title}`);
         
         toast({
-          title: "Análise concluída",
-          description: `'${item.title}' processado.`,
+          title: "Analysis completed",
+          description: `'${item.title}' processed.`,
           variant: "default",
         });
 
       } catch (error: any) {
-        addLogEntry(`[ERRO] ${item.title}: ${error.message}`);
+        addLogEntry(`[ERROR] ${item.title}: ${error.message}`);
         updatedQueue[index] = { 
           ...updatedQueue[index], 
           stage: 'error' as ProcessingStage, 
@@ -309,7 +309,7 @@ export const useProcessingLogic = (
         setProcessQueue([...updatedQueue]);
         
         toast({
-          title: "Erro",
+          title: "Error",
           description: error.message,
           variant: "destructive",
         });

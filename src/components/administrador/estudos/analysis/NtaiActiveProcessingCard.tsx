@@ -173,7 +173,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
     if (!currentTime || !previousTime) return { entry, duration: null };
     
     const durationMs = currentTime.getTime() - previousTime.getTime();
-    const durationS = (durationMs / 1000).toFixed(1);
+    const durationS = (durationMs / 1000).toFixed(2);
     
     return { entry, duration: `${durationS}s` };
   });
@@ -181,13 +181,13 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
   const getStatusText = () => {
     switch (item.stage) {
       case 'extracting':
-        return t('studies.ntai.statusExtracting', 'Extraindo dados do PDF...');
+        return t('studies.ntai.statusExtracting', 'Extracting data from PDF...');
       case 'analyzing':
-        return t('studies.ntai.statusAnalyzing', 'Analisando com IA...');
+        return t('studies.ntai.statusAnalyzing', 'Analyzing with AI...');
       case 'standardizing':
-        return t('studies.ntai.statusStandardizing', 'Padronizando dados...');
+        return t('studies.ntai.statusStandardizing', 'Standardizing data...');
       default:
-        return t('studies.ntai.statusProcessing', 'Processando...');
+        return t('studies.ntai.statusProcessing', 'Processing...');
     }
   };
 
@@ -354,7 +354,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
           
           {/* Stage indicator dots */}
           <div className="flex justify-between px-1">
-            {['Upload', 'Extração', 'Análise', 'Salvamento'].map((stage, idx) => {
+            {['Upload', 'Extraction', 'Analysis', 'Saving'].map((stage, idx) => {
               const stageProgress = [0, 30, 60, 90];
               const isActive = calculatedProgress >= stageProgress[idx];
               const isCurrent = calculatedProgress >= stageProgress[idx] && 

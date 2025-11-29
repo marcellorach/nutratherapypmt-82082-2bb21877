@@ -56,9 +56,9 @@ const NtaiProcessingSection: React.FC = () => {
   
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
-    { name: '📤 Upload', status: 'pending', description: 'Arquivo no storage Supabase' },
-    { name: '🤖 Gemini AI', status: 'pending', description: 'Análise com Google Gemini 2.5 Flash' },
-    { name: '✅ Completo', status: 'pending', description: 'Dados extraídos e salvos' },
+    { name: '📤 Upload', status: 'pending', description: 'File in Supabase storage' },
+    { name: '🤖 Gemini AI', status: 'pending', description: 'Analysis with Google Gemini 3 Pro Preview' },
+    { name: '✅ Complete', status: 'pending', description: 'Data extracted and saved' },
   ]);
   const { toast } = useToast();
 
@@ -159,9 +159,9 @@ const NtaiProcessingSection: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-blue-600" />
-            <h3 className="text-lg font-medium">Processamento com IA</h3>
+            <h3 className="text-lg font-medium">AI Processing</h3>
             <Badge className="ml-2 bg-blue-50 text-blue-700 border-blue-200" variant="outline">
-              🤖 Gemini 2.5 Flash
+              🤖 Gemini 3 Pro Preview
             </Badge>
           </div>
           <Button variant="outline" size="sm" className="flex items-center gap-1">
@@ -170,19 +170,19 @@ const NtaiProcessingSection: React.FC = () => {
           </Button>
         </div>
         
-        {/* Mostra informações sobre o processamento atual */}
+        {/* Processing info */}
         <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-          <h4 className="text-sm font-medium mb-2 text-blue-900">Informações do Processamento</h4>
+          <h4 className="text-sm font-medium mb-2 text-blue-900">Processing Information</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-blue-600 font-medium">Modelo:</span> <span className="text-blue-900">Google Gemini 2.5 Flash</span>
+              <span className="text-blue-600 font-medium">Model:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">Status:</span> <span className="text-blue-900">{processingActive ? 'Processando' : 'Inativo'}</span>
+              <span className="text-blue-600 font-medium">Status:</span> <span className="text-blue-900">{processingActive ? 'Processing' : 'Idle'}</span>
             </div>
           </div>
           <div className="mt-2 text-xs text-blue-700">
-            Extrai automaticamente nutracêuticos, condições de saúde e metadados dos estudos científicos usando IA generativa.
+            Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.
           </div>
         </div>
         
