@@ -1509,7 +1509,8 @@
     "vetGraphRAG": {
       "title": "VetGraphRAG",
       "subtitle": "Knowledge Extraction Pipeline",
-      "description": "Sistema híbrido de extração e construção de grafo de conhecimento veterinário a partir de estudos científicos"
+      "description": "Sistema híbrido de extração e construção de grafo de conhecimento veterinário a partir de estudos científicos",
+      "descriptionShort": "Extração de conhecimento veterinário via IA"
     },
     "pipeline": {
       "title": "Pipeline de Processamento",
@@ -1545,6 +1546,8 @@
     },
     "dataArchitecture": {
       "title": "Arquitetura do Knowledge Graph",
+      "showArchitecture": "Ver Arquitetura",
+      "hideArchitecture": "Ocultar Arquitetura",
       "entities": {
         "nutraceutical": "Nutracêutico",
         "condition": "Condição",

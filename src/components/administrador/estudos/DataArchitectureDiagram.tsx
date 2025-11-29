@@ -1,58 +1,76 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const DataArchitectureDiagram: React.FC = () => {
+interface DataArchitectureDiagramProps {
+  compact?: boolean;
+}
+
+const DataArchitectureDiagram: React.FC<DataArchitectureDiagramProps> = ({ compact = false }) => {
   const { t } = useTranslation();
 
-  // Node definitions with positions for organic graph layout
+  // Node definitions - adjusted for compact mode
+  const scale = compact ? 0.7 : 1;
   const nodes = [
-    { id: 'nutraceutical', x: 100, y: 140, color: 'hsl(var(--chart-2))', example: 'Curcuma' },
-    { id: 'condition', x: 320, y: 140, color: 'hsl(var(--chart-1))', example: 'Arthritis' },
-    { id: 'mechanism', x: 210, y: 50, color: 'hsl(var(--chart-3))', example: 'Anti-inflammatory' },
-    { id: 'breed', x: 320, y: 250, color: 'hsl(var(--chart-5))', example: 'Labrador' },
-    { id: 'species', x: 500, y: 140, color: 'hsl(var(--primary))', example: 'Canine' },
+    { id: 'nutraceutical', x: 100 * scale, y: 100 * scale, color: 'hsl(var(--chart-2))', example: 'Curcuma' },
+    { id: 'condition', x: 280 * scale, y: 100 * scale, color: 'hsl(var(--chart-1))', example: 'Arthritis' },
+    { id: 'mechanism', x: 190 * scale, y: 35 * scale, color: 'hsl(var(--chart-3))', example: 'Anti-inflammatory' },
   ];
 
-  // Edge definitions with curved paths
-  const edges = [
+  const fullNodes = [
+    ...nodes,
+    { id: 'breed', x: 280, y: 200, color: 'hsl(var(--chart-5))', example: 'Labrador' },
+    { id: 'species', x: 420, y: 100, color: 'hsl(var(--primary))', example: 'Canine' },
+  ];
+
+  const displayNodes = compact ? nodes : fullNodes;
+
+  // Edge definitions
+  const edges = compact ? [
+    { from: 'nutraceutical', to: 'condition', label: t('studies.dataArchitecture.relations.treats'), curveDir: 0 },
+    { from: 'nutraceutical', to: 'mechanism', label: t('studies.dataArchitecture.relations.modulates'), curveDir: -20 },
+  ] : [
     { from: 'nutraceutical', to: 'condition', label: t('studies.dataArchitecture.relations.treats'), curveDir: 0 },
     { from: 'nutraceutical', to: 'mechanism', label: t('studies.dataArchitecture.relations.modulates'), curveDir: -30 },
     { from: 'breed', to: 'condition', label: t('studies.dataArchitecture.relations.predisposedTo'), curveDir: 20 },
     { from: 'condition', to: 'species', label: t('studies.dataArchitecture.relations.affects'), curveDir: 0 },
   ];
 
-  // Get node by id
-  const getNode = (id: string) => nodes.find(n => n.id === id)!;
+  const getNode = (id: string) => displayNodes.find(n => n.id === id)!;
 
-  // Calculate curved path between two nodes
   const getCurvedPath = (fromId: string, toId: string, curveOffset: number) => {
     const from = getNode(fromId);
     const to = getNode(toId);
+    if (!from || !to) return '';
+    const nodeWidth = compact ? 35 : 55;
     const midX = (from.x + to.x) / 2;
     const midY = (from.y + to.y) / 2 + curveOffset;
-    return `M ${from.x + 55} ${from.y} Q ${midX} ${midY} ${to.x - 55} ${to.y}`;
+    return `M ${from.x + nodeWidth} ${from.y} Q ${midX} ${midY} ${to.x - nodeWidth} ${to.y}`;
   };
 
-  // Calculate label position on curve
   const getLabelPosition = (fromId: string, toId: string, curveOffset: number) => {
     const from = getNode(fromId);
     const to = getNode(toId);
+    if (!from || !to) return { x: 0, y: 0 };
     return {
-      x: (from.x + to.x) / 2 + 25,
+      x: (from.x + to.x) / 2 + (compact ? 15 : 25),
       y: (from.y + to.y) / 2 + curveOffset * 0.6
     };
   };
 
+  const viewBox = compact ? "0 0 280 150" : "0 0 520 280";
+  const nodeWidth = compact ? 70 : 110;
+  const nodeHeight = compact ? 36 : 56;
+  const fontSize = compact ? 8 : 11;
+  const exampleFontSize = compact ? 7 : 10;
+
   return (
     <div className="w-full">
-      <svg viewBox="0 0 600 320" className="w-full h-auto" aria-label={t('studies.dataArchitecture.title')}>
-        {/* Background */}
-        <rect width="600" height="320" fill="transparent" />
+      <svg viewBox={viewBox} className="w-full h-auto" aria-label={t('studies.dataArchitecture.title')}>
+        <rect width="100%" height="100%" fill="transparent" />
         
-        {/* Arrow Marker Definition */}
         <defs>
           <marker 
-            id="arrowhead-graph" 
+            id={`arrowhead-graph${compact ? '-compact' : ''}`}
             markerWidth="8" 
             markerHeight="6" 
             refX="7" 
@@ -67,36 +85,36 @@ const DataArchitectureDiagram: React.FC = () => {
           </marker>
         </defs>
 
-        {/* Edges - Curved connections with labels */}
+        {/* Edges */}
         {edges.map((edge, index) => {
           const labelPos = getLabelPosition(edge.from, edge.to, edge.curveDir);
+          const path = getCurvedPath(edge.from, edge.to, edge.curveDir);
+          if (!path) return null;
           return (
             <g key={`edge-${index}`}>
-              {/* Curved path */}
               <path
-                d={getCurvedPath(edge.from, edge.to, edge.curveDir)}
+                d={path}
                 fill="none"
                 stroke="hsl(var(--muted-foreground))"
-                strokeWidth="1.5"
+                strokeWidth={compact ? 1 : 1.5}
                 strokeOpacity="0.5"
-                markerEnd="url(#arrowhead-graph)"
+                markerEnd={`url(#arrowhead-graph${compact ? '-compact' : ''})`}
               />
-              {/* Edge label background */}
               <rect
-                x={labelPos.x - 30}
-                y={labelPos.y - 10}
-                width="60"
-                height="16"
+                x={labelPos.x - (compact ? 22 : 30)}
+                y={labelPos.y - (compact ? 8 : 10)}
+                width={compact ? 44 : 60}
+                height={compact ? 12 : 16}
                 rx="4"
                 fill="hsl(var(--background))"
                 fillOpacity="0.9"
               />
-              {/* Edge label text */}
               <text
                 x={labelPos.x}
-                y={labelPos.y + 2}
+                y={labelPos.y + (compact ? 1 : 2)}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-medium"
+                className="fill-muted-foreground font-medium"
+                style={{ fontSize: compact ? '7px' : '9px' }}
               >
                 {edge.label}
               </text>
@@ -104,66 +122,51 @@ const DataArchitectureDiagram: React.FC = () => {
           );
         })}
 
-        {/* Nodes - Rounded rectangles with entity type and example */}
-        {nodes.map((node) => (
+        {/* Nodes */}
+        {displayNodes.map((node) => (
           <g key={node.id}>
-            {/* Node background */}
             <rect
-              x={node.x - 55}
-              y={node.y - 28}
-              width="110"
-              height="56"
-              rx="10"
+              x={node.x - nodeWidth / 2}
+              y={node.y - nodeHeight / 2}
+              width={nodeWidth}
+              height={nodeHeight}
+              rx={compact ? 6 : 10}
               fill={node.color}
               fillOpacity="0.12"
               stroke={node.color}
-              strokeWidth="2"
+              strokeWidth={compact ? 1.5 : 2}
             />
-            {/* Entity type label */}
             <text
               x={node.x}
-              y={node.y - 6}
+              y={node.y - (compact ? 2 : 6)}
               textAnchor="middle"
-              className="fill-foreground text-[11px] font-semibold"
+              className="fill-foreground font-semibold"
+              style={{ fontSize: `${fontSize}px` }}
             >
               {t(`studies.dataArchitecture.entities.${node.id}`)}
             </text>
-            {/* Example value */}
             <text
               x={node.x}
-              y={node.y + 12}
+              y={node.y + (compact ? 10 : 12)}
               textAnchor="middle"
-              className="fill-muted-foreground text-[10px] italic"
+              className="fill-muted-foreground italic"
+              style={{ fontSize: `${exampleFontSize}px` }}
             >
               {t(`studies.dataArchitecture.examples.${node.id}`)}
             </text>
           </g>
         ))}
-
-        {/* Central highlight - main triplet example */}
-        <g opacity="0.6">
-          <rect
-            x="95"
-            y="118"
-            width="280"
-            height="44"
-            rx="22"
-            fill="none"
-            stroke="hsl(var(--primary))"
-            strokeWidth="1"
-            strokeDasharray="4 3"
-            strokeOpacity="0.4"
-          />
-        </g>
       </svg>
 
-      {/* Legend / Explanation */}
-      <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-border/50">
-        <p className="text-xs text-muted-foreground text-center">
-          <span className="font-medium text-foreground">💡 Triplet: </span>
-          {t('studies.dataArchitecture.tripletExplanation')}
-        </p>
-      </div>
+      {/* Legend - only show in full mode */}
+      {!compact && (
+        <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-border/50">
+          <p className="text-xs text-muted-foreground text-center">
+            <span className="font-medium text-foreground">💡 Triplet: </span>
+            {t('studies.dataArchitecture.tripletExplanation')}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
