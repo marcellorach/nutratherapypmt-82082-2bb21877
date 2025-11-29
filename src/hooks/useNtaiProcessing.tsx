@@ -12,7 +12,7 @@ import { useAnalysisResults } from './ntai/useAnalysisResults';
 export const useNtaiProcessing = () => {
   // Integração dos hooks especializados
   const { aiConfigs, updateAiConfig } = useNtaiConfig();
-  const { logEntries, addLogEntry, clearLogs, exportLogs } = useNtaiLogs();
+  const { logEntries, addLogEntry, clearLogs, exportLogs, calculatedProgress, resetProgress } = useNtaiLogs();
   const { availableStudies, refreshAvailableStudies } = useAvailableStudies();
   const { analysisResult, setAnalysisResult, clearAnalysisResult } = useAnalysisResults();
   
@@ -106,6 +106,7 @@ export const useNtaiProcessing = () => {
     aiConfigs,
     availableStudies,
     processingStats,
+    calculatedProgress,
     toggleItemSelection,
     handleSelectAll,
     addToQueue: handleAddToQueue,
@@ -118,7 +119,8 @@ export const useNtaiProcessing = () => {
     updateAiConfig,
     clearLogs,
     exportLogs,
-    refreshAvailableStudies
+    refreshAvailableStudies,
+    resetProgress,
   };
 };
 

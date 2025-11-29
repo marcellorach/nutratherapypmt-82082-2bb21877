@@ -1755,7 +1755,23 @@
         "statusInReview": "Under Review",
         "statusManual": "Manual",
         "statusUnknown": "Unknown"
-      }
+      },
+      "liveLog": "Live Log",
+      "events": "events",
+      "waitingLogs": "Waiting for processing to start...",
+      "statusExtracting": "Extracting data from PDF...",
+      "statusAnalyzing": "Analyzing with AI...",
+      "statusStandardizing": "Standardizing data...",
+      "statusProcessing": "Processing...",
+      "progressLabel": "Extraction progress",
+      "source": "Source",
+      "manualImport": "Manual Import",
+      "importedAgo": "Imported: less than a day ago",
+      "showAll": "Show All",
+      "showErrorsOnly": "Errors Only",
+      "noErrors": "No errors logged",
+      "noLogs": "No logs available",
+      "retry": "Retry"
     },
     "kanban": {
       "newStudies": "New Studies",
