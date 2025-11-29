@@ -23,7 +23,9 @@
     "tabs": {
       "timeline": "Timeline",
       "network": "Rede",
-      "distribution": "Distribuição"
+      "distribution": "Distribuição",
+      "localNetwork": "Extração Local",
+      "neo4jGraph": "Neo4j"
     },
     "timeline": {
       "title": "Linha do Tempo do Processamento",
@@ -48,8 +50,45 @@
       "description": "Visualização das conexões entre nutracêuticos e condições de saúde",
       "noData": "Dados insuficientes para visualização"
     },
+    "localNetwork": {
+      "title": "Extração Local (LLM)",
+      "description": "Dados extraídos diretamente do estudo via LLM - útil para revisão antes de sincronizar"
+    },
+    "neo4jGraph": {
+      "title": "Knowledge Graph (Neo4j)",
+      "description": "Grafo hierárquico VetGraphRAG com relações reais sincronizadas"
+    },
     "distribution": {
       "title": "Distribuição de Eficácia"
+    }
+  },
+  "neo4j": {
+    "graphTitle": "Knowledge Graph (Neo4j)",
+    "nodes": "nós",
+    "relations": "relações",
+    "loading": "Carregando grafo do Neo4j...",
+    "noData": "Sem dados do grafo",
+    "noDataDesc": "Este estudo ainda não foi sincronizado com o Neo4j. Processe os triplets e sincronize para ver o knowledge graph.",
+    "errorFetching": "Erro ao carregar grafo",
+    "contextSummary": "Resumo do Contexto"
+  },
+  "studies": {
+    "library": {
+      "title": "Biblioteca de Estudos",
+      "studies": "estudos",
+      "searchPlaceholder": "Buscar por título ou autor...",
+      "year": "Ano",
+      "journal": "Periódico",
+      "allYears": "Todos os Anos",
+      "allJournals": "Todos os Periódicos",
+      "showing": "Mostrando",
+      "of": "de",
+      "noStudies": "Nenhum estudo encontrado",
+      "errorFetching": "Erro ao carregar estudos"
+    },
+    "import": {
+      "libraryTab": "Biblioteca",
+      "importsTab": "Imports"
     }
   },
   "nutraceuticalsUnified": {

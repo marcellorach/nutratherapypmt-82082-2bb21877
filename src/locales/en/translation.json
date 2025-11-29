@@ -23,7 +23,9 @@
     "tabs": {
       "timeline": "Timeline",
       "network": "Network",
-      "distribution": "Distribution"
+      "distribution": "Distribution",
+      "localNetwork": "Local Extraction",
+      "neo4jGraph": "Neo4j"
     },
     "timeline": {
       "title": "Processing Timeline",
@@ -48,8 +50,45 @@
       "description": "Visualization of connections between nutraceuticals and health conditions",
       "noData": "Insufficient data for visualization"
     },
+    "localNetwork": {
+      "title": "Local Extraction (LLM)",
+      "description": "Data extracted directly from the study via LLM - useful for review before syncing"
+    },
+    "neo4jGraph": {
+      "title": "Knowledge Graph (Neo4j)",
+      "description": "VetGraphRAG hierarchical graph with real synchronized relations"
+    },
     "distribution": {
       "title": "Efficacy Distribution"
+    }
+  },
+  "neo4j": {
+    "graphTitle": "Knowledge Graph (Neo4j)",
+    "nodes": "nodes",
+    "relations": "relations",
+    "loading": "Loading graph from Neo4j...",
+    "noData": "No graph data available",
+    "noDataDesc": "This study has not been synced to Neo4j yet. Process triplets and sync to see the knowledge graph.",
+    "errorFetching": "Error fetching graph",
+    "contextSummary": "Context Summary"
+  },
+  "studies": {
+    "library": {
+      "title": "Studies Library",
+      "studies": "studies",
+      "searchPlaceholder": "Search by title or author...",
+      "year": "Year",
+      "journal": "Journal",
+      "allYears": "All Years",
+      "allJournals": "All Journals",
+      "showing": "Showing",
+      "of": "of",
+      "noStudies": "No studies found",
+      "errorFetching": "Error fetching studies"
+    },
+    "import": {
+      "libraryTab": "Library",
+      "importsTab": "Imports"
     }
   },
   "nutraceuticalsUnified": {

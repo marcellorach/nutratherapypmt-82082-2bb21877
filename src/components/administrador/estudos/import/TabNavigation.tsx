@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Database, Brain } from "lucide-react";
+import { Upload, FolderInput, Brain, BookOpen } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
 interface TabNavigationProps {
@@ -16,6 +16,14 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
     <div className="px-6 pt-4">
       <TabsList className="w-full justify-start">
         <TabsTrigger 
+          value="library" 
+          className="flex items-center gap-1"
+          onClick={() => onTabChange("library")}
+        >
+          <BookOpen className="h-4 w-4" />
+          <span>{t('studies.import.libraryTab', 'Library')}</span>
+        </TabsTrigger>
+        <TabsTrigger 
           value="file-upload" 
           className="flex items-center gap-1"
           onClick={() => onTabChange("file-upload")}
@@ -28,8 +36,8 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
           className="flex items-center gap-1"
           onClick={() => onTabChange("import-history")}
         >
-          <Database className="h-4 w-4" />
-          <span>{t('studies.import.historyTab')}</span>
+          <FolderInput className="h-4 w-4" />
+          <span>{t('studies.import.importsTab', 'Imports')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="ai-processing" 
