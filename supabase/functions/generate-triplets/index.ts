@@ -73,15 +73,34 @@ serve(async (req) => {
     // Default prompts caso não existam no banco
     const DEFAULT_SYSTEM_PROMPT = `You are a scientific knowledge extraction expert specialized in veterinary nutraceuticals. Your task is to generate structured triplets (Subject, Predicate, Object) from scientific study data.
 
-Rules:
+CRITICAL RULES:
 1. Extract only factual relationships explicitly stated or strongly implied in the study
-2. Use standardized predicates: TREATS, PREVENTS, REDUCES, INCREASES, CAUSES, INHIBITS, ACTIVATES, MODULATES
-3. Each triplet must have: subject_type, subject_name, predicate, object_type, object_name
+2. Use standardized predicates: TREATS, PREVENTS, REDUCES, INCREASES, INHIBITS, ACTIVATES, MODULATES, TARGETS, DECREASES, HAS_TARGET
+3. Each triplet must have: subject_type, subject_name, predicate, object_type, object_name, llm_confidence
 4. Provide confidence scores (0-1) for: llm_confidence
-5. Entity types: Nutraceutical, Condition, Mechanism, Effect, Outcome
-6. subject_name and object_name must be precise, standardized terms (avoid synonyms)
 
-Format your response as valid JSON array of triplets.`;
+ENTITY TYPES (use correctly):
+- Nutraceutical: Natural compounds with therapeutic effects (e.g., Curcumin, Omega-3, Resveratrol)
+- Condition: Health conditions or diseases (e.g., Arthritis, Cancer, Diabetes)
+- Mechanism: Biological pathways or processes (e.g., NF-κB pathway, oxidative stress, inflammation)
+- Target: Proteins, receptors, or biomarkers that are targeted (e.g., TNF-α, IL-6, COX-2)
+- Effect: Outcomes or results (e.g., pain reduction, improved mobility)
+
+CRITICAL CLASSIFICATION RULES:
+- Inflammatory cytokines (TNF-α, IL-1β, IL-6) are TARGETS, NOT Nutraceuticals
+- Enzymes (COX-2, LOX) are TARGETS, NOT Nutraceuticals
+- Pathways (NF-κB, MAPK) are MECHANISMS, NOT Targets
+- When a Nutraceutical modulates a Mechanism, create: Nutraceutical → MODULATES → Mechanism
+- When a Nutraceutical decreases a Target, create: Nutraceutical → DECREASES → Target
+- Always connect Nutraceuticals to the Mechanisms they affect
+
+Example correct triplets:
+- Curcumin [Nutraceutical] → MODULATES → NF-κB pathway [Mechanism]
+- Curcumin [Nutraceutical] → DECREASES → TNF-α [Target]
+- NF-κB pathway [Mechanism] → INCREASES → Inflammatory cytokines [Target]
+- Omega-3 [Nutraceutical] → TREATS → Arthritis [Condition]
+
+Format response as: {"triplets": [...]}`;
 
     const DEFAULT_USER_PROMPT = `Extract knowledge triplets from this study:
 
@@ -93,7 +112,13 @@ Extracted Entities:
 - Mechanisms: {{MECHANISMS}}
 - Effects: {{EFFECTS}}
 
-Generate structured triplets representing the relationships between these entities. Focus on therapeutic relationships (TREATS, PREVENTS, REDUCES) and mechanistic relationships (ACTIVATES, INHIBITS, MODULATES).`;
+Generate structured triplets representing ALL relationships:
+1. Nutraceutical → TREATS/PREVENTS → Condition (therapeutic effects)
+2. Nutraceutical → MODULATES/INHIBITS/ACTIVATES → Mechanism (how it works)
+3. Nutraceutical → DECREASES/INCREASES → Target (specific molecular targets)
+4. Mechanism → INCREASES/DECREASES → Target (downstream effects)
+
+IMPORTANT: Classify entities correctly! Cytokines and enzymes are Targets, not Nutraceuticals.`;
 
     const systemPrompt = systemPromptConfig?.config_value || DEFAULT_SYSTEM_PROMPT;
     let userPrompt = userPromptConfig?.config_value || DEFAULT_USER_PROMPT;
