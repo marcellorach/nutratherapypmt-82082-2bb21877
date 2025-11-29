@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,7 +10,8 @@ import {
   Download, 
   ChevronDown, 
   ChevronUp,
-  Zap 
+  Zap,
+  Clock
 } from "lucide-react";
 import { ProcessingItem } from '@/types/ntai';
 import { useTranslation } from 'react-i18next';
@@ -47,6 +48,55 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
   const [displayedEntries, setDisplayedEntries] = useState<string[]>([]);
   const pendingEntriesRef = useRef<string[]>([]);
   const isProcessingRef = useRef(false);
+  const [startTime] = useState<number>(Date.now());
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Atualizar tempo decorrido a cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedTime(Date.now() - startTime);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  // Calcular tempo restante estimado
+  const estimatedTimeRemaining = useMemo(() => {
+    if (calculatedProgress <= 0 || calculatedProgress >= 100) return null;
+    
+    const progressRate = calculatedProgress / (elapsedTime / 1000); // % por segundo
+    if (progressRate <= 0) return null;
+    
+    const remainingProgress = 100 - calculatedProgress;
+    const remainingSeconds = Math.ceil(remainingProgress / progressRate);
+    
+    if (remainingSeconds < 60) {
+      return `~${remainingSeconds}s`;
+    } else if (remainingSeconds < 3600) {
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      return `~${minutes}m ${seconds}s`;
+    } else {
+      const hours = Math.floor(remainingSeconds / 3600);
+      const minutes = Math.floor((remainingSeconds % 3600) / 60);
+      return `~${hours}h ${minutes}m`;
+    }
+  }, [calculatedProgress, elapsedTime]);
+
+  // Formatar tempo decorrido
+  const formattedElapsedTime = useMemo(() => {
+    const seconds = Math.floor(elapsedTime / 1000);
+    if (seconds < 60) {
+      return `${seconds}s`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${minutes}m ${secs}s`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${minutes}m`;
+    }
+  }, [elapsedTime]);
 
   // Sistema de delay para entradas que chegam muito rápido
   useEffect(() => {
@@ -269,12 +319,25 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
         {/* Progress Bar with Gamification */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">
-              {t('studies.ntai.progressLabel', 'Progresso da extração')}
-            </span>
-            <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
-              {calculatedProgress}%
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground">
+                {t('studies.ntai.progressLabel', 'Progresso da extração')}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {formattedElapsedTime}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              {estimatedTimeRemaining && (
+                <span className="text-xs text-cyan-600 dark:text-cyan-400 font-medium">
+                  {t('studies.ntai.timeRemaining', 'Restante')}: {estimatedTimeRemaining}
+                </span>
+              )}
+              <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                {calculatedProgress}%
+              </span>
+            </div>
           </div>
           
           <div className="relative">
