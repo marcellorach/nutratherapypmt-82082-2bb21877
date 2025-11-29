@@ -9,6 +9,62 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-11-29 🚀 VetGraphRAG Hierarchical Model Migration
+
+- ✅ **FASE 1: SQL Migrations** - Expansão completa do modelo de dados
+  - Criado ENUM `entity_layer` com 5 camadas hierárquicas (layer_0_compound → layer_4_outcome)
+  - Criado ENUM `entity_type_expanded` com 16+ tipos de entidade (nutraceutical, pathway, mechanism, biological_effect, condition, etc.)
+  - Criado ENUM `relationship_type_expanded` com 20+ predicados semânticos (INHIBITS, ACTIVATES, TREATS, SYNERGIZES_WITH, etc.)
+  - Expandida tabela `triplet_extractions` com 11 novos campos hierárquicos:
+    - `subject_layer`, `object_layer` - Camadas das entidades
+    - `intensity`, `direction` - Força e direção do efeito
+    - `evidence_level` - Nível de evidência (high/moderate/low/very_low)
+    - `dose_dependent`, `dose_range` - Dependência de dose
+    - `species_context` - Espécies validadas
+    - `mechanism_path` - Cadeia completa L0→L4
+    - `relationship_category`, `synergy_data` - Categorização e dados de sinergia
+  - Criada tabela `pathway_nodes` (Layer 1) - Vias moleculares com kegg_id, reactome_id, go_term
+  - Criada tabela `mechanism_nodes` (Layer 2) - Mecanismos com action_type, molecular_target
+  - Criada tabela `biological_effect_nodes` (Layer 3) - Efeitos com onset_time, duration, severity
+  - Criada tabela `hierarchical_edges` - Relações detalhadas com todas as propriedades científicas
+  - RLS policies e triggers configurados para todas as novas tabelas
+
+- ✅ **FASE 2: Neo4j Schema (Cypher)** - Configuração completa do grafo
+  - Criado arquivo `docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher` (~400 linhas)
+  - 18 constraints de unicidade para todos os node types
+  - 20+ índices de propriedades e relacionamentos
+  - 6 índices fulltext para busca avançada
+  - Exemplos completos de criação de nós (L0→L4)
+  - Exemplos de relacionamentos enriquecidos (INHIBITS, TREATS, SYNERGIZES_WITH)
+  - 5 queries hierárquicas de referência para traversal
+  - Queries de validação de dados
+
+- ✅ **FASE 3: generate-triplets Edge Function** - Extração hierárquica
+  - Atualizado prompt sistema com modelo VetGraphRAG de 5 camadas
+  - Suporte a 20+ relationship types com validação
+  - Extração de `mechanism_path` - cadeia completa L0→L1→L2→L3→L4
+  - Extração de `synergy_data` - dados estruturados para sinergias/antagonismos
+  - Categorização automática de relacionamentos (therapeutic, adverse, interaction, etc.)
+  - KG Matching expandido para `pathway_nodes`, `mechanism_nodes`, `biological_effect_nodes`
+  - Auto-criação de `hierarchical_edges` para triplets de alta confiança
+  - Tratamento de rate limits (429) e payment required (402)
+
+- ✅ **FASE 4: sync-approved-triplets Edge Function** - Sincronização hierárquica
+  - Node labels dinâmicos baseados em entity_type (Nutraceutical, Pathway, Mechanism, etc.)
+  - Propriedades hierárquicas nos nós: `layer`, `entity_type`, `source`
+  - Edges enriquecidas com 15+ propriedades científicas:
+    - `intensity`, `evidence_level`, `dose_range`, `species_validated`
+    - `synergy_data`, `evidence_count`, `curated`
+  - Sincronização de `mechanism_path` - cria nós e edges intermediários
+  - Auto-criação de schema Neo4j (constraints e índices)
+  - Estatísticas detalhadas: nodeTypes, relationshipTypes, mechanismPathsCreated
+  - Inferência de tipo para nós não tipados baseado em posição na cadeia
+
+### Changed - 2025-11-29
+- 📝 **ARCHITECTURE.md v1.9.0**: Seção GraphRAG completamente reescrita com modelo VetGraphRAG de 5 camadas
+- 📝 **Diagrama Mermaid**: Novo diagrama mostrando hierarquia L0→L4 com tipos de relacionamento
+- 📝 **Tabela de Status**: Atualizada com 4 fases concluídas do VetGraphRAG
+
 ### Fixed - 2025-11-26
 - ✅ **Neo4j Aura Compatibility**: Corrigido endpoint em todas edge functions para usar Query API v2 (`/db/neo4j/query/v2`) compatível com Neo4j Aura, substituindo o endpoint HTTP Transaction API antigo (`/db/neo4j/tx/commit`) que retornava erro 403 Forbidden
 - ✅ Edge functions corrigidas: `ai-config` (teste de conexão), `sync-approved-triplets`, `neo4j-sync`
