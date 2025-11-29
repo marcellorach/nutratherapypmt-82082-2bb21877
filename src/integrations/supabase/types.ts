@@ -173,6 +173,54 @@ export type Database = {
         }
         Relationships: []
       }
+      biological_effect_nodes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          duration: string | null
+          effect_category: string | null
+          effect_type: string | null
+          frequency_if_adverse: number | null
+          id: string
+          name: string
+          name_en: string | null
+          onset_time: string | null
+          severity_if_adverse: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          duration?: string | null
+          effect_category?: string | null
+          effect_type?: string | null
+          frequency_if_adverse?: number | null
+          id?: string
+          name: string
+          name_en?: string | null
+          onset_time?: string | null
+          severity_if_adverse?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          duration?: string | null
+          effect_category?: string | null
+          effect_type?: string | null
+          frequency_if_adverse?: number | null
+          id?: string
+          name?: string
+          name_en?: string | null
+          onset_time?: string | null
+          severity_if_adverse?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       breed_groups: {
         Row: {
           created_at: string | null
@@ -419,6 +467,148 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      hierarchical_edges: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          curated: boolean | null
+          curated_at: string | null
+          curated_by: string | null
+          dose_range: Json | null
+          ec50: string | null
+          evidence_count: number | null
+          evidence_level: string | null
+          ic50: string | null
+          id: string
+          intensity: number | null
+          ki: string | null
+          relationship: string
+          source_id: string
+          source_layer: string
+          source_type: string
+          species_validated: string[] | null
+          study_ids: string[] | null
+          target_id: string
+          target_layer: string
+          target_type: string
+          triplet_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          curated?: boolean | null
+          curated_at?: string | null
+          curated_by?: string | null
+          dose_range?: Json | null
+          ec50?: string | null
+          evidence_count?: number | null
+          evidence_level?: string | null
+          ic50?: string | null
+          id?: string
+          intensity?: number | null
+          ki?: string | null
+          relationship: string
+          source_id: string
+          source_layer: string
+          source_type: string
+          species_validated?: string[] | null
+          study_ids?: string[] | null
+          target_id: string
+          target_layer: string
+          target_type: string
+          triplet_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          curated?: boolean | null
+          curated_at?: string | null
+          curated_by?: string | null
+          dose_range?: Json | null
+          ec50?: string | null
+          evidence_count?: number | null
+          evidence_level?: string | null
+          ic50?: string | null
+          id?: string
+          intensity?: number | null
+          ki?: string | null
+          relationship?: string
+          source_id?: string
+          source_layer?: string
+          source_type?: string
+          species_validated?: string[] | null
+          study_ids?: string[] | null
+          target_id?: string
+          target_layer?: string
+          target_type?: string
+          triplet_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hierarchical_edges_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mechanism_nodes: {
+        Row: {
+          action_type: string | null
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          id: string
+          mechanism_type: string | null
+          molecular_target: string | null
+          name: string
+          name_en: string | null
+          reversibility: string | null
+          target_pathway_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          mechanism_type?: string | null
+          molecular_target?: string | null
+          name: string
+          name_en?: string | null
+          reversibility?: string | null
+          target_pathway_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          id?: string
+          mechanism_type?: string | null
+          molecular_target?: string | null
+          name?: string
+          name_en?: string | null
+          reversibility?: string | null
+          target_pathway_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mechanism_nodes_target_pathway_id_fkey"
+            columns: ["target_pathway_id"]
+            isOneToOne: false
+            referencedRelation: "pathway_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medical_knowledge_edges: {
         Row: {
@@ -945,6 +1135,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pathway_nodes: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          go_term: string | null
+          id: string
+          kegg_id: string | null
+          name: string
+          name_en: string | null
+          pathway_type: string | null
+          reactome_id: string | null
+          species_relevance: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          go_term?: string | null
+          id?: string
+          kegg_id?: string | null
+          name: string
+          name_en?: string | null
+          pathway_type?: string | null
+          reactome_id?: string | null
+          species_relevance?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          go_term?: string | null
+          id?: string
+          kegg_id?: string | null
+          name?: string
+          name_en?: string | null
+          pathway_type?: string | null
+          reactome_id?: string | null
+          species_relevance?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       processed_studies: {
         Row: {
           analysis_data: Json | null
@@ -1337,23 +1575,34 @@ export type Database = {
           auto_approved: boolean | null
           created_at: string | null
           curation_status: string | null
+          direction: string | null
+          dose_dependent: boolean | null
+          dose_range: Json | null
+          evidence_level: string | null
           extraction_confidence: number | null
           id: string
+          intensity: number | null
           kg_match_score: number | null
           llm_confidence: number | null
+          mechanism_path: Json | null
           object_id: string | null
+          object_layer: string | null
           object_name: string
           object_type: string
           predicate: string
+          relationship_category: string | null
           review_date: string | null
           review_notes: string | null
           reviewed_by: string | null
+          species_context: string[] | null
           study_id: string | null
           subject_id: string | null
+          subject_layer: string | null
           subject_name: string
           subject_type: string
           synced_at: string | null
           synced_to_neo4j: boolean | null
+          synergy_data: Json | null
           updated_at: string | null
         }
         Insert: {
@@ -1361,23 +1610,34 @@ export type Database = {
           auto_approved?: boolean | null
           created_at?: string | null
           curation_status?: string | null
+          direction?: string | null
+          dose_dependent?: boolean | null
+          dose_range?: Json | null
+          evidence_level?: string | null
           extraction_confidence?: number | null
           id?: string
+          intensity?: number | null
           kg_match_score?: number | null
           llm_confidence?: number | null
+          mechanism_path?: Json | null
           object_id?: string | null
+          object_layer?: string | null
           object_name: string
           object_type: string
           predicate: string
+          relationship_category?: string | null
           review_date?: string | null
           review_notes?: string | null
           reviewed_by?: string | null
+          species_context?: string[] | null
           study_id?: string | null
           subject_id?: string | null
+          subject_layer?: string | null
           subject_name: string
           subject_type: string
           synced_at?: string | null
           synced_to_neo4j?: boolean | null
+          synergy_data?: Json | null
           updated_at?: string | null
         }
         Update: {
@@ -1385,23 +1645,34 @@ export type Database = {
           auto_approved?: boolean | null
           created_at?: string | null
           curation_status?: string | null
+          direction?: string | null
+          dose_dependent?: boolean | null
+          dose_range?: Json | null
+          evidence_level?: string | null
           extraction_confidence?: number | null
           id?: string
+          intensity?: number | null
           kg_match_score?: number | null
           llm_confidence?: number | null
+          mechanism_path?: Json | null
           object_id?: string | null
+          object_layer?: string | null
           object_name?: string
           object_type?: string
           predicate?: string
+          relationship_category?: string | null
           review_date?: string | null
           review_notes?: string | null
           reviewed_by?: string | null
+          species_context?: string[] | null
           study_id?: string | null
           subject_id?: string | null
+          subject_layer?: string | null
           subject_name?: string
           subject_type?: string
           synced_at?: string | null
           synced_to_neo4j?: boolean | null
+          synergy_data?: Json | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1521,7 +1792,64 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      entity_layer:
+        | "layer_0_compound"
+        | "layer_1_target"
+        | "layer_2_mechanism"
+        | "layer_3_effect"
+        | "layer_4_outcome"
+      entity_type_expanded:
+        | "nutraceutical"
+        | "drug"
+        | "chemical_compound"
+        | "pathway"
+        | "receptor"
+        | "enzyme"
+        | "gene_protein"
+        | "mechanism"
+        | "signaling_cascade"
+        | "biological_effect"
+        | "side_effect"
+        | "clinical_outcome"
+        | "condition"
+        | "disease"
+        | "breed"
+        | "species"
+        | "age_group"
+        | "study"
+      relationship_type_expanded:
+        | "INHIBITS"
+        | "ACTIVATES"
+        | "MODULATES"
+        | "BINDS_TO"
+        | "BLOCKS"
+        | "UPREGULATES"
+        | "DOWNREGULATES"
+        | "TRIGGERS"
+        | "PARTICIPATES_IN"
+        | "REGULATES"
+        | "PRODUCES"
+        | "LEADS_TO"
+        | "CAUSES"
+        | "TREATS"
+        | "PREVENTS"
+        | "SUPPORTS"
+        | "AMELIORATES"
+        | "MANAGES"
+        | "WORSENS"
+        | "CONTRAINDICATED_FOR"
+        | "CAUSES_SIDE_EFFECT"
+        | "AGGRAVATES"
+        | "SYNERGIZES_WITH"
+        | "ANTAGONIZES"
+        | "ENHANCES_BIOAVAILABILITY"
+        | "REDUCES_BIOAVAILABILITY"
+        | "REQUIRES"
+        | "POTENTIATES"
+        | "PREDISPOSED_IN"
+        | "COMMON_IN"
+        | "CITED_IN"
+        | "STUDIED_IN"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1648,6 +1976,68 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      entity_layer: [
+        "layer_0_compound",
+        "layer_1_target",
+        "layer_2_mechanism",
+        "layer_3_effect",
+        "layer_4_outcome",
+      ],
+      entity_type_expanded: [
+        "nutraceutical",
+        "drug",
+        "chemical_compound",
+        "pathway",
+        "receptor",
+        "enzyme",
+        "gene_protein",
+        "mechanism",
+        "signaling_cascade",
+        "biological_effect",
+        "side_effect",
+        "clinical_outcome",
+        "condition",
+        "disease",
+        "breed",
+        "species",
+        "age_group",
+        "study",
+      ],
+      relationship_type_expanded: [
+        "INHIBITS",
+        "ACTIVATES",
+        "MODULATES",
+        "BINDS_TO",
+        "BLOCKS",
+        "UPREGULATES",
+        "DOWNREGULATES",
+        "TRIGGERS",
+        "PARTICIPATES_IN",
+        "REGULATES",
+        "PRODUCES",
+        "LEADS_TO",
+        "CAUSES",
+        "TREATS",
+        "PREVENTS",
+        "SUPPORTS",
+        "AMELIORATES",
+        "MANAGES",
+        "WORSENS",
+        "CONTRAINDICATED_FOR",
+        "CAUSES_SIDE_EFFECT",
+        "AGGRAVATES",
+        "SYNERGIZES_WITH",
+        "ANTAGONIZES",
+        "ENHANCES_BIOAVAILABILITY",
+        "REDUCES_BIOAVAILABILITY",
+        "REQUIRES",
+        "POTENTIATES",
+        "PREDISPOSED_IN",
+        "COMMON_IN",
+        "CITED_IN",
+        "STUDIED_IN",
+      ],
+    },
   },
 } as const
