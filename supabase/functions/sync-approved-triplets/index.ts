@@ -7,15 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Extended triplet interface with hierarchical fields
 interface TripletExtraction {
   id: string;
+  study_id: string | null;
   subject_type: string;
   subject_name: string;
   subject_id: string | null;
+  subject_layer: string | null;
   predicate: string;
   object_type: string;
   object_name: string;
   object_id: string | null;
+  object_layer: string | null;
+  // Enriched properties
+  intensity: number | null;
+  direction: string | null;
+  evidence_level: string | null;
+  dose_dependent: boolean | null;
+  dose_range: any | null;
+  species_context: string[] | null;
+  mechanism_path: any[] | null;
+  relationship_category: string | null;
+  synergy_data: any | null;
+  // Confidence scores
   extraction_confidence: number;
   kg_match_score: number;
   llm_confidence: number;
@@ -27,8 +42,33 @@ interface Neo4jCredentials {
   password: string;
 }
 
+// Map entity types to Neo4j labels
+const ENTITY_TYPE_TO_LABEL: Record<string, string> = {
+  'nutraceutical': 'Nutraceutical',
+  'drug': 'Drug',
+  'chemical_compound': 'ChemicalCompound',
+  'pathway': 'Pathway',
+  'receptor': 'Receptor',
+  'enzyme': 'Enzyme',
+  'gene_protein': 'GeneProtein',
+  'mechanism': 'Mechanism',
+  'signaling_cascade': 'SignalingCascade',
+  'biological_effect': 'BiologicalEffect',
+  'side_effect': 'SideEffect',
+  'clinical_outcome': 'ClinicalOutcome',
+  'condition': 'Condition',
+  'disease': 'Disease',
+  'breed': 'Breed',
+  'species': 'Species',
+  'age_group': 'AgeGroup',
+  'study': 'Study',
+  'target': 'Target',
+  'effect': 'BiologicalEffect',
+  'unknown': 'Entity'
+};
+
 /**
- * Executa query Cypher no Neo4j via Query API v2
+ * Execute Cypher query on Neo4j via Query API v2
  */
 async function executeCypherQuery(
   cypher: string,
@@ -37,12 +77,11 @@ async function executeCypherQuery(
 ): Promise<any> {
   const authHeader = 'Basic ' + btoa(`${credentials.username}:${credentials.password}`);
   
-  // Converter URI neo4j+s:// para https:// (neo4j:// para http://)
   const httpUri = credentials.uri
     .replace('neo4j+s://', 'https://')
     .replace('neo4j://', 'http://');
   
-  console.log(`🔗 Neo4j sync: ${httpUri}/db/neo4j/query/v2`);
+  console.log(`🔗 Neo4j query: ${cypher.substring(0, 100)}...`);
   
   const response = await fetch(`${httpUri}/db/neo4j/query/v2`, {
     method: 'POST',
@@ -66,71 +105,252 @@ async function executeCypherQuery(
 }
 
 /**
- * Sincroniza triplet aprovado para Neo4j AuraDB
+ * Get Neo4j label from entity type
  */
-async function syncTripletToNeo4j(
-  triplet: TripletExtraction,
-  credentials: Neo4jCredentials
-): Promise<void> {
-  console.log(`Syncing triplet ${triplet.id} to Neo4j...`);
-
-  // Criar nós e relacionamento no Neo4j
-  const cypher = `
-    // Criar ou atualizar nó subject
-    MERGE (subject:Entity {name: $subject_name, type: $subject_type})
-    ON CREATE SET 
-      subject.id = $subject_id,
-      subject.created_at = datetime(),
-      subject.source = 'triplet_curation'
-    ON MATCH SET
-      subject.updated_at = datetime()
-    
-    // Criar ou atualizar nó object
-    MERGE (object:Entity {name: $object_name, type: $object_type})
-    ON CREATE SET 
-      object.id = $object_id,
-      object.created_at = datetime(),
-      object.source = 'triplet_curation'
-    ON MATCH SET
-      object.updated_at = datetime()
-    
-    // Criar relacionamento com metadata
-    MERGE (subject)-[rel:\`${triplet.predicate}\`]->(object)
-    ON CREATE SET 
-      rel.triplet_id = $triplet_id,
-      rel.extraction_confidence = $extraction_confidence,
-      rel.kg_match_score = $kg_match_score,
-      rel.llm_confidence = $llm_confidence,
-      rel.created_at = datetime(),
-      rel.approved = true
-    ON MATCH SET
-      rel.extraction_confidence = $extraction_confidence,
-      rel.kg_match_score = $kg_match_score,
-      rel.llm_confidence = $llm_confidence,
-      rel.updated_at = datetime()
-    
-    RETURN subject, rel, object
-  `;
-
-  const params = {
-    subject_name: triplet.subject_name,
-    subject_type: triplet.subject_type,
-    subject_id: triplet.subject_id || triplet.subject_name,
-    object_name: triplet.object_name,
-    object_type: triplet.object_type,
-    object_id: triplet.object_id || triplet.object_name,
-    triplet_id: triplet.id,
-    extraction_confidence: triplet.extraction_confidence,
-    kg_match_score: triplet.kg_match_score,
-    llm_confidence: triplet.llm_confidence
-  };
-
-  await executeCypherQuery(cypher, params, credentials);
-  console.log(`Triplet ${triplet.id} synced successfully`);
+function getNodeLabel(entityType: string): string {
+  const normalized = (entityType || 'unknown').toLowerCase().trim();
+  return ENTITY_TYPE_TO_LABEL[normalized] || 'Entity';
 }
 
 /**
- * Busca credenciais Neo4j da tabela ai_configurations
+ * Sync hierarchical triplet to Neo4j AuraDB with dynamic labels and enriched properties
+ */
+async function syncHierarchicalTripletToNeo4j(
+  triplet: TripletExtraction,
+  credentials: Neo4jCredentials
+): Promise<void> {
+  console.log(`🔄 Syncing hierarchical triplet ${triplet.id}: ${triplet.subject_name} -[${triplet.predicate}]-> ${triplet.object_name}`);
+
+  const subjectLabel = getNodeLabel(triplet.subject_type);
+  const objectLabel = getNodeLabel(triplet.object_type);
+
+  // Build dynamic Cypher query with proper labels
+  // Using APOC-free approach for Neo4j AuraDB compatibility
+  const cypher = `
+    // Create or update subject node with dynamic label
+    MERGE (subject:${subjectLabel} {name: $subject_name})
+    ON CREATE SET 
+      subject.id = coalesce($subject_id, randomUuid()),
+      subject.entity_type = $subject_type,
+      subject.layer = $subject_layer,
+      subject.created_at = datetime(),
+      subject.source = 'vetgraphrag_extraction'
+    ON MATCH SET
+      subject.updated_at = datetime(),
+      subject.layer = coalesce(subject.layer, $subject_layer)
+    
+    // Create or update object node with dynamic label
+    MERGE (object:${objectLabel} {name: $object_name})
+    ON CREATE SET 
+      object.id = coalesce($object_id, randomUuid()),
+      object.entity_type = $object_type,
+      object.layer = $object_layer,
+      object.created_at = datetime(),
+      object.source = 'vetgraphrag_extraction'
+    ON MATCH SET
+      object.updated_at = datetime(),
+      object.layer = coalesce(object.layer, $object_layer)
+    
+    // Create relationship with ALL enriched properties
+    MERGE (subject)-[rel:${triplet.predicate}]->(object)
+    ON CREATE SET 
+      rel.triplet_id = $triplet_id,
+      rel.study_id = $study_id,
+      rel.extraction_confidence = $extraction_confidence,
+      rel.kg_match_score = $kg_match_score,
+      rel.llm_confidence = $llm_confidence,
+      rel.intensity = $intensity,
+      rel.direction = $direction,
+      rel.evidence_level = $evidence_level,
+      rel.dose_dependent = $dose_dependent,
+      rel.dose_range = $dose_range,
+      rel.species_validated = $species_context,
+      rel.relationship_category = $relationship_category,
+      rel.synergy_data = $synergy_data,
+      rel.created_at = datetime(),
+      rel.curated = true,
+      rel.evidence_count = 1
+    ON MATCH SET
+      rel.updated_at = datetime(),
+      rel.evidence_count = coalesce(rel.evidence_count, 0) + 1,
+      rel.extraction_confidence = CASE 
+        WHEN $extraction_confidence > coalesce(rel.extraction_confidence, 0) 
+        THEN $extraction_confidence 
+        ELSE rel.extraction_confidence 
+      END,
+      rel.evidence_level = CASE 
+        WHEN $evidence_level IS NOT NULL 
+        THEN $evidence_level 
+        ELSE rel.evidence_level 
+      END
+    
+    RETURN subject.name AS subject, type(rel) AS relationship, object.name AS object
+  `;
+
+  const params = {
+    // Subject properties
+    subject_name: triplet.subject_name,
+    subject_type: triplet.subject_type,
+    subject_id: triplet.subject_id,
+    subject_layer: triplet.subject_layer || 'unknown',
+    // Object properties
+    object_name: triplet.object_name,
+    object_type: triplet.object_type,
+    object_id: triplet.object_id,
+    object_layer: triplet.object_layer || 'unknown',
+    // Triplet metadata
+    triplet_id: triplet.id,
+    study_id: triplet.study_id,
+    // Confidence scores
+    extraction_confidence: triplet.extraction_confidence,
+    kg_match_score: triplet.kg_match_score,
+    llm_confidence: triplet.llm_confidence,
+    // Enriched properties
+    intensity: triplet.intensity,
+    direction: triplet.direction,
+    evidence_level: triplet.evidence_level,
+    dose_dependent: triplet.dose_dependent,
+    dose_range: triplet.dose_range ? JSON.stringify(triplet.dose_range) : null,
+    species_context: triplet.species_context,
+    relationship_category: triplet.relationship_category,
+    synergy_data: triplet.synergy_data ? JSON.stringify(triplet.synergy_data) : null
+  };
+
+  await executeCypherQuery(cypher, params, credentials);
+  console.log(`✅ Triplet ${triplet.id} synced with ${subjectLabel} -[${triplet.predicate}]-> ${objectLabel}`);
+
+  // If mechanism_path exists, create intermediate relationships
+  if (triplet.mechanism_path && Array.isArray(triplet.mechanism_path) && triplet.mechanism_path.length > 0) {
+    await syncMechanismPath(triplet.mechanism_path, triplet, credentials);
+  }
+}
+
+/**
+ * Sync complete mechanism path to Neo4j
+ * Creates intermediate nodes and relationships for full chain visualization
+ */
+async function syncMechanismPath(
+  mechanismPath: any[],
+  triplet: TripletExtraction,
+  credentials: Neo4jCredentials
+): Promise<void> {
+  console.log(`📊 Syncing mechanism path with ${mechanismPath.length} steps`);
+
+  for (let i = 0; i < mechanismPath.length; i++) {
+    const step = mechanismPath[i];
+    if (!step.from || !step.to || !step.relation) continue;
+
+    // Infer entity types from position in path
+    const fromType = inferEntityType(step.from, i, mechanismPath.length);
+    const toType = inferEntityType(step.to, i + 1, mechanismPath.length);
+    const fromLabel = getNodeLabel(fromType);
+    const toLabel = getNodeLabel(toType);
+
+    const pathCypher = `
+      MERGE (from:${fromLabel} {name: $from_name})
+      ON CREATE SET 
+        from.entity_type = $from_type,
+        from.layer = $from_layer,
+        from.created_at = datetime(),
+        from.source = 'mechanism_path'
+      
+      MERGE (to:${toLabel} {name: $to_name})
+      ON CREATE SET 
+        to.entity_type = $to_type,
+        to.layer = $to_layer,
+        to.created_at = datetime(),
+        to.source = 'mechanism_path'
+      
+      MERGE (from)-[rel:${step.relation}]->(to)
+      ON CREATE SET 
+        rel.path_step = $step_index,
+        rel.parent_triplet_id = $triplet_id,
+        rel.study_id = $study_id,
+        rel.confidence = $confidence,
+        rel.created_at = datetime(),
+        rel.is_mechanism_step = true
+      
+      RETURN from.name, type(rel), to.name
+    `;
+
+    const pathParams = {
+      from_name: step.from,
+      from_type: fromType,
+      from_layer: getLayerFromType(fromType),
+      to_name: step.to,
+      to_type: toType,
+      to_layer: getLayerFromType(toType),
+      step_index: i,
+      triplet_id: triplet.id,
+      study_id: triplet.study_id,
+      confidence: triplet.extraction_confidence * 0.9 // Slightly lower for inferred path
+    };
+
+    try {
+      await executeCypherQuery(pathCypher, pathParams, credentials);
+    } catch (err) {
+      console.warn(`⚠️ Failed to create path step ${i}: ${err}`);
+    }
+  }
+}
+
+/**
+ * Infer entity type based on position in mechanism path
+ */
+function inferEntityType(name: string, position: number, totalLength: number): string {
+  const nameLower = name.toLowerCase();
+  
+  // Check for keywords in name
+  if (nameLower.includes('pathway') || nameLower.includes('nf-κb') || nameLower.includes('mapk') || nameLower.includes('signaling')) {
+    return 'pathway';
+  }
+  if (nameLower.includes('mechanism') || nameLower.includes('cascade') || nameLower.includes('inhibition') || nameLower.includes('activation')) {
+    return 'mechanism';
+  }
+  if (nameLower.includes('effect') || nameLower.includes('reduction') || nameLower.includes('improvement') || nameLower.includes('inflammation')) {
+    return 'biological_effect';
+  }
+  if (nameLower.includes('receptor') || nameLower.includes('-r')) {
+    return 'receptor';
+  }
+  if (nameLower.includes('enzyme') || nameLower.includes('cox-') || nameLower.includes('lox')) {
+    return 'enzyme';
+  }
+  
+  // Infer from position
+  const relativePosition = position / (totalLength - 1 || 1);
+  if (relativePosition <= 0.2) return 'nutraceutical';
+  if (relativePosition <= 0.4) return 'pathway';
+  if (relativePosition <= 0.6) return 'mechanism';
+  if (relativePosition <= 0.8) return 'biological_effect';
+  return 'condition';
+}
+
+/**
+ * Get layer from entity type
+ */
+function getLayerFromType(entityType: string): string {
+  const layerMap: Record<string, string> = {
+    'nutraceutical': 'layer_0_compound',
+    'drug': 'layer_0_compound',
+    'chemical_compound': 'layer_0_compound',
+    'pathway': 'layer_1_target',
+    'receptor': 'layer_1_target',
+    'enzyme': 'layer_1_target',
+    'gene_protein': 'layer_1_target',
+    'mechanism': 'layer_2_mechanism',
+    'signaling_cascade': 'layer_2_mechanism',
+    'biological_effect': 'layer_3_effect',
+    'side_effect': 'layer_3_effect',
+    'condition': 'layer_4_outcome',
+    'disease': 'layer_4_outcome',
+    'clinical_outcome': 'layer_4_outcome'
+  };
+  return layerMap[entityType] || 'unknown';
+}
+
+/**
+ * Fetch Neo4j credentials from ai_configurations table
  */
 async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
   const { data, error } = await supabase
@@ -139,7 +359,7 @@ async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | nu
     .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password']);
   
   if (error || !data || data.length < 3) {
-    console.error('Failed to fetch Neo4j credentials from database:', error);
+    console.error('Failed to fetch Neo4j credentials:', error);
     return null;
   }
   
@@ -160,41 +380,77 @@ async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | nu
 }
 
 /**
- * Edge Function principal
+ * Create Neo4j constraints and indexes if not exists
+ */
+async function ensureNeo4jSchema(credentials: Neo4jCredentials): Promise<void> {
+  const schemaQueries = [
+    // Core node constraints
+    'CREATE CONSTRAINT nutraceutical_name IF NOT EXISTS FOR (n:Nutraceutical) REQUIRE n.name IS UNIQUE',
+    'CREATE CONSTRAINT condition_name IF NOT EXISTS FOR (n:Condition) REQUIRE n.name IS UNIQUE',
+    'CREATE CONSTRAINT pathway_name IF NOT EXISTS FOR (n:Pathway) REQUIRE n.name IS UNIQUE',
+    'CREATE CONSTRAINT mechanism_name IF NOT EXISTS FOR (n:Mechanism) REQUIRE n.name IS UNIQUE',
+    'CREATE CONSTRAINT biological_effect_name IF NOT EXISTS FOR (n:BiologicalEffect) REQUIRE n.name IS UNIQUE',
+    // Indexes for common queries
+    'CREATE INDEX entity_layer IF NOT EXISTS FOR (n:Entity) ON (n.layer)',
+    'CREATE INDEX nutraceutical_layer IF NOT EXISTS FOR (n:Nutraceutical) ON (n.layer)'
+  ];
+
+  for (const query of schemaQueries) {
+    try {
+      await executeCypherQuery(query, {}, credentials);
+    } catch (err) {
+      // Ignore errors for already existing constraints/indexes
+      console.log(`Schema query note: ${query.substring(0, 50)}... - ${err}`);
+    }
+  }
+}
+
+/**
+ * Main Edge Function
  */
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Inicializar Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Buscar credenciais Neo4j da tabela ai_configurations
+    // Get Neo4j credentials
     const credentials = await getNeo4jCredentials(supabase);
     
     if (!credentials) {
-      console.error('Neo4j credentials not configured in database');
+      console.error('Neo4j credentials not configured');
       return new Response(
         JSON.stringify({ 
           error: 'Neo4j credentials not configured',
-          message: 'Please configure NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD in AI Configuration tab'
+          message: 'Configure neo4j_uri, neo4j_username, neo4j_password in AI Configuration'
         }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Buscar triplets aprovados não sincronizados
+    // Ensure schema exists (only creates if not exists)
+    try {
+      await ensureNeo4jSchema(credentials);
+    } catch (schemaErr) {
+      console.warn('Schema setup warning:', schemaErr);
+    }
+
+    // Fetch approved triplets not yet synced - with all hierarchical fields
     const { data: triplets, error: fetchError } = await supabase
       .from('triplet_extractions')
-      .select('*')
+      .select(`
+        id, study_id,
+        subject_type, subject_name, subject_id, subject_layer,
+        predicate,
+        object_type, object_name, object_id, object_layer,
+        intensity, direction, evidence_level, dose_dependent, dose_range,
+        species_context, mechanism_path, relationship_category, synergy_data,
+        extraction_confidence, kg_match_score, llm_confidence
+      `)
       .eq('curation_status', 'approved')
       .is('synced_to_neo4j', false)
       .limit(100);
@@ -203,58 +459,78 @@ serve(async (req) => {
       throw fetchError;
     }
 
-    console.log(`Found ${triplets?.length || 0} triplets to sync`);
+    console.log(`📦 Found ${triplets?.length || 0} approved triplets to sync`);
 
     if (!triplets || triplets.length === 0) {
       return new Response(
         JSON.stringify({ 
           message: 'No triplets to sync',
-          synced: 0
+          synced: 0,
+          nodeTypes: {},
+          relationshipTypes: {}
         }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Sincronizar cada triplet
+    // Track statistics
     const results = {
       total: triplets.length,
       synced: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
+      nodeTypes: {} as Record<string, number>,
+      relationshipTypes: {} as Record<string, number>,
+      mechanismPathsCreated: 0
     };
 
+    // Sync each triplet with hierarchical model
     for (const triplet of triplets) {
       try {
-        await syncTripletToNeo4j(triplet as TripletExtraction, credentials);
+        await syncHierarchicalTripletToNeo4j(triplet as TripletExtraction, credentials);
         
-        // Marcar como sincronizado no Supabase
+        // Update sync status in Supabase
         await supabase
           .from('triplet_extractions')
-          .update({ synced_to_neo4j: true, synced_at: new Date().toISOString() })
+          .update({ 
+            synced_to_neo4j: true, 
+            synced_at: new Date().toISOString() 
+          })
           .eq('id', triplet.id);
         
         results.synced++;
+
+        // Track node types
+        const subjectLabel = getNodeLabel(triplet.subject_type);
+        const objectLabel = getNodeLabel(triplet.object_type);
+        results.nodeTypes[subjectLabel] = (results.nodeTypes[subjectLabel] || 0) + 1;
+        results.nodeTypes[objectLabel] = (results.nodeTypes[objectLabel] || 0) + 1;
+
+        // Track relationship types
+        results.relationshipTypes[triplet.predicate] = 
+          (results.relationshipTypes[triplet.predicate] || 0) + 1;
+
+        // Track mechanism paths
+        if (triplet.mechanism_path && Array.isArray(triplet.mechanism_path) && triplet.mechanism_path.length > 0) {
+          results.mechanismPathsCreated++;
+        }
+
       } catch (error: any) {
-        console.error(`Failed to sync triplet ${triplet.id}:`, error);
+        console.error(`❌ Failed to sync triplet ${triplet.id}:`, error);
         results.failed++;
         results.errors.push(`${triplet.id}: ${error.message}`);
       }
     }
 
-    console.log('Sync complete:', results);
+    console.log('🎉 VetGraphRAG sync complete:', JSON.stringify(results, null, 2));
 
     return new Response(
       JSON.stringify({ 
         success: true,
+        message: `Synced ${results.synced}/${results.total} hierarchical triplets to Neo4j`,
         results
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: any) {
@@ -264,10 +540,7 @@ serve(async (req) => {
         error: error.message,
         details: error.toString()
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
