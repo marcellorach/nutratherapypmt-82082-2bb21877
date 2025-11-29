@@ -57,7 +57,8 @@ const NtaiProcessingSection: React.FC = () => {
   const [processingStudy, setProcessingStudy] = useState<string | null>(null);
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
     { name: '📤 Upload', status: 'pending', description: 'File in Supabase storage' },
-    { name: '🤖 Gemini AI', status: 'pending', description: 'Analysis with Google Gemini 3 Pro Preview' },
+    { name: '🤖 Gemini AI', status: 'pending', description: 'Entity extraction with AI' },
+    { name: '🔗 Triplets', status: 'pending', description: 'VetGraphRAG triplet generation' },
     { name: '✅ Complete', status: 'pending', description: 'Data extracted and saved' },
   ]);
   const { toast } = useToast();
@@ -101,7 +102,7 @@ const NtaiProcessingSection: React.FC = () => {
         i === 0 ? { ...s, status: 'complete' as const } : s
       ));
 
-      // Stage 2: Parse with Unstructured
+      // Stage 2: Parse with AI
       setPipelineStages(stages => stages.map((s, i) => 
         i === 1 ? { ...s, status: 'processing' as const } : s
       ));
@@ -112,13 +113,9 @@ const NtaiProcessingSection: React.FC = () => {
 
       if (parseError) throw new Error(`Parse failed: ${parseError.message}`);
       
+      // Stage 2 complete, start entity extraction
       setPipelineStages(stages => stages.map((s, i) =>
         i === 1 ? { ...s, status: 'complete' as const } : s
-      ));
-
-      // Stage 3: Extract with AI
-      setPipelineStages(stages => stages.map((s, i) => 
-        i === 2 ? { ...s, status: 'processing' as const } : s
       ));
 
       const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-study-entities', {
@@ -127,20 +124,41 @@ const NtaiProcessingSection: React.FC = () => {
 
       if (extractError) throw new Error(`Extraction failed: ${extractError.message}`);
 
+      // Stage 3: Generate VetGraphRAG Triplets
       setPipelineStages(stages => stages.map((s, i) => 
-        i === 2 ? { ...s, status: 'complete' as const } : 
-        i === 3 ? { ...s, status: 'complete' as const } : 
-        i === 4 ? { ...s, status: 'complete' as const } : s
+        i === 2 ? { ...s, status: 'processing' as const } : s
       ));
 
+      const { data: tripletData, error: tripletError } = await supabase.functions.invoke('generate-triplets', {
+        body: { studyId }
+      });
+
+      if (tripletError) {
+        console.warn('Triplet generation warning:', tripletError.message);
+        // Continue even if triplet generation fails
+        setPipelineStages(stages => stages.map((s, i) => 
+          i === 2 ? { ...s, status: 'error' as const } : s
+        ));
+      } else {
+        setPipelineStages(stages => stages.map((s, i) => 
+          i === 2 ? { ...s, status: 'complete' as const } : s
+        ));
+      }
+
+      // Stage 4: Complete
+      setPipelineStages(stages => stages.map((s, i) => 
+        i === 3 ? { ...s, status: 'complete' as const } : s
+      ));
+
+      const tripletCount = tripletData?.tripletsGenerated || 0;
       toast({
         title: 'Processing Complete',
-        description: `Extracted ${extractData.counts.nutraceuticals} nutraceuticals, ${extractData.counts.conditions} conditions`,
+        description: `Extracted ${extractData.counts?.nutraceuticals || 0} nutraceuticals, ${extractData.counts?.conditions || 0} conditions, ${tripletCount} VetGraphRAG triplets`,
       });
 
     } catch (error) {
       console.error('Processing error:', error);
-      setPipelineStages(stages => stages.map((s, i) => 
+      setPipelineStages(stages => stages.map((s) => 
         s.status === 'processing' ? { ...s, status: 'error' as const } : s
       ));
       toast({
@@ -150,6 +168,33 @@ const NtaiProcessingSection: React.FC = () => {
       });
     } finally {
       setProcessingStudy(null);
+    }
+  };
+
+  const handleRegenerateVetGraphRAG = async (studyId: string) => {
+    try {
+      toast({
+        title: 'Regenerating Triplets',
+        description: 'Starting VetGraphRAG triplet generation...',
+      });
+
+      const { data, error } = await supabase.functions.invoke('generate-triplets', {
+        body: { studyId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Triplets Generated',
+        description: `Generated ${data.tripletsGenerated} hierarchical triplets (${data.autoApprovedCount} auto-approved)`,
+      });
+    } catch (error) {
+      console.error('Regenerate error:', error);
+      toast({
+        title: 'Regeneration Failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -202,6 +247,7 @@ const NtaiProcessingSection: React.FC = () => {
             onSelectAll={() => handleSelectAll(availableStudies)}
             onAddToQueue={addToQueue}
             onDelete={handleDeleteStudies}
+            onRegenerateVetGraphRAG={handleRegenerateVetGraphRAG}
           />
         </div>
         

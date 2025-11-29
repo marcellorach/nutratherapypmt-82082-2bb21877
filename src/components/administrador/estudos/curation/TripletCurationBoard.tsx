@@ -16,9 +16,11 @@ interface Triplet {
   study_id: string;
   subject_type: string;
   subject_name: string;
+  subject_layer: string | null;
   predicate: string;
   object_type: string;
   object_name: string;
+  object_layer: string | null;
   extraction_confidence: number;
   kg_match_score: number;
   llm_confidence: number;
@@ -26,6 +28,12 @@ interface Triplet {
   auto_approved: boolean;
   synced_to_neo4j: boolean;
   created_at: string;
+  // VetGraphRAG fields
+  evidence_level: string | null;
+  intensity: number | null;
+  mechanism_path: string[] | null;
+  relationship_category: string | null;
+  species_context: string[] | null;
 }
 
 interface Column {
@@ -226,6 +234,44 @@ export const TripletCurationBoard: React.FC = () => {
     return 'bg-red-500';
   };
 
+  const getLayerBadge = (layer: string | null) => {
+    if (!layer) return null;
+    const layerColors: Record<string, string> = {
+      'layer_0_compound': 'bg-purple-500',
+      'layer_1_target': 'bg-blue-500',
+      'layer_2_mechanism': 'bg-cyan-500',
+      'layer_3_effect': 'bg-orange-500',
+      'layer_4_outcome': 'bg-green-500',
+    };
+    const layerLabels: Record<string, string> = {
+      'layer_0_compound': 'L0',
+      'layer_1_target': 'L1',
+      'layer_2_mechanism': 'L2',
+      'layer_3_effect': 'L3',
+      'layer_4_outcome': 'L4',
+    };
+    return (
+      <Badge className={`${layerColors[layer] || 'bg-gray-500'} text-white text-[9px] px-1`}>
+        {layerLabels[layer] || layer}
+      </Badge>
+    );
+  };
+
+  const getEvidenceBadge = (level: string | null) => {
+    if (!level) return null;
+    const colors: Record<string, string> = {
+      'high': 'bg-green-500',
+      'moderate': 'bg-yellow-500',
+      'low': 'bg-orange-500',
+      'very_low': 'bg-red-500',
+    };
+    return (
+      <Badge className={`${colors[level] || 'bg-gray-500'} text-white text-[9px]`}>
+        {level}
+      </Badge>
+    );
+  };
+
   const filteredColumns = Object.entries(columns).reduce((acc, [key, col]) => {
     const filtered = col.triplets.filter(t => {
       const matchesSearch = searchTerm === '' || 
@@ -343,25 +389,54 @@ export const TripletCurationBoard: React.FC = () => {
                                 }
                               }}
                             >
-                              {/* Triplet content */}
+                              {/* Triplet content with VetGraphRAG layers */}
                               <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-xs">
+                                <div className="flex items-center gap-1 text-xs">
+                                  {getLayerBadge(triplet.subject_layer)}
                                   <Badge variant="outline" className="text-[10px]">
                                     {triplet.subject_type}
                                   </Badge>
-                                  <span className="font-semibold truncate">{triplet.subject_name}</span>
+                                  <span className="font-semibold truncate flex-1">{triplet.subject_name}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <ArrowRight className="h-3 w-3" />
                                   <Badge className="text-[10px]">{triplet.predicate}</Badge>
+                                  {triplet.relationship_category && (
+                                    <span className="text-[9px] text-muted-foreground">({triplet.relationship_category})</span>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-2 text-xs">
+                                <div className="flex items-center gap-1 text-xs">
+                                  {getLayerBadge(triplet.object_layer)}
                                   <Badge variant="outline" className="text-[10px]">
                                     {triplet.object_type}
                                   </Badge>
-                                  <span className="font-semibold truncate">{triplet.object_name}</span>
+                                  <span className="font-semibold truncate flex-1">{triplet.object_name}</span>
                                 </div>
                               </div>
+
+                              {/* VetGraphRAG enrichment */}
+                              {(triplet.evidence_level || triplet.intensity !== null || triplet.mechanism_path) && (
+                                <div className="pt-1 border-t border-dashed space-y-1">
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                    {getEvidenceBadge(triplet.evidence_level)}
+                                    {triplet.intensity !== null && (
+                                      <Badge variant="secondary" className="text-[9px]">
+                                        Int: {(triplet.intensity * 100).toFixed(0)}%
+                                      </Badge>
+                                    )}
+                                    {triplet.species_context && triplet.species_context.length > 0 && (
+                                      <Badge variant="outline" className="text-[9px]">
+                                        🐾 {triplet.species_context.join(', ')}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {triplet.mechanism_path && triplet.mechanism_path.length > 0 && (
+                                    <div className="text-[9px] text-muted-foreground bg-muted/50 p-1 rounded">
+                                      <span className="font-medium">Path:</span> {triplet.mechanism_path.join(' → ')}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
 
                               {/* Scores */}
                               <div className="flex items-center justify-between text-[10px]">

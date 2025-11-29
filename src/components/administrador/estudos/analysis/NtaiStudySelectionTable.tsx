@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RefreshCw, Network } from "lucide-react";
 
 interface NtaiStudySelectionTableProps {
   estudos: any[];
@@ -12,6 +13,7 @@ interface NtaiStudySelectionTableProps {
   onSelectAll: () => void;
   onAddToQueue: () => void;
   onDelete: () => void;
+  onRegenerateVetGraphRAG?: (studyId: string) => void;
 }
 
 const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
@@ -21,20 +23,19 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   onSelectAll,
   onAddToQueue,
   onDelete,
+  onRegenerateVetGraphRAG,
 }) => {
   const { t } = useTranslation();
   
-  // Função auxiliar para determinar o tipo de badge baseado no status
   const getBadgeVariant = (status: string) => {
     switch (status) {
       case "new": return "default";
       case "especial": return "secondary";
-      case "processed": return "secondary"; // Alterado de "success" para "secondary" para compatibilidade
+      case "processed": return "secondary";
       default: return "outline";
     }
   };
 
-  // Função auxiliar para formatar o texto do status
   const getStatusText = (status: string) => {
     switch (status) {
       case "new": return t('studies.ntai.table.statusNew');
@@ -49,16 +50,13 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   const allSelected = estudos.length > 0 && selectedItems.length === estudos.length;
   
   const handleSelectAll = () => {
-    console.log('Clicou em selecionar todos');
     onSelectAll();
   };
 
   const handleAddToQueue = () => {
-    console.log('Chamando onAddToQueue com selectedItems:', selectedItems);
     onAddToQueue();
   };
 
-  // Formatar a data para exibir "há menos de um dia"
   const formatTimeAgo = () => {
     return t('studies.ntai.table.lessThanDay');
   };
@@ -80,20 +78,18 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             <TableHead>{t('studies.ntai.table.source')}</TableHead>
             <TableHead>{t('studies.ntai.table.imported')}</TableHead>
             <TableHead>{t('studies.ntai.table.status')}</TableHead>
+            <TableHead className="w-[120px]">VetGraphRAG</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {estudos.length > 0 ? (
             estudos.map((estudo) => (
-              <TableRow key={estudo.id} className="hover:bg-gray-50">
+              <TableRow key={estudo.id} className="hover:bg-muted/50">
                 <TableCell>
                   <input 
                     type="checkbox"
                     checked={selectedItems.includes(estudo.id)}
-                    onChange={() => {
-                      console.log(`Clicou em ${estudo.id}`, estudo);
-                      onToggleSelection(estudo.id);
-                    }}
+                    onChange={() => onToggleSelection(estudo.id)}
                     className="rounded"
                   />
                 </TableCell>
@@ -101,12 +97,12 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                   <div>
                     <div className="font-medium">{estudo.title || `${t('studies.ntai.table.studyPrefix')} ${estudo.id.substring(0, 8)}`}</div>
                     {estudo.description && (
-                      <div className="text-sm text-gray-500">{estudo.description}</div>
+                      <div className="text-sm text-muted-foreground">{estudo.description}</div>
                     )}
                   </div>
                 </TableCell>
                 <TableCell>{estudo.journal || estudo.meta_summary_filename || t('studies.ntai.table.unknownSource')}</TableCell>
-                <TableCell className="text-sm text-gray-500">
+                <TableCell className="text-sm text-muted-foreground">
                   {formatTimeAgo()}
                 </TableCell>
                 <TableCell>
@@ -114,11 +110,25 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                     {getStatusText(estudo.kanban_status || estudo.scispace_status)}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  {onRegenerateVetGraphRAG && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onRegenerateVetGraphRAG(estudo.id)}
+                      className="h-7 text-xs gap-1"
+                      title="Regenerate VetGraphRAG triplets"
+                    >
+                      <Network className="h-3 w-3" />
+                      <RefreshCw className="h-3 w-3" />
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                 {t('studies.ntai.table.noStudies')}
               </TableCell>
             </TableRow>
@@ -126,8 +136,8 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
         </TableBody>
       </Table>
       
-      <div className="p-2 bg-gray-50 border-t flex justify-between items-center">
-        <span className="text-sm text-gray-500">
+      <div className="p-2 bg-muted/50 border-t flex justify-between items-center">
+        <span className="text-sm text-muted-foreground">
           {t('studies.ntai.table.selectedCount', { count: selectedItems.length })}
         </span>
         <div className="flex gap-2">
