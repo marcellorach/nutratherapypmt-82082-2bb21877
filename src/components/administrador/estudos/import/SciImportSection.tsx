@@ -11,11 +11,12 @@ import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import HistoryTab from './HistoryTab';
 import AIProcessingTab from './AIProcessingTab';
+import StudiesLibraryTab from '../library/StudiesLibraryTab';
 
 const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
 const SciImportSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("file-upload");
+  const [activeTab, setActiveTab] = useState<string>("library");
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -45,6 +46,10 @@ const SciImportSection: React.FC = () => {
         <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
         <div className="p-6">
+          <TabsContent value="library">
+            <StudiesLibraryTab />
+          </TabsContent>
+
           <TabsContent value="file-upload">
             <FileUploadTab />
           </TabsContent>

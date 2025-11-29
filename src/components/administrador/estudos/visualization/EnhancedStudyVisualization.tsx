@@ -8,11 +8,14 @@ import {
   Network, 
   BarChart3,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Database,
+  Cpu
 } from 'lucide-react';
 import NetworkGraph from '../../visualizations/NetworkGraph';
 import BiologicalNetworkGraph from '../../visualizations/biological/BiologicalNetworkGraph';
 import { buildBiologicalNetworkData } from '../../visualizations/biological/dataBuilder';
+import Neo4jStudyGraph from '../../visualizations/Neo4jStudyGraph';
 import { useTranslation } from 'react-i18next';
 
 interface EnhancedStudyVisualizationProps {
@@ -179,14 +182,18 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
 
       {/* Visualizations */}
       <Tabs value={activeViz} onValueChange={setActiveViz}>
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="timeline">
             <Clock className="h-4 w-4 mr-2" />
             {t('viz.tabs.timeline', 'Timeline')}
           </TabsTrigger>
-          <TabsTrigger value="network">
-            <Network className="h-4 w-4 mr-2" />
-            {t('viz.tabs.network', 'Rede')}
+          <TabsTrigger value="local-network">
+            <Cpu className="h-4 w-4 mr-2" />
+            {t('viz.tabs.localNetwork', 'Extração')}
+          </TabsTrigger>
+          <TabsTrigger value="neo4j-graph">
+            <Database className="h-4 w-4 mr-2" />
+            {t('viz.tabs.neo4jGraph', 'Neo4j')}
           </TabsTrigger>
           <TabsTrigger value="distribution">
             <BarChart3 className="h-4 w-4 mr-2" />
@@ -239,14 +246,15 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
           </Card>
         </TabsContent>
 
-        <TabsContent value="network" className="mt-4">
+        <TabsContent value="local-network" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">
-                {t('viz.network.title', 'Diagrama Biológico Hierárquico Multi-Camadas')}
+              <CardTitle className="text-base flex items-center gap-2">
+                <Cpu className="h-5 w-5 text-purple-600" />
+                {t('viz.localNetwork.title', 'Extração Local (LLM)')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {t('viz.network.description', 'Visualização científica das cascatas moleculares: Nutracêuticos → Mecanismos → Efeitos → Outcomes')}
+                {t('viz.localNetwork.description', 'Dados extraídos diretamente do estudo via LLM - útil para revisão antes de sincronizar')}
               </p>
             </CardHeader>
             <CardContent>
@@ -260,6 +268,26 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
                   {t('viz.network.noData', 'Dados insuficientes para visualização')}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="neo4j-graph" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Database className="h-5 w-5 text-blue-600" />
+                {t('viz.neo4jGraph.title', 'Knowledge Graph (Neo4j)')}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t('viz.neo4jGraph.description', 'Grafo hierárquico VetGraphRAG com relações reais sincronizadas')}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Neo4jStudyGraph 
+                studyId={study.id || study.study_id} 
+                studyTitle={study.title}
+              />
             </CardContent>
           </Card>
         </TabsContent>
