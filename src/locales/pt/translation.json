@@ -1764,6 +1764,8 @@
       "statusStandardizing": "Padronizando dados...",
       "statusProcessing": "Processando...",
       "progressLabel": "Progresso da extração",
+      "timeRemaining": "Restante",
+      "elapsed": "Decorrido",
       "source": "Fonte",
       "manualImport": "Importação Manual",
       "importedAgo": "Importado: há menos de um dia",
