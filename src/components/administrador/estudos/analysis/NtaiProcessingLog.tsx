@@ -80,8 +80,8 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
     <div className="border rounded-md mb-4" ref={scrollAreaRef}>
       <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-medium">Log de Processamento RAG</h4>
-          <span className="text-xs text-gray-500">{entries.length} eventos</span>
+          <h4 className="text-sm font-medium">RAG Processing Log</h4>
+          <span className="text-xs text-gray-500">{entries.length} events</span>
           <Button
             variant={showOnlyErrors ? "default" : "ghost"}
             size="sm"

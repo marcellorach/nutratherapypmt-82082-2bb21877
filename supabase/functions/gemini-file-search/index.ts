@@ -306,15 +306,15 @@ async function extractWithFileSearch(
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ MIGRADO PARA LOVABLE AI GATEWAY
-  const MODEL_NAME = 'google/gemini-3-pro-preview'; // Gemini 3 Pro Preview - Modelo de última geração
-  console.log('🔍 Extraindo dados com Lovable AI Gateway + Structured Output...');
+  // ✅ USING GOOGLE AI DIRECTLY with gemini-3-pro-preview
+  const MODEL_NAME = 'gemini-3-pro-preview';
+  console.log('🔍 Extracting data with Google AI Direct + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
-  console.log(`🤖 Modelo AI: ${MODEL_NAME} (Gemini 3 Pro Preview via Lovable AI Gateway)`);
-  console.log(`🛠️ Tecnologia: Tool Calling para JSON estruturado garantido`);
+  console.log(`🤖 AI Model: ${MODEL_NAME} (Google AI Direct)`);
+  console.log(`🛠️ Technology: Tool Calling for guaranteed structured JSON`);
   
-  // ✅ NOVO: Buscar prompts configuráveis da ai_configurations
-  console.log('📝 Carregando prompts customizados...');
+  // Load configurable prompts from ai_configurations
+  console.log('📝 Loading custom prompts...');
   const systemPrompt = await getConfigValue(supabaseClient, 'prompt_extraction_stage1_system') || 
     'You are a scientific extraction AI specialized in veterinary nutraceuticals. Extract ALL entities comprehensively.';
   const userPrompt = await getConfigValue(supabaseClient, 'prompt_extraction_stage1_user') || 
@@ -615,44 +615,37 @@ Nutraceutical to Molecular Mechanism to Biological Effect to Clinical Outcome
 Return using extract_study_data function with all arrays fully populated.`;
 
   try {
-    console.log('📤 Enviando query com Tool Calling via Lovable AI Gateway...');
+    console.log('📤 Sending query with Tool Calling via Google AI Direct...');
     
-    // ✅ Buscar LOVABLE_API_KEY em vez de Google API key
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY não configurada');
+    // ✅ Use GOOGLE_AI_API_KEY instead of LOVABLE_API_KEY
+    const googleApiKey = Deno.env.get('GOOGLE_AI_API_KEY');
+    if (!googleApiKey) {
+      throw new Error('GOOGLE_AI_API_KEY not configured');
     }
     
-    // ✅ Formato OpenAI-compatible para Lovable AI Gateway
+    // ✅ Google AI Native format with function declarations
     const response = await fetch(
-      'https://ai.gateway.lovable.dev/v1/chat/completions',
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${googleApiKey}`,
       {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${lovableApiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: MODEL_NAME,
-          messages: [
-            { 
-              role: 'system', 
-              content: systemPrompt 
-            },
+          contents: [
             { 
               role: 'user', 
-              content: prompt 
+              parts: [{ text: `${systemPrompt}\n\n${prompt}` }]
             }
           ],
-          tools: [
-            {
-              type: 'function',
-              function: extractionFunction
+          tools: [{
+            function_declarations: [extractionFunction]
+          }],
+          tool_config: {
+            function_calling_config: {
+              mode: 'ANY',
+              allowed_function_names: ['extract_study_data']
             }
-          ],
-          tool_choice: {
-            type: 'function',
-            function: { name: 'extract_study_data' }
           }
         })
       }
@@ -660,40 +653,40 @@ Return using extract_study_data function with all arrays fully populated.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Erro no Lovable AI Gateway:', response.status, errorText);
+      console.error('❌ Google AI API Error:', response.status, errorText);
       
-      // ✅ Tratamento específico de erros do Lovable AI
+      // Specific error handling for Google AI
       if (response.status === 429) {
-        throw new Error('Rate limit excedido no Lovable AI. Aguarde alguns minutos.');
+        throw new Error('Rate limit exceeded on Google AI. Wait a few minutes.');
       }
-      if (response.status === 402) {
-        throw new Error('Créditos insuficientes no Lovable AI. Adicione créditos em Settings → Workspace → Usage.');
+      if (response.status === 400) {
+        throw new Error('Invalid request to Google AI. Check parameters.');
       }
       
-      throw new Error(`Erro na API: ${response.status} - ${errorText}`);
+      throw new Error(`API Error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('📊 Resposta recebida do Lovable AI Gateway');
+    console.log('📊 Response received from Google AI Direct');
     
-    // ✅ Formato OpenAI para extração do function call
-    const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
+    // ✅ Google AI native format for function call extraction
+    const functionCall = result.candidates?.[0]?.content?.parts?.[0]?.functionCall;
 
-    if (!toolCall || toolCall.function?.name !== 'extract_study_data') {
-      console.error('❌ AI não retornou function call esperado');
-      console.log('📊 Resposta completa:', JSON.stringify(result, null, 2));
-      throw new Error('AI não usou a função extract_study_data. Resposta inesperada.');
+    if (!functionCall || functionCall.name !== 'extract_study_data') {
+      console.error('❌ AI did not return expected function call');
+      console.log('📊 Full response:', JSON.stringify(result, null, 2));
+      throw new Error('AI did not use extract_study_data function. Unexpected response.');
     }
 
-    const extractedArgs = JSON.parse(toolCall.function.arguments);
-    console.log('✅ Dados estruturados extraídos via Tool Calling');
-    console.log(`📊 Nutracêuticos: ${extractedArgs.nutraceuticals?.length || 0}`);
-    console.log(`📊 Mecanismos: ${extractedArgs.mechanisms?.length || 0}`);
-    console.log(`📊 Efeitos Biológicos: ${extractedArgs.biological_effects?.length || 0}`);
-    console.log(`📊 Condições: ${extractedArgs.conditions?.length || 0}`);
-    console.log(`📊 Interações: ${extractedArgs.interactions?.length || 0}`);
-    console.log(`📊 Efeitos Colaterais: ${extractedArgs.side_effects?.length || 0}`);
-    console.log(`📊 Título: ${extractedArgs.title?.substring(0, 50) || 'N/A'}...`);
+    const extractedArgs = functionCall.args;
+    console.log('✅ Structured data extracted via Tool Calling');
+    console.log(`📊 Nutraceuticals: ${extractedArgs.nutraceuticals?.length || 0}`);
+    console.log(`📊 Mechanisms: ${extractedArgs.mechanisms?.length || 0}`);
+    console.log(`📊 Biological Effects: ${extractedArgs.biological_effects?.length || 0}`);
+    console.log(`📊 Conditions: ${extractedArgs.conditions?.length || 0}`);
+    console.log(`📊 Interactions: ${extractedArgs.interactions?.length || 0}`);
+    console.log(`📊 Side Effects: ${extractedArgs.side_effects?.length || 0}`);
+    console.log(`📊 Title: ${extractedArgs.title?.substring(0, 50) || 'N/A'}...`);
 
     // Mapear dados estruturados para o formato esperado
     const extractedData: ExtractedStudyData = {

@@ -13,7 +13,7 @@ export const UploadEstudoForm = () => {
   const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
   
   return (
-    <Card className="max-w-md border-2 border-primary/20 bg-card">
+    <Card className="w-full border-2 border-primary/20 bg-card">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
           <span className="text-base">🧬</span>

@@ -13,6 +13,7 @@ import ApiStatusItem from './configuracoes/ApiStatusItem';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 import ConfigurationsSummary from './configuracoes/ConfigurationsSummary';
 import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
+import AIModelSelector from './configuracoes/AIModelSelector';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -331,20 +332,23 @@ const ConfiguracoesIATab: React.FC = () => {
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-xl font-bold">Configurações de Inteligência Artificial</h2>
-        <p className="text-gray-500">Configuração de chaves API para os serviços de IA</p>
+        <h2 className="text-xl font-bold">AI Configuration Settings</h2>
+        <p className="text-gray-500">Configure API keys and AI models for services</p>
       </div>
 
       <ConfiguracoesAvisosIA />
       
       <div className="grid grid-cols-1 gap-6">
+        {/* AI Model Selector - NEW */}
+        <AIModelSelector />
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield size={18} /> Chaves API
+              <Shield size={18} /> API Keys
             </CardTitle>
             <CardDescription>
-              Configure as chaves para cada serviço de IA que deseja utilizar
+              Configure the keys for each AI service you want to use
             </CardDescription>
           </CardHeader>
           <CardContent>
