@@ -88,7 +88,21 @@
       "real": "real",
       "simulated": "simulated",
       "simulatedBadge": "Simulated",
-      "realBadge": "Real"
+      "realBadge": "Real",
+      "uploadPdf": "Upload PDF",
+      "downloadPdf": "Download PDF",
+      "replacePdf": "Replace PDF",
+      "removePdf": "Remove PDF",
+      "pdfUploadSuccess": "PDF uploaded successfully",
+      "pdfUploadError": "Error uploading PDF",
+      "pdfDownloadError": "Error downloading PDF",
+      "pdfRemoved": "PDF removed",
+      "pdfRemoveError": "Error removing PDF",
+      "dropHere": "Drop the PDF here",
+      "dragOrClick": "Drag PDF here or click to select",
+      "maxSize": "Max 20MB",
+      "uploading": "Uploading...",
+      "upload": "Upload"
     },
     "search": {
       "title": "Search Scientific Studies",

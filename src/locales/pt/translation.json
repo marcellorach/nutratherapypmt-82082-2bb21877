@@ -88,7 +88,21 @@
       "real": "reais",
       "simulated": "simulados",
       "simulatedBadge": "Simulado",
-      "realBadge": "Real"
+      "realBadge": "Real",
+      "uploadPdf": "Enviar PDF",
+      "downloadPdf": "Baixar PDF",
+      "replacePdf": "Substituir PDF",
+      "removePdf": "Remover PDF",
+      "pdfUploadSuccess": "PDF enviado com sucesso",
+      "pdfUploadError": "Erro ao enviar PDF",
+      "pdfDownloadError": "Erro ao baixar PDF",
+      "pdfRemoved": "PDF removido",
+      "pdfRemoveError": "Erro ao remover PDF",
+      "dropHere": "Solte o PDF aqui",
+      "dragOrClick": "Arraste o PDF aqui ou clique para selecionar",
+      "maxSize": "Máximo 20MB",
+      "uploading": "Enviando...",
+      "upload": "Enviar"
     },
     "search": {
       "title": "Buscar Estudos Científicos",

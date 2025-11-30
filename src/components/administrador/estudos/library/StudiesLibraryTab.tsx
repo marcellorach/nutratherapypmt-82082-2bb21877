@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SearchExternalStudies from './SearchExternalStudies';
+import StudyPdfUpload from './StudyPdfUpload';
 
 interface ScientificStudy {
   id: string;
@@ -44,6 +45,8 @@ interface ScientificStudy {
   is_simulated: boolean | null;
   pmid: string | null;
   openalex_id: string | null;
+  pdf_storage_path: string | null;
+  pdf_filename: string | null;
 }
 
 const StudiesLibraryTab: React.FC = () => {
@@ -253,7 +256,14 @@ const StudiesLibraryTab: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 items-end">
+                    <StudyPdfUpload
+                      studyId={study.id}
+                      studyTitle={getTitle(study)}
+                      pdfStoragePath={study.pdf_storage_path}
+                      pdfFilename={study.pdf_filename}
+                      onUploadComplete={fetchStudies}
+                    />
                     {study.doi && (
                       <a
                         href={`https://doi.org/${study.doi}`}
