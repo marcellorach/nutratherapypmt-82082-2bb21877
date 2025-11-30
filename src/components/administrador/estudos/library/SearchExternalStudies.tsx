@@ -326,7 +326,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           {t('studies.search.searchExternal')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
@@ -337,7 +337,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
           {/* Search Form */}
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2">
@@ -437,10 +437,10 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                 )}
               </div>
 
-              <ScrollArea className="h-[350px] pr-4">
+              <ScrollArea className="flex-1 min-h-0 max-h-[350px] pr-4">
                 <div className="space-y-3">
                   {results.map((study) => (
-                    <Card key={study.id} className="relative">
+                    <Card key={study.id} className="relative bg-card border">
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
