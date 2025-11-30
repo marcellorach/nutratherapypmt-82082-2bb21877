@@ -102,6 +102,9 @@
       "searching": "Buscando...",
       "searchButton": "Buscar",
       "resultsCount": "{{count}} resultados encontrados",
+      "showingResults": "Mostrando {{count}} de ~{{total}} resultados",
+      "increaseMaxResults": "Aumente o máx. para ver mais",
+      "didYouMean": "Você quis dizer",
       "noResults": "Nenhum resultado",
       "tryDifferentQuery": "Tente termos de busca diferentes",
       "success": "Busca concluída",
@@ -115,7 +118,39 @@
       "importError": "Erro ao importar",
       "alreadyExists": "Estudo já existe",
       "studyAlreadyInLibrary": "Este estudo já está na biblioteca",
-      "viewOriginal": "Ver original"
+      "viewOriginal": "Ver original",
+      "filters": {
+        "advanced": "Filtros Avançados",
+        "dateFrom": "De (ano)",
+        "dateTo": "Até (ano)",
+        "minCitations": "Mín. citações",
+        "sortBy": "Ordenar por",
+        "sort": {
+          "relevance": "Relevância",
+          "date": "Data (mais recente)",
+          "citations": "Citações (mais citado)"
+        },
+        "openAccessOnly": "Apenas Open Access",
+        "publicationType": "Tipo de estudo",
+        "types": {
+          "review": "Revisão",
+          "clinicalTrial": "Ensaio Clínico",
+          "metaAnalysis": "Meta-análise",
+          "rct": "ECR",
+          "systematicReview": "Revisão Sistemática",
+          "caseReport": "Relato de Caso"
+        },
+        "speciesLabel": "Espécie",
+        "species": {
+          "dogs": "Cães",
+          "cats": "Gatos",
+          "horses": "Cavalos",
+          "humans": "Humanos"
+        },
+        "mustInclude": "Termos obrigatórios",
+        "mustExclude": "Excluir termos",
+        "addTerm": "Adicionar termo..."
+      }
     },
     "import": {
       "libraryTab": "Biblioteca",

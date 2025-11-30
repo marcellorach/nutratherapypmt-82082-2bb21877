@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSafeTranslation } from '@/hooks/useSafeTranslation';
-import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2 } from 'lucide-react';
+import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,8 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import AdvancedSearchFilters, { AdvancedFilters } from './AdvancedSearchFilters';
 
 interface StudyResult {
   id: string;
@@ -24,11 +26,34 @@ interface StudyResult {
   openalexId?: string;
   source: 'pubmed' | 'openalex';
   url?: string;
+  citationCount?: number;
+  isOpenAccess?: boolean;
+  publicationType?: string;
+}
+
+interface SearchMeta {
+  query: string;
+  source: string;
+  totalResults: number;
+  totalAvailable: number;
+  spellingSuggestion?: string;
 }
 
 interface SearchExternalStudiesProps {
   onStudyImported?: () => void;
 }
+
+const DEFAULT_FILTERS: AdvancedFilters = {
+  dateFrom: '',
+  dateTo: '',
+  minCitations: 0,
+  publicationType: [],
+  species: [],
+  openAccessOnly: false,
+  mustInclude: [],
+  mustExclude: [],
+  sortBy: 'relevance'
+};
 
 const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported }) => {
   const { t } = useSafeTranslation();
@@ -40,11 +65,16 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
   const [maxResults, setMaxResults] = useState('20');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<StudyResult[]>([]);
+  const [meta, setMeta] = useState<SearchMeta | null>(null);
   const [importingIds, setImportingIds] = useState<Set<string>>(new Set());
   const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
+  const handleSearch = async (searchQuery?: string) => {
+    const finalQuery = searchQuery || query;
+    
+    if (!finalQuery.trim()) {
       toast({
         title: t('studies.search.error'),
         description: t('studies.search.queryRequired'),
@@ -55,29 +85,55 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
 
     setIsSearching(true);
     setResults([]);
+    setMeta(null);
 
     try {
+      const searchParams: any = {
+        query: finalQuery.trim(),
+        source,
+        maxResults: parseInt(maxResults),
+        sortBy: advancedFilters.sortBy
+      };
+
+      // Add advanced filters
+      if (advancedFilters.dateFrom) {
+        searchParams.dateFrom = advancedFilters.dateFrom;
+      }
+      if (advancedFilters.dateTo) {
+        searchParams.dateTo = advancedFilters.dateTo;
+      }
+      if (advancedFilters.minCitations > 0) {
+        searchParams.minCitations = advancedFilters.minCitations;
+      }
+      if (advancedFilters.publicationType.length > 0) {
+        searchParams.publicationType = advancedFilters.publicationType;
+      }
+      if (advancedFilters.species.length > 0) {
+        searchParams.species = advancedFilters.species;
+      }
+      if (advancedFilters.openAccessOnly) {
+        searchParams.openAccessOnly = true;
+      }
+      if (advancedFilters.mustInclude.length > 0) {
+        searchParams.mustInclude = advancedFilters.mustInclude;
+      }
+      if (advancedFilters.mustExclude.length > 0) {
+        searchParams.mustExclude = advancedFilters.mustExclude;
+      }
+
       const { data, error } = await supabase.functions.invoke('search-scientific-studies', {
-        body: {
-          query: query.trim(),
-          source,
-          maxResults: parseInt(maxResults)
-        }
+        body: searchParams
       });
 
       if (error) throw error;
 
       setResults(data.results || []);
+      setMeta(data.meta);
       
       if (data.results?.length === 0) {
         toast({
           title: t('studies.search.noResults'),
           description: t('studies.search.tryDifferentQuery')
-        });
-      } else {
-        toast({
-          title: t('studies.search.success'),
-          description: t('studies.search.foundResults', { count: data.results.length })
         });
       }
     } catch (error) {
@@ -92,11 +148,17 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
     }
   };
 
+  const handleSpellingSuggestion = () => {
+    if (meta?.spellingSuggestion) {
+      setQuery(meta.spellingSuggestion);
+      handleSearch(meta.spellingSuggestion);
+    }
+  };
+
   const handleImport = async (study: StudyResult) => {
     setImportingIds(prev => new Set(prev).add(study.id));
 
     try {
-      // Check if study already exists by DOI or PMID
       let existingQuery = supabase.from('scientific_studies').select('id');
       
       if (study.doi) {
@@ -123,7 +185,6 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
         return;
       }
 
-      // Import the study
       const { error } = await supabase.from('scientific_studies').insert({
         title: study.title,
         title_en: study.title,
@@ -169,9 +230,15 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
 
   const getSourceBadge = (studySource: string) => {
     if (studySource === 'pubmed') {
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">PubMed</Badge>;
+      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300">PubMed</Badge>;
     }
-    return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">OpenAlex</Badge>;
+    return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300">OpenAlex</Badge>;
+  };
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
   };
 
   return (
@@ -235,7 +302,15 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
             </div>
           </div>
 
-          <Button onClick={handleSearch} disabled={isSearching} className="w-full gap-2">
+          {/* Advanced Filters */}
+          <AdvancedSearchFilters
+            filters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
+            isOpen={showAdvanced}
+            onOpenChange={setShowAdvanced}
+          />
+
+          <Button onClick={() => handleSearch()} disabled={isSearching} className="w-full gap-2">
             {isSearching ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -249,15 +324,43 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
             )}
           </Button>
 
+          {/* Spelling Suggestion */}
+          {meta?.spellingSuggestion && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center gap-2">
+                {t('studies.search.didYouMean')}
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-primary"
+                  onClick={handleSpellingSuggestion}
+                >
+                  {meta.spellingSuggestion}
+                </Button>
+                ?
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Results */}
           {results.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">
-                  {t('studies.search.resultsCount', { count: results.length })}
+              {/* Result Counter */}
+              <div className="flex items-center justify-between mb-3 p-2 bg-muted/50 rounded-md">
+                <span className="text-sm font-medium">
+                  {t('studies.search.showingResults', { 
+                    count: results.length, 
+                    total: formatNumber(meta?.totalAvailable || results.length) 
+                  })}
                 </span>
+                {meta?.totalAvailable && meta.totalAvailable > results.length && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('studies.search.increaseMaxResults')}
+                  </span>
+                )}
               </div>
-              <ScrollArea className="h-[400px] pr-4">
+
+              <ScrollArea className="h-[350px] pr-4">
                 <div className="space-y-3">
                   {results.map((study) => (
                     <Card key={study.id} className="relative">
@@ -272,10 +375,15 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                               {study.authors.length > 3 && ` +${study.authors.length - 3}`}
                             </CardDescription>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             {getSourceBadge(study.source)}
+                            {study.isOpenAccess && (
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 text-xs">
+                                OA
+                              </Badge>
+                            )}
                             {importedIds.has(study.id) ? (
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1">
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 gap-1">
                                 <CheckCircle2 className="h-3 w-3" />
                                 {t('studies.search.imported')}
                               </Badge>
@@ -299,10 +407,27 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2 flex-wrap">
                           <span>{study.journal}</span>
                           <span>•</span>
                           <span>{study.year}</span>
+                          {study.citationCount !== undefined && study.citationCount > 0 && (
+                            <>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Quote className="h-3 w-3" />
+                                {study.citationCount}
+                              </span>
+                            </>
+                          )}
+                          {study.publicationType && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="secondary" className="text-xs px-1 py-0">
+                                {study.publicationType}
+                              </Badge>
+                            </>
+                          )}
                           {study.doi && (
                             <>
                               <span>•</span>
