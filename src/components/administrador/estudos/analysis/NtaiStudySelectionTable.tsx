@@ -5,6 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Network } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NtaiStudySelectionTableProps {
   estudos: any[];
@@ -112,16 +113,25 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>
                   {onRegenerateVetGraphRAG && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onRegenerateVetGraphRAG(estudo.id)}
-                      className="h-7 text-xs gap-1"
-                      title="Regenerate VetGraphRAG triplets"
-                    >
-                      <Network className="h-3 w-3" />
-                      <RefreshCw className="h-3 w-3" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onRegenerateVetGraphRAG(estudo.id)}
+                            className="h-7 text-xs gap-1"
+                          >
+                            <Network className="h-3 w-3" />
+                            <RefreshCw className="h-3 w-3" />
+                            <span>{t('studies.ntai.vetGraphRAG.regenerate')}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t('studies.ntai.vetGraphRAG.regenerateTooltip')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </TableCell>
               </TableRow>

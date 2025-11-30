@@ -1798,6 +1798,10 @@
         "statusManual": "Manual",
         "statusUnknown": "Desconhecido"
       },
+      "vetGraphRAG": {
+        "regenerate": "Regenerar",
+        "regenerateTooltip": "Regenerar triplets hierárquicos VetGraphRAG para este estudo"
+      },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",
       "waitingLogs": "Aguardando início do processamento...",
