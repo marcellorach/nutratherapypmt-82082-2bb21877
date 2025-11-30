@@ -101,18 +101,18 @@ const AdvancedSearchFilters: React.FC<AdvancedSearchFiltersProps> = ({
   return (
     <Collapsible open={isOpen} onOpenChange={onOpenChange}>
       <CollapsibleTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full justify-between">
+        <Button variant="outline" size="sm" className="w-full justify-between h-7 text-xs">
           {t('studies.search.filters.advanced')}
           <span className="text-xs text-muted-foreground">
             {isOpen ? '−' : '+'}
           </span>
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-4 max-h-[280px] overflow-y-auto pr-2">
-        {/* Date Range */}
-        <div className="grid grid-cols-2 gap-3">
+      <CollapsibleContent className="space-y-2 pt-2 max-h-[160px] overflow-y-auto pr-1">
+        {/* Row 1: Date Range + Min Citations + Sort By */}
+        <div className="grid grid-cols-4 gap-2">
           <div>
-            <Label className="text-xs">{t('studies.search.filters.dateFrom')}</Label>
+            <Label className="text-[10px] text-muted-foreground">{t('studies.search.filters.dateFrom')}</Label>
             <Input
               type="number"
               placeholder="2015"
@@ -120,11 +120,11 @@ const AdvancedSearchFilters: React.FC<AdvancedSearchFiltersProps> = ({
               max={currentYear}
               value={filters.dateFrom}
               onChange={(e) => updateFilter('dateFrom', e.target.value)}
-              className="h-8 text-sm"
+              className="h-7 text-xs"
             />
           </div>
           <div>
-            <Label className="text-xs">{t('studies.search.filters.dateTo')}</Label>
+            <Label className="text-[10px] text-muted-foreground">{t('studies.search.filters.dateTo')}</Label>
             <Input
               type="number"
               placeholder={currentYear.toString()}
@@ -132,77 +132,70 @@ const AdvancedSearchFilters: React.FC<AdvancedSearchFiltersProps> = ({
               max={currentYear}
               value={filters.dateTo}
               onChange={(e) => updateFilter('dateTo', e.target.value)}
-              className="h-8 text-sm"
+              className="h-7 text-xs"
             />
+          </div>
+          <div>
+            <Label className="text-[10px] text-muted-foreground">{t('studies.search.filters.minCitations')}</Label>
+            <Input
+              type="number"
+              placeholder="0"
+              min={0}
+              value={filters.minCitations || ''}
+              onChange={(e) => updateFilter('minCitations', parseInt(e.target.value) || 0)}
+              className="h-7 text-xs"
+            />
+          </div>
+          <div>
+            <Label className="text-[10px] text-muted-foreground">{t('studies.search.filters.sortBy')}</Label>
+            <Select value={filters.sortBy} onValueChange={(v: any) => updateFilter('sortBy', v)}>
+              <SelectTrigger className="h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">{t('studies.search.filters.sort.relevance')}</SelectItem>
+                <SelectItem value="date">{t('studies.search.filters.sort.date')}</SelectItem>
+                <SelectItem value="citations">{t('studies.search.filters.sort.citations')}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Min Citations */}
-        <div>
-          <Label className="text-xs">{t('studies.search.filters.minCitations')}</Label>
-          <Input
-            type="number"
-            placeholder="0"
-            min={0}
-            value={filters.minCitations || ''}
-            onChange={(e) => updateFilter('minCitations', parseInt(e.target.value) || 0)}
-            className="h-8 text-sm"
-          />
-        </div>
-
-        {/* Sort By */}
-        <div>
-          <Label className="text-xs">{t('studies.search.filters.sortBy')}</Label>
-          <Select value={filters.sortBy} onValueChange={(v: any) => updateFilter('sortBy', v)}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="relevance">{t('studies.search.filters.sort.relevance')}</SelectItem>
-              <SelectItem value="date">{t('studies.search.filters.sort.date')}</SelectItem>
-              <SelectItem value="citations">{t('studies.search.filters.sort.citations')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Open Access */}
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="openAccess"
-            checked={filters.openAccessOnly}
-            onCheckedChange={(checked) => updateFilter('openAccessOnly', !!checked)}
-          />
-          <Label htmlFor="openAccess" className="text-sm cursor-pointer">
-            {t('studies.search.filters.openAccessOnly')}
-          </Label>
-        </div>
-
-        {/* Publication Types */}
-        <div>
-          <Label className="text-xs mb-2 block">{t('studies.search.filters.publicationType')}</Label>
-          <div className="flex flex-wrap gap-1">
+        {/* Row 2: Open Access + Publication Types + Species */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <Checkbox
+              id="openAccess"
+              checked={filters.openAccessOnly}
+              onCheckedChange={(checked) => updateFilter('openAccessOnly', !!checked)}
+              className="h-3.5 w-3.5"
+            />
+            <Label htmlFor="openAccess" className="text-xs cursor-pointer">
+              {t('studies.search.filters.openAccessOnly')}
+            </Label>
+          </div>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-[10px] text-muted-foreground">{t('studies.search.filters.publicationType')}:</span>
             {PUBLICATION_TYPES.map(type => (
               <Badge
                 key={type.value}
                 variant={filters.publicationType.includes(type.value) ? "default" : "outline"}
-                className="cursor-pointer text-xs"
+                className="cursor-pointer text-[10px] px-1.5 py-0 h-5"
                 onClick={() => togglePublicationType(type.value)}
               >
                 {t(type.labelKey)}
               </Badge>
             ))}
           </div>
-        </div>
-
-        {/* Species */}
-        <div>
-          <Label className="text-xs mb-2 block">{t('studies.search.filters.speciesLabel')}</Label>
-          <div className="flex flex-wrap gap-1">
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-[10px] text-muted-foreground">{t('studies.search.filters.speciesLabel')}:</span>
             {SPECIES_OPTIONS.map(species => (
               <Badge
                 key={species.value}
                 variant={filters.species.includes(species.value) ? "default" : "outline"}
-                className="cursor-pointer text-xs"
+                className="cursor-pointer text-[10px] px-1.5 py-0 h-5"
                 onClick={() => toggleSpecies(species.value)}
               >
                 {t(species.labelKey)}
@@ -211,53 +204,55 @@ const AdvancedSearchFilters: React.FC<AdvancedSearchFiltersProps> = ({
           </div>
         </div>
 
-        {/* Must Include Terms */}
-        <div>
-          <Label className="text-xs mb-2 block">{t('studies.search.filters.mustInclude')}</Label>
-          <div className="flex gap-2 mb-2">
-            <Input
-              placeholder={t('studies.search.filters.addTerm')}
-              value={newIncludeTerm}
-              onChange={(e) => setNewIncludeTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addIncludeTerm()}
-              className="h-8 text-sm flex-1"
-            />
-            <Button size="sm" variant="outline" onClick={addIncludeTerm} className="h-8 px-2">
-              <Plus className="h-3 w-3" />
-            </Button>
+        {/* Row 3: Include/Exclude Terms - Compact inline */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <div className="flex gap-1 mb-1">
+              <Input
+                placeholder={t('studies.search.filters.mustInclude')}
+                value={newIncludeTerm}
+                onChange={(e) => setNewIncludeTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addIncludeTerm()}
+                className="h-6 text-xs flex-1"
+              />
+              <Button size="sm" variant="outline" onClick={addIncludeTerm} className="h-6 px-1.5">
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+            {filters.mustInclude.length > 0 && (
+              <div className="flex flex-wrap gap-0.5">
+                {filters.mustInclude.map(term => (
+                  <Badge key={term} variant="secondary" className="gap-0.5 text-[10px] px-1 py-0 h-4">
+                    +{term}
+                    <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => removeIncludeTerm(term)} />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex flex-wrap gap-1">
-            {filters.mustInclude.map(term => (
-              <Badge key={term} variant="secondary" className="gap-1 text-xs">
-                +{term}
-                <X className="h-3 w-3 cursor-pointer" onClick={() => removeIncludeTerm(term)} />
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Must Exclude Terms */}
-        <div>
-          <Label className="text-xs mb-2 block">{t('studies.search.filters.mustExclude')}</Label>
-          <div className="flex gap-2 mb-2">
-            <Input
-              placeholder={t('studies.search.filters.addTerm')}
-              value={newExcludeTerm}
-              onChange={(e) => setNewExcludeTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addExcludeTerm()}
-              className="h-8 text-sm flex-1"
-            />
-            <Button size="sm" variant="outline" onClick={addExcludeTerm} className="h-8 px-2">
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {filters.mustExclude.map(term => (
-              <Badge key={term} variant="destructive" className="gap-1 text-xs">
-                -{term}
-                <X className="h-3 w-3 cursor-pointer" onClick={() => removeExcludeTerm(term)} />
-              </Badge>
-            ))}
+          <div>
+            <div className="flex gap-1 mb-1">
+              <Input
+                placeholder={t('studies.search.filters.mustExclude')}
+                value={newExcludeTerm}
+                onChange={(e) => setNewExcludeTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addExcludeTerm()}
+                className="h-6 text-xs flex-1"
+              />
+              <Button size="sm" variant="outline" onClick={addExcludeTerm} className="h-6 px-1.5">
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+            {filters.mustExclude.length > 0 && (
+              <div className="flex flex-wrap gap-0.5">
+                {filters.mustExclude.map(term => (
+                  <Badge key={term} variant="destructive" className="gap-0.5 text-[10px] px-1 py-0 h-4">
+                    -{term}
+                    <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => removeExcludeTerm(term)} />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleContent>
