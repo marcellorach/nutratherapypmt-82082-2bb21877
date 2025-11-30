@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
+import { TabInfoContentBilingual } from '@/data/types/tabInfoTypes';
+import { getLocalizedTabInfo, getLanguageFromI18n } from '@/data/tabInfoLocalizationHelper';
 
+// Legacy types for backward compatibility
 export interface ScientificStudy {
   title: string;
   authors: string;
@@ -61,6 +64,11 @@ export interface TabInfoContent {
       example: string;
     }[];
     decisions: string[];
+    glossary?: {
+      term: string;
+      definition: string;
+    }[];
+    limitations?: string[];
   };
   scientific: {
     foundation: string;
@@ -73,12 +81,26 @@ export interface TabInfoContent {
 interface TabInfoButtonProps {
   tabId: string;
   title: string;
-  content: TabInfoContent;
+  content: TabInfoContent | TabInfoContentBilingual;
+}
+
+// Type guard to check if content is bilingual
+function isBilingualContent(content: TabInfoContent | TabInfoContentBilingual): content is TabInfoContentBilingual {
+  return typeof content.overview.objective === 'object' && 'pt' in content.overview.objective;
 }
 
 const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) => {
   const [open, setOpen] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Localize content if bilingual, otherwise use as-is
+  const localizedContent = useMemo(() => {
+    if (isBilingualContent(content)) {
+      const language = getLanguageFromI18n(i18n.language);
+      return getLocalizedTabInfo(content, language);
+    }
+    return content as TabInfoContent;
+  }, [content, i18n.language]);
 
   return (
     <>
@@ -97,16 +119,16 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl">{title}</DialogTitle>
-              {content.version && (
+              {localizedContent.version && (
                 <Badge variant="outline" className="ml-2">
-                  v{content.version}
+                  v{localizedContent.version}
                 </Badge>
               )}
             </div>
             <DialogDescription>
-              {content.lastUpdate && (
+              {localizedContent.lastUpdate && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  {t('admin.tabInfo.lastUpdate')}: {content.lastUpdate}
+                  {t('admin.tabInfo.lastUpdate')}: {localizedContent.lastUpdate}
                 </div>
               )}
               {t('admin.tabInfo.description')}
@@ -122,11 +144,11 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
 
             <ScrollArea className="h-[60vh] mt-4">
               {/* Key Excerpts Section (if available) */}
-              {content.keyExcerpts && content.keyExcerpts.length > 0 && (
+              {localizedContent.keyExcerpts && localizedContent.keyExcerpts.length > 0 && (
                 <div className="mb-6 p-4 border rounded-lg bg-muted/30">
                   <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.keyExcerpts.title')}</h3>
                   <div className="space-y-3">
-                    {content.keyExcerpts.map((excerpt, idx) => (
+                    {localizedContent.keyExcerpts.map((excerpt, idx) => (
                       <div key={idx} className="border-l-4 border-primary pl-4 py-2">
                         <div className="text-xs font-semibold text-muted-foreground mb-1">{excerpt.source}</div>
                         <blockquote className="text-sm italic mb-2">&ldquo;{excerpt.quote}&rdquo;</blockquote>
@@ -148,13 +170,13 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
               <TabsContent value="overview" className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.overview.objective')}</h3>
-                  <p className="text-sm text-muted-foreground">{content.overview.objective}</p>
+                  <p className="text-sm text-muted-foreground">{localizedContent.overview.objective}</p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.overview.workflow')}</h3>
                   <ol className="list-decimal list-inside space-y-2">
-                    {content.overview.workflow.map((step, idx) => (
+                    {localizedContent.overview.workflow.map((step, idx) => (
                       <li key={idx} className="text-sm text-muted-foreground">{step}</li>
                     ))}
                   </ol>
@@ -163,7 +185,7 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.overview.benefits')}</h3>
                   <ul className="list-disc list-inside space-y-2">
-                    {content.overview.benefits.map((benefit, idx) => (
+                    {localizedContent.overview.benefits.map((benefit, idx) => (
                       <li key={idx} className="text-sm text-muted-foreground">{benefit}</li>
                     ))}
                   </ul>
@@ -173,18 +195,18 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
               {/* Methodology Tab */}
               <TabsContent value="methodology" className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-4">{content.methodology.description}</p>
+                  <p className="text-sm text-muted-foreground mb-4">{localizedContent.methodology.description}</p>
                 </div>
 
                 {/* Comparison Table (if available) */}
-                {content.methodology.comparisonTable && (
+                {localizedContent.methodology.comparisonTable && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.comparisonTable')}</h3>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm border">
                         <thead>
                           <tr className="bg-muted">
-                            {content.methodology.comparisonTable.headers.map((header, idx) => (
+                            {localizedContent.methodology.comparisonTable.headers.map((header, idx) => (
                               <th key={idx} className="border p-2 text-left font-semibold">
                                 {header}
                               </th>
@@ -192,7 +214,7 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                           </tr>
                         </thead>
                         <tbody>
-                          {content.methodology.comparisonTable.rows.map((row, idx) => (
+                          {localizedContent.methodology.comparisonTable.rows.map((row, idx) => (
                             <tr key={idx} className="border-b hover:bg-muted/50">
                               <td className="border p-2 font-medium">{row.feature}</td>
                               {row.values.map((value, vIdx) => (
@@ -209,25 +231,25 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 )}
 
                 {/* Architecture Diagram (if available) */}
-                {content.methodology.architectureDiagram && (
+                {localizedContent.methodology.architectureDiagram && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.architectureDiagram')}</h3>
                     <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-                      <code>{content.methodology.architectureDiagram}</code>
+                      <code>{localizedContent.methodology.architectureDiagram}</code>
                     </pre>
                   </div>
                 )}
 
-                {content.methodology.calculations && content.methodology.calculations.length > 0 && (
+                {localizedContent.methodology.calculations && localizedContent.methodology.calculations.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.calculations')}</h3>
-                    {content.methodology.calculations.map((calc, idx) => (
+                    {localizedContent.methodology.calculations.map((calc, idx) => (
                       <div key={idx} className="border rounded-lg p-4 mb-3 bg-muted/50">
                         <h4 className="font-medium mb-2">{calc.name}</h4>
-                        <div className="bg-background rounded p-3 mb-2 font-mono text-sm">
+                        <div className="bg-background rounded p-3 mb-2 font-mono text-sm whitespace-pre-wrap">
                           {calc.formula}
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                           <strong>{t('admin.tabInfo.methodology.example')}:</strong> {calc.example}
                         </p>
                       </div>
@@ -238,59 +260,86 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.methodology.decisions')}</h3>
                   <ul className="list-disc list-inside space-y-2">
-                    {content.methodology.decisions.map((decision, idx) => (
+                    {localizedContent.methodology.decisions.map((decision, idx) => (
                       <li key={idx} className="text-sm text-muted-foreground">{decision}</li>
                     ))}
                   </ul>
                 </div>
+
+                {/* Glossary (if available) */}
+                {localizedContent.methodology.glossary && localizedContent.methodology.glossary.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.glossary')}</h3>
+                    <div className="space-y-3">
+                      {localizedContent.methodology.glossary.map((item, idx) => (
+                        <div key={idx} className="border-l-4 border-secondary pl-4 py-2">
+                          <dt className="font-semibold text-sm">{item.term}</dt>
+                          <dd className="text-sm text-muted-foreground mt-1">{item.definition}</dd>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Limitations (if available) */}
+                {localizedContent.methodology.limitations && localizedContent.methodology.limitations.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.limitations')}</h3>
+                    <ul className="list-disc list-inside space-y-2">
+                      {localizedContent.methodology.limitations.map((limitation, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground">{limitation}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </TabsContent>
 
               {/* Scientific Tab */}
               <TabsContent value="scientific" className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.scientific.foundation')}</h3>
-                  <p className="text-sm text-muted-foreground">{content.scientific.foundation}</p>
+                  <p className="text-sm text-muted-foreground">{localizedContent.scientific.foundation}</p>
                 </div>
 
                 {/* Implementation Status (if available) */}
-                {content.scientific.implementationStatus && (
+                {localizedContent.scientific.implementationStatus && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.scientific.implementationStatus')}</h3>
                     <div className="space-y-4">
                       {/* Implemented */}
-                      {content.scientific.implementationStatus.implemented.length > 0 && (
+                      {localizedContent.scientific.implementationStatus.implemented.length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
                             ✅ {t('admin.tabInfo.scientific.implemented')}
                           </h4>
                           <ul className="list-disc list-inside space-y-1">
-                            {content.scientific.implementationStatus.implemented.map((item, idx) => (
+                            {localizedContent.scientific.implementationStatus.implemented.map((item, idx) => (
                               <li key={idx} className="text-sm text-muted-foreground">{item}</li>
                             ))}
                           </ul>
                         </div>
                       )}
                       {/* In Progress */}
-                      {content.scientific.implementationStatus.inProgress.length > 0 && (
+                      {localizedContent.scientific.implementationStatus.inProgress.length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 mb-2">
                             🔄 {t('admin.tabInfo.scientific.inProgress')}
                           </h4>
                           <ul className="list-disc list-inside space-y-1">
-                            {content.scientific.implementationStatus.inProgress.map((item, idx) => (
+                            {localizedContent.scientific.implementationStatus.inProgress.map((item, idx) => (
                               <li key={idx} className="text-sm text-muted-foreground">{item}</li>
                             ))}
                           </ul>
                         </div>
                       )}
                       {/* Planned */}
-                      {content.scientific.implementationStatus.planned.length > 0 && (
+                      {localizedContent.scientific.implementationStatus.planned.length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">
                             ⏳ {t('admin.tabInfo.scientific.planned')}
                           </h4>
                           <ul className="list-disc list-inside space-y-1">
-                            {content.scientific.implementationStatus.planned.map((item, idx) => (
+                            {localizedContent.scientific.implementationStatus.planned.map((item, idx) => (
                               <li key={idx} className="text-sm text-muted-foreground">{item}</li>
                             ))}
                           </ul>
@@ -303,7 +352,7 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 <div>
                   <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.scientific.studies')}</h3>
                   <div className="space-y-4">
-                    {content.scientific.studies.map((study, idx) => (
+                    {localizedContent.scientific.studies.map((study, idx) => (
                       <div key={idx} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-medium text-sm flex-1">{study.title}</h4>
@@ -328,11 +377,11 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                   </div>
                 </div>
 
-                {content.scientific.references.length > 0 && (
+                {localizedContent.scientific.references.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-2">{t('admin.tabInfo.scientific.references')}</h3>
                     <ul className="list-disc list-inside space-y-1">
-                      {content.scientific.references.map((ref, idx) => (
+                      {localizedContent.scientific.references.map((ref, idx) => (
                         <li key={idx} className="text-sm text-muted-foreground">{ref}</li>
                       ))}
                     </ul>
