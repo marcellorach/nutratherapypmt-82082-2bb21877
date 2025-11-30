@@ -1298,6 +1298,9 @@ export type Database = {
           journal_en: string | null
           link: string | null
           openalex_id: string | null
+          pdf_filename: string | null
+          pdf_storage_path: string | null
+          pdf_uploaded_at: string | null
           pmid: string | null
           source_api: string | null
           title: string
@@ -1318,6 +1321,9 @@ export type Database = {
           journal_en?: string | null
           link?: string | null
           openalex_id?: string | null
+          pdf_filename?: string | null
+          pdf_storage_path?: string | null
+          pdf_uploaded_at?: string | null
           pmid?: string | null
           source_api?: string | null
           title: string
@@ -1338,6 +1344,9 @@ export type Database = {
           journal_en?: string | null
           link?: string | null
           openalex_id?: string | null
+          pdf_filename?: string | null
+          pdf_storage_path?: string | null
+          pdf_uploaded_at?: string | null
           pmid?: string | null
           source_api?: string | null
           title?: string
