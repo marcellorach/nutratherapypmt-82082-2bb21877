@@ -1291,10 +1291,15 @@ export type Database = {
           authors: string[] | null
           created_at: string | null
           doi: string | null
+          external_id: string | null
           id: string
+          is_simulated: boolean | null
           journal: string | null
           journal_en: string | null
           link: string | null
+          openalex_id: string | null
+          pmid: string | null
+          source_api: string | null
           title: string
           title_en: string | null
           updated_at: string | null
@@ -1306,10 +1311,15 @@ export type Database = {
           authors?: string[] | null
           created_at?: string | null
           doi?: string | null
+          external_id?: string | null
           id?: string
+          is_simulated?: boolean | null
           journal?: string | null
           journal_en?: string | null
           link?: string | null
+          openalex_id?: string | null
+          pmid?: string | null
+          source_api?: string | null
           title: string
           title_en?: string | null
           updated_at?: string | null
@@ -1321,10 +1331,15 @@ export type Database = {
           authors?: string[] | null
           created_at?: string | null
           doi?: string | null
+          external_id?: string | null
           id?: string
+          is_simulated?: boolean | null
           journal?: string | null
           journal_en?: string | null
           link?: string | null
+          openalex_id?: string | null
+          pmid?: string | null
+          source_api?: string | null
           title?: string
           title_en?: string | null
           updated_at?: string | null
