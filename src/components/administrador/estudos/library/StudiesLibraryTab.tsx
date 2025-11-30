@@ -231,11 +231,10 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                       ) : study.source_api === 'pubmed' ? (
                         <Badge 
                           variant="outline" 
-                          className="text-xs gap-1 border-2 font-semibold"
+                          className="text-xs gap-1 font-medium bg-transparent"
                           style={{ 
-                            backgroundColor: 'rgb(219, 234, 254)', 
-                            color: 'rgb(30, 64, 175)', 
-                            borderColor: 'rgb(96, 165, 250)' 
+                            color: 'hsl(217, 91%, 40%)', 
+                            borderColor: 'hsl(217, 91%, 60%)' 
                           }}
                         >
                           <Database className="h-3 w-3" />
@@ -244,11 +243,10 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                       ) : study.source_api === 'openalex' ? (
                         <Badge 
                           variant="outline" 
-                          className="text-xs gap-1 border-2 font-semibold"
+                          className="text-xs gap-1 font-medium bg-transparent"
                           style={{ 
-                            backgroundColor: 'rgb(255, 237, 213)', 
-                            color: 'rgb(194, 65, 12)', 
-                            borderColor: 'rgb(251, 146, 60)' 
+                            color: 'hsl(25, 95%, 40%)', 
+                            borderColor: 'hsl(25, 95%, 55%)' 
                           }}
                         >
                           <Database className="h-3 w-3" />

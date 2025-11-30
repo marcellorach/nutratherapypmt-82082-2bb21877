@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSafeTranslation } from '@/hooks/useSafeTranslation';
-import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote } from 'lucide-react';
+import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote, Download, Lock, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,6 +29,7 @@ interface StudyResult {
   citationCount?: number;
   isOpenAccess?: boolean;
   publicationType?: string;
+  pdfUrl?: string;
 }
 
 interface SearchMeta {
@@ -68,6 +69,8 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
   const [meta, setMeta] = useState<SearchMeta | null>(null);
   const [importingIds, setImportingIds] = useState<Set<string>>(new Set());
   const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
+  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
+  const [downloadedIds, setDownloadedIds] = useState<Set<string>>(new Set());
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -228,16 +231,65 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
     }
   };
 
+  const handleDownloadPdf = async (study: StudyResult) => {
+    if (!study.pdfUrl) return;
+    
+    setDownloadingIds(prev => new Set(prev).add(study.id));
+
+    try {
+      const { data, error } = await supabase.functions.invoke('download-study-pdf', {
+        body: {
+          pdfUrl: study.pdfUrl,
+          studyData: {
+            title: study.title,
+            authors: study.authors,
+            journal: study.journal,
+            year: study.year,
+            doi: study.doi,
+            pmid: study.pmid,
+            openalexId: study.openalexId,
+            source: study.source,
+            abstract: study.abstract
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setDownloadedIds(prev => new Set(prev).add(study.id));
+        toast({
+          title: t('studies.search.pdfDownloaded'),
+          description: t('studies.search.pdfSavedToImports')
+        });
+      } else {
+        throw new Error(data.error || 'Failed to download PDF');
+      }
+    } catch (error) {
+      console.error('PDF download error:', error);
+      toast({
+        title: t('studies.search.pdfDownloadError'),
+        description: error instanceof Error ? error.message : t('studies.search.unknownError'),
+        variant: 'destructive'
+      });
+    } finally {
+      setDownloadingIds(prev => {
+        const next = new Set(prev);
+        next.delete(study.id);
+        return next;
+      });
+    }
+  };
+
   const getSourceBadge = (studySource: string) => {
     if (studySource === 'pubmed') {
       return (
         <Badge 
           variant="outline" 
-          className="border-2 font-semibold"
+          className="border font-medium bg-transparent"
           style={{ 
-            backgroundColor: 'rgb(219, 234, 254)', 
-            color: 'rgb(30, 64, 175)', 
-            borderColor: 'rgb(96, 165, 250)' 
+            color: 'hsl(217, 91%, 40%)', 
+            borderColor: 'hsl(217, 91%, 60%)' 
           }}
         >
           <Database className="h-3 w-3 mr-1" />
@@ -248,11 +300,10 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
     return (
       <Badge 
         variant="outline" 
-        className="border-2 font-semibold"
+        className="border font-medium bg-transparent"
         style={{ 
-          backgroundColor: 'rgb(255, 237, 213)', 
-          color: 'rgb(194, 65, 12)', 
-          borderColor: 'rgb(251, 146, 60)' 
+          color: 'hsl(25, 95%, 40%)', 
+          borderColor: 'hsl(25, 95%, 55%)' 
         }}
       >
         <BookOpen className="h-3 w-3 mr-1" />
@@ -404,30 +455,9 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {getSourceBadge(study.source)}
                             {study.isOpenAccess && (
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 text-xs">
+                              <Badge variant="outline" className="bg-transparent text-amber-600 border-amber-400 dark:text-amber-400 text-xs">
                                 OA
                               </Badge>
-                            )}
-                            {importedIds.has(study.id) ? (
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                {t('studies.search.imported')}
-                              </Badge>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleImport(study)}
-                                disabled={importingIds.has(study.id)}
-                                className="gap-1"
-                              >
-                                {importingIds.has(study.id) ? (
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : (
-                                  <Plus className="h-3 w-3" />
-                                )}
-                                {t('studies.search.import')}
-                              </Button>
                             )}
                           </div>
                         </div>
@@ -454,35 +484,98 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                               </Badge>
                             </>
                           )}
-                          {study.doi && (
-                            <>
-                              <span>•</span>
-                              <a
-                                href={`https://doi.org/${study.doi}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline flex items-center gap-1"
+                        </div>
+                        
+                        {study.abstract && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                            {study.abstract}
+                          </p>
+                        )}
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* PDF Download Button */}
+                          {study.pdfUrl ? (
+                            downloadedIds.has(study.id) ? (
+                              <Badge variant="outline" className="bg-transparent text-green-600 border-green-400 gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                {t('studies.search.pdfSaved')}
+                              </Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadPdf(study)}
+                                disabled={downloadingIds.has(study.id)}
+                                className="gap-1 text-green-600 border-green-400 hover:bg-green-50 dark:hover:bg-green-950"
                               >
-                                DOI <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </>
+                                {downloadingIds.has(study.id) ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Download className="h-3 w-3" />
+                                )}
+                                PDF
+                              </Button>
+                            )
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled
+                              className="gap-1 text-muted-foreground"
+                            >
+                              <Lock className="h-3 w-3" />
+                              PDF
+                            </Button>
                           )}
+                          
+                          {/* Import to Library Button */}
+                          {importedIds.has(study.id) ? (
+                            <Badge variant="outline" className="bg-transparent text-green-600 border-green-400 gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              {t('studies.search.imported')}
+                            </Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleImport(study)}
+                              disabled={importingIds.has(study.id)}
+                              className="gap-1"
+                            >
+                              {importingIds.has(study.id) ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Plus className="h-3 w-3" />
+                              )}
+                              {t('studies.search.import')}
+                            </Button>
+                          )}
+                          
+                          {/* DOI Link */}
+                          {study.doi && (
+                            <a
+                              href={`https://doi.org/${study.doi}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              DOI <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                          
+                          {/* Original URL */}
                           {study.url && (
                             <a
                               href={study.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary hover:underline flex items-center gap-1"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
                             >
                               {t('studies.search.viewOriginal')} <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
                         </div>
-                        {study.abstract && (
-                          <p className="text-xs text-muted-foreground line-clamp-4">
-                            {study.abstract}
-                          </p>
-                        )}
                       </CardContent>
                     </Card>
                   ))}
