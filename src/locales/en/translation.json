@@ -120,6 +120,7 @@
       "increaseMaxResults": "Increase max to see more",
       "didYouMean": "Did you mean",
       "noResults": "No results",
+      "noResultsYet": "Search for studies in PubMed and OpenAlex",
       "tryDifferentQuery": "Try different search terms",
       "success": "Search completed",
       "foundResults": "{{count}} studies found",

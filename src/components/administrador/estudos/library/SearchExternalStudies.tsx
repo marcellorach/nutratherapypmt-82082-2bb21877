@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSafeTranslation } from '@/hooks/useSafeTranslation';
-import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote, Download, Lock, FileText } from 'lucide-react';
+import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote, Download, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -98,7 +97,6 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
         sortBy: advancedFilters.sortBy
       };
 
-      // Add advanced filters
       if (advancedFilters.dateFrom) {
         searchParams.dateFrom = advancedFilters.dateFrom;
       }
@@ -326,20 +324,22 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           {t('studies.search.searchExternal')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            {t('studies.search.title')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('studies.search.description')}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="flex-shrink-0 p-6 pb-4 border-b">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              {t('studies.search.title')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('studies.search.description')}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        {/* Área FIXA - Formulário e Filtros */}
-        <div className="flex-shrink-0 space-y-4">
-          {/* Search Form */}
+        {/* Search Form - Fixed */}
+        <div className="flex-shrink-0 p-6 pt-4 pb-4 space-y-4 border-b bg-background">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2">
               <Label htmlFor="query">{t('studies.search.queryLabel')}</Label>
@@ -401,45 +401,50 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
               </>
             )}
           </Button>
+
+          {/* Spelling Suggestion */}
+          {meta?.spellingSuggestion && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center gap-2">
+                {t('studies.search.didYouMean')}
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-primary"
+                  onClick={handleSpellingSuggestion}
+                >
+                  {meta.spellingSuggestion}
+                </Button>
+                ?
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
-        {/* Spelling Suggestion */}
-        {meta?.spellingSuggestion && (
-          <Alert className="flex-shrink-0">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center gap-2">
-              {t('studies.search.didYouMean')}
-              <Button
-                variant="link"
-                className="p-0 h-auto text-primary"
-                onClick={handleSpellingSuggestion}
-              >
-                {meta.spellingSuggestion}
-              </Button>
-              ?
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Área FLEXÍVEL - Resultados */}
-        {results.length > 0 && (
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            {/* Result Counter */}
-            <div className="flex-shrink-0 flex items-center justify-between mb-3 p-2 bg-muted/50 rounded-md">
-              <span className="text-sm font-medium">
-                {t('studies.search.showingResults', { 
-                  count: results.length, 
-                  total: formatNumber(meta?.totalAvailable || results.length) 
-                })}
-              </span>
-              {meta?.totalAvailable && meta.totalAvailable > results.length && (
-                <span className="text-xs text-muted-foreground">
-                  {t('studies.search.increaseMaxResults')}
+        {/* Results Area - Scrollable with native overflow */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {results.length > 0 ? (
+            <>
+              {/* Result Counter - Fixed */}
+              <div className="flex-shrink-0 flex items-center justify-between px-6 py-2 bg-muted/50 border-b">
+                <span className="text-sm font-medium">
+                  {t('studies.search.showingResults', { 
+                    count: results.length, 
+                    total: formatNumber(meta?.totalAvailable || results.length) 
+                  })}
                 </span>
-              )}
-            </div>
+                {meta?.totalAvailable && meta.totalAvailable > results.length && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('studies.search.increaseMaxResults')}
+                  </span>
+                )}
+              </div>
 
-            <ScrollArea className="flex-1 min-h-0">
+              {/* Results List - NATIVE SCROLL */}
+              <div 
+                className="flex-1 overflow-y-auto p-6 pt-4"
+                style={{ overscrollBehavior: 'contain' }}
+              >
                 <div className="space-y-3">
                   {results.map((study) => (
                     <Card key={study.id} className="relative bg-card border">
@@ -582,9 +587,17 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                     </Card>
                   ))}
                 </div>
-              </ScrollArea>
-          </div>
-        )}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground p-6">
+              <div className="text-center">
+                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>{t('studies.search.noResultsYet')}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
