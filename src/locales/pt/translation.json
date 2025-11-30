@@ -1802,6 +1802,39 @@
         "regenerate": "Regenerar",
         "regenerateTooltip": "Regenerar triplets hierárquicos VetGraphRAG para este estudo"
       },
+      "analysis": {
+        "stages": {
+          "stage1": "Stage 1: Entidades",
+          "stage2": "Stage 2: Mecanismos",
+          "stage3": "Stage 3: Clínico"
+        },
+        "labels": {
+          "quality": "Qualidade",
+          "relevance": "Relevância",
+          "nutraceuticals": "Nutracêuticos",
+          "conditions": "Condições",
+          "interactions": "Interações",
+          "sideEffects": "Efeitos Colaterais",
+          "mechanisms": "Mecanismos",
+          "synergies": "Sinergias",
+          "dosages": "Dosagens",
+          "outcomes": "Desfechos",
+          "triplets": "Triplets",
+          "visualizations": "Visualizações",
+          "chat": "Chat",
+          "study": "Estudo"
+        }
+      },
+      "processing": {
+        "title": "Processamento IA",
+        "info": "Informações do Processamento",
+        "model": "Modelo",
+        "status": "Status",
+        "statusProcessing": "Processando",
+        "statusIdle": "Ocioso",
+        "description": "Extrai automaticamente nutracêuticos, condições de saúde e metadados de estudos científicos usando IA generativa.",
+        "pipeline": "Pipeline de Processamento"
+      },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",
       "waitingLogs": "Aguardando início do processamento...",

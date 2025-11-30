@@ -158,6 +158,77 @@ serve(async (req) => {
     
     console.log(`✅ EXTRAÇÃO COMPLETA: 3 stages executados`);
     
+    // ==================== EXTRAIR TÍTULO REAL DO PDF ====================
+    console.log('📝 Extraindo título real do documento...');
+    let extractedTitle = studyData.title;
+    
+    // Tentar extrair título do conteúdo parseado
+    if (parsedContent) {
+      // Prioridade 1: Título explícito do parsing
+      if (parsedContent.title && typeof parsedContent.title === 'string' && parsedContent.title.length > 10) {
+        extractedTitle = parsedContent.title;
+        console.log(`✅ Título encontrado no parsing: ${extractedTitle}`);
+      }
+      // Prioridade 2: Primeira linha/heading do documento
+      else if (parsedContent.sections && Array.isArray(parsedContent.sections) && parsedContent.sections.length > 0) {
+        const firstSection = parsedContent.sections[0];
+        if (firstSection.title && firstSection.title.length > 10 && firstSection.title.length < 300) {
+          extractedTitle = firstSection.title;
+          console.log(`✅ Título extraído da primeira seção: ${extractedTitle}`);
+        }
+      }
+      // Prioridade 3: Usar IA para extrair título se ainda não temos um bom
+      else if (!extractedTitle || extractedTitle.includes('Simulated') || extractedTitle.includes('Unknown')) {
+        try {
+          const titlePrompt = `Extract ONLY the title of this scientific study. Return just the title text, nothing else. First 2000 characters of document:\n\n${textContent.substring(0, 2000)}`;
+          const titleResult = await callLovableAI(
+            'You are a title extractor. Return ONLY the exact title of the scientific paper, nothing else.',
+            titlePrompt,
+            [{
+              type: 'function',
+              function: {
+                name: 'extract_title',
+                description: 'Extract the title',
+                parameters: {
+                  type: 'object',
+                  properties: { title: { type: 'string' } },
+                  required: ['title']
+                }
+              }
+            }]
+          );
+          if (titleResult) {
+            const titleData = JSON.parse(titleResult.function.arguments);
+            if (titleData.title && titleData.title.length > 10 && titleData.title.length < 300) {
+              extractedTitle = titleData.title;
+              console.log(`✅ Título extraído via IA: ${extractedTitle}`);
+            }
+          }
+        } catch (titleError) {
+          console.warn('⚠️ Não foi possível extrair título via IA:', titleError);
+        }
+      }
+    }
+    
+    // Fallback final: limpar o nome do arquivo
+    if (!extractedTitle || extractedTitle.includes('Simulated') || extractedTitle === 'Unknown Study') {
+      const { data: fileData } = await supabase
+        .from('processed_studies')
+        .select('original_filename')
+        .eq('id', studyId)
+        .single();
+      
+      if (fileData?.original_filename) {
+        // Remover extensão e formatar
+        extractedTitle = fileData.original_filename
+          .replace(/\.(pdf|PDF)$/, '')
+          .replace(/_/g, ' ')
+          .replace(/-/g, ' ')
+          .trim();
+        console.log(`📄 Usando nome do arquivo como título: ${extractedTitle}`);
+      }
+    }
+    
     // Calculate quality score
     const qualityScore = calculateQualityScore(extractedData);
 
@@ -183,10 +254,14 @@ serve(async (req) => {
       );
     }
 
-    // Update processed_studies status
+    // Update processed_studies status AND title
+    console.log(`📝 Atualizando título para: ${extractedTitle}`);
     await supabase
       .from('processed_studies')
-      .update({ kanban_status: 'processed' })
+      .update({ 
+        kanban_status: 'processed',
+        title: extractedTitle 
+      })
       .eq('id', studyId);
 
     // ==================== CRIAR TRIPLETS AUTOMATICAMENTE ====================

@@ -204,7 +204,7 @@ const NtaiProcessingSection: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-blue-600" />
-            <h3 className="text-lg font-medium">AI Processing</h3>
+            <h3 className="text-lg font-medium">{t('studies.ntai.processing.title')}</h3>
             <Badge className="ml-2 bg-blue-50 text-blue-700 border-blue-200" variant="outline">
               🤖 Gemini 3 Pro Preview
             </Badge>
@@ -217,23 +217,23 @@ const NtaiProcessingSection: React.FC = () => {
         
         {/* Processing info */}
         <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-          <h4 className="text-sm font-medium mb-2 text-blue-900">Processing Information</h4>
+          <h4 className="text-sm font-medium mb-2 text-blue-900">{t('studies.ntai.processing.info')}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-blue-600 font-medium">Model:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
+              <span className="text-blue-600 font-medium">{t('studies.ntai.processing.model')}:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">Status:</span> <span className="text-blue-900">{processingActive ? 'Processing' : 'Idle'}</span>
+              <span className="text-blue-600 font-medium">{t('studies.ntai.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.ntai.processing.statusProcessing') : t('studies.ntai.processing.statusIdle')}</span>
             </div>
           </div>
           <div className="mt-2 text-xs text-blue-700">
-            Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.
+            {t('studies.ntai.processing.description')}
           </div>
         </div>
         
         {processingStudy && (
           <div className="mb-6">
-            <h4 className="text-sm font-medium mb-3">Processing Pipeline</h4>
+            <h4 className="text-sm font-medium mb-3">{t('studies.ntai.processing.pipeline')}</h4>
             <NtaiPipelineVisualization stages={pipelineStages} />
           </div>
         )}
