@@ -27,6 +27,7 @@ interface StudyPdfUploadProps {
   pdfStoragePath: string | null;
   pdfFilename: string | null;
   onUploadComplete: () => void;
+  onNavigateToUpload?: () => void;
 }
 
 const StudyPdfUpload: React.FC<StudyPdfUploadProps> = ({
@@ -35,6 +36,7 @@ const StudyPdfUpload: React.FC<StudyPdfUploadProps> = ({
   pdfStoragePath,
   pdfFilename,
   onUploadComplete,
+  onNavigateToUpload,
 }) => {
   const { t } = useSafeTranslation();
   const { toast } = useToast();
@@ -217,7 +219,23 @@ const StudyPdfUpload: React.FC<StudyPdfUploadProps> = ({
     );
   }
 
-  // If no PDF, show upload button/dialog
+  // If no PDF, show button that navigates to File Upload tab
+  if (onNavigateToUpload) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-1 text-muted-foreground hover:text-foreground"
+        onClick={onNavigateToUpload}
+      >
+        <FileText className="h-3 w-3" />
+        PDF
+        <Upload className="h-3 w-3" />
+      </Button>
+    );
+  }
+
+  // Fallback: show upload dialog (for cases without navigation)
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
