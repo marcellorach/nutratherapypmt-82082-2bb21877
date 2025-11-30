@@ -119,6 +119,8 @@
       "alreadyExists": "Study already exists",
       "studyAlreadyInLibrary": "This study is already in the library",
       "viewOriginal": "View original",
+      "uploadPdfInfo": "Upload PDF",
+      "uploadPdfAfterImport": "First import the study, then you can attach the PDF file in the library.",
       "filters": {
         "advanced": "Advanced Filters",
         "dateFrom": "From (year)",
