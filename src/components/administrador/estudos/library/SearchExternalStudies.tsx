@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSafeTranslation } from '@/hooks/useSafeTranslation';
-import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote, Upload } from 'lucide-react';
+import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2, AlertCircle, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -231,14 +231,30 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
   const getSourceBadge = (studySource: string) => {
     if (studySource === 'pubmed') {
       return (
-        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200">
+        <Badge 
+          variant="outline" 
+          className="border-2 font-semibold"
+          style={{ 
+            backgroundColor: 'rgb(219, 234, 254)', 
+            color: 'rgb(30, 64, 175)', 
+            borderColor: 'rgb(96, 165, 250)' 
+          }}
+        >
           <Database className="h-3 w-3 mr-1" />
           PubMed
         </Badge>
       );
     }
     return (
-      <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900 dark:text-orange-200">
+      <Badge 
+        variant="outline" 
+        className="border-2 font-semibold"
+        style={{ 
+          backgroundColor: 'rgb(255, 237, 213)', 
+          color: 'rgb(194, 65, 12)', 
+          borderColor: 'rgb(251, 146, 60)' 
+        }}
+      >
         <BookOpen className="h-3 w-3 mr-1" />
         OpenAlex
       </Badge>
@@ -461,20 +477,6 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                               {t('studies.search.viewOriginal')} <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-5 px-1.5 text-xs text-muted-foreground hover:text-primary"
-                            onClick={() => {
-                              toast({
-                                title: t('studies.search.uploadPdfInfo'),
-                                description: t('studies.search.uploadPdfAfterImport')
-                              });
-                            }}
-                          >
-                            <Upload className="h-3 w-3 mr-1" />
-                            PDF
-                          </Button>
                         </div>
                         {study.abstract && (
                           <p className="text-xs text-muted-foreground line-clamp-4">
