@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.graph-rag-search]
 verify_jwt = true
+
+[functions.search-scientific-studies]
+verify_jwt = false

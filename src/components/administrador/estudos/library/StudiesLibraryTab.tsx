@@ -11,7 +11,9 @@ import {
   Users,
   ExternalLink,
   FileText,
-  Filter
+  Filter,
+  Database,
+  FlaskConical
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SearchExternalStudies from './SearchExternalStudies';
 
 interface ScientificStudy {
   id: string;
@@ -37,6 +40,10 @@ interface ScientificStudy {
   doi: string | null;
   link: string | null;
   created_at: string | null;
+  source_api: string | null;
+  is_simulated: boolean | null;
+  pmid: string | null;
+  openalex_id: string | null;
 }
 
 const StudiesLibraryTab: React.FC = () => {
@@ -98,7 +105,7 @@ const StudiesLibraryTab: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Header with stats */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">
@@ -107,11 +114,22 @@ const StudiesLibraryTab: React.FC = () => {
           <Badge variant="secondary">
             {studies.length} {t('studies.library.studies', 'studies')}
           </Badge>
+          <Badge variant="outline" className="text-xs gap-1">
+            <Database className="h-3 w-3" />
+            {studies.filter(s => !s.is_simulated).length} {t('studies.library.real')}
+          </Badge>
+          <Badge variant="outline" className="text-xs gap-1 text-amber-600 border-amber-300">
+            <FlaskConical className="h-3 w-3" />
+            {studies.filter(s => s.is_simulated).length} {t('studies.library.simulated')}
+          </Badge>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchStudies} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          {t('common.refresh', 'Refresh')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <SearchExternalStudies onStudyImported={fetchStudies} />
+          <Button variant="outline" size="sm" onClick={fetchStudies} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            {t('common.refresh', 'Refresh')}
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -198,6 +216,17 @@ const StudiesLibraryTab: React.FC = () => {
                     </h3>
                     
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-2">
+                      {study.is_simulated ? (
+                        <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 gap-1">
+                          <FlaskConical className="h-3 w-3" />
+                          {t('studies.library.simulatedBadge')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-green-600 border-green-300 gap-1">
+                          <Database className="h-3 w-3" />
+                          {study.source_api === 'pubmed' ? 'PubMed' : study.source_api === 'openalex' ? 'OpenAlex' : t('studies.library.realBadge')}
+                        </Badge>
+                      )}
                       {study.authors && study.authors.length > 0 && (
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
