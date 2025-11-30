@@ -49,7 +49,11 @@ interface ScientificStudy {
   pdf_filename: string | null;
 }
 
-const StudiesLibraryTab: React.FC = () => {
+interface StudiesLibraryTabProps {
+  onNavigateToUpload?: () => void;
+}
+
+const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUpload }) => {
   const { t, i18n } = useSafeTranslation();
   const { toast } = useToast();
   const [studies, setStudies] = useState<ScientificStudy[]>([]);
@@ -224,10 +228,36 @@ const StudiesLibraryTab: React.FC = () => {
                           <FlaskConical className="h-3 w-3" />
                           {t('studies.library.simulatedBadge')}
                         </Badge>
+                      ) : study.source_api === 'pubmed' ? (
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs gap-1 border-2 font-semibold"
+                          style={{ 
+                            backgroundColor: 'rgb(219, 234, 254)', 
+                            color: 'rgb(30, 64, 175)', 
+                            borderColor: 'rgb(96, 165, 250)' 
+                          }}
+                        >
+                          <Database className="h-3 w-3" />
+                          PubMed
+                        </Badge>
+                      ) : study.source_api === 'openalex' ? (
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs gap-1 border-2 font-semibold"
+                          style={{ 
+                            backgroundColor: 'rgb(255, 237, 213)', 
+                            color: 'rgb(194, 65, 12)', 
+                            borderColor: 'rgb(251, 146, 60)' 
+                          }}
+                        >
+                          <Database className="h-3 w-3" />
+                          OpenAlex
+                        </Badge>
                       ) : (
                         <Badge variant="outline" className="text-xs text-green-600 border-green-300 gap-1">
                           <Database className="h-3 w-3" />
-                          {study.source_api === 'pubmed' ? 'PubMed' : study.source_api === 'openalex' ? 'OpenAlex' : t('studies.library.realBadge')}
+                          {t('studies.library.realBadge')}
                         </Badge>
                       )}
                       {study.authors && study.authors.length > 0 && (
@@ -263,6 +293,7 @@ const StudiesLibraryTab: React.FC = () => {
                       pdfStoragePath={study.pdf_storage_path}
                       pdfFilename={study.pdf_filename}
                       onUploadComplete={fetchStudies}
+                      onNavigateToUpload={onNavigateToUpload}
                     />
                     {study.doi && (
                       <a
