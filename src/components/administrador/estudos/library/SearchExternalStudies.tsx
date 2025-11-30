@@ -327,7 +327,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
             {t('studies.search.title')}
@@ -337,7 +337,8 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+        {/* Área FIXA - Formulário e Filtros */}
+        <div className="flex-shrink-0 space-y-4">
           {/* Search Form */}
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2">
@@ -400,44 +401,45 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
               </>
             )}
           </Button>
+        </div>
 
-          {/* Spelling Suggestion */}
-          {meta?.spellingSuggestion && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="flex items-center gap-2">
-                {t('studies.search.didYouMean')}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-primary"
-                  onClick={handleSpellingSuggestion}
-                >
-                  {meta.spellingSuggestion}
-                </Button>
-                ?
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Spelling Suggestion */}
+        {meta?.spellingSuggestion && (
+          <Alert className="flex-shrink-0">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center gap-2">
+              {t('studies.search.didYouMean')}
+              <Button
+                variant="link"
+                className="p-0 h-auto text-primary"
+                onClick={handleSpellingSuggestion}
+              >
+                {meta.spellingSuggestion}
+              </Button>
+              ?
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Results */}
-          {results.length > 0 && (
-            <div>
-              {/* Result Counter */}
-              <div className="flex items-center justify-between mb-3 p-2 bg-muted/50 rounded-md">
-                <span className="text-sm font-medium">
-                  {t('studies.search.showingResults', { 
-                    count: results.length, 
-                    total: formatNumber(meta?.totalAvailable || results.length) 
-                  })}
+        {/* Área FLEXÍVEL - Resultados */}
+        {results.length > 0 && (
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            {/* Result Counter */}
+            <div className="flex-shrink-0 flex items-center justify-between mb-3 p-2 bg-muted/50 rounded-md">
+              <span className="text-sm font-medium">
+                {t('studies.search.showingResults', { 
+                  count: results.length, 
+                  total: formatNumber(meta?.totalAvailable || results.length) 
+                })}
+              </span>
+              {meta?.totalAvailable && meta.totalAvailable > results.length && (
+                <span className="text-xs text-muted-foreground">
+                  {t('studies.search.increaseMaxResults')}
                 </span>
-                {meta?.totalAvailable && meta.totalAvailable > results.length && (
-                  <span className="text-xs text-muted-foreground">
-                    {t('studies.search.increaseMaxResults')}
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
 
-              <ScrollArea className="flex-1 min-h-0 max-h-[350px] pr-4">
+            <ScrollArea className="flex-1 min-h-0">
                 <div className="space-y-3">
                   {results.map((study) => (
                     <Card key={study.id} className="relative bg-card border">
@@ -581,9 +583,8 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
                   ))}
                 </div>
               </ScrollArea>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
