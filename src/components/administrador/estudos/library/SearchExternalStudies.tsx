@@ -131,6 +131,11 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
       setResults(data.results || []);
       setMeta(data.meta);
       
+      // Auto-collapse filters when results are loaded
+      if (data.results?.length > 0) {
+        setShowAdvanced(false);
+      }
+      
       if (data.results?.length === 0) {
         toast({
           title: t('studies.search.noResults'),
@@ -324,37 +329,38 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           {t('studies.search.searchExternal')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col overflow-hidden">
-        {/* Header - Fixed */}
-        <div className="flex-shrink-0 p-6 pb-4 border-b">
+      <DialogContent className="max-w-4xl h-[92vh] p-0 gap-0 flex flex-col overflow-hidden">
+        {/* Header - Compact */}
+        <div className="flex-shrink-0 px-4 py-3 border-b">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <BookOpen className="h-4 w-4" />
               {t('studies.search.title')}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs">
               {t('studies.search.description')}
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        {/* Search Form - Fixed */}
-        <div className="flex-shrink-0 p-6 pt-4 pb-4 space-y-4 border-b bg-background">
-          <div className="grid gap-4 md:grid-cols-4">
+        {/* Search Form - Compact */}
+        <div className="flex-shrink-0 px-4 py-3 space-y-3 border-b bg-background">
+          <div className="grid gap-2 md:grid-cols-4">
             <div className="md:col-span-2">
-              <Label htmlFor="query">{t('studies.search.queryLabel')}</Label>
+              <Label htmlFor="query" className="text-xs">{t('studies.search.queryLabel')}</Label>
               <Input
                 id="query"
                 placeholder={t('studies.search.queryPlaceholder')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="h-8"
               />
             </div>
             <div>
-              <Label>{t('studies.search.sourceLabel')}</Label>
+              <Label className="text-xs">{t('studies.search.sourceLabel')}</Label>
               <Select value={source} onValueChange={(v: any) => setSource(v)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -365,9 +371,9 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
               </Select>
             </div>
             <div>
-              <Label>{t('studies.search.maxResultsLabel')}</Label>
+              <Label className="text-xs">{t('studies.search.maxResultsLabel')}</Label>
               <Select value={maxResults} onValueChange={setMaxResults}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,7 +394,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
             onOpenChange={setShowAdvanced}
           />
 
-          <Button onClick={() => handleSearch()} disabled={isSearching} className="w-full gap-2">
+          <Button onClick={() => handleSearch()} disabled={isSearching} className="w-full gap-2 h-9">
             {isSearching ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -425,9 +431,9 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {results.length > 0 ? (
             <>
-              {/* Result Counter - Fixed */}
-              <div className="flex-shrink-0 flex items-center justify-between px-6 py-2 bg-muted/50 border-b">
-                <span className="text-sm font-medium">
+              {/* Result Counter - Compact */}
+              <div className="flex-shrink-0 flex items-center justify-between px-4 py-1.5 bg-muted/50 border-b">
+                <span className="text-xs font-medium">
                   {t('studies.search.showingResults', { 
                     count: results.length, 
                     total: formatNumber(meta?.totalAvailable || results.length) 
@@ -442,7 +448,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
 
               {/* Results List - NATIVE SCROLL */}
               <div 
-                className="flex-1 overflow-y-auto p-6 pt-4"
+                className="flex-1 overflow-y-auto px-4 py-3"
                 style={{ overscrollBehavior: 'contain' }}
               >
                 <div className="space-y-3">
@@ -590,10 +596,10 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground p-6">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground p-4">
               <div className="text-center">
-                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>{t('studies.search.noResultsYet')}</p>
+                <Search className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">{t('studies.search.noResultsYet')}</p>
               </div>
             </div>
           )}
