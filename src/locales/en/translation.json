@@ -1802,6 +1802,39 @@
         "regenerate": "Regenerate",
         "regenerateTooltip": "Regenerate hierarchical VetGraphRAG triplets for this study"
       },
+      "analysis": {
+        "stages": {
+          "stage1": "Stage 1: Entities",
+          "stage2": "Stage 2: Mechanisms",
+          "stage3": "Stage 3: Clinical"
+        },
+        "labels": {
+          "quality": "Quality",
+          "relevance": "Relevance",
+          "nutraceuticals": "Nutraceuticals",
+          "conditions": "Conditions",
+          "interactions": "Interactions",
+          "sideEffects": "Side Effects",
+          "mechanisms": "Mechanisms",
+          "synergies": "Synergies",
+          "dosages": "Dosages",
+          "outcomes": "Outcomes",
+          "triplets": "Triplets",
+          "visualizations": "Visualizations",
+          "chat": "Chat",
+          "study": "Study"
+        }
+      },
+      "processing": {
+        "title": "AI Processing",
+        "info": "Processing Information",
+        "model": "Model",
+        "status": "Status",
+        "statusProcessing": "Processing",
+        "statusIdle": "Idle",
+        "description": "Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.",
+        "pipeline": "Processing Pipeline"
+      },
       "liveLog": "Live Log",
       "events": "events",
       "waitingLogs": "Waiting for processing to start...",
