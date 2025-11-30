@@ -37,6 +37,7 @@ interface StudyResult {
   citationCount?: number;
   isOpenAccess?: boolean;
   publicationType?: string;
+  pdfUrl?: string; // NEW: Direct PDF URL for Open Access articles
 }
 
 interface SearchResponse {
@@ -126,6 +127,34 @@ function buildPubMedQuery(params: SearchParams): string {
   return query;
 }
 
+// Check PMC for PDF availability
+async function checkPmcPdfAvailability(pmid: string): Promise<string | null> {
+  try {
+    // Query PMC OA service to check if PDF is available
+    const url = `https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id=pmid:${pmid}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    
+    const text = await response.text();
+    
+    // Check if there's a PDF link in the response
+    const pdfMatch = text.match(/<link format="pdf" href="([^"]+)"/);
+    if (pdfMatch && pdfMatch[1]) {
+      // Convert ftp:// to https:// if needed
+      let pdfUrl = pdfMatch[1];
+      if (pdfUrl.startsWith('ftp://')) {
+        pdfUrl = pdfUrl.replace('ftp://', 'https://');
+      }
+      return pdfUrl;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('PMC PDF check error for PMID', pmid, ':', error);
+    return null;
+  }
+}
+
 // PubMed E-utilities API
 async function searchPubMed(params: SearchParams): Promise<{ results: StudyResult[], totalAvailable: number }> {
   console.log('Searching PubMed with query:', params.query);
@@ -172,6 +201,9 @@ async function searchPubMed(params: SearchParams): Promise<{ results: StudyResul
     const articles: StudyResult[] = [];
     const articleMatches = xmlText.split('<PubmedArticle>').slice(1);
     
+    // Collect PMIDs to check for PDF availability (batch check)
+    const pmidsToCheck: string[] = [];
+    
     for (const articleXml of articleMatches) {
       try {
         const pmidMatch = articleXml.match(/<PMID[^>]*>(\d+)<\/PMID>/);
@@ -198,9 +230,18 @@ async function searchPubMed(params: SearchParams): Promise<{ results: StudyResul
         const doiMatch = articleXml.match(/<ArticleId IdType="doi">([^<]+)<\/ArticleId>/);
         const doi = doiMatch?.[1];
         
+        // Check if it's in PMC (open access indicator)
+        const pmcMatch = articleXml.match(/<ArticleId IdType="pmc">([^<]+)<\/ArticleId>/);
+        const pmcId = pmcMatch?.[1];
+        const isOpenAccess = !!pmcId;
+        
         // Extract publication type
         const pubTypeMatch = articleXml.match(/<PublicationType[^>]*>([^<]+)<\/PublicationType>/);
         const publicationType = pubTypeMatch?.[1] || undefined;
+        
+        if (pmid && isOpenAccess) {
+          pmidsToCheck.push(pmid);
+        }
         
         articles.push({
           id: `pubmed_${pmid}`,
@@ -213,7 +254,9 @@ async function searchPubMed(params: SearchParams): Promise<{ results: StudyResul
           pmid,
           source: 'pubmed',
           url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
-          publicationType
+          publicationType,
+          isOpenAccess,
+          pdfUrl: pmcId ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcId}/pdf/` : undefined
         });
       } catch (e) {
         console.error('Error parsing PubMed article:', e);
@@ -321,6 +364,10 @@ async function searchOpenAlex(params: SearchParams): Promise<{ results: StudyRes
       const pmidObj = work.ids?.pmid;
       const pmid = pmidObj?.replace('https://pubmed.ncbi.nlm.nih.gov/', '');
       
+      // Extract PDF URL from open_access object
+      const isOpenAccess = work.open_access?.is_oa || false;
+      const pdfUrl = work.open_access?.oa_url || work.best_oa_location?.pdf_url || null;
+      
       return {
         id: `openalex_${openalexId}`,
         title: work.title || 'Untitled',
@@ -334,8 +381,9 @@ async function searchOpenAlex(params: SearchParams): Promise<{ results: StudyRes
         source: 'openalex' as const,
         url: work.primary_location?.landing_page_url || work.doi || `https://openalex.org/${openalexId}`,
         citationCount: work.cited_by_count || 0,
-        isOpenAccess: work.is_oa || false,
-        publicationType: work.type || undefined
+        isOpenAccess,
+        publicationType: work.type || undefined,
+        pdfUrl: pdfUrl || undefined
       };
     });
     
@@ -398,6 +446,10 @@ function deduplicateResults(results: StudyResult[]): StudyResult[] {
       if (!existing.citationCount && result.citationCount) existing.citationCount = result.citationCount;
       if (existing.isOpenAccess === undefined && result.isOpenAccess !== undefined) {
         existing.isOpenAccess = result.isOpenAccess;
+      }
+      // Prefer pdfUrl from OpenAlex (more reliable)
+      if (!existing.pdfUrl && result.pdfUrl) {
+        existing.pdfUrl = result.pdfUrl;
       }
     }
   }

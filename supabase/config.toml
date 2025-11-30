@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.search-scientific-studies]
 verify_jwt = false
+
+[functions.download-study-pdf]
+verify_jwt = false

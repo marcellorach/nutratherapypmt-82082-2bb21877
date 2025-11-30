@@ -135,6 +135,11 @@
       "viewOriginal": "View original",
       "uploadPdfInfo": "Upload PDF",
       "uploadPdfAfterImport": "First import the study, then you can attach the PDF file in the library.",
+      "pdfDownloaded": "PDF Downloaded",
+      "pdfSavedToImports": "PDF saved to Imported Files successfully!",
+      "pdfDownloadError": "Error downloading PDF",
+      "pdfSaved": "PDF Saved",
+      "pdfNotAvailable": "PDF not available",
       "filters": {
         "advanced": "Advanced Filters",
         "dateFrom": "From (year)",

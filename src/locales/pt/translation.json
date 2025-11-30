@@ -135,6 +135,11 @@
       "viewOriginal": "Ver original",
       "uploadPdfInfo": "Enviar PDF",
       "uploadPdfAfterImport": "Primeiro importe o estudo, depois você pode anexar o arquivo PDF na biblioteca.",
+      "pdfDownloaded": "PDF Baixado",
+      "pdfSavedToImports": "PDF salvo em Arquivos Importados com sucesso!",
+      "pdfDownloadError": "Erro ao baixar PDF",
+      "pdfSaved": "PDF Salvo",
+      "pdfNotAvailable": "PDF não disponível",
       "filters": {
         "advanced": "Filtros Avançados",
         "dateFrom": "De (ano)",
