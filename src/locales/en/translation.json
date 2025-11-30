@@ -913,7 +913,9 @@
         "architectureDiagram": "Architecture Diagram",
         "calculations": "Calculations and Formulas",
         "example": "Example",
-        "decisions": "Methodological Decisions"
+        "decisions": "Methodological Decisions",
+        "glossary": "Technical Glossary",
+        "limitations": "Known Limitations"
       },
       "scientific": {
         "foundation": "Scientific Foundations",
