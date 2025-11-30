@@ -108,7 +108,7 @@ const AdvancedSearchFilters: React.FC<AdvancedSearchFiltersProps> = ({
           </span>
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-4">
+      <CollapsibleContent className="space-y-4 pt-4 max-h-[280px] overflow-y-auto pr-2">
         {/* Date Range */}
         <div className="grid grid-cols-2 gap-3">
           <div>
