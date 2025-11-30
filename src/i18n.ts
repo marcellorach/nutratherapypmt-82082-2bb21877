@@ -1,9 +1,12 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Carrega traduções
+// Carrega traduções diretamente (bundled)
 import translationEN from './locales/en/translation.json';
 import translationPT from './locales/pt/translation.json';
+
+// Versão para controle de cache - incrementar quando houver mudanças significativas
+const I18N_VERSION = '1.4.0';
 
 const resources = {
   en: {
@@ -15,53 +18,48 @@ const resources = {
 };
 
 // Detecta o idioma salvo ou usa inglês como padrão
-const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
-const defaultLanguage = savedLanguage || 'en';
+const getSavedLanguage = (): string => {
+  if (typeof window === 'undefined') return 'en';
+  return localStorage.getItem('language') || 'en';
+};
 
-// Força reinicialização COMPLETA das traduções limpando cache do i18next
-if (typeof window !== 'undefined') {
-  const currentVersion = '1.3.50'; // Incrementar para forçar reload
+// Limpa cache de forma segura SEM reload automático
+const clearI18nCache = () => {
+  if (typeof window === 'undefined') return;
+  
   const storedVersion = localStorage.getItem('i18n-version');
   
-  // SEMPRE limpar na primeira carga (forçar)
-  const forceClean = !storedVersion || storedVersion !== currentVersion;
-  
-  if (forceClean) {
-    console.log('🔥 LIMPEZA FORÇADA DE CACHE I18N - Versão:', currentVersion);
+  if (storedVersion !== I18N_VERSION) {
+    console.log('🔄 Atualizando cache i18n:', storedVersion, '->', I18N_VERSION);
     
-    // 1. Limpar TUDO relacionado a i18n
-    const keysToRemove = ['i18nextLng', 'language', 'i18n-version'];
+    // Limpa apenas chaves relacionadas ao i18next (não o idioma salvo pelo usuário)
+    const keysToRemove = ['i18nextLng'];
     keysToRemove.forEach(key => localStorage.removeItem(key));
     
-    // 2. Limpar TODOS os prefixos i18next*
+    // Limpa prefixos i18next* do localStorage
     Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('i18next')) {
+      if (key.startsWith('i18next') && key !== 'i18n-version') {
         localStorage.removeItem(key);
       }
     });
     
-    // 3. Limpar sessionStorage também
-    sessionStorage.clear();
-    
-    // 4. Salvar nova versão
-    localStorage.setItem('i18n-version', currentVersion);
-    console.log('✅ Cache limpo - recarregando em 500ms...');
-    
-    // 5. Delay antes do reload para garantir que salvou
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    // Atualiza versão
+    localStorage.setItem('i18n-version', I18N_VERSION);
+    console.log('✅ Cache i18n atualizado para versão:', I18N_VERSION);
   }
-}
+};
 
-// Inicializa i18next de forma síncrona
+// Limpa cache antes de inicializar
+clearI18nCache();
+
+// Inicializa i18next de forma síncrona e robusta
 i18next
   .use(initReactI18next)
   .init({
     resources,
-    lng: defaultLanguage,
+    lng: getSavedLanguage(),
     fallbackLng: 'en',
-    debug: true,
+    debug: process.env.NODE_ENV !== 'production',
     interpolation: {
       escapeValue: false
     },
@@ -69,12 +67,55 @@ i18next
       useSuspense: false
     },
     keySeparator: '.',
-    nsSeparator: false
+    nsSeparator: false,
+    // Configurações para melhor fallback
+    returnEmptyString: false,
+    returnNull: false,
+    saveMissing: false,
+    missingKeyHandler: (lng, ns, key) => {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`⚠️ Missing translation key: ${key} [${lng}/${ns}]`);
+      }
+    }
   });
 
-// Adiciona listener para permitir troca de idioma via LanguageSwitcher
+// Listener para mudança de idioma
 i18next.on('languageChanged', (lng) => {
-  console.log(`Language changed to: ${lng}`);
+  console.log(`🌍 Language changed to: ${lng}`);
+  // Salva a preferência do usuário
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('language', lng);
+  }
 });
+
+// Função utilitária para validar se as traduções foram carregadas corretamente
+export const validateTranslations = (): boolean => {
+  const criticalKeys = [
+    'common.save',
+    'common.cancel',
+    'navbar.home'
+  ];
+  
+  const missing = criticalKeys.filter(key => {
+    const result = i18next.t(key);
+    return result === key;
+  });
+  
+  if (missing.length > 0) {
+    console.error('❌ Critical translations missing:', missing);
+    return false;
+  }
+  
+  console.log('✅ All critical translations loaded successfully');
+  return true;
+};
+
+// Valida traduções após inicialização
+if (typeof window !== 'undefined') {
+  // Aguarda um tick para garantir que o i18next está pronto
+  setTimeout(() => {
+    validateTranslations();
+  }, 100);
+}
 
 export default i18next;

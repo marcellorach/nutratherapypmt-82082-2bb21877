@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useTranslation } from 'react-i18next';
+import { useSafeTranslation } from '@/hooks/useSafeTranslation';
 import {
   Select,
   SelectContent,
@@ -47,7 +47,7 @@ interface ScientificStudy {
 }
 
 const StudiesLibraryTab: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useSafeTranslation();
   const { toast } = useToast();
   const [studies, setStudies] = useState<ScientificStudy[]>([]);
   const [loading, setLoading] = useState(true);

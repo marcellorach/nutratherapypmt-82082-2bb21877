@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useSafeTranslation } from '@/hooks/useSafeTranslation';
 import { Search, Database, Loader2, ExternalLink, Plus, BookOpen, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ interface SearchExternalStudiesProps {
 }
 
 const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported }) => {
-  const { t } = useTranslation();
+  const { t } = useSafeTranslation();
   const { toast } = useToast();
   
   const [isOpen, setIsOpen] = useState(false);
