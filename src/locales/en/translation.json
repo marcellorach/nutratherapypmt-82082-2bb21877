@@ -102,6 +102,9 @@
       "searching": "Searching...",
       "searchButton": "Search",
       "resultsCount": "{{count}} results found",
+      "showingResults": "Showing {{count}} of ~{{total}} results",
+      "increaseMaxResults": "Increase max to see more",
+      "didYouMean": "Did you mean",
       "noResults": "No results",
       "tryDifferentQuery": "Try different search terms",
       "success": "Search completed",
@@ -115,7 +118,39 @@
       "importError": "Import error",
       "alreadyExists": "Study already exists",
       "studyAlreadyInLibrary": "This study is already in the library",
-      "viewOriginal": "View original"
+      "viewOriginal": "View original",
+      "filters": {
+        "advanced": "Advanced Filters",
+        "dateFrom": "From (year)",
+        "dateTo": "To (year)",
+        "minCitations": "Min. citations",
+        "sortBy": "Sort by",
+        "sort": {
+          "relevance": "Relevance",
+          "date": "Date (newest)",
+          "citations": "Citations (most cited)"
+        },
+        "openAccessOnly": "Open Access only",
+        "publicationType": "Study type",
+        "types": {
+          "review": "Review",
+          "clinicalTrial": "Clinical Trial",
+          "metaAnalysis": "Meta-analysis",
+          "rct": "RCT",
+          "systematicReview": "Systematic Review",
+          "caseReport": "Case Report"
+        },
+        "speciesLabel": "Species",
+        "species": {
+          "dogs": "Dogs",
+          "cats": "Cats",
+          "horses": "Horses",
+          "humans": "Humans"
+        },
+        "mustInclude": "Required terms",
+        "mustExclude": "Exclude terms",
+        "addTerm": "Add term..."
+      }
     },
     "import": {
       "libraryTab": "Library",
