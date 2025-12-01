@@ -303,13 +303,15 @@ async function addFileToCorpus(
 // Extração com File Search usando Structured Output (Function Calling)
 async function extractWithFileSearch(
   fileSearchStoreName: string,
+  fileUri: string,  // ✅ ADICIONADO: URI do arquivo para passar ao modelo
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ USING GOOGLE AI DIRECTLY with gemini-3-pro-preview
-  const MODEL_NAME = 'gemini-3-pro-preview';
+  // ✅ USING GOOGLE AI DIRECTLY with gemini-2.5-flash (mais rápido e eficiente)
+  const MODEL_NAME = 'gemini-2.5-flash';
   console.log('🔍 Extracting data with Google AI Direct + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
+  console.log(`📄 File URI: ${fileUri}`);  // ✅ LOG do URI
   console.log(`🤖 AI Model: ${MODEL_NAME} (Google AI Direct)`);
   console.log(`🛠️ Technology: Tool Calling for guaranteed structured JSON`);
   
@@ -533,89 +535,72 @@ async function extractWithFileSearch(
 
   const prompt = `You are a scientific data extraction AI specialized in mapping COMPLETE BIOLOGICAL CHAINS in nutraceuticals research.
 
-🔴 CRITICAL INSTRUCTION: Extract ALL data in ENGLISH only, regardless of the source document's language.
-If the document is in Portuguese, Spanish, French, or any other language, you MUST TRANSLATE all extracted terms to English.
+🔴 CRITICAL INSTRUCTION: 
+- Extract ALL data from the ATTACHED PDF document ONLY
+- Extract data in ENGLISH only, regardless of the source document's language
+- If the document is in Portuguese, Spanish, French, or any other language, TRANSLATE all extracted terms to English
+- DO NOT invent or fabricate data - extract ONLY what is present in the document
 
-🎯 YOUR MISSION: Map the ENTIRE HIERARCHICAL CHAIN from this study:
+🎯 YOUR MISSION: Analyze the ATTACHED PDF and map the ENTIRE HIERARCHICAL CHAIN:
 
-LAYER 0 to LAYER 1 to LAYER 2 to LAYER 3
-Nutraceutical to Molecular Mechanism to Biological Effect to Clinical Outcome
+LAYER 0 → LAYER 1 → LAYER 2 → LAYER 3
+Nutraceutical → Molecular Mechanism → Biological Effect → Clinical Outcome
 
 📋 EXTRACTION REQUIREMENTS:
 
 1️⃣ NUTRACEUTICALS (Layer 0 - Starting point):
-   - Extract ALL active compounds, supplements, phytochemicals tested
-   - Examples: Curcumin, Omega-3, Resveratrol, Turmeric Extract, etc.
-   - Translate to English: "Curcumina" becomes "Curcumin", "Cúrcuma" becomes "Turmeric"
+   - Extract ALL active compounds, supplements, phytochemicals mentioned in THIS document
+   - Translate to English if needed
 
 2️⃣ MOLECULAR MECHANISMS (Layer 1 - How it works):
    - Extract ALL molecular pathways, enzymes, receptors, genes involved
-   - Examples: "decrease COX-2 pathway", "decrease NF-kB activation", "increase PPAR-gamma", "increase Proteoglycans synthesis", "mTOR inhibition"
-   - Include signaling cascades: MAPK, PI3K/Akt, JAK/STAT, etc.
-   - Use direction indicators: decrease for inhibition/reduction, increase for activation/increase
-   - Translate all: "inibição de COX-2" becomes "decrease COX-2 pathway"
+   - Include signaling cascades: MAPK, PI3K/Akt, JAK/STAT, COX-2, NF-kB, etc.
+   - Use direction indicators: "decrease" for inhibition, "increase" for activation
 
 3️⃣ BIOLOGICAL EFFECTS (Layer 2 - What changes):
    - Extract ALL intermediate effects, biomarkers, physiological changes
-   - Examples: "decrease IL-6 and TNF-alpha", "decrease Oxidative stress", "increase Joint lubrication", "decrease Cartilage degradation"
-   - Include cytokines (IL-1beta, IL-6, TNF-alpha), ROS levels, tissue changes
+   - Include cytokines (IL-1β, IL-6, TNF-α), ROS levels, tissue changes
    - Use direction indicators consistently
-   - Translate all: "redução de citocinas" becomes "decrease IL-6 and TNF-alpha"
 
 4️⃣ CLINICAL OUTCOMES (Layer 3 - Final result):
-   - Extract ALL health conditions, diseases, clinical improvements
-   - Examples: "Canine Arthritis", "Osteoarthritis", "Joint Inflammation", "Cognitive Decline"
-   - Translate all: "Artrite Canina" becomes "Canine Arthritis"
+   - Extract ALL health conditions, diseases, clinical improvements addressed
 
 5️⃣ INTERACTIONS (The connections - MOST CRITICAL):
-   - Map the COMPLETE biological chain step by step
-   - MANDATORY: Create explicit connections for EACH step of the cascade
-   
-   Example for Turmeric/Curcumin study:
-   - Curcumin connects to decrease COX-2 pathway (type: inhibition)
-   - decrease COX-2 pathway connects to decrease IL-6 and TNF-alpha (type: stimulation - pathway inhibition leads to cytokine reduction)
-   - decrease IL-6 and TNF-alpha connects to Canine Arthritis (type: stimulation - cytokine reduction improves condition)
-   - Curcumin connects to decrease NF-kB activation (type: inhibition)
-   - decrease NF-kB activation connects to decrease Oxidative stress (type: stimulation)
-   - decrease Oxidative stress connects to Joint Inflammation (type: stimulation)
-   
-   Type definitions:
-   * inhibition: X blocks/reduces/inhibits Y (e.g., Curcumin inhibits COX-2)
-   * stimulation: X activates/increases/leads to Y (e.g., COX-2 inhibition leads to reduced cytokines)
-   * modulation: X regulates/modifies Y (e.g., bidirectional effects)
+   - Map the COMPLETE biological chain step by step FROM THIS DOCUMENT
+   - Create explicit connections for EACH step of the cascade
+   - Type definitions:
+     * inhibition: X blocks/reduces/inhibits Y
+     * stimulation: X activates/increases/leads to Y
+     * modulation: X regulates/modifies Y
 
 6️⃣ SIDE EFFECTS (Safety data):
    - Extract ALL adverse effects, safety concerns, contraindications mentioned
-   - Examples: "Mild Drowsiness", "Appetite Changes", "GI Discomfort"
    - Include severity based on study data
-   - Translate all: "Sonolência Leve" becomes "Mild Drowsiness"
 
-🔍 SEARCH STRATEGY:
-- Read ENTIRE document: abstract, introduction, methods, results, discussion, tables, figures
+🔍 READ STRATEGY:
+- Read the ENTIRE attached PDF: title, abstract, introduction, methods, results, discussion, conclusions
 - Look for mechanism sections: "mechanism of action", "molecular pathways", "signaling"
-- Check results for biomarkers: cytokines, inflammatory markers, oxidative stress markers
+- Check results for biomarkers and measured outcomes
 - Examine discussion for mechanistic explanations
-- Extract from tables/figures showing pathway diagrams or mechanism illustrations
+- Extract from tables/figures showing data
 
 🌍 TRANSLATION REQUIREMENTS (MANDATORY):
 - ALL names, descriptions, effects MUST be in English
 - Use standard scientific nomenclature
-- Preserve technical terms accuracy (e.g., "NF-kB" not "NF-kb")
-- Use standard units (mg, g, micromolar, etc.)
+- Preserve technical terms accuracy (e.g., "NF-κB" not "NF-kb")
+- Use standard units (mg, g, μM, etc.)
 
 ⚠️ CRITICAL RULES:
-1. Extract AT LEAST 3-5 items for EACH category (nutraceuticals, mechanisms, effects, conditions)
-2. Create AT LEAST 5-10 interactions mapping the complete chain
+1. Extract ONLY data present in the attached PDF - DO NOT use examples or external knowledge
+2. Create interactions mapping the complete chain as described in this specific document
 3. Names in interactions MUST match EXACTLY the names in their respective arrays
-4. Every nutraceutical should connect to at least one mechanism
-5. Every mechanism should connect to at least one biological effect
-6. Every biological effect should connect to at least one clinical outcome
-7. Use confidence scores based on statistical significance (p<0.05 = high confidence)
+4. Use confidence scores based on evidence strength in the document
 
-Return using extract_study_data function with all arrays fully populated.`;
+Return using extract_study_data function with all arrays populated from the document.`;
 
   try {
     console.log('📤 Sending query with Tool Calling via Google AI Direct...');
+    console.log(`📄 Including PDF file in request: ${fileUri}`);
     
     // ✅ Use GOOGLE_AI_API_KEY instead of LOVABLE_API_KEY
     const googleApiKey = Deno.env.get('GOOGLE_AI_API_KEY');
@@ -623,7 +608,7 @@ Return using extract_study_data function with all arrays fully populated.`;
       throw new Error('GOOGLE_AI_API_KEY not configured');
     }
     
-    // ✅ Google AI Native format with function declarations
+    // ✅ Google AI Native format with function declarations AND PDF FILE
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${googleApiKey}`,
       {
@@ -635,7 +620,17 @@ Return using extract_study_data function with all arrays fully populated.`;
           contents: [
             { 
               role: 'user', 
-              parts: [{ text: `${systemPrompt}\n\n${prompt}` }]
+              parts: [
+                // ✅ CRÍTICO: Incluir o PDF no request
+                {
+                  fileData: {
+                    mimeType: 'application/pdf',
+                    fileUri: fileUri
+                  }
+                },
+                // Depois o texto do prompt
+                { text: `${systemPrompt}\n\n${prompt}` }
+              ]
             }
           ],
           tools: [{
@@ -1109,8 +1104,9 @@ serve(async (req) => {
     const fileSearchStoreName = corpusName.replace(/^corpora\//, 'fileSearchStores/');
     
     const startTime = Date.now();
+    // ✅ CRÍTICO: Passar o uploadedFile.uri para a função de extração
     const extractedData = await retryWithExponentialBackoff(
-      () => extractWithFileSearch(fileSearchStoreName, GOOGLE_GEMINI_KEY, supabase),
+      () => extractWithFileSearch(fileSearchStoreName, uploadedFile.uri, GOOGLE_GEMINI_KEY, supabase),
       'Extract Data with File Search'
     );
     const duration = Date.now() - startTime;
