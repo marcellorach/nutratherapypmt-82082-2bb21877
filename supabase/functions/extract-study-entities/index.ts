@@ -718,25 +718,76 @@ function getStage3Tools() {
 
 // ==================== DEFAULT PROMPTS ====================
 function getDefaultStage1SystemPrompt(): string {
-  return `You are a veterinary nutraceutical research expert. Extract basic entities: nutraceuticals, health conditions, mechanisms, and findings. Be comprehensive.`;
+  return `You are a veterinary nutraceutical research expert extracting information from scientific studies.
+
+CRITICAL RULES - YOU MUST FOLLOW:
+1. Extract ONLY information that is EXPLICITLY stated in the provided document
+2. DO NOT invent, assume, or hallucinate any data
+3. DO NOT use knowledge from other studies or general knowledge
+4. If something is not mentioned in the text, DO NOT include it
+5. Return empty arrays [] for categories with no explicit data in the document
+
+Your job is to identify: nutraceuticals, health conditions, mechanisms, and key findings - but ONLY those actually mentioned in this specific document.`;
 }
 
 function getDefaultStage1UserPrompt(): string {
-  return `Extract all nutraceuticals, conditions, mechanisms, and key findings from this study:\n\n{{TEXT_CONTENT}}`;
+  return `Extract all nutraceuticals, conditions, mechanisms, and key findings from ONLY this study document.
+
+IMPORTANT: Only include information explicitly stated in this text. If a compound, condition, or mechanism is not mentioned, do not include it.
+
+Document to analyze:
+{{TEXT_CONTENT}}`;
 }
 
 function getDefaultStage2SystemPrompt(): string {
-  return `You are a molecular biology expert. Extract detailed molecular mechanisms, synergies between compounds, and hierarchical relationships. Focus on pathways, enzymes, receptors, and interaction types.`;
+  return `You are a molecular biology expert analyzing a specific veterinary study.
+
+CRITICAL RULES - YOU MUST FOLLOW:
+1. Extract ONLY molecular mechanisms and synergies EXPLICITLY described in this document
+2. If synergies between compounds are NOT explicitly mentioned, return an EMPTY array []
+3. DO NOT invent or assume synergies based on general knowledge
+4. DO NOT reference data from other studies like Curcumin, Piperine, etc. unless they are EXPLICITLY in this document
+5. Focus on pathways, enzymes, receptors ONLY if mentioned in the text
+6. If unsure whether something is in the document, leave it out`;
 }
 
 function getDefaultStage2UserPrompt(): string {
-  return `Based on these nutraceuticals: {{STAGE1_NUTRACEUTICALS}}\n\nExtract molecular mechanisms, synergies, and hierarchical relations from:\n\n{{TEXT_CONTENT}}`;
+  return `Based on these nutraceuticals found in Stage 1: {{STAGE1_NUTRACEUTICALS}}
+
+Extract molecular mechanisms, synergies, and hierarchical relations ONLY from the following document.
+
+CRITICAL: 
+- If no synergies are explicitly described, return synergies as []
+- Do NOT add compounds like Piperine, Curcumin, etc. unless they appear in this specific text
+- Only include mechanisms that are directly stated in the document
+
+Document to analyze:
+{{TEXT_CONTENT}}`;
 }
 
 function getDefaultStage3SystemPrompt(): string {
-  return `You are a clinical veterinary expert. Extract precise dosages, side effects, contraindications, and clinical outcomes. Include species-specific information.`;
+  return `You are a clinical veterinary expert extracting dosage and safety information.
+
+CRITICAL RULES - YOU MUST FOLLOW:
+1. Extract ONLY dosages, side effects, and outcomes EXPLICITLY stated in this document
+2. DO NOT invent dosages from general knowledge or other studies
+3. If a dosage for a compound is not mentioned, DO NOT include it
+4. Only include side effects and contraindications explicitly stated in this study
+5. If clinical outcomes are not explicitly described, return empty arrays
+6. Never assume or hallucinate data - if it's not in the document, don't include it`;
 }
 
 function getDefaultStage3UserPrompt(): string {
-  return `Based on these nutraceuticals: {{STAGE1_NUTRACEUTICALS}}\n\nExtract dosages, side effects, contraindications, and clinical outcomes from:\n\n{{TEXT_CONTENT}}`;
+  return `Based on these nutraceuticals found in Stage 1: {{STAGE1_NUTRACEUTICALS}}
+
+Extract dosages, side effects, contraindications, and clinical outcomes ONLY from the following document.
+
+CRITICAL:
+- Only include dosages explicitly stated in this document
+- Do NOT add dosages from general knowledge (e.g., do not add "Curcuminoid" dosages unless this document specifically mentions them)
+- If a compound's dosage is not mentioned, leave it out
+- Only include species-specific information that is explicitly stated
+
+Document to analyze:
+{{TEXT_CONTENT}}`;
 }
