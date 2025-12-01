@@ -7,7 +7,7 @@ interface AdminContainerProps {
 
 const AdminContainer: React.FC<AdminContainerProps> = ({ children }) => {
   return (
-    <div className="flex min-h-[calc(100vh-6rem)] w-full max-w-full bg-gray-50">
+    <div className="flex min-h-[calc(100vh-6rem)] w-full max-w-full bg-gray-50 overflow-hidden">
       {children}
     </div>
   );
