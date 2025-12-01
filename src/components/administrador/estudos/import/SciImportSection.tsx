@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,18 @@ const SciImportSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("library");
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  // Listen for custom event to navigate to AI Processing tab
+  useEffect(() => {
+    const handleStudyImportedToAI = (e: CustomEvent) => {
+      if (e.detail?.navigateToAI) {
+        setActiveTab('ai-processing');
+      }
+    };
+    
+    window.addEventListener('studyImportedToAI', handleStudyImportedToAI as EventListener);
+    return () => window.removeEventListener('studyImportedToAI', handleStudyImportedToAI as EventListener);
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

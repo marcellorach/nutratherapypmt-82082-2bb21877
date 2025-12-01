@@ -102,7 +102,11 @@
       "dragOrClick": "Drag PDF here or click to select",
       "maxSize": "Max 20MB",
       "uploading": "Uploading...",
-      "upload": "Upload"
+      "upload": "Upload",
+      "sendToAI": "Send to AI Processing",
+      "sentToAI": "Sent to AI",
+      "sentToAIDesc": "Study added to processing queue",
+      "sendToAIError": "Error sending to AI"
     },
     "search": {
       "title": "Search Scientific Studies",
