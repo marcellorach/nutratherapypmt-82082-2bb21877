@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 const Footer: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <footer className="bg-gray-50 text-gray-700 border-t border-gray-200">
-      <div className="container mx-auto px-4 py-6">
+    <footer className="bg-gray-50 text-gray-700 border-t border-gray-200 w-full max-w-full overflow-x-hidden">
+      <div className="container mx-auto px-4 py-6 max-w-full overflow-x-hidden">
         {/* Copyright e descrição principal */}
         <div className="text-center text-sm mb-4">
           {t('footer.copyright')}
