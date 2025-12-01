@@ -19,8 +19,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 }) => {
   return (
     <Layout hideFooter={true}>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex w-full">
+      <SidebarProvider defaultOpen={true} className="w-full max-w-full overflow-hidden">
+        <div className="flex w-full max-w-full overflow-hidden">
           <AdminContainer>
             <AdminSidebar 
               currentStep={currentStep} 
