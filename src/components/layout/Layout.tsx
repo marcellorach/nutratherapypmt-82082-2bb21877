@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children, hideFooter = false }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-grow mt-24">
+      <main className="flex-grow mt-24 w-full max-w-full overflow-x-hidden">
         {children}
       </main>
       {!hideFooter && <Footer />}
