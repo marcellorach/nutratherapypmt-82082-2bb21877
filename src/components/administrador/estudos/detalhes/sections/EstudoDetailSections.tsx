@@ -10,31 +10,38 @@ interface EstudoDetailSectionsProps {
 }
 
 const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) => {
-  // Dados de exemplo - em produção viriam do estudo
-  const nutraceuticos = [
-    { nome: "Ômega 3", score: 4.2 },
-    { nome: "Ômega 6", score: 3.9 }
-  ];
-
-  const condicoes = [
-    { nome: "Artrite Canina", score: 4.5 },
-    { nome: "Osteoartrite", score: 4.2 },
-    { nome: "Inflamação Articular", score: 3.8 }
-  ];
-
-  const interacoesPositivas = [
-    { nome: "Glucosamina", score: 4.0 },
-    { nome: "MSM", score: 3.8 }
-  ];
-
-  const interacoesNegativas = [
-    { nome: "Anti-inflamatórios", score: 2.5 }
-  ];
-
-  const efeitosColaterais = [
-    { nome: "Sonolência Leve", score: 2.0 },
-    { nome: "Alteração Apetite", score: 1.8 }
-  ];
+  // Extrair dados reais do analysis_data
+  const analysisData = estudo?.analysis_data || {};
+  
+  // Nutracêuticos identificados no estudo
+  const nutraceuticos = (analysisData.extractedNutraceuticals || []).map((n: any) => ({
+    nome: n.name,
+    score: n.confidence || 3.0
+  }));
+  
+  // Condições de saúde identificadas
+  const condicoes = (analysisData.extractedConditions || []).map((c: any) => ({
+    nome: c.name,
+    score: c.confidence || 3.0
+  }));
+  
+  // Sinergias/Interações positivas
+  const interacoesPositivas = (analysisData.synergies || []).map((s: any) => ({
+    nome: s.compound || s.name || 'N/A',
+    score: s.confidence || 3.0
+  }));
+  
+  // Interações negativas (contraindications)
+  const interacoesNegativas = (analysisData.contraindications || []).map((ci: any) => ({
+    nome: ci.name || ci.contraindication || 'N/A',
+    score: ci.severity === 'high' ? 4.0 : ci.severity === 'moderate' ? 3.0 : 2.0
+  }));
+  
+  // Efeitos colaterais detalhados
+  const efeitosColaterais = (analysisData.detailedSideEffects || analysisData.extractedSideEffects || []).map((e: any) => ({
+    nome: e.name,
+    score: e.severity === 'mild' ? 2.0 : e.severity === 'moderate' ? 3.0 : 4.0
+  }));
 
   return (
     <div className="space-y-6">

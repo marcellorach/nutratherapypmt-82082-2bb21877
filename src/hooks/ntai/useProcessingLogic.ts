@@ -258,6 +258,26 @@ export const useProcessingLogic = (
           stage3: `${extractData?.dosages?.length || 0} dosagens`
         });
 
+        // Generate VetGraphRAG triplets
+        try {
+          addLogEntry(`🔗 [TRIPLETS] Starting VetGraphRAG triplet generation...`);
+          const { data: tripletData, error: tripletError } = await supabase.functions.invoke('generate-triplets', {
+            body: { studyId: item.id }
+          });
+
+          if (tripletError) {
+            addLogEntry(`⚠️ [TRIPLETS] Warning: ${tripletError.message} (não crítico, continua processamento)`);
+          } else {
+            const tripletsGenerated = tripletData?.tripletsGenerated || 0;
+            const autoApproved = tripletData?.autoApproved || 0;
+            addLogEntry(`✅ [TRIPLETS] ${tripletsGenerated} triplets gerados (${autoApproved} auto-aprovados)`);
+            console.log('🔗 VetGraphRAG triplets:', { tripletsGenerated, autoApproved });
+          }
+        } catch (tripletErr: any) {
+          addLogEntry(`⚠️ [TRIPLETS] Erro ao gerar triplets: ${tripletErr.message} (não crítico)`);
+          console.error('Triplet generation error:', tripletErr);
+        }
+
         // STAGE 3: SAVING
         updatedQueue[index] = { ...item, stage: 'standardizing', progress: 90 };
         setProcessQueue([...updatedQueue]);
