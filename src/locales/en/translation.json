@@ -176,7 +176,15 @@
     },
     "import": {
       "libraryTab": "Library",
-      "importsTab": "Imports"
+      "importsTab": "Imports",
+      "title": "Study Import",
+      "description": "Import scientific studies via PDF or search external databases",
+      "uploadTab": "Upload PDFs",
+      "aiProcessingTab": "AI Processing",
+      "successInline": "{{count}} file(s) imported successfully!",
+      "successInlineDesc": "Studies are ready for AI processing",
+      "viewImported": "View Studies",
+      "fileNameSanitized": "Name will be renamed to"
     },
     "vetGraphRAG": {
       "title": "VetGraphRAG",
