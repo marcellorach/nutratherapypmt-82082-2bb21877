@@ -17,7 +17,7 @@ const Header: React.FC = () => {
   const isAdmin = hasRole('admin');
 
   return (
-    <header className="w-full bg-white text-gray-800 p-6 border-b border-gray-200 shadow-sm fixed top-0 left-0 z-50">
+    <header className="w-full max-w-[100vw] bg-white text-gray-800 p-6 border-b border-gray-200 shadow-sm fixed top-0 left-0 z-50 overflow-x-hidden">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center gap-4">
           <img 
