@@ -102,7 +102,11 @@
       "dragOrClick": "Arraste o PDF aqui ou clique para selecionar",
       "maxSize": "Máximo 20MB",
       "uploading": "Enviando...",
-      "upload": "Enviar"
+      "upload": "Enviar",
+      "sendToAI": "Enviar para AI Processing",
+      "sentToAI": "Enviado para AI",
+      "sentToAIDesc": "Estudo adicionado à fila de processamento",
+      "sendToAIError": "Erro ao enviar para AI"
     },
     "search": {
       "title": "Buscar Estudos Científicos",

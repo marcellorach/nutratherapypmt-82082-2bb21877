@@ -15,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
-import { FileText, Upload, Download, Trash2, RefreshCw, Check, X } from 'lucide-react';
+import { FileText, Upload, Download, Trash2, RefreshCw, Check, X, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSafeTranslation } from '@/hooks/useSafeTranslation';
+import { v4 as uuidv4 } from 'uuid';
 import { sanitizeFileName } from '@/utils/fileNameSanitizer';
 
 interface StudyPdfUploadProps {
@@ -186,6 +187,57 @@ const StudyPdfUpload: React.FC<StudyPdfUploadProps> = ({
     }
   };
 
+  const sendToAIProcessing = async () => {
+    if (!pdfStoragePath) return;
+
+    try {
+      const studyUuid = uuidv4();
+      
+      // Create record in processed_studies using the existing PDF path
+      const { error } = await supabase
+        .from('processed_studies')
+        .insert({
+          study_id: studyUuid,
+          title: studyTitle,
+          original_filename: pdfFilename || 'study.pdf',
+          storage_path: pdfStoragePath,
+          import_type: 'library',
+          kanban_status: 'new',
+          description: `Imported from Studies Library - ${studyTitle}`,
+          journal: 'Library Import',
+          analysis_data: {
+            studyId: studyUuid,
+            qualityScore: 0,
+            relevanceScore: 0,
+            extractedNutraceuticals: [],
+            extractedConditions: [],
+            extractedInteractions: [],
+            extractedSideEffects: []
+          }
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: t('studies.library.sentToAI', 'Sent to AI Processing'),
+        description: t('studies.library.sentToAIDesc', 'Study added to processing queue'),
+      });
+
+      // Emit custom event to navigate to AI Processing tab
+      window.dispatchEvent(new CustomEvent('studyImportedToAI', { 
+        detail: { studyId: studyUuid, navigateToAI: true } 
+      }));
+
+    } catch (error: any) {
+      console.error('Error sending to AI:', error);
+      toast({
+        title: t('studies.library.sendToAIError', 'Error sending to AI'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   // If PDF exists, show dropdown with options
   if (hasPdf) {
     return (
@@ -205,6 +257,10 @@ const StudyPdfUpload: React.FC<StudyPdfUploadProps> = ({
           <DropdownMenuItem onClick={downloadPdf} className="gap-2">
             <Download className="h-4 w-4" />
             {t('studies.library.downloadPdf', 'Download PDF')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={sendToAIProcessing} className="gap-2 text-blue-600">
+            <Brain className="h-4 w-4" />
+            {t('studies.library.sendToAI', 'Send to AI Processing')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDialogOpen(true)} className="gap-2">
             <RefreshCw className="h-4 w-4" />
