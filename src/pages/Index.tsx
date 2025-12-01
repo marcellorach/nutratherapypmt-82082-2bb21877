@@ -14,7 +14,7 @@ const Index: React.FC = () => {
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden">
+      <div className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden min-w-0">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-5xl font-bold mb-4">{t('home.title')}</h1>
@@ -39,7 +39,7 @@ const Index: React.FC = () => {
             </div>
             
             {/* Destaque dos benefícios */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full min-w-0">
               <Card className="p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col items-center text-center">
                   <div className="rounded-full bg-gray-50 p-3 mb-4">
@@ -79,7 +79,7 @@ const Index: React.FC = () => {
           </div>
         ) : (
           <div className="mt-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden w-full max-w-full">
               <div className="p-8 text-center border-b border-gray-100">
                 <h2 className="text-2xl font-bold mb-2">{t('home.welcomeBack')}</h2>
                 <p className="text-gray-600 mb-0">
@@ -87,9 +87,9 @@ const Index: React.FC = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                <div className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col items-center text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100 min-w-0">
+                <div className="p-6 hover:bg-gray-50 transition-colors min-w-0 overflow-hidden">
+                  <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <UserCog size={28} className="text-gray-800" />
                     </div>
@@ -108,8 +108,8 @@ const Index: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col items-center text-center">
+                <div className="p-6 hover:bg-gray-50 transition-colors min-w-0 overflow-hidden">
+                  <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Heart size={28} className="text-gray-800" />
                     </div>
@@ -128,8 +128,8 @@ const Index: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="p-6 bg-gray-50 transition-colors opacity-60">
-                  <div className="flex flex-col items-center text-center">
+                <div className="p-6 bg-gray-50 transition-colors opacity-60 min-w-0 overflow-hidden">
+                  <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Book size={28} className="text-gray-800" />
                     </div>
