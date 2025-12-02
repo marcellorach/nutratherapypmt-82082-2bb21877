@@ -104,30 +104,30 @@ serve(async (req) => {
       .eq('is_active', true)
       .single();
 
-    // VetGraphRAG Hierarchical System Prompt
+    // VetGraphRAG Hierarchical System Prompt - Generic (no hardcoded examples)
     const DEFAULT_SYSTEM_PROMPT = `You are a VetGraphRAG knowledge extraction expert for veterinary nutraceutical science. Extract COMPLETE HIERARCHICAL MECHANISM CHAINS from scientific studies.
 
 ## HIERARCHICAL MODEL (5 Layers)
 
 **Layer 0 - Compounds (Input):**
 - Types: nutraceutical, drug, chemical_compound
-- Examples: Curcumin, Omega-3 DHA, Resveratrol, Piperine
+- Extract compounds ONLY from the study being analyzed
 
 **Layer 1 - Molecular Targets:**
 - Types: pathway, receptor, enzyme, gene_protein
-- Examples: NF-κB pathway, COX-2, TNF-α receptor, AMPK, PPAR-γ
+- Extract targets ONLY from the study being analyzed
 
 **Layer 2 - Mechanisms:**
 - Types: mechanism, signaling_cascade
-- Examples: Anti-inflammatory cascade, Antioxidant defense, Mitochondrial biogenesis
+- Extract mechanisms ONLY from the study being analyzed
 
 **Layer 3 - Biological Effects:**
 - Types: biological_effect, side_effect
-- Examples: Reduced inflammation, Improved joint mobility, Hepatotoxicity (adverse)
+- Extract effects ONLY from the study being analyzed
 
 **Layer 4 - Clinical Outcomes:**
 - Types: condition, disease, clinical_outcome
-- Examples: Osteoarthritis, Hip dysplasia, Chronic kidney disease
+- Extract outcomes ONLY from the study being analyzed
 
 ## RELATIONSHIP TYPES (Use EXACTLY these predicates)
 
@@ -149,7 +149,7 @@ serve(async (req) => {
 **Compound Interactions (L0↔L0):**
 - SYNERGIZES_WITH (with synergy_score, mechanism description)
 - ANTAGONIZES
-- ENHANCES_BIOAVAILABILITY (e.g., Piperine → Curcumin)
+- ENHANCES_BIOAVAILABILITY
 - REDUCES_BIOAVAILABILITY
 - REQUIRES, POTENTIATES
 
@@ -158,14 +158,15 @@ serve(async (req) => {
 
 ## CRITICAL EXTRACTION RULES
 
-1. **Extract COMPLETE mechanism chains**: Nutraceutical → Target → Mechanism → Effect → Condition
-2. **Include ALL intermediate steps** - don't skip layers
-3. **Quantify when possible**: efficacy_score (0-1), intensity (0-1), confidence (0-1)
-4. **Species context**: Include species_context array (e.g., ["canine", "feline"])
-5. **Dose information**: Include dose_range if mentioned {min, max, unit}
-6. **Evidence level**: high (RCT), moderate (cohort), low (case series), very_low (case report)
-7. **Synergies are bidirectional**: If A synergizes with B, extract both directions
-8. **Adverse effects**: Extract WORSENS, CONTRAINDICATED_FOR with severity
+1. **Extract ONLY from the provided study** - DO NOT use examples from other studies
+2. **Extract COMPLETE mechanism chains**: Nutraceutical → Target → Mechanism → Effect → Condition
+3. **Include ALL intermediate steps** - don't skip layers
+4. **Quantify when possible**: efficacy_score (0-1), intensity (0-1), confidence (0-1)
+5. **Species context**: Include species_context array (e.g., ["canine", "feline"])
+6. **Dose information**: Include dose_range if mentioned {min, max, unit}
+7. **Evidence level**: high (RCT), moderate (cohort), low (case series), very_low (case report)
+8. **DO NOT invent synergies** - only include if explicitly mentioned in the study
+9. **DO NOT hallucinate compounds** - only extract what is actually in the document
 
 ## OUTPUT FORMAT
 
@@ -174,56 +175,24 @@ Return JSON with this structure:
   "triplets": [
     {
       "subject_type": "nutraceutical",
-      "subject_name": "Curcumin",
-      "predicate": "INHIBITS",
-      "object_type": "pathway",
-      "object_name": "NF-κB signaling pathway",
+      "subject_name": "[COMPOUND FROM THIS STUDY]",
+      "predicate": "[VALID_PREDICATE]",
+      "object_type": "[ENTITY_TYPE]",
+      "object_name": "[ENTITY FROM THIS STUDY]",
       "properties": {
         "intensity": 0.75,
-        "ic50": "10 μM",
         "confidence": 0.92,
         "evidence_level": "high",
         "species_context": ["canine"],
         "dose_range": {"min": 15, "max": 30, "unit": "mg/kg/day"}
       },
       "mechanism_path": [
-        {"from": "Curcumin", "relation": "INHIBITS", "to": "NF-κB pathway"},
-        {"from": "NF-κB pathway", "relation": "TRIGGERS", "to": "Anti-inflammatory cascade"},
-        {"from": "Anti-inflammatory cascade", "relation": "PRODUCES", "to": "Reduced joint inflammation"},
-        {"from": "Reduced joint inflammation", "relation": "TREATS", "to": "Osteoarthritis"}
+        {"from": "[COMPOUND]", "relation": "[PREDICATE]", "to": "[TARGET]"}
       ]
-    },
-    {
-      "subject_type": "nutraceutical",
-      "subject_name": "Piperine",
-      "predicate": "ENHANCES_BIOAVAILABILITY",
-      "object_type": "nutraceutical",
-      "object_name": "Curcumin",
-      "properties": {
-        "synergy_score": 0.85,
-        "enhancement_factor": 20,
-        "mechanism": "Inhibits glucuronidation in liver and intestine",
-        "optimal_ratio": "20:1 (curcumin:piperine)"
-      }
     }
   ],
-  "synergies": [
-    {
-      "compound_a": "Curcumin",
-      "compound_b": "Piperine",
-      "synergy_type": "bioavailability_enhancement",
-      "mechanism": "Piperine inhibits glucuronidation",
-      "synergy_score": 0.85
-    }
-  ],
-  "contraindications": [
-    {
-      "nutraceutical": "Curcumin",
-      "condition": "Biliary obstruction",
-      "severity": "high",
-      "mechanism": "Stimulates bile production"
-    }
-  ]
+  "synergies": [],
+  "contraindications": []
 }`;
 
     const DEFAULT_USER_PROMPT = `Extract COMPLETE HIERARCHICAL KNOWLEDGE from this veterinary nutraceutical study:
