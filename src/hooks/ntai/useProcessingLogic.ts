@@ -280,19 +280,21 @@ export const useProcessingLogic = (
           console.error('Triplet generation error:', tripletErr);
         }
 
-        // Sync approved triplets to Neo4J
-        if (autoApproved > 0) {
+        // Sync ALL triplets to Neo4J for immediate visualization (regardless of curation status)
+        if (tripletsGenerated > 0) {
           try {
-            addLogEntry(`🔄 [NEO4J] Syncing ${autoApproved} auto-approved triplets to Neo4J...`);
-            const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-approved-triplets', {
+            addLogEntry(`🔄 [NEO4J] Syncing ALL ${tripletsGenerated} triplets to Neo4J for visualization...`);
+            const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-study-to-neo4j', {
               body: { studyId: item.id }
             });
 
             if (syncError) {
               addLogEntry(`⚠️ [NEO4J] Sync warning: ${syncError.message}`);
             } else {
-              const syncedCount = syncData?.syncedCount || 0;
+              const syncedCount = syncData?.synced || 0;
+              const byStatus = syncData?.byStatus || {};
               addLogEntry(`✅ [NEO4J] ${syncedCount} triplets sincronizados com Neo4J`);
+              addLogEntry(`📊 [NEO4J] Por status: ${JSON.stringify(byStatus)}`);
               console.log('🔄 Neo4J sync result:', syncData);
             }
           } catch (syncErr: any) {
