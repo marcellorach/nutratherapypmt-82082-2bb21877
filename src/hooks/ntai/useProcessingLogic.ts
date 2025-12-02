@@ -259,6 +259,8 @@ export const useProcessingLogic = (
         });
 
         // Generate VetGraphRAG triplets
+        let tripletsGenerated = 0;
+        let autoApproved = 0;
         try {
           addLogEntry(`🔗 [TRIPLETS] Starting VetGraphRAG triplet generation...`);
           const { data: tripletData, error: tripletError } = await supabase.functions.invoke('generate-triplets', {
@@ -268,14 +270,35 @@ export const useProcessingLogic = (
           if (tripletError) {
             addLogEntry(`⚠️ [TRIPLETS] Warning: ${tripletError.message} (não crítico, continua processamento)`);
           } else {
-            const tripletsGenerated = tripletData?.tripletsGenerated || 0;
-            const autoApproved = tripletData?.autoApproved || 0;
+            tripletsGenerated = tripletData?.tripletsGenerated || 0;
+            autoApproved = tripletData?.autoApproved || 0;
             addLogEntry(`✅ [TRIPLETS] ${tripletsGenerated} triplets gerados (${autoApproved} auto-aprovados)`);
             console.log('🔗 VetGraphRAG triplets:', { tripletsGenerated, autoApproved });
           }
         } catch (tripletErr: any) {
           addLogEntry(`⚠️ [TRIPLETS] Erro ao gerar triplets: ${tripletErr.message} (não crítico)`);
           console.error('Triplet generation error:', tripletErr);
+        }
+
+        // Sync approved triplets to Neo4J
+        if (autoApproved > 0) {
+          try {
+            addLogEntry(`🔄 [NEO4J] Syncing ${autoApproved} auto-approved triplets to Neo4J...`);
+            const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-approved-triplets', {
+              body: { studyId: item.id }
+            });
+
+            if (syncError) {
+              addLogEntry(`⚠️ [NEO4J] Sync warning: ${syncError.message}`);
+            } else {
+              const syncedCount = syncData?.syncedCount || 0;
+              addLogEntry(`✅ [NEO4J] ${syncedCount} triplets sincronizados com Neo4J`);
+              console.log('🔄 Neo4J sync result:', syncData);
+            }
+          } catch (syncErr: any) {
+            addLogEntry(`⚠️ [NEO4J] Erro ao sincronizar: ${syncErr.message}`);
+            console.error('Neo4J sync error:', syncErr);
+          }
         }
 
         // STAGE 3: SAVING
