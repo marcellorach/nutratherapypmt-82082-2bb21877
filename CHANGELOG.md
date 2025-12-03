@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-12-03 📋 Sistema de Decisões Técnicas
+
+- ✅ **Criado `docs/TECHNICAL_DECISIONS.md`** - Documento central de decisões técnicas obrigatórias
+  - Seção de LLM & AI com modelos obrigatórios
+  - Seção de Database & Backend com estrutura hierárquica
+  - Seção de Internacionalização com processo i18n
+  - Seção de Design & UI com regras de estilização
+  - Seção "O Que NUNCA Fazer" com proibições claras
+  - Histórico de decisões para rastreabilidade
+
+### Changed - 2025-12-03 🤖 Migração para Gemini 3 Pro Preview
+
+- ✅ **Padronização de todas as edge functions para `google/gemini-3-pro-preview`**
+  - `supabase/functions/generate-triplets/index.ts` - Fase 1 e Fase 2 atualizadas
+  - `supabase/functions/gemini-file-search/index.ts` - Extração e análise atualizadas
+  - `supabase/functions/document-chat/index.ts` - Chat RAG atualizado
+  - `supabase/functions/translate-and-categorize-conditions/index.ts` - Tradução atualizada
+- ✅ **Motivo**: Gemini 3 Pro Preview oferece multi-hop reasoning superior para extração de cadeias biológicas complexas
+- ✅ **Documentação atualizada**: ARCHITECTURE.md v1.10.0, CURRENT_STATE.md v1.6.0
+
 ### Added - 2025-11-29 🚀 VetGraphRAG Hierarchical Model Migration
 
 - ✅ **FASE 1: SQL Migrations** - Expansão completa do modelo de dados

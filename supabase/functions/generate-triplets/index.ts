@@ -194,7 +194,7 @@ Be thorough - capture EVERY biological relationship mentioned in this study.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-3-pro-preview',
         messages: [
           { role: 'system', content: phase1SystemPrompt },
           { role: 'user', content: phase1UserPrompt }
@@ -317,7 +317,7 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-3-pro-preview',
         messages: [
           { role: 'system', content: phase2SystemPrompt },
           { role: 'user', content: phase2UserPrompt }

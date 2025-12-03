@@ -307,8 +307,8 @@ async function extractWithFileSearch(
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ USING GOOGLE AI DIRECTLY with gemini-2.5-flash (mais rápido e eficiente)
-  const MODEL_NAME = 'gemini-2.5-flash';
+  // ✅ USING GOOGLE AI DIRECTLY with gemini-3-pro-preview (melhor reasoning multi-hop)
+  const MODEL_NAME = 'gemini-3-pro-preview';
   console.log('🔍 Extracting data with Google AI Direct + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
   console.log(`📄 File URI: ${fileUri}`);  // ✅ LOG do URI
@@ -820,7 +820,7 @@ EXEMPLO DE RESPOSTA ESPERADA:
 - Se menciona "vitamina D, magnésio e zinco", retorne 3 nutracêuticos`;
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1323,7 +1323,7 @@ serve(async (req) => {
     try {
       await supabase.from('api_usage_logs').insert({
         api_provider: 'google_gemini',
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-pro-preview',
         operation: 'file_search_extraction',
         tokens_input: 0,
         tokens_output: 0,
