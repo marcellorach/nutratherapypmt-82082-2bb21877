@@ -44,6 +44,61 @@ const VALID_RELATIONSHIPS = [
   'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'
 ];
 
+// Valid evidence levels from database constraint
+const VALID_EVIDENCE_LEVELS = ['meta_analysis', 'rct', 'cohort', 'case_control', 'case_report', 'in_vitro', 'expert_opinion'];
+
+// Map evidence level to valid constraint values
+function mapEvidenceLevel(evidenceLevel: string | null | undefined): string | null {
+  if (!evidenceLevel) return null;
+  
+  const normalized = evidenceLevel.toLowerCase().replace(/[_\s-]+/g, '_');
+  
+  // Direct match
+  if (VALID_EVIDENCE_LEVELS.includes(normalized)) {
+    return normalized;
+  }
+  
+  // Common mappings
+  const mappings: Record<string, string> = {
+    'meta-analysis': 'meta_analysis',
+    'metaanalysis': 'meta_analysis',
+    'systematic_review': 'meta_analysis',
+    'systematic review': 'meta_analysis',
+    'randomized_controlled_trial': 'rct',
+    'randomized controlled trial': 'rct',
+    'randomised_controlled_trial': 'rct',
+    'clinical_trial': 'rct',
+    'clinical trial': 'rct',
+    'cohort_study': 'cohort',
+    'cohort study': 'cohort',
+    'observational': 'cohort',
+    'case_control_study': 'case_control',
+    'case-control': 'case_control',
+    'case_series': 'case_report',
+    'case series': 'case_report',
+    'case_study': 'case_report',
+    'case study': 'case_report',
+    'in_vivo': 'in_vitro', // Closest match for lab studies
+    'laboratory': 'in_vitro',
+    'preclinical': 'in_vitro',
+    'animal_study': 'in_vitro',
+    'animal study': 'in_vitro',
+    'expert': 'expert_opinion',
+    'opinion': 'expert_opinion',
+    'review': 'expert_opinion',
+    'narrative_review': 'expert_opinion',
+  };
+  
+  for (const [key, value] of Object.entries(mappings)) {
+    if (normalized.includes(key.replace(/[_\s-]+/g, '_')) || evidenceLevel.toLowerCase().includes(key)) {
+      return value;
+    }
+  }
+  
+  // Default to null if no match
+  return null;
+}
+
 // Map direction values to allowed constraint values: NULL, 'improves', 'worsens', 'neutral', 'bidirectional'
 function mapDirection(direction: string | null | undefined, predicate: string): string | null {
   const validDirections = ['improves', 'worsens', 'neutral', 'bidirectional'];
@@ -585,7 +640,7 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
         // Hierarchical fields
         intensity: props.intensity || null,
         direction: mapDirection(props.direction, predicate),
-        evidence_level: props.evidence_level || null,
+        evidence_level: mapEvidenceLevel(props.evidence_level),
         dose_dependent: props.dose_dependent || false,
         dose_range: props.dose_range || null,
         species_context: props.species_context || null,
