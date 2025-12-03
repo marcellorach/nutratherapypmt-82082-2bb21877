@@ -44,6 +44,32 @@ const VALID_RELATIONSHIPS = [
   'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'
 ];
 
+// Map direction values to allowed constraint values: NULL, 'improves', 'worsens', 'neutral', 'bidirectional'
+function mapDirection(direction: string | null | undefined, predicate: string): string | null {
+  // If direction is provided and valid, use it
+  const validDirections = ['improves', 'worsens', 'neutral', 'bidirectional'];
+  if (direction && validDirections.includes(direction.toLowerCase())) {
+    return direction.toLowerCase();
+  }
+  
+  // Map based on predicate
+  const worseningPredicates = ['INHIBITS', 'BLOCKS', 'DOWNREGULATES', 'WORSENS', 'AGGRAVATES', 'CONTRAINDICATED_FOR', 'CAUSES_SIDE_EFFECT', 'ANTAGONIZES', 'REDUCES_BIOAVAILABILITY'];
+  const improvingPredicates = ['ACTIVATES', 'UPREGULATES', 'TREATS', 'PREVENTS', 'SUPPORTS', 'AMELIORATES', 'MANAGES', 'SYNERGIZES_WITH', 'ENHANCES_BIOAVAILABILITY', 'POTENTIATES'];
+  const neutralPredicates = ['MODULATES', 'BINDS_TO', 'PARTICIPATES_IN', 'REGULATES', 'TRIGGERS', 'PRODUCES', 'LEADS_TO', 'CAUSES', 'REQUIRES', 'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'];
+  
+  if (worseningPredicates.some(p => predicate.includes(p))) {
+    return 'worsens';
+  }
+  if (improvingPredicates.some(p => predicate.includes(p))) {
+    return 'improves';
+  }
+  if (neutralPredicates.some(p => predicate.includes(p))) {
+    return 'neutral';
+  }
+  
+  return null;
+}
+
 /**
  * VetGraphRAG Edge Function - Hierarchical Triplet Extraction
  * Extracts complete Layer 0→4 hierarchy with enriched relationship properties
@@ -455,7 +481,8 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
         object_layer: objectLayer,
         // New hierarchical fields
         intensity: props.intensity || null,
-        direction: props.direction || (predicate.includes('INHIBITS') || predicate.includes('DECREASES') ? 'negative' : 'positive'),
+        // direction must be one of: NULL, 'improves', 'worsens', 'neutral', 'bidirectional'
+        direction: mapDirection(props.direction, predicate),
         evidence_level: props.evidence_level || null,
         dose_dependent: props.dose_dependent || false,
         dose_range: props.dose_range || null,
