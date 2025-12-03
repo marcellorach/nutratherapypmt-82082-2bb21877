@@ -46,13 +46,11 @@ const VALID_RELATIONSHIPS = [
 
 // Map direction values to allowed constraint values: NULL, 'improves', 'worsens', 'neutral', 'bidirectional'
 function mapDirection(direction: string | null | undefined, predicate: string): string | null {
-  // If direction is provided and valid, use it
   const validDirections = ['improves', 'worsens', 'neutral', 'bidirectional'];
   if (direction && validDirections.includes(direction.toLowerCase())) {
     return direction.toLowerCase();
   }
   
-  // Map based on predicate
   const worseningPredicates = ['INHIBITS', 'BLOCKS', 'DOWNREGULATES', 'WORSENS', 'AGGRAVATES', 'CONTRAINDICATED_FOR', 'CAUSES_SIDE_EFFECT', 'ANTAGONIZES', 'REDUCES_BIOAVAILABILITY'];
   const improvingPredicates = ['ACTIVATES', 'UPREGULATES', 'TREATS', 'PREVENTS', 'SUPPORTS', 'AMELIORATES', 'MANAGES', 'SYNERGIZES_WITH', 'ENHANCES_BIOAVAILABILITY', 'POTENTIATES'];
   const neutralPredicates = ['MODULATES', 'BINDS_TO', 'PARTICIPATES_IN', 'REGULATES', 'TRIGGERS', 'PRODUCES', 'LEADS_TO', 'CAUSES', 'REQUIRES', 'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'];
@@ -71,8 +69,9 @@ function mapDirection(direction: string | null | undefined, predicate: string): 
 }
 
 /**
- * VetGraphRAG Edge Function - Hierarchical Triplet Extraction
- * Extracts complete Layer 0→4 hierarchy with enriched relationship properties
+ * VetGraphRAG Edge Function - TWO-PHASE Hierarchical Triplet Extraction
+ * Phase 1: Free discovery without constraints to capture ALL biological pathways
+ * Phase 2: Structure discovered knowledge into triplets
  */
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -107,239 +106,261 @@ serve(async (req) => {
       );
     }
 
-    const analysisData = study.analysis_data || {};
-    const extractedNutraceuticals = analysisData.extractedNutraceuticals || [];
-    const extractedConditions = analysisData.extractedConditions || [];
-    const extractedMechanisms = analysisData.extractedMechanisms || [];
-    const extractedEffects = analysisData.extractedEffects || [];
-    const extractedTargets = analysisData.extractedTargets || [];
-    const extractedPathways = analysisData.extractedPathways || [];
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
+    const fullTextContent = (study.full_text_content || '').substring(0, 12000);
+    
+    console.log(`🔬 PHASE 1: Free Discovery for study: ${studyId}`);
+    console.log(`📄 Title: ${study.title}`);
 
-    // Fetch configurable prompts
-    const { data: systemPromptConfig } = await supabase
-      .from('ai_configurations')
-      .select('config_value')
-      .eq('config_key', 'prompt_triplet_extraction_system_v2')
-      .eq('is_active', true)
-      .single();
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PHASE 1: FREE DISCOVERY - No structured output, capture ALL biological knowledge
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    const phase1SystemPrompt = `You are a veterinary biochemistry expert specializing in nutraceutical mechanisms. Your task is to perform DEEP ANALYSIS of scientific studies to extract ALL biological pathways and mechanisms.
 
-    const { data: userPromptConfig } = await supabase
-      .from('ai_configurations')
-      .select('config_value')
-      .eq('config_key', 'prompt_triplet_extraction_user_v2')
-      .eq('is_active', true)
-      .single();
+## YOUR MISSION
+Read the study carefully and identify EVERY biological pathway, molecular mechanism, and cause-effect chain mentioned. Be extremely thorough - we want to capture the complete biological picture.
 
-    // VetGraphRAG Hierarchical System Prompt - Generic (no hardcoded examples)
-    const DEFAULT_SYSTEM_PROMPT = `You are a VetGraphRAG knowledge extraction expert for veterinary nutraceutical science. Extract COMPLETE HIERARCHICAL MECHANISM CHAINS from scientific studies.
+## WHAT TO EXTRACT
 
-## HIERARCHICAL MODEL (5 Layers)
+### 1. COMPLETE SIGNALING CASCADES
+Write out full pathway chains using arrow notation, like:
+- Astaxanthin → inhibits NF-κB → reduces TNF-α → decreases inflammation → improves joint health
+- NEFA accumulation → activates TLR4 → triggers MyD88 → activates NF-κB → increases IL-6 → chronic inflammation
+- Omega-3 → incorporates into cell membrane → displaces arachidonic acid → reduces PGE2 → anti-inflammatory effect
 
-**Layer 0 - Compounds (Input):**
-- Types: nutraceutical, drug, chemical_compound
-- Extract compounds ONLY from the study being analyzed
+### 2. MOLECULAR TARGETS
+For each compound, list:
+- Receptors it binds (PPARγ, TLR4, CB2, etc.)
+- Enzymes it affects (COX-2, LOX, PLA2, etc.)
+- Transcription factors it modulates (NF-κB, Nrf2, AP-1, etc.)
+- Gene expression changes
 
-**Layer 1 - Molecular Targets:**
-- Types: pathway, receptor, enzyme, gene_protein
-- Extract targets ONLY from the study being analyzed
+### 3. DOSE-RESPONSE RELATIONSHIPS
+- What doses were tested?
+- What effects at what concentrations?
+- Any IC50, EC50, or Ki values mentioned?
 
-**Layer 2 - Mechanisms:**
-- Types: mechanism, signaling_cascade
-- Extract mechanisms ONLY from the study being analyzed
+### 4. SPECIES-SPECIFIC FINDINGS
+- Which species were studied? (canine, feline, equine, etc.)
+- Any breed-specific effects?
+- Age-related considerations?
 
-**Layer 3 - Biological Effects:**
-- Types: biological_effect, side_effect
-- Extract effects ONLY from the study being analyzed
+### 5. CLINICAL OUTCOMES
+- What health conditions were addressed?
+- What measurable outcomes improved?
+- What was the efficacy (percentage improvement, response rate)?
 
-**Layer 4 - Clinical Outcomes:**
-- Types: condition, disease, clinical_outcome
-- Extract outcomes ONLY from the study being analyzed
+### 6. ADVERSE EFFECTS & CONTRAINDICATIONS
+- Any side effects mentioned?
+- Drug interactions?
+- Contraindicated conditions?
 
-## RELATIONSHIP TYPES (Use EXACTLY these predicates)
-
-**Direct Actions (L0→L1):**
-- INHIBITS (with IC50, Ki if available)
-- ACTIVATES (with EC50 if available)
-- MODULATES, BINDS_TO, BLOCKS, UPREGULATES, DOWNREGULATES
-
-**Cascade Flow (L1→L2→L3):**
-- TRIGGERS, PARTICIPATES_IN, REGULATES, PRODUCES, LEADS_TO, CAUSES
-
-**Therapeutic (L3→L4 or L0→L4):**
-- TREATS (with efficacy_score 0-1, evidence_level: high/moderate/low/very_low)
-- PREVENTS, SUPPORTS, AMELIORATES, MANAGES
-
-**Adverse (Any→L4):**
-- WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT, AGGRAVATES
-
-**Compound Interactions (L0↔L0):**
-- SYNERGIZES_WITH (with synergy_score, mechanism description)
-- ANTAGONIZES
-- ENHANCES_BIOAVAILABILITY
-- REDUCES_BIOAVAILABILITY
-- REQUIRES, POTENTIATES
-
-**Context:**
-- PREDISPOSED_IN (breed/species), COMMON_IN, CITED_IN, STUDIED_IN
-
-## CRITICAL EXTRACTION RULES
-
-1. **Extract ONLY from the provided study** - DO NOT use examples from other studies
-2. **Extract COMPLETE mechanism chains**: Nutraceutical → Target → Mechanism → Effect → Condition
-3. **Include ALL intermediate steps** - don't skip layers
-4. **Quantify when possible**: efficacy_score (0-1), intensity (0-1), confidence (0-1)
-5. **Species context**: Include species_context array (e.g., ["canine", "feline"])
-6. **Dose information**: Include dose_range if mentioned {min, max, unit}
-7. **Evidence level**: high (RCT), moderate (cohort), low (case series), very_low (case report)
-8. **DO NOT invent synergies** - only include if explicitly mentioned in the study
-9. **DO NOT hallucinate compounds** - only extract what is actually in the document
+### 7. SYNERGIES & INTERACTIONS
+- Compounds that work better together
+- Compounds that interfere with each other
+- Bioavailability enhancers
 
 ## OUTPUT FORMAT
+Write in natural language, organized by sections. Be EXHAUSTIVE. Don't skip any mechanism or pathway mentioned in the study.`;
 
-Return JSON with this structure:
-{
-  "triplets": [
-    {
-      "subject_type": "nutraceutical",
-      "subject_name": "[COMPOUND FROM THIS STUDY]",
-      "predicate": "[VALID_PREDICATE]",
-      "object_type": "[ENTITY_TYPE]",
-      "object_name": "[ENTITY FROM THIS STUDY]",
-      "properties": {
-        "intensity": 0.75,
-        "confidence": 0.92,
-        "evidence_level": "high",
-        "species_context": ["canine"],
-        "dose_range": {"min": 15, "max": 30, "unit": "mg/kg/day"}
-      },
-      "mechanism_path": [
-        {"from": "[COMPOUND]", "relation": "[PREDICATE]", "to": "[TARGET]"}
-      ]
-    }
-  ],
-  "synergies": [],
-  "contraindications": []
-}`;
+    const phase1UserPrompt = `Analyze this veterinary nutraceutical study and extract ALL biological mechanisms and pathways:
 
-    const DEFAULT_USER_PROMPT = `Extract COMPLETE HIERARCHICAL KNOWLEDGE from this veterinary nutraceutical study:
+**Title:** ${study.title || 'N/A'}
+**Authors:** ${Array.isArray(study.authors) ? study.authors.join(', ') : 'N/A'}
+**Year:** ${study.year || 'N/A'}
+**Journal:** ${study.journal || 'N/A'}
 
-## STUDY INFORMATION
-**Title:** {{TITLE}}
-**Authors:** {{AUTHORS}}
-**Year:** {{YEAR}}
-**Journal:** {{JOURNAL}}
+**FULL TEXT:**
+${fullTextContent}
 
-## EXTRACTED ENTITIES (Pre-identified)
-- **Nutraceuticals (L0):** {{NUTRACEUTICALS}}
-- **Targets (L1):** {{TARGETS}}
-- **Pathways (L1):** {{PATHWAYS}}
-- **Mechanisms (L2):** {{MECHANISMS}}
-- **Effects (L3):** {{EFFECTS}}
-- **Conditions (L4):** {{CONDITIONS}}
+---
 
-## FULL TEXT EXCERPT
-{{FULL_TEXT}}
+Please provide a comprehensive analysis covering:
+1. All signaling cascades (write them as: A → B → C → D format)
+2. All molecular targets (receptors, enzymes, transcription factors)
+3. Dose-response data
+4. Species/breed findings
+5. Clinical outcomes with efficacy data
+6. Adverse effects
+7. Compound interactions/synergies
 
-## EXTRACTION TASKS
+Be thorough - capture EVERY biological relationship mentioned in this study.`;
 
-1. **Extract COMPLETE mechanism chains (L0→L1→L2→L3→L4)**
-   - Don't skip intermediate layers
-   - Include mechanism_path array showing full chain
-
-2. **Direct therapeutic relationships (L0→L4)**
-   - Include efficacy_score, evidence_level, species_context
-
-3. **Compound interactions (L0↔L0)**
-   - Synergies with synergy_score and mechanism
-   - Antagonisms and bioavailability effects
-
-4. **Adverse effects and contraindications**
-   - WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT
-
-5. **Quantitative data**
-   - IC50, EC50, Ki values if mentioned
-   - Dose ranges with units
-   - Response rates, NNT if available
-
-Generate comprehensive triplets covering ALL relationships found in the study.`;
-
-    const systemPrompt = typeof systemPromptConfig?.config_value === 'string' 
-      ? systemPromptConfig.config_value 
-      : DEFAULT_SYSTEM_PROMPT;
-    
-    let userPrompt = typeof userPromptConfig?.config_value === 'string'
-      ? userPromptConfig.config_value
-      : DEFAULT_USER_PROMPT;
-
-    // Replace template variables
-    userPrompt = userPrompt
-      .replace('{{TITLE}}', study.title || 'N/A')
-      .replace('{{AUTHORS}}', Array.isArray(study.authors) ? study.authors.join(', ') : 'N/A')
-      .replace('{{YEAR}}', study.year?.toString() || 'N/A')
-      .replace('{{JOURNAL}}', study.journal || 'N/A')
-      .replace('{{NUTRACEUTICALS}}', extractedNutraceuticals.map((n: any) => n.name).join(', ') || 'None identified')
-      .replace('{{TARGETS}}', extractedTargets.map((t: any) => t.name).join(', ') || 'None identified')
-      .replace('{{PATHWAYS}}', extractedPathways.map((p: any) => p.name).join(', ') || 'None identified')
-      .replace('{{MECHANISMS}}', extractedMechanisms.map((m: any) => m.name).join(', ') || 'None identified')
-      .replace('{{EFFECTS}}', extractedEffects.map((e: any) => e.name).join(', ') || 'None identified')
-      .replace('{{CONDITIONS}}', extractedConditions.map((c: any) => c.name).join(', ') || 'None identified')
-      .replace('{{FULL_TEXT}}', (study.full_text_content || '').substring(0, 8000) || 'Not available');
-
-    // Call Lovable AI with Gemini 3 Pro Preview
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
-    
-    console.log(`Generating hierarchical triplets for study: ${studyId}`);
-    
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const phase1Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
+        model: 'google/gemini-2.5-pro',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        response_format: { type: "json_object" }
+          { role: 'system', content: phase1SystemPrompt },
+          { role: 'user', content: phase1UserPrompt }
+        ]
+        // NO response_format - we want free text
       }),
     });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
+    if (!phase1Response.ok) {
+      if (phase1Response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (aiResponse.status === 402) {
+      if (phase1Response.status === 402) {
         return new Response(
           JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      const errorText = await aiResponse.text();
-      console.error('Lovable AI error:', aiResponse.status, errorText);
-      throw new Error(`Lovable AI request failed: ${aiResponse.status}`);
+      const errorText = await phase1Response.text();
+      console.error('Phase 1 AI error:', phase1Response.status, errorText);
+      throw new Error(`Phase 1 AI request failed: ${phase1Response.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    const tripletContent = aiData.choices[0].message.content;
+    const phase1Data = await phase1Response.json();
+    const freeDiscoveryText = phase1Data.choices[0].message.content;
+    
+    console.log(`✅ Phase 1 complete. Discovery length: ${freeDiscoveryText.length} chars`);
+    console.log(`📝 Discovery preview: ${freeDiscoveryText.substring(0, 500)}...`);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PHASE 2: STRUCTURING - Convert free discovery into structured triplets
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    console.log(`🔄 PHASE 2: Structuring discovered knowledge into triplets`);
+
+    const phase2SystemPrompt = `You are a knowledge graph expert. Convert the biological analysis into structured triplets for a VetGraphRAG database.
+
+## ENTITY TYPES (use exactly these)
+- Layer 0 (Compounds): nutraceutical, drug, chemical_compound
+- Layer 1 (Targets): pathway, receptor, enzyme, gene_protein
+- Layer 2 (Mechanisms): mechanism, signaling_cascade
+- Layer 3 (Effects): biological_effect, side_effect
+- Layer 4 (Outcomes): condition, disease, clinical_outcome
+
+## RELATIONSHIP TYPES (use exactly these predicates)
+Direct Actions: INHIBITS, ACTIVATES, MODULATES, BINDS_TO, BLOCKS, UPREGULATES, DOWNREGULATES
+Cascade: TRIGGERS, PARTICIPATES_IN, REGULATES, PRODUCES, LEADS_TO, CAUSES
+Therapeutic: TREATS, PREVENTS, SUPPORTS, AMELIORATES, MANAGES
+Adverse: WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT, AGGRAVATES
+Interactions: SYNERGIZES_WITH, ANTAGONIZES, ENHANCES_BIOAVAILABILITY, REDUCES_BIOAVAILABILITY, REQUIRES, POTENTIATES
+Context: PREDISPOSED_IN, COMMON_IN, CITED_IN, STUDIED_IN
+
+## CRITICAL RULES
+1. For each pathway chain (A → B → C → D), create INDIVIDUAL triplets for each step:
+   - A → B (one triplet)
+   - B → C (one triplet)
+   - C → D (one triplet)
+2. Include quantitative properties when available (efficacy_score 0-1, intensity 0-1, confidence 0-1)
+3. Include species_context array (e.g., ["canine"])
+4. Include dose_range if mentioned: {"min": X, "max": Y, "unit": "mg/kg"}
+5. Include evidence_level: "high", "moderate", "low", or "very_low"
+6. Include IC50, EC50, Ki values in properties if mentioned
+
+## OUTPUT FORMAT (JSON)
+{
+  "triplets": [
+    {
+      "subject_type": "nutraceutical",
+      "subject_name": "Astaxanthin",
+      "predicate": "INHIBITS",
+      "object_type": "pathway",
+      "object_name": "NF-κB signaling",
+      "properties": {
+        "intensity": 0.8,
+        "confidence": 0.9,
+        "evidence_level": "high",
+        "species_context": ["canine"],
+        "dose_range": {"min": 10, "max": 20, "unit": "mg/kg/day"},
+        "ic50": "5 µM"
+      },
+      "mechanism_path": [
+        {"from": "Astaxanthin", "relation": "INHIBITS", "to": "NF-κB signaling"},
+        {"from": "NF-κB signaling", "relation": "REDUCES", "to": "TNF-α production"}
+      ]
+    }
+  ],
+  "pathway_chains": [
+    "Astaxanthin → inhibits IKK-β → prevents IκB phosphorylation → blocks NF-κB nuclear translocation → reduces TNF-α → decreases inflammation"
+  ],
+  "synergies": [],
+  "contraindications": []
+}`;
+
+    const phase2UserPrompt = `Convert this biological analysis into structured triplets:
+
+## ORIGINAL STUDY
+Title: ${study.title}
+
+## DISCOVERED BIOLOGICAL KNOWLEDGE
+${freeDiscoveryText}
+
+---
+
+Generate comprehensive triplets covering:
+1. ALL signaling pathway steps (break chains into individual triplets)
+2. ALL molecular target interactions
+3. ALL therapeutic relationships with efficacy scores
+4. ALL adverse effects and contraindications
+5. ALL compound synergies/interactions
+
+IMPORTANT: Include the full pathway_chains array showing the complete chains discovered.`;
+
+    const phase2Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: phase2SystemPrompt },
+          { role: 'user', content: phase2UserPrompt }
+        ],
+        response_format: { type: "json_object" }
+      }),
+    });
+
+    if (!phase2Response.ok) {
+      if (phase2Response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const errorText = await phase2Response.text();
+      console.error('Phase 2 AI error:', phase2Response.status, errorText);
+      throw new Error(`Phase 2 AI request failed: ${phase2Response.status}`);
+    }
+
+    const phase2Data = await phase2Response.json();
+    const tripletContent = phase2Data.choices[0].message.content;
     
     // Parse AI response
-    let parsedResponse: any = { triplets: [], synergies: [], contraindications: [] };
+    let parsedResponse: any = { triplets: [], pathway_chains: [], synergies: [], contraindications: [] };
     try {
       parsedResponse = JSON.parse(tripletContent);
     } catch (e) {
-      console.error('Failed to parse AI response:', tripletContent);
-      throw new Error('Invalid AI response format');
+      console.error('Failed to parse Phase 2 response:', tripletContent);
+      throw new Error('Invalid AI response format in Phase 2');
     }
 
     const triplets = Array.isArray(parsedResponse.triplets) ? parsedResponse.triplets : [];
+    const pathwayChains = Array.isArray(parsedResponse.pathway_chains) ? parsedResponse.pathway_chains : [];
     const synergies = Array.isArray(parsedResponse.synergies) ? parsedResponse.synergies : [];
 
-    // Process and enrich triplets with KG matching
+    console.log(`✅ Phase 2 complete. Generated ${triplets.length} triplets`);
+    console.log(`🔗 Pathway chains discovered: ${pathwayChains.length}`);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ENRICHMENT: Match entities to knowledge graph and calculate confidence
+    // ═══════════════════════════════════════════════════════════════════════════
+
     const tripletsWithScores = await Promise.all(triplets.map(async (t: any) => {
       let subjectMatchScore = 0;
       let objectMatchScore = 0;
@@ -479,9 +500,8 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
         object_name: t.object_name,
         object_id: objectId,
         object_layer: objectLayer,
-        // New hierarchical fields
+        // Hierarchical fields
         intensity: props.intensity || null,
-        // direction must be one of: NULL, 'improves', 'worsens', 'neutral', 'bidirectional'
         direction: mapDirection(props.direction, predicate),
         evidence_level: props.evidence_level || null,
         dose_dependent: props.dose_dependent || false,
@@ -518,11 +538,11 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
       throw insertError;
     }
 
-    // Also create hierarchical_edges for high-confidence triplets
+    // Create hierarchical_edges for high-confidence triplets
     const highConfidenceTriplets = tripletsWithScores.filter(t => t.extraction_confidence >= 0.7);
     if (highConfidenceTriplets.length > 0) {
       const hierarchicalEdges = highConfidenceTriplets.map(t => ({
-        source_id: t.subject_id || t.study_id, // Use study_id as fallback
+        source_id: t.subject_id || t.study_id,
         source_type: t.subject_type,
         source_layer: t.subject_layer,
         target_id: t.object_id || t.study_id,
@@ -535,7 +555,7 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
         dose_range: t.dose_range,
         species_validated: t.species_context,
         study_ids: [studyId],
-        triplet_id: null, // Will be updated after insert
+        triplet_id: null,
         curated: t.auto_approved
       }));
 
@@ -548,9 +568,27 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
       }
     }
 
-    console.log(`Generated ${insertedTriplets?.length || 0} hierarchical triplets from study ${studyId}`);
-    console.log(`Auto-approved: ${insertedTriplets?.filter((t: any) => t.auto_approved).length || 0}`);
-    console.log(`Synergies found: ${synergies.length}`);
+    // Store the free discovery text for reference
+    const { error: updateError } = await supabase
+      .from('processed_studies')
+      .update({
+        analysis_data: {
+          ...(study.analysis_data || {}),
+          phase1_discovery: freeDiscoveryText,
+          pathway_chains: pathwayChains,
+          extraction_timestamp: new Date().toISOString()
+        }
+      })
+      .eq('id', studyId);
+
+    if (updateError) {
+      console.warn('Warning: Could not store discovery text:', updateError);
+    }
+
+    console.log(`🎉 TWO-PHASE EXTRACTION COMPLETE for study ${studyId}`);
+    console.log(`📊 Generated ${insertedTriplets?.length || 0} triplets`);
+    console.log(`✅ Auto-approved: ${insertedTriplets?.filter((t: any) => t.auto_approved).length || 0}`);
+    console.log(`🔗 Pathway chains: ${pathwayChains.length}`);
 
     return new Response(
       JSON.stringify({
@@ -559,8 +597,10 @@ Generate comprehensive triplets covering ALL relationships found in the study.`;
         triplets: insertedTriplets,
         count: insertedTriplets?.length || 0,
         autoApproved: insertedTriplets?.filter((t: any) => t.auto_approved).length || 0,
+        pathwayChainsDiscovered: pathwayChains,
         synergiesExtracted: synergies.length,
-        hierarchicalEdgesCreated: highConfidenceTriplets.length
+        hierarchicalEdgesCreated: highConfidenceTriplets.length,
+        phase1DiscoveryLength: freeDiscoveryText.length
       }),
       {
         status: 200,
