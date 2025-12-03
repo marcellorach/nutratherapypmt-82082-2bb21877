@@ -310,6 +310,64 @@ Generate comprehensive triplets covering:
 
 IMPORTANT: Include the full pathway_chains array showing the complete chains discovered.`;
 
+    // Define tool for structured triplet extraction (recommended approach for Gemini 3)
+    const extractTripletsToolDef = {
+      type: "function",
+      function: {
+        name: "extract_triplets",
+        description: "Extract structured biological triplets from the analysis",
+        parameters: {
+          type: "object",
+          properties: {
+            triplets: {
+              type: "array",
+              description: "Array of biological relationship triplets",
+              items: {
+                type: "object",
+                properties: {
+                  subject_type: { type: "string", description: "Entity type of subject" },
+                  subject_name: { type: "string", description: "Name of subject entity" },
+                  predicate: { type: "string", description: "Relationship type" },
+                  object_type: { type: "string", description: "Entity type of object" },
+                  object_name: { type: "string", description: "Name of object entity" },
+                  properties: {
+                    type: "object",
+                    properties: {
+                      intensity: { type: "number" },
+                      confidence: { type: "number" },
+                      evidence_level: { type: "string" },
+                      species_context: { type: "array", items: { type: "string" } },
+                      dose_range: { type: "object" },
+                      ic50: { type: "string" },
+                      ec50: { type: "string" }
+                    }
+                  },
+                  mechanism_path: { type: "array", items: { type: "object" } }
+                },
+                required: ["subject_type", "subject_name", "predicate", "object_type", "object_name"]
+              }
+            },
+            pathway_chains: {
+              type: "array",
+              description: "Complete pathway chains in A → B → C format",
+              items: { type: "string" }
+            },
+            synergies: {
+              type: "array",
+              description: "Compound synergies discovered",
+              items: { type: "object" }
+            },
+            contraindications: {
+              type: "array",
+              description: "Contraindications discovered",
+              items: { type: "object" }
+            }
+          },
+          required: ["triplets", "pathway_chains"]
+        }
+      }
+    };
+
     const phase2Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -322,7 +380,8 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
           { role: 'system', content: phase2SystemPrompt },
           { role: 'user', content: phase2UserPrompt }
         ],
-        response_format: { type: "json_object" }
+        tools: [extractTripletsToolDef],
+        tool_choice: { type: "function", function: { name: "extract_triplets" } }
       }),
     });
 
@@ -333,20 +392,43 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      if (phase2Response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       const errorText = await phase2Response.text();
       console.error('Phase 2 AI error:', phase2Response.status, errorText);
       throw new Error(`Phase 2 AI request failed: ${phase2Response.status}`);
     }
 
     const phase2Data = await phase2Response.json();
-    const tripletContent = phase2Data.choices[0].message.content;
+    console.log('Phase 2 raw response:', JSON.stringify(phase2Data, null, 2).substring(0, 1000));
     
-    // Parse AI response
+    // Parse AI response from tool call
     let parsedResponse: any = { triplets: [], pathway_chains: [], synergies: [], contraindications: [] };
     try {
-      parsedResponse = JSON.parse(tripletContent);
+      const toolCalls = phase2Data.choices?.[0]?.message?.tool_calls;
+      if (toolCalls && toolCalls.length > 0) {
+        // Tool calling response
+        const toolCall = toolCalls[0];
+        parsedResponse = JSON.parse(toolCall.function.arguments);
+        console.log('✅ Parsed from tool call');
+      } else if (phase2Data.choices?.[0]?.message?.content) {
+        // Fallback: try to parse from content (might be JSON or markdown-wrapped JSON)
+        let content = phase2Data.choices[0].message.content;
+        // Remove markdown code blocks if present
+        content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        parsedResponse = JSON.parse(content);
+        console.log('✅ Parsed from content');
+      } else {
+        console.error('Unexpected Phase 2 response structure:', JSON.stringify(phase2Data, null, 2));
+        throw new Error('No valid response from AI');
+      }
     } catch (e) {
-      console.error('Failed to parse Phase 2 response:', tripletContent);
+      console.error('Failed to parse Phase 2 response:', e);
+      console.error('Raw phase2Data:', JSON.stringify(phase2Data, null, 2));
       throw new Error('Invalid AI response format in Phase 2');
     }
 
