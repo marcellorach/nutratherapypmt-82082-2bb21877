@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, MessageCircle, BarChart3 } from "lucide-react";
+import { ArrowRight, MessageCircle, BarChart3, Bug } from "lucide-react";
 import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
 import VisaoGeralTab from '../estudos/detalhes/tabs/VisaoGeralTab';
 import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
+import PipelineDebugTab from '../estudos/detalhes/tabs/PipelineDebugTab';
 import DocumentChatInterface from '../estudos/chat/DocumentChatInterface';
 import EnhancedStudyVisualization from '../estudos/visualization/EnhancedStudyVisualization';
 
@@ -44,7 +45,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-2">
             {estudo.title}
@@ -67,7 +68,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-6">
+          <TabsList className="grid grid-cols-7">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="analysis">Análise IA</TabsTrigger>
             <TabsTrigger value="conditions">Condições</TabsTrigger>
@@ -78,6 +79,10 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
             <TabsTrigger value="chat">
               <MessageCircle className="h-4 w-4 mr-1" />
               Chat
+            </TabsTrigger>
+            <TabsTrigger value="debug">
+              <Bug className="h-4 w-4 mr-1" />
+              Debug
             </TabsTrigger>
             <TabsTrigger value="approval">Aprovação</TabsTrigger>
           </TabsList>
@@ -106,6 +111,10 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
               studyId={estudo.id}
               studyTitle={estudo.title}
             />
+          </TabsContent>
+
+          <TabsContent value="debug">
+            <PipelineDebugTab estudo={estudo} />
           </TabsContent>
 
           <TabsContent value="approval">
