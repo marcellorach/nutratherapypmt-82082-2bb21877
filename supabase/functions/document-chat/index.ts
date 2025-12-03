@@ -444,7 +444,7 @@ Return format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-3-pro-preview',
         messages,
         temperature: 0.7,
         max_tokens: 1500,
