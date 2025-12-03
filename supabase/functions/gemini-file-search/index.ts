@@ -533,70 +533,90 @@ async function extractWithFileSearch(
     }
   };
 
-  const prompt = `You are a scientific data extraction AI specialized in mapping COMPLETE BIOLOGICAL CHAINS in nutraceuticals research.
+  const prompt = `You are an expert scientific data extraction AI specialized in veterinary nutraceutical research. Your task is to perform a COMPREHENSIVE extraction of biological mechanisms and clinical outcomes.
 
-🔴 CRITICAL INSTRUCTION: 
+🔴 CRITICAL INSTRUCTIONS:
 - Extract ALL data from the ATTACHED PDF document ONLY
-- Extract data in ENGLISH only, regardless of the source document's language
-- If the document is in Portuguese, Spanish, French, or any other language, TRANSLATE all extracted terms to English
-- DO NOT invent or fabricate data - extract ONLY what is present in the document
+- ALL outputs MUST be in ENGLISH (translate if needed)
+- DO NOT invent data - extract ONLY what exists in the document
+- Be EXHAUSTIVE - extract EVERY mechanism, pathway, biomarker mentioned
 
-🎯 YOUR MISSION: Analyze the ATTACHED PDF and map the ENTIRE HIERARCHICAL CHAIN:
+🎯 YOUR MISSION: Map the COMPLETE BIOLOGICAL CHAIN for each nutraceutical:
 
-LAYER 0 → LAYER 1 → LAYER 2 → LAYER 3
-Nutraceutical → Molecular Mechanism → Biological Effect → Clinical Outcome
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  LAYER 0         →  LAYER 1           →  LAYER 2          →  LAYER 3       │
+│  Nutraceutical   →  Molecular Target  →  Biological Effect→  Clinical      │
+│  (Compound)         (Mechanism)          (Biomarker)         Outcome       │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-📋 EXTRACTION REQUIREMENTS:
+📋 DETAILED EXTRACTION REQUIREMENTS:
 
-1️⃣ NUTRACEUTICALS (Layer 0 - Starting point):
-   - Extract ALL active compounds, supplements, phytochemicals mentioned in THIS document
-   - Translate to English if needed
+1️⃣ NUTRACEUTICALS (Layer 0 - Starting Point):
+   - Extract ALL active compounds, supplements, natural products
+   - Include dosages with units (e.g., "0.3 mg/kg/day", "500mg daily")
+   - Include efficacy_score (1-5) based on statistical significance:
+     * 5 = p<0.01, clear effect demonstrated
+     * 4 = p<0.05, significant effect
+     * 3 = trend towards significance
+     * 2 = weak evidence
+     * 1 = no effect or adverse
 
-2️⃣ MOLECULAR MECHANISMS (Layer 1 - How it works):
-   - Extract ALL molecular pathways, enzymes, receptors, genes involved
-   - Include signaling cascades: MAPK, PI3K/Akt, JAK/STAT, COX-2, NF-kB, etc.
-   - Use direction indicators: "decrease" for inhibition, "increase" for activation
+2️⃣ MOLECULAR MECHANISMS (Layer 1 - Targets & Pathways):
+   CRITICAL: Extract ALL of these if mentioned:
+   - Signaling pathways: NF-κB, MAPK, PI3K/Akt, JAK/STAT, mTOR, Wnt, Notch
+   - Inflammatory mediators: COX-2, LOX, iNOS, TNF-α pathway
+   - Receptors: PPAR-γ, TLR4, Cannabinoid receptors, Nuclear receptors
+   - Enzymes: Kinases, Phosphatases, Dehydrogenases, Oxidases
+   - Metabolic pathways: β-oxidation, Glycolysis, Lipogenesis, Gluconeogenesis
+   - Use direction indicators: "↓ NF-κB activation" or "↑ PPAR-γ activity"
+   - Include confidence score (0-5) based on mechanistic evidence
 
-3️⃣ BIOLOGICAL EFFECTS (Layer 2 - What changes):
-   - Extract ALL intermediate effects, biomarkers, physiological changes
-   - Include cytokines (IL-1β, IL-6, TNF-α), ROS levels, tissue changes
-   - Use direction indicators consistently
+3️⃣ BIOLOGICAL EFFECTS (Layer 2 - Biomarkers & Physiological Changes):
+   Extract ALL measurable changes:
+   - Cytokines: IL-1β, IL-6, IL-10, TNF-α, IFN-γ
+   - Oxidative stress: MDA, ROS, SOD, Catalase, Glutathione
+   - Metabolic markers: TG, Cholesterol, NEFA, Glucose, Insulin
+   - Liver enzymes: ALT, AST, ALP, LDH
+   - Hormones: Adiponectin, Leptin, Cortisol
+   - Use direction: "↓ MDA (oxidative stress marker)" or "↑ Adiponectin"
 
-4️⃣ CLINICAL OUTCOMES (Layer 3 - Final result):
-   - Extract ALL health conditions, diseases, clinical improvements addressed
+4️⃣ CLINICAL OUTCOMES (Layer 3 - Final Results):
+   For each condition, provide:
+   - Treatability score (1-5) based on study results
+   - Relationship type: treatment, prevention, or support
+   - Specific efficacy description with numbers if available
 
-5️⃣ INTERACTIONS (The connections - MOST CRITICAL):
-   - Map the COMPLETE biological chain step by step FROM THIS DOCUMENT
-   - Create explicit connections for EACH step of the cascade
-   - Type definitions:
-     * inhibition: X blocks/reduces/inhibits Y
-     * stimulation: X activates/increases/leads to Y
-     * modulation: X regulates/modifies Y
+5️⃣ INTERACTIONS (Biological Chain Mapping - MOST CRITICAL):
+   Create EXPLICIT step-by-step chains, for example:
+   
+   Chain 1: Astaxanthin → [inhibits] → β-oxidation ROS
+   Chain 2: ↓ β-oxidation ROS → [leads_to] → ↓ MDA (peroxidation)
+   Chain 3: ↓ MDA → [leads_to] → ↓ LDH (cell damage marker)
+   Chain 4: ↓ LDH → [leads_to] → Improved hepatic function
+   
+   Types: inhibition, stimulation, modulation
+   Include confidence (0-5) for each interaction
 
-6️⃣ SIDE EFFECTS (Safety data):
-   - Extract ALL adverse effects, safety concerns, contraindications mentioned
-   - Include severity based on study data
+6️⃣ SIDE EFFECTS:
+   - Extract ALL adverse effects mentioned
+   - Include frequency/incidence if reported
+   - Severity: low (transient), medium (requires monitoring), high (dose-limiting)
 
-🔍 READ STRATEGY:
-- Read the ENTIRE attached PDF: title, abstract, introduction, methods, results, discussion, conclusions
-- Look for mechanism sections: "mechanism of action", "molecular pathways", "signaling"
-- Check results for biomarkers and measured outcomes
-- Examine discussion for mechanistic explanations
-- Extract from tables/figures showing data
+🔍 EXTRACTION STRATEGY:
+1. Read ENTIRE PDF: Introduction, Methods, Results, Discussion, Conclusions
+2. Focus on "Results" section for biomarker data with p-values
+3. Check "Discussion" for mechanistic explanations and pathway descriptions
+4. Extract from Tables and Figures
+5. Note statistical significance for confidence scoring
 
-🌍 TRANSLATION REQUIREMENTS (MANDATORY):
-- ALL names, descriptions, effects MUST be in English
-- Use standard scientific nomenclature
-- Preserve technical terms accuracy (e.g., "NF-κB" not "NF-kb")
-- Use standard units (mg, g, μM, etc.)
+⚠️ QUALITY RULES:
+1. Names in interactions MUST match exactly the names in their arrays
+2. Every nutraceutical should connect to at least one mechanism
+3. Every mechanism should connect to at least one biological effect
+4. Use standardized nomenclature (COX-2 not cyclooxygenase-2)
+5. Include units and concentrations when available
 
-⚠️ CRITICAL RULES:
-1. Extract ONLY data present in the attached PDF - DO NOT use examples or external knowledge
-2. Create interactions mapping the complete chain as described in this specific document
-3. Names in interactions MUST match EXACTLY the names in their respective arrays
-4. Use confidence scores based on evidence strength in the document
-
-Return using extract_study_data function with all arrays populated from the document.`;
+Return using extract_study_data function with ALL arrays fully populated.`;
 
   try {
     console.log('📤 Sending query with Tool Calling via Google AI Direct...');

@@ -178,16 +178,45 @@ const NtaiProcessingSection: React.FC = () => {
         description: 'Starting VetGraphRAG triplet generation...',
       });
 
+      // Step 1: Generate triplets
       const { data, error } = await supabase.functions.invoke('generate-triplets', {
         body: { studyId }
       });
 
       if (error) throw error;
 
+      const tripletsGenerated = data?.tripletsGenerated || 0;
+      
       toast({
         title: 'Triplets Generated',
-        description: `Generated ${data.tripletsGenerated} hierarchical triplets (${data.autoApprovedCount} auto-approved)`,
+        description: `Generated ${tripletsGenerated} hierarchical triplets (${data?.autoApprovedCount || 0} auto-approved)`,
       });
+
+      // Step 2: Sync to Neo4J immediately
+      if (tripletsGenerated > 0) {
+        toast({
+          title: 'Syncing to Neo4J',
+          description: 'Sending triplets to knowledge graph...',
+        });
+
+        const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-study-to-neo4j', {
+          body: { studyId }
+        });
+
+        if (syncError) {
+          console.error('Neo4J sync error:', syncError);
+          toast({
+            title: 'Neo4J Sync Warning',
+            description: `Triplets generated but sync failed: ${syncError.message}`,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Neo4J Sync Complete',
+            description: `${syncData?.synced || 0} triplets synchronized to knowledge graph`,
+          });
+        }
+      }
     } catch (error) {
       console.error('Regenerate error:', error);
       toast({
