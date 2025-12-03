@@ -44,6 +44,67 @@ const VALID_RELATIONSHIPS = [
   'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'
 ];
 
+// Valid entity types from database constraint
+const VALID_ENTITY_TYPES = [
+  'nutraceutical', 'drug', 'chemical_compound', 'pathway', 'receptor', 'enzyme',
+  'gene_protein', 'mechanism', 'signaling_cascade', 'biological_effect', 'side_effect',
+  'clinical_outcome', 'condition', 'disease', 'breed', 'species', 'age_group', 'study'
+];
+
+// Map entity type to valid constraint values
+function mapEntityType(entityType: string | null | undefined): string {
+  if (!entityType) return 'mechanism'; // Default fallback
+  
+  const normalized = entityType.toLowerCase().replace(/[\s-]+/g, '_');
+  
+  // Direct match
+  if (VALID_ENTITY_TYPES.includes(normalized)) {
+    return normalized;
+  }
+  
+  // Common mappings
+  const mappings: Record<string, string> = {
+    'compound': 'chemical_compound',
+    'chemical': 'chemical_compound',
+    'supplement': 'nutraceutical',
+    'nutrient': 'nutraceutical',
+    'vitamin': 'nutraceutical',
+    'mineral': 'nutraceutical',
+    'antioxidant': 'nutraceutical',
+    'protein': 'gene_protein',
+    'gene': 'gene_protein',
+    'target': 'pathway',
+    'molecular_target': 'pathway',
+    'signaling_pathway': 'pathway',
+    'cascade': 'signaling_cascade',
+    'signal': 'signaling_cascade',
+    'effect': 'biological_effect',
+    'outcome': 'clinical_outcome',
+    'result': 'clinical_outcome',
+    'health_condition': 'condition',
+    'health_outcome': 'clinical_outcome',
+    'therapeutic_outcome': 'clinical_outcome',
+    'adverse_effect': 'side_effect',
+    'adverse_event': 'side_effect',
+    'toxicity': 'side_effect',
+    'action': 'mechanism',
+    'process': 'mechanism',
+    'biological_process': 'mechanism',
+    'cellular_process': 'mechanism',
+    'metabolic_process': 'mechanism',
+  };
+  
+  for (const [key, value] of Object.entries(mappings)) {
+    if (normalized.includes(key) || entityType.toLowerCase().includes(key.replace(/_/g, ' '))) {
+      return value;
+    }
+  }
+  
+  // Default to mechanism as safest fallback
+  console.log(`Unknown entity type "${entityType}", defaulting to "mechanism"`);
+  return 'mechanism';
+}
+
 // Valid evidence levels from database constraint
 const VALID_EVIDENCE_LEVELS = ['meta_analysis', 'rct', 'cohort', 'case_control', 'case_report', 'in_vitro', 'expert_opinion'];
 
@@ -78,7 +139,7 @@ function mapEvidenceLevel(evidenceLevel: string | null | undefined): string | nu
     'case series': 'case_report',
     'case_study': 'case_report',
     'case study': 'case_report',
-    'in_vivo': 'in_vitro', // Closest match for lab studies
+    'in_vivo': 'in_vitro',
     'laboratory': 'in_vitro',
     'preclinical': 'in_vitro',
     'animal_study': 'in_vitro',
@@ -95,7 +156,6 @@ function mapEvidenceLevel(evidenceLevel: string | null | undefined): string | nu
     }
   }
   
-  // Default to null if no match
   return null;
 }
 
@@ -626,17 +686,23 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
       // Determine auto-approval
       const autoApproved = extractionConfidence >= 0.85 && kgMatchScore >= 0.5;
 
+      // Apply entity type mapping to ensure valid values
+      const validatedSubjectType = mapEntityType(subjectType);
+      const validatedObjectType = mapEntityType(objectType);
+      const validatedSubjectLayer = ENTITY_LAYERS[validatedSubjectType] || 'layer_2_mechanism';
+      const validatedObjectLayer = ENTITY_LAYERS[validatedObjectType] || 'layer_2_mechanism';
+
       return {
         study_id: studyId,
-        subject_type: subjectType,
+        subject_type: validatedSubjectType,
         subject_name: t.subject_name,
         subject_id: subjectId,
-        subject_layer: subjectLayer,
+        subject_layer: validatedSubjectLayer,
         predicate: predicate,
-        object_type: objectType,
+        object_type: validatedObjectType,
         object_name: t.object_name,
         object_id: objectId,
-        object_layer: objectLayer,
+        object_layer: validatedObjectLayer,
         // Hierarchical fields
         intensity: props.intensity || null,
         direction: mapDirection(props.direction, predicate),
