@@ -76,12 +76,16 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
     });
 
     interactions.forEach((interaction: any, idx: number) => {
+      if (!interaction?.interaction) return;
+      
       const nutraIdx = nutraceuticals.findIndex((n: any) => 
-        n.name === interaction.nutraceutical
+        (n?.name || n) === interaction.nutraceutical
       );
-      const condIdx = conditions.findIndex((c: any) =>
-        interaction.interaction.toLowerCase().includes(c.name.toLowerCase())
-      );
+      const condName = interaction.interaction.toLowerCase();
+      const condIdx = conditions.findIndex((c: any) => {
+        const name = c?.name || (typeof c === 'string' ? c : '');
+        return name && condName.includes(name.toLowerCase());
+      });
       
       if (nutraIdx >= 0 && condIdx >= 0) {
         links.push({
