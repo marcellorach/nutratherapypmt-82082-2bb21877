@@ -366,7 +366,7 @@ async function extractWithFileSearch(
             properties: {
               name: {
                 type: 'string',
-                description: 'Scientific or common name of the nutraceutical IN ENGLISH (e.g., Curcumin, not Curcumina; Turmeric, not Cúrcuma)'
+                description: 'Scientific or common name of the nutraceutical IN ENGLISH. ⚠️ ONLY extract compounds explicitly mentioned in the PDF document - never use format examples as actual data'
               },
               dosage: {
                 type: 'string',
@@ -790,34 +790,34 @@ async function analyzeWithGemini(
   console.log('📄 Arquivo:', fileName);
   console.log('🔗 URI:', fileUri);
   
-  const systemPrompt = `Você é um especialista em extração de dados de estudos científicos sobre nutracêuticos e saúde.
+  const systemPrompt = `You are an expert in extracting data from scientific studies about nutraceuticals and health.
 
-IMPORTANTE: Analise TODO o conteúdo do PDF e extraia TODOS os dados encontrados.
+⚠️ CRITICAL ANTI-CONTAMINATION RULES:
+1. ONLY extract compounds and conditions that are EXPLICITLY MENTIONED in THIS specific PDF document
+2. NEVER use format examples as actual data to extract
+3. If a compound is not mentioned in the document, DO NOT include it
+4. The examples shown below are FORMAT templates only - they are NOT data to be extracted
 
-TAREFA:
-1. **Metadados básicos**: Extraia título completo, todos os autores listados, ano de publicação, nome do periódico/journal, abstract/resumo, DOI (se disponível)
+TASK:
+1. **Basic Metadata**: Extract complete title, all listed authors, publication year, journal name, abstract, DOI (if available)
 
-2. **Nutracêuticos/Compostos**: Liste TODAS as substâncias, compostos, suplementos ou ingredientes ativos mencionados no estudo (ex: resveratrol, curcumina, ômega-3, vitamina D, etc.). Para cada um, extraia:
-   - Nome científico ou comum
-   - Dosagem/quantidade utilizada (com unidades)
-   - Efeitos/resultados observados no estudo
+2. **Nutraceuticals/Compounds**: List ONLY substances, compounds, supplements or active ingredients EXPLICITLY MENTIONED in this study. For each one, extract:
+   - Scientific or common name (in English)
+   - Dosage/amount used (with units)
+   - Effects/results observed in the study
 
-3. **Condições de Saúde**: Liste TODAS as doenças, condições médicas ou problemas de saúde mencionados (ex: diabetes, obesidade, inflamação, doenças cardiovasculares, etc.). Para cada condição:
-   - Nome da condição
-   - Tipo de relação: "treatment" (tratamento ativo), "prevention" (prevenção), ou "support" (suporte/manutenção)
-   - Descrição da eficácia observada
+3. **Health Conditions**: List ONLY diseases, medical conditions or health problems EXPLICITLY MENTIONED. For each condition:
+   - Condition name (in English)
+   - Relationship type: "treatment", "prevention", or "support"
+   - Observed efficacy description
 
-INSTRUÇÕES CRÍTICAS:
-- Leia o PDF COMPLETO, não apenas o abstract
-- Se o estudo menciona múltiplos compostos, liste TODOS
-- Se o estudo aborda várias condições de saúde, liste TODAS
-- Seja DETALHADO nos arrays de nutracêuticos e condições
-- NÃO retorne arrays vazios se houver dados no PDF
-- Se não encontrar um campo específico, use string vazia ("") ou null
+CRITICAL INSTRUCTIONS:
+- Read the COMPLETE PDF, not just the abstract
+- ONLY include compounds and conditions that appear in the document text
+- DO NOT invent or assume data that is not explicitly written
+- If a field is not found, use empty string ("") or null
+- NEVER include example compounds (from these instructions) in your response`;
 
-EXEMPLO DE RESPOSTA ESPERADA:
-- Se o PDF fala sobre "resveratrol para longevidade", retorne pelo menos 1 nutracêutico e 1 condição
-- Se menciona "vitamina D, magnésio e zinco", retorne 3 nutracêuticos`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
