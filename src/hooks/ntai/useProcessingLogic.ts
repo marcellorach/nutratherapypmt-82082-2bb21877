@@ -267,13 +267,18 @@ export const useProcessingLogic = (
             body: { studyId: item.id }
           });
 
+          console.log('🔗 [DEBUG] generate-triplets full response:', JSON.stringify(tripletData, null, 2));
+          addLogEntry(`📤 [TRIPLETS] Raw response: ${JSON.stringify(tripletData)?.substring(0, 200)}...`);
+
           if (tripletError) {
             addLogEntry(`⚠️ [TRIPLETS] Warning: ${tripletError.message} (não crítico, continua processamento)`);
+            console.error('🔗 [DEBUG] tripletError:', tripletError);
           } else {
-            tripletsGenerated = tripletData?.tripletsGenerated || 0;
+            // Support both 'tripletsGenerated' (new) and 'count' (legacy) fields
+            tripletsGenerated = tripletData?.tripletsGenerated || tripletData?.count || 0;
             autoApproved = tripletData?.autoApproved || 0;
             addLogEntry(`✅ [TRIPLETS] ${tripletsGenerated} triplets gerados (${autoApproved} auto-aprovados)`);
-            console.log('🔗 VetGraphRAG triplets:', { tripletsGenerated, autoApproved });
+            console.log('🔗 VetGraphRAG triplets:', { tripletsGenerated, autoApproved, rawData: tripletData });
           }
         } catch (tripletErr: any) {
           addLogEntry(`⚠️ [TRIPLETS] Erro ao gerar triplets: ${tripletErr.message} (não crítico)`);
@@ -281,6 +286,9 @@ export const useProcessingLogic = (
         }
 
         // Sync ALL triplets to Neo4J for immediate visualization (regardless of curation status)
+        console.log(`🔄 [DEBUG] tripletsGenerated value before Neo4J sync: ${tripletsGenerated}`);
+        addLogEntry(`🔍 [DEBUG] tripletsGenerated = ${tripletsGenerated} (will sync if > 0)`);
+        
         if (tripletsGenerated > 0) {
           try {
             addLogEntry(`🔄 [NEO4J] Syncing ALL ${tripletsGenerated} triplets to Neo4J for visualization...`);
@@ -288,8 +296,12 @@ export const useProcessingLogic = (
               body: { studyId: item.id }
             });
 
+            console.log('🔄 [DEBUG] sync-study-to-neo4j full response:', JSON.stringify(syncData, null, 2));
+            addLogEntry(`📤 [NEO4J] Raw response: ${JSON.stringify(syncData)?.substring(0, 300)}`);
+
             if (syncError) {
               addLogEntry(`⚠️ [NEO4J] Sync warning: ${syncError.message}`);
+              console.error('🔄 [DEBUG] syncError:', syncError);
             } else {
               const syncedCount = syncData?.synced || 0;
               const byStatus = syncData?.byStatus || {};
@@ -301,6 +313,8 @@ export const useProcessingLogic = (
             addLogEntry(`⚠️ [NEO4J] Erro ao sincronizar: ${syncErr.message}`);
             console.error('Neo4J sync error:', syncErr);
           }
+        } else {
+          addLogEntry(`⚠️ [NEO4J] Skipping sync - no triplets generated (tripletsGenerated=${tripletsGenerated})`);
         }
 
         // STAGE 3: SAVING

@@ -793,13 +793,20 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
     console.log(`✅ Auto-approved: ${insertedTriplets?.filter((t: any) => t.auto_approved).length || 0}`);
     console.log(`🔗 Pathway chains: ${pathwayChains.length}`);
 
+    const tripletsGenerated = insertedTriplets?.length || 0;
+    const autoApprovedCount = insertedTriplets?.filter((t: any) => t.auto_approved).length || 0;
+
+    console.log(`📤 RESPONSE: tripletsGenerated=${tripletsGenerated}, autoApproved=${autoApprovedCount}`);
+
     return new Response(
       JSON.stringify({
         success: true,
         studyId,
         triplets: insertedTriplets,
-        count: insertedTriplets?.length || 0,
-        autoApproved: insertedTriplets?.filter((t: any) => t.auto_approved).length || 0,
+        // IMPORTANT: Frontend expects 'tripletsGenerated' - keep both for compatibility
+        tripletsGenerated: tripletsGenerated,
+        count: tripletsGenerated,
+        autoApproved: autoApprovedCount,
         pathwayChainsDiscovered: pathwayChains,
         synergiesExtracted: synergies.length,
         hierarchicalEdgesCreated: highConfidenceTriplets.length,
