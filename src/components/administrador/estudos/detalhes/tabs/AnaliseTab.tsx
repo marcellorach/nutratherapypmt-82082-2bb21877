@@ -1,49 +1,63 @@
 
 import React from 'react';
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, AlertCircle } from "lucide-react";
+import ExtractedDataVisualization from '../../visualization/ExtractedDataVisualization';
 
 interface AnaliseTabProps {
   estudo: any;
 }
 
 const AnaliseTab: React.FC<AnaliseTabProps> = ({ estudo }) => {
+  // Extract analysis_data from the study
+  const analysisData = estudo?.analysis_data;
+  const hasExtractedData = analysisData && (
+    analysisData.study_population ||
+    analysisData.structured_dosages?.length > 0 ||
+    analysisData.biomarkers?.length > 0 ||
+    analysisData.detailed_side_effects?.length > 0 ||
+    analysisData.contraindications?.length > 0 ||
+    analysisData.drug_interactions?.length > 0 ||
+    analysisData.synergies?.length > 0
+  );
+
   return (
     <div className="space-y-4">
-      <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md text-sm">
-        <p className="text-yellow-700 flex items-center">
-          <FlaskConical className="h-4 w-4 mr-2" />
-          A análise da IA está processando o conteúdo completo do estudo
-        </p>
-      </div>
-      
-      <div className="space-y-3">
-        <div>
-          <h4 className="text-sm font-medium">Principais Conclusões</h4>
-          <p className="text-sm text-gray-700">
-            O estudo demonstra eficácia significativa do nutracêutico para condições articulares
-            em cães de médio e grande porte. A dosagem recomendada mostrou resultados estatisticamente
-            significativos (p&lt;0.01) após 8 semanas de uso contínuo.
+      {!hasExtractedData ? (
+        <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md text-sm">
+          <p className="text-yellow-700 flex items-center">
+            <FlaskConical className="h-4 w-4 mr-2" />
+            A análise da IA está processando o conteúdo completo do estudo
           </p>
         </div>
-        
-        <div>
-          <h4 className="text-sm font-medium">Métricas de Avaliação</h4>
-          <div className="grid grid-cols-3 gap-2 mt-2">
-            <div className="bg-gray-50 p-2 rounded-md text-center">
-              <div className="text-lg font-semibold text-blue-700">4.2/5</div>
-              <div className="text-xs text-gray-500">Qualidade Metodológica</div>
-            </div>
-            <div className="bg-gray-50 p-2 rounded-md text-center">
-              <div className="text-lg font-semibold text-blue-700">3.8/5</div>
-              <div className="text-xs text-gray-500">Relevância Clínica</div>
-            </div>
-            <div className="bg-gray-50 p-2 rounded-md text-center">
-              <div className="text-lg font-semibold text-green-700">Alto</div>
-              <div className="text-xs text-gray-500">Nível de Evidência</div>
-            </div>
+      ) : (
+        <div className="bg-green-50 border border-green-100 p-3 rounded-md text-sm">
+          <p className="text-green-700 flex items-center">
+            <FlaskConical className="h-4 w-4 mr-2" />
+            Dados extraídos com sucesso pela IA
+          </p>
+        </div>
+      )}
+
+      {/* Visualization of extracted data */}
+      <ExtractedDataVisualization analysisData={analysisData} />
+
+      {/* Legacy metrics section - only show if no extracted data */}
+      {!hasExtractedData && (
+        <div className="space-y-3">
+          <div>
+            <h4 className="text-sm font-medium">Aguardando Extração</h4>
+            <p className="text-sm text-muted-foreground">
+              Processe o estudo para extrair automaticamente: população, dosagens, 
+              biomarcadores, efeitos adversos, contraindicações e interações.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <AlertCircle className="h-4 w-4" />
+            <span>Use o botão "Processar" no pipeline para iniciar a extração</span>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
