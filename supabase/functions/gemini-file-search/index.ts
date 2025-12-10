@@ -7,6 +7,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ✅ EXPANDED: Study population metadata for species/breed tracking
+interface StudyPopulation {
+  species: string; // canine, feline, equine, human, murine, etc.
+  breed?: string;
+  age_group?: string; // puppy, adult, senior
+  sample_size?: number;
+  weight_range?: { min: number; max: number; unit: string };
+  health_status?: string; // healthy, diseased, mixed
+}
+
+// ✅ EXPANDED: Structured dosage for precise tracking
+interface StructuredDosage {
+  compound: string;
+  amount: number;
+  unit: string; // mg, g, ml, mcg
+  frequency: string; // daily, twice daily, weekly
+  per_body_weight?: boolean; // true if dose is per kg
+  duration_days?: number;
+  route?: string; // oral, topical, injection
+}
+
+// ✅ EXPANDED: Biomarker measurements with statistical data
+interface BiomarkerMeasurement {
+  name: string;
+  baseline_value?: number;
+  final_value?: number;
+  change_percent?: number;
+  unit?: string;
+  p_value?: number;
+  significance: 'significant' | 'trending' | 'not_significant';
+}
+
 interface ExtractedStudyData {
   title: string;
   authors: string[];
@@ -14,12 +46,23 @@ interface ExtractedStudyData {
   journal?: string;
   abstract?: string;
   doi?: string;
-  full_text?: string; // ✅ NOVO: Texto completo do PDF para RAG
+  full_text?: string;
+  
+  // ✅ NEW: Study population metadata
+  study_population?: StudyPopulation;
+  
+  // ✅ NEW: Structured dosages array
+  structured_dosages?: StructuredDosage[];
+  
+  // ✅ NEW: Biomarker measurements
+  biomarkers?: BiomarkerMeasurement[];
+  
   nutraceuticals: Array<{
     name: string;
     dosage?: string;
     effects: string;
     efficacy_score?: number;
+    species_tested?: string[]; // ✅ NEW: Which species this was tested on
   }>;
   mechanisms: Array<{
     name: string;
@@ -39,6 +82,7 @@ interface ExtractedStudyData {
     efficacy_description?: string;
     treatability_score?: number;
     severity?: string;
+    species_specific?: string; // ✅ NEW: Canine Obesity vs Human Obesity
   }>;
   interactions: Array<{
     from: string;
@@ -322,7 +366,7 @@ async function extractWithFileSearch(
   const userPrompt = await getConfigValue(supabaseClient, 'prompt_extraction_stage1_user') || 
     'Analyze this scientific study and extract ALL nutraceuticals, conditions, mechanisms, and relationships.';
   
-  // Definir schema expandido para structured output
+  // Definir schema expandido para structured output - INCLUDES SPECIES, BREED, DOSAGES
   const extractionFunction = {
     name: 'extract_study_data',
     description: systemPrompt,
@@ -356,21 +400,136 @@ async function extractWithFileSearch(
         },
         full_text: {
           type: 'string',
-          description: 'COMPLETE full text content of the entire PDF document. Extract ALL text from all sections: Introduction, Methods, Results, Discussion, Conclusion, References, Tables, Figures captions. This is CRITICAL for RAG (Retrieval Augmented Generation) and must contain the complete document text, not just abstract or summary.'
+          description: 'COMPLETE full text content of the entire PDF document. Extract ALL text from all sections.'
         },
-        nutraceuticals: {
+        // ✅ NEW: Study population metadata
+        study_population: {
+          type: 'object',
+          description: 'CRITICAL: Extract the study population characteristics - species, breed, age, sample size',
+          properties: {
+            species: {
+              type: 'string',
+              description: 'Species studied: canine, feline, equine, human, murine, bovine, etc.'
+            },
+            breed: {
+              type: 'string',
+              description: 'Specific breed if mentioned (e.g., Labrador Retriever, Persian, Thoroughbred)'
+            },
+            age_group: {
+              type: 'string',
+              description: 'Age group: puppy, kitten, adult, senior, geriatric'
+            },
+            sample_size: {
+              type: 'integer',
+              description: 'Number of subjects in the study (n=X)'
+            },
+            weight_range_min: {
+              type: 'number',
+              description: 'Minimum weight in kg'
+            },
+            weight_range_max: {
+              type: 'number',
+              description: 'Maximum weight in kg'
+            },
+            health_status: {
+              type: 'string',
+              description: 'Health status: healthy, diseased, obese, diabetic, arthritic, etc.'
+            }
+          },
+          required: ['species']
+        },
+        // ✅ NEW: Structured dosages array
+        structured_dosages: {
           type: 'array',
-          description: 'List of ALL nutraceuticals, supplements or active compounds mentioned in the study (MUST be in English)',
+          description: 'CRITICAL: Extract ALL dosages with structured data - amount, unit, frequency, per kg, duration',
+          items: {
+            type: 'object',
+            properties: {
+              compound: {
+                type: 'string',
+                description: 'Name of the compound being dosed'
+              },
+              amount: {
+                type: 'number',
+                description: 'Numeric dose amount (e.g., 0.3, 500, 2.5)'
+              },
+              unit: {
+                type: 'string',
+                description: 'Dose unit: mg, g, ml, mcg, IU'
+              },
+              frequency: {
+                type: 'string',
+                description: 'How often: daily, twice daily, weekly, once'
+              },
+              per_body_weight: {
+                type: 'boolean',
+                description: 'True if dose is per kg body weight (e.g., 0.3 mg/kg/day)'
+              },
+              duration_days: {
+                type: 'integer',
+                description: 'Duration of treatment in days (e.g., 56 days = 8 weeks)'
+              },
+              route: {
+                type: 'string',
+                description: 'Administration route: oral, topical, injection, intravenous'
+              }
+            },
+            required: ['compound', 'amount', 'unit']
+          }
+        },
+        // ✅ NEW: Biomarker measurements with statistical data
+        biomarkers: {
+          type: 'array',
+          description: 'Extract ALL biomarker/outcome measurements with baseline, final values, and p-values',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
-                description: 'Scientific or common name of the nutraceutical IN ENGLISH. ⚠️ ONLY extract compounds explicitly mentioned in the PDF document - never use format examples as actual data'
+                description: 'Biomarker name: MDA, LDH, ALT, AST, TG, NEFA, IL-6, TNF-α, adiponectin'
+              },
+              baseline_value: {
+                type: 'number',
+                description: 'Baseline/control value before treatment'
+              },
+              final_value: {
+                type: 'number',
+                description: 'Final value after treatment'
+              },
+              change_percent: {
+                type: 'number',
+                description: 'Percent change from baseline (negative = decrease)'
+              },
+              unit: {
+                type: 'string',
+                description: 'Measurement unit (ng/ml, mmol/L, U/L, etc.)'
+              },
+              p_value: {
+                type: 'number',
+                description: 'Statistical p-value (e.g., 0.05, 0.01, 0.001)'
+              },
+              significance: {
+                type: 'string',
+                enum: ['significant', 'trending', 'not_significant'],
+                description: 'Statistical significance: significant (p<0.05), trending (0.05-0.1), not_significant'
+              }
+            },
+            required: ['name', 'significance']
+          }
+        },
+        nutraceuticals: {
+          type: 'array',
+          description: 'List of ALL nutraceuticals, supplements or active compounds mentioned (MUST be in English)',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Scientific or common name IN ENGLISH. ⚠️ ONLY extract from PDF'
               },
               dosage: {
                 type: 'string',
-                description: 'Dosage used with units (e.g., 500mg/day, 2g daily)'
+                description: 'Dosage used with units (e.g., 0.3 mg/kg/day, 500mg daily)'
               },
               effects: {
                 type: 'string',
@@ -378,7 +537,12 @@ async function extractWithFileSearch(
               },
               efficacy_score: {
                 type: 'integer',
-                description: 'Efficacy score 1-5 based on results and statistical significance'
+                description: 'Efficacy score 1-5 based on statistical significance'
+              },
+              species_tested: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Species this compound was tested on (canine, feline, etc.)'
               }
             },
             required: ['name', 'effects']
