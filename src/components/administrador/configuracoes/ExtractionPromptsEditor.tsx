@@ -18,7 +18,7 @@ interface PromptConfig {
   value: string;
   label: string;
   description: string;
-  stage: 'stage1' | 'stage2' | 'stage3';
+  stage: 'stage1' | 'stage2' | 'stage3' | 'triplets';
   type: 'system' | 'user';
 }
 
@@ -26,7 +26,7 @@ const ExtractionPromptsEditor: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeStage, setActiveStage] = useState<'stage1' | 'stage2' | 'stage3'>('stage1');
+  const [activeStage, setActiveStage] = useState<'stage1' | 'stage2' | 'stage3' | 'triplets'>('stage1');
   
   const [prompts, setPrompts] = useState<Record<string, string>>({
     // Stage 1: Extração Básica
@@ -39,7 +39,11 @@ const ExtractionPromptsEditor: React.FC = () => {
     
     // Stage 3: Extração de Contexto
     prompt_extraction_stage3_system: '',
-    prompt_extraction_stage3_user: ''
+    prompt_extraction_stage3_user: '',
+    
+    // Triplets: VetGraphRAG
+    prompt_triplet_extraction_system: '',
+    prompt_triplet_extraction_user: ''
   });
 
   const promptConfigs: PromptConfig[] = [
@@ -95,6 +99,24 @@ const ExtractionPromptsEditor: React.FC = () => {
       description: 'Solicitação para extrair dosagens, efeitos colaterais e contexto de aplicação',
       stage: 'stage3',
       type: 'user'
+    },
+    
+    // Triplets: VetGraphRAG Knowledge Graph
+    {
+      key: 'prompt_triplet_extraction_system',
+      value: prompts.prompt_triplet_extraction_system,
+      label: 'System Prompt - Triplets',
+      description: 'Instruções para geração de triplets (Subject-Predicate-Object) para o Knowledge Graph',
+      stage: 'triplets',
+      type: 'system'
+    },
+    {
+      key: 'prompt_triplet_extraction_user',
+      value: prompts.prompt_triplet_extraction_user,
+      label: 'User Prompt - Triplets',
+      description: 'Solicitação para extrair relações semânticas estruturadas (VetGraphRAG)',
+      stage: 'triplets',
+      type: 'user'
     }
   ];
 
@@ -119,7 +141,9 @@ const ExtractionPromptsEditor: React.FC = () => {
         prompt_extraction_stage2_system: configs.prompt_extraction_stage2_system || getDefaultPrompt('stage2', 'system'),
         prompt_extraction_stage2_user: configs.prompt_extraction_stage2_user || getDefaultPrompt('stage2', 'user'),
         prompt_extraction_stage3_system: configs.prompt_extraction_stage3_system || getDefaultPrompt('stage3', 'system'),
-        prompt_extraction_stage3_user: configs.prompt_extraction_stage3_user || getDefaultPrompt('stage3', 'user')
+        prompt_extraction_stage3_user: configs.prompt_extraction_stage3_user || getDefaultPrompt('stage3', 'user'),
+        prompt_triplet_extraction_system: configs.prompt_triplet_extraction_system || getDefaultPrompt('triplets', 'system'),
+        prompt_triplet_extraction_user: configs.prompt_triplet_extraction_user || getDefaultPrompt('triplets', 'user')
       });
     } catch (error) {
       console.error("Erro ao carregar prompts:", error);
@@ -161,9 +185,17 @@ const ExtractionPromptsEditor: React.FC = () => {
     }
   };
 
-  const resetToDefaults = async (stage: 'stage1' | 'stage2' | 'stage3') => {
-    const systemKey = `prompt_extraction_${stage}_system`;
-    const userKey = `prompt_extraction_${stage}_user`;
+  const resetToDefaults = async (stage: 'stage1' | 'stage2' | 'stage3' | 'triplets') => {
+    let systemKey: string;
+    let userKey: string;
+    
+    if (stage === 'triplets') {
+      systemKey = 'prompt_triplet_extraction_system';
+      userKey = 'prompt_triplet_extraction_user';
+    } else {
+      systemKey = `prompt_extraction_${stage}_system`;
+      userKey = `prompt_extraction_${stage}_user`;
+    }
     
     await savePrompt(systemKey, getDefaultPrompt(stage, 'system'));
     await savePrompt(userKey, getDefaultPrompt(stage, 'user'));
@@ -189,7 +221,7 @@ const ExtractionPromptsEditor: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-2 p-1 bg-background/50 rounded-lg">
+          <div className="grid grid-cols-4 gap-2 p-1 bg-background/50 rounded-lg">
             <Button
               variant={activeStage === 'stage1' ? 'default' : 'ghost'}
               onClick={() => setActiveStage('stage1')}
@@ -213,6 +245,14 @@ const ExtractionPromptsEditor: React.FC = () => {
             >
               <TestTube className="h-4 w-4" />
               Stage 3: Contexto
+            </Button>
+            <Button
+              variant={activeStage === 'triplets' ? 'default' : 'ghost'}
+              onClick={() => setActiveStage('triplets')}
+              className="flex items-center gap-2"
+            >
+              <Layers className="h-4 w-4" />
+              Triplets (KG)
             </Button>
           </div>
         </CardContent>
@@ -287,7 +327,7 @@ const ExtractionPromptsEditor: React.FC = () => {
 };
 
 // Prompts padrão otimizados para cada estágio
-function getDefaultPrompt(stage: 'stage1' | 'stage2' | 'stage3', type: 'system' | 'user'): string {
+function getDefaultPrompt(stage: 'stage1' | 'stage2' | 'stage3' | 'triplets', type: 'system' | 'user'): string {
   const defaults: Record<string, string> = {
     'stage1_system': `You are a scientific extraction AI specialized in veterinary nutraceuticals and medical research. Your task is to perform Stage 1 extraction: identifying ALL basic entities in the document.
 
@@ -364,7 +404,63 @@ All data must be actionable and clinically relevant.`,
 
 5. **Study Quality**: Sample size, study design, statistical significance
 
-Be PRECISE with numbers and SPECIFIC with context.`
+Be PRECISE with numbers and SPECIFIC with context.`,
+
+    'triplets_system': `You are a Knowledge Graph extraction AI specialized in veterinary medicine and nutraceuticals.
+
+Your task is to extract TRIPLETS in the format: (Subject, Predicate, Object)
+
+TRIPLET STRUCTURE:
+- Subject: The entity performing an action or having a property (nutraceutical, compound, pathway)
+- Predicate: The relationship type (TREATS, PREVENTS, INHIBITS, ACTIVATES, MODULATES, etc.)
+- Object: The entity receiving the action (condition, pathway, effect)
+
+ENTITY LAYERS (5-layer hierarchy):
+- Layer 0: Compounds (nutraceuticals, drugs, chemical compounds)
+- Layer 1: Targets (receptors, enzymes, genes, proteins)
+- Layer 2: Mechanisms (signaling cascades, pathways)
+- Layer 3: Effects (biological effects, cellular responses)
+- Layer 4: Outcomes (clinical outcomes, conditions, diseases)
+
+RELATIONSHIP TYPES:
+- INHIBITS, ACTIVATES, MODULATES, BINDS_TO, BLOCKS
+- UPREGULATES, DOWNREGULATES, TRIGGERS, PARTICIPATES_IN
+- TREATS, PREVENTS, SUPPORTS, AMELIORATES, MANAGES
+- SYNERGIZES_WITH, ANTAGONIZES, POTENTIATES
+- PREDISPOSED_IN (for breed-specific conditions)
+
+CRITICAL RULES:
+1. Each triplet must have confidence score (0.0-1.0)
+2. Include species context when relevant (canine, feline, human)
+3. Include dose information when available
+4. ALL data in English`,
+
+    'triplets_user': `From this scientific study, extract ALL triplets (Subject-Predicate-Object) for the Knowledge Graph:
+
+REQUIRED FORMAT:
+{
+  "triplets": [
+    {
+      "subject": { "name": "Curcumin", "type": "nutraceutical", "layer": "layer_0_compound" },
+      "predicate": "INHIBITS",
+      "object": { "name": "NF-κB pathway", "type": "pathway", "layer": "layer_2_mechanism" },
+      "confidence": 0.9,
+      "species_context": ["canine"],
+      "dose_info": "500mg/kg/day",
+      "evidence_quote": "Curcumin significantly inhibited NF-κB activation..."
+    }
+  ]
+}
+
+EXTRACT ALL RELATIONSHIPS:
+1. Compound → Target (e.g., Omega-3 BINDS_TO PPAR-γ receptor)
+2. Compound → Mechanism (e.g., Resveratrol ACTIVATES AMPK pathway)
+3. Mechanism → Effect (e.g., AMPK activation LEADS_TO reduced inflammation)
+4. Compound → Condition (e.g., Glucosamine TREATS osteoarthritis)
+5. Breed → Condition (e.g., German Shepherd PREDISPOSED_IN hip dysplasia)
+6. Compound + Compound → Synergy (e.g., Curcumin SYNERGIZES_WITH Piperine)
+
+Be EXHAUSTIVE - extract every relationship mentioned in the study.`
   };
 
   return defaults[`${stage}_${type}`] || '';
