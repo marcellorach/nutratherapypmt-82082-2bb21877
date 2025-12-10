@@ -34,31 +34,38 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get parsed study content
+    // Get parsed study content - INCLUI full_text_content da coluna separada
     console.log(`🔍 Buscando estudo com ID: ${studyId}`);
     const { data: studyData, error: studyError } = await supabase
       .from('processed_studies')
-      .select('analysis_data, title, study_id')
+      .select('analysis_data, title, study_id, full_text_content')
       .eq('id', studyId)
       .maybeSingle();
     
-    if (studyError || !studyData || !studyData.analysis_data) {
-      console.error(`❌ Estudo não encontrado ou sem dados`);
+    if (studyError || !studyData) {
+      console.error(`❌ Estudo não encontrado`);
       return new Response(
-        JSON.stringify({ error: 'Study not found or not parsed yet', studyId }),
+        JSON.stringify({ error: 'Study not found', studyId }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
     console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'}`);
 
-    const parsedContent = studyData.analysis_data;
-    const textContent = extractTextContent(parsedContent);
+    const parsedContent = studyData.analysis_data || {};
+    // CRÍTICO: Usar full_text_content da coluna separada como prioridade
+    const fullTextFromColumn = studyData.full_text_content;
+    const textContent = extractTextContent(parsedContent, fullTextFromColumn);
     
     if (!textContent || textContent.trim().length < 100) {
       console.error('❌ Texto insuficiente extraído');
+      console.error('📊 full_text_content length:', fullTextFromColumn?.length || 0);
+      console.error('📊 analysis_data keys:', Object.keys(parsedContent));
       return new Response(
-        JSON.stringify({ error: 'Insufficient text extracted', studyId }),
+        JSON.stringify({ error: 'Insufficient text extracted', studyId, details: {
+          fullTextLength: fullTextFromColumn?.length || 0,
+          analysisDataKeys: Object.keys(parsedContent)
+        }}),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -450,34 +457,131 @@ async function callLovableAI(systemPrompt: string, userPrompt: string, tools: an
   return result.choices[0]?.message?.tool_calls?.[0] || null;
 }
 
-// Helper: Extract text from parsed content
-function extractTextContent(parsedContent: any): string {
-  if (parsedContent.full_text && typeof parsedContent.full_text === 'string') {
+// Helper: Extract text from parsed content - PRIORIZA full_text_content da coluna separada
+function extractTextContent(parsedContent: any, fullTextFromColumn?: string | null): string {
+  // PRIORIDADE 1: full_text_content da coluna separada (fonte mais confiável)
+  if (fullTextFromColumn && typeof fullTextFromColumn === 'string' && fullTextFromColumn.length > 200) {
+    console.log(`📄 Usando full_text_content da coluna (${fullTextFromColumn.length} chars)`);
+    return fullTextFromColumn;
+  }
+  
+  // PRIORIDADE 2: full_text dentro de analysis_data (se não for placeholder)
+  if (parsedContent.full_text && 
+      typeof parsedContent.full_text === 'string' && 
+      parsedContent.full_text.length > 200 &&
+      !parsedContent.full_text.includes('See PDF content') &&
+      !parsedContent.full_text.includes('See attached')) {
+    console.log(`📄 Usando full_text de analysis_data (${parsedContent.full_text.length} chars)`);
     return parsedContent.full_text;
   }
   
-  if (parsedContent.abstract && typeof parsedContent.abstract === 'string') {
-    return parsedContent.abstract;
+  // PRIORIDADE 3: Construir texto a partir de TODOS os dados estruturados disponíveis
+  console.log('📄 Construindo texto a partir de dados estruturados...');
+  const textParts: string[] = [];
+  
+  // Metadados básicos
+  if (parsedContent.title) textParts.push(`# ${parsedContent.title}`);
+  if (parsedContent.abstract) textParts.push(`\n## Abstract\n${parsedContent.abstract}`);
+  
+  // Nutracêuticos com detalhes completos
+  const nutraceuticals = parsedContent.nutraceuticals || parsedContent.extractedNutraceuticals || [];
+  if (nutraceuticals.length > 0) {
+    textParts.push('\n## Nutraceuticals');
+    nutraceuticals.forEach((n: any) => {
+      textParts.push(`\n### ${n.name}`);
+      if (n.dosage) textParts.push(`- Dosage: ${n.dosage}`);
+      if (n.effects) textParts.push(`- Effects: ${n.effects}`);
+      if (n.efficacy_score) textParts.push(`- Efficacy: ${n.efficacy_score}/5`);
+    });
   }
   
-  if (Array.isArray(parsedContent.elements)) {
-    return parsedContent.elements
-      .filter((el: any) => el.type === 'text' || el.type === 'paragraph')
-      .map((el: any) => el.content)
-      .join('\n\n');
+  // Condições de saúde
+  const conditions = parsedContent.conditions || parsedContent.extractedConditions || [];
+  if (conditions.length > 0) {
+    textParts.push('\n## Health Conditions');
+    conditions.forEach((c: any) => {
+      textParts.push(`\n### ${c.name}`);
+      if (c.relationship_type) textParts.push(`- Relationship: ${c.relationship_type}`);
+      if (c.efficacy_description) textParts.push(`- Efficacy: ${c.efficacy_description}`);
+    });
   }
   
-  if (Array.isArray(parsedContent.sections)) {
-    return parsedContent.sections
-      .map((section: any) => {
-        let text = section.title ? `# ${section.title}\n\n` : '';
-        if (section.content) text += section.content;
-        return text;
-      })
-      .join('\n\n');
+  // Mecanismos moleculares
+  const mechanisms = parsedContent.mechanisms || parsedContent.extractedMechanisms || [];
+  if (mechanisms.length > 0) {
+    textParts.push('\n## Molecular Mechanisms');
+    mechanisms.forEach((m: any) => {
+      textParts.push(`- ${m.name || m.mechanism}: ${m.description || m.type || ''}`);
+    });
   }
   
-  return JSON.stringify(parsedContent);
+  // Efeitos biológicos
+  const effects = parsedContent.biological_effects || parsedContent.extractedEffects || [];
+  if (effects.length > 0) {
+    textParts.push('\n## Biological Effects');
+    effects.forEach((e: any) => {
+      textParts.push(`- ${e.name}: ${e.description || e.type || ''}`);
+    });
+  }
+  
+  // Interações
+  const interactions = parsedContent.interactions || parsedContent.extractedInteractions || [];
+  if (interactions.length > 0) {
+    textParts.push('\n## Interactions');
+    interactions.forEach((i: any) => {
+      textParts.push(`- ${i.from || i.nutraceutical} → ${i.type} → ${i.to || i.condition}`);
+      if (i.description) textParts.push(`  ${i.description}`);
+    });
+  }
+  
+  // Side effects
+  const sideEffects = parsedContent.side_effects || parsedContent.extractedSideEffects || [];
+  if (sideEffects.length > 0) {
+    textParts.push('\n## Side Effects');
+    sideEffects.forEach((s: any) => {
+      textParts.push(`- ${s.name}: ${s.description || ''} (${s.severity || 'unknown'} severity)`);
+    });
+  }
+  
+  // Study population (espécie, raça, etc)
+  if (parsedContent.study_population) {
+    const pop = parsedContent.study_population;
+    textParts.push('\n## Study Population');
+    if (pop.species) textParts.push(`- Species: ${pop.species}`);
+    if (pop.breed) textParts.push(`- Breed: ${pop.breed}`);
+    if (pop.sample_size) textParts.push(`- Sample size: ${pop.sample_size}`);
+    if (pop.age_group) textParts.push(`- Age group: ${pop.age_group}`);
+  }
+  
+  // Dosagens estruturadas
+  const dosages = parsedContent.structured_dosages || [];
+  if (dosages.length > 0) {
+    textParts.push('\n## Dosages');
+    dosages.forEach((d: any) => {
+      const perKg = d.per_body_weight ? '/kg' : '';
+      textParts.push(`- ${d.compound}: ${d.amount} ${d.unit}${perKg} ${d.frequency || ''}`);
+    });
+  }
+  
+  // Biomarkers
+  const biomarkers = parsedContent.biomarkers || [];
+  if (biomarkers.length > 0) {
+    textParts.push('\n## Biomarkers Measured');
+    biomarkers.forEach((b: any) => {
+      textParts.push(`- ${b.name}: ${b.change_percent ? b.change_percent + '% change' : ''} (${b.significance})`);
+    });
+  }
+  
+  const constructedText = textParts.join('\n');
+  
+  if (constructedText.length > 200) {
+    console.log(`📄 Texto construído com sucesso (${constructedText.length} chars)`);
+    return constructedText;
+  }
+  
+  // FALLBACK: Serializar o JSON como último recurso
+  console.log('⚠️ Usando JSON serializado como fallback');
+  return JSON.stringify(parsedContent, null, 2);
 }
 
 // Helper: Calculate quality score
