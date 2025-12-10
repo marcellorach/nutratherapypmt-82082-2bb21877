@@ -17,6 +17,8 @@ interface GraphStats {
   mechanisms: number;
   effects: number;
   avgConnections: number;
+  positiveRelations: number;
+  negativeRelations: number;
   topConnected: Array<{ name: string; connections: number }>;
 }
 
@@ -27,6 +29,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [stats, setStats] = useState<GraphStats | null>(null);
   const [entityFilter, setEntityFilter] = useState<string>('all');
   const [confidenceFilter, setConfidenceFilter] = useState<number>(0);
+  const [relationFilter, setRelationFilter] = useState<string>('all'); // all, positive, negative
   const [testingConnection, setTestingConnection] = useState(false);
 
   useEffect(() => {
@@ -80,22 +83,29 @@ export const KnowledgeGraphViewer: React.FC = () => {
         }
       });
 
-      // Processar relações do Neo4j
+      // Processar relações do Neo4j com suporte a direction
       graphResult.relationships.forEach((rel: any) => {
         const sourceNode = nodeMap.get(rel.source);
         const targetNode = nodeMap.get(rel.target);
         
         if (sourceNode && targetNode) {
           const confidence = rel.properties?.confidence || rel.properties?.extraction_confidence || 0.8;
+          const direction = rel.properties?.direction || 'positive';
+          const isNegative = direction === 'negative' || direction === 'worsens' || 
+            ['WORSENS', 'CAUSES_SIDE_EFFECT', 'CONTRAINDICATED_FOR', 'AGGRAVATES'].includes(rel.type);
+          
           links.push({
             from: rel.source,
             to: rel.target,
             label: rel.type,
-            title: `${rel.type} (Neo4j)`,
+            title: `${rel.type} ${isNegative ? '⚠️ Negative' : '✓ Positive'} (${Math.round(confidence * 100)}%)`,
             value: confidence,
-            color: getEdgeColor(confidence),
+            color: getEdgeColor(confidence, isNegative),
             width: 2 + confidence * 2,
-            properties: rel.properties
+            dashes: isNegative ? [5, 5] : false,
+            properties: rel.properties,
+            direction: direction,
+            isNegative: isNegative
           });
         }
       });
@@ -106,7 +116,10 @@ export const KnowledgeGraphViewer: React.FC = () => {
         color: getNodeColor(node.type)
       }));
 
-      // Calcular estatísticas
+      // Calcular estatísticas incluindo relações negativas
+      const negativeLinks = links.filter(l => l.isNegative);
+      const positiveLinks = links.filter(l => !l.isNegative);
+      
       const stats: GraphStats = {
         totalNodes: nodes.length,
         totalEdges: links.length,
@@ -115,6 +128,8 @@ export const KnowledgeGraphViewer: React.FC = () => {
         mechanisms: nodes.filter(n => n.type === 'Mechanism').length,
         effects: nodes.filter(n => n.type === 'Effect').length,
         avgConnections: links.length > 0 ? (links.length * 2) / nodes.length : 0,
+        positiveRelations: positiveLinks.length,
+        negativeRelations: negativeLinks.length,
         topConnected: nodes
           .sort((a, b) => b.value - a.value)
           .slice(0, 5)
@@ -160,13 +175,20 @@ export const KnowledgeGraphViewer: React.FC = () => {
     return colors[type] || colors['Unknown'];
   };
 
-  const getEdgeColor = (confidence: number) => {
-    if (confidence >= 0.85) return '#10b981';
-    if (confidence >= 0.70) return '#f59e0b';
-    return '#ef4444';
+  const getEdgeColor = (confidence: number, isNegative: boolean = false) => {
+    // Cores para relações negativas (worsens, contraindicated, etc.)
+    if (isNegative) {
+      if (confidence >= 0.85) return '#dc2626'; // red-600
+      if (confidence >= 0.70) return '#ea580c'; // orange-600
+      return '#f87171'; // red-400
+    }
+    // Cores para relações positivas
+    if (confidence >= 0.85) return '#10b981'; // green-500
+    if (confidence >= 0.70) return '#f59e0b'; // amber-500
+    return '#6b7280'; // gray-500
   };
 
-  // Aplicar filtros
+  // Aplicar filtros incluindo filtro de relação
   const filteredData = {
     nodes: entityFilter === 'all' 
       ? graphData.nodes 
@@ -181,7 +203,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
       
       const matchesConfidence = l.value >= confidenceFilter;
       
-      return matchesEntityFilter && matchesConfidence;
+      // Filtro de relação positiva/negativa
+      const matchesRelationType = relationFilter === 'all' ||
+        (relationFilter === 'positive' && !l.isNegative) ||
+        (relationFilter === 'negative' && l.isNegative);
+      
+      return matchesEntityFilter && matchesConfidence && matchesRelationType;
     })
   };
 
@@ -223,7 +250,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">{stats.totalNodes}</div>
@@ -234,6 +261,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">{stats.totalEdges}</div>
               <div className="text-sm text-muted-foreground">Total Relationships</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-2xl font-bold text-green-600">{stats.positiveRelations}</div>
+              <div className="text-sm text-muted-foreground">Positive (TREATS, SUPPORTS)</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-2xl font-bold text-red-600">{stats.negativeRelations}</div>
+              <div className="text-sm text-muted-foreground">Negative (WORSENS)</div>
             </CardContent>
           </Card>
           <Card>
@@ -254,7 +293,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
       {/* Filtros */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Entity Type</label>
               <Select value={entityFilter} onValueChange={setEntityFilter}>
@@ -268,6 +307,29 @@ export const KnowledgeGraphViewer: React.FC = () => {
                   <SelectItem value="Mechanism">Mechanisms</SelectItem>
                   <SelectItem value="Effect">Effects</SelectItem>
                   <SelectItem value="Outcome">Outcomes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Relation Type</label>
+              <Select value={relationFilter} onValueChange={setRelationFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Relations</SelectItem>
+                  <SelectItem value="positive">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      Positive (TREATS, SUPPORTS)
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="negative">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                      Negative (WORSENS, CONTRAINDICATED)
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -288,6 +350,9 @@ export const KnowledgeGraphViewer: React.FC = () => {
             <div className="flex items-end">
               <div className="text-sm text-muted-foreground">
                 Showing {filteredData.nodes.length} nodes, {filteredData.links.length} edges
+                {relationFilter === 'negative' && (
+                  <span className="ml-2 text-red-600 font-medium">(⚠️ Negative only)</span>
+                )}
               </div>
             </div>
           </div>

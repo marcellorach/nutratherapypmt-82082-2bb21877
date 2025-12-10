@@ -85,14 +85,15 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   // Usar o hook para inicializar o grafo
   const { network } = useNetworkGraph(containerRef, data, mergedOptions);
   
-  // Itens da legenda expandida
+  // Itens da legenda expandida com suporte a relações negativas
   const defaultLegendItems = [
     { color: '#3b82f6', label: 'Nutracêuticos' },
     { color: '#10b981', label: 'Condições de Saúde' },
     { color: '#a855f7', label: 'Estudos' },
-    { color: '#9ca3af', label: 'Conexões Potenciais', dashed: true },
-    { color: '#8b5cf6', label: 'Sinergias', dashed: [2, 2] },
-    { color: '#d1d5db', label: 'Correlações entre Condições', dashed: [5, 5] }
+    { color: '#10b981', label: 'Relação Positiva (TREATS, SUPPORTS)', dashed: false },
+    { color: '#dc2626', label: 'Relação Negativa (WORSENS, CONTRAINDICATED)', dashed: [5, 5] },
+    { color: '#f59e0b', label: 'Confiança Média (70-85%)', dashed: false },
+    { color: '#8b5cf6', label: 'Sinergias', dashed: [2, 2] }
   ];
   
   return (
