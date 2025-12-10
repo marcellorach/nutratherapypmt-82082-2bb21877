@@ -219,25 +219,36 @@ async function syncTripletToNeo4j(
 }
 
 async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
+  console.log('🔑 Fetching Neo4j credentials...');
+  
   const { data, error } = await supabase
     .from('ai_configurations')
     .select('config_key, config_value')
     .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password']);
   
   if (error || !data || data.length < 3) {
-    console.error('Failed to fetch Neo4j credentials:', error);
+    console.error('❌ Failed to fetch Neo4j credentials:', error);
     return null;
   }
   
   const config: Record<string, string> = {};
-  data.forEach((item: any) => { 
-    config[item.config_key] = item.config_value; 
+  data.forEach((item: any) => {
+    // Handle both JSONB string values (with quotes) and plain strings
+    let value = item.config_value;
+    if (typeof value === 'string') {
+      // Remove surrounding quotes if present
+      value = value.replace(/^"(.*)"$/, '$1');
+    }
+    config[item.config_key] = value;
+    console.log(`🔑 ${item.config_key}: ${item.config_key === 'neo4j_password' ? '***' : value}`);
   });
   
   if (!config.neo4j_uri || !config.neo4j_username || !config.neo4j_password) {
+    console.error('❌ Missing Neo4j credentials');
     return null;
   }
   
+  console.log('✅ Neo4j credentials loaded successfully');
   return {
     uri: config.neo4j_uri,
     username: config.neo4j_username,
