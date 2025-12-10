@@ -11,24 +11,40 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // ==================== LOGGING INICIAL DETALHADO ====================
+  console.log('🚀 [extract-study-entities] Function started');
+  console.log('📋 Request received at:', new Date().toISOString());
+  console.log('📋 Request method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight handled');
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verificar variáveis de ambiente ANTES de qualquer lógica
+  console.log('🔐 Checking environment variables...');
+  console.log('  - SUPABASE_URL:', supabaseUrl ? `✅ (${supabaseUrl.length} chars)` : '❌ NOT SET');
+  console.log('  - SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? `✅ (${supabaseServiceKey.length} chars)` : '❌ NOT SET');
+  console.log('  - LOVABLE_API_KEY:', lovableApiKey ? `✅ (${lovableApiKey.length} chars)` : '❌ NOT SET');
+
+  if (!lovableApiKey) {
+    console.error('❌ CRITICAL: LOVABLE_API_KEY not configured!');
+    return new Response(
+      JSON.stringify({ error: 'LOVABLE_API_KEY not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
+    console.log('📥 Parsing request body...');
     const { studyId } = await req.json();
+    console.log('📥 studyId received:', studyId);
     
     if (!studyId) {
+      console.error('❌ Missing studyId');
       return new Response(
         JSON.stringify({ error: 'Missing required field: studyId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (!lovableApiKey) {
-      return new Response(
-        JSON.stringify({ error: 'Lovable API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
