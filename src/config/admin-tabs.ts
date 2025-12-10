@@ -46,7 +46,7 @@ const ModelosPreditivosTab = lazy(() => import('@/components/administrador/Model
 const CustoBeneficioTab = lazy(() => import('@/components/administrador/CustoBeneficioTab'));
 const PredictiveAnalysisSettingsTab = lazy(() => import('@/components/administrador/settings/PredictiveAnalysisSettingsTab'));
 const ConfiguracoesIATab = lazy(() => import('@/components/administrador/ConfiguracoesIATab'));
-const PromptsTab = lazy(() => import('@/components/administrador/PromptsTab'));
+const PromptConfigurationTab = lazy(() => import('@/components/administrador/PromptConfigurationTab'));
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
 const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/MicrobiomeAnalysisTab'));
@@ -252,10 +252,10 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'prompts',
-    label: 'Prompts',
+    label: 'AI Prompts',
     group: 'configuration',
-    component: PromptsTab,
-    description: 'Gerenciamento de prompts'
+    component: PromptConfigurationTab,
+    description: 'Gerenciamento de prompts de IA (Extração, Triplets, Recomendação)'
   },
   {
     id: 'analytics',
