@@ -39,6 +39,31 @@ interface BiomarkerMeasurement {
   significance: 'significant' | 'trending' | 'not_significant';
 }
 
+// ✅ EXPANDED: Contraindication structure
+interface Contraindication {
+  condition: string;
+  reason: string;
+  severity: 'absolute' | 'relative' | 'caution';
+  evidence_level?: string;
+}
+
+// ✅ EXPANDED: Drug interaction structure
+interface DrugInteraction {
+  compound: string;
+  interaction_type: 'synergy' | 'antagonism' | 'potentiation' | 'inhibition' | 'enhancement' | 'reduction';
+  effect: string;
+  severity: 'beneficial' | 'neutral' | 'caution' | 'avoid' | 'dangerous';
+  mechanism?: string;
+}
+
+// ✅ EXPANDED: Synergy structure
+interface Synergy {
+  compounds: string[];
+  enhanced_effect: string;
+  mechanism?: string;
+  optimal_ratio?: string;
+}
+
 interface ExtractedStudyData {
   title: string;
   authors: string[];
@@ -48,13 +73,13 @@ interface ExtractedStudyData {
   doi?: string;
   full_text?: string;
   
-  // ✅ NEW: Study population metadata
+  // ✅ Study population metadata
   study_population?: StudyPopulation;
   
-  // ✅ NEW: Structured dosages array
+  // ✅ Structured dosages array
   structured_dosages?: StructuredDosage[];
   
-  // ✅ NEW: Biomarker measurements
+  // ✅ Biomarker measurements
   biomarkers?: BiomarkerMeasurement[];
   
   nutraceuticals: Array<{
@@ -62,7 +87,7 @@ interface ExtractedStudyData {
     dosage?: string;
     effects: string;
     efficacy_score?: number;
-    species_tested?: string[]; // ✅ NEW: Which species this was tested on
+    species_tested?: string[];
   }>;
   mechanisms: Array<{
     name: string;
@@ -82,7 +107,7 @@ interface ExtractedStudyData {
     efficacy_description?: string;
     treatability_score?: number;
     severity?: string;
-    species_specific?: string; // ✅ NEW: Canine Obesity vs Human Obesity
+    species_specific?: string;
   }>;
   interactions: Array<{
     from: string;
@@ -95,8 +120,16 @@ interface ExtractedStudyData {
     name: string;
     description: string;
     severity: 'low' | 'medium' | 'high';
+    frequency?: string;
+    dose_related?: boolean;
     confidence?: number;
   }>;
+  // ✅ NEW: Contraindications
+  contraindications?: Contraindication[];
+  // ✅ NEW: Drug interactions
+  drug_interactions?: DrugInteraction[];
+  // ✅ NEW: Synergies
+  synergies?: Synergy[];
 }
 
 interface GeminiFile {
@@ -684,6 +717,14 @@ async function extractWithFileSearch(
                 enum: ['low', 'medium', 'high'],
                 description: 'Severity level'
               },
+              frequency: {
+                type: 'string',
+                description: 'Frequency of occurrence (e.g., "5%", "rare", "common")'
+              },
+              dose_related: {
+                type: 'boolean',
+                description: 'Whether the side effect is dose-dependent'
+              },
               confidence: {
                 type: 'number',
                 description: 'Confidence score 0-5 based on evidence'
@@ -691,9 +732,99 @@ async function extractWithFileSearch(
             },
             required: ['name', 'description', 'severity']
           }
+        },
+        // ✅ NEW: Contraindications - conditions where compound should NOT be used
+        contraindications: {
+          type: 'array',
+          description: 'CRITICAL: Extract ALL contraindications - conditions/situations where the compound should NOT be used',
+          items: {
+            type: 'object',
+            properties: {
+              condition: {
+                type: 'string',
+                description: 'The condition or situation where use is contraindicated (e.g., "Pregnancy", "Liver disease", "Concurrent NSAID use")'
+              },
+              reason: {
+                type: 'string',
+                description: 'Why this is contraindicated'
+              },
+              severity: {
+                type: 'string',
+                enum: ['absolute', 'relative', 'caution'],
+                description: 'absolute=never use, relative=avoid if possible, caution=use with monitoring'
+              },
+              evidence_level: {
+                type: 'string',
+                enum: ['high', 'moderate', 'low'],
+                description: 'Strength of evidence for this contraindication'
+              }
+            },
+            required: ['condition', 'reason', 'severity']
+          }
+        },
+        // ✅ NEW: Drug interactions - interactions with other compounds/medications
+        drug_interactions: {
+          type: 'array',
+          description: 'CRITICAL: Extract ALL drug/compound interactions mentioned',
+          items: {
+            type: 'object',
+            properties: {
+              compound: {
+                type: 'string',
+                description: 'The other compound/drug that interacts'
+              },
+              interaction_type: {
+                type: 'string',
+                enum: ['synergy', 'antagonism', 'potentiation', 'inhibition', 'enhancement', 'reduction'],
+                description: 'Type of interaction'
+              },
+              effect: {
+                type: 'string',
+                description: 'What happens when combined'
+              },
+              severity: {
+                type: 'string',
+                enum: ['beneficial', 'neutral', 'caution', 'avoid', 'dangerous'],
+                description: 'Clinical significance of the interaction'
+              },
+              mechanism: {
+                type: 'string',
+                description: 'How the interaction occurs (e.g., "CYP450 inhibition", "competitive binding")'
+              }
+            },
+            required: ['compound', 'interaction_type', 'effect', 'severity']
+          }
+        },
+        // ✅ NEW: Synergies - beneficial compound combinations
+        synergies: {
+          type: 'array',
+          description: 'Extract beneficial compound combinations/synergies',
+          items: {
+            type: 'object',
+            properties: {
+              compounds: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Compounds that work synergistically together'
+              },
+              enhanced_effect: {
+                type: 'string',
+                description: 'What effect is enhanced by the combination'
+              },
+              mechanism: {
+                type: 'string',
+                description: 'How the synergy works'
+              },
+              optimal_ratio: {
+                type: 'string',
+                description: 'Optimal ratio if mentioned (e.g., "2:1 Omega-3:Omega-6")'
+              }
+            },
+            required: ['compounds', 'enhanced_effect']
+          }
         }
       },
-      required: ['title', 'authors', 'nutraceuticals', 'mechanisms', 'biological_effects', 'conditions', 'interactions']
+      required: ['title', 'authors', 'nutraceuticals', 'mechanisms', 'biological_effects', 'conditions', 'interactions', 'side_effects', 'contraindications']
     }
   };
 
@@ -865,9 +996,15 @@ Return using extract_study_data function with ALL arrays fully populated.`;
     console.log(`📊 Conditions: ${extractedArgs.conditions?.length || 0}`);
     console.log(`📊 Interactions: ${extractedArgs.interactions?.length || 0}`);
     console.log(`📊 Side Effects: ${extractedArgs.side_effects?.length || 0}`);
+    console.log(`📊 Contraindications: ${extractedArgs.contraindications?.length || 0}`);
+    console.log(`📊 Drug Interactions: ${extractedArgs.drug_interactions?.length || 0}`);
+    console.log(`📊 Synergies: ${extractedArgs.synergies?.length || 0}`);
+    console.log(`📊 Study Population: ${extractedArgs.study_population ? 'YES' : 'NO'}`);
+    console.log(`📊 Structured Dosages: ${extractedArgs.structured_dosages?.length || 0}`);
+    console.log(`📊 Biomarkers: ${extractedArgs.biomarkers?.length || 0}`);
     console.log(`📊 Title: ${extractedArgs.title?.substring(0, 50) || 'N/A'}...`);
 
-    // Mapear dados estruturados para o formato esperado
+    // Mapear dados estruturados para o formato esperado - EXPANDED with new fields
     const extractedData: ExtractedStudyData = {
       title: extractedArgs.title || '',
       authors: extractedArgs.authors || [],
@@ -875,11 +1012,46 @@ Return using extract_study_data function with ALL arrays fully populated.`;
       journal: extractedArgs.journal || '',
       abstract: extractedArgs.abstract || '',
       doi: extractedArgs.doi || '',
+      full_text: extractedArgs.full_text || '',
+      // ✅ NEW: Study population
+      study_population: extractedArgs.study_population ? {
+        species: extractedArgs.study_population.species || 'unknown',
+        breed: extractedArgs.study_population.breed,
+        age_group: extractedArgs.study_population.age_group,
+        sample_size: extractedArgs.study_population.sample_size,
+        weight_range: (extractedArgs.study_population.weight_range_min || extractedArgs.study_population.weight_range_max) ? {
+          min: extractedArgs.study_population.weight_range_min,
+          max: extractedArgs.study_population.weight_range_max,
+          unit: 'kg'
+        } : undefined,
+        health_status: extractedArgs.study_population.health_status
+      } : undefined,
+      // ✅ NEW: Structured dosages
+      structured_dosages: (extractedArgs.structured_dosages || []).map((d: any) => ({
+        compound: d.compound,
+        amount: d.amount,
+        unit: d.unit,
+        frequency: d.frequency || 'daily',
+        per_body_weight: d.per_body_weight || false,
+        duration_days: d.duration_days,
+        route: d.route || 'oral'
+      })),
+      // ✅ NEW: Biomarkers
+      biomarkers: (extractedArgs.biomarkers || []).map((b: any) => ({
+        name: b.name,
+        baseline_value: b.baseline_value,
+        final_value: b.final_value,
+        change_percent: b.change_percent,
+        unit: b.unit,
+        p_value: b.p_value,
+        significance: b.significance || 'not_significant'
+      })),
       nutraceuticals: (extractedArgs.nutraceuticals || []).map((n: any) => ({
         name: n.name,
         dosage: n.dosage || '',
         effects: n.effects,
-        efficacy_score: n.efficacy_score
+        efficacy_score: n.efficacy_score,
+        species_tested: n.species_tested || []
       })),
       mechanisms: (extractedArgs.mechanisms || []).map((m: any) => ({
         name: m.name,
@@ -898,7 +1070,8 @@ Return using extract_study_data function with ALL arrays fully populated.`;
         relationship_type: c.relationship_type,
         efficacy_description: c.efficacy_description || '',
         treatability_score: c.treatability_score,
-        severity: c.severity
+        severity: c.severity,
+        species_specific: c.species_specific
       })),
       interactions: (extractedArgs.interactions || []).map((i: any) => ({
         from: i.from,
@@ -911,7 +1084,31 @@ Return using extract_study_data function with ALL arrays fully populated.`;
         name: s.name,
         description: s.description,
         severity: s.severity,
+        frequency: s.frequency,
+        dose_related: s.dose_related,
         confidence: s.confidence || 0.8
+      })),
+      // ✅ NEW: Contraindications
+      contraindications: (extractedArgs.contraindications || []).map((c: any) => ({
+        condition: c.condition,
+        reason: c.reason,
+        severity: c.severity || 'caution',
+        evidence_level: c.evidence_level
+      })),
+      // ✅ NEW: Drug interactions
+      drug_interactions: (extractedArgs.drug_interactions || []).map((d: any) => ({
+        compound: d.compound,
+        interaction_type: d.interaction_type,
+        effect: d.effect,
+        severity: d.severity,
+        mechanism: d.mechanism
+      })),
+      // ✅ NEW: Synergies
+      synergies: (extractedArgs.synergies || []).map((s: any) => ({
+        compounds: s.compounds || [],
+        enhanced_effect: s.enhanced_effect,
+        mechanism: s.mechanism,
+        optimal_ratio: s.optimal_ratio
       }))
     };
 
@@ -1438,7 +1635,28 @@ serve(async (req) => {
             confidence: c.treatability_score || 4.0
           })),
           extractedInteractions: extractedData.interactions,
-          extractedSideEffects: extractedData.side_effects
+          extractedSideEffects: extractedData.side_effects,
+          // ✅ NEW: Add expanded data with clear keys
+          extractedContraindications: extractedData.contraindications || [],
+          extractedDrugInteractions: extractedData.drug_interactions || [],
+          extractedSynergies: extractedData.synergies || [],
+          // ✅ Metadata summary for quick reference
+          extraction_summary: {
+            total_nutraceuticals: extractedData.nutraceuticals.length,
+            total_mechanisms: extractedData.mechanisms.length,
+            total_effects: extractedData.biological_effects.length,
+            total_conditions: extractedData.conditions.length,
+            total_interactions: extractedData.interactions.length,
+            total_side_effects: extractedData.side_effects.length,
+            total_contraindications: extractedData.contraindications?.length || 0,
+            total_drug_interactions: extractedData.drug_interactions?.length || 0,
+            total_synergies: extractedData.synergies?.length || 0,
+            total_dosages: extractedData.structured_dosages?.length || 0,
+            total_biomarkers: extractedData.biomarkers?.length || 0,
+            has_population_data: !!extractedData.study_population,
+            species: extractedData.study_population?.species || 'unknown',
+            extracted_at: new Date().toISOString()
+          }
         };
         
         console.log('💾 Salvando com RAG support...');
