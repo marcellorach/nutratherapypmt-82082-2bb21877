@@ -108,24 +108,61 @@ serve(async (req) => {
 
     // ==================== STAGE 1: Basic Entities ====================
     console.log('🔵 [STAGE 1/3] Extraindo entidades básicas (nutracêuticos, condições)...');
-    const stage1Result = await callLovableAI(
-      prompts.stage1System,
-      prompts.stage1User.replace('{{TEXT_CONTENT}}', textContent),
-      getStage1Tools()
-    );
+    console.log('📝 Stage 1 System Prompt (first 200 chars):', prompts.stage1System?.substring(0, 200));
     
-    const stage1Data = stage1Result ? JSON.parse(stage1Result.function.arguments) : { nutraceuticals: [], conditions: [], mechanisms: [], findings: [] };
+    let stage1Data: any = { nutraceuticals: [], conditions: [], mechanisms: [], findings: [], study_quality: {} };
+    try {
+      const stage1Result = await callLovableAI(
+        prompts.stage1System,
+        prompts.stage1User.replace('{{TEXT_CONTENT}}', textContent),
+        getStage1Tools()
+      );
+      
+      if (stage1Result) {
+        console.log('📊 Stage 1 raw result:', JSON.stringify(stage1Result).substring(0, 500));
+        stage1Data = JSON.parse(stage1Result.function.arguments);
+      } else {
+        console.warn('⚠️ Stage 1 returned null result');
+      }
+    } catch (stage1Error) {
+      console.error('❌ Stage 1 error:', stage1Error);
+    }
     console.log(`✅ Stage 1: ${stage1Data.nutraceuticals?.length || 0} nutracêuticos, ${stage1Data.conditions?.length || 0} condições`);
 
     // ==================== STAGE 2: Molecular Mechanisms ====================
     console.log('🟢 [STAGE 2/3] Extraindo mecanismos moleculares, sinergias e relações...');
-    const stage2Result = await callLovableAI(
-      prompts.stage2System,
-      prompts.stage2User.replace('{{TEXT_CONTENT}}', textContent).replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || [])),
-      getStage2Tools()
-    );
+    console.log('📝 Stage 2 System Prompt (first 300 chars):', prompts.stage2System?.substring(0, 300));
+    console.log('📝 Stage 2 User Prompt template has TEXT_CONTENT:', prompts.stage2User?.includes('{{TEXT_CONTENT}}'));
+    console.log('📝 Text content length for Stage 2:', textContent?.length || 0);
     
-    const stage2Data = stage2Result ? JSON.parse(stage2Result.function.arguments) : { molecular_mechanisms: [], synergies: [], hierarchical_relations: [] };
+    let stage2Data: any = { molecular_mechanisms: [], synergies: [], hierarchical_relations: [] };
+    try {
+      const stage2UserPrompt = prompts.stage2User
+        .replace('{{TEXT_CONTENT}}', textContent)
+        .replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || []));
+      
+      console.log('📤 Calling Lovable AI for Stage 2...');
+      console.log('📝 Stage 2 User Prompt (first 500 chars):', stage2UserPrompt.substring(0, 500));
+      
+      const stage2Result = await callLovableAI(
+        prompts.stage2System,
+        stage2UserPrompt,
+        getStage2Tools()
+      );
+      
+      if (stage2Result) {
+        console.log('📊 Stage 2 raw function name:', stage2Result.function?.name);
+        console.log('📊 Stage 2 raw arguments (first 1000 chars):', stage2Result.function?.arguments?.substring(0, 1000));
+        stage2Data = JSON.parse(stage2Result.function.arguments);
+        console.log('📊 Stage 2 parsed mechanisms count:', stage2Data.molecular_mechanisms?.length || 0);
+        console.log('📊 Stage 2 parsed mechanisms:', JSON.stringify(stage2Data.molecular_mechanisms || []).substring(0, 500));
+      } else {
+        console.warn('⚠️ Stage 2 returned null result - AI may have failed to call the tool');
+      }
+    } catch (stage2Error: any) {
+      console.error('❌ Stage 2 error:', stage2Error);
+      console.error('❌ Stage 2 error stack:', stage2Error?.stack || 'no stack');
+    }
     console.log(`✅ Stage 2: ${stage2Data.molecular_mechanisms?.length || 0} mecanismos, ${stage2Data.synergies?.length || 0} sinergias`);
 
     // ==================== STAGE 3: Clinical Context ====================
