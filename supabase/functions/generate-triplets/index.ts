@@ -44,102 +44,117 @@ const VALID_RELATIONSHIPS = [
   'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'
 ];
 
-// Valid entity types from database constraint
-const VALID_ENTITY_TYPES = [
-  'nutraceutical', 'drug', 'chemical_compound', 'pathway', 'receptor', 'enzyme',
-  'gene_protein', 'mechanism', 'signaling_cascade', 'biological_effect', 'side_effect',
-  'clinical_outcome', 'condition', 'disease', 'breed', 'species', 'age_group', 'study'
+// Valid entity types from database CHECK constraint (CASE SENSITIVE!)
+// The constraint uses PascalCase values like 'Nutraceutical', 'Mechanism', etc.
+const VALID_CONSTRAINT_TYPES = [
+  'Nutraceutical', 'Condition', 'HealthCondition', 'Disease', 'Mechanism', 
+  'MolecularMechanism', 'Pathway', 'BiologicalProcess', 'Target', 'Compound', 
+  'Symptom', 'Treatment', 'Intervention'
 ];
 
-// Valid entity types per layer for better validation
-const LAYER_0_TYPES = ['nutraceutical', 'drug', 'chemical_compound'];
-const LAYER_1_TYPES = ['pathway', 'receptor', 'enzyme', 'gene_protein'];
-const LAYER_2_TYPES = ['mechanism', 'signaling_cascade'];
-const LAYER_3_TYPES = ['biological_effect', 'side_effect'];
-const LAYER_4_TYPES = ['clinical_outcome', 'condition', 'disease'];
-const CONTEXT_TYPES = ['breed', 'species', 'age_group', 'study'];
-
-// Map entity type to valid constraint values with intelligent fallbacks
+// Map entity type to valid CHECK CONSTRAINT values (PascalCase)
 function mapEntityType(entityType: string | null | undefined, entityName?: string): string {
-  if (!entityType) return 'mechanism'; // Default fallback
+  if (!entityType) return 'Mechanism'; // Default fallback
   
-  const normalized = entityType.toLowerCase().replace(/[\s-]+/g, '_');
+  const normalized = entityType.toLowerCase().replace(/[\s\-_]+/g, '');
   const nameLower = (entityName || '').toLowerCase();
   
-  // Check if entity name suggests a different type (contextual validation)
-  // This fixes cases where AI assigns wrong types like "chemical_compound" to "Mitochondrial ROS"
-  const nameBasedTypeHints: Record<string, string[]> = {
-    'biological_effect': ['ros', 'oxidative', 'stress', 'inflammation', 'damage', 'protection', 'reduction', 'increase', 'decrease', 'improvement', 'effect'],
-    'mechanism': ['signaling', 'cascade', 'pathway', 'activation', 'inhibition', 'phosphorylation', 'transcription', 'expression'],
-    'pathway': ['nf-κb', 'nf-kb', 'nfkb', 'ppar', 'ampk', 'mtor', 'mapk', 'jak', 'stat', 'pi3k', 'akt', 'wnt', 'notch', 'hedgehog'],
-    'enzyme': ['ase', 'kinase', 'phosphatase', 'synthase', 'oxidase', 'reductase', 'transferase', 'hydrolase', 'cox', 'lox'],
-    'receptor': ['receptor', 'tlr', 'gpcr', 'channel'],
-    'gene_protein': ['gene', 'protein', 'mrna', 'cytokine', 'interleukin', 'il-', 'tnf', 'tgf', 'ifn'],
-    'condition': ['disease', 'syndrome', 'disorder', 'obesity', 'diabetes', 'arthritis', 'cancer'],
-    'clinical_outcome': ['health', 'outcome', 'improvement', 'recovery', 'survival', 'mortality'],
-    'nutraceutical': ['astaxanthin', 'curcumin', 'resveratrol', 'omega', 'vitamin', 'mineral', 'extract', 'supplement'],
+  // Mapping from various inputs to valid constraint values
+  const typeMapping: Record<string, string> = {
+    // Nutraceutical variants
+    'nutraceutical': 'Nutraceutical',
+    'supplement': 'Nutraceutical',
+    'nutrient': 'Nutraceutical',
+    'vitamin': 'Nutraceutical',
+    'mineral': 'Nutraceutical',
+    'antioxidant': 'Nutraceutical',
+    'drug': 'Compound',
+    'chemicalcompound': 'Compound',
+    'compound': 'Compound',
+    'chemical': 'Compound',
+    
+    // Condition/Disease variants
+    'condition': 'Condition',
+    'healthcondition': 'HealthCondition',
+    'disease': 'Disease',
+    'disorder': 'Condition',
+    'syndrome': 'Condition',
+    'clinicaloutcome': 'Condition',
+    'outcome': 'Condition',
+    
+    // Mechanism variants  
+    'mechanism': 'Mechanism',
+    'molecularmechanism': 'MolecularMechanism',
+    'signalingcascade': 'Mechanism',
+    'signaling': 'Mechanism',
+    'cascade': 'Mechanism',
+    'action': 'Mechanism',
+    'process': 'BiologicalProcess',
+    'biologicalprocess': 'BiologicalProcess',
+    'cellularprocess': 'BiologicalProcess',
+    'metabolicprocess': 'BiologicalProcess',
+    
+    // Pathway variants
+    'pathway': 'Pathway',
+    'signalingpathway': 'Pathway',
+    
+    // Target variants (receptors, enzymes, genes)
+    'target': 'Target',
+    'receptor': 'Target',
+    'enzyme': 'Target',
+    'geneprotein': 'Target',
+    'protein': 'Target',
+    'gene': 'Target',
+    
+    // Biological effect variants
+    'biologicaleffect': 'BiologicalProcess',
+    'effect': 'BiologicalProcess',
+    'sideeffect': 'Symptom',
+    'adverseeffect': 'Symptom',
+    
+    // Treatment/Intervention variants
+    'treatment': 'Treatment',
+    'intervention': 'Intervention',
+    'therapy': 'Treatment',
+    
+    // Symptom variants
+    'symptom': 'Symptom',
+    'toxicity': 'Symptom',
   };
   
-  // First check if name suggests a specific type
-  for (const [hintType, keywords] of Object.entries(nameBasedTypeHints)) {
-    if (keywords.some(kw => nameLower.includes(kw))) {
-      // If the normalized type is clearly wrong for this entity, use the hint
-      if (normalized === 'chemical_compound' && !LAYER_0_TYPES.includes(hintType)) {
-        console.log(`Type correction: "${entityName}" (${entityType}) → ${hintType} (based on name)`);
-        return hintType;
-      }
+  // Direct mapping
+  if (typeMapping[normalized]) {
+    return typeMapping[normalized];
+  }
+  
+  // Check if entity name suggests a specific type
+  const nameBasedHints: Record<string, string> = {
+    'Nutraceutical': 'astaxanthin|curcumin|resveratrol|omega|vitamin|mineral|extract|supplement',
+    'Condition': 'obesity|diabetes|arthritis|cancer|disease|syndrome|disorder|hyperlipidemia|dysfunction',
+    'Mechanism': 'signaling|cascade|activation|inhibition|phosphorylation|transcription|peroxidation',
+    'Pathway': 'nf-κb|nf-kb|nfkb|ppar|ampk|mtor|mapk|jak|stat|pi3k|akt|β-oxidation|beta-oxidation',
+    'Target': 'receptor|enzyme|kinase|synthase|oxidase|reductase|transferase|tlr|cpt-1|cpt1|alt|ldh|mda',
+    'BiologicalProcess': 'ros|oxidative|stress|inflammation|antioxidant|function|capacity|effect',
+  };
+  
+  for (const [hintType, pattern] of Object.entries(nameBasedHints)) {
+    const regex = new RegExp(pattern, 'i');
+    if (regex.test(nameLower)) {
+      console.log(`Type mapping: "${entityName}" (${entityType}) → ${hintType} (name-based)`);
+      return hintType;
     }
   }
   
-  // Direct match to valid types
-  if (VALID_ENTITY_TYPES.includes(normalized)) {
-    return normalized;
-  }
-  
-  // Common mappings
-  const mappings: Record<string, string> = {
-    'compound': 'nutraceutical', // Changed from chemical_compound to be safer
-    'chemical': 'nutraceutical',
-    'supplement': 'nutraceutical',
-    'nutrient': 'nutraceutical',
-    'vitamin': 'nutraceutical',
-    'mineral': 'nutraceutical',
-    'antioxidant': 'nutraceutical',
-    'protein': 'gene_protein',
-    'gene': 'gene_protein',
-    'target': 'pathway',
-    'molecular_target': 'pathway',
-    'signaling_pathway': 'pathway',
-    'cascade': 'signaling_cascade',
-    'signal': 'signaling_cascade',
-    'effect': 'biological_effect',
-    'outcome': 'clinical_outcome',
-    'result': 'clinical_outcome',
-    'health_condition': 'condition',
-    'health_outcome': 'clinical_outcome',
-    'therapeutic_outcome': 'clinical_outcome',
-    'adverse_effect': 'side_effect',
-    'adverse_event': 'side_effect',
-    'toxicity': 'side_effect',
-    'action': 'mechanism',
-    'process': 'mechanism',
-    'biological_process': 'mechanism',
-    'cellular_process': 'mechanism',
-    'metabolic_process': 'mechanism',
-    'molecular': 'mechanism',
-    'reactive_oxygen': 'biological_effect',
-    'oxidative_stress': 'biological_effect',
-  };
-  
-  for (const [key, value] of Object.entries(mappings)) {
-    if (normalized.includes(key) || (entityName && entityName.toLowerCase().includes(key.replace(/_/g, ' ')))) {
+  // Fallback based on partial match
+  for (const [key, value] of Object.entries(typeMapping)) {
+    if (normalized.includes(key)) {
       return value;
     }
   }
   
-  // Default to mechanism as safest fallback
-  console.log(`Unknown entity type "${entityType}" for "${entityName}", defaulting to "mechanism"`);
-  return 'mechanism';
+  // Ultimate fallback
+  console.log(`Unknown entity type "${entityType}" for "${entityName}", defaulting to "Mechanism"`);
+  return 'Mechanism';
 }
 
 // Valid evidence levels from database constraint
