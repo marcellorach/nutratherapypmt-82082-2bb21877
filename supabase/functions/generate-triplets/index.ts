@@ -51,21 +51,55 @@ const VALID_ENTITY_TYPES = [
   'clinical_outcome', 'condition', 'disease', 'breed', 'species', 'age_group', 'study'
 ];
 
-// Map entity type to valid constraint values
-function mapEntityType(entityType: string | null | undefined): string {
+// Valid entity types per layer for better validation
+const LAYER_0_TYPES = ['nutraceutical', 'drug', 'chemical_compound'];
+const LAYER_1_TYPES = ['pathway', 'receptor', 'enzyme', 'gene_protein'];
+const LAYER_2_TYPES = ['mechanism', 'signaling_cascade'];
+const LAYER_3_TYPES = ['biological_effect', 'side_effect'];
+const LAYER_4_TYPES = ['clinical_outcome', 'condition', 'disease'];
+const CONTEXT_TYPES = ['breed', 'species', 'age_group', 'study'];
+
+// Map entity type to valid constraint values with intelligent fallbacks
+function mapEntityType(entityType: string | null | undefined, entityName?: string): string {
   if (!entityType) return 'mechanism'; // Default fallback
   
   const normalized = entityType.toLowerCase().replace(/[\s-]+/g, '_');
+  const nameLower = (entityName || '').toLowerCase();
   
-  // Direct match
+  // Check if entity name suggests a different type (contextual validation)
+  // This fixes cases where AI assigns wrong types like "chemical_compound" to "Mitochondrial ROS"
+  const nameBasedTypeHints: Record<string, string[]> = {
+    'biological_effect': ['ros', 'oxidative', 'stress', 'inflammation', 'damage', 'protection', 'reduction', 'increase', 'decrease', 'improvement', 'effect'],
+    'mechanism': ['signaling', 'cascade', 'pathway', 'activation', 'inhibition', 'phosphorylation', 'transcription', 'expression'],
+    'pathway': ['nf-κb', 'nf-kb', 'nfkb', 'ppar', 'ampk', 'mtor', 'mapk', 'jak', 'stat', 'pi3k', 'akt', 'wnt', 'notch', 'hedgehog'],
+    'enzyme': ['ase', 'kinase', 'phosphatase', 'synthase', 'oxidase', 'reductase', 'transferase', 'hydrolase', 'cox', 'lox'],
+    'receptor': ['receptor', 'tlr', 'gpcr', 'channel'],
+    'gene_protein': ['gene', 'protein', 'mrna', 'cytokine', 'interleukin', 'il-', 'tnf', 'tgf', 'ifn'],
+    'condition': ['disease', 'syndrome', 'disorder', 'obesity', 'diabetes', 'arthritis', 'cancer'],
+    'clinical_outcome': ['health', 'outcome', 'improvement', 'recovery', 'survival', 'mortality'],
+    'nutraceutical': ['astaxanthin', 'curcumin', 'resveratrol', 'omega', 'vitamin', 'mineral', 'extract', 'supplement'],
+  };
+  
+  // First check if name suggests a specific type
+  for (const [hintType, keywords] of Object.entries(nameBasedTypeHints)) {
+    if (keywords.some(kw => nameLower.includes(kw))) {
+      // If the normalized type is clearly wrong for this entity, use the hint
+      if (normalized === 'chemical_compound' && !LAYER_0_TYPES.includes(hintType)) {
+        console.log(`Type correction: "${entityName}" (${entityType}) → ${hintType} (based on name)`);
+        return hintType;
+      }
+    }
+  }
+  
+  // Direct match to valid types
   if (VALID_ENTITY_TYPES.includes(normalized)) {
     return normalized;
   }
   
   // Common mappings
   const mappings: Record<string, string> = {
-    'compound': 'chemical_compound',
-    'chemical': 'chemical_compound',
+    'compound': 'nutraceutical', // Changed from chemical_compound to be safer
+    'chemical': 'nutraceutical',
     'supplement': 'nutraceutical',
     'nutrient': 'nutraceutical',
     'vitamin': 'nutraceutical',
@@ -92,16 +126,19 @@ function mapEntityType(entityType: string | null | undefined): string {
     'biological_process': 'mechanism',
     'cellular_process': 'mechanism',
     'metabolic_process': 'mechanism',
+    'molecular': 'mechanism',
+    'reactive_oxygen': 'biological_effect',
+    'oxidative_stress': 'biological_effect',
   };
   
   for (const [key, value] of Object.entries(mappings)) {
-    if (normalized.includes(key) || entityType.toLowerCase().includes(key.replace(/_/g, ' '))) {
+    if (normalized.includes(key) || (entityName && entityName.toLowerCase().includes(key.replace(/_/g, ' ')))) {
       return value;
     }
   }
   
   // Default to mechanism as safest fallback
-  console.log(`Unknown entity type "${entityType}", defaulting to "mechanism"`);
+  console.log(`Unknown entity type "${entityType}" for "${entityName}", defaulting to "mechanism"`);
   return 'mechanism';
 }
 
@@ -686,11 +723,13 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
       // Determine auto-approval
       const autoApproved = extractionConfidence >= 0.85 && kgMatchScore >= 0.5;
 
-      // Apply entity type mapping to ensure valid values
-      const validatedSubjectType = mapEntityType(subjectType);
-      const validatedObjectType = mapEntityType(objectType);
+      // Apply entity type mapping to ensure valid values - pass entity name for contextual validation
+      const validatedSubjectType = mapEntityType(subjectType, t.subject_name);
+      const validatedObjectType = mapEntityType(objectType, t.object_name);
       const validatedSubjectLayer = ENTITY_LAYERS[validatedSubjectType] || 'layer_2_mechanism';
       const validatedObjectLayer = ENTITY_LAYERS[validatedObjectType] || 'layer_2_mechanism';
+      
+      console.log(`📊 Triplet: ${t.subject_name} (${subjectType}→${validatedSubjectType}) ${t.predicate} ${t.object_name} (${objectType}→${validatedObjectType})`);
 
       return {
         study_id: studyId,
