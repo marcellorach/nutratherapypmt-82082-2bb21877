@@ -280,17 +280,52 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
         </label>
       </div>
 
-      {/* Legenda */}
-      <Alert className="bg-blue-50 border-blue-200">
-        <Info className="h-4 w-4 text-blue-600" />
-        <AlertDescription className="text-sm text-blue-800">
-          <strong>Legenda de Setas:</strong> 
-          🟢 Estimulação/Aumento (→) | 
-          🔴 Inibição/Redução (⊣) | 
-          🟣 Modulação (⊸ tracejado)<br/>
-          <strong>Nós tracejados</strong> = Dados inferidos de interações mencionadas
-        </AlertDescription>
-      </Alert>
+      {/* Legenda Completa */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Legenda de Tipos de Setas */}
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-blue-800">
+            <strong>Tipo de Relação:</strong><br/>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-6 h-0.5 bg-emerald-500 inline-block"></span> Estimulação (→)
+            </span> | 
+            <span className="inline-flex items-center gap-1 ml-1">
+              <span className="w-6 h-0.5 bg-red-500 inline-block"></span> Inibição (⊣)
+            </span> | 
+            <span className="inline-flex items-center gap-1 ml-1">
+              <span className="w-6 h-0.5 bg-indigo-500 inline-block border-dashed border-t-2 border-indigo-500" style={{ height: 0, borderStyle: 'dashed' }}></span> Modulação
+            </span><br/>
+            <span className="text-xs opacity-75">Nós tracejados = Dados inferidos</span>
+          </AlertDescription>
+        </Alert>
+
+        {/* Legenda de Espessura (Confiança/Evidência) */}
+        <Alert className="bg-amber-50 border-amber-200">
+          <Info className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-sm text-amber-800">
+            <strong>Espessura = Confiança:</strong>
+            <div className="flex items-center gap-3 mt-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="w-8 bg-gray-600 rounded" style={{ height: '1px' }}></span>
+                <span className="text-xs">Baixa (≤30%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-8 bg-gray-600 rounded" style={{ height: '2px' }}></span>
+                <span className="text-xs">Média (40-60%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-8 bg-gray-600 rounded" style={{ height: '3px' }}></span>
+                <span className="text-xs">Alta (70-85%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-8 bg-gray-600 rounded" style={{ height: '5px' }}></span>
+                <span className="text-xs">Muito Alta (≥90%)</span>
+              </div>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
       
       <div 
         ref={containerRef} 
