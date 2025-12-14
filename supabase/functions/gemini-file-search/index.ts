@@ -882,13 +882,14 @@ async function extractWithFileSearch(
    - Specific efficacy description with numbers if available
 
 5️⃣ INTERACTIONS (Biological Chain Mapping - MOST CRITICAL):
-   Create EXPLICIT step-by-step chains, for example:
+   Create EXPLICIT step-by-step chains based on ACTUAL data from the study, for example:
    
-   Chain 1: Astaxanthin → [inhibits] → β-oxidation ROS
-   Chain 2: ↓ β-oxidation ROS → [leads_to] → ↓ MDA (peroxidation)
-   Chain 3: ↓ MDA → [leads_to] → ↓ LDH (cell damage marker)
-   Chain 4: ↓ LDH → [leads_to] → Improved hepatic function
+   Chain 1: [Compound X] → [inhibits] → [Target pathway ROS]
+   Chain 2: ↓ [Target] → [leads_to] → ↓ [Biomarker] (peroxidation)
+   Chain 3: ↓ [Biomarker] → [leads_to] → ↓ [Clinical marker]
+   Chain 4: ↓ [Clinical marker] → [leads_to] → [Improved outcome]
    
+   IMPORTANT: Replace all [bracketed placeholders] with ACTUAL compounds, pathways, and biomarkers found IN THIS STUDY. Do NOT use placeholder text in your output.
    Types: inhibition, stimulation, modulation
    Include confidence (0-5) for each interaction
 

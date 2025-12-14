@@ -324,9 +324,11 @@ Read the study carefully and identify EVERY biological pathway, molecular mechan
 
 ### 1. COMPLETE SIGNALING CASCADES
 Write out full pathway chains using arrow notation, like:
-- Astaxanthin → inhibits NF-κB → reduces TNF-α → decreases inflammation → improves joint health
-- NEFA accumulation → activates TLR4 → triggers MyD88 → activates NF-κB → increases IL-6 → chronic inflammation
-- Omega-3 → incorporates into cell membrane → displaces arachidonic acid → reduces PGE2 → anti-inflammatory effect
+- [Compound A] → inhibits [Pathway X] → reduces [Cytokine Y] → decreases inflammation → improves [Condition Z]
+- [Metabolite] accumulation → activates [Receptor] → triggers [Signaling Cascade] → activates [Transcription Factor] → increases [Cytokine] → chronic inflammation
+- [Compound B] → incorporates into cell membrane → displaces [Lipid] → reduces [Mediator] → anti-inflammatory effect
+
+IMPORTANT: Replace the bracketed placeholders above with the ACTUAL compounds, pathways, and conditions found IN THE STUDY TEXT. Do NOT use these placeholder names in your output.
 
 ### 2. MOLECULAR TARGETS
 For each compound, list:
@@ -459,11 +461,13 @@ For EVERY therapeutic relationship (X TREATS condition), you MUST generate ALL i
 - L2 (Mechanism) → L3 (Effect): PRODUCES, LEADS_TO, CAUSES
 - L3 (Effect) → L4 (Outcome): TREATS, PREVENTS, AMELIORATES
 
-Example: If "Astaxanthin treats obesity", generate:
-1. {subject_type: "nutraceutical", subject_name: "Astaxanthin", predicate: "ACTIVATES", object_type: "receptor", object_name: "PPARγ"}
-2. {subject_type: "receptor", subject_name: "PPARγ", predicate: "TRIGGERS", object_type: "mechanism", object_name: "Fatty acid β-oxidation"}
-3. {subject_type: "mechanism", subject_name: "Fatty acid β-oxidation", predicate: "PRODUCES", object_type: "biological_effect", object_name: "Lipid metabolism improvement"}
-4. {subject_type: "biological_effect", subject_name: "Lipid metabolism improvement", predicate: "TREATS", object_type: "condition", object_name: "Obesity"}
+Example: If "[Compound] treats [Condition]", generate the FULL CHAIN:
+1. {subject_type: "nutraceutical", subject_name: "[Compound]", predicate: "ACTIVATES", object_type: "receptor", object_name: "[Target Receptor]"}
+2. {subject_type: "receptor", subject_name: "[Target Receptor]", predicate: "TRIGGERS", object_type: "mechanism", object_name: "[Metabolic Pathway]"}
+3. {subject_type: "mechanism", subject_name: "[Metabolic Pathway]", predicate: "PRODUCES", object_type: "biological_effect", object_name: "[Measurable Effect]"}
+4. {subject_type: "biological_effect", subject_name: "[Measurable Effect]", predicate: "TREATS", object_type: "condition", object_name: "[Condition]"}
+
+IMPORTANT: Replace ALL bracketed placeholders with ACTUAL entities extracted from the study. Do NOT output "[Compound]" or any placeholder text.
 
 ### RULE 2: MANDATORY PROPERTIES FOR EACH TRIPLET
 EVERY triplet MUST include these properties:
@@ -478,39 +482,35 @@ EVERY triplet MUST include these properties:
 
 ### RULE 3: DO NOT SKIP STEPS
 NEVER create direct L0→L4 triplets without intermediate steps. Example of WRONG:
-❌ {subject_type: "nutraceutical", subject_name: "Omega-3", predicate: "TREATS", object_type: "condition", object_name: "Arthritis"}
+❌ {subject_type: "nutraceutical", subject_name: "X", predicate: "TREATS", object_type: "condition", object_name: "Y"}
 
 CORRECT approach - generate the full chain:
-✅ Omega-3 → INHIBITS → COX-2 (enzyme)
-✅ COX-2 → REGULATES → Prostaglandin synthesis (mechanism)
-✅ Prostaglandin synthesis → PRODUCES → Anti-inflammatory effect (biological_effect)
-✅ Anti-inflammatory effect → TREATS → Arthritis (condition)
+✅ [Compound] → INHIBITS → [Enzyme] (enzyme)
+✅ [Enzyme] → REGULATES → [Pathway] (mechanism)
+✅ [Pathway] → PRODUCES → [Effect] (biological_effect)
+✅ [Effect] → TREATS → [Condition] (condition)
 
 ## OUTPUT FORMAT
+Return a JSON object with this structure (replace ALL values with actual data from the study):
 {
   "triplets": [
     {
       "subject_type": "nutraceutical",
-      "subject_name": "Astaxanthin",
+      "subject_name": "actual_compound_from_study",
       "predicate": "ACTIVATES",
       "object_type": "receptor",
-      "object_name": "PPARγ",
+      "object_name": "actual_receptor_from_study",
       "properties": {
         "intensity": 0.8,
         "confidence": 0.9,
         "evidence_level": "rct",
         "species_context": ["canine"],
-        "dose_range": {"min": 10, "max": 20, "unit": "mg/kg/day"},
-        "ic50": "5 µM"
-      },
-      "mechanism_path": [
-        {"from": "Astaxanthin", "relation": "ACTIVATES", "to": "PPARγ"},
-        {"from": "PPARγ", "relation": "TRIGGERS", "to": "β-oxidation"}
-      ]
+        "dose_range": {"min": 10, "max": 20, "unit": "mg/kg/day"}
+      }
     }
   ],
   "pathway_chains": [
-    "Astaxanthin → activates PPARγ → triggers fatty acid β-oxidation → increases lipid metabolism → treats obesity"
+    "compound → action → target → effect → outcome"
   ],
   "synergies": [],
   "contraindications": []
