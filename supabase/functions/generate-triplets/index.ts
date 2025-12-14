@@ -235,6 +235,38 @@ function mapDirection(direction: string | null | undefined, predicate: string): 
   return null;
 }
 
+// Determine layer from validated PascalCase entity type
+function determineLayerFromType(validatedType: string): string {
+  const layerMapping: Record<string, string> = {
+    // Layer 0 - Compounds
+    'Nutraceutical': 'layer_0_compound',
+    'Compound': 'layer_0_compound',
+    
+    // Layer 1 - Targets
+    'Target': 'layer_1_target',
+    'Pathway': 'layer_1_target',
+    
+    // Layer 2 - Mechanisms
+    'Mechanism': 'layer_2_mechanism',
+    'MolecularMechanism': 'layer_2_mechanism',
+    'BiologicalProcess': 'layer_2_mechanism',
+    
+    // Layer 3 - Effects
+    'Symptom': 'layer_3_effect',
+    
+    // Layer 4 - Outcomes
+    'Condition': 'layer_4_outcome',
+    'HealthCondition': 'layer_4_outcome',
+    'Disease': 'layer_4_outcome',
+    
+    // Context
+    'Treatment': 'context',
+    'Intervention': 'context'
+  };
+  
+  return layerMapping[validatedType] || 'layer_2_mechanism';
+}
+
 /**
  * VetGraphRAG Edge Function - TWO-PHASE Hierarchical Triplet Extraction
  * Phase 1: Free discovery without constraints to capture ALL biological pathways
@@ -400,16 +432,17 @@ Be thorough - capture EVERY biological relationship mentioned in this study.`;
     
     console.log(`🔄 PHASE 2: Structuring discovered knowledge into triplets`);
 
-    const phase2SystemPrompt = `You are a knowledge graph expert. Convert the biological analysis into structured triplets for a VetGraphRAG database.
+    const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a veterinary nutraceutical knowledge base. Convert the biological analysis into structured triplets.
 
-## ENTITY TYPES (use exactly these)
+## ENTITY TYPES (use EXACTLY these lowercase values)
 - Layer 0 (Compounds): nutraceutical, drug, chemical_compound
 - Layer 1 (Targets): pathway, receptor, enzyme, gene_protein
 - Layer 2 (Mechanisms): mechanism, signaling_cascade
 - Layer 3 (Effects): biological_effect, side_effect
 - Layer 4 (Outcomes): condition, disease, clinical_outcome
+- Context: breed, species, age_group, study
 
-## RELATIONSHIP TYPES (use exactly these predicates)
+## RELATIONSHIP TYPES (use EXACTLY these predicates)
 Direct Actions: INHIBITS, ACTIVATES, MODULATES, BINDS_TO, BLOCKS, UPREGULATES, DOWNREGULATES
 Cascade: TRIGGERS, PARTICIPATES_IN, REGULATES, PRODUCES, LEADS_TO, CAUSES
 Therapeutic: TREATS, PREVENTS, SUPPORTS, AMELIORATES, MANAGES
@@ -417,65 +450,101 @@ Adverse: WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT, AGGRAVATES
 Interactions: SYNERGIZES_WITH, ANTAGONIZES, ENHANCES_BIOAVAILABILITY, REDUCES_BIOAVAILABILITY, REQUIRES, POTENTIATES
 Context: PREDISPOSED_IN, COMMON_IN, CITED_IN, STUDIED_IN
 
-## CRITICAL RULES
-1. For each pathway chain (A → B → C → D), create INDIVIDUAL triplets for each step:
-   - A → B (one triplet)
-   - B → C (one triplet)
-   - C → D (one triplet)
-2. Include quantitative properties when available (efficacy_score 0-1, intensity 0-1, confidence 0-1)
-3. Include species_context array (e.g., ["canine"])
-4. Include dose_range if mentioned: {"min": X, "max": Y, "unit": "mg/kg"}
-5. Include evidence_level: "high", "moderate", "low", or "very_low"
-6. Include IC50, EC50, Ki values in properties if mentioned
+## CRITICAL RULES - HIERARCHICAL CHAINS (L0→L1→L2→L3→L4)
 
-## OUTPUT FORMAT (JSON)
+### RULE 1: ALWAYS GENERATE COMPLETE HIERARCHICAL CHAINS
+For EVERY therapeutic relationship (X TREATS condition), you MUST generate ALL intermediate steps:
+- L0 (Compound) → L1 (Target): BINDS_TO, INHIBITS, ACTIVATES
+- L1 (Target) → L2 (Mechanism): TRIGGERS, REGULATES, PARTICIPATES_IN
+- L2 (Mechanism) → L3 (Effect): PRODUCES, LEADS_TO, CAUSES
+- L3 (Effect) → L4 (Outcome): TREATS, PREVENTS, AMELIORATES
+
+Example: If "Astaxanthin treats obesity", generate:
+1. {subject_type: "nutraceutical", subject_name: "Astaxanthin", predicate: "ACTIVATES", object_type: "receptor", object_name: "PPARγ"}
+2. {subject_type: "receptor", subject_name: "PPARγ", predicate: "TRIGGERS", object_type: "mechanism", object_name: "Fatty acid β-oxidation"}
+3. {subject_type: "mechanism", subject_name: "Fatty acid β-oxidation", predicate: "PRODUCES", object_type: "biological_effect", object_name: "Lipid metabolism improvement"}
+4. {subject_type: "biological_effect", subject_name: "Lipid metabolism improvement", predicate: "TREATS", object_type: "condition", object_name: "Obesity"}
+
+### RULE 2: MANDATORY PROPERTIES FOR EACH TRIPLET
+EVERY triplet MUST include these properties:
+- species_context: REQUIRED - Array of species studied. Use ["canine"], ["feline"], ["equine"], or combinations. DEFAULT to ["canine"] if unclear.
+- evidence_level: REQUIRED - One of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"
+- confidence: REQUIRED - 0.0 to 1.0, how confident based on study data
+- intensity: OPTIONAL - 0.0 to 1.0, strength of effect if mentioned
+- dose_range: REQUIRED if doses mentioned - {"min": X, "max": Y, "unit": "mg/kg/day"}
+- ic50: OPTIONAL - IC50 value if mentioned (e.g., "5 µM")
+- ec50: OPTIONAL - EC50 value if mentioned
+- ki: OPTIONAL - Ki value if mentioned
+
+### RULE 3: DO NOT SKIP STEPS
+NEVER create direct L0→L4 triplets without intermediate steps. Example of WRONG:
+❌ {subject_type: "nutraceutical", subject_name: "Omega-3", predicate: "TREATS", object_type: "condition", object_name: "Arthritis"}
+
+CORRECT approach - generate the full chain:
+✅ Omega-3 → INHIBITS → COX-2 (enzyme)
+✅ COX-2 → REGULATES → Prostaglandin synthesis (mechanism)
+✅ Prostaglandin synthesis → PRODUCES → Anti-inflammatory effect (biological_effect)
+✅ Anti-inflammatory effect → TREATS → Arthritis (condition)
+
+## OUTPUT FORMAT
 {
   "triplets": [
     {
       "subject_type": "nutraceutical",
       "subject_name": "Astaxanthin",
-      "predicate": "INHIBITS",
-      "object_type": "pathway",
-      "object_name": "NF-κB signaling",
+      "predicate": "ACTIVATES",
+      "object_type": "receptor",
+      "object_name": "PPARγ",
       "properties": {
         "intensity": 0.8,
         "confidence": 0.9,
-        "evidence_level": "high",
+        "evidence_level": "rct",
         "species_context": ["canine"],
         "dose_range": {"min": 10, "max": 20, "unit": "mg/kg/day"},
         "ic50": "5 µM"
       },
       "mechanism_path": [
-        {"from": "Astaxanthin", "relation": "INHIBITS", "to": "NF-κB signaling"},
-        {"from": "NF-κB signaling", "relation": "REDUCES", "to": "TNF-α production"}
+        {"from": "Astaxanthin", "relation": "ACTIVATES", "to": "PPARγ"},
+        {"from": "PPARγ", "relation": "TRIGGERS", "to": "β-oxidation"}
       ]
     }
   ],
   "pathway_chains": [
-    "Astaxanthin → inhibits IKK-β → prevents IκB phosphorylation → blocks NF-κB nuclear translocation → reduces TNF-α → decreases inflammation"
+    "Astaxanthin → activates PPARγ → triggers fatty acid β-oxidation → increases lipid metabolism → treats obesity"
   ],
   "synergies": [],
   "contraindications": []
 }`;
 
-    const phase2UserPrompt = `Convert this biological analysis into structured triplets:
+    const phase2UserPrompt = `Convert this biological analysis into structured triplets for VetGraphRAG:
 
 ## ORIGINAL STUDY
 Title: ${study.title}
+Year: ${study.year || 'N/A'}
+Journal: ${study.journal || 'N/A'}
 
 ## DISCOVERED BIOLOGICAL KNOWLEDGE
 ${freeDiscoveryText}
 
 ---
 
-Generate comprehensive triplets covering:
-1. ALL signaling pathway steps (break chains into individual triplets)
-2. ALL molecular target interactions
-3. ALL therapeutic relationships with efficacy scores
-4. ALL adverse effects and contraindications
-5. ALL compound synergies/interactions
+## INSTRUCTIONS
+1. Generate COMPLETE HIERARCHICAL CHAINS (L0→L1→L2→L3→L4) for each therapeutic relationship
+2. NEVER skip intermediate steps - always show the full molecular pathway
+3. EVERY triplet MUST have species_context (default to ["canine"] if unclear) and evidence_level
+4. Include dose_range when dosing information is available
+5. Include IC50/EC50/Ki values when mentioned
+6. Break all pathway chains into individual triplets
 
-IMPORTANT: Include the full pathway_chains array showing the complete chains discovered.`;
+Generate triplets covering:
+- ALL molecular target interactions (compound → receptor/enzyme)
+- ALL mechanism activations (target → mechanism)
+- ALL biological effects (mechanism → effect)
+- ALL therapeutic outcomes (effect → condition)
+- ALL adverse effects and contraindications
+- ALL compound synergies/interactions
+
+IMPORTANT: The pathway_chains array should show the complete discovered chains in readable format.`;
 
     // Define tool for structured triplet extraction (recommended approach for Gemini 3)
     const extractTripletsToolDef = {
@@ -741,10 +810,19 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
       // Apply entity type mapping to ensure valid values - pass entity name for contextual validation
       const validatedSubjectType = mapEntityType(subjectType, t.subject_name);
       const validatedObjectType = mapEntityType(objectType, t.object_name);
-      const validatedSubjectLayer = ENTITY_LAYERS[validatedSubjectType] || 'layer_2_mechanism';
-      const validatedObjectLayer = ENTITY_LAYERS[validatedObjectType] || 'layer_2_mechanism';
       
-      console.log(`📊 Triplet: ${t.subject_name} (${subjectType}→${validatedSubjectType}) ${t.predicate} ${t.object_name} (${objectType}→${validatedObjectType})`);
+      // CRITICAL: Use original lowercase type for layer mapping, then fall back to validated type
+      const subjectLayerKey = subjectType.toLowerCase().replace(/[\s\-_]+/g, '');
+      const objectLayerKey = objectType.toLowerCase().replace(/[\s\-_]+/g, '');
+      const validatedSubjectLayer = ENTITY_LAYERS[subjectLayerKey] || ENTITY_LAYERS[subjectType] || determineLayerFromType(validatedSubjectType);
+      const validatedObjectLayer = ENTITY_LAYERS[objectLayerKey] || ENTITY_LAYERS[objectType] || determineLayerFromType(validatedObjectType);
+      
+      // Validate mandatory fields for quality assurance
+      const speciesContext = props.species_context || (props.species ? [props.species] : ['canine']); // Default to canine
+      const evidenceLevel = mapEvidenceLevel(props.evidence_level) || 'in_vitro'; // Default evidence level
+      
+      console.log(`📊 Triplet: ${t.subject_name} [${validatedSubjectLayer}] -${predicate}-> ${t.object_name} [${validatedObjectLayer}]`);
+      console.log(`   └─ Species: ${JSON.stringify(speciesContext)}, Evidence: ${evidenceLevel}, Confidence: ${props.confidence || 0.7}`);
 
       return {
         study_id: studyId,
@@ -757,13 +835,13 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
         object_name: t.object_name,
         object_id: objectId,
         object_layer: validatedObjectLayer,
-        // Hierarchical fields
+        // Hierarchical fields - with validated mandatory fields
         intensity: props.intensity || null,
         direction: mapDirection(props.direction, predicate),
-        evidence_level: mapEvidenceLevel(props.evidence_level),
+        evidence_level: evidenceLevel,
         dose_dependent: props.dose_dependent || false,
         dose_range: props.dose_range || null,
-        species_context: props.species_context || null,
+        species_context: speciesContext,
         mechanism_path: t.mechanism_path || null,
         relationship_category: getRelationshipCategory(predicate),
         // Synergy data if applicable
