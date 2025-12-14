@@ -13,13 +13,14 @@ interface Neo4jCredentials {
 }
 
 interface GraphRAGRequest {
-  queryType: 'path' | 'cypher' | 'entity' | 'context';
+  queryType: 'path' | 'cypher' | 'entity' | 'context' | 'byStudy';
   sourceEntity?: string;
   targetEntity?: string;
   entityType?: string;
   cypherQuery?: string;
   parameters?: Record<string, any>;
   maxDepth?: number;
+  studyId?: string;
 }
 
 interface GraphNode {
@@ -237,14 +238,25 @@ serve(async (req) => {
       case 'context':
         // Buscar contexto rico para GraphRAG
         cypherQuery = `
-          MATCH (n:Nutraceutical)-[r1:TREATS|PREVENTS|SUPPORTS]->(c:Condition)
-          WHERE n.name =~ $pattern OR c.name =~ $pattern
-          OPTIONAL MATCH (n)-[r2:HAS_MECHANISM]->(m:Mechanism)
-          OPTIONAL MATCH (n)-[r3:CAUSES_EFFECT]->(e:Effect)
-          RETURN n, r1, c, r2, m, r3, e
+          MATCH (n)-[r]->(m)
+          WHERE n.name =~ $pattern OR m.name =~ $pattern
+          RETURN n, r, m
           LIMIT 100
         `;
         parameters = { pattern: `(?i).*${request.sourceEntity || ''}.*` };
+        break;
+
+      case 'byStudy':
+        // Buscar todos os nós e relacionamentos por study_id
+        if (!request.studyId) {
+          throw new Error('studyId required for byStudy query');
+        }
+        cypherQuery = `
+          MATCH (subject)-[rel {study_id: $studyId}]->(object)
+          RETURN subject, rel, object
+          LIMIT 200
+        `;
+        parameters = { studyId: request.studyId };
         break;
 
       case 'cypher':

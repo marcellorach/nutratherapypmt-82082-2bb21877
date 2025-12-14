@@ -852,6 +852,33 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
 
     console.log(`📤 RESPONSE: tripletsGenerated=${tripletsGenerated}, autoApproved=${autoApprovedCount}`);
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // AUTO-SYNC TO NEO4J: Automatically sync triplets after successful generation
+    // ═══════════════════════════════════════════════════════════════════════════
+    let neo4jSyncResult = null;
+    try {
+      console.log(`🔄 AUTO-SYNC: Starting Neo4j sync for study ${studyId}...`);
+      
+      const syncResponse = await fetch(`${supabaseUrl}/functions/v1/sync-study-to-neo4j`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ studyId })
+      });
+      
+      if (syncResponse.ok) {
+        neo4jSyncResult = await syncResponse.json();
+        console.log(`✅ AUTO-SYNC: Successfully synced ${neo4jSyncResult.synced || 0} triplets to Neo4j`);
+      } else {
+        const errorText = await syncResponse.text();
+        console.warn(`⚠️ AUTO-SYNC: Neo4j sync failed: ${errorText}`);
+      }
+    } catch (syncError: any) {
+      console.warn(`⚠️ AUTO-SYNC: Neo4j sync error (non-fatal): ${syncError.message}`);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -864,7 +891,12 @@ IMPORTANT: Include the full pathway_chains array showing the complete chains dis
         pathwayChainsDiscovered: pathwayChains,
         synergiesExtracted: synergies.length,
         hierarchicalEdgesCreated: highConfidenceTriplets.length,
-        phase1DiscoveryLength: freeDiscoveryText.length
+        phase1DiscoveryLength: freeDiscoveryText.length,
+        // Neo4j sync result
+        neo4jSync: neo4jSyncResult ? {
+          synced: neo4jSyncResult.synced || 0,
+          failed: neo4jSyncResult.failed || 0
+        } : null
       }),
       {
         status: 200,
