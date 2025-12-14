@@ -83,19 +83,36 @@ const Neo4jStudyGraph: React.FC<Neo4jStudyGraphProps> = ({ studyId, studyTitle }
     setError(null);
 
     try {
+      // Usar queryType 'byStudy' para buscar por study_id no Neo4j
       const { data, error: fnError } = await supabase.functions.invoke('graph-rag-search', {
         body: {
-          queryType: 'context',
-          entityName: studyId,
-          entityType: 'study',
+          queryType: 'byStudy',
+          studyId: studyId,
           maxDepth: 3
         }
       });
 
       if (fnError) throw fnError;
 
-      if (data?.result) {
-        setGraphData(data.result);
+      if (data?.data) {
+        // Transformar dados do formato graph-rag-search para o formato esperado
+        const transformedData: GraphData = {
+          nodes: data.data.nodes.map((n: any) => ({
+            id: n.id,
+            label: n.properties?.name || n.label || n.id,
+            labels: [n.type || n.label],
+            properties: n.properties || {}
+          })),
+          relationships: data.data.relationships.map((r: any) => ({
+            id: `${r.source}-${r.type}-${r.target}`,
+            type: r.type,
+            startNode: r.source,
+            endNode: r.target,
+            properties: r.properties || {}
+          })),
+          textContext: data.data.context
+        };
+        setGraphData(transformedData);
       } else {
         setGraphData({ nodes: [], relationships: [] });
       }
