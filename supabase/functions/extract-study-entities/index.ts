@@ -176,6 +176,29 @@ serve(async (req) => {
     const stage3Data = stage3Result ? JSON.parse(stage3Result.function.arguments) : { dosages: [], side_effects: [], contraindications: [], clinical_outcomes: [] };
     console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
 
+    // ==================== POST-EXTRACTION VALIDATION ====================
+    // Filter dosages to only include compounds that were found in Stage 1
+    const stage1CompoundNames: string[] = (stage1Data.nutraceuticals || [])
+      .map((n: any) => (n.name || '').toLowerCase().trim())
+      .filter((name: string) => name.length > 0);
+    
+    const validatedDosages = (stage3Data.dosages || []).filter((d: any) => {
+      const compoundName = (d.compound || '').toLowerCase().trim();
+      if (!compoundName) return false;
+      
+      // Check if compound matches any Stage 1 nutraceutical (partial match allowed)
+      const isValid = stage1CompoundNames.some((s1name: string) => 
+        compoundName.includes(s1name) || s1name.includes(compoundName)
+      );
+      
+      if (!isValid) {
+        console.warn(`⚠️ [VALIDATION] Filtering out dosage for "${d.compound}" - not found in Stage 1 nutraceuticals`);
+      }
+      return isValid;
+    });
+    
+    console.log(`✅ [VALIDATION] Dosages after validation: ${validatedDosages.length}/${stage3Data.dosages?.length || 0}`);
+
     // Combinar dados de todos os stages
     const extractedData = {
       // Stage 1
@@ -190,8 +213,8 @@ serve(async (req) => {
       synergies: stage2Data.synergies || [],
       hierarchical_relations: stage2Data.hierarchical_relations || [],
       
-      // Stage 3
-      dosages: stage3Data.dosages || [],
+      // Stage 3 (with validated dosages)
+      dosages: validatedDosages,
       side_effects: stage3Data.side_effects || [],
       contraindications: stage3Data.contraindications || [],
       clinical_outcomes: stage3Data.clinical_outcomes || [],
