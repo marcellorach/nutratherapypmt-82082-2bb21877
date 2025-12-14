@@ -99,3 +99,123 @@ export const getScoreLabel = (normalized: number): string => {
   if (normalized >= 0.2) return 'Low';
   return 'Very Low';
 };
+
+/**
+ * Species match weights for recommendation scoring
+ */
+const SPECIES_WEIGHTS: Record<string, number> = {
+  'canine': 1.0,
+  'feline': 0.7,
+  'equine': 0.6,
+  'mammal': 0.5,
+  'rodent': 0.4,
+  'in_vitro': 0.3,
+  'unknown': 0.5
+};
+
+/**
+ * Calculates a recommendation score for veterinary treatment suggestions
+ * Based on multiple weighted factors
+ */
+export interface RecommendationScoreParams {
+  confidence: number;
+  evidenceLevel?: string;
+  speciesContext?: string[];
+  hasDoseRange?: boolean;
+  replicationCount?: number;
+}
+
+export interface RecommendationScoreResult {
+  score: number;
+  breakdown: {
+    confidence: number;
+    evidence: number;
+    species: number;
+    dose: number;
+    replication: number;
+  };
+  qualityLevel: 'high' | 'medium' | 'low' | 'insufficient';
+}
+
+export const calculateRecommendationScore = (
+  params: RecommendationScoreParams
+): RecommendationScoreResult => {
+  const { confidence, evidenceLevel, speciesContext, hasDoseRange, replicationCount } = params;
+  
+  const normalizedConfidence = normalizeScore(confidence);
+  const evidenceWeight = EVIDENCE_WEIGHTS[evidenceLevel?.toLowerCase() || ''] || 0.5;
+  
+  // Species match - prioritize canine for veterinary context
+  let speciesMatch = 0.5;
+  if (speciesContext && speciesContext.length > 0) {
+    const maxWeight = Math.max(
+      ...speciesContext.map(s => SPECIES_WEIGHTS[s.toLowerCase()] || 0.3)
+    );
+    speciesMatch = maxWeight;
+  }
+  
+  // Dose availability bonus
+  const doseBonus = hasDoseRange ? 1.0 : 0.5;
+  
+  // Replication factor - more replications = more confidence
+  const replicationFactor = Math.min(1.0, 0.5 + (replicationCount || 0) * 0.25);
+  
+  // Weighted calculation
+  const breakdown = {
+    confidence: normalizedConfidence * 0.30,
+    evidence: evidenceWeight * 0.25,
+    species: speciesMatch * 0.20,
+    dose: doseBonus * 0.10,
+    replication: replicationFactor * 0.15
+  };
+  
+  const score = Math.min(1, Object.values(breakdown).reduce((a, b) => a + b, 0));
+  
+  // Determine quality level
+  let qualityLevel: 'high' | 'medium' | 'low' | 'insufficient';
+  if (score >= 0.7) qualityLevel = 'high';
+  else if (score >= 0.5) qualityLevel = 'medium';
+  else if (score >= 0.3) qualityLevel = 'low';
+  else qualityLevel = 'insufficient';
+  
+  return { score, breakdown, qualityLevel };
+};
+
+/**
+ * Validates triplet quality for completeness metrics
+ */
+export interface TripletQualityMetrics {
+  hasSpeciesContext: boolean;
+  hasEvidenceLevel: boolean;
+  hasDoseRange: boolean;
+  hasCorrectLayers: boolean;
+  confidenceLevel: 'high' | 'medium' | 'low';
+}
+
+export const assessTripletQuality = (triplet: {
+  species_context?: string[] | null;
+  evidence_level?: string | null;
+  dose_range?: Record<string, unknown> | null;
+  subject_layer?: string | null;
+  object_layer?: string | null;
+  extraction_confidence?: number | null;
+}): TripletQualityMetrics => {
+  const hasSpeciesContext = !!(triplet.species_context && triplet.species_context.length > 0);
+  const hasEvidenceLevel = !!(triplet.evidence_level && triplet.evidence_level !== 'unknown');
+  const hasDoseRange = !!(triplet.dose_range && Object.keys(triplet.dose_range).length > 0);
+  const hasCorrectLayers = !!(triplet.subject_layer && triplet.object_layer);
+  
+  const confidence = triplet.extraction_confidence || 0;
+  let confidenceLevel: 'high' | 'medium' | 'low';
+  if (confidence >= 0.7) confidenceLevel = 'high';
+  else if (confidence >= 0.4) confidenceLevel = 'medium';
+  else confidenceLevel = 'low';
+  
+  return {
+    hasSpeciesContext,
+    hasEvidenceLevel,
+    hasDoseRange,
+    hasCorrectLayers,
+    confidenceLevel
+  };
+};

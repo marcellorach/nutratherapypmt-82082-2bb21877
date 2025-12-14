@@ -434,7 +434,7 @@ Be thorough - capture EVERY biological relationship mentioned in this study.`;
     
     console.log(`🔄 PHASE 2: Structuring discovered knowledge into triplets`);
 
-    const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a veterinary nutraceutical knowledge base. Convert the biological analysis into structured triplets.
+const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a veterinary nutraceutical knowledge base. Convert the biological analysis into structured triplets.
 
 ## ENTITY TYPES (use EXACTLY these lowercase values)
 - Layer 0 (Compounds): nutraceutical, drug, chemical_compound
@@ -469,12 +469,57 @@ Example: If "[Compound] treats [Condition]", generate the FULL CHAIN:
 
 IMPORTANT: Replace ALL bracketed placeholders with ACTUAL entities extracted from the study. Do NOT output "[Compound]" or any placeholder text.
 
-### RULE 2: MANDATORY PROPERTIES FOR EACH TRIPLET
+### RULE 2: MANDATORY SCORING CRITERIA FOR CONFIDENCE (0.0-1.0)
+
+Use this BASE SCORE by evidence type, then apply MODIFIERS:
+
+| Evidence Type        | Base Score |
+|----------------------|------------|
+| meta_analysis        | 0.95       |
+| systematic_review    | 0.90       |
+| rct                  | 0.85       |
+| cohort               | 0.70       |
+| case_control         | 0.55       |
+| case_report          | 0.40       |
+| in_vivo              | 0.50       |
+| in_vitro             | 0.35       |
+| expert_opinion       | 0.25       |
+
+MODIFIERS (apply to base score):
+- p-value < 0.001: +0.10
+- p-value < 0.01: +0.05
+- p-value < 0.05: +0.02
+- Replicated in 2+ studies: +0.10
+- High risk of bias noted: -0.15
+- Sample size < 10: -0.15
+- Sample size 10-50: 0
+- Sample size 50-100: +0.05
+- Sample size ≥ 100: +0.10
+- Species is canine: +0.05
+- Species is feline/equine: +0.02
+- Species is rodent only: -0.05
+- Species is in vitro only: -0.20
+
+Final confidence = base_score + sum(modifiers), capped at [0.1, 0.99]
+
+### RULE 3: INTENSITY CALCULATION (0.0-1.0)
+
+Based on effect magnitude:
+- Complete resolution/cure: 0.9-1.0
+- Major improvement (>70%): 0.7-0.9
+- Moderate improvement (40-70%): 0.5-0.7
+- Mild improvement (20-40%): 0.3-0.5
+- Minimal effect (<20%): 0.1-0.3
+- No effect or harmful: 0.0-0.1
+
+If no effect size mentioned, default to 0.5.
+
+### RULE 4: MANDATORY PROPERTIES FOR EACH TRIPLET
 EVERY triplet MUST include these properties:
 - species_context: REQUIRED - Array of species studied. Use ["canine"], ["feline"], ["equine"], or combinations. DEFAULT to ["canine"] if unclear.
-- evidence_level: REQUIRED - One of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"
-- confidence: REQUIRED - 0.0 to 1.0, how confident based on study data
-- intensity: OPTIONAL - 0.0 to 1.0, strength of effect if mentioned
+- evidence_level: REQUIRED - One of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "in_vivo", "expert_opinion"
+- confidence: REQUIRED - 0.0 to 1.0, calculated using the SCORING CRITERIA above
+- intensity: OPTIONAL - 0.0 to 1.0, strength of effect using INTENSITY CALCULATION above
 - dose_range: REQUIRED if doses mentioned - {"min": X, "max": Y, "unit": "mg/kg/day"}
 - ic50: OPTIONAL - IC50 value if mentioned (e.g., "5 µM")
 - ec50: OPTIONAL - EC50 value if mentioned
@@ -802,7 +847,59 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       const props = t.properties || {};
       const kgMatchScore = (subjectMatchScore + objectMatchScore) / 2;
       const llmConfidence = props.confidence || t.llm_confidence || 0.7;
-      const extractionConfidence = (llmConfidence * 0.6) + (kgMatchScore * 0.4);
+      
+      // === POST-EXTRACTION VALIDATION & ADJUSTMENT ===
+      let adjustedConfidence = llmConfidence;
+      const validationWarnings: string[] = [];
+      
+      // Rule 1: No species context → reduce confidence
+      const speciesCtx = props.species_context || [];
+      if (!speciesCtx.length || speciesCtx.length === 0) {
+        adjustedConfidence *= 0.8;
+        validationWarnings.push('Missing species_context - confidence reduced by 20%');
+      }
+      
+      // Rule 2: Not canine validated → reduce for canine context
+      if (speciesCtx.length > 0 && !speciesCtx.includes('canine')) {
+        adjustedConfidence *= 0.7;
+        validationWarnings.push('Non-canine study - confidence reduced by 30% for canine context');
+      }
+      
+      // Rule 3: In vitro only → cap confidence at 0.4
+      const rawEvidenceLevel = props.evidence_level?.toLowerCase() || 'unknown';
+      if (rawEvidenceLevel === 'in_vitro') {
+        adjustedConfidence = Math.min(adjustedConfidence, 0.4);
+        validationWarnings.push('In vitro evidence - confidence capped at 0.4');
+      }
+      
+      // Rule 4: Missing evidence_level → reduce confidence
+      if (!props.evidence_level) {
+        adjustedConfidence *= 0.8;
+        validationWarnings.push('Missing evidence_level - confidence reduced by 20%');
+      }
+      
+      // Rule 5: TREATS predicate requires higher threshold - skip if too low
+      const tripletPredicate = VALID_RELATIONSHIPS.includes(t.predicate?.toUpperCase()) 
+        ? t.predicate.toUpperCase() 
+        : 'MODULATES';
+      const isTreatsRelation = ['TREATS', 'PREVENTS', 'AMELIORATES'].includes(tripletPredicate);
+      const shouldSkip = isTreatsRelation && adjustedConfidence < 0.3;
+      
+      // Final confidence capped at [0.1, 0.99]
+      adjustedConfidence = Math.max(0.1, Math.min(0.99, adjustedConfidence));
+      
+      // Log validation results
+      if (validationWarnings.length > 0) {
+        console.log(`   ⚠️ Validation: ${validationWarnings.join('; ')}`);
+        console.log(`   └─ Confidence adjusted: ${llmConfidence.toFixed(2)} → ${adjustedConfidence.toFixed(2)}`);
+      }
+      
+      if (shouldSkip) {
+        console.log(`   ❌ SKIPPED: ${tripletPredicate} relationship requires confidence >= 0.3 (got ${adjustedConfidence.toFixed(2)})`);
+        return null; // Will be filtered out
+      }
+      
+      const extractionConfidence = (adjustedConfidence * 0.6) + (kgMatchScore * 0.4);
 
       // Determine auto-approval
       const autoApproved = extractionConfidence >= 0.85 && kgMatchScore >= 0.5;
@@ -819,10 +916,10 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       
       // Validate mandatory fields for quality assurance
       const speciesContext = props.species_context || (props.species ? [props.species] : ['canine']); // Default to canine
-      const evidenceLevel = mapEvidenceLevel(props.evidence_level) || 'in_vitro'; // Default evidence level
+      const validatedEvidenceLevel = mapEvidenceLevel(props.evidence_level) || 'in_vitro'; // Default evidence level
       
-      console.log(`📊 Triplet: ${t.subject_name} [${validatedSubjectLayer}] -${predicate}-> ${t.object_name} [${validatedObjectLayer}]`);
-      console.log(`   └─ Species: ${JSON.stringify(speciesContext)}, Evidence: ${evidenceLevel}, Confidence: ${props.confidence || 0.7}`);
+      console.log(`📊 Triplet: ${t.subject_name} [${validatedSubjectLayer}] -${tripletPredicate}-> ${t.object_name} [${validatedObjectLayer}]`);
+      console.log(`   └─ Species: ${JSON.stringify(speciesContext)}, Evidence: ${validatedEvidenceLevel}, Confidence: ${props.confidence || 0.7}`);
 
       return {
         study_id: studyId,
@@ -830,29 +927,29 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         subject_name: t.subject_name,
         subject_id: subjectId,
         subject_layer: validatedSubjectLayer,
-        predicate: predicate,
+        predicate: tripletPredicate,
         object_type: validatedObjectType,
         object_name: t.object_name,
         object_id: objectId,
         object_layer: validatedObjectLayer,
         // Hierarchical fields - with validated mandatory fields
         intensity: props.intensity || null,
-        direction: mapDirection(props.direction, predicate),
-        evidence_level: evidenceLevel,
+        direction: mapDirection(props.direction, tripletPredicate),
+        evidence_level: validatedEvidenceLevel,
         dose_dependent: props.dose_dependent || false,
         dose_range: props.dose_range || null,
         species_context: speciesContext,
         mechanism_path: t.mechanism_path || null,
-        relationship_category: getRelationshipCategory(predicate),
+        relationship_category: getRelationshipCategory(tripletPredicate),
         // Synergy data if applicable
-        synergy_data: predicate === 'SYNERGIZES_WITH' || predicate === 'ANTAGONIZES' ? {
+        synergy_data: tripletPredicate === 'SYNERGIZES_WITH' || tripletPredicate === 'ANTAGONIZES' ? {
           synergy_score: props.synergy_score,
           mechanism: props.mechanism,
           enhancement_factor: props.enhancement_factor,
           optimal_ratio: props.optimal_ratio
         } : null,
         // Confidence scores
-        llm_confidence: llmConfidence,
+        llm_confidence: adjustedConfidence,
         kg_match_score: kgMatchScore,
         extraction_confidence: extractionConfidence,
         // Curation status
