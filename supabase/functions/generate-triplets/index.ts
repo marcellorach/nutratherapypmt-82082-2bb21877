@@ -851,6 +851,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       // === POST-EXTRACTION VALIDATION & ADJUSTMENT ===
       let adjustedConfidence = llmConfidence;
       const validationWarnings: string[] = [];
+      let hallucinationFlag = false;
       
       // Rule 1: No species context → reduce confidence
       const speciesCtx = props.species_context || [];
@@ -883,6 +884,35 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         ? t.predicate.toUpperCase() 
         : 'MODULATES';
       const isTreatsRelation = ['TREATS', 'PREVENTS', 'AMELIORATES'].includes(tripletPredicate);
+      
+      // Rule 6: ANTI-HALLUCINATION - Check if entity names appear in original text
+      const searchableText = (fullTextContent + ' ' + freeDiscoveryText).toLowerCase();
+      const subjectNameLower = (t.subject_name || '').toLowerCase().trim();
+      const objectNameLower = (t.object_name || '').toLowerCase().trim();
+      
+      // For subject: check if name appears in text (allow partial match for compound names)
+      const subjectInText = subjectNameLower.length >= 3 && (
+        searchableText.includes(subjectNameLower) ||
+        subjectNameLower.split(/[\s\-_]+/).some((part: string) => part.length >= 4 && searchableText.includes(part))
+      );
+      
+      // For object: check if name appears in text
+      const objectInText = objectNameLower.length >= 3 && (
+        searchableText.includes(objectNameLower) ||
+        objectNameLower.split(/[\s\-_]+/).some((part: string) => part.length >= 4 && searchableText.includes(part))
+      );
+      
+      if (!subjectInText || !objectInText) {
+        hallucinationFlag = true;
+        adjustedConfidence *= 0.5; // Reduce confidence by 50%
+        if (!subjectInText) {
+          validationWarnings.push(`HALLUCINATION: Subject "${t.subject_name}" not found in study text`);
+        }
+        if (!objectInText) {
+          validationWarnings.push(`HALLUCINATION: Object "${t.object_name}" not found in study text`);
+        }
+      }
+      
       const shouldSkip = isTreatsRelation && adjustedConfidence < 0.3;
       
       // Final confidence capped at [0.1, 0.99]
@@ -892,6 +922,9 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       if (validationWarnings.length > 0) {
         console.log(`   ⚠️ Validation: ${validationWarnings.join('; ')}`);
         console.log(`   └─ Confidence adjusted: ${llmConfidence.toFixed(2)} → ${adjustedConfidence.toFixed(2)}`);
+        if (hallucinationFlag) {
+          console.log(`   🚨 HALLUCINATION DETECTED - flagged for review`);
+        }
       }
       
       if (shouldSkip) {
@@ -952,6 +985,8 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         llm_confidence: adjustedConfidence,
         kg_match_score: kgMatchScore,
         extraction_confidence: extractionConfidence,
+        // Hallucination flag
+        hallucination_flag: hallucinationFlag,
         // Curation status
         curation_status: autoApproved ? 'approved' : 'pending',
         auto_approved: autoApproved,
