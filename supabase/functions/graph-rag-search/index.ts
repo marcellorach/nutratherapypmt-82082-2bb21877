@@ -110,18 +110,29 @@ async function executeCypherQuery(
 
   const result = await response.json();
   
-  // Query API v2 retorna formato diferente: { data: { values: [...] }, errors: [...] }
+  // Log da resposta raw para debug
+  console.log('📦 Neo4j raw response structure:', {
+    hasData: !!result.data,
+    hasFields: !!result.data?.fields,
+    fieldsCount: result.data?.fields?.length || 0,
+    valuesCount: result.data?.values?.length || 0,
+    hasErrors: result.errors?.length > 0
+  });
+  
+  if (result.data?.values?.length > 0) {
+    console.log('📊 First row sample:', JSON.stringify(result.data.values[0]).substring(0, 500));
+  }
+  
+  // Query API v2 retorna formato diferente: { data: { fields: [...], values: [...] }, errors: [...] }
   if (result.errors && result.errors.length > 0) {
     console.error('❌ Neo4j errors:', result.errors);
     throw new Error(`Neo4j errors: ${JSON.stringify(result.errors)}`);
   }
 
-  // Adaptar formato do Query API v2 para formato esperado
+  // Retornar formato Query API v2 diretamente para formatGraphData processar
   return {
-    data: result.data?.values?.map((row: any) => ({
-      row,
-      graph: result.data?.graph || { nodes: [], relationships: [] }
-    })) || []
+    fields: result.data?.fields || [],
+    values: result.data?.values || []
   };
 }
 
@@ -130,37 +141,57 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
   const relationships: GraphRelationship[] = [];
   const paths: Array<{ nodes: GraphNode[]; relationships: GraphRelationship[] }> = [];
 
-  if (!neo4jResult?.data) {
+  // Query API v2 retorna: { fields: ['subject', 'rel', 'object'], values: [[node, rel, node], ...] }
+  const fields = neo4jResult?.fields || [];
+  const values = neo4jResult?.values || [];
+
+  console.log(`🔍 formatGraphData: ${fields.length} fields, ${values.length} rows`);
+
+  if (values.length === 0) {
+    console.log('⚠️ No data returned from Neo4j');
     return { nodes: [], relationships: [], paths: [], context: '' };
   }
 
-  neo4jResult.data.forEach((row: any) => {
-    row.graph?.nodes?.forEach((node: any) => {
-      const nodeId = node.id;
-      if (!nodes.has(nodeId)) {
-        nodes.set(nodeId, {
-          id: nodeId,
-          label: node.labels[0] || 'Unknown',
-          type: node.labels[0] || 'Unknown',
-          properties: node.properties || {}
+  // Processar cada row do resultado
+  values.forEach((row: any[], rowIdx: number) => {
+    row.forEach((element: any, colIdx: number) => {
+      if (!element) return;
+      
+      // Detectar se é um nó (tem labels) ou relacionamento (tem type + startNodeElementId)
+      if (element.labels && Array.isArray(element.labels)) {
+        // É um nó
+        const nodeId = element.elementId || element.id || `node-${rowIdx}-${colIdx}`;
+        if (!nodes.has(nodeId)) {
+          const props = element.properties || {};
+          nodes.set(nodeId, {
+            id: nodeId,
+            label: props.name || props.title || element.labels[0] || 'Unknown',
+            type: element.labels[0] || 'Unknown',
+            properties: props
+          });
+          console.log(`  ✅ Node: ${element.labels[0]} - ${props.name || nodeId}`);
+        }
+      } else if (element.type && (element.startNodeElementId || element.startNode)) {
+        // É um relacionamento
+        const sourceId = element.startNodeElementId || element.startNode;
+        const targetId = element.endNodeElementId || element.endNode;
+        relationships.push({
+          type: element.type,
+          source: sourceId,
+          target: targetId,
+          properties: element.properties || {}
         });
+        console.log(`  🔗 Rel: ${element.type}`);
       }
     });
-
-    row.graph?.relationships?.forEach((rel: any) => {
-      relationships.push({
-        type: rel.type,
-        source: rel.startNode,
-        target: rel.endNode,
-        properties: rel.properties || {}
-      });
-    });
   });
+
+  console.log(`📊 Resultado: ${nodes.size} nodes, ${relationships.length} relationships`);
 
   // Gerar contexto textual dos dados
   const contextParts: string[] = [];
   nodes.forEach(node => {
-    const name = node.properties.name || node.properties.title || node.id;
+    const name = node.properties.name || node.properties.title || node.label;
     contextParts.push(`${node.type}: ${name}`);
   });
   
@@ -168,8 +199,8 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
     const source = nodes.get(rel.source);
     const target = nodes.get(rel.target);
     if (source && target) {
-      const sourceName = source.properties.name || source.id;
-      const targetName = target.properties.name || target.id;
+      const sourceName = source.properties.name || source.label;
+      const targetName = target.properties.name || target.label;
       contextParts.push(`${sourceName} -[${rel.type}]-> ${targetName}`);
     }
   });
