@@ -4096,5 +4096,42 @@
     "checking": "Verificando...",
     "allReady": "Todos prontos",
     "someOffline": "Alguns offline"
+  },
+  "tripletQuality": {
+    "title": "Dashboard de Qualidade dos Triplets",
+    "description": "Monitore completude e qualidade dos triplets extraídos",
+    "noData": "Nenhum triplet extraído ainda",
+    "noDataDesc": "Processe estudos para gerar triplets e ver métricas de qualidade aqui.",
+    "filtered": "Filtrado de",
+    "metrics": {
+      "total": "Total de Triplets",
+      "avgConfidence": "Confiança Média",
+      "completeness": "Score de Completude",
+      "highConfidence": "Alta Confiança"
+    },
+    "completeness": {
+      "title": "Completude dos Campos",
+      "description": "Percentual de triplets com cada campo obrigatório preenchido"
+    },
+    "fields": {
+      "speciesContext": "Contexto de Espécie",
+      "evidenceLevel": "Nível de Evidência",
+      "doseRange": "Faixa de Dose",
+      "correctLayers": "Layers Corretos"
+    },
+    "filters": {
+      "byStudy": "Por Estudo",
+      "byPredicate": "Por Predicado",
+      "allStudies": "Todos os Estudos",
+      "allPredicates": "Todos os Predicados"
+    },
+    "charts": {
+      "evidenceDistribution": "Distribuição por Nível de Evidência",
+      "predicateDistribution": "Top Predicados"
+    },
+    "lowConfidence": {
+      "title": "Triplets para Revisão",
+      "description": "Triplets de baixa confiança que precisam de verificação manual"
+    }
   }
 }

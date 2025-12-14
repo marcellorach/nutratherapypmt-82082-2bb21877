@@ -57,6 +57,7 @@ const TranslationManager = lazy(() => import('@/components/administrador/traduco
 // Knowledge Graph & Curation
 const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
+const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -263,6 +264,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: AnalyticsTab,
     description: 'Análises e métricas'
+  },
+  {
+    id: 'triplet-quality',
+    label: 'Qualidade Triplets',
+    group: 'configuration',
+    component: TripletQualityDashboard,
+    description: 'Dashboard de qualidade e completude dos triplets extraídos'
   },
   {
     id: 'design-conventions',

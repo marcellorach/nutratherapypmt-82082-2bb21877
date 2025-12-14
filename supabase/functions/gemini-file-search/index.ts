@@ -569,8 +569,8 @@ async function extractWithFileSearch(
                 description: 'Effects or results observed in the study IN ENGLISH'
               },
               efficacy_score: {
-                type: 'integer',
-                description: 'Efficacy score 1-5 based on statistical significance'
+                type: 'number',
+                description: 'Efficacy score 0.0-1.0 based on statistical significance. Calculate as: 1.0 if p<0.001, 0.8 if p<0.01, 0.6 if p<0.05, 0.4 if weak/not significant, 0.2 if no data'
               },
               species_tested: {
                 type: 'array',
@@ -602,7 +602,7 @@ async function extractWithFileSearch(
               },
               confidence: {
                 type: 'number',
-                description: 'Confidence score 0-5 based on evidence strength in the study'
+                description: 'Confidence score 0.0-1.0 based on evidence strength: 0.9+ for RCT/meta-analysis, 0.7-0.9 for cohort, 0.5-0.7 for case-control, 0.3-0.5 for case report, 0.1-0.3 for in vitro'
               }
             },
             required: ['name', 'type', 'description']
@@ -629,7 +629,7 @@ async function extractWithFileSearch(
               },
               confidence: {
                 type: 'number',
-                description: 'Confidence score 0-5 based on evidence strength'
+                description: 'Confidence score 0.0-1.0 based on evidence strength: 0.9+ for RCT/meta-analysis, 0.7-0.9 for cohort, 0.5-0.7 for case-control, 0.3-0.5 for case report, 0.1-0.3 for in vitro'
               }
             },
             required: ['name', 'type', 'description']
@@ -655,8 +655,8 @@ async function extractWithFileSearch(
                 description: 'Description of the observed efficacy IN ENGLISH'
               },
               treatability_score: {
-                type: 'integer',
-                description: 'Treatability score 1-5 based on study results'
+                type: 'number',
+                description: 'Treatability score 0.0-1.0 based on study results: 0.9+ for cure/complete resolution, 0.7-0.9 for major improvement, 0.5-0.7 for moderate, 0.3-0.5 for mild, 0.1-0.3 for minimal'
               },
               severity: {
                 type: 'string',
@@ -692,7 +692,7 @@ async function extractWithFileSearch(
               },
               confidence: {
                 type: 'number',
-                description: 'Confidence score 0-5 based on evidence in the study'
+                description: 'Confidence score 0.0-1.0 based on evidence strength: 0.9+ for RCT/meta-analysis with p<0.001, 0.7-0.9 for strong evidence, 0.5-0.7 for moderate, 0.3-0.5 for weak, 0.1-0.3 for speculation'
               }
             },
             required: ['from', 'to', 'type', 'description']
