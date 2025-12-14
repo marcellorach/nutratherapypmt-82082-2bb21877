@@ -2,10 +2,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import 'vis-network/styles/vis-network.css';
-import { BiologicalNetworkData, BiologicalNode } from './types';
+import { BiologicalNetworkData, BiologicalNode, BiologicalLink } from './types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-
+import { calculateEdgeWidth } from '@/utils/score-normalization';
 interface BiologicalNetworkGraphProps {
   data: BiologicalNetworkData;
   height?: string;
@@ -109,8 +109,11 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
       value: node.value
     }));
 
-    // Preparar arestas com estilos por tipo
-    const visEdges = filteredLinks.map(link => {
+    // Preparar arestas com estilos por tipo e ESPESSURA DINÂMICA baseada em confidence
+    const visEdges = filteredLinks.map((link: BiologicalLink) => {
+      // Calculate dynamic width based on confidence (1-5px)
+      const dynamicWidth = calculateEdgeWidth(link.confidence);
+      
       let edgeStyle: any = {};
       
       switch (link.type) {
@@ -118,7 +121,7 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
           edgeStyle = {
             color: { color: '#ef4444', highlight: '#dc2626' },
             arrows: { to: { enabled: true, type: 'bar', scaleFactor: 1.2 } },
-            width: 3,
+            width: dynamicWidth,
             smooth: { type: 'cubicBezier', roundness: 0.5 }
           };
           break;
@@ -126,7 +129,7 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
           edgeStyle = {
             color: { color: '#10b981', highlight: '#059669' },
             arrows: { to: { enabled: true, type: 'arrow', scaleFactor: 1.2 } },
-            width: 3,
+            width: dynamicWidth,
             smooth: { type: 'cubicBezier', roundness: 0.5 }
           };
           break;
@@ -134,7 +137,7 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
           edgeStyle = {
             color: { color: '#6366f1', highlight: '#4f46e5' },
             arrows: { to: { enabled: true, type: 'circle', scaleFactor: 1 } },
-            width: 2,
+            width: Math.max(1, dynamicWidth - 1), // Slightly thinner for modulation
             dashes: [5, 5],
             smooth: { type: 'cubicBezier', roundness: 0.5 }
           };
@@ -145,7 +148,7 @@ const BiologicalNetworkGraph: React.FC<BiologicalNetworkGraphProps> = ({
         id: link.id,
         from: link.from,
         to: link.to,
-        title: link.title || `${link.from} → ${link.to}`,
+        title: `${link.title || `${link.from} → ${link.to}`}\nConfiança: ${((link.confidence || 0.5) * 100).toFixed(0)}%`,
         label: link.label,
         ...edgeStyle
       };

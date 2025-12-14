@@ -17,6 +17,7 @@ import BiologicalNetworkGraph from '../../visualizations/biological/BiologicalNe
 import { buildBiologicalNetworkData } from '../../visualizations/biological/dataBuilder';
 import Neo4jStudyGraph from '../../visualizations/Neo4jStudyGraph';
 import { useTranslation } from 'react-i18next';
+import { normalizeScore, toDisplayScale, toPercentage, getScoreColorClass } from '@/utils/score-normalization';
 
 interface EnhancedStudyVisualizationProps {
   study: any;
@@ -56,22 +57,24 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
     const links: any[] = [];
     
     nutraceuticals.forEach((nutra: any, idx: number) => {
+      const normalized = normalizeScore(nutra.confidence || nutra.efficacy_score);
       nodes.push({
         id: `nutra-${idx}`,
         label: nutra.name || nutra,
         group: 'nutraceutical',
-        value: Math.round((nutra.confidence || 0.5) * 5),
-        title: `Confiança: ${((nutra.confidence || 0.5) * 100).toFixed(0)}%`
+        value: toDisplayScale(normalized),
+        title: `Confiança: ${toPercentage(nutra.confidence || nutra.efficacy_score).toFixed(0)}%`
       });
     });
 
     conditions.forEach((cond: any, idx: number) => {
+      const normalized = normalizeScore(cond.confidence);
       nodes.push({
         id: `cond-${idx}`,
         label: cond.name || cond,
         group: 'condition',
-        value: Math.round((cond.confidence || 0.5) * 5),
-        title: `Confiança: ${((cond.confidence || 0.5) * 100).toFixed(0)}%`
+        value: toDisplayScale(normalized),
+        title: `Confiança: ${toPercentage(cond.confidence).toFixed(0)}%`
       });
     });
 
@@ -88,10 +91,11 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
       });
       
       if (nutraIdx >= 0 && condIdx >= 0) {
+        const normalized = normalizeScore(interaction.confidence);
         links.push({
           source: `nutra-${nutraIdx}`,
           target: `cond-${condIdx}`,
-          value: Math.round((interaction.confidence || 0.5) * 5),
+          value: toDisplayScale(normalized),
           label: interaction.interaction.substring(0, 30) + '...',
           title: interaction.interaction
         });
@@ -306,9 +310,11 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
             <CardContent>
               <div className="space-y-4">
                 {nutraceuticals.slice(0, 8).map((nutra: any, idx: number) => {
-                  const confidence = nutra.confidence || 0.5;
-                  const score = confidence * 5;
-                  const percentage = confidence * 100;
+                  // Normalize: handle both 0-1 and 0-5 scales from Gemini
+                  const rawConfidence = nutra.confidence || nutra.efficacy_score || 0.5;
+                  const normalized = normalizeScore(rawConfidence);
+                  const score = toDisplayScale(normalized);
+                  const percentage = toPercentage(rawConfidence);
                   
                   return (
                     <div key={idx}>
@@ -322,13 +328,8 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
-                          className={`h-2 rounded-full transition-all ${
-                            percentage >= 80 ? 'bg-green-500' :
-                            percentage >= 60 ? 'bg-blue-500' :
-                            percentage >= 40 ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
-                          style={{ width: `${percentage}%` }}
+                          className={`h-2 rounded-full transition-all ${getScoreColorClass(percentage)}`}
+                          style={{ width: `${Math.min(100, percentage)}%` }}
                         />
                       </div>
                     </div>

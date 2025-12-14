@@ -1,4 +1,5 @@
 import { BiologicalNode, BiologicalLink, BiologicalNetworkData, ExtractedData } from './types';
+import { normalizeScore, toDisplayScale, toPercentage } from '@/utils/score-normalization';
 
 /**
  * Constrói dados hierárquicos para visualização biológica multi-camadas
@@ -24,28 +25,30 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
   
   // Camada 0: Nutracêuticos (início da cadeia)
   nutraceuticals.forEach((nutra: any, idx: number) => {
+    const normalized = normalizeScore(nutra.confidence || nutra.efficacy_score, 0.8);
     nodes.push({
       id: `nutra-${idx}`,
       label: nutra.name,
       type: 'nutraceutical',
       layer: 0,
-      value: Math.round((nutra.confidence || 0.8) * 5),
-      confidence: nutra.confidence || 0.8,
-      title: `${nutra.name}${nutra.dosage ? `\nDosagem: ${nutra.dosage}` : ''}${nutra.form ? `\nForma: ${nutra.form}` : ''}\nConfiança: ${((nutra.confidence || 0.8) * 100).toFixed(0)}%`
+      value: toDisplayScale(normalized),
+      confidence: normalized,
+      title: `${nutra.name}${nutra.dosage ? `\nDosagem: ${nutra.dosage}` : ''}${nutra.form ? `\nForma: ${nutra.form}` : ''}\nConfiança: ${toPercentage(nutra.confidence || nutra.efficacy_score, 0.8).toFixed(0)}%`
     });
   });
   
   // Camada 1: Mecanismos Moleculares (pathways, enzymes, receptors)
   mechanisms.forEach((mech: any, idx: number) => {
     const mechName = mech.name || mech.mechanism || 'Unknown';
+    const normalized = normalizeScore(mech.confidence, 0.7);
     nodes.push({
       id: `mech-${idx}`,
       label: mechName,
       type: 'mechanism',
       layer: 1,
-      value: Math.round((mech.confidence || 0.7) * 5),
-      confidence: mech.confidence || 0.7,
-      title: `${mechName}${mech.type ? ` (${mech.type})` : ''}\nConfiança: ${((mech.confidence || 0.7) * 100).toFixed(0)}%`,
+      value: toDisplayScale(normalized),
+      confidence: normalized,
+      title: `${mechName}${mech.type ? ` (${mech.type})` : ''}\nConfiança: ${toPercentage(mech.confidence, 0.7).toFixed(0)}%`,
       metadata: { mechanismType: mech.type, action: mech.action }
     });
     
@@ -58,7 +61,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
           from: targetNode.id,
           to: `mech-${idx}`,
           type: mech.action === 'inhibition' ? 'inhibition' : mech.action === 'activation' ? 'stimulation' : 'modulation',
-          confidence: mech.confidence || 0.7,
+          confidence: normalizeScore(mech.confidence, 0.7),
           label: mech.action || '',
           title: `${targetNode.label} → ${mechName}`
         });
@@ -68,28 +71,30 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
 
   // Camada 2: Efeitos Biológicos Intermediários
   effects.forEach((effect: any, idx: number) => {
+    const normalized = normalizeScore(effect.confidence, 0.7);
     nodes.push({
       id: `effect-${idx}`,
       label: effect.name,
       type: 'effect',
       layer: 2,
-      value: Math.round((effect.confidence || 0.7) * 5),
-      confidence: effect.confidence || 0.7,
-      title: `${effect.name}${effect.type ? ` (${effect.type} effect)` : ''}\nConfiança: ${((effect.confidence || 0.7) * 100).toFixed(0)}%`,
+      value: toDisplayScale(normalized),
+      confidence: normalized,
+      title: `${effect.name}${effect.type ? ` (${effect.type} effect)` : ''}\nConfiança: ${toPercentage(effect.confidence, 0.7).toFixed(0)}%`,
       metadata: { effectType: effect.type }
     });
   });
 
   // Camada 3: Condições/Outcomes Clínicos Finais
   conditions.forEach((cond: any, idx: number) => {
+    const normalized = normalizeScore(cond.confidence, 0.8);
     nodes.push({
       id: `cond-${idx}`,
       label: cond.name,
       type: 'outcome',
       layer: 3,
-      value: Math.round((cond.confidence || 0.8) * 5),
-      confidence: cond.confidence || 0.8,
-      title: `Outcome: ${cond.name}\nConfiança: ${((cond.confidence || 0.8) * 100).toFixed(0)}%`
+      value: toDisplayScale(normalized),
+      confidence: normalized,
+      title: `Outcome: ${cond.name}\nConfiança: ${toPercentage(cond.confidence, 0.8).toFixed(0)}%`
     });
   });
   
@@ -104,7 +109,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
         from: fromNode.id,
         to: toNode.id,
         type: rel.relation_type?.includes('inhib') ? 'inhibition' : rel.relation_type?.includes('activ') ? 'stimulation' : 'modulation',
-        confidence: rel.confidence || 0.75,
+        confidence: normalizeScore(rel.confidence, 0.75),
         label: rel.relation_type || '',
         title: `${rel.from} ${rel.relation_type} ${rel.to}`
       });
@@ -144,6 +149,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
     
     const fromNode = findNodeByName(fromName);
     const toNode = findNodeByName(toName);
+    const normalizedConfidence = normalizeScore(interaction.confidence, 0.8);
     
     if (fromNode && toNode) {
       links.push({
@@ -151,7 +157,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
         from: fromNode.id,
         to: toNode.id,
         type: interactionType as 'inhibition' | 'stimulation' | 'modulation',
-        confidence: interaction.confidence || 0.8,
+        confidence: normalizedConfidence,
         label: '',
         title: description
       });
@@ -164,9 +170,9 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
           label: `${fromName} (ref)`,
           type: 'nutraceutical',
           layer: 0,
-          value: Math.round((interaction.confidence || 0.8) * 3),
-          confidence: interaction.confidence || 0.8,
-          title: `${fromName}\n(Mencionado mas não extraído)\nConfiança: ${((interaction.confidence || 0.8) * 100).toFixed(0)}%`
+          value: toDisplayScale(normalizedConfidence) * 0.6, // Menor para virtuais
+          confidence: normalizedConfidence,
+          title: `${fromName}\n(Mencionado mas não extraído)\nConfiança: ${toPercentage(interaction.confidence, 0.8).toFixed(0)}%`
         });
         
         if (toNode) {
@@ -175,7 +181,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
             from: virtualId,
             to: toNode.id,
             type: interactionType as 'inhibition' | 'stimulation' | 'modulation',
-            confidence: interaction.confidence || 0.8,
+            confidence: normalizedConfidence,
             label: '',
             title: description
           });
@@ -187,14 +193,15 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
   // Efeitos colaterais (diamantes vermelhos, conectados aos nutracêuticos)
   sideEffects.forEach((effect: any, idx: number) => {
     const sideEffectId = `side-${idx}`;
+    const normalizedConfidence = normalizeScore(effect.confidence, 0.6);
     nodes.push({
       id: sideEffectId,
       label: effect.name,
       type: 'side_effect',
       layer: 2, // Mesmo nível que efeitos intermediários
       value: effect.severity === 'severe' || effect.severity === 'high' ? 5 : effect.severity === 'moderate' ? 3 : 1,
-      confidence: effect.confidence || 0.6,
-      title: `${effect.name}\n${effect.description || ''}\nSeveridade: ${effect.severity || 'unknown'}\nConfiança: ${((effect.confidence || 0.6) * 100).toFixed(0)}%`
+      confidence: normalizedConfidence,
+      title: `${effect.name}\n${effect.description || ''}\nSeveridade: ${effect.severity || 'unknown'}\nConfiança: ${toPercentage(effect.confidence, 0.6).toFixed(0)}%`
     });
     
     // Conectar aos nutracêuticos relacionados
@@ -206,7 +213,7 @@ export function buildBiologicalNetworkData(extractedData: ExtractedData): Biolog
           from: `nutra-${nIdx}`,
           to: sideEffectId,
           type: 'modulation',
-          confidence: effect.confidence || 0.6,
+          confidence: normalizedConfidence,
           label: '',
           title: `Efeito colateral de ${nutra.name}`
         });
