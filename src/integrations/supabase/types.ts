@@ -1604,6 +1604,7 @@ export type Database = {
           dose_range: Json | null
           evidence_level: string | null
           extraction_confidence: number | null
+          hallucination_flag: boolean | null
           id: string
           intensity: number | null
           kg_match_score: number | null
@@ -1639,6 +1640,7 @@ export type Database = {
           dose_range?: Json | null
           evidence_level?: string | null
           extraction_confidence?: number | null
+          hallucination_flag?: boolean | null
           id?: string
           intensity?: number | null
           kg_match_score?: number | null
@@ -1674,6 +1676,7 @@ export type Database = {
           dose_range?: Json | null
           evidence_level?: string | null
           extraction_confidence?: number | null
+          hallucination_flag?: boolean | null
           id?: string
           intensity?: number | null
           kg_match_score?: number | null

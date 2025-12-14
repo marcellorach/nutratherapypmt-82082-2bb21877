@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.download-study-pdf]
 verify_jwt = false
+
+[functions.batch-reprocess-triplets]
+verify_jwt = true
