@@ -1231,6 +1231,41 @@
           "distance": "Distância (m)",
           "sleepHours": "Horas Sono",
           "sleepScore": "Score Sono"
+        },
+        "charts": {
+          "heartRate": {
+            "title": "Frequência Cardíaca",
+            "dayMean": "FC Dia (média)",
+            "nightMean": "FC Noite (média)",
+            "dayMin": "FC Dia (mín)",
+            "dayMax": "FC Dia (máx)"
+          },
+          "breathingRate": {
+            "title": "Frequência Respiratória",
+            "dayMean": "FR Dia (média)",
+            "nightMean": "FR Noite (média)",
+            "dayMin": "FR Dia (mín)",
+            "dayMax": "FR Dia (máx)"
+          },
+          "hrv": {
+            "title": "Variabilidade Cardíaca (HRV)",
+            "sdnn": "SDNN Total",
+            "rmssd": "RMSSD Total",
+            "daySdnn": "SDNN Dia",
+            "nightSdnn": "SDNN Noite"
+          },
+          "activity": {
+            "title": "Atividade Física",
+            "distance": "Distância (m)",
+            "calories": "Calorias",
+            "exerciseMinutes": "Exercício (min)"
+          },
+          "sleep": {
+            "title": "Qualidade do Sono",
+            "hours": "Horas de Sono",
+            "score": "Score de Sono (%)",
+            "target": "Meta 8h"
+          }
         }
       },
       "overview": {
