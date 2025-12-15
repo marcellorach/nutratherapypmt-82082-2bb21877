@@ -1209,7 +1209,29 @@
         "dogsData": "Dados dos Cães"
       },
       "dogsData": {
-        "placeholder": "Conteúdo será adicionado em breve"
+        "title": "Dados de Monitoramento - Dionisia",
+        "fetchButton": "Buscar Dados da API Invoxia",
+        "loading": "Carregando dados...",
+        "error": "Erro ao buscar dados",
+        "noData": "Clique no botão acima para buscar os dados de monitoramento",
+        "lastFetch": "Última atualização",
+        "records": "registros",
+        "showingFirst": "Mostrando primeiros {{count}} de {{total}} registros",
+        "petInfo": {
+          "name": "Nome",
+          "id": "ID Invoxia"
+        },
+        "table": {
+          "date": "Data",
+          "hrDayMean": "FC Dia (média)",
+          "hrNightMean": "FC Noite (média)",
+          "brDayMean": "FR Dia (média)",
+          "brNightMean": "FR Noite (média)",
+          "hrvSdnn": "HRV (SDNN)",
+          "distance": "Distância (m)",
+          "sleepHours": "Horas Sono",
+          "sleepScore": "Score Sono"
+        }
       },
       "overview": {
         "studyPopulation": "População do Estudo",
