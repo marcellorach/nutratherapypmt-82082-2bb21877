@@ -83,9 +83,11 @@ function parseCSV(csvData: string): Record<string, string | number | null>[] {
 
     headers.forEach((header, index) => {
       const value = values[index]?.trim() || '';
-      // Try to parse as number, otherwise keep as string
       if (value === '' || value === 'NA' || value === 'null') {
         row[header] = null;
+      } else if (header === 'date') {
+        // Preserve date as string to keep full format (YYYY-MM-DD)
+        row[header] = value;
       } else {
         const numValue = parseFloat(value);
         row[header] = isNaN(numValue) ? value : numValue;
