@@ -27,9 +27,9 @@ export const ArrhythmiaChart: React.FC<ArrhythmiaChartProps> = ({ data }) => {
 
   const chartData = data
     .filter(row => row.date && (
-      row.all_tachy_count !== null || 
-      row.all_brady_count !== null ||
-      row.all_cardiac_pause_count_2 !== null
+      row.num_tachycardia !== null || 
+      row.num_bradycardia !== null ||
+      row.num_pauses !== null
     ))
     .sort((a, b) => {
       if (!a.date || !b.date) return 0;
@@ -39,20 +39,15 @@ export const ArrhythmiaChart: React.FC<ArrhythmiaChartProps> = ({ data }) => {
     .reverse()
     .map(row => ({
       date: formatDate(row.date),
-      tachycardia: Number(row.all_tachy_count) || 0,
-      bradycardia: Number(row.all_brady_count) || 0,
-      pauses2s: Number(row.all_cardiac_pause_count_2) || 0,
-      pauses3s: Number(row.all_cardiac_pause_count_3) || 0,
-      pauses4s: Number(row.all_cardiac_pause_count_4) || 0,
-      pauses5s: Number(row.all_cardiac_pause_count_5) || 0,
+      tachycardia: Number(row.num_tachycardia) || 0,
+      bradycardia: Number(row.num_bradycardia) || 0,
+      pauses: Number(row.num_pauses) || 0,
     }));
 
   // Summary data for the current period
   const totalTachy = chartData.reduce((acc, row) => acc + row.tachycardia, 0);
   const totalBrady = chartData.reduce((acc, row) => acc + row.bradycardia, 0);
-  const totalPauses = chartData.reduce((acc, row) => 
-    acc + row.pauses2s + row.pauses3s + row.pauses4s + row.pauses5s, 0
-  );
+  const totalPauses = chartData.reduce((acc, row) => acc + row.pauses, 0);
 
   const getStatusColor = (value: number, type: 'tachy' | 'brady' | 'pause') => {
     if (value === 0) return 'hsl(142, 76%, 36%)'; // green
@@ -145,9 +140,9 @@ export const ArrhythmiaChart: React.FC<ArrhythmiaChartProps> = ({ data }) => {
                 radius={[2, 2, 0, 0]}
               />
               <Bar
-                dataKey="pauses2s"
+                dataKey="pauses"
                 fill="hsl(38, 92%, 50%)"
-                name={t('admin.studies.ongoingStudies.dogsData.charts.arrhythmia.pauses2s')}
+                name={t('admin.studies.ongoingStudies.dogsData.charts.arrhythmia.pauses')}
                 radius={[2, 2, 0, 0]}
               />
             </BarChart>
