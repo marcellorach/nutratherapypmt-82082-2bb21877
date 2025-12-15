@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +65,6 @@ interface DogInfo {
 
 interface DogState {
   data: PetDataRow[];
-  loading: boolean;
   error: string | null;
   lastFetch: Date | null;
 }
@@ -78,64 +78,59 @@ const DOGS_LIST: DogInfo[] = [
   { id: 3680, name: 'Berinjela', breed: 'Other', weight: 15.0, gender: 'male' },
 ];
 
+// Função de fetch fora do componente para React Query
+const fetchAllDogsData = async (): Promise<Record<number, DogState>> => {
+  const results = await Promise.allSettled(
+    DOGS_LIST.map(dog =>
+      supabase.functions.invoke('invoxia-api', { body: { petId: dog.id } })
+    )
+  );
+
+  const dogsData: Record<number, DogState> = {};
+  DOGS_LIST.forEach((dog, index) => {
+    const result = results[index];
+    if (result.status === 'fulfilled' && result.value.data?.success) {
+      const response = result.value.data as InvoxiaResponse;
+      dogsData[dog.id] = {
+        data: response.data,
+        error: null,
+        lastFetch: new Date(),
+      };
+    } else {
+      const errorMsg = result.status === 'rejected' 
+        ? result.reason?.message || 'Erro ao buscar dados'
+        : result.value.data?.error || 'Erro ao buscar dados';
+      dogsData[dog.id] = {
+        data: [],
+        error: errorMsg,
+        lastFetch: null,
+      };
+    }
+  });
+
+  return dogsData;
+};
+
 export const InvoxiaDogsDataTab: React.FC = () => {
   const { t } = useTranslation();
-  const [globalLoading, setGlobalLoading] = useState(false);
-  const [dogsData, setDogsData] = useState<Record<number, DogState>>({});
+  
+  const { 
+    data: dogsData = {}, 
+    isLoading: globalLoading,
+    isFetching,
+    refetch 
+  } = useQuery({
+    queryKey: ['invoxia-dogs-data'],
+    queryFn: fetchAllDogsData,
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+    refetchOnWindowFocus: false,
+  });
 
-  const fetchAllData = async () => {
-    setGlobalLoading(true);
-
-    // Set all dogs to loading
-    const loadingState: Record<number, DogState> = {};
-    DOGS_LIST.forEach(dog => {
-      loadingState[dog.id] = {
-        data: dogsData[dog.id]?.data || [],
-        loading: true,
-        error: null,
-        lastFetch: dogsData[dog.id]?.lastFetch || null,
-      };
-    });
-    setDogsData(loadingState);
-
-    // Fetch all dogs in parallel
-    const results = await Promise.allSettled(
-      DOGS_LIST.map(dog =>
-        supabase.functions.invoke('invoxia-api', { body: { petId: dog.id } })
-      )
-    );
-
-    // Update state with results
-    const newDogsData: Record<number, DogState> = {};
-    DOGS_LIST.forEach((dog, index) => {
-      const result = results[index];
-      if (result.status === 'fulfilled' && result.value.data?.success) {
-        const response = result.value.data as InvoxiaResponse;
-        newDogsData[dog.id] = {
-          data: response.data,
-          loading: false,
-          error: null,
-          lastFetch: new Date(),
-        };
-      } else {
-        const errorMsg = result.status === 'rejected' 
-          ? result.reason?.message || t('admin.studies.ongoingStudies.dogsData.error')
-          : result.value.data?.error || t('admin.studies.ongoingStudies.dogsData.error');
-        newDogsData[dog.id] = {
-          data: [],
-          loading: false,
-          error: errorMsg,
-          lastFetch: null,
-        };
-      }
-    });
-
-    setDogsData(newDogsData);
-    setGlobalLoading(false);
-  };
-
-  const getDogState = (dogId: number): DogState => {
-    return dogsData[dogId] || { data: [], loading: false, error: null, lastFetch: null };
+  const getDogState = (dogId: number): DogState & { loading: boolean } => {
+    const state = dogsData[dogId];
+    return state 
+      ? { ...state, loading: globalLoading || isFetching }
+      : { data: [], error: null, lastFetch: null, loading: globalLoading || isFetching };
   };
 
   return (
@@ -152,13 +147,13 @@ export const InvoxiaDogsDataTab: React.FC = () => {
             </p>
           </div>
         </div>
-        <Button onClick={fetchAllData} disabled={globalLoading} variant="outline" size="sm">
-          {globalLoading ? (
+        <Button onClick={() => refetch()} disabled={globalLoading || isFetching} variant="outline" size="sm">
+          {(globalLoading || isFetching) ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
             <RefreshCw className="h-4 w-4 mr-2" />
           )}
-          {t('admin.studies.ongoingStudies.dogsData.fetchAllButton')}
+          {t('admin.studies.ongoingStudies.dogsData.refreshButton')}
         </Button>
       </CardHeader>
 
