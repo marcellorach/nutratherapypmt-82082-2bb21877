@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.batch-reprocess-triplets]
 verify_jwt = true
+
+[functions.invoxia-api]
+verify_jwt = false

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +9,7 @@ import StudyProgressCard from './StudyProgressCard';
 import PartialResultsChart from './PartialResultsChart';
 import StudyPhaseIndicator from './StudyPhaseIndicator';
 import StudyNotesCard from './StudyNotesCard';
+import { InvoxiaDogsDataTab } from './InvoxiaDogsDataTab';
 
 interface DetailedStudyPanelProps {
   study: OngoingStudy;
@@ -128,9 +128,7 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
             </TabsContent>
             
             <TabsContent value="dogsData" className="pt-4">
-              <div className="flex items-center justify-center min-h-[200px] text-muted-foreground">
-                {t('admin.studies.ongoingStudies.dogsData.placeholder')}
-              </div>
+              <InvoxiaDogsDataTab />
             </TabsContent>
           </Tabs>
         </div>

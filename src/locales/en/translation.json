@@ -1209,7 +1209,29 @@
         "dogsData": "Dogs Data"
       },
       "dogsData": {
-        "placeholder": "Content will be added soon"
+        "title": "Monitoring Data - Dionisia",
+        "fetchButton": "Fetch Invoxia API Data",
+        "loading": "Loading data...",
+        "error": "Error fetching data",
+        "noData": "Click the button above to fetch monitoring data",
+        "lastFetch": "Last updated",
+        "records": "records",
+        "showingFirst": "Showing first {{count}} of {{total}} records",
+        "petInfo": {
+          "name": "Name",
+          "id": "Invoxia ID"
+        },
+        "table": {
+          "date": "Date",
+          "hrDayMean": "HR Day (mean)",
+          "hrNightMean": "HR Night (mean)",
+          "brDayMean": "BR Day (mean)",
+          "brNightMean": "BR Night (mean)",
+          "hrvSdnn": "HRV (SDNN)",
+          "distance": "Distance (m)",
+          "sleepHours": "Sleep Hours",
+          "sleepScore": "Sleep Score"
+        }
       },
       "overview": {
         "studyPopulation": "Study Population",
