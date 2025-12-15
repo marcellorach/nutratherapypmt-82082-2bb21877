@@ -2,18 +2,38 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, RefreshCw, Dog, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  HeartRateChart, 
+  BreathingRateChart, 
+  HRVChart, 
+  ActivityChart, 
+  SleepChart 
+} from './invoxia-charts';
 
 interface PetDataRow {
   date: string | null;
   HR_day_mean: number | null;
   HR_night_mean: number | null;
+  HR_day_min: number | null;
+  HR_day_max: number | null;
+  HR_night_min: number | null;
+  HR_night_max: number | null;
   BR_day_mean: number | null;
   BR_night_mean: number | null;
+  BR_day_min: number | null;
+  BR_day_max: number | null;
+  BR_night_min: number | null;
+  BR_night_max: number | null;
   all_sdnn: number | null;
+  all_rmssd: number | null;
+  all_hrv: number | null;
+  day_sdnn: number | null;
+  night_sdnn: number | null;
   distance: number | null;
+  calories: number | null;
+  exercise_duration_minutes: number | null;
   night_sleep_duration_hours: number | null;
   sleep_score: number | null;
   [key: string]: string | number | null;
@@ -63,12 +83,6 @@ export const InvoxiaDogsDataTab: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatValue = (value: number | string | null, decimals = 1): string => {
-    if (value === null || value === undefined) return '-';
-    if (typeof value === 'string') return value;
-    return value.toFixed(decimals);
   };
 
   return (
@@ -127,43 +141,14 @@ export const InvoxiaDogsDataTab: React.FC = () => {
                 {' | '}{data.length} {t('admin.studies.ongoingStudies.dogsData.records')}
               </p>
             )}
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.date')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.hrDayMean')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.hrNightMean')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.brDayMean')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.brNightMean')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.hrvSdnn')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.distance')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.sleepHours')}</TableHead>
-                    <TableHead className="whitespace-nowrap">{t('admin.studies.ongoingStudies.dogsData.table.sleepScore')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.slice(0, 50).map((row, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{row.date || '-'}</TableCell>
-                      <TableCell>{formatValue(row.HR_day_mean)}</TableCell>
-                      <TableCell>{formatValue(row.HR_night_mean)}</TableCell>
-                      <TableCell>{formatValue(row.BR_day_mean)}</TableCell>
-                      <TableCell>{formatValue(row.BR_night_mean)}</TableCell>
-                      <TableCell>{formatValue(row.all_sdnn)}</TableCell>
-                      <TableCell>{formatValue(row.distance, 0)}</TableCell>
-                      <TableCell>{formatValue(row.night_sleep_duration_hours)}</TableCell>
-                      <TableCell>{formatValue(row.sleep_score, 0)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <HeartRateChart data={data} />
+              <BreathingRateChart data={data} />
+              <HRVChart data={data} />
+              <ActivityChart data={data} />
+              <SleepChart data={data} />
             </div>
-            {data.length > 50 && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                {t('admin.studies.ongoingStudies.dogsData.showingFirst', { count: 50, total: data.length })}
-              </p>
-            )}
           </>
         )}
       </CardContent>

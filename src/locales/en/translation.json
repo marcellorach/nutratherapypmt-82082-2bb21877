@@ -1231,6 +1231,41 @@
           "distance": "Distance (m)",
           "sleepHours": "Sleep Hours",
           "sleepScore": "Sleep Score"
+        },
+        "charts": {
+          "heartRate": {
+            "title": "Heart Rate",
+            "dayMean": "HR Day (mean)",
+            "nightMean": "HR Night (mean)",
+            "dayMin": "HR Day (min)",
+            "dayMax": "HR Day (max)"
+          },
+          "breathingRate": {
+            "title": "Breathing Rate",
+            "dayMean": "BR Day (mean)",
+            "nightMean": "BR Night (mean)",
+            "dayMin": "BR Day (min)",
+            "dayMax": "BR Day (max)"
+          },
+          "hrv": {
+            "title": "Heart Rate Variability (HRV)",
+            "sdnn": "SDNN Total",
+            "rmssd": "RMSSD Total",
+            "daySdnn": "SDNN Day",
+            "nightSdnn": "SDNN Night"
+          },
+          "activity": {
+            "title": "Physical Activity",
+            "distance": "Distance (m)",
+            "calories": "Calories",
+            "exerciseMinutes": "Exercise (min)"
+          },
+          "sleep": {
+            "title": "Sleep Quality",
+            "hours": "Sleep Hours",
+            "score": "Sleep Score (%)",
+            "target": "Target 8h"
+          }
         }
       },
       "overview": {
