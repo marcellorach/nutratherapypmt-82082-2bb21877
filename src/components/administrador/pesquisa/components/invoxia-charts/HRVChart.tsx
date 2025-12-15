@@ -21,12 +21,21 @@ interface HRVChartProps {
 export const HRVChart: React.FC<HRVChartProps> = ({ data }) => {
   const { t } = useTranslation();
 
+  const formatDate = (date: string | number | null): string => {
+    if (!date) return '';
+    const dateStr = String(date);
+    if (dateStr.includes('-')) {
+      return dateStr.split('-').slice(1).join('/');
+    }
+    return dateStr.slice(0, 10);
+  };
+
   const chartData = data
     .filter(row => row.date && (row.all_sdnn || row.all_rmssd || row.all_hrv))
     .slice(0, 30)
     .reverse()
     .map(row => ({
-      date: row.date?.split('-').slice(1).join('/') || '',
+      date: formatDate(row.date),
       sdnn: row.all_sdnn,
       rmssd: row.all_rmssd,
       hrv: row.all_hrv,
