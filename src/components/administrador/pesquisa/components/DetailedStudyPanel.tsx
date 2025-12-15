@@ -15,9 +15,14 @@ interface DetailedStudyPanelProps {
   study: OngoingStudy;
 }
 
+// ID do estudo que deve exibir a aba "Dogs Data"
+const STUDY_WITH_DOGS_DATA = "rapa-sglt2i-longevity-2025";
+
 const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>("overview");
+  
+  const showDogsDataTab = study.id === STUDY_WITH_DOGS_DATA;
   
   const formatValue = (value: number, formatterType?: string) => {
     if (formatterType === 'percent') return `${value}%`;
@@ -39,7 +44,7 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
       <CardContent>
         <div className="mb-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4">
+            <TabsList className={`grid ${showDogsDataTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
                 <span>{t('admin.studies.ongoingStudies.tabs.overview')}</span>
@@ -52,10 +57,12 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
                 <ChartLine className="h-4 w-4" />
                 <span>{t('admin.studies.ongoingStudies.tabs.trends')}</span>
               </TabsTrigger>
-              <TabsTrigger value="dogsData" className="flex items-center gap-2">
-                <Dog className="h-4 w-4" />
-                <span>{t('admin.studies.ongoingStudies.tabs.dogsData')}</span>
-              </TabsTrigger>
+              {showDogsDataTab && (
+                <TabsTrigger value="dogsData" className="flex items-center gap-2">
+                  <Dog className="h-4 w-4" />
+                  <span>{t('admin.studies.ongoingStudies.tabs.dogsData')}</span>
+                </TabsTrigger>
+              )}
             </TabsList>
             
             <TabsContent value="overview" className="pt-4">
@@ -127,9 +134,11 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
               ))}
             </TabsContent>
             
-            <TabsContent value="dogsData" className="pt-4">
-              <InvoxiaDogsDataTab />
-            </TabsContent>
+            {showDogsDataTab && (
+              <TabsContent value="dogsData" className="pt-4">
+                <InvoxiaDogsDataTab />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </CardContent>
