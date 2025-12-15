@@ -1270,6 +1270,21 @@
             "hours": "Sleep Hours",
             "score": "Sleep Score (%)",
             "target": "Target 8h"
+          },
+          "arrhythmia": {
+            "title": "Cardiac Arrhythmias",
+            "tachycardia": "Tachycardia",
+            "bradycardia": "Bradycardia",
+            "pauses": "Pauses",
+            "pauses2s": "Pauses ≥2s"
+          },
+          "poincare": {
+            "title": "Poincaré Analysis",
+            "angle": "Poincaré Angle",
+            "avgAngle": "Average Angle",
+            "triangularIndex": "Triangular Index",
+            "inAngle": "Inspiration Angle",
+            "exAngle": "Expiration Angle"
           }
         }
       },
