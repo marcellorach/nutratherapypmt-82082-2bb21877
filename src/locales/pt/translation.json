@@ -1270,21 +1270,6 @@
             "hours": "Horas de Sono",
             "score": "Score de Sono (%)",
             "target": "Meta 8h"
-          },
-          "arrhythmia": {
-            "title": "Arritmias Cardíacas",
-            "tachycardia": "Taquicardia",
-            "bradycardia": "Bradicardia",
-            "pauses": "Pausas",
-            "pauses2s": "Pausas ≥2s"
-          },
-          "poincare": {
-            "title": "Análise de Poincaré",
-            "angle": "Ângulo Poincaré",
-            "avgAngle": "Ângulo Médio",
-            "triangularIndex": "Índice Triangular",
-            "inAngle": "Ângulo Inspiração",
-            "exAngle": "Ângulo Expiração"
           }
         }
       },
