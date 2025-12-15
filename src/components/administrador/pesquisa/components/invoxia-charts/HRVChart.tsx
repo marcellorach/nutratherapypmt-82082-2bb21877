@@ -32,7 +32,11 @@ export const HRVChart: React.FC<HRVChartProps> = ({ data }) => {
 
   const chartData = data
     .filter(row => row.date && (row.all_sdnn || row.all_rmssd || row.all_hrv))
-    .slice(0, 30)
+    .sort((a, b) => {
+      if (!a.date || !b.date) return 0;
+      return String(b.date).localeCompare(String(a.date));
+    })
+    .slice(0, 10)
     .reverse()
     .map(row => ({
       date: formatDate(row.date),
