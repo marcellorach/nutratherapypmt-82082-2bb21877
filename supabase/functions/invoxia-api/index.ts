@@ -26,7 +26,7 @@ async function loginToInvoxia(): Promise<string> {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ login: username, password }),
   });
 
   if (!response.ok) {
