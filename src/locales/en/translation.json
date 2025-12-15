@@ -1205,7 +1205,11 @@
       "tabs": {
         "overview": "Overview",
         "metrics": "Metrics",
-        "trends": "Trends"
+        "trends": "Trends",
+        "dogsData": "Dogs Data"
+      },
+      "dogsData": {
+        "placeholder": "Content will be added soon"
       },
       "overview": {
         "studyPopulation": "Study Population",

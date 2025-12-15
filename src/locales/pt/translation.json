@@ -1205,7 +1205,11 @@
       "tabs": {
         "overview": "Visão Geral",
         "metrics": "Métricas",
-        "trends": "Tendências"
+        "trends": "Tendências",
+        "dogsData": "Dados dos Cães"
+      },
+      "dogsData": {
+        "placeholder": "Conteúdo será adicionado em breve"
       },
       "overview": {
         "studyPopulation": "População do Estudo",

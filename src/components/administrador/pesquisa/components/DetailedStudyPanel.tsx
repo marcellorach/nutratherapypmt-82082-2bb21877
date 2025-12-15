@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartLine, Heart, ChartBar, Info } from "lucide-react";
+import { ChartLine, ChartBar, Info, Dog } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { OngoingStudy } from '../types/studyTypes';
 import DogGroupVisualization from './DogGroupVisualization';
@@ -39,7 +39,7 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
       <CardContent>
         <div className="mb-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3">
+            <TabsList className="grid grid-cols-4">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
                 <span>{t('admin.studies.ongoingStudies.tabs.overview')}</span>
@@ -51,6 +51,10 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <ChartLine className="h-4 w-4" />
                 <span>{t('admin.studies.ongoingStudies.tabs.trends')}</span>
+              </TabsTrigger>
+              <TabsTrigger value="dogsData" className="flex items-center gap-2">
+                <Dog className="h-4 w-4" />
+                <span>{t('admin.studies.ongoingStudies.tabs.dogsData')}</span>
               </TabsTrigger>
             </TabsList>
             
@@ -121,6 +125,12 @@ const DetailedStudyPanel: React.FC<DetailedStudyPanelProps> = ({ study }) => {
                   formatter={(value) => formatValue(value, metric.formatter)}
                 />
               ))}
+            </TabsContent>
+            
+            <TabsContent value="dogsData" className="pt-4">
+              <div className="flex items-center justify-center min-h-[200px] text-muted-foreground">
+                {t('admin.studies.ongoingStudies.dogsData.placeholder')}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
