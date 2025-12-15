@@ -69,13 +69,14 @@ interface DogState {
   lastFetch: Date | null;
 }
 
+// Ordered by record count: Luco(8), Dionísia(8), Cash(7), Mia(7), Berinjela(4), Boris(1)
 const DOGS_LIST: DogInfo[] = [
   { id: 3738, name: 'Luco', breed: 'Bouledogue Français', weight: 11.5, gender: 'male' },
   { id: 3736, name: 'Dionísia', breed: 'Miniature Pinscher', weight: 6.0, gender: 'female' },
   { id: 3732, name: 'Cash', breed: 'Unknown', weight: 11.3, gender: 'male' },
   { id: 3731, name: 'Mia', breed: 'Unknown', weight: 29.0, gender: 'female' },
-  { id: 3694, name: 'Boris', breed: 'Bouledogue Français', weight: 19.4, gender: 'male' },
   { id: 3680, name: 'Berinjela', breed: 'Other', weight: 15.0, gender: 'male' },
+  { id: 3694, name: 'Boris', breed: 'Bouledogue Français', weight: 19.4, gender: 'male' },
 ];
 
 export const InvoxiaDogsDataTab: React.FC = () => {
