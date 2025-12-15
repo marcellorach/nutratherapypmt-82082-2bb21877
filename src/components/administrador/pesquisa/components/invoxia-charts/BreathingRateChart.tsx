@@ -33,7 +33,11 @@ export const BreathingRateChart: React.FC<BreathingRateChartProps> = ({ data }) 
 
   const chartData = data
     .filter(row => row.date && (row.BR_day_mean || row.BR_night_mean))
-    .slice(0, 30)
+    .sort((a, b) => {
+      if (!a.date || !b.date) return 0;
+      return String(b.date).localeCompare(String(a.date));
+    })
+    .slice(0, 10)
     .reverse()
     .map(row => ({
       date: formatDate(row.date),

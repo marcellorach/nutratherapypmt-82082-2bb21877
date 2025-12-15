@@ -33,7 +33,11 @@ export const HeartRateChart: React.FC<HeartRateChartProps> = ({ data }) => {
 
   const chartData = data
     .filter(row => row.date && (row.HR_day_mean || row.HR_night_mean))
-    .slice(0, 30)
+    .sort((a, b) => {
+      if (!a.date || !b.date) return 0;
+      return String(b.date).localeCompare(String(a.date));
+    })
+    .slice(0, 10)
     .reverse()
     .map(row => ({
       date: formatDate(row.date),
