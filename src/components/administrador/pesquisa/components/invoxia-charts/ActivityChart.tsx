@@ -19,12 +19,21 @@ interface ActivityChartProps {
 export const ActivityChart: React.FC<ActivityChartProps> = ({ data }) => {
   const { t } = useTranslation();
 
+  const formatDate = (date: string | number | null): string => {
+    if (!date) return '';
+    const dateStr = String(date);
+    if (dateStr.includes('-')) {
+      return dateStr.split('-').slice(1).join('/');
+    }
+    return dateStr.slice(0, 10);
+  };
+
   const chartData = data
     .filter(row => row.date && row.distance !== null)
     .slice(0, 30)
     .reverse()
     .map(row => ({
-      date: row.date?.split('-').slice(1).join('/') || '',
+      date: formatDate(row.date),
       distance: row.distance,
       calories: row.calories,
       exerciseMinutes: row.exercise_duration_minutes,

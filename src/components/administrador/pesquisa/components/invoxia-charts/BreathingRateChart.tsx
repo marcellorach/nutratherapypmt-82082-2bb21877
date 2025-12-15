@@ -22,12 +22,21 @@ interface BreathingRateChartProps {
 export const BreathingRateChart: React.FC<BreathingRateChartProps> = ({ data }) => {
   const { t } = useTranslation();
 
+  const formatDate = (date: string | number | null): string => {
+    if (!date) return '';
+    const dateStr = String(date);
+    if (dateStr.includes('-')) {
+      return dateStr.split('-').slice(1).join('/');
+    }
+    return dateStr.slice(0, 10);
+  };
+
   const chartData = data
     .filter(row => row.date && (row.BR_day_mean || row.BR_night_mean))
     .slice(0, 30)
     .reverse()
     .map(row => ({
-      date: row.date?.split('-').slice(1).join('/') || '',
+      date: formatDate(row.date),
       dayMean: row.BR_day_mean,
       nightMean: row.BR_night_mean,
       dayMin: row.BR_day_min,
