@@ -1616,6 +1616,18 @@ serve(async (req) => {
         // Preparar analysis_data com formato compatível com visualização
         const analysisData = {
           ...extractedData,
+          // ✅ EXPLICIT: Add study_population and structured_dosages with clear keys
+          study_population: extractedData.study_population || null,
+          structured_dosages: extractedData.structured_dosages || [],
+          biomarkers: extractedData.biomarkers || [],
+          // ✅ EXPLICIT: Also add dosages array for backward compatibility
+          dosages: (extractedData.structured_dosages || []).map(d => ({
+            compound: d.compound,
+            dose: `${d.amount} ${d.unit}${d.per_body_weight ? '/kg' : ''}`,
+            frequency: d.frequency || 'daily',
+            duration: d.duration_days ? `${d.duration_days} days` : undefined,
+            route: d.route || 'oral'
+          })),
           // Adicionar aliases para compatibilidade com componentes existentes
           extractedNutraceuticals: extractedData.nutraceuticals.map(n => ({
             name: n.name,
@@ -1663,7 +1675,10 @@ serve(async (req) => {
         console.log('💾 Salvando com RAG support...');
         console.log(`   - full_text_content: ${fullTextContent.length} chars`);
         console.log(`   - word_count: ${fullTextMetadata.word_count}`);
+        console.log(`   - structured_dosages: ${extractedData.structured_dosages?.length || 0}`);
+        console.log(`   - study_population: ${extractedData.study_population?.species || 'N/A'}`);
         
+        // ✅ STEP 1: Save to processed_studies
         const result = await supabase
           .from('processed_studies')
           .update({
@@ -1679,6 +1694,81 @@ serve(async (req) => {
           .eq('id', studyId);
         
         if (result.error) throw result.error;
+        
+        // ✅ STEP 2: Upsert to study_extractions for Stage 3 data
+        console.log('💾 Salvando em study_extractions para Stage 3...');
+        const extractionData = {
+          // Core nutraceutical data with dosages
+          nutraceuticals: extractedData.nutraceuticals.map(n => ({
+            ...n,
+            dosage: n.dosage,
+            species_tested: n.species_tested || [extractedData.study_population?.species || 'unknown']
+          })),
+          // ✅ CRITICAL: Structured dosages for precise tracking
+          structured_dosages: extractedData.structured_dosages || [],
+          dosages: (extractedData.structured_dosages || []).map(d => ({
+            compound: d.compound,
+            amount: d.amount,
+            unit: d.unit,
+            dose_string: `${d.amount} ${d.unit}${d.per_body_weight ? '/kg' : ''}/${d.frequency || 'day'}`,
+            frequency: d.frequency,
+            per_body_weight: d.per_body_weight,
+            duration_days: d.duration_days,
+            route: d.route
+          })),
+          // ✅ CRITICAL: Study population metadata
+          study_population: extractedData.study_population || null,
+          // Biomarkers with statistical data
+          biomarkers: extractedData.biomarkers || [],
+          // Health conditions
+          conditions: extractedData.conditions,
+          // Mechanisms and effects
+          mechanisms: extractedData.mechanisms,
+          biological_effects: extractedData.biological_effects,
+          // Interactions chain
+          interactions: extractedData.interactions,
+          // Safety data
+          side_effects: extractedData.side_effects,
+          contraindications: extractedData.contraindications || [],
+          drug_interactions: extractedData.drug_interactions || [],
+          synergies: extractedData.synergies || [],
+          // Clinical outcomes for chat context
+          clinical_outcomes: extractedData.conditions.map(c => ({
+            condition: c.name,
+            relationship: c.relationship_type,
+            efficacy: c.efficacy_description,
+            treatability_score: c.treatability_score
+          })),
+          // Metadata
+          extraction_version: '3.0',
+          extracted_at: new Date().toISOString()
+        };
+        
+        const { error: extractionError } = await supabase
+          .from('study_extractions')
+          .upsert({
+            study_id: studyId,
+            extracted_data: extractionData as any,
+            extraction_status: 'completed',
+            extraction_quality_score: Math.round(
+              (extractedData.nutraceuticals.length > 0 ? 25 : 0) +
+              ((extractedData.structured_dosages?.length ?? 0) > 0 ? 25 : 0) +
+              (extractedData.study_population ? 25 : 0) +
+              (extractedData.conditions.length > 0 ? 25 : 0)
+            ),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'study_id'
+          });
+        
+        if (extractionError) {
+          console.warn('⚠️ Falha ao salvar em study_extractions (não crítico):', extractionError);
+        } else {
+          console.log('✅ Dados salvos em study_extractions com sucesso');
+          console.log(`   - dosages: ${extractionData.dosages.length}`);
+          console.log(`   - species: ${extractionData.study_population?.species || 'N/A'}`);
+        }
+        
         return result;
       },
       'Save to Database'
