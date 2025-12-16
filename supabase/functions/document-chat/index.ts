@@ -305,17 +305,104 @@ Return format:
       study.authors?.length ? `**Autores**: ${study.authors.join(', ')}` : '',
     ].filter(Boolean);
 
-    // Add nutraceuticals
-    const nutraceuticals = extractionData?.nutraceuticals || analysisData?.nutraceuticals || [];
+    // Add nutraceuticals (priorizar extractionData sobre analysisData)
+    const nutraceuticals = extractionData?.nutraceuticals || analysisData?.extractedNutraceuticals || analysisData?.nutraceuticals || [];
     if (nutraceuticals.length > 0) {
       contextParts.push(`\n**Nutracêuticos Identificados** (${nutraceuticals.length}):`);
       nutraceuticals.slice(0, 10).forEach((n: any, i: number) => {
-        contextParts.push(`${i + 1}. ${n.name || n}${n.dosage ? ` (${n.dosage})` : ''}${n.efficacy_score ? ` [Eficácia: ${n.efficacy_score}/5]` : ''}`);
+        const name = n.name || n.compound_name || n;
+        const dosage = n.dosage || n.dose || n.dosage_info || '';
+        const duration = n.duration || n.study_duration || '';
+        const efficacy = n.efficacy_score || n.score || '';
+        
+        let entry = `${i + 1}. **${name}**`;
+        if (dosage) entry += ` - Dosagem: ${dosage}`;
+        if (duration) entry += ` (${duration})`;
+        if (efficacy) entry += ` [Eficácia: ${efficacy}/5]`;
+        
+        contextParts.push(entry);
       });
     }
 
+    // ============================================
+    // NOVO: Extrair DOSAGENS ESTRUTURADAS
+    // Prioridade: study_extractions > analysisData
+    // ============================================
+    const dosages = extractionData?.dosages || 
+                    extractionData?.structured_dosages ||
+                    analysisData?.dosages || 
+                    analysisData?.structured_dosages || 
+                    [];
+    
+    // Também extrair dosagens de clinical_outcomes se existir
+    const clinicalOutcomes = extractionData?.clinical_outcomes || analysisData?.clinicalOutcomes || [];
+    
+    // Coletar todas as dosagens encontradas
+    const allDosages: Array<{compound: string, dose: string, duration?: string, notes?: string}> = [];
+    
+    // Dosagens estruturadas diretas
+    if (Array.isArray(dosages) && dosages.length > 0) {
+      dosages.forEach((d: any) => {
+        if (d.compound || d.nutraceutical || d.name) {
+          allDosages.push({
+            compound: d.compound || d.nutraceutical || d.name,
+            dose: d.dose || d.dosage || d.amount || '',
+            duration: d.duration || d.period || '',
+            notes: d.notes || d.species || ''
+          });
+        }
+      });
+    }
+    
+    // Dosagens dos nutracêuticos
+    nutraceuticals.forEach((n: any) => {
+      if (n.dosage || n.dose || n.dosage_info) {
+        const name = n.name || n.compound_name || 'Unknown';
+        const existingDosage = allDosages.find(d => 
+          d.compound.toLowerCase() === name.toLowerCase()
+        );
+        
+        if (!existingDosage) {
+          allDosages.push({
+            compound: name,
+            dose: n.dosage || n.dose || n.dosage_info,
+            duration: n.duration || n.study_duration || '',
+            notes: n.species || ''
+          });
+        }
+      }
+    });
+    
+    // Dosagens dos outcomes clínicos
+    if (Array.isArray(clinicalOutcomes)) {
+      clinicalOutcomes.forEach((outcome: any) => {
+        if (outcome.intervention_dose || outcome.dosage) {
+          allDosages.push({
+            compound: outcome.intervention || outcome.nutraceutical || 'Intervenção',
+            dose: outcome.intervention_dose || outcome.dosage,
+            duration: outcome.study_duration || '',
+            notes: outcome.outcome || ''
+          });
+        }
+      });
+    }
+    
+    // Adicionar seção de dosagens ao contexto SE houver dosagens
+    if (allDosages.length > 0) {
+      contextParts.push(`\n**📋 DOSAGENS ESTUDADAS** (${allDosages.length}):`);
+      allDosages.forEach((d, i) => {
+        let entry = `${i + 1}. **${d.compound}**: ${d.dose}`;
+        if (d.duration) entry += ` por ${d.duration}`;
+        if (d.notes) entry += ` - ${d.notes}`;
+        contextParts.push(entry);
+      });
+      console.log(`📊 Dosagens encontradas: ${allDosages.length}`);
+    } else {
+      console.log('⚠️ Nenhuma dosagem estruturada encontrada');
+    }
+
     // Add conditions
-    const conditions = extractionData?.conditions || analysisData?.conditions || [];
+    const conditions = extractionData?.conditions || extractionData?.extractedConditions || analysisData?.extractedConditions || analysisData?.conditions || [];
     if (conditions.length > 0) {
       contextParts.push(`\n**Condições de Saúde** (${conditions.length}):`);
       conditions.slice(0, 10).forEach((c: any, i: number) => {
@@ -332,12 +419,14 @@ Return format:
       });
     }
 
-    // Add mechanisms
-    const mechanisms = extractionData?.mechanisms || analysisData?.mechanisms || [];
+    // Add mechanisms (priorizar extractionData)
+    const mechanisms = extractionData?.mechanisms || extractionData?.molecularMechanisms || analysisData?.molecularMechanisms || analysisData?.mechanisms || [];
     if (mechanisms.length > 0) {
       contextParts.push(`\n**Mecanismos de Ação**:`);
       mechanisms.slice(0, 5).forEach((m: any) => {
-        contextParts.push(`- ${m.nutraceutical || m}: ${m.mechanism || 'Não especificado'}`);
+        const name = m.nutraceutical || m.compound || m.name || m;
+        const mechanism = m.mechanism || m.action || m.description || 'Não especificado';
+        contextParts.push(`- **${name}**: ${mechanism}`);
       });
     }
 
@@ -360,6 +449,7 @@ Return format:
     console.log(`📊 RAG chunks: ${relevantChunks.length}`);
     console.log(`📊 GraphRAG ativo: ${graphContext ? 'Sim' : 'Não'}`);
     console.log(`📊 Nutracêuticos no contexto: ${nutraceuticals.length}`);
+    console.log(`📊 Dosagens estruturadas: ${allDosages.length}`);
     console.log(`📊 Condições no contexto: ${conditions.length}`);
     console.log(`📊 Achados no contexto: ${findings.length}`);
     console.log(`📊 Mecanismos no contexto: ${mechanisms.length}`);
@@ -527,6 +617,7 @@ A análise completa do documento ainda está sendo processada. Por favor, tente 
         answer,
         context_used: {
           nutraceuticals_count: nutraceuticals.length,
+          dosages_count: allDosages.length,
           conditions_count: conditions.length,
           findings_count: findings.length,
           context_length: fullContext.length,
@@ -559,6 +650,7 @@ A análise completa do documento ainda está sendo processada. Por favor, tente 
         metadata: {
           studyTitle: study.title,
           nutraceuticalsCount: nutraceuticals.length,
+          dosagesCount: allDosages.length,
           conditionsCount: conditions.length,
           extractionQuality: study.study_extractions?.[0]?.extraction_quality_score,
         }
