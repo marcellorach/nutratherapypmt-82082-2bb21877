@@ -435,8 +435,11 @@ Return format:
     }
 
     console.log('🤖 Chamando Lovable AI...');
+    console.log(`📊 Messages count: ${messages.length}`);
+    console.log(`📊 System prompt length: ${messages[0]?.content?.length || 0}`);
+    console.log(`📊 User prompt length: ${messages[1]?.content?.length || 0}`);
 
-    // Call Lovable AI
+    // Call Lovable AI - usar modelo estável
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -444,12 +447,14 @@ Return format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
+        model: 'google/gemini-2.5-flash', // Modelo mais estável
         messages,
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 2000,
       }),
     });
+
+    console.log(`📊 AI Response status: ${aiResponse.status}`);
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
@@ -466,7 +471,38 @@ Return format:
     }
 
     const aiData = await aiResponse.json();
-    const answer = aiData.choices[0].message.content;
+    console.log(`📊 AI Data structure: ${JSON.stringify(Object.keys(aiData))}`);
+    console.log(`📊 Choices count: ${aiData.choices?.length || 0}`);
+    
+    let answer = aiData.choices?.[0]?.message?.content || '';
+    
+    // Verificar se resposta está vazia e gerar fallback
+    if (!answer || answer.trim().length < 10) {
+      console.warn('⚠️ Resposta vazia ou muito curta, gerando fallback...');
+      console.log(`📊 Raw answer: "${answer}"`);
+      
+      // Gerar resposta de fallback baseada no contexto
+      answer = `### 🔬 Análise do Estudo
+
+**${study.title}**
+
+Baseado nos dados extraídos deste estudo:
+
+#### 📊 Informações Disponíveis
+${nutraceuticals.length > 0 ? `- **Nutracêuticos identificados**: ${nutraceuticals.slice(0, 5).map((n: any) => n.name || n).join(', ')}` : '- Nutracêuticos: dados não extraídos'}
+${conditions.length > 0 ? `- **Condições de saúde**: ${conditions.slice(0, 5).map((c: any) => c.name || c).join(', ')}` : '- Condições: dados não extraídos'}
+${findings.length > 0 ? `- **Principais achados**: ${findings.slice(0, 3).map((f: any) => f.finding || f).join('; ')}` : '- Achados: dados não extraídos'}
+
+#### ⚠️ Nota
+A análise completa do documento ainda está sendo processada. Por favor, tente novamente em alguns instantes ou reformule sua pergunta.
+
+---
+
+**💡 Perguntas sugeridas:**
+- Quais nutracêuticos são mencionados neste estudo?
+- Quais condições de saúde são abordadas?
+- Há informações sobre dosagens?`;
+    }
 
     console.log('✅ Resposta gerada com sucesso');
     console.log(`📝 Tamanho da resposta: ${answer.length} caracteres`);
