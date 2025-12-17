@@ -81,11 +81,12 @@ export interface TabInfoContent {
 interface TabInfoButtonProps {
   tabId: string;
   title: string;
-  content: TabInfoContent | TabInfoContentBilingual;
+  content?: TabInfoContent | TabInfoContentBilingual;
 }
 
 // Type guard to check if content is bilingual
-function isBilingualContent(content: TabInfoContent | TabInfoContentBilingual): content is TabInfoContentBilingual {
+function isBilingualContent(content: TabInfoContent | TabInfoContentBilingual | undefined): content is TabInfoContentBilingual {
+  if (!content || !content.overview) return false;
   return typeof content.overview.objective === 'object' && 'pt' in content.overview.objective;
 }
 
@@ -95,12 +96,18 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
 
   // Localize content if bilingual, otherwise use as-is
   const localizedContent = useMemo(() => {
+    if (!content) return null;
     if (isBilingualContent(content)) {
       const language = getLanguageFromI18n(i18n.language);
       return getLocalizedTabInfo(content, language);
     }
     return content as TabInfoContent;
   }, [content, i18n.language]);
+
+  // Don't render if no content
+  if (!localizedContent) {
+    return null;
+  }
 
   return (
     <>
