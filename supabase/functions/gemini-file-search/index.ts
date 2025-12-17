@@ -2022,8 +2022,12 @@ serve(async (req) => {
         
         // Upsert entities to veterinary_ontology (auto-expand the ontology)
         let linkedCount = 0;
+        console.log(`📊 Attempting to link ${entitiesToLink.length} entities to ontology...`);
+        
         for (const entity of entitiesToLink) {
-          const { error: ontologyError } = await supabase
+          console.log(`  → Upserting: ${entity.entity_id} (${entity.entity_type})`);
+          
+          const { data: upsertData, error: ontologyError } = await supabase
             .from('veterinary_ontology')
             .upsert({
               entity_id: entity.entity_id,
@@ -2040,10 +2044,14 @@ serve(async (req) => {
             }, {
               onConflict: 'entity_id',
               ignoreDuplicates: false // Update if exists
-            });
+            })
+            .select();
           
-          if (!ontologyError) {
+          if (ontologyError) {
+            console.error(`  ❌ Error upserting ${entity.entity_id}:`, ontologyError.message);
+          } else {
             linkedCount++;
+            console.log(`  ✅ Upserted: ${entity.entity_id}`);
           }
         }
         
