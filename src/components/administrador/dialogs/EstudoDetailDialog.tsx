@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, BarChart3, Bug } from "lucide-react";
+import { MessageCircle, BarChart3, Bug, GitPullRequest } from "lucide-react";
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
@@ -12,7 +12,7 @@ import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
 import PipelineDebugTab from '../estudos/detalhes/tabs/PipelineDebugTab';
 import DocumentChatInterface from '../estudos/chat/DocumentChatInterface';
 import EnhancedStudyVisualization from '../estudos/visualization/EnhancedStudyVisualization';
-import ApprovalTab from '../estudos/approval/ApprovalTab';
+import StudyTripletCuration from '../estudos/curation/StudyTripletCuration';
 
 interface EstudoDetailDialogProps {
   open: boolean;
@@ -86,6 +86,10 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="analysis">Análise IA</TabsTrigger>
             <TabsTrigger value="conditions">Condições</TabsTrigger>
+            <TabsTrigger value="triplets">
+              <GitPullRequest className="h-4 w-4 mr-1" />
+              Triplets
+            </TabsTrigger>
             <TabsTrigger value="visualizations">
               <BarChart3 className="h-4 w-4 mr-1" />
               Visualizações
@@ -98,7 +102,6 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
               <Bug className="h-4 w-4 mr-1" />
               Debug
             </TabsTrigger>
-            <TabsTrigger value="approval">Aprovação</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -111,6 +114,13 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
 
           <TabsContent value="conditions">
             <EstudoDetailSections estudo={estudo} />
+          </TabsContent>
+
+          <TabsContent value="triplets">
+            <StudyTripletCuration 
+              studyId={estudo.id}
+              studyTitle={estudo.title}
+            />
           </TabsContent>
 
           <TabsContent value="visualizations">
@@ -129,13 +139,6 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
 
           <TabsContent value="debug">
             <PipelineDebugTab estudo={estudo} />
-          </TabsContent>
-
-          <TabsContent value="approval">
-            <ApprovalTab 
-              estudo={estudo} 
-              onAdvanceApproval={onAdvanceApproval}
-            />
           </TabsContent>
         </Tabs>
 
