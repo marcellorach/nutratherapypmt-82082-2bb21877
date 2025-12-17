@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -65,6 +65,42 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <span>{t('admin.sidebar.knowledgeBase.veterinaryTargets')}</span>
             </div>
             {currentStep === "veterinary-targets" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "triplet-curation"} 
+          onClick={() => handleStepClick("triplet-curation")}
+          className={currentStep === "triplet-curation" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <GitPullRequest className={`h-4 w-4 mr-2 ${currentStep === "triplet-curation" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.tripletCuration')}</span>
+            </div>
+            {currentStep === "triplet-curation" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "knowledge-graph"} 
+          onClick={() => handleStepClick("knowledge-graph")}
+          className={currentStep === "knowledge-graph" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Share2 className={`h-4 w-4 mr-2 ${currentStep === "knowledge-graph" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.knowledgeGraph')}</span>
+            </div>
+            {currentStep === "knowledge-graph" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>

@@ -948,6 +948,8 @@
         "studies": "Scientific Studies",
         "nutraceuticalsUnified": "Nutraceuticals",
         "veterinaryTargets": "Veterinary Targets",
+        "tripletCuration": "Triplet Curation",
+        "knowledgeGraph": "Knowledge Graph",
         "aiInsights": "A.I. Insights",
         "relations": "Relations",
         "manageOutcomes": "Manage Outcomes",
