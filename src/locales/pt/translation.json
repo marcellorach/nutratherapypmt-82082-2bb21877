@@ -1,4 +1,55 @@
 {
+  "knowledgeGraph": {
+    "title": "Visualização do Grafo de Conhecimento",
+    "description": "Visualização interativa do grafo de conhecimento médico",
+    "testConnection": "Testar Conexão Neo4j",
+    "loading": "Carregando grafo...",
+    "topConnected": "Entidades Mais Conectadas",
+    "connections": "conexões",
+    "dataSources": {
+      "title": "Fontes de Dados",
+      "ontology": "Ontologia",
+      "triplets": "De Estudos",
+      "known": "Relações Conhecidas",
+      "contributingStudies": "Estudos Contribuintes",
+      "noStudies": "Nenhum estudo contribuindo ainda"
+    },
+    "stats": {
+      "totalNodes": "Total de Nós",
+      "totalRelations": "Total de Relações",
+      "positive": "Positivas (TRATA)",
+      "negative": "Negativas (PIORA)",
+      "nutraceuticals": "Nutracêuticos",
+      "conditions": "Condições"
+    },
+    "filters": {
+      "study": "Filtrar por Estudo",
+      "allStudies": "Todos os Estudos",
+      "entityType": "Tipo de Entidade",
+      "allTypes": "Todos os Tipos",
+      "nutraceuticals": "Nutracêuticos",
+      "conditions": "Condições",
+      "mechanisms": "Mecanismos",
+      "effects": "Efeitos",
+      "outcomes": "Desfechos",
+      "relationType": "Tipo de Relação",
+      "allRelations": "Todas as Relações",
+      "positive": "Positivas (TRATA, SUPORTA)",
+      "negative": "Negativas (PIORA, CONTRAINDICADO)",
+      "minConfidence": "Confiança Mínima",
+      "all": "Todas (0%)",
+      "medium": "Média (50%+)",
+      "high": "Alta (70%+)",
+      "veryHigh": "Muito Alta (85%+)",
+      "showing": "Mostrando",
+      "nodes": "nós",
+      "edges": "arestas"
+    },
+    "empty": {
+      "title": "Nenhum dado de grafo disponível",
+      "description": "Aprove e sincronize alguns triplets para visualizar o grafo de conhecimento"
+    }
+  },
   "chat": {
     "title": "Chat com Documento",
     "inputPlaceholder": "Digite sua pergunta...",
