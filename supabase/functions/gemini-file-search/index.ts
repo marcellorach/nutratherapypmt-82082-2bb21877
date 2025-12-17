@@ -822,9 +822,95 @@ async function extractWithFileSearch(
             },
             required: ['compounds', 'enhanced_effect']
           }
+        },
+        // ✅ NEW: Study Assessment - Quality, Relevance, Novelty scores
+        study_assessment: {
+          type: 'object',
+          description: 'CRITICAL: Evaluate study methodology and generate quality scores (1.0-5.0)',
+          properties: {
+            methodology_type: {
+              type: 'string',
+              enum: ['RCT', 'cohort', 'case_control', 'case_study', 'meta_analysis', 'systematic_review', 'in_vitro', 'observational'],
+              description: 'Study design type'
+            },
+            sample_size: {
+              type: 'integer',
+              description: 'Number of subjects (n=X)'
+            },
+            randomization: {
+              type: 'boolean',
+              description: 'Was the study randomized?'
+            },
+            blinding: {
+              type: 'string',
+              enum: ['double_blind', 'single_blind', 'open_label', 'none'],
+              description: 'Blinding method used'
+            },
+            placebo_controlled: {
+              type: 'boolean',
+              description: 'Did the study have a placebo control group?'
+            },
+            statistical_significance: {
+              type: 'boolean',
+              description: 'Were results statistically significant (p<0.05)?'
+            },
+            p_values: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'List of p-values reported (e.g., ["<0.001", "0.03", "0.045"])'
+            },
+            follow_up_duration: {
+              type: 'string',
+              description: 'Duration of the study/follow-up (e.g., "12 weeks", "6 months")'
+            },
+            species_tested: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Species studied (canine, feline, human, murine, etc.)'
+            },
+            quality_score: {
+              type: 'number',
+              description: 'Methodological quality score (1.0-5.0). 5.0=RCT double-blind n>100, 4.0=RCT n>50, 3.0=Cohort n>30, 2.0=Case-control n<30, 1.0=Case report'
+            },
+            relevance_score: {
+              type: 'number',
+              description: 'Clinical relevance score (1.0-5.0). 5.0=Direct veterinary application, 4.0=Translatable, 3.0=Human study, 2.0=In vitro/rodent, 1.0=Pure mechanistic'
+            },
+            novelty_score: {
+              type: 'number',
+              description: 'Scientific novelty score (1.0-5.0). 5.0=First of its kind, 4.0=Novel combination, 3.0=Confirms with new data, 2.0=Replication, 1.0=Well-established'
+            }
+          },
+          required: ['methodology_type', 'quality_score', 'relevance_score', 'novelty_score']
+        },
+        // ✅ NEW: Study Summary - Structured description
+        study_summary: {
+          type: 'object',
+          description: 'Structured summary of the study findings',
+          properties: {
+            objective: {
+              type: 'string',
+              description: 'Main research objective in one sentence'
+            },
+            key_findings: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of 3-5 main findings from the study'
+            },
+            clinical_implications: {
+              type: 'string',
+              description: 'Practical implications for veterinary practice'
+            },
+            limitations: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Study limitations mentioned by authors'
+            }
+          },
+          required: ['objective', 'key_findings']
         }
       },
-      required: ['title', 'authors', 'nutraceuticals', 'mechanisms', 'biological_effects', 'conditions', 'interactions', 'side_effects', 'contraindications']
+      required: ['title', 'authors', 'nutraceuticals', 'mechanisms', 'biological_effects', 'conditions', 'interactions', 'side_effects', 'contraindications', 'study_assessment', 'study_summary']
     }
   };
 
@@ -882,14 +968,7 @@ async function extractWithFileSearch(
    - Specific efficacy description with numbers if available
 
 5️⃣ INTERACTIONS (Biological Chain Mapping - MOST CRITICAL):
-   Create EXPLICIT step-by-step chains based on ACTUAL data from the study, for example:
-   
-   Chain 1: [Compound X] → [inhibits] → [Target pathway ROS]
-   Chain 2: ↓ [Target] → [leads_to] → ↓ [Biomarker] (peroxidation)
-   Chain 3: ↓ [Biomarker] → [leads_to] → ↓ [Clinical marker]
-   Chain 4: ↓ [Clinical marker] → [leads_to] → [Improved outcome]
-   
-   IMPORTANT: Replace all [bracketed placeholders] with ACTUAL compounds, pathways, and biomarkers found IN THIS STUDY. Do NOT use placeholder text in your output.
+   Create EXPLICIT step-by-step chains based on ACTUAL data from the study.
    Types: inhibition, stimulation, modulation
    Include confidence (0-5) for each interaction
 
@@ -898,12 +977,45 @@ async function extractWithFileSearch(
    - Include frequency/incidence if reported
    - Severity: low (transient), medium (requires monitoring), high (dose-limiting)
 
+7️⃣ STUDY ASSESSMENT (CRITICAL - Scores 1.0-5.0):
+   Evaluate the study methodology and generate THREE scores:
+   
+   📊 QUALITY_SCORE (Methodological Rigor):
+   - 5.0: RCT double-blind, placebo-controlled, n>100, clear statistics
+   - 4.0: RCT single-blind, n>50, adequate methodology
+   - 3.0: Cohort/observational study, n>30, reasonable controls
+   - 2.0: Case-control, small sample (n<30), limited controls
+   - 1.0: Case report, anecdotal, no controls
+   
+   📊 RELEVANCE_SCORE (Clinical Applicability):
+   - 5.0: Direct veterinary application, species-specific, actionable dosages
+   - 4.0: Translatable to veterinary practice, relevant species model
+   - 3.0: Human study with potential veterinary translation
+   - 2.0: In vitro or rodent model, limited clinical translation
+   - 1.0: Pure mechanistic study, no clinical application
+   
+   📊 NOVELTY_SCORE (Scientific Contribution):
+   - 5.0: First study of its kind, paradigm-shifting findings
+   - 4.0: Novel combination, new mechanism discovered
+   - 3.0: Confirms previous findings with new data
+   - 2.0: Replication study, incremental knowledge
+   - 1.0: Well-established findings, no new information
+   
+   Also extract: methodology_type, sample_size, randomization, blinding, placebo_controlled, statistical_significance, p_values, follow_up_duration, species_tested
+
+8️⃣ STUDY SUMMARY:
+   - objective: Main research objective in one sentence
+   - key_findings: Array of 3-5 main findings from the study
+   - clinical_implications: Practical implications for veterinary practice
+   - limitations: Study limitations mentioned by authors
+
 🔍 EXTRACTION STRATEGY:
 1. Read ENTIRE PDF: Introduction, Methods, Results, Discussion, Conclusions
-2. Focus on "Results" section for biomarker data with p-values
-3. Check "Discussion" for mechanistic explanations and pathway descriptions
-4. Extract from Tables and Figures
-5. Note statistical significance for confidence scoring
+2. Focus on "Methods" section for study_assessment data
+3. Focus on "Results" section for biomarker data with p-values
+4. Check "Discussion" for mechanistic explanations and pathway descriptions
+5. Extract from Tables and Figures
+6. Note statistical significance for confidence scoring
 
 ⚠️ QUALITY RULES:
 1. Names in interactions MUST match exactly the names in their arrays
@@ -911,8 +1023,9 @@ async function extractWithFileSearch(
 3. Every mechanism should connect to at least one biological effect
 4. Use standardized nomenclature (COX-2 not cyclooxygenase-2)
 5. Include units and concentrations when available
+6. BE CRITICAL and OBJECTIVE with scores - base on actual evidence
 
-Return using extract_study_data function with ALL arrays fully populated.`;
+Return using extract_study_data function with ALL arrays fully populated, INCLUDING study_assessment and study_summary.`;
 
   try {
     console.log('📤 Sending query with Tool Calling via Google AI Direct...');
