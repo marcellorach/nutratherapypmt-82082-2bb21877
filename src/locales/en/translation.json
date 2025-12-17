@@ -45,6 +45,27 @@
       "nodes": "nodes",
       "edges": "edges"
     },
+    "tooltips": {
+      "ontology": "Base entities from veterinary ontology (nutraceuticals, conditions, mechanisms)",
+      "fromStudies": "Triplets automatically extracted from scientific studies by AI",
+      "knownRelations": "Pre-defined high-confidence relationships based on established literature",
+      "totalNodes": "Total unique entities in the graph",
+      "totalRelations": "Total connections between entities in the graph",
+      "positiveRelations": "Beneficial relations: treatments, improvements, therapeutic support",
+      "negativeRelations": "Adverse relations: contraindications, symptom worsening, side effects",
+      "nutraceuticals": "Bioactive substances with therapeutic potential",
+      "conditions": "Diseases, symptoms or treatable health states",
+      "studyFilter": "Show only data extracted from a specific study",
+      "entityFilter": "Filter by entity category",
+      "relationFilter": "Filter by relation nature",
+      "confidenceFilter": "Filter by extraction confidence level",
+      "testConnection": "Test connection with Neo4j graph database",
+      "refresh": "Reload all graph data",
+      "legendOntology": "Nodes derived from the system base ontology",
+      "legendStudy": "Nodes automatically extracted from scientific studies",
+      "legendKnown": "Known and pre-defined relationships with high confidence",
+      "topConnected": "Entities with the most connections in the graph, indicating high relevance"
+    },
     "empty": {
       "title": "No graph data available",
       "description": "Approve and sync some triplets to visualize the knowledge graph"

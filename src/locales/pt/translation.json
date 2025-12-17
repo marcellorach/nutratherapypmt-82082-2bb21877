@@ -45,6 +45,27 @@
       "nodes": "nós",
       "edges": "arestas"
     },
+    "tooltips": {
+      "ontology": "Entidades base da ontologia veterinária (nutracêuticos, condições, mecanismos)",
+      "fromStudies": "Triplets extraídos automaticamente de estudos científicos pela IA",
+      "knownRelations": "Relacionamentos pré-definidos com alta confiança baseados em literatura estabelecida",
+      "totalNodes": "Quantidade total de entidades únicas no grafo",
+      "totalRelations": "Quantidade total de conexões entre entidades no grafo",
+      "positiveRelations": "Relações benéficas: tratamentos, melhorias, suporte terapêutico",
+      "negativeRelations": "Relações adversas: contraindicações, piora de sintomas, efeitos colaterais",
+      "nutraceuticals": "Substâncias bioativas com potencial terapêutico",
+      "conditions": "Doenças, sintomas ou estados de saúde tratáveis",
+      "studyFilter": "Mostrar apenas dados extraídos de um estudo específico",
+      "entityFilter": "Filtrar por categoria de entidade",
+      "relationFilter": "Filtrar por natureza da relação",
+      "confidenceFilter": "Filtrar por nível de confiança da extração",
+      "testConnection": "Testar conexão com o banco de dados Neo4j",
+      "refresh": "Recarregar todos os dados do grafo",
+      "legendOntology": "Nós derivados da ontologia base do sistema",
+      "legendStudy": "Nós extraídos automaticamente de estudos científicos",
+      "legendKnown": "Relações conhecidas e pré-definidas com alta confiança",
+      "topConnected": "Entidades com mais conexões no grafo, indicando alta relevância"
+    },
     "empty": {
       "title": "Nenhum dado de grafo disponível",
       "description": "Aprove e sincronize alguns triplets para visualizar o grafo de conhecimento"
