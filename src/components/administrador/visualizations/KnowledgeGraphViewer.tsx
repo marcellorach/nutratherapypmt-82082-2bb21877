@@ -402,253 +402,266 @@ export const KnowledgeGraphViewer: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Network className="h-5 w-5" />
-              {t('knowledgeGraph.title', 'Knowledge Graph Visualization')}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={testNeo4jConnection}
-                disabled={testingConnection}
-              >
-                <Database className="h-4 w-4 mr-2" />
-                {t('knowledgeGraph.testConnection', 'Test Neo4j Connection')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setStudyFilter('all');
-                  loadGraphData();
-                  loadDataSourceStats();
-                }}
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                {t('common.refresh', 'Refresh')}
-              </Button>
-            </div>
-          </CardTitle>
-          <CardDescription>
-            {t('knowledgeGraph.description', 'Interactive visualization of the medical knowledge graph')}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      {/* Data Sources Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <KnowledgeGraphDataSources
-            stats={dataSourceStats}
-            onStudyClick={handleStudyClick}
-            loading={loadingDataSources}
-          />
-        </div>
-
-        <div className="lg:col-span-3 space-y-6">
-          {/* Stats */}
-          {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{stats.totalNodes}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.totalNodes', 'Total Nodes')}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{stats.totalEdges}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.totalRelations', 'Total Relationships')}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold text-green-600">{stats.positiveRelations}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.positive', 'Positive (TREATS)')}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold text-red-600">{stats.negativeRelations}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.negative', 'Negative (WORSENS)')}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{stats.nutraceuticals}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.nutraceuticals', 'Nutraceuticals')}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{stats.conditions}</div>
-                  <div className="text-sm text-muted-foreground">{t('knowledgeGraph.stats.conditions', 'Conditions')}</div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Filters */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {/* Study Filter */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block flex items-center gap-1">
-                    <Filter className="h-3.5 w-3.5" />
-                    {t('knowledgeGraph.filters.study', 'Filter by Study')}
-                  </label>
-                  <Select value={studyFilter} onValueChange={setStudyFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All Studies" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        {t('knowledgeGraph.filters.allStudies', 'All Studies')}
-                      </SelectItem>
-                      {studyOptions.map(study => (
-                        <SelectItem key={study.id} value={study.id}>
-                          <span className="truncate max-w-[200px]">
-                            {study.title.length > 30 ? `${study.title.substring(0, 30)}...` : study.title}
-                          </span>
-                          <Badge variant="secondary" className="ml-2 text-xs">
-                            {study.tripletCount}
-                          </Badge>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+    <div className="space-y-4">
+      {/* Header Row: Title + Data Sources + Stats */}
+      <div className="flex flex-wrap items-stretch gap-3">
+        {/* Data Sources Compact */}
+        <Card className="flex-shrink-0">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">{t('knowledgeGraph.dataSources.title', 'Data Sources')}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-600">{dataSourceStats.ontologyEntities}</div>
+                  <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.dataSources.ontology', 'Ontology')}</div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{t('knowledgeGraph.filters.entityType', 'Entity Type')}</label>
-                  <Select value={entityFilter} onValueChange={setEntityFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t('knowledgeGraph.filters.allTypes', 'All Types')}</SelectItem>
-                      <SelectItem value="Nutraceutical">{t('knowledgeGraph.filters.nutraceuticals', 'Nutraceuticals')}</SelectItem>
-                      <SelectItem value="Condition">{t('knowledgeGraph.filters.conditions', 'Conditions')}</SelectItem>
-                      <SelectItem value="Mechanism">{t('knowledgeGraph.filters.mechanisms', 'Mechanisms')}</SelectItem>
-                      <SelectItem value="Effect">{t('knowledgeGraph.filters.effects', 'Effects')}</SelectItem>
-                      <SelectItem value="Outcome">{t('knowledgeGraph.filters.outcomes', 'Outcomes')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600">{dataSourceStats.tripletCount}</div>
+                  <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.dataSources.triplets', 'From Studies')}</div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{t('knowledgeGraph.filters.relationType', 'Relation Type')}</label>
-                  <Select value={relationFilter} onValueChange={setRelationFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t('knowledgeGraph.filters.allRelations', 'All Relations')}</SelectItem>
-                      <SelectItem value="positive">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-green-500" />
-                          {t('knowledgeGraph.filters.positive', 'Positive (TREATS, SUPPORTS)')}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="negative">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500" />
-                          {t('knowledgeGraph.filters.negative', 'Negative (WORSENS, CONTRAINDICATED)')}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{t('knowledgeGraph.filters.minConfidence', 'Min Confidence')}</label>
-                  <Select value={confidenceFilter.toString()} onValueChange={(v) => setConfidenceFilter(parseFloat(v))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">{t('knowledgeGraph.filters.all', 'All (0%)')}</SelectItem>
-                      <SelectItem value="0.5">{t('knowledgeGraph.filters.medium', 'Medium (50%+)')}</SelectItem>
-                      <SelectItem value="0.7">{t('knowledgeGraph.filters.high', 'High (70%+)')}</SelectItem>
-                      <SelectItem value="0.85">{t('knowledgeGraph.filters.veryHigh', 'Very High (85%+)')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end">
-                  <div className="text-sm text-muted-foreground">
-                    {t('knowledgeGraph.filters.showing', 'Showing')} {filteredData.nodes.length} {t('knowledgeGraph.filters.nodes', 'nodes')}, {filteredData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
-                    {studyFilter !== 'all' && (
-                      <Badge variant="outline" className="ml-2 bg-green-500/10 text-green-700">
-                        Study filter active
-                      </Badge>
-                    )}
-                    {relationFilter === 'negative' && (
-                      <span className="ml-2 text-red-600 font-medium">(⚠️ Negative only)</span>
-                    )}
-                  </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-600">{dataSourceStats.knownRelations}</div>
+                  <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.dataSources.known', 'Known')}</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              {/* Legend badges */}
+              <div className="hidden xl:flex items-center gap-2 border-l pl-3 ml-1">
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-200 text-[10px] py-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1" />
+                  Ontology
+                </Badge>
+                <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-200 text-[10px] py-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1" />
+                  Study
+                </Badge>
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-700 border-amber-200 text-[10px] py-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1" />
+                  Known
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Graph */}
-          <Card>
-            <CardContent className="pt-6">
-              {loading ? (
-                <div className="flex items-center justify-center h-[600px]">
-                  <div className="text-center">
-                    <Activity className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <div className="text-sm text-muted-foreground">{t('knowledgeGraph.loading', 'Loading graph...')}</div>
-                  </div>
-                </div>
-              ) : filteredData.nodes.length === 0 ? (
-                <div className="flex items-center justify-center h-[600px]">
-                  <div className="text-center">
-                    <Network className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <div className="text-lg font-medium mb-2">{t('knowledgeGraph.empty.title', 'No graph data available')}</div>
-                    <div className="text-sm text-muted-foreground mb-4">
-                      {t('knowledgeGraph.empty.description', 'Approve and sync some triplets to visualize the knowledge graph')}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <NetworkGraph
-                  data={filteredData}
-                  height="600px"
-                  showControls={true}
-                  showLegend={true}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Top Connected */}
-          {stats && stats.topConnected.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <GitBranch className="h-4 w-4" />
-                  {t('knowledgeGraph.topConnected', 'Top Connected Entities')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {stats.topConnected.map((entity, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className="text-sm">{entity.name}</span>
-                      <Badge variant="outline">{entity.connections} {t('knowledgeGraph.connections', 'connections')}</Badge>
-                    </div>
-                  ))}
-                </div>
+        {/* Stats Cards */}
+        {stats && (
+          <>
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold">{stats.totalNodes}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalNodes', 'Nodes')}</div>
               </CardContent>
             </Card>
-          )}
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold">{stats.totalEdges}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalRelations', 'Relations')}</div>
+              </CardContent>
+            </Card>
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold text-green-600">{stats.positiveRelations}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.positive', 'Positive')}</div>
+              </CardContent>
+            </Card>
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold text-red-600">{stats.negativeRelations}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.negative', 'Negative')}</div>
+              </CardContent>
+            </Card>
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold">{stats.nutraceuticals}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.nutraceuticals', 'Nutraceuticals')}</div>
+              </CardContent>
+            </Card>
+            <Card className="flex-shrink-0">
+              <CardContent className="py-3 px-4 text-center">
+                <div className="text-lg font-bold">{stats.conditions}</div>
+                <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.conditions', 'Conditions')}</div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={testNeo4jConnection}
+            disabled={testingConnection}
+          >
+            <Database className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Test</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setStudyFilter('all');
+              loadGraphData();
+              loadDataSourceStats();
+            }}
+          >
+            <RefreshCcw className="h-4 w-4" />
+          </Button>
         </div>
       </div>
+
+      {/* Filters Row */}
+      <Card>
+        <CardContent className="py-3 px-4">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Study Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={studyFilter} onValueChange={setStudyFilter}>
+                <SelectTrigger className="w-[180px] h-8">
+                  <SelectValue placeholder={t('knowledgeGraph.filters.allStudies', 'All Studies')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {t('knowledgeGraph.filters.allStudies', 'All Studies')}
+                  </SelectItem>
+                  {studyOptions.map(study => (
+                    <SelectItem key={study.id} value={study.id}>
+                      <span className="truncate max-w-[150px]">
+                        {study.title.length > 25 ? `${study.title.substring(0, 25)}...` : study.title}
+                      </span>
+                      <Badge variant="secondary" className="ml-1 text-[10px]">
+                        {study.tripletCount}
+                      </Badge>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Entity Type */}
+            <Select value={entityFilter} onValueChange={setEntityFilter}>
+              <SelectTrigger className="w-[140px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('knowledgeGraph.filters.allTypes', 'All Types')}</SelectItem>
+                <SelectItem value="Nutraceutical">{t('knowledgeGraph.filters.nutraceuticals', 'Nutraceuticals')}</SelectItem>
+                <SelectItem value="Condition">{t('knowledgeGraph.filters.conditions', 'Conditions')}</SelectItem>
+                <SelectItem value="Mechanism">{t('knowledgeGraph.filters.mechanisms', 'Mechanisms')}</SelectItem>
+                <SelectItem value="Effect">{t('knowledgeGraph.filters.effects', 'Effects')}</SelectItem>
+                <SelectItem value="Outcome">{t('knowledgeGraph.filters.outcomes', 'Outcomes')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Relation Type */}
+            <Select value={relationFilter} onValueChange={setRelationFilter}>
+              <SelectTrigger className="w-[160px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('knowledgeGraph.filters.allRelations', 'All Relations')}</SelectItem>
+                <SelectItem value="positive">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    Positive
+                  </span>
+                </SelectItem>
+                <SelectItem value="negative">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    Negative
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Min Confidence */}
+            <Select value={confidenceFilter.toString()} onValueChange={(v) => setConfidenceFilter(parseFloat(v))}>
+              <SelectTrigger className="w-[130px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">{t('knowledgeGraph.filters.all', 'All (0%)')}</SelectItem>
+                <SelectItem value="0.5">{t('knowledgeGraph.filters.medium', 'Medium (50%+)')}</SelectItem>
+                <SelectItem value="0.7">{t('knowledgeGraph.filters.high', 'High (70%+)')}</SelectItem>
+                <SelectItem value="0.85">{t('knowledgeGraph.filters.veryHigh', 'Very High (85%+)')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Results count */}
+            <div className="flex items-center gap-2 ml-auto text-sm text-muted-foreground">
+              <span>
+                {t('knowledgeGraph.filters.showing', 'Showing')} <strong>{filteredData.nodes.length}</strong> {t('knowledgeGraph.filters.nodes', 'nodes')}, <strong>{filteredData.links.length}</strong> {t('knowledgeGraph.filters.edges', 'edges')}
+              </span>
+              {studyFilter !== 'all' && (
+                <Badge variant="outline" className="bg-green-500/10 text-green-700 text-[10px]">
+                  Study filter
+                </Badge>
+              )}
+              {relationFilter === 'negative' && (
+                <Badge variant="outline" className="bg-red-500/10 text-red-700 text-[10px]">
+                  ⚠️ Negative
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Graph - Full Width */}
+      <Card>
+        <CardContent className="p-4">
+          {loading ? (
+            <div className="flex items-center justify-center h-[calc(100vh-320px)] min-h-[500px]">
+              <div className="text-center">
+                <Activity className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">{t('knowledgeGraph.loading', 'Loading graph...')}</div>
+              </div>
+            </div>
+          ) : filteredData.nodes.length === 0 ? (
+            <div className="flex items-center justify-center h-[calc(100vh-320px)] min-h-[500px]">
+              <div className="text-center">
+                <Network className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <div className="text-lg font-medium mb-2">{t('knowledgeGraph.empty.title', 'No graph data available')}</div>
+                <div className="text-sm text-muted-foreground mb-4">
+                  {t('knowledgeGraph.empty.description', 'Approve and sync some triplets to visualize the knowledge graph')}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <NetworkGraph
+              data={filteredData}
+              height="calc(100vh - 320px)"
+              showControls={true}
+              showLegend={false}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Connected - Inline at bottom */}
+      {stats && stats.topConnected.length > 0 && (
+        <Card>
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <GitBranch className="h-4 w-4" />
+                {t('knowledgeGraph.topConnected', 'Top Connected')}:
+              </div>
+              {stats.topConnected.map((entity, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="text-sm">{entity.name}</span>
+                  <Badge variant="secondary" className="text-[10px]">{entity.connections}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
