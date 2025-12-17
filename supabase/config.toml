@@ -59,3 +59,6 @@ verify_jwt = true
 
 [functions.invoxia-api]
 verify_jwt = false
+
+[functions.sync-ontology-to-neo4j]
+verify_jwt = false
