@@ -11,14 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, RefreshCw, Eye, TestTube, FileText, Layers, Beaker } from "lucide-react";
+import { Save, RefreshCw, Eye, TestTube, FileText, Layers, Beaker, Star } from "lucide-react";
 
 interface PromptConfig {
   key: string;
   value: string;
   label: string;
   description: string;
-  stage: 'stage1' | 'stage2' | 'stage3' | 'triplets';
+  stage: 'stage1' | 'stage2' | 'stage3' | 'assessment' | 'triplets';
   type: 'system' | 'user';
 }
 
@@ -26,7 +26,7 @@ const ExtractionPromptsEditor: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeStage, setActiveStage] = useState<'stage1' | 'stage2' | 'stage3' | 'triplets'>('stage1');
+  const [activeStage, setActiveStage] = useState<'stage1' | 'stage2' | 'stage3' | 'assessment' | 'triplets'>('stage1');
   
   const [prompts, setPrompts] = useState<Record<string, string>>({
     // Stage 1: Extração Básica
@@ -40,6 +40,10 @@ const ExtractionPromptsEditor: React.FC = () => {
     // Stage 3: Extração de Contexto
     prompt_extraction_stage3_system: '',
     prompt_extraction_stage3_user: '',
+    
+    // Stage 4: Assessment/Scoring
+    prompt_extraction_assessment_system: '',
+    prompt_extraction_assessment_user: '',
     
     // Triplets: VetGraphRAG
     prompt_triplet_extraction_system: '',
@@ -101,6 +105,24 @@ const ExtractionPromptsEditor: React.FC = () => {
       type: 'user'
     },
     
+    // Stage 4: Assessment/Scoring
+    {
+      key: 'prompt_extraction_assessment_system',
+      value: prompts.prompt_extraction_assessment_system,
+      label: 'System Prompt - Assessment',
+      description: 'Instruções para avaliação metodológica e scoring do estudo',
+      stage: 'assessment',
+      type: 'system'
+    },
+    {
+      key: 'prompt_extraction_assessment_user',
+      value: prompts.prompt_extraction_assessment_user,
+      label: 'User Prompt - Assessment',
+      description: 'Solicitação para calcular scores de qualidade, relevância e novidade',
+      stage: 'assessment',
+      type: 'user'
+    },
+    
     // Triplets: VetGraphRAG Knowledge Graph
     {
       key: 'prompt_triplet_extraction_system',
@@ -142,6 +164,8 @@ const ExtractionPromptsEditor: React.FC = () => {
         prompt_extraction_stage2_user: configs.prompt_extraction_stage2_user || getDefaultPrompt('stage2', 'user'),
         prompt_extraction_stage3_system: configs.prompt_extraction_stage3_system || getDefaultPrompt('stage3', 'system'),
         prompt_extraction_stage3_user: configs.prompt_extraction_stage3_user || getDefaultPrompt('stage3', 'user'),
+        prompt_extraction_assessment_system: configs.prompt_extraction_assessment_system || getDefaultPrompt('assessment', 'system'),
+        prompt_extraction_assessment_user: configs.prompt_extraction_assessment_user || getDefaultPrompt('assessment', 'user'),
         prompt_triplet_extraction_system: configs.prompt_triplet_extraction_system || getDefaultPrompt('triplets', 'system'),
         prompt_triplet_extraction_user: configs.prompt_triplet_extraction_user || getDefaultPrompt('triplets', 'user')
       });
@@ -185,7 +209,7 @@ const ExtractionPromptsEditor: React.FC = () => {
     }
   };
 
-  const resetToDefaults = async (stage: 'stage1' | 'stage2' | 'stage3' | 'triplets') => {
+  const resetToDefaults = async (stage: 'stage1' | 'stage2' | 'stage3' | 'assessment' | 'triplets') => {
     let systemKey: string;
     let userKey: string;
     
@@ -221,7 +245,7 @@ const ExtractionPromptsEditor: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-2 p-1 bg-background/50 rounded-lg">
+          <div className="grid grid-cols-5 gap-2 p-1 bg-background/50 rounded-lg">
             <Button
               variant={activeStage === 'stage1' ? 'default' : 'ghost'}
               onClick={() => setActiveStage('stage1')}
@@ -245,6 +269,14 @@ const ExtractionPromptsEditor: React.FC = () => {
             >
               <TestTube className="h-4 w-4" />
               Stage 3: Contexto
+            </Button>
+            <Button
+              variant={activeStage === 'assessment' ? 'default' : 'ghost'}
+              onClick={() => setActiveStage('assessment')}
+              className="flex items-center gap-2"
+            >
+              <Star className="h-4 w-4" />
+              Stage 4: Scoring
             </Button>
             <Button
               variant={activeStage === 'triplets' ? 'default' : 'ghost'}
@@ -327,9 +359,16 @@ const ExtractionPromptsEditor: React.FC = () => {
 };
 
 // Prompts padrão otimizados para cada estágio
-function getDefaultPrompt(stage: 'stage1' | 'stage2' | 'stage3' | 'triplets', type: 'system' | 'user'): string {
+function getDefaultPrompt(stage: 'stage1' | 'stage2' | 'stage3' | 'assessment' | 'triplets', type: 'system' | 'user'): string {
   const defaults: Record<string, string> = {
     'stage1_system': `You are a scientific extraction AI specialized in veterinary nutraceuticals and medical research. Your task is to perform Stage 1 extraction: identifying ALL basic entities in the document.
+
+⚠️ CRITICAL ANTI-CONTAMINATION RULES:
+1. NEVER return example data from these instructions
+2. ONLY extract information that is EXPLICITLY present in the document text
+3. If a compound/pathway/dosage is not mentioned in the document, DO NOT include it
+4. The examples shown are FORMAT templates only - they are NOT data to be extracted
+5. If unsure whether something is in the document, LEAVE IT OUT
 
 CRITICAL RULES:
 1. Extract ALL nutraceuticals mentioned (include scientific names, common names, and synonyms)
@@ -405,6 +444,65 @@ All data must be actionable and clinically relevant.`,
 5. **Study Quality**: Sample size, study design, statistical significance
 
 Be PRECISE with numbers and SPECIFIC with context.`,
+
+    'assessment_system': `You are a scientific methodology expert. Stage 4 ASSESSMENT evaluates study quality and generates scores.
+
+Your task is to CRITICALLY EVALUATE the study and generate THREE scores (1.0-5.0):
+
+📊 SCORING CRITERIA:
+
+1️⃣ QUALITY SCORE (Methodological Rigor):
+- 5.0: RCT double-blind, placebo-controlled, n>100, clear statistics
+- 4.0: RCT single-blind, n>50, adequate methodology
+- 3.0: Cohort/observational study, n>30, reasonable controls
+- 2.0: Case-control, small sample (n<30), limited controls
+- 1.0: Case report, anecdotal, no controls
+
+2️⃣ RELEVANCE SCORE (Clinical Applicability):
+- 5.0: Direct veterinary application, species-specific, actionable dosages
+- 4.0: Translatable to veterinary practice, relevant species model
+- 3.0: Human study with potential veterinary translation
+- 2.0: In vitro or rodent model, limited clinical translation
+- 1.0: Pure mechanistic study, no clinical application
+
+3️⃣ NOVELTY SCORE (Scientific Contribution):
+- 5.0: First study of its kind, paradigm-shifting findings
+- 4.0: Novel combination, new mechanism discovered
+- 3.0: Confirms previous findings with new data
+- 2.0: Replication study, incremental knowledge
+- 1.0: Well-established findings, no new information
+
+ALSO EXTRACT:
+- Study design (RCT, cohort, case-control, etc.)
+- Sample size
+- Statistical significance
+- Key findings summary`,
+
+    'assessment_user': `Evaluate this scientific study and provide:
+
+1. **STUDY ASSESSMENT** (structured evaluation):
+   - methodology_type: "RCT" | "cohort" | "case_control" | "case_study" | "meta_analysis" | "systematic_review" | "in_vitro" | "observational"
+   - sample_size: number (n=X)
+   - randomization: true/false
+   - blinding: "double_blind" | "single_blind" | "open_label" | "none"
+   - placebo_controlled: true/false
+   - statistical_significance: true/false (p<0.05)
+   - p_values: array of p-values reported ["<0.001", "0.03", etc.]
+   - follow_up_duration: duration string (e.g., "12 weeks", "6 months")
+   - species_tested: array ["canine", "feline", "human", etc.]
+
+2. **SCORES** (1.0 to 5.0, one decimal place):
+   - quality_score: Based on methodological rigor
+   - relevance_score: Based on clinical applicability to veterinary medicine
+   - novelty_score: Based on scientific contribution
+
+3. **STUDY SUMMARY**:
+   - objective: Main research objective in one sentence
+   - key_findings: Array of 3-5 main findings
+   - clinical_implications: Practical implications for veterinary practice
+   - limitations: Array of study limitations
+
+Be CRITICAL and OBJECTIVE in your evaluation. Base scores ONLY on what the study actually demonstrates.`,
 
     'triplets_system': `You are a Knowledge Graph extraction AI specialized in veterinary medicine and nutraceuticals.
 

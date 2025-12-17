@@ -37,11 +37,18 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
     }
   };
 
+  // ✅ Use real scores from analysis_data if available, otherwise fallback
+  const analysisData = estudo.analysis_data || {};
+  const studyAssessment = analysisData.study_assessment || {};
+  
   const studyScores = {
-    qualityScore: 4.2,
-    relevanceScore: 3.8,
-    noveltyScore: 3.5,
+    qualityScore: studyAssessment.quality_score || analysisData.qualityScore || 3.0,
+    relevanceScore: studyAssessment.relevance_score || analysisData.relevanceScore || 3.0,
+    noveltyScore: studyAssessment.novelty_score || analysisData.noveltyScore || 3.0,
   };
+  
+  // Get average score for EvidenceTag
+  const avgScore = (studyScores.qualityScore + studyScores.relevanceScore + studyScores.noveltyScore) / 3;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,14 +62,21 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
               {estudo.journal}, {estudo.year}
             </p>
             <div className="flex items-center gap-2">
-              <EvidenceTag score={4.2} showLabel={false} />
-              {estudo.nutraceuticals?.map((nutra: string, idx: number) => (
-                <NutraceuticalTag 
-                  key={idx} 
-                  name={nutra} 
-                  score={[4.2, 3.9, 3.7, 4.5][idx % 4]} 
-                />
-              ))}
+              <EvidenceTag score={avgScore} showLabel={false} />
+              {estudo.nutraceuticals?.map((nutra: string, idx: number) => {
+                // Get individual nutraceutical confidence from analysis_data if available
+                const nutraData = analysisData.nutraceuticals?.find((n: any) => 
+                  n.name?.toLowerCase() === nutra.toLowerCase()
+                );
+                const nutraScore = nutraData?.efficacy_score || nutraData?.confidence || [4.2, 3.9, 3.7, 4.5][idx % 4];
+                return (
+                  <NutraceuticalTag 
+                    key={idx} 
+                    name={nutra} 
+                    score={nutraScore} 
+                  />
+                );
+              })}
             </div>
           </div>
         </DialogHeader>
