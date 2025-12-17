@@ -2057,6 +2057,225 @@ serve(async (req) => {
         
         console.log(`✅ PHASE 2 Complete: ${linkedCount}/${entitiesToLink.length} entities linked to ontology`);
         
+        // ✅ STEP 4: PHASE 3 - Generate triplet_extractions from interactions
+        console.log('🔗 PHASE 3: Generating triplet_extractions from interactions...');
+        
+        // Map interaction types to predicate format
+        const interactionToPredicateMap: Record<string, string> = {
+          'inhibition': 'INHIBITS',
+          'stimulation': 'ACTIVATES',
+          'modulation': 'MODULATES',
+          'activation': 'ACTIVATES',
+          'suppression': 'INHIBITS',
+          'enhancement': 'ENHANCES',
+          'reduction': 'REDUCES',
+          'binding': 'BINDS_TO',
+          'regulation': 'REGULATES'
+        };
+        
+        // Helper function to determine entity type and layer
+        const getEntityTypeAndLayer = (entityName: string): { type: string; layer: string } => {
+          // Check if it matches a nutraceutical
+          const matchedNut = extractedData.nutraceuticals.find(n => 
+            n.name.toLowerCase() === entityName.toLowerCase()
+          );
+          if (matchedNut) return { type: 'nutraceutical', layer: 'layer_0_compound' };
+          
+          // Check if it matches a mechanism
+          const matchedMech = extractedData.mechanisms.find(m => 
+            m.name.toLowerCase() === entityName.toLowerCase()
+          );
+          if (matchedMech) return { type: 'mechanism', layer: 'layer_2_mechanism' };
+          
+          // Check if it matches a biological effect
+          const matchedEff = extractedData.biological_effects.find(e => 
+            e.name.toLowerCase() === entityName.toLowerCase()
+          );
+          if (matchedEff) return { type: 'effect', layer: 'layer_3_effect' };
+          
+          // Check if it matches a condition
+          const matchedCond = extractedData.conditions.find(c => 
+            c.name.toLowerCase() === entityName.toLowerCase()
+          );
+          if (matchedCond) return { type: 'condition', layer: 'layer_4_outcome' };
+          
+          // Default to unknown
+          return { type: 'unknown', layer: 'layer_0_compound' };
+        };
+        
+        // Generate triplets from interactions
+        const tripletsToInsert = [];
+        const speciesContext = extractedData.study_population?.species 
+          ? [extractedData.study_population.species] 
+          : [];
+        
+        // 1. From interactions array
+        for (const interaction of extractedData.interactions) {
+          const subjectInfo = getEntityTypeAndLayer(interaction.from);
+          const objectInfo = getEntityTypeAndLayer(interaction.to);
+          const predicate = interactionToPredicateMap[interaction.type.toLowerCase()] || interaction.type.toUpperCase();
+          
+          tripletsToInsert.push({
+            study_id: studyId,
+            subject_name: interaction.from,
+            subject_type: subjectInfo.type,
+            subject_layer: subjectInfo.layer,
+            predicate: predicate,
+            object_name: interaction.to,
+            object_type: objectInfo.type,
+            object_layer: objectInfo.layer,
+            extraction_confidence: interaction.confidence || 0.7,
+            llm_confidence: interaction.confidence || 0.7,
+            species_context: speciesContext,
+            curation_status: 'pending',
+            hallucination_flag: false
+          });
+        }
+        
+        // 2. From nutraceutical-condition relationships
+        for (const nutraceutical of extractedData.nutraceuticals) {
+          for (const condition of extractedData.conditions) {
+            // Map relationship types to predicates
+            const relationshipMap: Record<string, string> = {
+              'treatment': 'TREATS',
+              'prevention': 'PREVENTS',
+              'support': 'SUPPORTS',
+              'management': 'MANAGES',
+              'amelioration': 'AMELIORATES'
+            };
+            
+            const predicate = relationshipMap[condition.relationship_type?.toLowerCase()] || 'TREATS';
+            
+            tripletsToInsert.push({
+              study_id: studyId,
+              subject_name: nutraceutical.name,
+              subject_type: 'nutraceutical',
+              subject_layer: 'layer_0_compound',
+              predicate: predicate,
+              object_name: condition.name,
+              object_type: 'condition',
+              object_layer: 'layer_4_outcome',
+              extraction_confidence: condition.treatability_score || 0.6,
+              llm_confidence: nutraceutical.efficacy_score || 0.6,
+              species_context: speciesContext,
+              curation_status: 'pending',
+              hallucination_flag: false,
+              relationship_category: condition.relationship_type || 'treatment'
+            });
+          }
+        }
+        
+        // 3. From drug interactions (for contraindications)
+        for (const drugInt of (extractedData.drug_interactions || [])) {
+          const severityToConfidence: Record<string, number> = {
+            'dangerous': 0.95,
+            'avoid': 0.85,
+            'caution': 0.7,
+            'neutral': 0.5,
+            'beneficial': 0.8
+          };
+          
+          const interactionTypeMap: Record<string, string> = {
+            'synergy': 'SYNERGIZES_WITH',
+            'antagonism': 'ANTAGONIZES',
+            'potentiation': 'POTENTIATES',
+            'inhibition': 'INHIBITS',
+            'enhancement': 'ENHANCES_BIOAVAILABILITY',
+            'reduction': 'REDUCES_BIOAVAILABILITY'
+          };
+          
+          // Find the nutraceutical this interaction is related to
+          const relatedNut = extractedData.nutraceuticals[0]?.name || 'Unknown compound';
+          
+          tripletsToInsert.push({
+            study_id: studyId,
+            subject_name: relatedNut,
+            subject_type: 'nutraceutical',
+            subject_layer: 'layer_0_compound',
+            predicate: interactionTypeMap[drugInt.interaction_type] || 'INTERACTS_WITH',
+            object_name: drugInt.compound,
+            object_type: 'drug',
+            object_layer: 'layer_0_compound',
+            extraction_confidence: severityToConfidence[drugInt.severity] || 0.7,
+            llm_confidence: 0.8,
+            species_context: speciesContext,
+            curation_status: 'pending',
+            hallucination_flag: false,
+            relationship_category: 'drug_interaction'
+          });
+        }
+        
+        // 4. From synergies
+        for (const synergy of (extractedData.synergies || [])) {
+          if (synergy.compounds.length >= 2) {
+            tripletsToInsert.push({
+              study_id: studyId,
+              subject_name: synergy.compounds[0],
+              subject_type: 'nutraceutical',
+              subject_layer: 'layer_0_compound',
+              predicate: 'SYNERGIZES_WITH',
+              object_name: synergy.compounds[1],
+              object_type: 'nutraceutical',
+              object_layer: 'layer_0_compound',
+              extraction_confidence: 0.75,
+              llm_confidence: 0.75,
+              species_context: speciesContext,
+              curation_status: 'pending',
+              hallucination_flag: false,
+              synergy_data: {
+                enhanced_effect: synergy.enhanced_effect,
+                mechanism: synergy.mechanism,
+                optimal_ratio: synergy.optimal_ratio
+              }
+            });
+          }
+        }
+        
+        // 5. From contraindications
+        for (const contraind of (extractedData.contraindications || [])) {
+          const relatedNut = extractedData.nutraceuticals[0]?.name || 'Unknown compound';
+          const severityConfidence: Record<string, number> = {
+            'absolute': 0.95,
+            'relative': 0.75,
+            'caution': 0.6
+          };
+          
+          tripletsToInsert.push({
+            study_id: studyId,
+            subject_name: relatedNut,
+            subject_type: 'nutraceutical',
+            subject_layer: 'layer_0_compound',
+            predicate: 'CONTRAINDICATED_FOR',
+            object_name: contraind.condition,
+            object_type: 'condition',
+            object_layer: 'layer_4_outcome',
+            extraction_confidence: severityConfidence[contraind.severity] || 0.7,
+            llm_confidence: 0.8,
+            species_context: speciesContext,
+            curation_status: 'pending',
+            hallucination_flag: false,
+            relationship_category: 'contraindication'
+          });
+        }
+        
+        // Insert all triplets
+        console.log(`📊 Inserting ${tripletsToInsert.length} triplets into triplet_extractions...`);
+        let insertedTriplets = 0;
+        
+        for (const triplet of tripletsToInsert) {
+          const { error: tripletError } = await supabase
+            .from('triplet_extractions')
+            .insert(triplet);
+          
+          if (tripletError) {
+            console.warn(`  ⚠️ Error inserting triplet ${triplet.subject_name}->${triplet.object_name}:`, tripletError.message);
+          } else {
+            insertedTriplets++;
+          }
+        }
+        
+        console.log(`✅ PHASE 3 Complete: ${insertedTriplets}/${tripletsToInsert.length} triplets created`);
+        
         return result;
       },
       'Save to Database'
@@ -2113,10 +2332,13 @@ serve(async (req) => {
         studyId,
         nutraceuticalsCount: extractedData.nutraceuticals.length,
         conditionsCount: extractedData.conditions.length,
-        message: 'Pipeline completo com retry automático em todas as etapas',
+        interactionsCount: extractedData.interactions.length,
+        message: 'Pipeline VetGraphRAG 2.0 completo: Extração → Ontologia → Triplets',
         metadata: {
           duration_seconds: duration / 1000,
-          retries_used: 'automatic retry enabled for all steps'
+          retries_used: 'automatic retry enabled for all steps',
+          phase2_entities: extractedData.nutraceuticals.length + extractedData.mechanisms.length + extractedData.biological_effects.length + extractedData.conditions.length,
+          phase3_triplets_estimated: extractedData.interactions.length + (extractedData.nutraceuticals.length * extractedData.conditions.length)
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
