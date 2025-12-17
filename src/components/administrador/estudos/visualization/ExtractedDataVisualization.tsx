@@ -504,10 +504,10 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
                   {synergies.map((synergy, idx) => (
                     <div key={idx} className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20">
                       <div className="flex flex-wrap gap-1 mb-2">
-                        {synergy.compounds.map((compound, cIdx) => (
+                        {(synergy.compounds || []).map((compound, cIdx) => (
                           <React.Fragment key={cIdx}>
                             <Badge variant="secondary">{compound}</Badge>
-                            {cIdx < synergy.compounds.length - 1 && (
+                            {cIdx < (synergy.compounds?.length || 0) - 1 && (
                               <span className="text-muted-foreground">+</span>
                             )}
                           </React.Fragment>
