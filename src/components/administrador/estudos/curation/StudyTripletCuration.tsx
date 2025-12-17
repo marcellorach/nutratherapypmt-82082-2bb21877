@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   CheckCircle2, 
@@ -20,7 +21,9 @@ import {
   Eye,
   AlertTriangle,
   Check,
-  X
+  X,
+  ThumbsDown,
+  Settings2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -48,6 +51,10 @@ interface Triplet {
   relationship_category: string | null;
   species_context: string[] | null;
   review_notes: string | null;
+  confidence_rationale: string | null;
+  hallucination_flag: boolean | null;
+  dose_range: any;
+  direction: string | null;
 }
 
 interface StudyTripletCurationProps {
@@ -67,6 +74,11 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedTriplet, setExpandedTriplet] = useState<string | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  
+  // Editable threshold state
+  const [confidenceThreshold, setConfidenceThreshold] = useState(85);
+  const [showThresholdSettings, setShowThresholdSettings] = useState(false);
 
   const fetchTriplets = useCallback(async () => {
     if (!studyId) return;
@@ -132,16 +144,19 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
     }
   };
 
-  const handleBulkApprove = async (minConfidence: number = 0.85) => {
+  // Bulk approve with dynamic threshold
+  const handleBulkApprove = async () => {
+    const threshold = confidenceThreshold / 100;
     const pendingHighConfidence = triplets.filter(
-      t => t.curation_status === 'pending' && t.extraction_confidence >= minConfidence
+      t => t.curation_status === 'pending' && t.extraction_confidence >= threshold
     );
 
     if (pendingHighConfidence.length === 0) {
-      toast.info(t('tripletCuration.noHighConfidence', 'Nenhum triplet de alta confiança pendente'));
+      toast.info(t('tripletCuration.noHighConfidence', `Nenhum triplet pendente com confiança ≥${confidenceThreshold}%`));
       return;
     }
 
+    setBulkProcessing(true);
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id;
       const ids = pendingHighConfidence.map(t => t.id);
@@ -162,11 +177,55 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
         prev.map(t => ids.includes(t.id) ? { ...t, curation_status: 'approved', auto_approved: true } : t)
       );
       
-      toast.success(t('tripletCuration.bulkApproved', `${ids.length} triplets aprovados automaticamente`));
+      toast.success(t('tripletCuration.bulkApproved', `${ids.length} triplets aprovados`));
       onTripletsUpdated?.();
     } catch (error: any) {
       console.error('Error bulk approving:', error);
       toast.error(t('tripletCuration.errorBulkApproving', 'Erro ao aprovar em lote'));
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  // Bulk reject below threshold
+  const handleBulkReject = async () => {
+    const threshold = confidenceThreshold / 100;
+    const pendingLowConfidence = triplets.filter(
+      t => t.curation_status === 'pending' && t.extraction_confidence < threshold
+    );
+
+    if (pendingLowConfidence.length === 0) {
+      toast.info(t('tripletCuration.noLowConfidence', `Nenhum triplet pendente com confiança <${confidenceThreshold}%`));
+      return;
+    }
+
+    setBulkProcessing(true);
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const ids = pendingLowConfidence.map(t => t.id);
+      
+      const { error } = await supabase
+        .from('triplet_extractions')
+        .update({
+          curation_status: 'rejected',
+          reviewed_by: userId,
+          review_date: new Date().toISOString()
+        })
+        .in('id', ids);
+
+      if (error) throw error;
+
+      setTriplets(prev => 
+        prev.map(t => ids.includes(t.id) ? { ...t, curation_status: 'rejected' } : t)
+      );
+      
+      toast.success(t('tripletCuration.bulkRejected', `${ids.length} triplets rejeitados`));
+      onTripletsUpdated?.();
+    } catch (error: any) {
+      console.error('Error bulk rejecting:', error);
+      toast.error(t('tripletCuration.errorBulkRejecting', 'Erro ao rejeitar em lote'));
+    } finally {
+      setBulkProcessing(false);
     }
   };
 
@@ -187,12 +246,15 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   };
 
   // Stats
+  const threshold = confidenceThreshold / 100;
   const stats = {
     total: triplets.length,
     pending: triplets.filter(t => t.curation_status === 'pending').length,
     approved: triplets.filter(t => t.curation_status === 'approved').length,
     rejected: triplets.filter(t => t.curation_status === 'rejected').length,
-    synced: triplets.filter(t => t.synced_to_neo4j).length
+    synced: triplets.filter(t => t.synced_to_neo4j).length,
+    aboveThreshold: triplets.filter(t => t.curation_status === 'pending' && t.extraction_confidence >= threshold).length,
+    belowThreshold: triplets.filter(t => t.curation_status === 'pending' && t.extraction_confidence < threshold).length
   };
 
   // Filtered triplets
@@ -215,8 +277,8 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.85) return 'bg-green-500';
-    if (confidence >= 0.70) return 'bg-yellow-500';
+    if (confidence >= threshold) return 'bg-green-500';
+    if (confidence >= threshold - 0.15) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
@@ -288,16 +350,16 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
         
         <div className="flex-1" />
         
-        {/* Actions */}
+        {/* Settings toggle */}
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          onClick={() => handleBulkApprove(0.85)}
-          disabled={stats.pending === 0}
+          onClick={() => setShowThresholdSettings(!showThresholdSettings)}
+          className="gap-1"
         >
-          <Sparkles className="h-4 w-4 mr-1" />
-          {t('tripletCuration.autoApprove', 'Auto-aprovar ≥85%')}
+          <Settings2 className="h-4 w-4" />
         </Button>
+        
         <Button
           variant="outline"
           size="sm"
@@ -308,6 +370,90 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
           {t('tripletCuration.sync', 'Sync Neo4j')}
         </Button>
       </div>
+
+      {/* Threshold Settings Panel */}
+      {showThresholdSettings && (
+        <Card className="border-dashed">
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium">{t('tripletCuration.confidenceThreshold', 'Nota de Corte')}</h4>
+                <p className="text-xs text-muted-foreground">
+                  {t('tripletCuration.thresholdDesc', 'Triplets com confiança ≥ este valor serão aprovados em massa')}
+                </p>
+              </div>
+              <div className="text-2xl font-bold text-primary">{confidenceThreshold}%</div>
+            </div>
+            
+            <Slider
+              value={[confidenceThreshold]}
+              onValueChange={(value) => setConfidenceThreshold(value[0])}
+              min={50}
+              max={99}
+              step={1}
+              className="w-full"
+            />
+            
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>50%</span>
+              <span className="text-center">
+                {stats.aboveThreshold} triplets ≥{confidenceThreshold}% | {stats.belowThreshold} triplets &lt;{confidenceThreshold}%
+              </span>
+              <span>99%</span>
+            </div>
+            
+            {/* Bulk Actions */}
+            <div className="flex gap-2 pt-2 border-t">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleBulkApprove}
+                disabled={stats.aboveThreshold === 0 || bulkProcessing}
+                className="flex-1 gap-1"
+              >
+                {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {t('tripletCuration.approveAbove', `Aprovar ${stats.aboveThreshold} ≥${confidenceThreshold}%`)}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkReject}
+                disabled={stats.belowThreshold === 0 || bulkProcessing}
+                className="flex-1 gap-1"
+              >
+                {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="h-4 w-4" />}
+                {t('tripletCuration.rejectBelow', `Rejeitar ${stats.belowThreshold} <${confidenceThreshold}%`)}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions - Always visible */}
+      {!showThresholdSettings && stats.pending > 0 && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkApprove}
+            disabled={stats.aboveThreshold === 0 || bulkProcessing}
+            className="gap-1"
+          >
+            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {t('tripletCuration.autoApprove', `Auto-aprovar ≥${confidenceThreshold}%`)} ({stats.aboveThreshold})
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkReject}
+            disabled={stats.belowThreshold === 0 || bulkProcessing}
+            className="gap-1 text-destructive hover:text-destructive"
+          >
+            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="h-4 w-4" />}
+            {t('tripletCuration.rejectLow', `Rejeitar <${confidenceThreshold}%`)} ({stats.belowThreshold})
+          </Button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -344,6 +490,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   getConfidenceColor={getConfidenceColor}
                   getLayerLabel={getLayerLabel}
                   getLayerColor={getLayerColor}
+                  threshold={threshold}
                   t={t}
                 />
               ))}
@@ -372,6 +519,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   getConfidenceColor={getConfidenceColor}
                   getLayerLabel={getLayerLabel}
                   getLayerColor={getLayerColor}
+                  threshold={threshold}
                   t={t}
                   readonly
                 />
@@ -401,6 +549,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   getConfidenceColor={getConfidenceColor}
                   getLayerLabel={getLayerLabel}
                   getLayerColor={getLayerColor}
+                  threshold={threshold}
                   t={t}
                 />
               ))}
@@ -468,6 +617,7 @@ interface TripletCardProps {
   getConfidenceColor: (c: number) => string;
   getLayerLabel: (l: string | null) => string | null;
   getLayerColor: (l: string | null) => string;
+  threshold: number;
   t: any;
   readonly?: boolean;
 }
@@ -482,17 +632,28 @@ const TripletCard: React.FC<TripletCardProps> = ({
   getConfidenceColor,
   getLayerLabel,
   getLayerColor,
+  threshold,
   t,
   readonly = false
 }) => {
   const showActions = triplet.curation_status !== 'approved' || !readonly;
+  const isAboveThreshold = triplet.extraction_confidence >= threshold;
   
   return (
     <Card className={cn(
       "transition-all",
-      isExpanded && "ring-1 ring-primary/50"
+      isExpanded && "ring-1 ring-primary/50",
+      triplet.hallucination_flag && "border-red-300 bg-red-50/30"
     )}>
       <CardContent className="p-3 space-y-2">
+        {/* Hallucination warning */}
+        {triplet.hallucination_flag && (
+          <div className="flex items-center gap-1 text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+            <AlertTriangle className="h-3 w-3" />
+            {t('tripletCuration.hallucinationWarning', 'Possível alucinação detectada')}
+          </div>
+        )}
+        
         {/* Main triplet info */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-1 min-w-0">
@@ -515,6 +676,11 @@ const TripletCard: React.FC<TripletCardProps> = ({
               <Badge className="text-[10px]">{triplet.predicate}</Badge>
               {triplet.relationship_category && (
                 <span className="text-[9px]">({triplet.relationship_category})</span>
+              )}
+              {triplet.direction && (
+                <Badge variant="outline" className="text-[9px]">
+                  {triplet.direction === 'improves' ? '↑' : triplet.direction === 'worsens' ? '↓' : '↔'}
+                </Badge>
               )}
             </div>
             
@@ -596,31 +762,53 @@ const TripletCard: React.FC<TripletCardProps> = ({
         {/* Expanded Details */}
         {isExpanded && (
           <div className="pt-2 border-t space-y-2 text-xs">
-            {triplet.evidence_level && (
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{t('tripletCuration.evidenceLevel', 'Nível de Evidência')}:</span>
-                <Badge variant="outline">{triplet.evidence_level}</Badge>
+            {/* Confidence Rationale - Most important for decision */}
+            {triplet.confidence_rationale && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded space-y-1">
+                <span className="text-muted-foreground font-medium">{t('tripletCuration.confidenceRationale', 'Racional da Nota')}:</span>
+                <p className="text-[11px] font-mono">{triplet.confidence_rationale}</p>
               </div>
             )}
             
-            {triplet.intensity !== null && (
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{t('tripletCuration.intensity', 'Intensidade')}:</span>
-                <span>{(triplet.intensity * 100).toFixed(0)}%</span>
-              </div>
-            )}
+            {/* Evidence Level - Always show */}
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">{t('tripletCuration.evidenceLevel', 'Nível de Evidência')}:</span>
+              <Badge variant={triplet.evidence_level ? 'outline' : 'secondary'}>
+                {triplet.evidence_level || 'N/A'}
+              </Badge>
+            </div>
             
-            {triplet.species_context && triplet.species_context.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{t('tripletCuration.species', 'Espécies')}:</span>
-                <div className="flex gap-1 flex-wrap">
-                  {triplet.species_context.map((s, i) => (
+            {/* Intensity - Always show */}
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">{t('tripletCuration.intensity', 'Intensidade')}:</span>
+              <span>{triplet.intensity !== null ? `${(triplet.intensity * 100).toFixed(0)}%` : 'N/A'}</span>
+            </div>
+            
+            {/* Species - Always show */}
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">{t('tripletCuration.species', 'Espécies')}:</span>
+              <div className="flex gap-1 flex-wrap">
+                {triplet.species_context && triplet.species_context.length > 0 ? (
+                  triplet.species_context.map((s, i) => (
                     <Badge key={i} variant="outline" className="text-[9px]">🐾 {s}</Badge>
-                  ))}
-                </div>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground">N/A</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Dose Range */}
+            {triplet.dose_range && (
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{t('tripletCuration.doseRange', 'Dose')}:</span>
+                <span>
+                  {triplet.dose_range.min}-{triplet.dose_range.max} {triplet.dose_range.unit}
+                </span>
               </div>
             )}
             
+            {/* Mechanism Path */}
             {triplet.mechanism_path && Array.isArray(triplet.mechanism_path) && triplet.mechanism_path.length > 0 && (
               <div className="space-y-1">
                 <span className="text-muted-foreground">{t('tripletCuration.mechanismPath', 'Caminho do Mecanismo')}:</span>
@@ -630,19 +818,17 @@ const TripletCard: React.FC<TripletCardProps> = ({
               </div>
             )}
             
-            {triplet.kg_match_score !== null && (
+            {/* Scores breakdown */}
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t">
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">{t('tripletCuration.kgMatch', 'KG Match')}:</span>
-                <span>{(triplet.kg_match_score * 100).toFixed(0)}%</span>
+                <span>{triplet.kg_match_score !== null ? `${(triplet.kg_match_score * 100).toFixed(0)}%` : 'N/A'}</span>
               </div>
-            )}
-            
-            {triplet.llm_confidence !== null && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">{t('tripletCuration.llmConfidence', 'LLM Confidence')}:</span>
-                <span>{(triplet.llm_confidence * 100).toFixed(0)}%</span>
+                <span>{triplet.llm_confidence !== null ? `${(triplet.llm_confidence * 100).toFixed(0)}%` : 'N/A'}</span>
               </div>
-            )}
+            </div>
           </div>
         )}
       </CardContent>

@@ -71,23 +71,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "triplet-curation"} 
-          onClick={() => handleStepClick("triplet-curation")}
-          className={currentStep === "triplet-curation" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <GitPullRequest className={`h-4 w-4 mr-2 ${currentStep === "triplet-curation" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.tripletCuration')}</span>
-            </div>
-            {currentStep === "triplet-curation" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      {/* triplet-curation tab removed - curadoria agora integrada ao EstudoDetailDialog */}
 
       <SidebarMenuItem>
         <SidebarMenuButton 
