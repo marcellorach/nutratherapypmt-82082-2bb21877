@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.sync-ontology-to-neo4j]
 verify_jwt = false
+
+[functions.consolidate-knowledge-graph]
+verify_jwt = false
