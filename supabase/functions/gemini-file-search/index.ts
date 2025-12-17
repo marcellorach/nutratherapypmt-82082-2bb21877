@@ -2073,34 +2073,40 @@ serve(async (req) => {
           'regulation': 'REGULATES'
         };
         
-        // Helper function to determine entity type and layer
+        // Helper function to determine entity type and layer (PascalCase for DB constraint)
         const getEntityTypeAndLayer = (entityName: string): { type: string; layer: string } => {
           // Check if it matches a nutraceutical
           const matchedNut = extractedData.nutraceuticals.find(n => 
             n.name.toLowerCase() === entityName.toLowerCase()
           );
-          if (matchedNut) return { type: 'nutraceutical', layer: 'layer_0_compound' };
+          if (matchedNut) return { type: 'Nutraceutical', layer: 'layer_0_compound' };
           
           // Check if it matches a mechanism
           const matchedMech = extractedData.mechanisms.find(m => 
             m.name.toLowerCase() === entityName.toLowerCase()
           );
-          if (matchedMech) return { type: 'mechanism', layer: 'layer_2_mechanism' };
+          if (matchedMech) return { type: 'Mechanism', layer: 'layer_2_mechanism' };
           
           // Check if it matches a biological effect
           const matchedEff = extractedData.biological_effects.find(e => 
             e.name.toLowerCase() === entityName.toLowerCase()
           );
-          if (matchedEff) return { type: 'effect', layer: 'layer_3_effect' };
+          if (matchedEff) return { type: 'BiologicalProcess', layer: 'layer_3_effect' };
           
           // Check if it matches a condition
           const matchedCond = extractedData.conditions.find(c => 
             c.name.toLowerCase() === entityName.toLowerCase()
           );
-          if (matchedCond) return { type: 'condition', layer: 'layer_4_outcome' };
+          if (matchedCond) return { type: 'Condition', layer: 'layer_4_outcome' };
           
-          // Default to unknown
-          return { type: 'unknown', layer: 'layer_0_compound' };
+          // Default to Compound (valid type for DB constraint)
+          return { type: 'Compound', layer: 'layer_0_compound' };
+        };
+        
+        // Helper to clamp confidence between 0 and 1
+        const clampConfidence = (val: number | undefined | null): number => {
+          if (val === undefined || val === null) return 0.5;
+          return Math.max(0, Math.min(1, val));
         };
         
         // Generate triplets from interactions
@@ -2124,8 +2130,8 @@ serve(async (req) => {
             object_name: interaction.to,
             object_type: objectInfo.type,
             object_layer: objectInfo.layer,
-            extraction_confidence: interaction.confidence || 0.7,
-            llm_confidence: interaction.confidence || 0.7,
+            extraction_confidence: clampConfidence(interaction.confidence),
+            llm_confidence: clampConfidence(interaction.confidence),
             species_context: speciesContext,
             curation_status: 'pending',
             hallucination_flag: false
@@ -2149,14 +2155,14 @@ serve(async (req) => {
             tripletsToInsert.push({
               study_id: studyId,
               subject_name: nutraceutical.name,
-              subject_type: 'nutraceutical',
+              subject_type: 'Nutraceutical',
               subject_layer: 'layer_0_compound',
               predicate: predicate,
               object_name: condition.name,
-              object_type: 'condition',
+              object_type: 'Condition',
               object_layer: 'layer_4_outcome',
-              extraction_confidence: condition.treatability_score || 0.6,
-              llm_confidence: nutraceutical.efficacy_score || 0.6,
+              extraction_confidence: clampConfidence(condition.treatability_score),
+              llm_confidence: clampConfidence(nutraceutical.efficacy_score),
               species_context: speciesContext,
               curation_status: 'pending',
               hallucination_flag: false,
@@ -2190,14 +2196,14 @@ serve(async (req) => {
           tripletsToInsert.push({
             study_id: studyId,
             subject_name: relatedNut,
-            subject_type: 'nutraceutical',
+            subject_type: 'Nutraceutical',
             subject_layer: 'layer_0_compound',
             predicate: interactionTypeMap[drugInt.interaction_type] || 'INTERACTS_WITH',
             object_name: drugInt.compound,
-            object_type: 'drug',
+            object_type: 'Compound',
             object_layer: 'layer_0_compound',
-            extraction_confidence: severityToConfidence[drugInt.severity] || 0.7,
-            llm_confidence: 0.8,
+            extraction_confidence: clampConfidence(severityToConfidence[drugInt.severity]),
+            llm_confidence: clampConfidence(0.8),
             species_context: speciesContext,
             curation_status: 'pending',
             hallucination_flag: false,
@@ -2211,14 +2217,14 @@ serve(async (req) => {
             tripletsToInsert.push({
               study_id: studyId,
               subject_name: synergy.compounds[0],
-              subject_type: 'nutraceutical',
+              subject_type: 'Nutraceutical',
               subject_layer: 'layer_0_compound',
               predicate: 'SYNERGIZES_WITH',
               object_name: synergy.compounds[1],
-              object_type: 'nutraceutical',
+              object_type: 'Nutraceutical',
               object_layer: 'layer_0_compound',
-              extraction_confidence: 0.75,
-              llm_confidence: 0.75,
+              extraction_confidence: clampConfidence(0.75),
+              llm_confidence: clampConfidence(0.75),
               species_context: speciesContext,
               curation_status: 'pending',
               hallucination_flag: false,
@@ -2243,14 +2249,14 @@ serve(async (req) => {
           tripletsToInsert.push({
             study_id: studyId,
             subject_name: relatedNut,
-            subject_type: 'nutraceutical',
+            subject_type: 'Nutraceutical',
             subject_layer: 'layer_0_compound',
             predicate: 'CONTRAINDICATED_FOR',
             object_name: contraind.condition,
-            object_type: 'condition',
+            object_type: 'Condition',
             object_layer: 'layer_4_outcome',
-            extraction_confidence: severityConfidence[contraind.severity] || 0.7,
-            llm_confidence: 0.8,
+            extraction_confidence: clampConfidence(severityConfidence[contraind.severity]),
+            llm_confidence: clampConfidence(0.8),
             species_context: speciesContext,
             curation_status: 'pending',
             hallucination_flag: false,
