@@ -1597,6 +1597,7 @@ export type Database = {
         Row: {
           approval_chain: Json | null
           auto_approved: boolean | null
+          confidence_rationale: string | null
           created_at: string | null
           curation_status: string | null
           direction: string | null
@@ -1633,6 +1634,7 @@ export type Database = {
         Insert: {
           approval_chain?: Json | null
           auto_approved?: boolean | null
+          confidence_rationale?: string | null
           created_at?: string | null
           curation_status?: string | null
           direction?: string | null
@@ -1669,6 +1671,7 @@ export type Database = {
         Update: {
           approval_chain?: Json | null
           auto_approved?: boolean | null
+          confidence_rationale?: string | null
           created_at?: string | null
           curation_status?: string | null
           direction?: string | null
