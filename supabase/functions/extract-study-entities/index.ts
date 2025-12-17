@@ -324,8 +324,8 @@ serve(async (req) => {
         extracted_data: extractedData,
         extraction_status: 'pending_review',
         extraction_quality_score: qualityScore,
-        created_at: new Date().toISOString(),
-      })
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'study_id' })
       .select()
       .maybeSingle();
 
