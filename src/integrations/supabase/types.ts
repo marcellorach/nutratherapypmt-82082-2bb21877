@@ -1736,6 +1736,71 @@ export type Database = {
         }
         Relationships: []
       }
+      veterinary_ontology: {
+        Row: {
+          canonical_name: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          entity_id: string
+          entity_name: string
+          entity_name_en: string | null
+          entity_type: string
+          external_ids: Json | null
+          id: string
+          layer: string
+          parent_id: string | null
+          properties: Json | null
+          source: string | null
+          synonyms: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_name: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          entity_id: string
+          entity_name: string
+          entity_name_en?: string | null
+          entity_type: string
+          external_ids?: Json | null
+          id?: string
+          layer?: string
+          parent_id?: string | null
+          properties?: Json | null
+          source?: string | null
+          synonyms?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_name?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          entity_id?: string
+          entity_name?: string
+          entity_name_en?: string | null
+          entity_type?: string
+          external_ids?: Json | null
+          id?: string
+          layer?: string
+          parent_id?: string | null
+          properties?: Json | null
+          source?: string | null
+          synonyms?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterinary_ontology_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "veterinary_ontology"
+            referencedColumns: ["entity_id"]
+          },
+        ]
+      }
     }
     Views: {
       clean_seed_data: {
