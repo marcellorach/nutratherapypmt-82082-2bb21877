@@ -84,25 +84,38 @@ interface ExtractedStudyData {
   
   nutraceuticals: Array<{
     name: string;
+    description?: string;
+    canonical_id?: string;
+    category?: string;
     dosage?: string;
     effects: string;
     efficacy_score?: number;
     species_tested?: string[];
+    synonyms?: string[];
   }>;
   mechanisms: Array<{
     name: string;
-    type: 'pathway' | 'mediator' | 'enzyme' | 'receptor' | 'gene' | 'protein';
     description: string;
+    canonical_id?: string;
+    type: 'pathway' | 'mediator' | 'enzyme' | 'receptor' | 'gene' | 'protein';
+    action_type?: string;
+    molecular_target?: string;
     confidence?: number;
   }>;
   biological_effects: Array<{
     name: string;
-    type: 'intermediate' | 'biomarker' | 'physiological';
     description: string;
+    canonical_id?: string;
+    type: 'intermediate' | 'biomarker' | 'physiological';
+    effect_category?: string;
+    duration?: string;
     confidence?: number;
   }>;
   conditions: Array<{
     name: string;
+    description?: string;
+    canonical_id?: string;
+    category?: string;
     relationship_type: string;
     efficacy_description?: string;
     treatability_score?: number;
@@ -552,13 +565,26 @@ async function extractWithFileSearch(
         },
         nutraceuticals: {
           type: 'array',
-          description: 'List of ALL nutraceuticals, supplements or active compounds mentioned (MUST be in English)',
+          description: 'List of ALL nutraceuticals, supplements or active compounds mentioned (MUST be in English). Extract DETAILED descriptions for each.',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
                 description: 'Scientific or common name IN ENGLISH. ⚠️ ONLY extract from PDF'
+              },
+              description: {
+                type: 'string',
+                description: 'DETAILED scientific description of the compound: what it is, its chemical class, natural sources, and primary biological functions. 2-4 sentences.'
+              },
+              canonical_id: {
+                type: 'string',
+                description: 'Canonical identifier for ontology linking. Format: NUT_[UPPERCASE_NAME] (e.g., NUT_GLUCOSAMINE, NUT_OMEGA3, NUT_CURCUMIN). Use standardized names.'
+              },
+              category: {
+                type: 'string',
+                enum: ['amino_acid', 'fatty_acid', 'vitamin', 'mineral', 'polyphenol', 'enzyme', 'probiotic', 'prebiotic', 'herb_extract', 'other'],
+                description: 'Category of the nutraceutical compound'
               },
               dosage: {
                 type: 'string',
@@ -576,14 +602,19 @@ async function extractWithFileSearch(
                 type: 'array',
                 items: { type: 'string' },
                 description: 'Species this compound was tested on (canine, feline, etc.)'
+              },
+              synonyms: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Alternative names for this compound (e.g., ["GlcN", "2-Amino-2-deoxy-D-glucose"])'
               }
             },
-            required: ['name', 'effects']
+            required: ['name', 'effects', 'description', 'canonical_id']
           }
         },
         mechanisms: {
           type: 'array',
-          description: 'List of ALL molecular mechanisms, pathways, enzymes, receptors involved (MUST be in English). Examples: COX-2 pathway, NF-κB activation, PPAR-γ, TNF-α signaling, mTOR pathway',
+          description: 'List of ALL molecular mechanisms, pathways, enzymes, receptors involved (MUST be in English). Extract DETAILED descriptions for ontology.',
           items: {
             type: 'object',
             properties: {
@@ -591,26 +622,39 @@ async function extractWithFileSearch(
                 type: 'string',
                 description: 'Name of the molecular mechanism IN ENGLISH. Use standard nomenclature with direction indicators (e.g., "↓ COX-2 pathway" for inhibition, "↑ Proteoglycans" for stimulation)'
               },
+              description: {
+                type: 'string',
+                description: 'DETAILED scientific description of how this mechanism works, its role in the biological cascade, and its clinical significance. 2-4 sentences.'
+              },
+              canonical_id: {
+                type: 'string',
+                description: 'Canonical identifier for ontology linking. Format: MECH_[UPPERCASE_NAME] (e.g., MECH_COX2_INHIBITION, MECH_NFKB_PATHWAY). Use standardized names.'
+              },
               type: {
                 type: 'string',
                 enum: ['pathway', 'mediator', 'enzyme', 'receptor', 'gene', 'protein'],
                 description: 'Type of molecular mechanism'
               },
-              description: {
+              action_type: {
                 type: 'string',
-                description: 'How this mechanism works in the context of the study IN ENGLISH'
+                enum: ['activation', 'inhibition', 'modulation', 'binding', 'catalysis', 'signaling'],
+                description: 'Primary action type of this mechanism'
+              },
+              molecular_target: {
+                type: 'string',
+                description: 'Specific molecular target (e.g., "Cyclooxygenase-2", "NF-κB p65 subunit")'
               },
               confidence: {
                 type: 'number',
                 description: 'Confidence score 0.0-1.0 based on evidence strength: 0.9+ for RCT/meta-analysis, 0.7-0.9 for cohort, 0.5-0.7 for case-control, 0.3-0.5 for case report, 0.1-0.3 for in vitro'
               }
             },
-            required: ['name', 'type', 'description']
+            required: ['name', 'type', 'description', 'canonical_id']
           }
         },
         biological_effects: {
           type: 'array',
-          description: 'List of ALL intermediate biological effects, biomarkers, physiological changes (MUST be in English). Examples: cytokine levels (IL-6, TNF-α), oxidative stress markers, tissue changes, cellular responses',
+          description: 'List of ALL intermediate biological effects, biomarkers, physiological changes (MUST be in English). Extract DETAILED descriptions for ontology.',
           items: {
             type: 'object',
             properties: {
@@ -618,32 +662,58 @@ async function extractWithFileSearch(
                 type: 'string',
                 description: 'Name of the biological effect IN ENGLISH. Use direction indicators (e.g., "↓ IL-6 & TNF-α" for reduction, "↑ Joint lubrication" for increase)'
               },
+              description: {
+                type: 'string',
+                description: 'DETAILED scientific description of the biological effect, its measurement methods, clinical relevance, and expected magnitude of change. 2-4 sentences.'
+              },
+              canonical_id: {
+                type: 'string',
+                description: 'Canonical identifier for ontology linking. Format: EFF_[UPPERCASE_NAME] (e.g., EFF_INFLAMMATION_REDUCTION, EFF_JOINT_LUBRICATION). Use standardized names.'
+              },
               type: {
                 type: 'string',
                 enum: ['intermediate', 'biomarker', 'physiological'],
                 description: 'Type of biological effect'
               },
-              description: {
+              effect_category: {
                 type: 'string',
-                description: 'Description of the effect and its significance IN ENGLISH'
+                enum: ['anti_inflammatory', 'antioxidant', 'metabolic', 'cardiovascular', 'neurological', 'musculoskeletal', 'immune', 'digestive', 'other'],
+                description: 'Category of the biological effect'
+              },
+              duration: {
+                type: 'string',
+                description: 'Duration or onset of the effect (e.g., "within 2 weeks", "chronic", "immediate")'
               },
               confidence: {
                 type: 'number',
                 description: 'Confidence score 0.0-1.0 based on evidence strength: 0.9+ for RCT/meta-analysis, 0.7-0.9 for cohort, 0.5-0.7 for case-control, 0.3-0.5 for case report, 0.1-0.3 for in vitro'
               }
             },
-            required: ['name', 'type', 'description']
+            required: ['name', 'type', 'description', 'canonical_id']
           }
         },
         conditions: {
           type: 'array',
-          description: 'List of ALL health conditions, diseases or clinical outcomes addressed (MUST be in English)',
+          description: 'List of ALL health conditions, diseases or clinical outcomes addressed (MUST be in English). Extract DETAILED descriptions for ontology.',
           items: {
             type: 'object',
             properties: {
               name: {
                 type: 'string',
                 description: 'Name of the condition or disease IN ENGLISH (e.g., Canine Arthritis, Osteoarthritis, Joint Inflammation)'
+              },
+              description: {
+                type: 'string',
+                description: 'DETAILED clinical description of the condition: pathophysiology, symptoms, affected systems, and typical progression. 2-4 sentences.'
+              },
+              canonical_id: {
+                type: 'string',
+                description: 'Canonical identifier for ontology linking. Format: COND_[UPPERCASE_NAME] (e.g., COND_OSTEOARTHRITIS, COND_HIP_DYSPLASIA). Use standardized medical terminology.'
+              },
+              category: {
+                type: 'string',
+                enum: ['musculoskeletal', 'cardiovascular', 'neurological', 'metabolic', 'dermatological', 'gastrointestinal', 'respiratory', 'oncological', 'immunological', 'other'],
+                description: 'Medical category of the condition'
               },
               relationship_type: {
                 type: 'string',
@@ -662,9 +732,13 @@ async function extractWithFileSearch(
                 type: 'string',
                 enum: ['low', 'medium', 'high'],
                 description: 'Severity level of the condition'
+              },
+              species_specific: {
+                type: 'string',
+                description: 'Species for which this condition is being studied (if specific to certain species)'
               }
             },
-            required: ['name', 'relationship_type']
+            required: ['name', 'relationship_type', 'description', 'canonical_id']
           }
         },
         interactions: {
@@ -1742,23 +1816,40 @@ serve(async (req) => {
             route: d.route || 'oral'
           })),
           // Adicionar aliases para compatibilidade com componentes existentes
+          // ✅ PHASE 2: Enhanced with descriptions and ontology links
           extractedNutraceuticals: extractedData.nutraceuticals.map(n => ({
             name: n.name,
-            confidence: n.efficacy_score || 4.0
+            description: n.description || null,
+            canonical_id: n.canonical_id || `NUT_${n.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            category: n.category || 'other',
+            synonyms: n.synonyms || [],
+            confidence: n.efficacy_score || 0.5
           })),
           extractedMechanisms: extractedData.mechanisms.map(m => ({
             name: m.name,
+            description: m.description || null,
+            canonical_id: m.canonical_id || `MECH_${m.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
             type: m.type,
-            confidence: m.confidence || 0.8
+            action_type: m.action_type || 'modulation',
+            molecular_target: m.molecular_target || null,
+            confidence: m.confidence || 0.5
           })),
           extractedEffects: extractedData.biological_effects.map(e => ({
             name: e.name,
+            description: e.description || null,
+            canonical_id: e.canonical_id || `EFF_${e.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
             type: e.type,
-            confidence: e.confidence || 0.8
+            effect_category: e.effect_category || 'other',
+            duration: e.duration || null,
+            confidence: e.confidence || 0.5
           })),
           extractedConditions: extractedData.conditions.map(c => ({
             name: c.name,
-            confidence: c.treatability_score || 4.0
+            description: c.description || null,
+            canonical_id: c.canonical_id || `COND_${c.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            category: c.category || 'other',
+            relationship_type: c.relationship_type,
+            confidence: c.treatability_score || 0.5
           })),
           extractedInteractions: extractedData.interactions,
           extractedSideEffects: extractedData.side_effects,
@@ -1881,6 +1972,82 @@ serve(async (req) => {
           console.log(`   - dosages: ${extractionData.dosages.length}`);
           console.log(`   - species: ${extractionData.study_population?.species || 'N/A'}`);
         }
+        
+        // ✅ STEP 3: PHASE 2 - Link to veterinary_ontology and auto-create new entities
+        console.log('🧬 PHASE 2: Linking entities to veterinary_ontology...');
+        
+        // Collect all extracted entities with their canonical IDs
+        const entitiesToLink = [
+          ...extractedData.nutraceuticals.map(n => ({
+            entity_id: n.canonical_id || `NUT_${n.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            entity_name: n.name,
+            entity_type: 'compound',
+            canonical_name: n.name,
+            description: n.description || `Nutraceutical compound: ${n.name}`,
+            layer: 'layer_0_compound',
+            synonyms: n.synonyms || [],
+            properties: { category: n.category, efficacy_score: n.efficacy_score }
+          })),
+          ...extractedData.mechanisms.map(m => ({
+            entity_id: m.canonical_id || `MECH_${m.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            entity_name: m.name,
+            entity_type: 'mechanism',
+            canonical_name: m.name,
+            description: m.description || `Molecular mechanism: ${m.name}`,
+            layer: 'layer_2_mechanism',
+            synonyms: [],
+            properties: { type: m.type, action_type: m.action_type, molecular_target: m.molecular_target }
+          })),
+          ...extractedData.biological_effects.map(e => ({
+            entity_id: e.canonical_id || `EFF_${e.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            entity_name: e.name,
+            entity_type: 'effect',
+            canonical_name: e.name,
+            description: e.description || `Biological effect: ${e.name}`,
+            layer: 'layer_3_effect',
+            synonyms: [],
+            properties: { type: e.type, effect_category: e.effect_category, duration: e.duration }
+          })),
+          ...extractedData.conditions.map(c => ({
+            entity_id: c.canonical_id || `COND_${c.name.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')}`,
+            entity_name: c.name,
+            entity_type: 'condition',
+            canonical_name: c.name,
+            description: c.description || `Health condition: ${c.name}`,
+            layer: 'layer_4_outcome',
+            synonyms: [],
+            properties: { category: c.category, severity: c.severity, relationship_type: c.relationship_type }
+          }))
+        ];
+        
+        // Upsert entities to veterinary_ontology (auto-expand the ontology)
+        let linkedCount = 0;
+        for (const entity of entitiesToLink) {
+          const { error: ontologyError } = await supabase
+            .from('veterinary_ontology')
+            .upsert({
+              entity_id: entity.entity_id,
+              entity_name: entity.entity_name,
+              entity_name_en: entity.entity_name,
+              entity_type: entity.entity_type,
+              canonical_name: entity.canonical_name,
+              description: entity.description,
+              description_en: entity.description,
+              layer: entity.layer,
+              synonyms: entity.synonyms,
+              properties: entity.properties,
+              source: 'gemini_extraction'
+            }, {
+              onConflict: 'entity_id',
+              ignoreDuplicates: false // Update if exists
+            });
+          
+          if (!ontologyError) {
+            linkedCount++;
+          }
+        }
+        
+        console.log(`✅ PHASE 2 Complete: ${linkedCount}/${entitiesToLink.length} entities linked to ontology`);
         
         return result;
       },
