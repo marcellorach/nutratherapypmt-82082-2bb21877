@@ -291,7 +291,7 @@ const PipelineDebugTab: React.FC<PipelineDebugTabProps> = ({ estudo, onRefresh }
                   Interactions (Chain Mapping)
                 </h4>
                 <div className="space-y-1">
-                  {extractedData?.interactions?.slice(0, 5).map((i: any, idx: number) => (
+                  {(extractedData?.interactions || []).slice(0, 5).map((i: any, idx: number) => (
                     <div key={idx} className="text-xs bg-muted/50 p-2 rounded flex items-center gap-2">
                       <span className="font-medium">{i.from}</span>
                       <span className="text-muted-foreground">→</span>
@@ -302,7 +302,7 @@ const PipelineDebugTab: React.FC<PipelineDebugTabProps> = ({ estudo, onRefresh }
                   ))}
                   {(extractedData?.interactions?.length || 0) > 5 && (
                     <p className="text-xs text-muted-foreground">
-                      ... and {extractedData.interactions.length - 5} more
+                      ... and {(extractedData?.interactions?.length || 0) - 5} more
                     </p>
                   )}
                 </div>
