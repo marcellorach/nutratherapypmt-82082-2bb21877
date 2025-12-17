@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, MessageCircle, BarChart3, Bug } from "lucide-react";
-import ApprovalStagesList from '../pesquisa/components/ApprovalStagesList';
+import { MessageCircle, BarChart3, Bug } from "lucide-react";
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
@@ -13,6 +12,7 @@ import AnaliseTab from '../estudos/detalhes/tabs/AnaliseTab';
 import PipelineDebugTab from '../estudos/detalhes/tabs/PipelineDebugTab';
 import DocumentChatInterface from '../estudos/chat/DocumentChatInterface';
 import EnhancedStudyVisualization from '../estudos/visualization/EnhancedStudyVisualization';
+import ApprovalTab from '../estudos/approval/ApprovalTab';
 
 interface EstudoDetailDialogProps {
   open: boolean;
@@ -132,58 +132,21 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
           </TabsContent>
 
           <TabsContent value="approval">
-            <ApprovalStagesList 
-              stages={[
-                { name: 'Análise Inicial', status: 'completed' },
-                { name: 'Análise IA', status: 'completed' },
-                { name: 'Revisão Técnica', status: 'in-progress' },
-                { name: 'Aprovação Final', status: 'pending' }
-              ]}
+            <ApprovalTab 
+              estudo={estudo} 
+              onAdvanceApproval={onAdvanceApproval}
             />
-            
-            <div className="mt-4 border-t pt-4">
-              <h4 className="text-sm font-medium">Histórico de Aprovação</h4>
-              <ul className="space-y-2 mt-2">
-                <li className="text-xs bg-gray-50 p-2 rounded flex justify-between">
-                  <span>Submetido para análise inicial</span>
-                  <span className="text-gray-500">10/04/2024</span>
-                </li>
-                <li className="text-xs bg-gray-50 p-2 rounded flex justify-between">
-                  <span>Análise inicial concluída</span>
-                  <span className="text-gray-500">12/04/2024</span>
-                </li>
-                <li className="text-xs bg-gray-50 p-2 rounded flex justify-between">
-                  <span>Análise de IA concluída</span>
-                  <span className="text-gray-500">15/04/2024</span>
-                </li>
-              </ul>
-            </div>
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="flex justify-between items-center">
-          <div className="flex-1">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onOpenChange(false)}
-            >
-              Fechar
-            </Button>
-          </div>
-          
-          <div className="flex gap-2">
-            {activeTab === "approval" && (
-              <Button 
-                onClick={() => handleAdvanceApproval()}
-                size="sm"
-                className="flex items-center"
-              >
-                <span>Avançar Estágio</span>
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onOpenChange(false)}
+          >
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

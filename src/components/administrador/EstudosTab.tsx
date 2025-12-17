@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Database, FileText, FileCode, ArrowDown, ArrowUp, ListCheck, Filter, RefreshCcw } from "lucide-react";
+import { Database, FileText, ArrowDown, ListCheck, RefreshCcw } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import AdicionarEstudoDialog from './dialogs/AdicionarEstudoDialog';
 import EstudoDetailDialog from './dialogs/EstudoDetailDialog';
@@ -15,6 +14,7 @@ import EstudosColumn from './estudos/EstudosColumn';
 import SciImportSection from './estudos/import/SciImportSection';
 import { UploadEstudoForm } from './estudos/UploadEstudoForm';
 import { useTranslation } from 'react-i18next';
+import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
 import './estudos/estudos.css';
 
 const EstudosTab: React.FC = () => {
@@ -27,6 +27,7 @@ const EstudosTab: React.FC = () => {
   const [estudos, setEstudos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { executeApprovalWorkflow, isProcessing } = useStudyApprovalWorkflow();
 
   // Fetch estudos from database
   useEffect(() => {
@@ -96,26 +97,11 @@ const EstudosTab: React.FC = () => {
 
   const handleAdvanceApproval = async (estudoId: string) => {
     try {
-      const { error } = await supabase
-        .from('processed_studies')
-        .update({ kanban_status: 'approved' })
-        .eq('id', estudoId);
-
-      if (error) throw error;
-
-      toast({
-        title: t('studies.toast.stageAdvanced'),
-        description: t('studies.toast.stageAdvancedDesc'),
-      });
+      await executeApprovalWorkflow(estudoId);
       setDetailDialogOpen(false);
       fetchEstudos();
     } catch (error) {
-      console.error('Error approving study:', error);
-      toast({
-        title: "Erro ao aprovar estudo",
-        description: "Não foi possível atualizar o status do estudo.",
-        variant: "destructive",
-      });
+      console.error('Error in approval workflow:', error);
     }
   };
 
