@@ -1,4 +1,55 @@
 {
+  "knowledgeGraph": {
+    "title": "Knowledge Graph Visualization",
+    "description": "Interactive visualization of the medical knowledge graph",
+    "testConnection": "Test Neo4j Connection",
+    "loading": "Loading graph...",
+    "topConnected": "Top Connected Entities",
+    "connections": "connections",
+    "dataSources": {
+      "title": "Data Sources",
+      "ontology": "Ontology",
+      "triplets": "From Studies",
+      "known": "Known Relations",
+      "contributingStudies": "Contributing Studies",
+      "noStudies": "No studies contributing yet"
+    },
+    "stats": {
+      "totalNodes": "Total Nodes",
+      "totalRelations": "Total Relationships",
+      "positive": "Positive (TREATS)",
+      "negative": "Negative (WORSENS)",
+      "nutraceuticals": "Nutraceuticals",
+      "conditions": "Conditions"
+    },
+    "filters": {
+      "study": "Filter by Study",
+      "allStudies": "All Studies",
+      "entityType": "Entity Type",
+      "allTypes": "All Types",
+      "nutraceuticals": "Nutraceuticals",
+      "conditions": "Conditions",
+      "mechanisms": "Mechanisms",
+      "effects": "Effects",
+      "outcomes": "Outcomes",
+      "relationType": "Relation Type",
+      "allRelations": "All Relations",
+      "positive": "Positive (TREATS, SUPPORTS)",
+      "negative": "Negative (WORSENS, CONTRAINDICATED)",
+      "minConfidence": "Min Confidence",
+      "all": "All (0%)",
+      "medium": "Medium (50%+)",
+      "high": "High (70%+)",
+      "veryHigh": "Very High (85%+)",
+      "showing": "Showing",
+      "nodes": "nodes",
+      "edges": "edges"
+    },
+    "empty": {
+      "title": "No graph data available",
+      "description": "Approve and sync some triplets to visualize the knowledge graph"
+    }
+  },
   "chat": {
     "title": "Chat with Document",
     "inputPlaceholder": "Type your question...",
