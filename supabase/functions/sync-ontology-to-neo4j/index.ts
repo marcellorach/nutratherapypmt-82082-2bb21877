@@ -54,27 +54,55 @@ const ENTITY_TYPE_TO_LAYER: Record<string, string> = {
 async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
   console.log('[Neo4j] Fetching credentials from ai_configurations...');
   
+  // Fetch all Neo4j related configs
   const { data, error } = await supabase
     .from('ai_configurations')
-    .select('config_value')
-    .eq('config_key', 'neo4j_credentials')
-    .eq('is_active', true)
-    .single();
+    .select('config_key, config_value')
+    .in('config_key', ['neo4j_uri', 'neo4j_username', 'neo4j_password'])
+    .eq('is_active', true);
   
-  if (error || !data) {
+  if (error || !data || data.length < 3) {
     console.error('[Neo4j] Error fetching credentials:', error);
     return null;
   }
   
-  const config = data.config_value as Neo4jCredentials;
+  // Build credentials object from separate configs
+  const configMap = data.reduce((acc: Record<string, any>, item: any) => {
+    acc[item.config_key] = item.config_value;
+    return acc;
+  }, {});
   
-  if (!config.uri || !config.username || !config.password) {
-    console.error('[Neo4j] Invalid credentials configuration');
+  const uri = configMap['neo4j_uri'];
+  const username = configMap['neo4j_username'];
+  const password = configMap['neo4j_password'];
+  
+  if (!uri || !username || !password) {
+    console.error('[Neo4j] Missing credentials:', { hasUri: !!uri, hasUsername: !!username, hasPassword: !!password });
     return null;
   }
   
   console.log('[Neo4j] Credentials loaded successfully');
-  return config;
+  return { uri, username, password };
+}
+
+// Convert Bolt URI to HTTP URI for REST API
+function convertBoltToHttpUri(boltUri: string): string {
+  // neo4j+s:// -> https://
+  // neo4j:// -> http://
+  // bolt+s:// -> https://
+  // bolt:// -> http://
+  let httpUri = boltUri
+    .replace(/^neo4j\+s:\/\//, 'https://')
+    .replace(/^neo4j:\/\//, 'http://')
+    .replace(/^bolt\+s:\/\//, 'https://')
+    .replace(/^bolt:\/\//, 'http://');
+  
+  // Remove port if it's the default Bolt port (7687) and add nothing (use default HTTPS)
+  // Neo4j Aura uses HTTPS on port 443 by default for REST API
+  httpUri = httpUri.replace(/:7687\/?$/, '');
+  
+  console.log(`[Neo4j] Converted URI: ${boltUri} -> ${httpUri}`);
+  return httpUri;
 }
 
 async function executeCypherQuery(
@@ -82,19 +110,23 @@ async function executeCypherQuery(
   params: Record<string, any>, 
   credentials: Neo4jCredentials
 ): Promise<any> {
-  const txEndpoint = `${credentials.uri}/db/neo4j/tx/commit`;
+  const httpUri = convertBoltToHttpUri(credentials.uri);
   
-  const response = await fetch(txEndpoint, {
+  // Use Query API v2 for Neo4j Aura
+  const queryEndpoint = `${httpUri}/db/neo4j/query/v2`;
+  
+  console.log(`[Neo4j] Executing query on: ${queryEndpoint}`);
+  
+  const response = await fetch(queryEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`),
+      'Accept': 'application/json',
     },
     body: JSON.stringify({
-      statements: [{
-        statement: cypher,
-        parameters: params,
-      }],
+      statement: cypher,
+      parameters: params,
     }),
   });
   
