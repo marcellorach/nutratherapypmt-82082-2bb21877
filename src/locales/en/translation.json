@@ -66,6 +66,23 @@
       "legendKnown": "Known and pre-defined relationships with high confidence",
       "topConnected": "Entities with the most connections in the graph, indicating high relevance"
     },
+    "studyPanel": {
+      "title": "Study Details",
+      "description": "Detailed information about the selected study and its extracted knowledge",
+      "extractionStats": "Extraction Stats",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "lastSync": "Last synced",
+      "extractedEntities": "Extracted Entities",
+      "nutraceuticals": "Nutraceuticals",
+      "conditions": "Conditions",
+      "mechanisms": "Mechanisms",
+      "effects": "Effects",
+      "topRelations": "Top Relations",
+      "clearFilter": "Clear Study Filter",
+      "noData": "No study data available"
+    },
     "empty": {
       "title": "No graph data available",
       "description": "Approve and sync some triplets to visualize the knowledge graph"

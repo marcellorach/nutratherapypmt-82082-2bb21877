@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle } from 'lucide-react';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -29,6 +32,32 @@ interface StudyOption {
   title: string;
   tripletCount: number;
   lastSyncedAt: string | null;
+}
+
+interface StudyDetails {
+  id: string;
+  title: string;
+  description?: string;
+  authors?: string[];
+  journal?: string;
+  year?: number;
+  tripletCount: number;
+  approvedCount: number;
+  pendingCount: number;
+  rejectedCount: number;
+  lastSyncedAt: string | null;
+  extractedEntities: {
+    nutraceuticals: string[];
+    conditions: string[];
+    mechanisms: string[];
+    effects: string[];
+  };
+  topRelations: Array<{
+    subject: string;
+    predicate: string;
+    object: string;
+    confidence: number;
+  }>;
 }
 
 interface DataSourceStats {
@@ -62,6 +91,9 @@ export const KnowledgeGraphViewer: React.FC = () => {
   });
   const [testingConnection, setTestingConnection] = useState(false);
   const [loadingDataSources, setLoadingDataSources] = useState(true);
+  const [studyPanelOpen, setStudyPanelOpen] = useState(false);
+  const [selectedStudyDetails, setSelectedStudyDetails] = useState<StudyDetails | null>(null);
+  const [loadingStudyDetails, setLoadingStudyDetails] = useState(false);
 
   useEffect(() => {
     loadGraphData();
@@ -71,10 +103,94 @@ export const KnowledgeGraphViewer: React.FC = () => {
   useEffect(() => {
     if (studyFilter !== 'all') {
       loadGraphDataByStudy(studyFilter);
+      loadStudyDetails(studyFilter);
+      setStudyPanelOpen(true);
     } else {
       loadGraphData();
+      setStudyPanelOpen(false);
+      setSelectedStudyDetails(null);
     }
   }, [studyFilter]);
+
+  const loadStudyDetails = async (studyId: string) => {
+    try {
+      setLoadingStudyDetails(true);
+      
+      // Get study info
+      const { data: studyData } = await supabase
+        .from('processed_studies')
+        .select('id, title, description, authors, journal, year')
+        .eq('id', studyId)
+        .single();
+      
+      if (!studyData) return;
+      
+      // Get all triplets for this study with their status
+      const { data: triplets } = await supabase
+        .from('triplet_extractions')
+        .select('subject_name, subject_type, predicate, object_name, object_type, curation_status, extraction_confidence, synced_at')
+        .eq('study_id', studyId);
+      
+      const approvedCount = triplets?.filter(t => t.curation_status === 'approved').length || 0;
+      const pendingCount = triplets?.filter(t => t.curation_status === 'pending').length || 0;
+      const rejectedCount = triplets?.filter(t => t.curation_status === 'rejected').length || 0;
+      
+      // Extract unique entities by type
+      const nutraceuticals = new Set<string>();
+      const conditions = new Set<string>();
+      const mechanisms = new Set<string>();
+      const effects = new Set<string>();
+      
+      triplets?.forEach(t => {
+        [{ name: t.subject_name, type: t.subject_type }, { name: t.object_name, type: t.object_type }].forEach(entity => {
+          if (entity.type === 'nutraceutical') nutraceuticals.add(entity.name);
+          else if (entity.type === 'condition') conditions.add(entity.name);
+          else if (entity.type === 'mechanism') mechanisms.add(entity.name);
+          else if (entity.type === 'biological_effect') effects.add(entity.name);
+        });
+      });
+      
+      // Get top approved relations
+      const topRelations = triplets
+        ?.filter(t => t.curation_status === 'approved')
+        .sort((a, b) => (b.extraction_confidence || 0) - (a.extraction_confidence || 0))
+        .slice(0, 5)
+        .map(t => ({
+          subject: t.subject_name,
+          predicate: t.predicate,
+          object: t.object_name,
+          confidence: t.extraction_confidence || 0
+        })) || [];
+      
+      const lastSyncedAt = triplets?.find(t => t.synced_at)?.synced_at || null;
+      
+      setSelectedStudyDetails({
+        id: studyData.id,
+        title: studyData.title || 'Untitled Study',
+        description: studyData.description || undefined,
+        authors: studyData.authors || undefined,
+        journal: studyData.journal || undefined,
+        year: studyData.year || undefined,
+        tripletCount: triplets?.length || 0,
+        approvedCount,
+        pendingCount,
+        rejectedCount,
+        lastSyncedAt,
+        extractedEntities: {
+          nutraceuticals: Array.from(nutraceuticals),
+          conditions: Array.from(conditions),
+          mechanisms: Array.from(mechanisms),
+          effects: Array.from(effects)
+        },
+        topRelations
+      });
+      
+    } catch (error) {
+      console.error('Error loading study details:', error);
+    } finally {
+      setLoadingStudyDetails(false);
+    }
+  };
 
   const loadDataSourceStats = async () => {
     try {
@@ -804,6 +920,220 @@ export const KnowledgeGraphViewer: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Study Details Side Panel */}
+      <Sheet open={studyPanelOpen} onOpenChange={setStudyPanelOpen}>
+        <SheetContent className="w-[400px] sm:w-[450px] overflow-hidden flex flex-col">
+          <SheetHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <SheetTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                {t('knowledgeGraph.studyPanel.title', 'Study Details')}
+              </SheetTitle>
+            </div>
+            <SheetDescription>
+              {t('knowledgeGraph.studyPanel.description', 'Detailed information about the selected study and its extracted knowledge')}
+            </SheetDescription>
+          </SheetHeader>
+
+          <ScrollArea className="flex-1 -mx-6 px-6">
+            {loadingStudyDetails ? (
+              <div className="flex items-center justify-center py-12">
+                <Activity className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : selectedStudyDetails ? (
+              <div className="space-y-6 py-4">
+                {/* Study Title & Meta */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg leading-tight">{selectedStudyDetails.title}</h3>
+                  {selectedStudyDetails.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-3">{selectedStudyDetails.description}</p>
+                  )}
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    {selectedStudyDetails.year && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {selectedStudyDetails.year}
+                      </span>
+                    )}
+                    {selectedStudyDetails.journal && (
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" />
+                        {selectedStudyDetails.journal}
+                      </span>
+                    )}
+                  </div>
+                  {selectedStudyDetails.authors && selectedStudyDetails.authors.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {selectedStudyDetails.authors.slice(0, 3).join(', ')}
+                      {selectedStudyDetails.authors.length > 3 && ` +${selectedStudyDetails.authors.length - 3} more`}
+                    </p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Triplet Stats */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    {t('knowledgeGraph.studyPanel.extractionStats', 'Extraction Stats')}
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-green-600">{selectedStudyDetails.approvedCount}</div>
+                      <div className="text-[10px] text-green-700 dark:text-green-400">{t('knowledgeGraph.studyPanel.approved', 'Approved')}</div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-amber-600">{selectedStudyDetails.pendingCount}</div>
+                      <div className="text-[10px] text-amber-700 dark:text-amber-400">{t('knowledgeGraph.studyPanel.pending', 'Pending')}</div>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-red-600">{selectedStudyDetails.rejectedCount}</div>
+                      <div className="text-[10px] text-red-700 dark:text-red-400">{t('knowledgeGraph.studyPanel.rejected', 'Rejected')}</div>
+                    </div>
+                  </div>
+                  {selectedStudyDetails.lastSyncedAt && (
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3 text-green-500" />
+                      {t('knowledgeGraph.studyPanel.lastSync', 'Last synced')}: {new Date(selectedStudyDetails.lastSyncedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Extracted Entities */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">{t('knowledgeGraph.studyPanel.extractedEntities', 'Extracted Entities')}</h4>
+                  
+                  {selectedStudyDetails.extractedEntities.nutraceuticals.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-blue-600">{t('knowledgeGraph.studyPanel.nutraceuticals', 'Nutraceuticals')} ({selectedStudyDetails.extractedEntities.nutraceuticals.length})</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedStudyDetails.extractedEntities.nutraceuticals.slice(0, 8).map((n, i) => (
+                          <Badge key={i} variant="secondary" className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                            {n}
+                          </Badge>
+                        ))}
+                        {selectedStudyDetails.extractedEntities.nutraceuticals.length > 8 && (
+                          <Badge variant="outline" className="text-[10px]">
+                            +{selectedStudyDetails.extractedEntities.nutraceuticals.length - 8}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedStudyDetails.extractedEntities.conditions.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-emerald-600">{t('knowledgeGraph.studyPanel.conditions', 'Conditions')} ({selectedStudyDetails.extractedEntities.conditions.length})</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedStudyDetails.extractedEntities.conditions.slice(0, 8).map((c, i) => (
+                          <Badge key={i} variant="secondary" className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                            {c}
+                          </Badge>
+                        ))}
+                        {selectedStudyDetails.extractedEntities.conditions.length > 8 && (
+                          <Badge variant="outline" className="text-[10px]">
+                            +{selectedStudyDetails.extractedEntities.conditions.length - 8}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedStudyDetails.extractedEntities.mechanisms.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-amber-600">{t('knowledgeGraph.studyPanel.mechanisms', 'Mechanisms')} ({selectedStudyDetails.extractedEntities.mechanisms.length})</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedStudyDetails.extractedEntities.mechanisms.slice(0, 6).map((m, i) => (
+                          <Badge key={i} variant="secondary" className="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                            {m}
+                          </Badge>
+                        ))}
+                        {selectedStudyDetails.extractedEntities.mechanisms.length > 6 && (
+                          <Badge variant="outline" className="text-[10px]">
+                            +{selectedStudyDetails.extractedEntities.mechanisms.length - 6}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedStudyDetails.extractedEntities.effects.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-purple-600">{t('knowledgeGraph.studyPanel.effects', 'Effects')} ({selectedStudyDetails.extractedEntities.effects.length})</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedStudyDetails.extractedEntities.effects.slice(0, 6).map((e, i) => (
+                          <Badge key={i} variant="secondary" className="text-[10px] bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400">
+                            {e}
+                          </Badge>
+                        ))}
+                        {selectedStudyDetails.extractedEntities.effects.length > 6 && (
+                          <Badge variant="outline" className="text-[10px]">
+                            +{selectedStudyDetails.extractedEntities.effects.length - 6}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedStudyDetails.topRelations.length > 0 && (
+                  <>
+                    <Separator />
+                    
+                    {/* Top Relations */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium">{t('knowledgeGraph.studyPanel.topRelations', 'Top Relations')}</h4>
+                      <div className="space-y-2">
+                        {selectedStudyDetails.topRelations.map((rel, idx) => (
+                          <div key={idx} className="bg-muted/50 rounded-lg p-2.5 text-xs">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-medium text-blue-700 dark:text-blue-400">{rel.subject}</span>
+                              <span className="text-muted-foreground px-1.5 py-0.5 bg-background rounded text-[10px]">{rel.predicate}</span>
+                              <span className="font-medium text-emerald-700 dark:text-emerald-400">{rel.object}</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1.5 text-muted-foreground">
+                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-green-500 rounded-full" 
+                                  style={{ width: `${rel.confidence * 100}%` }}
+                                />
+                              </div>
+                              <span className="text-[10px]">{Math.round(rel.confidence * 100)}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Clear Filter Button */}
+                <div className="pt-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setStudyFilter('all');
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {t('knowledgeGraph.studyPanel.clearFilter', 'Clear Study Filter')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <AlertCircle className="h-5 w-5 mr-2" />
+                {t('knowledgeGraph.studyPanel.noData', 'No study data available')}
+              </div>
+            )}
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
     </TooltipProvider>
   );
 };

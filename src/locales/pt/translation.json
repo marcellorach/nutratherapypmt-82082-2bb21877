@@ -66,6 +66,23 @@
       "legendKnown": "Relações conhecidas e pré-definidas com alta confiança",
       "topConnected": "Entidades com mais conexões no grafo, indicando alta relevância"
     },
+    "studyPanel": {
+      "title": "Detalhes do Estudo",
+      "description": "Informações detalhadas sobre o estudo selecionado e seu conhecimento extraído",
+      "extractionStats": "Estatísticas de Extração",
+      "approved": "Aprovados",
+      "pending": "Pendentes",
+      "rejected": "Rejeitados",
+      "lastSync": "Última sincronização",
+      "extractedEntities": "Entidades Extraídas",
+      "nutraceuticals": "Nutracêuticos",
+      "conditions": "Condições",
+      "mechanisms": "Mecanismos",
+      "effects": "Efeitos",
+      "topRelations": "Principais Relações",
+      "clearFilter": "Limpar Filtro de Estudo",
+      "noData": "Nenhum dado de estudo disponível"
+    },
     "empty": {
       "title": "Nenhum dado de grafo disponível",
       "description": "Aprove e sincronize alguns triplets para visualizar o grafo de conhecimento"
