@@ -162,6 +162,19 @@
     "contextSummary": "Context Summary"
   },
   "studies": {
+    "approval": {
+      "approveStudy": "Approve Study",
+      "confirmTitle": "Confirm Approval",
+      "confirmDescription": "You are about to approve this study. This action will:",
+      "actionChangeStatus": "Change the study status to 'Approved'",
+      "actionAutoApprove": "Auto-approve triplets with confidence ≥70%",
+      "actionUpdateKG": "Update the Knowledge Graph",
+      "confirm": "Yes, Approve",
+      "processing": "Processing...",
+      "success": "Study approved successfully",
+      "successDetails": "{{triplets}} triplets approved, {{edges}} edges created in the graph",
+      "error": "Error approving study"
+    },
     "library": {
       "title": "Studies Library",
       "studies": "studies",

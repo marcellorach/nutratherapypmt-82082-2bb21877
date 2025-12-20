@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, BarChart3, Bug, GitPullRequest } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { MessageCircle, BarChart3, Bug, GitPullRequest, CheckCircle, Loader2 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
+import { toast } from 'sonner';
 import EvidenceTag from '../tags/EvidenceTag';
 import NutraceuticalTag from '../tags/NutraceuticalTag';
 import EstudoDetailSections from '../estudos/detalhes/sections/EstudoDetailSections';
@@ -27,15 +31,41 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   estudo,
   onAdvanceApproval
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isApproving, setIsApproving] = useState(false);
+  const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
 
   if (!estudo) return null;
 
-  const handleAdvanceApproval = () => {
-    if (onAdvanceApproval) {
-      onAdvanceApproval(estudo.id);
+  const handleAdvanceApproval = async () => {
+    setIsApproving(true);
+    try {
+      const result = await executeApprovalWorkflow(estudo.id);
+      
+      toast.success(t('studies.approval.success'), {
+        description: t('studies.approval.successDetails', {
+          triplets: result.tripletsApproved,
+          edges: result.edgesCreated
+        })
+      });
+      
+      // Call the parent callback to refresh the list
+      if (onAdvanceApproval) {
+        onAdvanceApproval(estudo.id);
+      }
+      
+      // Close the dialog after approval
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Approval workflow error:', error);
+      toast.error(t('studies.approval.error'));
+    } finally {
+      setIsApproving(false);
     }
   };
+  
+  const canApprove = estudo.kanban_status !== 'approved';
 
   // ✅ Use real scores from analysis_data if available, otherwise fallback
   const analysisData = estudo.analysis_data || {};
@@ -142,14 +172,60 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => onOpenChange(false)}
           >
-            Fechar
+            {t('common.close')}
           </Button>
+          
+          {canApprove && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700"
+                  disabled={isApproving}
+                >
+                  {isApproving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('studies.approval.processing')}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {t('studies.approval.approveStudy')}
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('studies.approval.confirmTitle')}</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p>{t('studies.approval.confirmDescription')}</p>
+                    <ul className="list-disc list-inside text-sm space-y-1 mt-2">
+                      <li>{t('studies.approval.actionChangeStatus')}</li>
+                      <li>{t('studies.approval.actionAutoApprove')}</li>
+                      <li>{t('studies.approval.actionUpdateKG')}</li>
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleAdvanceApproval}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {t('studies.approval.confirm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

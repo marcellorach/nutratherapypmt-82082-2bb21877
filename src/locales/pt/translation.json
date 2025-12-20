@@ -162,6 +162,19 @@
     "contextSummary": "Resumo do Contexto"
   },
   "studies": {
+    "approval": {
+      "approveStudy": "Aprovar Estudo",
+      "confirmTitle": "Confirmar Aprovação",
+      "confirmDescription": "Você está prestes a aprovar este estudo. Esta ação irá:",
+      "actionChangeStatus": "Alterar o status do estudo para 'Aprovado'",
+      "actionAutoApprove": "Auto-aprovar triplets com confiança ≥70%",
+      "actionUpdateKG": "Atualizar o Grafo de Conhecimento",
+      "confirm": "Sim, Aprovar",
+      "processing": "Processando...",
+      "success": "Estudo aprovado com sucesso",
+      "successDetails": "{{triplets}} triplets aprovados, {{edges}} arestas criadas no grafo",
+      "error": "Erro ao aprovar estudo"
+    },
     "library": {
       "title": "Biblioteca de Estudos",
       "studies": "estudos",
