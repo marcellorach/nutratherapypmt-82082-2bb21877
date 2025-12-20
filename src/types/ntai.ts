@@ -28,13 +28,18 @@ export interface HierarchicalRelation {
 // Stage 3 - Clinical Context
 export interface ContextualDosage {
   compound: string;
-  amount: number;
+  amount?: number;
+  amount_min?: number;
+  amount_max?: number;
+  amount_text?: string;
   unit: string;
+  per_body_weight?: boolean;
   frequency?: string;
   duration?: string;
-  species?: 'human' | 'canine' | 'feline' | 'equine' | 'other';
+  species?: 'human' | 'canine' | 'feline' | 'equine' | 'rodent' | 'other';
   condition?: string;
   route?: 'oral' | 'topical' | 'intravenous' | 'subcutaneous' | 'other';
+  source?: string;
 }
 
 export interface DetailedSideEffect {
