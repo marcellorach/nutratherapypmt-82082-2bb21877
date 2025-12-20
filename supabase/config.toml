@@ -1,5 +1,8 @@
 project_id = "kytkpkimzwazhpnxahxt"
 
+[functions.chat]
+verify_jwt = false
+
 [functions.translate-conditions]
 verify_jwt = false
 
