@@ -11,7 +11,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen } from 'lucide-react';
+import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
+import { KnowledgeGraphChat } from './KnowledgeGraphChat';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -94,6 +96,11 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [studyPanelOpen, setStudyPanelOpen] = useState(false);
   const [selectedStudyDetails, setSelectedStudyDetails] = useState<StudyDetails | null>(null);
   const [loadingStudyDetails, setLoadingStudyDetails] = useState(false);
+  
+  // New states for dialogs and chat
+  const [statDialogOpen, setStatDialogOpen] = useState(false);
+  const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative'>('ontology');
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     loadGraphData();
@@ -518,6 +525,27 @@ export const KnowledgeGraphViewer: React.FC = () => {
     setStudyFilter(studyId);
   };
 
+  const openStatDialog = (type: 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative') => {
+    setSelectedStatType(type);
+    setStatDialogOpen(true);
+  };
+
+  const handleEntityClick = (entityId: string, entityType: string) => {
+    setStatDialogOpen(false);
+    setEntityFilter(entityType);
+    toast.info(`Filtrado por: ${entityType}`);
+  };
+
+  const handleStudyFromDialogClick = (studyId: string) => {
+    setStatDialogOpen(false);
+    setStudyFilter(studyId);
+  };
+
+  const handleHighlightEntity = (entityName: string) => {
+    // Could be used to highlight entity in the graph
+    toast.info(`Entidade: ${entityName}`);
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-4">
@@ -534,24 +562,32 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="text-center cursor-help">
+                      <div 
+                        className="text-center cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+                        onClick={() => openStatDialog('ontology')}
+                      >
                         <div className="text-lg font-bold text-blue-600">{dataSourceStats.ontologyEntities}</div>
                         <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.dataSources.ontology', 'Ontology')}</div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-[280px]">
                       <p>{t('knowledgeGraph.tooltips.ontology', 'Base entities from veterinary ontology (nutraceuticals, conditions, mechanisms)')}</p>
+                      <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="text-center cursor-help">
+                      <div 
+                        className="text-center cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+                        onClick={() => openStatDialog('studies')}
+                      >
                         <div className="text-lg font-bold text-green-600">{dataSourceStats.tripletCount}</div>
                         <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.dataSources.triplets', 'From Studies')}</div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-[280px]">
                       <p>{t('knowledgeGraph.tooltips.fromStudies', 'Triplets automatically extracted from scientific studies by AI')}</p>
+                      <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
@@ -611,7 +647,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('nodes')}>
                     <CardContent className="py-3 px-4 text-center">
                       <div className="text-lg font-bold">{stats.totalNodes}</div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalNodes', 'Nodes')}</div>
@@ -620,11 +656,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.totalNodes', 'Total unique entities in the graph')}</p>
+                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('edges')}>
                     <CardContent className="py-3 px-4 text-center">
                       <div className="text-lg font-bold">{stats.totalEdges}</div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalRelations', 'Relations')}</div>
@@ -633,11 +670,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.totalRelations', 'Total connections between entities in the graph')}</p>
+                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('positive')}>
                     <CardContent className="py-3 px-4 text-center">
                       <div className="text-lg font-bold text-green-600">{stats.positiveRelations}</div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.positive', 'Positive')}</div>
@@ -646,11 +684,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.positiveRelations', 'Beneficial relations: treatments, improvements, therapeutic support')}</p>
+                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('negative')}>
                     <CardContent className="py-3 px-4 text-center">
                       <div className="text-lg font-bold text-red-600">{stats.negativeRelations}</div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.negative', 'Negative')}</div>
@@ -659,6 +698,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.negativeRelations', 'Adverse relations: contraindications, symptom worsening, side effects')}</p>
+                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -1134,6 +1174,40 @@ export const KnowledgeGraphViewer: React.FC = () => {
           </ScrollArea>
         </SheetContent>
       </Sheet>
+
+      {/* Stat Dialog */}
+      <KnowledgeGraphStatDialog
+        open={statDialogOpen}
+        onOpenChange={setStatDialogOpen}
+        statType={selectedStatType}
+        stats={{
+          ontologyEntities: dataSourceStats.ontologyEntities,
+          tripletCount: dataSourceStats.tripletCount,
+          knownRelations: dataSourceStats.knownRelations,
+          totalNodes: stats?.totalNodes || 0,
+          totalEdges: stats?.totalEdges || 0,
+          positiveRelations: stats?.positiveRelations || 0,
+          negativeRelations: stats?.negativeRelations || 0,
+        }}
+        onEntityClick={handleEntityClick}
+        onStudyClick={handleStudyFromDialogClick}
+      />
+
+      {/* Chat with Knowledge Graph */}
+      <KnowledgeGraphChat
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        onHighlightEntity={handleHighlightEntity}
+        onFilterByEntity={(name, type) => setEntityFilter(type)}
+      />
+
+      {/* Floating Chat Button */}
+      <Button
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+        onClick={() => setChatOpen(true)}
+      >
+        <MessageCircle className="h-6 w-6" />
+      </Button>
     </TooltipProvider>
   );
 };
