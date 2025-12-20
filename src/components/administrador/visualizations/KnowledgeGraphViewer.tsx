@@ -1203,13 +1203,19 @@ export const KnowledgeGraphViewer: React.FC = () => {
 
       {/* Floating Chat Button */}
       <div className="fixed bottom-6 right-6 z-[9999]">
-        <Button
-          className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
-          onClick={() => setChatOpen(true)}
-          title="Chat com o Knowledge Graph"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 animate-pulse hover:animate-none"
+              onClick={() => setChatOpen(true)}
+            >
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="bg-popover text-popover-foreground">
+            <p>{t('knowledgeGraph.chat.tooltip', 'Pergunte ao Knowledge Graph')}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </TooltipProvider>
   );
