@@ -61,15 +61,27 @@ export const useGeminiProcessing = () => {
       let errorMessage = 'Erro ao processar estudo';
       let errorHint = '';
 
-      if (error.message?.includes('API key')) {
+      // Parse error from edge function response
+      const errorData = error.message || '';
+      
+      if (errorData.includes('ARQUIVO_INVALIDO') || errorData.includes('HTML')) {
+        errorMessage = 'PDF inválido ou inacessível';
+        errorHint = 'O link pode requerer acesso institucional. Tente fazer upload manual do PDF.';
+      } else if (errorData.includes('muito pequeno')) {
+        errorMessage = 'PDF corrompido ou incompleto';
+        errorHint = 'O arquivo baixado está vazio ou corrompido. Tente outro link.';
+      } else if (errorData.includes('API key')) {
         errorMessage = 'Chave API do Gemini não configurada';
         errorHint = 'Configure a chave em Configurações de IA';
-      } else if (error.message?.includes('429')) {
+      } else if (errorData.includes('429')) {
         errorMessage = 'Limite de requisições excedido';
         errorHint = 'Aguarde alguns minutos antes de tentar novamente';
-      } else if (error.message?.includes('402')) {
+      } else if (errorData.includes('402')) {
         errorMessage = 'Créditos insuficientes';
         errorHint = 'Adicione créditos na sua conta Google AI';
+      } else if (errorData.includes('500') && errorData.includes('INTERNAL')) {
+        errorMessage = 'Erro interno do Gemini';
+        errorHint = 'O PDF pode ser inválido ou muito grande. Tente com outro arquivo.';
       }
 
       toast({

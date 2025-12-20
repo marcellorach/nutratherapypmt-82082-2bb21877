@@ -164,6 +164,37 @@ async function uploadToGeminiFileAPI(
   // Converter blob para bytes
   const pdfBytes = new Uint8Array(await pdfBlob.arrayBuffer());
   
+  // ✅ VALIDAÇÃO: Verificar se é um PDF válido antes de fazer upload
+  const pdfSignature = String.fromCharCode(...pdfBytes.slice(0, 4));
+  const isValidPdf = pdfSignature === '%PDF';
+  
+  if (!isValidPdf) {
+    // Tentar detectar se é HTML
+    const firstChars = String.fromCharCode(...pdfBytes.slice(0, 100));
+    const isHtml = firstChars.toLowerCase().includes('<!doctype') || 
+                   firstChars.toLowerCase().includes('<html') ||
+                   firstChars.toLowerCase().includes('<?xml');
+    
+    console.error('❌ Arquivo inválido detectado!');
+    console.error('📊 Primeiros bytes:', firstChars.substring(0, 50));
+    console.error('📊 É HTML:', isHtml);
+    
+    if (isHtml) {
+      throw new Error('ARQUIVO_INVALIDO: O arquivo baixado é uma página HTML, não um PDF. Isso geralmente acontece quando o PDF requer autenticação institucional ou foi removido.');
+    }
+    
+    throw new Error(`ARQUIVO_INVALIDO: O arquivo não é um PDF válido. Assinatura encontrada: "${pdfSignature}". Esperado: "%PDF"`);
+  }
+  
+  // ✅ VALIDAÇÃO: Verificar tamanho mínimo (PDFs válidos geralmente têm > 10KB)
+  const MIN_PDF_SIZE = 10 * 1024; // 10KB
+  if (pdfBlob.size < MIN_PDF_SIZE) {
+    console.error('❌ PDF muito pequeno:', pdfBlob.size, 'bytes');
+    throw new Error(`ARQUIVO_INVALIDO: O PDF é muito pequeno (${pdfBlob.size} bytes). PDFs científicos válidos geralmente têm pelo menos ${MIN_PDF_SIZE} bytes. O arquivo pode estar corrompido ou incompleto.`);
+  }
+  
+  console.log('✅ PDF validado - assinatura correta e tamanho adequado');
+  
   // Método 1: Tentar com resumable upload (método oficial)
   console.log('📤 Iniciando resumable upload...');
   
