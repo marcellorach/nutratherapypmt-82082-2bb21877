@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   MessageCircle,
   Send,
@@ -34,6 +34,7 @@ interface Message {
 }
 
 interface KnowledgeGraphChatProps {
+  variant?: 'sheet' | 'inline';
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onHighlightEntity?: (entityName: string) => void;
@@ -49,6 +50,7 @@ const EXAMPLE_QUERIES = [
 ];
 
 export const KnowledgeGraphChat: React.FC<KnowledgeGraphChatProps> = ({
+  variant = 'sheet',
   open,
   onOpenChange,
   onHighlightEntity,
@@ -304,6 +306,177 @@ Do not mention technical details like "Cypher" or "graph database".`
     setMessages([]);
   };
 
+  // Inline variant - renders as a Card
+  if (variant === 'inline') {
+    return (
+      <Card className="w-full">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">{t('knowledgeGraph.chat.title', 'Chat com o Grafo')}</CardTitle>
+            </div>
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={handleClearChat}
+              >
+                <RefreshCcw className="h-3 w-3 mr-1" />
+                {t('knowledgeGraph.chat.clear', 'Limpar')}
+              </Button>
+            )}
+          </div>
+          <CardDescription>
+            {t('knowledgeGraph.chat.description', 'Faça perguntas em linguagem natural sobre o conhecimento do grafo')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Example queries */}
+          {messages.length === 0 && (
+            <div className="flex flex-wrap gap-2">
+              {EXAMPLE_QUERIES.slice(0, 4).map((example, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => handleSendMessage(example.label)}
+                >
+                  <span className="mr-1">{example.icon}</span>
+                  {example.label}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {/* Messages Area - fixed height scroll */}
+          {messages.length > 0 && (
+            <ScrollArea className="h-[250px] rounded-md border p-3" ref={scrollAreaRef}>
+              <div className="space-y-3">
+                {messages.map(message => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-lg p-3 ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : message.isError
+                          ? 'bg-destructive/10 border border-destructive/20'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      {message.role === 'assistant' && !message.isError && (
+                        <div className="flex items-center gap-1 mb-2">
+                          <Sparkles className="h-3 w-3 text-primary" />
+                          <span className="text-[10px] text-muted-foreground">AI</span>
+                        </div>
+                      )}
+                      
+                      {message.isError && (
+                        <div className="flex items-center gap-1 mb-2">
+                          <AlertTriangle className="h-3 w-3 text-destructive" />
+                          <span className="text-[10px] text-destructive">Erro</span>
+                        </div>
+                      )}
+                      
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      
+                      {/* Entities found */}
+                      {message.entities && message.entities.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <div className="flex flex-wrap gap-1">
+                            {message.entities.slice(0, 5).map((entity, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="secondary"
+                                className="text-[10px] cursor-pointer hover:bg-primary/20"
+                                onClick={() => {
+                                  onHighlightEntity?.(entity.name);
+                                  onFilterByEntity?.(entity.name, entity.type);
+                                }}
+                              >
+                                {entity.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Query used (expandable) */}
+                      {message.queryUsed && (
+                        <details className="mt-2">
+                          <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground">
+                            Ver query
+                          </summary>
+                          <div className="mt-1 p-2 bg-background/50 rounded text-[10px] font-mono relative">
+                            <pre className="whitespace-pre-wrap break-all">{message.queryUsed}</pre>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-1 right-1 h-5 w-5"
+                              onClick={() => handleCopyQuery(message.queryUsed!, message.id)}
+                            >
+                              {copiedId === message.id ? (
+                                <CheckCircle2 className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">
+                          {t('knowledgeGraph.chat.thinking', 'Buscando...')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+
+          {/* Input Area */}
+          <div className="flex gap-2">
+            <Input
+              ref={inputRef}
+              placeholder={t('knowledgeGraph.chat.placeholder', 'Pergunte sobre nutracêuticos, condições...')}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+              disabled={isLoading}
+            />
+            <Button
+              onClick={() => handleSendMessage()}
+              disabled={!inputValue.trim() || isLoading}
+              size="icon"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Sheet variant - original behavior
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[450px] sm:w-[500px] flex flex-col p-0">

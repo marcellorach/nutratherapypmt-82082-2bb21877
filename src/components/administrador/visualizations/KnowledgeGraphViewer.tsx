@@ -406,10 +406,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
       }
     });
 
-    // Convert map to array with colors based on source
+    // Calculate real connection counts from edges
+    const connectionCounts = new Map<string, number>();
+    links.forEach(link => {
+      connectionCounts.set(link.from, (connectionCounts.get(link.from) || 0) + 1);
+      connectionCounts.set(link.to, (connectionCounts.get(link.to) || 0) + 1);
+    });
+
+    // Convert map to array with colors based on source and real connection counts
     const nodes = Array.from(nodeMap.values()).map(node => ({
       ...node,
-      color: getNodeColor(node.type, node.source)
+      color: getNodeColor(node.type, node.source),
+      connections: connectionCounts.get(node.id) || 0
     }));
 
     // Calculate stats
@@ -427,9 +435,9 @@ export const KnowledgeGraphViewer: React.FC = () => {
       positiveRelations: positiveLinks.length,
       negativeRelations: negativeLinks.length,
       topConnected: nodes
-        .sort((a, b) => b.value - a.value)
+        .sort((a, b) => b.connections - a.connections)
         .slice(0, 5)
-        .map(n => ({ name: n.label, connections: n.value }))
+        .map(n => ({ name: n.label, connections: n.connections }))
     };
 
     setGraphData({ nodes, links });
@@ -959,6 +967,15 @@ export const KnowledgeGraphViewer: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Knowledge Graph Chat - Inline Card */}
+        <KnowledgeGraphChat
+          variant="inline"
+          open={true}
+          onOpenChange={() => {}}
+          onHighlightEntity={handleHighlightEntity}
+          onFilterByEntity={(name, type) => setEntityFilter(type)}
+        />
       </div>
 
       {/* Study Details Side Panel */}
@@ -1193,30 +1210,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
         onStudyClick={handleStudyFromDialogClick}
       />
 
-      {/* Chat with Knowledge Graph */}
-      <KnowledgeGraphChat
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        onHighlightEntity={handleHighlightEntity}
-        onFilterByEntity={(name, type) => setEntityFilter(type)}
-      />
-
-      {/* Floating Chat Button */}
-      <div className="fixed bottom-6 right-6 z-[9999]">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 animate-pulse hover:animate-none"
-              onClick={() => setChatOpen(true)}
-            >
-              <MessageCircle className="h-6 w-6" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-popover text-popover-foreground">
-            <p>{t('knowledgeGraph.chat.tooltip', 'Pergunte ao Knowledge Graph')}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+      {/* Stat Dialog */}
     </TooltipProvider>
   );
 };
