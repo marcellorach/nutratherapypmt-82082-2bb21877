@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
 import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
 import { KnowledgeGraphChat } from './KnowledgeGraphChat';
+import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar';
 import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -97,10 +98,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [selectedStudyDetails, setSelectedStudyDetails] = useState<StudyDetails | null>(null);
   const [loadingStudyDetails, setLoadingStudyDetails] = useState(false);
   
-  // New states for dialogs and chat
+  // New states for dialogs, chat and node details
   const [statDialogOpen, setStatDialogOpen] = useState(false);
   const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative'>('ontology');
   const [chatOpen, setChatOpen] = useState(false);
+  const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
+  const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
 
   useEffect(() => {
     loadGraphData();
@@ -554,6 +557,54 @@ export const KnowledgeGraphViewer: React.FC = () => {
     toast.info(`Entidade: ${entityName}`);
   };
 
+  // Handle node click to show details sidebar
+  const handleNodeClick = useCallback((nodeId: string, nodeData: any) => {
+    // Find all connections for this node
+    const connectedNodes: NodeDetailsData['connectedNodes'] = [];
+    
+    filteredData.links.forEach((link: any) => {
+      const fromId = link.from || link.source;
+      const toId = link.to || link.target;
+      
+      if (fromId === nodeId) {
+        // Outgoing connection
+        const targetNode = filteredData.nodes.find((n: any) => n.id === toId);
+        if (targetNode) {
+          connectedNodes.push({
+            id: targetNode.id,
+            label: targetNode.label,
+            type: targetNode.group || targetNode.type || 'unknown',
+            relationLabel: link.label || link.relationship,
+            relationDirection: 'outgoing',
+            confidence: link.confidence || link.value
+          });
+        }
+      } else if (toId === nodeId) {
+        // Incoming connection
+        const sourceNode = filteredData.nodes.find((n: any) => n.id === fromId);
+        if (sourceNode) {
+          connectedNodes.push({
+            id: sourceNode.id,
+            label: sourceNode.label,
+            type: sourceNode.group || sourceNode.type || 'unknown',
+            relationLabel: link.label || link.relationship,
+            relationDirection: 'incoming',
+            confidence: link.confidence || link.value
+          });
+        }
+      }
+    });
+
+    setSelectedNodeDetails({
+      id: nodeId,
+      label: nodeData.label || nodeData.title || nodeId,
+      type: nodeData.group || nodeData.type || 'unknown',
+      connections: connectedNodes.length,
+      connectedNodes
+    });
+    setNodeDetailsSidebarOpen(true);
+  }, [filteredData]);
+
   return (
     <TooltipProvider>
       <div className="space-y-4">
@@ -936,6 +987,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
               height="calc(100vh - 320px)"
               showControls={true}
               showLegend={false}
+              onNodeClick={handleNodeClick}
             />
           )}
         </CardContent>
@@ -1210,7 +1262,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
         onStudyClick={handleStudyFromDialogClick}
       />
 
-      {/* Stat Dialog */}
+      {/* Node Details Sidebar */}
+      <NodeDetailsSidebar
+        open={nodeDetailsSidebarOpen}
+        onOpenChange={setNodeDetailsSidebarOpen}
+        nodeData={selectedNodeDetails}
+      />
     </TooltipProvider>
   );
 };

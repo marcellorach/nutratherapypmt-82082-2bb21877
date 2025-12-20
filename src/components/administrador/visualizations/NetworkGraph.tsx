@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import 'vis-network/styles/vis-network.css';
 import { useNetworkGraph } from '@/hooks/network/useNetworkGraph';
 import NetworkControls from './graph/NetworkControls';
@@ -14,6 +14,7 @@ interface NetworkGraphProps {
   showControls?: boolean;
   showLegend?: boolean;
   customOptions?: any;
+  onNodeClick?: (nodeId: string, nodeData: any) => void;
 }
 
 const NetworkGraph: React.FC<NetworkGraphProps> = ({
@@ -21,7 +22,8 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   height = '500px',
   showControls = true,
   showLegend = false,
-  customOptions = {}
+  customOptions = {},
+  onNodeClick
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -33,9 +35,9 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
         fit: true
       },
       barnesHut: {
-        gravitationalConstant: -10000,  // Aumentei para melhorar a distribuição
+        gravitationalConstant: -10000,
         centralGravity: 0.8,
-        springLength: 150,  // Aumentado para espaçar mais os nós
+        springLength: 150,
         springConstant: 0.08,
         damping: 0.09
       }
@@ -69,7 +71,7 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     },
     layout: {
       improvedLayout: true,
-      randomSeed: 42  // Usar seed fixo para garantir consistência na visualização
+      randomSeed: 42
     },
     interaction: {
       hover: true,
@@ -83,7 +85,28 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   const mergedOptions = { ...defaultCustomOptions, ...customOptions };
   
   // Usar o hook para inicializar o grafo
-  const { network } = useNetworkGraph(containerRef, data, mergedOptions);
+  const { network, nodes } = useNetworkGraph(containerRef, data, mergedOptions);
+  
+  // Setup click handler for nodes
+  useEffect(() => {
+    if (!network || !onNodeClick) return;
+    
+    const handleClick = (params: any) => {
+      if (params.nodes.length > 0 && nodes) {
+        const nodeId = params.nodes[0];
+        const nodeData = nodes.get(nodeId);
+        if (nodeData) {
+          onNodeClick(nodeId, nodeData);
+        }
+      }
+    };
+    
+    network.on('click', handleClick);
+    
+    return () => {
+      network.off('click', handleClick);
+    };
+  }, [network, nodes, onNodeClick]);
   
   // Itens da legenda expandida com suporte a relações negativas
   const defaultLegendItems = [
@@ -116,7 +139,7 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
             overflow: 'hidden',
             backgroundColor: '#f8fafc'
           }}
-          className="shadow-inner"
+          className="shadow-inner cursor-pointer"
         />
       </div>
       
