@@ -2389,18 +2389,28 @@ serve(async (req) => {
     console.error('❌ Mensagem:', error instanceof Error ? error.message : String(error));
     console.error('❌ Stack:', error instanceof Error ? error.stack : 'N/A');
     console.error('💥 ============================================');
-    
+
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
+    // ✅ Erros esperados (ex.: arquivo inválido/HTML) não devem virar 500,
+    // para evitar que o client reporte "Edge function returned 500".
+    const isInvalidFile = errorMessage.startsWith('ARQUIVO_INVALIDO:');
+
+    const status = isInvalidFile ? 200 : 500;
+    const recommendation = isInvalidFile
+      ? 'O arquivo armazenado não é um PDF válido (muitas vezes é HTML/redirect). Solução: reimportar o estudo, fazer upload manual do PDF ou usar uma fonte aberta do artigo.'
+      : 'Verifique os logs detalhados. Se o erro persistir após 3 retries automáticos, verifique: 1) Tamanho do PDF (<20MB), 2) Formato válido, 3) Quota da API Gemini';
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: false,
         error: errorMessage,
-        recommendation: 'Verifique os logs detalhados. Se o erro persistir após 3 retries automáticos, verifique: 1) Tamanho do PDF (<20MB), 2) Formato válido, 3) Quota da API Gemini'
+        errorCode: isInvalidFile ? 'INVALID_PDF' : undefined,
+        recommendation,
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
