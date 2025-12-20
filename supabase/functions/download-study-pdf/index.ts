@@ -79,12 +79,28 @@ serve(async (req) => {
     console.log('Downloading PDF from:', pdfUrl);
     console.log('Study:', studyData.title);
     
-    // Step 1: Download the PDF
-    const pdfResponse = await fetch(pdfUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; VetGraphBot/1.0; +https://vetgraph.ai)',
-        'Accept': 'application/pdf,*/*'
+    // Normalize PMC URLs - many PMC links return HTML redirects
+    let normalizedPdfUrl = pdfUrl;
+    
+    // PMC URLs: try to get the actual PDF
+    if (pdfUrl.includes('ncbi.nlm.nih.gov/pmc/articles/')) {
+      const pmcMatch = pdfUrl.match(/PMC(\d+)/i);
+      if (pmcMatch) {
+        const pmcId = pmcMatch[1];
+        // Try direct PDF link format
+        normalizedPdfUrl = `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/pdf/`;
+        console.log('📋 Normalized PMC URL:', normalizedPdfUrl);
       }
+    }
+    
+    // Step 1: Download the PDF with redirect following
+    let pdfResponse = await fetch(normalizedPdfUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/pdf,application/octet-stream,*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      redirect: 'follow'
     });
     
     if (!pdfResponse.ok) {
@@ -100,11 +116,53 @@ serve(async (req) => {
     
     const contentType = pdfResponse.headers.get('content-type') || '';
     console.log('Content-Type:', contentType);
+    console.log('Final URL:', pdfResponse.url);
     
-    // Check if it's actually a PDF (or HTML redirect)
-    if (!contentType.includes('pdf') && !contentType.includes('octet-stream')) {
-      console.warn('Warning: Content type is not PDF:', contentType);
-      // Some servers return PDF with wrong content type, so we'll try anyway
+    // Check if we got an HTML page instead of PDF (common with PMC)
+    const isHtmlResponse = contentType.includes('text/html');
+    
+    if (isHtmlResponse) {
+      console.warn('⚠️ Received HTML instead of PDF, attempting to extract PDF link...');
+      
+      const htmlContent = await pdfResponse.text();
+      
+      // Try to find direct PDF link in HTML
+      const pdfLinkMatch = htmlContent.match(/href="([^"]*\.pdf[^"]*)"/i) || 
+                           htmlContent.match(/src="([^"]*\.pdf[^"]*)"/i);
+      
+      if (pdfLinkMatch) {
+        let extractedPdfUrl = pdfLinkMatch[1];
+        if (extractedPdfUrl.startsWith('/')) {
+          extractedPdfUrl = `https://www.ncbi.nlm.nih.gov${extractedPdfUrl}`;
+        }
+        console.log('📥 Found PDF link in HTML:', extractedPdfUrl);
+        
+        pdfResponse = await fetch(extractedPdfUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/pdf,application/octet-stream,*/*',
+          },
+          redirect: 'follow'
+        });
+        
+        if (!pdfResponse.ok) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to download PDF from extracted link',
+              details: `HTTP ${pdfResponse.status}` 
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      } else {
+        return new Response(
+          JSON.stringify({ 
+            error: 'PDF not directly accessible',
+            details: 'The provided URL returned HTML instead of a PDF. The PDF may require institutional access or manual download.'
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
     
     const pdfBuffer = await pdfResponse.arrayBuffer();
@@ -112,12 +170,28 @@ serve(async (req) => {
     
     console.log('Downloaded PDF size:', pdfSize, 'bytes');
     
-    if (pdfSize < 1000) {
-      // Too small to be a real PDF, likely an error page
+    // Check for valid PDF signature (starts with %PDF)
+    const pdfBytes = new Uint8Array(pdfBuffer);
+    const pdfSignature = String.fromCharCode(...pdfBytes.slice(0, 4));
+    const isValidPdf = pdfSignature === '%PDF';
+    
+    if (!isValidPdf) {
+      console.error('❌ Invalid PDF signature:', pdfSignature);
       return new Response(
         JSON.stringify({ 
-          error: 'Downloaded file is too small to be a valid PDF',
-          details: `Size: ${pdfSize} bytes`
+          error: 'Downloaded file is not a valid PDF',
+          details: `File does not start with PDF signature. Size: ${pdfSize} bytes. This URL may require institutional access.`
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (pdfSize < 5000) {
+      // Too small to be a real PDF with content
+      return new Response(
+        JSON.stringify({ 
+          error: 'Downloaded PDF is too small to contain valid content',
+          details: `Size: ${pdfSize} bytes. The PDF may be incomplete or require authentication.`
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
