@@ -584,7 +584,23 @@
       "showErrorsOnly": "Apenas Erros",
       "noErrors": "Nenhum erro registrado",
       "noLogs": "Nenhum log disponível",
-      "retry": "Tentar novamente"
+      "retry": "Tentar novamente",
+      "clinicalDosages": "Dosagens Clínicas",
+      "perBodyWeight": "por peso",
+      "dosageRange": "Intervalo de dosagem",
+      "parsedFromText": "Extraído do texto",
+      "frequency": "Frequência",
+      "duration": "Duração",
+      "for": "Para",
+      "noDosagesIdentified": "Nenhuma dosagem específica identificada.",
+      "species": {
+        "canine": "Canino",
+        "feline": "Felino",
+        "equine": "Equino",
+        "human": "Humano",
+        "rodent": "Roedor",
+        "other": "Outro"
+      }
     },
     "kanban": {
       "newStudies": "Novos Estudos",

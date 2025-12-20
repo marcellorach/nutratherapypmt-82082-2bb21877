@@ -177,19 +177,51 @@ serve(async (req) => {
     console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
 
     // ==================== POST-EXTRACTION VALIDATION ====================
-    // Filter dosages to only include compounds that were found in Stage 1
-    const stage1CompoundNames: string[] = (stage1Data.nutraceuticals || [])
+    // Filter dosages to only include compounds that were found in Stage 1 (with flexible matching)
+    const stage1Nutraceuticals = stage1Data.nutraceuticals || [];
+    const stage1CompoundNames: string[] = stage1Nutraceuticals
       .map((n: any) => (n.name || '').toLowerCase().trim())
       .filter((name: string) => name.length > 0);
     
-    const validatedDosages = (stage3Data.dosages || []).filter((d: any) => {
+    // Also collect alternative names (synonyms) - e.g., "L-deprenyl" and "Selegiline"
+    const compoundSynonyms: { [key: string]: string[] } = {
+      'l-deprenyl': ['selegiline', 'deprenyl', 'eldepryl', 'zelapar'],
+      'selegiline': ['l-deprenyl', 'deprenyl', 'eldepryl', 'zelapar'],
+      'curcumin': ['curcuminoid', 'turmeric extract'],
+      'omega-3': ['omega 3', 'fish oil', 'epa', 'dha'],
+      'coq10': ['coenzyme q10', 'ubiquinone', 'ubiquinol'],
+    };
+    
+    const normalizeCompoundName = (name: string): string => {
+      return name.toLowerCase().trim()
+        .replace(/[-_]/g, ' ')
+        .replace(/\s+/g, ' ');
+    };
+    
+    const compoundsMatch = (name1: string, name2: string): boolean => {
+      const n1 = normalizeCompoundName(name1);
+      const n2 = normalizeCompoundName(name2);
+      
+      // Direct match or partial containment
+      if (n1.includes(n2) || n2.includes(n1)) return true;
+      
+      // Check synonyms
+      for (const [key, synonyms] of Object.entries(compoundSynonyms)) {
+        const allNames = [key, ...synonyms];
+        const n1Match = allNames.some(s => n1.includes(s) || s.includes(n1));
+        const n2Match = allNames.some(s => n2.includes(s) || s.includes(n2));
+        if (n1Match && n2Match) return true;
+      }
+      
+      return false;
+    };
+    
+    let validatedDosages = (stage3Data.dosages || []).filter((d: any) => {
       const compoundName = (d.compound || '').toLowerCase().trim();
       if (!compoundName) return false;
       
-      // Check if compound matches any Stage 1 nutraceutical (partial match allowed)
-      const isValid = stage1CompoundNames.some((s1name: string) => 
-        compoundName.includes(s1name) || s1name.includes(compoundName)
-      );
+      // Check if compound matches any Stage 1 nutraceutical (flexible match)
+      const isValid = stage1CompoundNames.some((s1name: string) => compoundsMatch(compoundName, s1name));
       
       if (!isValid) {
         console.warn(`⚠️ [VALIDATION] Filtering out dosage for "${d.compound}" - not found in Stage 1 nutraceuticals`);
@@ -198,6 +230,68 @@ serve(async (req) => {
     });
     
     console.log(`✅ [VALIDATION] Dosages after validation: ${validatedDosages.length}/${stage3Data.dosages?.length || 0}`);
+    
+    // ==================== FALLBACK: Parse dosages from Stage 1 if Stage 3 returned none ====================
+    if (validatedDosages.length === 0 && stage1Nutraceuticals.length > 0) {
+      console.log('⚠️ [FALLBACK] Stage 3 returned no dosages - parsing from Stage 1 nutraceuticals');
+      
+      for (const nutra of stage1Nutraceuticals) {
+        if (nutra.dosage && typeof nutra.dosage === 'string' && nutra.dosage.length > 0) {
+          const dosageText = nutra.dosage;
+          console.log(`📊 Parsing dosage from Stage 1: "${nutra.name}" -> "${dosageText}"`);
+          
+          // Parse dosage ranges like "0.5-1.0 mg/kg (dogs)"
+          const rangeMatch = dosageText.match(/(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|ml)/i);
+          const singleMatch = dosageText.match(/(\d+\.?\d*)\s*(mg\/kg|mg|g|ml)/i);
+          
+          // Parse species from parentheses
+          const speciesMatch = dosageText.match(/\((dog|canine|cat|feline|rodent|human|horse|equine)s?\)/i);
+          let species = 'other';
+          if (speciesMatch) {
+            const sp = speciesMatch[1].toLowerCase();
+            if (sp === 'dog' || sp === 'canine') species = 'canine';
+            else if (sp === 'cat' || sp === 'feline') species = 'feline';
+            else if (sp === 'horse' || sp === 'equine') species = 'equine';
+            else if (sp === 'rodent') species = 'rodent';
+            else if (sp === 'human') species = 'human';
+          }
+          
+          if (rangeMatch) {
+            validatedDosages.push({
+              compound: nutra.name,
+              amount_min: parseFloat(rangeMatch[1]),
+              amount_max: parseFloat(rangeMatch[2]),
+              unit: rangeMatch[3],
+              amount_text: dosageText,
+              per_body_weight: rangeMatch[3].toLowerCase().includes('/kg'),
+              species: species,
+              source: 'stage1_fallback'
+            });
+          } else if (singleMatch) {
+            validatedDosages.push({
+              compound: nutra.name,
+              amount: parseFloat(singleMatch[1]),
+              unit: singleMatch[2],
+              amount_text: dosageText,
+              per_body_weight: singleMatch[2].toLowerCase().includes('/kg'),
+              species: species,
+              source: 'stage1_fallback'
+            });
+          } else {
+            // Just store the text
+            validatedDosages.push({
+              compound: nutra.name,
+              amount_text: dosageText,
+              unit: 'unknown',
+              species: species,
+              source: 'stage1_fallback'
+            });
+          }
+        }
+      }
+      
+      console.log(`✅ [FALLBACK] Created ${validatedDosages.length} dosages from Stage 1`);
+    }
 
     // Combinar dados de todos os stages
     const extractedData = {
@@ -213,7 +307,7 @@ serve(async (req) => {
       synergies: stage2Data.synergies || [],
       hierarchical_relations: stage2Data.hierarchical_relations || [],
       
-      // Stage 3 (with validated dosages)
+      // Stage 3 (with validated dosages + fallback)
       dosages: validatedDosages,
       side_effects: stage3Data.side_effects || [],
       contraindications: stage3Data.contraindications || [],
@@ -823,25 +917,30 @@ function getStage3Tools() {
     type: 'function',
     function: {
       name: 'extract_clinical_context',
-      description: 'Extract dosages, side effects, contraindications, and clinical outcomes',
+      description: 'Extract dosages (including ranges like 0.5-1.0 mg/kg), side effects, contraindications, and clinical outcomes',
       parameters: {
         type: 'object',
         properties: {
           dosages: {
             type: 'array',
+            description: 'Extract ALL dosages mentioned, including ranges (e.g., 0.5-1.0 mg/kg). Use amount_min/amount_max for ranges, or amount_text for complex dosages.',
             items: {
               type: 'object',
               properties: {
-                compound: { type: 'string' },
-                amount: { type: 'number' },
-                unit: { type: 'string' },
+                compound: { type: 'string', description: 'Name of the compound. Use EXACT name from Stage 1 nutraceuticals if possible.' },
+                amount: { type: 'number', description: 'Single dosage amount (if not a range)' },
+                amount_min: { type: 'number', description: 'Minimum of dosage range (e.g., 0.5 for "0.5-1.0 mg/kg")' },
+                amount_max: { type: 'number', description: 'Maximum of dosage range (e.g., 1.0 for "0.5-1.0 mg/kg")' },
+                amount_text: { type: 'string', description: 'Original dosage text for complex cases (e.g., "0.25-0.5 mg/kg (rodents); 0.5-1.0 mg/kg (dogs)")' },
+                unit: { type: 'string', description: 'Unit of measurement (mg, mg/kg, g, ml, etc.)' },
+                per_body_weight: { type: 'boolean', description: 'True if dosage is per body weight (e.g., mg/kg)' },
                 frequency: { type: 'string' },
                 duration: { type: 'string' },
-                species: { type: 'string', enum: ['human', 'canine', 'feline', 'equine', 'other'] },
+                species: { type: 'string', enum: ['human', 'canine', 'feline', 'equine', 'rodent', 'other'] },
                 condition: { type: 'string' },
                 route: { type: 'string', enum: ['oral', 'topical', 'intravenous', 'subcutaneous', 'other'] }
               },
-              required: ['compound', 'amount', 'unit']
+              required: ['compound', 'unit']
             }
           },
           side_effects: {
@@ -946,15 +1045,19 @@ Document to analyze:
 }
 
 function getDefaultStage3SystemPrompt(): string {
-  return `You are a clinical veterinary expert extracting dosage and safety information.
+  return `You are a clinical veterinary expert extracting dosage and safety information from scientific studies.
 
 CRITICAL RULES - YOU MUST FOLLOW:
 1. Extract ONLY dosages, side effects, and outcomes EXPLICITLY stated in this document
 2. DO NOT invent dosages from general knowledge or other studies
-3. If a dosage for a compound is not mentioned, DO NOT include it
-4. Only include side effects and contraindications explicitly stated in this study
-5. If clinical outcomes are not explicitly described, return empty arrays
-6. Never assume or hallucinate data - if it's not in the document, don't include it`;
+3. IMPORTANT: Extract dosages even if they are RANGES (e.g., "0.5-1.0 mg/kg")
+   - Use amount_min and amount_max for ranges
+   - Use amount_text to preserve the original complex dosage text
+   - Set per_body_weight=true if dosage is per kg body weight
+4. For compound names, use the EXACT name from Stage 1 nutraceuticals when possible
+5. If a study mentions dosages for multiple species, create SEPARATE entries for each species
+6. Only include side effects and contraindications explicitly stated in this study
+7. Never assume or hallucinate data - if it's not in the document, don't include it`;
 }
 
 function getDefaultStage3UserPrompt(): string {
@@ -962,11 +1065,20 @@ function getDefaultStage3UserPrompt(): string {
 
 Extract dosages, side effects, contraindications, and clinical outcomes ONLY from the following document.
 
-CRITICAL:
-- Only include dosages explicitly stated in this document
-- Do NOT add dosages from general knowledge (e.g., do not add "Curcuminoid" dosages unless this document specifically mentions them)
-- If a compound's dosage is not mentioned, leave it out
-- Only include species-specific information that is explicitly stated
+CRITICAL DOSAGE EXTRACTION RULES:
+1. Look for ANY dosage information in the text (mg, mg/kg, g, ml, etc.)
+2. For RANGES like "0.5-1.0 mg/kg":
+   - Set amount_min: 0.5
+   - Set amount_max: 1.0
+   - Set unit: "mg/kg"
+   - Set per_body_weight: true
+   - Set amount_text: "0.5-1.0 mg/kg"
+3. For MULTI-SPECIES dosages like "0.25-0.5 mg/kg (rodents); 0.5-1.0 mg/kg (dogs)":
+   - Create SEPARATE entries for each species
+   - Entry 1: species: "rodent", amount_min: 0.25, amount_max: 0.5
+   - Entry 2: species: "canine", amount_min: 0.5, amount_max: 1.0
+4. COMPOUND NAME: Use the EXACT name from Stage 1 nutraceuticals (e.g., if Stage 1 has "L-deprenyl", use "L-deprenyl", not "Selegiline")
+5. Only include dosages explicitly stated in this document
 
 Document to analyze:
 {{TEXT_CONTENT}}`;
