@@ -75,8 +75,20 @@ export const KnowledgeGraphChat: React.FC<KnowledgeGraphChatProps> = ({
     }
   }, [messages]);
 
-  const generateCypherFromQuestion = async (question: string): Promise<string> => {
-    // Use AI to generate Cypher query from natural language
+  // Build conversation history for context-aware responses
+  const buildConversationHistory = (): Array<{ role: 'user' | 'assistant'; content: string }> => {
+    return messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+  };
+
+  const generateCypherFromQuestion = async (question: string, conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>): Promise<string> => {
+    // Build context from previous messages for follow-up understanding
+    const contextMessages = conversationHistory.length > 0 
+      ? `\n\nPrevious conversation for context:\n${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nNow the user asks:`
+      : '';
+
     const response = await supabase.functions.invoke('chat', {
       body: {
         messages: [
@@ -87,11 +99,13 @@ Relationships include: TREATS, PREVENTS, SUPPORTS, CAUSES, WORSENS, CONTRAINDICA
 Node properties: name, description, confidence, source, study_id.
 Relationship properties: confidence, direction (positive/negative), study_title.
 
+IMPORTANT: The user may ask follow-up questions referring to previous answers. Use the conversation context to understand what "it", "those", "the same", etc. refer to.
+
 Generate ONLY a valid Cypher query based on the user question. Return ONLY the query, nothing else.
 Limit results to 20 to avoid overwhelming responses.
 Always include relevant properties in the RETURN clause.`
           },
-          { role: 'user', content: question }
+          { role: 'user', content: contextMessages + question }
         ]
       }
     });
@@ -136,8 +150,18 @@ Always include relevant properties in the RETURN clause.`
     return data;
   };
 
-  const generateNaturalResponse = async (question: string, queryResult: any): Promise<string> => {
+  const generateNaturalResponse = async (
+    question: string, 
+    queryResult: any, 
+    conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+  ): Promise<string> => {
     const resultSummary = JSON.stringify(queryResult?.data || {}, null, 2);
+    
+    // Include conversation history for contextual responses
+    const historyMessages = conversationHistory.map(m => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content
+    }));
     
     const response = await supabase.functions.invoke('chat', {
       body: {
@@ -145,6 +169,12 @@ Always include relevant properties in the RETURN clause.`
           {
             role: 'system',
             content: `You are a helpful veterinary knowledge assistant. Based on the query results from a knowledge graph, provide a clear, concise answer in Portuguese (Brazilian).
+
+IMPORTANT: You are in an ongoing conversation. The user may ask follow-up questions about previous answers. Use the conversation history to:
+- Understand what "it", "those", "the same", "more about", etc. refer to
+- Build upon previous answers when relevant
+- Provide continuity in the conversation
+
 Format your response with:
 - Direct answer to the question first
 - Relevant details and relationships found
@@ -152,6 +182,7 @@ Format your response with:
 - Keep it conversational but informative
 Do not mention technical details like "Cypher" or "graph database".`
           },
+          ...historyMessages,
           { 
             role: 'user', 
             content: `Question: ${question}\n\nGraph Query Results:\n${resultSummary}` 
@@ -198,14 +229,17 @@ Do not mention technical details like "Cypher" or "graph database".`
     setIsLoading(true);
 
     try {
-      // Step 1: Generate Cypher query
-      const cypherQuery = await generateCypherFromQuestion(text);
+      // Get conversation history for context
+      const conversationHistory = buildConversationHistory();
+      
+      // Step 1: Generate Cypher query with context
+      const cypherQuery = await generateCypherFromQuestion(text, conversationHistory);
       
       // Step 2: Execute the query
       const queryResult = await executeGraphQuery(cypherQuery);
       
-      // Step 3: Generate natural language response
-      const naturalResponse = await generateNaturalResponse(text, queryResult);
+      // Step 3: Generate natural language response with context
+      const naturalResponse = await generateNaturalResponse(text, queryResult, conversationHistory);
       
       // Extract entities and relations from result for visualization
       const entities: Array<{ name: string; type: string }> = [];
