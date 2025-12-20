@@ -173,7 +173,14 @@
       "processing": "Processando...",
       "success": "Estudo aprovado com sucesso",
       "successDetails": "{{triplets}} triplets aprovados, {{edges}} arestas criadas no grafo",
-      "error": "Erro ao aprovar estudo"
+      "error": "Erro ao aprovar estudo",
+      "tripletSummary": "Resumo dos Triplets",
+      "totalTriplets": "Total",
+      "alreadyApproved": "Já aprovados",
+      "pending": "Pendentes",
+      "rejected": "Rejeitados",
+      "willAutoApprove": "Serão auto-aprovados",
+      "needsManualReview": "Precisam revisão manual"
     },
     "library": {
       "title": "Biblioteca de Estudos",

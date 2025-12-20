@@ -173,7 +173,14 @@
       "processing": "Processing...",
       "success": "Study approved successfully",
       "successDetails": "{{triplets}} triplets approved, {{edges}} edges created in the graph",
-      "error": "Error approving study"
+      "error": "Error approving study",
+      "tripletSummary": "Triplet Summary",
+      "totalTriplets": "Total",
+      "alreadyApproved": "Already approved",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "willAutoApprove": "Will be auto-approved",
+      "needsManualReview": "Needs manual review"
     },
     "library": {
       "title": "Studies Library",
