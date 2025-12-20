@@ -48,12 +48,12 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   const [loadingSummary, setLoadingSummary] = useState(false);
   const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
 
-  // Fetch triplet summary when dialog opens or estudo changes
+  // Fetch triplet summary when dialog opens, estudo changes, or tab changes
   useEffect(() => {
     if (open && estudo?.id) {
       fetchTripletSummary(estudo.id);
     }
-  }, [open, estudo?.id]);
+  }, [open, estudo?.id, activeTab]);
 
   const fetchTripletSummary = async (studyId: string) => {
     setLoadingSummary(true);
@@ -207,6 +207,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
             <StudyTripletCuration 
               studyId={estudo.id}
               studyTitle={estudo.title}
+              onTripletsUpdated={() => fetchTripletSummary(estudo.id)}
             />
           </TabsContent>
 
