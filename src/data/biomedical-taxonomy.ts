@@ -1014,3 +1014,42 @@ export function getTaxonomyStats() {
            KNOWN_CONDITIONS.size + KNOWN_CELL_TYPES.size + KNOWN_CELL_COMPONENTS.size,
   };
 }
+
+/**
+ * Get taxonomy terms as arrays for database seeding/dialog
+ */
+export function getTaxonomyTerms(category: string): string[] {
+  switch (category.toLowerCase()) {
+    case 'nutraceuticals': return Array.from(KNOWN_NUTRACEUTICALS);
+    case 'drugs': return Array.from(KNOWN_DRUGS);
+    case 'enzymes': return Array.from(KNOWN_ENZYMES);
+    case 'receptors': return Array.from(KNOWN_RECEPTORS);
+    case 'pathways': return Array.from(KNOWN_PATHWAYS);
+    case 'genes_proteins': return Array.from(KNOWN_GENES_PROTEINS);
+    case 'mechanisms': return Array.from(KNOWN_MECHANISMS);
+    case 'biological_processes': return Array.from(KNOWN_BIOLOGICAL_PROCESSES);
+    case 'effects': return Array.from(KNOWN_EFFECTS);
+    case 'conditions': return Array.from(KNOWN_CONDITIONS);
+    case 'cell_types': return Array.from(KNOWN_CELL_TYPES);
+    case 'cell_components': return Array.from(KNOWN_CELL_COMPONENTS);
+    default: return [];
+  }
+}
+
+/**
+ * All taxonomy categories with their metadata
+ */
+export const TAXONOMY_CATEGORIES = [
+  { key: 'nutraceuticals', layer: 'layer_0_compound', color: 'bg-green-500' },
+  { key: 'drugs', layer: 'layer_0_compound', color: 'bg-blue-500' },
+  { key: 'enzymes', layer: 'layer_1_target', color: 'bg-purple-500' },
+  { key: 'receptors', layer: 'layer_1_target', color: 'bg-indigo-500' },
+  { key: 'pathways', layer: 'layer_1_target', color: 'bg-cyan-500' },
+  { key: 'genes_proteins', layer: 'layer_1_target', color: 'bg-teal-500' },
+  { key: 'mechanisms', layer: 'layer_2_mechanism', color: 'bg-orange-500' },
+  { key: 'biological_processes', layer: 'layer_3_effect', color: 'bg-yellow-500' },
+  { key: 'effects', layer: 'layer_3_effect', color: 'bg-amber-500' },
+  { key: 'conditions', layer: 'layer_4_outcome', color: 'bg-red-500' },
+  { key: 'cell_types', layer: 'context', color: 'bg-pink-500' },
+  { key: 'cell_components', layer: 'context', color: 'bg-rose-500' },
+] as const;

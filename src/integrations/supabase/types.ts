@@ -1563,6 +1563,39 @@ export type Database = {
           },
         ]
       }
+      taxonomy_dictionaries: {
+        Row: {
+          added_by: string | null
+          category: string
+          created_at: string | null
+          id: string
+          source: string | null
+          term: string
+          term_normalized: string
+          updated_at: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          category: string
+          created_at?: string | null
+          id?: string
+          source?: string | null
+          term: string
+          term_normalized: string
+          updated_at?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          source?: string | null
+          term?: string
+          term_normalized?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       translations: {
         Row: {
           created_at: string | null
