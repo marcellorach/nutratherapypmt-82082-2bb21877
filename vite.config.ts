@@ -42,11 +42,21 @@ export default defineConfig(({ mode }) => ({
     translationAuditPlugin(),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "three": path.resolve(__dirname, "node_modules/three"),
-      "three/webgpu": path.resolve(__dirname, "./src/lib/three-webgpu-stub.ts"),
-    },
+    // IMPORTANT: order matters (three alias would otherwise catch three/webgpu)
+    alias: [
+      {
+        find: 'three/webgpu',
+        replacement: path.resolve(__dirname, './src/lib/three-webgpu-stub.ts'),
+      },
+      {
+        find: '@',
+        replacement: path.resolve(__dirname, './src'),
+      },
+      {
+        find: 'three',
+        replacement: path.resolve(__dirname, 'node_modules/three'),
+      },
+    ],
   },
   optimizeDeps: {
     exclude: ['three/webgpu'],
