@@ -4372,5 +4372,77 @@
     "confidenceRationale": "Confidence Rationale",
     "doseRange": "Dose",
     "hallucinationWarning": "Possible hallucination detected"
+  },
+  "ontologyAudit": {
+    "title": "Ontology Audit",
+    "description": "Review and correct entity classifications in the Knowledge Graph",
+    "actions": {
+      "export": "Export Report",
+      "refresh": "Refresh",
+      "selectAll": "Select All",
+      "applySelected": "Apply {{count}} Selected"
+    },
+    "stats": {
+      "totalEntities": "Total Entities",
+      "correct": "Correctly Classified",
+      "needsReview": "Needs Review",
+      "taxonomySize": "Taxonomy",
+      "knownEntities": "known entities"
+    },
+    "taxonomy": {
+      "title": "Taxonomy Overview",
+      "description": "Available biomedical classification dictionaries"
+    },
+    "tabs": {
+      "review": "Review",
+      "allEntities": "All Entities",
+      "misclassifications": "Misclassifications"
+    },
+    "filters": {
+      "searchPlaceholder": "Search entity...",
+      "type": "Filter by Type",
+      "allTypes": "All Types"
+    },
+    "table": {
+      "entityName": "Entity Name",
+      "currentType": "Current Type",
+      "suggestedType": "Suggested Type",
+      "confidence": "Confidence",
+      "method": "Method",
+      "actions": "Actions",
+      "type": "Type",
+      "layer": "Layer",
+      "status": "Status"
+    },
+    "status": {
+      "needsReview": "Needs Review",
+      "correct": "Correct"
+    },
+    "dialog": {
+      "reclassifyTitle": "Reclassify Entity",
+      "reclassifyDescription": "Change the classification type for \"{{name}}\"",
+      "currentType": "Current Type",
+      "newType": "New Type",
+      "apply": "Apply Change"
+    },
+    "misclassifications": {
+      "title": "Misclassification Patterns",
+      "description": "Entity types frequently classified incorrectly",
+      "occurrences": "occurrences"
+    },
+    "empty": {
+      "noReviewNeeded": "No entities need review!",
+      "noMisclassifications": "No misclassification patterns detected"
+    },
+    "success": {
+      "reclassified": "\"{{name}}\" reclassified to {{type}}",
+      "bulkReclassified": "{{count}} entities successfully reclassified",
+      "exported": "Audit report exported"
+    },
+    "errors": {
+      "loadFailed": "Error loading entities for audit",
+      "reclassifyFailed": "Error reclassifying entity",
+      "bulkPartialFailed": "{{count}} entities failed to reclassify"
+    }
   }
 }

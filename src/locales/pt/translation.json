@@ -4372,5 +4372,77 @@
     "confidenceRationale": "Racional da Nota",
     "doseRange": "Dose",
     "hallucinationWarning": "Possível alucinação detectada"
+  },
+  "ontologyAudit": {
+    "title": "Auditoria de Ontologia",
+    "description": "Verifique e corrija classificações de entidades no Knowledge Graph",
+    "actions": {
+      "export": "Exportar Relatório",
+      "refresh": "Atualizar",
+      "selectAll": "Selecionar Todos",
+      "applySelected": "Aplicar {{count}} Selecionados"
+    },
+    "stats": {
+      "totalEntities": "Total de Entidades",
+      "correct": "Classificados Corretamente",
+      "needsReview": "Precisam Revisão",
+      "taxonomySize": "Taxonomia",
+      "knownEntities": "entidades conhecidas"
+    },
+    "taxonomy": {
+      "title": "Visão Geral da Taxonomia",
+      "description": "Dicionários de classificação biomédica disponíveis"
+    },
+    "tabs": {
+      "review": "Revisão",
+      "allEntities": "Todas Entidades",
+      "misclassifications": "Reclassificações"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar entidade...",
+      "type": "Filtrar por Tipo",
+      "allTypes": "Todos os Tipos"
+    },
+    "table": {
+      "entityName": "Nome da Entidade",
+      "currentType": "Tipo Atual",
+      "suggestedType": "Tipo Sugerido",
+      "confidence": "Confiança",
+      "method": "Método",
+      "actions": "Ações",
+      "type": "Tipo",
+      "layer": "Camada",
+      "status": "Status"
+    },
+    "status": {
+      "needsReview": "Revisão Necessária",
+      "correct": "Correto"
+    },
+    "dialog": {
+      "reclassifyTitle": "Reclassificar Entidade",
+      "reclassifyDescription": "Altere o tipo de classificação para \"{{name}}\"",
+      "currentType": "Tipo Atual",
+      "newType": "Novo Tipo",
+      "apply": "Aplicar Mudança"
+    },
+    "misclassifications": {
+      "title": "Padrões de Classificação Incorreta",
+      "description": "Tipos de entidades frequentemente classificados incorretamente",
+      "occurrences": "ocorrências"
+    },
+    "empty": {
+      "noReviewNeeded": "Nenhuma entidade precisa de revisão!",
+      "noMisclassifications": "Nenhum padrão de classificação incorreta detectado"
+    },
+    "success": {
+      "reclassified": "\"{{name}}\" reclassificado para {{type}}",
+      "bulkReclassified": "{{count}} entidades reclassificadas com sucesso",
+      "exported": "Relatório de auditoria exportado"
+    },
+    "errors": {
+      "loadFailed": "Erro ao carregar entidades para auditoria",
+      "reclassifyFailed": "Erro ao reclassificar entidade",
+      "bulkPartialFailed": "{{count}} entidades falharam ao reclassificar"
+    }
   }
 }
