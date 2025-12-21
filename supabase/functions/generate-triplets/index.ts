@@ -44,6 +44,35 @@ const VALID_RELATIONSHIPS = [
   'PREDISPOSED_IN', 'COMMON_IN', 'CITED_IN', 'STUDIED_IN'
 ];
 
+// Mapping for invalid predicates to valid ones
+const PREDICATE_MAPPING: Record<string, string> = {
+  'HAS_MECHANISM': 'MODULATES',
+  'MECHANISM': 'MODULATES',
+  'INTERACTS': 'MODULATES',
+  'INTERACTS_WITH': 'MODULATES',
+  'AFFECTS': 'MODULATES',
+  'RELATED_TO': 'MODULATES',
+  'ASSOCIATED_WITH': 'MODULATES',
+  'INFLUENCES': 'MODULATES',
+  'IMPACTS': 'MODULATES',
+  'TARGETS': 'BINDS_TO',
+  'ACTS_ON': 'MODULATES',
+  'INVOLVED_IN': 'PARTICIPATES_IN',
+  'CONTRIBUTES_TO': 'LEADS_TO',
+  'RESULTS_IN': 'PRODUCES',
+  'INDUCES': 'TRIGGERS',
+  'STIMULATES': 'ACTIVATES',
+  'SUPPRESSES': 'INHIBITS',
+  'REDUCES': 'DOWNREGULATES',
+  'INCREASES': 'UPREGULATES',
+  'DECREASES': 'DOWNREGULATES',
+  'ENHANCES': 'ACTIVATES',
+  'ATTENUATES': 'INHIBITS',
+  'MITIGATES': 'AMELIORATES',
+  'ALLEVIATES': 'AMELIORATES',
+  'EXACERBATES': 'AGGRAVATES',
+};
+
 // Valid entity types from database CHECK constraint (CASE SENSITIVE!)
 // The constraint uses PascalCase values like 'Nutraceutical', 'Mechanism', etc.
 const VALID_CONSTRAINT_TYPES = [
@@ -53,13 +82,69 @@ const VALID_CONSTRAINT_TYPES = [
 ];
 
 // Map entity type to valid CHECK CONSTRAINT values (PascalCase)
+// CRITICAL: This function must detect when LLM misclassifies proteins/enzymes/pathways as nutraceuticals
 function mapEntityType(entityType: string | null | undefined, entityName?: string): string {
   if (!entityType) return 'Mechanism'; // Default fallback
   
   const normalized = entityType.toLowerCase().replace(/[\s\-_]+/g, '');
   const nameLower = (entityName || '').toLowerCase();
   
-  // Mapping from various inputs to valid constraint values
+  // ==========================================================================
+  // NAME-BASED OVERRIDE PATTERNS - These take PRIORITY over LLM classification
+  // ==========================================================================
+  // Use these to CORRECT misclassifications by the LLM
+  
+  // ENZYMES: Detect enzyme names (kinases, synthases, oxidases, etc.)
+  const enzymePattern = /\b(caspase|kinase|synthase|oxidase|reductase|transferase|protease|hydrolase|isomerase|ligase|lyase|phosphatase|dehydrogenase|catalase|peroxidase|cyclooxygenase|lipoxygenase|cox-?\d*|lox|pla2|mmp|dnase|rnase|atpase|nadph|nadh)\b/i;
+  if (enzymePattern.test(nameLower)) {
+    console.log(`🔧 Type override: "${entityName}" → Target (enzyme pattern detected)`);
+    return 'Target';
+  }
+  
+  // PROTEINS & GROWTH FACTORS: Detect protein/factor names
+  const proteinPattern = /\b(vegf|gfap|bdnf|ngf|gdnf|igf|egf|fgf|pdgf|tgf|tnf|tnf-?α?|ifn|interleukin|il-?\d+|tubulin|actin|myosin|collagen|elastin|fibronectin|laminin|albumin|globulin|hemoglobin|myoglobin|ferritin|transferrin|vascular endothelial|growth factor|endothelial factor|nerve factor|brain-derived|tumor necrosis)\b/i;
+  if (proteinPattern.test(nameLower)) {
+    console.log(`🔧 Type override: "${entityName}" → Target (protein/factor pattern detected)`);
+    return 'Target';
+  }
+  
+  // RECEPTORS: Detect receptor names
+  const receptorPattern = /\b(ppar[γαβδ]?|ppar-?gamma|ppar-?alpha|tlr\d*|toll-like|cb[12]|cannabinoid|nmda|ampa|gaba|dopamine|serotonin|5-?ht|adrenergic|muscarinic|nicotinic|opioid|angiotensin|estrogen|androgen|thyroid|insulin|leptin|adiponectin)\s*(receptor)?s?\b/i;
+  if (receptorPattern.test(nameLower)) {
+    console.log(`🔧 Type override: "${entityName}" → Target (receptor pattern detected)`);
+    return 'Target';
+  }
+  
+  // PATHWAYS: Detect pathway/signaling cascade names
+  const pathwayPattern = /\b(pathway|signaling\s*(pathway|cascade)?|cascade|signal\s*transduction|nf-?κ?b|nfkb|ampk|mtor|mapk|erk|jnk|p38|jak|stat|pi3k|akt|wnt|notch|hedgehog|tgf-?β|β-oxidation|beta-oxidation|krebs|citric acid|glycolysis|gluconeogenesis|pentose|autophagy\s*pathway)\b/i;
+  if (pathwayPattern.test(nameLower)) {
+    console.log(`🔧 Type override: "${entityName}" → Pathway (pathway pattern detected)`);
+    return 'Pathway';
+  }
+  
+  // BIOLOGICAL PROCESSES: Detect process names
+  const processPattern = /\b(autophagy|apoptosis|necrosis|mitophagy|ferroptosis|pyroptosis|senescence|angiogenesis|neurogenesis|oxidative\s*stress|oxidation|reduction|phosphorylation|glycolysis|metabolism|catabolism|anabolism|biosynthesis|degradation|transcription|translation|replication|inflammation|immune\s*response)\b/i;
+  if (processPattern.test(nameLower) && !pathwayPattern.test(nameLower)) {
+    console.log(`🔧 Type override: "${entityName}" → BiologicalProcess (process pattern detected)`);
+    return 'BiologicalProcess';
+  }
+  
+  // NUTRACEUTICALS: Only if name matches known nutraceutical patterns AND not matched above
+  const nutraceuticalPattern = /\b(curcumin|resveratrol|quercetin|omega-?[369]|dha|epa|vitamin\s*[a-ek]?\d*|coq10|coenzyme\s*q|carnitine|l-carnitine|taurine|glucosamine|chondroitin|msm|astaxanthin|lutein|lycopene|beta-?carotene|α-?tocopherol|tocopherol|probiotics?|prebiotics?|extract|berberine|silymarin|ginkgo|ashwagandha|rhodiola|ginseng|turmeric|fish\s*oil|krill\s*oil)\b/i;
+  if (nutraceuticalPattern.test(nameLower)) {
+    return 'Nutraceutical';
+  }
+  
+  // DRUGS: Pharmaceutical compounds (non-natural)
+  const drugPattern = /\b(statin|metformin|aspirin|ibuprofen|acetaminophen|atorvastatin|simvastatin|rosuvastatin|lisinopril|amlodipine|losartan|omeprazole|prednisone|prednisolone|dexamethasone|insulin\s*glargine|methotrexate|azathioprine|cyclosporine|tacrolimus|rapamycin|sirolimus|everolimus)\b/i;
+  if (drugPattern.test(nameLower)) {
+    return 'Compound';
+  }
+  
+  // ==========================================================================
+  // STANDARD TYPE MAPPING (if no name-based override matched)
+  // ==========================================================================
+  
   const typeMapping: Record<string, string> = {
     // Nutraceutical variants
     'nutraceutical': 'Nutraceutical',
@@ -122,25 +207,21 @@ function mapEntityType(entityType: string | null | undefined, entityName?: strin
     'toxicity': 'Symptom',
   };
   
-  // Direct mapping
+  // Direct mapping from LLM-provided type
   if (typeMapping[normalized]) {
     return typeMapping[normalized];
   }
   
-  // Check if entity name suggests a specific type
+  // Legacy name-based hints (less specific, used as fallback)
   const nameBasedHints: Record<string, string> = {
-    'Nutraceutical': 'astaxanthin|curcumin|resveratrol|omega|vitamin|mineral|extract|supplement',
-    'Condition': 'obesity|diabetes|arthritis|cancer|disease|syndrome|disorder|hyperlipidemia|dysfunction',
-    'Mechanism': 'signaling|cascade|activation|inhibition|phosphorylation|transcription|peroxidation',
-    'Pathway': 'nf-κb|nf-kb|nfkb|ppar|ampk|mtor|mapk|jak|stat|pi3k|akt|β-oxidation|beta-oxidation',
-    'Target': 'receptor|enzyme|kinase|synthase|oxidase|reductase|transferase|tlr|cpt-1|cpt1|alt|ldh|mda',
-    'BiologicalProcess': 'ros|oxidative|stress|inflammation|antioxidant|function|capacity|effect',
+    'Condition': 'obesity|diabetes|arthritis|cancer|disease|syndrome|disorder|hyperlipidemia|dysfunction|failure|deficiency',
+    'Mechanism': 'phosphorylation|dephosphorylation|methylation|acetylation|ubiquitination',
   };
   
   for (const [hintType, pattern] of Object.entries(nameBasedHints)) {
     const regex = new RegExp(pattern, 'i');
     if (regex.test(nameLower)) {
-      console.log(`Type mapping: "${entityName}" (${entityType}) → ${hintType} (name-based)`);
+      console.log(`Type mapping: "${entityName}" (${entityType}) → ${hintType} (fallback name-based)`);
       return hintType;
     }
   }
@@ -436,6 +517,46 @@ Be thorough - capture EVERY biological relationship mentioned in this study.`;
 
 const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a veterinary nutraceutical knowledge base. Convert the biological analysis into structured triplets.
 
+## ⚠️ CRITICAL ENTITY CLASSIFICATION RULES - READ CAREFULLY ⚠️
+
+### WHAT IS A NUTRACEUTICAL vs OTHER ENTITY TYPES
+
+**NUTRACEUTICAL (subject_type: "nutraceutical")** - ONLY use for:
+- Natural dietary supplements: Curcumin, Resveratrol, Quercetin, Omega-3, EPA, DHA
+- Vitamins and minerals: Vitamin D, Vitamin E, Zinc, Selenium, CoQ10
+- Herbal extracts: Turmeric extract, Green tea extract, Ginkgo biloba
+- Amino acid supplements: L-Carnitine, Taurine, Glutamine
+- Probiotics, Prebiotics, Fish oil, Krill oil, Astaxanthin, Lutein
+
+**DRUG (subject_type: "drug")** - Use for pharmaceutical compounds:
+- Prescription medications, synthetic drugs, pharmaceutical compounds
+- Examples: Statins, Metformin, NSAIDs (Ibuprofen, Aspirin)
+
+**⛔ NEVER CLASSIFY THE FOLLOWING AS "nutraceutical" OR "drug" - USE CORRECT TYPES:**
+
+| Entity Name Pattern | Correct subject_type | Examples |
+|---------------------|---------------------|----------|
+| Enzymes (-ase suffix) | "enzyme" | Caspase-3, COX-2, LOX, PLA2, Kinases, Proteases, Lipase |
+| Proteins/Factors | "gene_protein" | VEGF, GFAP, BDNF, TNF-α, IL-6, NF-κB, Tubulin, Collagen |
+| Pathways/Signaling | "pathway" | Autophagy Pathway, NF-κB pathway, AMPK, mTOR, MAPK |
+| Receptors | "receptor" | PPARγ, TLR4, CB2, NMDA receptor, Insulin receptor |
+| Biological Processes | "biological_effect" | Oxidative stress, Inflammation, Apoptosis, Necrosis |
+| Diseases/Conditions | "condition" or "disease" | Obesity, Diabetes, Cancer, Arthritis |
+
+### EXAMPLES OF CORRECT vs WRONG CLASSIFICATION
+
+❌ WRONG: { subject_type: "nutraceutical", subject_name: "Autophagy Pathway" }
+✅ CORRECT: { subject_type: "pathway", subject_name: "Autophagy Pathway" }
+
+❌ WRONG: { subject_type: "nutraceutical", subject_name: "Vascular Endothelial Growth Factor" }
+✅ CORRECT: { subject_type: "gene_protein", subject_name: "VEGF" }
+
+❌ WRONG: { subject_type: "nutraceutical", subject_name: "COX-2" }
+✅ CORRECT: { subject_type: "enzyme", subject_name: "COX-2" }
+
+❌ WRONG: { subject_type: "nutraceutical", subject_name: "NF-κB" }
+✅ CORRECT: { subject_type: "pathway", subject_name: "NF-κB Pathway" }
+
 ## ENTITY TYPES (use EXACTLY these lowercase values)
 - Layer 0 (Compounds): nutraceutical, drug, chemical_compound
 - Layer 1 (Targets): pathway, receptor, enzyme, gene_protein
@@ -444,13 +565,20 @@ const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a 
 - Layer 4 (Outcomes): condition, disease, clinical_outcome
 - Context: breed, species, age_group, study
 
-## RELATIONSHIP TYPES (use EXACTLY these predicates)
+## RELATIONSHIP TYPES (use ONLY these predicates - NO OTHER PREDICATES ALLOWED)
 Direct Actions: INHIBITS, ACTIVATES, MODULATES, BINDS_TO, BLOCKS, UPREGULATES, DOWNREGULATES
 Cascade: TRIGGERS, PARTICIPATES_IN, REGULATES, PRODUCES, LEADS_TO, CAUSES
 Therapeutic: TREATS, PREVENTS, SUPPORTS, AMELIORATES, MANAGES
 Adverse: WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT, AGGRAVATES
 Interactions: SYNERGIZES_WITH, ANTAGONIZES, ENHANCES_BIOAVAILABILITY, REDUCES_BIOAVAILABILITY, REQUIRES, POTENTIATES
 Context: PREDISPOSED_IN, COMMON_IN, CITED_IN, STUDIED_IN
+
+⚠️ FORBIDDEN PREDICATES - DO NOT USE:
+- HAS_MECHANISM → use MODULATES or TRIGGERS instead
+- INTERACTS → use MODULATES instead
+- AFFECTS → use MODULATES instead
+- RELATED_TO → use MODULATES instead
+- INVOLVES → use PARTICIPATES_IN instead
 
 ## CRITICAL RULES - HIERARCHICAL CHAINS (L0→L1→L2→L3→L4)
 
@@ -735,8 +863,14 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       const subjectLayer = ENTITY_LAYERS[subjectType] || 'unknown';
       const objectLayer = ENTITY_LAYERS[objectType] || 'unknown';
 
-      // Validate predicate
-      const predicate = VALID_RELATIONSHIPS.includes(t.predicate) ? t.predicate : 'MODULATES';
+      // Validate predicate - first try mapping invalid predicates, then validate
+      const rawPredicate = (t.predicate || 'MODULATES').toUpperCase();
+      const mappedPredicate = PREDICATE_MAPPING[rawPredicate] || rawPredicate;
+      const predicate = VALID_RELATIONSHIPS.includes(mappedPredicate) ? mappedPredicate : 'MODULATES';
+      
+      if (rawPredicate !== predicate) {
+        console.log(`🔧 Predicate mapped: "${t.predicate}" → "${predicate}"`);
+      }
 
       // KG Matching - Subject
       if (subjectType === 'nutraceutical' && t.subject_name) {
@@ -880,9 +1014,8 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       }
       
       // Rule 5: TREATS predicate requires higher threshold - skip if too low
-      const tripletPredicate = VALID_RELATIONSHIPS.includes(t.predicate?.toUpperCase()) 
-        ? t.predicate.toUpperCase() 
-        : 'MODULATES';
+      // Use the already validated predicate from above
+      const tripletPredicate = predicate; // Already validated with PREDICATE_MAPPING
       const isTreatsRelation = ['TREATS', 'PREVENTS', 'AMELIORATES'].includes(tripletPredicate);
       
       // Rule 6: ANTI-HALLUCINATION - Check if entity names appear in original text
