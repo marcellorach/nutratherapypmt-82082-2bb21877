@@ -42,28 +42,54 @@ interface Neo4jCredentials {
   password: string;
 }
 
-// Map entity types to Neo4j labels
+// Map entity types to Neo4j labels - EXPANDED with biomedical taxonomy
 const ENTITY_TYPE_TO_LABEL: Record<string, string> = {
+  // Layer 0: Compounds
   'nutraceutical': 'Nutraceutical',
   'drug': 'Drug',
   'chemical_compound': 'ChemicalCompound',
+  'compound': 'Compound',
+  // Layer 1: Molecular Targets
   'pathway': 'Pathway',
   'receptor': 'Receptor',
   'enzyme': 'Enzyme',
   'gene_protein': 'GeneProtein',
+  'geneprotein': 'GeneProtein',
+  'protein': 'GeneProtein',
+  'cytokine': 'Cytokine',
+  'growthfactor': 'GrowthFactor',
+  'growth_factor': 'GrowthFactor',
+  'target': 'Target',
+  // Layer 2: Mechanisms
   'mechanism': 'Mechanism',
   'signaling_cascade': 'SignalingCascade',
+  'signalingcascade': 'SignalingCascade',
+  // Layer 3: Effects
   'biological_effect': 'BiologicalEffect',
+  'biologicaleffect': 'BiologicalEffect',
+  'biological_process': 'BiologicalProcess',
+  'biologicalprocess': 'BiologicalProcess',
+  'effect': 'BiologicalEffect',
   'side_effect': 'SideEffect',
+  'sideeffect': 'SideEffect',
+  // Layer 4: Outcomes
   'clinical_outcome': 'ClinicalOutcome',
+  'clinicaloutcome': 'ClinicalOutcome',
   'condition': 'Condition',
   'disease': 'Disease',
+  // Context nodes
+  'cell': 'Cell',
+  'cell_type': 'Cell',
+  'celltype': 'Cell',
+  'cellcomponent': 'CellComponent',
+  'cell_component': 'CellComponent',
   'breed': 'Breed',
   'species': 'Species',
   'age_group': 'AgeGroup',
+  'agegroup': 'AgeGroup',
   'study': 'Study',
-  'target': 'Target',
-  'effect': 'BiologicalEffect',
+  // Fallbacks
+  'entity': 'Entity',
   'unknown': 'Entity'
 };
 
@@ -295,31 +321,82 @@ async function syncMechanismPath(
 }
 
 /**
- * Infer entity type based on position in mechanism path
+ * ROBUST: Infer entity type based on biomedical taxonomy patterns
+ * Uses dictionary lookups and pattern matching instead of position-based inference
  */
 function inferEntityType(name: string, position: number, totalLength: number): string {
-  const nameLower = name.toLowerCase();
+  const nameLower = name.toLowerCase().trim();
   
-  // Check for keywords in name
-  if (nameLower.includes('pathway') || nameLower.includes('nf-κb') || nameLower.includes('mapk') || nameLower.includes('signaling')) {
-    return 'pathway';
-  }
-  if (nameLower.includes('mechanism') || nameLower.includes('cascade') || nameLower.includes('inhibition') || nameLower.includes('activation')) {
-    return 'mechanism';
-  }
-  if (nameLower.includes('effect') || nameLower.includes('reduction') || nameLower.includes('improvement') || nameLower.includes('inflammation')) {
-    return 'biological_effect';
-  }
-  if (nameLower.includes('receptor') || nameLower.includes('-r')) {
-    return 'receptor';
-  }
-  if (nameLower.includes('enzyme') || nameLower.includes('cox-') || nameLower.includes('lox')) {
+  // Known enzymes (by suffix or name)
+  const enzymePatterns = /(-ase$|kinase|phosphatase|synthase|oxidase|reductase|transferase|hydrolase|catalase|sod|sirt\d|caspase|cox-?\d?|lox|mmp|parp|telomerase|ache)/i;
+  if (enzymePatterns.test(nameLower)) {
     return 'enzyme';
   }
   
-  // Infer from position
+  // Known receptors
+  const receptorPatterns = /(receptor|-r$|channel|ppar|lxr|fxr|vdr|tlr\d?|trpv?\d?|cb[12]|nmda|ampa|gaba)/i;
+  if (receptorPatterns.test(nameLower)) {
+    return 'receptor';
+  }
+  
+  // Cytokines and interleukins
+  const cytokinePatterns = /(^il-?\d+|interleukin|cytokine|chemokine|interferon|tnf-?α?|tgf-?β?)/i;
+  if (cytokinePatterns.test(nameLower)) {
+    return 'gene_protein';
+  }
+  
+  // Growth factors
+  const growthFactorPatterns = /(growth factor|ngf|bdnf|vegf|egf|fgf|igf|pdgf)/i;
+  if (growthFactorPatterns.test(nameLower)) {
+    return 'gene_protein';
+  }
+  
+  // Pathways
+  const pathwayPatterns = /(pathway|signaling|cascade|axis|nf-κb|nf-kb|mapk|jak-stat|pi3k|mtor|ampk|wnt|notch|nrf2)/i;
+  if (pathwayPatterns.test(nameLower)) {
+    return 'pathway';
+  }
+  
+  // Biological processes
+  const processPatterns = /(autophagy|mitophagy|apoptosis|necrosis|senescence|inflammation|neuroinflammation|oxidative stress|metabolism|phosphorylation|acetylation|methylation|ubiquitination|angiogenesis|neurogenesis|synaptic|phagocytosis)/i;
+  if (processPatterns.test(nameLower)) {
+    return 'biological_process';
+  }
+  
+  // Diseases/Conditions
+  const conditionPatterns = /(disease|disorder|syndrome|deficiency|dysfunction|failure|-itis$|-emia$|-pathy$|cancer|tumor|diabetes|hypertension|arthritis|alzheimer|parkinson|dementia)/i;
+  if (conditionPatterns.test(nameLower)) {
+    return 'condition';
+  }
+  
+  // Cell types
+  const cellPatterns = /(cell|cyte$|blast$|clast$|macrophage|neutrophil|lymphocyte|monocyte|neuron|astrocyte|microglia|fibroblast|adipocyte|hepatocyte)/i;
+  if (cellPatterns.test(nameLower)) {
+    return 'cell';
+  }
+  
+  // Known transcription factors and proteins
+  const proteinPatterns = /(^[A-Z]{2,5}\d?$|protein|factor|nf-κb|stat\d?|creb|foxo|p53|p21|bcl-2|bax|ras|raf|erk|akt)/i;
+  if (proteinPatterns.test(name)) {
+    return 'gene_protein';
+  }
+  
+  // Mechanism-like terms
+  if (nameLower.includes('inhibition') || nameLower.includes('activation') || 
+      nameLower.includes('modulation') || nameLower.includes('regulation')) {
+    return 'mechanism';
+  }
+  
+  // Effect-like terms
+  if (nameLower.includes('reduction') || nameLower.includes('improvement') || 
+      nameLower.includes('increase') || nameLower.includes('decrease')) {
+    return 'biological_effect';
+  }
+  
+  // Fallback: Use position-based inference only as last resort
+  console.warn(`⚠️ Could not classify entity: "${name}" - using position-based fallback`);
   const relativePosition = position / (totalLength - 1 || 1);
-  if (relativePosition <= 0.2) return 'nutraceutical';
+  if (relativePosition <= 0.2) return 'compound';
   if (relativePosition <= 0.4) return 'pathway';
   if (relativePosition <= 0.6) return 'mechanism';
   if (relativePosition <= 0.8) return 'biological_effect';

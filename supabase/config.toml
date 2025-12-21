@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.consolidate-knowledge-graph]
 verify_jwt = false
+
+[functions.classify-entity]
+verify_jwt = false
