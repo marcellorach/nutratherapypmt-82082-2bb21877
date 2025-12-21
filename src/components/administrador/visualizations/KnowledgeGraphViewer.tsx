@@ -14,7 +14,7 @@ import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
 import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
 import { KnowledgeGraphChat } from './KnowledgeGraphChat';
 import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle } from 'lucide-react';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -100,7 +100,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   
   // New states for dialogs, chat and node details
   const [statDialogOpen, setStatDialogOpen] = useState(false);
-  const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative'>('ontology');
+  const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions'>('ontology');
   const [chatOpen, setChatOpen] = useState(false);
   const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
@@ -554,7 +554,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
     setStudyFilter(studyId);
   };
 
-  const openStatDialog = (type: 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative') => {
+  const openStatDialog = (type: 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions') => {
     setSelectedStatType(type);
     setStatDialogOpen(true);
   };
@@ -724,84 +724,104 @@ export const KnowledgeGraphViewer: React.FC = () => {
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('nodes')}>
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-primary/50" onClick={() => openStatDialog('nodes')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold">{stats.totalNodes}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold">{stats.totalNodes}</div>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalNodes', 'Nodes')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.totalNodes', 'Total unique entities in the graph')}</p>
-                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('edges')}>
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-primary/50" onClick={() => openStatDialog('edges')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold">{stats.totalEdges}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold">{stats.totalEdges}</div>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.totalRelations', 'Relations')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.totalRelations', 'Total connections between entities in the graph')}</p>
-                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('positive')}>
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-green-500/50" onClick={() => openStatDialog('positive')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold text-green-600">{stats.positiveRelations}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold text-green-600">{stats.positiveRelations}</div>
+                        <ExternalLink className="h-3 w-3 text-green-600/70" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.positive', 'Positive')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.positiveRelations', 'Beneficial relations: treatments, improvements, therapeutic support')}</p>
-                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openStatDialog('negative')}>
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-red-500/50" onClick={() => openStatDialog('negative')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold text-red-600">{stats.negativeRelations}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold text-red-600">{stats.negativeRelations}</div>
+                        <ExternalLink className="h-3 w-3 text-red-600/70" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.negative', 'Negative')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.negativeRelations', 'Adverse relations: contraindications, symptom worsening, side effects')}</p>
-                  <p className="text-[10px] mt-1 text-primary">Clique para ver detalhes</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-blue-500/50" onClick={() => openStatDialog('nutraceuticals')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold">{stats.nutraceuticals}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold text-blue-600">{stats.nutraceuticals}</div>
+                        <ExternalLink className="h-3 w-3 text-blue-600/70" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.nutraceuticals', 'Nutraceuticals')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.nutraceuticals', 'Bioactive substances with therapeutic potential')}</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="flex-shrink-0 cursor-help">
+                  <Card className="flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors border-2 hover:border-emerald-500/50" onClick={() => openStatDialog('conditions')}>
                     <CardContent className="py-3 px-4 text-center">
-                      <div className="text-lg font-bold">{stats.conditions}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="text-lg font-bold text-emerald-600">{stats.conditions}</div>
+                        <ExternalLink className="h-3 w-3 text-emerald-600/70" />
+                      </div>
                       <div className="text-[10px] text-muted-foreground">{t('knowledgeGraph.stats.conditions', 'Conditions')}</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[250px]">
                   <p>{t('knowledgeGraph.tooltips.conditions', 'Diseases, symptoms or treatable health states')}</p>
+                  <p className="text-[10px] mt-1 text-primary flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> {t('common.clickToExpand', 'Click to see details')}</p>
                 </TooltipContent>
               </Tooltip>
             </>
