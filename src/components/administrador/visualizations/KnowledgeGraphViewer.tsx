@@ -9,12 +9,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
 import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
 import { KnowledgeGraphChat } from './KnowledgeGraphChat';
 import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink } from 'lucide-react';
+import { GraphLimitSlider } from './GraphLimitSlider';
+import { KnowledgeGraph3D } from './KnowledgeGraph3D';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -104,6 +108,10 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
+  
+  // New states for configurable limit and 3D toggle
+  const [edgeLimit, setEdgeLimit] = useState(500);
+  const [use3DGraph, setUse3DGraph] = useState(false);
 
   useEffect(() => {
     loadGraphData();
@@ -326,7 +334,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
           cypherQuery: `
             MATCH (n)-[r]->(m)
             RETURN n, r, m
-            LIMIT 500
+            LIMIT ${edgeLimit}
           `
         }
       });
@@ -998,7 +1006,44 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </Badge>
               )}
             </div>
+            
+            {/* 3D Toggle */}
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Square className="h-4 w-4 text-muted-foreground" />
+                    <Switch 
+                      checked={use3DGraph} 
+                      onCheckedChange={setUse3DGraph}
+                      id="3d-toggle"
+                    />
+                    <Box className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('knowledgeGraph.controls.toggle3D', 'Toggle 2D/3D visualization')}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Badge variant={use3DGraph ? 'default' : 'secondary'} className="text-xs">
+                {use3DGraph ? '3D' : '2D'}
+              </Badge>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+      
+      {/* Edge Limit Slider */}
+      <Card>
+        <CardContent className="py-3 px-4">
+          <GraphLimitSlider
+            value={edgeLimit}
+            onChange={(newLimit) => {
+              setEdgeLimit(newLimit);
+              // Reload with new limit after a short delay
+              setTimeout(() => loadGraphData(), 100);
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -1022,10 +1067,17 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 </div>
               </div>
             </div>
+          ) : use3DGraph ? (
+            <KnowledgeGraph3D
+              data={filteredData}
+              height="calc(100vh - 400px)"
+              onNodeClick={handleNodeClick}
+              enable3D={true}
+            />
           ) : (
             <NetworkGraph
               data={filteredData}
-              height="calc(100vh - 320px)"
+              height="calc(100vh - 400px)"
               showControls={true}
               showLegend={false}
               onNodeClick={handleNodeClick}

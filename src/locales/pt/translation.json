@@ -86,6 +86,37 @@
     "empty": {
       "title": "Nenhum dado de grafo disponível",
       "description": "Aprove e sincronize alguns triplets para visualizar o grafo de conhecimento"
+    },
+    "limit": {
+      "title": "Limite de Arestas",
+      "tooltip": "Controla quantas arestas são carregadas do Neo4j. Valores maiores mostram mais dados mas podem deixar a visualização lenta.",
+      "fast": "Rápido",
+      "balanced": "Equilibrado",
+      "moderate": "Moderado",
+      "slow": "Lento",
+      "heavy": "Pesado"
+    },
+    "controls": {
+      "switchTo2D": "Mudar para 2D",
+      "switchTo3D": "Mudar para 3D",
+      "zoomIn": "Aumentar Zoom",
+      "zoomOut": "Diminuir Zoom",
+      "reset": "Resetar Visão",
+      "fitView": "Ajustar à Tela",
+      "settings": "Configurações",
+      "toggle3D": "Alternar visualização 2D/3D"
+    },
+    "settings": {
+      "nodeSize": "Tamanho dos Nós",
+      "linkOpacity": "Opacidade das Ligações"
+    },
+    "legend": {
+      "nutraceutical": "Nutracêutico",
+      "condition": "Condição",
+      "mechanism": "Mecanismo",
+      "effect": "Efeito",
+      "positive": "Positivo",
+      "negative": "Negativo"
     }
   },
   "chat": {
