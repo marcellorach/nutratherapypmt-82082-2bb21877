@@ -115,6 +115,14 @@ export const normalizeLink = (link: any, index: number) => {
   if ('arrows' in link) edgeData.arrows = link.arrows;
   if ('dashes' in link) edgeData.dashes = link.dashes;
   if ('label' in link) edgeData.label = link.label;
+  
+  // Propriedades adicionais importantes para o Knowledge Graph
+  if ('isNegative' in link) edgeData.isNegative = link.isNegative;
+  if ('direction' in link) edgeData.direction = link.direction;
+  if ('properties' in link) edgeData.properties = link.properties;
+  if ('source' in link && !('from' in link)) edgeData.source = link.source;
+  if ('confidence' in link) edgeData.confidence = link.confidence;
+  if ('relationship' in link) edgeData.relationship = link.relationship;
 
   return edgeData;
 };

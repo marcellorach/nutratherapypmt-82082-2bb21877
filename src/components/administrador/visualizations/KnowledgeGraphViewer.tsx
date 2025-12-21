@@ -464,19 +464,32 @@ export const KnowledgeGraphViewer: React.FC = () => {
   };
 
   const getNodeColor = (type: string, source?: string) => {
-    // Base colors by type
+    // Normalizar tipo para lowercase para comparações consistentes
+    const normalizedType = type?.toLowerCase() || 'unknown';
+    
+    // Base colors by type (usando lowercase para consistência)
     const typeColors: Record<string, { base: string; study: string }> = {
-      'Nutraceutical': { base: '#3b82f6', study: '#22c55e' },
-      'Condition': { base: '#10b981', study: '#22c55e' },
-      'Mechanism': { base: '#f59e0b', study: '#22c55e' },
-      'Effect': { base: '#8b5cf6', study: '#22c55e' },
-      'Outcome': { base: '#ec4899', study: '#22c55e' },
-      'Unknown': { base: '#6b7280', study: '#22c55e' }
+      'nutraceutical': { base: '#3b82f6', study: '#22c55e' },
+      'compound': { base: '#3b82f6', study: '#22c55e' },  // Drug/Compound usa mesma cor de nutraceutical
+      'drug': { base: '#2563eb', study: '#22c55e' },
+      'condition': { base: '#10b981', study: '#22c55e' },
+      'disease': { base: '#10b981', study: '#22c55e' },
+      'mechanism': { base: '#f59e0b', study: '#22c55e' },
+      'effect': { base: '#8b5cf6', study: '#22c55e' },
+      'biological_effect': { base: '#8b5cf6', study: '#22c55e' },
+      'outcome': { base: '#ec4899', study: '#22c55e' },
+      'target': { base: '#06b6d4', study: '#22c55e' },     // Novo: Target (enzimas, proteínas)
+      'pathway': { base: '#14b8a6', study: '#22c55e' },    // Novo: Pathway
+      'biologicalprocess': { base: '#8b5cf6', study: '#22c55e' },  // Novo: BiologicalProcess
+      'receptor': { base: '#06b6d4', study: '#22c55e' },   // Novo: Receptor
+      'enzyme': { base: '#06b6d4', study: '#22c55e' },     // Novo: Enzyme
+      'gene_protein': { base: '#0ea5e9', study: '#22c55e' }, // Novo: Gene/Protein
+      'unknown': { base: '#6b7280', study: '#22c55e' }
     };
     
-    const colors = typeColors[type] || typeColors['Unknown'];
+    const colors = typeColors[normalizedType] || typeColors['unknown'];
     
-    // If from study, use green-tinted version
+    // Always return consistent object format to avoid rendering issues
     if (source === 'study') {
       return {
         background: colors.study,
@@ -485,7 +498,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
       };
     }
     
-    return colors.base;
+    // Return consistent object format for non-study sources too
+    return {
+      background: colors.base,
+      border: colors.base,
+      highlight: { background: colors.base, border: colors.base }
+    };
   };
 
   const getEdgeColor = (confidence: number, isNegative: boolean = false, source?: string) => {
@@ -509,18 +527,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
     return '#6b7280';
   };
 
-  // Apply filters
+  // Apply filters - usando comparação case-insensitive para consistência
   const filteredData = {
     nodes: entityFilter === 'all' 
       ? graphData.nodes 
-      : graphData.nodes.filter(n => n.type === entityFilter),
+      : graphData.nodes.filter(n => n.type?.toLowerCase() === entityFilter.toLowerCase()),
     links: graphData.links.filter(l => {
       const sourceNode = graphData.nodes.find(n => n.id === l.from);
       const targetNode = graphData.nodes.find(n => n.id === l.to);
       
       const matchesEntityFilter = entityFilter === 'all' ||
-        sourceNode?.type === entityFilter ||
-        targetNode?.type === entityFilter;
+        sourceNode?.type?.toLowerCase() === entityFilter.toLowerCase() ||
+        targetNode?.type?.toLowerCase() === entityFilter.toLowerCase();
       
       const matchesConfidence = l.value >= confidenceFilter;
       
@@ -869,13 +887,16 @@ export const KnowledgeGraphViewer: React.FC = () => {
                 <TooltipTrigger asChild>
                   <div>
                     <Select value={entityFilter} onValueChange={setEntityFilter}>
-                      <SelectTrigger className="w-[140px] h-8">
+                      <SelectTrigger className="w-[160px] h-8">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">{t('knowledgeGraph.filters.allTypes', 'All Types')}</SelectItem>
                         <SelectItem value="Nutraceutical">{t('knowledgeGraph.filters.nutraceuticals', 'Nutraceuticals')}</SelectItem>
+                        <SelectItem value="Compound">{t('knowledgeGraph.filters.drugs', 'Drugs/Compounds')}</SelectItem>
                         <SelectItem value="Condition">{t('knowledgeGraph.filters.conditions', 'Conditions')}</SelectItem>
+                        <SelectItem value="Target">{t('knowledgeGraph.filters.targets', 'Targets')}</SelectItem>
+                        <SelectItem value="Pathway">{t('knowledgeGraph.filters.pathways', 'Pathways')}</SelectItem>
                         <SelectItem value="Mechanism">{t('knowledgeGraph.filters.mechanisms', 'Mechanisms')}</SelectItem>
                         <SelectItem value="Effect">{t('knowledgeGraph.filters.effects', 'Effects')}</SelectItem>
                         <SelectItem value="Outcome">{t('knowledgeGraph.filters.outcomes', 'Outcomes')}</SelectItem>
