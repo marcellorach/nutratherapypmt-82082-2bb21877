@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2 } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2, ClipboardCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -90,10 +90,28 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "ontology-audit"} 
+          onClick={() => handleStepClick("ontology-audit")}
+          className={currentStep === "ontology-audit" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <ClipboardCheck className={`h-4 w-4 mr-2 ${currentStep === "ontology-audit" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.ontologyAudit')}</span>
+            </div>
+            {currentStep === "ontology-audit" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "relacoes"} 
+          isActive={currentStep === "relacoes"}
           onClick={() => handleStepClick("relacoes")}
           className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
         >
