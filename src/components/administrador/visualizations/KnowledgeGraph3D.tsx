@@ -33,8 +33,10 @@ interface Node {
 }
 
 interface Link {
-  source: string;
-  target: string;
+  source?: string;
+  target?: string;
+  from?: string;
+  to?: string;
   label?: string;
   value?: number;
   color?: string;
@@ -89,9 +91,9 @@ const lightenColor = (color: string, percent: number): string => {
 
 const getLinkColor = (isNegative?: boolean, confidence?: number): string => {
   if (isNegative) {
-    return `rgba(239, 68, 68, ${0.4 + (confidence || 0.5) * 0.4})`;
+    return `rgba(220, 38, 38, 0.8)`;
   }
-  return `rgba(34, 197, 94, ${0.3 + (confidence || 0.5) * 0.4})`;
+  return `rgba(16, 185, 129, 0.75)`;
 };
 
 // Loading fallback component
@@ -131,6 +133,16 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  // Auto-centralize graph on load
+  useEffect(() => {
+    if (fgRef.current && graphData.nodes.length > 0) {
+      const timer = setTimeout(() => {
+        fgRef.current?.zoomToFit(500, 80);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const graphData = useMemo(() => {
     const nodes = data.nodes.map(node => ({
       id: node.id,
@@ -143,14 +155,29 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       properties: node.properties,
     }));
 
-    const links = data.links.map(link => ({
-      source: typeof link.source === 'object' ? (link.source as any).id : link.source,
-      target: typeof link.target === 'object' ? (link.target as any).id : link.target,
-      value: link.value || 1,
-      color: getLinkColor(link.isNegative, link.value),
-      isNegative: link.isNegative,
-      label: link.label,
-    }));
+    // Create set of valid node IDs for validation
+    const nodeIds = new Set(nodes.map(n => n.id));
+
+    // Map links - accept both from/to and source/target formats
+    const links = data.links
+      .map(link => {
+        const sourceId = link.source || (link as any).from;
+        const targetId = link.target || (link as any).to;
+        
+        const resolvedSource = typeof sourceId === 'object' ? (sourceId as any).id : sourceId;
+        const resolvedTarget = typeof targetId === 'object' ? (targetId as any).id : targetId;
+        
+        return {
+          source: resolvedSource,
+          target: resolvedTarget,
+          value: link.value || 1,
+          color: getLinkColor(link.isNegative, link.value),
+          isNegative: link.isNegative,
+          label: link.label,
+        };
+      })
+      // Filter out invalid links where source or target node doesn't exist
+      .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
 
     return { nodes, links };
   }, [data]);
@@ -203,24 +230,31 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     const fontSize = Math.max(12 / globalScale, 3);
     const nodeRadius = Math.sqrt(node.val || 1) * nodeSize;
     
+    // Draw node circle
     ctx.beginPath();
     ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
     ctx.fillStyle = node.color;
     ctx.fill();
     
+    // Add white border for visibility
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1 / globalScale;
+    ctx.lineWidth = 1.5 / globalScale;
     ctx.stroke();
     
-    if (globalScale > 0.5) {
-      ctx.font = `${fontSize}px Inter, sans-serif`;
+    // Draw label with better visibility (show at lower zoom level)
+    if (globalScale > 0.3) {
+      ctx.font = `bold ${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 3;
-      ctx.fillText(label, node.x, node.y + nodeRadius + fontSize);
-      ctx.shadowBlur = 0;
+      
+      // White outline for contrast on any background
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+      ctx.lineWidth = 3 / globalScale;
+      ctx.strokeText(label, node.x, node.y + nodeRadius + fontSize + 2);
+      
+      // Dark text for readability
+      ctx.fillStyle = '#1f2937';
+      ctx.fillText(label, node.x, node.y + nodeRadius + fontSize + 2);
     }
   }, [nodeSize]);
 
