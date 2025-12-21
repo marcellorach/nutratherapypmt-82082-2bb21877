@@ -87,9 +87,11 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
   // Usar o hook para inicializar o grafo
   const { network, nodes } = useNetworkGraph(containerRef, data, mergedOptions);
   
-  // Setup click handler for nodes
+  // Setup click handler for nodes - sem early return para manter hooks consistentes
   useEffect(() => {
-    if (!network || !onNodeClick) return;
+    // Guard clauses dentro do useEffect, não early return do hook
+    if (!network) return;
+    if (!onNodeClick) return;
     
     const handleClick = (params: any) => {
       if (params.nodes.length > 0 && nodes) {
