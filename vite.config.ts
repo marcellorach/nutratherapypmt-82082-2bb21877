@@ -45,6 +45,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "three": path.resolve(__dirname, "node_modules/three"),
+      "three/webgpu": path.resolve(__dirname, "./src/lib/three-webgpu-stub.ts"),
     },
+  },
+  optimizeDeps: {
+    exclude: ['three/webgpu'],
   },
 }));
