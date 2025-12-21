@@ -110,7 +110,28 @@ const TaxonomyDuplicateChecker: React.FC = () => {
 
   const handleResolve = async (duplicate: DuplicateEntry, keepCategory: string) => {
     try {
-      // Remove from other database categories
+      // 1. Check if an override already exists for this term in the chosen category
+      const { data: existing } = await supabase
+        .from('taxonomy_dictionaries')
+        .select('id')
+        .eq('term_normalized', duplicate.term_normalized)
+        .eq('category', keepCategory)
+        .maybeSingle();
+
+      // 2. If no override exists, insert one with source='override'
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from('taxonomy_dictionaries')
+          .insert({
+            category: keepCategory,
+            term: duplicate.term,
+            term_normalized: duplicate.term_normalized,
+            source: 'override'
+          });
+        if (insertError) throw insertError;
+      }
+
+      // 3. Remove from other database categories (if any)
       const categoriesToRemove = duplicate.categories.filter(
         c => c.key !== keepCategory && c.source === 'database' && c.id
       );
@@ -123,6 +144,9 @@ const TaxonomyDuplicateChecker: React.FC = () => {
         
         if (error) throw error;
       }
+
+      // 4. Add to ignored list so it disappears from duplicates view
+      setIgnoredTerms(prev => new Set([...prev, duplicate.term_normalized]));
 
       toast.success(t('ontologyAudit.duplicates.resolved', { term: duplicate.term, category: keepCategory }));
       findDuplicates();
