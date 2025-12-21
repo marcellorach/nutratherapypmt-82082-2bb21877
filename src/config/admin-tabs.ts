@@ -53,6 +53,7 @@ const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/Micr
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
+const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
 
 // Knowledge Graph & Curation
 const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
@@ -292,6 +293,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: TranslationManager,
     description: 'Editar traduções diretamente no banco de dados'
+  },
+  {
+    id: 'ontology-audit',
+    label: 'Auditoria de Ontologia',
+    group: 'knowledge-base',
+    component: OntologyAuditTab,
+    description: 'Auditoria e correção de classificações de entidades no Knowledge Graph'
   }
 ];
 
