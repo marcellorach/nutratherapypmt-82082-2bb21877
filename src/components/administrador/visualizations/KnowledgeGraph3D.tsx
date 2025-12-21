@@ -1,13 +1,10 @@
-import React, { useRef, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import ForceGraph3D from 'react-force-graph-3d';
-import ForceGraph2D from 'react-force-graph-2d';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { 
   Box, 
@@ -17,8 +14,12 @@ import {
   RotateCcw, 
   Maximize, 
   Settings, 
-  Layers 
+  Layers,
+  Loader2
 } from 'lucide-react';
+
+// Lazy load force-graph components to handle import errors gracefully
+const ForceGraph2D = lazy(() => import('react-force-graph-2d').catch(() => ({ default: () => null })));
 
 interface Node {
   id: string;
@@ -50,7 +51,7 @@ interface KnowledgeGraph3DProps {
   enable3D?: boolean;
 }
 
-// Color mapping for node types (optimized for 3D visibility)
+// Color mapping for node types
 const getNodeColor = (type: string, source?: string): string => {
   const normalizedType = type?.toLowerCase() || 'unknown';
   
@@ -73,12 +74,10 @@ const getNodeColor = (type: string, source?: string): string => {
     protein: '#4f46e5',
   };
   
-  // If from study, make slightly brighter
   const baseColor = colors[normalizedType] || '#6b7280';
   return source === 'study' ? lightenColor(baseColor, 20) : baseColor;
 };
 
-// Helper to lighten colors
 const lightenColor = (color: string, percent: number): string => {
   const num = parseInt(color.replace('#', ''), 16);
   const amt = Math.round(2.55 * percent);
@@ -88,7 +87,6 @@ const lightenColor = (color: string, percent: number): string => {
   return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 };
 
-// Get link color based on relation type
 const getLinkColor = (isNegative?: boolean, confidence?: number): string => {
   if (isNegative) {
     return `rgba(239, 68, 68, ${0.4 + (confidence || 0.5) * 0.4})`;
@@ -96,22 +94,28 @@ const getLinkColor = (isNegative?: boolean, confidence?: number): string => {
   return `rgba(34, 197, 94, ${0.3 + (confidence || 0.5) * 0.4})`;
 };
 
+// Loading fallback component
+const GraphLoading = () => (
+  <div className="flex items-center justify-center h-full">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+);
+
 export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   data,
   height = '600px',
   onNodeClick,
-  enable3D = true,
+  enable3D = false, // Disabled by default until 3D is stable
 }) => {
   const { t } = useTranslation();
   const fgRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [is3D, setIs3D] = useState(enable3D);
   const [showSettings, setShowSettings] = useState(false);
   const [nodeSize, setNodeSize] = useState(8);
   const [linkOpacity, setLinkOpacity] = useState(0.6);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [graphError, setGraphError] = useState<string | null>(null);
 
-  // Update dimensions on resize
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -127,14 +131,13 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Transform data for react-force-graph format
   const graphData = useMemo(() => {
     const nodes = data.nodes.map(node => ({
       id: node.id,
       name: node.label,
       type: node.type,
       group: node.group || node.type,
-      val: Math.max(1, (node.connections || 1) / 2), // Size based on connections
+      val: Math.max(1, (node.connections || 1) / 2),
       color: node.color || getNodeColor(node.type, node.source),
       source: node.source,
       properties: node.properties,
@@ -152,58 +155,32 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     return { nodes, links };
   }, [data]);
 
-  // Handle node click
   const handleNodeClick = useCallback((node: any) => {
     if (onNodeClick) {
       onNodeClick(node.id, node);
     }
-    // Focus on clicked node
     if (fgRef.current) {
-      const distance = is3D ? 200 : 100;
-      if (is3D) {
-        fgRef.current.cameraPosition(
-          { x: node.x, y: node.y, z: node.z + distance },
-          node,
-          1000
-        );
-      } else {
-        fgRef.current.centerAt(node.x, node.y, 1000);
-        fgRef.current.zoom(2, 1000);
-      }
+      fgRef.current.centerAt(node.x, node.y, 1000);
+      fgRef.current.zoom(2, 1000);
     }
-  }, [onNodeClick, is3D]);
+  }, [onNodeClick]);
 
-  // Camera controls
   const handleZoomIn = () => {
     if (fgRef.current) {
-      if (is3D) {
-        const { x, y, z } = fgRef.current.cameraPosition();
-        fgRef.current.cameraPosition({ x, y, z: z * 0.7 }, null, 500);
-      } else {
-        fgRef.current.zoom(fgRef.current.zoom() * 1.5, 500);
-      }
+      fgRef.current.zoom(fgRef.current.zoom() * 1.5, 500);
     }
   };
 
   const handleZoomOut = () => {
     if (fgRef.current) {
-      if (is3D) {
-        const { x, y, z } = fgRef.current.cameraPosition();
-        fgRef.current.cameraPosition({ x, y, z: z * 1.5 }, null, 500);
-      } else {
-        fgRef.current.zoom(fgRef.current.zoom() * 0.7, 500);
-      }
+      fgRef.current.zoom(fgRef.current.zoom() * 0.7, 500);
     }
   };
 
   const handleReset = () => {
     if (fgRef.current) {
-      if (is3D) {
-        fgRef.current.cameraPosition({ x: 0, y: 0, z: 500 }, { x: 0, y: 0, z: 0 }, 1000);
-      } else {
-        fgRef.current.centerAt(0, 0, 1000);
-        fgRef.current.zoom(1, 1000);
-      }
+      fgRef.current.centerAt(0, 0, 1000);
+      fgRef.current.zoom(1, 1000);
     }
   };
 
@@ -213,7 +190,6 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     }
   };
 
-  // Node label for 3D
   const nodeLabel = useCallback((node: any) => {
     return `<div style="background: rgba(0,0,0,0.8); color: white; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
       <strong>${node.name}</strong><br/>
@@ -222,44 +198,20 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     </div>`;
   }, []);
 
-  // Common graph props
-  const commonProps = {
-    ref: fgRef,
-    graphData,
-    nodeLabel,
-    nodeColor: (node: any) => node.color,
-    nodeVal: (node: any) => node.val * (nodeSize / 8),
-    linkColor: (link: any) => link.color,
-    linkOpacity,
-    linkWidth: (link: any) => Math.max(1, link.value * 2),
-    linkDirectionalArrowLength: 4,
-    linkDirectionalArrowRelPos: 1,
-    onNodeClick: handleNodeClick,
-    enableNodeDrag: true,
-    cooldownTicks: 100,
-    warmupTicks: 50,
-    width: dimensions.width,
-    height: dimensions.height,
-  };
-
-  // Render node for 2D
   const nodeCanvasObject = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const label = node.name;
     const fontSize = Math.max(12 / globalScale, 3);
     const nodeRadius = Math.sqrt(node.val || 1) * nodeSize;
     
-    // Draw node circle
     ctx.beginPath();
     ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
     ctx.fillStyle = node.color;
     ctx.fill();
     
-    // Draw border
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1 / globalScale;
     ctx.stroke();
     
-    // Draw label if zoomed in enough
     if (globalScale > 0.5) {
       ctx.font = `${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
@@ -272,6 +224,14 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     }
   }, [nodeSize]);
 
+  if (graphError) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <p>{graphError}</p>
+      </div>
+    );
+  }
+
   return (
     <div 
       ref={containerRef} 
@@ -282,17 +242,6 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
         <TooltipProvider>
           <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm p-2 rounded-lg border shadow-sm">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setIs3D(!is3D)}>
-                  {is3D ? <Box className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {is3D ? t('knowledgeGraph.controls.switchTo2D', 'Switch to 2D') : t('knowledgeGraph.controls.switchTo3D', 'Switch to 3D')}
-              </TooltipContent>
-            </Tooltip>
-
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={handleZoomIn}>
@@ -344,7 +293,6 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
           </div>
         </TooltipProvider>
 
-        {/* Settings panel */}
         {showSettings && (
           <Card className="w-64 bg-background/95 backdrop-blur-sm">
             <CardContent className="p-4 space-y-4">
@@ -383,8 +331,8 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
           <Badge variant="outline" className="text-xs">
             {graphData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
           </Badge>
-          <Badge variant={is3D ? 'default' : 'secondary'} className="text-xs">
-            {is3D ? '3D' : '2D'}
+          <Badge variant="secondary" className="text-xs">
+            WebGL 2D
           </Badge>
         </div>
       </div>
@@ -421,22 +369,27 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
         </Card>
       </div>
 
-      {/* Graph */}
-      {is3D ? (
-        <ForceGraph3D
-          {...commonProps}
-          backgroundColor="hsl(var(--background))"
-          nodeThreeObject={(node: any) => {
-            // Use default sphere, color is set via nodeColor
-            return false;
-          }}
-        />
-      ) : (
+      {/* Graph - 2D only for now */}
+      <Suspense fallback={<GraphLoading />}>
         <ForceGraph2D
-          {...commonProps}
+          ref={fgRef}
+          graphData={graphData}
+          nodeLabel={nodeLabel}
+          nodeColor={(node: any) => node.color}
+          nodeVal={(node: any) => node.val * (nodeSize / 8)}
+          linkColor={(link: any) => link.color}
+          linkWidth={(link: any) => Math.max(1, link.value * 2)}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          onNodeClick={handleNodeClick}
+          enableNodeDrag={true}
+          cooldownTicks={100}
+          warmupTicks={50}
+          width={dimensions.width}
+          height={dimensions.height}
           nodeCanvasObject={nodeCanvasObject}
         />
-      )}
+      </Suspense>
     </div>
   );
 };
