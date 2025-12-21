@@ -20,9 +20,37 @@ import {
   Move
 } from 'lucide-react';
 
-// Lazy load force-graph components
-const ForceGraph3D = lazy(() => import('react-force-graph-3d').catch(() => ({ default: () => null })));
-const ForceGraph2D = lazy(() => import('react-force-graph-2d').catch(() => ({ default: () => null })));
+// Lazy load force-graph components with error logging
+const ForceGraph3D = lazy(() => 
+  import('react-force-graph-3d')
+    .then(module => {
+      console.log('✅ ForceGraph3D loaded successfully');
+      return module;
+    })
+    .catch((error) => {
+      console.error('❌ Failed to load ForceGraph3D:', error);
+      // Return a fallback component that shows the error
+      return { 
+        default: () => (
+          <div className="flex items-center justify-center h-full text-red-400 bg-[#0a0a0f] p-4">
+            <p>Erro ao carregar visualização 3D. Verifique o console.</p>
+          </div>
+        ) 
+      };
+    })
+);
+
+const ForceGraph2D = lazy(() => 
+  import('react-force-graph-2d')
+    .then(module => {
+      console.log('✅ ForceGraph2D loaded successfully');
+      return module;
+    })
+    .catch((error) => {
+      console.error('❌ Failed to load ForceGraph2D:', error);
+      return { default: () => null };
+    })
+);
 
 interface Node {
   id: string;
@@ -154,6 +182,13 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   }, [is3D]);
 
   const graphData = useMemo(() => {
+    console.log('KnowledgeGraph3D - Processing data:', { 
+      nodesCount: data.nodes.length, 
+      linksCount: data.links.length,
+      sampleNode: data.nodes[0],
+      sampleLink: data.links[0]
+    });
+
     const nodes = data.nodes.map(node => ({
       id: node.id,
       name: node.label,
@@ -188,6 +223,12 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       })
       // Filter out invalid links where source or target node doesn't exist
       .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+
+    console.log('KnowledgeGraph3D - Processed data:', { 
+      nodesCount: nodes.length, 
+      validLinksCount: links.length,
+      invalidLinksFiltered: data.links.length - links.length
+    });
 
     return { nodes, links };
   }, [data]);
