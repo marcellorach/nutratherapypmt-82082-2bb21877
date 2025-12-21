@@ -86,6 +86,37 @@
     "empty": {
       "title": "No graph data available",
       "description": "Approve and sync some triplets to visualize the knowledge graph"
+    },
+    "limit": {
+      "title": "Edge Limit",
+      "tooltip": "Controls how many edges are loaded from Neo4j. Higher values show more data but may slow down the visualization.",
+      "fast": "Fast",
+      "balanced": "Balanced",
+      "moderate": "Moderate",
+      "slow": "Slow",
+      "heavy": "Heavy"
+    },
+    "controls": {
+      "switchTo2D": "Switch to 2D",
+      "switchTo3D": "Switch to 3D",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "reset": "Reset View",
+      "fitView": "Fit to View",
+      "settings": "Settings",
+      "toggle3D": "Toggle 2D/3D visualization"
+    },
+    "settings": {
+      "nodeSize": "Node Size",
+      "linkOpacity": "Link Opacity"
+    },
+    "legend": {
+      "nutraceutical": "Nutraceutical",
+      "condition": "Condition",
+      "mechanism": "Mechanism",
+      "effect": "Effect",
+      "positive": "Positive",
+      "negative": "Negative"
     }
   },
   "chat": {
