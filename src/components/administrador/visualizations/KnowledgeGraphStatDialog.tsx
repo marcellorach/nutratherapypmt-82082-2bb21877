@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-type StatType = 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative';
+type StatType = 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions';
 
 interface KnowledgeGraphStatDialogProps {
   open: boolean;
@@ -119,14 +119,18 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
         case 'studies':
           await loadStudiesData();
           break;
-        case 'nodes':
-          await loadNodesData();
-          break;
-        case 'edges':
-        case 'positive':
-        case 'negative':
-          await loadRelationsData();
-          break;
+      case 'nodes':
+        await loadNodesData();
+        break;
+      case 'nutraceuticals':
+      case 'conditions':
+        await loadNodesData(statType);
+        break;
+      case 'edges':
+      case 'positive':
+      case 'negative':
+        await loadRelationsData();
+        break;
       }
     } catch (error) {
       console.error('Error loading stat data:', error);
@@ -189,23 +193,43 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
     setStudyContributions(Array.from(studyMap.values()).sort((a, b) => b.tripletCount - a.tripletCount));
   };
 
-  const loadNodesData = async () => {
+  const loadNodesData = async (filterType?: 'nutraceuticals' | 'conditions') => {
+    // Build query based on filter type
+    let typeFilter = '';
+    if (filterType === 'nutraceuticals') {
+      typeFilter = 'WHERE n:Nutraceutical OR n:Compound OR n:Drug';
+    } else if (filterType === 'conditions') {
+      typeFilter = 'WHERE n:Condition OR n:Disease';
+    }
+    
     // Get nodes from Neo4j via the edge function
     const { data } = await supabase.functions.invoke('graph-rag-search', {
       body: {
         queryType: 'cypher',
         cypherQuery: `
           MATCH (n)
+          ${typeFilter}
           OPTIONAL MATCH (n)-[r]-()
           WITH n, count(r) as connections
-          RETURN n, connections
+          RETURN n.name as name, labels(n)[0] as type, n.study_id as studyId, connections
           ORDER BY connections DESC
           LIMIT 200
         `
       }
     });
 
-    if (data?.success && data?.data?.nodes) {
+    if (data?.success && data?.data?.rows) {
+      // Parse the rows array - Neo4j returns columns: [name, type, studyId, connections]
+      const nodes = data.data.rows.map((row: any[], idx: number) => ({
+        id: `node-${idx}`,
+        label: row[0] || 'Unknown',
+        type: row[1] || 'Unknown',
+        source: row[2] ? 'study' : 'ontology',
+        connections: row[3] || 0,
+      }));
+      setGraphNodes(nodes);
+    } else if (data?.success && data?.data?.nodes) {
+      // Fallback for older response format
       const nodes = data.data.nodes.map((node: any) => ({
         id: node.id,
         label: node.properties?.name || node.id,
@@ -234,24 +258,43 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
     });
 
     if (data?.success && data?.data) {
-      // Parse relationships from the raw response
       const relations: GraphRelation[] = [];
       const negativeTypes = ['WORSENS', 'CAUSES_SIDE_EFFECT', 'CONTRAINDICATED_FOR', 'AGGRAVATES'];
       
-      data.data.relationships?.forEach((rel: any, idx: number) => {
-        const isNegative = rel.properties?.direction === 'negative' || 
-          negativeTypes.includes(rel.type);
-        
-        relations.push({
-          id: `rel-${idx}`,
-          sourceName: rel.sourceNode?.name || 'Unknown',
-          targetName: rel.targetNode?.name || 'Unknown',
-          type: rel.type,
-          confidence: rel.properties?.confidence || 0.8,
-          isNegative,
-          studyTitle: rel.properties?.study_title,
+      // Check if data is in rows format (column array) or relationships format
+      if (data.data.rows && Array.isArray(data.data.rows)) {
+        // Parse rows array - columns: [sourceName, relType, targetName, confidence, direction, studyTitle]
+        data.data.rows.forEach((row: any[], idx: number) => {
+          const [sourceName, relType, targetName, confidence, direction, studyTitle] = row;
+          const isNegative = direction === 'negative' || negativeTypes.includes(relType);
+          
+          relations.push({
+            id: `rel-${idx}`,
+            sourceName: sourceName || 'Unknown',
+            targetName: targetName || 'Unknown',
+            type: relType || 'UNKNOWN',
+            confidence: confidence || 0.8,
+            isNegative,
+            studyTitle: studyTitle || undefined,
+          });
         });
-      });
+      } else if (data.data.relationships && Array.isArray(data.data.relationships)) {
+        // Fallback for older response format
+        data.data.relationships.forEach((rel: any, idx: number) => {
+          const isNegative = rel.properties?.direction === 'negative' || 
+            negativeTypes.includes(rel.type);
+          
+          relations.push({
+            id: `rel-${idx}`,
+            sourceName: rel.sourceNode?.name || rel.source || 'Unknown',
+            targetName: rel.targetNode?.name || rel.target || 'Unknown',
+            type: rel.type,
+            confidence: rel.properties?.confidence || 0.8,
+            isNegative,
+            studyTitle: rel.properties?.study_title,
+          });
+        });
+      }
 
       setGraphRelations(relations);
     }
@@ -265,6 +308,10 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
         return t('knowledgeGraph.dialogs.studies.title', 'Study Contributions');
       case 'nodes':
         return t('knowledgeGraph.dialogs.nodes.title', 'Graph Nodes');
+      case 'nutraceuticals':
+        return t('knowledgeGraph.dialogs.nutraceuticals.title', 'Nutraceutical Nodes');
+      case 'conditions':
+        return t('knowledgeGraph.dialogs.conditions.title', 'Condition Nodes');
       case 'edges':
         return t('knowledgeGraph.dialogs.edges.title', 'All Relations');
       case 'positive':
@@ -282,6 +329,10 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
         return t('knowledgeGraph.dialogs.studies.description', 'Scientific studies contributing to the knowledge graph');
       case 'nodes':
         return t('knowledgeGraph.dialogs.nodes.description', 'All unique entities in the graph');
+      case 'nutraceuticals':
+        return t('knowledgeGraph.dialogs.nutraceuticals.description', 'Nutraceuticals, compounds and drugs in the knowledge graph');
+      case 'conditions':
+        return t('knowledgeGraph.dialogs.conditions.description', 'Health conditions and diseases in the knowledge graph');
       case 'edges':
         return t('knowledgeGraph.dialogs.edges.description', 'All connections between entities');
       case 'positive':
@@ -337,7 +388,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-3xl h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {statType === 'ontology' && <Database className="h-5 w-5 text-blue-600" />}
@@ -350,6 +401,8 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
               {statType === 'ontology' && stats.ontologyEntities}
               {statType === 'studies' && stats.tripletCount}
               {statType === 'nodes' && stats.totalNodes}
+              {statType === 'nutraceuticals' && graphNodes.length}
+              {statType === 'conditions' && graphNodes.length}
               {statType === 'edges' && stats.totalEdges}
               {statType === 'positive' && stats.positiveRelations}
               {statType === 'negative' && stats.negativeRelations}
@@ -369,7 +422,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
           />
         </div>
 
-        {/* Type Tabs for ontology and nodes */}
+        {/* Type Tabs for ontology and nodes only */}
         {(statType === 'ontology' || statType === 'nodes') && (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full justify-start flex-wrap h-auto gap-1">
@@ -385,8 +438,8 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
           </Tabs>
         )}
 
-        {/* Content */}
-        <ScrollArea className="flex-1 -mx-6 px-6">
+        {/* Content - min-h-0 is critical for flex scroll to work */}
+        <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 8 }).map((_, i) => (
@@ -475,8 +528,8 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                 </div>
               ))}
 
-              {/* Graph Nodes */}
-              {statType === 'nodes' && filteredNodes.map(node => (
+              {/* Graph Nodes - also used for nutraceuticals and conditions */}
+              {(statType === 'nodes' || statType === 'nutraceuticals' || statType === 'conditions') && filteredNodes.map(node => (
                 <div
                   key={node.id}
                   className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
