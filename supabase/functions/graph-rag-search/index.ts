@@ -45,6 +45,9 @@ interface GraphRAGResult {
     relationships: GraphRelationship[];
   }>;
   context: string;
+  // Dados tabulares raw para queries que retornam valores simples
+  rows?: any[];
+  fields?: string[];
 }
 
 async function getNeo4jCredentials(supabase: any): Promise<Neo4jCredentials | null> {
@@ -209,7 +212,10 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
     nodes: Array.from(nodes.values()),
     relationships,
     paths,
-    context: contextParts.join('\n')
+    context: contextParts.join('\n'),
+    // Incluir dados tabulares raw para o frontend processar
+    rows: values,
+    fields: fields
   };
 }
 
