@@ -4412,7 +4412,47 @@
     "tabs": {
       "review": "Review",
       "allEntities": "All Entities",
-      "misclassifications": "Misclassifications"
+      "misclassifications": "Misclassifications",
+      "duplicates": "Duplicates",
+      "aiSuggestions": "AI Suggestions"
+    },
+    "duplicates": {
+      "title": "Duplicate Check",
+      "description": "Terms appearing in multiple taxonomy categories",
+      "errorLoading": "Error loading duplicates",
+      "noDuplicates": "No duplicates found between categories",
+      "conflictsFound": "conflicts found",
+      "keepIn": "Keep in {{category}}",
+      "resolved": "\"{{term}}\" kept only in {{category}}",
+      "ignored": "\"{{term}}\" ignored",
+      "errorResolving": "Error resolving duplicate",
+      "showIgnored": "Show Ignored",
+      "hideIgnored": "Hide Ignored"
+    },
+    "aiSuggestions": {
+      "title": "AI Suggestions",
+      "description": "Use AI to automatically classify entities",
+      "errorLoading": "Error loading entities",
+      "noEntities": "No unclassified entities",
+      "unclassified": "unclassified",
+      "analyzeWithAI": "Analyze with AI",
+      "analyzing": "Analyzing with AI...",
+      "analysisComplete": "{{count}} entities analyzed",
+      "errorAnalyzing": "Error analyzing with AI",
+      "noPending": "No pending suggestions",
+      "allClassified": "All entities are already classified",
+      "andMore": "and {{count}} more...",
+      "alternatives": "Alternatives",
+      "accept": "Accept",
+      "accepted": "\"{{entity}}\" added to dictionary",
+      "rejected": "\"{{entity}}\" rejected",
+      "errorAccepting": "Error accepting suggestion",
+      "errorRejecting": "Error rejecting suggestion",
+      "tabs": {
+        "pending": "Pending",
+        "unclassified": "Unclassified",
+        "results": "Results"
+      }
     },
     "filters": {
       "searchPlaceholder": "Search entity...",

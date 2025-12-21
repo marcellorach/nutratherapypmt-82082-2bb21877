@@ -4412,7 +4412,47 @@
     "tabs": {
       "review": "Revisão",
       "allEntities": "Todas Entidades",
-      "misclassifications": "Reclassificações"
+      "misclassifications": "Reclassificações",
+      "duplicates": "Duplicatas",
+      "aiSuggestions": "Sugestões IA"
+    },
+    "duplicates": {
+      "title": "Verificação de Duplicatas",
+      "description": "Termos que aparecem em múltiplas categorias de taxonomia",
+      "errorLoading": "Erro ao carregar duplicatas",
+      "noDuplicates": "Nenhuma duplicata encontrada entre categorias",
+      "conflictsFound": "conflitos encontrados",
+      "keepIn": "Manter em {{category}}",
+      "resolved": "\"{{term}}\" mantido apenas em {{category}}",
+      "ignored": "\"{{term}}\" ignorado",
+      "errorResolving": "Erro ao resolver duplicata",
+      "showIgnored": "Mostrar Ignorados",
+      "hideIgnored": "Ocultar Ignorados"
+    },
+    "aiSuggestions": {
+      "title": "Sugestões de IA",
+      "description": "Use IA para classificar entidades automaticamente",
+      "errorLoading": "Erro ao carregar entidades",
+      "noEntities": "Nenhuma entidade não classificada",
+      "unclassified": "não classificadas",
+      "analyzeWithAI": "Analisar com IA",
+      "analyzing": "Analisando com IA...",
+      "analysisComplete": "{{count}} entidades analisadas",
+      "errorAnalyzing": "Erro ao analisar com IA",
+      "noPending": "Nenhuma sugestão pendente",
+      "allClassified": "Todas entidades já estão classificadas",
+      "andMore": "e mais {{count}}...",
+      "alternatives": "Alternativas",
+      "accept": "Aceitar",
+      "accepted": "\"{{entity}}\" adicionado ao dicionário",
+      "rejected": "\"{{entity}}\" rejeitado",
+      "errorAccepting": "Erro ao aceitar sugestão",
+      "errorRejecting": "Erro ao rejeitar sugestão",
+      "tabs": {
+        "pending": "Pendentes",
+        "unclassified": "Não Classificadas",
+        "results": "Resultados"
+      }
     },
     "filters": {
       "searchPlaceholder": "Buscar entidade...",

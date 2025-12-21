@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.classify-entity]
 verify_jwt = false
+
+[functions.suggest-taxonomy-terms]
+verify_jwt = false
