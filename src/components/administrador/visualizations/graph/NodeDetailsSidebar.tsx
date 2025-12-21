@@ -43,15 +43,24 @@ interface NodeDetailsSidebarProps {
 const getEntityIcon = (type: string) => {
   switch (type?.toLowerCase()) {
     case 'nutraceutical':
+    case 'compound':
+    case 'drug':
       return <Pill className="h-4 w-4" />;
     case 'condition':
     case 'disease':
       return <HeartPulse className="h-4 w-4" />;
     case 'mechanism':
+    case 'pathway':
+    case 'biologicalprocess':
       return <Dna className="h-4 w-4" />;
     case 'biological_effect':
     case 'effect':
       return <Zap className="h-4 w-4" />;
+    case 'target':
+    case 'receptor':
+    case 'enzyme':
+    case 'gene_protein':
+      return <Dna className="h-4 w-4" />;
     case 'study':
       return <FileText className="h-4 w-4" />;
     default:
@@ -62,12 +71,22 @@ const getEntityIcon = (type: string) => {
 const getEntityColor = (type: string) => {
   switch (type?.toLowerCase()) {
     case 'nutraceutical':
+    case 'compound':
+    case 'drug':
       return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
     case 'condition':
     case 'disease':
       return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
     case 'mechanism':
       return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+    case 'pathway':
+    case 'biologicalprocess':
+      return 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400';
+    case 'target':
+    case 'receptor':
+    case 'enzyme':
+    case 'gene_protein':
+      return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400';
     case 'biological_effect':
     case 'effect':
       return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';

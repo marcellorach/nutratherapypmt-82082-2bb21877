@@ -104,7 +104,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     network.on('click', handleClick);
     
     return () => {
-      network.off('click', handleClick);
+      // Verificar se network ainda existe antes de chamar off para evitar memory leak
+      if (network) {
+        network.off('click', handleClick);
+      }
     };
   }, [network, nodes, onNodeClick]);
   

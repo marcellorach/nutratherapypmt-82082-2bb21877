@@ -10,18 +10,18 @@ interface UseNetworkEventsProps {
 }
 
 export const useNetworkEvents = ({ network, nodes, edges }: UseNetworkEventsProps) => {
-  // Registrar eventos de clique
+  // Registrar eventos de clique - DESATIVADO: NetworkGraph.tsx já possui seu próprio handler
+  // para evitar conflitos e comportamentos inesperados
   const setupClickEvents = useCallback(() => {
-    if (!network.current) return;
-    
-    network.current.on('click', function(params) {
-      if (params.nodes.length > 0 && nodes.current) {
-        console.log('Nó clicado:', nodes.current.get(params.nodes[0]));
-      } else if (params.edges.length > 0 && edges.current) {
-        console.log('Aresta clicada:', edges.current.get(params.edges[0]));
-      }
-    });
-  }, [network, nodes, edges]);
+    // Handler de clique removido para evitar conflito com NetworkGraph.tsx
+    // Se necessário para debug, pode ser reativado:
+    // if (!network.current) return;
+    // network.current.on('click', function(params) {
+    //   if (params.nodes.length > 0 && nodes.current) {
+    //     console.log('Nó clicado:', nodes.current.get(params.nodes[0]));
+    //   }
+    // });
+  }, []);
 
   // Evento de estabilização
   const setupStabilizationEvents = useCallback(() => {
