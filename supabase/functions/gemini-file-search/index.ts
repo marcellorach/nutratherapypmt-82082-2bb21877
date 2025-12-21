@@ -2104,34 +2104,158 @@ serve(async (req) => {
           'regulation': 'REGULATES'
         };
         
-        // Helper function to determine entity type and layer (PascalCase for DB constraint)
+        // =========================================================================
+        // ROBUST ENTITY CLASSIFICATION - Based on UMLS/GO biomedical taxonomy
+        // =========================================================================
+        
+        // Dictionaries for accurate classification
+        const KNOWN_ENZYMES = new Set([
+          'catalase', 'superoxide dismutase', 'sod', 'sod1', 'sod2', 'glutathione peroxidase', 'gpx',
+          'cytochrome p450', 'cyp450', 'nadph oxidase', 'nox', 'xanthine oxidase', 'lipoxygenase', 'lox',
+          '5-lox', '12-lox', 'cyclooxygenase', 'cox', 'cox-1', 'cox-2', 'glutathione s-transferase', 'gst',
+          'kinase', 'phosphatase', 'transaminase', 'alt', 'ast', 'lipase', 'protease', 'amylase',
+          'mmp', 'matrix metalloproteinase', 'mmp-2', 'mmp-9', 'mmp-13', 'caspase', 'caspase-1', 'caspase-3',
+          'sirtuin', 'sirt1', 'sirt2', 'sirt3', 'parp', 'telomerase', 'acetylcholinesterase', 'ache',
+          'hmg-coa reductase', 'aromatase', 'phosphodiesterase', 'pde', 'monoamine oxidase', 'mao',
+        ]);
+        
+        const KNOWN_RECEPTORS = new Set([
+          'ppar', 'ppar-α', 'ppar-γ', 'peroxisome proliferator-activated receptor', 'lxr', 'fxr', 'rxr',
+          'vdr', 'vitamin d receptor', 'estrogen receptor', 'androgen receptor', 'glucocorticoid receptor',
+          'gpcr', 'adrenergic receptor', 'dopamine receptor', 'serotonin receptor', '5-ht', 'histamine receptor',
+          'muscarinic receptor', 'nicotinic receptor', 'opioid receptor', 'cannabinoid receptor', 'cb1', 'cb2',
+          'trp channel', 'trpv1', 'calcium channel', 'gabaa receptor', 'nmda receptor', 'ampa receptor',
+          'egfr', 'vegfr', 'igfr', 'insulin receptor', 'toll-like receptor', 'tlr', 'tlr4', 'nlrp3',
+        ]);
+        
+        const KNOWN_PROTEINS = new Set([
+          'nf-κb', 'nf-kappa-b', 'nfkb', 'ap-1', 'nrf2', 'hif-1α', 'stat', 'stat3', 'creb', 'foxo',
+          'p53', 'p21', 'myc', 'ampk', 'mtor', 'akt', 'tnf-α', 'tnf-alpha', 'tumor necrosis factor',
+          'il-1', 'il-1β', 'interleukin-1', 'il-6', 'interleukin-6', 'il-10', 'ifn-γ', 'interferon-gamma',
+          'tgf-β', 'transforming growth factor', 'egf', 'vegf', 'ngf', 'bdnf', 'brain-derived neurotrophic factor',
+          'bcl-2', 'bax', 'bak', 'cytochrome c', 'ras', 'raf', 'mek', 'erk', 'mapk', 'jnk', 'p38', 'pi3k',
+          'pgc-1α', 'complement', 'c3', 'crp', 'c-reactive protein', 'fibrinogen',
+        ]);
+        
+        const KNOWN_PATHWAYS = new Set([
+          'nf-κb pathway', 'nf-kb pathway', 'inflammasome', 'nlrp3 inflammasome', 'mapk pathway',
+          'jak-stat pathway', 'arachidonic acid pathway', 'pi3k/akt pathway', 'mtor pathway', 'ampk pathway',
+          'wnt pathway', 'notch pathway', 'tgf-β pathway', 'nrf2 pathway', 'autophagy pathway',
+          'apoptosis pathway', 'glycolysis', 'oxidative phosphorylation', 'electron transport chain',
+          'fatty acid oxidation', 'β-oxidation', 'mevalonate pathway',
+        ]);
+        
+        const KNOWN_PROCESSES = new Set([
+          'autophagy', 'mitophagy', 'apoptosis', 'necrosis', 'necroptosis', 'pyroptosis', 'ferroptosis',
+          'cell proliferation', 'cell differentiation', 'phagocytosis', 'endocytosis', 'exocytosis',
+          'protein synthesis', 'protein folding', 'protein degradation', 'phosphorylation', 'acetylation',
+          'cellular senescence', 'senescence', 'replicative senescence', 'telomere shortening', 'dna repair',
+          'oxidative stress', 'lipid peroxidation', 'inflammation', 'neuroinflammation', 'cytokine release',
+          'glucose metabolism', 'insulin signaling', 'lipid metabolism', 'cholesterol metabolism',
+          'ros production', 'antioxidant defense', 'glutathione metabolism', 'neurotransmission',
+          'synaptic plasticity', 'neurogenesis', 'angiogenesis', 'vasodilation', 'gene expression',
+        ]);
+        
+        const KNOWN_CONDITIONS = new Set([
+          'hypertension', 'heart failure', 'atherosclerosis', 'arrhythmia', 'cardiomyopathy', 'stroke',
+          'diabetes', 'insulin resistance', 'obesity', 'metabolic syndrome', 'dyslipidemia', 'nafld',
+          'alzheimer', 'dementia', 'parkinson', 'cognitive decline', 'neurodegeneration', 'neuropathy',
+          'osteoarthritis', 'arthritis', 'osteoporosis', 'sarcopenia', 'fibromyalgia', 'hip dysplasia',
+          'cancer', 'tumor', 'carcinoma', 'lymphoma', 'leukemia', 'inflammatory bowel disease', 'ibd',
+          'gastritis', 'hepatitis', 'cirrhosis', 'autoimmune disease', 'lupus', 'psoriasis', 'asthma',
+          'chronic kidney disease', 'nephropathy', 'depression', 'anxiety', 'aging', 'frailty',
+        ]);
+        
+        const KNOWN_CELLS = new Set([
+          'macrophage', 'monocyte', 'neutrophil', 'lymphocyte', 't cell', 'cd4+ t cell', 'cd8+ t cell',
+          'b cell', 'natural killer cell', 'nk cell', 'dendritic cell', 'mast cell', 'eosinophil',
+          'neuron', 'astrocyte', 'oligodendrocyte', 'microglia', 'catecholaminergic neurons',
+          'dopaminergic neurons', 'epithelial cell', 'endothelial cell', 'fibroblast', 'adipocyte',
+          'hepatocyte', 'cardiomyocyte', 'osteoblast', 'osteoclast', 'chondrocyte', 'stem cell',
+        ]);
+        
+        const KNOWN_NUTRACEUTICALS = new Set([
+          'curcumin', 'curcumina', 'quercetin', 'resveratrol', 'egcg', 'omega-3', 'dha', 'epa',
+          'glucosamine', 'chondroitin', 'msm', 'l-carnitine', 'taurine', 'coenzyme q10', 'coq10',
+          'vitamin d', 'vitamin e', 'vitamin c', 'zinc', 'selenium', 'magnesium', 'probiotics',
+          'silymarin', 'ginkgo biloba', 'ashwagandha', 'boswellia', 'nmn', 'nad+', 'nr', 'pterostilbene',
+          'spermidine', 'fisetin', 'alpha lipoic acid', 'melatonin', 'collagen', 'berberine',
+          'spirulina', 'chlorella', 'astaxanthin', 'lutein', 'lycopene', 'pqq',
+        ]);
+        
+        // Helper function to determine entity type and layer with ROBUST classification
         const getEntityTypeAndLayer = (entityName: string): { type: string; layer: string } => {
-          // Check if it matches a nutraceutical
+          const normalized = entityName.toLowerCase().trim();
+          
+          // 1. Check explicit nutraceuticals from extraction
           const matchedNut = extractedData.nutraceuticals.find(n => 
-            n.name.toLowerCase() === entityName.toLowerCase()
+            n.name.toLowerCase() === normalized
           );
           if (matchedNut) return { type: 'Nutraceutical', layer: 'layer_0_compound' };
           
-          // Check if it matches a mechanism
+          // 2. Dictionary-based classification (HIGH CONFIDENCE)
+          if (KNOWN_NUTRACEUTICALS.has(normalized)) return { type: 'Nutraceutical', layer: 'layer_0_compound' };
+          if (KNOWN_ENZYMES.has(normalized)) return { type: 'Enzyme', layer: 'layer_1_target' };
+          if (KNOWN_RECEPTORS.has(normalized)) return { type: 'Receptor', layer: 'layer_1_target' };
+          if (KNOWN_PROTEINS.has(normalized)) return { type: 'GeneProtein', layer: 'layer_1_target' };
+          if (KNOWN_PATHWAYS.has(normalized)) return { type: 'Pathway', layer: 'layer_1_target' };
+          if (KNOWN_PROCESSES.has(normalized)) return { type: 'BiologicalProcess', layer: 'layer_3_effect' };
+          if (KNOWN_CONDITIONS.has(normalized)) return { type: 'Condition', layer: 'layer_4_outcome' };
+          if (KNOWN_CELLS.has(normalized)) return { type: 'Cell', layer: 'context' };
+          
+          // 3. Pattern-based classification
+          // Enzyme patterns
+          if (/-ase$/.test(normalized) || /kinase|phosphatase|synthase|oxidase|reductase/i.test(normalized)) {
+            return { type: 'Enzyme', layer: 'layer_1_target' };
+          }
+          // Receptor patterns
+          if (/receptor|channel|\-r$/i.test(normalized)) {
+            return { type: 'Receptor', layer: 'layer_1_target' };
+          }
+          // Interleukin/Cytokine patterns
+          if (/^il-?\d+|interleukin|cytokine|interferon|tnf/i.test(normalized)) {
+            return { type: 'Cytokine', layer: 'layer_1_target' };
+          }
+          // Pathway patterns
+          if (/pathway|signaling|cascade/i.test(normalized)) {
+            return { type: 'Pathway', layer: 'layer_1_target' };
+          }
+          // Biological process patterns
+          if (/ation$|osis$|genesis$|lysis$|metabolism|response|regulation|activation|inhibition/i.test(normalized)) {
+            return { type: 'BiologicalProcess', layer: 'layer_3_effect' };
+          }
+          // Disease/Condition patterns
+          if (/disease|disorder|syndrome|deficiency|dysfunction|failure|itis$|emia$|pathy$/i.test(normalized)) {
+            return { type: 'Condition', layer: 'layer_4_outcome' };
+          }
+          // Cell patterns
+          if (/cell|cyte$|blast$|clast$/i.test(normalized)) {
+            return { type: 'Cell', layer: 'context' };
+          }
+          // Protein/Gene patterns
+          if (/^[A-Z]{2,5}\d?$/i.test(entityName) || /protein|factor/i.test(normalized)) {
+            return { type: 'GeneProtein', layer: 'layer_1_target' };
+          }
+          
+          // 4. Check extraction context (from other arrays)
           const matchedMech = extractedData.mechanisms.find(m => 
-            m.name.toLowerCase() === entityName.toLowerCase()
+            m.name.toLowerCase() === normalized
           );
           if (matchedMech) return { type: 'Mechanism', layer: 'layer_2_mechanism' };
           
-          // Check if it matches a biological effect
           const matchedEff = extractedData.biological_effects.find(e => 
-            e.name.toLowerCase() === entityName.toLowerCase()
+            e.name.toLowerCase() === normalized
           );
           if (matchedEff) return { type: 'BiologicalProcess', layer: 'layer_3_effect' };
           
-          // Check if it matches a condition
           const matchedCond = extractedData.conditions.find(c => 
-            c.name.toLowerCase() === entityName.toLowerCase()
+            c.name.toLowerCase() === normalized
           );
           if (matchedCond) return { type: 'Condition', layer: 'layer_4_outcome' };
           
-          // Default to Compound (valid type for DB constraint)
-          return { type: 'Compound', layer: 'layer_0_compound' };
+          // 5. Default to Entity (NOT Nutraceutical!) - requires manual curation
+          console.warn(`⚠️ Unknown entity type for: "${entityName}" - defaulting to Entity`);
+          return { type: 'Entity', layer: 'unknown' };
         };
         
         // Helper to clamp confidence between 0 and 1
