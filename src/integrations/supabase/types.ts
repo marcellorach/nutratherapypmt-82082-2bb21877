@@ -1596,6 +1596,51 @@ export type Database = {
         }
         Relationships: []
       }
+      taxonomy_suggestions: {
+        Row: {
+          alternative_categories: string[] | null
+          confidence: number
+          created_at: string | null
+          entity_name: string
+          id: string
+          reasoning: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_entity_ids: string[] | null
+          status: string | null
+          suggested_category: string
+          updated_at: string | null
+        }
+        Insert: {
+          alternative_categories?: string[] | null
+          confidence: number
+          created_at?: string | null
+          entity_name: string
+          id?: string
+          reasoning?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_entity_ids?: string[] | null
+          status?: string | null
+          suggested_category: string
+          updated_at?: string | null
+        }
+        Update: {
+          alternative_categories?: string[] | null
+          confidence?: number
+          created_at?: string | null
+          entity_name?: string
+          id?: string
+          reasoning?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_entity_ids?: string[] | null
+          status?: string | null
+          suggested_category?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       translations: {
         Row: {
           created_at: string | null

@@ -25,10 +25,14 @@ import {
   AlertCircle,
   ChevronRight,
   Play,
-  Settings2
+  Settings2,
+  Sparkles,
+  Brain
 } from 'lucide-react';
 import { classifyEntity, TYPE_TO_LAYER, getTaxonomyStats, getTaxonomyTerms, TAXONOMY_CATEGORIES } from '@/data/biomedical-taxonomy';
 import TaxonomyDictionaryDialog from './TaxonomyDictionaryDialog';
+import TaxonomyDuplicateChecker from './TaxonomyDuplicateChecker';
+import AISuggestionPanel from './AISuggestionPanel';
 
 interface EntityAuditItem {
   id: string;
@@ -477,6 +481,14 @@ const OntologyAuditTab: React.FC = () => {
           <TabsTrigger value="misclassifications">
             {t('ontologyAudit.tabs.misclassifications')}
           </TabsTrigger>
+          <TabsTrigger value="duplicates" className="flex items-center gap-2">
+            <Merge className="h-4 w-4" />
+            {t('ontologyAudit.tabs.duplicates')}
+          </TabsTrigger>
+          <TabsTrigger value="ai-suggestions" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            {t('ontologyAudit.tabs.aiSuggestions')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="review" className="space-y-4">
@@ -723,6 +735,14 @@ const OntologyAuditTab: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="duplicates">
+          <TaxonomyDuplicateChecker />
+        </TabsContent>
+
+        <TabsContent value="ai-suggestions">
+          <AISuggestionPanel />
         </TabsContent>
       </Tabs>
     </div>
