@@ -24,9 +24,11 @@ import {
   BarChart3,
   AlertCircle,
   ChevronRight,
-  Play
+  Play,
+  Settings2
 } from 'lucide-react';
-import { classifyEntity, TYPE_TO_LAYER, getTaxonomyStats } from '@/data/biomedical-taxonomy';
+import { classifyEntity, TYPE_TO_LAYER, getTaxonomyStats, getTaxonomyTerms, TAXONOMY_CATEGORIES } from '@/data/biomedical-taxonomy';
+import TaxonomyDictionaryDialog from './TaxonomyDictionaryDialog';
 
 interface EntityAuditItem {
   id: string;
@@ -65,6 +67,10 @@ const OntologyAuditTab: React.FC = () => {
   const [selectedEntity, setSelectedEntity] = useState<EntityAuditItem | null>(null);
   const [newType, setNewType] = useState('');
   const [processing, setProcessing] = useState(false);
+  
+  // Taxonomy dictionary dialog state
+  const [taxonomyDialogOpen, setTaxonomyDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<{ key: string; label: string } | null>(null);
 
   const taxonomyStats = getTaxonomyStats();
 
@@ -411,19 +417,52 @@ const OntologyAuditTab: React.FC = () => {
             <BarChart3 className="h-5 w-5" />
             {t('ontologyAudit.taxonomy.title')}
           </CardTitle>
-          <CardDescription>{t('ontologyAudit.taxonomy.description')}</CardDescription>
+          <CardDescription>
+            {t('ontologyAudit.taxonomy.description')}
+            <span className="ml-2 text-xs text-primary">{t('ontologyAudit.taxonomy.clickToManage')}</span>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {Object.entries(taxonomyStats).map(([key, count]) => (
-              <div key={key} className="p-3 rounded-lg border bg-card">
-                <div className="text-lg font-semibold">{count}</div>
-                <div className="text-xs text-muted-foreground capitalize">{key.replace('_', ' ')}</div>
-              </div>
-            ))}
+            {Object.entries(taxonomyStats)
+              .filter(([key]) => key !== 'total')
+              .map(([key, count]) => {
+                const categoryMeta = TAXONOMY_CATEGORIES.find(c => c.key === key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setSelectedCategory({ 
+                        key, 
+                        label: t(`ontologyAudit.taxonomy.categories.${key}`, key.replace('_', ' '))
+                      });
+                      setTaxonomyDialogOpen(true);
+                    }}
+                    className="p-3 rounded-lg border bg-card hover:bg-accent hover:border-primary/50 transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-lg font-semibold">{count}</div>
+                      <Settings2 className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="text-xs text-muted-foreground capitalize">{key.replace('_', ' ')}</div>
+                    {categoryMeta && (
+                      <div className={`w-full h-1 rounded-full mt-2 ${categoryMeta.color} opacity-50`} />
+                    )}
+                  </button>
+                );
+              })}
           </div>
         </CardContent>
       </Card>
+
+      {/* Taxonomy Dictionary Dialog */}
+      <TaxonomyDictionaryDialog
+        open={taxonomyDialogOpen}
+        onOpenChange={setTaxonomyDialogOpen}
+        category={selectedCategory?.key || ''}
+        categoryLabel={selectedCategory?.label || ''}
+        initialTerms={selectedCategory ? getTaxonomyTerms(selectedCategory.key) : []}
+      />
 
       <Tabs defaultValue="review" className="w-full">
         <TabsList>

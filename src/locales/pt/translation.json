@@ -4392,7 +4392,22 @@
     },
     "taxonomy": {
       "title": "Visão Geral da Taxonomia",
-      "description": "Dicionários de classificação biomédica disponíveis"
+      "description": "Dicionários de classificação biomédica disponíveis",
+      "clickToManage": "(clique para gerenciar)",
+      "categories": {
+        "nutraceuticals": "Nutracêuticos",
+        "drugs": "Medicamentos",
+        "enzymes": "Enzimas",
+        "receptors": "Receptores",
+        "pathways": "Vias Biológicas",
+        "genes_proteins": "Genes/Proteínas",
+        "mechanisms": "Mecanismos",
+        "biological_processes": "Processos Biológicos",
+        "effects": "Efeitos",
+        "conditions": "Condições",
+        "cell_types": "Tipos Celulares",
+        "cell_components": "Componentes Celulares"
+      }
     },
     "tabs": {
       "review": "Revisão",
@@ -4444,6 +4459,50 @@
       "loadFailed": "Erro ao carregar entidades para auditoria",
       "reclassifyFailed": "Erro ao reclassificar entidade",
       "bulkPartialFailed": "{{count}} entidades falharam ao reclassificar"
+    }
+  },
+  "taxonomyDialog": {
+    "title": "Gerenciar {{category}}",
+    "description": "Adicione, edite ou remova termos do dicionário de classificação",
+    "search": "Buscar termos...",
+    "addPlaceholder": "Novo termo...",
+    "staticWarning": "Estes termos são do arquivo local. Migre para o banco de dados para poder editar.",
+    "noResults": "Nenhum termo encontrado",
+    "empty": "Nenhum termo cadastrado",
+    "actions": {
+      "add": "Adicionar",
+      "migrate": "Migrar para Banco"
+    },
+    "sources": {
+      "manual": "Manual",
+      "imported": "Importado",
+      "seed": "Inicial",
+      "static": "Arquivo"
+    },
+    "footer": {
+      "showing": "Mostrando {{filtered}} de {{total}} termos"
+    },
+    "info": {
+      "allDuplicates": "Todos os termos importados já existem"
+    },
+    "success": {
+      "added": "Termo adicionado com sucesso",
+      "deleted": "Termo removido",
+      "updated": "Termo atualizado",
+      "migrated": "{{count}} termos migrados para o banco",
+      "exported": "Dicionário exportado",
+      "imported": "{{count}} termos importados"
+    },
+    "errors": {
+      "duplicate": "Este termo já existe",
+      "addFailed": "Erro ao adicionar termo",
+      "deleteFailed": "Erro ao remover termo",
+      "updateFailed": "Erro ao atualizar termo",
+      "migrateFailed": "Erro ao migrar termos",
+      "importFailed": "Erro ao importar arquivo",
+      "emptyImport": "Arquivo vazio ou formato inválido",
+      "cannotDeleteStatic": "Não é possível remover termos do arquivo local. Migre primeiro.",
+      "cannotEditStatic": "Não é possível editar termos do arquivo local. Migre primeiro."
     }
   }
 }

@@ -4392,7 +4392,22 @@
     },
     "taxonomy": {
       "title": "Taxonomy Overview",
-      "description": "Available biomedical classification dictionaries"
+      "description": "Available biomedical classification dictionaries",
+      "clickToManage": "(click to manage)",
+      "categories": {
+        "nutraceuticals": "Nutraceuticals",
+        "drugs": "Drugs",
+        "enzymes": "Enzymes",
+        "receptors": "Receptors",
+        "pathways": "Pathways",
+        "genes_proteins": "Genes/Proteins",
+        "mechanisms": "Mechanisms",
+        "biological_processes": "Biological Processes",
+        "effects": "Effects",
+        "conditions": "Conditions",
+        "cell_types": "Cell Types",
+        "cell_components": "Cell Components"
+      }
     },
     "tabs": {
       "review": "Review",
@@ -4444,6 +4459,50 @@
       "loadFailed": "Error loading entities for audit",
       "reclassifyFailed": "Error reclassifying entity",
       "bulkPartialFailed": "{{count}} entities failed to reclassify"
+    }
+  },
+  "taxonomyDialog": {
+    "title": "Manage {{category}}",
+    "description": "Add, edit or remove terms from the classification dictionary",
+    "search": "Search terms...",
+    "addPlaceholder": "New term...",
+    "staticWarning": "These terms are from the local file. Migrate to database to enable editing.",
+    "noResults": "No terms found",
+    "empty": "No terms registered",
+    "actions": {
+      "add": "Add",
+      "migrate": "Migrate to Database"
+    },
+    "sources": {
+      "manual": "Manual",
+      "imported": "Imported",
+      "seed": "Initial",
+      "static": "File"
+    },
+    "footer": {
+      "showing": "Showing {{filtered}} of {{total}} terms"
+    },
+    "info": {
+      "allDuplicates": "All imported terms already exist"
+    },
+    "success": {
+      "added": "Term added successfully",
+      "deleted": "Term removed",
+      "updated": "Term updated",
+      "migrated": "{{count}} terms migrated to database",
+      "exported": "Dictionary exported",
+      "imported": "{{count}} terms imported"
+    },
+    "errors": {
+      "duplicate": "This term already exists",
+      "addFailed": "Error adding term",
+      "deleteFailed": "Error removing term",
+      "updateFailed": "Error updating term",
+      "migrateFailed": "Error migrating terms",
+      "importFailed": "Error importing file",
+      "emptyImport": "Empty file or invalid format",
+      "cannotDeleteStatic": "Cannot remove terms from local file. Migrate first.",
+      "cannotEditStatic": "Cannot edit terms from local file. Migrate first."
     }
   }
 }
