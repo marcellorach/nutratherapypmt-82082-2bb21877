@@ -117,6 +117,7 @@ export const NodeDetailsSidebar: React.FC<NodeDetailsSidebarProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // Early return DEPOIS de todos os hooks para manter contagem consistente
   if (!nodeData) return null;
 
   const incomingConnections = nodeData.connectedNodes.filter(n => n.relationDirection === 'incoming');
