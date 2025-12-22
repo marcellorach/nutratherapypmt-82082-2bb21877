@@ -30,9 +30,12 @@ const ForceGraphLoadError: React.FC = () => {
 };
 
 // Lazy load force-graph components with error logging
-const ForceGraph3D = lazy(() => 
+// NOTE: react-force-graph-3d exports a component type that includes ref typing (FCwithRef).
+// Our fallback component doesn't need to match that ref typing, so we cast the lazy component
+// to a generic ComponentType to keep TypeScript happy while preserving runtime behavior.
+const ForceGraph3D = lazy((): Promise<any> =>
   import('react-force-graph-3d')
-    .then(module => {
+    .then((module) => {
       console.log('✅ ForceGraph3D loaded successfully');
       return module;
     })
@@ -40,11 +43,11 @@ const ForceGraph3D = lazy(() =>
       console.error('❌ Failed to load ForceGraph3D:', error);
       return { default: ForceGraphLoadError };
     })
-);
+) as unknown as React.LazyExoticComponent<React.ComponentType<any>>;
 
-const ForceGraph2D = lazy(() => 
+const ForceGraph2D = lazy((): Promise<any> =>
   import('react-force-graph-2d')
-    .then(module => {
+    .then((module) => {
       console.log('✅ ForceGraph2D loaded successfully');
       return module;
     })
@@ -52,7 +55,7 @@ const ForceGraph2D = lazy(() =>
       console.error('❌ Failed to load ForceGraph2D:', error);
       return { default: () => null };
     })
-);
+) as unknown as React.LazyExoticComponent<React.ComponentType<any>>;
 
 interface Node {
   id: string;
