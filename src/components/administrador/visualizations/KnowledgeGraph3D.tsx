@@ -20,6 +20,15 @@ import {
   Move
 } from 'lucide-react';
 
+const ForceGraphLoadError: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center justify-center h-full text-red-400 bg-[#0a0a0f] p-4">
+      <p>{t('knowledgeGraph.errors.forceGraph3DLoad')}</p>
+    </div>
+  );
+};
+
 // Lazy load force-graph components with error logging
 const ForceGraph3D = lazy(() => 
   import('react-force-graph-3d')
@@ -29,14 +38,7 @@ const ForceGraph3D = lazy(() =>
     })
     .catch((error) => {
       console.error('❌ Failed to load ForceGraph3D:', error);
-      // Return a fallback component that shows the error
-      return { 
-        default: () => (
-          <div className="flex items-center justify-center h-full text-red-400 bg-[#0a0a0f] p-4">
-            <p>Erro ao carregar visualização 3D. Verifique o console.</p>
-          </div>
-        ) 
-      };
+      return { default: ForceGraphLoadError };
     })
 );
 
@@ -182,23 +184,37 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   }, [is3D]);
 
   const graphData = useMemo(() => {
-    console.log('KnowledgeGraph3D - Processing data:', { 
-      nodesCount: data.nodes.length, 
+    console.log('KnowledgeGraph3D - Processing data:', {
+      nodesCount: data.nodes.length,
       linksCount: data.links.length,
       sampleNode: data.nodes[0],
       sampleLink: data.links[0]
     });
 
-    const nodes = data.nodes.map(node => ({
-      id: node.id,
-      name: node.label,
-      type: node.type,
-      group: node.group || node.type,
-      val: Math.max(1, (node.connections || 1)),
-      color: node.color || getNodeColor(node.type, node.source),
-      source: node.source,
-      properties: node.properties,
-    }));
+    const normalizeId = (v: any): string | null => {
+      if (v == null) return null;
+      if (typeof v === 'object') return normalizeId((v as any).id);
+      const s = String(v).trim();
+      return s.length ? s : null;
+    };
+
+    const nodes = data.nodes
+      .map(node => {
+        const id = normalizeId(node.id);
+        if (!id) return null;
+
+        return {
+          id,
+          name: node.label,
+          type: node.type,
+          group: node.group || node.type,
+          val: Math.max(1, (node.connections || 1)),
+          color: node.color || getNodeColor(node.type, node.source),
+          source: node.source,
+          properties: node.properties,
+        };
+      })
+      .filter(Boolean) as any[];
 
     // Create set of valid node IDs for validation
     const nodeIds = new Set(nodes.map(n => n.id));
@@ -206,29 +222,42 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     // Map links - accept both from/to and source/target formats
     const links = data.links
       .map(link => {
-        const sourceId = link.source || (link as any).from;
-        const targetId = link.target || (link as any).to;
-        
-        const resolvedSource = typeof sourceId === 'object' ? (sourceId as any).id : sourceId;
-        const resolvedTarget = typeof targetId === 'object' ? (targetId as any).id : targetId;
-        
+        const sourceId = normalizeId(link.source ?? link.from);
+        const targetId = normalizeId(link.target ?? link.to);
+
         return {
-          source: resolvedSource,
-          target: resolvedTarget,
+          source: sourceId,
+          target: targetId,
           value: link.value || 1,
           color: getLinkColor(link.isNegative),
           isNegative: link.isNegative,
           label: link.label,
         };
       })
-      // Filter out invalid links where source or target node doesn't exist
+      // Filter out invalid links where source or target is missing
+      .filter(link => !!link.source && !!link.target)
+      // Keep only links whose endpoints exist in the nodes list
       .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
 
-    console.log('KnowledgeGraph3D - Processed data:', { 
-      nodesCount: nodes.length, 
+    console.log('KnowledgeGraph3D - Processed data:', {
+      nodesCount: nodes.length,
       validLinksCount: links.length,
       invalidLinksFiltered: data.links.length - links.length
     });
+
+    // If everything got filtered, log one sample to help debugging
+    if (links.length === 0 && data.links.length > 0 && nodes.length > 0) {
+      const raw = data.links[0];
+      const sampleSource = normalizeId((raw as any).source ?? (raw as any).from);
+      const sampleTarget = normalizeId((raw as any).target ?? (raw as any).to);
+      console.log('KnowledgeGraph3D - Debug membership sample:', {
+        sampleSource,
+        sampleTarget,
+        sampleSourceExists: !!sampleSource && nodeIds.has(sampleSource),
+        sampleTargetExists: !!sampleTarget && nodeIds.has(sampleTarget),
+        firstNodeId: nodes[0]?.id
+      });
+    }
 
     return { nodes, links };
   }, [data]);
@@ -298,12 +327,14 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   };
 
   const nodeLabel = useCallback((node: any) => {
+    const sourceLabel = t('knowledgeGraph.nodeTooltip.source');
+
     return `<div style="background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);">
       <strong style="font-size: 14px;">${node.name}</strong><br/>
       <span style="color: #9ca3af; font-size: 11px;">${node.type}</span>
-      ${node.source ? `<br/><span style="color: #6ee7b7; font-size: 11px;">Source: ${node.source}</span>` : ''}
+      ${node.source ? `<br/><span style="color: #6ee7b7; font-size: 11px;">${sourceLabel}: ${node.source}</span>` : ''}
     </div>`;
-  }, []);
+  }, [t]);
 
   if (graphError) {
     return (
@@ -332,10 +363,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
                   className={is3D ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}
                 >
                   {is3D ? <Box className="h-4 w-4 mr-1" /> : <Square className="h-4 w-4 mr-1" />}
-                  {is3D ? '3D' : '2D'}
+                  {is3D ? t('knowledgeGraph.viewModes.threeD') : t('knowledgeGraph.viewModes.twoD')}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{is3D ? t('knowledgeGraph.controls.switch2D', 'Switch to 2D') : t('knowledgeGraph.controls.switch3D', 'Switch to 3D')}</TooltipContent>
+              <TooltipContent>{is3D ? t('knowledgeGraph.controls.switchTo2D') : t('knowledgeGraph.controls.switchTo3D')}</TooltipContent>
             </Tooltip>
 
             <div className="w-px h-6 bg-white/20" />
@@ -433,7 +464,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             {graphData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
           </Badge>
           <Badge className={`text-xs ${is3D ? 'bg-blue-600/80 text-white' : 'bg-white/10 text-white/80'}`}>
-            {is3D ? 'WebGL 3D' : 'Canvas 2D'}
+            {is3D ? t('knowledgeGraph.renderModes.webgl3d') : t('knowledgeGraph.renderModes.canvas2d')}
           </Badge>
         </div>
       </div>
@@ -443,13 +474,13 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
         <div className="flex items-center gap-4 text-xs text-white/40 bg-black/40 backdrop-blur-sm px-3 py-2 rounded-lg">
           <span className="flex items-center gap-1">
             <MousePointer className="h-3 w-3" />
-            {is3D ? 'Drag: rotate' : 'Drag: pan'}
+            {is3D ? t('knowledgeGraph.hints.dragRotate') : t('knowledgeGraph.hints.dragPan')}
           </span>
           <span className="flex items-center gap-1">
             <Move className="h-3 w-3" />
-            {is3D ? 'Right-drag: pan' : ''}
+            {is3D ? t('knowledgeGraph.hints.rightDragPan') : ''}
           </span>
-          <span>Scroll: zoom</span>
+          <span>{t('knowledgeGraph.hints.scrollZoom')}</span>
         </div>
       </div>
 
@@ -490,7 +521,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             nodeColor={(node: any) => node.color}
             nodeVal={(node: any) => node.val * nodeSize}
             nodeOpacity={0.95}
-            linkColor={(link: any) => `rgba(255, 255, 255, ${linkOpacity})`}
+            linkColor={(link: any) => link.color}
             linkWidth={0.5}
             linkOpacity={linkOpacity}
             onNodeClick={handleNodeClick}
@@ -510,7 +541,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             nodeLabel={nodeLabel}
             nodeColor={(node: any) => node.color}
             nodeVal={(node: any) => node.val * nodeSize}
-            linkColor={(link: any) => `rgba(255, 255, 255, ${linkOpacity})`}
+            linkColor={(link: any) => link.color}
             linkWidth={0.5}
             onNodeClick={handleNodeClick}
             enableNodeDrag={true}
