@@ -102,7 +102,7 @@ const NODE_COLORS: Record<string, string> = {
   disease: '#ef4444',          // Vermelho (problema/doença)
   
   // Mecanismos e processos - cor única
-  mechanism: '#0891b2',        // Ciano escuro (processo)
+  mechanism: '#1e3a5f',        // Azul escuro (processo)
   
   // Efeitos - cores vibrantes distintas
   effect: '#06b6d4',           // Ciano claro (resultado)
