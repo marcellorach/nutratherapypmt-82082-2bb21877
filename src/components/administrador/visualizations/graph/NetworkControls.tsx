@@ -42,12 +42,15 @@ const NetworkControls: React.FC<NetworkControlsProps> = ({ network, className = 
     }
   };
   
+  const isDisabled = !network;
+  
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <Button 
         variant="outline" 
         size="icon" 
         onClick={handleZoomIn}
+        disabled={isDisabled}
         title="Aumentar zoom"
       >
         <ZoomIn className="h-4 w-4" />
@@ -57,6 +60,7 @@ const NetworkControls: React.FC<NetworkControlsProps> = ({ network, className = 
         variant="outline" 
         size="icon" 
         onClick={handleZoomOut}
+        disabled={isDisabled}
         title="Diminuir zoom"
       >
         <ZoomOut className="h-4 w-4" />
@@ -66,6 +70,7 @@ const NetworkControls: React.FC<NetworkControlsProps> = ({ network, className = 
         variant="outline" 
         size="icon" 
         onClick={handleFit}
+        disabled={isDisabled}
         title="Ajustar visualização"
       >
         <Maximize className="h-4 w-4" />
@@ -75,6 +80,7 @@ const NetworkControls: React.FC<NetworkControlsProps> = ({ network, className = 
         variant="outline" 
         size="icon" 
         onClick={handleRefresh}
+        disabled={isDisabled}
         title="Recalcular layout"
       >
         <RefreshCw className="h-4 w-4" />
