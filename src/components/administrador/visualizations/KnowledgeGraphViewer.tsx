@@ -361,9 +361,16 @@ export const KnowledgeGraphViewer: React.FC = () => {
     const nodeMap = new Map<string, any>();
     const links: any[] = [];
 
-    // Process nodes
-    graphResult.nodes.forEach((node: any) => {
-      const nodeId = node.id;
+    console.log('📊 processGraphResult input:', {
+      nodesCount: graphResult.nodes?.length || 0,
+      relationshipsCount: graphResult.relationships?.length || 0,
+      sampleNode: graphResult.nodes?.[0],
+      sampleRelationship: graphResult.relationships?.[0]
+    });
+
+    // Process nodes - build a map for fast lookups
+    (graphResult.nodes || []).forEach((node: any) => {
+      const nodeId = String(node.id);
       if (!nodeMap.has(nodeId)) {
         // Determine if node is from ontology or study extraction
         const isFromStudy = node.properties?.study_id || node.properties?.triplet_id;
@@ -371,12 +378,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
         
         nodeMap.set(nodeId, {
           id: nodeId,
-          label: node.properties.name || node.properties.title || node.id,
+          label: node.label || node.properties?.name || node.properties?.title || nodeId,
           type: node.type,
           group: node.type,
           value: 1,
-          title: `${node.type}: ${node.properties.name || node.id}\n[Source: ${nodeSource}]`,
-          properties: node.properties,
+          title: `${node.type}: ${node.label || node.properties?.name || nodeId}\n[Source: ${nodeSource}]`,
+          properties: node.properties || {},
           source: nodeSource
         });
       } else {
@@ -385,10 +392,19 @@ export const KnowledgeGraphViewer: React.FC = () => {
       }
     });
 
-    // Process relationships
-    graphResult.relationships.forEach((rel: any) => {
-      const sourceNode = nodeMap.get(rel.source);
-      const targetNode = nodeMap.get(rel.target);
+    console.log(`📊 Nodes processed: ${nodeMap.size}`);
+
+    // Process relationships - using nodeMap for O(1) lookups
+    // Support both 'relationships' array and alternative formats
+    const relationships = graphResult.relationships || [];
+    
+    relationships.forEach((rel: any) => {
+      // Support both source/target (from backend) and from/to formats
+      const sourceId = String(rel.source || rel.from || '');
+      const targetId = String(rel.target || rel.to || '');
+      
+      const sourceNode = nodeMap.get(sourceId);
+      const targetNode = nodeMap.get(targetId);
       
       if (sourceNode && targetNode) {
         const confidence = rel.properties?.confidence || rel.properties?.extraction_confidence || 0.8;
@@ -401,21 +417,28 @@ export const KnowledgeGraphViewer: React.FC = () => {
                          rel.properties?.source === 'ontology' ? 'ontology' : 'known';
         
         links.push({
-          from: rel.source,
-          to: rel.target,
+          from: sourceId,
+          to: targetId,
+          // Also include source/target for 3D graph compatibility
+          source: sourceId,
+          target: targetId,
           label: rel.type,
           title: `${rel.type} ${isNegative ? '⚠️ Negative' : '✓ Positive'} (${Math.round(confidence * 100)}%)\n[Source: ${relSource}]`,
           value: confidence,
           color: getEdgeColor(confidence, isNegative, relSource),
           width: 2 + confidence * 2,
           dashes: isNegative ? [5, 5] : false,
-          properties: rel.properties,
+          properties: rel.properties || {},
           direction: direction,
           isNegative: isNegative,
-          source: relSource
+          relSource: relSource
         });
+      } else {
+        console.log(`  ⚠️ Skipped relationship: source=${sourceId} (exists: ${!!sourceNode}), target=${targetId} (exists: ${!!targetNode})`);
       }
     });
+
+    console.log(`📊 Links processed: ${links.length} (from ${relationships.length} relationships)`);
 
     // Calculate real connection counts from edges
     const connectionCounts = new Map<string, number>();
@@ -438,11 +461,11 @@ export const KnowledgeGraphViewer: React.FC = () => {
     const stats: GraphStats = {
       totalNodes: nodes.length,
       totalEdges: links.length,
-      nutraceuticals: nodes.filter(n => n.type === 'Nutraceutical').length,
-      conditions: nodes.filter(n => n.type === 'Condition').length,
-      mechanisms: nodes.filter(n => n.type === 'Mechanism').length,
-      effects: nodes.filter(n => n.type === 'Effect').length,
-      avgConnections: links.length > 0 ? (links.length * 2) / nodes.length : 0,
+      nutraceuticals: nodes.filter(n => n.type?.toLowerCase() === 'nutraceutical').length,
+      conditions: nodes.filter(n => n.type?.toLowerCase() === 'condition').length,
+      mechanisms: nodes.filter(n => n.type?.toLowerCase() === 'mechanism').length,
+      effects: nodes.filter(n => n.type?.toLowerCase() === 'effect' || n.type?.toLowerCase() === 'biological_effect').length,
+      avgConnections: nodes.length > 0 ? (links.length * 2) / nodes.length : 0,
       positiveRelations: positiveLinks.length,
       negativeRelations: negativeLinks.length,
       topConnected: nodes
@@ -450,6 +473,8 @@ export const KnowledgeGraphViewer: React.FC = () => {
         .slice(0, 5)
         .map(n => ({ name: n.label, connections: n.connections }))
     };
+
+    console.log('📊 Final stats:', stats);
 
     setGraphData({ nodes, links });
     setStats(stats);
