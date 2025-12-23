@@ -4595,5 +4595,27 @@
       "cannotDeleteStatic": "Não é possível remover termos do arquivo local. Migre primeiro.",
       "cannotEditStatic": "Não é possível editar termos do arquivo local. Migre primeiro."
     }
+  },
+  "legend": {
+    "nodesTitle": "Nós",
+    "edgesTitle": "Relações",
+    "nodes": {
+      "nutraceutical": "Nutracêutico",
+      "compound": "Composto",
+      "drug": "Fármaco",
+      "condition": "Condição",
+      "disease": "Doença",
+      "mechanism": "Mecanismo",
+      "effect": "Efeito",
+      "biological_effect": "Efeito Biológico"
+    },
+    "edges": {
+      "activation": "Ativação",
+      "inhibition": "Inibição",
+      "modulation": "Modulação",
+      "binding": "Ligação",
+      "participation": "Participação",
+      "association": "Associação"
+    }
   }
 }

@@ -23,6 +23,7 @@ import {
   Type
 } from 'lucide-react';
 import SpriteText from 'three-spritetext';
+import BiologicalLegend from './graph/BiologicalLegend';
 
 const ForceGraphLoadError: React.FC = () => {
   const { t } = useTranslation();
@@ -606,16 +607,9 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 z-10">
-        <div className="flex flex-wrap gap-2 text-xs bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 max-w-[300px]">
-          {Object.entries(NODE_COLORS).slice(0, 8).map(([type, color]) => (
-            <span key={type} className="flex items-center gap-1 text-slate-600">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-              <span className="capitalize">{type}</span>
-            </span>
-          ))}
-        </div>
+      {/* Legend - Biological notation */}
+      <div className="absolute bottom-4 left-4 z-10 max-w-[420px]">
+        <BiologicalLegend />
       </div>
 
       {/* Graph container */}
