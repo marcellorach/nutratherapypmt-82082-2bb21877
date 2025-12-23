@@ -90,25 +90,35 @@ interface KnowledgeGraph3DProps {
   enable3D?: boolean;
 }
 
-// Color mapping for node types - saturated colors for light background
+// Paleta de cores maximamente distintas para fundo claro
 const NODE_COLORS: Record<string, string> = {
-  nutraceutical: '#2563eb',  // Deep blue
-  compound: '#1d4ed8',
-  drug: '#1e40af',
-  condition: '#059669',      // Deep green
-  disease: '#047857',
-  mechanism: '#d97706',      // Deep amber
-  effect: '#7c3aed',         // Deep purple
-  biological_effect: '#9333ea',
-  biologicalprocess: '#6d28d9',
-  outcome: '#db2777',        // Deep pink
-  target: '#0891b2',         // Deep cyan
-  pathway: '#0d9488',
-  receptor: '#0e7490',
-  enzyme: '#0369a1',
-  gene: '#4f46e5',           // Deep indigo
-  protein: '#4338ca',
-  unknown: '#64748b',
+  // Entidades principais - cores primárias únicas
+  nutraceutical: '#22c55e',    // Verde vibrante (natural, saudável)
+  compound: '#eab308',         // Amarelo dourado (químico)
+  drug: '#3b82f6',             // Azul médio (farmacêutico)
+  
+  // Condições de saúde - tons de alerta
+  condition: '#f97316',        // Laranja vibrante (atenção)
+  disease: '#ef4444',          // Vermelho (problema/doença)
+  
+  // Mecanismos e processos - cor única
+  mechanism: '#0891b2',        // Ciano escuro (processo)
+  
+  // Efeitos - cores vibrantes distintas
+  effect: '#06b6d4',           // Ciano claro (resultado)
+  biological_effect: '#ec4899', // Rosa pink (biológico)
+  biologicalprocess: '#14b8a6', // Teal (processo bio)
+  
+  // Alvos e estruturas - cada um distinto
+  target: '#0ea5e9',           // Sky blue
+  pathway: '#10b981',          // Emerald
+  receptor: '#6366f1',         // Indigo
+  enzyme: '#f43f5e',           // Rose/coral
+  gene: '#a855f7',             // Purple
+  protein: '#84cc16',          // Lime verde claro
+  outcome: '#d946ef',          // Fuchsia/magenta
+  
+  unknown: '#64748b',          // Slate (neutro)
 };
 
 // Light warm background
