@@ -117,6 +117,26 @@
       "effect": "Efeito",
       "positive": "Positivo",
       "negative": "Negativo"
+    },
+    "viewModes": {
+      "twoD": "2D",
+      "threeD": "3D"
+    },
+    "renderModes": {
+      "webgl3d": "WebGL 3D",
+      "canvas2d": "Canvas 2D"
+    },
+    "hints": {
+      "dragRotate": "Arraste para rotacionar",
+      "dragPan": "Arraste para mover",
+      "rightDragPan": "Botão direito para mover",
+      "scrollZoom": "Scroll para zoom"
+    },
+    "errors": {
+      "forceGraph3DLoad": "Erro ao carregar visualização 3D"
+    },
+    "nodeTooltip": {
+      "source": "Fonte"
     }
   },
   "chat": {
