@@ -235,6 +235,13 @@ const BiologicalLegend: React.FC<BiologicalLegendProps> = ({
             </div>
           </div>
         )}
+
+        {/* Hint footer */}
+        <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end">
+          <span className="text-[10px] text-slate-400 italic">
+            {t('legend.hoverHint', '💡 Passe o mouse sobre os itens para ver detalhes')}
+          </span>
+        </div>
       </div>
     </TooltipProvider>
   );
