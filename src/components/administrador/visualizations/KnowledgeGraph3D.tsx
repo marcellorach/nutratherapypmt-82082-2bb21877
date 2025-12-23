@@ -106,7 +106,7 @@ const NODE_COLORS: Record<string, string> = {
   
   // Efeitos - cores vibrantes distintas
   effect: '#06b6d4',           // Ciano claro (resultado)
-  biological_effect: '#ec4899', // Rosa pink (biológico)
+  biological_effect: '#71717a', // Cinza (zinc)
   biologicalprocess: '#14b8a6', // Teal (processo bio)
   
   // Alvos e estruturas - cada um distinto
