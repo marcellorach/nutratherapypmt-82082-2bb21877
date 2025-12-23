@@ -650,7 +650,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
 
     setSelectedNodeDetails({
       id: nodeId,
-      label: nodeData.label || nodeData.title || nodeId,
+      label: nodeData.label || nodeData.name || nodeData.title || nodeId,
       type: nodeData.group || nodeData.type || 'unknown',
       connections: connectedNodes.length,
       connectedNodes
