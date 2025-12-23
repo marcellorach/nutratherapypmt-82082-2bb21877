@@ -19,8 +19,10 @@ import {
   MousePointer,
   Move,
   AlertTriangle,
-  Database
+  Database,
+  Type
 } from 'lucide-react';
+import SpriteText from 'three-spritetext';
 
 const ForceGraphLoadError: React.FC = () => {
   const { t } = useTranslation();
@@ -358,54 +360,22 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     </div>`;
   }, [t]);
 
-  // Custom node object for 3D with text labels
+  // Custom node object for 3D with SpriteText labels
   const nodeThreeObject = useCallback((node: any) => {
-    if (!showLabels || !is3D) return undefined;
+    if (!showLabels) return undefined;
     
-    // Only show labels for highly connected nodes to avoid clutter
-    if (node.connections < 2) return undefined;
+    // Create SpriteText label
+    const sprite = new SpriteText(node.name);
+    sprite.color = node.color || '#ffffff';
+    sprite.textHeight = 4;
+    sprite.fontFace = 'Inter, system-ui, sans-serif';
+    sprite.fontWeight = 'bold';
+    sprite.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+    sprite.padding = 2;
+    sprite.borderRadius = 3;
     
-    // Dynamic import of three.js sprite
-    const THREE = (window as any).THREE;
-    if (!THREE) return undefined;
-    
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: createTextTexture(node.name, node.color),
-        transparent: true,
-      })
-    );
-    sprite.scale.set(40, 20, 1);
-    sprite.position.y = 12;
     return sprite;
-  }, [showLabels, is3D]);
-
-  // Create text texture for labels
-  const createTextTexture = (text: string, color: string) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    
-    canvas.width = 256;
-    canvas.height = 64;
-    
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillStyle = color || '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    const displayText = text.length > 20 ? text.substring(0, 18) + '...' : text;
-    ctx.fillText(displayText, canvas.width / 2, canvas.height / 2);
-    
-    const THREE = (window as any).THREE;
-    if (!THREE) return null;
-    
-    const texture = new THREE.CanvasTexture(canvas);
-    return texture;
-  };
+  }, [showLabels]);
 
   if (graphError) {
     return (
@@ -648,6 +618,8 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             nodeVal={(node: any) => node.val * nodeSize * 0.5}
             nodeLabel={nodeLabel}
             nodeOpacity={1}
+            nodeThreeObject={showLabels ? nodeThreeObject : undefined}
+            nodeThreeObjectExtend={showLabels}
             linkColor={(link: any) => link.color}
             linkWidth={linkWidth}
             linkOpacity={linkOpacity}
