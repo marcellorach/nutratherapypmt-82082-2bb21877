@@ -2,25 +2,18 @@ import React, { useRef, useCallback, useMemo, useState, useEffect, lazy, Suspens
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { 
-  Box, 
-  Square, 
   ZoomIn, 
   ZoomOut, 
   RotateCcw, 
   Maximize, 
   Settings, 
-  Layers,
   Loader2,
   MousePointer,
   Move,
-  AlertTriangle,
-  Database,
-  Type
+  AlertTriangle
 } from 'lucide-react';
 import SpriteText from 'three-spritetext';
 import BiologicalLegend from './graph/BiologicalLegend';
@@ -400,266 +393,203 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   }
 
   return (
-    <div 
-      ref={containerRef} 
-      className="relative w-full rounded-lg overflow-hidden border border-slate-200 shadow-sm"
-      style={{ height, backgroundColor: BG_COLOR }}
-    >
-      {/* Controls overlay */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-        <TooltipProvider>
-          <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow-lg">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant={is3D ? 'secondary' : 'ghost'} 
-                  size="sm"
-                  onClick={() => setIs3D(!is3D)}
-                  className={is3D ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}
-                >
-                  {is3D ? <Box className="h-4 w-4 mr-1" /> : <Square className="h-4 w-4 mr-1" />}
-                  {is3D ? t('knowledgeGraph.viewModes.threeD') : t('knowledgeGraph.viewModes.twoD')}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{is3D ? t('knowledgeGraph.controls.switchTo2D') : t('knowledgeGraph.controls.switchTo3D')}</TooltipContent>
-            </Tooltip>
-
-            <div className="w-px h-6 bg-slate-200" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleZoomIn} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('knowledgeGraph.controls.zoomIn', 'Zoom In')}</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleZoomOut} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('knowledgeGraph.controls.zoomOut', 'Zoom Out')}</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleReset} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('knowledgeGraph.controls.reset', 'Reset View')}</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleFitView} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <Maximize className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('knowledgeGraph.controls.fitView', 'Fit to View')}</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant={showSettings ? 'secondary' : 'ghost'} 
-                  size="icon" 
-                  onClick={() => setShowSettings(!showSettings)}
-                  className={showSettings ? 'bg-slate-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('knowledgeGraph.controls.settings', 'Settings')}</TooltipContent>
-            </Tooltip>
+    <div className="flex flex-col">
+      <div 
+        ref={containerRef} 
+        className="relative w-full rounded-lg overflow-hidden border border-slate-200 shadow-sm"
+        style={{ height, backgroundColor: BG_COLOR }}
+      >
+        {/* Controls overlay - simplified like 2D graph */}
+        <div className="absolute top-2 right-2 z-10">
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" onClick={handleZoomIn} title={t('knowledgeGraph.controls.zoomIn', 'Zoom In')}>
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleZoomOut} title={t('knowledgeGraph.controls.zoomOut', 'Zoom Out')}>
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleFitView} title={t('knowledgeGraph.controls.fitView', 'Fit to View')}>
+              <Maximize className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleReset} title={t('knowledgeGraph.controls.reset', 'Reset View')}>
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={showSettings ? 'secondary' : 'outline'} 
+              size="icon" 
+              onClick={() => setShowSettings(!showSettings)}
+              title={t('knowledgeGraph.controls.settings', 'Settings')}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
           </div>
-        </TooltipProvider>
+        </div>
 
+        {/* Settings panel - top left */}
         {showSettings && (
-          <Card className="w-72 bg-white/95 backdrop-blur-sm border-slate-200 shadow-lg">
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}: {nodeSize}</Label>
-                <Slider
-                  value={[nodeSize]}
-                  onValueChange={([v]) => setNodeSize(v)}
-                  min={2}
-                  max={12}
-                  step={1}
-                  className="[&_[role=slider]]:bg-slate-800"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkWidth', 'Link Width')}: {linkWidth}</Label>
-                <Slider
-                  value={[linkWidth]}
-                  onValueChange={([v]) => setLinkWidth(v)}
-                  min={0.5}
-                  max={5}
-                  step={0.5}
-                  className="[&_[role=slider]]:bg-slate-800"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}: {Math.round(linkOpacity * 100)}%</Label>
-                <Slider
-                  value={[linkOpacity * 100]}
-                  onValueChange={([v]) => setLinkOpacity(v / 100)}
-                  min={10}
-                  max={100}
-                  step={5}
-                  className="[&_[role=slider]]:bg-slate-800"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.showLabels', 'Show Labels')}</Label>
-                <Button
-                  variant={showLabels ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setShowLabels(!showLabels)}
-                  className="h-7 px-2"
-                >
-                  {showLabels ? 'On' : 'Off'}
-                </Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.diagnostics', 'Diagnostics')}</Label>
-                <Button
-                  variant={showDiagnostics ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setShowDiagnostics(!showDiagnostics)}
-                  className="h-7 px-2"
-                >
-                  {showDiagnostics ? 'On' : 'Off'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="absolute top-2 left-2 z-10">
+            <Card className="w-72 bg-white/95 backdrop-blur-sm border-slate-200 shadow-lg">
+              <CardContent className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}: {nodeSize}</Label>
+                  <Slider
+                    value={[nodeSize]}
+                    onValueChange={([v]) => setNodeSize(v)}
+                    min={2}
+                    max={12}
+                    step={1}
+                    className="[&_[role=slider]]:bg-slate-800"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkWidth', 'Link Width')}: {linkWidth}</Label>
+                  <Slider
+                    value={[linkWidth]}
+                    onValueChange={([v]) => setLinkWidth(v)}
+                    min={0.5}
+                    max={5}
+                    step={0.5}
+                    className="[&_[role=slider]]:bg-slate-800"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}: {Math.round(linkOpacity * 100)}%</Label>
+                  <Slider
+                    value={[linkOpacity * 100]}
+                    onValueChange={([v]) => setLinkOpacity(v / 100)}
+                    min={10}
+                    max={100}
+                    step={5}
+                    className="[&_[role=slider]]:bg-slate-800"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.showLabels', 'Show Labels')}</Label>
+                  <Button
+                    variant={showLabels ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setShowLabels(!showLabels)}
+                    className="h-7 px-2"
+                  >
+                    {showLabels ? 'On' : 'Off'}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.diagnostics', 'Diagnostics')}</Label>
+                  <Button
+                    variant={showDiagnostics ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setShowDiagnostics(!showDiagnostics)}
+                    className="h-7 px-2"
+                  >
+                    {showDiagnostics ? 'On' : 'Off'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
-      </div>
 
-      {/* Stats overlay */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 shadow-lg">
-          <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700 border-slate-200">
-            <Layers className="h-3 w-3 mr-1" />
-            {graphData.nodes.length} {t('knowledgeGraph.filters.nodes', 'nodes')}
-          </Badge>
-          <Badge variant="outline" className={`text-xs bg-transparent ${graphData.links.length > 0 ? 'text-emerald-600 border-emerald-300' : 'text-amber-600 border-amber-300'}`}>
-            {graphData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
-          </Badge>
-          <Badge className={`text-xs ${is3D ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'}`}>
-            {is3D ? t('knowledgeGraph.renderModes.webgl3d') : t('knowledgeGraph.renderModes.canvas2d')}
-          </Badge>
-          <Badge className="text-xs bg-emerald-100 text-emerald-700 border-emerald-300">
-            <Database className="h-3 w-3 mr-1" />
-            Neo4j
-          </Badge>
-        </div>
-      </div>
-
-      {/* Diagnostics overlay */}
-      {showDiagnostics && (
-        <div className="absolute top-16 right-4 z-10 bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200 shadow-lg text-xs text-slate-600 font-mono max-w-sm">
-          <div className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            Pipeline Diagnostics
-          </div>
-          <div className="space-y-1">
-            <div>Input: {diagnostics.inputNodes} nodes, {diagnostics.inputLinks} links</div>
-            <div>Processed: {diagnostics.processedNodes} nodes, {diagnostics.processedLinks} links</div>
-            <div className={diagnostics.invalidLinks > 0 ? 'text-amber-600' : 'text-emerald-600'}>
-              Invalid links: {diagnostics.invalidLinks}
+        {/* Diagnostics overlay */}
+        {showDiagnostics && (
+          <div className="absolute top-14 left-2 z-10 bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200 shadow-lg text-xs text-slate-600 font-mono max-w-sm">
+            <div className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              Pipeline Diagnostics
             </div>
-            {diagnostics.sampleNodeIds.length > 0 && (
-              <div className="text-slate-400 text-[10px] truncate">
-                Node IDs: {diagnostics.sampleNodeIds.join(', ')}...
+            <div className="space-y-1">
+              <div>Input: {diagnostics.inputNodes} nodes, {diagnostics.inputLinks} links</div>
+              <div>Processed: {diagnostics.processedNodes} nodes, {diagnostics.processedLinks} links</div>
+              <div className={diagnostics.invalidLinks > 0 ? 'text-amber-600' : 'text-emerald-600'}>
+                Invalid links: {diagnostics.invalidLinks}
               </div>
-            )}
-            {diagnostics.sampleInvalidLinks.length > 0 && (
-              <div className="mt-2 text-amber-700">
-                Sample invalid:
-                {diagnostics.sampleInvalidLinks.slice(0, 2).map((inv: any, i: number) => (
-                  <div key={i} className="text-[10px] truncate pl-2">
-                    {inv.reason}: {inv.source} → {inv.target}
-                  </div>
-                ))}
-              </div>
-            )}
+              {diagnostics.sampleNodeIds.length > 0 && (
+                <div className="text-slate-400 text-[10px] truncate">
+                  Node IDs: {diagnostics.sampleNodeIds.join(', ')}...
+                </div>
+              )}
+              {diagnostics.sampleInvalidLinks.length > 0 && (
+                <div className="mt-2 text-amber-700">
+                  Sample invalid:
+                  {diagnostics.sampleInvalidLinks.slice(0, 2).map((inv: any, i: number) => (
+                    <div key={i} className="text-[10px] truncate pl-2">
+                      {inv.reason}: {inv.source} → {inv.target}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation hints */}
+        <div className="absolute bottom-4 right-4 z-10">
+          <div className="flex items-center gap-4 text-xs text-slate-500 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200">
+            <span className="flex items-center gap-1">
+              <MousePointer className="h-3 w-3" />
+              {is3D ? t('knowledgeGraph.hints.dragRotate') : t('knowledgeGraph.hints.dragPan')}
+            </span>
+            <span className="flex items-center gap-1">
+              <Move className="h-3 w-3" />
+              {is3D ? t('knowledgeGraph.hints.rightDragPan') : t('knowledgeGraph.hints.scrollZoom')}
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Navigation hints */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <div className="flex items-center gap-4 text-xs text-slate-500 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200">
-          <span className="flex items-center gap-1">
-            <MousePointer className="h-3 w-3" />
-            {is3D ? t('knowledgeGraph.hints.dragRotate') : t('knowledgeGraph.hints.dragPan')}
-          </span>
-          <span className="flex items-center gap-1">
-            <Move className="h-3 w-3" />
-            {is3D ? t('knowledgeGraph.hints.rightDragPan') : t('knowledgeGraph.hints.scrollZoom')}
-          </span>
-        </div>
+        {/* Graph container */}
+        <Suspense fallback={<GraphLoading />}>
+          {is3D ? (
+            <ForceGraph3D
+              ref={fgRef}
+              graphData={graphData}
+              width={dimensions.width}
+              height={dimensions.height}
+              backgroundColor={BG_COLOR}
+              nodeColor={(node: any) => node.color}
+              nodeVal={(node: any) => node.val * nodeSize * 0.5}
+              nodeLabel={nodeLabel}
+              nodeOpacity={1}
+              nodeThreeObject={showLabels ? nodeThreeObject : undefined}
+              nodeThreeObjectExtend={showLabels}
+              linkColor={(link: any) => link.color}
+              linkWidth={linkWidth}
+              linkOpacity={linkOpacity}
+              linkDirectionalParticles={2}
+              linkDirectionalParticleWidth={1.5}
+              linkDirectionalParticleSpeed={0.005}
+              onNodeClick={handleNodeClick}
+              onEngineStop={handleEngineStop}
+              cooldownTicks={100}
+              d3AlphaDecay={0.02}
+              d3VelocityDecay={0.3}
+              warmupTicks={50}
+            />
+          ) : (
+            <ForceGraph2D
+              ref={fgRef}
+              graphData={graphData}
+              width={dimensions.width}
+              height={dimensions.height}
+              backgroundColor={BG_COLOR}
+              nodeColor={(node: any) => node.color}
+              nodeVal={(node: any) => node.val * nodeSize * 0.5}
+              nodeLabel={nodeLabel}
+              linkColor={(link: any) => link.color}
+              linkWidth={linkWidth}
+              linkDirectionalParticles={2}
+              linkDirectionalParticleWidth={2}
+              onNodeClick={handleNodeClick}
+              onEngineStop={handleEngineStop}
+              cooldownTicks={100}
+            />
+          )}
+        </Suspense>
       </div>
 
-      {/* Legend - Biological notation */}
-      <div className="absolute bottom-4 left-4 z-10 max-w-[420px]">
+      {/* Legend - Biological notation - outside graph container */}
+      <div className="mt-3 border-t pt-3">
         <BiologicalLegend />
       </div>
-
-      {/* Graph container */}
-      <Suspense fallback={<GraphLoading />}>
-        {is3D ? (
-          <ForceGraph3D
-            ref={fgRef}
-            graphData={graphData}
-            width={dimensions.width}
-            height={dimensions.height}
-            backgroundColor={BG_COLOR}
-            nodeColor={(node: any) => node.color}
-            nodeVal={(node: any) => node.val * nodeSize * 0.5}
-            nodeLabel={nodeLabel}
-            nodeOpacity={1}
-            nodeThreeObject={showLabels ? nodeThreeObject : undefined}
-            nodeThreeObjectExtend={showLabels}
-            linkColor={(link: any) => link.color}
-            linkWidth={linkWidth}
-            linkOpacity={linkOpacity}
-            linkDirectionalParticles={2}
-            linkDirectionalParticleWidth={1.5}
-            linkDirectionalParticleSpeed={0.005}
-            onNodeClick={handleNodeClick}
-            onEngineStop={handleEngineStop}
-            cooldownTicks={100}
-            d3AlphaDecay={0.02}
-            d3VelocityDecay={0.3}
-            warmupTicks={50}
-          />
-        ) : (
-          <ForceGraph2D
-            ref={fgRef}
-            graphData={graphData}
-            width={dimensions.width}
-            height={dimensions.height}
-            backgroundColor={BG_COLOR}
-            nodeColor={(node: any) => node.color}
-            nodeVal={(node: any) => node.val * nodeSize * 0.5}
-            nodeLabel={nodeLabel}
-            linkColor={(link: any) => link.color}
-            linkWidth={linkWidth}
-            linkDirectionalParticles={2}
-            linkDirectionalParticleWidth={2}
-            onNodeClick={handleNodeClick}
-            onEngineStop={handleEngineStop}
-            cooldownTicks={100}
-          />
-        )}
-      </Suspense>
     </div>
   );
 };
