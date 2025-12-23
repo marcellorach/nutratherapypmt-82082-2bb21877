@@ -113,15 +113,18 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     };
   }, [network, nodes, onNodeClick]);
   
-  // Itens da legenda expandida com suporte a relações negativas
+  // Itens da legenda sincronizada com KnowledgeGraph3D.tsx
   const defaultLegendItems = [
-    { color: '#3b82f6', label: 'Nutracêuticos' },
-    { color: '#10b981', label: 'Condições de Saúde' },
-    { color: '#a855f7', label: 'Estudos' },
-    { color: '#10b981', label: 'Relação Positiva (TREATS, SUPPORTS)', dashed: false },
-    { color: '#dc2626', label: 'Relação Negativa (WORSENS, CONTRAINDICATED)', dashed: [5, 5] },
-    { color: '#f59e0b', label: 'Confiança Média (70-85%)', dashed: false },
-    { color: '#8b5cf6', label: 'Sinergias', dashed: [2, 2] }
+    { color: '#22c55e', label: 'Nutraceutical' },
+    { color: '#eab308', label: 'Compound' },
+    { color: '#3b82f6', label: 'Drug' },
+    { color: '#f97316', label: 'Condition' },
+    { color: '#991b1b', label: 'Disease' },
+    { color: '#1e3a5f', label: 'Mechanism' },
+    { color: '#06b6d4', label: 'Effect' },
+    { color: '#71717a', label: 'Biological Effect' },
+    { color: '#10b981', label: 'Relação Positiva', dashed: false },
+    { color: '#dc2626', label: 'Relação Negativa', dashed: [5, 5] },
   ];
   
   return (
