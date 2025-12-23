@@ -4595,5 +4595,27 @@
       "cannotDeleteStatic": "Cannot remove terms from local file. Migrate first.",
       "cannotEditStatic": "Cannot edit terms from local file. Migrate first."
     }
+  },
+  "legend": {
+    "nodesTitle": "Nodes",
+    "edgesTitle": "Relations",
+    "nodes": {
+      "nutraceutical": "Nutraceutical",
+      "compound": "Compound",
+      "drug": "Drug",
+      "condition": "Condition",
+      "disease": "Disease",
+      "mechanism": "Mechanism",
+      "effect": "Effect",
+      "biological_effect": "Biological Effect"
+    },
+    "edges": {
+      "activation": "Activation",
+      "inhibition": "Inhibition",
+      "modulation": "Modulation",
+      "binding": "Binding",
+      "participation": "Participation",
+      "association": "Association"
+    }
   }
 }

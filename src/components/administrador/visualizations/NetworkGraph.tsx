@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import 'vis-network/styles/vis-network.css';
 import { useNetworkGraph } from '@/hooks/network/useNetworkGraph';
 import NetworkControls from './graph/NetworkControls';
-import NetworkLegend from './graph/NetworkLegend';
+import BiologicalLegend from './graph/BiologicalLegend';
 
 interface NetworkGraphProps {
   data: {
@@ -113,19 +113,6 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     };
   }, [network, nodes, onNodeClick]);
   
-  // Itens da legenda sincronizada com KnowledgeGraph3D.tsx
-  const defaultLegendItems = [
-    { color: '#22c55e', label: 'Nutraceutical' },
-    { color: '#eab308', label: 'Compound' },
-    { color: '#3b82f6', label: 'Drug' },
-    { color: '#f97316', label: 'Condition' },
-    { color: '#991b1b', label: 'Disease' },
-    { color: '#1e3a5f', label: 'Mechanism' },
-    { color: '#06b6d4', label: 'Effect' },
-    { color: '#71717a', label: 'Biological Effect' },
-    { color: '#10b981', label: 'Relação Positiva', dashed: false },
-    { color: '#dc2626', label: 'Relação Negativa', dashed: [5, 5] },
-  ];
   
   return (
     <div className="flex flex-col">
@@ -151,11 +138,10 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
         />
       </div>
       
-      {/* Legenda */}
+      {/* Legenda Biológica */}
       {showLegend && (
         <div className="mt-3 border-t pt-3">
-          <h4 className="text-sm font-medium mb-2">Legenda</h4>
-          <NetworkLegend items={defaultLegendItems} />
+          <BiologicalLegend />
         </div>
       )}
     </div>
