@@ -4609,6 +4609,16 @@
       "effect": "Effect",
       "biological_effect": "Biological Effect"
     },
+    "nodeDescriptions": {
+      "nutraceutical": "Natural bioactive substances with therapeutic potential, such as curcumin, resveratrol, omega-3",
+      "compound": "Active chemical compounds that can be isolated from natural sources or synthesized",
+      "drug": "Pharmaceutical medications approved for therapeutic use",
+      "condition": "Health states, symptoms or syndromes that can be treated or managed",
+      "disease": "Diagnosed pathologies that require medical intervention",
+      "mechanism": "Biochemical processes and molecular pathways through which substances exert their effects",
+      "effect": "Observable outcomes of an intervention on the organism",
+      "biological_effect": "Effects at cellular or tissue level resulting from biochemical actions"
+    },
     "edges": {
       "activation": "Activation",
       "inhibition": "Inhibition",
@@ -4616,6 +4626,14 @@
       "binding": "Binding",
       "participation": "Participation",
       "association": "Association"
+    },
+    "edgeDescriptions": {
+      "activation": "Stimulates, promotes or increases target activity. Includes: ACTIVATES, PROMOTES, TRIGGERS, UPREGULATES, TREATS, SUPPORTS",
+      "inhibition": "Blocks, suppresses or reduces target activity. Includes: INHIBITS, BLOCKS, DOWNREGULATES, WORSENS, CONTRAINDICATED_FOR",
+      "modulation": "Regulates or adjusts activity without direct activation or inhibition. Includes: MODULATES, REGULATES",
+      "binding": "Direct physical interaction between molecules, forming complexes. Includes: BINDS_TO",
+      "participation": "Involvement in biological processes or cascades. Includes: PARTICIPATES_IN, LEADS_TO, CAUSES",
+      "association": "Correlation or conceptual relationship without direct mechanism. Includes: IS_A, RELATED_TO, PREDISPOSED_TO"
     }
   }
 }
