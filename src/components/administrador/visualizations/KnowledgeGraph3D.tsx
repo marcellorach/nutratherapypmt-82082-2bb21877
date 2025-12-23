@@ -99,7 +99,7 @@ const NODE_COLORS: Record<string, string> = {
   
   // Condições de saúde - tons de alerta
   condition: '#f97316',        // Laranja vibrante (atenção)
-  disease: '#ef4444',          // Vermelho (problema/doença)
+  disease: '#991b1b',          // Vermelho escuro (problema/doença)
   
   // Mecanismos e processos - cor única
   mechanism: '#1e3a5f',        // Azul escuro (processo)
