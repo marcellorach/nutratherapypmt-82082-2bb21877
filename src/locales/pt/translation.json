@@ -4634,6 +4634,7 @@
       "binding": "Interação física direta entre moléculas, formando complexos. Inclui: BINDS_TO",
       "participation": "Envolvimento em processos ou cascatas biológicas. Inclui: PARTICIPATES_IN, LEADS_TO, CAUSES",
       "association": "Correlação ou relação conceitual sem mecanismo direto. Inclui: IS_A, RELATED_TO, PREDISPOSED_TO"
-    }
+    },
+    "hoverHint": "💡 Passe o mouse para ver detalhes"
   }
 }
