@@ -17,7 +17,9 @@ import {
   Layers,
   Loader2,
   MousePointer,
-  Move
+  Move,
+  AlertTriangle,
+  Database
 } from 'lucide-react';
 
 const ForceGraphLoadError: React.FC = () => {
@@ -30,9 +32,6 @@ const ForceGraphLoadError: React.FC = () => {
 };
 
 // Lazy load force-graph components with error logging
-// NOTE: react-force-graph-3d exports a component type that includes ref typing (FCwithRef).
-// Our fallback component doesn't need to match that ref typing, so we cast the lazy component
-// to a generic ComponentType to keep TypeScript happy while preserving runtime behavior.
 const ForceGraph3D = lazy((): Promise<any> =>
   import('react-force-graph-3d')
     .then((module) => {
@@ -89,30 +88,30 @@ interface KnowledgeGraph3DProps {
   enable3D?: boolean;
 }
 
-// Color mapping for node types - brighter colors for dark background
+// Color mapping for node types - bright colors for dark background
+const NODE_COLORS: Record<string, string> = {
+  nutraceutical: '#60a5fa',  // Bright blue
+  compound: '#3b82f6',
+  drug: '#2563eb',
+  condition: '#34d399',      // Bright green
+  disease: '#10b981',
+  mechanism: '#fbbf24',      // Bright yellow
+  effect: '#a78bfa',         // Bright purple
+  biological_effect: '#c084fc',
+  biologicalprocess: '#8b5cf6',
+  outcome: '#f472b6',        // Bright pink
+  target: '#22d3ee',         // Bright cyan
+  pathway: '#2dd4bf',
+  receptor: '#06b6d4',
+  enzyme: '#0891b2',
+  gene: '#818cf8',           // Bright indigo
+  protein: '#6366f1',
+  unknown: '#94a3b8',
+};
+
 const getNodeColor = (type: string, source?: string): string => {
   const normalizedType = type?.toLowerCase() || 'unknown';
-  
-  const colors: Record<string, string> = {
-    nutraceutical: '#60a5fa',  // Bright blue
-    compound: '#3b82f6',
-    drug: '#2563eb',
-    condition: '#34d399',      // Bright green
-    disease: '#10b981',
-    mechanism: '#fbbf24',      // Bright yellow
-    effect: '#a78bfa',         // Bright purple
-    biological_effect: '#c084fc',
-    biologicalprocess: '#8b5cf6',
-    outcome: '#f472b6',        // Bright pink
-    target: '#22d3ee',         // Bright cyan
-    pathway: '#2dd4bf',
-    receptor: '#06b6d4',
-    enzyme: '#0891b2',
-    gene: '#818cf8',           // Bright indigo
-    protein: '#6366f1',
-  };
-  
-  const baseColor = colors[normalizedType] || '#94a3b8';
+  const baseColor = NODE_COLORS[normalizedType] || NODE_COLORS.unknown;
   return source === 'study' ? lightenColor(baseColor, 20) : baseColor;
 };
 
@@ -127,10 +126,7 @@ const lightenColor = (color: string, percent: number): string => {
 
 // Link colors for dark background - return HEX for three.js compatibility
 const getLinkColor = (isNegative?: boolean): string => {
-  if (isNegative) {
-    return '#f87171'; // Red - opacity controlled by linkOpacity prop
-  }
-  return '#888888'; // Light gray - opacity controlled by linkOpacity prop
+  return isNegative ? '#f87171' : '#6b7280';
 };
 
 // Sanitize node color - handles both string and vis-network object format
@@ -138,12 +134,10 @@ const sanitizeNodeColor = (node: Node): string => {
   if (!node.color) {
     return getNodeColor(node.type, node.source);
   }
-  // If color is an object (vis-network format), extract background color
   if (typeof node.color === 'object') {
     const colorObj = node.color as any;
     return colorObj.background || colorObj.border || getNodeColor(node.type, node.source);
   }
-  // If it's already a string, use it directly
   return node.color;
 };
 
@@ -158,17 +152,20 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   data,
   height = '600px',
   onNodeClick,
-  enable3D = true, // Enable 3D by default now
+  enable3D = true,
 }) => {
   const { t } = useTranslation();
   const fgRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [nodeSize, setNodeSize] = useState(4);
-  const [linkOpacity, setLinkOpacity] = useState(0.3);
+  const [nodeSize, setNodeSize] = useState(5);
+  const [linkOpacity, setLinkOpacity] = useState(0.6);
+  const [linkWidth, setLinkWidth] = useState(2);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [graphError, setGraphError] = useState<string | null>(null);
   const [is3D, setIs3D] = useState(enable3D);
+  const [showLabels, setShowLabels] = useState(true);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -188,16 +185,20 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   // Handle engine stop - zoomToFit for better initial visibility
   const handleEngineStop = useCallback(() => {
     if (fgRef.current) {
-      fgRef.current.zoomToFit(500, 50);
+      fgRef.current.zoomToFit(400, 80);
     }
   }, []);
 
-  const graphData = useMemo(() => {
+  // Process data with diagnostics
+  const { graphData, diagnostics } = useMemo(() => {
+    const inputNodesCount = data.nodes?.length || 0;
+    const inputLinksCount = data.links?.length || 0;
+    
     console.log('KnowledgeGraph3D - Processing data:', {
-      nodesCount: data.nodes.length,
-      linksCount: data.links.length,
-      sampleNode: data.nodes[0],
-      sampleLink: data.links[0]
+      nodesCount: inputNodesCount,
+      linksCount: inputLinksCount,
+      sampleNode: data.nodes?.[0],
+      sampleLink: data.links?.[0]
     });
 
     const normalizeId = (v: any): string | null => {
@@ -207,20 +208,22 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       return s.length ? s : null;
     };
 
-    const nodes = data.nodes
+    // Process nodes
+    const nodes = (data.nodes || [])
       .map(node => {
         const id = normalizeId(node.id);
         if (!id) return null;
 
         return {
           id,
-          name: node.label,
-          type: node.type,
-          group: node.group || node.type,
-          val: Math.max(2, (node.connections || 1) * 1.5), // Slightly larger nodes for visibility
-          color: sanitizeNodeColor(node), // Use sanitized color
+          name: node.label || id,
+          type: node.type || 'unknown',
+          group: node.group || node.type || 'unknown',
+          val: Math.max(3, (node.connections || 1) * 2),
+          color: sanitizeNodeColor(node),
           source: node.source,
           properties: node.properties,
+          connections: node.connections || 0,
         };
       })
       .filter(Boolean) as any[];
@@ -229,7 +232,8 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     const nodeIds = new Set(nodes.map(n => n.id));
 
     // Map links - accept both from/to and source/target formats
-    const links = data.links
+    const invalidLinks: any[] = [];
+    const links = (data.links || [])
       .map(link => {
         const sourceId = normalizeId(link.source ?? link.from);
         const targetId = normalizeId(link.target ?? link.to);
@@ -238,37 +242,51 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
           source: sourceId,
           target: targetId,
           value: link.value || 1,
-          color: getLinkColor(link.isNegative),
+          color: link.color || getLinkColor(link.isNegative),
           isNegative: link.isNegative,
           label: link.label,
+          _originalSource: link.source ?? link.from,
+          _originalTarget: link.target ?? link.to,
         };
       })
-      // Filter out invalid links where source or target is missing
-      .filter(link => !!link.source && !!link.target)
-      // Keep only links whose endpoints exist in the nodes list
-      .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
-
-    console.log('KnowledgeGraph3D - Processed data:', {
-      nodesCount: nodes.length,
-      validLinksCount: links.length,
-      invalidLinksFiltered: data.links.length - links.length
-    });
-
-    // If everything got filtered, log one sample to help debugging
-    if (links.length === 0 && data.links.length > 0 && nodes.length > 0) {
-      const raw = data.links[0];
-      const sampleSource = normalizeId((raw as any).source ?? (raw as any).from);
-      const sampleTarget = normalizeId((raw as any).target ?? (raw as any).to);
-      console.log('KnowledgeGraph3D - Debug membership sample:', {
-        sampleSource,
-        sampleTarget,
-        sampleSourceExists: !!sampleSource && nodeIds.has(sampleSource),
-        sampleTargetExists: !!sampleTarget && nodeIds.has(sampleTarget),
-        firstNodeId: nodes[0]?.id
+      .filter(link => {
+        const valid = !!link.source && !!link.target;
+        if (!valid) {
+          invalidLinks.push({ reason: 'null_id', link });
+        }
+        return valid;
+      })
+      .filter(link => {
+        const sourceExists = nodeIds.has(link.source);
+        const targetExists = nodeIds.has(link.target);
+        if (!sourceExists || !targetExists) {
+          invalidLinks.push({ 
+            reason: 'missing_node', 
+            source: link.source, 
+            target: link.target,
+            sourceExists, 
+            targetExists 
+          });
+        }
+        return sourceExists && targetExists;
       });
-    }
 
-    return { nodes, links };
+    const diagnosticsData = {
+      inputNodes: inputNodesCount,
+      inputLinks: inputLinksCount,
+      processedNodes: nodes.length,
+      processedLinks: links.length,
+      invalidLinks: invalidLinks.length,
+      sampleInvalidLinks: invalidLinks.slice(0, 3),
+      sampleNodeIds: Array.from(nodeIds).slice(0, 3),
+    };
+
+    console.log('KnowledgeGraph3D - Processed:', diagnosticsData);
+
+    return { 
+      graphData: { nodes, links },
+      diagnostics: diagnosticsData
+    };
   }, [data]);
 
   const handleNodeClick = useCallback((node: any) => {
@@ -277,11 +295,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     }
     if (fgRef.current) {
       if (is3D) {
-        // 3D camera movement
-        const distance = 150;
-        const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+        const distance = 120;
+        const distRatio = 1 + distance/Math.hypot(node.x || 0, node.y || 0, node.z || 0);
         fgRef.current.cameraPosition(
-          { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+          { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
           node,
           1000
         );
@@ -317,7 +334,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   const handleReset = () => {
     if (fgRef.current) {
       if (is3D) {
-        fgRef.current.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, 1000);
+        fgRef.current.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 1000);
       } else {
         fgRef.current.centerAt(0, 0, 1000);
         fgRef.current.zoom(1, 1000);
@@ -327,23 +344,68 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
   const handleFitView = () => {
     if (fgRef.current) {
-      if (is3D) {
-        fgRef.current.zoomToFit(500, 100);
-      } else {
-        fgRef.current.zoomToFit(500, 50);
-      }
+      fgRef.current.zoomToFit(500, 80);
     }
   };
 
   const nodeLabel = useCallback((node: any) => {
     const sourceLabel = t('knowledgeGraph.nodeTooltip.source');
-
-    return `<div style="background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);">
+    return `<div style="background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); max-width: 280px;">
       <strong style="font-size: 14px;">${node.name}</strong><br/>
       <span style="color: #9ca3af; font-size: 11px;">${node.type}</span>
+      ${node.connections ? `<br/><span style="color: #a78bfa; font-size: 11px;">${node.connections} connections</span>` : ''}
       ${node.source ? `<br/><span style="color: #6ee7b7; font-size: 11px;">${sourceLabel}: ${node.source}</span>` : ''}
     </div>`;
   }, [t]);
+
+  // Custom node object for 3D with text labels
+  const nodeThreeObject = useCallback((node: any) => {
+    if (!showLabels || !is3D) return undefined;
+    
+    // Only show labels for highly connected nodes to avoid clutter
+    if (node.connections < 2) return undefined;
+    
+    // Dynamic import of three.js sprite
+    const THREE = (window as any).THREE;
+    if (!THREE) return undefined;
+    
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: createTextTexture(node.name, node.color),
+        transparent: true,
+      })
+    );
+    sprite.scale.set(40, 20, 1);
+    sprite.position.y = 12;
+    return sprite;
+  }, [showLabels, is3D]);
+
+  // Create text texture for labels
+  const createTextTexture = (text: string, color: string) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    
+    canvas.width = 256;
+    canvas.height = 64;
+    
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = color || '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    const displayText = text.length > 20 ? text.substring(0, 18) + '...' : text;
+    ctx.fillText(displayText, canvas.width / 2, canvas.height / 2);
+    
+    const THREE = (window as any).THREE;
+    if (!THREE) return null;
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  };
 
   if (graphError) {
     return (
@@ -433,29 +495,62 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
         </TooltipProvider>
 
         {showSettings && (
-          <Card className="w-64 bg-black/80 backdrop-blur-sm border-white/10">
+          <Card className="w-72 bg-black/80 backdrop-blur-sm border-white/10">
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}</Label>
+                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}: {nodeSize}</Label>
                 <Slider
                   value={[nodeSize]}
                   onValueChange={([v]) => setNodeSize(v)}
-                  min={1}
-                  max={10}
+                  min={2}
+                  max={12}
                   step={1}
                   className="[&_[role=slider]]:bg-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}</Label>
+                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.linkWidth', 'Link Width')}: {linkWidth}</Label>
+                <Slider
+                  value={[linkWidth]}
+                  onValueChange={([v]) => setLinkWidth(v)}
+                  min={0.5}
+                  max={5}
+                  step={0.5}
+                  className="[&_[role=slider]]:bg-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}: {Math.round(linkOpacity * 100)}%</Label>
                 <Slider
                   value={[linkOpacity * 100]}
                   onValueChange={([v]) => setLinkOpacity(v / 100)}
-                  min={5}
-                  max={60}
+                  min={10}
+                  max={100}
                   step={5}
                   className="[&_[role=slider]]:bg-white"
                 />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.showLabels', 'Show Labels')}</Label>
+                <Button
+                  variant={showLabels ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setShowLabels(!showLabels)}
+                  className="h-7 px-2"
+                >
+                  {showLabels ? 'On' : 'Off'}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.diagnostics', 'Diagnostics')}</Label>
+                <Button
+                  variant={showDiagnostics ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setShowDiagnostics(!showDiagnostics)}
+                  className="h-7 px-2"
+                >
+                  {showDiagnostics ? 'On' : 'Off'}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -469,14 +564,50 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             <Layers className="h-3 w-3 mr-1" />
             {graphData.nodes.length} {t('knowledgeGraph.filters.nodes', 'nodes')}
           </Badge>
-          <Badge variant="outline" className="text-xs bg-transparent text-white/60 border-white/20">
+          <Badge variant="outline" className={`text-xs bg-transparent border-white/20 ${graphData.links.length > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
             {graphData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
           </Badge>
           <Badge className={`text-xs ${is3D ? 'bg-blue-600/80 text-white' : 'bg-white/10 text-white/80'}`}>
             {is3D ? t('knowledgeGraph.renderModes.webgl3d') : t('knowledgeGraph.renderModes.canvas2d')}
           </Badge>
+          <Badge className="text-xs bg-green-600/30 text-green-300 border-green-500/30">
+            <Database className="h-3 w-3 mr-1" />
+            Neo4j
+          </Badge>
         </div>
       </div>
+
+      {/* Diagnostics overlay */}
+      {showDiagnostics && (
+        <div className="absolute top-16 right-4 z-10 bg-black/80 backdrop-blur-sm p-3 rounded-lg border border-white/10 text-xs text-white/70 font-mono max-w-sm">
+          <div className="font-bold text-white mb-2 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            Pipeline Diagnostics
+          </div>
+          <div className="space-y-1">
+            <div>Input: {diagnostics.inputNodes} nodes, {diagnostics.inputLinks} links</div>
+            <div>Processed: {diagnostics.processedNodes} nodes, {diagnostics.processedLinks} links</div>
+            <div className={diagnostics.invalidLinks > 0 ? 'text-yellow-400' : 'text-green-400'}>
+              Invalid links: {diagnostics.invalidLinks}
+            </div>
+            {diagnostics.sampleNodeIds.length > 0 && (
+              <div className="text-white/50 text-[10px] truncate">
+                Node IDs: {diagnostics.sampleNodeIds.join(', ')}...
+              </div>
+            )}
+            {diagnostics.sampleInvalidLinks.length > 0 && (
+              <div className="mt-2 text-yellow-300/70">
+                Sample invalid:
+                {diagnostics.sampleInvalidLinks.slice(0, 2).map((inv: any, i: number) => (
+                  <div key={i} className="text-[10px] truncate pl-2">
+                    {inv.reason}: {inv.source} → {inv.target}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Navigation hints */}
       <div className="absolute bottom-4 right-4 z-10">
@@ -487,78 +618,66 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
           </span>
           <span className="flex items-center gap-1">
             <Move className="h-3 w-3" />
-            {is3D ? t('knowledgeGraph.hints.rightDragPan') : ''}
+            {is3D ? t('knowledgeGraph.hints.rightDragPan') : t('knowledgeGraph.hints.scrollZoom')}
           </span>
-          <span>{t('knowledgeGraph.hints.scrollZoom')}</span>
         </div>
       </div>
 
       {/* Legend */}
       <div className="absolute bottom-4 left-4 z-10">
-        <Card className="bg-black/60 backdrop-blur-sm border-white/10">
-          <CardContent className="p-3">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#60a5fa' }} />
-                <span className="text-white/60">{t('knowledgeGraph.legend.nutraceutical', 'Nutraceutical')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#34d399' }} />
-                <span className="text-white/60">{t('knowledgeGraph.legend.condition', 'Condition')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }} />
-                <span className="text-white/60">{t('knowledgeGraph.legend.mechanism', 'Mechanism')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#a78bfa' }} />
-                <span className="text-white/60">{t('knowledgeGraph.legend.effect', 'Effect')}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-wrap gap-2 text-xs bg-black/40 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[300px]">
+          {Object.entries(NODE_COLORS).slice(0, 8).map(([type, color]) => (
+            <span key={type} className="flex items-center gap-1 text-white/60">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+              <span className="capitalize">{type}</span>
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Graph - 3D or 2D based on toggle */}
+      {/* Graph container */}
       <Suspense fallback={<GraphLoading />}>
         {is3D ? (
           <ForceGraph3D
             ref={fgRef}
             graphData={graphData}
-            backgroundColor="#0a0a0f"
-            nodeLabel={nodeLabel}
-            nodeColor={(node: any) => node.color}
-            nodeVal={(node: any) => node.val * nodeSize}
-            nodeOpacity={1.0}
-            linkColor={(link: any) => link.color}
-            linkWidth={1}
-            linkOpacity={linkOpacity}
-            onNodeClick={handleNodeClick}
-            onEngineStop={handleEngineStop}
-            enableNodeDrag={true}
-            enableNavigationControls={true}
-            showNavInfo={false}
-            warmupTicks={100}
-            cooldownTicks={0}
             width={dimensions.width}
             height={dimensions.height}
+            backgroundColor="#0a0a0f"
+            nodeColor={(node: any) => node.color}
+            nodeVal={(node: any) => node.val * nodeSize * 0.5}
+            nodeLabel={nodeLabel}
+            nodeOpacity={1}
+            linkColor={(link: any) => link.color}
+            linkWidth={linkWidth}
+            linkOpacity={linkOpacity}
+            linkDirectionalParticles={2}
+            linkDirectionalParticleWidth={1.5}
+            linkDirectionalParticleSpeed={0.005}
+            onNodeClick={handleNodeClick}
+            onEngineStop={handleEngineStop}
+            cooldownTicks={100}
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
+            warmupTicks={50}
           />
         ) : (
           <ForceGraph2D
             ref={fgRef}
             graphData={graphData}
-            backgroundColor="#0a0a0f"
-            nodeLabel={nodeLabel}
-            nodeColor={(node: any) => node.color}
-            nodeVal={(node: any) => node.val * nodeSize}
-            linkColor={(link: any) => link.color}
-            linkWidth={0.5}
-            onNodeClick={handleNodeClick}
-            enableNodeDrag={true}
-            cooldownTicks={100}
-            warmupTicks={50}
             width={dimensions.width}
             height={dimensions.height}
+            backgroundColor="#0a0a0f"
+            nodeColor={(node: any) => node.color}
+            nodeVal={(node: any) => node.val * nodeSize * 0.5}
+            nodeLabel={nodeLabel}
+            linkColor={(link: any) => link.color}
+            linkWidth={linkWidth}
+            linkDirectionalParticles={2}
+            linkDirectionalParticleWidth={2}
+            onNodeClick={handleNodeClick}
+            onEngineStop={handleEngineStop}
+            cooldownTicks={100}
           />
         )}
       </Suspense>

@@ -45,7 +45,6 @@ interface GraphRAGResult {
     relationships: GraphRelationship[];
   }>;
   context: string;
-  // Dados tabulares raw para queries que retornam valores simples
   rows?: any[];
   fields?: string[];
 }
@@ -113,7 +112,6 @@ async function executeCypherQuery(
 
   const result = await response.json();
   
-  // Log da resposta raw para debug
   console.log('📦 Neo4j raw response structure:', {
     hasData: !!result.data,
     hasFields: !!result.data?.fields,
@@ -126,17 +124,31 @@ async function executeCypherQuery(
     console.log('📊 First row sample:', JSON.stringify(result.data.values[0]).substring(0, 500));
   }
   
-  // Query API v2 retorna formato diferente: { data: { fields: [...], values: [...] }, errors: [...] }
   if (result.errors && result.errors.length > 0) {
     console.error('❌ Neo4j errors:', result.errors);
     throw new Error(`Neo4j errors: ${JSON.stringify(result.errors)}`);
   }
 
-  // Retornar formato Query API v2 diretamente para formatGraphData processar
   return {
     fields: result.data?.fields || [],
     values: result.data?.values || []
   };
+}
+
+/**
+ * Generate a canonical ID for a Neo4j node.
+ * Priority: properties.id (uuid from Supabase) > elementId > fallback
+ */
+function getCanonicalNodeId(element: any, fallback: string): string {
+  // Prefer the UUID from properties (matches Supabase records)
+  if (element.properties?.id) {
+    return String(element.properties.id);
+  }
+  // Fall back to elementId (Neo4j internal ID)
+  if (element.elementId) {
+    return String(element.elementId);
+  }
+  return fallback;
 }
 
 function formatGraphData(neo4jResult: any): GraphRAGResult {
@@ -144,7 +156,6 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
   const relationships: GraphRelationship[] = [];
   const paths: Array<{ nodes: GraphNode[]; relationships: GraphRelationship[] }> = [];
 
-  // Query API v2 retorna: { fields: ['subject', 'rel', 'object'], values: [[node, rel, node], ...] }
   const fields = neo4jResult?.fields || [];
   const values = neo4jResult?.values || [];
 
@@ -155,43 +166,72 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
     return { nodes: [], relationships: [], paths: [], context: '' };
   }
 
-  // Processar cada row do resultado
+  // First pass: collect all nodes and build ID mapping
+  // Key = elementId, Value = canonical ID (we need this to map relationship endpoints)
+  const elementIdToCanonicalId = new Map<string, string>();
+
   values.forEach((row: any[], rowIdx: number) => {
     row.forEach((element: any, colIdx: number) => {
       if (!element) return;
       
-      // Detectar se é um nó (tem labels) ou relacionamento (tem type + startNodeElementId)
+      // Detect if it's a node (has labels)
       if (element.labels && Array.isArray(element.labels)) {
-        // É um nó
-        const nodeId = element.elementId || element.id || `node-${rowIdx}-${colIdx}`;
-        if (!nodes.has(nodeId)) {
+        const canonicalId = getCanonicalNodeId(element, `node-${rowIdx}-${colIdx}`);
+        
+        // Store mapping from elementId to canonical ID
+        if (element.elementId) {
+          elementIdToCanonicalId.set(element.elementId, canonicalId);
+        }
+        
+        if (!nodes.has(canonicalId)) {
           const props = element.properties || {};
-          nodes.set(nodeId, {
-            id: nodeId,
+          nodes.set(canonicalId, {
+            id: canonicalId,
             label: props.name || props.title || element.labels[0] || 'Unknown',
             type: element.labels[0] || 'Unknown',
             properties: props
           });
-          console.log(`  ✅ Node: ${element.labels[0]} - ${props.name || nodeId}`);
+          console.log(`  ✅ Node [${canonicalId}]: ${element.labels[0]} - ${props.name || 'unnamed'}`);
         }
-      } else if (element.type && (element.startNodeElementId || element.startNode)) {
-        // É um relacionamento
-        const sourceId = element.startNodeElementId || element.startNode;
-        const targetId = element.endNodeElementId || element.endNode;
-        relationships.push({
-          type: element.type,
-          source: sourceId,
-          target: targetId,
-          properties: element.properties || {}
-        });
-        console.log(`  🔗 Rel: ${element.type}`);
       }
     });
   });
 
-  console.log(`📊 Resultado: ${nodes.size} nodes, ${relationships.length} relationships`);
+  console.log(`📊 Nodes collected: ${nodes.size}, ID mappings: ${elementIdToCanonicalId.size}`);
 
-  // Gerar contexto textual dos dados
+  // Second pass: process relationships using the ID mapping
+  values.forEach((row: any[], rowIdx: number) => {
+    row.forEach((element: any, colIdx: number) => {
+      if (!element) return;
+      
+      // Detect if it's a relationship (has type and startNodeElementId)
+      if (element.type && (element.startNodeElementId || element.startNode)) {
+        const startElementId = element.startNodeElementId || element.startNode;
+        const endElementId = element.endNodeElementId || element.endNode;
+        
+        // Map element IDs to canonical IDs
+        const sourceId = elementIdToCanonicalId.get(startElementId) || startElementId;
+        const targetId = elementIdToCanonicalId.get(endElementId) || endElementId;
+        
+        // Only add relationship if both nodes exist
+        if (nodes.has(sourceId) && nodes.has(targetId)) {
+          relationships.push({
+            type: element.type,
+            source: sourceId,
+            target: targetId,
+            properties: element.properties || {}
+          });
+          console.log(`  🔗 Rel [${sourceId}] -[${element.type}]-> [${targetId}]`);
+        } else {
+          console.log(`  ⚠️ Skipped rel: source=${sourceId} (exists: ${nodes.has(sourceId)}), target=${targetId} (exists: ${nodes.has(targetId)})`);
+        }
+      }
+    });
+  });
+
+  console.log(`📊 Final result: ${nodes.size} nodes, ${relationships.length} relationships`);
+
+  // Generate textual context
   const contextParts: string[] = [];
   nodes.forEach(node => {
     const name = node.properties.name || node.properties.title || node.label;
@@ -213,7 +253,6 @@ function formatGraphData(neo4jResult: any): GraphRAGResult {
     relationships,
     paths,
     context: contextParts.join('\n'),
-    // Incluir dados tabulares raw para o frontend processar
     rows: values,
     fields: fields
   };
@@ -242,7 +281,7 @@ serve(async (req) => {
     let cypherQuery = '';
     let parameters: Record<string, any> = {};
 
-    // Construir query baseado no tipo
+    // Build query based on type
     switch (request.queryType) {
       case 'path':
         if (!request.sourceEntity || !request.targetEntity) {
@@ -273,7 +312,6 @@ serve(async (req) => {
         break;
 
       case 'context':
-        // Buscar contexto rico para GraphRAG
         cypherQuery = `
           MATCH (n)-[r]->(m)
           WHERE n.name =~ $pattern OR m.name =~ $pattern
@@ -284,7 +322,6 @@ serve(async (req) => {
         break;
 
       case 'byStudy':
-        // Buscar todos os nós e relacionamentos por study_id
         if (!request.studyId) {
           throw new Error('studyId required for byStudy query');
         }
@@ -322,7 +359,8 @@ serve(async (req) => {
         metadata: {
           nodeCount: graphData.nodes.length,
           relationshipCount: graphData.relationships.length,
-          queryType: request.queryType
+          queryType: request.queryType,
+          source: 'neo4j'
         }
       }),
       {
