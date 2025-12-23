@@ -90,26 +90,29 @@ interface KnowledgeGraph3DProps {
   enable3D?: boolean;
 }
 
-// Color mapping for node types - bright colors for dark background
+// Color mapping for node types - saturated colors for light background
 const NODE_COLORS: Record<string, string> = {
-  nutraceutical: '#60a5fa',  // Bright blue
-  compound: '#3b82f6',
-  drug: '#2563eb',
-  condition: '#34d399',      // Bright green
-  disease: '#10b981',
-  mechanism: '#fbbf24',      // Bright yellow
-  effect: '#a78bfa',         // Bright purple
-  biological_effect: '#c084fc',
-  biologicalprocess: '#8b5cf6',
-  outcome: '#f472b6',        // Bright pink
-  target: '#22d3ee',         // Bright cyan
-  pathway: '#2dd4bf',
-  receptor: '#06b6d4',
-  enzyme: '#0891b2',
-  gene: '#818cf8',           // Bright indigo
-  protein: '#6366f1',
-  unknown: '#94a3b8',
+  nutraceutical: '#2563eb',  // Deep blue
+  compound: '#1d4ed8',
+  drug: '#1e40af',
+  condition: '#059669',      // Deep green
+  disease: '#047857',
+  mechanism: '#d97706',      // Deep amber
+  effect: '#7c3aed',         // Deep purple
+  biological_effect: '#9333ea',
+  biologicalprocess: '#6d28d9',
+  outcome: '#db2777',        // Deep pink
+  target: '#0891b2',         // Deep cyan
+  pathway: '#0d9488',
+  receptor: '#0e7490',
+  enzyme: '#0369a1',
+  gene: '#4f46e5',           // Deep indigo
+  protein: '#4338ca',
+  unknown: '#64748b',
 };
+
+// Light warm background
+const BG_COLOR = '#faf8f5';  // Warm off-white / cream
 
 const getNodeColor = (type: string, source?: string): string => {
   const normalizedType = type?.toLowerCase() || 'unknown';
@@ -126,9 +129,9 @@ const lightenColor = (color: string, percent: number): string => {
   return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 };
 
-// Link colors for dark background - return HEX for three.js compatibility
+// Link colors for light background
 const getLinkColor = (isNegative?: boolean): string => {
-  return isNegative ? '#f87171' : '#6b7280';
+  return isNegative ? '#dc2626' : '#9ca3af';
 };
 
 // Sanitize node color - handles both string and vis-network object format
@@ -145,8 +148,8 @@ const sanitizeNodeColor = (node: Node): string => {
 
 // Loading fallback component
 const GraphLoading = () => (
-  <div className="flex items-center justify-center h-full bg-[#0a0a0f]">
-    <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+  <div className="flex items-center justify-center h-full" style={{ backgroundColor: BG_COLOR }}>
+    <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
   </div>
 );
 
@@ -352,11 +355,11 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
   const nodeLabel = useCallback((node: any) => {
     const sourceLabel = t('knowledgeGraph.nodeTooltip.source');
-    return `<div style="background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); max-width: 280px;">
-      <strong style="font-size: 14px;">${node.name}</strong><br/>
-      <span style="color: #9ca3af; font-size: 11px;">${node.type}</span>
-      ${node.connections ? `<br/><span style="color: #a78bfa; font-size: 11px;">${node.connections} connections</span>` : ''}
-      ${node.source ? `<br/><span style="color: #6ee7b7; font-size: 11px;">${sourceLabel}: ${node.source}</span>` : ''}
+    return `<div style="background: rgba(255,255,255,0.95); color: #1e293b; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 280px;">
+      <strong style="font-size: 14px; color: #0f172a;">${node.name}</strong><br/>
+      <span style="color: #64748b; font-size: 11px;">${node.type}</span>
+      ${node.connections ? `<br/><span style="color: #7c3aed; font-size: 11px;">${node.connections} connections</span>` : ''}
+      ${node.source ? `<br/><span style="color: #059669; font-size: 11px;">${sourceLabel}: ${node.source}</span>` : ''}
     </div>`;
   }, [t]);
 
@@ -366,11 +369,11 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     
     // Create SpriteText label
     const sprite = new SpriteText(node.name);
-    sprite.color = node.color || '#ffffff';
+    sprite.color = '#1e293b';  // Dark text for light background
     sprite.textHeight = 4;
     sprite.fontFace = 'Inter, system-ui, sans-serif';
     sprite.fontWeight = 'bold';
-    sprite.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+    sprite.backgroundColor = 'rgba(255, 255, 255, 0.85)';
     sprite.padding = 2;
     sprite.borderRadius = 3;
     
@@ -379,7 +382,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
   if (graphError) {
     return (
-      <div className="flex items-center justify-center h-full text-white/50 bg-[#0a0a0f]">
+      <div className="flex items-center justify-center h-full text-slate-500" style={{ backgroundColor: BG_COLOR }}>
         <p>{graphError}</p>
       </div>
     );
@@ -388,20 +391,20 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full rounded-lg overflow-hidden border border-white/10"
-      style={{ height, backgroundColor: '#0a0a0f' }}
+      className="relative w-full rounded-lg overflow-hidden border border-slate-200 shadow-sm"
+      style={{ height, backgroundColor: BG_COLOR }}
     >
       {/* Controls overlay */}
       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
         <TooltipProvider>
-          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm p-2 rounded-lg border border-white/10 shadow-xl">
+          <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow-lg">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
                   variant={is3D ? 'secondary' : 'ghost'} 
                   size="sm"
                   onClick={() => setIs3D(!is3D)}
-                  className={is3D ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}
+                  className={is3D ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}
                 >
                   {is3D ? <Box className="h-4 w-4 mr-1" /> : <Square className="h-4 w-4 mr-1" />}
                   {is3D ? t('knowledgeGraph.viewModes.threeD') : t('knowledgeGraph.viewModes.twoD')}
@@ -410,11 +413,11 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               <TooltipContent>{is3D ? t('knowledgeGraph.controls.switchTo2D') : t('knowledgeGraph.controls.switchTo3D')}</TooltipContent>
             </Tooltip>
 
-            <div className="w-px h-6 bg-white/20" />
+            <div className="w-px h-6 bg-slate-200" />
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleZoomIn} className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" onClick={handleZoomIn} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                   <ZoomIn className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -423,7 +426,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleZoomOut} className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" onClick={handleZoomOut} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                   <ZoomOut className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -432,7 +435,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleReset} className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" onClick={handleReset} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                   <RotateCcw className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -441,7 +444,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleFitView} className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" onClick={handleFitView} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                   <Maximize className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -454,7 +457,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
                   variant={showSettings ? 'secondary' : 'ghost'} 
                   size="icon" 
                   onClick={() => setShowSettings(!showSettings)}
-                  className={showSettings ? 'bg-white/20' : 'text-white/70 hover:text-white hover:bg-white/10'}
+                  className={showSettings ? 'bg-slate-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -465,43 +468,43 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
         </TooltipProvider>
 
         {showSettings && (
-          <Card className="w-72 bg-black/80 backdrop-blur-sm border-white/10">
+          <Card className="w-72 bg-white/95 backdrop-blur-sm border-slate-200 shadow-lg">
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}: {nodeSize}</Label>
+                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.nodeSize', 'Node Size')}: {nodeSize}</Label>
                 <Slider
                   value={[nodeSize]}
                   onValueChange={([v]) => setNodeSize(v)}
                   min={2}
                   max={12}
                   step={1}
-                  className="[&_[role=slider]]:bg-white"
+                  className="[&_[role=slider]]:bg-slate-800"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.linkWidth', 'Link Width')}: {linkWidth}</Label>
+                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkWidth', 'Link Width')}: {linkWidth}</Label>
                 <Slider
                   value={[linkWidth]}
                   onValueChange={([v]) => setLinkWidth(v)}
                   min={0.5}
                   max={5}
                   step={0.5}
-                  className="[&_[role=slider]]:bg-white"
+                  className="[&_[role=slider]]:bg-slate-800"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}: {Math.round(linkOpacity * 100)}%</Label>
+                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.linkOpacity', 'Link Opacity')}: {Math.round(linkOpacity * 100)}%</Label>
                 <Slider
                   value={[linkOpacity * 100]}
                   onValueChange={([v]) => setLinkOpacity(v / 100)}
                   min={10}
                   max={100}
                   step={5}
-                  className="[&_[role=slider]]:bg-white"
+                  className="[&_[role=slider]]:bg-slate-800"
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.showLabels', 'Show Labels')}</Label>
+                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.showLabels', 'Show Labels')}</Label>
                 <Button
                   variant={showLabels ? 'secondary' : 'ghost'}
                   size="sm"
@@ -512,7 +515,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
                 </Button>
               </div>
               <div className="flex items-center justify-between">
-                <Label className="text-xs text-white/70">{t('knowledgeGraph.settings.diagnostics', 'Diagnostics')}</Label>
+                <Label className="text-xs text-slate-600">{t('knowledgeGraph.settings.diagnostics', 'Diagnostics')}</Label>
                 <Button
                   variant={showDiagnostics ? 'secondary' : 'ghost'}
                   size="sm"
@@ -529,18 +532,18 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
       {/* Stats overlay */}
       <div className="absolute top-4 right-4 z-10">
-        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10 shadow-xl">
-          <Badge variant="secondary" className="text-xs bg-white/10 text-white/80 border-white/10">
+        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 shadow-lg">
+          <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700 border-slate-200">
             <Layers className="h-3 w-3 mr-1" />
             {graphData.nodes.length} {t('knowledgeGraph.filters.nodes', 'nodes')}
           </Badge>
-          <Badge variant="outline" className={`text-xs bg-transparent border-white/20 ${graphData.links.length > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+          <Badge variant="outline" className={`text-xs bg-transparent ${graphData.links.length > 0 ? 'text-emerald-600 border-emerald-300' : 'text-amber-600 border-amber-300'}`}>
             {graphData.links.length} {t('knowledgeGraph.filters.edges', 'edges')}
           </Badge>
-          <Badge className={`text-xs ${is3D ? 'bg-blue-600/80 text-white' : 'bg-white/10 text-white/80'}`}>
+          <Badge className={`text-xs ${is3D ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'}`}>
             {is3D ? t('knowledgeGraph.renderModes.webgl3d') : t('knowledgeGraph.renderModes.canvas2d')}
           </Badge>
-          <Badge className="text-xs bg-green-600/30 text-green-300 border-green-500/30">
+          <Badge className="text-xs bg-emerald-100 text-emerald-700 border-emerald-300">
             <Database className="h-3 w-3 mr-1" />
             Neo4j
           </Badge>
@@ -549,24 +552,24 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
       {/* Diagnostics overlay */}
       {showDiagnostics && (
-        <div className="absolute top-16 right-4 z-10 bg-black/80 backdrop-blur-sm p-3 rounded-lg border border-white/10 text-xs text-white/70 font-mono max-w-sm">
-          <div className="font-bold text-white mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+        <div className="absolute top-16 right-4 z-10 bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200 shadow-lg text-xs text-slate-600 font-mono max-w-sm">
+          <div className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
             Pipeline Diagnostics
           </div>
           <div className="space-y-1">
             <div>Input: {diagnostics.inputNodes} nodes, {diagnostics.inputLinks} links</div>
             <div>Processed: {diagnostics.processedNodes} nodes, {diagnostics.processedLinks} links</div>
-            <div className={diagnostics.invalidLinks > 0 ? 'text-yellow-400' : 'text-green-400'}>
+            <div className={diagnostics.invalidLinks > 0 ? 'text-amber-600' : 'text-emerald-600'}>
               Invalid links: {diagnostics.invalidLinks}
             </div>
             {diagnostics.sampleNodeIds.length > 0 && (
-              <div className="text-white/50 text-[10px] truncate">
+              <div className="text-slate-400 text-[10px] truncate">
                 Node IDs: {diagnostics.sampleNodeIds.join(', ')}...
               </div>
             )}
             {diagnostics.sampleInvalidLinks.length > 0 && (
-              <div className="mt-2 text-yellow-300/70">
+              <div className="mt-2 text-amber-700">
                 Sample invalid:
                 {diagnostics.sampleInvalidLinks.slice(0, 2).map((inv: any, i: number) => (
                   <div key={i} className="text-[10px] truncate pl-2">
@@ -581,7 +584,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
       {/* Navigation hints */}
       <div className="absolute bottom-4 right-4 z-10">
-        <div className="flex items-center gap-4 text-xs text-white/40 bg-black/40 backdrop-blur-sm px-3 py-2 rounded-lg">
+        <div className="flex items-center gap-4 text-xs text-slate-500 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200">
           <span className="flex items-center gap-1">
             <MousePointer className="h-3 w-3" />
             {is3D ? t('knowledgeGraph.hints.dragRotate') : t('knowledgeGraph.hints.dragPan')}
@@ -595,9 +598,9 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
       {/* Legend */}
       <div className="absolute bottom-4 left-4 z-10">
-        <div className="flex flex-wrap gap-2 text-xs bg-black/40 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[300px]">
+        <div className="flex flex-wrap gap-2 text-xs bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 max-w-[300px]">
           {Object.entries(NODE_COLORS).slice(0, 8).map(([type, color]) => (
-            <span key={type} className="flex items-center gap-1 text-white/60">
+            <span key={type} className="flex items-center gap-1 text-slate-600">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
               <span className="capitalize">{type}</span>
             </span>
@@ -613,7 +616,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             graphData={graphData}
             width={dimensions.width}
             height={dimensions.height}
-            backgroundColor="#0a0a0f"
+            backgroundColor={BG_COLOR}
             nodeColor={(node: any) => node.color}
             nodeVal={(node: any) => node.val * nodeSize * 0.5}
             nodeLabel={nodeLabel}
@@ -639,7 +642,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             graphData={graphData}
             width={dimensions.width}
             height={dimensions.height}
-            backgroundColor="#0a0a0f"
+            backgroundColor={BG_COLOR}
             nodeColor={(node: any) => node.color}
             nodeVal={(node: any) => node.val * nodeSize * 0.5}
             nodeLabel={nodeLabel}
