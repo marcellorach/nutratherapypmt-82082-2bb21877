@@ -500,42 +500,44 @@ export const KnowledgeGraphViewer: React.FC = () => {
     // Normalizar tipo para lowercase para comparações consistentes
     const normalizedType = type?.toLowerCase() || 'unknown';
     
-    // Base colors by type (usando lowercase para consistência)
-    const typeColors: Record<string, { base: string; study: string }> = {
-      'nutraceutical': { base: '#3b82f6', study: '#22c55e' },
-      'compound': { base: '#3b82f6', study: '#22c55e' },  // Drug/Compound usa mesma cor de nutraceutical
-      'drug': { base: '#2563eb', study: '#22c55e' },
-      'condition': { base: '#10b981', study: '#22c55e' },
-      'disease': { base: '#10b981', study: '#22c55e' },
-      'mechanism': { base: '#f59e0b', study: '#22c55e' },
-      'effect': { base: '#8b5cf6', study: '#22c55e' },
-      'biological_effect': { base: '#8b5cf6', study: '#22c55e' },
-      'outcome': { base: '#ec4899', study: '#22c55e' },
-      'target': { base: '#06b6d4', study: '#22c55e' },     // Novo: Target (enzimas, proteínas)
-      'pathway': { base: '#14b8a6', study: '#22c55e' },    // Novo: Pathway
-      'biologicalprocess': { base: '#8b5cf6', study: '#22c55e' },  // Novo: BiologicalProcess
-      'receptor': { base: '#06b6d4', study: '#22c55e' },   // Novo: Receptor
-      'enzyme': { base: '#06b6d4', study: '#22c55e' },     // Novo: Enzyme
-      'gene_protein': { base: '#0ea5e9', study: '#22c55e' }, // Novo: Gene/Protein
-      'unknown': { base: '#6b7280', study: '#22c55e' }
+    // Paleta sincronizada com KnowledgeGraph3D.tsx
+    const NODE_COLORS: Record<string, string> = {
+      nutraceutical: '#22c55e',    // Verde vibrante
+      compound: '#eab308',         // Amarelo dourado
+      drug: '#3b82f6',             // Azul médio
+      condition: '#f97316',        // Laranja
+      disease: '#991b1b',          // Vermelho escuro
+      mechanism: '#1e3a5f',        // Azul escuro
+      effect: '#06b6d4',           // Ciano
+      biological_effect: '#71717a', // Cinza
+      biologicalprocess: '#14b8a6', // Teal
+      target: '#0ea5e9',           // Sky blue
+      pathway: '#10b981',          // Emerald
+      receptor: '#6366f1',         // Indigo
+      enzyme: '#f43f5e',           // Rose
+      gene: '#a855f7',             // Purple
+      protein: '#84cc16',          // Lime
+      outcome: '#d946ef',          // Fuchsia
+      gene_protein: '#0ea5e9',     // Sky blue
+      unknown: '#64748b',          // Slate
     };
     
-    const colors = typeColors[normalizedType] || typeColors['unknown'];
+    const baseColor = NODE_COLORS[normalizedType] || NODE_COLORS['unknown'];
     
-    // Always return consistent object format to avoid rendering issues
+    // Para nós de estudo, usar borda diferenciada
     if (source === 'study') {
       return {
-        background: colors.study,
+        background: baseColor,
         border: '#16a34a',
-        highlight: { background: '#4ade80', border: '#16a34a' }
+        highlight: { background: baseColor, border: '#16a34a' }
       };
     }
     
     // Return consistent object format for non-study sources too
     return {
-      background: colors.base,
-      border: colors.base,
-      highlight: { background: colors.base, border: colors.base }
+      background: baseColor,
+      border: baseColor,
+      highlight: { background: baseColor, border: baseColor }
     };
   };
 
@@ -1104,7 +1106,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
               data={filteredData}
               height="calc(100vh - 400px)"
               showControls={true}
-              showLegend={false}
+              showLegend={true}
               onNodeClick={handleNodeClick}
             />
           )}
