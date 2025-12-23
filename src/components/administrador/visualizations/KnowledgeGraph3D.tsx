@@ -63,7 +63,7 @@ interface Node {
   type: string;
   group?: string;
   connections?: number;
-  color?: string;
+  color?: string | Record<string, string>;
   source?: string;
   properties?: Record<string, any>;
 }
@@ -125,12 +125,26 @@ const lightenColor = (color: string, percent: number): string => {
   return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 };
 
-// Link colors for dark background
+// Link colors for dark background - return HEX for three.js compatibility
 const getLinkColor = (isNegative?: boolean): string => {
   if (isNegative) {
-    return 'rgba(248, 113, 113, 0.4)'; // Red with low opacity
+    return '#f87171'; // Red - opacity controlled by linkOpacity prop
   }
-  return 'rgba(255, 255, 255, 0.15)'; // White with very low opacity like the example
+  return '#888888'; // Light gray - opacity controlled by linkOpacity prop
+};
+
+// Sanitize node color - handles both string and vis-network object format
+const sanitizeNodeColor = (node: Node): string => {
+  if (!node.color) {
+    return getNodeColor(node.type, node.source);
+  }
+  // If color is an object (vis-network format), extract background color
+  if (typeof node.color === 'object') {
+    const colorObj = node.color as any;
+    return colorObj.background || colorObj.border || getNodeColor(node.type, node.source);
+  }
+  // If it's already a string, use it directly
+  return node.color;
 };
 
 // Loading fallback component
@@ -171,20 +185,12 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Auto-centralize graph on load
-  useEffect(() => {
-    if (fgRef.current && graphData.nodes.length > 0) {
-      const timer = setTimeout(() => {
-        if (is3D) {
-          // For 3D, adjust camera position
-          fgRef.current?.cameraPosition({ z: 400 }, null, 1000);
-        } else {
-          fgRef.current?.zoomToFit(500, 80);
-        }
-      }, 1500);
-      return () => clearTimeout(timer);
+  // Handle engine stop - zoomToFit for better initial visibility
+  const handleEngineStop = useCallback(() => {
+    if (fgRef.current) {
+      fgRef.current.zoomToFit(500, 50);
     }
-  }, [is3D]);
+  }, []);
 
   const graphData = useMemo(() => {
     console.log('KnowledgeGraph3D - Processing data:', {
@@ -211,8 +217,8 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
           name: node.label,
           type: node.type,
           group: node.group || node.type,
-          val: Math.max(1, (node.connections || 1)),
-          color: node.color || getNodeColor(node.type, node.source),
+          val: Math.max(2, (node.connections || 1) * 1.5), // Slightly larger nodes for visibility
+          color: sanitizeNodeColor(node), // Use sanitized color
           source: node.source,
           properties: node.properties,
         };
@@ -523,11 +529,12 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
             nodeLabel={nodeLabel}
             nodeColor={(node: any) => node.color}
             nodeVal={(node: any) => node.val * nodeSize}
-            nodeOpacity={0.95}
+            nodeOpacity={1.0}
             linkColor={(link: any) => link.color}
-            linkWidth={0.5}
+            linkWidth={1}
             linkOpacity={linkOpacity}
             onNodeClick={handleNodeClick}
+            onEngineStop={handleEngineStop}
             enableNodeDrag={true}
             enableNavigationControls={true}
             showNavInfo={false}
