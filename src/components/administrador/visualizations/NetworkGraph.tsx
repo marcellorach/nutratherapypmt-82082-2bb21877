@@ -94,12 +94,11 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     if (!onNodeClick) return;
     
     const handleClick = (params: any) => {
-      if (params.nodes.length > 0 && nodes) {
+      if (params.nodes && params.nodes.length > 0) {
         const nodeId = params.nodes[0];
-        const nodeData = nodes.get(nodeId);
-        if (nodeData) {
-          onNodeClick(nodeId, nodeData);
-        }
+        // Tenta obter nodeData do DataSet, mas passa dados mínimos se não encontrar
+        const nodeData = nodes?.get(nodeId) || { id: nodeId, label: nodeId };
+        onNodeClick(nodeId, nodeData);
       }
     };
     

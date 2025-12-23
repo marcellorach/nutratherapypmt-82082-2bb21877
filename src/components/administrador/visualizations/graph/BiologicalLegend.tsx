@@ -151,7 +151,7 @@ const BiologicalLegend: React.FC<BiologicalLegendProps> = ({
 
   if (compact) {
     return (
-      <TooltipProvider delayDuration={200}>
+      <TooltipProvider delayDuration={100}>
         <div className={`flex flex-wrap gap-2 text-xs bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-200 ${className}`}>
           {showNodes && nodeEntries.map(([type, color]) => (
             <Tooltip key={type}>
@@ -185,7 +185,7 @@ const BiologicalLegend: React.FC<BiologicalLegendProps> = ({
   }
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delayDuration={100}>
       <div className={`bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg border border-slate-200 shadow-sm ${className}`}>
         {showNodes && (
           <div className="mb-3">
