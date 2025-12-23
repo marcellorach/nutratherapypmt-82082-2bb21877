@@ -4609,6 +4609,16 @@
       "effect": "Efeito",
       "biological_effect": "Efeito Biológico"
     },
+    "nodeDescriptions": {
+      "nutraceutical": "Substâncias bioativas naturais com potencial terapêutico, como curcumina, resveratrol, ômega-3",
+      "compound": "Compostos químicos ativos que podem ser isolados de fontes naturais ou sintetizados",
+      "drug": "Medicamentos farmacêuticos aprovados para uso terapêutico",
+      "condition": "Estados de saúde, sintomas ou síndromes que podem ser tratados ou gerenciados",
+      "disease": "Patologias diagnosticadas que requerem intervenção médica",
+      "mechanism": "Processos bioquímicos e vias moleculares pelos quais substâncias exercem seus efeitos",
+      "effect": "Resultados observáveis de uma intervenção no organismo",
+      "biological_effect": "Efeitos em nível celular ou tecidual resultantes de ações bioquímicas"
+    },
     "edges": {
       "activation": "Ativação",
       "inhibition": "Inibição",
@@ -4616,6 +4626,14 @@
       "binding": "Ligação",
       "participation": "Participação",
       "association": "Associação"
+    },
+    "edgeDescriptions": {
+      "activation": "Estimula, promove ou aumenta a atividade do alvo. Inclui: ACTIVATES, PROMOTES, TRIGGERS, UPREGULATES, TREATS, SUPPORTS",
+      "inhibition": "Bloqueia, suprime ou reduz a atividade do alvo. Inclui: INHIBITS, BLOCKS, DOWNREGULATES, WORSENS, CONTRAINDICATED_FOR",
+      "modulation": "Regula ou ajusta a atividade sem ativação ou inibição direta. Inclui: MODULATES, REGULATES",
+      "binding": "Interação física direta entre moléculas, formando complexos. Inclui: BINDS_TO",
+      "participation": "Envolvimento em processos ou cascatas biológicas. Inclui: PARTICIPATES_IN, LEADS_TO, CAUSES",
+      "association": "Correlação ou relação conceitual sem mecanismo direto. Inclui: IS_A, RELATED_TO, PREDISPOSED_TO"
     }
   }
 }
