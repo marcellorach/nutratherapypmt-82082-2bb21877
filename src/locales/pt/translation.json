@@ -1081,6 +1081,7 @@
     },
     "tabInfo": {
       "button": "Informações sobre esta aba",
+      "vetgraphragButton": "ℹ️ Sobre o VetGraphRAG",
       "description": "Entenda a metodologia, fundamentos científicos e objetivos desta funcionalidade",
       "lastUpdate": "Última Atualização",
       "keyExcerpts": {
@@ -1100,11 +1101,13 @@
       "methodology": {
         "comparisonTable": "Quadro Comparativo",
         "architectureDiagram": "Diagrama de Arquitetura",
+        "architectureRoadmap": "Roadmap Arquitetural",
         "calculations": "Cálculos e Fórmulas",
         "example": "Exemplo",
         "decisions": "Decisões Metodológicas",
         "glossary": "Glossário Técnico",
-        "limitations": "Limitações Conhecidas"
+        "limitations": "Limitações Conhecidas",
+        "componentLinks": "Links para Componentes"
       },
       "scientific": {
         "foundation": "Fundamentos Científicos",
@@ -1116,6 +1119,15 @@
         "keyFindings": "Principais Descobertas",
         "viewStudy": "Ver estudo",
         "references": "Referências"
+      },
+      "componentTypes": {
+        "component": "Componente",
+        "edgeFunction": "Edge Function"
+      },
+      "roadmapStatus": {
+        "implemented": "Implementado",
+        "inProgress": "Em Progresso",
+        "planned": "Planejado"
       }
     },
     "sidebar": {

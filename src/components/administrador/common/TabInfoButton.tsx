@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ExternalLink, Code, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -58,6 +59,18 @@ export interface TabInfoContent {
     description: string;
     comparisonTable?: ComparisonTable;
     architectureDiagram?: string;
+    architectureRoadmap?: {
+      phase1?: { name: string; status: string; description: string };
+      phase2?: { name: string; status: string; description: string };
+      phase3?: { name: string; status: string; description: string };
+      phase4?: { name: string; status: string; description: string };
+    };
+    componentLinks?: {
+      name: string;
+      path: string;
+      type: string;
+      description: string;
+    }[];
     calculations?: {
       name: string;
       formula: string;
@@ -109,6 +122,11 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
     return null;
   }
 
+  // Determine button text based on tabId
+  const buttonText = tabId === 'estudos' 
+    ? t('admin.tabInfo.vetgraphragButton') 
+    : t('admin.tabInfo.button');
+
   return (
     <>
       <Button
@@ -118,7 +136,8 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
         className="gap-2 bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-200 dark:border-amber-700"
       >
         <BookOpen className="h-4 w-4" />
-        {t('admin.tabInfo.button')}
+        {buttonText}
+      </Button>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

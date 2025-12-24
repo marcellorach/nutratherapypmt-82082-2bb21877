@@ -101,8 +101,8 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
   },
 
   'estudos': {
-    version: '3.0.0',
-    lastUpdate: '2025-11-30',
+    version: '4.0.0',
+    lastUpdate: '2025-12-24',
     keyExcerpts: [
       {
         source: 'MedGraphRAG (Wu et al., 2024) - arXiv:2408.04187',
@@ -115,9 +115,34 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
         url: 'https://openreview.net/forum?id=OOq3W1MEVT'
       },
       {
+        source: 'AgeXtend (Ahuja et al., Nature Aging 2024)',
+        quote: 'AI-based multimodal geroprotector prediction platform leveraging bioactivity data of known geroprotectors. Screened ~1.1 billion compounds with explainability module identifying senomodulators, caloric restriction mimetics, and autophagy inducers.',
+        url: 'https://www.nature.com/articles/s43587-024-00763-4'
+      },
+      {
+        source: 'Dog Aging Project (Creevy et al., GeroScience 2022)',
+        quote: 'Largest longitudinal study of canine aging (45,000+ dogs). Provides baseline data for intervention studies, biological age markers, and breed-specific aging patterns for geroprotector development.',
+        url: 'https://dogagingproject.org'
+      },
+      {
+        source: 'TRIAD Study - Test of Rapamycin in Aging Dogs (GeroScience, 2025)',
+        quote: 'Prospective, randomized, placebo-controlled, multicenter trial of rapamycin in healthy middle-aged dogs. Gold standard methodology for canine geroprotector trials with rigorous endpoints.',
+        url: 'https://pubmed.ncbi.nlm.nih.gov/39951177'
+      },
+      {
+        source: 'PrimeKG (Chandak et al., Nature Scientific Data 2023)',
+        quote: 'Precision Medicine Knowledge Graph with 4M+ relationships integrating 20+ biomedical databases. Enables graph neural network-based drug discovery and adverse effect prediction with 87% AUROC.',
+        url: 'https://www.nature.com/articles/s41597-023-01960-3'
+      },
+      {
         source: 'TransE Link Prediction (Bordes et al., 2013) - NeurIPS',
         quote: 'TransE models relationships as translations in embedding space: h + r ≈ t, enabling prediction of missing links in knowledge graphs with high accuracy for structured biomedical data.',
         url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html'
+      },
+      {
+        source: 'Canine Cognitive Nutraceuticals (Yarborough et al., GeroScience 2025)',
+        quote: 'Systematic review of enriched diets and nutraceuticals for enhancing cognitive functions in aged dogs. Documents efficacy of omega-3s, antioxidants, and medium-chain triglycerides for canine cognitive dysfunction.',
+        url: 'https://link.springer.com/article/10.1007/s11357-025-01521-z'
       },
       {
         source: 'VeNom Veterinary Nomenclature - Purdue University',
@@ -131,13 +156,13 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
       }
     ],
     overview: {
-      objective: 'VetGraphRAG: Sistema híbrido de GraphRAG que combina MedGraphRAG (Triple Graph + U-Retrieval) com KGARevion (ciclo GRRA), adaptado para medicina veterinária com ontologias VeNom, diretrizes AAHA/WSAVA, e modelagem de predisposição por raça.',
+      objective: 'VetGraphRAG: Sistema híbrido de GraphRAG que combina MedGraphRAG (Triple Graph + U-Retrieval) com KGARevion (ciclo GRRA), adaptado para medicina veterinária com foco em LONGEVIDADE CANINA. Objetivo final: varrer dados de pacientes (prontuário, histórico clínico, exames, biometria) e recomendar esquemas nutracêuticos e geroprotetores personalizados para prevenir doenças degenerativas associadas à idade e estender a vida saudável dos pets.',
       workflow: [
         '1. PDF Upload → Gemini File API extrai texto completo com estrutura hierárquica preservada',
         '2. Triple Graph Construction → 4 níveis: Document → Chunk → Entity → Mechanism (5 camadas hierárquicas)',
         '3. Entity Extraction (3 Stages) → Stage 1: Entidades básicas | Stage 2: Mecanismos moleculares | Stage 3: Contexto clínico',
         '4. GRRA Cycle (KGARevion) → Generate triplets → Review contra KG → Revise erros → Answer/Approve',
-        '5. Dual Storage → Supabase pgvector (embeddings) + Neo4j AuraDB (Knowledge Graph) - PLANEJADO',
+        '5. Dual Storage → Supabase pgvector (embeddings) + Neo4j AuraDB (Knowledge Graph)',
         '6. U-Retrieval → Top-down (Graph Cypher) + Bottom-up (Vector Search)',
         '7. LLM Synthesis → Gemini 3 Pro gera recomendações clínicas com citações',
         '8. Auto-Discovery → TransE Link Prediction sugere pathways novos para revisão veterinária'
@@ -148,13 +173,13 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
         'Raciocínio multi-hop através de nutracêuticos, condições e mecanismos',
         'Auto-descobre pathways de tratamento novos para curadoria humana',
         'Sistema GRADE de evidências garante transparência na força das recomendações',
-        'Títulos reais extraídos automaticamente dos PDFs processados'
+        'Base para recomendações personalizadas de geroprotetores por raça e idade'
       ]
     },
     methodology: {
-      description: 'Arquitetura híbrida combinando Triple Graph Construction (MedGraphRAG), GRRA Cycle (KGARevion), e TransE Embeddings para link prediction, com 5 camadas hierárquicas de entidades.',
+      description: 'Arquitetura híbrida combinando Triple Graph Construction (MedGraphRAG), GRRA Cycle (KGARevion), e TransE Embeddings para link prediction, com 5 camadas hierárquicas de entidades. Sistema projetado para evoluir em 4 fases: Knowledge Base → Patient System → Recommendation Engine → Longitudinal Follow-up.',
       comparisonTable: {
-        headers: ['Feature', 'MedGraphRAG', 'KGARevion', 'VetGraphRAG (NTAI)'],
+        headers: ['Feature', 'MedGraphRAG', 'KGARevion', 'VetGraphRAG'],
         rows: [
           { feature: '1. Entity Extraction Stages', values: ['Single stage', 'Single stage', '3 stages (Entities → Mechanisms → Clinical)'] },
           { feature: '2. Hierarchical Layers', values: ['3 níveis', '2 níveis', '5 níveis (L0→L4: Compound→Target→Mechanism→Effect→Outcome)'] },
@@ -164,7 +189,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
           { feature: '6. Retrieval Method', values: ['U-Retrieval (Top+Bottom)', 'KG-grounded search', 'Hybrid U-Retrieval + KG Validation + Confidence Scoring'] },
           { feature: '7. Validation Cycle', values: ['Not explicit', 'GRRA cycle', 'GRRA + Human-in-Loop + GRADE scoring + Auto-approve thresholds'] },
           { feature: '8. Hallucination Reduction', values: ['40%', '87% error elimination', 'Combined: ~50% reduction expected'] },
-          { feature: '9. Title Extraction', values: ['Not covered', 'Not covered', '✅ Extração automática de títulos reais dos PDFs'] },
+          { feature: '9. Longevity Focus', values: ['Not covered', 'Not covered', '✅ Geroprotetores, marcadores de idade biológica, predisposições de raça'] },
           { feature: '10. Synergy Scoring', values: ['Not covered', 'Not covered', '✅ Quantificação de pathways compartilhados'] },
           { feature: '11. Breed Predisposition', values: ['Not covered', 'Not covered', '✅ Species→BreedGroup→Breed→Condition paths'] },
           { feature: '12. Auto-Discovery', values: ['Not covered', 'Not covered', '✅ TransE Link Prediction para pathways novos'] }
@@ -172,8 +197,8 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
       },
       architectureDiagram: `
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    VetGraphRAG Architecture v3.0                               ║
-║                  MedGraphRAG + KGARevion Hybrid System                         ║
+║                    VetGraphRAG Architecture v4.0                               ║
+║        MedGraphRAG + KGARevion + Canine Longevity Focus                        ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -193,7 +218,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
 │   │             │    │                 │    │                   │              │
 │   │ Nutraceuticals│  │ Molecular targets│    │ Dosages, Side    │              │
 │   │ Conditions    │  │ Synergies       │    │ effects, Outcomes│              │
-│   │ Interactions  │  │ Hierarchical    │    │ Contraindications │              │
+│   │ Geroprotectors│  │ Aging pathways  │    │ Breed specifics  │              │
 │   └─────────────┘    └─────────────────┘    └───────────────────┘              │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -204,16 +229,16 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
 │   L0: COMPOUND        L1: TARGET         L2: MECHANISM                          │
 │   ┌────────────┐     ┌────────────┐     ┌────────────────┐                     │
 │   │Nutraceutical│────▶│  Receptor  │────▶│    Pathway     │                     │
-│   │   Drug     │     │  Enzyme    │     │   Signaling    │                     │
-│   │ Chemical   │     │  Pathway   │     │    Cascade     │                     │
+│   │Geroprotector│    │  Enzyme    │     │   Signaling    │                     │
+│   │   Drug     │     │Gene/Protein│     │    Cascade     │                     │
 │   └────────────┘     └────────────┘     └────────────────┘                     │
 │          │                                      │                              │
 │          ▼                                      ▼                              │
 │   L3: EFFECT                            L4: OUTCOME                            │
 │   ┌────────────────┐                   ┌────────────────┐                      │
 │   │Biological Effect│                  │   Condition    │                      │
-│   │  Side Effect   │                   │    Disease     │                      │
-│   │Clinical Outcome│                   │  Breed/Species │                      │
+│   │Aging Biomarker │                   │  Breed/Species │                      │
+│   │Clinical Outcome│                   │   Longevity    │                      │
 │   └────────────────┘                   └────────────────┘                      │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -243,18 +268,49 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
 │   │                            │    │                                │         │
 │   │  • study_embeddings        │    │  NODES:                        │         │
 │   │  • triplet_extractions     │◀──▶│  • (:Nutraceutical)           │         │
-│   │  • hierarchical_edges      │    │  • (:Condition)               │         │
-│   │  • processed_studies       │    │  • (:Mechanism)               │         │
+│   │  • hierarchical_edges      │    │  • (:Geroprotector)           │         │
+│   │  • processed_studies       │    │  • (:Condition)               │         │
 │   │                            │    │  • (:Breed)                   │         │
 │   │  INDEXES:                  │    │                                │         │
 │   │  • ivfflat (cosine)        │    │  RELATIONSHIPS:                │         │
 │   │  • GIN (metadata)          │    │  • -[:TREATS]->               │         │
-│   │  • btree (timestamps)      │    │  • -[:MODULATES]->            │         │
-│   └────────────────────────────┘    │  • -[:SYNERGIZES]->           │         │
-│                                     │  • -[:PREDISPOSED_TO]->       │         │
+│   │  • btree (timestamps)      │    │  • -[:EXTENDS_LIFESPAN]->     │         │
+│   └────────────────────────────┘    │  • -[:PREDISPOSED_TO]->       │         │
 │                                     └────────────────────────────────┘         │
 └─────────────────────────────────────────────────────────────────────────────────┘
 `,
+      architectureRoadmap: {
+        phase1: { 
+          name: 'Knowledge Base (VetGraphRAG)', 
+          status: 'implemented', 
+          description: 'Extração de conhecimento de PDFs científicos para Knowledge Graph com 5 camadas hierárquicas, ciclo GRRA, e TransE link prediction.' 
+        },
+        phase2: { 
+          name: 'Patient System', 
+          status: 'planned', 
+          description: 'Cadastro de pets (pets table), prontuário veterinário, histórico clínico, resultados de exames, dados biométricos, e idade biológica estimada.' 
+        },
+        phase3: { 
+          name: 'Recommendation Engine', 
+          status: 'planned', 
+          description: 'Motor de matching pet ↔ protocolo baseado em raça, idade, condições, e histórico. Dosagem personalizada, scoring de prioridade terapêutica, e verificação de interações.' 
+        },
+        phase4: { 
+          name: 'Longitudinal Follow-up', 
+          status: 'planned', 
+          description: 'Dashboard de evolução por pet, alertas de milestone, comparações before/after, feedback loop para retraining de modelos, e otimização contínua de protocolos.' 
+        }
+      },
+      componentLinks: [
+        { name: 'VetGraphRAGProcessingSection', path: '/administrador?tab=estudos', type: 'component', description: 'Interface principal de processamento de estudos' },
+        { name: 'TripletCurationBoard', path: '/administrador?tab=curadoria', type: 'component', description: 'Curadoria humana de triplets extraídos' },
+        { name: 'KnowledgeGraphViewer', path: '/administrador?tab=knowledge-graph', type: 'component', description: 'Visualização 2D/3D do Knowledge Graph' },
+        { name: 'parse-study', path: '', type: 'edge-function', description: 'Parsing de PDFs com Unstructured API' },
+        { name: 'gemini-file-search', path: '', type: 'edge-function', description: 'Extração com Gemini File API + RAG' },
+        { name: 'extract-study-entities', path: '', type: 'edge-function', description: 'Extração em 3 estágios com tool calling' },
+        { name: 'generate-triplets', path: '', type: 'edge-function', description: 'Geração de triplets SPO hierárquicos' },
+        { name: 'sync-approved-triplets', path: '', type: 'edge-function', description: 'Sincronização com Neo4j AuraDB' }
+      ],
       calculations: [
         {
           name: '1. KGARevion Confidence Score',
@@ -342,26 +398,31 @@ Action: AUTO-SUGGEST for veterinary review`
         'Threshold de auto-aprovação em 0.8 para manter alta precisão',
         'Scores de sinergia baseados em pathways compartilhados + overlap de mecanismos',
         'Extração automática de títulos para evitar dados incorretos de simulação',
-        'Predisposição de raça integrada ao grafo para recomendações personalizadas'
+        'Predisposição de raça integrada ao grafo para recomendações personalizadas',
+        'Foco em longevidade: geroprotetores, marcadores de idade biológica, intervenções anti-aging'
       ]
     },
     scientific: {
-      foundation: 'Sistema híbrido fundamentado em três pilares: (1) MedGraphRAG para construção de grafos hierárquicos e U-Retrieval, (2) KGARevion para validação de triplets com ciclo GRRA, (3) TransE para link prediction e auto-descoberta. Adaptado para veterinária com VeNom, AAHA/WSAVA, e modelagem de predisposição por raça.',
+      foundation: 'Sistema híbrido fundamentado em quatro pilares: (1) MedGraphRAG para construção de grafos hierárquicos e U-Retrieval, (2) KGARevion para validação de triplets com ciclo GRRA, (3) TransE para link prediction e auto-descoberta, (4) Ciência da Longevidade Canina (Dog Aging Project, TRIAD, AgeXtend). Adaptado para veterinária com VeNom, AAHA/WSAVA, e modelagem de predisposição por raça.',
       implementationStatus: {
         implemented: [
           'PDF Upload + Gemini Parsing (Funcionando com Gemini 3 Pro)',
           '3-Stage Entity Extraction (Stage 1-3 implementados com tool calling)',
           'Title Extraction (Extração automática do título real do PDF)',
-          'Triplet Generation (Geração automática de triplets para curadoria)'
+          'Triplet Generation (Geração automática de triplets para curadoria)',
+          'Triplet Curation UI (Interface de curadoria com approve/reject/review)',
+          '5-Layer Hierarchical Schema (Tabelas hierárquicas criadas no Supabase)'
         ],
         inProgress: [
-          '5-Layer Hierarchical Graph (Tabelas hierárquicas criadas, sincronização em desenvolvimento)',
-          'GRRA Validation Cycle (Auto-approve implementado, human review UI em desenvolvimento)'
+          'Neo4j Synchronization (sync-approved-triplets implementado, testando)',
+          'GRRA Validation Cycle (Auto-approve implementado, human review UI ativo)',
+          'Confidence Scoring (KG_match + LLM_confidence + GRADE calculados)'
         ],
         planned: [
-          'Neo4j Integration (Planejado para persistência de Knowledge Graph)',
-          'TransE Link Prediction (Planejado para auto-descoberta de pathways)',
-          'Breed Predisposition Paths (Schema definido, population em desenvolvimento)'
+          'TransE Link Prediction (Auto-descoberta de pathways novos)',
+          'Patient System (Cadastro de pets, prontuário, histórico clínico)',
+          'Recommendation Engine (Matching pet ↔ protocolo geroprotetor)',
+          'Longitudinal Follow-up (Dashboard de evolução, feedback loop)'
         ]
       },
       studies: [
@@ -382,12 +443,52 @@ Action: AUTO-SUGGEST for veterinary review`
           keyFindings: 'Ciclo GRRA (Generate-Review-Revise-Answer) elimina 87% dos erros de extração ao validar triplets contra Knowledge Graph existente.'
         },
         {
+          title: 'AgeXtend: Multi-omic geroprotector prediction using AI',
+          authors: 'Ahuja et al.',
+          year: 2024,
+          journal: 'Nature Aging',
+          url: 'https://www.nature.com/articles/s43587-024-00763-4',
+          keyFindings: 'Plataforma AI para predição de geroprotetores baseada em dados de bioatividade. Screening de ~1.1 bilhão de compostos com módulo de explicabilidade identificando senomoduladores, miméticos de restrição calórica, e indutores de autofagia.'
+        },
+        {
+          title: 'The Dog Aging Project: Longitudinal Study of Canine Aging',
+          authors: 'Creevy et al.',
+          year: 2022,
+          journal: 'GeroScience',
+          url: 'https://dogagingproject.org',
+          keyFindings: 'Maior estudo longitudinal de envelhecimento canino (45.000+ cães). Dados baseline para estudos de intervenção, marcadores de idade biológica, e padrões de envelhecimento específicos por raça.'
+        },
+        {
+          title: 'TRIAD: Test of Rapamycin in Aging Dogs',
+          authors: 'Kaeberlein et al.',
+          year: 2025,
+          journal: 'GeroScience',
+          url: 'https://pubmed.ncbi.nlm.nih.gov/39951177',
+          keyFindings: 'Estudo prospectivo, randomizado, controlado por placebo, multicêntrico de rapamicina em cães de meia-idade saudáveis. Metodologia padrão-ouro para ensaios de geroprotetores caninos.'
+        },
+        {
+          title: 'PrimeKG: A Knowledge Graph for Precision Medicine',
+          authors: 'Chandak et al.',
+          year: 2023,
+          journal: 'Nature Scientific Data',
+          url: 'https://www.nature.com/articles/s41597-023-01960-3',
+          keyFindings: 'Knowledge Graph de medicina de precisão com 4M+ relacionamentos integrando 20+ databases biomédicos. Permite descoberta de drogas e predição de efeitos adversos com 87% AUROC usando GNNs.'
+        },
+        {
           title: 'Translating Embeddings for Modeling Multi-relational Data',
           authors: 'Bordes et al.',
           year: 2013,
           journal: 'NeurIPS',
           url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html',
           keyFindings: 'TransE modela relações como translações no espaço de embeddings (h + r ≈ t), permitindo link prediction com alta precisão.'
+        },
+        {
+          title: 'Nutraceuticals for Canine Cognitive Health',
+          authors: 'Yarborough et al.',
+          year: 2025,
+          journal: 'GeroScience',
+          url: 'https://link.springer.com/article/10.1007/s11357-025-01521-z',
+          keyFindings: 'Revisão sistemática de dietas enriquecidas e nutracêuticos para função cognitiva em cães idosos. Documenta eficácia de omega-3s, antioxidantes, e MCTs para disfunção cognitiva canina.'
         }
       ],
       references: [
@@ -395,7 +496,9 @@ Action: AUTO-SUGGEST for veterinary review`
         'AAHA Senior Care Guidelines 2023 (https://www.aaha.org/resources/2023-aaha-senior-care-guidelines-for-dogs-and-cats/)',
         'WSAVA Nutritional Assessment Guidelines 2022',
         'GRADE Working Group - Evidence Grading System (https://www.gradeworkinggroup.org/)',
-        'Natural Medicines Database (https://naturalmedicines.therapeuticresearch.com/)'
+        'Natural Medicines Database (https://naturalmedicines.therapeuticresearch.com/)',
+        'Dog Aging Project (https://dogagingproject.org)',
+        'Loyal for Dogs - Canine Longevity Research (https://loyalfordogs.com)'
       ]
     }
   },

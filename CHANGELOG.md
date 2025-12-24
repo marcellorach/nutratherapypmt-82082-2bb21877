@@ -9,6 +9,32 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-12-24 📚 Fase 4: Documentação VetGraphRAG Enriquecida
+
+- ✅ **Novas Referências Científicas** no TabInfo da tab "Estudos":
+  - AgeXtend (Ahuja et al., Nature Aging 2024) - Plataforma AI para predição de geroprotetores
+  - Dog Aging Project (Creevy et al., GeroScience 2022) - Maior estudo longitudinal canino
+  - TRIAD Study (Kaeberlein et al., GeroScience 2025) - Ensaio clínico de rapamicina em cães
+  - PrimeKG (Chandak et al., Nature Sci Data 2023) - Knowledge Graph de medicina de precisão
+  - Canine Cognitive Nutraceuticals (Yarborough et al., 2025) - Revisão de nutracêuticos cognitivos
+- ✅ **Roadmap Arquitetural de 4 Fases** adicionado à metodologia:
+  - Fase 1: Knowledge Base (VetGraphRAG) - Implementado
+  - Fase 2: Patient System - Planejado
+  - Fase 3: Recommendation Engine - Planejado
+  - Fase 4: Longitudinal Follow-up - Planejado
+- ✅ **Component Links** com links internos para componentes e edge functions
+- ✅ **Objetivo atualizado** com foco em LONGEVIDADE CANINA e recomendação de geroprotetores
+- ✅ **Botão renomeado** para "ℹ️ About VetGraphRAG" na tab estudos
+
+### Changed - 2025-12-24 🔄 Renomeação NTAI → VetGraphRAG
+
+- ✅ **Renomeação completa** de NTAI para VetGraphRAG em todo o código
+  - Tipos: `ntai.ts` → `vetgraphrag.ts` (com aliases de compatibilidade)
+  - Hooks: `useNtaiProcessing` → `useVetGraphRAGProcessing`
+  - Serviços: `ntai-service.ts` → `vetgraphrag-service.ts`
+  - Traduções: chave `ntai` → `vetgraphrag` em PT e EN
+- ✅ **i18n version**: Incrementado para 1.9.27
+
 ### Added - 2025-12-03 📋 Sistema de Decisões Técnicas
 
 - ✅ **Criado `docs/TECHNICAL_DECISIONS.md`** - Documento central de decisões técnicas obrigatórias

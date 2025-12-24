@@ -1081,6 +1081,7 @@
     },
     "tabInfo": {
       "button": "Information about this tab",
+      "vetgraphragButton": "ℹ️ About VetGraphRAG",
       "description": "Understand the methodology, scientific foundations and objectives of this feature",
       "lastUpdate": "Last Update",
       "keyExcerpts": {
@@ -1100,11 +1101,13 @@
       "methodology": {
         "comparisonTable": "Comparison Table",
         "architectureDiagram": "Architecture Diagram",
+        "architectureRoadmap": "Architecture Roadmap",
         "calculations": "Calculations and Formulas",
         "example": "Example",
         "decisions": "Methodological Decisions",
         "glossary": "Technical Glossary",
-        "limitations": "Known Limitations"
+        "limitations": "Known Limitations",
+        "componentLinks": "Component Links"
       },
       "scientific": {
         "foundation": "Scientific Foundations",
@@ -1116,6 +1119,15 @@
         "keyFindings": "Key Findings",
         "viewStudy": "View study",
         "references": "References"
+      },
+      "componentTypes": {
+        "component": "Component",
+        "edgeFunction": "Edge Function"
+      },
+      "roadmapStatus": {
+        "implemented": "Implemented",
+        "inProgress": "In Progress",
+        "planned": "Planned"
       }
     },
     "sidebar": {
