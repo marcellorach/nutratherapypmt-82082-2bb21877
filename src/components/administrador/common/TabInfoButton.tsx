@@ -138,7 +138,6 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
         <BookOpen className="h-4 w-4" />
         {buttonText}
       </Button>
-      </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
