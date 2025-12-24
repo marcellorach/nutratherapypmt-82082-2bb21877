@@ -1284,6 +1284,83 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_logs: {
+        Row: {
+          condition_id: string | null
+          confidence_level: string | null
+          confidence_overall: number | null
+          created_at: string | null
+          data_freshness_score: number | null
+          disclaimer_shown: string | null
+          evidence_quality_score: number | null
+          id: string
+          kg_coverage_score: number | null
+          outcome_rating: number | null
+          pet_id: string | null
+          rationale: string | null
+          recommendation_data: Json | null
+          recommendation_source: string | null
+          review_notes: string | null
+          studies_referenced: string[] | null
+          triplets_used: string[] | null
+          updated_at: string | null
+          veterinarian_reviewed: boolean | null
+          warnings: string[] | null
+        }
+        Insert: {
+          condition_id?: string | null
+          confidence_level?: string | null
+          confidence_overall?: number | null
+          created_at?: string | null
+          data_freshness_score?: number | null
+          disclaimer_shown?: string | null
+          evidence_quality_score?: number | null
+          id?: string
+          kg_coverage_score?: number | null
+          outcome_rating?: number | null
+          pet_id?: string | null
+          rationale?: string | null
+          recommendation_data?: Json | null
+          recommendation_source?: string | null
+          review_notes?: string | null
+          studies_referenced?: string[] | null
+          triplets_used?: string[] | null
+          updated_at?: string | null
+          veterinarian_reviewed?: boolean | null
+          warnings?: string[] | null
+        }
+        Update: {
+          condition_id?: string | null
+          confidence_level?: string | null
+          confidence_overall?: number | null
+          created_at?: string | null
+          data_freshness_score?: number | null
+          disclaimer_shown?: string | null
+          evidence_quality_score?: number | null
+          id?: string
+          kg_coverage_score?: number | null
+          outcome_rating?: number | null
+          pet_id?: string | null
+          rationale?: string | null
+          recommendation_data?: Json | null
+          recommendation_source?: string | null
+          review_notes?: string | null
+          studies_referenced?: string[] | null
+          triplets_used?: string[] | null
+          updated_at?: string | null
+          veterinarian_reviewed?: boolean | null
+          warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_logs_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "health_conditions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scientific_studies: {
         Row: {
           abstract: string | null

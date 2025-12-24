@@ -74,3 +74,9 @@ verify_jwt = false
 
 [functions.suggest-taxonomy-terms]
 verify_jwt = false
+
+[functions.calculate-recommendation-confidence]
+verify_jwt = true
+
+[functions.hybrid-recommendation]
+verify_jwt = true
