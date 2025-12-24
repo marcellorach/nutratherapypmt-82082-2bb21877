@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult, ProcessingStage } from '@/types/vetgraphrag';
 import { supabase } from '@/integrations/supabase/client';
-import ntaiService from '@/services/ntai-service';
+import vetGraphRAGService from '@/services/vetgraphrag-service';
 import { AvailableStudy } from './types/processing';
 import { ProcessingItem } from './types';
+
+type NtaiAnalysisResult = VetGraphRAGAnalysisResult;
 
 // Função auxiliar para determinar o progresso baseado no estágio
 const getProgressForStage = (stage: ProcessingStage): number => {
@@ -245,7 +247,7 @@ export const useNtaiProcessing = () => {
         }
 
         // Usar o ID do estudo diretamente, que agora é um UUID válido
-        const simulatedResult = await ntaiService.analyzeStudy(
+        const simulatedResult = await vetGraphRAGService.analyzeStudy(
           item.id,
           `Texto simulado de ${item.title}`,
           aiConfigs.nutraceuticals_prompt,

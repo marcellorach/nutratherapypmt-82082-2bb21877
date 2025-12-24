@@ -1,5 +1,8 @@
 
-import { NtaiAnalysisResult, ProcessingStage } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult, ProcessingStage } from '@/types/vetgraphrag';
+
+// Alias para compatibilidade
+export type NtaiAnalysisResult = VetGraphRAGAnalysisResult;
 
 export interface ProcessingItem {
   id: string;

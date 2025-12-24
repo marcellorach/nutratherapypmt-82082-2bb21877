@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { ProcessingItem, ProcessingStage } from '@/types/ntai';
+import { ProcessingItem, ProcessingStage } from '@/types/vetgraphrag';
 import { useToast } from "@/hooks/use-toast";
 import { AvailableStudy } from './types/processing';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useNtaiQueue = () => {
+export const useVetGraphRAGQueue = () => {
   const [processQueue, setProcessQueue] = useState<ProcessingItem[]>([]);
   const [processingActive, setProcessingActive] = useState(false);
   const [activeItemIndex, setActiveItemIndex] = useState<number>(-1);
@@ -130,7 +130,7 @@ export const useNtaiQueue = () => {
     } else {
       toast({
         title: "Estudos adicionados à fila",
-        description: `${addedCount} estudo(s) adicionado(s) para processamento NTAI.`,
+        description: `${addedCount} estudo(s) adicionado(s) para processamento VetGraphRAG.`,
         variant: "default",
       });
     }
