@@ -4648,5 +4648,42 @@
       "association": "Correlation or conceptual relationship without direct mechanism. Includes: IS_A, RELATED_TO, PREDISPOSED_TO"
     },
     "hoverHint": "💡 Hover over items for details"
+  },
+  "confidence": {
+    "levels": {
+      "high": "High Confidence",
+      "medium": "Medium Confidence",
+      "low": "Low Confidence",
+      "insufficient": "Insufficient Data"
+    },
+    "breakdown": "Confidence Breakdown",
+    "kgCoverage": "KG Coverage",
+    "evidenceQuality": "Quality",
+    "freshness": "Freshness",
+    "triplets": "triplets",
+    "studies": "studies",
+    "hasMetaAnalysis": "Supported by meta-analyses",
+    "hasRCT": "Supported by RCTs",
+    "reviewRecommended": "Veterinary review recommended",
+    "warnings": "Warnings"
+  },
+  "disclaimer": {
+    "lowConfidence": {
+      "title": "⚠️ Limited Confidence",
+      "description": "This recommendation is based on limited data from the Knowledge Graph. Some details were enriched by AI for completeness.",
+      "recommendation": "We recommend:",
+      "point1": "Consult a veterinarian before starting",
+      "point2": "Start with conservative doses",
+      "point3": "Monitor reactions carefully"
+    },
+    "noKgData": {
+      "title": "🔴 Low Confidence Warning",
+      "description": "This recommendation is based on general AI knowledge, NOT on curated data from our scientific Knowledge Graph.",
+      "criticalRecommendation": "CRITICAL RECOMMENDED ACTIONS:",
+      "point1": "MANDATORY: Consult a veterinarian before implementing",
+      "point2": "Start with VERY conservative doses (50% of suggested)",
+      "point3": "Monitor reactions closely for the first 48h",
+      "point4": "Stop immediately if there are adverse reactions"
+    }
   }
 }
