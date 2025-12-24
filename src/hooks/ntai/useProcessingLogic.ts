@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import ntaiService from '@/services/ntai-service';
-import { ProcessingItem, ProcessingStage } from '@/types/ntai';
+import vetGraphRAGService from '@/services/vetgraphrag-service';
+import { ProcessingItem, ProcessingStage } from '@/types/vetgraphrag';
 import { simulateStageProcessing, getStageMessage, getProgressForStage } from './utils/processing';
 
 export const useProcessingLogic = (

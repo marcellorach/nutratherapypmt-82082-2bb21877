@@ -1,6 +1,9 @@
 
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult } from '@/types/vetgraphrag';
 import { supabase } from '@/integrations/supabase/client';
+
+// Alias for backward compatibility
+type NtaiAnalysisResult = VetGraphRAGAnalysisResult;
 
 export const processStudyWithAI = async (
   studyId: string,

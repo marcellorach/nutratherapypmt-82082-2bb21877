@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useNtaiConfig = () => {
+export const useVetGraphRAGConfig = () => {
   const [aiConfigs, setAiConfigs] = useState({
     modelName: "gemini-2.5-flash",
     temperature: "0.7",

@@ -1,7 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult } from '@/types/vetgraphrag';
 import { supabase } from '@/integrations/supabase/client';
+
+// Type alias for backward compatibility
+type NtaiAnalysisResult = VetGraphRAGAnalysisResult;
 import { useToast } from '@/hooks/use-toast';
 
 export const useAnalysisResults = () => {

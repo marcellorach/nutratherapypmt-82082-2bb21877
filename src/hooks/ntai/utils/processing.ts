@@ -1,5 +1,5 @@
 
-import { ProcessingStage } from '@/types/ntai';
+import { ProcessingStage } from '@/types/vetgraphrag';
 
 export const getProgressForStage = (stage: ProcessingStage): number => {
   switch (stage) {

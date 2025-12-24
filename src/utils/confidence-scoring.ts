@@ -3,7 +3,7 @@
  * Calcula scores de confiança para entidades extraídas
  */
 
-import { ConfidenceScore } from '@/types/ntai-enhanced';
+import { ConfidenceScore } from '@/types/vetgraphrag-enhanced';
 
 interface EntityMentions {
   count: number;

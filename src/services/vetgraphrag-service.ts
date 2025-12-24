@@ -1,5 +1,5 @@
 
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult } from '@/types/vetgraphrag';
 import { processStudyWithAI } from './ntai/processing';
 import { 
   extractNutraceuticalsFromStudy, 
@@ -10,6 +10,9 @@ import {
 } from './ntai/simulation';
 import { scoreStudyQuality, scoreStudyRelevance } from './ntai/scoring';
 import { supabase } from '@/integrations/supabase/client';
+
+// Alias for backward compatibility
+type NtaiAnalysisResult = VetGraphRAGAnalysisResult;
 
 export const analyzeStudy = async (
   studyId: string, 

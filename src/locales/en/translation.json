@@ -532,8 +532,8 @@
         "statusUnknown": "Unknown"
       }
     },
-    "ntai": {
-      "processing": "NTAI Processing",
+    "vetgraphrag": {
+      "processing": "VetGraphRAG Processing",
       "model": "Model",
       "temperature": "Temperature",
       "status": "Status",
@@ -543,10 +543,10 @@
       "hideLog": "Hide Log",
       "showLog": "Show Log",
       "settings": "Settings",
-      "infoTitle": "NTAI Processing Information",
+      "infoTitle": "VetGraphRAG Processing Information",
       "availableStudies": "Available Studies for Processing",
       "queueEmpty": "No items in processing queue",
-      "analysisResults": "NTAI Analysis Results",
+      "analysisResults": "VetGraphRAG Analysis Results",
       "cardGenerated": "Card Generated for Kanban",
       "cardAdded": "Card added to kanban",
       "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column.",
@@ -687,7 +687,7 @@
     },
     "card": {
       "ragAnalysis": "RAG Analysis",
-      "ntaiAnalysis": "NTAI Analysis",
+      "vetgraphragAnalysis": "VetGraphRAG Analysis",
       "nutraceuticals": "Nutraceuticals",
       "conditions": "Conditions",
       "interactions": "Interactions",
@@ -4235,7 +4235,7 @@
       "resetSuccess": "Study reset",
       "studyReset": "The study was successfully reset"
     },
-    "ntai": {
+    "vetgraphrag": {
       "errorTitle": "Processing Error",
       "resetAndReprocess": "Reset and Reprocess",
       "retry": "Try Again",

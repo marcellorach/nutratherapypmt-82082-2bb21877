@@ -532,8 +532,8 @@
         "statusUnknown": "Desconhecido"
       }
     },
-    "ntai": {
-      "processing": "Processamento NTAI",
+    "vetgraphrag": {
+      "processing": "Processamento VetGraphRAG",
       "model": "Modelo",
       "temperature": "Temperature",
       "status": "Status",
@@ -543,10 +543,10 @@
       "hideLog": "Ocultar Log",
       "showLog": "Exibir Log",
       "settings": "Configurações",
-      "infoTitle": "Informações do Processamento NTAI",
+      "infoTitle": "Informações do Processamento VetGraphRAG",
       "availableStudies": "Estudos Disponíveis para Processamento",
       "queueEmpty": "Nenhum item na fila de processamento",
-      "analysisResults": "Resultados da Análise NTAI",
+      "analysisResults": "Resultados da Análise VetGraphRAG",
       "cardGenerated": "Card Gerado para Kanban",
       "cardAdded": "Card adicionado ao kanban",
       "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\".",
@@ -687,7 +687,7 @@
     },
     "card": {
       "ragAnalysis": "Análise RAG",
-      "ntaiAnalysis": "Análise NTAI",
+      "vetgraphragAnalysis": "Análise VetGraphRAG",
       "nutraceuticals": "Nutraceuticos",
       "conditions": "Condições",
       "interactions": "Interações",
@@ -4235,7 +4235,7 @@
       "resetSuccess": "Estudo resetado",
       "studyReset": "O estudo foi resetado com sucesso"
     },
-    "ntai": {
+    "vetgraphrag": {
       "errorTitle": "Erro no Processamento",
       "resetAndReprocess": "Resetar e Reprocessar",
       "retry": "Tentar Novamente",

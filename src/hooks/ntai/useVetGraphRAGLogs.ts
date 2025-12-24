@@ -16,7 +16,7 @@ const LOG_PROGRESS_MAP: Record<string, number> = {
   'SUCESSO': 95,
 };
 
-export const useNtaiLogs = () => {
+export const useVetGraphRAGLogs = () => {
   const [logEntries, setLogEntries] = useState<string[]>([]);
   const [calculatedProgress, setCalculatedProgress] = useState(0);
   const { toast } = useToast();
@@ -87,7 +87,7 @@ export const useNtaiLogs = () => {
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ntai-logs-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `vetgraphrag-logs-${new Date().toISOString().split('T')[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

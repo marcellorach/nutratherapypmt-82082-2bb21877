@@ -1,5 +1,5 @@
 
-import { NtaiAnalysisResult } from '@/types/ntai';
+import { VetGraphRAGAnalysisResult as NtaiAnalysisResult } from '@/types/vetgraphrag';
 
 export const scoreStudyQuality = (studyId: string): number => {
   // Algoritmo simulado para avaliação da qualidade do estudo
