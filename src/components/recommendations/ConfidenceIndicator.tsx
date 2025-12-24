@@ -1,3 +1,4 @@
+// Confidence Indicator Component - v1.0.1
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
