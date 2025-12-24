@@ -9,6 +9,42 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-12-24 🎯 Sistema de Confidence Scoring + Fallback Híbrido LLM
+
+- ✅ **Tipos TypeScript** (`src/types/recommendation-confidence.ts`):
+  - `RecommendationConfidence` com métricas overall, kgCoverage, evidenceQuality, dataFreshness
+  - `KGCoverageMetrics`, `EvidenceQualityMetrics`, `DataFreshnessMetrics`
+  - `ConfidenceLevel`: 'high' | 'medium' | 'low' | 'insufficient'
+  - `HybridRecommendationResult` para orquestração de recomendações
+  
+- ✅ **Serviços de Confiança** (`src/services/recommendation-confidence-service.ts`):
+  - `calculateKGCoverage()` - Avalia cobertura do Knowledge Graph
+  - `calculateEvidenceQuality()` - Avalia qualidade das evidências científicas
+  - `calculateDataFreshness()` - Avalia recência dos estudos
+  - `computeRecommendationConfidence()` - Combina métricas em score final
+  
+- ✅ **Serviço Híbrido** (`src/services/hybrid-recommendation-service.ts`):
+  - `getHybridRecommendation()` - Orquestra recomendações com fallback
+  - `useHybridRecommendation()` - Hook React Query para uso em componentes
+  - Fallback automático para Lovable AI (Gemini 2.5 Flash) quando KG insuficiente
+  
+- ✅ **Edge Functions**:
+  - `calculate-recommendation-confidence` - Calcula confiança via API
+  - `hybrid-recommendation` - Enriquecimento e fallback LLM com prompts especializados
+  
+- ✅ **Componentes UI**:
+  - `ConfidenceIndicator` - Badge colorido com tooltip de breakdown (verde/amarelo/laranja/vermelho)
+  - `RecommendationDisclaimer` - Banners de aviso por nível de confiança
+  - Integração no `RecommendationCardContainer`
+  
+- ✅ **Tabela `recommendation_logs`**:
+  - Campos de confiança: `confidence_overall`, `confidence_level`, `kg_coverage_score`, `evidence_quality_score`
+  - Rastreamento de fonte: `recommendation_source`, `triplets_used`, `studies_referenced`
+  - Loop de feedback: `veterinarian_reviewed`, `outcome_rating`
+  
+- ✅ **Traduções PT/EN** para chaves `confidence.*` e `disclaimer.*`
+- ✅ **i18n version**: Incrementado para 1.9.28
+
 ### Added - 2025-12-24 📚 Fase 4: Documentação VetGraphRAG Enriquecida
 
 - ✅ **Novas Referências Científicas** no TabInfo da tab "Estudos":

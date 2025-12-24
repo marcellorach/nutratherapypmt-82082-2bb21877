@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Recommendation, Nutraceutical } from '@/types';
@@ -14,15 +13,22 @@ import { useIngredients } from './hooks/useIngredients';
 import { useScoreCalculation } from './hooks/useScoreCalculation';
 import { usePersistence } from './hooks/usePersistence';
 import RecommendationDetails from './RecommendationDetails';
+import ConfidenceIndicator from './ConfidenceIndicator';
+import RecommendationDisclaimer from './RecommendationDisclaimer';
+import { RecommendationConfidence, DisclaimerType } from '@/types/recommendation-confidence';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
   nutraceutical?: Nutraceutical;
+  confidence?: RecommendationConfidence;
+  disclaimer?: DisclaimerType;
 }
 
 const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({ 
   recommendation, 
-  nutraceutical 
+  nutraceutical,
+  confidence,
+  disclaimer
 }) => {
   // Se o nutraceutical não estiver definido, exibir uma mensagem de erro
   if (!nutraceutical) {
@@ -108,10 +114,19 @@ const RecommendationCardContainer: React.FC<RecommendationCardProps> = ({
       />
       
       <CardContent className="space-y-3">
+        {/* Disclaimer de confiança (se aplicável) */}
+        <RecommendationDisclaimer 
+          disclaimerType={disclaimer || 'none'} 
+          rationale={confidence?.rationale}
+        />
+        
         <RecommendationDetails recommendation={recommendation} />
         
         {/* Escores de eficácia e sustentação calculados dinamicamente */}
-        <div className="flex gap-2 text-xs">
+        <div className="flex flex-wrap gap-2 text-xs">
+          {confidence && (
+            <ConfidenceIndicator confidence={confidence} showDetails size="sm" />
+          )}
           <Badge variant="outline" className="bg-slate-50">
             Eficácia calculada: {efficacyScore.toFixed(1)}/5
           </Badge>

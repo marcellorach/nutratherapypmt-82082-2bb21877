@@ -4648,5 +4648,42 @@
       "association": "Correlação ou relação conceitual sem mecanismo direto. Inclui: IS_A, RELATED_TO, PREDISPOSED_TO"
     },
     "hoverHint": "💡 Passe o mouse para ver detalhes"
+  },
+  "confidence": {
+    "levels": {
+      "high": "Alta Confiança",
+      "medium": "Confiança Média",
+      "low": "Confiança Baixa",
+      "insufficient": "Dados Insuficientes"
+    },
+    "breakdown": "Detalhamento da Confiança",
+    "kgCoverage": "Cobertura KG",
+    "evidenceQuality": "Qualidade",
+    "freshness": "Atualidade",
+    "triplets": "triplets",
+    "studies": "estudos",
+    "hasMetaAnalysis": "Suportado por meta-análises",
+    "hasRCT": "Suportado por RCTs",
+    "reviewRecommended": "Revisão veterinária recomendada",
+    "warnings": "Avisos"
+  },
+  "disclaimer": {
+    "lowConfidence": {
+      "title": "⚠️ Confiança Limitada",
+      "description": "Esta recomendação está baseada em dados limitados do Knowledge Graph. Alguns detalhes foram enriquecidos por IA para completude.",
+      "recommendation": "Recomendamos:",
+      "point1": "Consultar veterinário antes de iniciar",
+      "point2": "Iniciar com doses conservadoras",
+      "point3": "Monitorar reações cuidadosamente"
+    },
+    "noKgData": {
+      "title": "🔴 Aviso de Confiança Baixa",
+      "description": "Esta recomendação é baseada em conhecimento geral de IA, NÃO em dados curados do nosso Knowledge Graph científico.",
+      "criticalRecommendation": "AÇÕES CRÍTICAS RECOMENDADAS:",
+      "point1": "OBRIGATÓRIO: Consultar veterinário antes de implementar",
+      "point2": "Iniciar com doses MUITO conservadoras (50% do sugerido)",
+      "point3": "Monitorar reações de perto nas primeiras 48h",
+      "point4": "Interromper imediatamente se houver reações adversas"
+    }
   }
 }

@@ -1,8 +1,8 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.10.0  
-**Última Atualização:** 2025-12-03  
+**Versão:** 1.11.0  
+**Última Atualização:** 2025-12-24  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
@@ -311,10 +311,86 @@ Curcumin [L0] -[:INHIBITS {IC50: "10 μM"}]-> NF-κB pathway [L1]
 | **Fase 2**: Neo4j Schema (Cypher) | ✅ Concluída | `docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher` |
 | **Fase 3**: generate-triplets (hierarchical) | ✅ Concluída | Extração L0→L4, 20+ predicados |
 | **Fase 4**: sync-approved-triplets | ✅ Concluída | Labels dinâmicos, edges enriquecidas |
+| **Fase 5**: Confidence Scoring + Hybrid Fallback | ✅ Concluída | Edge Functions + UI Components |
 | graph-rag-search (U-Retrieval) | ⏳ Pendente | Próxima fase |
 | UI Graph Visualization | ⏳ Pendente | Visualização interativa |
 
 **Referência**: Ver `docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher` para schema completo.
+
+---
+
+## 🎯 Sistema de Confidence Scoring + Fallback Híbrido LLM
+
+### Visão Geral
+
+Sistema que calcula a confiança de cada recomendação baseado na cobertura do Knowledge Graph e qualidade das evidências, com fallback automático para LLM quando dados são insuficientes.
+
+### Arquitetura do Sistema
+
+```mermaid
+flowchart TD
+    subgraph Input["📥 Input"]
+        PET[Pet Profile]
+        COND[Target Condition]
+    end
+    
+    subgraph ConfidenceCalc["🔬 Confidence Calculation"]
+        PET --> CALC[calculate-recommendation-confidence]
+        COND --> CALC
+        CALC --> KG_QUERY[Query Triplets]
+        CALC --> STUDY_QUERY[Query Studies Quality]
+        KG_QUERY --> SCORE[Compute Confidence Score]
+        STUDY_QUERY --> SCORE
+    end
+    
+    subgraph Decision["⚖️ Decision Tree"]
+        SCORE --> CHECK{Confidence Level?}
+        CHECK -->|high/medium| KG_PATH[Knowledge Graph Only]
+        CHECK -->|low| HYBRID_PATH[Hybrid: KG + LLM]
+        CHECK -->|insufficient| LLM_PATH[LLM Fallback]
+    end
+    
+    subgraph Output["📤 Output"]
+        KG_PATH --> NO_DISCLAIMER[✅ No Disclaimer]
+        HYBRID_PATH --> YELLOW_DISCLAIMER[⚠️ Yellow Disclaimer]
+        LLM_PATH --> RED_DISCLAIMER[🔴 Red Disclaimer]
+        NO_DISCLAIMER --> FINAL[RecommendationCard]
+        YELLOW_DISCLAIMER --> FINAL
+        RED_DISCLAIMER --> FINAL
+    end
+    
+    style KG_PATH fill:#d4edda
+    style HYBRID_PATH fill:#fff3cd
+    style LLM_PATH fill:#f8d7da
+```
+
+### Componentes Implementados
+
+| Componente | Arquivo | Descrição |
+|------------|---------|-----------|
+| **Types** | `src/types/recommendation-confidence.ts` | Tipos para `RecommendationConfidence`, `KGCoverageMetrics`, `EvidenceQualityMetrics` |
+| **Service** | `src/services/recommendation-confidence-service.ts` | Funções para cálculo de KG Coverage, Evidence Quality, Data Freshness |
+| **Hybrid Service** | `src/services/hybrid-recommendation-service.ts` | Orquestração de recomendações com fallback LLM |
+| **Edge Function** | `supabase/functions/calculate-recommendation-confidence/` | Cálculo de confiança via API |
+| **Edge Function** | `supabase/functions/hybrid-recommendation/` | Enriquecimento e fallback LLM |
+| **UI Component** | `src/components/recommendations/ConfidenceIndicator.tsx` | Badge visual com tooltip de breakdown |
+| **UI Component** | `src/components/recommendations/RecommendationDisclaimer.tsx` | Disclaimers coloridos por nível |
+| **Database** | `recommendation_logs` table | Log de recomendações com métricas e feedback |
+
+### Níveis de Confiança
+
+| Nível | Score | Comportamento | Disclaimer |
+|-------|-------|---------------|------------|
+| **High** | ≥ 0.7 | Usa apenas dados do KG | Nenhum |
+| **Medium** | 0.5 - 0.7 | Usa apenas dados do KG | Nenhum |
+| **Low** | 0.3 - 0.5 | KG + enriquecimento LLM | ⚠️ Amarelo |
+| **Insufficient** | < 0.3 | Fallback total para LLM | 🔴 Vermelho |
+
+### Métricas de Confiança
+
+1. **KG Coverage (40%)**: Quantidade e relevância dos triplets encontrados
+2. **Evidence Quality (40%)**: Nível de evidência dos estudos (meta-análises, RCTs)
+3. **Data Freshness (20%)**: Recência dos estudos científicos
 
 ---
 
