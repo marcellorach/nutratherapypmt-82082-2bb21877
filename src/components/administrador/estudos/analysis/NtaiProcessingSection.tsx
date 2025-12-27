@@ -74,8 +74,8 @@ const NtaiProcessingSection: React.FC = () => {
       if (error) throw error;
 
       toast({
-        title: t('studies.ntai.deleteSuccess'),
-        description: t('studies.ntai.deleteSuccessDescription', { count: selectedItems.length }),
+        title: t('studies.vetgraphrag.deleteSuccess'),
+        description: t('studies.vetgraphrag.deleteSuccessDescription', { count: selectedItems.length }),
       });
 
       // Recarregar lista de estudos
@@ -83,8 +83,8 @@ const NtaiProcessingSection: React.FC = () => {
     } catch (error) {
       console.error('Error deleting studies:', error);
       toast({
-        title: t('studies.ntai.deleteError'),
-        description: t('studies.ntai.deleteErrorDescription'),
+        title: t('studies.vetgraphrag.deleteError'),
+        description: t('studies.vetgraphrag.deleteErrorDescription'),
         variant: "destructive",
       });
     }
@@ -233,42 +233,42 @@ const NtaiProcessingSection: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-blue-600" />
-            <h3 className="text-lg font-medium">{t('studies.ntai.processing.title')}</h3>
+            <h3 className="text-lg font-medium">{t('studies.vetgraphrag.processing.title')}</h3>
             <Badge className="ml-2 bg-blue-50 text-blue-700 border-blue-200" variant="outline">
               🤖 Gemini 3 Pro Preview
             </Badge>
           </div>
           <Button variant="outline" size="sm" className="flex items-center gap-1">
             <Settings className="h-4 w-4" />
-            <span>{t('studies.ntai.settings')}</span>
+            <span>{t('studies.vetgraphrag.settings')}</span>
           </Button>
         </div>
         
         {/* Processing info */}
         <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-          <h4 className="text-sm font-medium mb-2 text-blue-900">{t('studies.ntai.processing.info')}</h4>
+          <h4 className="text-sm font-medium mb-2 text-blue-900">{t('studies.vetgraphrag.processing.info')}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-blue-600 font-medium">{t('studies.ntai.processing.model')}:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
+              <span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.model')}:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">{t('studies.ntai.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.ntai.processing.statusProcessing') : t('studies.ntai.processing.statusIdle')}</span>
+              <span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.vetgraphrag.processing.statusProcessing') : t('studies.vetgraphrag.processing.statusIdle')}</span>
             </div>
           </div>
           <div className="mt-2 text-xs text-blue-700">
-            {t('studies.ntai.processing.description')}
+            {t('studies.vetgraphrag.processing.description')}
           </div>
         </div>
         
         {processingStudy && (
           <div className="mb-6">
-            <h4 className="text-sm font-medium mb-3">{t('studies.ntai.processing.pipeline')}</h4>
+            <h4 className="text-sm font-medium mb-3">{t('studies.vetgraphrag.processing.pipeline')}</h4>
             <NtaiPipelineVisualization stages={pipelineStages} />
           </div>
         )}
         
         <div className="space-y-4">
-          <h4 className="text-sm font-medium">{t('studies.ntai.availableStudies')}</h4>
+          <h4 className="text-sm font-medium">{t('studies.vetgraphrag.availableStudies')}</h4>
           <NtaiStudySelectionTable 
             estudos={availableStudies}
             selectedItems={selectedItems}
@@ -319,7 +319,7 @@ const NtaiProcessingSection: React.FC = () => {
             </div>
           ) : !processingActive && (
             <div className="border rounded-md p-8 text-center text-gray-500">
-              {t('studies.ntai.queueEmpty')}
+              {t('studies.vetgraphrag.queueEmpty')}
             </div>
           )}
         </div>
@@ -328,18 +328,18 @@ const NtaiProcessingSection: React.FC = () => {
         {analysisResult && (
           <div className="mt-8 border-t pt-4">
             <div className="flex items-center mb-4">
-              <h3 className="text-lg font-medium">{t('studies.ntai.analysisResults')}</h3>
+              <h3 className="text-lg font-medium">{t('studies.vetgraphrag.analysisResults')}</h3>
               <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
               <Badge variant="outline" className="bg-green-50 text-green-700">
-                {t('studies.ntai.cardGenerated')}
+                {t('studies.vetgraphrag.cardGenerated')}
               </Badge>
             </div>
             <NtaiAnalysisResults result={analysisResult} />
             
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <h4 className="text-sm font-medium text-green-800 mb-2">{t('studies.ntai.cardAdded')}</h4>
+              <h4 className="text-sm font-medium text-green-800 mb-2">{t('studies.vetgraphrag.cardAdded')}</h4>
               <p className="text-xs text-green-700">
-                {t('studies.ntai.cardAddedDesc')}
+                {t('studies.vetgraphrag.cardAddedDesc')}
               </p>
             </div>
           </div>

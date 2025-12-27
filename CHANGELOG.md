@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-12-27 🔧 Correção de Tradução NTAI → VetGraphRAG
+
+- ✅ **Corrigido problema de chaves de tradução literais** - 8 componentes atualizados para usar `studies.vetgraphrag.*` ao invés de `studies.ntai.*`
+- ✅ Arquivos corrigidos: `NtaiActiveProcessingCard.tsx`, `NtaiAnalysisResults.tsx`, `NtaiProcessingSection.tsx`, `NtaiProcessingLog.tsx`, `NtaiTripletsStatsTab.tsx`, `NtaiStudySelectionTable.tsx`
+- ✅ **i18n version**: Incrementado para 1.9.29 para forçar atualização de cache
+
 ### Added - 2025-12-24 🎯 Sistema de Confidence Scoring + Fallback Híbrido LLM
 
 - ✅ **Tipos TypeScript** (`src/types/recommendation-confidence.ts`):
