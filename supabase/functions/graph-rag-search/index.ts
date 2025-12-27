@@ -13,7 +13,7 @@ interface Neo4jCredentials {
 }
 
 interface GraphRAGRequest {
-  queryType: 'path' | 'cypher' | 'entity' | 'context' | 'byStudy';
+  queryType: 'path' | 'cypher' | 'entity' | 'context' | 'byStudy' | 'stats';
   sourceEntity?: string;
   targetEntity?: string;
   entityType?: string;
@@ -340,6 +340,89 @@ serve(async (req) => {
         cypherQuery = request.cypherQuery;
         parameters = request.parameters || {};
         break;
+
+      case 'stats':
+        // Return graph statistics: node counts by type, relationship counts, etc.
+        cypherQuery = `
+          MATCH (n)
+          WITH labels(n) AS nodeLabels, count(n) AS cnt
+          UNWIND nodeLabels AS label
+          WITH label, sum(cnt) AS nodeCount
+          RETURN 'nodeStats' AS statType, label AS category, nodeCount AS count
+          UNION ALL
+          MATCH ()-[r]->()
+          WITH type(r) AS relType, count(r) AS cnt
+          RETURN 'relStats' AS statType, relType AS category, cnt AS count
+          UNION ALL
+          MATCH (n)
+          RETURN 'totalNodes' AS statType, 'all' AS category, count(n) AS count
+          UNION ALL
+          MATCH ()-[r]->()
+          RETURN 'totalRelations' AS statType, 'all' AS category, count(r) AS count
+        `;
+        parameters = {};
+        
+        // For stats, we need to process differently
+        console.log('Executing Stats Cypher:', cypherQuery);
+        const statsResult = await executeCypherQuery(cypherQuery, parameters, credentials);
+        
+        // Parse stats from result
+        const statsData: Record<string, any> = {
+          totalNodes: 0,
+          totalRelations: 0,
+          positiveRelations: 0,
+          negativeRelations: 0,
+          nutraceuticals: 0,
+          conditions: 0,
+          nodesByType: {},
+          relationsByType: {}
+        };
+        
+        const positiveRelTypes = ['TREATS', 'PREVENTS', 'SUPPORTS', 'AMELIORATES', 'MANAGES', 'ACTIVATES', 'UPREGULATES', 'ENHANCES_BIOAVAILABILITY', 'SYNERGIZES_WITH', 'POTENTIATES'];
+        const negativeRelTypes = ['WORSENS', 'CONTRAINDICATED_FOR', 'CAUSES_SIDE_EFFECT', 'AGGRAVATES', 'ANTAGONIZES', 'INHIBITS', 'BLOCKS', 'DOWNREGULATES', 'REDUCES_BIOAVAILABILITY'];
+        
+        if (statsResult.values) {
+          statsResult.values.forEach((row: any[]) => {
+            const statType = row[0];
+            const category = row[1];
+            const count = typeof row[2] === 'object' && row[2].low !== undefined ? row[2].low : row[2];
+            
+            if (statType === 'totalNodes') {
+              statsData.totalNodes = count;
+            } else if (statType === 'totalRelations') {
+              statsData.totalRelations = count;
+            } else if (statType === 'nodeStats') {
+              statsData.nodesByType[category] = count;
+              if (category === 'Nutraceutical') statsData.nutraceuticals = count;
+              if (category === 'Condition' || category === 'Disease') statsData.conditions += count;
+            } else if (statType === 'relStats') {
+              statsData.relationsByType[category] = count;
+              if (positiveRelTypes.includes(category)) {
+                statsData.positiveRelations += count;
+              } else if (negativeRelTypes.includes(category)) {
+                statsData.negativeRelations += count;
+              }
+            }
+          });
+        }
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: statsData,
+            metadata: {
+              queryType: 'stats',
+              source: 'neo4j'
+            }
+          }),
+          {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json; charset=utf-8',
+            }
+          }
+        );
 
       default:
         throw new Error(`Unknown queryType: ${request.queryType}`);
