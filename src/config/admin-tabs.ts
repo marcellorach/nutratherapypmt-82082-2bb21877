@@ -59,6 +59,7 @@ const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria
 const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
 const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
+const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -110,6 +111,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: KnowledgeGraphViewer,
     description: 'Visualização 3D do grafo de conhecimento médico'
+  },
+  {
+    id: 'evidence-conflicts',
+    label: 'Conflitos de Evidência',
+    group: 'knowledge-base',
+    component: ConflictReviewPanel,
+    description: 'Revisão e resolução de conflitos entre estudos científicos'
   },
   {
     id: 'knowledge-base-settings',

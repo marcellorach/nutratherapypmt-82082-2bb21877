@@ -4752,5 +4752,90 @@
       "point3": "Monitor reactions closely for the first 48h",
       "point4": "Stop immediately if there are adverse reactions"
     }
+  },
+  "conflicts": {
+    "title": "Evidence Conflicts",
+    "description": "Review and resolution of conflicts between scientific studies",
+    "panel": {
+      "title": "Conflict Review Panel",
+      "description": "Review and resolve evidence conflicts between scientific studies",
+      "pendingReview": "Pending Review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed",
+      "noConflicts": "No conflicts found",
+      "noConflictsDesc": "There are no pending conflicts for review in this category"
+    },
+    "filters": {
+      "all": "All",
+      "high": "High",
+      "moderate": "Moderate",
+      "low": "Low"
+    },
+    "card": {
+      "studies": "studies",
+      "claims": "claims",
+      "agreementScore": "Agreement",
+      "varianceCoefficient": "Variance",
+      "aiSuggestion": "AI Suggestion",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss",
+      "viewDetails": "View Details"
+    },
+    "levels": {
+      "high": "High Conflict",
+      "moderate": "Moderate Conflict",
+      "low": "Low Conflict",
+      "none": "No Conflict"
+    },
+    "alert": {
+      "title": "Pending Conflicts",
+      "description": "There are {{count}} evidence conflict(s) awaiting review",
+      "review": "Review Now"
+    },
+    "resolution": {
+      "title": "Resolve Conflict",
+      "description": "Select how to resolve this evidence conflict",
+      "type": {
+        "label": "Resolution Type",
+        "singleStudy": "Use Specific Study",
+        "singleStudyDesc": "Adopt values from one study as canonical reference",
+        "weightedAverage": "Weighted Average",
+        "weightedAverageDesc": "Calculate canonical value based on study quality",
+        "contextSpecific": "Context Specific",
+        "contextSpecificDesc": "Define different values by species, breed, or context",
+        "manualValue": "Manual Value",
+        "manualValueDesc": "Enter canonical value defined by specialist"
+      },
+      "selectStudy": "Select Reference Study",
+      "manualDose": {
+        "value": "Dose Value",
+        "unit": "Unit",
+        "frequency": "Frequency"
+      },
+      "rationale": {
+        "label": "Rationale",
+        "placeholder": "Explain the scientific rationale for this decision...",
+        "required": "Rationale is required"
+      },
+      "cancel": "Cancel",
+      "confirm": "Confirm Resolution",
+      "success": "Conflict resolved successfully",
+      "error": "Error resolving conflict"
+    },
+    "species": {
+      "dog": "Dog",
+      "cat": "Cat",
+      "horse": "Horse",
+      "canine": "Canine",
+      "feline": "Feline",
+      "equine": "Equine"
+    },
+    "predicates": {
+      "TREATS": "Treats",
+      "PREVENTS": "Prevents",
+      "SUPPORTS": "Supports",
+      "WORSENS": "Worsens",
+      "CONTRAINDICATED_FOR": "Contraindicated for"
+    }
   }
 }
