@@ -1188,6 +1188,8 @@ export type Database = {
           analysis_data: Json | null
           authors: string[] | null
           created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           error_message: string | null
           full_text_content: string | null
@@ -1209,6 +1211,8 @@ export type Database = {
           analysis_data?: Json | null
           authors?: string[] | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           error_message?: string | null
           full_text_content?: string | null
@@ -1230,6 +1234,8 @@ export type Database = {
           analysis_data?: Json | null
           authors?: string[] | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           error_message?: string | null
           full_text_content?: string | null
@@ -1511,6 +1517,42 @@ export type Database = {
           name?: string
           name_en?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      study_audit_logs: {
+        Row: {
+          action_type: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          performed_at: string
+          performed_by: string | null
+          previous_status: string[] | null
+          study_ids: string[]
+          study_titles: string[] | null
+        }
+        Insert: {
+          action_type: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          previous_status?: string[] | null
+          study_ids: string[]
+          study_titles?: string[] | null
+        }
+        Update: {
+          action_type?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          previous_status?: string[] | null
+          study_ids?: string[]
+          study_titles?: string[] | null
         }
         Relationships: []
       }
