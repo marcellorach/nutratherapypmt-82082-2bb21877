@@ -9,11 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2025-12-27 🛡️ Correção Crítica: Soft Delete + Recuperação de Estudos
+
+- ✅ **Recuperados 6 estudos "Approved"** que foram deletados acidentalmente
+- ✅ **Implementado Soft Delete**: Colunas `deleted_at` e `deleted_by` em `processed_studies`
+- ✅ **Tabela de Auditoria**: `study_audit_logs` para rastrear todas as operações de delete/restore
+- ✅ **Modal de Confirmação Seguro**: Para delete em massa exige digitar "DELETE" e bloqueia estudos "Approved"
+- ✅ **Hook `useStudyDeletion`**: `softDeleteStudy()`, `softDeleteMultiple()`, `restoreStudies()`, `previewDeletion()`
+- ✅ **Componente `BulkDeleteConfirmDialog`**: Lista estudos afetados, destaca aprovados, exige confirmação tipada
+- ✅ **Causa do bug identificada**: `handleDeleteStudies` usava `selectedItems` global que podia conter IDs de outras colunas
+
 ### Fixed - 2025-12-27 🔧 Correção de Tradução NTAI → VetGraphRAG
 
 - ✅ **Corrigido problema de chaves de tradução literais** - 8 componentes atualizados para usar `studies.vetgraphrag.*` ao invés de `studies.ntai.*`
 - ✅ Arquivos corrigidos: `NtaiActiveProcessingCard.tsx`, `NtaiAnalysisResults.tsx`, `NtaiProcessingSection.tsx`, `NtaiProcessingLog.tsx`, `NtaiTripletsStatsTab.tsx`, `NtaiStudySelectionTable.tsx`
-- ✅ **i18n version**: Incrementado para 1.9.29 para forçar atualização de cache
+- ✅ **i18n version**: Incrementado para 1.9.30 para forçar atualização de cache
 
 ### Added - 2025-12-24 🎯 Sistema de Confidence Scoring + Fallback Híbrido LLM
 

@@ -6,12 +6,14 @@ import { Brain, ArrowRight, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
+import { useStudyDeletion } from '@/hooks/useStudyDeletion';
 import NtaiProcessCard from './NtaiProcessCard';
 import NtaiActiveProcessingCard from './NtaiActiveProcessingCard';
 import NtaiAnalysisResults from './NtaiAnalysisResults';
 import NtaiStudySelectionTable from './NtaiStudySelectionTable';
 import NtaiQueueControls from './NtaiQueueControls';
 import NtaiPipelineVisualization from './NtaiPipelineVisualization';
+import BulkDeleteConfirmDialog from '../BulkDeleteConfirmDialog';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +43,11 @@ const NtaiProcessingSection: React.FC = () => {
   } = useNtaiProcessing();
 
   const { availableStudies, refreshAvailableStudies } = useAvailableStudies();
+  const { softDeleteMultiple, previewDeletion, isDeleting } = useStudyDeletion();
+  
+  // State para modal de confirmação de delete em massa
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [studiesToDelete, setStudiesToDelete] = useState<Array<{ id: string; title: string; kanban_status: string }>>([]);
   
   useEffect(() => {
     refreshAvailableStudies();
@@ -63,30 +70,31 @@ const NtaiProcessingSection: React.FC = () => {
   ]);
   const { toast } = useToast();
 
-  const handleDeleteStudies = async () => {
-    try {
-      // Deletar estudos e suas relações
-      const { error } = await supabase
-        .from('processed_studies')
-        .delete()
-        .in('id', selectedItems);
-
-      if (error) throw error;
-
+  // Handler para iniciar o processo de delete (abre modal de confirmação)
+  const handleDeleteStudiesClick = async () => {
+    if (selectedItems.length === 0) {
       toast({
-        title: t('studies.vetgraphrag.deleteSuccess'),
-        description: t('studies.vetgraphrag.deleteSuccessDescription', { count: selectedItems.length }),
-      });
-
-      // Recarregar lista de estudos
-      await refreshAvailableStudies();
-    } catch (error) {
-      console.error('Error deleting studies:', error);
-      toast({
-        title: t('studies.vetgraphrag.deleteError'),
-        description: t('studies.vetgraphrag.deleteErrorDescription'),
+        title: t('studies.vetgraphrag.noStudiesSelected'),
         variant: "destructive",
       });
+      return;
+    }
+
+    // Buscar preview dos estudos que serão deletados
+    const preview = await previewDeletion(selectedItems);
+    setStudiesToDelete(preview);
+    setShowDeleteConfirm(true);
+  };
+
+  // Handler de confirmação final do delete
+  const handleConfirmDelete = async () => {
+    const result = await softDeleteMultiple(selectedItems, undefined, { allowApproved: false });
+    
+    if (result.success) {
+      setShowDeleteConfirm(false);
+      setStudiesToDelete([]);
+      // Limpar seleção e recarregar
+      await refreshAvailableStudies();
     }
   };
 
@@ -275,7 +283,7 @@ const NtaiProcessingSection: React.FC = () => {
             onToggleSelection={toggleItemSelection}
             onSelectAll={() => handleSelectAll(availableStudies)}
             onAddToQueue={addToQueue}
-            onDelete={handleDeleteStudies}
+            onDelete={handleDeleteStudiesClick}
             onRegenerateVetGraphRAG={handleRegenerateVetGraphRAG}
           />
         </div>
@@ -345,6 +353,15 @@ const NtaiProcessingSection: React.FC = () => {
           </div>
         )}
       </CardContent>
+
+      {/* Modal de confirmação de delete em massa */}
+      <BulkDeleteConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        studies={studiesToDelete}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </Card>
   );
 };
