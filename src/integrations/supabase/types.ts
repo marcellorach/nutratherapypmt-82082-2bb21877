@@ -173,6 +173,90 @@ export type Database = {
         }
         Relationships: []
       }
+      base_knowledge_candidates: {
+        Row: {
+          chemical_formula: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          entity_name: string
+          entity_name_en: string | null
+          entity_type: string
+          external_id: string | null
+          external_source: string
+          external_url: string | null
+          harmonization_suggestion: string | null
+          id: string
+          matched_existing_id: string | null
+          molecular_weight: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          similarity_score: number | null
+          source_metadata: Json | null
+          status: string | null
+          synonyms: string[] | null
+          target_id: string | null
+          target_table: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chemical_formula?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          entity_name: string
+          entity_name_en?: string | null
+          entity_type: string
+          external_id?: string | null
+          external_source: string
+          external_url?: string | null
+          harmonization_suggestion?: string | null
+          id?: string
+          matched_existing_id?: string | null
+          molecular_weight?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similarity_score?: number | null
+          source_metadata?: Json | null
+          status?: string | null
+          synonyms?: string[] | null
+          target_id?: string | null
+          target_table?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chemical_formula?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          entity_name?: string
+          entity_name_en?: string | null
+          entity_type?: string
+          external_id?: string | null
+          external_source?: string
+          external_url?: string | null
+          harmonization_suggestion?: string | null
+          id?: string
+          matched_existing_id?: string | null
+          molecular_weight?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similarity_score?: number | null
+          source_metadata?: Json | null
+          status?: string | null
+          synonyms?: string[] | null
+          target_id?: string | null
+          target_table?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       biological_effect_nodes: {
         Row: {
           created_at: string | null
