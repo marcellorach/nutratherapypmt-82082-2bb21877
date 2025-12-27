@@ -363,6 +363,83 @@ export type Database = {
           },
         ]
       }
+      canonical_resolutions: {
+        Row: {
+          breed_context: string[] | null
+          canonical_value: Json
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          object_name: string
+          object_type: string
+          predicate: string
+          rationale: string
+          resolution_type: string
+          resolved_at: string | null
+          resolved_by: string | null
+          review_due_at: string | null
+          source_claim_ids: string[] | null
+          source_study_ids: string[] | null
+          species_context: string[] | null
+          subject_name: string
+          subject_type: string
+          superseded_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          breed_context?: string[] | null
+          canonical_value?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          object_name: string
+          object_type: string
+          predicate: string
+          rationale: string
+          resolution_type: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_due_at?: string | null
+          source_claim_ids?: string[] | null
+          source_study_ids?: string[] | null
+          species_context?: string[] | null
+          subject_name: string
+          subject_type: string
+          superseded_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          breed_context?: string[] | null
+          canonical_value?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          object_name?: string
+          object_type?: string
+          predicate?: string
+          rationale?: string
+          resolution_type?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_due_at?: string | null
+          source_claim_ids?: string[] | null
+          source_study_ids?: string[] | null
+          species_context?: string[] | null
+          subject_name?: string
+          subject_type?: string
+          superseded_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canonical_resolutions_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "canonical_resolutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
@@ -389,6 +466,191 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      evidence_claims: {
+        Row: {
+          age_context: string | null
+          breed_context: string[] | null
+          created_at: string | null
+          dose_duration: string | null
+          dose_frequency: string | null
+          dose_max: number | null
+          dose_min: number | null
+          dose_route: string | null
+          dose_unit: string | null
+          dose_value: number | null
+          extraction_confidence: number | null
+          id: string
+          object_id: string | null
+          object_name: string
+          object_type: string
+          predicate: string
+          species_context: string[] | null
+          study_id: string | null
+          study_quality_score: number | null
+          study_year: number | null
+          subject_id: string | null
+          subject_name: string
+          subject_type: string
+          triplet_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_context?: string | null
+          breed_context?: string[] | null
+          created_at?: string | null
+          dose_duration?: string | null
+          dose_frequency?: string | null
+          dose_max?: number | null
+          dose_min?: number | null
+          dose_route?: string | null
+          dose_unit?: string | null
+          dose_value?: number | null
+          extraction_confidence?: number | null
+          id?: string
+          object_id?: string | null
+          object_name: string
+          object_type: string
+          predicate: string
+          species_context?: string[] | null
+          study_id?: string | null
+          study_quality_score?: number | null
+          study_year?: number | null
+          subject_id?: string | null
+          subject_name: string
+          subject_type: string
+          triplet_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_context?: string | null
+          breed_context?: string[] | null
+          created_at?: string | null
+          dose_duration?: string | null
+          dose_frequency?: string | null
+          dose_max?: number | null
+          dose_min?: number | null
+          dose_route?: string | null
+          dose_unit?: string | null
+          dose_value?: number | null
+          extraction_confidence?: number | null
+          id?: string
+          object_id?: string | null
+          object_name?: string
+          object_type?: string
+          predicate?: string
+          species_context?: string[] | null
+          study_id?: string | null
+          study_quality_score?: number | null
+          study_year?: number | null
+          subject_id?: string | null
+          subject_name?: string
+          subject_type?: string
+          triplet_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_claims_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_claims_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_conflicts: {
+        Row: {
+          agreement_score: number | null
+          ai_recommended_action: string | null
+          ai_suggestion: string | null
+          assigned_to: string | null
+          claim_count: number
+          claim_ids: string[] | null
+          conflict_level: string
+          created_at: string | null
+          id: string
+          object_name: string
+          object_type: string
+          predicate: string
+          resolution_id: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          species_context: string[] | null
+          status: string
+          study_count: number
+          subject_name: string
+          subject_type: string
+          updated_at: string | null
+          variance_coefficient: number | null
+        }
+        Insert: {
+          agreement_score?: number | null
+          ai_recommended_action?: string | null
+          ai_suggestion?: string | null
+          assigned_to?: string | null
+          claim_count?: number
+          claim_ids?: string[] | null
+          conflict_level: string
+          created_at?: string | null
+          id?: string
+          object_name: string
+          object_type: string
+          predicate: string
+          resolution_id?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          species_context?: string[] | null
+          status?: string
+          study_count?: number
+          subject_name: string
+          subject_type: string
+          updated_at?: string | null
+          variance_coefficient?: number | null
+        }
+        Update: {
+          agreement_score?: number | null
+          ai_recommended_action?: string | null
+          ai_suggestion?: string | null
+          assigned_to?: string | null
+          claim_count?: number
+          claim_ids?: string[] | null
+          conflict_level?: string
+          created_at?: string | null
+          id?: string
+          object_name?: string
+          object_type?: string
+          predicate?: string
+          resolution_id?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          species_context?: string[] | null
+          status?: string
+          study_count?: number
+          subject_name?: string
+          subject_type?: string
+          updated_at?: string | null
+          variance_coefficient?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_conflicts_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_resolutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       health_conditions: {
         Row: {
@@ -470,7 +732,10 @@ export type Database = {
       }
       hierarchical_edges: {
         Row: {
+          canonical_resolution_id: string | null
+          claim_ids: string[] | null
           confidence: number | null
+          conflict_level: string | null
           created_at: string | null
           curated: boolean | null
           curated_at: string | null
@@ -484,6 +749,7 @@ export type Database = {
           intensity: number | null
           ki: string | null
           relationship: string
+          requires_human_review: boolean | null
           source_id: string
           source_layer: string
           source_type: string
@@ -496,7 +762,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          canonical_resolution_id?: string | null
+          claim_ids?: string[] | null
           confidence?: number | null
+          conflict_level?: string | null
           created_at?: string | null
           curated?: boolean | null
           curated_at?: string | null
@@ -510,6 +779,7 @@ export type Database = {
           intensity?: number | null
           ki?: string | null
           relationship: string
+          requires_human_review?: boolean | null
           source_id: string
           source_layer: string
           source_type: string
@@ -522,7 +792,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          canonical_resolution_id?: string | null
+          claim_ids?: string[] | null
           confidence?: number | null
+          conflict_level?: string | null
           created_at?: string | null
           curated?: boolean | null
           curated_at?: string | null
@@ -536,6 +809,7 @@ export type Database = {
           intensity?: number | null
           ki?: string | null
           relationship?: string
+          requires_human_review?: boolean | null
           source_id?: string
           source_layer?: string
           source_type?: string
@@ -548,6 +822,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "hierarchical_edges_canonical_resolution_id_fkey"
+            columns: ["canonical_resolution_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_resolutions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hierarchical_edges_triplet_id_fkey"
             columns: ["triplet_id"]
