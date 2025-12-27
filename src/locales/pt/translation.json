@@ -126,6 +126,53 @@
       "webgl3d": "WebGL 3D",
       "canvas2d": "Canvas 2D"
     },
+    "statsSection": {
+      "base": {
+        "title": "Base de Conhecimento",
+        "subtotal": "Total: {{count}} entidades",
+        "ontologyManual": "Ontologia Manual",
+        "ontologyManualDesc": "Entidades cadastradas pelo admin",
+        "chebi": "ChEBI (Química)",
+        "chebiDesc": "Compostos químicos de ontologia externa",
+        "nutraceuticals": "Nutracêuticos",
+        "nutraceuticalsDesc": "Cadastrados no sistema",
+        "conditions": "Condições",
+        "conditionsDesc": "Condições de saúde veterinárias",
+        "outcomes": "Desfechos",
+        "outcomesDesc": "Famílias de outcomes",
+        "pathways": "Pathways",
+        "pathwaysDesc": "Vias biológicas"
+      },
+      "extracted": {
+        "title": "Conhecimento Extraído (AI)",
+        "subtotal": "De {{count}} estudos ativos",
+        "entitiesAI": "Entidades AI",
+        "entitiesAIDesc": "Efeitos, mecanismos descobertos por IA",
+        "relationsAI": "Relações AI",
+        "relationsAIDesc": "TREATS, INHIBITS, etc. extraídas",
+        "activeStudies": "Estudos Ativos",
+        "activeStudiesDesc": "Contribuindo para o grafo",
+        "approvedTriplets": "Triplets Aprovados",
+        "approvedTripletsDesc": "Curados e validados",
+        "pendingTriplets": "Triplets Pendentes",
+        "pendingTripletsDesc": "Aguardando curadoria"
+      },
+      "graph": {
+        "title": "Estrutura do Grafo (Neo4j)",
+        "totalNodes": "Total Nós",
+        "totalNodesDesc": "Todas as entidades no grafo",
+        "totalRelations": "Total Relações",
+        "totalRelationsDesc": "Todas as arestas do grafo",
+        "positiveRelations": "Positivas",
+        "positiveRelationsDesc": "TREATS, PREVENTS, SUPPORTS...",
+        "negativeRelations": "Negativas",
+        "negativeRelationsDesc": "WORSENS, CONTRAINDICATED...",
+        "coverageNutra": "Nutracêuticos",
+        "coverageNutraDesc": "Percentual de nutracêuticos com relações no grafo",
+        "coverageCond": "Condições",
+        "coverageCondDesc": "Percentual de condições com tratamentos mapeados"
+      }
+    },
     "hints": {
       "dragRotate": "Arraste para rotacionar",
       "dragPan": "Arraste para mover",

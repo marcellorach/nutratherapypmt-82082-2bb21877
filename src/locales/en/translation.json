@@ -126,6 +126,53 @@
       "webgl3d": "WebGL 3D",
       "canvas2d": "Canvas 2D"
     },
+    "statsSection": {
+      "base": {
+        "title": "Knowledge Base",
+        "subtotal": "Total: {{count}} entities",
+        "ontologyManual": "Manual Ontology",
+        "ontologyManualDesc": "Entities registered by admin",
+        "chebi": "ChEBI (Chemistry)",
+        "chebiDesc": "Chemical compounds from external ontology",
+        "nutraceuticals": "Nutraceuticals",
+        "nutraceuticalsDesc": "Registered in the system",
+        "conditions": "Conditions",
+        "conditionsDesc": "Veterinary health conditions",
+        "outcomes": "Outcomes",
+        "outcomesDesc": "Outcome families",
+        "pathways": "Pathways",
+        "pathwaysDesc": "Biological pathways"
+      },
+      "extracted": {
+        "title": "Extracted Knowledge (AI)",
+        "subtotal": "From {{count}} active studies",
+        "entitiesAI": "AI Entities",
+        "entitiesAIDesc": "Effects, mechanisms discovered by AI",
+        "relationsAI": "AI Relations",
+        "relationsAIDesc": "TREATS, INHIBITS, etc. extracted",
+        "activeStudies": "Active Studies",
+        "activeStudiesDesc": "Contributing to the graph",
+        "approvedTriplets": "Approved Triplets",
+        "approvedTripletsDesc": "Curated and validated",
+        "pendingTriplets": "Pending Triplets",
+        "pendingTripletsDesc": "Awaiting curation"
+      },
+      "graph": {
+        "title": "Graph Structure (Neo4j)",
+        "totalNodes": "Total Nodes",
+        "totalNodesDesc": "All entities in the graph",
+        "totalRelations": "Total Relations",
+        "totalRelationsDesc": "All edges in the graph",
+        "positiveRelations": "Positive",
+        "positiveRelationsDesc": "TREATS, PREVENTS, SUPPORTS...",
+        "negativeRelations": "Negative",
+        "negativeRelationsDesc": "WORSENS, CONTRAINDICATED...",
+        "coverageNutra": "Nutraceuticals",
+        "coverageNutraDesc": "Percentage of nutraceuticals with relations in graph",
+        "coverageCond": "Conditions",
+        "coverageCondDesc": "Percentage of conditions with mapped treatments"
+      }
+    },
     "hints": {
       "dragRotate": "Drag to rotate",
       "dragPan": "Drag to pan",

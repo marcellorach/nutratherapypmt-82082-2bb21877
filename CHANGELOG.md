@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2025-12-27 📊 Reorganização das Estatísticas do Knowledge Graph
+
+- ✅ **Nova estrutura em 3 linhas temáticas**:
+  - **Base de Conhecimento** (azul): Ontologia Manual, ChEBI, Nutracêuticos, Condições, Desfechos, Pathways
+  - **Conhecimento Extraído (AI)** (verde): Entidades AI, Relações AI, Estudos Ativos, Triplets Aprovados/Pendentes
+  - **Estrutura do Grafo (Neo4j)** (cinza): Total Nós, Total Relações, Positivas, Negativas + badges de cobertura
+- ✅ **Hook `useKnowledgeGraphStats`**: Busca centralizada de estatísticas categorizadas
+- ✅ **Componentes modulares**: `KGBaseKnowledgeRow`, `KGExtractedKnowledgeRow`, `KGGraphStructureRow`
+- ✅ **Indicadores de cobertura**: Percentual de nutracêuticos/condições com relações no grafo
+- ✅ **Subtotais por seção**: Totais parciais para cada categoria de conhecimento
+- ✅ **i18n bilíngue**: Chaves `knowledgeGraph.statsSection.*` em PT e EN
+
 ### Fixed - 2025-12-27 🛡️ Correção Crítica: Soft Delete + Recuperação de Estudos
 
 - ✅ **Recuperados 6 estudos "Approved"** que foram deletados acidentalmente
