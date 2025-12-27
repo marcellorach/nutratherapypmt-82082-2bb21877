@@ -181,13 +181,13 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
   const getStatusText = () => {
     switch (item.stage) {
       case 'extracting':
-        return t('studies.ntai.statusExtracting', 'Extracting data from PDF...');
+        return t('studies.vetgraphrag.statusExtracting', 'Extracting data from PDF...');
       case 'analyzing':
-        return t('studies.ntai.statusAnalyzing', 'Analyzing with AI...');
+        return t('studies.vetgraphrag.statusAnalyzing', 'Analyzing with AI...');
       case 'standardizing':
-        return t('studies.ntai.statusStandardizing', 'Standardizing data...');
+        return t('studies.vetgraphrag.statusStandardizing', 'Standardizing data...');
       default:
-        return t('studies.ntai.statusProcessing', 'Processing...');
+        return t('studies.vetgraphrag.statusProcessing', 'Processing...');
     }
   };
 
@@ -199,10 +199,10 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-pulse" />
             <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {t('studies.ntai.liveLog', 'Log em Tempo Real')}
+              {t('studies.vetgraphrag.liveLog', 'Log em Tempo Real')}
             </h4>
             <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-200/50 dark:bg-blue-800/50 px-2 py-0.5 rounded-full">
-              {displayedEntries.length} {t('studies.ntai.events', 'eventos')}
+              {displayedEntries.length} {t('studies.vetgraphrag.events', 'eventos')}
             </span>
           </div>
           <div className="flex gap-1">
@@ -212,7 +212,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
                 size="sm" 
                 onClick={onExportLog}
                 className="h-7 px-2 text-blue-700 hover:text-blue-900 hover:bg-blue-200/50"
-                title={t('studies.ntai.exportLog')}
+                title={t('studies.vetgraphrag.exportLog')}
               >
                 <Download className="h-3.5 w-3.5" />
               </Button>
@@ -224,22 +224,22 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
                     variant="ghost" 
                     size="sm" 
                     className="h-7 px-2 hover:bg-red-100 hover:text-red-600"
-                    title={t('studies.ntai.clearLog')}
+                    title={t('studies.vetgraphrag.clearLog')}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{t('studies.ntai.clearLog')}</AlertDialogTitle>
+                    <AlertDialogTitle>{t('studies.vetgraphrag.clearLog')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {t('studies.ntai.clearLogConfirm')}
+                      {t('studies.vetgraphrag.clearLogConfirm')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={onClearLog} className="bg-red-600 hover:bg-red-700">
-                      {t('studies.ntai.clearLog')}
+                      {t('studies.vetgraphrag.clearLog')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -289,7 +289,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
                 })
               ) : (
                 <div className="h-full flex items-center justify-center text-slate-500">
-                  {t('studies.ntai.waitingLogs', 'Aguardando início do processamento...')}
+                  {t('studies.vetgraphrag.waitingLogs', 'Aguardando início do processamento...')}
                 </div>
               )}
             </div>
@@ -321,7 +321,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center gap-3">
               <span className="text-muted-foreground">
-                {t('studies.ntai.progressLabel', 'Progresso da extração')}
+                {t('studies.vetgraphrag.progressLabel', 'Progresso da extração')}
               </span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
@@ -331,7 +331,7 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
             <div className="flex items-center gap-3">
               {estimatedTimeRemaining && (
                 <span className="text-xs text-cyan-600 dark:text-cyan-400 font-medium">
-                  {t('studies.ntai.timeRemaining', 'Restante')}: {estimatedTimeRemaining}
+                  {t('studies.vetgraphrag.timeRemaining', 'Restante')}: {estimatedTimeRemaining}
                 </span>
               )}
               <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
@@ -387,10 +387,10 @@ const NtaiActiveProcessingCard: React.FC<NtaiActiveProcessingCardProps> = ({
         <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t border-border/50">
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5" />
-            <span>{t('studies.ntai.source', 'Fonte')}: {item.sourceFile || t('studies.ntai.manualImport', 'Importação Manual')}</span>
+            <span>{t('studies.vetgraphrag.source', 'Fonte')}: {item.sourceFile || t('studies.vetgraphrag.manualImport', 'Importação Manual')}</span>
           </div>
           <div className="text-right">
-            {t('studies.ntai.importedAgo', 'Importado: há menos de um dia')}
+            {t('studies.vetgraphrag.importedAgo', 'Importado: há menos de um dia')}
           </div>
         </div>
       </CardContent>

@@ -39,12 +39,12 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "new": return t('studies.ntai.table.statusNew');
-      case "especial": return t('studies.ntai.table.statusSpecial');
-      case "processed": return t('studies.ntai.table.statusProcessed');
-      case "in-review": return t('studies.ntai.table.statusInReview');
-      case "manual": return t('studies.ntai.table.statusManual');
-      default: return status || t('studies.ntai.table.statusUnknown');
+      case "new": return t('studies.vetgraphrag.table.statusNew');
+      case "especial": return t('studies.vetgraphrag.table.statusSpecial');
+      case "processed": return t('studies.vetgraphrag.table.statusProcessed');
+      case "in-review": return t('studies.vetgraphrag.table.statusInReview');
+      case "manual": return t('studies.vetgraphrag.table.statusManual');
+      default: return status || t('studies.vetgraphrag.table.statusUnknown');
     }
   };
 
@@ -59,7 +59,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
   };
 
   const formatTimeAgo = () => {
-    return t('studies.ntai.table.lessThanDay');
+    return t('studies.vetgraphrag.table.lessThanDay');
   };
 
   return (
@@ -75,10 +75,10 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 className="rounded"
               />
             </TableHead>
-            <TableHead>{t('studies.ntai.table.study')}</TableHead>
-            <TableHead>{t('studies.ntai.table.source')}</TableHead>
-            <TableHead>{t('studies.ntai.table.imported')}</TableHead>
-            <TableHead>{t('studies.ntai.table.status')}</TableHead>
+            <TableHead>{t('studies.vetgraphrag.table.study')}</TableHead>
+            <TableHead>{t('studies.vetgraphrag.table.source')}</TableHead>
+            <TableHead>{t('studies.vetgraphrag.table.imported')}</TableHead>
+            <TableHead>{t('studies.vetgraphrag.table.status')}</TableHead>
             <TableHead className="w-[120px]">VetGraphRAG</TableHead>
           </TableRow>
         </TableHeader>
@@ -96,13 +96,13 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{estudo.title || `${t('studies.ntai.table.studyPrefix')} ${estudo.id.substring(0, 8)}`}</div>
+                    <div className="font-medium">{estudo.title || `${t('studies.vetgraphrag.table.studyPrefix')} ${estudo.id.substring(0, 8)}`}</div>
                     {estudo.description && (
                       <div className="text-sm text-muted-foreground">{estudo.description}</div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{estudo.journal || estudo.meta_summary_filename || t('studies.ntai.table.unknownSource')}</TableCell>
+                <TableCell>{estudo.journal || estudo.meta_summary_filename || t('studies.vetgraphrag.table.unknownSource')}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {formatTimeAgo()}
                 </TableCell>
@@ -124,11 +124,11 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                           >
                             <Network className="h-3 w-3" />
                             <RefreshCw className="h-3 w-3" />
-                            <span>{t('studies.ntai.vetGraphRAG.regenerate')}</span>
+                            <span>{t('studies.vetgraphrag.vetGraphRAG.regenerate')}</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{t('studies.ntai.vetGraphRAG.regenerateTooltip')}</p>
+                          <p>{t('studies.vetgraphrag.vetGraphRAG.regenerateTooltip')}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -139,7 +139,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
           ) : (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                {t('studies.ntai.table.noStudies')}
+                {t('studies.vetgraphrag.table.noStudies')}
               </TableCell>
             </TableRow>
           )}
@@ -148,7 +148,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
       
       <div className="p-2 bg-muted/50 border-t flex justify-between items-center">
         <span className="text-sm text-muted-foreground">
-          {t('studies.ntai.table.selectedCount', { count: selectedItems.length })}
+          {t('studies.vetgraphrag.table.selectedCount', { count: selectedItems.length })}
         </span>
         <div className="flex gap-2">
           <Button 
@@ -156,7 +156,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             onClick={handleAddToQueue}
             disabled={selectedItems.length === 0}
           >
-            {t('studies.ntai.table.addToQueue')}
+            {t('studies.vetgraphrag.table.addToQueue')}
           </Button>
           <Button 
             size="sm" 
@@ -164,7 +164,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             disabled={selectedItems.length === 0}
             variant="destructive"
           >
-            {t('studies.ntai.table.deleteSelected')}
+            {t('studies.vetgraphrag.table.deleteSelected')}
           </Button>
         </div>
       </div>

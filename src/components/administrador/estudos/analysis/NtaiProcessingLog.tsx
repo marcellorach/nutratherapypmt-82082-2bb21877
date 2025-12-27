@@ -88,7 +88,7 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
             onClick={() => setShowOnlyErrors(!showOnlyErrors)}
             className="h-6 px-2 text-xs"
           >
-            {showOnlyErrors ? t('studies.ntai.showAll') : t('studies.ntai.showErrorsOnly')}
+            {showOnlyErrors ? t('studies.vetgraphrag.showAll') : t('studies.vetgraphrag.showErrorsOnly')}
           </Button>
         </div>
         <div className="flex gap-1">
@@ -98,7 +98,7 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
               size="sm" 
               onClick={onExportLog}
               className="h-7 px-2"
-              title={t('studies.ntai.exportLog')}
+              title={t('studies.vetgraphrag.exportLog')}
             >
               <Download className="h-3.5 w-3.5" />
             </Button>
@@ -110,22 +110,22 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
                   variant="ghost" 
                   size="sm" 
                   className="h-7 px-2 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
-                  title={t('studies.ntai.clearLog')}
+                  title={t('studies.vetgraphrag.clearLog')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t('studies.ntai.clearLog')}</AlertDialogTitle>
+                  <AlertDialogTitle>{t('studies.vetgraphrag.clearLog')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t('studies.ntai.clearLogConfirm')}
+                    {t('studies.vetgraphrag.clearLogConfirm')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={onClearLog} className="bg-red-600 hover:bg-red-700">
-                    {t('studies.ntai.clearLog')}
+                    {t('studies.vetgraphrag.clearLog')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -164,7 +164,7 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
                         className="h-6 px-2 text-xs hover:bg-blue-100 dark:hover:bg-blue-900"
                       >
                         <RotateCcw className="h-3 w-3 mr-1" />
-                        {t('studies.ntai.retry')}
+                        {t('studies.vetgraphrag.retry')}
                       </Button>
                     </div>
                   )}
@@ -175,8 +175,8 @@ const NtaiProcessingLog: React.FC<NtaiProcessingLogProps> = ({ entries, onClearL
         ) : (
           <div className="h-full flex items-center justify-center text-gray-400 text-sm">
             {showOnlyErrors 
-              ? t('studies.ntai.noErrors')
-              : t('studies.ntai.noLogs')}
+              ? t('studies.vetgraphrag.noErrors')
+              : t('studies.vetgraphrag.noLogs')}
           </div>
         )}
       </ScrollArea>
