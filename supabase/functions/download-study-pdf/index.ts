@@ -79,91 +79,159 @@ serve(async (req) => {
     console.log('Downloading PDF from:', pdfUrl);
     console.log('Study:', studyData.title);
     
-    // Normalize PMC URLs - many PMC links return HTML redirects
-    let normalizedPdfUrl = pdfUrl;
+    // Build list of URLs to try for PMC articles
+    const urlsToTry: string[] = [];
     
-    // PMC URLs: try to get the actual PDF
-    if (pdfUrl.includes('ncbi.nlm.nih.gov/pmc/articles/')) {
-      const pmcMatch = pdfUrl.match(/PMC(\d+)/i);
-      if (pmcMatch) {
-        const pmcId = pmcMatch[1];
-        // Try direct PDF link format
-        normalizedPdfUrl = `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/pdf/`;
-        console.log('📋 Normalized PMC URL:', normalizedPdfUrl);
+    // Check if this is a PMC URL
+    const pmcMatch = pdfUrl.match(/PMC(\d+)/i);
+    if (pmcMatch) {
+      const pmcId = pmcMatch[1];
+      // Multiple URL formats that PMC uses
+      urlsToTry.push(
+        `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/pdf/`,
+        `https://pmc.ncbi.nlm.nih.gov/articles/PMC${pmcId}/pdf/`,
+        `https://europepmc.org/backend/ptpmcrender.fcgi?accid=PMC${pmcId}&blobtype=pdf`,
+        pdfUrl // Original URL as fallback
+      );
+      console.log('📋 PMC article detected. Will try multiple URL formats for PMC' + pmcId);
+    } else {
+      urlsToTry.push(pdfUrl);
+    }
+    
+    let pdfResponse: Response | null = null;
+    let lastError = '';
+    let successUrl = '';
+    
+    // Try each URL format
+    for (const urlToTry of urlsToTry) {
+      console.log('🔗 Trying URL:', urlToTry);
+      
+      try {
+        const response = await fetch(urlToTry, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/pdf,application/octet-stream,*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+          },
+          redirect: 'follow'
+        });
+        
+        if (!response.ok) {
+          console.log(`   ❌ HTTP ${response.status}`);
+          lastError = `HTTP ${response.status}: ${response.statusText}`;
+          continue;
+        }
+        
+        const contentType = response.headers.get('content-type') || '';
+        console.log('   Content-Type:', contentType);
+        
+        // Check if this is actually a PDF
+        if (contentType.includes('application/pdf') || contentType.includes('application/octet-stream')) {
+          pdfResponse = response;
+          successUrl = urlToTry;
+          console.log('   ✅ PDF found!');
+          break;
+        }
+        
+        // If HTML, try to extract PDF link
+        if (contentType.includes('text/html')) {
+          const htmlContent = await response.text();
+          
+          // Look for PDF links in the HTML
+          const pdfPatterns = [
+            /href="([^"]*\.pdf[^"]*)"/gi,
+            /href="([^"]*\/pdf\/[^"]*)"/gi,
+            /data-pdf-url="([^"]*)"/gi,
+            /<a[^>]*href="([^"]*)"[^>]*>.*?PDF.*?<\/a>/gi,
+          ];
+          
+          let foundPdfLink: string | null = null;
+          for (const pattern of pdfPatterns) {
+            const match = pattern.exec(htmlContent);
+            if (match && match[1]) {
+              foundPdfLink = match[1];
+              break;
+            }
+          }
+          
+          if (foundPdfLink) {
+            // Make the URL absolute if needed
+            if (foundPdfLink.startsWith('/')) {
+              const urlObj = new URL(urlToTry);
+              foundPdfLink = `${urlObj.origin}${foundPdfLink}`;
+            } else if (!foundPdfLink.startsWith('http')) {
+              const urlObj = new URL(urlToTry);
+              foundPdfLink = `${urlObj.origin}/${foundPdfLink}`;
+            }
+            
+            console.log('   📥 Found PDF link in HTML:', foundPdfLink);
+            
+            // Try to fetch the extracted PDF link
+            const pdfLinkResponse = await fetch(foundPdfLink, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/pdf,application/octet-stream,*/*',
+              },
+              redirect: 'follow'
+            });
+            
+            if (pdfLinkResponse.ok) {
+              const linkContentType = pdfLinkResponse.headers.get('content-type') || '';
+              if (linkContentType.includes('application/pdf') || linkContentType.includes('application/octet-stream')) {
+                pdfResponse = pdfLinkResponse;
+                successUrl = foundPdfLink;
+                console.log('   ✅ PDF from extracted link!');
+                break;
+              }
+            }
+          }
+          
+          console.log('   ⚠️ HTML response, no extractable PDF link');
+          lastError = 'Received HTML instead of PDF';
+          continue;
+        }
+        
+        // Unknown content type - try reading first bytes to check if PDF
+        const buffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const signature = String.fromCharCode(...bytes.slice(0, 4));
+        
+        if (signature === '%PDF') {
+          // Create a new Response with the buffer
+          pdfResponse = new Response(buffer, {
+            status: 200,
+            headers: response.headers
+          });
+          successUrl = urlToTry;
+          console.log('   ✅ Valid PDF detected from content!');
+          break;
+        }
+        
+        console.log('   ⚠️ Unknown content, not a PDF');
+        lastError = 'Content is not a valid PDF';
+        
+      } catch (fetchError) {
+        console.error('   ❌ Fetch error:', fetchError);
+        lastError = fetchError instanceof Error ? fetchError.message : 'Fetch failed';
       }
     }
     
-    // Step 1: Download the PDF with redirect following
-    let pdfResponse = await fetch(normalizedPdfUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/pdf,application/octet-stream,*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-      redirect: 'follow'
-    });
-    
-    if (!pdfResponse.ok) {
-      console.error('Failed to download PDF:', pdfResponse.status, pdfResponse.statusText);
+    if (!pdfResponse) {
+      console.error('❌ All URL attempts failed. Last error:', lastError);
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to download PDF', 
-          details: `HTTP ${pdfResponse.status}: ${pdfResponse.statusText}` 
+          error: 'PDF not directly accessible',
+          details: `Could not download PDF after trying ${urlsToTry.length} URL formats. ${lastError}. The PDF may require institutional access or manual download.`,
+          triedUrls: urlsToTry
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const contentType = pdfResponse.headers.get('content-type') || '';
-    console.log('Content-Type:', contentType);
-    console.log('Final URL:', pdfResponse.url);
-    
-    // Check if we got an HTML page instead of PDF (common with PMC)
-    const isHtmlResponse = contentType.includes('text/html');
-    
-    if (isHtmlResponse) {
-      console.warn('⚠️ Received HTML instead of PDF, attempting to extract PDF link...');
-      
-      const htmlContent = await pdfResponse.text();
-      
-      // Try to find direct PDF link in HTML
-      const pdfLinkMatch = htmlContent.match(/href="([^"]*\.pdf[^"]*)"/i) || 
-                           htmlContent.match(/src="([^"]*\.pdf[^"]*)"/i);
-      
-      if (pdfLinkMatch) {
-        let extractedPdfUrl = pdfLinkMatch[1];
-        if (extractedPdfUrl.startsWith('/')) {
-          extractedPdfUrl = `https://www.ncbi.nlm.nih.gov${extractedPdfUrl}`;
-        }
-        console.log('📥 Found PDF link in HTML:', extractedPdfUrl);
-        
-        pdfResponse = await fetch(extractedPdfUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/pdf,application/octet-stream,*/*',
-          },
-          redirect: 'follow'
-        });
-        
-        if (!pdfResponse.ok) {
-          return new Response(
-            JSON.stringify({ 
-              error: 'Failed to download PDF from extracted link',
-              details: `HTTP ${pdfResponse.status}` 
-            }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      } else {
-        return new Response(
-          JSON.stringify({ 
-            error: 'PDF not directly accessible',
-            details: 'The provided URL returned HTML instead of a PDF. The PDF may require institutional access or manual download.'
-          }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
+    console.log('✅ Successfully downloaded from:', successUrl);
     
     const pdfBuffer = await pdfResponse.arrayBuffer();
     const pdfSize = pdfBuffer.byteLength;
