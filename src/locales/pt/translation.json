@@ -4752,5 +4752,90 @@
       "point3": "Monitorar reações de perto nas primeiras 48h",
       "point4": "Interromper imediatamente se houver reações adversas"
     }
+  },
+  "conflicts": {
+    "title": "Conflitos de Evidência",
+    "description": "Revisão e resolução de conflitos entre estudos científicos",
+    "panel": {
+      "title": "Painel de Revisão de Conflitos",
+      "description": "Revise e resolva conflitos de evidência entre estudos científicos",
+      "pendingReview": "Pendentes de Revisão",
+      "resolved": "Resolvidos",
+      "dismissed": "Descartados",
+      "noConflicts": "Nenhum conflito encontrado",
+      "noConflictsDesc": "Não há conflitos pendentes de revisão nesta categoria"
+    },
+    "filters": {
+      "all": "Todos",
+      "high": "Alto",
+      "moderate": "Moderado",
+      "low": "Baixo"
+    },
+    "card": {
+      "studies": "estudos",
+      "claims": "claims",
+      "agreementScore": "Concordância",
+      "varianceCoefficient": "Variância",
+      "aiSuggestion": "Sugestão da IA",
+      "resolve": "Resolver",
+      "dismiss": "Descartar",
+      "viewDetails": "Ver Detalhes"
+    },
+    "levels": {
+      "high": "Conflito Alto",
+      "moderate": "Conflito Moderado",
+      "low": "Conflito Baixo",
+      "none": "Sem Conflito"
+    },
+    "alert": {
+      "title": "Conflitos Pendentes",
+      "description": "Existem {{count}} conflito(s) de evidência aguardando revisão",
+      "review": "Revisar Agora"
+    },
+    "resolution": {
+      "title": "Resolver Conflito",
+      "description": "Selecione como resolver este conflito de evidência",
+      "type": {
+        "label": "Tipo de Resolução",
+        "singleStudy": "Usar Estudo Específico",
+        "singleStudyDesc": "Adotar valores de um estudo como referência canônica",
+        "weightedAverage": "Média Ponderada",
+        "weightedAverageDesc": "Calcular valor canônico baseado na qualidade dos estudos",
+        "contextSpecific": "Contexto Específico",
+        "contextSpecificDesc": "Definir valores diferentes por espécie, raça ou contexto",
+        "manualValue": "Valor Manual",
+        "manualValueDesc": "Inserir valor canônico definido por especialista"
+      },
+      "selectStudy": "Selecionar Estudo de Referência",
+      "manualDose": {
+        "value": "Valor da Dosagem",
+        "unit": "Unidade",
+        "frequency": "Frequência"
+      },
+      "rationale": {
+        "label": "Justificativa",
+        "placeholder": "Explique o racional científico para esta decisão...",
+        "required": "Justificativa é obrigatória"
+      },
+      "cancel": "Cancelar",
+      "confirm": "Confirmar Resolução",
+      "success": "Conflito resolvido com sucesso",
+      "error": "Erro ao resolver conflito"
+    },
+    "species": {
+      "dog": "Cão",
+      "cat": "Gato",
+      "horse": "Cavalo",
+      "canine": "Canino",
+      "feline": "Felino",
+      "equine": "Equino"
+    },
+    "predicates": {
+      "TREATS": "Trata",
+      "PREVENTS": "Previne",
+      "SUPPORTS": "Suporta",
+      "WORSENS": "Piora",
+      "CONTRAINDICATED_FOR": "Contraindicado para"
+    }
   }
 }

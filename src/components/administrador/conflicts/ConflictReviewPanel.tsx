@@ -257,3 +257,5 @@ export function ConflictReviewPanel() {
     </div>
   );
 }
+
+export default ConflictReviewPanel;
