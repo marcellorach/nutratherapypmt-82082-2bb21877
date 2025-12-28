@@ -80,3 +80,6 @@ verify_jwt = true
 
 [functions.hybrid-recommendation]
 verify_jwt = true
+
+[functions.fetch-external-ontologies]
+verify_jwt = false

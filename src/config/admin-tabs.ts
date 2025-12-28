@@ -60,6 +60,7 @@ const TripletCurationBoard = lazy(() => import('@/components/administrador/estud
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
 const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
+const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -118,6 +119,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: ConflictReviewPanel,
     description: 'Revisão e resolução de conflitos entre estudos científicos'
+  },
+  {
+    id: 'base-knowledge',
+    label: 'Dados Base',
+    group: 'knowledge-base',
+    component: BaseKnowledgeTab,
+    description: 'Importação e curadoria de dados de ontologias externas'
   },
   {
     id: 'knowledge-base-settings',

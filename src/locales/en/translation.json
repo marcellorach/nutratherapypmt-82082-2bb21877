@@ -4837,5 +4837,107 @@
       "WORSENS": "Worsens",
       "CONTRAINDICATED_FOR": "Contraindicated for"
     }
+  },
+  "baseKnowledge": {
+    "title": "Base Knowledge System",
+    "description": "Import and manage data from external ontologies with curation",
+    "tabs": {
+      "search": "Search Ontologies",
+      "candidates": "Candidates",
+      "testing": "Test Data"
+    },
+    "stats": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "merged": "Merged",
+      "total": "Total"
+    },
+    "search": {
+      "title": "Search External Ontologies",
+      "description": "Search for compounds and entities in scientific databases",
+      "placeholder": "E.g.: curcumin, glucosamine, omega-3...",
+      "button": "Search",
+      "searching": "Searching...",
+      "sources": {
+        "ChEBI": "ChEBI (Chemical Compounds)",
+        "PubChem": "PubChem (Substances)",
+        "KEGG": "KEGG (Metabolites)",
+        "MeSH": "MeSH (Medical Terms)"
+      },
+      "results": "Results",
+      "noResults": "No results found",
+      "addCandidate": "Add as Candidate",
+      "adding": "Adding...",
+      "added": "Added to candidates queue",
+      "error": "Error searching ontologies"
+    },
+    "candidates": {
+      "title": "Candidates Queue",
+      "description": "Review and approve entities for the knowledge base",
+      "empty": "No pending candidates",
+      "emptyDescription": "Search external ontologies to add candidates",
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "merged": "Merged"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "merge": "Merge",
+        "view": "View"
+      },
+      "approving": "Approving...",
+      "approved": "Candidate approved successfully",
+      "rejected": "Candidate rejected",
+      "error": "Error processing candidate",
+      "details": {
+        "source": "Source",
+        "externalId": "External ID",
+        "formula": "Formula",
+        "weight": "Molecular Weight",
+        "synonyms": "Synonyms",
+        "description": "Description"
+      },
+      "harmonization": {
+        "title": "Name Harmonization",
+        "possibleDuplicates": "Possible Duplicates",
+        "similarity": "Similarity",
+        "suggestion": "Suggestion",
+        "linkExisting": "Link to Existing",
+        "createNew": "Create New Entity"
+      }
+    },
+    "testing": {
+      "title": "Test Data Generator",
+      "description": "Generate mock data to test the conflict detection system",
+      "generate": "Generate Test Data",
+      "generating": "Generating...",
+      "success": "Test data generated successfully",
+      "error": "Error generating test data",
+      "warning": "Warning",
+      "warningText": "This will create mock studies and triplets in the database. Use only in development environment.",
+      "studiesCount": "Studies to generate",
+      "conflictTypes": {
+        "title": "Conflict Types",
+        "dosage": "Dosage Conflicts",
+        "direction": "Direction Conflicts",
+        "efficacy": "Efficacy Conflicts"
+      },
+      "generated": {
+        "studies": "studies created",
+        "triplets": "triplets created",
+        "conflicts": "conflicts detected"
+      }
+    },
+    "entityTypes": {
+      "nutraceutical": "Nutraceutical",
+      "condition": "Condition",
+      "compound": "Compound",
+      "pathway": "Pathway",
+      "mechanism": "Mechanism"
+    }
   }
 }
