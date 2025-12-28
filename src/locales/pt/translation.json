@@ -4837,5 +4837,107 @@
       "WORSENS": "Piora",
       "CONTRAINDICATED_FOR": "Contraindicado para"
     }
+  },
+  "baseKnowledge": {
+    "title": "Sistema de Dados Base",
+    "description": "Importar e gerenciar dados de ontologias externas com curadoria",
+    "tabs": {
+      "search": "Buscar Ontologias",
+      "candidates": "Candidatos",
+      "testing": "Dados de Teste"
+    },
+    "stats": {
+      "pending": "Pendentes",
+      "approved": "Aprovados",
+      "rejected": "Rejeitados",
+      "merged": "Mesclados",
+      "total": "Total"
+    },
+    "search": {
+      "title": "Buscar em Ontologias Externas",
+      "description": "Pesquise compostos e entidades em bases de dados científicas",
+      "placeholder": "Ex: curcumin, glucosamine, omega-3...",
+      "button": "Buscar",
+      "searching": "Buscando...",
+      "sources": {
+        "ChEBI": "ChEBI (Compostos Químicos)",
+        "PubChem": "PubChem (Substâncias)",
+        "KEGG": "KEGG (Metabólitos)",
+        "MeSH": "MeSH (Termos Médicos)"
+      },
+      "results": "Resultados",
+      "noResults": "Nenhum resultado encontrado",
+      "addCandidate": "Adicionar como Candidato",
+      "adding": "Adicionando...",
+      "added": "Adicionado à fila de candidatos",
+      "error": "Erro ao buscar ontologias"
+    },
+    "candidates": {
+      "title": "Fila de Candidatos",
+      "description": "Revise e aprove entidades para a base de conhecimento",
+      "empty": "Nenhum candidato pendente",
+      "emptyDescription": "Busque em ontologias externas para adicionar candidatos",
+      "status": {
+        "pending": "Pendente",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "merged": "Mesclado"
+      },
+      "actions": {
+        "approve": "Aprovar",
+        "reject": "Rejeitar",
+        "merge": "Mesclar",
+        "view": "Visualizar"
+      },
+      "approving": "Aprovando...",
+      "approved": "Candidato aprovado com sucesso",
+      "rejected": "Candidato rejeitado",
+      "error": "Erro ao processar candidato",
+      "details": {
+        "source": "Fonte",
+        "externalId": "ID Externo",
+        "formula": "Fórmula",
+        "weight": "Peso Molecular",
+        "synonyms": "Sinônimos",
+        "description": "Descrição"
+      },
+      "harmonization": {
+        "title": "Harmonização de Nomes",
+        "possibleDuplicates": "Possíveis Duplicatas",
+        "similarity": "Similaridade",
+        "suggestion": "Sugestão",
+        "linkExisting": "Vincular a Existente",
+        "createNew": "Criar Nova Entidade"
+      }
+    },
+    "testing": {
+      "title": "Gerador de Dados de Teste",
+      "description": "Gere dados fictícios para testar o sistema de detecção de conflitos",
+      "generate": "Gerar Dados de Teste",
+      "generating": "Gerando...",
+      "success": "Dados de teste gerados com sucesso",
+      "error": "Erro ao gerar dados de teste",
+      "warning": "Atenção",
+      "warningText": "Isso criará estudos e triplets fictícios no banco de dados. Use apenas em ambiente de desenvolvimento.",
+      "studiesCount": "Estudos a gerar",
+      "conflictTypes": {
+        "title": "Tipos de Conflito",
+        "dosage": "Conflitos de Dosagem",
+        "direction": "Conflitos de Direção",
+        "efficacy": "Conflitos de Eficácia"
+      },
+      "generated": {
+        "studies": "estudos criados",
+        "triplets": "triplets criados",
+        "conflicts": "conflitos detectados"
+      }
+    },
+    "entityTypes": {
+      "nutraceutical": "Nutracêutico",
+      "condition": "Condição",
+      "compound": "Composto",
+      "pathway": "Pathway",
+      "mechanism": "Mecanismo"
+    }
   }
 }
