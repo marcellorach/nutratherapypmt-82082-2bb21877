@@ -1139,32 +1139,37 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
     }
 
     // Create hierarchical_edges for high-confidence triplets
-    const highConfidenceTriplets = tripletsWithScores.filter(t => t.extraction_confidence >= 0.7);
+    const highConfidenceTriplets = tripletsWithScores.filter(t => t && t.extraction_confidence >= 0.7);
     if (highConfidenceTriplets.length > 0) {
-      const hierarchicalEdges = highConfidenceTriplets.map(t => ({
-        source_id: t.subject_id || t.study_id,
-        source_type: t.subject_type,
-        source_layer: t.subject_layer,
-        target_id: t.object_id || t.study_id,
-        target_type: t.object_type,
-        target_layer: t.object_layer,
-        relationship: t.predicate,
-        intensity: t.intensity,
-        confidence: t.extraction_confidence,
-        evidence_level: t.evidence_level,
-        dose_range: t.dose_range,
-        species_validated: t.species_context,
-        study_ids: [studyId],
-        triplet_id: null,
-        curated: t.auto_approved
-      }));
+      const hierarchicalEdges = highConfidenceTriplets
+        .filter(t => t && t.subject_type && t.object_type && t.predicate) // Ensure required fields exist
+        .map(t => ({
+          source_id: t.subject_id || t.study_id || studyId,
+          source_type: t.subject_type || 'Unknown',
+          source_layer: t.subject_layer || 'layer_0_compound',
+          target_id: t.object_id || t.study_id || studyId,
+          target_type: t.object_type || 'Unknown',
+          target_layer: t.object_layer || 'layer_4_outcome',
+          relationship: t.predicate || 'RELATED_TO',
+          intensity: t.intensity ?? null,
+          confidence: t.extraction_confidence ?? 0.7,
+          evidence_level: t.evidence_level || 'in_vitro',
+          dose_range: t.dose_range ?? null,
+          species_validated: t.species_context || [],
+          study_ids: [studyId],
+          triplet_id: null,
+          curated: t.auto_approved ?? false
+        }));
 
-      const { error: edgeError } = await supabase
-        .from('hierarchical_edges')
-        .insert(hierarchicalEdges);
+      // Only insert if we have valid edges
+      if (hierarchicalEdges.length > 0) {
+        const { error: edgeError } = await supabase
+          .from('hierarchical_edges')
+          .insert(hierarchicalEdges);
 
-      if (edgeError) {
-        console.warn('Warning: Could not create hierarchical edges:', edgeError);
+        if (edgeError) {
+          console.warn('Warning: Could not create hierarchical edges:', edgeError);
+        }
       }
     }
 
