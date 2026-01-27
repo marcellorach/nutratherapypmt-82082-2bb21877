@@ -55,7 +55,7 @@ const AdminFooter: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="https://dist.neo4j.com/wp-content/uploads/20210423062553/neo4j-social-share-21.png" 
+                  src="/images/neo4j-logo.png" 
                   alt="Neo4j" 
                   className="h-6 w-auto transition-all"
                 />
