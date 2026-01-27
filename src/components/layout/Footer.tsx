@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
                 <img 
                   src="https://dist.neo4j.com/wp-content/uploads/20210423062553/neo4j-social-share-21.png" 
                   alt="Neo4j" 
-                  className="h-6 w-auto transition-all"
+                  className="h-8 w-auto transition-all"
                 />
               </div>
             </div>
