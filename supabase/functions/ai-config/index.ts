@@ -1,7 +1,7 @@
 
 // Função Edge do Supabase para manipular configurações de IA de forma segura
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 
 // Configuração de CORS para permitir solicitações do frontend
 const corsHeaders = {
