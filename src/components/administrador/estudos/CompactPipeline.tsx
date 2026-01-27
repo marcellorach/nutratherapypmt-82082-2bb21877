@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 import { Upload, Brain, GitBranch, Network, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,7 +22,7 @@ export const CompactPipeline = () => {
     <TooltipProvider>
       <div className="flex items-center justify-center gap-1 py-1">
         {steps.map((step, index) => (
-          <React.Fragment key={index}>
+          <Fragment key={index}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary cursor-default hover:bg-primary/20 transition-colors">
@@ -37,7 +37,7 @@ export const CompactPipeline = () => {
             {index < steps.length - 1 && (
               <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             )}
-          </React.Fragment>
+          </Fragment>
         ))}
       </div>
     </TooltipProvider>
