@@ -858,7 +858,8 @@
     "close": "Close",
     "confirm": "Confirm",
     "access": "Access",
-    "poweredBy": "Powered by"
+    "poweredBy": "Powered by",
+    "refresh": "Refresh"
   },
   "sampleGroup": {
     "badge": "Group {{id}}",
@@ -1116,6 +1117,7 @@
     }
   },
   "navbar": {
+    "home": "Home",
     "researchDev": "R&D Area",
     "platform": "Nutraceutical research and development platform"
   },
