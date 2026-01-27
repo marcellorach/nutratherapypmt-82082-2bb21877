@@ -57,7 +57,7 @@ const AdminFooter: React.FC = () => {
                 <img 
                   src="/images/neo4j-logo.png" 
                   alt="Neo4j" 
-                  className="h-6 w-auto transition-all"
+                  className="h-12 w-auto transition-all"
                 />
               </div>
             </div>
