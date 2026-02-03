@@ -1,107 +1,58 @@
 
-# Plano: Sincronizar Dados de Estudos Entre Preview e Site Publicado
 
-## Diagnóstico Confirmado
+# Plano: Adicionar jpedroazedo@gmail.com como Administrador
 
-O problema não é de sincronização de dados, mas de **permissões de usuário**:
+## Resumo
 
-- **Dados**: Existem 2 estudos válidos no banco de dados ✅
-- **RLS**: Tabela `processed_studies` só permite acesso a usuários com role `admin`
-- **Preview**: Você está logado como `mrachlyn@gmail.com` (tem role admin) → vê 2 estudos
-- **Site Publicado**: Usuário `marcello@healthprotection.com` (sem role admin) → vê 0 estudos
+Adicionar o usuário `jpedroazedo@gmail.com` à tabela `user_roles` com role `admin` para que ele tenha acesso completo aos estudos curados no Kanban e demais funcionalidades administrativas.
 
-## Ação Necessária
+## Dados do Usuário
 
-Adicionar os usuários que precisam acessar o site publicado à tabela `user_roles` com role `admin`:
+| Campo | Valor |
+|-------|-------|
+| Email | jpedroazedo@gmail.com |
+| User ID | cc1eeeec-9175-4240-ace8-4084135ba933 |
+| Role a ser concedida | admin |
 
-### Usuários para Adicionar como Admin
+## Ação
 
-| Email | User ID |
-|-------|---------|
-| marcello@healthprotection.com | 8e154080-a33f-46d6-a8aa-cf85643df10d |
-| arthur@healthprotection.com | 3de4a348-1386-45d4-9975-ea6f11fe0113 |
-| marcello@lifespan.com.br | d457e518-d49d-43fe-9b37-9fcc0814ba63 |
-
-## Implementação
-
-### Passo 1: Inserir Roles para Usuários Existentes
-
-Executar INSERT na tabela `user_roles` para cada usuário que precisa ter acesso admin:
+Executar o seguinte comando SQL:
 
 ```sql
-INSERT INTO user_roles (user_id, role) VALUES
-  ('8e154080-a33f-46d6-a8aa-cf85643df10d', 'admin'),  -- marcello@healthprotection.com
-  ('3de4a348-1386-45d4-9975-ea6f11fe0113', 'admin'),  -- arthur@healthprotection.com
-  ('d457e518-d49d-43fe-9b37-9fcc0814ba63', 'admin'); -- marcello@lifespan.com.br
+INSERT INTO user_roles (user_id, role) 
+VALUES ('cc1eeeec-9175-4240-ace8-4084135ba933', 'admin');
 ```
 
-### Passo 2: Verificar Resultado
+## Resultado Esperado
 
-Após a inserção, o usuário logado no site publicado terá acesso aos 2 estudos.
+Após a inserção, o usuário `jpedroazedo@gmail.com` terá acesso a:
 
-### Passo 3 (Opcional): Corrigir Erros de Console
+- Estudos curados no Kanban (`processed_studies`)
+- Triplets extraídos (`triplet_extractions`)
+- Todas as funcionalidades do painel administrativo protegidas por RLS
 
-Os logs mostram dois problemas secundários:
+## Seção Técnica
 
-1. **React.Fragment Warning**: O componente `CompactPipeline.tsx` está recebendo prop inválida - corrigir estrutura do JSX
-2. **Tradução Faltando**: Chave `common.refresh` não existe - adicionar nas locales PT/EN
+A tabela `user_roles` possui uma política RLS que permite apenas usuários com role `admin` visualizarem dados sensíveis. A função `is_admin()` verifica se o `auth.uid()` atual possui uma entrada com `role = 'admin'` nesta tabela.
 
-## Resumo Técnico
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    FLUXO ATUAL                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Preview (Lovable)                                          │
-│  ┌────────────────────┐    ┌─────────────────┐              │
-│  │ mrachlyn@gmail.com │───▶│ user_roles      │              │
-│  │ (admin) ✅         │    │ role: admin ✅   │              │
-│  └────────────────────┘    └─────────────────┘              │
-│                                   │                         │
-│                                   ▼                         │
-│                            ┌─────────────────┐              │
-│                            │ RLS Policy ✅    │              │
-│                            │ PERMITE ACESSO  │              │
-│                            └─────────────────┘              │
-│                                   │                         │
-│                                   ▼                         │
-│                            ┌─────────────────┐              │
-│                            │ 2 estudos       │              │
-│                            │ visíveis ✅      │              │
-│                            └─────────────────┘              │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Site Publicado                                             │
-│  ┌────────────────────────────┐    ┌─────────────────┐      │
-│  │ marcello@healthprotection │───▶│ user_roles      │      │
-│  │ (sem role) ❌              │    │ role: ??? ❌    │      │
-│  └────────────────────────────┘    └─────────────────┘      │
-│                                          │                  │
-│                                          ▼                  │
-│                                   ┌─────────────────┐       │
-│                                   │ RLS Policy ❌    │       │
-│                                   │ BLOQUEIA ACESSO │       │
-│                                   └─────────────────┘       │
-│                                          │                  │
-│                                          ▼                  │
-│                                   ┌─────────────────┐       │
-│                                   │ 0 estudos       │       │
-│                                   │ visíveis ❌      │       │
-│                                   └─────────────────┘       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```text
+┌─────────────────────────────────────┐
+│         ANTES DA INSERÇÃO           │
+├─────────────────────────────────────┤
+│ jpedroazedo@gmail.com               │
+│ → user_roles: (vazio)               │
+│ → is_admin(): FALSE                 │
+│ → Acesso Kanban: BLOQUEADO ❌       │
+└─────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────┐
+│         DEPOIS DA INSERÇÃO          │
+├─────────────────────────────────────┤
+│ jpedroazedo@gmail.com               │
+│ → user_roles: role = 'admin'        │
+│ → is_admin(): TRUE                  │
+│ → Acesso Kanban: LIBERADO ✅        │
+└─────────────────────────────────────┘
 ```
 
-## Arquivos a Modificar
-
-1. **Nenhuma modificação de código necessária** - apenas inserção de dados no banco
-
-## Perguntas para Você
-
-Antes de prosseguir, preciso saber:
-
-1. **Quais usuários devem ter acesso admin?** Devo adicionar todos os 3 usuários mencionados ou apenas alguns específicos?
-
-2. **Deseja que eu também corrija os erros de console** (React.Fragment e tradução faltando)?
