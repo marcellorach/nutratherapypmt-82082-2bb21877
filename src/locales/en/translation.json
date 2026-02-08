@@ -1008,6 +1008,56 @@
       "invalidEmail": "Please enter a valid email address",
       "accessError": "Unable to access demo. Please try again.",
       "demoNote": "Demo accounts use simplified authentication for course access"
+    },
+    "googleAuth": {
+      "title": "Welcome to NutraTherapy",
+      "description": "Sign in with your Google account to access the platform",
+      "signInButton": "Continue with Google",
+      "signingIn": "Signing in...",
+      "stanfordAutoAccess": "Stanford University emails get instant access",
+      "gmailRequestAccess": "Gmail accounts require administrator approval",
+      "domainNotAllowed": "Domain not authorized",
+      "domainNotAllowedDesc": "Only @stanford.edu and @gmail.com emails are allowed",
+      "errorSignIn": "Error signing in with Google"
+    },
+    "accessPending": {
+      "title": "Access Request Submitted",
+      "description": "Your access request to the NutraTherapy platform has been submitted successfully. An administrator will review your request shortly.",
+      "emailLabel": "Email",
+      "requestedAt": "Requested at",
+      "statusLabel": "Status",
+      "statusPending": "Awaiting approval",
+      "signOut": "Sign Out",
+      "checkAgain": "Check Status"
+    },
+    "accessRejected": {
+      "title": "Access Request Rejected",
+      "description": "Unfortunately, your access request has been rejected. If you believe this is an error, please contact an administrator.",
+      "reason": "Reason",
+      "noReason": "No reason provided",
+      "signOut": "Sign Out",
+      "tryAgain": "Submit New Request"
+    },
+    "accessRequests": {
+      "title": "Access Requests",
+      "description": "Manage user access requests to the platform",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approving": "Approving...",
+      "rejecting": "Rejecting...",
+      "approvedSuccess": "Access request approved successfully",
+      "rejectedSuccess": "Access request rejected",
+      "errorApproving": "Error approving request",
+      "errorRejecting": "Error rejecting request",
+      "noRequests": "No access requests found",
+      "requestedAgo": "Requested {{time}}",
+      "rejectReason": "Rejection reason (optional)",
+      "rejectReasonPlaceholder": "Explain why this request was rejected...",
+      "confirmReject": "Confirm Rejection",
+      "cancelReject": "Cancel"
     }
   },
   "audit": {
@@ -1877,7 +1927,9 @@
     "administrator": "Administrator",
     "veterinarian": "Veterinarian",
     "tutor": "Tutor",
-    "login": "Sign In"
+    "login": "Sign In",
+    "pendingRequests": "Pending access requests",
+    "pendingRequestsCount": "{{count}} pending request(s)"
   },
   "messages": {
     "success": "Operation completed successfully",

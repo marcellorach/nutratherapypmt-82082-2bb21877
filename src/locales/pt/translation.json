@@ -1008,6 +1008,56 @@
       "invalidEmail": "Por favor, digite um endereço de email válido",
       "accessError": "Não foi possível acessar a demo. Tente novamente.",
       "demoNote": "Contas demo usam autenticação simplificada para acesso ao curso"
+    },
+    "googleAuth": {
+      "title": "Bem-vindo ao NutraTherapy",
+      "description": "Faça login com sua conta Google para acessar a plataforma",
+      "signInButton": "Continuar com Google",
+      "signingIn": "Entrando...",
+      "stanfordAutoAccess": "Emails da Stanford University têm acesso imediato",
+      "gmailRequestAccess": "Contas Gmail requerem aprovação de administrador",
+      "domainNotAllowed": "Domínio não autorizado",
+      "domainNotAllowedDesc": "Apenas emails @stanford.edu e @gmail.com são permitidos",
+      "errorSignIn": "Erro ao fazer login com Google"
+    },
+    "accessPending": {
+      "title": "Solicitação de Acesso Enviada",
+      "description": "Sua solicitação de acesso à plataforma NutraTherapy foi enviada com sucesso. Um administrador irá analisar seu pedido em breve.",
+      "emailLabel": "Email",
+      "requestedAt": "Solicitado em",
+      "statusLabel": "Status",
+      "statusPending": "Aguardando aprovação",
+      "signOut": "Sair da Conta",
+      "checkAgain": "Verificar Status"
+    },
+    "accessRejected": {
+      "title": "Solicitação de Acesso Rejeitada",
+      "description": "Infelizmente, sua solicitação de acesso foi rejeitada. Se você acredita que isso é um erro, entre em contato com um administrador.",
+      "reason": "Motivo",
+      "noReason": "Nenhum motivo informado",
+      "signOut": "Sair da Conta",
+      "tryAgain": "Enviar Nova Solicitação"
+    },
+    "accessRequests": {
+      "title": "Solicitações de Acesso",
+      "description": "Gerencie solicitações de acesso de usuários à plataforma",
+      "pending": "Pendentes",
+      "approved": "Aprovadas",
+      "rejected": "Rejeitadas",
+      "approve": "Aprovar",
+      "reject": "Rejeitar",
+      "approving": "Aprovando...",
+      "rejecting": "Rejeitando...",
+      "approvedSuccess": "Solicitação de acesso aprovada com sucesso",
+      "rejectedSuccess": "Solicitação de acesso rejeitada",
+      "errorApproving": "Erro ao aprovar solicitação",
+      "errorRejecting": "Erro ao rejeitar solicitação",
+      "noRequests": "Nenhuma solicitação de acesso encontrada",
+      "requestedAgo": "Solicitado {{time}}",
+      "rejectReason": "Motivo da rejeição (opcional)",
+      "rejectReasonPlaceholder": "Explique por que esta solicitação foi rejeitada...",
+      "confirmReject": "Confirmar Rejeição",
+      "cancelReject": "Cancelar"
     }
   },
   "audit": {
@@ -1877,7 +1927,9 @@
     "administrator": "Administrador",
     "veterinarian": "Veterinário",
     "tutor": "Tutor",
-    "login": "Entrar"
+    "login": "Entrar",
+    "pendingRequests": "Solicitações de acesso pendentes",
+    "pendingRequestsCount": "{{count}} solicitação(ões) pendente(s)"
   },
   "messages": {
     "success": "Operação realizada com sucesso",

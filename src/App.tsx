@@ -6,6 +6,8 @@ import TutorPage from './pages/tutor/TutorPage';
 import VeterinarioPage from './pages/veterinario/VeterinarioPage';
 import AdministradorPage from './pages/administrador/AdministradorPage';
 import AuthPage from './pages/auth/AuthPage';
+import AccessPendingPage from './pages/auth/AccessPendingPage';
+import AccessRejectedPage from './pages/auth/AccessRejectedPage';
 import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
@@ -32,6 +34,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/access-pending" element={<AccessPendingPage />} />
+                <Route path="/access-rejected" element={<AccessRejectedPage />} />
                 <Route path="/tutor" element={
                   <ProtectedRoute>
                     <TutorPage />

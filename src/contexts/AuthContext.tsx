@@ -28,17 +28,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Define o listener de mudança de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
-          // Após definir os estados síncronos, buscar dados adicionais de forma assíncrona
           setTimeout(() => {
             fetchUserProfile(currentSession.user.id);
             fetchUserRoles(currentSession.user.id);
+            
+            // Handle post-OAuth domain-based access
+            if (event === 'SIGNED_IN') {
+              handlePostAuthAccess(currentSession.user);
+            }
           }, 0);
         } else {
           setUserProfile(null);
@@ -47,7 +50,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Verifica sessão atual
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -60,26 +62,102 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // Limpeza do listener
     return () => subscription.unsubscribe();
   }, []);
+
+  const handlePostAuthAccess = async (authUser: User) => {
+    const email = authUser.email || '';
+    const provider = authUser.app_metadata?.provider;
+    
+    // Only handle Google OAuth logins (not password-based)
+    if (provider !== 'google') return;
+
+    // Check if user already has roles (existing user)
+    const { data: existingRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', authUser.id);
+
+    if (existingRoles && existingRoles.length > 0) {
+      // User already has roles, let them through
+      return;
+    }
+
+    // @stanford.edu - auto-approve
+    if (email.endsWith('@stanford.edu')) {
+      await ensureUserProfile(authUser);
+      await ensureUserRole(authUser.id, 'user');
+      return;
+    }
+
+    // @gmail.com or other - check/create access request
+    const { data: existingRequest } = await supabase
+      .from('access_requests')
+      .select('status')
+      .eq('user_id', authUser.id)
+      .maybeSingle();
+
+    if (existingRequest?.status === 'approved') {
+      await ensureUserProfile(authUser);
+      await ensureUserRole(authUser.id, 'user');
+      return;
+    } else if (existingRequest?.status === 'pending') {
+      navigate('/access-pending');
+      return;
+    } else if (existingRequest?.status === 'rejected') {
+      navigate('/access-rejected');
+      return;
+    }
+
+    // No existing request - create one
+    await supabase.from('access_requests').insert({
+      user_id: authUser.id,
+      email: authUser.email,
+      full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || null,
+      avatar_url: authUser.user_metadata?.avatar_url || null,
+    });
+
+    navigate('/access-pending');
+  };
+
+  const ensureUserProfile = async (authUser: User) => {
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', authUser.id)
+      .maybeSingle();
+
+    if (!existing) {
+      await supabase.from('profiles').insert({
+        user_id: authUser.id,
+        full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || null,
+        avatar_url: authUser.user_metadata?.avatar_url || null,
+      });
+    }
+  };
+
+  const ensureUserRole = async (userId: string, role: string) => {
+    await supabase
+      .from('user_roles')
+      .upsert({ user_id: userId, role }, { onConflict: 'user_id,role' });
+  };
 
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (error) {
-        console.error('Erro ao buscar perfil do usuário:', error);
+        console.error('Error fetching user profile:', error);
         return;
       }
 
       setUserProfile(data);
     } catch (error) {
-      console.error('Erro ao buscar perfil do usuário:', error);
+      console.error('Error fetching user profile:', error);
     }
   };
 
@@ -91,13 +169,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Erro ao buscar funções do usuário:', error);
+        console.error('Error fetching user roles:', error);
         return;
       }
 
       setUserRoles(data.map(item => item.role));
     } catch (error) {
-      console.error('Erro ao buscar funções do usuário:', error);
+      console.error('Error fetching user roles:', error);
     }
   };
 

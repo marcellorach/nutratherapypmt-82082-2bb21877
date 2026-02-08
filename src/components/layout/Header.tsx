@@ -6,6 +6,7 @@ import { LogOut, LogIn, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import PendingAccessBadge from './PendingAccessBadge';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Header: React.FC = () => {
@@ -45,20 +46,23 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               {isAdmin && (
-                <Link to="/administrador">
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border-gray-300 hover:border-gray-400 transition-all"
-                  >
-                    <Settings size={16} />
-                    {t('header.administrator')}
-                  </Button>
-                </Link>
+                <>
+                  <PendingAccessBadge />
+                  <Link to="/administrador">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border-gray-300 hover:border-gray-400 transition-all"
+                    >
+                      <Settings size={16} />
+                      {t('header.administrator')}
+                    </Button>
+                  </Link>
+                </>
               )}
               <div className="flex flex-col items-end">
                 <span className="font-medium text-sm text-gray-800">
-                  {userProfile?.first_name} {userProfile?.last_name}
+                  {userProfile?.full_name || user?.user_metadata?.full_name || user?.email}
                 </span>
                 <span className="text-xs text-gray-500">
                   {userRoles.length > 0 && userRoles[0] === 'admin' 
@@ -69,9 +73,14 @@ const Header: React.FC = () => {
                 </span>
               </div>
               <Avatar className="h-10 w-10 border-2 border-gray-200">
-                <AvatarImage src={userProfile?.avatar_url || "/lovable-uploads/56284482-b2f9-4ef0-a5c8-6bd2afc82e04.png"} />
+                <AvatarImage src={userProfile?.avatar_url || user?.user_metadata?.avatar_url || "/lovable-uploads/56284482-b2f9-4ef0-a5c8-6bd2afc82e04.png"} />
                 <AvatarFallback className="bg-gray-100 text-gray-600">
-                  {userProfile?.first_name?.charAt(0)}{userProfile?.last_name?.charAt(0)}
+                  {(userProfile?.full_name || user?.user_metadata?.full_name || user?.email || '?')
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <Button 

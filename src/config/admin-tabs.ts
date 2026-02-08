@@ -54,6 +54,7 @@ const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migr
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
 const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
+const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
 
 // Knowledge Graph & Curation
 const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
@@ -316,6 +317,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: OntologyAuditTab,
     description: 'Auditoria e correção de classificações de entidades no Knowledge Graph'
+  },
+  {
+    id: 'access-requests',
+    label: 'Solicitações de Acesso',
+    group: 'configuration',
+    component: AccessRequestsPanel,
+    description: 'Gerenciamento de solicitações de acesso à plataforma'
   }
 ];
 
