@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import StanfordDemoForm from '@/components/auth/StanfordDemoForm';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 
 const AuthPage: React.FC = () => {
   const { user, loading } = useAuth();
@@ -22,15 +22,15 @@ const AuthPage: React.FC = () => {
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">
-              {t('auth.stanfordDemo.title')}
+              {t('auth.googleAuth.title')}
             </CardTitle>
             <CardDescription>
-              {t('auth.stanfordDemo.description')}
+              {t('auth.googleAuth.description')}
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-4 py-4">
-            <StanfordDemoForm />
+            <GoogleAuthButton />
           </CardContent>
         </Card>
       </div>

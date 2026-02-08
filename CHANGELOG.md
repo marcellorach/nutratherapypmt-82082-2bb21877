@@ -9,6 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-02-08 🔐 Sistema de Acesso com Google OAuth + Aprovação de Admin
+
+- ✅ **Google OAuth**: Login via Google configurado com Lovable Cloud
+- ✅ **Acesso automático @stanford.edu**: Emails Stanford recebem role 'user' instantaneamente
+- ✅ **Fila de aprovação @gmail.com**: Emails Gmail criam solicitação pendente para admin
+- ✅ **Tabela `access_requests`**: Controle de solicitações com status pending/approved/rejected, RLS segura
+- ✅ **Função `approve_access_request`**: Security Definer que cria role + perfil automaticamente
+- ✅ **Badge no Header**: Notificação em tempo real com contagem de solicitações pendentes para admins
+- ✅ **Painel de Aprovação**: Nova tab "Solicitações de Acesso" no admin com tabs Pendentes/Aprovadas/Rejeitadas
+- ✅ **Tela "Acesso Pendente"**: Página para usuários aguardando aprovação com verificação de status
+- ✅ **Tela "Acesso Rejeitado"**: Página para usuários rejeitados com motivo da rejeição
+- ✅ **Realtime**: Tabela `access_requests` com realtime habilitado para atualização automática
+- ✅ **i18n completo**: Todas as chaves de tradução em PT e EN
+- ✅ **Header atualizado**: Exibe `full_name` do perfil/metadata Google com avatar
+
 ### Added - 2025-12-27 📊 Reorganização das Estatísticas do Knowledge Graph
 
 - ✅ **Nova estrutura em 3 linhas temáticas**:

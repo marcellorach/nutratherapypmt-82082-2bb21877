@@ -1,8 +1,8 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.11.0  
-**Última Atualização:** 2025-12-24  
+**Versão:** 1.12.0  
+**Última Atualização:** 2026-02-08  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---

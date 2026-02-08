@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          avatar_url: string | null
+          email: string
+          full_name: string | null
+          id: string
+          rejection_reason: string | null
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_configurations: {
         Row: {
           config_key: string
@@ -2409,6 +2448,11 @@ export type Database = {
       }
     }
     Functions: {
+      approve_access_request: {
+        Args: { request_id: string }
+        Returns: undefined
+      }
+      count_pending_access_requests: { Args: never; Returns: number }
       get_conditions_with_treatability: {
         Args: never
         Returns: {
