@@ -1193,6 +1193,15 @@
     "createPlanPrompt": "Create a treatment plan for this pet."
   },
   "admin": {
+    "patients": {
+      "title": "Patient Management",
+      "description": "Register and manage canine patients for nutraceutical analysis",
+      "created": "Patient registered successfully!",
+      "tabs": {
+        "list": "Patients",
+        "register": "New Registration"
+      }
+    },
     "header": {
       "database": "Database",
       "scientificLibrary": "Scientific Library",
@@ -1269,6 +1278,7 @@
         "import": "Import Data",
         "multiAgentSimulation": "RAG Simulation",
         "visualization": "Visualization",
+        "petManagement": "Patient Management",
         "settings": "Settings"
       },
       "actions": {

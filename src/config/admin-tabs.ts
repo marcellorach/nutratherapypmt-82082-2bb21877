@@ -55,6 +55,7 @@ const TranslationAuditTab = lazy(() => import('@/components/administrador/audito
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
 const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
+const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
 
 // Knowledge Graph & Curation
 const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
@@ -185,6 +186,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'data-processing',
     component: ClinicalMonitoringTab,
     description: 'Monitoramento longitudinal de pets em nutraterapia'
+  },
+  {
+    id: 'pet-management',
+    label: 'Gestão de Pacientes',
+    group: 'data-processing',
+    component: AdminPetManagementTab,
+    description: 'Registro e gestão de pacientes caninos'
   },
   {
     id: 'data-processing-settings',

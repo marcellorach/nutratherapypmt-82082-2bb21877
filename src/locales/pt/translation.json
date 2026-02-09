@@ -1193,6 +1193,15 @@
     "createPlanPrompt": "Crie um plano de tratamento para este pet."
   },
   "admin": {
+    "patients": {
+      "title": "Gestão de Pacientes",
+      "description": "Registre e gerencie pacientes caninos para análise nutracêutica",
+      "created": "Paciente registrado com sucesso!",
+      "tabs": {
+        "list": "Pacientes",
+        "register": "Novo Registro"
+      }
+    },
     "header": {
       "database": "Base de Dados",
       "scientificLibrary": "Biblioteca Científica",
@@ -1269,6 +1278,7 @@
         "import": "Importar Dados",
         "multiAgentSimulation": "Simulação RAG",
         "visualization": "Visualização",
+        "petManagement": "Gestão de Pacientes",
         "settings": "Configurações"
       },
       "actions": {
