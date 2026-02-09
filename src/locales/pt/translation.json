@@ -1190,12 +1190,13 @@
     "noPetSelected": "Nenhum pet selecionado",
     "selectPetPrompt": "Selecione um pet na aba \"Pets\" para ver suas recomendações.",
     "noPlanExists": "não possui recomendações",
-    "createPlanPrompt": "Crie um plano de tratamento para este pet."
+    "createPlanPrompt": "Crie um plano de tratamento para este pet.",
+    "noPetsFound": "Nenhum pet encontrado com esse termo."
   },
   "admin": {
     "patients": {
-      "title": "Gestão de Pacientes",
-      "description": "Registre e gerencie pacientes caninos para análise nutracêutica",
+      "title": "Análise de Pacientes",
+      "description": "Registre e analise pacientes caninos para nutraterapia personalizada",
       "created": "Paciente registrado com sucesso!",
       "tabs": {
         "list": "Pacientes",
@@ -1278,7 +1279,7 @@
         "import": "Importar Dados",
         "multiAgentSimulation": "Simulação RAG",
         "visualization": "Visualização",
-        "petManagement": "Gestão de Pacientes",
+        "petManagement": "Análise de Pacientes",
         "settings": "Configurações"
       },
       "actions": {
@@ -2482,9 +2483,6 @@
       "placeholder": "Selecione uma família",
       "noFamily": "Sem família"
     }
-  },
-  "veterinarian": {
-    "noPetsFound": "Nenhum pet encontrado com esse termo."
   },
   "nutraceuticalDatabase": {
     "title": "Banco de Nutracêuticos",
