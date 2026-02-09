@@ -189,7 +189,7 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'pet-management',
-    label: 'Gestão de Pacientes',
+    label: 'Análise de Pacientes',
     group: 'data-processing',
     component: AdminPetManagementTab,
     description: 'Registro e gestão de pacientes caninos'
