@@ -1587,6 +1587,252 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_clinical_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          extracted_entities: Json | null
+          id: string
+          note_type: string
+          pet_id: string
+          source_message: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          extracted_entities?: Json | null
+          id?: string
+          note_type?: string
+          pet_id: string
+          source_message?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          extracted_entities?: Json | null
+          id?: string
+          note_type?: string
+          pet_id?: string
+          source_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_clinical_notes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_conditions: {
+        Row: {
+          condition_id: string | null
+          condition_name: string
+          created_at: string
+          diagnosis_date: string | null
+          id: string
+          notes: string | null
+          pet_id: string
+          severity: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          condition_id?: string | null
+          condition_name: string
+          created_at?: string
+          diagnosis_date?: string | null
+          id?: string
+          notes?: string | null
+          pet_id: string
+          severity?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          condition_id?: string | null
+          condition_name?: string
+          created_at?: string
+          diagnosis_date?: string | null
+          id?: string
+          notes?: string | null
+          pet_id?: string
+          severity?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_conditions_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "health_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_conditions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_exams: {
+        Row: {
+          created_at: string
+          exam_date: string | null
+          exam_type: string
+          file_url: string | null
+          id: string
+          notes: string | null
+          pet_id: string
+          results: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_date?: string | null
+          exam_type: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          pet_id: string
+          results?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_date?: string | null
+          exam_type?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          pet_id?: string
+          results?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_exams_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_medications: {
+        Row: {
+          created_at: string
+          dosage: string | null
+          end_date: string | null
+          frequency: string | null
+          id: string
+          medication_name: string
+          pet_id: string
+          prescribing_vet: string | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          medication_name: string
+          pet_id: string
+          prescribing_vet?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          medication_name?: string
+          pet_id?: string
+          prescribing_vet?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_medications_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_profiles: {
+        Row: {
+          age_years: number
+          breed: string
+          chip_number: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          neutered: boolean
+          notes: string | null
+          owner_email: string | null
+          owner_name: string | null
+          photo_url: string | null
+          sex: string
+          species: string
+          updated_at: string
+          veterinarian_id: string | null
+          weight_kg: number
+        }
+        Insert: {
+          age_years: number
+          breed: string
+          chip_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          neutered?: boolean
+          notes?: string | null
+          owner_email?: string | null
+          owner_name?: string | null
+          photo_url?: string | null
+          sex: string
+          species?: string
+          updated_at?: string
+          veterinarian_id?: string | null
+          weight_kg: number
+        }
+        Update: {
+          age_years?: number
+          breed?: string
+          chip_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          neutered?: boolean
+          notes?: string | null
+          owner_email?: string | null
+          owner_name?: string | null
+          photo_url?: string | null
+          sex?: string
+          species?: string
+          updated_at?: string
+          veterinarian_id?: string | null
+          weight_kg?: number
+        }
+        Relationships: []
+      }
       processed_studies: {
         Row: {
           analysis_data: Json | null

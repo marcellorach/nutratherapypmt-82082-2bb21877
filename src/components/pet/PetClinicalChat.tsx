@@ -1,0 +1,327 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MessageSquare, Send, Loader2, Check, X, Stethoscope, Pill, TestTube, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAddPetCondition, useAddPetMedication, useAddPetExam, useAddClinicalNote } from '@/hooks/usePetProfile';
+import { useToast } from '@/hooks/use-toast';
+
+interface ExtractedEntity {
+  type: 'condition' | 'medication' | 'symptom' | 'exam' | 'biomarker';
+  name: string;
+  details?: Record<string, any>;
+}
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  entities?: ExtractedEntity[];
+  confirmed?: boolean;
+}
+
+interface PetClinicalChatProps {
+  petId: string;
+  petBreed?: string;
+  petAge?: number;
+}
+
+const entityIcons: Record<string, React.ReactNode> = {
+  condition: <Stethoscope className="h-3 w-3" />,
+  medication: <Pill className="h-3 w-3" />,
+  symptom: <AlertCircle className="h-3 w-3" />,
+  exam: <TestTube className="h-3 w-3" />,
+  biomarker: <TestTube className="h-3 w-3" />,
+};
+
+const entityColors: Record<string, string> = {
+  condition: 'bg-red-100 text-red-800 border-red-200',
+  medication: 'bg-blue-100 text-blue-800 border-blue-200',
+  symptom: 'bg-amber-100 text-amber-800 border-amber-200',
+  exam: 'bg-green-100 text-green-800 border-green-200',
+  biomarker: 'bg-purple-100 text-purple-800 border-purple-200',
+};
+
+const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petAge }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const addCondition = useAddPetCondition();
+  const addMedication = useAddPetMedication();
+  const addExam = useAddPetExam();
+  const addNote = useAddClinicalNote();
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isExtracting) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: input.trim() };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsExtracting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-pet-clinical-data', {
+        body: {
+          petId,
+          clinicalText: userMessage.content,
+          existingProfile: { breed: petBreed, age: petAge },
+        },
+      });
+
+      if (error) throw error;
+
+      const entities: ExtractedEntity[] = [];
+
+      if (data.conditions) {
+        data.conditions.forEach((c: any) => entities.push({ type: 'condition', name: c.name, details: c }));
+      }
+      if (data.medications) {
+        data.medications.forEach((m: any) => entities.push({ type: 'medication', name: m.name, details: m }));
+      }
+      if (data.symptoms) {
+        data.symptoms.forEach((s: any) => entities.push({ type: 'symptom', name: s.name, details: s }));
+      }
+      if (data.examResults) {
+        data.examResults.forEach((e: any) => entities.push({ type: 'exam', name: e.type || e.name, details: e }));
+      }
+      if (data.biomarkers) {
+        data.biomarkers.forEach((b: any) => entities.push({ type: 'biomarker', name: b.name, details: b }));
+      }
+
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: entities.length > 0
+          ? t('petRegistration.chat.entitiesFound', { count: entities.length })
+          : t('petRegistration.chat.noEntitiesFound'),
+        entities,
+        confirmed: false,
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error: any) {
+      console.error('Error extracting clinical data:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: t('petRegistration.chat.extractionError'),
+      }]);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleConfirmEntities = async (messageIndex: number) => {
+    const message = messages[messageIndex];
+    if (!message.entities || message.confirmed) return;
+
+    try {
+      for (const entity of message.entities) {
+        switch (entity.type) {
+          case 'condition':
+            await addCondition.mutateAsync({
+              pet_id: petId,
+              condition_name: entity.name,
+              severity: entity.details?.severity || undefined,
+              status: 'active',
+            });
+            break;
+          case 'medication':
+            await addMedication.mutateAsync({
+              pet_id: petId,
+              medication_name: entity.name,
+              dosage: entity.details?.dosage || undefined,
+            });
+            break;
+          case 'exam':
+            await addExam.mutateAsync({
+              pet_id: petId,
+              exam_type: entity.name,
+              results: entity.details || {},
+            });
+            break;
+          case 'symptom':
+          case 'biomarker':
+            await addNote.mutateAsync({
+              pet_id: petId,
+              content: `${entity.name}: ${JSON.stringify(entity.details || {})}`,
+              note_type: entity.type === 'symptom' ? 'symptom' : 'observation',
+              extracted_entities: entity.details,
+              source_message: messages[messageIndex - 1]?.content,
+            });
+            break;
+        }
+      }
+
+      // Also save the original text as a clinical note
+      await addNote.mutateAsync({
+        pet_id: petId,
+        content: messages[messageIndex - 1]?.content || '',
+        note_type: 'chat_extracted',
+        extracted_entities: message.entities,
+        source_message: messages[messageIndex - 1]?.content,
+      });
+
+      setMessages(prev => prev.map((m, i) =>
+        i === messageIndex ? { ...m, confirmed: true } : m
+      ));
+
+      toast({
+        title: t('petRegistration.chat.entitiesSaved'),
+        description: t('petRegistration.chat.entitiesSavedDesc', { count: message.entities.length }),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <Card className="flex flex-col h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <MessageSquare className="h-5 w-5" />
+          {t('petRegistration.chat.title')}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {t('petRegistration.chat.description')}
+        </p>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col min-h-0">
+        <ScrollArea className="flex-1 pr-4 mb-4" ref={scrollRef}>
+          <div className="space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">{t('petRegistration.chat.placeholder')}</p>
+                <p className="text-xs mt-2 italic">{t('petRegistration.chat.example')}</p>
+              </div>
+            )}
+
+            {messages.map((message, idx) => (
+              <div
+                key={idx}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+
+                  {message.entities && message.entities.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {message.entities.map((entity, eIdx) => (
+                          <Badge
+                            key={eIdx}
+                            variant="outline"
+                            className={`text-xs ${entityColors[entity.type]}`}
+                          >
+                            {entityIcons[entity.type]}
+                            <span className="ml-1">{entity.name}</span>
+                            {entity.details?.severity && (
+                              <span className="ml-1 opacity-70">({entity.details.severity})</span>
+                            )}
+                            {entity.details?.dosage && (
+                              <span className="ml-1 opacity-70">({entity.details.dosage})</span>
+                            )}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      {!message.confirmed && (
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                            onClick={() => handleConfirmEntities(idx)}
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            {t('petRegistration.chat.confirm')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            onClick={() => setMessages(prev => prev.map((m, i) =>
+                              i === idx ? { ...m, confirmed: true, entities: [] } : m
+                            ))}
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            {t('petRegistration.chat.discard')}
+                          </Button>
+                        </div>
+                      )}
+
+                      {message.confirmed && message.entities.length > 0 && (
+                        <p className="text-xs text-green-600 mt-1">
+                          ✓ {t('petRegistration.chat.entitiesConfirmed')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {isExtracting && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-lg px-4 py-3 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">{t('petRegistration.chat.extracting')}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="flex gap-2">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={t('petRegistration.chat.inputPlaceholder')}
+            rows={2}
+            className="resize-none"
+            disabled={isExtracting}
+          />
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || isExtracting}
+            size="icon"
+            className="shrink-0 h-auto"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default PetClinicalChat;

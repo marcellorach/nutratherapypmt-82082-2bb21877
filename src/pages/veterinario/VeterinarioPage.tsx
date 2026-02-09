@@ -1,46 +1,26 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter } from "lucide-react";
-import PetCard from '@/components/pet/PetCard';
-import { pets, generateRandomData } from '@/data';
-import { Pet } from '@/types';
-import RecommendationsList from './RecommendationsList';
+import { Search, Plus, Filter, Loader2 } from "lucide-react";
+import PetProfileCard from '@/components/pet/PetProfileCard';
+import GenerateSamplePetsButton from '@/components/pet/GenerateSamplePetsButton';
+import { usePetProfiles } from '@/hooks/usePetProfile';
 import { useTranslation } from 'react-i18next';
 
 const VeterinarioPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
-  const [showRecommendations, setShowRecommendations] = useState(false);
-  
-  // Filtrar apenas cães
-  const allDogs = pets.filter(pet => pet.species === 'Cachorro');
-  
-  // Função para filtrar pets com base na pesquisa
-  const filteredPets = allDogs.filter(pet => 
-    pet.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const { data: petProfiles, isLoading } = usePetProfiles();
+
+  // Filter pets based on search
+  const filteredPets = (petProfiles || []).filter(pet =>
+    pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pet.breed.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
-  const handleSelectPet = (pet: Pet) => {
-    setSelectedPet(pet);
-    setShowRecommendations(true);
-  };
-  
-  const handleBackToPets = () => {
-    setShowRecommendations(false);
-  };
-  
-  // Ordenar os pets por dias pendentes de revisão (prioridade mais alta primeiro)
-  const sortedPets = [...filteredPets].sort((a, b) => {
-    // Primeiro ordenar por dias de revisão
-    const daysA = a.reviewDays !== undefined ? a.reviewDays : 999;
-    const daysB = b.reviewDays !== undefined ? b.reviewDays : 999;
-    return daysA - daysB;
-  });
 
   return (
     <Layout>
@@ -51,77 +31,59 @@ const VeterinarioPage: React.FC = () => {
             <p className="text-gray-600">{t('veterinarian.portalDesc')}</p>
           </div>
           
-          {!showRecommendations && (
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder={t('veterinarian.searchPet')}
-                  className="w-64 pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                {t('veterinarian.newPet')}
-              </Button>
+          <div className="flex gap-4 mt-4 md:mt-0">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder={t('veterinarian.searchPet')}
+                className="w-64 pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-          )}
+            <Button onClick={() => navigate('/veterinario/pet/new')}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('veterinarian.newPet')}
+            </Button>
+          </div>
         </div>
         
-        {showRecommendations ? (
-          <>
-            <Button 
-              variant="ghost" 
-              onClick={handleBackToPets}
-              className="mb-6"
-            >
-              ← {t('common.backToPatients')}
+        <div className="space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-muted-foreground">
+              {isLoading
+                ? t('common.loading')
+                : t('veterinarian.patient', { count: filteredPets.length })}
+            </p>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter size={16} />
+              {t('veterinarian.filter')}
             </Button>
-            <RecommendationsList selectedPet={selectedPet} />
-          </>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-gray-700">
-                {t('veterinarian.patient', { count: filteredPets.length })}
-              </p>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter size={16} />
-                {t('veterinarian.filter')}
-              </Button>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-            
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {sortedPets.map((pet) => (
-                <PetCard 
-                  key={pet.id}
-                  pet={pet}
-                  onSelect={handleSelectPet}
-                  onViewDetails={handleSelectPet}
-                />
+              {filteredPets.map((pet) => (
+                <PetProfileCard key={pet.id} pet={pet} />
               ))}
-              
+
               {filteredPets.length === 0 && (
                 <div className="col-span-full text-center py-10">
-                  <p className="text-gray-500">{t('veterinarian.noPetsFound')}</p>
+                  <p className="text-muted-foreground">{t('veterinarian.noPetsFound')}</p>
                 </div>
               )}
             </div>
-            
-            <div className="flex justify-center mt-6">
-              <Button 
-                variant="outline" 
-                onClick={() => generateRandomData()}
-                className="text-gray-700"
-              >
-                {t('common.generateRandomData')}
-              </Button>
-            </div>
+          )}
+
+          <div className="flex justify-center mt-6">
+            <GenerateSamplePetsButton />
           </div>
-        )}
+        </div>
       </div>
     </Layout>
   );

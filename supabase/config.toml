@@ -83,3 +83,6 @@ verify_jwt = true
 
 [functions.fetch-external-ontologies]
 verify_jwt = false
+
+[functions.extract-pet-clinical-data]
+verify_jwt = false

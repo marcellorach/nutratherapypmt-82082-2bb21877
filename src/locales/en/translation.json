@@ -4991,7 +4991,85 @@
       "condition": "Condition",
       "compound": "Compound",
       "pathway": "Pathway",
-      "mechanism": "Mechanism"
+    "mechanism": "Mechanism"
+    }
+  },
+  "petRegistration": {
+    "title": "Register New Patient",
+    "description": "Register a new canine patient with structured and clinical data",
+    "goToProfile": "View Patient Profile",
+    "form": {
+      "title": "Patient Data",
+      "name": "Name",
+      "namePlaceholder": "e.g.: Rex, Luna, Thor...",
+      "breed": "Breed",
+      "breedPlaceholder": "Select breed",
+      "age": "Age (years)",
+      "weight": "Weight (kg)",
+      "sex": "Sex",
+      "male": "Male",
+      "female": "Female",
+      "neutered": "Neutered",
+      "chipNumber": "Chip Number",
+      "chipPlaceholder": "Optional",
+      "ownerInfo": "Owner Information",
+      "ownerName": "Owner Name",
+      "ownerNamePlaceholder": "Full name",
+      "ownerEmail": "Owner Email",
+      "ownerEmailPlaceholder": "email@example.com",
+      "notes": "Notes",
+      "notesPlaceholder": "General observations about the patient...",
+      "register": "Register Patient",
+      "successTitle": "Patient registered",
+      "successDesc": "{{name}} was registered successfully"
+    },
+    "chat": {
+      "title": "Intelligent Clinical Chat",
+      "description": "Describe the clinical picture in natural language. AI will extract entities automatically.",
+      "placeholder": "Describe the patient's clinical picture here...",
+      "example": "e.g.: \"Rex has bilateral hip dysplasia, limping for 3 months. Taking meloxicam 0.1mg/kg.\"",
+      "inputPlaceholder": "Describe conditions, medications, symptoms...",
+      "registerFirst": "Register the patient first to enable clinical chat",
+      "extracting": "Analyzing clinical text...",
+      "entitiesFound": "{{count}} clinical entit(ies) identified:",
+      "noEntitiesFound": "No clinical entities identified in the text. Try being more specific.",
+      "extractionError": "Error analyzing clinical text. Please try again.",
+      "confirm": "Confirm",
+      "discard": "Discard",
+      "entitiesConfirmed": "Entities saved to profile",
+      "entitiesSaved": "Clinical data saved",
+      "entitiesSavedDesc": "{{count}} entit(ies) added to patient profile"
+    },
+    "conditions": {
+      "title": "Conditions",
+      "active": "Active Conditions",
+      "none": "No conditions registered"
+    },
+    "medications": {
+      "title": "Medications",
+      "current": "Current Medications",
+      "none": "No medications registered",
+      "active": "Active"
+    },
+    "exams": {
+      "title": "Exams",
+      "results": "Exam Results",
+      "none": "No exams registered"
+    },
+    "profile": {
+      "viewProfile": "View Profile",
+      "years": "years",
+      "analyzeWithKG": "Analyze with VetGraphRAG",
+      "clinicalNotes": "Clinical Notes",
+      "clinicalHistory": "Clinical History",
+      "noNotes": "No clinical notes registered",
+      "notFound": "Patient not found"
+    },
+    "generator": {
+      "button": "Generate Sample Patients",
+      "generating": "Generating...",
+      "success": "Patients generated",
+      "successDesc": "{{count}} sample patients were created successfully"
     }
   }
 }
