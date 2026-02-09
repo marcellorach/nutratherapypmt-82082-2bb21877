@@ -1,327 +1,312 @@
 
-
-# Plano: Sistema de Acesso com Stanford.edu Auto-Aprovado e Solicitações Google
+# Plano: Sistema de Registro de Pacientes Caninos (Fase 2 do VetGraphRAG)
 
 ## Resumo
 
-Implementar um novo sistema de autenticação com duas formas de acesso:
-1. **Acesso automático** para emails `@stanford.edu` - aprovação imediata
-2. **Solicitação de acesso** para emails `@gmail.com` via Google OAuth - requer aprovação de admin
+Criar o sistema de registro de pacientes caninos com uma abordagem híbrida: formulário estruturado para dados essenciais + chat inteligente para dados clínicos desestruturados + gerador de dados de exemplo para testes. Isso conecta o Knowledge Graph curado (Fase 1) aos dados individuais dos pacientes, habilitando recomendações personalizadas.
 
-Os administradores receberão alertas visuais no header quando houver solicitações pendentes.
-
-## Fluxo de Acesso
+## Arquitetura da Solução
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                        PÁGINA DE LOGIN                               │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   ┌─────────────────────────────────────────────────────────────┐   │
-│   │              "Continue with Google"                          │   │
-│   │                 [Botão OAuth Google]                         │   │
-│   └─────────────────────────────────────────────────────────────┘   │
-│                                                                      │
-│   ┌──────────────────────┐    ┌──────────────────────┐             │
-│   │   @stanford.edu      │    │   @gmail.com         │             │
-│   │   ────────────────   │    │   ────────────────   │             │
-│   │   Acesso IMEDIATO    │    │   Aguarda APROVAÇÃO  │             │
-│   │   role = 'user'      │    │   status = pending   │             │
-│   │   ✅ Pode usar app   │    │   ⏳ Espera admin    │             │
-│   └──────────────────────┘    └──────────────────────┘             │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     REGISTRO DE PACIENTE CANINO                        │
+├───────────────────────┬─────────────────────────────────────────────────┤
+│                       │                                                 │
+│  FORMULÁRIO MÍNIMO    │          CHAT CLÍNICO INTELIGENTE              │
+│  (Dados Obrigatórios) │          (Dados Complementares)                │
+│                       │                                                 │
+│  ┌─────────────────┐  │  ┌──────────────────────────────────────────┐  │
+│  │ Nome: Rex       │  │  │ Vet: "Rex é um Labrador de 8 anos,      │  │
+│  │ Raça: Labrador  │  │  │ castrado, com displasia coxofemoral     │  │
+│  │ Idade: 8 anos   │  │  │ bilateral. Claudicando há 3 meses.      │  │
+│  │ Peso: 30kg      │  │  │ Radiografia grau 3. Tomando meloxicam." │  │
+│  │ Sexo: Macho     │  │  │                                          │  │
+│  │ Castrado: Sim   │  │  │         IA EXTRAI AUTOMATICAMENTE:       │  │
+│  └─────────────────┘  │  │  ┌──────────────────────────────────┐    │  │
+│                       │  │  │ Condições: Displasia coxofemoral │    │  │
+│  ┌─────────────────┐  │  │  │ Medicações: Meloxicam 0.1mg/kg   │    │  │
+│  │ Condições       │  │  │  │ Exames: Radiografia grau 3       │    │  │
+│  │ [x] Displasia   │  │  │  │ Sintomas: Claudicação 3 meses    │    │  │
+│  │ [ ] Artrite     │  │  │  │ Biomarcadores: (extraídos)       │    │  │
+│  │ [ ] Cardíaco    │  │  │  └──────────────────────────────────┘    │  │
+│  └─────────────────┘  │  └──────────────────────────────────────────┘  │
+│                       │                                                 │
+├───────────────────────┴─────────────────────────────────────────────────┤
+│                                                                         │
+│            PERFIL DO PACIENTE CONSOLIDADO                               │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │ Rex | Labrador | 8a | 30kg | Macho | Castrado                    │  │
+│  │ Condições: Displasia coxofemoral bilateral (grau 3)              │  │
+│  │ Medicações: Meloxicam 0.1mg/kg                                    │  │
+│  │ Sintomas: Claudicação (3 meses)                                   │  │
+│  │ Exames: Radiografia articular, Hemograma (leucócitos 12.500)      │  │
+│  │                                                                    │  │
+│  │  [Buscar Recomendações no Knowledge Graph]                        │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Componentes do Sistema
+## Modelo de Dados (Tabelas no Banco)
 
-### 1. Nova Tabela: `access_requests`
-
-Armazena solicitações de acesso pendentes de aprovação.
+### Tabela: `pet_profiles`
+Dados estruturados do paciente canino.
 
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| id | uuid | Chave primária |
-| user_id | uuid | Referência ao auth.users |
-| email | text | Email do solicitante |
-| full_name | text | Nome completo (do Google) |
-| avatar_url | text | Foto do perfil (do Google) |
-| status | text | 'pending', 'approved', 'rejected' |
-| requested_at | timestamptz | Data/hora da solicitação |
-| reviewed_by | uuid | Admin que revisou |
-| reviewed_at | timestamptz | Data/hora da revisão |
-| rejection_reason | text | Motivo da rejeição (opcional) |
+| id | uuid | PK |
+| name | text | Nome do pet |
+| species | text | Especie (default: 'canine') |
+| breed | text | Raca |
+| age_years | numeric | Idade em anos |
+| weight_kg | numeric | Peso em kg |
+| sex | text | 'male' / 'female' |
+| neutered | boolean | Castrado |
+| chip_number | text | Numero do chip (opcional) |
+| photo_url | text | URL da foto (opcional) |
+| owner_name | text | Nome do tutor |
+| owner_email | text | Email do tutor |
+| veterinarian_id | uuid | Referencia ao veterinario responsavel |
+| created_by | uuid | Quem cadastrou |
+| notes | text | Observacoes gerais |
+| created_at | timestamptz | Data de criacao |
+| updated_at | timestamptz | Ultima atualizacao |
 
-### 2. Autenticação Google OAuth
+### Tabela: `pet_conditions`
+Condicoes diagnosticadas do paciente.
 
-- Configurar Google OAuth via Lovable Cloud
-- Após login, verificar domínio do email:
-  - `@stanford.edu` → criar perfil + role 'user' automaticamente
-  - `@gmail.com` → criar entrada em `access_requests` com status 'pending'
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | uuid | PK |
+| pet_id | uuid | FK para pet_profiles |
+| condition_name | text | Nome da condicao |
+| condition_id | uuid | FK para health_conditions (se existir no KG) |
+| diagnosis_date | date | Data do diagnostico |
+| severity | text | 'mild', 'moderate', 'severe' |
+| status | text | 'active', 'resolved', 'monitoring' |
+| notes | text | Observacoes |
 
-### 3. Lógica de Acesso Pós-Login
+### Tabela: `pet_medications`
+Medicamentos em uso pelo paciente.
 
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                    APÓS AUTENTICAÇÃO GOOGLE                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   IF email.endsWith('@stanford.edu')                                │
-│   ├── Criar profile (se não existir)                                │
-│   ├── Adicionar role 'user' em user_roles                           │
-│   └── Redirecionar para HOME ✅                                     │
-│                                                                      │
-│   ELSE IF email.endsWith('@gmail.com')                              │
-│   ├── Verificar se já existe access_request                         │
-│   │   ├── status = 'approved' → Criar profile + role 'user' ✅      │
-│   │   ├── status = 'pending' → Mostrar tela "Aguardando" ⏳         │
-│   │   └── status = 'rejected' → Mostrar tela "Rejeitado" ❌         │
-│   └── Se não existe → Criar access_request com status 'pending'     │
-│                                                                      │
-│   ELSE (outros domínios)                                            │
-│   └── Mostrar erro: "Domínio não permitido"                         │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | uuid | PK |
+| pet_id | uuid | FK para pet_profiles |
+| medication_name | text | Nome do medicamento |
+| dosage | text | Dosagem |
+| frequency | text | Frequencia |
+| start_date | date | Inicio |
+| end_date | date | Termino (nulo se em uso) |
+| prescribing_vet | text | Veterinario que prescreveu |
 
-### 4. Alerta no Header para Admins
+### Tabela: `pet_exams`
+Resultados de exames clinicos.
 
-Badge com contador de solicitações pendentes:
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | uuid | PK |
+| pet_id | uuid | FK para pet_profiles |
+| exam_type | text | Tipo do exame |
+| exam_date | date | Data do exame |
+| results | jsonb | Resultados em JSON |
+| notes | text | Observacoes |
+| file_url | text | URL do arquivo do exame (se upload) |
 
-```text
-┌────────────────────────────────────────────────────────────────────┐
-│ [Logo]  NutraTherapy          [🔔 3] [⚙️ Admin] [Avatar] [Logout] │
-└────────────────────────────────────────────────────────────────────┘
-                                  ↑
-                           Ícone de sino com badge
-                           mostrando quantidade de
-                           solicitações pendentes
-```
+### Tabela: `pet_clinical_notes`
+Anotacoes clinicas extraidas via chat ou inseridas manualmente.
 
-### 5. Painel de Aprovação de Solicitações
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | uuid | PK |
+| pet_id | uuid | FK para pet_profiles |
+| note_type | text | 'chat_extracted', 'manual', 'symptom', 'observation' |
+| content | text | Conteudo da nota |
+| extracted_entities | jsonb | Entidades extraidas pela IA |
+| source_message | text | Mensagem original do chat (se via chat) |
+| created_by | uuid | Quem inseriu |
+| created_at | timestamptz | Data |
 
-Nova seção no admin para gerenciar solicitações:
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  📋 Solicitações de Acesso                              [Pendentes: 3]│
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │ [👤 Avatar]  john.doe@gmail.com                              │    │
-│  │              John Doe                                         │    │
-│  │              Solicitado há 2 horas                           │    │
-│  │                                                               │    │
-│  │              [✅ Aprovar]  [❌ Rejeitar]                      │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │ [👤 Avatar]  jane.smith@gmail.com                            │    │
-│  │              Jane Smith                                       │    │
-│  │              Solicitado há 1 dia                             │    │
-│  │                                                               │    │
-│  │              [✅ Aprovar]  [❌ Rejeitar]                      │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### 6. Tela de Status para Usuários Pendentes
-
-Quando um usuário @gmail faz login e está pendente:
+## Fluxo de Dados: Do Chat ao Knowledge Graph
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                                                                      │
-│                         ⏳                                           │
-│                                                                      │
-│              Solicitação de Acesso Enviada                          │
-│                                                                      │
-│   Sua solicitação de acesso à plataforma NutraTherapy foi           │
-│   enviada com sucesso. Um administrador irá analisar seu            │
-│   pedido em breve.                                                   │
-│                                                                      │
-│   Email: john.doe@gmail.com                                         │
-│   Enviado em: 04/02/2026 às 10:30                                   │
-│                                                                      │
-│                    [Sair da Conta]                                  │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌──────────────┐     ┌──────────────────┐     ┌─────────────────────┐
+│ Veterinario  │     │  Edge Function   │     │    Banco de Dados   │
+│ digita no    │────▶│  extract-pet-    │────▶│                     │
+│ chat clinico │     │  clinical-data   │     │  pet_conditions     │
+│              │     │                  │     │  pet_medications    │
+│ "Rex tem     │     │  Usa Gemini para │     │  pet_exams          │
+│  displasia   │     │  extrair:        │     │  pet_clinical_notes │
+│  bilateral,  │     │  - Condicoes     │     │                     │
+│  tomando     │     │  - Medicacoes    │     └────────┬────────────┘
+│  meloxicam"  │     │  - Exames        │              │
+│              │     │  - Sintomas      │              ▼
+└──────────────┘     │  - Biomarcadores │     ┌─────────────────────┐
+                     └──────────────────┘     │ Recommendation      │
+                                              │ Engine consulta o   │
+                                              │ Knowledge Graph     │
+                                              │ com o perfil        │
+                                              │ consolidado do pet  │
+                                              │                     │
+                                              │ petProfile:         │
+                                              │  species: canine    │
+                                              │  breed: Labrador    │
+                                              │  age: 8             │
+                                              │  conditions: [...]  │
+                                              │  medications: [...] │
+                                              └─────────────────────┘
 ```
 
-## Arquivos a Criar/Modificar
+## Componentes da Interface
 
-### Novos Arquivos
+### 1. Pagina de Registro de Paciente (`/veterinario/pet/new`)
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `src/components/auth/GoogleAuthButton.tsx` | Botão de login com Google |
-| `src/components/auth/AccessPendingScreen.tsx` | Tela para usuários aguardando aprovação |
-| `src/components/auth/AccessRejectedScreen.tsx` | Tela para usuários rejeitados |
-| `src/components/layout/PendingAccessBadge.tsx` | Badge de notificação no header |
-| `src/components/administrador/access/AccessRequestsPanel.tsx` | Painel de gerenciamento de solicitações |
-| `src/hooks/useAccessRequests.ts` | Hook para buscar/gerenciar solicitações |
+Layout em duas colunas:
+- **Esquerda**: Formulario estruturado com campos obrigatorios (nome, raca, idade, peso, sexo, castrado) + secao de condicoes com autocomplete do Knowledge Graph
+- **Direita**: Chat clinico inteligente onde o vet pode descrever o paciente em texto livre
 
-### Arquivos a Modificar
+### 2. Pagina de Perfil do Paciente (`/veterinario/pet/:id`)
 
-| Arquivo | Modificação |
-|---------|-------------|
-| `src/pages/auth/AuthPage.tsx` | Adicionar botão Google OAuth |
-| `src/components/auth/StanfordDemoForm.tsx` | Manter como fallback opcional |
-| `src/components/layout/Header.tsx` | Adicionar badge de notificação |
-| `src/contexts/AuthContext.tsx` | Adicionar lógica de verificação de domínio |
+Dashboard do paciente com:
+- Dados basicos em card superior
+- Tabs: Condicoes | Exames | Medicacoes | Historico Clinico | Recomendacoes
+- Botao "Analisar com VetGraphRAG" que envia o perfil consolidado ao recommendation engine
 
-## Seção Técnica
+### 3. Chat Clinico Inteligente (`PetClinicalChat`)
 
-### Migração SQL
+Interface de chat contextualizada ao paciente:
+- O vet digita informacoes clinicas em linguagem natural
+- A IA extrai entidades e mostra preview do que foi extraido
+- O vet confirma ou corrige as extracoes
+- Dados confirmados sao salvos nas tabelas correspondentes
 
-```sql
--- Criar enum para status de solicitação
-CREATE TYPE access_request_status AS ENUM ('pending', 'approved', 'rejected');
+### 4. Gerador de Pacientes de Exemplo
 
--- Criar tabela de solicitações de acesso
-CREATE TABLE public.access_requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  email TEXT NOT NULL,
-  full_name TEXT,
-  avatar_url TEXT,
-  status access_request_status DEFAULT 'pending' NOT NULL,
-  requested_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-  reviewed_by UUID REFERENCES auth.users(id),
-  reviewed_at TIMESTAMPTZ,
-  rejection_reason TEXT,
-  UNIQUE(user_id)
-);
+Botao que cria 5-10 pacientes realistas com:
+- Racas comuns com predisposicoes conhecidas (Golden: displasia, Cavalier: cardiaco, Beagle: epilepsia)
+- Exames com series temporais
+- Condicoes que mapeiam para entidades do Knowledge Graph
+- Variacoes de idade (filhotes, adultos, geriatricos)
 
--- Habilitar RLS
-ALTER TABLE public.access_requests ENABLE ROW LEVEL SECURITY;
+## Edge Function: `extract-pet-clinical-data`
 
--- Políticas RLS
--- Admins podem ver todas as solicitações
-CREATE POLICY "Admins can view all access requests"
-ON public.access_requests FOR SELECT
-TO authenticated
-USING (public.is_admin());
+Nova edge function que recebe texto clinico em linguagem natural e retorna entidades estruturadas usando Lovable AI (Gemini 3 Flash Preview).
 
--- Admins podem atualizar solicitações (aprovar/rejeitar)
-CREATE POLICY "Admins can update access requests"
-ON public.access_requests FOR UPDATE
-TO authenticated
-USING (public.is_admin());
-
--- Usuários podem ver apenas sua própria solicitação
-CREATE POLICY "Users can view own access request"
-ON public.access_requests FOR SELECT
-TO authenticated
-USING (user_id = auth.uid());
-
--- Qualquer autenticado pode inserir (criar solicitação)
-CREATE POLICY "Authenticated users can insert access request"
-ON public.access_requests FOR INSERT
-TO authenticated
-WITH CHECK (user_id = auth.uid());
-
--- Função para contar solicitações pendentes
-CREATE OR REPLACE FUNCTION public.count_pending_access_requests()
-RETURNS INTEGER
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT COUNT(*)::INTEGER
-  FROM public.access_requests
-  WHERE status = 'pending';
-$$;
-
--- Índice para performance
-CREATE INDEX idx_access_requests_status ON public.access_requests(status);
-CREATE INDEX idx_access_requests_user_id ON public.access_requests(user_id);
+Entrada:
+```json
+{
+  "petId": "uuid",
+  "clinicalText": "Rex tem displasia coxofemoral bilateral...",
+  "existingProfile": { "breed": "Labrador", "age": 8 }
+}
 ```
 
-### Lógica de Verificação de Domínio (AuthContext)
+Saida:
+```json
+{
+  "conditions": [
+    { "name": "Displasia coxofemoral", "severity": "moderate", "side": "bilateral" }
+  ],
+  "medications": [
+    { "name": "Meloxicam", "dosage": "0.1mg/kg", "type": "NSAID" }
+  ],
+  "symptoms": [
+    { "name": "Claudicacao", "duration": "3 meses" }
+  ],
+  "examResults": [
+    { "type": "Radiografia", "finding": "Desgaste articular grau 3" }
+  ],
+  "biomarkers": [
+    { "name": "Leucocitos", "value": 12500, "unit": "/uL" }
+  ]
+}
+```
+
+## Seguranca (RLS)
+
+- Veterinarios so veem pacientes atribuidos a eles (`veterinarian_id = auth.uid()`)
+- Admins veem todos os pacientes
+- Dados clinicos protegidos por RLS em todas as tabelas
+- Chat clinico logado para auditoria
+
+## Traducoes (PT/EN)
+
+Chaves a adicionar em ambos os idiomas:
+- `petRegistration.form.*` - campos do formulario
+- `petRegistration.chat.*` - interface do chat clinico
+- `petRegistration.profile.*` - pagina de perfil
+- `petRegistration.generator.*` - gerador de dados de exemplo
+- `petRegistration.conditions.*` - condicoes
+- `petRegistration.exams.*` - exames
+- `petRegistration.medications.*` - medicacoes
+
+## Integracao com o Recommendation Engine Existente
+
+O `ConfidenceCalculationParams` atual ja aceita `petProfile` com `{species, breed, age, weight}`. A implementacao expandira isso para incluir `conditions`, `medications` e `biomarkers`, permitindo recomendacoes mais precisas:
 
 ```typescript
-const handlePostGoogleAuth = async (user: User) => {
-  const email = user.email || '';
-  
-  // Emails @stanford.edu - acesso automático
-  if (email.endsWith('@stanford.edu')) {
-    await ensureUserProfile(user);
-    await ensureUserRole(user.id, 'user');
-    navigate('/');
-    return;
-  }
-  
-  // Emails @gmail.com - verificar/criar solicitação
-  if (email.endsWith('@gmail.com')) {
-    const { data: existingRequest } = await supabase
-      .from('access_requests')
-      .select('status')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (existingRequest?.status === 'approved') {
-      await ensureUserProfile(user);
-      await ensureUserRole(user.id, 'user');
-      navigate('/');
-    } else if (existingRequest?.status === 'pending') {
-      navigate('/access-pending');
-    } else if (existingRequest?.status === 'rejected') {
-      navigate('/access-rejected');
-    } else {
-      // Criar nova solicitação
-      await supabase.from('access_requests').insert({
-        user_id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name,
-        avatar_url: user.user_metadata?.avatar_url,
-      });
-      navigate('/access-pending');
-    }
-    return;
-  }
-  
-  // Outros domínios - não permitido
-  toast({ title: 'Domínio não autorizado', variant: 'destructive' });
-  await supabase.auth.signOut();
-};
+// Antes (atual)
+petProfile: { species: 'canine', breed: 'Labrador', age: 8, weight: 30 }
+
+// Depois (expandido)
+petProfile: {
+  species: 'canine',
+  breed: 'Labrador',
+  age: 8,
+  weight: 30,
+  conditions: ['hip_dysplasia'],
+  medications: ['meloxicam'],
+  biomarkers: { leucocytes: 12500 }
+}
 ```
 
-### Realtime para Notificações
+## Arquivos a Criar
 
-```sql
--- Habilitar realtime para access_requests
-ALTER PUBLICATION supabase_realtime ADD TABLE public.access_requests;
-```
+| Arquivo | Descricao |
+|---------|-----------|
+| `src/pages/veterinario/PetRegistrationPage.tsx` | Pagina de registro com formulario + chat |
+| `src/pages/veterinario/PetProfilePage.tsx` | Dashboard do paciente |
+| `src/components/pet/PetRegistrationForm.tsx` | Formulario estruturado |
+| `src/components/pet/PetClinicalChat.tsx` | Chat clinico inteligente |
+| `src/components/pet/PetConditionsList.tsx` | Lista de condicoes com autocomplete |
+| `src/components/pet/PetExamsList.tsx` | Lista de exames |
+| `src/components/pet/PetMedicationsList.tsx` | Lista de medicacoes |
+| `src/components/pet/GenerateSamplePetsButton.tsx` | Gerador de dados de exemplo |
+| `src/hooks/usePetProfile.ts` | Hook para CRUD de perfis |
+| `src/hooks/usePetClinicalChat.ts` | Hook para chat clinico |
+| `supabase/functions/extract-pet-clinical-data/index.ts` | Edge function de extracao |
 
-Isso permitirá que admins vejam o badge atualizar em tempo real quando novas solicitações chegarem.
+## Arquivos a Modificar
 
-### Traduções a Adicionar
+| Arquivo | Modificacao |
+|---------|-------------|
+| `src/App.tsx` | Adicionar rotas `/veterinario/pet/new` e `/veterinario/pet/:id` |
+| `src/pages/veterinario/VeterinarioPage.tsx` | Usar dados do banco em vez de mock, botao "Novo Paciente" funcional |
+| `src/types/index.ts` | Expandir interface Pet com campos clinicos |
+| `src/types/recommendation-confidence.ts` | Expandir `petProfile` com conditions/medications |
+| `src/services/hybrid-recommendation-service.ts` | Usar perfil expandido na busca |
+| `src/locales/pt/translation.json` | Adicionar traducoes PT |
+| `src/locales/en/translation.json` | Adicionar traducoes EN |
+| `src/i18n.ts` | Incrementar versao do cache |
 
-Chaves de tradução para PT e EN:
-- `accessRequest.pending.title`
-- `accessRequest.pending.description`
-- `accessRequest.rejected.title`
-- `accessRequest.rejected.description`
-- `accessRequest.badge.tooltip`
-- `admin.accessRequests.title`
-- `admin.accessRequests.approve`
-- `admin.accessRequests.reject`
-- `admin.accessRequests.pendingCount`
+## Prioridade de Implementacao
 
-## Comportamento dos Admins Existentes
+1. Criar tabelas no banco (`pet_profiles`, `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes`) com RLS
+2. Criar formulario de registro de paciente (dados estruturados)
+3. Criar edge function `extract-pet-clinical-data`
+4. Implementar chat clinico inteligente com extracao
+5. Criar pagina de perfil do paciente
+6. Implementar gerador de pacientes de exemplo
+7. Integrar com recommendation engine existente
+8. Adicionar traducoes PT/EN
+9. Atualizar documentacao (ARCHITECTURE.md, CURRENT_STATE.md, CHANGELOG.md)
 
-Os 5 administradores atuais (incluindo `jpedroazedo@gmail.com` recém-adicionado) **permanecerão com acesso total** e não serão afetados por essas mudanças. A verificação de admin é feita pela tabela `user_roles`, não pela `access_requests`.
+## Secao Tecnica: Por que Chat + Formulario?
 
-## Prioridade de Implementação
+A abordagem hibrida resolve 3 problemas criticos:
 
-1. Configurar Google OAuth via Lovable Cloud
-2. Criar tabela `access_requests` com RLS
-3. Modificar `AuthContext` com lógica de verificação
-4. Criar telas de status (pending/rejected)
-5. Adicionar badge no Header
-6. Criar painel de aprovação no admin
-7. Adicionar traduções PT/EN
+1. **Barreira de entrada**: Veterinarios no consultorio nao tem tempo para preencher formularios extensos. O chat permite inserir dados clinicos no ritmo natural de uma consulta.
 
+2. **Dados nao-estruturados ricos**: Informacoes como "claudicou nas ultimas semanas" ou "come menos desde quinta" contem sinais clinicos que formularios nao capturam. A IA pode mapear esses sinais para entidades do Knowledge Graph.
+
+3. **Demonstrabilidade (Stanford)**: O "efeito WOW" de digitar uma descricao clinica e ver o sistema extrair entidades, cruzar com o Knowledge Graph, e gerar recomendacoes fundamentadas em evidencias e impressionante para uma demonstracao academica.
