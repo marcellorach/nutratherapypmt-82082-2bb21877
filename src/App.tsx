@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Index from './pages/Index';
 import TutorPage from './pages/tutor/TutorPage';
 import VeterinarioPage from './pages/veterinario/VeterinarioPage';
+import PetRegistrationPage from './pages/veterinario/PetRegistrationPage';
+import PetProfilePage from './pages/veterinario/PetProfilePage';
 import AdministradorPage from './pages/administrador/AdministradorPage';
 import AuthPage from './pages/auth/AuthPage';
 import AccessPendingPage from './pages/auth/AccessPendingPage';
@@ -44,6 +46,16 @@ function App() {
                 <Route path="/veterinario" element={
                   <ProtectedRoute>
                     <VeterinarioPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/veterinario/pet/new" element={
+                  <ProtectedRoute>
+                    <PetRegistrationPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/veterinario/pet/:id" element={
+                  <ProtectedRoute>
+                    <PetProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="/administrador" element={

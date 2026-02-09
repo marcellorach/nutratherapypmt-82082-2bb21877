@@ -4991,7 +4991,85 @@
       "condition": "Condição",
       "compound": "Composto",
       "pathway": "Pathway",
-      "mechanism": "Mecanismo"
+    "mechanism": "Mecanismo"
+    }
+  },
+  "petRegistration": {
+    "title": "Registrar Novo Paciente",
+    "description": "Cadastre um novo paciente canino com dados estruturados e clínicos",
+    "goToProfile": "Ver Perfil do Paciente",
+    "form": {
+      "title": "Dados do Paciente",
+      "name": "Nome",
+      "namePlaceholder": "Ex: Rex, Luna, Thor...",
+      "breed": "Raça",
+      "breedPlaceholder": "Selecione a raça",
+      "age": "Idade (anos)",
+      "weight": "Peso (kg)",
+      "sex": "Sexo",
+      "male": "Macho",
+      "female": "Fêmea",
+      "neutered": "Castrado",
+      "chipNumber": "Número do Chip",
+      "chipPlaceholder": "Opcional",
+      "ownerInfo": "Informações do Tutor",
+      "ownerName": "Nome do Tutor",
+      "ownerNamePlaceholder": "Nome completo",
+      "ownerEmail": "Email do Tutor",
+      "ownerEmailPlaceholder": "email@exemplo.com",
+      "notes": "Observações",
+      "notesPlaceholder": "Observações gerais sobre o paciente...",
+      "register": "Registrar Paciente",
+      "successTitle": "Paciente registrado",
+      "successDesc": "{{name}} foi registrado com sucesso"
+    },
+    "chat": {
+      "title": "Chat Clínico Inteligente",
+      "description": "Descreva o quadro clínico em linguagem natural. A IA extrairá as entidades automaticamente.",
+      "placeholder": "Descreva o quadro clínico do paciente aqui...",
+      "example": "Ex: \"Rex tem displasia coxofemoral bilateral, claudicando há 3 meses. Tomando meloxicam 0.1mg/kg.\"",
+      "inputPlaceholder": "Descreva condições, medicações, sintomas...",
+      "registerFirst": "Registre o paciente primeiro para habilitar o chat clínico",
+      "extracting": "Analisando texto clínico...",
+      "entitiesFound": "{{count}} entidade(s) clínica(s) identificada(s):",
+      "noEntitiesFound": "Nenhuma entidade clínica identificada no texto. Tente ser mais específico.",
+      "extractionError": "Erro ao analisar o texto clínico. Tente novamente.",
+      "confirm": "Confirmar",
+      "discard": "Descartar",
+      "entitiesConfirmed": "Entidades salvas no perfil",
+      "entitiesSaved": "Dados clínicos salvos",
+      "entitiesSavedDesc": "{{count}} entidade(s) adicionada(s) ao perfil do paciente"
+    },
+    "conditions": {
+      "title": "Condições",
+      "active": "Condições Ativas",
+      "none": "Nenhuma condição registrada"
+    },
+    "medications": {
+      "title": "Medicações",
+      "current": "Medicações em Uso",
+      "none": "Nenhuma medicação registrada",
+      "active": "Em uso"
+    },
+    "exams": {
+      "title": "Exames",
+      "results": "Resultados de Exames",
+      "none": "Nenhum exame registrado"
+    },
+    "profile": {
+      "viewProfile": "Ver Perfil",
+      "years": "anos",
+      "analyzeWithKG": "Analisar com VetGraphRAG",
+      "clinicalNotes": "Notas Clínicas",
+      "clinicalHistory": "Histórico Clínico",
+      "noNotes": "Nenhuma nota clínica registrada",
+      "notFound": "Paciente não encontrado"
+    },
+    "generator": {
+      "button": "Gerar Pacientes de Exemplo",
+      "generating": "Gerando...",
+      "success": "Pacientes gerados",
+      "successDesc": "{{count}} pacientes de exemplo foram criados com sucesso"
     }
   }
 }
