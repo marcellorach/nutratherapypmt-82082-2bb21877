@@ -126,7 +126,7 @@ const InvestmentSection: React.FC = () => {
               </PopoverTrigger>
               <PopoverContent className="w-72 p-4" side="top">
                 <div className="space-y-3">
-                  <p className="text-sm font-semibold text-gray-900 mb-3">Contact Marcello</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Contact Marcello Rachlyn</p>
                   <a
                     href="mailto:marcello@lifespan.com.br"
                     className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
@@ -147,12 +147,35 @@ const InvestmentSection: React.FC = () => {
               </PopoverContent>
             </Popover>
 
-            <a href="mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet">
-              <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 text-base px-8 py-6">
-                <FileText size={20} className="mr-2" />
-                {t('landing.investment.cta2')}
-              </Button>
-            </a>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 text-base px-8 py-6">
+                  <FileText size={20} className="mr-2" />
+                  {t('landing.investment.cta2')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-4" side="top">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Contact Marcello Rachlyn</p>
+                  <a
+                    href="mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet"
+                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <Mail size={16} className="shrink-0" />
+                    marcello@lifespan.com.br
+                  </a>
+                  <a
+                    href="https://wa.me/5511972059371"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <Phone size={16} className="shrink-0" />
+                    +55 11 97205-9371
+                  </a>
+                </div>
+              </PopoverContent>
+            </Popover>
           </motion.div>
         </motion.div>
       </div>
