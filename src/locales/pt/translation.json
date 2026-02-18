@@ -5090,7 +5090,10 @@
       "technology": "Tecnologia",
       "outcomes": "Resultados",
       "market": "Mercado",
-      "invest": "Investir"
+      "invest": "Investir",
+      "introduction": "Introdução",
+      "controlPanel": "Painel de Controle",
+      "vetPortal": "Portal Vet"
     },
     "vision": {
       "badge": "Ciência da Longevidade para Medicina Veterinária",

@@ -52,11 +52,17 @@ const LandingSectionNav: React.FC = () => {
             ))}
           </div>
           <div className="flex items-center gap-2 ml-4 shrink-0">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors whitespace-nowrap"
+            >
+              {t('landing.nav.introduction')}
+            </button>
             <a href="/administrador" className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors whitespace-nowrap">
-              Control Panel
+              {t('landing.nav.controlPanel')}
             </a>
             <a href="/veterinario" className="px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors whitespace-nowrap">
-              Vet Portal
+              {t('landing.nav.vetPortal')}
             </a>
           </div>
         </nav>
