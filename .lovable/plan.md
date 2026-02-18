@@ -1,312 +1,123 @@
 
-# Plano: Sistema de Registro de Pacientes Caninos (Fase 2 do VetGraphRAG)
 
-## Resumo
+# Plano: Landing Page Pitch Stanford com Slogan Atualizado
 
-Criar o sistema de registro de pacientes caninos com uma abordagem híbrida: formulário estruturado para dados essenciais + chat inteligente para dados clínicos desestruturados + gerador de dados de exemplo para testes. Isso conecta o Knowledge Graph curado (Fase 1) aos dados individuais dos pacientes, habilitando recomendações personalizadas.
+## Slogan Final
 
-## Arquitetura da Solução
+**EN:** "Extending Lives Through Precision Geroscience. 1.4 Million Dogs. Unlimited Discoveries."
+**PT:** "Estendendo Vidas Atraves da Gerociencia de Precisao. 1,4 Milhao de Caes. Descobertas Ilimitadas."
 
-```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     REGISTRO DE PACIENTE CANINO                        │
-├───────────────────────┬─────────────────────────────────────────────────┤
-│                       │                                                 │
-│  FORMULÁRIO MÍNIMO    │          CHAT CLÍNICO INTELIGENTE              │
-│  (Dados Obrigatórios) │          (Dados Complementares)                │
-│                       │                                                 │
-│  ┌─────────────────┐  │  ┌──────────────────────────────────────────┐  │
-│  │ Nome: Rex       │  │  │ Vet: "Rex é um Labrador de 8 anos,      │  │
-│  │ Raça: Labrador  │  │  │ castrado, com displasia coxofemoral     │  │
-│  │ Idade: 8 anos   │  │  │ bilateral. Claudicando há 3 meses.      │  │
-│  │ Peso: 30kg      │  │  │ Radiografia grau 3. Tomando meloxicam." │  │
-│  │ Sexo: Macho     │  │  │                                          │  │
-│  │ Castrado: Sim   │  │  │         IA EXTRAI AUTOMATICAMENTE:       │  │
-│  └─────────────────┘  │  │  ┌──────────────────────────────────┐    │  │
-│                       │  │  │ Condições: Displasia coxofemoral │    │  │
-│  ┌─────────────────┐  │  │  │ Medicações: Meloxicam 0.1mg/kg   │    │  │
-│  │ Condições       │  │  │  │ Exames: Radiografia grau 3       │    │  │
-│  │ [x] Displasia   │  │  │  │ Sintomas: Claudicação 3 meses    │    │  │
-│  │ [ ] Artrite     │  │  │  │ Biomarcadores: (extraídos)       │    │  │
-│  │ [ ] Cardíaco    │  │  │  └──────────────────────────────────┘    │  │
-│  └─────────────────┘  │  └──────────────────────────────────────────┘  │
-│                       │                                                 │
-├───────────────────────┴─────────────────────────────────────────────────┤
-│                                                                         │
-│            PERFIL DO PACIENTE CONSOLIDADO                               │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │ Rex | Labrador | 8a | 30kg | Macho | Castrado                    │  │
-│  │ Condições: Displasia coxofemoral bilateral (grau 3)              │  │
-│  │ Medicações: Meloxicam 0.1mg/kg                                    │  │
-│  │ Sintomas: Claudicação (3 meses)                                   │  │
-│  │ Exames: Radiografia articular, Hemograma (leucócitos 12.500)      │  │
-│  │                                                                    │  │
-│  │  [Buscar Recomendações no Knowledge Graph]                        │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+## Estrutura
 
-## Modelo de Dados (Tabelas no Banco)
-
-### Tabela: `pet_profiles`
-Dados estruturados do paciente canino.
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| id | uuid | PK |
-| name | text | Nome do pet |
-| species | text | Especie (default: 'canine') |
-| breed | text | Raca |
-| age_years | numeric | Idade em anos |
-| weight_kg | numeric | Peso em kg |
-| sex | text | 'male' / 'female' |
-| neutered | boolean | Castrado |
-| chip_number | text | Numero do chip (opcional) |
-| photo_url | text | URL da foto (opcional) |
-| owner_name | text | Nome do tutor |
-| owner_email | text | Email do tutor |
-| veterinarian_id | uuid | Referencia ao veterinario responsavel |
-| created_by | uuid | Quem cadastrou |
-| notes | text | Observacoes gerais |
-| created_at | timestamptz | Data de criacao |
-| updated_at | timestamptz | Ultima atualizacao |
-
-### Tabela: `pet_conditions`
-Condicoes diagnosticadas do paciente.
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| id | uuid | PK |
-| pet_id | uuid | FK para pet_profiles |
-| condition_name | text | Nome da condicao |
-| condition_id | uuid | FK para health_conditions (se existir no KG) |
-| diagnosis_date | date | Data do diagnostico |
-| severity | text | 'mild', 'moderate', 'severe' |
-| status | text | 'active', 'resolved', 'monitoring' |
-| notes | text | Observacoes |
-
-### Tabela: `pet_medications`
-Medicamentos em uso pelo paciente.
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| id | uuid | PK |
-| pet_id | uuid | FK para pet_profiles |
-| medication_name | text | Nome do medicamento |
-| dosage | text | Dosagem |
-| frequency | text | Frequencia |
-| start_date | date | Inicio |
-| end_date | date | Termino (nulo se em uso) |
-| prescribing_vet | text | Veterinario que prescreveu |
-
-### Tabela: `pet_exams`
-Resultados de exames clinicos.
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| id | uuid | PK |
-| pet_id | uuid | FK para pet_profiles |
-| exam_type | text | Tipo do exame |
-| exam_date | date | Data do exame |
-| results | jsonb | Resultados em JSON |
-| notes | text | Observacoes |
-| file_url | text | URL do arquivo do exame (se upload) |
-
-### Tabela: `pet_clinical_notes`
-Anotacoes clinicas extraidas via chat ou inseridas manualmente.
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| id | uuid | PK |
-| pet_id | uuid | FK para pet_profiles |
-| note_type | text | 'chat_extracted', 'manual', 'symptom', 'observation' |
-| content | text | Conteudo da nota |
-| extracted_entities | jsonb | Entidades extraidas pela IA |
-| source_message | text | Mensagem original do chat (se via chat) |
-| created_by | uuid | Quem inseriu |
-| created_at | timestamptz | Data |
-
-## Fluxo de Dados: Do Chat ao Knowledge Graph
+A pagina atual (hero + login/dashboard) permanece intacta no topo. Abaixo, adiciona-se um indicador "Scroll to explore" e 6 novas secoes com Framer Motion.
 
 ```text
-┌──────────────┐     ┌──────────────────┐     ┌─────────────────────┐
-│ Veterinario  │     │  Edge Function   │     │    Banco de Dados   │
-│ digita no    │────▶│  extract-pet-    │────▶│                     │
-│ chat clinico │     │  clinical-data   │     │  pet_conditions     │
-│              │     │                  │     │  pet_medications    │
-│ "Rex tem     │     │  Usa Gemini para │     │  pet_exams          │
-│  displasia   │     │  extrair:        │     │  pet_clinical_notes │
-│  bilateral,  │     │  - Condicoes     │     │                     │
-│  tomando     │     │  - Medicacoes    │     └────────┬────────────┘
-│  meloxicam"  │     │  - Exames        │              │
-│              │     │  - Sintomas      │              ▼
-└──────────────┘     │  - Biomarcadores │     ┌─────────────────────┐
-                     └──────────────────┘     │ Recommendation      │
-                                              │ Engine consulta o   │
-                                              │ Knowledge Graph     │
-                                              │ com o perfil        │
-                                              │ consolidado do pet  │
-                                              │                     │
-                                              │ petProfile:         │
-                                              │  species: canine    │
-                                              │  breed: Labrador    │
-                                              │  age: 8             │
-                                              │  conditions: [...]  │
-                                              │  medications: [...] │
-                                              └─────────────────────┘
+TOPO EXISTENTE (inalterado)
+  v Scroll to discover our vision v
+
+SECAO 1 - THE VISION
+  Slogan principal
+  Caes como modelo translacional (7x mais rapido)
+  Infografico Geroproteção vs Gerogenicidade (CSS/SVG)
+  Nova ciencia da longevidade: tratar causas-raiz
+
+SECAO 2 - THE OPPORTUNITY
+  PetLove: 1.4M caes, +30K/mes, 2o maior plano pet
+  PAMEC: 11 policias estaduais
+  3 pilares: tratamento preventivo, descobertas epidemiologicas, estudos cohort
+
+SECAO 3 - THE TECHNOLOGY (VetGraphRAG)
+  Infografico 5 camadas: Compounds > Targets > Mechanisms > Effects > Clinical Outcomes
+  Pipeline visual: Mass Data > AI Analysis > KG > Treatment > ML Feedback Loop
+  Destaque: MedGraphRAG para veterinaria, machine learning, retroalimentacao
+
+SECAO 4 - EXPECTED OUTCOMES
+  Metricas: 20-30% reducao doencas, deteccao precoce, descobertas translacionais
+  Casos por raca: Golden/displasia, Cavalier/cardiaco, Beagle/epilepsia
+
+SECAO 5 - MARKET OPPORTUNITY
+  TAM: 85M caes | SAM: 28M | SOM: 5.6M
+  3o maior mercado pet, 14%+ crescimento, US$12bi/ano
+  Infografico circulos concentricos CSS
+
+SECAO 6 - INVESTMENT CTA
+  Moats competitivos, roadmap 4 fases
+  [Schedule Meeting] [Request Pitch Deck]
 ```
 
-## Componentes da Interface
+## Navegacao por Secoes
 
-### 1. Pagina de Registro de Paciente (`/veterinario/pet/new`)
+Barra sticky ao scrollar com anchors: Vision | Opportunity | Technology | Outcomes | Market | Invest
 
-Layout em duas colunas:
-- **Esquerda**: Formulario estruturado com campos obrigatorios (nome, raca, idade, peso, sexo, castrado) + secao de condicoes com autocomplete do Knowledge Graph
-- **Direita**: Chat clinico inteligente onde o vet pode descrever o paciente em texto livre
+## Secao Tecnica
 
-### 2. Pagina de Perfil do Paciente (`/veterinario/pet/:id`)
-
-Dashboard do paciente com:
-- Dados basicos em card superior
-- Tabs: Condicoes | Exames | Medicacoes | Historico Clinico | Recomendacoes
-- Botao "Analisar com VetGraphRAG" que envia o perfil consolidado ao recommendation engine
-
-### 3. Chat Clinico Inteligente (`PetClinicalChat`)
-
-Interface de chat contextualizada ao paciente:
-- O vet digita informacoes clinicas em linguagem natural
-- A IA extrai entidades e mostra preview do que foi extraido
-- O vet confirma ou corrige as extracoes
-- Dados confirmados sao salvos nas tabelas correspondentes
-
-### 4. Gerador de Pacientes de Exemplo
-
-Botao que cria 5-10 pacientes realistas com:
-- Racas comuns com predisposicoes conhecidas (Golden: displasia, Cavalier: cardiaco, Beagle: epilepsia)
-- Exames com series temporais
-- Condicoes que mapeiam para entidades do Knowledge Graph
-- Variacoes de idade (filhotes, adultos, geriatricos)
-
-## Edge Function: `extract-pet-clinical-data`
-
-Nova edge function que recebe texto clinico em linguagem natural e retorna entidades estruturadas usando Lovable AI (Gemini 3 Flash Preview).
-
-Entrada:
-```json
-{
-  "petId": "uuid",
-  "clinicalText": "Rex tem displasia coxofemoral bilateral...",
-  "existingProfile": { "breed": "Labrador", "age": 8 }
-}
-```
-
-Saida:
-```json
-{
-  "conditions": [
-    { "name": "Displasia coxofemoral", "severity": "moderate", "side": "bilateral" }
-  ],
-  "medications": [
-    { "name": "Meloxicam", "dosage": "0.1mg/kg", "type": "NSAID" }
-  ],
-  "symptoms": [
-    { "name": "Claudicacao", "duration": "3 meses" }
-  ],
-  "examResults": [
-    { "type": "Radiografia", "finding": "Desgaste articular grau 3" }
-  ],
-  "biomarkers": [
-    { "name": "Leucocitos", "value": 12500, "unit": "/uL" }
-  ]
-}
-```
-
-## Seguranca (RLS)
-
-- Veterinarios so veem pacientes atribuidos a eles (`veterinarian_id = auth.uid()`)
-- Admins veem todos os pacientes
-- Dados clinicos protegidos por RLS em todas as tabelas
-- Chat clinico logado para auditoria
-
-## Traducoes (PT/EN)
-
-Chaves a adicionar em ambos os idiomas:
-- `petRegistration.form.*` - campos do formulario
-- `petRegistration.chat.*` - interface do chat clinico
-- `petRegistration.profile.*` - pagina de perfil
-- `petRegistration.generator.*` - gerador de dados de exemplo
-- `petRegistration.conditions.*` - condicoes
-- `petRegistration.exams.*` - exames
-- `petRegistration.medications.*` - medicacoes
-
-## Integracao com o Recommendation Engine Existente
-
-O `ConfidenceCalculationParams` atual ja aceita `petProfile` com `{species, breed, age, weight}`. A implementacao expandira isso para incluir `conditions`, `medications` e `biomarkers`, permitindo recomendacoes mais precisas:
-
-```typescript
-// Antes (atual)
-petProfile: { species: 'canine', breed: 'Labrador', age: 8, weight: 30 }
-
-// Depois (expandido)
-petProfile: {
-  species: 'canine',
-  breed: 'Labrador',
-  age: 8,
-  weight: 30,
-  conditions: ['hip_dysplasia'],
-  medications: ['meloxicam'],
-  biomarkers: { leucocytes: 12500 }
-}
-```
-
-## Arquivos a Criar
+### Arquivos a Criar
 
 | Arquivo | Descricao |
 |---------|-----------|
-| `src/pages/veterinario/PetRegistrationPage.tsx` | Pagina de registro com formulario + chat |
-| `src/pages/veterinario/PetProfilePage.tsx` | Dashboard do paciente |
-| `src/components/pet/PetRegistrationForm.tsx` | Formulario estruturado |
-| `src/components/pet/PetClinicalChat.tsx` | Chat clinico inteligente |
-| `src/components/pet/PetConditionsList.tsx` | Lista de condicoes com autocomplete |
-| `src/components/pet/PetExamsList.tsx` | Lista de exames |
-| `src/components/pet/PetMedicationsList.tsx` | Lista de medicacoes |
-| `src/components/pet/GenerateSamplePetsButton.tsx` | Gerador de dados de exemplo |
-| `src/hooks/usePetProfile.ts` | Hook para CRUD de perfis |
-| `src/hooks/usePetClinicalChat.ts` | Hook para chat clinico |
-| `supabase/functions/extract-pet-clinical-data/index.ts` | Edge function de extracao |
+| `src/components/landing/LandingContent.tsx` | Container com todas as 6 secoes |
+| `src/components/landing/LandingSectionNav.tsx` | Navegacao sticky por anchors |
+| `src/components/landing/VisionSection.tsx` | Slogan, modelo translacional, infografico geroproteção |
+| `src/components/landing/OpportunitySection.tsx` | PetLove, PAMEC, 3 pilares |
+| `src/components/landing/TechnologySection.tsx` | VetGraphRAG 5 camadas, pipeline, ML feedback |
+| `src/components/landing/OutcomesSection.tsx` | Resultados esperados, casos por raca |
+| `src/components/landing/MarketSection.tsx` | TAM/SAM/SOM infografico CSS |
+| `src/components/landing/InvestmentSection.tsx` | CTA investimento, roadmap |
 
-## Arquivos a Modificar
+### Arquivos a Modificar
 
 | Arquivo | Modificacao |
 |---------|-------------|
-| `src/App.tsx` | Adicionar rotas `/veterinario/pet/new` e `/veterinario/pet/:id` |
-| `src/pages/veterinario/VeterinarioPage.tsx` | Usar dados do banco em vez de mock, botao "Novo Paciente" funcional |
-| `src/types/index.ts` | Expandir interface Pet com campos clinicos |
-| `src/types/recommendation-confidence.ts` | Expandir `petProfile` com conditions/medications |
-| `src/services/hybrid-recommendation-service.ts` | Usar perfil expandido na busca |
-| `src/locales/pt/translation.json` | Adicionar traducoes PT |
-| `src/locales/en/translation.json` | Adicionar traducoes EN |
-| `src/i18n.ts` | Incrementar versao do cache |
+| `src/pages/Index.tsx` | Adicionar scroll indicator + importar LandingContent abaixo do conteudo existente |
+| `src/locales/pt/translation.json` | Adicionar chaves `landing.*` |
+| `src/locales/en/translation.json` | Adicionar chaves `landing.*` |
+| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.39 |
 
-## Prioridade de Implementacao
+### Conteudo das Secoes (EN)
 
-1. Criar tabelas no banco (`pet_profiles`, `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes`) com RLS
-2. Criar formulario de registro de paciente (dados estruturados)
-3. Criar edge function `extract-pet-clinical-data`
-4. Implementar chat clinico inteligente com extracao
-5. Criar pagina de perfil do paciente
-6. Implementar gerador de pacientes de exemplo
-7. Integrar com recommendation engine existente
-8. Adicionar traducoes PT/EN
-9. Atualizar documentacao (ARCHITECTURE.md, CURRENT_STATE.md, CHANGELOG.md)
+**Vision:**
+- Slogan: "Extending Lives Through Precision Geroscience. 1.4 Million Dogs. Unlimited Discoveries."
+- "Dogs age 7x faster than humans -- the perfect translational model for longevity science"
+- Infografico CSS: Geroprotection (healthy aging, cellular repair) vs Gerogenic damage (tumors, arthritis, cognitive decline)
+- "By targeting the root causes of aging, we prevent degenerative diseases before they manifest"
 
-## Secao Tecnica: Por que Chat + Formulario?
+**Opportunity:**
+- PetLove: "The 2nd largest pet health plan worldwide. 1.4M dogs with full veterinary records, growing 30K/month."
+- PAMEC: "Police canine aging program across 11 Brazilian state forces"
+- 3 pilares com icones: Preventive Geroprotective Treatment | Epidemiological Discovery | Volunteer Cohort Studies
 
-A abordagem hibrida resolve 3 problemas criticos:
+**Technology:**
+- "VetGraphRAG: A MedGraphRAG Purpose-Built for Veterinary Geroscience"
+- Infografico pipeline 5 camadas em CSS com cores distintas
+- Fluxo circular: Mass Data Acquisition > Curated KG + AI Analysis > Individualized Treatment > Outcome Tracking > Discovery Feedback Loop
+- "Machine learning accelerates discoveries -- treatment outcomes feed back into the knowledge graph"
 
-1. **Barreira de entrada**: Veterinarios no consultorio nao tem tempo para preencher formularios extensos. O chat permite inserir dados clinicos no ritmo natural de uma consulta.
+**Outcomes:**
+- 4 cards: 20-30% fewer degenerative diseases | Early risk detection by breed | Translational discoveries (dog to human) | Mass personalized treatment
+- 3 casos por raca com predisposicoes
 
-2. **Dados nao-estruturados ricos**: Informacoes como "claudicou nas ultimas semanas" ou "come menos desde quinta" contem sinais clinicos que formularios nao capturam. A IA pode mapear esses sinais para entidades do Knowledge Graph.
+**Market (dados dos slides):**
+- Infografico circulos concentricos: TAM 85M | SAM 28M | SOM 5.6M
+- Metricas laterais: 3rd largest pet market, 14%+ growth, US$12bi/year
 
-3. **Demonstrabilidade (Stanford)**: O "efeito WOW" de digitar uma descricao clinica e ver o sistema extrair entidades, cruzar com o Knowledge Graph, e gerar recomendacoes fundamentadas em evidencias e impressionante para uma demonstracao academica.
+**Investment:**
+- 4 moats: Unique 1.4M cohort, Curated scientific KG, AI-powered geroscience, PAMEC credibility
+- Roadmap: Phase 1 Knowledge Base (done) > Phase 2 Patient System (done) > Phase 3 Recommendation Engine > Phase 4 Longitudinal Studies
+- CTAs: Schedule a Meeting, Request Pitch Deck
+
+### Design
+
+- Estilo clean/minimalista existente (preto, cinzas, pasteis)
+- Infograficos em CSS/SVG puro (nao imagens)
+- Framer Motion fade-in ao scroll
+- Responsivo para projetor 1920x1080
+- Secao hero existente 100% inalterada
+
+### Prioridade
+
+1. Criar todos os componentes de secao em paralelo
+2. Criar LandingContent e LandingSectionNav
+3. Modificar Index.tsx (scroll indicator + LandingContent)
+4. Adicionar todas as traducoes PT/EN
+5. Incrementar I18N_VERSION
+
