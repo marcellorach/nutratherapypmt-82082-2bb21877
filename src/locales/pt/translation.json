@@ -930,15 +930,15 @@
     }
   },
   "home": {
-    "title": "NutraTherapy PET",
+    "title": "VetGeroTherapy PET",
     "subtitle": "Plataforma de terapia nutracêutica baseada em evidências, alimentada por 267 estudos revisados analisando 35 compostos ativos em 95 condições de saúde, alcançando índice de eficácia 4,2/5 através de recomendações personalizadas via IA",
     "platformAccess": "Acesse a Plataforma",
-    "platformAccessDesc": "Faça login para acessar todas as funcionalidades do sistema NutraTherapy PET. Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores.",
+    "platformAccessDesc": "Faça login para acessar todas as funcionalidades do sistema VetGeroTherapy PET. Nossa plataforma oferece soluções personalizadas para tutores, veterinários e pesquisadores.",
     "loginButton": "Entrar na Plataforma",
     "welcomeBack": "Bem-vindo de volta!",
     "connectedAs": "Você está conectado como",
     "forTutors": "Portal do Tutor",
-    "forTutorsDesc": "Acompanhe os PETs que aderiram ao NutraTherapy e monitore seu plano de tratamento nutracêutico personalizado.",
+    "forTutorsDesc": "Acompanhe os PETs que aderiram ao VetGeroTherapy e monitore seu plano de tratamento nutracêutico personalizado.",
     "forVeterinarians": "Portal do Veterinário",
     "forVeterinariansDesc": "Analise dados clínicos e gere planos de tratamento baseados em evidências para veterinários verificados.",
     "forResearchDev": "Painel de Controle",
@@ -946,7 +946,7 @@
     "forAdmins": "Para Administradores",
     "forAdminsDesc": "Gerencie configurações do sistema, usuários e integrações da plataforma.",
     "tutorArea": "Portal do Tutor",
-    "tutorAreaDesc": "Acompanhe os PETs que aderiram ao NutraTherapy e monitore seu plano de tratamento nutracêutico personalizado.",
+    "tutorAreaDesc": "Acompanhe os PETs que aderiram ao VetGeroTherapy e monitore seu plano de tratamento nutracêutico personalizado.",
     "tutorAreaButton": "Ir para Portal do Tutor",
     "veterinarianArea": "Portal do Veterinário",
     "veterinarianAreaDesc": "Analise dados clínicos e gere planos de tratamento baseados em evidências. Restrito a veterinários verificados.",
@@ -970,8 +970,8 @@
     "register": "Cadastro",
     "loginTitle": "Login",
     "registerTitle": "Cadastro",
-    "loginDesc": "Acesse sua conta NutraTherapy PET",
-    "registerDesc": "Crie sua conta na plataforma NutraTherapy PET",
+    "loginDesc": "Acesse sua conta VetGeroTherapy PET",
+    "registerDesc": "Crie sua conta na plataforma VetGeroTherapy PET",
     "email": "E-mail",
     "password": "Senha",
     "confirmPassword": "Confirmar Senha",
@@ -998,7 +998,7 @@
     },
     "stanfordDemo": {
       "title": "Acesso Demo Stanford",
-      "description": "Digite seu email para explorar a plataforma NutraTherapy",
+      "description": "Digite seu email para explorar a plataforma VetGeroTherapy",
       "emailLabel": "Email",
       "emailPlaceholder": "seunome@stanford.edu",
       "accessButton": "Acessar Demo",
@@ -1010,7 +1010,7 @@
       "demoNote": "Contas demo usam autenticação simplificada para acesso ao curso"
     },
     "googleAuth": {
-      "title": "Bem-vindo ao NutraTherapy",
+      "title": "Bem-vindo ao VetGeroTherapy",
       "description": "Faça login com sua conta Google para acessar a plataforma",
       "signInButton": "Continuar com Google",
       "signingIn": "Entrando...",
@@ -1022,7 +1022,7 @@
     },
     "accessPending": {
       "title": "Solicitação de Acesso Enviada",
-      "description": "Sua solicitação de acesso à plataforma NutraTherapy foi enviada com sucesso. Um administrador irá analisar seu pedido em breve.",
+      "description": "Sua solicitação de acesso à plataforma VetGeroTherapy foi enviada com sucesso. Um administrador irá analisar seu pedido em breve.",
       "emailLabel": "Email",
       "requestedAt": "Solicitado em",
       "statusLabel": "Status",
@@ -1928,7 +1928,7 @@
     }
   },
   "footer": {
-    "copyright": "NutraTherapy Pet © 2025",
+    "copyright": "VetGeroTherapy Pet © 2025",
     "sloganLine1": "Extending Lives Through Precision Geroscience",
     "sloganLine2": "1.4 Million Dogs. Unlimited Discoveries.",
     "poweredBy": "Powered by",
