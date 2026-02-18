@@ -1,58 +1,66 @@
 
-# Plano: Atualizar Metricas e Casos por Raca na OutcomesSection
 
-## Resumo das Mudancas
+# Plano: Atualizar Métricas, Casos por Raça + Verificação de Segurança
 
-### 1. Metricas (cards do topo)
-- **Card 1 (foto 1)**: Trocar "20-30%" por **"15-25%"** e texto para "Potential lifespan extension through geroprotective interventions" / "Potencial de extensao da vida atraves de intervencoes geroprotetoras"
-- **Card 2 (foto 2)**: Trocar "~" (deteccao precoce) por **"40-70%"** e texto para "Fewer degenerative diseases through preventive geroprotection" / "Menos doencas degenerativas atraves de geroproteção preventiva"
-- Cards 3 e 4 permanecem iguais (translational discoveries e 1.4M personalized)
+## Resumo
 
-### 2. Casos por raca (foto 3) - Incluir drogas geroprotetoras reais
+3 mudanças principais + 1 verificação:
 
-Baseado em evidencias cientificas:
+a) **Métricas da OutcomesSection**: Card 1 muda para "15-25%" (extensão de vida), Card 2 muda para "40-70%" (menos doenças degenerativas)
+b) **Casos por raça**: Incluir drogas geroprotetoras reais (Rapamicina, Curcumina, Empagliflozina, Dapagliflozina, Apigenina)
+c) **Idioma default**: Já está em inglês — nenhuma mudança necessária
+d) **Políticas de acesso**: 2 alertas críticos encontrados (detalhes abaixo)
 
-- **Golden Retriever** - Hip Dysplasia 60%
-  - Approach: Curcumin (anti-inflamatorio articular) + Rapamycin (geroprotetor geral via inibicao mTOR) para protecao condroprotetora e geroprotecao sistemica desde os 2 anos.
+## Slogan
 
-- **Cavalier King Charles** - Mitral Valve Disease 70%
-  - Approach: Empagliflozin (cardioprotetor SGLT2 com evidencia em insuficiencia cardiaca) + Rapamycin (geroprotetor geral) com CoQ10 e taurina desde idade adulta.
+O slogan atual já está correto com as instruções anteriores:
+- **EN:** "Extending Lives Through Precision Geroscience. 1.4 Million Dogs. Unlimited Discoveries."
+- **PT:** "Estendendo Vidas Através da Gerociência de Precisão. 1,4 Milhão de Cães. Descobertas Ilimitadas."
 
-- **Beagle** - Epilepsy 6%
-  - Approach: Apigenin (neuroprotetor, modulador GABAergico) + Dapagliflozin (neuroprotetor SGLT2 com evidencia em protecao cerebral) com monitoramento continuo.
+Nenhuma mudança necessária no slogan.
 
-## Secao Tecnica
+## Idioma Default
+
+O `src/i18n.ts` já usa `'en'` como fallback e default (`getSavedLanguage()` retorna `'en'` quando não há preferência salva). Nenhuma mudança necessária.
+
+## Verificação de Políticas de Acesso
+
+O linter de segurança encontrou **2 alertas críticos (ERROR)**:
+
+1. **Security Definer View** — Existe uma view com `SECURITY DEFINER` que pode expor dados do criador da view ao invés do usuário que consulta
+2. **RLS Desabilitada em tabela pública** — Existe uma tabela no schema público sem Row Level Security habilitada, permitindo acesso irrestrito
+
+Esses alertas não serão corrigidos neste momento (para não afetar a apresentação), mas ficam registrados para correção posterior.
+
+## Seção Técnica
 
 ### Arquivos a Modificar
 
-| Arquivo | Modificacao |
+| Arquivo | Modificação |
 |---------|-------------|
-| `src/components/landing/OutcomesSection.tsx` | Trocar valores e icones dos 2 primeiros cards; reordenar metricas |
-| `src/locales/en/translation.json` | Atualizar chaves `landing.outcomes.metrics.fewer`, `detection` e todas as `breeds.*.approach` |
-| `src/locales/pt/translation.json` | Mesmo para portugues |
-| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.40 |
+| `src/components/landing/OutcomesSection.tsx` | Trocar ícones e valores dos 2 primeiros cards (TrendingUp 15-25%, TrendingDown 40-70%); remover import de Search, adicionar TrendingUp |
+| `src/locales/en/translation.json` | Adicionar chave `lifeExtension`, remover `detection`; atualizar `approach` dos 3 breeds com drogas reais |
+| `src/locales/pt/translation.json` | Mesmo em português |
+| `src/i18n.ts` | Incrementar I18N_VERSION de 1.9.39 para 1.9.40 |
 
-### Detalhes das Mudancas
+### Detalhes das Mudanças
 
-**OutcomesSection.tsx:**
-- Metric 1: icon `TrendingUp` (extensao de vida), value `15-25%`, key `lifeExtension`
-- Metric 2: icon `TrendingDown`, value `40-70%`, key `fewer`
-- Metric 3 e 4: permanecem iguais
-
-**Traducoes EN:**
-```
-metrics.lifeExtension: "Potential lifespan extension through geroprotective interventions"
-metrics.fewer: "Fewer degenerative diseases through preventive geroprotection"
-breeds.golden.approach: "Curcumin (anti-inflammatory) + Rapamycin (mTOR inhibitor for systemic geroprotection) — chondroprotective protocol starting at age 2."
-breeds.cavalier.approach: "Empagliflozin (SGLT2 cardioprotection) + Rapamycin (systemic geroprotection) with CoQ10 and taurine from early adulthood."
-breeds.beagle.approach: "Apigenin (GABAergic neuroprotection) + Dapagliflozin (SGLT2 neuroprotection) with continuous outcome monitoring."
+**OutcomesSection.tsx — métricas:**
+```text
+Antes:                              Depois:
+fewer    TrendingDown  20-30%  -->  lifeExtension  TrendingUp    15-25%
+detection  Search      ~       -->  fewer          TrendingDown  40-70%
+translational (inalterado)          translational (inalterado)
+personalized (inalterado)           personalized (inalterado)
 ```
 
-**Traducoes PT:**
-```
-metrics.lifeExtension: "Potencial de extensao da vida atraves de intervencoes geroprotetoras"
-metrics.fewer: "Menos doencas degenerativas atraves de geroproteção preventiva"
-breeds.golden.approach: "Curcumina (anti-inflamatorio) + Rapamicina (inibidor mTOR para geroproteção sistemica) — protocolo condroprotetor iniciando aos 2 anos."
-breeds.cavalier.approach: "Empagliflozina (cardioproteção SGLT2) + Rapamicina (geroproteção sistemica) com CoQ10 e taurina desde a idade adulta."
-breeds.beagle.approach: "Apigenina (neuroproteção GABAergica) + Dapagliflozina (neuroproteção SGLT2) com monitoramento continuo de resultados."
-```
+**Traduções EN — breeds.approach:**
+- Golden: "Curcumin (anti-inflammatory) + Rapamycin (mTOR inhibitor for systemic geroprotection) — chondroprotective protocol starting at age 2."
+- Cavalier: "Empagliflozin (SGLT2 cardioprotection) + Rapamycin (systemic geroprotection) with CoQ10 and taurine from early adulthood."
+- Beagle: "Apigenin (GABAergic neuroprotection) + Dapagliflozin (SGLT2 neuroprotection) with continuous outcome monitoring."
+
+**Traduções PT — breeds.approach:**
+- Golden: "Curcumina (anti-inflamatório) + Rapamicina (inibidor mTOR para geroproteção sistêmica) — protocolo condroprotetor iniciando aos 2 anos."
+- Cavalier: "Empagliflozina (cardioproteção SGLT2) + Rapamicina (geroproteção sistêmica) com CoQ10 e taurina desde a idade adulta."
+- Beagle: "Apigenina (neuroproteção GABAérgica) + Dapagliflozina (neuroproteção SGLT2) com monitoramento contínuo de resultados."
+
