@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Dna, ShieldCheck, AlertTriangle, Clock, ArrowRight } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Clock, ArrowRight, BarChart3, FlaskConical } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -10,6 +10,20 @@ const fadeUp = {
     transition: { delay: i * 0.15, duration: 0.6, ease: [0, 0, 0.2, 1] as const }
   })
 };
+
+const dogMilestones = [
+  { key: 'puppy', pos: 0 },
+  { key: 'adult', pos: 23 },   // ~3/13
+  { key: 'senior', pos: 54 },  // ~7/13
+  { key: 'geriatric', pos: 77 } // ~10/13
+];
+
+const humanMilestones = [
+  { key: 'puppy', pos: 0 },
+  { key: 'adult', pos: 24 },   // ~20/85
+  { key: 'senior', pos: 59 },  // ~50/85
+  { key: 'geriatric', pos: 82 } // ~70/85
+];
 
 const VisionSection: React.FC = () => {
   const { t } = useTranslation();
@@ -50,24 +64,114 @@ const VisionSection: React.FC = () => {
             {t('landing.vision.translational.desc')}
           </motion.p>
 
-          {/* 7x faster visual */}
-          <motion.div variants={fadeUp} custom={2} className="flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1 text-center">
-              <div className="text-6xl font-black text-gray-900">7×</div>
-              <p className="text-sm text-gray-500 mt-2">{t('landing.vision.translational.faster')}</p>
-            </div>
-            <div className="flex-1">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 rounded-full bg-gray-800" style={{ width: '100%' }} />
-                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('landing.vision.translational.dogLife')}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-3 rounded-full bg-gray-300" style={{ width: '14%' }} />
-                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('landing.vision.translational.humanEquiv')}</span>
+          {/* === LAYER 1: Comparative Life Timelines === */}
+          <motion.div variants={fadeUp} custom={2} className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+              {t('landing.vision.translational.timelineTitle')}
+            </p>
+
+            {/* Dog timeline */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-sm font-bold text-gray-800 w-16">{t('landing.vision.translational.dogTimeline')}</span>
+                <span className="text-xs text-gray-400">0–13 {t('landing.vision.translational.years')}</span>
+              </div>
+              <div className="relative h-8 rounded-full bg-gray-900 overflow-visible">
+                {dogMilestones.map((m) => (
+                  <div key={m.key} className="absolute top-full mt-1" style={{ left: `${m.pos}%` }}>
+                    <div className="w-px h-3 bg-gray-400 mx-auto" />
+                    <span className="text-[10px] text-gray-500 whitespace-nowrap block -translate-x-1/2 ml-[0.5px]">
+                      {t(`landing.vision.translational.${m.key}`)}
+                    </span>
+                  </div>
+                ))}
+                {/* Intervention window marker */}
+                <div className="absolute top-0 bottom-0 rounded-r-full bg-emerald-500/30 border-l-2 border-emerald-500" style={{ left: '54%', right: '0%' }} />
+                <div className="absolute -top-7 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap" style={{ left: '54%' }}>
+                  {t('landing.vision.translational.interventionWindow')}
                 </div>
               </div>
             </div>
+
+            {/* Human timeline */}
+            <div className="mt-10">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-sm font-bold text-gray-800 w-16">{t('landing.vision.translational.humanTimeline')}</span>
+                <span className="text-xs text-gray-400">0–85 {t('landing.vision.translational.years')}</span>
+              </div>
+              <div className="relative h-8 rounded-full bg-gray-300 overflow-visible">
+                {humanMilestones.map((m) => (
+                  <div key={m.key} className="absolute top-full mt-1" style={{ left: `${m.pos}%` }}>
+                    <div className="w-px h-3 bg-gray-300 mx-auto" />
+                    <span className="text-[10px] text-gray-400 whitespace-nowrap block -translate-x-1/2 ml-[0.5px]">
+                      {t(`landing.vision.translational.${m.key}`)}
+                    </span>
+                  </div>
+                ))}
+                {/* Equivalent intervention window */}
+                <div className="absolute top-0 bottom-0 rounded-r-full bg-emerald-500/15 border-l-2 border-emerald-300" style={{ left: '59%', right: '0%' }} />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* === LAYER 2: Time to Clinical Results === */}
+          <motion.div variants={fadeUp} custom={3} className="mb-10 bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-5">
+              {t('landing.vision.translational.clinicalResultsTitle')}
+            </p>
+
+            <div className="flex items-center gap-3 mb-4">
+              <FlaskConical size={16} className="text-gray-500" />
+              <span className="text-sm text-gray-600">{t('landing.vision.translational.treatmentStart')}</span>
+            </div>
+
+            {/* Dog: short arrow */}
+            <div className="flex items-center gap-4 mb-3">
+              <span className="text-xs font-semibold text-gray-700 w-16 shrink-0">{t('landing.vision.translational.dogTimeline')}</span>
+              <div className="relative flex-1">
+                <div className="h-4 rounded-full bg-emerald-500 flex items-center justify-end pr-3" style={{ width: '20%' }}>
+                  <ArrowRight size={12} className="text-white" />
+                </div>
+              </div>
+              <span className="text-xs font-semibold text-emerald-700 whitespace-nowrap">{t('landing.vision.translational.dogResults')}</span>
+            </div>
+
+            {/* Human: long arrow */}
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-xs font-semibold text-gray-700 w-16 shrink-0">{t('landing.vision.translational.humanTimeline')}</span>
+              <div className="relative flex-1">
+                <div className="h-4 rounded-full bg-gray-300 flex items-center justify-end pr-3" style={{ width: '85%' }}>
+                  <ArrowRight size={12} className="text-gray-500" />
+                </div>
+              </div>
+              <span className="text-xs text-gray-500 whitespace-nowrap">{t('landing.vision.translational.humanResults')}</span>
+            </div>
+
+            {/* 7x badge */}
+            <div className="text-center">
+              <span className="inline-block bg-gray-900 text-white text-lg font-black px-5 py-2 rounded-full">
+                {t('landing.vision.translational.fasterLabel')}
+              </span>
+            </div>
+          </motion.div>
+
+          {/* === LAYER 3: Statistical Nuances === */}
+          <motion.div variants={fadeUp} custom={4} className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart3 size={20} className="text-blue-700" />
+              <h5 className="text-sm font-bold text-blue-900">{t('landing.vision.translational.statisticalTitle')}</h5>
+            </div>
+            <ul className="space-y-3 mb-4">
+              {['stat1', 'stat2', 'stat3'].map((key) => (
+                <li key={key} className="flex items-start gap-3">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                  <span className="text-sm text-gray-700">{t(`landing.vision.translational.${key}`)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] text-blue-400 italic">
+              {t('landing.vision.translational.reference')}
+            </p>
           </motion.div>
         </motion.div>
 
@@ -83,7 +187,7 @@ const VisionSection: React.FC = () => {
               <h4 className="text-xl font-bold text-emerald-900">{t('landing.vision.geroprotection.title')}</h4>
             </div>
             <ul className="space-y-4">
-              {['item1', 'item2', 'item3', 'item4'].map((key, i) => (
+              {['item1', 'item2', 'item3', 'item4'].map((key) => (
                 <li key={key} className="flex items-start gap-3">
                   <div className="mt-1 w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                   <span className="text-gray-700">{t(`landing.vision.geroprotection.${key}`)}</span>
@@ -104,7 +208,7 @@ const VisionSection: React.FC = () => {
               <h4 className="text-xl font-bold text-red-900">{t('landing.vision.gerogenic.title')}</h4>
             </div>
             <ul className="space-y-4">
-              {['item1', 'item2', 'item3', 'item4'].map((key, i) => (
+              {['item1', 'item2', 'item3', 'item4'].map((key) => (
                 <li key={key} className="flex items-start gap-3">
                   <div className="mt-1 w-2 h-2 rounded-full bg-red-500 shrink-0" />
                   <span className="text-gray-700">{t(`landing.vision.gerogenic.${key}`)}</span>
