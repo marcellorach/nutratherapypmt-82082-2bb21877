@@ -36,7 +36,7 @@ const AccessRejectedPage: React.FC = () => {
   };
 
   if (loading) return null;
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   return (
     <Layout>

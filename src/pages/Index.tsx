@@ -31,7 +31,7 @@ const Index: React.FC = () => {
               <p className="text-gray-600 mb-6">
                 {t('home.platformAccessDesc')}
               </p>
-              <Link to="/auth">
+              <Link to="/administrador">
                 <Button className="flex items-center gap-2 px-6 py-6 text-lg">
                   <LogIn size={20} />
                   {t('home.loginButton')}

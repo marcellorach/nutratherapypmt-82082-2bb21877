@@ -95,10 +95,11 @@ const Header: React.FC = () => {
           ) : (
             <Link to="/auth">
               <Button 
-                variant="outline"
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 border-gray-300 hover:border-gray-400 transition-all"
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-all"
               >
-                <LogIn size={18} />
+                <LogIn size={16} />
                 {t('header.login')}
               </Button>
             </Link>
