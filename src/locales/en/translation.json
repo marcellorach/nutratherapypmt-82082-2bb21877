@@ -830,6 +830,25 @@
       }
     }
   },
+  "enrich": {
+    "title": "Enrich Knowledge Graph",
+    "description": "Search, download, extract, and auto-approve real scientific studies to enrich the knowledge graph.",
+    "button": "Enrich with Studies",
+    "buttonTooltip": "Search, download and process real scientific studies to enrich the knowledge graph",
+    "queries": "Search Queries",
+    "addQuery": "Add custom query...",
+    "start": "Start Enrichment",
+    "progress": "Processing query {{current}} of {{total}}",
+    "summary": {
+      "studies": "Studies Processed",
+      "triplets": "Triplets Created",
+      "approved": "Auto-Approved"
+    },
+    "log": {
+      "starting": "Starting enrichment with {{count}} queries...",
+      "complete": "Complete! {{studies}} studies, {{triplets}} triplets, {{approved}} approved"
+    }
+  },
   "common": {
     "madeWith": "Made with",
     "by": "by",
