@@ -38,14 +38,14 @@ const MarketSection: React.FC = () => {
         </motion.div>
 
         <motion.div
-          className="flex flex-col md:flex-row items-center gap-12"
+          className="flex justify-center"
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
         >
-          <motion.div variants={fadeUp} custom={0} className="flex justify-center">
+          <motion.div variants={fadeUp} custom={0}>
             <img 
               src={tamSamSomChart} 
               alt="TAM 85M dogs / SAM 28M dogs / SOM 5.6M premium dogs" 
-              className="w-full max-w-4xl rounded-2xl"
+              className="w-full max-w-4xl rounded-2xl mx-auto"
             />
           </motion.div>
         </motion.div>
