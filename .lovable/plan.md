@@ -1,109 +1,80 @@
 
+# Plano: Logos PetLove/PAMEC + Grafico TAM/SAM/SOM com imagem
 
-# Plano: Footer, CTAs, Acesso Livre e Gráfico TAM/SAM/SOM
+## 2 Mudancas
 
-## 4 Mudanças
+### a) Substituir icones por logos reais (PetLove e PAMEC)
 
-### a) Atualizar Slogan no Footer
+Na OpportunitySection, os cards PetLove e PAMEC usam icones genericos (Database e Shield do Lucide). Vamos:
 
-O footer atual mostra: "NutraTherapy Pet (c) 2025 -- Scalable intelligent nutraceutical recommendation system for pets"
+1. Copiar o SVG do PetLove (`user-uploads://pet-love.svg`) para `src/assets/petlove-logo.svg`
+2. Copiar a imagem do PAMEC (`user-uploads://Screenshot_2026-02-18_at_00.08.24.png`) para `src/assets/pamec-logo.png`
+3. No `OpportunitySection.tsx`:
+   - Importar ambos os logos como modulos ES6
+   - Substituir `<Database>` por `<img src={petloveLogo}>` (altura ~28px)
+   - Substituir `<Shield>` por `<img src={pamecLogo}>` (altura ~32px)
+   - Remover imports de `Database` e `Shield` do lucide-react
 
-Atualizar para o novo slogan em duas linhas:
-- Linha 1: "Extending Lives Through Precision Geroscience"  
-- Linha 2: "1.4 Million Dogs. Unlimited Discoveries."
-- Manter copyright separado: "NutraTherapy Pet (c) 2025"
+### b) Substituir grafico TAM/SAM/SOM por imagem do usuario
 
-### b) Botao "Schedule a Meeting" com Contato Direto + Habilitar Segundo Botao
+O grafico atual em CSS puro tem problemas de sobreposicao. O usuario enviou uma versao melhor (foto 4 - Screenshot_2026-02-18_at_00.10.39.png) que mostra o layout ideal com circulos sobrepostos estilo Venn + metricas laterais com barras de segmentacao.
 
-No InvestmentSection, o botao "Schedule a Meeting" vai abrir um modal/popover com:
-- Email: marcello@lifespan.com.br (link mailto:)
-- WhatsApp: +55 11 97205-9371 (link wa.me)
-
-O botao "Request Pitch Deck" sera habilitado com link mailto para o mesmo email com assunto pre-preenchido.
-
-### c) Remover Toda Fricção de Login
-
-Remover ProtectedRoute de TODAS as rotas internas. Qualquer pessoa podera acessar /veterinario, /administrador, /tutor sem login. Isso significa:
-- Remover wrapper ProtectedRoute das rotas no App.tsx
-- As paginas ficarao acessiveis diretamente pela URL
-- O sistema de auth continua existindo (para quem quiser logar), mas nao bloqueia acesso
-
-### d) Melhorar Gráfico TAM/SAM/SOM
-
-Problemas visíveis na screenshot: labels "85M" e "Brazil" sobrepondo com SAM. Melhorias:
-- Aumentar container para 420x420px
-- Melhorar espacamento entre aneis (TAM inset 0, SAM inset 80px, SOM inset 155px)
-- Labels do TAM posicionados mais acima (pt-5) com fonte maior
-- Labels do SAM com mais padding top para nao sobrepor com descricao do TAM
-- Descricoes mais curtas para caber nos aneis
-
-### e) Upload de Imagens
-
-Sim, voce pode enviar imagens e eu as incluo no site. Basta enviar na proxima mensagem.
+1. Copiar `user-uploads://Screenshot_2026-02-18_at_00.10.39.png` para `src/assets/tam-sam-som.png`
+2. No `MarketSection.tsx`:
+   - Importar a imagem
+   - Substituir todo o bloco de circulos concentricos CSS (linhas 44-90) por uma unica `<img>` com a imagem importada
+   - Manter max-width de ~500px e responsividade
+   - Remover as metricas laterais (3rd, 14%+, US$12B, 33%) pois ja estao na imagem
 
 ---
 
 ## Secao Tecnica
 
+### Arquivos a Criar/Copiar
+
+| Origem | Destino |
+|--------|---------|
+| `user-uploads://pet-love.svg` | `src/assets/petlove-logo.svg` |
+| `user-uploads://Screenshot_2026-02-18_at_00.08.24.png` | `src/assets/pamec-logo.png` |
+| `user-uploads://Screenshot_2026-02-18_at_00.10.39.png` | `src/assets/tam-sam-som.png` |
+
 ### Arquivos a Modificar
 
 | Arquivo | Modificacao |
 |---------|-------------|
-| `src/locales/en/translation.json` | Atualizar `footer.copyright` com novo slogan |
-| `src/locales/pt/translation.json` | Mesmo em portugues |
-| `src/components/landing/InvestmentSection.tsx` | CTA1 abre popover com email+WhatsApp; CTA2 abre mailto com assunto "Pitch Deck Request" |
-| `src/App.tsx` | Remover ProtectedRoute de todas as rotas |
-| `src/components/landing/MarketSection.tsx` | Ajustar dimensoes e espacamentos do grafico TAM/SAM/SOM |
-| `src/components/layout/Footer.tsx` | Reestruturar para mostrar slogan em duas linhas |
-| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.43 |
+| `src/components/landing/OpportunitySection.tsx` | Trocar icones Database/Shield por logos importados |
+| `src/components/landing/MarketSection.tsx` | Trocar grafico CSS por imagem TAM/SAM/SOM |
+| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.44 |
 
-### Detalhes do Footer Atualizado
+### OpportunitySection - Mudancas
 
-```text
-NutraTherapy Pet (c) 2025
-Extending Lives Through Precision Geroscience
-1.4 Million Dogs. Unlimited Discoveries.
-
-Powered by
-[logos]
-```
-
-Novas chaves de traducao:
-- `footer.copyright`: apenas "NutraTherapy Pet (c) 2025"
-- `footer.sloganLine1`: "Extending Lives Through Precision Geroscience"
-- `footer.sloganLine2`: "1.4 Million Dogs. Unlimited Discoveries."
-
-### Detalhes do CTA "Schedule a Meeting"
-
-Usar Popover do Radix (ja instalado) para mostrar ao clicar:
-- Icone de email + "marcello@lifespan.com.br" (link mailto:)
-- Icone de WhatsApp + "+55 11 97205-9371" (link https://wa.me/5511972059371)
-
-CTA2 "Request Pitch Deck": link `mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet`
-
-### Detalhes da Remocao de Fricao
-
-No App.tsx, trocar:
 ```tsx
-<Route path="/veterinario" element={
-  <ProtectedRoute><VeterinarioPage /></ProtectedRoute>
-} />
+// Adicionar imports
+import petloveLogo from '@/assets/petlove-logo.svg';
+import pamecLogo from '@/assets/pamec-logo.png';
+
+// PetLove card - trocar <Database> por:
+<img src={petloveLogo} alt="PetLove" className="h-7 w-auto" />
+
+// PAMEC card - trocar <Shield> por:
+<img src={pamecLogo} alt="PAMEC" className="h-8 w-auto" />
 ```
-Por:
+
+### MarketSection - Mudancas
+
+Substituir o bloco de circulos concentricos (div com width/height 420) e as metricas laterais por:
+
 ```tsx
-<Route path="/veterinario" element={<VeterinarioPage />} />
+import tamSamSomChart from '@/assets/tam-sam-som.png';
+
+// Substituir todo o flex container com circulos + metricas por:
+<motion.div variants={fadeUp} custom={0} className="flex justify-center">
+  <img 
+    src={tamSamSomChart} 
+    alt="TAM 85M dogs / SAM 28M dogs / SOM 5.6M premium dogs" 
+    className="w-full max-w-4xl rounded-2xl"
+  />
+</motion.div>
 ```
 
-Para TODAS as 5 rotas protegidas (tutor, veterinario, veterinario/pet/new, veterinario/pet/:id, administrador).
-
-### Grafico TAM/SAM/SOM Melhorado
-
-- Container: 420x420px
-- TAM (externo): inset-0, pt-6, textos menores e mais concisos
-- SAM (meio): inset 80px em todos os lados, pt-4
-- SOM (centro): inset 155px, centralizado
-- Descricoes simplificadas para evitar sobreposicao:
-  - TAM: "Companion dogs in Brazil"
-  - SAM: "Adults + seniors"  
-  - SOM: "Premium segment"
-
+Isso remove ~60 linhas de CSS complexo e usa a imagem profissional do usuario.
