@@ -5162,6 +5162,7 @@
         "L4": "Desfechos Clínicos"
       },
       "layersDesc": "Cada camada se conecta à próxima através de relações baseadas em evidências extraídas de literatura científica curada.",
+      "flywheelTitle": "Ciclo de Negócios & Flywheel de Dados",
       "pipelineTitle": "Pipeline de Descoberta e Tratamento",
       "pipeline": {
         "massData": {

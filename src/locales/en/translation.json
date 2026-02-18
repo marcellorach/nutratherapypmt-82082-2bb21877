@@ -5162,6 +5162,7 @@
         "L4": "Clinical Outcomes"
       },
       "layersDesc": "Each layer connects to the next through evidence-backed relationships extracted from curated scientific literature.",
+      "flywheelTitle": "Business Cycle & Data Flywheel",
       "pipelineTitle": "Discovery & Treatment Pipeline",
       "pipeline": {
         "massData": {

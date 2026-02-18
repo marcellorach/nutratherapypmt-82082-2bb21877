@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Brain, ArrowRight, RotateCcw } from 'lucide-react';
+import businessCycleFlywheel from '@/assets/business-cycle-flywheel.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -74,6 +75,24 @@ const TechnologySection: React.FC = () => {
           <motion.p variants={fadeUp} custom={2} className="text-gray-500 text-sm mt-6 text-center">
             {t('landing.technology.layersDesc')}
           </motion.p>
+        </motion.div>
+
+        {/* Business Cycle Flywheel */}
+        <motion.div
+          className="mb-12"
+          initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
+        >
+          <motion.div variants={fadeUp} custom={0} className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+            <motion.h3 variants={fadeUp} custom={0} className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <RotateCcw size={24} className="text-gray-700" />
+              {t('landing.technology.flywheelTitle')}
+            </motion.h3>
+            <img
+              src={businessCycleFlywheel}
+              alt="Business cycle flywheel - from data acquisition to treatment, sales and feedback"
+              className="w-full rounded-lg"
+            />
+          </motion.div>
         </motion.div>
 
         {/* Pipeline Flow */}
