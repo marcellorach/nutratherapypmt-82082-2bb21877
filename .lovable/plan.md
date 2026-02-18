@@ -1,60 +1,64 @@
 
+# Plano: Substituir Grafico Simples por Infografico de Vantagem Translacional com Nuances Estatisticas
 
-# Plano: Enriquecimento Automatizado do Knowledge Graph com Estudos Reais
+## O Que Muda
 
-## Objetivo
-Criar uma edge function que busca estudos cientificos reais sobre longevidade canina/geroprotetores no PubMed/OpenAlex, baixa os PDFs, processa com Gemini, gera triplets e aprova tudo automaticamente -- enriquecendo o Knowledge Graph de ponta a ponta.
+Substituir as duas barras simples (dog lifespan / human research time) na VisionSection por um infografico rico que comunica visualmente:
 
-## Abordagem
+1. **Timeline comparativa completa**: Lifespan de caes (10-13 anos) vs humanos (75-85 anos) com marcos etarios
+2. **Janela de tratamento e verificacao**: Mostrando que ao iniciar tratamento em caes de 7-8 anos, resultados estatisticamente significativos surgem em 2-3 anos (vs 15-20 anos em humanos)
+3. **Nuances estatisticas**: Nao e preciso esperar todos os caes morrerem -- analises interinas (Kaplan-Meier, Cox hazards) permitem detectar efeitos com ~50-60% dos eventos esperados
 
-Criar uma nova edge function `enrich-knowledge-graph` que orquestra todo o pipeline existente em sequencia para cada estudo encontrado.
+## Design do Infografico
 
-### Pipeline por estudo:
-1. **Buscar estudos** via `search-scientific-studies` (PubMed/OpenAlex) com queries sobre geroprotetores caninos
-2. **Baixar PDF** via `download-study-pdf` 
-3. **Extrair dados** via `gemini-file-search` (extrai entidades, dosagens, etc.)
-4. **Gerar triplets** via `generate-triplets`
-5. **Auto-aprovar** triplets com confianca >= 70% e marcar estudo como "approved"
-6. **Consolidar** via `consolidate-knowledge-graph`
-7. **Sincronizar Neo4j** via `sync-study-to-neo4j`
+Layout vertical com 3 camadas:
 
-### Queries de busca propostas (5 estudos):
-- "curcumin canine aging neuroprotection"
-- "omega-3 fatty acids dog osteoarthritis longevity"
-- "resveratrol canine cardiac aging"
-- "NAD+ NMN canine geriatric supplementation"
-- "probiotics gut microbiome elderly dogs"
+### Camada 1: Timelines de Vida Comparativas
+- Barra horizontal escura = vida do cao (0-13 anos) com marcos: Filhote, Adulto, Senior, Geriatrico
+- Barra horizontal clara = vida humana (0-85 anos) com marcos equivalentes
+- Marcador visual mostrando a "janela de intervencao" (7-8 anos no cao = ~50 anos humanos)
 
-### Interface no Admin
-Adicionar um botao "Enriquecer Knowledge Graph" na tab Knowledge Graph que:
-- Mostra progresso em tempo real (estudo 1/5, etapa atual)
-- Lista estudos encontrados e status de cada um
-- Ao final, exibe resumo (X estudos, Y triplets, Z novas conexoes)
+### Camada 2: Tempo ate Resultados Clinicos
+- Indicador visual: "Inicio do tratamento geroprotetor" no cao aos 7 anos
+- Seta curta (2-3 anos) ate "Resultados estatisticamente significativos" no cao
+- Seta longa (15-20 anos) para o equivalente humano
+- Destaque: "7x mais rapido"
+
+### Camada 3: Card com Nuances Estatisticas
+- Icone de grafico + texto explicativo sobre analises interinas
+- Pontos-chave:
+  - "Nao e necessario aguardar desfecho final (morte) para todos os sujeitos"
+  - "Analises de sobrevivencia (Kaplan-Meier) detectam diferencas com ~60% dos eventos"
+  - "Endpoints compostos (funcao cognitiva, mobilidade, biomarcadores) fornecem sinais ainda mais rapidos"
+  - Referencia ao TRIAD (Dog Aging Project) como validacao real
 
 ## Detalhes Tecnicos
 
-### Nova Edge Function: `enrich-knowledge-graph`
-- Recebe: lista de queries ou usa queries padrao
-- Chama as edge functions existentes sequencialmente via fetch interno (Supabase service URL)
-- Retorna progresso via streaming SSE para feedback em tempo real
-- Timeout de 300s (estudos levam tempo para processar)
+### Arquivo modificado:
+- `src/components/landing/VisionSection.tsx` -- substituir o bloco das linhas 53-71 (7x faster visual) pelo novo infografico
 
-### Modificacoes no Frontend
-- **KnowledgeGraphTab.tsx**: Adicionar botao "Enriquecer com Estudos Reais" com dialog de progresso
-- Novo componente `EnrichKnowledgeGraphDialog.tsx` com:
-  - Lista de queries editaveis
-  - Progresso por estudo (barra + log)
-  - Resumo final
+### Traducoes a adicionar:
+Novas chaves em `landing.vision.translational.*`:
+- `timelineTitle`, `dogTimeline`, `humanTimeline`
+- `puppy`, `adult`, `senior`, `geriatric` (marcos)
+- `interventionWindow`, `treatmentStart`
+- `dogResults` ("Resultados em 2-3 anos")
+- `humanResults` ("Equivalente humano: 15-20 anos")
+- `statisticalTitle`
+- `stat1` ("Analises interinas permitem conclusoes antes do desfecho final")
+- `stat2` ("Curvas de sobrevivencia detectam efeitos com ~60% dos eventos")
+- `stat3` ("Endpoints compostos aceleram ainda mais a deteccao")
+- `reference` ("Baseado no design do TRIAD - Dog Aging Project, Nature 2022")
 
-### Arquivos a criar/modificar:
-1. `supabase/functions/enrich-knowledge-graph/index.ts` (nova edge function)
-2. `src/components/administrador/knowledge-graph/EnrichKnowledgeGraphDialog.tsx` (novo componente)
-3. `src/components/administrador/knowledge-graph/KnowledgeGraphTab.tsx` (adicionar botao)
-4. Arquivos de traducao PT/EN
-5. `src/i18n.ts` (incrementar versao)
+### Arquivos afetados:
+1. `src/components/landing/VisionSection.tsx` -- novo infografico
+2. `src/locales/pt/translation.json` -- chaves PT
+3. `src/locales/en/translation.json` -- chaves EN
+4. `src/i18n.ts` -- incrementar versao
 
-### Riscos e Mitigacoes
-- **PDFs inacessiveis**: O download-study-pdf ja lida com isso, estudos sem PDF serao pulados
-- **Timeout**: Se 5 estudos excederem o timeout, processar em lotes menores
-- **Qualidade dos triplets**: Usar threshold de 70% para auto-aprovacao (mais permissivo para enriquecimento rapido)
-
+### Implementacao visual:
+- Puro CSS/Tailwind + Framer Motion (sem bibliotecas de chart)
+- Barras proporcionais com gradientes sutis
+- Badges para marcos etarios
+- Cards com bordas finas e icones Lucide
+- Mantendo o estilo clean/minimalista atual da landing page
