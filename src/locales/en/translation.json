@@ -5226,7 +5226,20 @@
       "metric1": "Largest pet market worldwide",
       "metric2": "Annual market growth rate",
       "metric3": "Annual pet market revenue",
-      "metric4": "Of dogs are adults/seniors eligible for geroprotection"
+      "metric4": "Of dogs are adults/seniors eligible for geroprotection",
+      "b2cTitle": "Already in Market",
+      "b2cDesc": "Our B2C platform petmoretime.com.br is already selling personalized geroprotective treatments directly to pet owners, validating the business model and generating real-world outcome data.",
+      "b2cLink": "Visit petmoretime.com.br →",
+      "monetizationTitle": "Win-Win Business Model",
+      "monetizationDesc": "Monetization through mass-scale sale of preventive geroprotective treatments to PetLove's 1.4M plan members — creating value for everyone.",
+      "winPetloveTitle": "PetLove Wins",
+      "winPetlove": "Reduces long-term costs by preventing expensive degenerative diseases in plan members.",
+      "winTutorsTitle": "Pet Owners Win",
+      "winTutors": "Healthier, longer-lived companions through accessible preventive treatments.",
+      "winScienceTitle": "Science Wins",
+      "winScience": "Longitudinal outcome data from 1.4M dogs accelerates translational discoveries for human geroscience.",
+      "winPlatformTitle": "Platform Wins",
+      "winPlatform": "Monetizes at scale through the largest accessible veterinary cohort in Latin America."
     },
     "investment": {
       "badge": "Investment Opportunity",
