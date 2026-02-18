@@ -1,80 +1,74 @@
 
-# Plano: Logos PetLove/PAMEC + Grafico TAM/SAM/SOM com imagem
+# Plano: Roadmap com 6 Fases + Progresso Visual
 
-## 2 Mudancas
+## Mudanca
 
-### a) Substituir icones por logos reais (PetLove e PAMEC)
+Atualizar o roadmap de 4 para 6 fases com indicadores de progresso percentual e novos conteudos estrategicos.
 
-Na OpportunitySection, os cards PetLove e PAMEC usam icones genericos (Database e Shield do Lucide). Vamos:
+### Novas 6 Fases
 
-1. Copiar o SVG do PetLove (`user-uploads://pet-love.svg`) para `src/assets/petlove-logo.svg`
-2. Copiar a imagem do PAMEC (`user-uploads://Screenshot_2026-02-18_at_00.08.24.png`) para `src/assets/pamec-logo.png`
-3. No `OpportunitySection.tsx`:
-   - Importar ambos os logos como modulos ES6
-   - Substituir `<Database>` por `<img src={petloveLogo}>` (altura ~28px)
-   - Substituir `<Shield>` por `<img src={pamecLogo}>` (altura ~32px)
-   - Remover imports de `Database` e `Shield` do lucide-react
+| # | Titulo EN | Titulo PT | Status | Progresso |
+|---|-----------|-----------|--------|-----------|
+| 1 | Knowledge Base | Base de Conhecimento | Done | 100% |
+| 2 | Patient System | Sistema de Pacientes | Done | 100% |
+| 3 | Recommendation Engine | Motor de Recomendacao | 90% | 90% |
+| 4 | Go-to-Market | Go-to-Market | Done | 100% |
+| 5 | Health Plan Integration | Integracao Plano de Saude | 10% | 10% |
+| 6 | Scale: Discoveries, Patents and Monetization | Escala: Descobertas, Patentes e Monetizacao | Planned | 0% |
 
-### b) Substituir grafico TAM/SAM/SOM por imagem do usuario
+### Mudancas Visuais
 
-O grafico atual em CSS puro tem problemas de sobreposicao. O usuario enviou uma versao melhor (foto 4 - Screenshot_2026-02-18_at_00.10.39.png) que mostra o layout ideal com circulos sobrepostos estilo Venn + metricas laterais com barras de segmentacao.
-
-1. Copiar `user-uploads://Screenshot_2026-02-18_at_00.10.39.png` para `src/assets/tam-sam-som.png`
-2. No `MarketSection.tsx`:
-   - Importar a imagem
-   - Substituir todo o bloco de circulos concentricos CSS (linhas 44-90) por uma unica `<img>` com a imagem importada
-   - Manter max-width de ~500px e responsividade
-   - Remover as metricas laterais (3rd, 14%+, US$12B, 33%) pois ja estao na imagem
+- Cards com barra de progresso (Progress component) mostrando % de conclusao
+- Fase 3: icone parcial (circlo com 90%) em amarelo/amber
+- Fase 4: check verde (concluida)
+- Fase 5: icone parcial (10%) em azul
+- Fase 6: icone vazio (planejada)
+- Status textual abaixo da barra: "Done", "90%", "10%", "Planned"
 
 ---
 
 ## Secao Tecnica
 
-### Arquivos a Criar/Copiar
-
-| Origem | Destino |
-|--------|---------|
-| `user-uploads://pet-love.svg` | `src/assets/petlove-logo.svg` |
-| `user-uploads://Screenshot_2026-02-18_at_00.08.24.png` | `src/assets/pamec-logo.png` |
-| `user-uploads://Screenshot_2026-02-18_at_00.10.39.png` | `src/assets/tam-sam-som.png` |
-
 ### Arquivos a Modificar
 
 | Arquivo | Modificacao |
 |---------|-------------|
-| `src/components/landing/OpportunitySection.tsx` | Trocar icones Database/Shield por logos importados |
-| `src/components/landing/MarketSection.tsx` | Trocar grafico CSS por imagem TAM/SAM/SOM |
-| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.44 |
+| `src/components/landing/InvestmentSection.tsx` | Expandir roadmap para 6 fases com progresso |
+| `src/locales/en/translation.json` | Atualizar textos das fases 3-4, adicionar fases 5-6 |
+| `src/locales/pt/translation.json` | Mesmo em portugues |
+| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.45 |
 
-### OpportunitySection - Mudancas
+### InvestmentSection.tsx - Mudancas
 
+Roadmap array atualizado:
 ```tsx
-// Adicionar imports
-import petloveLogo from '@/assets/petlove-logo.svg';
-import pamecLogo from '@/assets/pamec-logo.png';
-
-// PetLove card - trocar <Database> por:
-<img src={petloveLogo} alt="PetLove" className="h-7 w-auto" />
-
-// PAMEC card - trocar <Shield> por:
-<img src={pamecLogo} alt="PAMEC" className="h-8 w-auto" />
+const roadmap = [
+  { key: 'phase1', done: true, progress: 100 },
+  { key: 'phase2', done: true, progress: 100 },
+  { key: 'phase3', done: false, progress: 90 },
+  { key: 'phase4', done: true, progress: 100 },
+  { key: 'phase5', done: false, progress: 10 },
+  { key: 'phase6', done: false, progress: 0 },
+];
 ```
 
-### MarketSection - Mudancas
+Cards com layout em grid 3x2 em desktop (grid-cols-3) e barra de progresso visual em cada card.
 
-Substituir o bloco de circulos concentricos (div com width/height 420) e as metricas laterais por:
+Logica de icone:
+- `progress === 100` -> CheckCircle2 verde
+- `progress > 0` -> Circle com texto do % em amber
+- `progress === 0` -> Circle vazio cinza
 
-```tsx
-import tamSamSomChart from '@/assets/tam-sam-som.png';
+### Traducoes EN (novas/modificadas)
 
-// Substituir todo o flex container com circulos + metricas por:
-<motion.div variants={fadeUp} custom={0} className="flex justify-center">
-  <img 
-    src={tamSamSomChart} 
-    alt="TAM 85M dogs / SAM 28M dogs / SOM 5.6M premium dogs" 
-    className="w-full max-w-4xl rounded-2xl"
-  />
-</motion.div>
-```
+- phase3.desc: "AI-powered personalized geroprotective protocols. 90% complete."
+- phase4.phase: "Phase 4", title: "Go-to-Market", desc: "Commercial launch strategy, partnerships, initial customer acquisition. Done."
+- phase5.phase: "Phase 5", title: "Health Plan Integration", desc: "Pet health insurance integration, recurring revenue model. Early stage."
+- phase6.phase: "Phase 6", title: "Scale: Discoveries and Patents", desc: "Translational discoveries, IP portfolio, monetization via health plans at scale."
 
-Isso remove ~60 linhas de CSS complexo e usa a imagem profissional do usuario.
+### Traducoes PT (novas/modificadas)
+
+- phase3.desc: "Protocolos geroprotetores personalizados com IA. 90% concluido."
+- phase4: "Go-to-Market", "Estrategia de lancamento comercial, parcerias, aquisicao inicial de clientes. Concluido."
+- phase5: "Integracao Plano de Saude", "Integracao com seguros de saude pet, modelo de receita recorrente. Estagio inicial."
+- phase6: "Escala: Descobertas e Patentes", "Descobertas translacionais, portfolio de PI, monetizacao via planos de saude em escala."
