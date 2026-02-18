@@ -830,6 +830,25 @@
       }
     }
   },
+  "enrich": {
+    "title": "Enriquecer Knowledge Graph",
+    "description": "Busque, baixe, extraia e auto-aprove estudos científicos reais para enriquecer o grafo de conhecimento.",
+    "button": "Enriquecer com Estudos",
+    "buttonTooltip": "Buscar, baixar e processar estudos científicos reais para enriquecer o grafo de conhecimento",
+    "queries": "Queries de Busca",
+    "addQuery": "Adicionar query personalizada...",
+    "start": "Iniciar Enriquecimento",
+    "progress": "Processando query {{current}} de {{total}}",
+    "summary": {
+      "studies": "Estudos Processados",
+      "triplets": "Triplets Criados",
+      "approved": "Auto-Aprovados"
+    },
+    "log": {
+      "starting": "Iniciando enriquecimento com {{count}} queries...",
+      "complete": "Completo! {{studies}} estudos, {{triplets}} triplets, {{approved}} aprovados"
+    }
+  },
   "common": {
     "madeWith": "Feito com",
     "by": "por",

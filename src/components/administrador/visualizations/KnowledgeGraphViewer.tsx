@@ -19,7 +19,8 @@ import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar'
 import { GraphLimitSlider } from './GraphLimitSlider';
 import { KnowledgeGraph3D } from './KnowledgeGraph3D';
 import { KnowledgeGraphStatsSection } from './kg-stats';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square } from 'lucide-react';
+import { EnrichKnowledgeGraphDialog } from './EnrichKnowledgeGraphDialog';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -112,6 +113,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   
   // New states for configurable limit and 3D toggle
   const [edgeLimit, setEdgeLimit] = useState(500);
+  const [enrichDialogOpen, setEnrichDialogOpen] = useState(false);
   const [use3DGraph, setUse3DGraph] = useState(false);
 
   useEffect(() => {
@@ -670,6 +672,22 @@ export const KnowledgeGraphViewer: React.FC = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                variant="default"
+                size="sm"
+                onClick={() => setEnrichDialogOpen(true)}
+                className="gap-1.5"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('enrich.button', 'Enrich with Studies')}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[250px]">
+              <p>{t('enrich.buttonTooltip', 'Search, download and process real scientific studies to enrich the knowledge graph')}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={testNeo4jConnection}
@@ -1189,6 +1207,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
         open={nodeDetailsSidebarOpen}
         onOpenChange={setNodeDetailsSidebarOpen}
         nodeData={selectedNodeDetails}
+      />
+
+      {/* Enrich Knowledge Graph Dialog */}
+      <EnrichKnowledgeGraphDialog
+        open={enrichDialogOpen}
+        onOpenChange={setEnrichDialogOpen}
       />
     </TooltipProvider>
   );
