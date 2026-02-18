@@ -84,7 +84,7 @@ const InvestmentSection: React.FC = () => {
                 <div key={phase.key} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2 mb-3">
                     {phase.progress === 100 ? (
-                      <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+                      <span className="text-xs font-bold text-emerald-500 shrink-0">100%</span>
                     ) : phase.progress > 0 ? (
                       <span className="text-xs font-bold text-amber-500 shrink-0">{phase.progress}%</span>
                     ) : (
