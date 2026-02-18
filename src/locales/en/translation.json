@@ -1039,6 +1039,8 @@
       "domainNotAllowedDesc": "Only @stanford.edu and @gmail.com emails are allowed",
       "errorSignIn": "Error signing in with Google"
     },
+    "or": "or",
+    "continueWithoutLogin": "Continue without signing in",
     "accessPending": {
       "title": "Access Request Submitted",
       "description": "Your access request to the VetGeroTherapy platform has been submitted successfully. An administrator will review your request shortly.",
