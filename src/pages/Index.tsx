@@ -98,14 +98,25 @@ const Index: React.FC = () => {
                     <p className="text-gray-500 mb-4">
                       {t('home.researchAreaDesc')}
                     </p>
-                    <Link to="/administrador">
-                      <Button 
-                        variant="outline" 
-                        className="w-full flex items-center justify-center gap-1"
-                      >
-                        {t('home.researchAreaButton')} <ArrowRight size={16} />
-                      </Button>
-                    </Link>
+                    <div className="relative">
+                      <Link to="/administrador">
+                        <Button 
+                          variant="outline" 
+                          className="w-full flex items-center justify-center gap-1"
+                        >
+                          {t('home.researchAreaButton')} <ArrowRight size={16} />
+                        </Button>
+                      </Link>
+                      {/* Red arrow callout */}
+                      <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full flex items-center gap-1 animate-pulse">
+                        <svg width="32" height="24" viewBox="0 0 32 24" fill="none" className="rotate-180">
+                          <path d="M0 12H28M28 12L18 2M28 12L18 22" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="text-red-500 font-bold text-sm whitespace-nowrap italic" style={{ fontFamily: 'cursive' }}>
+                          visite aqui!
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
