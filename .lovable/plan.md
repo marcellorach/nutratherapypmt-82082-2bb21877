@@ -1,74 +1,60 @@
 
-# Plano: Roadmap com 6 Fases + Progresso Visual
 
-## Mudanca
+# Plano: Enriquecimento Automatizado do Knowledge Graph com Estudos Reais
 
-Atualizar o roadmap de 4 para 6 fases com indicadores de progresso percentual e novos conteudos estrategicos.
+## Objetivo
+Criar uma edge function que busca estudos cientificos reais sobre longevidade canina/geroprotetores no PubMed/OpenAlex, baixa os PDFs, processa com Gemini, gera triplets e aprova tudo automaticamente -- enriquecendo o Knowledge Graph de ponta a ponta.
 
-### Novas 6 Fases
+## Abordagem
 
-| # | Titulo EN | Titulo PT | Status | Progresso |
-|---|-----------|-----------|--------|-----------|
-| 1 | Knowledge Base | Base de Conhecimento | Done | 100% |
-| 2 | Patient System | Sistema de Pacientes | Done | 100% |
-| 3 | Recommendation Engine | Motor de Recomendacao | 90% | 90% |
-| 4 | Go-to-Market | Go-to-Market | Done | 100% |
-| 5 | Health Plan Integration | Integracao Plano de Saude | 10% | 10% |
-| 6 | Scale: Discoveries, Patents and Monetization | Escala: Descobertas, Patentes e Monetizacao | Planned | 0% |
+Criar uma nova edge function `enrich-knowledge-graph` que orquestra todo o pipeline existente em sequencia para cada estudo encontrado.
 
-### Mudancas Visuais
+### Pipeline por estudo:
+1. **Buscar estudos** via `search-scientific-studies` (PubMed/OpenAlex) com queries sobre geroprotetores caninos
+2. **Baixar PDF** via `download-study-pdf` 
+3. **Extrair dados** via `gemini-file-search` (extrai entidades, dosagens, etc.)
+4. **Gerar triplets** via `generate-triplets`
+5. **Auto-aprovar** triplets com confianca >= 70% e marcar estudo como "approved"
+6. **Consolidar** via `consolidate-knowledge-graph`
+7. **Sincronizar Neo4j** via `sync-study-to-neo4j`
 
-- Cards com barra de progresso (Progress component) mostrando % de conclusao
-- Fase 3: icone parcial (circlo com 90%) em amarelo/amber
-- Fase 4: check verde (concluida)
-- Fase 5: icone parcial (10%) em azul
-- Fase 6: icone vazio (planejada)
-- Status textual abaixo da barra: "Done", "90%", "10%", "Planned"
+### Queries de busca propostas (5 estudos):
+- "curcumin canine aging neuroprotection"
+- "omega-3 fatty acids dog osteoarthritis longevity"
+- "resveratrol canine cardiac aging"
+- "NAD+ NMN canine geriatric supplementation"
+- "probiotics gut microbiome elderly dogs"
 
----
+### Interface no Admin
+Adicionar um botao "Enriquecer Knowledge Graph" na tab Knowledge Graph que:
+- Mostra progresso em tempo real (estudo 1/5, etapa atual)
+- Lista estudos encontrados e status de cada um
+- Ao final, exibe resumo (X estudos, Y triplets, Z novas conexoes)
 
-## Secao Tecnica
+## Detalhes Tecnicos
 
-### Arquivos a Modificar
+### Nova Edge Function: `enrich-knowledge-graph`
+- Recebe: lista de queries ou usa queries padrao
+- Chama as edge functions existentes sequencialmente via fetch interno (Supabase service URL)
+- Retorna progresso via streaming SSE para feedback em tempo real
+- Timeout de 300s (estudos levam tempo para processar)
 
-| Arquivo | Modificacao |
-|---------|-------------|
-| `src/components/landing/InvestmentSection.tsx` | Expandir roadmap para 6 fases com progresso |
-| `src/locales/en/translation.json` | Atualizar textos das fases 3-4, adicionar fases 5-6 |
-| `src/locales/pt/translation.json` | Mesmo em portugues |
-| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.45 |
+### Modificacoes no Frontend
+- **KnowledgeGraphTab.tsx**: Adicionar botao "Enriquecer com Estudos Reais" com dialog de progresso
+- Novo componente `EnrichKnowledgeGraphDialog.tsx` com:
+  - Lista de queries editaveis
+  - Progresso por estudo (barra + log)
+  - Resumo final
 
-### InvestmentSection.tsx - Mudancas
+### Arquivos a criar/modificar:
+1. `supabase/functions/enrich-knowledge-graph/index.ts` (nova edge function)
+2. `src/components/administrador/knowledge-graph/EnrichKnowledgeGraphDialog.tsx` (novo componente)
+3. `src/components/administrador/knowledge-graph/KnowledgeGraphTab.tsx` (adicionar botao)
+4. Arquivos de traducao PT/EN
+5. `src/i18n.ts` (incrementar versao)
 
-Roadmap array atualizado:
-```tsx
-const roadmap = [
-  { key: 'phase1', done: true, progress: 100 },
-  { key: 'phase2', done: true, progress: 100 },
-  { key: 'phase3', done: false, progress: 90 },
-  { key: 'phase4', done: true, progress: 100 },
-  { key: 'phase5', done: false, progress: 10 },
-  { key: 'phase6', done: false, progress: 0 },
-];
-```
+### Riscos e Mitigacoes
+- **PDFs inacessiveis**: O download-study-pdf ja lida com isso, estudos sem PDF serao pulados
+- **Timeout**: Se 5 estudos excederem o timeout, processar em lotes menores
+- **Qualidade dos triplets**: Usar threshold de 70% para auto-aprovacao (mais permissivo para enriquecimento rapido)
 
-Cards com layout em grid 3x2 em desktop (grid-cols-3) e barra de progresso visual em cada card.
-
-Logica de icone:
-- `progress === 100` -> CheckCircle2 verde
-- `progress > 0` -> Circle com texto do % em amber
-- `progress === 0` -> Circle vazio cinza
-
-### Traducoes EN (novas/modificadas)
-
-- phase3.desc: "AI-powered personalized geroprotective protocols. 90% complete."
-- phase4.phase: "Phase 4", title: "Go-to-Market", desc: "Commercial launch strategy, partnerships, initial customer acquisition. Done."
-- phase5.phase: "Phase 5", title: "Health Plan Integration", desc: "Pet health insurance integration, recurring revenue model. Early stage."
-- phase6.phase: "Phase 6", title: "Scale: Discoveries and Patents", desc: "Translational discoveries, IP portfolio, monetization via health plans at scale."
-
-### Traducoes PT (novas/modificadas)
-
-- phase3.desc: "Protocolos geroprotetores personalizados com IA. 90% concluido."
-- phase4: "Go-to-Market", "Estrategia de lancamento comercial, parcerias, aquisicao inicial de clientes. Concluido."
-- phase5: "Integracao Plano de Saude", "Integracao com seguros de saude pet, modelo de receita recorrente. Estagio inicial."
-- phase6: "Escala: Descobertas e Patentes", "Descobertas translacionais, portfolio de PI, monetizacao via planos de saude em escala."
