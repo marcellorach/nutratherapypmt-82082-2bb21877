@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ExternalLink, Heart, PawPrint, FlaskConical, Rocket } from 'lucide-react';
 import tamSamSomChart from '@/assets/tam-sam-som.png';
+import petMoreTimeLogo from '@/assets/petmoretime-logo.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -79,8 +80,8 @@ const MarketSection: React.FC = () => {
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
-            <div className="shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center border border-emerald-200">
-              <PawPrint className="w-8 h-8 text-emerald-600" />
+            <div className="shrink-0 w-20 h-20 rounded-2xl bg-white flex items-center justify-center">
+              <img src={petMoreTimeLogo} alt="PetMoreTime" className="w-full h-full object-contain rounded-2xl" />
             </div>
           </motion.div>
         </motion.div>
