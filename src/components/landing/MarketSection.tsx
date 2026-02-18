@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ExternalLink, Heart, PawPrint, FlaskConical, Rocket } from 'lucide-react';
+import tamSamSomChart from '@/assets/tam-sam-som.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -40,68 +41,12 @@ const MarketSection: React.FC = () => {
           className="flex flex-col md:flex-row items-center gap-12"
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
         >
-          {/* Concentric circles TAM/SAM/SOM — redesigned */}
-          <motion.div variants={fadeUp} custom={0} className="flex-1 flex items-center justify-center">
-            <div className="relative" style={{ width: 420, height: 420 }}>
-              {/* TAM — outer ring */}
-              <div
-                className="absolute inset-0 rounded-full flex flex-col items-center justify-start pt-5"
-                style={{
-                  background: 'radial-gradient(circle, transparent 52%, #f3f4f6 53%)',
-                  border: '2px solid #e5e7eb',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-                }}
-              >
-                <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">TAM</span>
-                <span className="text-3xl font-black text-gray-900 leading-tight">85M</span>
-                <span className="text-[10px] text-gray-500 text-center leading-tight">Companion dogs in Brazil</span>
-              </div>
-
-              {/* SAM — middle ring */}
-              <div
-                className="absolute rounded-full flex flex-col items-center justify-start pt-4"
-                style={{
-                  top: 80, left: 80, right: 80, bottom: 80,
-                  background: 'radial-gradient(circle, transparent 46%, #e5e7eb 47%)',
-                  border: '2px solid #d1d5db',
-                  boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
-                }}
-              >
-                <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">SAM</span>
-                <span className="text-2xl font-black text-gray-800 leading-tight">28M</span>
-                <span className="text-[10px] text-gray-500 text-center leading-tight">Adults + seniors</span>
-              </div>
-
-              {/* SOM — center circle */}
-              <div
-                className="absolute rounded-full flex flex-col items-center justify-center"
-                style={{
-                  top: 155, left: 155, right: 155, bottom: 155,
-                  background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
-                  border: '2px solid #374151',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                }}
-              >
-                <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">SOM</span>
-                <span className="text-xl font-black text-white leading-tight">5.6M</span>
-                <span className="text-[9px] text-gray-400 text-center leading-tight">Premium segment</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Side metrics */}
-          <motion.div variants={fadeUp} custom={1} className="flex-1 space-y-4">
-            {[
-              { value: '3rd', label: t('landing.market.metric1') },
-              { value: '14%+', label: t('landing.market.metric2') },
-              { value: 'US$12B', label: t('landing.market.metric3') },
-              { value: '33%', label: t('landing.market.metric4') },
-            ].map((m, i) => (
-              <div key={i} className="flex items-center gap-4 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                <div className="text-2xl font-black text-gray-900 min-w-[80px]">{m.value}</div>
-                <p className="text-sm text-gray-600">{m.label}</p>
-              </div>
-            ))}
+          <motion.div variants={fadeUp} custom={0} className="flex justify-center">
+            <img 
+              src={tamSamSomChart} 
+              alt="TAM 85M dogs / SAM 28M dogs / SOM 5.6M premium dogs" 
+              className="w-full max-w-4xl rounded-2xl"
+            />
           </motion.div>
         </motion.div>
 
