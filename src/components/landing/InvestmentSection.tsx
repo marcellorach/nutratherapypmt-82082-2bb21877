@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Calendar, FileText, CheckCircle2, Circle, Mail, Phone, X } from 'lucide-react';
+import { Calendar, FileText, CheckCircle2, Circle, Mail, Phone } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -16,10 +17,12 @@ const fadeUp = {
 const moats = ['moat1', 'moat2', 'moat3', 'moat4'];
 
 const roadmap = [
-  { key: 'phase1', done: true },
-  { key: 'phase2', done: true },
-  { key: 'phase3', done: false },
-  { key: 'phase4', done: false },
+  { key: 'phase1', progress: 100 },
+  { key: 'phase2', progress: 100 },
+  { key: 'phase3', progress: 90 },
+  { key: 'phase4', progress: 100 },
+  { key: 'phase5', progress: 10 },
+  { key: 'phase6', progress: 0 },
 ];
 
 const InvestmentSection: React.FC = () => {
@@ -69,19 +72,27 @@ const InvestmentSection: React.FC = () => {
           <motion.h3 variants={fadeUp} custom={0} className="text-2xl font-bold text-center mb-8">
             {t('landing.investment.roadmapTitle')}
           </motion.h3>
-          <motion.div variants={fadeUp} custom={1} className="flex flex-col md:flex-row gap-4">
-            {roadmap.map((phase, i) => (
-              <div key={phase.key} className={`flex-1 rounded-xl p-6 border ${phase.done ? 'bg-gray-700 border-gray-600' : 'bg-gray-800 border-gray-700'}`}>
+          <motion.div variants={fadeUp} custom={1} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {roadmap.map((phase) => (
+              <div key={phase.key} className={`rounded-xl p-6 border ${phase.progress === 100 ? 'bg-gray-700 border-gray-600' : 'bg-gray-800 border-gray-700'}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  {phase.done ? (
+                  {phase.progress === 100 ? (
                     <CheckCircle2 size={18} className="text-emerald-400" />
+                  ) : phase.progress > 0 ? (
+                    <span className="text-xs font-bold text-amber-400 w-[18px] h-[18px] flex items-center justify-center">{phase.progress}%</span>
                   ) : (
                     <Circle size={18} className="text-gray-500" />
                   )}
                   <span className="text-xs font-semibold text-gray-400 uppercase">{t(`landing.investment.${phase.key}.phase`)}</span>
                 </div>
                 <h4 className="font-bold mb-1">{t(`landing.investment.${phase.key}.title`)}</h4>
-                <p className="text-xs text-gray-500">{t(`landing.investment.${phase.key}.desc`)}</p>
+                <p className="text-xs text-gray-500 mb-3">{t(`landing.investment.${phase.key}.desc`)}</p>
+                <div className="space-y-1">
+                  <Progress value={phase.progress} className="h-1.5 bg-gray-600" />
+                  <p className="text-[10px] text-gray-500 text-right">
+                    {phase.progress === 100 ? 'Done' : phase.progress === 0 ? 'Planned' : `${phase.progress}%`}
+                  </p>
+                </div>
               </div>
             ))}
           </motion.div>

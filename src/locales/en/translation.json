@@ -5277,12 +5277,22 @@
       "phase3": {
         "phase": "Phase 3",
         "title": "Recommendation Engine",
-        "desc": "AI-powered personalized geroprotective treatment protocols. In progress."
+        "desc": "AI-powered personalized geroprotective protocols. 90% complete."
       },
       "phase4": {
         "phase": "Phase 4",
-        "title": "Longitudinal Studies",
-        "desc": "Cohort follow-up, translational discovery pipeline, ML feedback loop."
+        "title": "Go-to-Market",
+        "desc": "Commercial launch strategy, partnerships, initial customer acquisition. Done."
+      },
+      "phase5": {
+        "phase": "Phase 5",
+        "title": "Health Plan Integration",
+        "desc": "Pet health insurance integration, recurring revenue model. Early stage."
+      },
+      "phase6": {
+        "phase": "Phase 6",
+        "title": "Scale: Discoveries & Patents",
+        "desc": "Translational discoveries, IP portfolio, monetization via health plans at scale."
       },
       "cta1": "Schedule a Meeting",
       "cta2": "Request Pitch Deck"

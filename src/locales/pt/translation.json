@@ -5277,12 +5277,22 @@
       "phase3": {
         "phase": "Fase 3",
         "title": "Motor de Recomendação",
-        "desc": "Protocolos de tratamento geroprotetor personalizados com IA. Em andamento."
+        "desc": "Protocolos geroprotetores personalizados com IA. 90% concluído."
       },
       "phase4": {
         "phase": "Fase 4",
-        "title": "Estudos Longitudinais",
-        "desc": "Acompanhamento de coorte, pipeline de descoberta translacional, loop de feedback ML."
+        "title": "Go-to-Market",
+        "desc": "Estratégia de lançamento comercial, parcerias, aquisição inicial de clientes. Concluído."
+      },
+      "phase5": {
+        "phase": "Fase 5",
+        "title": "Integração Plano de Saúde",
+        "desc": "Integração com seguros de saúde pet, modelo de receita recorrente. Estágio inicial."
+      },
+      "phase6": {
+        "phase": "Fase 6",
+        "title": "Escala: Descobertas e Patentes",
+        "desc": "Descobertas translacionais, portfólio de PI, monetização via planos de saúde em escala."
       },
       "cta1": "Agendar Reunião",
       "cta2": "Solicitar Pitch Deck"
