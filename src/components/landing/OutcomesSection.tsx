@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { TrendingDown, Search, ArrowLeftRight, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowLeftRight, Users } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -12,8 +12,8 @@ const fadeUp = {
 };
 
 const metrics = [
-  { key: 'fewer', icon: TrendingDown, value: '20-30%' },
-  { key: 'detection', icon: Search, value: '~' },
+  { key: 'lifeExtension', icon: TrendingUp, value: '15-25%' },
+  { key: 'fewer', icon: TrendingDown, value: '40-70%' },
   { key: 'translational', icon: ArrowLeftRight, value: '→' },
   { key: 'personalized', icon: Users, value: '1.4M' },
 ];

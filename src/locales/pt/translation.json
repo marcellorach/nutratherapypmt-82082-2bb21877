@@ -5193,8 +5193,8 @@
       "badge": "Impacto Esperado",
       "title": "O Que Pretendemos Alcançar",
       "metrics": {
+        "lifeExtension": "Potencial de extensão da vida através de intervenções geroprotetoras",
         "fewer": "Menos doenças degenerativas através de geroproteção preventiva",
-        "detection": "Detecção precoce de riscos por predisposição genética racial",
         "translational": "Descobertas translacionais de cães para humanos",
         "personalized": "Cães recebendo tratamento personalizado em massa"
       },
@@ -5203,17 +5203,17 @@
         "golden": {
           "name": "Golden Retriever",
           "risk": "Displasia Coxofemoral — 60% de predisposição",
-          "approach": "Protocolo nutracêutico condroprotetor e anti-inflamatório direcionado, iniciando aos 2 anos."
+          "approach": "Curcumina (anti-inflamatório) + Rapamicina (inibidor mTOR para geroproteção sistêmica) — protocolo condroprotetor iniciando aos 2 anos."
         },
         "cavalier": {
           "name": "Cavalier King Charles",
           "risk": "Doença da Válvula Mitral — 70% até os 10 anos",
-          "approach": "Stack geroprotetor cardioprotetor com CoQ10, taurina e ômega-3 desde a idade adulta."
+          "approach": "Empagliflozina (cardioproteção SGLT2) + Rapamicina (geroproteção sistêmica) com CoQ10 e taurina desde a idade adulta."
         },
         "beagle": {
           "name": "Beagle",
           "risk": "Epilepsia — 6% de incidência",
-          "approach": "Compostos neuroprotetores direcionados às vias GABA com monitoramento contínuo de resultados."
+          "approach": "Apigenina (neuroproteção GABAérgica) + Dapagliflozina (neuroproteção SGLT2) com monitoramento contínuo de resultados."
         }
       }
     },
