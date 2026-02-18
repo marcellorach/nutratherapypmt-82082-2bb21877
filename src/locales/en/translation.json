@@ -930,15 +930,15 @@
     }
   },
   "home": {
-    "title": "NutraTherapy PET",
+    "title": "VetGeroTherapy PET",
     "subtitle": "Evidence-based nutraceutical therapy platform powered by 267 peer-reviewed studies analyzing 35 active compounds across 95 health conditions, achieving a 4.2/5 efficacy index through AI-driven personalized recommendations",
     "platformAccess": "Access the Platform",
-    "platformAccessDesc": "Log in to access all features of the NutraTherapy PET system. Our platform offers personalized solutions for tutors, veterinarians and researchers.",
+    "platformAccessDesc": "Log in to access all features of the VetGeroTherapy PET system. Our platform offers personalized solutions for tutors, veterinarians and researchers.",
     "loginButton": "Enter Platform",
     "welcomeBack": "Welcome back!",
     "connectedAs": "You're signed in as",
     "forTutors": "Owner Portal",
-    "forTutorsDesc": "Follow the PETs enrolled in NutraTherapy and monitor their personalized nutraceutical treatment plan.",
+    "forTutorsDesc": "Follow the PETs enrolled in VetGeroTherapy and monitor their personalized nutraceutical treatment plan.",
     "forVeterinarians": "Veterinarian Portal",
     "forVeterinariansDesc": "Analyze clinical data and generate evidence-based treatment plans for verified veterinarians.",
     "forResearchDev": "Control Panel",
@@ -946,7 +946,7 @@
     "forAdmins": "For Administrators",
     "forAdminsDesc": "Manage system settings, users and platform integrations.",
     "tutorArea": "Owner Portal",
-    "tutorAreaDesc": "Follow the PETs enrolled in NutraTherapy and monitor their personalized nutraceutical treatment plan.",
+    "tutorAreaDesc": "Follow the PETs enrolled in VetGeroTherapy and monitor their personalized nutraceutical treatment plan.",
     "tutorAreaButton": "Go to Owner Portal",
     "veterinarianArea": "Veterinarian Portal",
     "veterinarianAreaDesc": "Analyze clinical data and generate evidence-based treatment plans. Restricted to verified veterinarians.",
@@ -970,8 +970,8 @@
     "register": "Register",
     "loginTitle": "Login",
     "registerTitle": "Register",
-    "loginDesc": "Access your NutraTherapy PET account",
-    "registerDesc": "Create your account on the NutraTherapy PET platform",
+    "loginDesc": "Access your VetGeroTherapy PET account",
+    "registerDesc": "Create your account on the VetGeroTherapy PET platform",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
@@ -998,7 +998,7 @@
     },
     "stanfordDemo": {
       "title": "Stanford Demo Access",
-      "description": "Enter your email to explore the NutraTherapy platform",
+      "description": "Enter your email to explore the VetGeroTherapy platform",
       "emailLabel": "Email",
       "emailPlaceholder": "yourname@stanford.edu",
       "accessButton": "Access Demo",
@@ -1010,7 +1010,7 @@
       "demoNote": "Demo accounts use simplified authentication for course access"
     },
     "googleAuth": {
-      "title": "Welcome to NutraTherapy",
+      "title": "Welcome to VetGeroTherapy",
       "description": "Sign in with your Google account to access the platform",
       "signInButton": "Continue with Google",
       "signingIn": "Signing in...",
@@ -1022,7 +1022,7 @@
     },
     "accessPending": {
       "title": "Access Request Submitted",
-      "description": "Your access request to the NutraTherapy platform has been submitted successfully. An administrator will review your request shortly.",
+      "description": "Your access request to the VetGeroTherapy platform has been submitted successfully. An administrator will review your request shortly.",
       "emailLabel": "Email",
       "requestedAt": "Requested at",
       "statusLabel": "Status",
@@ -1928,7 +1928,7 @@
     }
   },
   "footer": {
-    "copyright": "NutraTherapy Pet © 2025",
+    "copyright": "VetGeroTherapy Pet © 2025",
     "sloganLine1": "Extending Lives Through Precision Geroscience",
     "sloganLine2": "1.4 Million Dogs. Unlimited Discoveries.",
     "poweredBy": "Powered by",

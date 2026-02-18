@@ -158,7 +158,7 @@ const InvestmentSection: React.FC = () => {
                 <div className="space-y-3">
                   <p className="text-sm font-semibold text-gray-900 mb-3">Contact Marcello Rachlyn</p>
                   <a
-                    href="mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet"
+                    href="mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20VetGeroTherapy%20Pet"
                     className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     <Mail size={16} className="shrink-0" />

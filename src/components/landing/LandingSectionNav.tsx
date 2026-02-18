@@ -35,20 +35,30 @@ const LandingSectionNav: React.FC = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm animate-fade-in">
       <div className="max-w-6xl mx-auto px-4">
-        <nav className="flex items-center gap-1 overflow-x-auto py-3 scrollbar-none">
-          {sections.map((s) => (
-            <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
-                active === s
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
-              }`}
-            >
-              {t(`landing.nav.${s}`)}
-            </button>
-          ))}
+        <nav className="flex items-center justify-between py-3">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+            {sections.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                className={`px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
+                  active === s
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                {t(`landing.nav.${s}`)}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 ml-4 shrink-0">
+            <a href="/administrador" className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors whitespace-nowrap">
+              Control Panel
+            </a>
+            <a href="/veterinario" className="px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors whitespace-nowrap">
+              Vet Portal
+            </a>
+          </div>
         </nav>
       </div>
     </div>

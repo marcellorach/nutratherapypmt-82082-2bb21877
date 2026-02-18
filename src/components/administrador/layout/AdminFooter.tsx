@@ -6,7 +6,7 @@ const AdminFooter: React.FC = () => {
       <div className="px-6 py-4">
         {/* Copyright e descrição principal */}
         <div className="text-center text-sm mb-3">
-          NutraTherapy PET © {new Date().getFullYear()} - Sistema inteligente de recomendação de nutracêuticos para pets
+          VetGeroTherapy PET © {new Date().getFullYear()} - Sistema inteligente de recomendação de nutracêuticos para pets
         </div>
         
         {/* Seção Powered by com logos */}

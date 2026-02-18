@@ -23,12 +23,12 @@ const Header: React.FC = () => {
         <Link to="/" className="flex items-center gap-4">
           <img 
             src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png" 
-            alt="NutraTherapy"
+            alt="VetGeroTherapy"
             className="h-6"
           />
           <div className="flex flex-col leading-tight">
             <div className="text-lg font-bold text-gray-800 text-center">
-              NutraTherapy
+              VetGeroTherapy
             </div>
             <div className="text-xs text-gray-600 font-light text-center">
               {t('header.platformSubtitleLine1')}
