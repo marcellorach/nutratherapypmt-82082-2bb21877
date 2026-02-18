@@ -1,96 +1,109 @@
 
 
-# Plano: Melhorar Market Section + B2C + Monetização
+# Plano: Footer, CTAs, Acesso Livre e Gráfico TAM/SAM/SOM
 
-## 3 Mudanças
+## 4 Mudanças
 
-### a) Corrigir Gráfico TAM/SAM/SOM
+### a) Atualizar Slogan no Footer
 
-O gráfico atual tem problemas: os valores 85M e 28M ficam sobrepostos/cortados nos círculos concêntricos. A referência mostra círculos bem proporcionados com labels claros.
+O footer atual mostra: "NutraTherapy Pet (c) 2025 -- Scalable intelligent nutraceutical recommendation system for pets"
 
-**Solução:** Redesenhar completamente o infográfico com:
-- Círculos maiores (w-96 h-96 ao invés de w-80 h-80) para dar espaço
-- Labels TAM/SAM posicionadas **fora** dos círculos (acima e ao lado) para não sobrepor
-- Proporcionalidade visual correta entre TAM (externo, claro), SAM (meio, médio), SOM (centro, escuro)
-- Valores e descrições bem espaçados dentro de cada anel
-- Sombras sutis para dar profundidade como na referência
+Atualizar para o novo slogan em duas linhas:
+- Linha 1: "Extending Lives Through Precision Geroscience"  
+- Linha 2: "1.4 Million Dogs. Unlimited Discoveries."
+- Manter copyright separado: "NutraTherapy Pet (c) 2025"
 
-### b) Incluir petmoretime.com.br como Usuário Atual
+### b) Botao "Schedule a Meeting" com Contato Direto + Habilitar Segundo Botao
 
-Adicionar uma nova subseção abaixo do gráfico TAM/SAM/SOM mostrando que já existe um produto B2C ativo:
-- Card com destaque: "Already in Market" / "Já no Mercado"
-- Link para www.petmoretime.com.br
-- Contexto: plataforma B2C de venda de tratamentos geroprotetores personalizados para tutores de pets, validando o modelo de negócio
+No InvestmentSection, o botao "Schedule a Meeting" vai abrir um modal/popover com:
+- Email: marcello@lifespan.com.br (link mailto:)
+- WhatsApp: +55 11 97205-9371 (link wa.me)
 
-### c) Monetização: Venda em Massa de Tratamentos
+O botao "Request Pitch Deck" sera habilitado com link mailto para o mesmo email com assunto pre-preenchido.
 
-Adicionar subseção "Business Model" explicando:
-- Monetização via venda em massa de tratamentos geroprotetores para os integrantes do plano de saúde PetLove
-- Ganha-ganha: PetLove reduz custos com doenças degenerativas, tutores têm pets mais saudáveis, plataforma monetiza em escala, ciência avança com dados longitudinais
-- Modelo: tratamentos preventivos em escala a preço acessível, habilitado pela parceria de dados
+### c) Remover Toda Fricção de Login
 
-## Seção Técnica
+Remover ProtectedRoute de TODAS as rotas internas. Qualquer pessoa podera acessar /veterinario, /administrador, /tutor sem login. Isso significa:
+- Remover wrapper ProtectedRoute das rotas no App.tsx
+- As paginas ficarao acessiveis diretamente pela URL
+- O sistema de auth continua existindo (para quem quiser logar), mas nao bloqueia acesso
+
+### d) Melhorar Gráfico TAM/SAM/SOM
+
+Problemas visíveis na screenshot: labels "85M" e "Brazil" sobrepondo com SAM. Melhorias:
+- Aumentar container para 420x420px
+- Melhorar espacamento entre aneis (TAM inset 0, SAM inset 80px, SOM inset 155px)
+- Labels do TAM posicionados mais acima (pt-5) com fonte maior
+- Labels do SAM com mais padding top para nao sobrepor com descricao do TAM
+- Descricoes mais curtas para caber nos aneis
+
+### e) Upload de Imagens
+
+Sim, voce pode enviar imagens e eu as incluo no site. Basta enviar na proxima mensagem.
+
+---
+
+## Secao Tecnica
 
 ### Arquivos a Modificar
 
-| Arquivo | Modificação |
+| Arquivo | Modificacao |
 |---------|-------------|
-| `src/components/landing/MarketSection.tsx` | Redesenhar gráfico TAM/SAM/SOM com proporções corretas; adicionar subseção B2C (petmoretime.com.br) e subseção Business Model (monetização ganha-ganha) |
-| `src/locales/en/translation.json` | Adicionar chaves `landing.market.b2c*`, `landing.market.monetization*` |
-| `src/locales/pt/translation.json` | Mesmo em português |
-| `src/i18n.ts` | Incrementar I18N_VERSION de 1.9.40 para 1.9.41 |
+| `src/locales/en/translation.json` | Atualizar `footer.copyright` com novo slogan |
+| `src/locales/pt/translation.json` | Mesmo em portugues |
+| `src/components/landing/InvestmentSection.tsx` | CTA1 abre popover com email+WhatsApp; CTA2 abre mailto com assunto "Pitch Deck Request" |
+| `src/App.tsx` | Remover ProtectedRoute de todas as rotas |
+| `src/components/landing/MarketSection.tsx` | Ajustar dimensoes e espacamentos do grafico TAM/SAM/SOM |
+| `src/components/layout/Footer.tsx` | Reestruturar para mostrar slogan em duas linhas |
+| `src/i18n.ts` | Incrementar I18N_VERSION para 1.9.43 |
 
-### Detalhes do Gráfico Corrigido
-
-O novo gráfico terá:
-- Container maior (400x400px) com posicionamento absoluto proporcional
-- TAM: círculo externo bg-gray-100 com borda fina, label "TAM" + "85M" posicionados no topo do anel (pt-8) com texto "Companion dogs in Brazil"
-- SAM: círculo médio (inset ~20%) bg-gray-200, label "SAM" + "28M" + "Adults + seniors (33%)"
-- SOM: círculo interno (inset ~40%) bg-gray-800 (escuro), "SOM" + "5.6M" + "Premium segment (20%)" em branco
-- Shadow sutil nos círculos para profundidade
-
-### Traduções Novas (EN)
-
-```
-landing.market.b2cTitle: "Already in Market"
-landing.market.b2cDesc: "Our B2C platform petmoretime.com.br is already selling personalized geroprotective treatments directly to pet owners, validating the business model and generating real-world outcome data."
-landing.market.b2cLink: "Visit petmoretime.com.br"
-landing.market.monetizationTitle: "Win-Win Business Model"
-landing.market.monetizationDesc: "Monetization through mass-scale sale of preventive geroprotective treatments to PetLove's 1.4M plan members — creating value for everyone."
-landing.market.winPetlove: "PetLove reduces long-term costs by preventing expensive degenerative diseases in plan members."
-landing.market.winTutors: "Pet owners get healthier, longer-lived companions through accessible preventive treatments."
-landing.market.winScience: "Longitudinal outcome data from 1.4M dogs accelerates translational discoveries for human geroscience."
-landing.market.winPlatform: "Platform monetizes at scale through the largest accessible veterinary cohort in Latin America."
-```
-
-### Traduções Novas (PT)
-
-```
-landing.market.b2cTitle: "Já no Mercado"
-landing.market.b2cDesc: "Nossa plataforma B2C petmoretime.com.br já vende tratamentos geroprotetores personalizados diretamente para tutores de pets, validando o modelo de negócio e gerando dados reais de resultados."
-landing.market.b2cLink: "Visite petmoretime.com.br"
-landing.market.monetizationTitle: "Modelo de Negócio Ganha-Ganha"
-landing.market.monetizationDesc: "Monetização através da venda em massa de tratamentos geroprotetores preventivos para os 1,4M de integrantes do plano PetLove — criando valor para todos."
-landing.market.winPetlove: "PetLove reduz custos de longo prazo prevenindo doenças degenerativas caras nos integrantes do plano."
-landing.market.winTutors: "Tutores têm companheiros mais saudáveis e longevos através de tratamentos preventivos acessíveis."
-landing.market.winScience: "Dados longitudinais de resultados de 1,4M de cães aceleram descobertas translacionais para gerociência humana."
-landing.market.winPlatform: "Plataforma monetiza em escala através do maior coorte veterinário acessível da América Latina."
-```
-
-### Estrutura Visual Final da Seção Market
+### Detalhes do Footer Atualizado
 
 ```text
-MARKET OPPORTUNITY
-Brazil's Pet Market
+NutraTherapy Pet (c) 2025
+Extending Lives Through Precision Geroscience
+1.4 Million Dogs. Unlimited Discoveries.
 
-[Gráfico TAM/SAM/SOM corrigido]    [4 métricas laterais]
-  85M / 28M / 5.6M                   3rd, 14%+, US$12B, 33%
-
---- Already in Market ---
-[Card] petmoretime.com.br - B2C já operando
-       [Botão: Visit petmoretime.com.br →]
-
---- Win-Win Business Model ---
-[4 cards em grid 2x2]
-  PetLove wins | Tutors win | Science wins | Platform wins
+Powered by
+[logos]
 ```
+
+Novas chaves de traducao:
+- `footer.copyright`: apenas "NutraTherapy Pet (c) 2025"
+- `footer.sloganLine1`: "Extending Lives Through Precision Geroscience"
+- `footer.sloganLine2`: "1.4 Million Dogs. Unlimited Discoveries."
+
+### Detalhes do CTA "Schedule a Meeting"
+
+Usar Popover do Radix (ja instalado) para mostrar ao clicar:
+- Icone de email + "marcello@lifespan.com.br" (link mailto:)
+- Icone de WhatsApp + "+55 11 97205-9371" (link https://wa.me/5511972059371)
+
+CTA2 "Request Pitch Deck": link `mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet`
+
+### Detalhes da Remocao de Fricao
+
+No App.tsx, trocar:
+```tsx
+<Route path="/veterinario" element={
+  <ProtectedRoute><VeterinarioPage /></ProtectedRoute>
+} />
+```
+Por:
+```tsx
+<Route path="/veterinario" element={<VeterinarioPage />} />
+```
+
+Para TODAS as 5 rotas protegidas (tutor, veterinario, veterinario/pet/new, veterinario/pet/:id, administrador).
+
+### Grafico TAM/SAM/SOM Melhorado
+
+- Container: 420x420px
+- TAM (externo): inset-0, pt-6, textos menores e mais concisos
+- SAM (meio): inset 80px em todos os lados, pt-4
+- SOM (centro): inset 155px, centralizado
+- Descricoes simplificadas para evitar sobreposicao:
+  - TAM: "Companion dogs in Brazil"
+  - SAM: "Adults + seniors"  
+  - SOM: "Premium segment"
+
