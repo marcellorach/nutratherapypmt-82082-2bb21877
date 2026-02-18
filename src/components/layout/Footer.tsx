@@ -7,9 +7,11 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-50 text-gray-700 border-t border-gray-200 w-full max-w-full overflow-x-hidden">
       <div className="container mx-auto px-4 py-6 max-w-full overflow-x-hidden">
-        {/* Copyright e descrição principal */}
-        <div className="text-center text-sm mb-4">
-          {t('footer.copyright')}
+        {/* Copyright e slogan */}
+        <div className="text-center mb-4 space-y-1">
+          <div className="text-xs text-gray-500">{t('footer.copyright')}</div>
+          <div className="text-sm font-semibold text-gray-800">{t('footer.sloganLine1')}</div>
+          <div className="text-sm text-gray-600 italic">{t('footer.sloganLine2')}</div>
         </div>
         
         {/* Seção Powered by com logos */}

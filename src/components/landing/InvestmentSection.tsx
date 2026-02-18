@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Calendar, FileText, CheckCircle2, Circle } from 'lucide-react';
+import { Calendar, FileText, CheckCircle2, Circle, Mail, Phone, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -92,14 +93,44 @@ const InvestmentSection: React.FC = () => {
           initial="hidden" whileInView="visible" viewport={{ once: true }}
         >
           <motion.div variants={fadeUp} custom={0} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 text-base px-8 py-6">
-              <Calendar size={20} className="mr-2" />
-              {t('landing.investment.cta1')}
-            </Button>
-            <Button size="lg" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 text-base px-8 py-6">
-              <FileText size={20} className="mr-2" />
-              {t('landing.investment.cta2')}
-            </Button>
+            {/* Schedule a Meeting — Popover with contact info */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 text-base px-8 py-6">
+                  <Calendar size={20} className="mr-2" />
+                  {t('landing.investment.cta1')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-4" side="top">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Contact Marcello</p>
+                  <a
+                    href="mailto:marcello@lifespan.com.br"
+                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <Mail size={16} className="shrink-0" />
+                    marcello@lifespan.com.br
+                  </a>
+                  <a
+                    href="https://wa.me/5511972059371"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <Phone size={16} className="shrink-0" />
+                    +55 11 97205-9371
+                  </a>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Request Pitch Deck — mailto link */}
+            <a href="mailto:marcello@lifespan.com.br?subject=Pitch%20Deck%20Request%20-%20NutraTherapy%20Pet">
+              <Button size="lg" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 text-base px-8 py-6">
+                <FileText size={20} className="mr-2" />
+                {t('landing.investment.cta2')}
+              </Button>
+            </a>
           </motion.div>
         </motion.div>
       </div>
