@@ -5079,5 +5079,198 @@
       "success": "Pacientes gerados",
       "successDesc": "{{count}} pacientes de exemplo foram criados com sucesso"
     }
+  },
+  "landing": {
+    "scrollIndicator": "Role para descobrir nossa visão",
+    "nav": {
+      "vision": "Visão",
+      "opportunity": "Oportunidade",
+      "technology": "Tecnologia",
+      "outcomes": "Resultados",
+      "market": "Mercado",
+      "invest": "Investir"
+    },
+    "vision": {
+      "badge": "Ciência da Longevidade para Medicina Veterinária",
+      "slogan1": "Estendendo Vidas Através da Gerociência de Precisão.",
+      "slogan2": "1,4 Milhão de Cães. Descobertas Ilimitadas.",
+      "subtitle": "Cães envelhecem 7× mais rápido que humanos — o modelo translacional perfeito para a ciência da longevidade. Ao tratar as causas-raiz do envelhecimento, prevenimos doenças degenerativas antes que se manifestem.",
+      "translational": {
+        "title": "O Modelo Translacional Perfeito",
+        "desc": "Cães compartilham 84% do genoma com humanos e desenvolvem as mesmas doenças relacionadas à idade — câncer, artrite, declínio cognitivo, doenças cardíacas. Mas fazem isso 7× mais rápido, nos dando resultados em anos ao invés de décadas.",
+        "faster": "Resultados mais rápidos que estudos humanos",
+        "dogLife": "Expectativa de vida canina (10-13 anos)",
+        "humanEquiv": "Tempo equivalente em pesquisa humana"
+      },
+      "geroprotection": {
+        "title": "Geroproteção",
+        "item1": "Reparo e rejuvenescimento celular",
+        "item2": "Ativação de vias de envelhecimento saudável",
+        "item3": "Intervenções nutracêuticas preventivas",
+        "item4": "Compostos promotores de longevidade",
+        "label": "Estendendo a Saúde"
+      },
+      "gerogenic": {
+        "title": "Dano Gerogênico",
+        "item1": "Desenvolvimento de tumores e câncer",
+        "item2": "Artrite e degeneração articular",
+        "item3": "Declínio cognitivo e demência",
+        "item4": "Insuficiência cardíaca e renal",
+        "label": "O Que Prevenimos"
+      },
+      "rootCause": "Ao tratar as causas-raiz do envelhecimento, prevenimos doenças degenerativas antes que se manifestem."
+    },
+    "opportunity": {
+      "badge": "Uma Vantagem Sem Precedentes",
+      "title": "O Maior Coorte Veterinário Acessível da América Latina",
+      "subtitle": "Uma parceria única de compartilhamento de dados nos dá acesso a 1,4 milhão de cães com registros veterinários completos — e crescendo.",
+      "petlove": {
+        "dogs": "Cães com registros de saúde",
+        "monthly": "Novos cães por mês",
+        "desc": "O 2º maior plano de saúde pet do mundo. Registros veterinários completos incluindo resultados de exames, diagnósticos, tratamentos e dados longitudinais."
+      },
+      "pamec": {
+        "forces": "Forças policiais estaduais",
+        "desc": "Programa Avançado de Mitigação do Envelhecimento Canino Policial — estudos de coorte controlados com cães de trabalho em 11 estados brasileiros."
+      },
+      "pillarsTitle": "Três Pilares Estratégicos",
+      "pillar1": {
+        "title": "Tratamento Geroprotetor Preventivo",
+        "desc": "Intervenções nutracêuticas e geroprotetoras em escala, porém individualizadas, baseadas em raça, idade e perfil de risco."
+      },
+      "pillar2": {
+        "title": "Descoberta Epidemiológica",
+        "desc": "Reconhecimento de padrões em 1,4M de cães para prever trajetórias de doenças e descobrir novas oportunidades de tratamento."
+      },
+      "pillar3": {
+        "title": "Estudos com Coorte Voluntário",
+        "desc": "Estudos longitudinais controlados com cães voluntários para descobertas translacionais aplicáveis à gerociência humana."
+      }
+    },
+    "technology": {
+      "badge": "O Cérebro Por Trás da Ciência",
+      "title": "VetGraphRAG",
+      "subtitle": "Um MedGraphRAG construído especificamente para gerociência veterinária. Modelo causal de conhecimento em cinco camadas com loop de feedback de aprendizado de máquina para descoberta contínua.",
+      "layersTitle": "Modelo Causal de Conhecimento em Cinco Camadas",
+      "layers": {
+        "L0": "Compostos",
+        "L1": "Alvos",
+        "L2": "Mecanismos",
+        "L3": "Efeitos",
+        "L4": "Desfechos Clínicos"
+      },
+      "layersDesc": "Cada camada se conecta à próxima através de relações baseadas em evidências extraídas de literatura científica curada.",
+      "pipelineTitle": "Pipeline de Descoberta e Tratamento",
+      "pipeline": {
+        "massData": {
+          "title": "Aquisição em Massa de Dados",
+          "desc": "1,4M de registros veterinários da PetLove + coortes PAMEC"
+        },
+        "aiAnalysis": {
+          "title": "Análise com IA",
+          "desc": "Extração por LLM + raciocínio em grafo de conhecimento"
+        },
+        "knowledgeGraph": {
+          "title": "Grafo de Conhecimento Curado",
+          "desc": "1.500+ entidades biomédicas com rastreabilidade de evidências"
+        },
+        "treatment": {
+          "title": "Tratamento Individualizado",
+          "desc": "Protocolos geroprotetores personalizados por raça e risco"
+        },
+        "tracking": {
+          "title": "Acompanhamento de Resultados",
+          "desc": "Monitoramento longitudinal da eficácia dos tratamentos"
+        },
+        "feedback": {
+          "title": "Loop de Retroalimentação",
+          "desc": "Insights de ML retroalimentam o grafo de conhecimento"
+        }
+      },
+      "mlInsight": "O aprendizado de máquina acelera descobertas — resultados de tratamentos de 1,4M de cães retroalimentam o grafo de conhecimento, criando um sistema que se auto-aprimora."
+    },
+    "outcomes": {
+      "badge": "Impacto Esperado",
+      "title": "O Que Pretendemos Alcançar",
+      "metrics": {
+        "fewer": "Menos doenças degenerativas através de geroproteção preventiva",
+        "detection": "Detecção precoce de riscos por predisposição genética racial",
+        "translational": "Descobertas translacionais de cães para humanos",
+        "personalized": "Cães recebendo tratamento personalizado em massa"
+      },
+      "breedTitle": "Casos de Prevenção por Raça",
+      "breeds": {
+        "golden": {
+          "name": "Golden Retriever",
+          "risk": "Displasia Coxofemoral — 60% de predisposição",
+          "approach": "Protocolo nutracêutico condroprotetor e anti-inflamatório direcionado, iniciando aos 2 anos."
+        },
+        "cavalier": {
+          "name": "Cavalier King Charles",
+          "risk": "Doença da Válvula Mitral — 70% até os 10 anos",
+          "approach": "Stack geroprotetor cardioprotetor com CoQ10, taurina e ômega-3 desde a idade adulta."
+        },
+        "beagle": {
+          "name": "Beagle",
+          "risk": "Epilepsia — 6% de incidência",
+          "approach": "Compostos neuroprotetores direcionados às vias GABA com monitoramento contínuo de resultados."
+        }
+      }
+    },
+    "market": {
+      "badge": "Oportunidade de Mercado",
+      "title": "Mercado Pet do Brasil",
+      "tam": "Cães de companhia no Brasil",
+      "sam": "Adultos + idosos (33%)",
+      "som": "Segmento premium (20%)",
+      "metric1": "Maior mercado pet do mundo",
+      "metric2": "Taxa de crescimento anual do mercado",
+      "metric3": "Receita anual do mercado pet",
+      "metric4": "Dos cães são adultos/idosos elegíveis para geroproteção"
+    },
+    "investment": {
+      "badge": "Oportunidade de Investimento",
+      "title": "Junte-se à Revolução da Longevidade Canina",
+      "subtitle": "Uma convergência única de acesso massivo a dados, IA de ponta e um mercado inexplorado em gerociência veterinária.",
+      "moat1": {
+        "title": "Coorte Único de 1,4M de Cães",
+        "desc": "Acordo exclusivo de compartilhamento de dados com o 2º maior plano de saúde pet do mundo. Nenhum concorrente tem este acesso."
+      },
+      "moat2": {
+        "title": "Grafo de Conhecimento Científico Curado",
+        "desc": "1.500+ entidades biomédicas com rastreabilidade de evidências em 5 camadas causais. Anos de curadoria."
+      },
+      "moat3": {
+        "title": "Gerociência com IA",
+        "desc": "VetGraphRAG combina raciocínio em grafo de conhecimento com inteligência LLM para recomendações explicáveis."
+      },
+      "moat4": {
+        "title": "Credibilidade PAMEC",
+        "desc": "Parceria com 11 forças policiais estaduais fornece condições controladas de estudo e credibilidade institucional."
+      },
+      "roadmapTitle": "Roadmap de Desenvolvimento",
+      "phase1": {
+        "phase": "Fase 1",
+        "title": "Base de Conhecimento",
+        "desc": "KG científico com 1.500+ entidades, estudos curados, pipeline de extração de evidências. Concluído."
+      },
+      "phase2": {
+        "phase": "Fase 2",
+        "title": "Sistema de Pacientes",
+        "desc": "Perfis de pacientes veterinários, predisposições raciais, gestão de dados clínicos. Concluído."
+      },
+      "phase3": {
+        "phase": "Fase 3",
+        "title": "Motor de Recomendação",
+        "desc": "Protocolos de tratamento geroprotetor personalizados com IA. Em andamento."
+      },
+      "phase4": {
+        "phase": "Fase 4",
+        "title": "Estudos Longitudinais",
+        "desc": "Acompanhamento de coorte, pipeline de descoberta translacional, loop de feedback ML."
+      },
+      "cta1": "Agendar Reunião",
+      "cta2": "Solicitar Pitch Deck"
+    }
   }
 }

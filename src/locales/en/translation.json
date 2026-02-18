@@ -5079,5 +5079,198 @@
       "success": "Patients generated",
       "successDesc": "{{count}} sample patients were created successfully"
     }
+  },
+  "landing": {
+    "scrollIndicator": "Scroll to discover our vision",
+    "nav": {
+      "vision": "Vision",
+      "opportunity": "Opportunity",
+      "technology": "Technology",
+      "outcomes": "Outcomes",
+      "market": "Market",
+      "invest": "Invest"
+    },
+    "vision": {
+      "badge": "Longevity Science for Veterinary Medicine",
+      "slogan1": "Extending Lives Through Precision Geroscience.",
+      "slogan2": "1.4 Million Dogs. Unlimited Discoveries.",
+      "subtitle": "Dogs age 7× faster than humans — the perfect translational model for longevity science. By targeting root causes of aging, we prevent degenerative diseases before they manifest.",
+      "translational": {
+        "title": "The Perfect Translational Model",
+        "desc": "Dogs share 84% of their genome with humans and develop the same age-related diseases — cancer, arthritis, cognitive decline, cardiac disease. But they do it 7× faster, giving us results in years instead of decades.",
+        "faster": "Faster results than human trials",
+        "dogLife": "Dog lifespan (10-13 years)",
+        "humanEquiv": "Equivalent human research time"
+      },
+      "geroprotection": {
+        "title": "Geroprotection",
+        "item1": "Cellular repair and rejuvenation",
+        "item2": "Healthy aging pathways activation",
+        "item3": "Preventive nutraceutical interventions",
+        "item4": "Longevity-promoting compounds",
+        "label": "Extending Healthspan"
+      },
+      "gerogenic": {
+        "title": "Gerogenic Damage",
+        "item1": "Tumor development and cancer",
+        "item2": "Arthritis and joint degeneration",
+        "item3": "Cognitive decline and dementia",
+        "item4": "Cardiac and renal failure",
+        "label": "What We Prevent"
+      },
+      "rootCause": "By targeting the root causes of aging, we prevent degenerative diseases before they manifest."
+    },
+    "opportunity": {
+      "badge": "An Unprecedented Advantage",
+      "title": "The Largest Accessible Veterinary Cohort in Latin America",
+      "subtitle": "A unique data-sharing partnership gives us access to 1.4 million dogs with full veterinary records — and growing.",
+      "petlove": {
+        "dogs": "Dogs with health records",
+        "monthly": "New dogs per month",
+        "desc": "The 2nd largest pet health plan worldwide. Full veterinary records including lab results, diagnoses, treatments, and longitudinal data."
+      },
+      "pamec": {
+        "forces": "State police forces",
+        "desc": "Advanced Police Canine Aging Mitigation Program — controlled cohort studies with working dogs across 11 Brazilian states."
+      },
+      "pillarsTitle": "Three Strategic Pillars",
+      "pillar1": {
+        "title": "Preventive Geroprotective Treatment",
+        "desc": "Mass-scale, yet individualized nutraceutical and geroprotector interventions based on breed, age, and risk profile."
+      },
+      "pillar2": {
+        "title": "Epidemiological Discovery",
+        "desc": "Pattern recognition across 1.4M dogs to predict disease trajectories and discover new treatment opportunities."
+      },
+      "pillar3": {
+        "title": "Volunteer Cohort Studies",
+        "desc": "Controlled longitudinal studies with volunteer dogs for translational discoveries applicable to human geroscience."
+      }
+    },
+    "technology": {
+      "badge": "The Brain Behind the Science",
+      "title": "VetGraphRAG",
+      "subtitle": "A MedGraphRAG purpose-built for veterinary geroscience. Five-layer causal knowledge model with machine learning feedback loop for continuous discovery.",
+      "layersTitle": "Five-Layer Causal Knowledge Model",
+      "layers": {
+        "L0": "Compounds",
+        "L1": "Targets",
+        "L2": "Mechanisms",
+        "L3": "Effects",
+        "L4": "Clinical Outcomes"
+      },
+      "layersDesc": "Each layer connects to the next through evidence-backed relationships extracted from curated scientific literature.",
+      "pipelineTitle": "Discovery & Treatment Pipeline",
+      "pipeline": {
+        "massData": {
+          "title": "Mass Data Acquisition",
+          "desc": "1.4M veterinary records from PetLove + PAMEC cohorts"
+        },
+        "aiAnalysis": {
+          "title": "AI-Powered Analysis",
+          "desc": "LLM extraction + knowledge graph reasoning"
+        },
+        "knowledgeGraph": {
+          "title": "Curated Knowledge Graph",
+          "desc": "1,500+ biomedical entities with evidence traceability"
+        },
+        "treatment": {
+          "title": "Individualized Treatment",
+          "desc": "Personalized geroprotective protocols by breed and risk"
+        },
+        "tracking": {
+          "title": "Outcome Tracking",
+          "desc": "Longitudinal monitoring of treatment efficacy"
+        },
+        "feedback": {
+          "title": "Discovery Feedback Loop",
+          "desc": "ML insights feed back into the knowledge graph"
+        }
+      },
+      "mlInsight": "Machine learning accelerates discoveries — treatment outcomes from 1.4M dogs feed back into the knowledge graph, creating a self-improving system."
+    },
+    "outcomes": {
+      "badge": "Expected Impact",
+      "title": "What We Aim to Achieve",
+      "metrics": {
+        "fewer": "Fewer degenerative diseases through preventive geroprotection",
+        "detection": "Early risk detection by breed genetic predisposition",
+        "translational": "Translational discoveries from dogs to humans",
+        "personalized": "Dogs receiving mass personalized treatment"
+      },
+      "breedTitle": "Breed-Specific Prevention Cases",
+      "breeds": {
+        "golden": {
+          "name": "Golden Retriever",
+          "risk": "Hip Dysplasia — 60% predisposition",
+          "approach": "Targeted chondroprotective and anti-inflammatory nutraceutical protocol starting at age 2."
+        },
+        "cavalier": {
+          "name": "Cavalier King Charles",
+          "risk": "Mitral Valve Disease — 70% by age 10",
+          "approach": "Cardioprotective geroprotector stack with CoQ10, taurine, and omega-3 from early adulthood."
+        },
+        "beagle": {
+          "name": "Beagle",
+          "risk": "Epilepsy — 6% incidence",
+          "approach": "Neuroprotective compounds targeting GABA pathways with continuous outcome monitoring."
+        }
+      }
+    },
+    "market": {
+      "badge": "Market Opportunity",
+      "title": "Brazil's Pet Market",
+      "tam": "Companion dogs in Brazil",
+      "sam": "Adults + seniors (33%)",
+      "som": "Premium segment (20%)",
+      "metric1": "Largest pet market worldwide",
+      "metric2": "Annual market growth rate",
+      "metric3": "Annual pet market revenue",
+      "metric4": "Of dogs are adults/seniors eligible for geroprotection"
+    },
+    "investment": {
+      "badge": "Investment Opportunity",
+      "title": "Join the Canine Longevity Revolution",
+      "subtitle": "A unique convergence of massive data access, cutting-edge AI, and an untapped market in veterinary geroscience.",
+      "moat1": {
+        "title": "Unique 1.4M Dog Cohort",
+        "desc": "Exclusive data-sharing agreement with the 2nd largest pet health plan worldwide. No competitor has this access."
+      },
+      "moat2": {
+        "title": "Curated Scientific Knowledge Graph",
+        "desc": "1,500+ biomedical entities with evidence traceability across 5 causal layers. Years of curation."
+      },
+      "moat3": {
+        "title": "AI-Powered Geroscience",
+        "desc": "VetGraphRAG combines knowledge graph reasoning with LLM intelligence for explainable recommendations."
+      },
+      "moat4": {
+        "title": "PAMEC Credibility",
+        "desc": "Partnership with 11 state police forces provides controlled study conditions and institutional credibility."
+      },
+      "roadmapTitle": "Development Roadmap",
+      "phase1": {
+        "phase": "Phase 1",
+        "title": "Knowledge Base",
+        "desc": "Scientific KG with 1,500+ entities, curated studies, evidence extraction pipeline. Done."
+      },
+      "phase2": {
+        "phase": "Phase 2",
+        "title": "Patient System",
+        "desc": "Veterinary patient profiles, breed predispositions, clinical data management. Done."
+      },
+      "phase3": {
+        "phase": "Phase 3",
+        "title": "Recommendation Engine",
+        "desc": "AI-powered personalized geroprotective treatment protocols. In progress."
+      },
+      "phase4": {
+        "phase": "Phase 4",
+        "title": "Longitudinal Studies",
+        "desc": "Cohort follow-up, translational discovery pipeline, ML feedback loop."
+      },
+      "cta1": "Schedule a Meeting",
+      "cta2": "Request Pitch Deck"
+    }
   }
 }
