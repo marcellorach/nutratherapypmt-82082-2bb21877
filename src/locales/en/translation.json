@@ -5193,8 +5193,8 @@
       "badge": "Expected Impact",
       "title": "What We Aim to Achieve",
       "metrics": {
+        "lifeExtension": "Potential lifespan extension through geroprotective interventions",
         "fewer": "Fewer degenerative diseases through preventive geroprotection",
-        "detection": "Early risk detection by breed genetic predisposition",
         "translational": "Translational discoveries from dogs to humans",
         "personalized": "Dogs receiving mass personalized treatment"
       },
@@ -5203,17 +5203,17 @@
         "golden": {
           "name": "Golden Retriever",
           "risk": "Hip Dysplasia — 60% predisposition",
-          "approach": "Targeted chondroprotective and anti-inflammatory nutraceutical protocol starting at age 2."
+          "approach": "Curcumin (anti-inflammatory) + Rapamycin (mTOR inhibitor for systemic geroprotection) — chondroprotective protocol starting at age 2."
         },
         "cavalier": {
           "name": "Cavalier King Charles",
           "risk": "Mitral Valve Disease — 70% by age 10",
-          "approach": "Cardioprotective geroprotector stack with CoQ10, taurine, and omega-3 from early adulthood."
+          "approach": "Empagliflozin (SGLT2 cardioprotection) + Rapamycin (systemic geroprotection) with CoQ10 and taurine from early adulthood."
         },
         "beagle": {
           "name": "Beagle",
           "risk": "Epilepsy — 6% incidence",
-          "approach": "Neuroprotective compounds targeting GABA pathways with continuous outcome monitoring."
+          "approach": "Apigenin (GABAergic neuroprotection) + Dapagliflozin (SGLT2 neuroprotection) with continuous outcome monitoring."
         }
       }
     },
