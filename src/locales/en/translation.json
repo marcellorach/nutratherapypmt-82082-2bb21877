@@ -1928,7 +1928,9 @@
     }
   },
   "footer": {
-    "copyright": "NutraTherapy Pet © 2025 — Scalable intelligent nutraceutical recommendation system for pets",
+    "copyright": "NutraTherapy Pet © 2025",
+    "sloganLine1": "Extending Lives Through Precision Geroscience",
+    "sloganLine2": "1.4 Million Dogs. Unlimited Discoveries.",
     "poweredBy": "Powered by",
     "comingSoon": "coming soon"
   },

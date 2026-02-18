@@ -42,41 +42,41 @@ const MarketSection: React.FC = () => {
         >
           {/* Concentric circles TAM/SAM/SOM — redesigned */}
           <motion.div variants={fadeUp} custom={0} className="flex-1 flex items-center justify-center">
-            <div className="relative" style={{ width: 380, height: 380 }}>
+            <div className="relative" style={{ width: 420, height: 420 }}>
               {/* TAM — outer ring */}
               <div
-                className="absolute inset-0 rounded-full flex flex-col items-center justify-start pt-7"
+                className="absolute inset-0 rounded-full flex flex-col items-center justify-start pt-5"
                 style={{
-                  background: 'radial-gradient(circle, transparent 55%, #f3f4f6 56%)',
+                  background: 'radial-gradient(circle, transparent 52%, #f3f4f6 53%)',
                   border: '2px solid #e5e7eb',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
                 }}
               >
                 <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">TAM</span>
                 <span className="text-3xl font-black text-gray-900 leading-tight">85M</span>
-                <span className="text-[11px] text-gray-500 max-w-[120px] text-center leading-tight">{t('landing.market.tam')}</span>
+                <span className="text-[10px] text-gray-500 text-center leading-tight">Companion dogs in Brazil</span>
               </div>
 
               {/* SAM — middle ring */}
               <div
-                className="absolute rounded-full flex flex-col items-center justify-start pt-5"
+                className="absolute rounded-full flex flex-col items-center justify-start pt-4"
                 style={{
-                  top: 65, left: 65, right: 65, bottom: 65,
-                  background: 'radial-gradient(circle, transparent 50%, #e5e7eb 51%)',
+                  top: 80, left: 80, right: 80, bottom: 80,
+                  background: 'radial-gradient(circle, transparent 46%, #e5e7eb 47%)',
                   border: '2px solid #d1d5db',
                   boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
                 }}
               >
                 <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">SAM</span>
                 <span className="text-2xl font-black text-gray-800 leading-tight">28M</span>
-                <span className="text-[10px] text-gray-500 max-w-[100px] text-center leading-tight">{t('landing.market.sam')}</span>
+                <span className="text-[10px] text-gray-500 text-center leading-tight">Adults + seniors</span>
               </div>
 
               {/* SOM — center circle */}
               <div
                 className="absolute rounded-full flex flex-col items-center justify-center"
                 style={{
-                  top: 130, left: 130, right: 130, bottom: 130,
+                  top: 155, left: 155, right: 155, bottom: 155,
                   background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
                   border: '2px solid #374151',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
@@ -84,7 +84,7 @@ const MarketSection: React.FC = () => {
               >
                 <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">SOM</span>
                 <span className="text-xl font-black text-white leading-tight">5.6M</span>
-                <span className="text-[9px] text-gray-400 max-w-[80px] text-center leading-tight">{t('landing.market.som')}</span>
+                <span className="text-[9px] text-gray-400 text-center leading-tight">Premium segment</span>
               </div>
             </div>
           </motion.div>
