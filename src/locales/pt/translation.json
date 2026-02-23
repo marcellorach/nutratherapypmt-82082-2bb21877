@@ -278,7 +278,17 @@
       "pending": "Pendentes",
       "rejected": "Rejeitados",
       "willAutoApprove": "Serão auto-aprovados",
-      "needsManualReview": "Precisam revisão manual"
+      "needsManualReview": "Precisam revisão manual",
+      "completed": "Concluído",
+      "inProgress": "Em Progresso",
+      "tripletStats": "Estatísticas de Triplets",
+      "approved": "Aprovados",
+      "pendingItems": "Pendentes",
+      "stagesTitle": "Estágios de Aprovação",
+      "items": "itens",
+      "approveAndRun": "Aprovar Estudo e Executar Workflow",
+      "workflowDescription": "Isso irá auto-aprovar triplets de alta confiança, consolidar o knowledge graph e sincronizar com Neo4j.",
+      "studyApproved": "Estudo Aprovado"
     },
     "library": {
       "title": "Biblioteca de Estudos",
@@ -5094,7 +5104,21 @@
       "clinicalNotes": "Notas Clínicas",
       "clinicalHistory": "Histórico Clínico",
       "noNotes": "Nenhuma nota clínica registrada",
-      "notFound": "Paciente não encontrado"
+      "notFound": "Paciente não encontrado",
+      "analyzing": "Analisando...",
+      "analysisComplete": "Análise Concluída",
+      "analysisCompleteDesc": "Recomendações geradas com base no Knowledge Graph.",
+      "analysisError": "Erro na Análise",
+      "kgAnalysisTitle": "Análise VetGraphRAG",
+      "conditionsAnalyzed": "Condições analisadas",
+      "kgFindings": "Achados no Knowledge Graph",
+      "entitiesFound": "entidades",
+      "relationsFound": "relações",
+      "recommendedStack": "Stack Geroprotetor Recomendado",
+      "rationale": "Fundamentação",
+      "clinicalConsiderations": "Considerações Clínicas Adicionais",
+      "precautions": "Precauções",
+      "disclaimer": "Esta análise é gerada por IA e deve ser validada por um veterinário. Não substitui consulta profissional."
     },
     "generator": {
       "button": "Gerar Pacientes de Exemplo",

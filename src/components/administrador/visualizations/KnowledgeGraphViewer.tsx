@@ -592,8 +592,27 @@ export const KnowledgeGraphViewer: React.FC = () => {
     setStudyFilter(studyId);
   };
 
-  const openStatDialog = (type: 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions') => {
-    setSelectedStatType(type);
+  const openStatDialog = (cardId: string) => {
+    // Map card IDs from stats rows to dialog stat types
+    const cardIdToStatType: Record<string, 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions'> = {
+      'ontology-manual': 'ontology',
+      'ontology-chebi': 'ontology',
+      'nutraceuticals': 'nutraceuticals',
+      'conditions': 'conditions',
+      'outcomes': 'ontology',
+      'pathways': 'ontology',
+      'entities-ai': 'nodes',
+      'relations-ai': 'edges',
+      'active-studies': 'studies',
+      'approved-triplets': 'positive',
+      'pending-triplets': 'studies',
+      'total-nodes': 'nodes',
+      'total-relations': 'edges',
+      'positive-relations': 'positive',
+      'negative-relations': 'negative',
+    };
+    const mappedType = cardIdToStatType[cardId] || 'ontology';
+    setSelectedStatType(mappedType);
     setStatDialogOpen(true);
   };
 
