@@ -66,6 +66,68 @@
       "legendKnown": "Relações conhecidas e pré-definidas com alta confiança",
       "topConnected": "Entidades com mais conexões no grafo, indicando alta relevância"
     },
+    "dialogs": {
+      "ontology": {
+        "title": "Entidades da Ontologia (Manual)",
+        "description": "Entidades base curadas manualmente da ontologia veterinária"
+      },
+      "studies": {
+        "title": "Contribuições de Estudos",
+        "description": "Estudos científicos contribuindo para o grafo de conhecimento"
+      },
+      "nodes": {
+        "title": "Nós do Grafo",
+        "description": "Todas as entidades únicas no grafo"
+      },
+      "nutraceuticals": {
+        "title": "Nutracêuticos",
+        "description": "Nutracêuticos registrados no catálogo base"
+      },
+      "conditions": {
+        "title": "Condições de Saúde",
+        "description": "Condições de saúde registradas no catálogo base"
+      },
+      "edges": {
+        "title": "Todas as Relações",
+        "description": "Todas as conexões entre entidades"
+      },
+      "positive": {
+        "title": "Relações Positivas",
+        "description": "Relações benéficas: tratamentos, melhorias, suporte terapêutico"
+      },
+      "negative": {
+        "title": "Relações Negativas",
+        "description": "Relações adversas: contraindicações, efeitos colaterais"
+      },
+      "pathways": {
+        "title": "Pathways / Mecanismos",
+        "description": "Vias biológicas e mecanismos da ontologia veterinária"
+      },
+      "outcomes": {
+        "title": "Famílias de Outcomes",
+        "description": "Famílias de outcomes usadas para categorizar resultados terapêuticos"
+      },
+      "chebi": {
+        "title": "Entidades ChEBI",
+        "description": "Entidades químicas do banco de dados ChEBI"
+      },
+      "entitiesAI": {
+        "title": "Entidades Extraídas por IA",
+        "description": "Entidades automaticamente extraídas de estudos por IA"
+      },
+      "relationsAI": {
+        "title": "Relações Extraídas por IA",
+        "description": "Relações extraídas de estudos com links de evidência"
+      },
+      "approvedTriplets": {
+        "title": "Triplets Aprovados",
+        "description": "Triplets aprovados para inclusão no grafo de conhecimento"
+      },
+      "pendingTriplets": {
+        "title": "Triplets Pendentes",
+        "description": "Triplets aguardando revisão de curadoria"
+      }
+    },
     "studyPanel": {
       "title": "Detalhes do Estudo",
       "description": "Informações detalhadas sobre o estudo selecionado e seu conhecimento extraído",

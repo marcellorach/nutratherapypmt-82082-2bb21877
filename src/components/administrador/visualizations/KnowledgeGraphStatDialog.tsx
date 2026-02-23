@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-type StatType = 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions';
+type StatType = 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions' | 'pathways' | 'outcomes' | 'chebi' | 'entities-ai' | 'relations-ai' | 'approved-triplets' | 'pending-triplets';
 
 interface KnowledgeGraphStatDialogProps {
   open: boolean;
@@ -102,6 +102,8 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const [studyContributions, setStudyContributions] = useState<StudyContribution[]>([]);
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
   const [graphRelations, setGraphRelations] = useState<GraphRelation[]>([]);
+  // Generic data state for new stat types
+  const [genericData, setGenericData] = useState<any[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -111,6 +113,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
 
   const loadData = async () => {
     setLoading(true);
+    setGenericData([]);
     try {
       switch (statType) {
         case 'ontology':
@@ -119,18 +122,41 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
         case 'studies':
           await loadStudiesData();
           break;
-      case 'nodes':
-        await loadNodesData();
-        break;
-      case 'nutraceuticals':
-      case 'conditions':
-        await loadNodesData(statType);
-        break;
-      case 'edges':
-      case 'positive':
-      case 'negative':
-        await loadRelationsData();
-        break;
+        case 'nodes':
+          await loadNodesData();
+          break;
+        case 'nutraceuticals':
+          await loadNutraceuticalsData();
+          break;
+        case 'conditions':
+          await loadConditionsData();
+          break;
+        case 'edges':
+        case 'positive':
+        case 'negative':
+          await loadRelationsData();
+          break;
+        case 'pathways':
+          await loadPathwaysData();
+          break;
+        case 'outcomes':
+          await loadOutcomesData();
+          break;
+        case 'chebi':
+          await loadChebiData();
+          break;
+        case 'entities-ai':
+          await loadEntitiesAIData();
+          break;
+        case 'relations-ai':
+          await loadRelationsAIData();
+          break;
+        case 'approved-triplets':
+          await loadTripletsData('approved');
+          break;
+        case 'pending-triplets':
+          await loadTripletsData('pending');
+          break;
       }
     } catch (error) {
       console.error('Error loading stat data:', error);
@@ -300,45 +326,121 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
     }
   };
 
+  const loadNutraceuticalsData = async () => {
+    const { data } = await supabase
+      .from('nutraceuticals')
+      .select('id, name, name_en, description, description_en, chemical_compound, source')
+      .order('name')
+      .limit(500);
+    setGenericData(data || []);
+  };
+
+  const loadConditionsData = async () => {
+    const { data } = await supabase
+      .from('health_conditions')
+      .select('id, name, name_en, description, description_en, category, severity_level')
+      .order('name')
+      .limit(500);
+    setGenericData(data || []);
+  };
+
+  const loadPathwaysData = async () => {
+    const { data } = await supabase
+      .from('veterinary_ontology')
+      .select('id, entity_name, entity_type, layer, description')
+      .eq('layer', 'layer_2_mechanism')
+      .order('entity_name')
+      .limit(500);
+    setGenericData(data || []);
+  };
+
+  const loadOutcomesData = async () => {
+    const { data } = await (supabase as any)
+      .from('outcome_families')
+      .select('id, name, name_en, description, description_en, color, icon, sort_order')
+      .order('sort_order', { ascending: true });
+    setGenericData(data || []);
+  };
+
+  const loadChebiData = async () => {
+    const { data } = await supabase
+      .from('veterinary_ontology')
+      .select('id, entity_name, entity_type, layer, description, synonyms')
+      .eq('source', 'ChEBI')
+      .order('entity_name')
+      .limit(500);
+    setGenericData(data || []);
+  };
+
+  const loadEntitiesAIData = async () => {
+    const { data } = await supabase
+      .from('veterinary_ontology')
+      .select('id, entity_name, entity_type, layer, description, synonyms')
+      .eq('source', 'gemini_extraction')
+      .order('entity_name')
+      .limit(500);
+    setGenericData(data || []);
+  };
+
+  const loadRelationsAIData = async () => {
+    const { data } = await supabase
+      .from('hierarchical_edges')
+      .select('id, source_type, target_type, relationship, confidence, evidence_level, source_id, target_id')
+      .not('study_ids', 'is', null)
+      .order('confidence', { ascending: false })
+      .limit(300);
+    setGenericData(data || []);
+  };
+
+  const loadTripletsData = async (status: 'approved' | 'pending') => {
+    const { data } = await supabase
+      .from('triplet_extractions')
+      .select('id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status')
+      .eq('curation_status', status)
+      .order('extraction_confidence', { ascending: false })
+      .limit(300);
+    setGenericData(data || []);
+  };
+
   const getTitle = () => {
     switch (statType) {
-      case 'ontology':
-        return t('knowledgeGraph.dialogs.ontology.title', 'Ontology Entities');
-      case 'studies':
-        return t('knowledgeGraph.dialogs.studies.title', 'Study Contributions');
-      case 'nodes':
-        return t('knowledgeGraph.dialogs.nodes.title', 'Graph Nodes');
-      case 'nutraceuticals':
-        return t('knowledgeGraph.dialogs.nutraceuticals.title', 'Nutraceutical Nodes');
-      case 'conditions':
-        return t('knowledgeGraph.dialogs.conditions.title', 'Condition Nodes');
-      case 'edges':
-        return t('knowledgeGraph.dialogs.edges.title', 'All Relations');
-      case 'positive':
-        return t('knowledgeGraph.dialogs.positive.title', 'Positive Relations');
-      case 'negative':
-        return t('knowledgeGraph.dialogs.negative.title', 'Negative Relations');
+      case 'ontology': return t('knowledgeGraph.dialogs.ontology.title', 'Ontology Entities (Manual)');
+      case 'studies': return t('knowledgeGraph.dialogs.studies.title', 'Study Contributions');
+      case 'nodes': return t('knowledgeGraph.dialogs.nodes.title', 'Graph Nodes');
+      case 'nutraceuticals': return t('knowledgeGraph.dialogs.nutraceuticals.title', 'Nutraceuticals');
+      case 'conditions': return t('knowledgeGraph.dialogs.conditions.title', 'Health Conditions');
+      case 'edges': return t('knowledgeGraph.dialogs.edges.title', 'All Relations');
+      case 'positive': return t('knowledgeGraph.dialogs.positive.title', 'Positive Relations');
+      case 'negative': return t('knowledgeGraph.dialogs.negative.title', 'Negative Relations');
+      case 'pathways': return t('knowledgeGraph.dialogs.pathways.title', 'Pathways / Mechanisms');
+      case 'outcomes': return t('knowledgeGraph.dialogs.outcomes.title', 'Outcome Families');
+      case 'chebi': return t('knowledgeGraph.dialogs.chebi.title', 'ChEBI Entities');
+      case 'entities-ai': return t('knowledgeGraph.dialogs.entitiesAI.title', 'AI-Extracted Entities');
+      case 'relations-ai': return t('knowledgeGraph.dialogs.relationsAI.title', 'AI-Extracted Relations');
+      case 'approved-triplets': return t('knowledgeGraph.dialogs.approvedTriplets.title', 'Approved Triplets');
+      case 'pending-triplets': return t('knowledgeGraph.dialogs.pendingTriplets.title', 'Pending Triplets');
+      default: return '';
     }
   };
 
   const getDescription = () => {
     switch (statType) {
-      case 'ontology':
-        return t('knowledgeGraph.dialogs.ontology.description', 'Base entities from the veterinary knowledge ontology');
-      case 'studies':
-        return t('knowledgeGraph.dialogs.studies.description', 'Scientific studies contributing to the knowledge graph');
-      case 'nodes':
-        return t('knowledgeGraph.dialogs.nodes.description', 'All unique entities in the graph');
-      case 'nutraceuticals':
-        return t('knowledgeGraph.dialogs.nutraceuticals.description', 'Nutraceuticals, compounds and drugs in the knowledge graph');
-      case 'conditions':
-        return t('knowledgeGraph.dialogs.conditions.description', 'Health conditions and diseases in the knowledge graph');
-      case 'edges':
-        return t('knowledgeGraph.dialogs.edges.description', 'All connections between entities');
-      case 'positive':
-        return t('knowledgeGraph.dialogs.positive.description', 'Beneficial relations: treatments, improvements, therapeutic support');
-      case 'negative':
-        return t('knowledgeGraph.dialogs.negative.description', 'Adverse relations: contraindications, side effects');
+      case 'ontology': return t('knowledgeGraph.dialogs.ontology.description', 'Manually curated base entities from the veterinary knowledge ontology');
+      case 'studies': return t('knowledgeGraph.dialogs.studies.description', 'Scientific studies contributing to the knowledge graph');
+      case 'nodes': return t('knowledgeGraph.dialogs.nodes.description', 'All unique entities in the graph');
+      case 'nutraceuticals': return t('knowledgeGraph.dialogs.nutraceuticals.description', 'Nutraceuticals registered in the base catalog');
+      case 'conditions': return t('knowledgeGraph.dialogs.conditions.description', 'Health conditions registered in the base catalog');
+      case 'edges': return t('knowledgeGraph.dialogs.edges.description', 'All connections between entities');
+      case 'positive': return t('knowledgeGraph.dialogs.positive.description', 'Beneficial relations: treatments, improvements, therapeutic support');
+      case 'negative': return t('knowledgeGraph.dialogs.negative.description', 'Adverse relations: contraindications, side effects');
+      case 'pathways': return t('knowledgeGraph.dialogs.pathways.description', 'Biological pathways and mechanisms from the veterinary ontology');
+      case 'outcomes': return t('knowledgeGraph.dialogs.outcomes.description', 'Outcome families used to categorize therapeutic results');
+      case 'chebi': return t('knowledgeGraph.dialogs.chebi.description', 'Chemical entities from the ChEBI database');
+      case 'entities-ai': return t('knowledgeGraph.dialogs.entitiesAI.description', 'Entities automatically extracted from studies by AI');
+      case 'relations-ai': return t('knowledgeGraph.dialogs.relationsAI.description', 'Relations extracted from studies with evidence links');
+      case 'approved-triplets': return t('knowledgeGraph.dialogs.approvedTriplets.description', 'Triplets approved for inclusion in the knowledge graph');
+      case 'pending-triplets': return t('knowledgeGraph.dialogs.pendingTriplets.description', 'Triplets awaiting curation review');
+      default: return '';
     }
   };
 
@@ -386,18 +488,27 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const ontologyTypes = Array.from(new Set(ontologyEntities.map(e => e.entity_type.toLowerCase())));
   const nodeTypes = Array.from(new Set(graphNodes.map(n => n.type.toLowerCase())));
 
+  const filteredGeneric = genericData.filter(item => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return JSON.stringify(item).toLowerCase().includes(q);
+  });
+
+  const isGenericType = ['pathways', 'outcomes', 'chebi', 'entities-ai', 'relations-ai', 'approved-triplets', 'pending-triplets', 'nutraceuticals', 'conditions'].includes(statType);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {statType === 'ontology' && <Database className="h-5 w-5 text-blue-600" />}
-            {statType === 'studies' && <FileText className="h-5 w-5 text-green-600" />}
-            {statType === 'nodes' && <Sparkles className="h-5 w-5 text-purple-600" />}
-            {(statType === 'edges' || statType === 'positive') && <Link2 className="h-5 w-5 text-emerald-600" />}
-            {statType === 'negative' && <AlertTriangle className="h-5 w-5 text-red-600" />}
+            {(statType === 'ontology' || statType === 'chebi' || statType === 'entities-ai') && <Database className="h-5 w-5 text-primary" />}
+            {(statType === 'studies' || statType === 'approved-triplets' || statType === 'pending-triplets') && <FileText className="h-5 w-5 text-primary" />}
+            {(statType === 'nodes' || statType === 'nutraceuticals' || statType === 'conditions' || statType === 'pathways' || statType === 'outcomes') && <Sparkles className="h-5 w-5 text-primary" />}
+            {(statType === 'edges' || statType === 'positive' || statType === 'relations-ai') && <Link2 className="h-5 w-5 text-primary" />}
+            {statType === 'negative' && <AlertTriangle className="h-5 w-5 text-destructive" />}
             {getTitle()}
             <Badge variant="secondary" className="ml-2">
+              {isGenericType ? filteredGeneric.length : null}
               {statType === 'ontology' && stats.ontologyEntities}
               {statType === 'studies' && stats.tripletCount}
               {statType === 'nodes' && stats.totalNodes}
@@ -529,7 +640,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
               ))}
 
               {/* Graph Nodes - also used for nutraceuticals and conditions */}
-              {(statType === 'nodes' || statType === 'nutraceuticals' || statType === 'conditions') && filteredNodes.map(node => (
+              {statType === 'nodes' && filteredNodes.map(node => (
                 <div
                   key={node.id}
                   className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
@@ -597,11 +708,120 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                 ))
               }
 
+              {/* Generic data rendering for new types */}
+              {isGenericType && filteredGeneric.map((item, idx) => (
+                <div
+                  key={item.id || `item-${idx}`}
+                  className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  {(statType === 'pathways' || statType === 'chebi' || statType === 'entities-ai') && (
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium truncate">{item.entity_name}</span>
+                          <Badge variant="outline" className={`text-[10px] ${getEntityTypeColor(item.entity_type || '')}`}>
+                            {item.entity_type}
+                          </Badge>
+                          {item.layer && (
+                            <Badge variant="outline" className="text-[10px]">{item.layer}</Badge>
+                          )}
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {statType === 'nutraceuticals' && (
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{item.name}</span>
+                        {item.chemical_compound && (
+                          <Badge variant="outline" className="text-[10px] ml-2">{item.chemical_compound}</Badge>
+                        )}
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {statType === 'conditions' && (
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{item.name}</span>
+                          {item.category && (
+                            <Badge variant="outline" className="text-[10px]">{item.category}</Badge>
+                          )}
+                          {item.severity_level && (
+                            <Badge variant="secondary" className="text-[10px]">{item.severity_level}</Badge>
+                          )}
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {statType === 'outcomes' && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color || '#888' }} />
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{item.name}</span>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="text-[10px]">#{item.sort_order}</Badge>
+                    </div>
+                  )}
+                  {statType === 'relations-ai' && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="outline" className="text-[10px]">{item.source_type}</Badge>
+                      <span className="font-medium text-primary">{item.relationship}</span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                      <Badge variant="outline" className="text-[10px]">{item.target_type}</Badge>
+                      {item.confidence && (
+                        <Badge variant="secondary" className="text-[10px]">{Math.round(item.confidence * 100)}%</Badge>
+                      )}
+                      {item.evidence_level && (
+                        <Badge variant="outline" className="text-[10px]">{item.evidence_level}</Badge>
+                      )}
+                    </div>
+                  )}
+                  {(statType === 'approved-triplets' || statType === 'pending-triplets') && (
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-primary">{item.subject_name}</span>
+                        <Badge variant="outline" className="text-[10px]">{item.predicate}</Badge>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                        <span className="font-medium">{item.object_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-[10px]">{item.subject_type}</Badge>
+                        <Badge variant="outline" className="text-[10px]">{item.object_type}</Badge>
+                        {item.extraction_confidence && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            {Math.round(item.extraction_confidence * 100)}%
+                          </Badge>
+                        )}
+                        <Badge variant={statType === 'approved-triplets' ? 'default' : 'secondary'} className="text-[10px]">
+                          {item.curation_status}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
               {/* Empty state */}
-              {((statType === 'ontology' && filteredOntology.length === 0) ||
+              {!loading && (
+                (statType === 'ontology' && filteredOntology.length === 0) ||
                 (statType === 'studies' && filteredStudies.length === 0) ||
-                (statType === 'nodes' && filteredNodes.length === 0) ||
-                ((statType === 'edges' || statType === 'positive' || statType === 'negative') && filteredRelations.length === 0)) && (
+                ((statType === 'nodes' || statType === 'nutraceuticals' || statType === 'conditions') && filteredNodes.length === 0) ||
+                ((statType === 'edges' || statType === 'positive' || statType === 'negative') && filteredRelations.length === 0) ||
+                (isGenericType && filteredGeneric.length === 0)
+              ) && (
                 <div className="text-center py-12 text-muted-foreground">
                   <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>{t('common.noResults', 'No results found')}</p>

@@ -66,6 +66,68 @@
       "legendKnown": "Known and pre-defined relationships with high confidence",
       "topConnected": "Entities with the most connections in the graph, indicating high relevance"
     },
+    "dialogs": {
+      "ontology": {
+        "title": "Ontology Entities (Manual)",
+        "description": "Manually curated base entities from the veterinary knowledge ontology"
+      },
+      "studies": {
+        "title": "Study Contributions",
+        "description": "Scientific studies contributing to the knowledge graph"
+      },
+      "nodes": {
+        "title": "Graph Nodes",
+        "description": "All unique entities in the graph"
+      },
+      "nutraceuticals": {
+        "title": "Nutraceuticals",
+        "description": "Nutraceuticals registered in the base catalog"
+      },
+      "conditions": {
+        "title": "Health Conditions",
+        "description": "Health conditions registered in the base catalog"
+      },
+      "edges": {
+        "title": "All Relations",
+        "description": "All connections between entities"
+      },
+      "positive": {
+        "title": "Positive Relations",
+        "description": "Beneficial relations: treatments, improvements, therapeutic support"
+      },
+      "negative": {
+        "title": "Negative Relations",
+        "description": "Adverse relations: contraindications, side effects"
+      },
+      "pathways": {
+        "title": "Pathways / Mechanisms",
+        "description": "Biological pathways and mechanisms from the veterinary ontology"
+      },
+      "outcomes": {
+        "title": "Outcome Families",
+        "description": "Outcome families used to categorize therapeutic results"
+      },
+      "chebi": {
+        "title": "ChEBI Entities",
+        "description": "Chemical entities from the ChEBI database"
+      },
+      "entitiesAI": {
+        "title": "AI-Extracted Entities",
+        "description": "Entities automatically extracted from studies by AI"
+      },
+      "relationsAI": {
+        "title": "AI-Extracted Relations",
+        "description": "Relations extracted from studies with evidence links"
+      },
+      "approvedTriplets": {
+        "title": "Approved Triplets",
+        "description": "Triplets approved for inclusion in the knowledge graph"
+      },
+      "pendingTriplets": {
+        "title": "Pending Triplets",
+        "description": "Triplets awaiting curation review"
+      }
+    },
     "studyPanel": {
       "title": "Study Details",
       "description": "Detailed information about the selected study and its extracted knowledge",
