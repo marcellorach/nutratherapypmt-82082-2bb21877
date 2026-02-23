@@ -1,64 +1,61 @@
 
-# Plano: Substituir Grafico Simples por Infografico de Vantagem Translacional com Nuances Estatisticas
+# Corrigir Inconsistencias nos Stats do Knowledge Graph
 
-## O Que Muda
+## Problemas Identificados
 
-Substituir as duas barras simples (dog lifespan / human research time) na VisionSection por um infografico rico que comunica visualmente:
+### Problema B: Todos os cards abrem o mesmo dialog
+O mapeamento `cardIdToStatType` no `openStatDialog` (linha 595-617 de KnowledgeGraphViewer.tsx) faz varios cards apontarem para o mesmo dialog:
+- `pathways` -> `ontology` (abre "Ontology Entities" generico)
+- `outcomes` -> `ontology` (mesmo dialog)
+- `ontology-chebi` -> `ontology` (mesmo dialog)
+- `nutraceuticals` -> `nutraceuticals` (correto mas usa Neo4j, nao a tabela `nutraceuticals`)
+- `conditions` -> `conditions` (correto mas usa Neo4j)
 
-1. **Timeline comparativa completa**: Lifespan de caes (10-13 anos) vs humanos (75-85 anos) com marcos etarios
-2. **Janela de tratamento e verificacao**: Mostrando que ao iniciar tratamento em caes de 7-8 anos, resultados estatisticamente significativos surgem em 2-3 anos (vs 15-20 anos em humanos)
-3. **Nuances estatisticas**: Nao e preciso esperar todos os caes morrerem -- analises interinas (Kaplan-Meier, Cox hazards) permitem detectar efeitos com ~50-60% dos eventos esperados
+**Solucao**: Criar stat types especificos para cada card e carregar dados da tabela correta. Ex: `pathways` deve abrir um dialog com dados de pathways, `nutraceuticals` deve listar da tabela `nutraceuticals`, etc.
 
-## Design do Infografico
+### Problema D: Pathways = 0 vs Graph Nodes mostra pathways
+- O card "Pathways" na Base de Conhecimento conta da tabela `pathway_nodes` (linha 94 de useKnowledgeGraphStats.ts) = **vazia**
+- O dialog "Graph Nodes" filtra por tipo "Pathway" no Neo4j onde existem AMPK, mTOR, NF-kB etc.
+- Essas entidades existem na `veterinary_ontology` como type `pathway` / layer `layer_2_mechanism` mas o card nao conta de la
 
-Layout vertical com 3 camadas:
+**Solucao**: Mudar a query do card "Pathways" para contar pathways da `veterinary_ontology` (onde realmente existem) em vez da tabela `pathway_nodes` (vazia e sem uso).
 
-### Camada 1: Timelines de Vida Comparativas
-- Barra horizontal escura = vida do cao (0-13 anos) com marcos: Filhote, Adulto, Senior, Geriatrico
-- Barra horizontal clara = vida humana (0-85 anos) com marcos equivalentes
-- Marcador visual mostrando a "janela de intervencao" (7-8 anos no cao = ~50 anos humanos)
+## Mudancas Tecnicas
 
-### Camada 2: Tempo ate Resultados Clinicos
-- Indicador visual: "Inicio do tratamento geroprotetor" no cao aos 7 anos
-- Seta curta (2-3 anos) ate "Resultados estatisticamente significativos" no cao
-- Seta longa (15-20 anos) para o equivalente humano
-- Destaque: "7x mais rapido"
+### 1. `src/hooks/useKnowledgeGraphStats.ts`
+- Substituir a query de `pathway_nodes` por query em `veterinary_ontology` filtrando por `entity_type = 'pathway'` ou `layer LIKE '%pathway%'`
+- Isso corrige o "0" no card Pathways
 
-### Camada 3: Card com Nuances Estatisticas
-- Icone de grafico + texto explicativo sobre analises interinas
-- Pontos-chave:
-  - "Nao e necessario aguardar desfecho final (morte) para todos os sujeitos"
-  - "Analises de sobrevivencia (Kaplan-Meier) detectam diferencas com ~60% dos eventos"
-  - "Endpoints compostos (funcao cognitiva, mobilidade, biomarcadores) fornecem sinais ainda mais rapidos"
-  - Referencia ao TRIAD (Dog Aging Project) como validacao real
+### 2. `src/components/administrador/visualizations/KnowledgeGraphViewer.tsx`
+- Expandir o union type `StatType` para incluir: `'pathways'`, `'outcomes'`, `'chebi'`, `'entities-ai'`, `'relations-ai'`, `'approved-triplets'`, `'pending-triplets'`
+- Atualizar `openStatDialog` para mapear cada card ID ao seu tipo especifico em vez de colapsar tudo em `'ontology'`
 
-## Detalhes Tecnicos
+### 3. `src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx`
+- Adicionar suporte aos novos stat types:
+  - `pathways`: carrega pathways da `veterinary_ontology` WHERE entity_type='pathway'
+  - `outcomes`: carrega da tabela `outcome_families`
+  - `chebi`: carrega da `veterinary_ontology` WHERE source='ChEBI'
+  - `entities-ai`: carrega da `veterinary_ontology` WHERE source='gemini_extraction'
+  - `relations-ai`: carrega de `hierarchical_edges` com study_ids
+  - `approved-triplets`: carrega de `triplet_extractions` WHERE curation_status='approved'
+  - `pending-triplets`: carrega de `triplet_extractions` WHERE curation_status='pending'
+- Cada tipo tera titulo, descricao e renderizacao proprios
 
-### Arquivo modificado:
-- `src/components/landing/VisionSection.tsx` -- substituir o bloco das linhas 53-71 (7x faster visual) pelo novo infografico
+### 4. Traducoes
+- Adicionar chaves i18n para os novos tipos de dialog (titulos e descricoes)
+- Atualizar `src/locales/pt/translation.json` e `src/locales/en/translation.json`
+- Incrementar versao no `src/i18n.ts`
 
-### Traducoes a adicionar:
-Novas chaves em `landing.vision.translational.*`:
-- `timelineTitle`, `dogTimeline`, `humanTimeline`
-- `puppy`, `adult`, `senior`, `geriatric` (marcos)
-- `interventionWindow`, `treatmentStart`
-- `dogResults` ("Resultados em 2-3 anos")
-- `humanResults` ("Equivalente humano: 15-20 anos")
-- `statisticalTitle`
-- `stat1` ("Analises interinas permitem conclusoes antes do desfecho final")
-- `stat2` ("Curvas de sobrevivencia detectam efeitos com ~60% dos eventos")
-- `stat3` ("Endpoints compostos aceleram ainda mais a deteccao")
-- `reference` ("Baseado no design do TRIAD - Dog Aging Project, Nature 2022")
+## Sobre o Ponto A (Patient Analysis)
+Para testar o Patient Analysis, o caminho e: pagina do veterinario -> selecionar um pet -> clicar "Analisar com VetGraphRAG". Isso requer ter um pet cadastrado no sistema. Se nao houver pets, precisaremos usar dados de teste. Isso sera tratado separadamente apos estas correcoes.
 
-### Arquivos afetados:
-1. `src/components/landing/VisionSection.tsx` -- novo infografico
-2. `src/locales/pt/translation.json` -- chaves PT
-3. `src/locales/en/translation.json` -- chaves EN
-4. `src/i18n.ts` -- incrementar versao
+## Sobre o Ponto C ("Aguardando processamento")
+O status "Aguardando processamento" indica que o estudo foi importado mas o pipeline de extracao de triplets ainda nao rodou para ele. Isso e comportamento esperado - quando voce processar os 30 novos estudos, eles passarao por esse estado antes de terem triplets extraidos.
 
-### Implementacao visual:
-- Puro CSS/Tailwind + Framer Motion (sem bibliotecas de chart)
-- Barras proporcionais com gradientes sutis
-- Badges para marcos etarios
-- Cards com bordas finas e icones Lucide
-- Mantendo o estilo clean/minimalista atual da landing page
+## Arquivos Afetados
+1. `src/hooks/useKnowledgeGraphStats.ts` - corrigir query de pathways
+2. `src/components/administrador/visualizations/KnowledgeGraphViewer.tsx` - expandir StatType e mapeamento
+3. `src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx` - adicionar renders para novos tipos
+4. `src/locales/pt/translation.json` - novas chaves
+5. `src/locales/en/translation.json` - novas chaves
+6. `src/i18n.ts` - incrementar versao
