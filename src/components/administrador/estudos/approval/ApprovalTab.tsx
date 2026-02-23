@@ -69,11 +69,11 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-500">Concluído</Badge>;
+        return <Badge variant="default" className="bg-green-500">{t('studies.approval.completed', 'Concluído')}</Badge>;
       case 'in-progress':
-        return <Badge variant="secondary" className="bg-amber-100 text-amber-700">Em Progresso</Badge>;
+        return <Badge variant="secondary" className="bg-amber-100 text-amber-700">{t('studies.approval.inProgress', 'Em Progresso')}</Badge>;
       default:
-        return <Badge variant="outline">Pendente</Badge>;
+        return <Badge variant="outline">{t('studies.approval.pending', 'Pendente')}</Badge>;
     }
   };
 
@@ -90,23 +90,23 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
       {/* Triplet Stats */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Estatísticas de Triplets</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('studies.approval.tripletStats', 'Estatísticas de Triplets')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold">{tripletStats.total}</span>
-              <span className="text-sm text-muted-foreground">Total</span>
+              <span className="text-sm text-muted-foreground">{t('common.total', 'Total')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <span className="text-lg font-semibold text-green-600">{tripletStats.approved}</span>
-              <span className="text-sm text-muted-foreground">Aprovados</span>
+              <span className="text-sm text-muted-foreground">{t('studies.approval.approved', 'Aprovados')}</span>
             </div>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-amber-500" />
               <span className="text-lg font-semibold text-amber-600">{tripletStats.pending}</span>
-              <span className="text-sm text-muted-foreground">Pendentes</span>
+              <span className="text-sm text-muted-foreground">{t('studies.approval.pendingItems', 'Pendentes')}</span>
             </div>
           </div>
         </CardContent>
@@ -114,7 +114,7 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
 
       {/* Stages List */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium">Estágios de Aprovação</h4>
+        <h4 className="text-sm font-medium">{t('studies.approval.stagesTitle', 'Estágios de Aprovação')}</h4>
         {stages.map((stage, index) => (
           <div 
             key={index}
@@ -126,12 +126,12 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
                 <span className="font-medium">{stage.name}</span>
                 {stage.count !== undefined && (
                   <span className="text-sm text-muted-foreground ml-2">
-                    ({stage.count} itens)
+                    ({stage.count} {t('studies.approval.items', 'itens')})
                   </span>
                 )}
                 {stage.approved !== undefined && (
                   <span className="text-sm text-muted-foreground ml-2">
-                    ({stage.approved} aprovados, {stage.pending} pendentes)
+                    ({stage.approved} {t('studies.approval.approved', 'aprovados')}, {stage.pending} {t('studies.approval.pendingItems', 'pendentes')})
                   </span>
                 )}
               </div>
@@ -159,17 +159,17 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processando...
+                {t('studies.approval.processing', 'Processando...')}
               </>
             ) : (
               <>
                 <ArrowRight className="h-4 w-4 mr-2" />
-                Aprovar Estudo e Executar Workflow
+                {t('studies.approval.approveAndRun', 'Aprovar Estudo e Executar Workflow')}
               </>
             )}
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Isso irá auto-aprovar triplets de alta confiança, consolidar o knowledge graph e sincronizar com Neo4j.
+            {t('studies.approval.workflowDescription', 'Isso irá auto-aprovar triplets de alta confiança, consolidar o knowledge graph e sincronizar com Neo4j.')}
           </p>
         </div>
       )}
@@ -178,7 +178,7 @@ const ApprovalTab: React.FC<ApprovalTabProps> = ({ estudo, onAdvanceApproval }) 
         <div className="pt-4 border-t">
           <div className="flex items-center justify-center gap-2 text-green-600">
             <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Estudo Aprovado</span>
+            <span className="font-medium">{t('studies.approval.studyApproved', 'Estudo Aprovado')}</span>
           </div>
         </div>
       )}

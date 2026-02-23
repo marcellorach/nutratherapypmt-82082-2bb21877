@@ -278,7 +278,17 @@
       "pending": "Pending",
       "rejected": "Rejected",
       "willAutoApprove": "Will be auto-approved",
-      "needsManualReview": "Needs manual review"
+      "needsManualReview": "Needs manual review",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "tripletStats": "Triplet Statistics",
+      "approved": "Approved",
+      "pendingItems": "Pending",
+      "stagesTitle": "Approval Stages",
+      "items": "items",
+      "approveAndRun": "Approve Study & Run Workflow",
+      "workflowDescription": "This will auto-approve high-confidence triplets, consolidate the knowledge graph and sync to Neo4j.",
+      "studyApproved": "Study Approved"
     },
     "library": {
       "title": "Studies Library",
@@ -5094,7 +5104,21 @@
       "clinicalNotes": "Clinical Notes",
       "clinicalHistory": "Clinical History",
       "noNotes": "No clinical notes registered",
-      "notFound": "Patient not found"
+      "notFound": "Patient not found",
+      "analyzing": "Analyzing...",
+      "analysisComplete": "Analysis Complete",
+      "analysisCompleteDesc": "Recommendations generated based on the Knowledge Graph.",
+      "analysisError": "Analysis Error",
+      "kgAnalysisTitle": "VetGraphRAG Analysis",
+      "conditionsAnalyzed": "Conditions analyzed",
+      "kgFindings": "Knowledge Graph Findings",
+      "entitiesFound": "entities",
+      "relationsFound": "relations",
+      "recommendedStack": "Recommended Geroprotective Stack",
+      "rationale": "Rationale",
+      "clinicalConsiderations": "Additional Clinical Considerations",
+      "precautions": "Precautions",
+      "disclaimer": "This analysis is AI-generated and must be validated by a veterinarian. It does not replace professional consultation."
     },
     "generator": {
       "button": "Generate Sample Patients",

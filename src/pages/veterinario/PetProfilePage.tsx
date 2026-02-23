@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Layout from '@/components/layout/Layout';
@@ -6,9 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, AlertTriangle, CheckCircle, FlaskConical, Shield } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const severityColors: Record<string, string> = {
   mild: 'bg-yellow-100 text-yellow-800',
@@ -26,7 +30,94 @@ const PetProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+
+  const handleAnalyzeWithKG = async () => {
+    if (!data?.profile) return;
+    setAnalyzing(true);
+    
+    try {
+      const { profile, conditions } = data;
+      const conditionNames = conditions.map((c: any) => c.condition_name);
+      
+      // Step 1: Query KG for each condition
+      const kgResults: any[] = [];
+      
+      for (const condition of conditionNames.length > 0 ? conditionNames : ['aging', 'longevity']) {
+        try {
+          const { data: kgData, error: kgError } = await supabase.functions.invoke('graph-rag-search', {
+            body: {
+              queryType: 'context',
+              sourceEntity: condition,
+            }
+          });
+          
+          if (!kgError && kgData?.data) {
+            kgResults.push({ condition, graphData: kgData.data });
+          }
+        } catch (e) {
+          console.warn(`KG query for ${condition} failed:`, e);
+        }
+      }
+
+      // Step 2: Get hybrid recommendation (uses AI + KG data)
+      const primaryCondition = conditionNames[0] || 'geriatric wellness';
+      const { data: recommendation, error: recError } = await supabase.functions.invoke('hybrid-recommendation', {
+        body: {
+          mode: kgResults.length > 0 ? 'enrich' : 'fallback',
+          petProfile: {
+            species: profile.species,
+            breed: profile.breed,
+            age: profile.age_years,
+            weight: profile.weight_kg,
+          },
+          condition: primaryCondition,
+          kgData: kgResults.length > 0 ? {
+            nutraceuticals: kgResults.flatMap(r => 
+              (r.graphData.nodes || [])
+                .filter((n: any) => n.type === 'Nutraceutical' || n.type === 'Compound')
+                .map((n: any) => ({
+                  name: n.label || n.properties?.name,
+                  dosage: n.properties?.dosage || 'Consultar veterinário',
+                  mechanism: n.properties?.mechanism || 'Via knowledge graph',
+                  evidenceLevel: 'KG-backed',
+                }))
+            ),
+            rationale: `Baseado em ${kgResults.length} consulta(s) ao Knowledge Graph para: ${conditionNames.join(', ')}`,
+            precautions: [],
+          } : undefined,
+        }
+      });
+
+      if (recError) throw recError;
+
+      setAnalysisResult({
+        kgResults,
+        recommendation,
+        petProfile: profile,
+        conditions: conditionNames,
+      });
+      setAnalysisDialogOpen(true);
+      
+      toast({
+        title: t('petRegistration.profile.analysisComplete', 'Análise Concluída'),
+        description: t('petRegistration.profile.analysisCompleteDesc', 'Recomendações geradas com base no Knowledge Graph.'),
+      });
+    } catch (err: any) {
+      console.error('KG Analysis error:', err);
+      toast({
+        title: t('petRegistration.profile.analysisError', 'Erro na Análise'),
+        description: err.message || 'Erro ao consultar o Knowledge Graph.',
+        variant: 'destructive',
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -73,9 +164,20 @@ const PetProfilePage: React.FC = () => {
               {profile.neutered && ` · ${t('petRegistration.form.neutered')}`}
             </p>
           </div>
-          <Button variant="outline" className="gap-2">
-            <Brain className="h-4 w-4" />
-            {t('petRegistration.profile.analyzeWithKG')}
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleAnalyzeWithKG}
+            disabled={analyzing}
+          >
+            {analyzing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Brain className="h-4 w-4" />
+            )}
+            {analyzing 
+              ? t('petRegistration.profile.analyzing', 'Analisando...') 
+              : t('petRegistration.profile.analyzeWithKG')}
           </Button>
         </div>
 
@@ -289,6 +391,126 @@ const PetProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* KG Analysis Results Dialog */}
+      <Dialog open={analysisDialogOpen} onOpenChange={setAnalysisDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              {t('petRegistration.profile.kgAnalysisTitle', 'Análise VetGraphRAG')}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            {analysisResult && (
+              <div className="space-y-6 pr-4">
+                {/* Patient Summary */}
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm font-medium">
+                    {analysisResult.petProfile?.name} · {analysisResult.petProfile?.breed} · {analysisResult.petProfile?.age_years} {t('petRegistration.profile.years')}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('petRegistration.profile.conditionsAnalyzed', 'Condições analisadas')}: {analysisResult.conditions?.join(', ') || 'Bem-estar geriátrico'}
+                  </p>
+                </div>
+
+                {/* KG Graph Data */}
+                {analysisResult.kgResults?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
+                      <FlaskConical className="h-4 w-4" />
+                      {t('petRegistration.profile.kgFindings', 'Achados no Knowledge Graph')}
+                    </h4>
+                    {analysisResult.kgResults.map((result: any, idx: number) => (
+                      <div key={idx} className="mb-3 p-3 border rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">{result.condition}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(result.graphData?.nodes || []).slice(0, 12).map((node: any, nIdx: number) => (
+                            <Badge key={nIdx} variant="outline" className="text-xs">
+                              {node.label || node.properties?.name}
+                              <span className="ml-1 opacity-60">({node.type})</span>
+                            </Badge>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {result.graphData?.nodes?.length || 0} {t('petRegistration.profile.entitiesFound', 'entidades')} · {result.graphData?.relationships?.length || 0} {t('petRegistration.profile.relationsFound', 'relações')}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Nutraceutical Recommendations */}
+                {analysisResult.recommendation?.nutraceuticals?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      {t('petRegistration.profile.recommendedStack', 'Stack Recomendado')}
+                    </h4>
+                    <div className="space-y-2">
+                      {analysisResult.recommendation.nutraceuticals.map((nutra: any, idx: number) => (
+                        <div key={idx} className="p-3 border rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-sm">{nutra.name}</p>
+                            <Badge variant="secondary" className="text-xs">{nutra.evidenceLevel}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">{nutra.dosage}</p>
+                          <p className="text-xs mt-1">{nutra.mechanism}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rationale */}
+                {analysisResult.recommendation?.rationale && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">
+                      {t('petRegistration.profile.rationale', 'Fundamentação')}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{analysisResult.recommendation.rationale}</p>
+                  </div>
+                )}
+
+                {/* Enrichment */}
+                {analysisResult.recommendation?.enrichment && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">
+                      {t('petRegistration.profile.clinicalConsiderations', 'Considerações Clínicas Adicionais')}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{analysisResult.recommendation.enrichment}</p>
+                  </div>
+                )}
+
+                {/* Precautions */}
+                {analysisResult.recommendation?.precautions?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-1">
+                      <Shield className="h-4 w-4 text-amber-500" />
+                      {t('petRegistration.profile.precautions', 'Precauções')}
+                    </h4>
+                    <ul className="space-y-1">
+                      {analysisResult.recommendation.precautions.map((p: string, idx: number) => (
+                        <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <AlertTriangle className="h-3 w-3 mt-0.5 text-amber-500 shrink-0" />
+                          {p}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Disclaimer */}
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {t('petRegistration.profile.disclaimer', 'Esta análise é gerada por IA e deve ser validada por um veterinário. Não substitui consulta profissional.')}
+                  </p>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
