@@ -106,7 +106,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   
   // New states for dialogs, chat and node details
   const [statDialogOpen, setStatDialogOpen] = useState(false);
-  const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions'>('ontology');
+  const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions' | 'pathways' | 'outcomes' | 'chebi' | 'entities-ai' | 'relations-ai' | 'approved-triplets' | 'pending-triplets'>('ontology');
   const [chatOpen, setChatOpen] = useState(false);
   const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
@@ -593,19 +593,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
   };
 
   const openStatDialog = (cardId: string) => {
-    // Map card IDs from stats rows to dialog stat types
-    const cardIdToStatType: Record<string, 'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions'> = {
+    const cardIdToStatType: Record<string, typeof selectedStatType> = {
       'ontology-manual': 'ontology',
-      'ontology-chebi': 'ontology',
+      'ontology-chebi': 'chebi',
       'nutraceuticals': 'nutraceuticals',
       'conditions': 'conditions',
-      'outcomes': 'ontology',
-      'pathways': 'ontology',
-      'entities-ai': 'nodes',
-      'relations-ai': 'edges',
+      'outcomes': 'outcomes',
+      'pathways': 'pathways',
+      'entities-ai': 'entities-ai',
+      'relations-ai': 'relations-ai',
       'active-studies': 'studies',
-      'approved-triplets': 'positive',
-      'pending-triplets': 'studies',
+      'approved-triplets': 'approved-triplets',
+      'pending-triplets': 'pending-triplets',
       'total-nodes': 'nodes',
       'total-relations': 'edges',
       'positive-relations': 'positive',

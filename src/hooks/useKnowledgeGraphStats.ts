@@ -91,8 +91,9 @@ export function useKnowledgeGraphStats(): UseKnowledgeGraphStatsReturn {
           .from('outcome_families')
           .select('*', { count: 'exact', head: true }),
         supabase
-          .from('pathway_nodes')
-          .select('*', { count: 'exact', head: true }),
+          .from('veterinary_ontology')
+          .select('*', { count: 'exact', head: true })
+          .eq('layer', 'layer_2_mechanism'),
         // Extracted Knowledge queries
         supabase
           .from('veterinary_ontology')
