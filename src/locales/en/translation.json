@@ -6193,5 +6193,55 @@
     "effectHigh": "Clinically significant effect",
     "effectModerate": "Relevant effect",
     "effectLow": "Limited effect"
+  },
+  "ntaiSynergies": {
+    "title": "Synergies and Interactions",
+    "magnitude": "Magnitude",
+    "noSynergies": "No synergies identified."
+  },
+  "ntaiInteractions": {
+    "title": "Identified Interactions",
+    "noInteractions": "No significant interactions identified."
+  },
+  "pdfFileList": {
+    "selectedFiles": "Selected files ({{count}})"
+  },
+  "submitImport": {
+    "saving": "Saving...",
+    "saveImport": "Save Import"
+  },
+  "consensoForm": {
+    "nameLabel": "Integrative Consensus Name",
+    "namePlaceholder": "E.g.: Brazilian Joint Health Consensus 2025",
+    "commentsLabel": "General Comments",
+    "commentsPlaceholder": "Important observations about this consensus or study base."
+  },
+  "settingsTabs": {
+    "predictiveTitle": "Settings - Predictive Analysis",
+    "predictiveDescription": "Configure engines, prompts and conventions specific to Predictive Analysis",
+    "researchTitle": "Settings - Research and Development",
+    "researchDescription": "Configure engines, prompts and conventions specific to Research and Development",
+    "saveSettings": "Save Settings",
+    "enginesPrompts": "Engines & Prompts",
+    "conventions": "Conventions",
+    "apiUsage": "API Usage"
+  },
+  "usageTab": {
+    "recommendedDosage": "Recommended Dosage",
+    "administrationForms": "Administration Forms",
+    "addToFood": "Added to food",
+    "oralPaste": "Oral supplement in paste form",
+    "capsules": "Capsules",
+    "powderMix": "Powder to mix with water",
+    "drugInteractions": "Drug Interactions",
+    "consultVet": "Consult a veterinarian before combining this nutraceutical with conventional medications."
+  },
+  "ingredientsTab": {
+    "activeIngredients": "Active Ingredients",
+    "chemicalFormula": "Chemical Formula and Mechanisms of Action",
+    "comingSoon": "Detailed information about molecular mechanisms will be available soon."
+  },
+  "sciImportHistory": {
+    "delete": "Delete"
   }
 }

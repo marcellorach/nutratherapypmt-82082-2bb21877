@@ -2,6 +2,7 @@
 import React from 'react';
 import { StudyPdfFile } from './PdfFileItem';
 import PdfFileItem from './PdfFileItem';
+import { useTranslation } from 'react-i18next';
 
 interface PdfFileListProps {
   files: StudyPdfFile[];
@@ -9,13 +10,15 @@ interface PdfFileListProps {
 }
 
 const PdfFileList: React.FC<PdfFileListProps> = ({ files, onRemoveFile }) => {
+  const { t } = useTranslation();
+
   if (files.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium mb-2">Arquivos selecionados ({files.length})</h3>
+      <h3 className="text-sm font-medium mb-2">{t('pdfFileList.selectedFiles', { count: files.length })}</h3>
       <div className="space-y-2">
         {files.map(file => (
           <PdfFileItem 

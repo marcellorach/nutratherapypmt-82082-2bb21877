@@ -6193,5 +6193,55 @@
     "effectHigh": "Efeito clinicamente significativo",
     "effectModerate": "Efeito relevante",
     "effectLow": "Efeito limitado"
+  },
+  "ntaiSynergies": {
+    "title": "Sinergias e Interações",
+    "magnitude": "Magnitude",
+    "noSynergies": "Nenhuma sinergia identificada."
+  },
+  "ntaiInteractions": {
+    "title": "Interações Identificadas",
+    "noInteractions": "Nenhuma interação significativa identificada."
+  },
+  "pdfFileList": {
+    "selectedFiles": "Arquivos selecionados ({{count}})"
+  },
+  "submitImport": {
+    "saving": "Salvando...",
+    "saveImport": "Salvar Importação"
+  },
+  "consensoForm": {
+    "nameLabel": "Nome do Consenso Integrativo",
+    "namePlaceholder": "Ex: Consenso Brasileiro de Saúde Articular 2025",
+    "commentsLabel": "Comentários Gerais",
+    "commentsPlaceholder": "Observações importantes sobre este consenso ou base de estudos."
+  },
+  "settingsTabs": {
+    "predictiveTitle": "Configurações - Análise Preditiva",
+    "predictiveDescription": "Configure engines, prompts e convenções específicas para a Análise Preditiva",
+    "researchTitle": "Configurações - Pesquisa e Desenvolvimento",
+    "researchDescription": "Configure engines, prompts e convenções específicas para Pesquisa e Desenvolvimento",
+    "saveSettings": "Salvar Configurações",
+    "enginesPrompts": "Engines & Prompts",
+    "conventions": "Convenções",
+    "apiUsage": "Uso de API"
+  },
+  "usageTab": {
+    "recommendedDosage": "Dosagem Recomendada",
+    "administrationForms": "Formas de Administração",
+    "addToFood": "Adição à ração",
+    "oralPaste": "Suplemento oral em forma de pasta",
+    "capsules": "Cápsulas",
+    "powderMix": "Em pó para misturar com água",
+    "drugInteractions": "Interações com Medicamentos",
+    "consultVet": "Consulte um veterinário antes de combinar este nutracêutico com medicamentos convencionais."
+  },
+  "ingredientsTab": {
+    "activeIngredients": "Princípios Ativos",
+    "chemicalFormula": "Fórmula Química e Mecanismos de Ação",
+    "comingSoon": "Informações detalhadas sobre mecanismos moleculares estarão disponíveis em breve."
+  },
+  "sciImportHistory": {
+    "delete": "Apagar"
   }
 }
