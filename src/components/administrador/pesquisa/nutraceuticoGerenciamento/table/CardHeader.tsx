@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CardHeaderProps {
   refreshData: () => void;
@@ -19,11 +20,13 @@ const CardHeaderComponent: React.FC<CardHeaderProps> = ({
   hasMigratedData,
   openMigratorDialog
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <div className="flex-1 w-full sm:w-auto">
         <Input
-          placeholder="Buscar nutracêuticos por nome..."
+          placeholder={t('nutraManagement.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
@@ -37,7 +40,7 @@ const CardHeaderComponent: React.FC<CardHeaderProps> = ({
           className="h-9"
         >
           <RefreshCw className="h-4 w-4 mr-1" />
-          Atualizar
+          {t('nutraManagement.refresh')}
         </Button>
 
         {!hasMigratedData && (
@@ -48,7 +51,7 @@ const CardHeaderComponent: React.FC<CardHeaderProps> = ({
             className="h-9"
           >
             <Upload className="h-4 w-4 mr-1" />
-            Importar Dados
+            {t('nutraManagement.importData')}
           </Button>
         )}
       </div>
