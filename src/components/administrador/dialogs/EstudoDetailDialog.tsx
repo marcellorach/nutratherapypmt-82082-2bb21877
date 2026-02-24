@@ -170,24 +170,24 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
 
         <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-7">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="analysis">Análise IA</TabsTrigger>
-            <TabsTrigger value="conditions">Condições</TabsTrigger>
+            <TabsTrigger value="overview">{t('estudoDetailDialog.tabs.overview')}</TabsTrigger>
+            <TabsTrigger value="analysis">{t('estudoDetailDialog.tabs.analysis')}</TabsTrigger>
+            <TabsTrigger value="conditions">{t('estudoDetailDialog.tabs.conditions')}</TabsTrigger>
             <TabsTrigger value="triplets">
               <GitPullRequest className="h-4 w-4 mr-1" />
-              Triplets
+              {t('estudoDetailDialog.tabs.triplets')}
             </TabsTrigger>
             <TabsTrigger value="visualizations">
               <BarChart3 className="h-4 w-4 mr-1" />
-              Visualizações
+              {t('estudoDetailDialog.tabs.visualizations')}
             </TabsTrigger>
             <TabsTrigger value="chat">
               <MessageCircle className="h-4 w-4 mr-1" />
-              Chat
+              {t('estudoDetailDialog.tabs.chat')}
             </TabsTrigger>
             <TabsTrigger value="debug">
               <Bug className="h-4 w-4 mr-1" />
-              Debug
+              {t('estudoDetailDialog.tabs.debug')}
             </TabsTrigger>
           </TabsList>
 
