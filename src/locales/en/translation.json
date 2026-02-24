@@ -6332,7 +6332,137 @@
       "removeRelationError": "Could not remove the relation.",
       "selectStudyError": "Please select a scientific study.",
       "studyAdded": "Study relation added successfully.",
-      "studyRemoveError": "Could not remove the relation."
+    "studyRemoveError": "Could not remove the relation."
+    }
+  },
+  "enginesPromptsPanel": {
+    "engineConfig": "Engine Configuration",
+    "engineConfigDesc": "Configure the AI engine used for this section",
+    "aiModel": "AI Model",
+    "selectModel": "Select a model",
+    "temperature": "Temperature: {{value}}",
+    "morePrecise": "More precise",
+    "moreCreative": "More creative",
+    "systemPrompt": "System Prompt",
+    "systemPromptPlaceholder": "Enter a prompt to guide AI behavior",
+    "restoreDefault": "Restore Default",
+    "saveSettings": "Save Settings",
+    "specializedPrompts": "Specialized Prompts",
+    "specializedPromptsDesc": "Configure specific prompts for different operations within this section",
+    "dataExtraction": "Data Extraction",
+    "dataExtractionPlaceholder": "Prompt for specific data extraction",
+    "resultAnalysis": "Result Analysis",
+    "resultAnalysisPlaceholder": "Prompt for result analysis",
+    "summarization": "Summarization",
+    "summarizationPlaceholder": "Prompt for result summarization",
+    "saveAllPrompts": "Save All Prompts",
+    "models": {
+      "gpt4oMini": "GPT-4o Mini - Fast and economical",
+      "gpt4o": "GPT-4o - High performance",
+      "gpt4Vision": "GPT-4 Vision - Image processing",
+      "gpt4Turbo": "GPT-4 Turbo - High speed and performance"
+    }
+  },
+  "usagePanel": {
+    "title": "API Usage - {{section}}",
+    "sectionNames": {
+      "knowledgeBase": "Knowledge Base",
+      "dataProcessing": "Data Processing",
+      "research": "Research & Development",
+      "predictiveAnalysis": "Predictive Analysis"
+    },
+    "period": "Period",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "last90d": "Last 90 days",
+    "lastYear": "Last year",
+    "tokenConsumption": "Token Consumption",
+    "tokenConsumptionDesc": "Monthly token usage for this section",
+    "tokensLabel": "{{value}} tokens",
+    "modelDistribution": "Model Distribution",
+    "modelDistributionDesc": "Usage by AI model",
+    "exportReport": "Export Report"
+  },
+  "conventionsPanel": {
+    "title": "Conventions - {{section}}",
+    "description": "Define and manage naming conventions, formats, and validation rules",
+    "naming": "Naming",
+    "format": "Format",
+    "rules": "Rules",
+    "restoreDefault": "Restore Default",
+    "saveConventions": "Save Conventions",
+    "sectionNames": {
+      "knowledgeBase": "Knowledge Base",
+      "dataProcessing": "Data Processing",
+      "research": "Research",
+      "predictiveAnalysis": "Predictive Analysis"
+    },
+    "examples": {
+      "visualExamples": "Visual Examples:",
+      "nutraceuticalNaming": "← Nutraceutical Naming",
+      "citationFormat": "← Citation Format",
+      "dosageFormat": "← Dosage Format",
+      "conventionInPractice": "Convention in Practice:",
+      "nutraceutical": "Nutraceutical",
+      "validated": "✓ Validated",
+      "correct": "Correct:",
+      "incorrect": "Incorrect:",
+      "standardFormats": "Standard Formats:",
+      "strongEvidence": "Strong evidence with multiple studies",
+      "identifierFormat": "Identifier Format",
+      "metadataExample": "Metadata example:",
+      "validations": "Validations:",
+      "studiesValidated": "3+ validated studies",
+      "undocumentedInteractions": "Undocumented interactions",
+      "undocumentedInteractionsDesc": "Drug interactions must be documented before approval",
+      "validationChecklist": "Validation checklist:",
+      "atLeast3Studies": "At least 3 supporting studies",
+      "evidenceLevelJustification": "Evidence level justification",
+      "drugInteractions": "Drug interaction documentation",
+      "sideEffectsFrequency": "Side effects frequency"
+    }
+  },
+  "adicionarEstudoDialog": {
+    "titleForm": "Add New Scientific Study",
+    "titleProcessing": "Processing Study with AI",
+    "studyTitle": "Study Title",
+    "studyTitlePlaceholder": "Full study title",
+    "journal": "Journal",
+    "journalPlaceholder": "Journal name",
+    "year": "Year",
+    "yearPlaceholder": "YYYY",
+    "shortDescription": "Short Description",
+    "shortDescriptionPlaceholder": "Brief study description",
+    "abstract": "Abstract",
+    "abstractPlaceholder": "Paste the full abstract of the scientific study here...",
+    "studyUrl": "Study URL (optional)",
+    "studyUrlPlaceholder": "https://...",
+    "pdfUpload": "PDF Upload (optional)",
+    "submitToAI": "Submit for AI Analysis",
+    "processingLog": "Processing Log:",
+    "stages": {
+      "extractingText": "Extracting text from document",
+      "analyzingContent": "Analyzing content with AI",
+      "identifyingNutraceuticals": "Identifying nutraceuticals and compounds",
+      "correlatingConditions": "Correlating with medical conditions",
+      "preparingCard": "Preparing card for kanban",
+      "completed": "Processing completed!"
+    },
+    "log": {
+      "startProcessing": "Starting document processing...",
+      "textExtractionComplete": "Text extraction completed successfully.",
+      "analyzingWithAI": "Analyzing content with AI model...",
+      "analysisComplete": "Content analysis completed.",
+      "identifiedNutraceuticals": "Identified 3 main nutraceuticals.",
+      "correlating": "Correlating with 2 medical conditions...",
+      "generatingTags": "Generating tags and metadata for card.",
+      "processingComplete": "Processing completed. Card added to kanban."
+    },
+    "toasts": {
+      "successTitle": "Study processed successfully",
+      "successDesc": "The study was analyzed by AI and added to the kanban.",
+      "errorTitle": "Error processing study",
+      "errorDesc": "An error occurred during study processing."
     }
   }
 }

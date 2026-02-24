@@ -6332,7 +6332,137 @@
       "removeRelationError": "Não foi possível remover a relação.",
       "selectStudyError": "Selecione um estudo científico.",
       "studyAdded": "Relação com estudo adicionada com sucesso.",
-      "studyRemoveError": "Não foi possível remover a relação."
+    "studyRemoveError": "Não foi possível remover a relação."
+    }
+  },
+  "enginesPromptsPanel": {
+    "engineConfig": "Configuração de Engine",
+    "engineConfigDesc": "Configure a engine de IA utilizada para esta seção",
+    "aiModel": "Modelo de IA",
+    "selectModel": "Selecione um modelo",
+    "temperature": "Temperatura: {{value}}",
+    "morePrecise": "Mais preciso",
+    "moreCreative": "Mais criativo",
+    "systemPrompt": "Prompt de Sistema",
+    "systemPromptPlaceholder": "Insira um prompt para guiar o comportamento da IA",
+    "restoreDefault": "Restaurar Padrão",
+    "saveSettings": "Salvar Configurações",
+    "specializedPrompts": "Prompts Especializados",
+    "specializedPromptsDesc": "Configure prompts específicos para diferentes operações dentro desta seção",
+    "dataExtraction": "Extração de Dados",
+    "dataExtractionPlaceholder": "Prompt para extração de dados específicos",
+    "resultAnalysis": "Análise de Resultados",
+    "resultAnalysisPlaceholder": "Prompt para análise de resultados",
+    "summarization": "Sumarização",
+    "summarizationPlaceholder": "Prompt para sumarização de resultados",
+    "saveAllPrompts": "Salvar Todos os Prompts",
+    "models": {
+      "gpt4oMini": "GPT-4o Mini - Rápido e econômico",
+      "gpt4o": "GPT-4o - Alta performance",
+      "gpt4Vision": "GPT-4 Vision - Processamento de imagens",
+      "gpt4Turbo": "GPT-4 Turbo - Alta velocidade e performance"
+    }
+  },
+  "usagePanel": {
+    "title": "Uso de API - {{section}}",
+    "sectionNames": {
+      "knowledgeBase": "Base de Conhecimento",
+      "dataProcessing": "Processamento de Dados",
+      "research": "Pesquisa e Desenvolvimento",
+      "predictiveAnalysis": "Análise Preditiva"
+    },
+    "period": "Período",
+    "last7d": "Últimos 7 dias",
+    "last30d": "Últimos 30 dias",
+    "last90d": "Últimos 90 dias",
+    "lastYear": "Último ano",
+    "tokenConsumption": "Consumo de Tokens",
+    "tokenConsumptionDesc": "Uso mensal de tokens por esta seção",
+    "tokensLabel": "{{value}} tokens",
+    "modelDistribution": "Distribuição por Modelo",
+    "modelDistributionDesc": "Uso por modelo de IA",
+    "exportReport": "Exportar Relatório"
+  },
+  "conventionsPanel": {
+    "title": "Convenções - {{section}}",
+    "description": "Defina e gerencie as convenções de nomenclatura, formato e regras de validação",
+    "naming": "Nomenclatura",
+    "format": "Formato",
+    "rules": "Regras",
+    "restoreDefault": "Restaurar Padrão",
+    "saveConventions": "Salvar Convenções",
+    "sectionNames": {
+      "knowledgeBase": "Base de Conhecimento",
+      "dataProcessing": "Processamento de Dados",
+      "research": "Pesquisa",
+      "predictiveAnalysis": "Análise Preditiva"
+    },
+    "examples": {
+      "visualExamples": "Exemplos Visuais:",
+      "nutraceuticalNaming": "← Nomenclatura de Nutracêutico",
+      "citationFormat": "← Formato de Citação",
+      "dosageFormat": "← Formato de Dosagem",
+      "conventionInPractice": "Convenção em Prática:",
+      "nutraceutical": "Nutracêutico",
+      "validated": "✓ Validado",
+      "correct": "Correto:",
+      "incorrect": "Incorreto:",
+      "standardFormats": "Formatos Padrão:",
+      "strongEvidence": "Evidência forte com múltiplos estudos",
+      "identifierFormat": "Formato de Identificador",
+      "metadataExample": "Exemplo de metadados:",
+      "validations": "Validações:",
+      "studiesValidated": "3+ estudos validados",
+      "undocumentedInteractions": "Interações não documentadas",
+      "undocumentedInteractionsDesc": "É necessário documentar possíveis interações medicamentosas antes da aprovação",
+      "validationChecklist": "Checklist de validação:",
+      "atLeast3Studies": "Pelo menos 3 estudos de suporte",
+      "evidenceLevelJustification": "Justificativa para nível de evidência",
+      "drugInteractions": "Documentação de interações medicamentosas",
+      "sideEffectsFrequency": "Frequência de efeitos colaterais"
+    }
+  },
+  "adicionarEstudoDialog": {
+    "titleForm": "Adicionar Novo Estudo Científico",
+    "titleProcessing": "Processando Estudo com IA",
+    "studyTitle": "Título do Estudo",
+    "studyTitlePlaceholder": "Título completo do estudo",
+    "journal": "Journal",
+    "journalPlaceholder": "Nome do journal",
+    "year": "Ano",
+    "yearPlaceholder": "YYYY",
+    "shortDescription": "Descrição Breve",
+    "shortDescriptionPlaceholder": "Descrição curta do estudo",
+    "abstract": "Resumo (Abstract)",
+    "abstractPlaceholder": "Cole aqui o resumo completo do estudo científico...",
+    "studyUrl": "URL do Estudo (opcional)",
+    "studyUrlPlaceholder": "https://...",
+    "pdfUpload": "Upload do PDF (opcional)",
+    "submitToAI": "Enviar para Análise da IA",
+    "processingLog": "Log de Processamento:",
+    "stages": {
+      "extractingText": "Extraindo texto do documento",
+      "analyzingContent": "Analisando conteúdo com IA",
+      "identifyingNutraceuticals": "Identificando nutracêuticos e compostos",
+      "correlatingConditions": "Correlacionando com condições médicas",
+      "preparingCard": "Preparando card para o kanban",
+      "completed": "Processamento concluído!"
+    },
+    "log": {
+      "startProcessing": "Iniciando processamento do documento...",
+      "textExtractionComplete": "Extração de texto concluída com sucesso.",
+      "analyzingWithAI": "Analisando conteúdo com modelo de IA...",
+      "analysisComplete": "Análise de conteúdo concluída.",
+      "identifiedNutraceuticals": "Identificados 3 nutracêuticos principais.",
+      "correlating": "Correlacionando com 2 condições médicas...",
+      "generatingTags": "Gerando tags e metadados para o card.",
+      "processingComplete": "Processamento concluído. Card adicionado ao kanban."
+    },
+    "toasts": {
+      "successTitle": "Estudo processado com sucesso",
+      "successDesc": "O estudo foi analisado pela IA e adicionado ao kanban.",
+      "errorTitle": "Erro ao processar estudo",
+      "errorDesc": "Ocorreu um erro durante o processamento do estudo."
     }
   }
 }
