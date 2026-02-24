@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SuccessRateCard from './SuccessRateCard';
 import ResponseTimeCard from './ResponseTimeCard';
 
@@ -22,15 +23,17 @@ interface SuccessRateCardsProps {
 }
 
 const SuccessRateCards: React.FC<SuccessRateCardsProps> = ({ successRates }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-3 gap-3">
       <SuccessRateCard 
-        title="Taxa de sucesso - Estudos" 
+        title={t('recommendations.successRate.studies')}
         efficacyRate={successRates.estudos.eficaz}
         rates={successRates.estudos}
       />
       <SuccessRateCard 
-        title="Taxa de sucesso - PetLove" 
+        title={t('recommendations.successRate.petlove')}
         efficacyRate={successRates.petlove.eficaz}
         rates={successRates.petlove}
       />

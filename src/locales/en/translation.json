@@ -469,7 +469,38 @@
       "viewImported": "View Studies",
       "fileNameSanitized": "Name will be renamed to",
       "sectionTitle": "Study Import",
-      "uploadAndExtraction": "Upload and Automatic Extraction (Gemini AI)"
+      "uploadAndExtraction": "Upload and Automatic Extraction (Gemini AI)",
+      "metaSummary": "Meta Summary",
+      "dragDrop": "Drag and drop meta summary files here, or click to select",
+      "supportedFormats": "Supported formats: JSON, CSV, XLS, XLSX, DOC, DOCX, TXT, RTF, PDF",
+      "file": {
+        "readyToSend": "Ready to send",
+        "sending": "Sending... {{progress}}%",
+        "uploadError": "Upload error",
+        "sentSuccess": "Sent successfully",
+        "selected": "File selected",
+        "removeFile": "Remove file"
+      }
+    },
+    "queue": {
+      "processingQueue": "Processing queue:",
+      "item": "item",
+      "items": "items",
+      "noItems": "No items in queue",
+      "clearCompleted": "Clear Completed",
+      "retryFailed": "Retry",
+      "retryTooltip": "Tries to reprocess failed studies",
+      "retryWaitTip": "Recommended to wait 5-10min after DNS failures",
+      "clearFailed": "Remove Failed",
+      "processing": "Processing...",
+      "startProcessing": "Start Processing"
+    },
+    "analysis": {
+      "aiProcessing": "AI analysis is processing the study's full content",
+      "dataExtracted": "Data extracted successfully by AI",
+      "awaitingExtraction": "Awaiting Extraction",
+      "processStudyDesc": "Process the study to automatically extract: population, dosages, biomarkers, adverse effects, contraindications and interactions.",
+      "useProcessButton": "Use the \"Process\" button in the pipeline to start extraction"
     },
     "vetGraphRAG": {
       "title": "VetGraphRAG",
@@ -1976,7 +2007,14 @@
       "generateExample": "Generate Example Prompts",
       "newPrompt": "New Prompt",
       "createTitle": "Create New Prompt",
-      "createDescription": "Configure a new prompt for AI",
+      "createDescription": "Fill in the fields below to create a new prompt",
+      "recommendationTab": "Recommendation Prompts",
+      "extractionTab": "Extraction Prompts",
+      "recommendationTitle": "AI Recommendation Prompts",
+      "recommendationDesc": "Configure prompts for personalized recommendations",
+      "noPrompts": "No prompts configured yet.",
+      "generateExamples": "Generate Example Prompts",
+      "loading": "Loading prompts...",
       "form": {
         "name": "Prompt Name",
         "namePlaceholder": "Prompt name",
@@ -2009,7 +2047,13 @@
         "createdDescription": "New prompt has been successfully added.",
         "removed": "Prompt removed",
         "removedDescription": "Prompt has been successfully deleted.",
-        "error": "Error"
+        "error": "Error",
+        "errorLoading": "Could not load saved prompts.",
+        "errorSaving": "Could not save changes.",
+        "errorCreating": "Could not save the new prompt.",
+        "errorDeleting": "Could not remove the prompt.",
+        "requiredFields": "Required fields",
+        "requiredFieldsDesc": "Please fill in at least the name and content."
       },
       "examples": {
         "analysisName": "Nutraceutical Analysis",
@@ -2049,6 +2093,56 @@
     "deleted": "Item deleted successfully",
     "updated": "Item updated successfully",
     "created": "Item created successfully"
+  },
+  "research": {
+    "searchStudies": "Search Studies",
+    "savedSearches": "Saved Searches",
+    "bookmarkedStudies": "Bookmarked Studies",
+    "searchPlaceholder": "Search by term, author, nutraceutical, health condition...",
+    "searching": "Searching...",
+    "search": "Search",
+    "saveSearch": "Save Search",
+    "emptySearch": "Empty search field",
+    "enterSearchTerm": "Please enter a search term",
+    "searchComplete": "Search complete",
+    "studiesFound": "{{count}} studies found",
+    "searchError": "Search error",
+    "searchErrorDesc": "Could not complete the search. Please try again.",
+    "searchSaved": "Search saved",
+    "searchSavedDesc": "This search was saved and can be accessed later",
+    "searchLoaded": "Search loaded",
+    "searchLoadedDesc": "Search terms restored. Click Search to run again.",
+    "searchRemoved": "Search removed",
+    "searchRemovedDesc": "Saved search removed successfully",
+    "studyBookmarked": "Study bookmarked",
+    "studyBookmarkedDesc": "Study added to bookmarked items for later analysis",
+    "studyUnbookmarked": "Study removed",
+    "studyUnbookmarkedDesc": "Study removed from bookmarked items"
+  },
+  "recommendations": {
+    "successRate": {
+      "studies": "Success rate - Studies",
+      "petlove": "Success rate - PetLove",
+      "efficacious": "Efficacious",
+      "lowEfficacy": "Low efficacy",
+      "inefficacious": "Inefficacious",
+      "avgResponseTime": "Average time to response",
+      "days": "days",
+      "initialReaction": "Initial reaction",
+      "fullResponse": "Full response",
+      "populationAvg": "Population average: {{days}} days"
+    }
+  },
+  "dataAnalysis": {
+    "nutraceuticals": {
+      "title": "Nutraceutical Compositions",
+      "description": "Analysis of synergistic nutraceutical combinations",
+      "searchPlaceholder": "Search nutraceutical...",
+      "filters": "Filters",
+      "export": "Export",
+      "inDevelopment": "Nutraceutical visualization component in development.",
+      "synergiesWillShow": "Here the nutraceutical compositions and their synergies will be displayed."
+    }
   },
   "relations": {
     "title": "Relations and Connections",
@@ -2223,6 +2317,8 @@
       "actions": "Actions",
       "notDefined": "Not defined",
       "notFound": "No nutraceuticals found.",
+      "emptyState": "No nutraceuticals found with the selected filters.",
+      "countOf": "{{filtered}} of {{total}} nutraceuticals",
       "editTitle": "Edit",
       "deleteTitle": "Delete",
       "manageOutcomes": "Manage Outcomes",
@@ -2266,7 +2362,26 @@
       "saving": "Saving...",
       "creating": "Creating...",
       "save": "Save Nutraceutical",
-      "create": "Create Nutraceutical"
+      "create": "Create Nutraceutical",
+      "mainRelation": "Main Relation",
+      "relationN": "Relation {{n}}",
+      "categoryOutcome": "Category / Outcome",
+      "selectCategory": "Select a category",
+      "efficacyLevel": "Efficacy Level: {{score}}",
+      "notesObservations": "Notes / Observations",
+      "observationsPlaceholder": "Observations about this relation",
+      "relatedStudies": "Related Studies",
+      "noStudiesAvailable": "No studies available",
+      "addRelation": "Add new relation"
+    },
+    "conditions": {
+      "addTitle": "Add New Health Condition",
+      "conditionName": "Condition Name",
+      "conditionNamePlaceholder": "E.g.: Arthritis, Diabetes, Heart Failure, etc.",
+      "conditionDescription": "Description",
+      "conditionDescriptionPlaceholder": "Describe this health condition and its main characteristics",
+      "savingCondition": "Saving...",
+      "saveCondition": "Save Condition"
     },
     "relationships": {
       "title": "Relationships",

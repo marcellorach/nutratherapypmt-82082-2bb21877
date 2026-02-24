@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CardFooterProps {
   filteredCount: number;
@@ -10,9 +11,11 @@ const CardFooterComponent: React.FC<CardFooterProps> = ({
   filteredCount,
   totalCount
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="text-sm text-muted-foreground">
-      {filteredCount} de {totalCount} nutracêuticos
+      {t('nutraceuticals.table.countOf', { filtered: filteredCount, total: totalCount })}
     </div>
   );
 };

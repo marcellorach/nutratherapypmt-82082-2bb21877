@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, FileText, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -23,36 +24,31 @@ interface PdfFileItemProps {
 }
 
 const PdfFileItem: React.FC<PdfFileItemProps> = ({ file, onRemove }) => {
-  // Formatação do tamanho do arquivo
+  const { t } = useTranslation();
+
   const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) {
-      return `${bytes} B`;
-    } else if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(1)} KB`;
-    } else {
-      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // Determinando o status do arquivo
   const getStatusDisplay = () => {
     switch (file.status) {
       case 'queued':
-        return 'Pronto para envio';
+        return t('studies.import.file.readyToSend');
       case 'uploading':
-        return `Enviando... ${file.uploadProgress?.toFixed(0)}%`;
+        return t('studies.import.file.sending', { progress: file.uploadProgress?.toFixed(0) });
       case 'error':
-        return file.errorMessage || 'Erro no upload';
+        return file.errorMessage || t('studies.import.file.uploadError');
       case 'complete':
-        return 'Enviado com sucesso';
+        return t('studies.import.file.sentSuccess');
       default:
-        return 'Arquivo selecionado';
+        return t('studies.import.file.selected');
     }
   };
 
-  // Renderiza o item do arquivo
   return (
-    <div className="flex items-center justify-between border rounded-md p-2 bg-white">
+    <div className="flex items-center justify-between border rounded-md p-2 bg-background">
       <div className="flex items-center space-x-3 flex-1">
         <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
         <div className="flex-1 min-w-0">
@@ -67,7 +63,7 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({ file, onRemove }) => {
           
           <div className="flex items-center mt-1">
             {file.status === 'error' ? (
-              <AlertCircle className="h-3 w-3 text-red-500 mr-1" />
+              <AlertCircle className="h-3 w-3 text-destructive mr-1" />
             ) : file.status === 'complete' ? (
               <Check className="h-3 w-3 text-green-500 mr-1" />
             ) : null}
@@ -85,8 +81,8 @@ const PdfFileItem: React.FC<PdfFileItemProps> = ({ file, onRemove }) => {
         className="h-8 w-8 p-0"
         onClick={() => onRemove(file.id)}
       >
-        <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
-        <span className="sr-only">Remover arquivo</span>
+        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+        <span className="sr-only">{t('studies.import.file.removeFile')}</span>
       </Button>
     </div>
   );

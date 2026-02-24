@@ -1,5 +1,6 @@
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X } from 'lucide-react';
 
@@ -14,6 +15,8 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
   setMetaSummaryFiles,
   disabled = false
 }) => {
+  const { t } = useTranslation();
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setMetaSummaryFiles([...metaSummaryFiles, ...acceptedFiles]);
   }, [metaSummaryFiles, setMetaSummaryFiles]);
@@ -41,23 +44,23 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Meta Sumário</h3>
+        <h3 className="text-lg font-medium">{t('studies.import.metaSummary')}</h3>
       </div>
       
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'}
+          ${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60 hover:bg-muted/50'}
           ${disabled ? 'opacity-70 cursor-not-allowed' : ''}
         `}
       >
         <input {...getInputProps()} />
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-2 text-sm text-gray-600">
-          Arraste e solte os arquivos de meta sumário aqui, ou clique para selecionar
+        <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t('studies.import.dragDrop')}
         </p>
-        <p className="text-xs text-gray-500 mt-1">
-          Formatos suportados: JSON, CSV, XLS, XLSX, DOC, DOCX, TXT, RTF, PDF
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          {t('studies.import.supportedFormats')}
         </p>
       </div>
 
@@ -67,13 +70,13 @@ const MetaSummaryUpload: React.FC<MetaSummaryUploadProps> = ({
             <div key={`${file.name}-${index}`} className="p-4 flex justify-between items-center">
               <div>
                 <p className="font-medium">{file.name}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {(file.size / 1024).toFixed(2)} KB
                 </p>
               </div>
               <button
                 onClick={() => removeFile(index)}
-                className="text-red-500 hover:text-red-700 p-1"
+                className="text-destructive hover:text-destructive/80 p-1"
                 disabled={disabled}
               >
                 <X className="h-5 w-5" />

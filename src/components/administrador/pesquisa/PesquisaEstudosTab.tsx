@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PesquisaEstudosHeader from './estudos/PesquisaEstudosHeader';
 import PesquisaEstudosResults from './estudos/PesquisaEstudosResults';
@@ -38,6 +39,7 @@ export interface BuscaSalva {
 }
 
 const PesquisaEstudosTab: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('buscar');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<EstudoResultado[]>([]);
@@ -51,8 +53,8 @@ const PesquisaEstudosTab: React.FC = () => {
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
       toast({
-        title: "Campo de busca vazio",
-        description: "Por favor, digite um termo para buscar",
+        title: t('research.emptySearch'),
+        description: t('research.enterSearchTerm'),
         variant: "destructive",
       });
       return;
@@ -60,19 +62,17 @@ const PesquisaEstudosTab: React.FC = () => {
 
     setIsSearching(true);
     try {
-      // Simulação de busca - em produção, seria uma chamada de API real
       const resultados = await simulateEstudoSearch(searchTerm, filtrosAtivos);
       setSearchResults(resultados);
-      
       toast({
-        title: "Busca concluída",
-        description: `${resultados.length} estudos encontrados`,
+        title: t('research.searchComplete'),
+        description: t('research.studiesFound', { count: resultados.length }),
       });
     } catch (error) {
-      console.error("Erro na busca:", error);
+      console.error("Search error:", error);
       toast({
-        title: "Erro na busca",
-        description: "Não foi possível completar a busca. Tente novamente.",
+        title: t('research.searchError'),
+        description: t('research.searchErrorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -83,8 +83,8 @@ const PesquisaEstudosTab: React.FC = () => {
   const salvarBusca = () => {
     if (!searchTerm.trim()) {
       toast({
-        title: "Campo de busca vazio",
-        description: "Por favor, digite um termo para salvar a busca",
+        title: t('research.emptySearch'),
+        description: t('research.enterSearchTerm'),
         variant: "destructive",
       });
       return;
@@ -92,7 +92,7 @@ const PesquisaEstudosTab: React.FC = () => {
     
     const novaBusca: BuscaSalva = {
       id: `busca-${Date.now()}`,
-      nome: `Busca: ${searchTerm.substring(0, 30)}${searchTerm.length > 30 ? '...' : ''}`,
+      nome: `${t('research.search')}: ${searchTerm.substring(0, 30)}${searchTerm.length > 30 ? '...' : ''}`,
       termos: searchTerm,
       filtros: filtrosAtivos,
       dataCriacao: new Date().toISOString(),
@@ -100,10 +100,9 @@ const PesquisaEstudosTab: React.FC = () => {
     };
     
     setBuscasSalvas(prev => [...prev, novaBusca]);
-    
     toast({
-      title: "Busca salva",
-      description: "Esta busca foi salva e pode ser acessada posteriormente",
+      title: t('research.searchSaved'),
+      description: t('research.searchSavedDesc'),
     });
   };
 
@@ -111,14 +110,14 @@ const PesquisaEstudosTab: React.FC = () => {
     if (estudosMarcados.some(e => e.id === estudo.id)) {
       setEstudosMarcados(prev => prev.filter(e => e.id !== estudo.id));
       toast({
-        title: "Estudo removido",
-        description: "O estudo foi removido dos itens marcados",
+        title: t('research.studyUnbookmarked'),
+        description: t('research.studyUnbookmarkedDesc'),
       });
     } else {
       setEstudosMarcados(prev => [...prev, estudo]);
       toast({
-        title: "Estudo marcado",
-        description: "O estudo foi adicionado aos itens marcados para análise posterior",
+        title: t('research.studyBookmarked'),
+        description: t('research.studyBookmarkedDesc'),
       });
     }
   };
@@ -127,18 +126,17 @@ const PesquisaEstudosTab: React.FC = () => {
     setSearchTerm(busca.termos);
     setFiltrosAtivos(busca.filtros);
     setActiveTab('buscar');
-    
     toast({
-      title: "Busca carregada",
-      description: "Os termos da busca foram restaurados. Clique em Buscar para executá-la novamente.",
+      title: t('research.searchLoaded'),
+      description: t('research.searchLoadedDesc'),
     });
   };
 
   const removerBuscaSalva = (id: string) => {
     setBuscasSalvas(prev => prev.filter(busca => busca.id !== id));
     toast({
-      title: "Busca removida",
-      description: "A busca salva foi removida com sucesso",
+      title: t('research.searchRemoved'),
+      description: t('research.searchRemovedDesc'),
     });
   };
 
@@ -152,9 +150,9 @@ const PesquisaEstudosTab: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full border-b">
-          <TabsTrigger value="buscar">Buscar Estudos</TabsTrigger>
-          <TabsTrigger value="salvas">Buscas Salvas</TabsTrigger>
-          <TabsTrigger value="marcados">Estudos Marcados</TabsTrigger>
+          <TabsTrigger value="buscar">{t('research.searchStudies')}</TabsTrigger>
+          <TabsTrigger value="salvas">{t('research.savedSearches')}</TabsTrigger>
+          <TabsTrigger value="marcados">{t('research.bookmarkedStudies')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="buscar" className="pt-4">
@@ -164,7 +162,7 @@ const PesquisaEstudosTab: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <input
                     type="text"
-                    placeholder="Busque por termo, autor, nutracêutico, condição de saúde..."
+                    placeholder={t('research.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -175,14 +173,14 @@ const PesquisaEstudosTab: React.FC = () => {
                     onClick={handleSearch}
                     disabled={isSearching}
                   >
-                    {isSearching ? 'Buscando...' : 'Buscar'}
+                    {isSearching ? t('research.searching') : t('research.search')}
                   </button>
                   {searchResults.length > 0 && (
                     <button 
                       className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium"
                       onClick={salvarBusca}
                     >
-                      Salvar Busca
+                      {t('research.saveSearch')}
                     </button>
                   )}
                 </div>
