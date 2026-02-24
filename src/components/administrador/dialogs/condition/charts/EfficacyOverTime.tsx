@@ -4,23 +4,25 @@ import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
 import { generateEfficacyOverTimeData } from '../utils';
 import { NutraceuticalCondition } from "@/types";
+import { useTranslation } from 'react-i18next';
 
 interface EfficacyOverTimeProps {
   selectedCondition: NutraceuticalCondition;
 }
 
 const EfficacyOverTime: React.FC<EfficacyOverTimeProps> = ({ selectedCondition }) => {
+  const { t } = useTranslation();
   const efficacyOverTimeData = generateEfficacyOverTimeData(selectedCondition.efficacyScore);
 
   return (
     <div>
-      <h4 className="text-sm font-medium mb-2">Eficácia ao Longo do Tempo</h4>
-      <p className="text-xs text-gray-500 mb-2">
-        Progressão da eficácia para {selectedCondition.name}
+      <h4 className="text-sm font-medium mb-2">{t('efficacyOverTime.title')}</h4>
+      <p className="text-xs text-muted-foreground mb-2">
+        {t('efficacyOverTime.description', { name: selectedCondition.name })}
       </p>
       <div className="h-64 w-full">
         <ChartContainer config={{
-          eficácia: { color: "#9b87f5" }
+          efficacy: { color: "#9b87f5" }
         }}>
           <LineChart
             data={efficacyOverTimeData}
