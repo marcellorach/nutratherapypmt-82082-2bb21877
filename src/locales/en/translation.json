@@ -5906,5 +5906,91 @@
     "saveErrorDesc": "Could not save the prompt",
     "restored": "Prompt restored",
     "restoredDesc": "Default prompt has been restored"
+  },
+  "sankeyLegend": {
+    "title": "Legend",
+    "categories": "Categories",
+    "relationTypes": "Relationship Types",
+    "connectionThickness": "Connection Thickness",
+    "lowEfficacy": "Low efficacy",
+    "mediumEfficacy": "Medium efficacy",
+    "highEfficacy": "High efficacy",
+    "items": {
+      "nutraceuticals": "Nutraceuticals",
+      "nutraceuticalsDesc": "Natural substances with therapeutic properties",
+      "healthConditions": "Health Conditions",
+      "healthConditionsDesc": "Clinical conditions or health problems",
+      "outcomes": "Outcomes",
+      "outcomesDesc": "Expected or observed results",
+      "severity": "Severity",
+      "severityDesc": "Severity levels of conditions",
+      "treatability": "Treatability",
+      "treatabilityDesc": "Ease of condition treatment"
+    },
+    "relations": {
+      "prevention": "Prevention",
+      "treatment": "Treatment",
+      "support": "Support",
+      "study": "Study"
+    }
+  },
+  "sciSpaceReview": {
+    "metaSummary": "Meta Summary",
+    "baseStudies": "Base Studies",
+    "back": "Back"
+  },
+  "relatedConditions": {
+    "noConditions": "No related conditions found",
+    "prevention": "Prevention",
+    "treatment": "Treatment",
+    "support": "Support"
+  },
+  "estudosMarcados": {
+    "noBookmarks": "No bookmarked studies",
+    "bookmarkHint": "Bookmark interesting studies for later analysis",
+    "countStudies": "{{count}} bookmarked studies",
+    "analyzeHint": "Analyze and process selected studies",
+    "scheduleNtai": "Schedule NTAI Analysis",
+    "ntaiStarted": "NTAI Analysis started",
+    "ntaiStartedDesc": "{{count}} studies sent for processing",
+    "exportSelected": "Export Selected",
+    "share": "Share",
+    "cards": "Cards",
+    "table": "Table",
+    "remove": "Remove",
+    "details": "Details",
+    "tableHeaders": {
+      "title": "Title",
+      "source": "Source",
+      "year": "Year",
+      "relevance": "Relevance",
+      "methodology": "Methodology",
+      "actions": "Actions"
+    }
+  },
+  "studiesDropZone": {
+    "dropHint": "Drop to add studies...",
+    "dragHint": "Drag studies to this area or select below",
+    "noStudies": "No studies available",
+    "selectedCount_one": "{{count}} study selected",
+    "selectedCount_other": "{{count}} studies selected"
+  },
+  "scientificTab": {
+    "efficacy": "Efficacy",
+    "sustainability": "Sustainability",
+    "prevention": "Prevention",
+    "treatment": "Treatment",
+    "support": "Support",
+    "noPreventionConditions": "This nutraceutical has no registered prevention conditions.",
+    "noTreatmentConditions": "This nutraceutical has no registered treatment conditions.",
+    "noSupportConditions": "This nutraceutical has no registered support conditions.",
+    "scientificStudies": "Scientific Studies",
+    "noStudies": "This nutraceutical has no registered scientific studies."
+  },
+  "partialResultsChart": {
+    "control": "Control",
+    "dapagliflozin": "Dapagliflozin",
+    "empagliflozin": "Empagliflozin",
+    "treatment": "Treatment"
   }
 }

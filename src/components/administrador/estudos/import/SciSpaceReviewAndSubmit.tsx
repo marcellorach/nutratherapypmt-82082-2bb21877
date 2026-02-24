@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import FilePreview from "./FilePreview";
 import SubmitImportButton from "./SubmitImportButton";
 
@@ -22,17 +23,19 @@ const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
   onPrev,
   onSubmit
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div>
       <div className="mb-6 grid md:grid-cols-2 gap-6">
         <FilePreview
           file={metaSummaryFile}
-          label="Meta Sumário"
+          label={t('sciSpaceReview.metaSummary')}
           onRemove={undefined}
         />
         <FilePreview
           file={baseStudiesFile}
-          label="Base Estudos"
+          label={t('sciSpaceReview.baseStudies')}
           onRemove={undefined}
         />
       </div>
@@ -42,7 +45,7 @@ const SciSpaceReviewAndSubmit: React.FC<SciSpaceReviewAndSubmitProps> = ({
           onClick={onPrev}
           disabled={loading}
         >
-          Voltar
+          {t('sciSpaceReview.back')}
         </button>
         <SubmitImportButton
           onClick={onSubmit}

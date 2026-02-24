@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
 import { FileText, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,12 +23,10 @@ const StudiesDropZone: React.FC<StudiesDropZoneProps> = ({
   onStudiesDropped,
   loading = false
 }) => {
+  const { t } = useTranslation();
   const [draggedStudies, setDraggedStudies] = useState<string[]>([]);
   
-  // Para simular o comportamento de arrastar e soltar, vamos usar o hook useDropzone
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    // Como estamos só simulando, vamos considerar que qualquer arquivo arrastado
-    // representa a seleção de um estudo não selecionado ainda
     const availableStudies = studies
       .filter(study => !selectedStudies.includes(study.id))
       .slice(0, acceptedFiles.length)
@@ -79,8 +78,8 @@ const StudiesDropZone: React.FC<StudiesDropZoneProps> = ({
           <FileText className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             {isDragActive 
-              ? "Solte para adicionar estudos..." 
-              : "Arraste estudos para esta área ou selecione abaixo"}
+              ? t('studiesDropZone.dropHint')
+              : t('studiesDropZone.dragHint')}
           </p>
         </div>
       </div>
@@ -90,7 +89,7 @@ const StudiesDropZone: React.FC<StudiesDropZoneProps> = ({
           <CardContent className="p-2">
             {studies.length === 0 ? (
               <div className="flex items-center justify-center h-36 text-sm text-muted-foreground">
-                Nenhum estudo disponível
+                {t('studiesDropZone.noStudies')}
               </div>
             ) : (
               <div className="space-y-1">
@@ -138,7 +137,7 @@ const StudiesDropZone: React.FC<StudiesDropZoneProps> = ({
       {selectedStudies.length > 0 && (
         <div className="mt-2">
           <p className="text-xs text-muted-foreground mb-1">
-            {selectedStudies.length} {selectedStudies.length === 1 ? 'estudo selecionado' : 'estudos selecionados'}
+            {t('studiesDropZone.selectedCount', { count: selectedStudies.length })}
           </p>
           <div className="flex flex-wrap gap-1">
             {selectedStudies.map(studyId => {
