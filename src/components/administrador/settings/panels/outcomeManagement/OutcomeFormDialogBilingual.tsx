@@ -111,8 +111,6 @@ const OutcomeFormDialogBilingual: React.FC<OutcomeFormDialogBilingualProps> = ({
                       <Loader2 className="h-3 w-3 animate-spin" />
                       {t('outcomeManagement.form.translatingAuto')}
                     </span>
-                      Traduzindo automaticamente...
-                    </span>
                   )}
                 </div>
                 
