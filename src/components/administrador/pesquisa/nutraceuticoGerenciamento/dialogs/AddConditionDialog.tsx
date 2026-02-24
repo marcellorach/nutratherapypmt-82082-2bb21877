@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -10,13 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useConditions } from '@/hooks/nutraceuticals/useConditions';
 
-// Schema de validação
 const formSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  description: z.string().min(10, 'Descrição deve ser mais detalhada'),
+  name: z.string().min(2),
+  description: z.string().min(10),
 });
 
-// Tipagem para os dados do formulário
 type FormData = z.infer<typeof formSchema>;
 
 interface AddConditionDialogProps {
@@ -30,35 +29,24 @@ const AddConditionDialog: React.FC<AddConditionDialogProps> = ({
   onOpenChange,
   onSuccess
 }) => {
+  const { t } = useTranslation();
   const { createCondition } = useConditions();
   
-  // Inicialização do formulário
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-    }
+    defaultValues: { name: '', description: '' }
   });
   
   const { isSubmitting } = form.formState;
 
-  // Função para lidar com o envio do formulário
   const handleSubmit = async (values: FormData) => {
     try {
-      await createCondition({
-        name: values.name,
-        description: values.description
-      });
-      
+      await createCondition({ name: values.name, description: values.description });
       form.reset();
       onOpenChange(false);
-      
-      if (onSuccess) {
-        onSuccess();
-      }
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Erro ao criar condição de saúde:', error);
+      console.error('Error creating health condition:', error);
     }
   };
 
@@ -66,7 +54,7 @@ const AddConditionDialog: React.FC<AddConditionDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Adicionar Nova Condição de Saúde</DialogTitle>
+          <DialogTitle>{t('nutraceuticals.conditions.addTitle')}</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -76,9 +64,9 @@ const AddConditionDialog: React.FC<AddConditionDialogProps> = ({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome da Condição</FormLabel>
+                  <FormLabel>{t('nutraceuticals.conditions.conditionName')}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: Artrite, Diabetes, Insuficiência Cardíaca, etc." />
+                    <Input {...field} placeholder={t('nutraceuticals.conditions.conditionNamePlaceholder')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,11 +78,11 @@ const AddConditionDialog: React.FC<AddConditionDialogProps> = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>{t('nutraceuticals.conditions.conditionDescription')}</FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 
-                      placeholder="Descreva esta condição de saúde e suas características principais"
+                      placeholder={t('nutraceuticals.conditions.conditionDescriptionPlaceholder')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -104,10 +92,10 @@ const AddConditionDialog: React.FC<AddConditionDialogProps> = ({
             
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : 'Salvar Condição'}
+                {isSubmitting ? t('nutraceuticals.conditions.savingCondition') : t('nutraceuticals.conditions.saveCondition')}
               </Button>
             </DialogFooter>
           </form>

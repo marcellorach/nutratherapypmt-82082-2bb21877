@@ -469,7 +469,38 @@
       "viewImported": "Ver Estudos",
       "fileNameSanitized": "Nome será renomeado para",
       "sectionTitle": "Importação de Estudos",
-      "uploadAndExtraction": "Upload e Extração Automática (Gemini AI)"
+      "uploadAndExtraction": "Upload e Extração Automática (Gemini AI)",
+      "metaSummary": "Meta Sumário",
+      "dragDrop": "Arraste e solte os arquivos de meta sumário aqui, ou clique para selecionar",
+      "supportedFormats": "Formatos suportados: JSON, CSV, XLS, XLSX, DOC, DOCX, TXT, RTF, PDF",
+      "file": {
+        "readyToSend": "Pronto para envio",
+        "sending": "Enviando... {{progress}}%",
+        "uploadError": "Erro no upload",
+        "sentSuccess": "Enviado com sucesso",
+        "selected": "Arquivo selecionado",
+        "removeFile": "Remover arquivo"
+      }
+    },
+    "queue": {
+      "processingQueue": "Fila de processamento:",
+      "item": "item",
+      "items": "itens",
+      "noItems": "Nenhum item na fila",
+      "clearCompleted": "Limpar Concluídos",
+      "retryFailed": "Tentar Novamente",
+      "retryTooltip": "Tenta reprocessar estudos que falharam",
+      "retryWaitTip": "Recomendado aguardar 5-10min após falhas de DNS",
+      "clearFailed": "Remover com Erro",
+      "processing": "Processando...",
+      "startProcessing": "Iniciar Processamento"
+    },
+    "analysis": {
+      "aiProcessing": "A análise da IA está processando o conteúdo completo do estudo",
+      "dataExtracted": "Dados extraídos com sucesso pela IA",
+      "awaitingExtraction": "Aguardando Extração",
+      "processStudyDesc": "Processe o estudo para extrair automaticamente: população, dosagens, biomarcadores, efeitos adversos, contraindicações e interações.",
+      "useProcessButton": "Use o botão \"Processar\" no pipeline para iniciar a extração"
     },
     "vetGraphRAG": {
       "title": "VetGraphRAG",
@@ -1973,10 +2004,17 @@
     },
     "prompts": {
       "title": "Configuração de Prompts",
-      "generateExample": "Gerar Prompts Exemplo",
+      "generateExample": "Gerar Prompts de Exemplo",
       "newPrompt": "Novo Prompt",
       "createTitle": "Criar Novo Prompt",
-      "createDescription": "Configure um novo prompt para a IA",
+      "createDescription": "Preencha os campos abaixo para criar um novo prompt",
+      "recommendationTab": "Prompts de Recomendação",
+      "extractionTab": "Prompts de Extração",
+      "recommendationTitle": "Prompts de Recomendação de IA",
+      "recommendationDesc": "Configure os prompts para recomendações personalizadas",
+      "noPrompts": "Nenhum prompt configurado ainda.",
+      "generateExamples": "Gerar Prompts de Exemplo",
+      "loading": "Carregando prompts...",
       "form": {
         "name": "Nome do Prompt",
         "namePlaceholder": "Nome do prompt",
@@ -2009,7 +2047,13 @@
         "createdDescription": "Novo prompt foi adicionado com sucesso.",
         "removed": "Prompt removido",
         "removedDescription": "O prompt foi excluído com sucesso.",
-        "error": "Erro"
+        "error": "Erro",
+        "errorLoading": "Não foi possível carregar os prompts salvos.",
+        "errorSaving": "Não foi possível salvar as alterações.",
+        "errorCreating": "Não foi possível salvar o novo prompt.",
+        "errorDeleting": "Não foi possível remover o prompt.",
+        "requiredFields": "Campos obrigatórios",
+        "requiredFieldsDesc": "Preencha pelo menos o nome e o conteúdo do prompt."
       },
       "examples": {
         "analysisName": "Análise de Nutracêuticos",
@@ -2049,6 +2093,56 @@
     "deleted": "Item excluído com sucesso",
     "updated": "Item atualizado com sucesso",
     "created": "Item criado com sucesso"
+  },
+  "research": {
+    "searchStudies": "Buscar Estudos",
+    "savedSearches": "Buscas Salvas",
+    "bookmarkedStudies": "Estudos Marcados",
+    "searchPlaceholder": "Busque por termo, autor, nutracêutico, condição de saúde...",
+    "searching": "Buscando...",
+    "search": "Buscar",
+    "saveSearch": "Salvar Busca",
+    "emptySearch": "Campo de busca vazio",
+    "enterSearchTerm": "Por favor, digite um termo para buscar",
+    "searchComplete": "Busca concluída",
+    "studiesFound": "{{count}} estudos encontrados",
+    "searchError": "Erro na busca",
+    "searchErrorDesc": "Não foi possível completar a busca. Tente novamente.",
+    "searchSaved": "Busca salva",
+    "searchSavedDesc": "Esta busca foi salva e pode ser acessada posteriormente",
+    "searchLoaded": "Busca carregada",
+    "searchLoadedDesc": "Os termos da busca foram restaurados. Clique em Buscar para executá-la novamente.",
+    "searchRemoved": "Busca removida",
+    "searchRemovedDesc": "A busca salva foi removida com sucesso",
+    "studyBookmarked": "Estudo marcado",
+    "studyBookmarkedDesc": "O estudo foi adicionado aos itens marcados para análise posterior",
+    "studyUnbookmarked": "Estudo removido",
+    "studyUnbookmarkedDesc": "O estudo foi removido dos itens marcados"
+  },
+  "recommendations": {
+    "successRate": {
+      "studies": "Taxa de sucesso - Estudos",
+      "petlove": "Taxa de sucesso - PetLove",
+      "efficacious": "Eficaz",
+      "lowEfficacy": "Baixa eficácia",
+      "inefficacious": "Ineficaz",
+      "avgResponseTime": "Tempo médio até resposta",
+      "days": "dias",
+      "initialReaction": "Reação inicial",
+      "fullResponse": "Resposta completa",
+      "populationAvg": "Média da população: {{days}} dias"
+    }
+  },
+  "dataAnalysis": {
+    "nutraceuticals": {
+      "title": "Composições Nutracêuticas",
+      "description": "Análise de combinações sinérgicas de nutracêuticos",
+      "searchPlaceholder": "Buscar nutracêutico...",
+      "filters": "Filtros",
+      "export": "Exportar",
+      "inDevelopment": "Componente de visualização de nutracêuticos em desenvolvimento.",
+      "synergiesWillShow": "Aqui serão exibidas as composições nutracêuticas e suas sinergias."
+    }
   },
   "relations": {
     "title": "Relações e Conexões",
@@ -2223,6 +2317,8 @@
       "actions": "Ações",
       "notDefined": "Não definido",
       "notFound": "Nenhum nutracêutico encontrado.",
+      "emptyState": "Nenhum nutracêutico encontrado com os filtros selecionados.",
+      "countOf": "{{filtered}} de {{total}} nutracêuticos",
       "editTitle": "Editar",
       "deleteTitle": "Excluir",
       "manageOutcomes": "Gerenciar Outcomes",
@@ -2266,7 +2362,26 @@
       "saving": "Salvando...",
       "creating": "Criando...",
       "save": "Salvar Nutracêutico",
-      "create": "Criar Nutracêutico"
+      "create": "Criar Nutracêutico",
+      "mainRelation": "Relação Principal",
+      "relationN": "Relação {{n}}",
+      "categoryOutcome": "Categoria / Outcome",
+      "selectCategory": "Selecione uma categoria",
+      "efficacyLevel": "Nível de Eficácia: {{score}}",
+      "notesObservations": "Notas / Observações",
+      "observationsPlaceholder": "Observações sobre esta relação",
+      "relatedStudies": "Estudos Relacionados",
+      "noStudiesAvailable": "Não há estudos disponíveis",
+      "addRelation": "Adicionar nova relação"
+    },
+    "conditions": {
+      "addTitle": "Adicionar Nova Condição de Saúde",
+      "conditionName": "Nome da Condição",
+      "conditionNamePlaceholder": "Ex: Artrite, Diabetes, Insuficiência Cardíaca, etc.",
+      "conditionDescription": "Descrição",
+      "conditionDescriptionPlaceholder": "Descreva esta condição de saúde e suas características principais",
+      "savingCondition": "Salvando...",
+      "saveCondition": "Salvar Condição"
     },
     "relationships": {
       "title": "Relacionamentos",

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FormDialogProps } from "../types";
 import { FormInputField, FormSelectField, FormTextareaField } from "@/components/administrador/settings/FormDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,61 +26,61 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
   studiesLoading,
   selectedStudies
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Tabs defaultValue="info" className="w-full">
       <TabsList className="grid grid-cols-2">
-        <TabsTrigger value="info">Informações Básicas</TabsTrigger>
-        <TabsTrigger value="relations">Relações</TabsTrigger>
+        <TabsTrigger value="info">{t('nutraceuticals.dialog.tabs.basicInfo')}</TabsTrigger>
+        <TabsTrigger value="relations">{t('nutraceuticals.form.relations', 'Relations')}</TabsTrigger>
       </TabsList>
       
-      {/* Aba de informações básicas */}
       <TabsContent value="info" className="space-y-4 py-4">
         <FormInputField 
-          label="Nome do Nutracêutico"
+          label={t('nutraceuticals.form.name')}
           value={formData.name}
           onChange={(e) => handleFormChange('name', e.target.value)}
-          placeholder="Ex: Resveratrol, Ômega-3"
+          placeholder={t('nutraceuticals.form.namePlaceholder')}
         />
         
         <FormTextareaField 
-          label="Descrição"
+          label={t('nutraceuticals.form.description')}
           value={formData.description || ''}
           onChange={(e) => handleFormChange('description', e.target.value)}
-          placeholder="Descreva o nutracêutico e suas principais propriedades"
+          placeholder={t('nutraceuticals.form.descriptionPlaceholder')}
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInputField 
-            label="Fonte"
+            label={t('nutraceuticals.form.source')}
             value={formData.source || ''}
             onChange={(e) => handleFormChange('source', e.target.value)}
-            placeholder="Ex: Uvas, chá verde"
+            placeholder={t('nutraceuticals.form.sourcePlaceholder')}
           />
           
           <FormInputField 
-            label="Dosagem"
+            label={t('nutraceuticals.form.dosage')}
             value={formData.dosage || ''}
             onChange={(e) => handleFormChange('dosage', e.target.value)}
-            placeholder="Ex: 500mg/dia"
+            placeholder={t('nutraceuticals.form.dosagePlaceholder')}
           />
         </div>
         
         <FormInputField 
-          label="Composto Químico"
+          label={t('nutraceuticals.form.chemicalCompound')}
           value={formData.chemical_compound || ''}
           onChange={(e) => handleFormChange('chemical_compound', e.target.value)}
-          placeholder="Ex: C14H12O3"
+          placeholder={t('nutraceuticals.form.chemicalPlaceholder')}
         />
         
         <FormTextareaField 
-          label="Contraindicações"
+          label={t('nutraceuticals.form.contraindications')}
           value={formData.contraindications ? formData.contraindications.join('\n') : ''}
           onChange={(e) => handleFormChange('contraindications', e.target.value.split('\n').filter(Boolean))}
-          placeholder="Uma contraindicação por linha"
+          placeholder={t('nutraceuticals.form.contraindicationsPlaceholder')}
         />
       </TabsContent>
       
-      {/* Aba de relações */}
       <TabsContent value="relations" className="space-y-6 py-4">
         {relations.map((relation, index) => (
           <div key={`relation-${index}`} className="rounded-md border p-4 space-y-4 relative">
@@ -88,7 +89,7 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="absolute top-2 right-2 h-8 w-8 text-red-500"
+                className="absolute top-2 right-2 h-8 w-8 text-destructive"
                 onClick={(e) => handleRemoveRelation(index, e)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -96,13 +97,13 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
             )}
             
             <h3 className="font-medium">
-              {index === 0 ? 'Relação Principal' : `Relação ${index + 1}`}
+              {index === 0 ? t('nutraceuticals.form.mainRelation') : t('nutraceuticals.form.relationN', { n: index + 1 })}
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor={`outcome-${index}`} className="text-sm font-medium">
-                  Categoria / Outcome
+                  {t('nutraceuticals.form.categoryOutcome')}
                 </label>
                 <select
                   id={`outcome-${index}`}
@@ -110,7 +111,7 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
                   onChange={(e) => handleOutcomeChange(index, e.target.value)}
                   className="w-full border rounded px-3 py-2"
                 >
-                  <option value="none">Selecione uma categoria</option>
+                  <option value="none">{t('nutraceuticals.form.selectCategory')}</option>
                   {outcomes.map(outcome => (
                     <option key={outcome.id} value={outcome.id}>
                       {outcome.name}
@@ -121,7 +122,7 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
               
               <div className="space-y-1">
                 <label className="text-sm font-medium">
-                  Nível de Eficácia: {relation.efficacy_score}
+                  {t('nutraceuticals.form.efficacyLevel', { score: relation.efficacy_score })}
                 </label>
                 <div className="pt-5">
                   <Slider
@@ -132,12 +133,7 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
                     onValueChange={(values) => handleEfficacyChange(index, values[0])}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0</span>
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                   </div>
                 </div>
               </div>
@@ -145,26 +141,22 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
             
             <div className="space-y-2">
               <label htmlFor={`notes-${index}`} className="text-sm font-medium">
-                Notas / Observações
+                {t('nutraceuticals.form.notesObservations')}
               </label>
               <textarea
                 id={`notes-${index}`}
                 value={relation.notes || ''}
                 onChange={(e) => {
                   const newRelations = [...relations];
-                  newRelations[index] = {
-                    ...newRelations[index],
-                    notes: e.target.value
-                  };
-                  // Atualizar relações
+                  newRelations[index] = { ...newRelations[index], notes: e.target.value };
                 }}
-                placeholder="Observações sobre esta relação"
+                placeholder={t('nutraceuticals.form.observationsPlaceholder')}
                 className="w-full border rounded px-3 py-2 min-h-[80px]"
               />
             </div>
             
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">Estudos Relacionados</h4>
+              <h4 className="text-sm font-medium">{t('nutraceuticals.form.relatedStudies')}</h4>
               <Card>
                 <CardContent className="p-3 max-h-[200px] overflow-y-auto">
                   {studiesLoading ? (
@@ -173,7 +165,7 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
                     </div>
                   ) : studies.length === 0 ? (
                     <div className="text-center py-3 text-sm text-muted-foreground">
-                      Não há estudos disponíveis
+                      {t('nutraceuticals.form.noStudiesAvailable')}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -186,15 +178,10 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
                             onChange={(e) => handleStudyChange(index, study.id, e.target.checked)}
                             className="h-4 w-4"
                           />
-                          <label 
-                            htmlFor={`study-${study.id}-${index}`} 
-                            className="text-sm cursor-pointer flex-1"
-                          >
+                          <label htmlFor={`study-${study.id}-${index}`} className="text-sm cursor-pointer flex-1">
                             {study.title}
                             {study.journal && (
-                              <Badge variant="outline" className="ml-2 text-xs">
-                                {study.journal}
-                              </Badge>
+                              <Badge variant="outline" className="ml-2 text-xs">{study.journal}</Badge>
                             )}
                           </label>
                         </div>
@@ -207,14 +194,9 @@ const DialogFormContent: React.FC<Omit<FormDialogProps, 'isOpen' | 'setIsOpen' |
           </div>
         ))}
         
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="w-full"
-          onClick={handleAddRelation}
-        >
+        <Button type="button" variant="outline" className="w-full" onClick={handleAddRelation}>
           <Plus className="h-4 w-4 mr-2" />
-          Adicionar nova relação
+          {t('nutraceuticals.form.addRelation')}
         </Button>
       </TabsContent>
     </Tabs>
