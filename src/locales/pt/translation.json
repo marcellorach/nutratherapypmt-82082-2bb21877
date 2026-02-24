@@ -6541,5 +6541,47 @@
       "relationRemoved": "Relação removida com sucesso",
       "removeError": "Não foi possível remover a associação"
     }
+  },
+  "studiesTab": {
+    "specificStudies": "Estudos Científicos Específicos para {{conditionName}}",
+    "nutraceuticalStudies": "Estudos do Nutracêutico",
+    "viewStudy": "Ver estudo",
+    "viewStudyWithYear": "Ver estudo ({{year}})",
+    "efficacyTitle": "Eficácia de {{nutraceutical}} em {{condition}} em cães",
+    "comparativeTitle": "Análise comparativa de nutracêuticos para {{condition}} em diferentes raças caninas",
+    "longTermTitle": "Impacto a longo prazo do {{nutraceutical}} na progressão de {{condition}}",
+    "molecularTitle": "Mecanismos moleculares de {{ingredient}} em {{condition}}"
+  },
+  "outcomesTab": {
+    "associateTitle": "Associar a Outcomes",
+    "outcomeLabel": "Outcome",
+    "selectOutcome": "Selecione um outcome",
+    "relationshipType": "Tipo de Relação",
+    "selectRelationType": "Selecione o tipo de relação",
+    "prevention": "Prevenção",
+    "treatment": "Tratamento",
+    "support": "Suporte",
+    "unknown": "Desconhecido",
+    "efficacyLevel": "Nível de Eficácia ({{score}})",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas sobre esta relação",
+    "saving": "Salvando...",
+    "addOutcome": "Adicionar Outcome",
+    "relatedOutcomes": "Outcomes Relacionados",
+    "efficacyScore": "Eficácia: {{score}}/5",
+    "noOutcomes": "Nenhum outcome relacionado a este nutracêutico",
+    "unknownOutcome": "Outcome desconhecido",
+    "toasts": {
+      "errorSelectOutcome": "Selecione um outcome para adicionar",
+      "alreadyRelated": "Este outcome já está relacionado a este nutracêutico",
+      "addSuccess": "Relação adicionada com sucesso",
+      "addError": "Não foi possível adicionar a relação",
+      "removeSuccess": "Relação removida com sucesso",
+      "removeError": "Não foi possível remover a relação",
+      "loadError": "Não foi possível carregar as relações existentes",
+      "error": "Erro",
+      "warning": "Aviso",
+      "success": "Sucesso"
+    }
   }
 }

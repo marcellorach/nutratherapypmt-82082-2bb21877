@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NutraceuticalRelationsService } from '@/services/nutraceuticals/relations';
+import { useTranslation } from 'react-i18next';
 
 interface OutcomesTabProps {
   nutraceutical: any;
@@ -24,6 +25,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
   isLoading,
   onSuccess
 }) => {
+  const { t } = useTranslation();
   const [selectedConditionId, setSelectedConditionId] = useState<string>('');
   const [efficacyScore, setEfficacyScore] = useState<number>(3);
   const [notes, setNotes] = useState<string>('');
@@ -34,26 +36,22 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
   
   const { toast } = useToast();
   
-  // Carregar relações existentes quando o componente é montado
   useEffect(() => {
     if (nutraceutical?.id) {
       loadExistingRelations();
     }
   }, [nutraceutical]);
   
-  // Carregar relações existentes entre o nutracêutico e outcomes
   const loadExistingRelations = async () => {
     setIsLoadingRelations(true);
     try {
-      console.log('Carregando relações de outcomes para o nutracêutico:', nutraceutical.id);
       const relations = await NutraceuticalRelationsService.getConditionRelations(nutraceutical.id);
-      console.log('Relações de outcomes carregadas:', relations);
       setExistingRelations(relations || []);
     } catch (error) {
-      console.error('Erro ao carregar relações existentes:', error);
+      console.error('Error loading existing relations:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar as relações existentes',
+        title: t('outcomesTab.toasts.error'),
+        description: t('outcomesTab.toasts.loadError'),
         variant: 'destructive'
       });
     } finally {
@@ -61,23 +59,21 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
     }
   };
   
-  // Adicionar nova relação entre nutracêutico e outcome
   const handleAddRelation = async () => {
     if (!selectedConditionId) {
       toast({
-        title: 'Erro',
-        description: 'Selecione um outcome para adicionar',
+        title: t('outcomesTab.toasts.error'),
+        description: t('outcomesTab.toasts.errorSelectOutcome'),
         variant: 'destructive'
       });
       return;
     }
     
-    // Verificar se já existe uma relação com este outcome
     const existingRelation = existingRelations.find(rel => rel.condition_id === selectedConditionId);
     if (existingRelation) {
       toast({
-        title: 'Aviso',
-        description: 'Este outcome já está relacionado a este nutracêutico',
+        title: t('outcomesTab.toasts.warning'),
+        description: t('outcomesTab.toasts.alreadyRelated'),
         variant: 'default'
       });
       return;
@@ -85,15 +81,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
     
     setIsSaving(true);
     try {
-      console.log('Adicionando relação com outcome:', {
-        nutraceuticalId: nutraceutical.id,
-        outcomeId: selectedConditionId,
-        relationshipType,
-        efficacyScore,
-        notes
-      });
-      
-      const result = await NutraceuticalRelationsService.relateToCondition(
+      await NutraceuticalRelationsService.relateToCondition(
         nutraceutical.id,
         selectedConditionId,
         relationshipType,
@@ -101,30 +89,26 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
         notes
       );
       
-      console.log('Resultado da adição da relação:', result);
-      
       toast({
-        title: 'Sucesso',
-        description: 'Relação adicionada com sucesso',
+        title: t('outcomesTab.toasts.success'),
+        description: t('outcomesTab.toasts.addSuccess'),
       });
       
-      // Limpar campos
       setSelectedConditionId('');
       setEfficacyScore(3);
       setNotes('');
       setRelationshipType('prevention');
       
-      // Recarregar relações
       await loadExistingRelations();
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error('Erro ao adicionar relação:', error);
+      console.error('Error adding relation:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível adicionar a relação',
+        title: t('outcomesTab.toasts.error'),
+        description: t('outcomesTab.toasts.addError'),
         variant: 'destructive'
       });
     } finally {
@@ -132,30 +116,26 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
     }
   };
   
-  // Remover relação existente
   const handleRemoveRelation = async (relationId: string) => {
     setIsSaving(true);
     try {
-      console.log('Removendo relação com outcome:', { relationId });
-      
       await NutraceuticalRelationsService.removeConditionRelation(relationId);
       
       toast({
-        title: 'Sucesso',
-        description: 'Relação removida com sucesso',
+        title: t('outcomesTab.toasts.success'),
+        description: t('outcomesTab.toasts.removeSuccess'),
       });
       
-      // Recarregar relações
       await loadExistingRelations();
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error('Erro ao remover relação:', error);
+      console.error('Error removing relation:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível remover a relação',
+        title: t('outcomesTab.toasts.error'),
+        description: t('outcomesTab.toasts.removeError'),
         variant: 'destructive'
       });
     } finally {
@@ -163,42 +143,40 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
     }
   };
   
-  // Obter nome do outcome pelo ID
   const getConditionName = (conditionId: string) => {
     const condition = conditions.find(c => c.id === conditionId);
-    return condition?.name || 'Outcome desconhecido';
+    return condition?.name || t('outcomesTab.unknownOutcome');
   };
   
-  // Renderizar etiqueta para o tipo de relacionamento
   const renderRelationshipTypeBadge = (type: string) => {
     switch(type) {
       case 'prevention':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Prevenção</Badge>;
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">{t('outcomesTab.prevention')}</Badge>;
       case 'treatment':
-        return <Badge variant="outline" className="bg-green-50 text-green-700">Tratamento</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{t('outcomesTab.treatment')}</Badge>;
       case 'support':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700">Suporte</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">{t('outcomesTab.support')}</Badge>;
       default:
-        return <Badge variant="outline">Desconhecido</Badge>;
+        return <Badge variant="outline">{t('outcomesTab.unknown')}</Badge>;
     }
   };
   
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-4">Associar a Outcomes</h3>
+        <h3 className="text-lg font-medium mb-4">{t('outcomesTab.associateTitle')}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="conditionSelect">Outcome</Label>
+              <Label htmlFor="conditionSelect">{t('outcomesTab.outcomeLabel')}</Label>
               <Select
                 value={selectedConditionId}
                 onValueChange={setSelectedConditionId}
                 disabled={isLoading || isSaving}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um outcome" />
+                  <SelectValue placeholder={t('outcomesTab.selectOutcome')} />
                 </SelectTrigger>
                 <SelectContent>
                   {conditions && conditions.map((condition) => (
@@ -211,19 +189,19 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="relationshipType">Tipo de Relação</Label>
+              <Label htmlFor="relationshipType">{t('outcomesTab.relationshipType')}</Label>
               <Select
                 value={relationshipType}
                 onValueChange={(value) => setRelationshipType(value as 'prevention' | 'treatment' | 'support')}
                 disabled={isLoading || isSaving}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o tipo de relação" />
+                  <SelectValue placeholder={t('outcomesTab.selectRelationType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="prevention">Prevenção</SelectItem>
-                  <SelectItem value="treatment">Tratamento</SelectItem>
-                  <SelectItem value="support">Suporte</SelectItem>
+                  <SelectItem value="prevention">{t('outcomesTab.prevention')}</SelectItem>
+                  <SelectItem value="treatment">{t('outcomesTab.treatment')}</SelectItem>
+                  <SelectItem value="support">{t('outcomesTab.support')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -231,7 +209,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
           
           <div className="space-y-4">
             <div>
-              <Label>Nível de Eficácia ({efficacyScore})</Label>
+              <Label>{t('outcomesTab.efficacyLevel', { score: efficacyScore })}</Label>
               <Slider
                 value={[efficacyScore]}
                 min={1}
@@ -244,12 +222,12 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="notes">Notas</Label>
+              <Label htmlFor="notes">{t('outcomesTab.notes')}</Label>
               <Textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notas sobre esta relação"
+                placeholder={t('outcomesTab.notesPlaceholder')}
                 disabled={isLoading || isSaving}
               />
             </div>
@@ -264,19 +242,19 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Salvando...
+              {t('outcomesTab.saving')}
             </>
           ) : (
             <>
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Outcome
+              {t('outcomesTab.addOutcome')}
             </>
           )}
         </Button>
       </div>
       
       <div>
-        <h3 className="text-lg font-medium mb-4">Outcomes Relacionados</h3>
+        <h3 className="text-lg font-medium mb-4">{t('outcomesTab.relatedOutcomes')}</h3>
         
         {isLoadingRelations ? (
           <div className="flex items-center justify-center p-6">
@@ -284,7 +262,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
           </div>
         ) : existingRelations.length === 0 ? (
           <div className="text-center p-6 text-muted-foreground border rounded-md">
-            Nenhum outcome relacionado a este nutracêutico
+            {t('outcomesTab.noOutcomes')}
           </div>
         ) : (
           <div className="space-y-3">
@@ -298,8 +276,8 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
                       </h4>
                       <div className="flex items-center space-x-2">
                         {renderRelationshipTypeBadge(relation.relationship_type)}
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                          Eficácia: {relation.efficacy_score}/5
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+                          {t('outcomesTab.efficacyScore', { score: relation.efficacy_score })}
                         </Badge>
                       </div>
                       {relation.notes && (
@@ -312,7 +290,7 @@ const OutcomesTab: React.FC<OutcomesTabProps> = ({
                       onClick={() => handleRemoveRelation(relation.id)}
                       disabled={isSaving}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </CardContent>
