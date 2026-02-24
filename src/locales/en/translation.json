@@ -246,6 +246,43 @@
     },
     "nodeTooltip": {
       "source": "Source"
+    },
+    "toast": {
+      "noDataStudy": "No graph data available for this study",
+      "errorLoadStudy": "Error loading graph data for study",
+      "noDataNeo4j": "No graph data available from Neo4j",
+      "loadedNodes": "Loaded {{count}} nodes from Neo4j",
+      "errorLoadNeo4j": "Error loading graph data from Neo4j",
+      "connectionSuccess": "Neo4j connection successful!",
+      "connectionFailed": "Failed to connect to Neo4j",
+      "filteredBy": "Filtered by: {{type}}",
+      "entityHighlight": "Entity: {{name}}",
+      "queryCopied": "Query copied!",
+      "chatError": "Error processing question"
+    },
+    "chat": {
+      "title": "Chat with Graph",
+      "description": "Ask questions in natural language about the knowledge graph",
+      "clear": "Clear",
+      "clearChat": "Clear chat",
+      "thinking": "Searching...",
+      "placeholder": "Ask about nutraceuticals, conditions...",
+      "welcome": "Ask anything about the knowledge graph",
+      "hint": "I will use AI to interpret your question and search the graph",
+      "examples": "Example questions:",
+      "entitiesFound": "Entities found:",
+      "relations": "Relations:",
+      "viewQuery": "View Cypher query",
+      "aiResponse": "AI Response",
+      "errorLabel": "Error",
+      "errorMessage": "Sorry, I had a problem processing your question. Try rephrasing or check if the graph has enough data.",
+      "exampleQueries": {
+        "q1": "Which nutraceuticals treat arthritis?",
+        "q2": "Show contraindications for Curcumin",
+        "q3": "What is the relationship between Omega-3 and inflammation?",
+        "q4": "How many studies mention Resveratrol?",
+        "q5": "Which conditions have the most treatments?"
+      }
     }
   },
   "chat": {
@@ -848,7 +885,26 @@
       "deleteDescription": "The study will be moved to trash and can be restored later.",
       "deleteSuccess": "Study moved to trash",
       "deleteError": "Error moving study",
-      "ntaiAnalysis": "VetGraphRAG Analysis"
+      "ntaiAnalysis": "VetGraphRAG Analysis",
+      "awaitingAI": "Awaiting AI",
+      "processingStatus": "Processing",
+      "completed": "Completed",
+      "errorStatus": "Error",
+      "noRag": "No RAG",
+      "positiveInteractions": "Positive Interactions",
+      "sideEffectsLabel": "Side Effects",
+      "more": "more",
+      "authors": "Authors",
+      "year": "Year",
+      "importedStudy": "Imported scientific study",
+      "vectorizing": "Vectorizing study...",
+      "embeddingsCreated": "{{count}} embeddings created!",
+      "vectorizeError": "Error vectorizing study",
+      "needsProcessing": "This study needs to be processed by Gemini AI to extract structured data",
+      "processWithGemini": "Process with Gemini AI",
+      "geminiAnalyzing": "Gemini AI analyzing document... {{progress}}%",
+      "vectorizedChunks": "{{count}} vectorized chunks for semantic search",
+      "clickToVectorize": "Click to vectorize and enable semantic search"
     },
     "deletion": {
       "success": "Study moved to trash",
@@ -2677,11 +2733,17 @@
       "createDescription": "Add a new outcome to the system",
       "editDescription": "Edit outcome information",
       "name": "Name",
+      "nameLabel": "Outcome Name",
+      "descriptionLabel": "Description",
+      "familyLabel": "Family",
+      "familyPlaceholder": "Select a family",
       "family": "Family",
       "description": "Description",
       "cancel": "Cancel",
       "create": "Create",
-      "save": "Save"
+      "save": "Save",
+      "translatingAuto": "Translating automatically...",
+      "outcomeName": "Outcome Name"
     },
     "deleteDialog": {
       "title": "Delete Outcome",
@@ -4631,6 +4693,26 @@
       "approve": "Approve",
       "reject": "Reject",
       "requestExpert": "Expert"
+    },
+    "board": {
+      "title": "Triplet Curation Board",
+      "autoApproveHigh": "Auto-Approve High Confidence",
+      "bulkApprove": "Bulk Approve ({{count}})",
+      "syncToNeo4j": "Sync to Neo4j",
+      "searchPlaceholder": "Search triplets...",
+      "minConfidencePlaceholder": "Min Confidence (0-1)",
+      "total": "Total: {{count}} triplets",
+      "reviewNotesPlaceholder": "Review notes...",
+      "movedTo": "Triplet moved to {{column}}",
+      "updateError": "Error updating triplet status",
+      "noSelected": "No triplets selected",
+      "approvedCount": "Approved {{count}} triplets",
+      "approveError": "Error approving triplets",
+      "autoApproved": "Auto-approved high-confidence triplets",
+      "autoApproveError": "Error auto-approving triplets",
+      "syncedCount": "Synced {{count}} triplets to Neo4j",
+      "syncError": "Failed to sync with Neo4j",
+      "fetchError": "Error fetching triplets"
     },
     "discoveries": {
       "title": "Auto-Discovery Review",

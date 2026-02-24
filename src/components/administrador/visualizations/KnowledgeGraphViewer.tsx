@@ -313,14 +313,14 @@ export const KnowledgeGraphViewer: React.FC = () => {
       if (error) throw error;
 
       if (!data?.success || !data?.data) {
-        toast.info('No graph data available for this study');
+        toast.info(t('knowledgeGraph.toast.noDataStudy'));
         setGraphData({ nodes: [], links: [] });
         return;
       }
 
       processGraphResult(data.data, 'study');
     } catch (error: any) {
-      toast.error('Error loading graph data for study');
+      toast.error(t('knowledgeGraph.toast.errorLoadStudy'));
       console.error('Error:', error);
     } finally {
       setLoading(false);
@@ -345,15 +345,15 @@ export const KnowledgeGraphViewer: React.FC = () => {
       if (error) throw error;
 
       if (!data?.success || !data?.data) {
-        toast.info('No graph data available from Neo4j');
+        toast.info(t('knowledgeGraph.toast.noDataNeo4j'));
         setGraphData({ nodes: [], links: [] });
         return;
       }
 
       processGraphResult(data.data, 'all');
-      toast.success(`Loaded ${data.data.nodes.length} nodes from Neo4j`);
+      toast.success(t('knowledgeGraph.toast.loadedNodes', { count: data.data.nodes.length }));
     } catch (error: any) {
-      toast.error('Error loading graph data from Neo4j');
+      toast.error(t('knowledgeGraph.toast.errorLoadNeo4j'));
       console.error('Error:', error);
     } finally {
       setLoading(false);
@@ -490,9 +490,9 @@ export const KnowledgeGraphViewer: React.FC = () => {
       
       if (error) throw error;
       
-      toast.success('Neo4j connection successful!');
+      toast.success(t('knowledgeGraph.toast.connectionSuccess'));
     } catch (error: any) {
-      toast.error('Failed to connect to Neo4j');
+      toast.error(t('knowledgeGraph.toast.connectionFailed'));
       console.error('Error:', error);
     } finally {
       setTestingConnection(false);
@@ -618,7 +618,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const handleEntityClick = (entityId: string, entityType: string) => {
     setStatDialogOpen(false);
     setEntityFilter(entityType);
-    toast.info(`Filtrado por: ${entityType}`);
+    toast.info(t('knowledgeGraph.toast.filteredBy', { type: entityType }));
   };
 
   const handleStudyFromDialogClick = (studyId: string) => {
@@ -628,7 +628,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
 
   const handleHighlightEntity = (entityName: string) => {
     // Could be used to highlight entity in the graph
-    toast.info(`Entidade: ${entityName}`);
+    toast.info(t('knowledgeGraph.toast.entityHighlight', { name: entityName }));
   };
 
   // Handle node click to show details sidebar
