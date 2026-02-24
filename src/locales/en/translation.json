@@ -5992,5 +5992,104 @@
     "dapagliflozin": "Dapagliflozin",
     "empagliflozin": "Empagliflozin",
     "treatment": "Treatment"
+  },
+  "addNutraceuticalDialog": {
+    "editTitle": "Edit Nutraceutical",
+    "addTitle": "Add New Nutraceutical",
+    "basicInfo": "Basic Information",
+    "relationships": "Relationships",
+    "validation": {
+      "nameRequired": "Name is required"
+    },
+    "toasts": {
+      "successTitle": "Success",
+      "updated": "Nutraceutical updated successfully",
+      "created": "Nutraceutical created successfully",
+      "errorTitle": "Error",
+      "errorDescription": "Could not save nutraceutical. Please check the data and try again."
+    }
+  },
+  "overviewTab": {
+    "benefits": "Benefits",
+    "conditionLabel": "Indicated for condition",
+    "contraindications": "Contraindications"
+  },
+  "estudoDetailSections": {
+    "nutraceuticalsIdentified": "Identified Nutraceuticals",
+    "healthConditions": "Health Conditions",
+    "actionMechanisms": "Action Mechanisms",
+    "target": "Target",
+    "extractedRelations": "Extracted Relations",
+    "confidence": "Confidence",
+    "sideEffects": "Side Effects",
+    "noData": "No extracted data available for this study.",
+    "runAnalysis": "Run AI analysis to extract information.",
+    "predicates": {
+      "TREATS": "Treats",
+      "PREVENTS": "Prevents",
+      "INHIBITS": "Inhibits",
+      "ACTIVATES": "Activates",
+      "MODULATES": "Modulates",
+      "BINDS_TO": "Binds to",
+      "UPREGULATES": "Upregulates",
+      "DOWNREGULATES": "Downregulates",
+      "SUPPORTS": "Supports",
+      "AMELIORATES": "Ameliorates",
+      "CAUSES": "Causes",
+      "CAUSES_SIDE_EFFECT": "Side Effect",
+      "CONTRAINDICATED_FOR": "Contraindicated",
+      "SYNERGIZES_WITH": "Synergy"
+    }
+  },
+  "multipleScatterPlot": {
+    "mainChart": "Main Chart: All Breeds",
+    "addComparison": "Add Comparison Chart",
+    "breed": "Breed",
+    "selectBreed": "Select breed",
+    "chart": "Chart",
+    "activeComparison": "Active Comparison",
+    "comparingCharts": "You are comparing {{count}} charts simultaneously.",
+    "sharedControls": "Use the shared controls to adjust the number of dogs and density mode across all charts.",
+    "breedsCompared": "Breeds being compared:",
+    "allBreeds": "All breeds",
+    "filteredFor": "Filtered for {{breed}}",
+    "analysisFor": "Specific analysis for breed {{breed}}",
+    "toasts": {
+      "limitTitle": "Limit reached",
+      "limitDescription": "Maximum of 4 comparison charts allowed",
+      "addedTitle": "Chart added",
+      "addedDescription": "Comparison chart {{number}} created",
+      "removedTitle": "Chart removed",
+      "removedDescription": "Comparison chart removed successfully"
+    }
+  },
+  "editRelevanceDialog": {
+    "title": "Edit Study Relevance",
+    "defaultStudy": "Study",
+    "relevanceLabel": "Relevance ({{score}}/5)",
+    "scaleTitle": "Relevance Scale:",
+    "scale5": "Direct and robust evidence for the nutraceutical",
+    "scale4": "Strong evidence with good applicability",
+    "scale3": "Moderate or indirect evidence",
+    "scale2": "Weak or limited evidence",
+    "scale1": "Minimal or tangential evidence",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "save": "Save Changes"
+  },
+  "packageDetailsPanel": {
+    "notAvailable": "Package details not available",
+    "edit": "Edit",
+    "send": "Send",
+    "basicInfo": "Basic Information",
+    "condition": "Condition",
+    "speciesTarget": "Target Species",
+    "totalEfficacy": "Total Efficacy",
+    "nutraceuticalComposition": "Nutraceutical Composition",
+    "dosage": "Dosage",
+    "mainSynergies": "Main Synergies",
+    "administrationInstructions": "Administration Instructions",
+    "contraindications": "Contraindications",
+    "downloadReport": "Download Full Report"
   }
 }

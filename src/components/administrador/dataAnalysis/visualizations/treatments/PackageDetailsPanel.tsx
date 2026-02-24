@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,8 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
   packageId,
   isLoading
 }) => {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -56,7 +59,7 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
   if (!packageDetails) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>Detalhes do pacote não disponíveis</p>
+        <p>{t('packageDetailsPanel.notAvailable')}</p>
       </div>
     );
   }
@@ -72,33 +75,32 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex items-center gap-1">
               <FileEdit className="h-4 w-4" />
-              <span>Editar</span>
+              <span>{t('packageDetailsPanel.edit')}</span>
             </Button>
             <Button variant="default" size="sm" className="flex items-center gap-1">
               <Send className="h-4 w-4" />
-              <span>Enviar</span>
+              <span>{t('packageDetailsPanel.send')}</span>
             </Button>
           </div>
         </div>
-
         <div className="mt-4">
           <p className="text-sm">{packageDetails.description}</p>
         </div>
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Informações Básicas</h4>
+        <h4 className="font-medium text-sm mb-2">{t('packageDetailsPanel.basicInfo')}</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-muted-foreground">Condição</p>
+            <p className="text-muted-foreground">{t('packageDetailsPanel.condition')}</p>
             <p>{packageDetails.condition}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Espécies Alvo</p>
+            <p className="text-muted-foreground">{t('packageDetailsPanel.speciesTarget')}</p>
             <p>{packageDetails.speciesTarget.join(', ')}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Eficácia Total</p>
+            <p className="text-muted-foreground">{t('packageDetailsPanel.totalEfficacy')}</p>
             <div className="flex items-center mt-1">
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
@@ -116,13 +118,13 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Composição Nutracêutica ({packageDetails.nutraceuticals.length})</h4>
+        <h4 className="font-medium text-sm mb-2">{t('packageDetailsPanel.nutraceuticalComposition')} ({packageDetails.nutraceuticals.length})</h4>
         <div className="space-y-3">
           {packageDetails.nutraceuticals.map(nutra => (
             <div key={nutra.id} className="flex items-center justify-between bg-muted/40 p-2 rounded-md">
               <div>
                 <p className="font-medium text-sm">{nutra.name}</p>
-                <p className="text-xs text-muted-foreground">Dosagem: {nutra.dosage}</p>
+                <p className="text-xs text-muted-foreground">{t('packageDetailsPanel.dosage')}: {nutra.dosage}</p>
               </div>
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
                 {nutra.efficacyScore}%
@@ -133,7 +135,7 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Sinergias Principais</h4>
+        <h4 className="font-medium text-sm mb-2">{t('packageDetailsPanel.mainSynergies')}</h4>
         <div className="space-y-2">
           {packageDetails.synergies.map((synergy, index) => (
             <div key={index} className="text-sm">
@@ -149,12 +151,12 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Instruções de Administração</h4>
+        <h4 className="font-medium text-sm mb-2">{t('packageDetailsPanel.administrationInstructions')}</h4>
         <p className="text-sm">{packageDetails.administrationInstructions}</p>
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Contraindicações</h4>
+        <h4 className="font-medium text-sm mb-2">{t('packageDetailsPanel.contraindications')}</h4>
         <ul className="list-disc pl-5 text-sm space-y-1">
           {packageDetails.contraindications.map((item, index) => (
             <li key={index}>{item}</li>
@@ -165,7 +167,7 @@ const PackageDetailsPanel: React.FC<PackageDetailsPanelProps> = ({
       <div className="pt-4 flex justify-center">
         <Button variant="outline" className="w-full flex items-center justify-center gap-2">
           <Download className="h-4 w-4" />
-          Baixar Relatório Completo
+          {t('packageDetailsPanel.downloadReport')}
         </Button>
       </div>
     </div>

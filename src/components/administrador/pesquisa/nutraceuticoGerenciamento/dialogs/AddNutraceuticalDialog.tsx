@@ -7,29 +7,27 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useNutraceuticals } from '@/hooks/nutraceuticals/useNutraceuticals';
+import { useTranslation } from 'react-i18next';
 
 // Importando os componentes de cada tab
 import BasicInfoTab from './tabs/BasicInfoTab';
 import RelationshipsTab from './tabs/RelationshipsTab';
 import ManageRelationshipsDialog from './ManageRelationshipsDialog';
 
-// Schema de validação
-const nutraceuticalSchema = z.object({
-  name: z.string().min(1, 'O nome é obrigatório'),
-  description: z.string().optional(),
-  dosage: z.string().optional(),
-  source: z.string().optional(),
-  chemical_compound: z.string().optional(),
-  contraindications: z.string().optional()
-});
-
 // Tipagem para os dados do formulário
-type FormData = z.infer<typeof nutraceuticalSchema>;
+type FormData = {
+  name: string;
+  description?: string;
+  dosage?: string;
+  source?: string;
+  chemical_compound?: string;
+  contraindications?: string;
+};
 
 interface AddNutraceuticalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  nutraceutical?: any;  // Se fornecido, é modo de edição
+  nutraceutical?: any;
   onSuccess?: () => void;
 }
 
@@ -39,6 +37,7 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   nutraceutical,
   onSuccess
 }) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { createNutraceutical, updateNutraceutical } = useNutraceuticals();
   
@@ -47,10 +46,18 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
   const [isRelationshipsDialogOpen, setIsRelationshipsDialogOpen] = useState(false);
   const [savedNutraceutical, setSavedNutraceutical] = useState<any>(null);
   
-  // Modo de edição ou criação
   const isEditMode = Boolean(nutraceutical);
   
-  // Inicialização do formulário
+  // Schema de validação
+  const nutraceuticalSchema = z.object({
+    name: z.string().min(1, t('addNutraceuticalDialog.validation.nameRequired')),
+    description: z.string().optional(),
+    dosage: z.string().optional(),
+    source: z.string().optional(),
+    chemical_compound: z.string().optional(),
+    contraindications: z.string().optional()
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(nutraceuticalSchema),
     defaultValues: {
@@ -63,10 +70,8 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     },
   });
 
-  // Preencher o formulário se estivermos em modo de edição
   useEffect(() => {
     if (isEditMode && nutraceutical) {
-      // Transformar array de contraindicações em string, se necessário
       const contraindicationsString = Array.isArray(nutraceutical.contraindications)
         ? nutraceutical.contraindications.join('\n')
         : nutraceutical.contraindications || '';
@@ -82,7 +87,6 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     }
   }, [isEditMode, nutraceutical, form]);
   
-  // Resetar o formulário quando o diálogo é fechado
   useEffect(() => {
     if (!open) {
       form.reset();
@@ -91,16 +95,12 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     }
   }, [open, form]);
 
-  // Função para lidar com o envio do formulário
   const handleSubmit = async (values: FormData) => {
     try {
       setIsSubmitting(true);
-      console.log('Enviando formulário:', values);
       
-      // Preparar dados para salvar
       const nutraceuticalData = {
         ...values,
-        // Converter string de contraindicações em array
         contraindications: values.contraindications 
           ? values.contraindications.split('\n').filter(item => item.trim() !== '') 
           : []
@@ -109,36 +109,26 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       let result;
       
       if (isEditMode) {
-        // Atualizar nutracêutico existente
-        console.log('Atualizando nutracêutico:', nutraceutical.id);
         result = await updateNutraceutical(nutraceutical.id, nutraceuticalData);
-        
         toast({
-          title: "Sucesso",
-          description: "Nutracêutico atualizado com sucesso",
+          title: t('addNutraceuticalDialog.toasts.successTitle'),
+          description: t('addNutraceuticalDialog.toasts.updated'),
         });
       } else {
-        // Criar novo nutracêutico
-        console.log('Criando novo nutracêutico');
         result = await createNutraceutical({
           name: values.name || '',
           ...nutraceuticalData
         });
-        
         toast({
-          title: "Sucesso",
-          description: "Nutracêutico criado com sucesso",
+          title: t('addNutraceuticalDialog.toasts.successTitle'),
+          description: t('addNutraceuticalDialog.toasts.created'),
         });
       }
       
-      console.log('Resultado da operação:', result);
-      
-      // Se sucesso, vamos para a tab de relacionamentos
       if (result && result.id) {
         setSavedNutraceutical(result);
         setActiveTab('relationships');
       } else {
-        // Se não tem resultado ou ID, fechamos o diálogo
         if (onSuccess) {
           onSuccess();
         } else {
@@ -148,10 +138,9 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       
     } catch (error) {
       console.error('Erro ao salvar nutracêutico:', error);
-      
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar o nutracêutico. Verifique os dados e tente novamente.",
+        title: t('addNutraceuticalDialog.toasts.errorTitle'),
+        description: t('addNutraceuticalDialog.toasts.errorDescription'),
         variant: "destructive"
       });
     } finally {
@@ -159,7 +148,6 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     }
   };
 
-  // Função para finalizar o diálogo
   const handleFinish = () => {
     if (onSuccess) {
       onSuccess();
@@ -168,7 +156,6 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
     }
   };
 
-  // Função para abrir o diálogo de relacionamentos
   const handleOpenRelationshipsDialog = () => {
     setIsRelationshipsDialogOpen(true);
   };
@@ -180,17 +167,17 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
       }}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Editar Nutracêutico" : "Adicionar Novo Nutracêutico"}</DialogTitle>
+            <DialogTitle>{isEditMode ? t('addNutraceuticalDialog.editTitle') : t('addNutraceuticalDialog.addTitle')}</DialogTitle>
           </DialogHeader>
           
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-2">
-              <TabsTrigger value="basic-info">Informações Básicas</TabsTrigger>
+              <TabsTrigger value="basic-info">{t('addNutraceuticalDialog.basicInfo')}</TabsTrigger>
               <TabsTrigger 
                 value="relationships" 
                 disabled={!isEditMode && !savedNutraceutical}
               >
-                Relacionamentos
+                {t('addNutraceuticalDialog.relationships')}
               </TabsTrigger>
             </TabsList>
             
@@ -216,14 +203,12 @@ const AddNutraceuticalDialog: React.FC<AddNutraceuticalDialogProps> = ({
         </DialogContent>
       </Dialog>
       
-      {/* Diálogo para gerenciar relações (estudos e condições) */}
       {(savedNutraceutical || nutraceutical) && (
         <ManageRelationshipsDialog
           open={isRelationshipsDialogOpen}
           onOpenChange={setIsRelationshipsDialogOpen}
           nutraceutical={savedNutraceutical || nutraceutical}
           onSuccess={() => {
-            // Recarregar dados após alterações
             setIsRelationshipsDialogOpen(false);
           }}
         />
