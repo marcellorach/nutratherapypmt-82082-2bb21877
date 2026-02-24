@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useTranslation } from 'react-i18next';
 
 interface SubmitImportButtonProps {
   onClick: () => void;
@@ -15,21 +16,25 @@ const SubmitImportButton: React.FC<SubmitImportButtonProps> = ({
   disabled,
   loading,
   progress,
-}) => (
-  <Button
-    onClick={onClick}
-    disabled={disabled}
-    className="w-full md:w-auto"
-  >
-    {loading ? (
-      <>
-        <span>Salvando...</span>
-        <Progress value={progress} className="h-2 bg-gray-100 mt-2 w-full" />
-      </>
-    ) : (
-      <>Salvar Importação</>
-    )}
-  </Button>
-);
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full md:w-auto"
+    >
+      {loading ? (
+        <>
+          <span>{t('submitImport.saving')}</span>
+          <Progress value={progress} className="h-2 bg-muted mt-2 w-full" />
+        </>
+      ) : (
+        <>{t('submitImport.saveImport')}</>
+      )}
+    </Button>
+  );
+};
 
 export default SubmitImportButton;

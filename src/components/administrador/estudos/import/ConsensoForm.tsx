@@ -2,6 +2,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from 'react-i18next';
 
 interface ConsensoFormProps {
   consensoName: string;
@@ -17,31 +18,35 @@ const ConsensoForm: React.FC<ConsensoFormProps> = ({
   comentarios,
   setComentarios,
   disabled = false
-}) => (
-  <div className="mb-4 grid md:grid-cols-2 gap-4">
-    <div>
-      <label className="block mb-1 text-sm font-medium">
-        Nome do Consenso Integrativo <span className="text-red-500">*</span>
-      </label>
-      <Input
-        value={consensoName}
-        onChange={e => setConsensoName(e.target.value)}
-        disabled={disabled}
-        placeholder="Ex: Consenso Brasileiro de Saúde Articular 2025"
-        required
-      />
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="mb-4 grid md:grid-cols-2 gap-4">
+      <div>
+        <label className="block mb-1 text-sm font-medium">
+          {t('consensoForm.nameLabel')} <span className="text-destructive">*</span>
+        </label>
+        <Input
+          value={consensoName}
+          onChange={e => setConsensoName(e.target.value)}
+          disabled={disabled}
+          placeholder={t('consensoForm.namePlaceholder')}
+          required
+        />
+      </div>
+      <div>
+        <label className="block mb-1 text-sm font-medium">{t('consensoForm.commentsLabel')}</label>
+        <Textarea
+          value={comentarios}
+          onChange={e => setComentarios(e.target.value)}
+          disabled={disabled}
+          placeholder={t('consensoForm.commentsPlaceholder')}
+          rows={2}
+        />
+      </div>
     </div>
-    <div>
-      <label className="block mb-1 text-sm font-medium">Comentários Gerais</label>
-      <Textarea
-        value={comentarios}
-        onChange={e => setComentarios(e.target.value)}
-        disabled={disabled}
-        placeholder="Observações importantes sobre este consenso ou base de estudos."
-        rows={2}
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 export default ConsensoForm;

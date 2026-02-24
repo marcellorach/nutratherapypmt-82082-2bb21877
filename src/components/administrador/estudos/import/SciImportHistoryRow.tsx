@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Trash } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface SciImportHistoryRowProps {
   item: {
@@ -26,6 +27,7 @@ const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({
   isSelected = false,
   onToggleSelect 
 }) => {
+  const { t } = useTranslation();
   const [deleting, setDeleting] = useState(false);
 
   const formatDate = (dateString: string | null) => {
@@ -104,7 +106,7 @@ const SciImportHistoryRow: React.FC<SciImportHistoryRowProps> = ({
       <td className="px-2 py-1 text-xs">
         <Button size="icon" variant="destructive" onClick={handleDelete} disabled={deleting}>
           <Trash className="w-4 h-4" />
-          <span className="sr-only">Apagar</span>
+          <span className="sr-only">{t('sciImportHistory.delete')}</span>
         </Button>
       </td>
     </tr>

@@ -3,12 +3,15 @@ import { Sparkles } from "lucide-react";
 import { Synergy } from '@/types/ntai';
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from 'react-i18next';
 
 interface NtaiSynergiesTabProps {
   synergies: Synergy[];
 }
 
 const NtaiSynergiesTab: React.FC<NtaiSynergiesTabProps> = ({ synergies }) => {
+  const { t } = useTranslation();
+
   const getSynergyTypeColor = (type: string) => {
     switch (type) {
       case 'bioavailability_enhancement': return 'bg-green-100 text-green-700 border-green-300';
@@ -24,7 +27,7 @@ const NtaiSynergiesTab: React.FC<NtaiSynergiesTabProps> = ({ synergies }) => {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-blue-600" />
-        <h4 className="text-sm font-medium">Sinergias e Interações</h4>
+        <h4 className="text-sm font-medium">{t('ntaiSynergies.title')}</h4>
       </div>
       
       {synergies.length > 0 ? (
@@ -50,7 +53,7 @@ const NtaiSynergiesTab: React.FC<NtaiSynergiesTabProps> = ({ synergies }) => {
                 
                 {syn.magnitude && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium">Magnitude:</span>
+                    <span className="text-xs font-medium">{t('ntaiSynergies.magnitude')}:</span>
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (
                         <div
@@ -68,7 +71,7 @@ const NtaiSynergiesTab: React.FC<NtaiSynergiesTabProps> = ({ synergies }) => {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">Nenhuma sinergia identificada.</p>
+        <p className="text-sm text-muted-foreground">{t('ntaiSynergies.noSynergies')}</p>
       )}
     </div>
   );
