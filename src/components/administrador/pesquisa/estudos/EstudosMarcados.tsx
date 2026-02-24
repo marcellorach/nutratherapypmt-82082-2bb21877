@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bookmark, FileText, Trash2, Share2, FileUp, AlarmClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,14 +16,15 @@ interface EstudosMarcadosProps {
 }
 
 const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRemoverEstudo }) => {
+  const { t } = useTranslation();
   const [visualizacao, setVisualizacao] = useState<'cards' | 'tabela'>('cards');
   const [estudoSelecionado, setEstudoSelecionado] = useState<EstudoResultado | null>(null);
   const { toast } = useToast();
 
   const iniciarAnaliseNtai = (ids: string[]) => {
     toast({
-      title: "Análise NTAI iniciada",
-      description: `${ids.length} estudos enviados para processamento`,
+      title: t('estudosMarcados.ntaiStarted'),
+      description: t('estudosMarcados.ntaiStartedDesc', { count: ids.length }),
     });
   };
 
@@ -30,9 +32,9 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Bookmark className="h-16 w-16 mb-4 text-gray-300" />
-        <h3 className="text-lg font-semibold text-gray-500">Nenhum estudo marcado</h3>
+        <h3 className="text-lg font-semibold text-gray-500">{t('estudosMarcados.noBookmarks')}</h3>
         <p className="text-gray-400">
-          Marque estudos interessantes para análise posterior
+          {t('estudosMarcados.bookmarkHint')}
         </p>
       </div>
     );
@@ -42,8 +44,8 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h3 className="text-lg font-semibold">{estudosMarcados.length} estudos marcados</h3>
-          <p className="text-sm text-gray-500">Analise e processe os estudos selecionados</p>
+          <h3 className="text-lg font-semibold">{t('estudosMarcados.countStudies', { count: estudosMarcados.length })}</h3>
+          <p className="text-sm text-gray-500">{t('estudosMarcados.analyzeHint')}</p>
         </div>
         
         <div className="flex gap-2 flex-wrap">
@@ -53,7 +55,7 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
             className="flex items-center"
           >
             <AlarmClock className="h-4 w-4 mr-2" />
-            Agendar Análise NTAI
+            {t('estudosMarcados.scheduleNtai')}
           </Button>
           
           <Button 
@@ -61,7 +63,7 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
             className="flex items-center"
           >
             <FileUp className="h-4 w-4 mr-2" />
-            Exportar Selecionados
+            {t('estudosMarcados.exportSelected')}
           </Button>
           
           <Button 
@@ -69,13 +71,13 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
             className="flex items-center"
           >
             <Share2 className="h-4 w-4 mr-2" />
-            Compartilhar
+            {t('estudosMarcados.share')}
           </Button>
           
           <Tabs value={visualizacao} onValueChange={(v: 'cards' | 'tabela') => setVisualizacao(v)}>
             <TabsList>
-              <TabsTrigger value="cards">Cards</TabsTrigger>
-              <TabsTrigger value="tabela">Tabela</TabsTrigger>
+              <TabsTrigger value="cards">{t('estudosMarcados.cards')}</TabsTrigger>
+              <TabsTrigger value="tabela">{t('estudosMarcados.table')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -137,7 +139,7 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
                   onClick={() => onRemoverEstudo(estudo.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Remover
+                  {t('estudosMarcados.remove')}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -146,7 +148,7 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
                   onClick={() => setEstudoSelecionado(estudo)}
                 >
                   <FileText className="h-3.5 w-3.5 mr-1" />
-                  Detalhes
+                  {t('estudosMarcados.details')}
                 </Button>
               </CardFooter>
             </Card>
@@ -157,12 +159,12 @@ const EstudosMarcados: React.FC<EstudosMarcadosProps> = ({ estudosMarcados, onRe
           <table className="w-full">
             <thead>
               <tr className="bg-gray-100 text-xs">
-                <th className="px-4 py-3 text-left">Título</th>
-                <th className="px-4 py-3 text-left">Fonte</th>
-                <th className="px-4 py-3 text-center">Ano</th>
-                <th className="px-4 py-3 text-center">Relevância</th>
-                <th className="px-4 py-3 text-center">Metodologia</th>
-                <th className="px-4 py-3 text-center">Ações</th>
+                <th className="px-4 py-3 text-left">{t('estudosMarcados.tableHeaders.title')}</th>
+                <th className="px-4 py-3 text-left">{t('estudosMarcados.tableHeaders.source')}</th>
+                <th className="px-4 py-3 text-center">{t('estudosMarcados.tableHeaders.year')}</th>
+                <th className="px-4 py-3 text-center">{t('estudosMarcados.tableHeaders.relevance')}</th>
+                <th className="px-4 py-3 text-center">{t('estudosMarcados.tableHeaders.methodology')}</th>
+                <th className="px-4 py-3 text-center">{t('estudosMarcados.tableHeaders.actions')}</th>
               </tr>
             </thead>
             <tbody>

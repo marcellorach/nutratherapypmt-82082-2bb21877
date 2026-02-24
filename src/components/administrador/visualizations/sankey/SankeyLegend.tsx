@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { NodeCategory } from './types';
 
 interface SankeyLegendProps {
@@ -8,56 +9,58 @@ interface SankeyLegendProps {
 
 interface LegendItem {
   category: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   color: string;
   textColor: string;
 }
 
 const SankeyLegend: React.FC<SankeyLegendProps> = ({ compact = false }) => {
+  const { t } = useTranslation();
+
   const legendItems: LegendItem[] = [
     {
       category: 'nutraceutico',
-      title: 'Nutracêuticos',
-      description: 'Substâncias naturais com propriedades terapêuticas',
+      titleKey: 'sankeyLegend.items.nutraceuticals',
+      descriptionKey: 'sankeyLegend.items.nutraceuticalsDesc',
       color: 'bg-blue-500',
       textColor: 'text-blue-700'
     },
     {
       category: 'condicao',
-      title: 'Condições de Saúde',
-      description: 'Condições clínicas ou problemas de saúde',
+      titleKey: 'sankeyLegend.items.healthConditions',
+      descriptionKey: 'sankeyLegend.items.healthConditionsDesc',
       color: 'bg-green-500',
       textColor: 'text-green-700'
     },
     {
       category: 'outcome',
-      title: 'Outcomes',
-      description: 'Resultados esperados ou observados',
+      titleKey: 'sankeyLegend.items.outcomes',
+      descriptionKey: 'sankeyLegend.items.outcomesDesc',
       color: 'bg-amber-500',
       textColor: 'text-amber-700'
     },
     {
       category: 'severidade',
-      title: 'Severidade',
-      description: 'Níveis de gravidade das condições',
+      titleKey: 'sankeyLegend.items.severity',
+      descriptionKey: 'sankeyLegend.items.severityDesc',
       color: 'bg-purple-500',
       textColor: 'text-purple-700'
     },
     {
       category: 'tratabilidade',
-      title: 'Tratabilidade',
-      description: 'Facilidade de tratamento da condição',
+      titleKey: 'sankeyLegend.items.treatability',
+      descriptionKey: 'sankeyLegend.items.treatabilityDesc',
       color: 'bg-rose-500',
       textColor: 'text-rose-700'
     }
   ];
 
   const relationshipTypes = [
-    { type: 'prevention', title: 'Prevenção', color: 'bg-green-500' },
-    { type: 'treatment', title: 'Tratamento', color: 'bg-blue-500' },
-    { type: 'support', title: 'Suporte', color: 'bg-amber-500' },
-    { type: 'study', title: 'Estudo', color: 'bg-purple-500' }
+    { type: 'prevention', titleKey: 'sankeyLegend.relations.prevention', color: 'bg-green-500' },
+    { type: 'treatment', titleKey: 'sankeyLegend.relations.treatment', color: 'bg-blue-500' },
+    { type: 'support', titleKey: 'sankeyLegend.relations.support', color: 'bg-amber-500' },
+    { type: 'study', titleKey: 'sankeyLegend.relations.study', color: 'bg-purple-500' }
   ];
 
   if (compact) {
@@ -67,7 +70,7 @@ const SankeyLegend: React.FC<SankeyLegendProps> = ({ compact = false }) => {
           {legendItems.map(item => (
             <div key={item.category} className="flex items-center">
               <div className={`h-3 w-3 rounded-sm ${item.color} mr-1`}></div>
-              <span className="text-xs">{item.title}</span>
+              <span className="text-xs">{t(item.titleKey)}</span>
             </div>
           ))}
         </div>
@@ -77,28 +80,28 @@ const SankeyLegend: React.FC<SankeyLegendProps> = ({ compact = false }) => {
 
   return (
     <div className="mt-4 pt-4 border-t">
-      <h4 className="text-sm font-medium mb-2">Legenda</h4>
+      <h4 className="text-sm font-medium mb-2">{t('sankeyLegend.title')}</h4>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <h5 className="text-xs font-medium mb-2">Categorias</h5>
+          <h5 className="text-xs font-medium mb-2">{t('sankeyLegend.categories')}</h5>
           <div className="grid grid-cols-2 gap-2">
             {legendItems.map(item => (
               <div key={item.category} className="flex items-center">
                 <div className={`h-3 w-3 rounded-sm ${item.color} mr-2`}></div>
-                <span className={`text-xs ${item.textColor}`}>{item.title}</span>
+                <span className={`text-xs ${item.textColor}`}>{t(item.titleKey)}</span>
               </div>
             ))}
           </div>
         </div>
         
         <div>
-          <h5 className="text-xs font-medium mb-2">Tipos de Relações</h5>
+          <h5 className="text-xs font-medium mb-2">{t('sankeyLegend.relationTypes')}</h5>
           <div className="grid grid-cols-2 gap-2">
             {relationshipTypes.map(rel => (
               <div key={rel.type} className="flex items-center">
                 <div className={`h-1 w-6 rounded-sm ${rel.color} mr-2`}></div>
-                <span className="text-xs">{rel.title}</span>
+                <span className="text-xs">{t(rel.titleKey)}</span>
               </div>
             ))}
           </div>
@@ -106,14 +109,14 @@ const SankeyLegend: React.FC<SankeyLegendProps> = ({ compact = false }) => {
       </div>
       
       <div className="mt-2">
-        <h5 className="text-xs font-medium mb-1">Espessura das Conexões</h5>
+        <h5 className="text-xs font-medium mb-1">{t('sankeyLegend.connectionThickness')}</h5>
         <div className="flex items-center gap-2">
           <div className="h-1 w-10 bg-gray-300 rounded-sm"></div>
-          <span className="text-xs">Baixa eficácia</span>
+          <span className="text-xs">{t('sankeyLegend.lowEfficacy')}</span>
           <div className="h-2 w-10 bg-gray-400 rounded-sm"></div>
-          <span className="text-xs">Média eficácia</span>
+          <span className="text-xs">{t('sankeyLegend.mediumEfficacy')}</span>
           <div className="h-3 w-10 bg-gray-500 rounded-sm"></div>
-          <span className="text-xs">Alta eficácia</span>
+          <span className="text-xs">{t('sankeyLegend.highEfficacy')}</span>
         </div>
       </div>
     </div>

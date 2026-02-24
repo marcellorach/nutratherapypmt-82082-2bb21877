@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 import { Nutraceutical } from "@/types";
 
@@ -8,12 +9,12 @@ interface ScientificTabProps {
 }
 
 export const ScientificTab: React.FC<ScientificTabProps> = ({ nutraceutical }) => {
-  // Dividir condições por tipo de relacionamento
+  const { t } = useTranslation();
+
   const preventionConditions = nutraceutical.preventionConditions || [];
   const treatmentConditions = nutraceutical.treatmentConditions || [];
   const supportConditions = nutraceutical.supportConditions || [];
   
-  // Função para render uma seção de condições
   const renderConditionSection = (title: string, conditions: any[], emptyMessage: string) => {
     return (
       <div className="mb-4">
@@ -29,7 +30,7 @@ export const ScientificTab: React.FC<ScientificTabProps> = ({ nutraceutical }) =
                 <Badge 
                   variant={condition.efficacyScore >= 4 ? "default" : "secondary"}
                 >
-                  Eficácia: {condition.efficacyScore.toFixed(1)}/5
+                  {t('scientificTab.efficacy')}: {condition.efficacyScore.toFixed(1)}/5
                 </Badge>
               </div>
             ))}
@@ -45,40 +46,37 @@ export const ScientificTab: React.FC<ScientificTabProps> = ({ nutraceutical }) =
   
   return (
     <div className="space-y-4">
-      {/* Pontuação científica */}
       <div className="flex flex-wrap gap-3">
         <Badge className="bg-slate-50 text-slate-800">
-          Eficácia: {nutraceutical.scientificEvidence?.efficacyScore.toFixed(1)}/5
+          {t('scientificTab.efficacy')}: {nutraceutical.scientificEvidence?.efficacyScore.toFixed(1)}/5
         </Badge>
         <Badge className="bg-slate-50 text-slate-800">
-          Sustentação: {nutraceutical.scientificEvidence?.sustainabilityScore.toFixed(1)}/5
+          {t('scientificTab.sustainability')}: {nutraceutical.scientificEvidence?.sustainabilityScore.toFixed(1)}/5
         </Badge>
       </div>
       
-      {/* Categorias de condições */}
       <div className="space-y-4 mt-4">
         {renderConditionSection(
-          "Prevenção", 
+          t('scientificTab.prevention'), 
           preventionConditions, 
-          "Este nutracêutico não tem condições de prevenção cadastradas."
+          t('scientificTab.noPreventionConditions')
         )}
         
         {renderConditionSection(
-          "Tratamento", 
+          t('scientificTab.treatment'), 
           treatmentConditions, 
-          "Este nutracêutico não tem condições de tratamento cadastradas."
+          t('scientificTab.noTreatmentConditions')
         )}
         
         {renderConditionSection(
-          "Suporte", 
+          t('scientificTab.support'), 
           supportConditions, 
-          "Este nutracêutico não tem condições de suporte cadastradas."
+          t('scientificTab.noSupportConditions')
         )}
       </div>
       
-      {/* Estudos científicos */}
       <div className="mt-4">
-        <h3 className="font-medium mb-2">Estudos Científicos</h3>
+        <h3 className="font-medium mb-2">{t('scientificTab.scientificStudies')}</h3>
         {nutraceutical.scientificEvidence?.studies?.length > 0 ? (
           <div className="space-y-3">
             {nutraceutical.scientificEvidence.studies.map((study, i) => (
@@ -99,7 +97,7 @@ export const ScientificTab: React.FC<ScientificTabProps> = ({ nutraceutical }) =
           </div>
         ) : (
           <div className="text-sm text-muted-foreground bg-slate-50 p-2 rounded">
-            Este nutracêutico não tem estudos científicos cadastrados.
+            {t('scientificTab.noStudies')}
           </div>
         )}
       </div>

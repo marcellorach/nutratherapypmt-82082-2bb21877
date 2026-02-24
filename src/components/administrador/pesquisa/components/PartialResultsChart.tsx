@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -7,7 +8,7 @@ interface DataPoint {
   control: number;
   dapagliflozin?: number;
   empagliflozin?: number;
-  treatment?: number; // Mantém para compatibilidade com uso anterior
+  treatment?: number;
 }
 
 interface StatisticalInfo {
@@ -35,6 +36,8 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
   formatter = (value) => `${value}`,
   statisticalInfo
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className="border-l-4 border-l-primary/20">
       <CardHeader className="pb-3">
@@ -101,7 +104,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                   type="monotone"
                   dataKey="control"
                   stroke="hsl(var(--muted-foreground))"
-                  name="Controle"
+                  name={t('partialResultsChart.control')}
                   strokeWidth={3}
                   dot={{ fill: 'hsl(var(--muted-foreground))', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: 'hsl(var(--muted-foreground))', strokeWidth: 2 }}
@@ -112,7 +115,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                     type="monotone"
                     dataKey="dapagliflozin"
                     stroke="hsl(var(--primary))"
-                    name="Dapagliflozina"
+                    name={t('partialResultsChart.dapagliflozin')}
                     strokeWidth={3}
                     dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
@@ -123,7 +126,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                     type="monotone"
                     dataKey="empagliflozin"
                     stroke="#ea580c"
-                    name="Empagliflozina"
+                    name={t('partialResultsChart.empagliflozin')}
                     strokeWidth={3}
                     dot={{ fill: '#ea580c', strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, stroke: '#ea580c', strokeWidth: 2 }}
@@ -134,7 +137,7 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                     type="monotone"
                     dataKey="treatment"
                     stroke="hsl(var(--primary))"
-                    name="Tratamento"
+                    name={t('partialResultsChart.treatment')}
                     strokeWidth={3}
                     dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
@@ -180,10 +183,10 @@ const PartialResultsChart: React.FC<PartialResultsChartProps> = ({
                     fontSize: '12px'
                   }}
                 />
-                <Bar dataKey="control" name="Controle" fill="hsl(var(--muted))" />
-                {data[0]?.dapagliflozin !== undefined && <Bar dataKey="dapagliflozin" name="Dapagliflozina" fill="hsl(var(--primary))" />}
-                {data[0]?.empagliflozin !== undefined && <Bar dataKey="empagliflozin" name="Empagliflozina" fill="#ea580c" />}
-                {data[0]?.treatment !== undefined && <Bar dataKey="treatment" name="Tratamento" fill="hsl(var(--primary))" />}
+                <Bar dataKey="control" name={t('partialResultsChart.control')} fill="hsl(var(--muted))" />
+                {data[0]?.dapagliflozin !== undefined && <Bar dataKey="dapagliflozin" name={t('partialResultsChart.dapagliflozin')} fill="hsl(var(--primary))" />}
+                {data[0]?.empagliflozin !== undefined && <Bar dataKey="empagliflozin" name={t('partialResultsChart.empagliflozin')} fill="#ea580c" />}
+                {data[0]?.treatment !== undefined && <Bar dataKey="treatment" name={t('partialResultsChart.treatment')} fill="hsl(var(--primary))" />}
               </BarChart>
             )}
           </ResponsiveContainer>

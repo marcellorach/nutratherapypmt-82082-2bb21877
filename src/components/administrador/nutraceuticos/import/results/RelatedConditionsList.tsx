@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp } from 'lucide-react';
 
@@ -8,11 +9,12 @@ interface RelatedConditionsListProps {
 }
 
 const RelatedConditionsList: React.FC<RelatedConditionsListProps> = ({ conditions }) => {
+  const { t } = useTranslation();
+
   if (!conditions || conditions.length === 0) {
-    return <div className="text-sm text-gray-500">Nenhuma condição relacionada encontrada</div>;
+    return <div className="text-sm text-gray-500">{t('relatedConditions.noConditions')}</div>;
   }
 
-  // Agrupar por tipo de relacionamento
   const preventionConditions = conditions.filter(c => 
     c.relationshipType === 'prevention' || 
     c.relationship_type === 'prevention'
@@ -28,12 +30,6 @@ const RelatedConditionsList: React.FC<RelatedConditionsListProps> = ({ condition
     c.relationship_type === 'support' || 
     (!c.relationshipType && !c.relationship_type)
   );
-
-  const getRelationType = (type: string) => {
-    if (type === 'prevention') return 'Prevenção';
-    if (type === 'treatment') return 'Tratamento';
-    return 'Suporte';
-  };
 
   const getEfficacyColor = (score: number): string => {
     if (score >= 4) return "bg-green-100 text-green-800 border-green-300";
@@ -74,9 +70,9 @@ const RelatedConditionsList: React.FC<RelatedConditionsListProps> = ({ condition
 
   return (
     <div className="space-y-2">
-      {renderConditionsGroup(preventionConditions, "Prevenção")}
-      {renderConditionsGroup(treatmentConditions, "Tratamento")}
-      {renderConditionsGroup(supportConditions, "Suporte")}
+      {renderConditionsGroup(preventionConditions, t('relatedConditions.prevention'))}
+      {renderConditionsGroup(treatmentConditions, t('relatedConditions.treatment'))}
+      {renderConditionsGroup(supportConditions, t('relatedConditions.support'))}
     </div>
   );
 };
