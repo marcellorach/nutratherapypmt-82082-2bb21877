@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 
 interface ConventionsPanelProps {
   section: 'knowledge-base' | 'data-processing' | 'research' | 'predictive-analysis';
@@ -103,6 +104,7 @@ const SECTION_CONVENTIONS: Record<string, Record<string, string>> = {
 };
 
 const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('naming');
   const conventions = SECTION_CONVENTIONS[section];
   
@@ -279,21 +281,18 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Convenções de {section === 'knowledge-base' ? 'Base de Conhecimento' : 
-                               section === 'data-processing' ? 'Processamento de Dados' :
-                               section === 'research' ? 'Pesquisa e Desenvolvimento' :
-                               'Análise Preditiva'}
+        <CardTitle>{t('conventionsPanel.title', { section: t(`conventionsPanel.sectionNames.${section === 'knowledge-base' ? 'knowledgeBase' : section === 'data-processing' ? 'dataProcessing' : section === 'research' ? 'research' : 'predictiveAnalysis'}`) })}
         </CardTitle>
         <CardDescription>
-          Defina convenções específicas para padronizar o trabalho nesta seção
+          {t('conventionsPanel.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="naming">Nomenclatura</TabsTrigger>
-            <TabsTrigger value="format">Formatação</TabsTrigger>
-            <TabsTrigger value="rules">Regras</TabsTrigger>
+            <TabsTrigger value="naming">{t('conventionsPanel.naming')}</TabsTrigger>
+            <TabsTrigger value="format">{t('conventionsPanel.format')}</TabsTrigger>
+            <TabsTrigger value="rules">{t('conventionsPanel.rules')}</TabsTrigger>
           </TabsList>
           <TabsContent value="naming">
             <ScrollArea className="h-[400px] w-full rounded-md border mt-4 p-4">
@@ -328,8 +327,8 @@ const ConventionsPanel: React.FC<ConventionsPanelProps> = ({ section }) => {
         </Tabs>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline">Restaurar Padrão</Button>
-        <Button>Salvar Convenções</Button>
+        <Button variant="outline">{t('conventionsPanel.restoreDefault')}</Button>
+        <Button>{t('conventionsPanel.saveConventions')}</Button>
       </CardFooter>
     </Card>
   );
