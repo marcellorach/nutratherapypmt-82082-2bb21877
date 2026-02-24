@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from '@/components/ui/switch';
 import { Slider } from "@/components/ui/slider";
+import { useTranslation } from 'react-i18next';
 
 interface EnginesPanelProps {
   section: 'knowledge-base' | 'data-processing' | 'research' | 'predictive-analysis';
 }
 
 const MODELS = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Rápido e econômico' },
-  { value: 'gpt-4o', label: 'GPT-4o - Alta performance' },
-  { value: 'gpt-4-vision', label: 'GPT-4 Vision - Processamento de imagens' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Alta velocidade e performance' },
-  
+  { value: 'gpt-4o-mini', labelKey: 'enginesPromptsPanel.models.gpt4oMini' },
+  { value: 'gpt-4o', labelKey: 'enginesPromptsPanel.models.gpt4o' },
+  { value: 'gpt-4-vision', labelKey: 'enginesPromptsPanel.models.gpt4Vision' },
+  { value: 'gpt-4-turbo', labelKey: 'enginesPromptsPanel.models.gpt4Turbo' },
 ];
 
 const SECTION_PROMPTS: Record<string, string> = {
@@ -29,6 +29,7 @@ const SECTION_PROMPTS: Record<string, string> = {
 };
 
 const EnginesPromptsPanel: React.FC<EnginesPanelProps> = ({ section }) => {
+  const { t } = useTranslation();
   const [selectedModel, setSelectedModel] = useState('gpt-4o');
   const [systemPrompt, setSystemPrompt] = useState(SECTION_PROMPTS[section]);
   const [temperature, setTemperature] = useState([0.7]);
@@ -38,29 +39,23 @@ const EnginesPromptsPanel: React.FC<EnginesPanelProps> = ({ section }) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Configuração de Engine</CardTitle>
-          <CardDescription>
-            Configure a engine de IA utilizada para esta seção
-          </CardDescription>
+          <CardTitle>{t('enginesPromptsPanel.engineConfig')}</CardTitle>
+          <CardDescription>{t('enginesPromptsPanel.engineConfigDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="model-selector">Modelo de IA</Label>
-              <Switch 
-                checked={isActive} 
-                onCheckedChange={setIsActive} 
-                id="active-switch"
-              />
+              <Label htmlFor="model-selector">{t('enginesPromptsPanel.aiModel')}</Label>
+              <Switch checked={isActive} onCheckedChange={setIsActive} id="active-switch" />
             </div>
             <Select value={selectedModel} onValueChange={setSelectedModel}>
               <SelectTrigger id="model-selector">
-                <SelectValue placeholder="Selecione um modelo" />
+                <SelectValue placeholder={t('enginesPromptsPanel.selectModel')} />
               </SelectTrigger>
               <SelectContent>
                 {MODELS.map(model => (
                   <SelectItem key={model.value} value={model.value}>
-                    {model.label}
+                    {t(model.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -68,79 +63,56 @@ const EnginesPromptsPanel: React.FC<EnginesPanelProps> = ({ section }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="temperature">Temperatura: {temperature[0].toFixed(1)}</Label>
-            <Slider
-              id="temperature"
-              min={0}
-              max={1}
-              step={0.1}
-              value={temperature}
-              onValueChange={setTemperature}
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>Mais preciso</span>
-              <span>Mais criativo</span>
+            <Label htmlFor="temperature">{t('enginesPromptsPanel.temperature', { value: temperature[0].toFixed(1) })}</Label>
+            <Slider id="temperature" min={0} max={1} step={0.1} value={temperature} onValueChange={setTemperature} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{t('enginesPromptsPanel.morePrecise')}</span>
+              <span>{t('enginesPromptsPanel.moreCreative')}</span>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="system-prompt">Prompt de Sistema</Label>
+            <Label htmlFor="system-prompt">{t('enginesPromptsPanel.systemPrompt')}</Label>
             <ScrollArea className="h-[200px] w-full rounded-md border">
               <Textarea
                 id="system-prompt"
                 className="min-h-[200px] resize-none border-0"
                 value={systemPrompt}
                 onChange={(e) => setSystemPrompt(e.target.value)}
-                placeholder="Insira um prompt para guiar o comportamento da IA"
+                placeholder={t('enginesPromptsPanel.systemPromptPlaceholder')}
               />
             </ScrollArea>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline">Restaurar Padrão</Button>
-          <Button>Salvar Configurações</Button>
+          <Button variant="outline">{t('enginesPromptsPanel.restoreDefault')}</Button>
+          <Button>{t('enginesPromptsPanel.saveSettings')}</Button>
         </CardFooter>
       </Card>
       
       <Card>
         <CardHeader>
-          <CardTitle>Prompts Especializados</CardTitle>
-          <CardDescription>
-            Configure prompts específicos para diferentes operações dentro desta seção
-          </CardDescription>
+          <CardTitle>{t('enginesPromptsPanel.specializedPrompts')}</CardTitle>
+          <CardDescription>{t('enginesPromptsPanel.specializedPromptsDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="border rounded-md p-4">
-              <Label htmlFor="extract-prompt" className="font-semibold">Extração de Dados</Label>
-              <Textarea
-                id="extract-prompt"
-                className="mt-2"
-                placeholder="Prompt para extração de dados específicos"
-              />
+              <Label htmlFor="extract-prompt" className="font-semibold">{t('enginesPromptsPanel.dataExtraction')}</Label>
+              <Textarea id="extract-prompt" className="mt-2" placeholder={t('enginesPromptsPanel.dataExtractionPlaceholder')} />
             </div>
-            
             <div className="border rounded-md p-4">
-              <Label htmlFor="analyze-prompt" className="font-semibold">Análise de Resultados</Label>
-              <Textarea
-                id="analyze-prompt"
-                className="mt-2"
-                placeholder="Prompt para análise de resultados"
-              />
+              <Label htmlFor="analyze-prompt" className="font-semibold">{t('enginesPromptsPanel.resultAnalysis')}</Label>
+              <Textarea id="analyze-prompt" className="mt-2" placeholder={t('enginesPromptsPanel.resultAnalysisPlaceholder')} />
             </div>
-            
             <div className="border rounded-md p-4">
-              <Label htmlFor="summarize-prompt" className="font-semibold">Sumarização</Label>
-              <Textarea
-                id="summarize-prompt"
-                className="mt-2"
-                placeholder="Prompt para sumarização de resultados"
-              />
+              <Label htmlFor="summarize-prompt" className="font-semibold">{t('enginesPromptsPanel.summarization')}</Label>
+              <Textarea id="summarize-prompt" className="mt-2" placeholder={t('enginesPromptsPanel.summarizationPlaceholder')} />
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full">Salvar Todos os Prompts</Button>
+          <Button className="w-full">{t('enginesPromptsPanel.saveAllPrompts')}</Button>
         </CardFooter>
       </Card>
     </div>

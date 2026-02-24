@@ -2,22 +2,27 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface UsagePanelProps {
   section: 'knowledge-base' | 'data-processing' | 'research' | 'predictive-analysis';
 }
 
-const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
-  const sectionLabel = section === 'knowledge-base' ? 'Base de Conhecimento' : 
-                       section === 'data-processing' ? 'Processamento de Dados' :
-                       section === 'research' ? 'Pesquisa e Desenvolvimento' :
-                       'Análise Preditiva';
+const SECTION_KEY_MAP: Record<string, string> = {
+  'knowledge-base': 'knowledgeBase',
+  'data-processing': 'dataProcessing',
+  'research': 'research',
+  'predictive-analysis': 'predictiveAnalysis',
+};
 
-  // Dados simulados de uso
+const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
+  const { t } = useTranslation();
+  const sectionLabel = t(`usagePanel.sectionNames.${SECTION_KEY_MAP[section]}`);
+
   const usageData = {
     tokens: [
       { name: "Jan", tokens: 2500 },
@@ -40,17 +45,17 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Uso de API - {sectionLabel}</h3>
+        <h3 className="text-lg font-medium">{t('usagePanel.title', { section: sectionLabel })}</h3>
         <div className="flex gap-2">
           <Select defaultValue="30d">
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Período" />
+              <SelectValue placeholder={t('usagePanel.period')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">Últimos 7 dias</SelectItem>
-              <SelectItem value="30d">Últimos 30 dias</SelectItem>
-              <SelectItem value="90d">Últimos 90 dias</SelectItem>
-              <SelectItem value="1y">Último ano</SelectItem>
+              <SelectItem value="7d">{t('usagePanel.last7d')}</SelectItem>
+              <SelectItem value="30d">{t('usagePanel.last30d')}</SelectItem>
+              <SelectItem value="90d">{t('usagePanel.last90d')}</SelectItem>
+              <SelectItem value="1y">{t('usagePanel.lastYear')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon">
@@ -62,23 +67,15 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Consumo de Tokens</CardTitle>
-            <CardDescription>Uso mensal de tokens por esta seção</CardDescription>
+            <CardTitle>{t('usagePanel.tokenConsumption')}</CardTitle>
+            <CardDescription>{t('usagePanel.tokenConsumptionDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <ChartContainer 
-              className="h-80"
-              config={{
-                tokens: { color: "#6366f1" }
-              }}
-            >
-              <BarChart
-                data={usageData.tokens}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-              >
+            <ChartContainer className="h-80" config={{ tokens: { color: "#6366f1" } }}>
+              <BarChart data={usageData.tokens} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => `${value.toLocaleString()} tokens`} />
+                <Tooltip formatter={(value) => t('usagePanel.tokensLabel', { value: value.toLocaleString() })} />
                 <Bar dataKey="tokens" fill="var(--color-tokens, #6366f1)" />
               </BarChart>
             </ChartContainer>
@@ -87,16 +84,11 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Distribuição por Modelo</CardTitle>
-            <CardDescription>Uso por modelo de IA</CardDescription>
+            <CardTitle>{t('usagePanel.modelDistribution')}</CardTitle>
+            <CardDescription>{t('usagePanel.modelDistributionDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center p-0">
-            <ChartContainer 
-              className="h-80"
-              config={{
-                default: { color: "#6366f1" }
-              }}
-            >
+            <ChartContainer className="h-80" config={{ default: { color: "#6366f1" } }}>
               <PieChart>
                 <Pie
                   data={usageData.models}
@@ -124,7 +116,7 @@ const UsagePanel: React.FC<UsagePanelProps> = ({ section }) => {
       <div className="flex justify-end">
         <Button variant="outline" className="flex gap-2">
           <Download className="h-4 w-4" />
-          <span>Exportar Relatório</span>
+          <span>{t('usagePanel.exportReport')}</span>
         </Button>
       </div>
     </div>
