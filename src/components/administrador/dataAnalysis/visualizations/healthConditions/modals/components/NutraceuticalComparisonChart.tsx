@@ -42,7 +42,7 @@ const NutraceuticalComparisonChart: React.FC<NutraceuticalComparisonChartProps> 
     [t('visualization.detailedAnalysis.nutraceuticals.prevention')]: nutri.prevention.score,
     [t('visualization.detailedAnalysis.nutraceuticals.treatment')]: nutri.treatment.score,
     [t('visualization.detailedAnalysis.nutraceuticals.evidence')]: nutri.evidence === t('visualization.detailedAnalysis.nutraceuticals.high') ? 5 : nutri.evidence === t('visualization.detailedAnalysis.nutraceuticals.moderate') ? 3.5 : 2,
-    Segurança: Math.random() * 1.5 + 3.5 // Simulado entre 3.5-5
+    Segurança: Math.random() * 1.5 + 3.5
   }));
 
   const getEvidenceBadge = (evidence: string) => {
