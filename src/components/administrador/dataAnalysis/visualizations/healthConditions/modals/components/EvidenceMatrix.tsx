@@ -447,25 +447,25 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
       {/* Notas metodológicas */}
       <Card>
         <CardHeader>
-          <CardTitle>Critérios de Avaliação da Qualidade</CardTitle>
+          <CardTitle>{t('evidenceQualityCriteria.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <h4 className="font-semibold mb-2">Score de Confiança (1-5):</h4>
+              <h4 className="font-semibold mb-2">{t('evidenceQualityCriteria.confidenceScore')}</h4>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• <strong>5.0:</strong> RCT duplo-cego, amostra &gt;100</li>
-                <li>• <strong>4.0-4.9:</strong> RCT bem conduzido</li>
-                <li>• <strong>3.0-3.9:</strong> Estudo observacional robusto</li>
-                <li>• <strong>1.0-2.9:</strong> Evidência limitada</li>
+                <li>• <strong>5.0:</strong> {t('evidenceQualityCriteria.confidenceLevel5')}</li>
+                <li>• <strong>4.0-4.9:</strong> {t('evidenceQualityCriteria.confidenceLevel4')}</li>
+                <li>• <strong>3.0-3.9:</strong> {t('evidenceQualityCriteria.confidenceLevel3')}</li>
+                <li>• <strong>1.0-2.9:</strong> {t('evidenceQualityCriteria.confidenceLevel1')}</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Tamanho do Efeito:</h4>
+              <h4 className="font-semibold mb-2">{t('evidenceQualityCriteria.effectSizeTitle')}</h4>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• <strong>Alto (&gt;1.8):</strong> Efeito clinicamente significativo</li>
-                <li>• <strong>Moderado (1.3-1.8):</strong> Efeito relevante</li>
-                <li>• <strong>Baixo (&lt;1.3):</strong> Efeito limitado</li>
+                <li>• <strong>{t('visualization.detailedAnalysis.evidence.high')} (&gt;1.8):</strong> {t('evidenceQualityCriteria.effectHigh')}</li>
+                <li>• <strong>{t('visualization.detailedAnalysis.evidence.moderate')} (1.3-1.8):</strong> {t('evidenceQualityCriteria.effectModerate')}</li>
+                <li>• <strong>{t('visualization.detailedAnalysis.evidence.low')} (&lt;1.3):</strong> {t('evidenceQualityCriteria.effectLow')}</li>
               </ul>
             </div>
           </div>

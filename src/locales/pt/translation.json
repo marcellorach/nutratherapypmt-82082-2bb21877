@@ -6091,5 +6091,107 @@
     "administrationInstructions": "Instruções de Administração",
     "contraindications": "Contraindicações",
     "downloadReport": "Baixar Relatório Completo"
+  },
+  "configAvisosIA": {
+    "title": "Importante",
+    "description": "As chaves API são armazenadas de forma segura no Supabase e também mantidas localmente como fallback. Em um ambiente de produção, apenas o armazenamento seguro no servidor é utilizado."
+  },
+  "apiStatus": {
+    "configured": "Configurado",
+    "notConfigured": "Não configurado"
+  },
+  "modelDetail": {
+    "currentAccuracy": "Acurácia Atual",
+    "tabs": {
+      "overview": "Visão Geral",
+      "evolution": "Evolução",
+      "sources": "Fontes de Dados",
+      "insights": "Descobertas",
+      "performance": "Performance"
+    },
+    "significance": {
+      "high": "Alta Significância",
+      "medium": "Média Significância",
+      "low": "Baixa Significância"
+    },
+    "stats": {
+      "totalMonitored": "Total Monitorados",
+      "treatmentGroup": "Grupo Tratamento",
+      "controlGroup": "Grupo Controle",
+      "monthlyGrowth": "Crescimento Mensal"
+    },
+    "nextMilestone": "Próximo Marco",
+    "progress": "Progresso",
+    "target": "Meta",
+    "accuracyEvolution": "Evolução de Acurácia ao Longo do Tempo",
+    "accuracyPercent": "Acurácia (%)",
+    "dataVolume": "Volume de Dados no Tempo",
+    "petsMonitored": "Pets Monitorados",
+    "dataSourcesComposition": "Composição das Fontes de Dados",
+    "degenerativeInsights": "Descobertas Proprietárias sobre Doenças Degenerativas",
+    "relatedConditions": "Condições Relacionadas",
+    "analyzedBreeds": "Raças Analisadas",
+    "evidence": {
+      "sampleSize": "Amostra",
+      "pValue": "p-valor",
+      "effectSize": "Tamanho de Efeito",
+      "ci95": "IC 95%"
+    },
+    "segmentedPerformance": "Performance Segmentada",
+    "segmentedDescription": "Análise detalhada da acurácia do modelo em diferentes segmentos populacionais e condições clínicas",
+    "byAgeRange": "Por Faixa Etária",
+    "bySize": "Por Porte",
+    "byDegenerativeCondition": "Por Condição Degenerativa",
+    "sizes": {
+      "miniature": "Miniatura (<5kg)",
+      "small": "Pequeno (5-10kg)",
+      "medium": "Médio (10-25kg)",
+      "large": "Grande (25-45kg)",
+      "giant": "Gigante (>45kg)"
+    },
+    "conditions": {
+      "osteoarthritis": "Osteoartrite",
+      "cognitiveDegradation": "Declínio Cognitivo",
+      "cardiomyopathy": "Cardiomiopatia",
+      "chronicKidneyDisease": "Doença Renal Crônica",
+      "sarcopenia": "Sarcopenia",
+      "retinalDegeneration": "Degeneração Retiniana"
+    }
+  },
+  "healthSankey": {
+    "filterBy": "Filtrar por",
+    "allConditions": "Todas condições",
+    "dogsOnly": "Somente cães",
+    "catsOnly": "Somente gatos",
+    "seniorPets": "Pets sênior (7+ anos)",
+    "youngPets": "Pets jovens (< 3 anos)",
+    "reduce": "Reduzir",
+    "enlarge": "Ampliar",
+    "reset": "Resetar",
+    "categories": {
+      "species": "Espécies",
+      "breeds": "Raças",
+      "conditions": "Condições",
+      "severity": "Severidade"
+    },
+    "tooltip": {
+      "quantity": "Quantidade",
+      "pets": "pets",
+      "clickForDetails": "Clique para ver detalhes"
+    },
+    "description": "O diagrama mostra fluxos de pets desde espécie até severidade de condições",
+    "currentScale": "Escala atual"
+  },
+  "evidenceQualityCriteria": {
+    "title": "Critérios de Avaliação da Qualidade",
+    "confidenceScore": "Score de Confiança (1-5):",
+    "confidenceLevel5": "RCT duplo-cego, amostra >100",
+    "confidenceLevel4": "RCT bem conduzido",
+    "confidenceLevel3": "Estudo observacional robusto",
+    "confidenceLevel1": "Evidência limitada",
+    "effectSizeTitle": "Tamanho do Efeito:",
+    "effectHigh": "Efeito clinicamente significativo",
+    "effectModerate": "Efeito relevante",
+    "effectLow": "Efeito limitado"
   }
 }

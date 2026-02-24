@@ -7,6 +7,7 @@ import { TrendingUp, Users, Target, Database, Lightbulb, AlertCircle } from "luc
 import { PredictiveModel } from '../types/predictiveModelTypes';
 import { DataSourcesChart } from './DataSourcesChart';
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 
 interface ModelDetailDialogProps {
   model: PredictiveModel | null;
@@ -15,6 +16,7 @@ interface ModelDetailDialogProps {
 }
 
 export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDialogProps) => {
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState('overview');
 
   if (!model) return null;
@@ -22,11 +24,11 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
   const getSignificanceBadge = (significance: string) => {
     switch (significance) {
       case 'high':
-        return <Badge className="bg-success/10 text-success border-success/20">Alta Significância</Badge>;
+        return <Badge className="bg-success/10 text-success border-success/20">{t('modelDetail.significance.high')}</Badge>;
       case 'medium':
-        return <Badge className="bg-warning/10 text-warning border-warning/20">Média Significância</Badge>;
+        return <Badge className="bg-warning/10 text-warning border-warning/20">{t('modelDetail.significance.medium')}</Badge>;
       case 'low':
-        return <Badge className="bg-muted/50 text-muted-foreground border-muted">Baixa Significância</Badge>;
+        return <Badge className="bg-muted/50 text-muted-foreground border-muted">{t('modelDetail.significance.low')}</Badge>;
       default:
         return null;
     }
@@ -45,21 +47,20 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-brand-primary">{model.currentAccuracy}%</p>
-              <p className="text-xs text-muted-foreground">Acurácia Atual</p>
+              <p className="text-xs text-muted-foreground">{t('modelDetail.currentAccuracy')}</p>
             </div>
           </div>
         </DialogHeader>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="evolution">Evolução</TabsTrigger>
-            <TabsTrigger value="sources">Fontes de Dados</TabsTrigger>
-            <TabsTrigger value="insights">Descobertas</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="overview">{t('modelDetail.tabs.overview')}</TabsTrigger>
+            <TabsTrigger value="evolution">{t('modelDetail.tabs.evolution')}</TabsTrigger>
+            <TabsTrigger value="sources">{t('modelDetail.tabs.sources')}</TabsTrigger>
+            <TabsTrigger value="insights">{t('modelDetail.tabs.insights')}</TabsTrigger>
+            <TabsTrigger value="performance">{t('modelDetail.tabs.performance')}</TabsTrigger>
           </TabsList>
 
-          {/* Visão Geral */}
           <TabsContent value="overview" className="space-y-4">
             <Card className="p-4 bg-muted/30 border-border">
               <p className="text-sm text-foreground">{model.description}</p>
@@ -69,7 +70,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
               <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="h-4 w-4 text-info" />
-                  <p className="text-xs text-muted-foreground">Total Monitorados</p>
+                  <p className="text-xs text-muted-foreground">{t('modelDetail.stats.totalMonitored')}</p>
                 </div>
                 <p className="text-2xl font-bold text-foreground">{model.totalPetsMonitored.toLocaleString()}</p>
               </Card>
@@ -77,7 +78,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
               <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="h-4 w-4 text-success" />
-                  <p className="text-xs text-muted-foreground">Grupo Tratamento</p>
+                  <p className="text-xs text-muted-foreground">{t('modelDetail.stats.treatmentGroup')}</p>
                 </div>
                 <p className="text-2xl font-bold text-foreground">{model.treatmentGroup.toLocaleString()}</p>
               </Card>
@@ -85,7 +86,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
               <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <Database className="h-4 w-4 text-chart-3" />
-                  <p className="text-xs text-muted-foreground">Grupo Controle</p>
+                  <p className="text-xs text-muted-foreground">{t('modelDetail.stats.controlGroup')}</p>
                 </div>
                 <p className="text-2xl font-bold text-foreground">{model.controlGroup.toLocaleString()}</p>
               </Card>
@@ -93,18 +94,18 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
               <Card className="p-4 border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="h-4 w-4 text-chart-5" />
-                  <p className="text-xs text-muted-foreground">Crescimento Mensal</p>
+                  <p className="text-xs text-muted-foreground">{t('modelDetail.stats.monthlyGrowth')}</p>
                 </div>
                 <p className="text-2xl font-bold text-success">+{model.monthlyGrowthRate}%</p>
               </Card>
             </div>
 
             <Card className="p-4 border-border">
-              <h4 className="text-sm font-semibold text-foreground mb-3">Próximo Marco</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3">{t('modelDetail.nextMilestone')}</h4>
               <p className="text-sm text-muted-foreground mb-3">{model.nextMilestone.description}</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="text-muted-foreground">{t('modelDetail.progress')}</span>
                   <span className="font-medium text-foreground">{milestoneProgress}%</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -115,16 +116,15 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{model.nextMilestone.current.toLocaleString()} pets</span>
-                  <span>Meta: {model.nextMilestone.target.toLocaleString()} pets</span>
+                  <span>{t('modelDetail.target')}: {model.nextMilestone.target.toLocaleString()} pets</span>
                 </div>
               </div>
             </Card>
           </TabsContent>
 
-          {/* Evolução Temporal */}
           <TabsContent value="evolution" className="space-y-4">
             <Card className="p-4 border-border">
-              <h4 className="text-sm font-semibold text-foreground mb-4">Evolução de Acurácia ao Longo do Tempo</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-4">{t('modelDetail.accuracyEvolution')}</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={model.performanceHistory}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -153,14 +153,14 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
                     stroke="hsl(var(--brand-primary))" 
                     fill="hsl(var(--brand-primary) / 0.2)"
                     strokeWidth={2}
-                    name="Acurácia (%)"
+                    name={t('modelDetail.accuracyPercent')}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
 
             <Card className="p-4 border-border">
-              <h4 className="text-sm font-semibold text-foreground mb-4">Volume de Dados no Tempo</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-4">{t('modelDetail.dataVolume')}</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={model.performanceHistory}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -190,17 +190,16 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
                     stroke="hsl(var(--chart-2))" 
                     strokeWidth={2}
                     dot={{ fill: 'hsl(var(--chart-2))', r: 4 }}
-                    name="Pets Monitorados"
+                    name={t('modelDetail.petsMonitored')}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
           </TabsContent>
 
-          {/* Fontes de Dados */}
           <TabsContent value="sources" className="space-y-4">
             <Card className="p-4 border-border">
-              <h4 className="text-sm font-semibold text-foreground mb-4">Composição das Fontes de Dados</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-4">{t('modelDetail.dataSourcesComposition')}</h4>
               <DataSourcesChart dataSources={model.dataSources} />
             </Card>
 
@@ -223,12 +222,11 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
             </div>
           </TabsContent>
 
-          {/* Descobertas Degenerativas */}
           <TabsContent value="insights" className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="h-5 w-5 text-warning" />
               <h4 className="text-sm font-semibold text-foreground">
-                Descobertas Proprietárias sobre Doenças Degenerativas
+                {t('modelDetail.degenerativeInsights')}
               </h4>
             </div>
 
@@ -249,7 +247,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Condições Relacionadas</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('modelDetail.relatedConditions')}</p>
                       <div className="flex flex-wrap gap-1">
                         {insight.relatedConditions.map((condition, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
@@ -259,7 +257,7 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Raças Analisadas</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('modelDetail.analyzedBreeds')}</p>
                       <div className="flex flex-wrap gap-1">
                         {insight.relatedBreeds.slice(0, 3).map((breed, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
@@ -277,19 +275,19 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
 
                   <div className="grid grid-cols-4 gap-4 p-3 bg-muted/30 rounded-lg">
                     <div>
-                      <p className="text-xs text-muted-foreground">Amostra</p>
+                      <p className="text-xs text-muted-foreground">{t('modelDetail.evidence.sampleSize')}</p>
                       <p className="text-sm font-semibold text-foreground">{insight.evidence.sampleSize.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">p-valor</p>
+                      <p className="text-xs text-muted-foreground">{t('modelDetail.evidence.pValue')}</p>
                       <p className="text-sm font-semibold text-foreground">{insight.evidence.pValue.toFixed(4)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Tamanho de Efeito</p>
+                      <p className="text-xs text-muted-foreground">{t('modelDetail.evidence.effectSize')}</p>
                       <p className="text-sm font-semibold text-foreground">{(insight.evidence.effectSize * 100).toFixed(1)}%</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">IC 95%</p>
+                      <p className="text-xs text-muted-foreground">{t('modelDetail.evidence.ci95')}</p>
                       <p className="text-sm font-semibold text-foreground">
                         [{(insight.evidence.confidenceInterval[0] * 100).toFixed(1)}%, {(insight.evidence.confidenceInterval[1] * 100).toFixed(1)}%]
                       </p>
@@ -300,15 +298,14 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
             </div>
           </TabsContent>
 
-          {/* Performance por Segmento */}
           <TabsContent value="performance" className="space-y-4">
             <Card className="p-4 border-border">
               <div className="flex items-start gap-3 mb-4">
                 <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-1">Performance Segmentada</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-1">{t('modelDetail.segmentedPerformance')}</h4>
                   <p className="text-sm text-muted-foreground">
-                    Análise detalhada da acurácia do modelo em diferentes segmentos populacionais e condições clínicas
+                    {t('modelDetail.segmentedDescription')}
                   </p>
                 </div>
               </div>
@@ -316,13 +313,13 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
 
             <div className="grid grid-cols-2 gap-4">
               <Card className="p-4 border-border">
-                <h5 className="text-sm font-semibold text-foreground mb-3">Por Faixa Etária</h5>
+                <h5 className="text-sm font-semibold text-foreground mb-3">{t('modelDetail.byAgeRange')}</h5>
                 <div className="space-y-3">
                   {[
-                    { range: '0-2 anos', accuracy: model.currentAccuracy - 5.2 },
-                    { range: '3-6 anos', accuracy: model.currentAccuracy - 2.1 },
-                    { range: '7-10 anos', accuracy: model.currentAccuracy + 1.8 },
-                    { range: '11+ anos', accuracy: model.currentAccuracy + 2.5 }
+                    { range: '0-2', accuracy: model.currentAccuracy - 5.2 },
+                    { range: '3-6', accuracy: model.currentAccuracy - 2.1 },
+                    { range: '7-10', accuracy: model.currentAccuracy + 1.8 },
+                    { range: '11+', accuracy: model.currentAccuracy + 2.5 }
                   ].map((segment, idx) => (
                     <div key={idx} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
@@ -341,14 +338,14 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
               </Card>
 
               <Card className="p-4 border-border">
-                <h5 className="text-sm font-semibold text-foreground mb-3">Por Porte</h5>
+                <h5 className="text-sm font-semibold text-foreground mb-3">{t('modelDetail.bySize')}</h5>
                 <div className="space-y-3">
                   {[
-                    { size: 'Miniatura (<5kg)', accuracy: model.currentAccuracy - 3.1 },
-                    { size: 'Pequeno (5-10kg)', accuracy: model.currentAccuracy - 1.4 },
-                    { size: 'Médio (10-25kg)', accuracy: model.currentAccuracy + 0.8 },
-                    { size: 'Grande (25-45kg)', accuracy: model.currentAccuracy + 2.2 },
-                    { size: 'Gigante (>45kg)', accuracy: model.currentAccuracy + 1.1 }
+                    { size: t('modelDetail.sizes.miniature'), accuracy: model.currentAccuracy - 3.1 },
+                    { size: t('modelDetail.sizes.small'), accuracy: model.currentAccuracy - 1.4 },
+                    { size: t('modelDetail.sizes.medium'), accuracy: model.currentAccuracy + 0.8 },
+                    { size: t('modelDetail.sizes.large'), accuracy: model.currentAccuracy + 2.2 },
+                    { size: t('modelDetail.sizes.giant'), accuracy: model.currentAccuracy + 1.1 }
                   ].map((segment, idx) => (
                     <div key={idx} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
@@ -368,15 +365,15 @@ export const ModelDetailDialog = ({ model, open, onOpenChange }: ModelDetailDial
             </div>
 
             <Card className="p-4 border-border">
-              <h5 className="text-sm font-semibold text-foreground mb-3">Por Condição Degenerativa</h5>
+              <h5 className="text-sm font-semibold text-foreground mb-3">{t('modelDetail.byDegenerativeCondition')}</h5>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { condition: 'Osteoartrite', accuracy: model.currentAccuracy + 3.2 },
-                  { condition: 'Declínio Cognitivo', accuracy: model.currentAccuracy + 1.8 },
-                  { condition: 'Cardiomiopatia', accuracy: model.currentAccuracy - 0.5 },
-                  { condition: 'Doença Renal Crônica', accuracy: model.currentAccuracy + 2.1 },
-                  { condition: 'Sarcopenia', accuracy: model.currentAccuracy - 1.2 },
-                  { condition: 'Degeneração Retiniana', accuracy: model.currentAccuracy - 2.8 }
+                  { condition: t('modelDetail.conditions.osteoarthritis'), accuracy: model.currentAccuracy + 3.2 },
+                  { condition: t('modelDetail.conditions.cognitiveDegradation'), accuracy: model.currentAccuracy + 1.8 },
+                  { condition: t('modelDetail.conditions.cardiomyopathy'), accuracy: model.currentAccuracy - 0.5 },
+                  { condition: t('modelDetail.conditions.chronicKidneyDisease'), accuracy: model.currentAccuracy + 2.1 },
+                  { condition: t('modelDetail.conditions.sarcopenia'), accuracy: model.currentAccuracy - 1.2 },
+                  { condition: t('modelDetail.conditions.retinalDegeneration'), accuracy: model.currentAccuracy - 2.8 }
                 ].map((segment, idx) => (
                   <div key={idx} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">

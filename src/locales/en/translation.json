@@ -6091,5 +6091,107 @@
     "administrationInstructions": "Administration Instructions",
     "contraindications": "Contraindications",
     "downloadReport": "Download Full Report"
+  },
+  "configAvisosIA": {
+    "title": "Important",
+    "description": "API keys are securely stored in the backend and also maintained locally as fallback. In a production environment, only the secure server storage is used."
+  },
+  "apiStatus": {
+    "configured": "Configured",
+    "notConfigured": "Not configured"
+  },
+  "modelDetail": {
+    "currentAccuracy": "Current Accuracy",
+    "tabs": {
+      "overview": "Overview",
+      "evolution": "Evolution",
+      "sources": "Data Sources",
+      "insights": "Discoveries",
+      "performance": "Performance"
+    },
+    "significance": {
+      "high": "High Significance",
+      "medium": "Medium Significance",
+      "low": "Low Significance"
+    },
+    "stats": {
+      "totalMonitored": "Total Monitored",
+      "treatmentGroup": "Treatment Group",
+      "controlGroup": "Control Group",
+      "monthlyGrowth": "Monthly Growth"
+    },
+    "nextMilestone": "Next Milestone",
+    "progress": "Progress",
+    "target": "Target",
+    "accuracyEvolution": "Accuracy Evolution Over Time",
+    "accuracyPercent": "Accuracy (%)",
+    "dataVolume": "Data Volume Over Time",
+    "petsMonitored": "Pets Monitored",
+    "dataSourcesComposition": "Data Sources Composition",
+    "degenerativeInsights": "Proprietary Discoveries on Degenerative Diseases",
+    "relatedConditions": "Related Conditions",
+    "analyzedBreeds": "Analyzed Breeds",
+    "evidence": {
+      "sampleSize": "Sample",
+      "pValue": "p-value",
+      "effectSize": "Effect Size",
+      "ci95": "95% CI"
+    },
+    "segmentedPerformance": "Segmented Performance",
+    "segmentedDescription": "Detailed accuracy analysis of the model across different population segments and clinical conditions",
+    "byAgeRange": "By Age Range",
+    "bySize": "By Size",
+    "byDegenerativeCondition": "By Degenerative Condition",
+    "sizes": {
+      "miniature": "Miniature (<5kg)",
+      "small": "Small (5-10kg)",
+      "medium": "Medium (10-25kg)",
+      "large": "Large (25-45kg)",
+      "giant": "Giant (>45kg)"
+    },
+    "conditions": {
+      "osteoarthritis": "Osteoarthritis",
+      "cognitiveDegradation": "Cognitive Decline",
+      "cardiomyopathy": "Cardiomyopathy",
+      "chronicKidneyDisease": "Chronic Kidney Disease",
+      "sarcopenia": "Sarcopenia",
+      "retinalDegeneration": "Retinal Degeneration"
+    }
+  },
+  "healthSankey": {
+    "filterBy": "Filter by",
+    "allConditions": "All conditions",
+    "dogsOnly": "Dogs only",
+    "catsOnly": "Cats only",
+    "seniorPets": "Senior pets (7+ years)",
+    "youngPets": "Young pets (< 3 years)",
+    "reduce": "Reduce",
+    "enlarge": "Enlarge",
+    "reset": "Reset",
+    "categories": {
+      "species": "Species",
+      "breeds": "Breeds",
+      "conditions": "Conditions",
+      "severity": "Severity"
+    },
+    "tooltip": {
+      "quantity": "Quantity",
+      "pets": "pets",
+      "clickForDetails": "Click for details"
+    },
+    "description": "The diagram shows pet flows from species to condition severity",
+    "currentScale": "Current scale"
+  },
+  "evidenceQualityCriteria": {
+    "title": "Quality Assessment Criteria",
+    "confidenceScore": "Confidence Score (1-5):",
+    "confidenceLevel5": "Double-blind RCT, sample >100",
+    "confidenceLevel4": "Well-conducted RCT",
+    "confidenceLevel3": "Robust observational study",
+    "confidenceLevel1": "Limited evidence",
+    "effectSizeTitle": "Effect Size:",
+    "effectHigh": "Clinically significant effect",
+    "effectModerate": "Relevant effect",
+    "effectLow": "Limited effect"
   }
 }
