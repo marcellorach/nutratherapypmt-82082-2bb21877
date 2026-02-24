@@ -3,6 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { getEvidenceLevel } from '@/rules/general/evidence-levels';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation } from 'react-i18next';
 
 interface EvidenceTagProps {
   score: number;
@@ -15,6 +16,7 @@ const EvidenceTag: React.FC<EvidenceTagProps> = ({
   showLabel = true,
   className = ""
 }) => {
+  const { t } = useTranslation();
   const level = getEvidenceLevel(score);
   
   return (
@@ -35,7 +37,7 @@ const EvidenceTag: React.FC<EvidenceTagProps> = ({
         </TooltipTrigger>
         <TooltipContent>
           <p><span className="font-medium">{level.level}</span> ({score.toFixed(1)}/5)</p>
-          <p className="text-xs text-gray-500 mt-1">Qualidade da evidência científica</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('evidenceTag.qualityTooltip')}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

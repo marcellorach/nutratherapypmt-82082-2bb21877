@@ -6464,5 +6464,82 @@
       "errorTitle": "Error processing study",
       "errorDesc": "An error occurred during study processing."
     }
+  },
+  "efficacyOverTime": {
+    "title": "Efficacy Over Time",
+    "description": "Efficacy progression for {{name}}"
+  },
+  "pdfUploadZone": {
+    "filesNotSupported": "Some files are not supported",
+    "dropHere": "Drop files here...",
+    "dragOrClick": "Drag and drop PDFs here or click to select",
+    "supportedFormats": "Supported formats: PDF, DOCX",
+    "fileCount": "{{current}}/{{max}} files (maximum {{max}})"
+  },
+  "evidenceTag": {
+    "qualityTooltip": "Scientific evidence quality"
+  },
+  "formDialog": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "selectOption": "Select an option"
+  },
+  "searchBar": {
+    "placeholder": "Search nutraceuticals..."
+  },
+  "sciSpace2Step": {
+    "missingFiles": "Missing files",
+    "missingFilesDesc": "Please select at least one meta summary file and one base studies file.",
+    "missingConsensoName": "Missing Integrative Consensus name",
+    "missingConsensoNameDesc": "Please fill in the Integrative Consensus name.",
+    "importComplete": "Import Complete!",
+    "importCompleteDesc": "{{count}} files uploaded and registered successfully.",
+    "importError": "Import error",
+    "importedStudy": "Imported study: {{title}}",
+    "integrativeImport": "Integrative Import"
+  },
+  "visaoGeralTab": {
+    "description": "Description",
+    "noDescription": "No description available",
+    "keyFindings": "Key Findings",
+    "clinicalImplications": "Clinical Implications",
+    "limitations": "Limitations",
+    "methodologicalAssessment": "Methodological Assessment",
+    "randomized": "Randomized",
+    "placeboControlled": "Placebo-controlled",
+    "methodologicalQuality": "Methodological Quality",
+    "methodologicalQualityDesc": "Scientific rigor and study design",
+    "clinicalRelevance": "Clinical Relevance",
+    "clinicalRelevanceDesc": "Applicability in veterinary practice",
+    "scientificNovelty": "Scientific Novelty",
+    "scientificNoveltyDesc": "Contribution to existing knowledge"
+  },
+  "outcomesEditor": {
+    "addNewRelation": "Add new relation",
+    "outcome": "Outcome",
+    "selectOutcome": "Select an outcome",
+    "allOutcomesAssociated": "All outcomes have been associated",
+    "relationType": "Relation Type",
+    "prevention": "Prevention",
+    "treatment": "Treatment",
+    "support": "Support",
+    "efficacy": "Efficacy (1-5): {{score}}",
+    "efficacyLabel": "Efficacy: {{score}}",
+    "notesLabel": "Notes or Observations",
+    "notesPlaceholder": "Add notes about this relation between nutraceutical and outcome",
+    "addRelation": "Add Relation",
+    "existingRelations": "Existing Relations",
+    "noRelations": "This nutraceutical has no relations with outcomes",
+    "all": "All",
+    "notes": "Notes:",
+    "toasts": {
+      "error": "Error",
+      "selectOutcome": "Please select an outcome",
+      "success": "Success",
+      "outcomeAssociated": "Outcome associated successfully",
+      "associateError": "Could not associate the outcome",
+      "relationRemoved": "Relation removed successfully",
+      "removeError": "Could not remove the association"
+    }
   }
 }
