@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,7 +49,6 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   // Update local estudo when prop changes
   useEffect(() => {
     setLocalEstudo(estudo);
-    // Check vectorization status
     checkVectorizationStatus();
   }, [estudo]);
 
@@ -75,18 +73,18 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
   const handleVectorize = async () => {
     try {
-      toast.loading('Vetorizando estudo...', { id: 'vectorize' });
+      toast.loading(t('studies.card.vectorizing'), { id: 'vectorize' });
       const { data, error } = await supabase.functions.invoke('vectorize-study', {
         body: { studyId: localEstudo.id }
       });
       
       if (error) throw error;
       
-      toast.success(`${data.chunksProcessed} embeddings criados!`, { id: 'vectorize' });
+      toast.success(t('studies.card.embeddingsCreated', { count: data.chunksProcessed }), { id: 'vectorize' });
       await checkVectorizationStatus();
     } catch (error: any) {
       console.error('Error vectorizing:', error);
-      toast.error('Erro ao vetorizar estudo', { id: 'vectorize' });
+      toast.error(t('studies.card.vectorizeError'), { id: 'vectorize' });
     }
   };
 
@@ -134,7 +132,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
       if (error) throw error;
 
-      toast.success(t('studies.card.deleteSuccess') || 'Study deleted successfully');
+      toast.success(t('studies.card.deleteSuccess'));
       
       // Notify parent component if callback provided
       if (onDelete) {
@@ -142,7 +140,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
       }
     } catch (error) {
       console.error('Error deleting study:', error);
-      toast.error(t('studies.card.deleteError') || 'Error deleting study');
+      toast.error(t('studies.card.deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -185,18 +183,18 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t('studies.card.deleteTitle') || 'Delete Study?'}</AlertDialogTitle>
+                  <AlertDialogTitle>{t('studies.card.deleteTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t('studies.card.deleteDescription') || 'This action cannot be undone. This will permanently delete the study and all its extracted data.'}
+                    {t('studies.card.deleteDescription')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.cancel') || 'Cancel'}</AlertDialogCancel>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
                     className="bg-red-600 hover:bg-red-700"
                   >
-                    {t('common.delete') || 'Delete'}
+                    {t('common.delete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -204,25 +202,25 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             {needsProcessing && !isProcessing && (
               <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />
-                Aguardando IA
+                {t('studies.card.awaitingAI')}
               </Badge>
             )}
             {isProcessing && (
               <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Processando
+                {t('studies.card.processingStatus')}
               </Badge>
             )}
             {processingStatus === 'success' && (
               <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" />
-                Concluído
+                {t('studies.card.completed')}
               </Badge>
             )}
             {processingStatus === 'error' && (
               <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Erro
+                {t('studies.card.errorStatus')}
               </Badge>
             )}
             {/* Vectorization Status Badge */}
@@ -230,7 +228,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               <Badge 
                 variant="outline" 
                 className="bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1 cursor-help"
-                title={`${embeddingsCount} chunks vetorizados para busca semântica`}
+                title={t('studies.card.vectorizedChunks', { count: embeddingsCount })}
               >
                 <CheckCircle2 className="h-3 w-3" />
                 RAG: {embeddingsCount}
@@ -241,22 +239,22 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 variant="outline" 
                 className="bg-amber-100 text-amber-800 border-amber-300 flex items-center gap-1 cursor-pointer hover:bg-amber-200"
                 onClick={handleVectorize}
-                title="Clique para vetorizar e habilitar busca semântica"
+                title={t('studies.card.clickToVectorize')}
               >
                 <AlertCircle className="h-3 w-3" />
-                Sem RAG
+                {t('studies.card.noRag')}
               </Badge>
             )}
           </div>
         </div>
-        <CardDescription>{localEstudo.description || 'Estudo científico importado'}</CardDescription>
+        <CardDescription>{localEstudo.description || t('studies.card.importedStudy')}</CardDescription>
         
         {/* Progress Bar durante processamento */}
         {isProcessing && (
           <div className="mt-3 space-y-2">
             <Progress value={currentProgress} className="h-2" />
             <p className="text-xs text-blue-600">
-              🤖 Gemini AI analisando documento... {currentProgress}%
+              {t('studies.card.geminiAnalyzing', { progress: currentProgress })}
             </p>
           </div>
         )}
@@ -266,7 +264,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800 font-medium flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              Este estudo precisa ser processado pelo Gemini AI para extrair dados estruturados
+              {t('studies.card.needsProcessing')}
             </p>
             <Button
               onClick={handleGeminiProcess}
@@ -274,7 +272,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               className="mt-2 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
               <Sparkles className="h-4 w-4 mr-2" />
-              Processar com Gemini AI
+              {t('studies.card.processWithGemini')}
             </Button>
           </div>
         )}
@@ -325,7 +323,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             {/* Seção Interações Positivas */}
             {interactions.length > 0 && (
               <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-1">Interações Positivas</p>
+                <p className="text-xs text-gray-500 mb-1">{t('studies.card.positiveInteractions')}</p>
                 <div className="flex flex-wrap gap-1">
                   {interactions.slice(0, 3).map((interaction: any, idx: number) => (
                     <Badge 
@@ -338,7 +336,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                   ))}
                   {interactions.length > 3 && (
                     <Badge variant="outline" className="text-xs">
-                      +{interactions.length - 3} mais
+                      +{interactions.length - 3} {t('studies.card.more')}
                     </Badge>
                   )}
                 </div>
@@ -348,7 +346,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             {/* Seção Efeitos Colaterais */}
             {sideEffects.length > 0 && (
               <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-1">Efeitos Colaterais</p>
+                <p className="text-xs text-gray-500 mb-1">{t('studies.card.sideEffectsLabel')}</p>
                 <div className="flex flex-wrap gap-1">
                   {sideEffects.slice(0, 2).map((effect: any, idx: number) => (
                     <Badge 
@@ -361,7 +359,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                   ))}
                   {sideEffects.length > 2 && (
                     <Badge variant="outline" className="text-xs">
-                      +{sideEffects.length - 2} mais
+                      +{sideEffects.length - 2} {t('studies.card.more')}
                     </Badge>
                   )}
                 </div>
@@ -374,10 +372,10 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
         {(localEstudo.authors || localEstudo.year || localEstudo.journal) && (
           <div className="text-xs text-gray-600 space-y-1">
             {localEstudo.authors && (
-              <p><strong>Autores:</strong> {Array.isArray(localEstudo.authors) ? localEstudo.authors.join(', ') : localEstudo.authors}</p>
+              <p><strong>{t('studies.card.authors')}:</strong> {Array.isArray(localEstudo.authors) ? localEstudo.authors.join(', ') : localEstudo.authors}</p>
             )}
             {localEstudo.year && (
-              <p><strong>Ano:</strong> {localEstudo.year}</p>
+              <p><strong>{t('studies.card.year')}:</strong> {localEstudo.year}</p>
             )}
             {localEstudo.journal && (
               <p><strong>Journal:</strong> {localEstudo.journal}</p>

@@ -109,6 +109,8 @@ const OutcomeFormDialogBilingual: React.FC<OutcomeFormDialogBilingualProps> = ({
                   {translating.name && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Loader2 className="h-3 w-3 animate-spin" />
+                      {t('outcomeManagement.form.translatingAuto')}
+                    </span>
                       Traduzindo automaticamente...
                     </span>
                   )}
@@ -129,7 +131,7 @@ const OutcomeFormDialogBilingual: React.FC<OutcomeFormDialogBilingualProps> = ({
                   {translating.description && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Loader2 className="h-3 w-3 animate-spin" />
-                      Traduzindo automaticamente...
+                      {t('outcomeManagement.form.translatingAuto')}
                     </span>
                   )}
                 </div>
@@ -139,7 +141,7 @@ const OutcomeFormDialogBilingual: React.FC<OutcomeFormDialogBilingualProps> = ({
               <TabsContent value="en" className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="name_en" className="flex items-center gap-2">
-                    Outcome Name
+                    {t('outcomeManagement.form.outcomeName')}
                     {translating.name && <Languages className="h-3 w-3 animate-pulse text-primary" />}
                   </Label>
                   <Input
@@ -158,7 +160,7 @@ const OutcomeFormDialogBilingual: React.FC<OutcomeFormDialogBilingualProps> = ({
                 
                 <div className="space-y-2">
                   <Label htmlFor="description_en" className="flex items-center gap-2">
-                    Description
+                    {t('outcomeManagement.form.descriptionLabel')}
                     {translating.description && <Languages className="h-3 w-3 animate-pulse text-primary" />}
                   </Label>
                   <Textarea

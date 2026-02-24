@@ -289,7 +289,7 @@ Do not mention technical details like "Cypher" or "graph database".`
       };
 
       setMessages(prev => [...prev, errorMessage]);
-      toast.error('Erro ao processar pergunta');
+      toast.error(t('knowledgeGraph.toast.chatError'));
     } finally {
       setIsLoading(false);
     }
@@ -299,7 +299,7 @@ Do not mention technical details like "Cypher" or "graph database".`
     navigator.clipboard.writeText(query);
     setCopiedId(messageId);
     setTimeout(() => setCopiedId(null), 2000);
-    toast.success('Query copiada!');
+    toast.success(t('knowledgeGraph.toast.queryCopied'));
   };
 
   const handleClearChat = () => {
@@ -558,7 +558,7 @@ Do not mention technical details like "Cypher" or "graph database".`
                     {/* Entities found */}
                     {message.entities && message.entities.length > 0 && (
                       <div className="mt-3 pt-2 border-t border-border/50">
-                        <p className="text-[10px] text-muted-foreground mb-1">Entidades encontradas:</p>
+                        <p className="text-[10px] text-muted-foreground mb-1">{t('knowledgeGraph.chat.entitiesFound')}</p>
                         <div className="flex flex-wrap gap-1">
                           {message.entities.map((entity, idx) => (
                             <Badge
@@ -580,7 +580,7 @@ Do not mention technical details like "Cypher" or "graph database".`
                     {/* Relations found */}
                     {message.relations && message.relations.length > 0 && (
                       <div className="mt-2">
-                        <p className="text-[10px] text-muted-foreground mb-1">Relações:</p>
+                        <p className="text-[10px] text-muted-foreground mb-1">{t('knowledgeGraph.chat.relations')}</p>
                         <div className="space-y-1">
                           {message.relations.map((rel, idx) => (
                             <div key={idx} className="flex items-center gap-1 text-[10px]">
@@ -600,8 +600,8 @@ Do not mention technical details like "Cypher" or "graph database".`
                     {/* Query used (expandable) */}
                     {message.queryUsed && (
                       <details className="mt-2">
-                        <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground">
-                          Ver query Cypher
+                          <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground">
+                            {t('knowledgeGraph.chat.viewQuery')}
                         </summary>
                         <div className="mt-1 p-2 bg-background/50 rounded text-[10px] font-mono relative">
                           <pre className="whitespace-pre-wrap break-all">{message.queryUsed}</pre>

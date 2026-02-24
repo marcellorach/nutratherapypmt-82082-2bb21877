@@ -28,7 +28,6 @@ interface Triplet {
   auto_approved: boolean;
   synced_to_neo4j: boolean;
   created_at: string;
-  // VetGraphRAG fields
   evidence_level: string | null;
   intensity: number | null;
   mechanism_path: string[] | null;
@@ -45,10 +44,10 @@ interface Column {
 export const TripletCurationBoard: React.FC = () => {
   const { t } = useTranslation();
   const [columns, setColumns] = useState<Record<string, Column>>({
-    pending: { id: 'pending', title: 'Pending', triplets: [] },
-    reviewing: { id: 'reviewing', title: 'Reviewing', triplets: [] },
-    approved: { id: 'approved', title: 'Approved', triplets: [] },
-    rejected: { id: 'rejected', title: 'Rejected', triplets: [] }
+    pending: { id: 'pending', title: t('curation.triplets.pending'), triplets: [] },
+    reviewing: { id: 'reviewing', title: t('curation.triplets.needsReview'), triplets: [] },
+    approved: { id: 'approved', title: t('curation.triplets.approve'), triplets: [] },
+    rejected: { id: 'rejected', title: t('curation.triplets.reject'), triplets: [] }
   });
   const [loading, setLoading] = useState(true);
   const [selectedTriplets, setSelectedTriplets] = useState<Set<string>>(new Set());
@@ -71,7 +70,6 @@ export const TripletCurationBoard: React.FC = () => {
 
       if (error) throw error;
 
-      // Organizar triplets por coluna
       const newColumns = { ...columns };
       Object.values(newColumns).forEach(col => col.triplets = []);
 
@@ -84,7 +82,7 @@ export const TripletCurationBoard: React.FC = () => {
 
       setColumns(newColumns);
     } catch (error: any) {
-      toast.error('Error fetching triplets');
+      toast.error(t('curation.board.fetchError'));
       console.error('Error:', error);
     } finally {
       setLoading(false);
@@ -115,13 +113,11 @@ export const TripletCurationBoard: React.FC = () => {
     const destColumn = columns[destination.droppableId];
     const movedTriplet = sourceColumn.triplets[source.index];
 
-    // Atualizar estado local
     const newColumns = { ...columns };
     newColumns[source.droppableId].triplets.splice(source.index, 1);
     newColumns[destination.droppableId].triplets.splice(destination.index, 0, movedTriplet);
     setColumns(newColumns);
 
-    // Atualizar no banco de dados
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id;
       const { error } = await supabase
@@ -136,22 +132,21 @@ export const TripletCurationBoard: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(`Triplet moved to ${destColumn.title}`);
+      toast.success(t('curation.board.movedTo', { column: destColumn.title }));
 
-      // Se aprovado, sincronizar com Neo4j
       if (destination.droppableId === 'approved') {
         syncToNeo4j();
       }
     } catch (error: any) {
-      toast.error('Error updating triplet status');
+      toast.error(t('curation.board.updateError'));
       console.error('Error:', error);
-      fetchTriplets(); // Reverter mudanças
+      fetchTriplets();
     }
   };
 
   const handleBulkApprove = async () => {
     if (selectedTriplets.size === 0) {
-      toast.error('No triplets selected');
+      toast.error(t('curation.board.noSelected'));
       return;
     }
 
@@ -168,12 +163,12 @@ export const TripletCurationBoard: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(`Approved ${selectedTriplets.size} triplets`);
+      toast.success(t('curation.board.approvedCount', { count: selectedTriplets.size }));
       setSelectedTriplets(new Set());
       fetchTriplets();
       syncToNeo4j();
     } catch (error: any) {
-      toast.error('Error approving triplets');
+      toast.error(t('curation.board.approveError'));
       console.error('Error:', error);
     }
   };
@@ -194,11 +189,11 @@ export const TripletCurationBoard: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(`Auto-approved high-confidence triplets`);
+      toast.success(t('curation.board.autoApproved'));
       fetchTriplets();
       syncToNeo4j();
     } catch (error: any) {
-      toast.error('Error auto-approving triplets');
+      toast.error(t('curation.board.autoApproveError'));
       console.error('Error:', error);
     }
   };
@@ -210,11 +205,11 @@ export const TripletCurationBoard: React.FC = () => {
       if (error) throw error;
       
       if (data?.results) {
-        toast.success(`Synced ${data.results.synced} triplets to Neo4j`);
+        toast.success(t('curation.board.syncedCount', { count: data.results.synced }));
       }
     } catch (error: any) {
       console.error('Neo4j sync error:', error);
-      toast.error('Failed to sync with Neo4j');
+      toast.error(t('curation.board.syncError'));
     }
   };
 
@@ -290,13 +285,12 @@ export const TripletCurationBoard: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header e controles */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              Triplet Curation Board
+              {t('curation.board.title')}
             </span>
             <div className="flex gap-2">
               <Button
@@ -304,21 +298,21 @@ export const TripletCurationBoard: React.FC = () => {
                 size="sm"
                 onClick={() => handleAutoApprove(0.9)}
               >
-                Auto-Approve High Confidence
+                {t('curation.board.autoApproveHigh')}
               </Button>
               <Button
                 size="sm"
                 onClick={handleBulkApprove}
                 disabled={selectedTriplets.size === 0}
               >
-                Bulk Approve ({selectedTriplets.size})
+                {t('curation.board.bulkApprove', { count: selectedTriplets.size })}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={syncToNeo4j}
               >
-                Sync to Neo4j
+                {t('curation.board.syncToNeo4j')}
               </Button>
             </div>
           </CardTitle>
@@ -328,7 +322,7 @@ export const TripletCurationBoard: React.FC = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search triplets..."
+                placeholder={t('curation.board.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -340,13 +334,13 @@ export const TripletCurationBoard: React.FC = () => {
                 min="0"
                 max="1"
                 step="0.1"
-                placeholder="Min Confidence (0-1)"
+                placeholder={t('curation.board.minConfidencePlaceholder')}
                 value={confidenceFilter}
                 onChange={(e) => setConfidenceFilter(parseFloat(e.target.value) || 0)}
               />
             </div>
             <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-              Total: {Object.values(columns).reduce((sum, col) => sum + col.triplets.length, 0)} triplets
+              {t('curation.board.total', { count: Object.values(columns).reduce((sum, col) => sum + col.triplets.length, 0) })}
             </div>
           </div>
         </CardContent>
@@ -389,7 +383,6 @@ export const TripletCurationBoard: React.FC = () => {
                                 }
                               }}
                             >
-                              {/* Triplet content with VetGraphRAG layers */}
                               <div className="space-y-1">
                                 <div className="flex items-center gap-1 text-xs">
                                   {getLayerBadge(triplet.subject_layer)}
@@ -414,7 +407,6 @@ export const TripletCurationBoard: React.FC = () => {
                                 </div>
                               </div>
 
-                              {/* VetGraphRAG enrichment */}
                               {(triplet.evidence_level || triplet.intensity !== null || triplet.mechanism_path) && (
                                 <div className="pt-1 border-t border-dashed space-y-1">
                                   <div className="flex items-center gap-1 flex-wrap">
@@ -438,7 +430,6 @@ export const TripletCurationBoard: React.FC = () => {
                                 </div>
                               )}
 
-                              {/* Scores */}
                               <div className="flex items-center justify-between text-[10px]">
                                 <div className="flex gap-1">
                                   <Badge className={`${getConfidenceBadgeColor(triplet.extraction_confidence)} text-white`}>
@@ -457,10 +448,9 @@ export const TripletCurationBoard: React.FC = () => {
                                 </div>
                               </div>
 
-                              {/* Review notes input (only for reviewing) */}
                               {columnId === 'reviewing' && (
                                 <Textarea
-                                  placeholder="Review notes..."
+                                  placeholder={t('curation.board.reviewNotesPlaceholder')}
                                   value={reviewNotes[triplet.id] || ''}
                                   onChange={(e) => setReviewNotes({ ...reviewNotes, [triplet.id]: e.target.value })}
                                   rows={2}

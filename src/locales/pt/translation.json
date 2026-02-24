@@ -246,6 +246,43 @@
     },
     "nodeTooltip": {
       "source": "Fonte"
+    },
+    "toast": {
+      "noDataStudy": "Nenhum dado de grafo disponível para este estudo",
+      "errorLoadStudy": "Erro ao carregar dados do grafo para o estudo",
+      "noDataNeo4j": "Nenhum dado de grafo disponível do Neo4j",
+      "loadedNodes": "{{count}} nós carregados do Neo4j",
+      "errorLoadNeo4j": "Erro ao carregar dados do grafo do Neo4j",
+      "connectionSuccess": "Conexão com Neo4j bem sucedida!",
+      "connectionFailed": "Falha ao conectar ao Neo4j",
+      "filteredBy": "Filtrado por: {{type}}",
+      "entityHighlight": "Entidade: {{name}}",
+      "queryCopied": "Query copiada!",
+      "chatError": "Erro ao processar pergunta"
+    },
+    "chat": {
+      "title": "Chat com o Grafo",
+      "description": "Faça perguntas em linguagem natural sobre o conhecimento do grafo",
+      "clear": "Limpar",
+      "clearChat": "Limpar chat",
+      "thinking": "Buscando...",
+      "placeholder": "Pergunte sobre nutracêuticos, condições...",
+      "welcome": "Pergunte qualquer coisa sobre o grafo de conhecimento",
+      "hint": "Usarei IA para interpretar sua pergunta e buscar no grafo",
+      "examples": "Exemplos de perguntas:",
+      "entitiesFound": "Entidades encontradas:",
+      "relations": "Relações:",
+      "viewQuery": "Ver query Cypher",
+      "aiResponse": "Resposta IA",
+      "errorLabel": "Erro",
+      "errorMessage": "Desculpe, tive um problema ao processar sua pergunta. Tente reformular ou verificar se o grafo tem dados suficientes.",
+      "exampleQueries": {
+        "q1": "Quais nutracêuticos tratam artrite?",
+        "q2": "Mostre contraindicações para Curcuma",
+        "q3": "Qual a relação entre Omega-3 e inflamação?",
+        "q4": "Quantos estudos mencionam Resveratrol?",
+        "q5": "Quais condições têm mais tratamentos?"
+      }
     }
   },
   "chat": {
@@ -848,7 +885,26 @@
       "deleteDescription": "O estudo será movido para a lixeira e poderá ser restaurado posteriormente.",
       "deleteSuccess": "Estudo movido para lixeira",
       "deleteError": "Erro ao mover estudo",
-      "ntaiAnalysis": "Análise VetGraphRAG"
+      "ntaiAnalysis": "Análise VetGraphRAG",
+      "awaitingAI": "Aguardando IA",
+      "processingStatus": "Processando",
+      "completed": "Concluído",
+      "errorStatus": "Erro",
+      "noRag": "Sem RAG",
+      "positiveInteractions": "Interações Positivas",
+      "sideEffectsLabel": "Efeitos Colaterais",
+      "more": "mais",
+      "authors": "Autores",
+      "year": "Ano",
+      "importedStudy": "Estudo científico importado",
+      "vectorizing": "Vetorizando estudo...",
+      "embeddingsCreated": "{{count}} embeddings criados!",
+      "vectorizeError": "Erro ao vetorizar estudo",
+      "needsProcessing": "Este estudo precisa ser processado pelo Gemini AI para extrair dados estruturados",
+      "processWithGemini": "Processar com Gemini AI",
+      "geminiAnalyzing": "🤖 Gemini AI analisando documento... {{progress}}%",
+      "vectorizedChunks": "{{count}} chunks vetorizados para busca semântica",
+      "clickToVectorize": "Clique para vetorizar e habilitar busca semântica"
     },
     "deletion": {
       "success": "Estudo movido para lixeira",
@@ -2677,11 +2733,17 @@
       "createDescription": "Adicione um novo outcome ao sistema",
       "editDescription": "Edite as informações do outcome",
       "name": "Nome",
+      "nameLabel": "Nome do Outcome",
+      "descriptionLabel": "Descrição",
+      "familyLabel": "Família",
+      "familyPlaceholder": "Selecione uma família",
       "family": "Família",
       "description": "Descrição",
       "cancel": "Cancelar",
       "create": "Criar",
-      "save": "Salvar"
+      "save": "Salvar",
+      "translatingAuto": "Traduzindo automaticamente...",
+      "outcomeName": "Nome do Outcome"
     },
     "deleteDialog": {
       "title": "Excluir Outcome",
@@ -4631,6 +4693,26 @@
       "approve": "Aprovar",
       "reject": "Rejeitar",
       "requestExpert": "Especialista"
+    },
+    "board": {
+      "title": "Painel de Curadoria de Triplets",
+      "autoApproveHigh": "Auto-Aprovar Alta Confiança",
+      "bulkApprove": "Aprovar em Lote ({{count}})",
+      "syncToNeo4j": "Sincronizar com Neo4j",
+      "searchPlaceholder": "Buscar triplets...",
+      "minConfidencePlaceholder": "Confiança Mín. (0-1)",
+      "total": "Total: {{count}} triplets",
+      "reviewNotesPlaceholder": "Notas de revisão...",
+      "movedTo": "Triplet movido para {{column}}",
+      "updateError": "Erro ao atualizar status do triplet",
+      "noSelected": "Nenhum triplet selecionado",
+      "approvedCount": "{{count}} triplets aprovados",
+      "approveError": "Erro ao aprovar triplets",
+      "autoApproved": "Triplets de alta confiança auto-aprovados",
+      "autoApproveError": "Erro ao auto-aprovar triplets",
+      "syncedCount": "{{count}} triplets sincronizados com Neo4j",
+      "syncError": "Falha ao sincronizar com Neo4j",
+      "fetchError": "Erro ao carregar triplets"
     },
     "discoveries": {
       "title": "Revisão de Auto-Descobertas",
