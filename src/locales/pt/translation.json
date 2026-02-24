@@ -467,7 +467,9 @@
       "successInline": "{{count}} arquivo(s) importado(s) com sucesso!",
       "successInlineDesc": "Os estudos estão prontos para processamento de IA",
       "viewImported": "Ver Estudos",
-      "fileNameSanitized": "Nome será renomeado para"
+      "fileNameSanitized": "Nome será renomeado para",
+      "sectionTitle": "Importação de Estudos",
+      "uploadAndExtraction": "Upload e Extração Automática (Gemini AI)"
     },
     "vetGraphRAG": {
       "title": "VetGraphRAG",
@@ -950,7 +952,9 @@
     "confirm": "Confirmar",
     "access": "Acessar",
     "poweredBy": "Powered by",
-    "refresh": "Atualizar"
+    "refresh": "Atualizar",
+    "update": "Atualizar",
+    "updating": "Atualizando..."
   },
   "sampleGroup": {
     "badge": "Grupo {{id}}",
