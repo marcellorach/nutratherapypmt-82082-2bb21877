@@ -68,8 +68,8 @@ const EstudosTab: React.FC = () => {
     } catch (error) {
       console.error('Error fetching studies:', error);
       toast({
-        title: "Erro ao carregar estudos",
-        description: "Não foi possível carregar os estudos do banco de dados.",
+        title: t('studies.library.errorFetching'),
+        description: t('common.loading'),
         variant: "destructive",
       });
     } finally {
@@ -154,7 +154,7 @@ const EstudosTab: React.FC = () => {
                 className="flex items-center gap-2"
               >
                 <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Atualizando...' : 'Atualizar'}
+                {loading ? t('common.updating') : t('common.update')}
               </Button>
               <EstudoSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             </div>
@@ -165,7 +165,7 @@ const EstudosTab: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4 text-green-600" />
-              <h3 className="text-lg font-medium">Upload e Extração Automática (Gemini AI)</h3>
+              <h3 className="text-lg font-medium">{t('studies.import.uploadAndExtraction')}</h3>
             </div>
             <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
               {t('common.recommended')}

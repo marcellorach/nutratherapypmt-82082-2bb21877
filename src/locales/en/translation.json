@@ -467,7 +467,9 @@
       "successInline": "{{count}} file(s) imported successfully!",
       "successInlineDesc": "Studies are ready for AI processing",
       "viewImported": "View Studies",
-      "fileNameSanitized": "Name will be renamed to"
+      "fileNameSanitized": "Name will be renamed to",
+      "sectionTitle": "Study Import",
+      "uploadAndExtraction": "Upload and Automatic Extraction (Gemini AI)"
     },
     "vetGraphRAG": {
       "title": "VetGraphRAG",
@@ -950,7 +952,9 @@
     "confirm": "Confirm",
     "access": "Access",
     "poweredBy": "Powered by",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "update": "Update",
+    "updating": "Updating..."
   },
   "sampleGroup": {
     "badge": "Group {{id}}",
