@@ -6,16 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Cpu, Zap, Save, RefreshCw } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const AVAILABLE_MODELS = [
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', description: 'Latest generation, advanced reasoning', recommended: true },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Fast and balanced' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental', description: 'Experimental features' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Powerful, slower' },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', descKey: 'Latest generation, advanced reasoning', recommended: true },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', descKey: 'Fast and balanced' },
+  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental', descKey: 'Experimental features' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', descKey: 'Powerful, slower' },
 ];
 
 const EMBEDDING_MODELS = [
-  { id: 'text-embedding-004', name: 'Text Embedding 004', description: 'Latest embedding model', recommended: true },
+  { id: 'text-embedding-004', name: 'Text Embedding 004', descKey: 'Latest embedding model', recommended: true },
 ];
 
 interface AIModelConfig {
@@ -28,6 +29,7 @@ interface AIModelConfig {
 
 const AIModelSelector: React.FC = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState<AIModelConfig>({
@@ -38,9 +40,7 @@ const AIModelSelector: React.FC = () => {
     embeddings: 'text-embedding-004',
   });
 
-  useEffect(() => {
-    loadConfig();
-  }, []);
+  useEffect(() => { loadConfig(); }, []);
 
   const loadConfig = async () => {
     setIsLoading(true);
@@ -49,14 +49,11 @@ const AIModelSelector: React.FC = () => {
         .from('ai_configurations')
         .select('config_key, config_value')
         .like('config_key', 'ai_model_%');
-
       if (error) throw error;
-
       const newConfig = { ...config };
       data?.forEach(item => {
         const key = item.config_key.replace('ai_model_', '') as keyof AIModelConfig;
         if (key in newConfig) {
-          // Handle JSON string values
           const value = typeof item.config_value === 'string' 
             ? item.config_value.replace(/"/g, '') 
             : String(item.config_value);
@@ -80,24 +77,21 @@ const AIModelSelector: React.FC = () => {
         description: `Model for ${key} tasks`,
         is_active: true,
       }));
-
       for (const update of updates) {
         const { error } = await supabase
           .from('ai_configurations')
           .upsert(update, { onConflict: 'config_key' });
-
         if (error) throw error;
       }
-
       toast({
-        title: "Configuration saved",
-        description: "AI model settings have been updated successfully.",
+        title: t('aiModelSelector.configSaved'),
+        description: t('aiModelSelector.configSavedDesc'),
       });
     } catch (error) {
       console.error('Error saving AI config:', error);
       toast({
-        title: "Error saving configuration",
-        description: "Failed to save AI model settings.",
+        title: t('aiModelSelector.configSaveError'),
+        description: t('aiModelSelector.configSaveErrorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -110,10 +104,10 @@ const AIModelSelector: React.FC = () => {
   };
 
   const tasks = [
-    { key: 'extraction' as const, label: 'PDF Extraction', icon: '📄', description: 'Entity extraction from scientific studies' },
-    { key: 'triplets' as const, label: 'Triplet Generation', icon: '🔗', description: 'Knowledge graph triplet extraction' },
-    { key: 'chat' as const, label: 'Document Chat', icon: '💬', description: 'RAG-based document Q&A' },
-    { key: 'translate' as const, label: 'Translation', icon: '🌍', description: 'Medical term translation' },
+    { key: 'extraction' as const, label: t('aiModelSelector.tasks.extraction'), icon: '📄', description: t('aiModelSelector.tasks.extractionDesc') },
+    { key: 'triplets' as const, label: t('aiModelSelector.tasks.triplets'), icon: '🔗', description: t('aiModelSelector.tasks.tripletsDesc') },
+    { key: 'chat' as const, label: t('aiModelSelector.tasks.chat'), icon: '💬', description: t('aiModelSelector.tasks.chatDesc') },
+    { key: 'translate' as const, label: t('aiModelSelector.tasks.translate'), icon: '🌍', description: t('aiModelSelector.tasks.translateDesc') },
   ];
 
   if (isLoading) {
@@ -121,7 +115,7 @@ const AIModelSelector: React.FC = () => {
       <Card>
         <CardContent className="p-6 flex items-center justify-center">
           <RefreshCw className="h-5 w-5 animate-spin mr-2" />
-          Loading configuration...
+          {t('aiModelSelector.loadingConfig')}
         </CardContent>
       </Card>
     );
@@ -132,25 +126,25 @@ const AIModelSelector: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Cpu className="h-5 w-5" />
-          AI Model Configuration
+          {t('aiModelSelector.title')}
         </CardTitle>
         <CardDescription>
-          Configure which Google AI model to use for each task. All models use your Google AI API key.
+          {t('aiModelSelector.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="h-4 w-4 text-blue-600" />
-            <span className="font-medium text-blue-900 dark:text-blue-100">Provider: Google AI</span>
+            <span className="font-medium text-blue-900 dark:text-blue-100">{t('aiModelSelector.provider')}</span>
           </div>
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            Using your configured Google AI API key for all AI operations.
+            {t('aiModelSelector.providerDesc')}
           </p>
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-muted-foreground">Generative Models</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">{t('aiModelSelector.generativeModels')}</h4>
           <div className="grid gap-4">
             {tasks.map(task => (
               <div key={task.key} className="flex items-center justify-between p-3 border rounded-lg">
@@ -161,10 +155,7 @@ const AIModelSelector: React.FC = () => {
                     <p className="text-xs text-muted-foreground">{task.description}</p>
                   </div>
                 </div>
-                <Select
-                  value={config[task.key]}
-                  onValueChange={(value) => updateModel(task.key, value)}
-                >
+                <Select value={config[task.key]} onValueChange={(value) => updateModel(task.key, value)}>
                   <SelectTrigger className="w-[220px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -174,7 +165,7 @@ const AIModelSelector: React.FC = () => {
                         <div className="flex items-center gap-2">
                           {model.name}
                           {model.recommended && (
-                            <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                            <Badge variant="secondary" className="text-xs">{t('aiModelSelector.recommended')}</Badge>
                           )}
                         </div>
                       </SelectItem>
@@ -187,19 +178,16 @@ const AIModelSelector: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-muted-foreground">Embedding Models</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">{t('aiModelSelector.embeddingModels')}</h4>
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center gap-3">
               <span className="text-xl">🔢</span>
               <div>
-                <p className="font-medium">Embeddings</p>
-                <p className="text-xs text-muted-foreground">Vector embeddings for semantic search</p>
+                <p className="font-medium">{t('aiModelSelector.embeddings')}</p>
+                <p className="text-xs text-muted-foreground">{t('aiModelSelector.embeddingsDesc')}</p>
               </div>
             </div>
-            <Select
-              value={config.embeddings}
-              onValueChange={(value) => updateModel('embeddings', value)}
-            >
+            <Select value={config.embeddings} onValueChange={(value) => updateModel('embeddings', value)}>
               <SelectTrigger className="w-[220px]">
                 <SelectValue />
               </SelectTrigger>
@@ -209,7 +197,7 @@ const AIModelSelector: React.FC = () => {
                     <div className="flex items-center gap-2">
                       {model.name}
                       {model.recommended && (
-                        <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                        <Badge variant="secondary" className="text-xs">{t('aiModelSelector.recommended')}</Badge>
                       )}
                     </div>
                   </SelectItem>
@@ -224,12 +212,12 @@ const AIModelSelector: React.FC = () => {
             {isSaving ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {t('aiModelSelector.savingConfig')}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Configuration
+                {t('aiModelSelector.saveConfig')}
               </>
             )}
           </Button>

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Save, RefreshCw, Eye, TestTube, FileText, Layers, Beaker, Star } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface PromptConfig {
   key: string;
@@ -24,6 +25,7 @@ interface PromptConfig {
 
 const ExtractionPromptsEditor: React.FC = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeStage, setActiveStage] = useState<'stage1' | 'stage2' | 'stage3' | 'assessment' | 'triplets'>('stage1');
@@ -56,7 +58,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage1_system',
       value: prompts.prompt_extraction_stage1_system,
       label: 'System Prompt - Stage 1',
-      description: 'Instruções gerais para extração básica de entidades',
+      description: t('extractionPromptsEditor.stage1Desc'),
       stage: 'stage1',
       type: 'system'
     },
@@ -64,7 +66,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage1_user',
       value: prompts.prompt_extraction_stage1_user,
       label: 'User Prompt - Stage 1',
-      description: 'Solicitação específica para identificar nutracêuticos, condições e compostos',
+      description: t('extractionPromptsEditor.stage1UserDesc'),
       stage: 'stage1',
       type: 'user'
     },
@@ -74,7 +76,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage2_system',
       value: prompts.prompt_extraction_stage2_system,
       label: 'System Prompt - Stage 2',
-      description: 'Instruções para extração de mecanismos e pathways moleculares',
+      description: t('extractionPromptsEditor.stage2Desc'),
       stage: 'stage2',
       type: 'system'
     },
@@ -82,7 +84,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage2_user',
       value: prompts.prompt_extraction_stage2_user,
       label: 'User Prompt - Stage 2',
-      description: 'Solicitação para identificar sinergias, interações e cascatas moleculares',
+      description: t('extractionPromptsEditor.stage2UserDesc'),
       stage: 'stage2',
       type: 'user'
     },
@@ -92,7 +94,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage3_system',
       value: prompts.prompt_extraction_stage3_system,
       label: 'System Prompt - Stage 3',
-      description: 'Instruções para extração de contexto clínico e dosagens',
+      description: t('extractionPromptsEditor.stage3Desc'),
       stage: 'stage3',
       type: 'system'
     },
@@ -100,7 +102,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_stage3_user',
       value: prompts.prompt_extraction_stage3_user,
       label: 'User Prompt - Stage 3',
-      description: 'Solicitação para extrair dosagens, efeitos colaterais e contexto de aplicação',
+      description: t('extractionPromptsEditor.stage3UserDesc'),
       stage: 'stage3',
       type: 'user'
     },
@@ -110,7 +112,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_assessment_system',
       value: prompts.prompt_extraction_assessment_system,
       label: 'System Prompt - Assessment',
-      description: 'Instruções para avaliação metodológica e scoring do estudo',
+      description: t('extractionPromptsEditor.assessmentDesc'),
       stage: 'assessment',
       type: 'system'
     },
@@ -118,7 +120,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_extraction_assessment_user',
       value: prompts.prompt_extraction_assessment_user,
       label: 'User Prompt - Assessment',
-      description: 'Solicitação para calcular scores de qualidade, relevância e novidade',
+      description: t('extractionPromptsEditor.assessmentUserDesc'),
       stage: 'assessment',
       type: 'user'
     },
@@ -128,7 +130,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_triplet_extraction_system',
       value: prompts.prompt_triplet_extraction_system,
       label: 'System Prompt - Triplets',
-      description: 'Instruções para geração de triplets (Subject-Predicate-Object) para o Knowledge Graph',
+      description: t('extractionPromptsEditor.tripletsDesc'),
       stage: 'triplets',
       type: 'system'
     },
@@ -136,7 +138,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       key: 'prompt_triplet_extraction_user',
       value: prompts.prompt_triplet_extraction_user,
       label: 'User Prompt - Triplets',
-      description: 'Solicitação para extrair relações semânticas estruturadas (VetGraphRAG)',
+      description: t('extractionPromptsEditor.tripletsUserDesc'),
       stage: 'triplets',
       type: 'user'
     }
@@ -173,8 +175,8 @@ const ExtractionPromptsEditor: React.FC = () => {
       console.error("Erro ao carregar prompts:", error);
       toast({
         variant: "destructive",
-        title: "Erro ao carregar prompts",
-        description: "Não foi possível carregar os prompts de extração."
+        title: t('extractionPrompts.promptLoadError'),
+        description: t('extractionPrompts.promptLoadErrorDesc')
       });
     } finally {
       setIsLoading(false);
@@ -194,15 +196,15 @@ const ExtractionPromptsEditor: React.FC = () => {
       setPrompts(prev => ({ ...prev, [key]: value }));
       
       toast({
-        title: "✅ Prompt salvo",
-        description: `Prompt ${key} atualizado com sucesso.`
+        title: t('extractionPrompts.promptSaved'),
+        description: t('extractionPrompts.promptSavedDesc', { key })
       });
     } catch (error: any) {
       console.error(`Erro ao salvar ${key}:`, error);
       toast({
         variant: "destructive",
-        title: "Erro ao salvar prompt",
-        description: error.message || "Ocorreu um erro ao salvar o prompt."
+        title: t('extractionPrompts.promptSaveError'),
+        description: error.message || t('extractionPrompts.promptSaveError')
       });
     } finally {
       setIsSaving(false);
@@ -225,8 +227,8 @@ const ExtractionPromptsEditor: React.FC = () => {
     await savePrompt(userKey, getDefaultPrompt(stage, 'user'));
     
     toast({
-      title: "✅ Prompts restaurados",
-      description: `Prompts do ${stage.toUpperCase()} restaurados para valores padrão.`
+      title: t('extractionPrompts.promptsRestored'),
+      description: t('extractionPrompts.promptsRestoredDesc', { stage: stage.toUpperCase() })
     });
   };
 
@@ -238,10 +240,10 @@ const ExtractionPromptsEditor: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Layers className="h-5 w-5" />
-            Prompts de Extração Científica Multi-Estágio
+            {t('extractionPrompts.title')}
           </CardTitle>
           <CardDescription>
-            Configure os prompts usados em cada estágio da extração de dados científicos
+            {t('extractionPrompts.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -252,7 +254,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               className="flex items-center gap-2"
             >
               <FileText className="h-4 w-4" />
-              Stage 1: Básico
+              {t('extractionPrompts.stage1')}
             </Button>
             <Button
               variant={activeStage === 'stage2' ? 'default' : 'ghost'}
@@ -260,7 +262,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               className="flex items-center gap-2"
             >
               <Beaker className="h-4 w-4" />
-              Stage 2: Relações
+              {t('extractionPrompts.stage2')}
             </Button>
             <Button
               variant={activeStage === 'stage3' ? 'default' : 'ghost'}
@@ -268,7 +270,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               className="flex items-center gap-2"
             >
               <TestTube className="h-4 w-4" />
-              Stage 3: Contexto
+              {t('extractionPrompts.stage3')}
             </Button>
             <Button
               variant={activeStage === 'assessment' ? 'default' : 'ghost'}
@@ -276,7 +278,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               className="flex items-center gap-2"
             >
               <Star className="h-4 w-4" />
-              Stage 4: Scoring
+              {t('extractionPrompts.stage4')}
             </Button>
             <Button
               variant={activeStage === 'triplets' ? 'default' : 'ghost'}
@@ -284,7 +286,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               className="flex items-center gap-2"
             >
               <Layers className="h-4 w-4" />
-              Triplets (KG)
+              {t('extractionPrompts.triplets')}
             </Button>
           </div>
         </CardContent>
@@ -310,7 +312,7 @@ const ExtractionPromptsEditor: React.FC = () => {
                   size="sm"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Salvar
+                  {t('extractionPrompts.save')}
                 </Button>
               </div>
             </CardHeader>
@@ -318,7 +320,7 @@ const ExtractionPromptsEditor: React.FC = () => {
               <Textarea
                 value={config.value}
                 onChange={(e) => setPrompts(prev => ({ ...prev, [config.key]: e.target.value }))}
-                placeholder={`Prompt ${config.type} para ${config.stage}...`}
+                placeholder={t('extractionPromptsEditor.promptPlaceholder', { type: config.type, stage: config.stage })}
                 className="min-h-[200px] font-mono text-sm"
                 disabled={isLoading}
               />
@@ -336,20 +338,20 @@ const ExtractionPromptsEditor: React.FC = () => {
               disabled={isSaving || isLoading}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Restaurar Padrões do {activeStage.toUpperCase()}
+              {t('extractionPrompts.restoreDefaults', { stage: activeStage.toUpperCase() })}
             </Button>
             
             <Button
               variant="secondary"
               onClick={() => {
                 toast({ 
-                  title: "🔬 Teste de Prompts", 
-                  description: "Navegue até a aba 'Estudos' para fazer upload de um PDF e testar a extração com os prompts atuais."
+                  title: t('extractionPrompts.testPromptTitle'), 
+                  description: t('extractionPrompts.testPromptDesc')
                 });
               }}
             >
               <TestTube className="h-4 w-4 mr-2" />
-              Testar com Estudo Real
+              {t('extractionPrompts.testWithStudy')}
             </Button>
           </div>
         </CardContent>
