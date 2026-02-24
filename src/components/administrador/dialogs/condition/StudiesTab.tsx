@@ -3,6 +3,7 @@ import React from 'react';
 import { ExternalLink, FileText } from "lucide-react";
 import { Nutraceutical, NutraceuticalCondition } from "@/types";
 import EvidenceTag from '../../tags/EvidenceTag';
+import { useTranslation } from 'react-i18next';
 
 interface StudiesTabProps {
   selectedCondition: NutraceuticalCondition;
@@ -10,37 +11,37 @@ interface StudiesTabProps {
 }
 
 const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutical }) => {
-  // Função para gerar um score para estudos
+  const { t } = useTranslation();
+  
   const getStudyScore = (title: string): number => {
-    // Hash simples para gerar pontuações consistentes baseadas no título
     const hash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;
-    return 2 + (hash / 10); // Pontuação entre 2.0 e 6.9
+    return 2 + (hash / 10);
   };
   
   const relevantStudies = [
     {
-      title: `Eficácia de ${nutraceutical.name} em ${selectedCondition.name} em cães`,
+      title: t('studiesTab.efficacyTitle', { nutraceutical: nutraceutical.name, condition: selectedCondition.name }),
       authors: "Silva et al.",
       journal: "Journal of Veterinary Nutraceuticals",
       year: 2023,
       link: "https://doi.org/10.example/jvn.2023.01"
     },
     {
-      title: `Análise comparativa de nutracêuticos para ${selectedCondition.name} em diferentes raças caninas`,
+      title: t('studiesTab.comparativeTitle', { condition: selectedCondition.name }),
       authors: "Martinez & Johnson",
       journal: "Comparative Veterinary Medicine",
       year: 2024,
       link: "https://doi.org/10.example/cvm.2024.05"
     },
     {
-      title: `Impacto a longo prazo do ${nutraceutical.name} na progressão de ${selectedCondition.name}`,
+      title: t('studiesTab.longTermTitle', { nutraceutical: nutraceutical.name, condition: selectedCondition.name }),
       authors: "Williams, Lee & Patel",
       journal: "Advanced Veterinary Research",
       year: 2022,
       link: "https://doi.org/10.example/avr.2022.12"
     },
     {
-      title: `Mecanismos moleculares de ${nutraceutical.activeIngredients[0]} em ${selectedCondition.name}`,
+      title: t('studiesTab.molecularTitle', { ingredient: nutraceutical.activeIngredients[0], condition: selectedCondition.name }),
       authors: "Nakamura et al.",
       journal: "Molecular Veterinary Studies",
       year: 2023,
@@ -53,21 +54,21 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
       <div>
         <div className="flex justify-between items-center mb-2">
           <h4 className="text-sm font-medium">
-            Estudos Científicos Específicos para {selectedCondition.name}
+            {t('studiesTab.specificStudies', { conditionName: selectedCondition.name })}
           </h4>
           <EvidenceTag score={selectedCondition.efficacyScore} showLabel={false} />
         </div>
         <div className="space-y-3">
           {relevantStudies.map((study, idx) => (
-            <div key={idx} className="border rounded-md p-3 hover:bg-gray-50 transition-colors">
+            <div key={idx} className="border rounded-md p-3 hover:bg-muted/50 transition-colors">
               <div className="flex items-start">
-                <FileText className="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
+                <FileText className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
                     <h5 className="font-medium text-sm">{study.title}</h5>
                     <EvidenceTag score={getStudyScore(study.title)} showLabel={false} className="ml-2 shrink-0" />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {study.authors} • {study.journal} • {study.year}
                   </p>
                   <div className="mt-2">
@@ -75,9 +76,9 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
                       href={study.link} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="text-xs text-blue-500 hover:underline inline-flex items-center"
+                      className="text-xs text-primary hover:underline inline-flex items-center"
                     >
-                      Ver estudo <ExternalLink className="h-3 w-3 ml-1" />
+                      {t('studiesTab.viewStudy')} <ExternalLink className="h-3 w-3 ml-1" />
                     </a>
                   </div>
                 </div>
@@ -88,10 +89,10 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
       </div>
       
       <div>
-        <h4 className="text-sm font-medium mb-2">Estudos do Nutracêutico</h4>
+        <h4 className="text-sm font-medium mb-2">{t('studiesTab.nutraceuticalStudies')}</h4>
         <div className="space-y-3">
           {nutraceutical.scientificEvidence.studies.map((study, idx) => (
-            <div key={idx} className="border rounded-md p-3 bg-slate-50">
+            <div key={idx} className="border rounded-md p-3 bg-muted/30">
               <div className="flex justify-between items-start">
                 <h5 className="font-medium text-sm">{study.title}</h5>
                 <EvidenceTag 
@@ -105,9 +106,9 @@ const StudiesTab: React.FC<StudiesTabProps> = ({ selectedCondition, nutraceutica
                   href={study.link} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="text-xs text-blue-500 hover:underline inline-flex items-center"
+                  className="text-xs text-primary hover:underline inline-flex items-center"
                 >
-                  Ver estudo ({study.year}) <ExternalLink className="h-3 w-3 ml-1" />
+                  {t('studiesTab.viewStudyWithYear', { year: study.year })} <ExternalLink className="h-3 w-3 ml-1" />
                 </a>
               </div>
             </div>

@@ -6541,5 +6541,47 @@
       "relationRemoved": "Relation removed successfully",
       "removeError": "Could not remove the association"
     }
+  },
+  "studiesTab": {
+    "specificStudies": "Specific Scientific Studies for {{conditionName}}",
+    "nutraceuticalStudies": "Nutraceutical Studies",
+    "viewStudy": "View study",
+    "viewStudyWithYear": "View study ({{year}})",
+    "efficacyTitle": "Efficacy of {{nutraceutical}} in {{condition}} in dogs",
+    "comparativeTitle": "Comparative analysis of nutraceuticals for {{condition}} in different canine breeds",
+    "longTermTitle": "Long-term impact of {{nutraceutical}} on {{condition}} progression",
+    "molecularTitle": "Molecular mechanisms of {{ingredient}} in {{condition}}"
+  },
+  "outcomesTab": {
+    "associateTitle": "Associate to Outcomes",
+    "outcomeLabel": "Outcome",
+    "selectOutcome": "Select an outcome",
+    "relationshipType": "Relationship Type",
+    "selectRelationType": "Select relationship type",
+    "prevention": "Prevention",
+    "treatment": "Treatment",
+    "support": "Support",
+    "unknown": "Unknown",
+    "efficacyLevel": "Efficacy Level ({{score}})",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes about this relationship",
+    "saving": "Saving...",
+    "addOutcome": "Add Outcome",
+    "relatedOutcomes": "Related Outcomes",
+    "efficacyScore": "Efficacy: {{score}}/5",
+    "noOutcomes": "No outcomes related to this nutraceutical",
+    "unknownOutcome": "Unknown outcome",
+    "toasts": {
+      "errorSelectOutcome": "Select an outcome to add",
+      "alreadyRelated": "This outcome is already related to this nutraceutical",
+      "addSuccess": "Relation added successfully",
+      "addError": "Could not add the relation",
+      "removeSuccess": "Relation removed successfully",
+      "removeError": "Could not remove the relation",
+      "loadError": "Could not load existing relations",
+      "error": "Error",
+      "warning": "Warning",
+      "success": "Success"
+    }
   }
 }
