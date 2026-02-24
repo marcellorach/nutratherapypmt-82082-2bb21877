@@ -6583,5 +6583,17 @@
       "warning": "Warning",
       "success": "Success"
     }
+  },
+  "nutraManagement": {
+    "searchPlaceholder": "Search nutraceuticals by name...",
+    "refresh": "Refresh",
+    "importData": "Import Data",
+    "table": {
+      "name": "Name",
+      "outcome": "Outcome",
+      "outcomes": "Outcomes",
+      "studies": "Studies",
+      "actions": "Actions"
+    }
   }
 }
