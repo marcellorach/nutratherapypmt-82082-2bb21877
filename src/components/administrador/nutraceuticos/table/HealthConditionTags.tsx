@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { NutraceuticalCondition } from "@/types";
 import { TrendingUp } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation } from 'react-i18next';
 
 interface HealthConditionTagsProps {
   conditions: NutraceuticalCondition[];
@@ -14,8 +15,7 @@ const HealthConditionTags = ({
   conditions,
   onConditionClick
 }) => {
-  console.log('🏷️ [TAGS] Condições recebidas:', conditions);
-  console.log('🏷️ [TAGS] Total de condições:', conditions?.length);
+  const { t } = useTranslation();
   
   const getEfficacyColor = (score: number): string => {
     if (score >= 4) return "bg-green-200 hover:bg-green-300";
@@ -32,25 +32,19 @@ const HealthConditionTags = ({
   };
 
   if (!conditions || conditions.length === 0) {
-    console.log('🏷️ [TAGS] Nenhuma condição para exibir');
     return (
       <div className="flex items-center justify-center h-8">
-        <span className="text-gray-400 text-xs">Nenhuma condição</span>
+        <span className="text-muted-foreground text-xs">{t('healthTags.noCondition')}</span>
       </div>
     );
   }
 
-  console.log('🏷️ [TAGS] Renderizando', conditions.length, 'condições');
-
-  // Limitar a 3 condições visíveis + indicador se houver mais
   const visibleConditions = conditions.slice(0, 3);
   const hasMore = conditions.length > 3;
 
   return (
     <div className="flex flex-wrap gap-1 max-w-full">
       {visibleConditions.map((condition, index) => {
-        console.log(`🏷️ [TAGS] Renderizando condição ${index}:`, condition);
-        
         const truncatedName = condition.name.length > 15 
           ? `${condition.name.substring(0, 15)}...` 
           : condition.name;
@@ -65,14 +59,14 @@ const HealthConditionTags = ({
                   onClick={() => onConditionClick(condition)}
                 >
                   <div className="flex items-center space-x-1 min-w-0">
-                    <span className="text-gray-800 font-normal truncate">{truncatedName}</span>
+                    <span className="text-foreground font-normal truncate">{truncatedName}</span>
                     <div className="flex items-center flex-shrink-0">
                       <TrendingUp 
                         size={12} 
                         className={`${getIconColor(condition.efficacyScore)}`} 
                         strokeWidth={2}
                       />
-                      <span className="text-xs font-light text-black/70 ml-1">
+                      <span className="text-xs font-light text-foreground/70 ml-1">
                         {condition.efficacyScore.toFixed(1)}
                       </span>
                     </div>
@@ -82,9 +76,9 @@ const HealthConditionTags = ({
               <TooltipContent>
                 <div className="max-w-xs">
                   <p className="font-medium">{condition.name}</p>
-                  <p className="text-xs mt-1">Eficácia: {condition.efficacyScore.toFixed(1)}/5</p>
+                  <p className="text-xs mt-1">{t('healthTags.efficacy', { score: condition.efficacyScore.toFixed(1) })}</p>
                   {condition.description && (
-                    <p className="text-xs mt-1 text-gray-600">{condition.description}</p>
+                    <p className="text-xs mt-1 text-muted-foreground">{condition.description}</p>
                   )}
                 </div>
               </TooltipContent>
@@ -99,14 +93,14 @@ const HealthConditionTags = ({
             <TooltipTrigger asChild>
               <Badge 
                 variant="outline" 
-                className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-xs px-2 py-1"
+                className="cursor-pointer bg-muted hover:bg-muted/80 text-xs px-2 py-1"
               >
                 +{conditions.length - 3}
               </Badge>
             </TooltipTrigger>
             <TooltipContent>
               <div className="max-w-xs">
-                <p className="font-medium">Condições adicionais:</p>
+                <p className="font-medium">{t('healthTags.additionalConditions')}</p>
                 <ul className="text-xs mt-1">
                   {conditions.slice(3).map((condition, index) => (
                     <li key={index} className="truncate">• {condition.name}</li>

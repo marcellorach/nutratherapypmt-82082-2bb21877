@@ -24,19 +24,19 @@ const FileUploadTab: React.FC = () => {
     
     if (pdfFiles.length < acceptedFiles.length) {
       toast({
-        title: 'Arquivos inválidos',
-        description: 'Apenas arquivos PDF são aceitos',
+        title: t('fileUpload.invalidFiles'),
+        description: t('fileUpload.onlyPdf'),
         variant: "destructive"
       });
     }
     
     setSelectedFiles(prev => [...prev, ...pdfFiles]);
-  }, [toast]);
+  }, [toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'application/pdf': ['.pdf'] },
-    maxSize: 20 * 1024 * 1024, // 20MB
+    maxSize: 20 * 1024 * 1024,
   });
 
   const removeFile = (index: number) => {
@@ -46,8 +46,8 @@ const FileUploadTab: React.FC = () => {
   const handleImport = async () => {
     if (selectedFiles.length === 0) {
       toast({
-        title: 'Nenhum arquivo selecionado',
-        description: 'Selecione pelo menos um arquivo para importar',
+        title: t('fileUpload.noFileSelected'),
+        description: t('fileUpload.selectAtLeastOne'),
         variant: "destructive"
       });
       return;
@@ -61,7 +61,6 @@ const FileUploadTab: React.FC = () => {
     try {
       let successCount = 0;
 
-      // Criar registro de importação no banco
       const { data: importData, error: importError } = await supabase
         .from('scispace_imports')
         .insert({
@@ -73,14 +72,12 @@ const FileUploadTab: React.FC = () => {
 
       if (importError) throw importError;
 
-      // Upload paralelo com progresso individual
       const uploadPromises = selectedFiles.map(async (file) => {
         const fileName = file.name;
         const studyId = uuidv4();
         const storagePath = createSafeStoragePath(studyId, fileName);
 
         try {
-          // Simular progresso de upload
           const uploadInterval = setInterval(() => {
             setUploadProgress(prev => {
               const current = prev[fileName] || 0;
@@ -92,7 +89,6 @@ const FileUploadTab: React.FC = () => {
             });
           }, 200);
 
-          // Upload para Storage
           const { error: storageError } = await supabase.storage
             .from('study_pdfs')
             .upload(storagePath, file);
@@ -101,10 +97,8 @@ const FileUploadTab: React.FC = () => {
           
           if (storageError) throw storageError;
 
-          // Finalizar progresso
           setUploadProgress(prev => ({ ...prev, [fileName]: 100 }));
 
-          // Criar registro em processed_studies com analysis_data vazio estruturado
           const { error: dbError } = await supabase
             .from('processed_studies')
             .insert({
@@ -115,8 +109,8 @@ const FileUploadTab: React.FC = () => {
               import_type: 'manual',
               kanban_status: 'new',
               source_import_id: importData.id,
-              description: 'Aguardando processamento',
-              journal: 'Importação Manual',
+              description: 'Awaiting processing',
+              journal: 'Manual Import',
               analysis_data: {
                 studyId: studyId,
                 qualityScore: 0,
@@ -136,7 +130,7 @@ const FileUploadTab: React.FC = () => {
           
           return { success: true, fileName };
         } catch (fileError) {
-          console.error(`Erro ao importar ${fileName}:`, fileError);
+          console.error(`Error importing ${fileName}:`, fileError);
           setUploadProgress(prev => ({ ...prev, [fileName]: -1 }));
           return { success: false, fileName, error: fileError };
         }
@@ -146,35 +140,31 @@ const FileUploadTab: React.FC = () => {
 
       setImportedStudyIds(newImportedIds);
 
-      // Emit custom event for other components to listen
       const event = new CustomEvent('studyImported', { 
         detail: { studyIds: newImportedIds, count: successCount } 
       });
       window.dispatchEvent(event);
 
-      // Show inline success message
       setSuccessMessage({
         count: successCount,
         studyIds: newImportedIds
       });
 
-      // Aguardar 2s para mostrar progresso completo antes de limpar
       setTimeout(() => {
         setSelectedFiles([]);
         setUploadProgress({});
         setUploadedCount(0);
       }, 2000);
 
-      // Auto-dismiss success message after 10 seconds
       setTimeout(() => {
         setSuccessMessage(null);
       }, 10000);
 
     } catch (error) {
-      console.error('Erro durante importação:', error);
+      console.error('Import error:', error);
       toast({
-        title: 'Erro na importação',
-        description: error instanceof Error ? error.message : 'Tente novamente',
+        title: t('fileUpload.importError'),
+        description: error instanceof Error ? error.message : t('common.tryAgain'),
         variant: "destructive"
       });
     } finally {
@@ -227,19 +217,19 @@ const FileUploadTab: React.FC = () => {
         <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         {isDragActive ? (
           <p className="text-lg font-medium text-primary">
-            Solte os arquivos aqui
+            {t('fileUpload.dropHere')}
           </p>
         ) : (
           <>
             <p className="text-lg font-medium mb-2">
-              Arraste PDFs aqui ou clique para selecionar
+              {t('fileUpload.dragOrClick')}
             </p>
             <p className="text-sm text-muted-foreground mb-4">
-              Formatos suportados: PDF (máx. 20MB por arquivo)
+              {t('fileUpload.supportedFormats')}
             </p>
             <Button variant="outline" type="button">
               <Upload className="mr-2 h-4 w-4" />
-              Selecionar Arquivos
+              {t('fileUpload.selectFiles')}
             </Button>
           </>
         )}
@@ -249,11 +239,11 @@ const FileUploadTab: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-medium">
-              {selectedFiles.length} {selectedFiles.length === 1 ? 'arquivo selecionado' : 'arquivos selecionados'}
+              {selectedFiles.length} {selectedFiles.length === 1 ? t('fileUpload.fileSelected') : t('fileUpload.filesSelected')}
             </p>
             {importing && (
               <p className="text-sm text-muted-foreground">
-                {uploadedCount} / {selectedFiles.length} concluídos
+                {uploadedCount} / {selectedFiles.length} {t('fileUpload.completed')}
               </p>
             )}
           </div>
@@ -282,11 +272,7 @@ const FileUploadTab: React.FC = () => {
                   </div>
                   
                   {!importing && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => removeFile(index)}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
@@ -304,14 +290,14 @@ const FileUploadTab: React.FC = () => {
                   <div className="space-y-1">
                     <Progress value={progress} className="h-1.5" />
                     <p className="text-xs text-muted-foreground">
-                      {progress === 100 ? 'Concluído' : `Enviando... ${progress}%`}
+                      {progress === 100 ? t('fileUpload.done') : t('fileUpload.uploading', { progress })}
                     </p>
                   </div>
                 )}
                 
                 {hasError && (
                   <p className="text-xs text-destructive">
-                    Erro ao fazer upload. Tente novamente.
+                    {t('fileUpload.uploadError')}
                   </p>
                 )}
               </div>
@@ -327,11 +313,11 @@ const FileUploadTab: React.FC = () => {
           className="min-w-[200px]"
         >
           {importing ? (
-            <>Importando {uploadedCount}/{selectedFiles.length}...</>
+            <>{t('fileUpload.importing', { current: uploadedCount, total: selectedFiles.length })}</>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Importar {selectedFiles.length > 0 ? `${selectedFiles.length} arquivo(s)` : 'Arquivos'}
+              {selectedFiles.length > 0 ? t('fileUpload.importFiles', { count: selectedFiles.length }) : t('fileUpload.importButton')}
             </>
           )}
         </Button>
