@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
   relation,
   onSave
 }) => {
+  const { t } = useTranslation();
   const [relevanceScore, setRelevanceScore] = useState<number>(3);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -36,7 +38,6 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
 
   const handleSave = async () => {
     if (!relation) return;
-    
     setIsSaving(true);
     try {
       await onSave(relation.id, relevanceScore);
@@ -48,13 +49,13 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
     }
   };
 
-  const studyTitle = relation?.study?.title || 'Estudo';
+  const studyTitle = relation?.study?.title || t('editRelevanceDialog.defaultStudy');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Editar Relevância do Estudo</DialogTitle>
+          <DialogTitle>{t('editRelevanceDialog.title')}</DialogTitle>
           <DialogDescription className="text-sm break-words">
             {studyTitle}
           </DialogDescription>
@@ -62,7 +63,7 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
         
         <div className="space-y-6 py-4">
           <div className="space-y-3">
-            <Label>Relevância ({relevanceScore}/5)</Label>
+            <Label>{t('editRelevanceDialog.relevanceLabel', { score: relevanceScore })}</Label>
             <Slider
               value={[relevanceScore]}
               min={1}
@@ -72,16 +73,12 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
               disabled={isSaving}
               className="py-2"
             />
-            
-            {/* Indicadores visuais */}
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map(score => (
                 <div
                   key={score}
                   className={`h-3 flex-1 rounded-sm transition-colors ${
-                    score <= relevanceScore
-                      ? 'bg-purple-500' 
-                      : 'bg-gray-200'
+                    score <= relevanceScore ? 'bg-purple-500' : 'bg-gray-200'
                   }`}
                 />
               ))}
@@ -89,36 +86,29 @@ const EditRelevanceDialog: React.FC<EditRelevanceDialogProps> = ({
           </div>
           
           <div className="text-sm text-muted-foreground bg-slate-50 p-3 rounded-md">
-            <p className="font-medium mb-2">Escala de Relevância:</p>
+            <p className="font-medium mb-2">{t('editRelevanceDialog.scaleTitle')}</p>
             <ul className="space-y-1 text-xs">
-              <li>• <strong>5:</strong> Evidência direta e robusta para o nutracêutico</li>
-              <li>• <strong>4:</strong> Evidência forte com boa aplicabilidade</li>
-              <li>• <strong>3:</strong> Evidência moderada ou indireta</li>
-              <li>• <strong>2:</strong> Evidência fraca ou limitada</li>
-              <li>• <strong>1:</strong> Evidência mínima ou tangencial</li>
+              <li>• <strong>5:</strong> {t('editRelevanceDialog.scale5')}</li>
+              <li>• <strong>4:</strong> {t('editRelevanceDialog.scale4')}</li>
+              <li>• <strong>3:</strong> {t('editRelevanceDialog.scale3')}</li>
+              <li>• <strong>2:</strong> {t('editRelevanceDialog.scale2')}</li>
+              <li>• <strong>1:</strong> {t('editRelevanceDialog.scale1')}</li>
             </ul>
           </div>
         </div>
         
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={onClose}
-            disabled={isSaving}
-          >
-            Cancelar
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>
+            {t('editRelevanceDialog.cancel')}
           </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={isSaving}
-          >
+          <Button onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
+                {t('editRelevanceDialog.saving')}
               </>
             ) : (
-              'Salvar Alterações'
+              t('editRelevanceDialog.save')
             )}
           </Button>
         </DialogFooter>
