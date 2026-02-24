@@ -9,6 +9,7 @@ import { ScientificTab } from './nutraceutico/ScientificTab';
 import { IngredientsTab } from './nutraceutico/IngredientsTab';
 import { UsageTab } from './nutraceutico/UsageTab';
 import { DialogFooter } from './nutraceutico/DialogFooter';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticoDetailDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ const NutraceuticoDetailDialog: React.FC<NutraceuticoDetailDialogProps> = ({
   onOpenChange,
   nutraceutical
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!nutraceutical) return null;
@@ -38,10 +40,10 @@ const NutraceuticoDetailDialog: React.FC<NutraceuticoDetailDialogProps> = ({
         
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-2">
           <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="scientific">Evidências Científicas</TabsTrigger>
-            <TabsTrigger value="ingredients">Princípios Ativos</TabsTrigger>
-            <TabsTrigger value="usage">Uso e Dosagem</TabsTrigger>
+            <TabsTrigger value="overview">{t('nutraceuticoDetailDialog.tabs.overview')}</TabsTrigger>
+            <TabsTrigger value="scientific">{t('nutraceuticoDetailDialog.tabs.scientific')}</TabsTrigger>
+            <TabsTrigger value="ingredients">{t('nutraceuticoDetailDialog.tabs.ingredients')}</TabsTrigger>
+            <TabsTrigger value="usage">{t('nutraceuticoDetailDialog.tabs.usage')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">

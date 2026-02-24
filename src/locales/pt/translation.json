@@ -6243,5 +6243,96 @@
   },
   "sciImportHistory": {
     "delete": "Apagar"
+  },
+  "estudoDetailDialog": {
+    "tabs": {
+      "overview": "Visão Geral",
+      "analysis": "Análise IA",
+      "conditions": "Condições",
+      "triplets": "Triplets",
+      "visualizations": "Visualizações",
+      "chat": "Chat",
+      "debug": "Debug"
+    }
+  },
+  "nutraceuticoDetailDialog": {
+    "tabs": {
+      "overview": "Visão Geral",
+      "scientific": "Evidências Científicas",
+      "ingredients": "Princípios Ativos",
+      "usage": "Uso e Dosagem"
+    }
+  },
+  "pageHeader": {
+    "title": "Banco de Nutracêuticos",
+    "description": "Gerencie e mantenha atualizado o banco de dados de nutracêuticos e estudos científicos",
+    "exportData": "Exportar Dados",
+    "reports": "Relatórios"
+  },
+  "dataAnalysisTab": {
+    "title": "Análise de Dados",
+    "generateRandom": "Gerar Dados Aleatórios",
+    "exportReport": "Exportar Relatório",
+    "totalNutraceuticals": "Total de Nutracêuticos",
+    "sinceLastMonth": "+12 desde o mês passado",
+    "avgEfficacy": "Eficácia Média",
+    "pointsThisMonth": "+0.3 pontos este mês",
+    "scientificStudies": "Estudos Científicos",
+    "newStudies": "+89 novos estudos",
+    "efficacyByNutraceutical": "Eficácia por Nutracêutico",
+    "efficacyComparative": "Análise comparativa da eficácia dos principais nutracêuticos",
+    "conditionsDistribution": "Distribuição por Condições",
+    "conditionsDescription": "Nutracêuticos mais utilizados por condição de saúde",
+    "arthritis": "Artrite",
+    "cardiopathies": "Cardiopatias",
+    "diabetes": "Diabetes",
+    "nutraceuticalsCount": "{{count}} nutracêuticos",
+    "researchTrends": "Tendências de Pesquisa",
+    "researchDescription": "Áreas de maior interesse científico",
+    "antiInflammatory": "Anti-inflamatórios",
+    "neuroprotection": "Neuroproteção",
+    "longevity": "Longevidade"
+  },
+  "relationsTab": {
+    "tabs": {
+      "conditions": "Condições de Saúde",
+      "studies": "Estudos Científicos"
+    },
+    "addConditionRelation": "Adicionar Nova Relação com Condição",
+    "healthCondition": "Condição de Saúde",
+    "selectCondition": "Selecione uma condição",
+    "relationType": "Tipo de Relação",
+    "prevention": "Prevenção",
+    "treatment": "Tratamento",
+    "support": "Suporte",
+    "efficacyScore": "Score de Eficácia: {{score}}",
+    "notes": "Notas",
+    "notesPlaceholder": "Observações sobre esta relação...",
+    "addRelation": "Adicionar Relação",
+    "existingRelations": "Relações Existentes",
+    "loading": "Carregando...",
+    "noRelations": "Nenhuma relação encontrada.",
+    "efficacy": "Eficácia: {{score}}/5",
+    "addStudyRelation": "Adicionar Nova Relação com Estudo",
+    "scientificStudy": "Estudo Científico",
+    "selectStudy": "Selecione um estudo",
+    "relevanceScore": "Score de Relevância: {{score}}",
+    "relatedStudies": "Estudos Relacionados",
+    "noStudies": "Nenhum estudo relacionado.",
+    "relevance": "Relevância: {{score}}/5",
+    "toasts": {
+      "errorTitle": "Erro",
+      "successTitle": "Sucesso",
+      "loadConditionsError": "Não foi possível carregar as relações de condições.",
+      "loadStudiesError": "Não foi possível carregar as relações de estudos.",
+      "selectConditionError": "Selecione uma condição de saúde.",
+      "conditionAdded": "Relação com condição adicionada com sucesso.",
+      "addRelationError": "Não foi possível adicionar a relação.",
+      "relationRemoved": "Relação removida com sucesso.",
+      "removeRelationError": "Não foi possível remover a relação.",
+      "selectStudyError": "Selecione um estudo científico.",
+      "studyAdded": "Relação com estudo adicionada com sucesso.",
+      "studyRemoveError": "Não foi possível remover a relação."
+    }
   }
 }
