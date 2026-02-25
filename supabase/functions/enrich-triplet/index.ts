@@ -85,9 +85,11 @@ serve(async (req) => {
     }
 
     // 4. Call LLM to extract evidence_level, intensity, and rationale
+    const VALID_EVIDENCE_LEVELS = ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"];
+
     const prompt = `You are a scientific evidence analyst. Given the following text excerpt from a study and a specific biological relationship, determine:
 
-1. **evidence_level**: The type of study evidence. Must be one of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "in_vivo", "expert_opinion"
+1. **evidence_level**: The type of study evidence. Must be EXACTLY one of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"
 2. **intensity**: The strength of the observed effect on a scale of 0.0 to 1.0 (0.0 = no effect, 0.5 = moderate, 1.0 = complete resolution)
 3. **confidence_rationale**: A brief explanation (1-2 sentences) of why you assigned these values
 
@@ -120,7 +122,7 @@ Return your analysis using the provided tool.`;
               properties: {
                 evidence_level: { 
                   type: "string", 
-                  enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "in_vivo", "expert_opinion"]
+                  enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"]
                 },
                 intensity: { type: "number", description: "Effect strength 0.0-1.0" },
                 confidence_rationale: { type: "string", description: "Brief explanation of the assessment" }
@@ -151,8 +153,13 @@ Return your analysis using the provided tool.`;
 
     // 5. Update the triplet
     const updateData: Record<string, any> = {};
-    if (enrichment.evidence_level) updateData.evidence_level = enrichment.evidence_level;
-    if (enrichment.intensity !== undefined) updateData.intensity = enrichment.intensity;
+    if (enrichment.evidence_level && VALID_EVIDENCE_LEVELS.includes(enrichment.evidence_level)) {
+      updateData.evidence_level = enrichment.evidence_level;
+    } else if (enrichment.evidence_level) {
+      // Map in_vivo → in_vitro as fallback
+      updateData.evidence_level = enrichment.evidence_level === 'in_vivo' ? 'in_vitro' : 'expert_opinion';
+    }
+    if (enrichment.intensity !== undefined) updateData.intensity = Math.max(0, Math.min(1, enrichment.intensity));
     if (enrichment.confidence_rationale) updateData.confidence_rationale = enrichment.confidence_rationale;
     updateData.updated_at = new Date().toISOString();
 
