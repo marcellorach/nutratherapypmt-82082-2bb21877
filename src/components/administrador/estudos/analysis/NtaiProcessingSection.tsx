@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, ArrowRight, Settings } from "lucide-react";
+import { Brain, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
@@ -337,17 +337,13 @@ const NtaiProcessingSection: React.FC = () => {
           <div className="mt-8 border-t pt-4">
             <div className="flex items-center mb-4">
               <h3 className="text-lg font-medium">{t('studies.vetgraphrag.analysisResults')}</h3>
-              <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                {t('studies.vetgraphrag.cardGenerated')}
-              </Badge>
             </div>
             <NtaiAnalysisResults result={analysisResult} />
             
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <h4 className="text-sm font-medium text-green-800 mb-2">{t('studies.vetgraphrag.cardAdded')}</h4>
-              <p className="text-xs text-green-700">
-                {t('studies.vetgraphrag.cardAddedDesc')}
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <h4 className="text-sm font-medium text-amber-800 mb-2">{t('studies.vetgraphrag.curationWarningTitle')}</h4>
+              <p className="text-xs text-amber-700">
+                {t('studies.vetgraphrag.curationWarning')}
               </p>
             </div>
           </div>

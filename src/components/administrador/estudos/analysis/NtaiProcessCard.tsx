@@ -65,40 +65,32 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
   const getStatusText = () => {
     switch (item.stage) {
       case 'complete':
-        return 'Processado';
+        return t('studies.vetgraphrag.processCard.statusComplete');
       case 'error':
-        return 'Erro';
+        return t('studies.vetgraphrag.processCard.statusError');
       case 'extracting':
-        return 'Extraindo texto';
+        return t('studies.vetgraphrag.processCard.statusExtracting');
       case 'analyzing':
-        return 'Analisando conteúdo';
+        return t('studies.vetgraphrag.processCard.statusAnalyzing');
       case 'standardizing':
-        return 'Padronizando dados';
+        return t('studies.vetgraphrag.processCard.statusStandardizing');
       default:
-        return 'Pendente';
+        return t('studies.vetgraphrag.processCard.statusPending');
     }
   };
 
   const getBorderClass = () => {
-    if (isActive) {
-      return 'border-2 border-blue-300 bg-blue-50';
-    }
-    
+    if (isActive) return 'border-2 border-blue-300 bg-blue-50';
     switch (item.stage) {
-      case 'complete':
-        return 'border-green-200 bg-green-50';
-      case 'error':
-        return 'border-red-200';
+      case 'complete': return 'border-green-200 bg-green-50';
+      case 'error': return 'border-red-200';
       case 'extracting':
       case 'analyzing':
-      case 'standardizing':
-        return 'border-blue-200';
-      default:
-        return 'border-gray-200';
+      case 'standardizing': return 'border-blue-200';
+      default: return 'border-gray-200';
     }
   };
 
-  // Detectar se é erro crítico que permite reset
   const isCriticalError = (error?: string) => {
     if (!error) return false;
     return (
@@ -109,17 +101,14 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
     );
   };
 
-  // Handler para resetar e reprocessar
   const handleResetAndReprocess = async () => {
     setIsResetting(true);
     try {
       await StudyResetService.resetStudy(item.id);
       toast({
-        title: t('studies.ntai.resetSuccess'),
-        description: t('studies.ntai.resetSuccessDesc')
+        title: t('studies.vetgraphrag.processCard.statusComplete'),
+        description: t('studies.vetgraphrag.processCard.processedSuccess')
       });
-      
-      // Chamar callback para adicionar à fila novamente
       onResetAndReprocess?.(item.id);
     } catch (error: any) {
       toast({
@@ -132,43 +121,18 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
     }
   };
 
-  // Formata a mensagem de erro para melhor legibilidade (SEM SQL!)
   const formatErrorMessage = (error?: string) => {
     if (!error) return "";
-    
-    // Verificar se o erro é sobre sintaxe UUID inválida
-    if (error.includes("invalid input syntax for type uuid")) {
-      return t('studies.ntai.errorInvalidUuid');
-    }
-    
-    // Verificar outros erros comuns e apresentar mensagens mais amigáveis
-    if (error.includes("duplicate key value violates unique constraint")) {
-      return t('studies.ntai.errorDuplicate');
-    }
-
-    // Verificar erro de conexão
-    if (error.includes("NetworkError") || error.includes("network") || error.includes("fetch")) {
-      return t('studies.ntai.errorNetwork');
-    }
-    
-    // Erro de status ou já processado
-    if (error.includes("status") || error.includes("already") || error.includes("já")) {
-      return t('studies.ntai.errorAlreadyProcessed');
-    }
-
-    // Erro crítico de dados
-    if (isCriticalError(error)) {
-      return t('studies.ntai.errorCriticalData');
-    }
-    
+    if (error.includes("invalid input syntax for type uuid")) return t('studies.vetgraphrag.errorInvalidUuid');
+    if (error.includes("duplicate key value violates unique constraint")) return t('studies.vetgraphrag.errorDuplicate');
+    if (error.includes("NetworkError") || error.includes("network") || error.includes("fetch")) return t('studies.vetgraphrag.errorNetwork');
+    if (error.includes("status") || error.includes("already") || error.includes("já")) return t('studies.vetgraphrag.errorAlreadyProcessed');
+    if (isCriticalError(error)) return t('studies.vetgraphrag.errorCriticalData');
     return error;
   };
 
-  // Adicionar um estilo visual diferenciado para itens processados
   const getStatusClass = () => {
-    if (item.stage === 'complete') {
-      return 'text-green-700 font-semibold';
-    }
+    if (item.stage === 'complete') return 'text-green-700 font-semibold';
     return 'text-gray-500 font-normal';
   };
 
@@ -191,7 +155,7 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
                   size="icon"
                   className="h-6 w-6 p-0 hover:bg-red-100 text-gray-400 hover:text-red-600"
                   onClick={handleRemoveClick}
-                  title="Remover da fila"
+                  title={t('studies.vetgraphrag.processCard.removeFromQueue')}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -210,19 +174,18 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
           
           {item.sourceFile && (
             <div className="text-xs text-gray-500">
-              Fonte: {item.sourceFile}
+              {t('studies.vetgraphrag.processCard.source')}: {item.sourceFile}
             </div>
           )}
           
-          {/* Usamos a data atual sempre como "há menos de um dia" para simplificar */}
           <div className="text-xs text-gray-500">
-            Importado: há menos de um dia
+            {t('studies.vetgraphrag.processCard.importedLessThanDay')}
           </div>
           
           {item.error && (
             <div className="space-y-2">
               <div className="p-2 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-                <div className="font-medium mb-1">❌ {t('studies.ntai.errorTitle')}</div>
+                <div className="font-medium mb-1">❌ {t('studies.vetgraphrag.errorTitle')}</div>
                 <div>{formatErrorMessage(item.error)}</div>
               </div>
               
@@ -235,16 +198,17 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
                   className="w-full text-blue-600 border-blue-300 hover:bg-blue-50"
                 >
                   <RotateCcw className={`h-3 w-3 mr-2 ${isResetting ? 'animate-spin' : ''}`} />
-                  {t('studies.ntai.resetAndReprocess')}
+                  {t('studies.vetgraphrag.resetAndReprocess')}
                 </Button>
               )}
             </div>
           )}
           
-          {/* Adicionar um indicador visual para estudos processados */}
+          {/* Warning: curation needed instead of green success */}
           {item.stage === 'complete' && (
-            <div className="p-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">
-              Estudo processado com sucesso e disponível no sistema.
+            <div className="p-2 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
+              <span className="font-medium">{t('studies.vetgraphrag.curationWarningTitle')}:</span>{' '}
+              {t('studies.vetgraphrag.processCard.processedSuccess')}
             </div>
           )}
         </CardContent>
@@ -253,20 +217,20 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
       <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancelar processamento?</AlertDialogTitle>
+            <AlertDialogTitle>{t('studies.vetgraphrag.processCard.cancelProcessingTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Este estudo está sendo processado no momento. Tem certeza que deseja cancelar e removê-lo da fila?
+              {t('studies.vetgraphrag.processCard.cancelProcessingDesc')}
               <br />
-              <strong className="block mt-2">Esta ação não pode ser desfeita.</strong>
+              <strong className="block mt-2">{t('studies.vetgraphrag.processCard.cancelProcessingIrreversible')}</strong>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Não, continuar processando</AlertDialogCancel>
+            <AlertDialogCancel>{t('studies.vetgraphrag.processCard.cancelNo')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmRemove}
               className="bg-red-600 hover:bg-red-700"
             >
-              Sim, cancelar e remover
+              {t('studies.vetgraphrag.processCard.cancelYes')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
