@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-02-25 🔧 Enrich Triplets + Inline Chat + Fix Generate Pipeline
+
+- ✅ **Toast duplicado removido**: `useStudyApprovalWorkflow` não dispara mais toast redundante (mantido apenas no dialog)
+- ✅ **Fix generate-triplets**: `intensity` agora usa `??` em vez de `||` (valor 0 não vira null), `confidence_rationale` é salvo no banco, `properties` e campos-chave são `required` no tool schema, `intensity` marcado como REQUIRED no prompt
+- ✅ **Edge function `enrich-triplet`**: Enriquece triplets antigos com N/A via LLM — busca chunks relevantes, extrai evidence_level, intensity e rationale, atualiza o banco
+- ✅ **Botão "Enriquecer com IA"**: Aparece nos details expandidos quando evidence_level ou intensity estão null
+- ✅ **TripletInlineChat**: Mini-chat inline dentro do card expandido — pergunta pré-populada enviada automaticamente ao abrir, suporta follow-ups, renderiza markdown
+- ✅ **i18n**: Novas chaves para enrichWithAI, enriching, enrichSuccess, enrichError, inlineChat (title, placeholder, thinking, noResponse, error)
+
 ### Added - 2026-02-25 📄 Trecho de Origem nos Triplets + Threshold Unificado
 
 - ✅ **Trecho de Origem nos Details expandidos**: Ao expandir um triplet, o sistema busca automaticamente chunks do `study_embeddings` que mencionam o subject/object, exibindo o trecho científico original para suporte à decisão do revisor

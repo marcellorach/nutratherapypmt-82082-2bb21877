@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.enrich-knowledge-graph]
 verify_jwt = false
+
+[functions.enrich-triplet]
+verify_jwt = false

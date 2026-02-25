@@ -109,21 +109,9 @@ export const useStudyApprovalWorkflow = () => {
         console.warn('Neo4j sync skipped or failed:', e);
       }
 
-      toast({
-        title: t('studies.toast.workflowComplete', 'Workflow Completo'),
-        description: t('studies.toast.workflowCompleteDesc', 
-          `Estudo aprovado. ${tripletsApproved} triplets auto-aprovados, ${edgesCreated} edges criadas, ${tripletsSynced} triplets sincronizados.`
-        ),
-      });
-
       return { tripletsApproved, edgesCreated, tripletsSynced };
     } catch (error) {
       console.error('Error in approval workflow:', error);
-      toast({
-        title: t('studies.toast.workflowError', 'Erro no Workflow'),
-        description: t('studies.toast.workflowErrorDesc', 'Ocorreu um erro durante o processo de aprovação.'),
-        variant: 'destructive',
-      });
       throw error;
     } finally {
       setIsProcessing(false);

@@ -4904,7 +4904,19 @@
     "askAI": "Ask AI",
     "sourceStudy": "Source",
     "noSourceAvailable": "Original text not available (study not vectorized)",
-    "loadingSource": "Loading study excerpt..."
+    "loadingSource": "Loading study excerpt...",
+    "enrichWithAI": "Enrich with AI",
+    "enriching": "Analyzing...",
+    "enrichSuccess": "Data enriched successfully",
+    "enrichError": "Error enriching triplet",
+    "enrichNoSource": "No source text available for enrichment",
+    "inlineChat": {
+      "title": "Chat about this triplet",
+      "placeholder": "Ask a question about this triplet...",
+      "thinking": "Analyzing...",
+      "noResponse": "No response from AI.",
+      "error": "Error querying AI. Please try again."
+    }
   },
   "ontologyAudit": {
     "title": "Ontology Audit",

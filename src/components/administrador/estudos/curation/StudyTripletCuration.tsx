@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import TripletInlineChat from './TripletInlineChat';
 
 interface Triplet {
   id: string;
@@ -501,6 +502,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   studyTitle={studyTitle}
                   onNavigateToChat={onNavigateToChat}
                   sourceChunkCache={sourceChunkCache}
+                  fetchTriplets={fetchTriplets}
                 />
               ))}
             </TripletSection>
@@ -534,6 +536,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   studyTitle={studyTitle}
                   onNavigateToChat={onNavigateToChat}
                   sourceChunkCache={sourceChunkCache}
+                  fetchTriplets={fetchTriplets}
                 />
               ))}
             </TripletSection>
@@ -566,6 +569,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   studyTitle={studyTitle}
                   onNavigateToChat={onNavigateToChat}
                   sourceChunkCache={sourceChunkCache}
+                  fetchTriplets={fetchTriplets}
                 />
               ))}
             </TripletSection>
@@ -621,6 +625,41 @@ const TripletSection: React.FC<TripletSectionProps> = ({
   );
 };
 
+// Enrich Button Component - calls enrich-triplet edge function
+const EnrichButton: React.FC<{ tripletId: string; field: string; onEnriched: () => void }> = ({ tripletId, field, onEnriched }) => {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+
+  const handleEnrich = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enrich-triplet', {
+        body: { tripletId }
+      });
+      if (error) throw error;
+      if (data?.enriched) {
+        toast.success(t('tripletCuration.enrichSuccess', 'Dados enriquecidos com sucesso'));
+        onEnriched();
+      } else {
+        toast.warning(t('tripletCuration.enrichNoSource', 'Sem texto fonte disponível'));
+      }
+    } catch (err) {
+      console.error('Enrich error:', err);
+      toast.error(t('tripletCuration.enrichError', 'Erro ao enriquecer triplet'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button variant="ghost" size="sm" className="h-5 text-[9px] gap-1 px-1.5" onClick={handleEnrich} disabled={loading}>
+      {loading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Sparkles className="h-2.5 w-2.5" />}
+      {loading ? t('tripletCuration.enriching', 'Analisando...') : t('tripletCuration.enrichWithAI', 'Enriquecer com IA')}
+    </Button>
+  );
+};
+
 // Triplet Card Component
 interface TripletCardProps {
   triplet: Triplet;
@@ -638,6 +677,7 @@ interface TripletCardProps {
   studyTitle?: string;
   onNavigateToChat?: (question?: string) => void;
   sourceChunkCache: React.MutableRefObject<Record<string, { chunks: any[]; loaded: boolean }>>;
+  fetchTriplets: () => void;
 }
 
 const TripletCard: React.FC<TripletCardProps> = ({
@@ -655,7 +695,8 @@ const TripletCard: React.FC<TripletCardProps> = ({
   readonly = false,
   studyTitle,
   onNavigateToChat,
-  sourceChunkCache
+  sourceChunkCache,
+  fetchTriplets
 }) => {
   const showActions = triplet.curation_status !== 'approved' || !readonly;
   const isAboveThreshold = triplet.extraction_confidence >= threshold;
@@ -850,20 +891,12 @@ const TripletCard: React.FC<TripletCardProps> = ({
                       {t('tripletCuration.sourceStudy', 'Fonte')}: <span className="font-medium">{studyTitle}</span>
                     </p>
                   )}
-                  <div className="flex gap-2 pt-1">
-                    {onNavigateToChat && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-[10px] gap-1"
-                        onClick={() => onNavigateToChat(
-                          `Explain the relationship between "${triplet.subject_name}" and "${triplet.object_name}" (${triplet.predicate}) based on this study.`
-                        )}
-                      >
-                        <MessageCircle className="h-3 w-3" />
-                        {t('tripletCuration.askAI', 'Perguntar à IA')}
-                      </Button>
-                    )}
+                  <div className="pt-1">
+                    <TripletInlineChat
+                      studyId={triplet.study_id}
+                      studyTitle={studyTitle}
+                      initialQuestion={`Explain the relationship between "${triplet.subject_name}" and "${triplet.object_name}" (${triplet.predicate}) based on this study.`}
+                    />
                   </div>
                 </div>
               ) : (
@@ -887,12 +920,18 @@ const TripletCard: React.FC<TripletCardProps> = ({
               <Badge variant={triplet.evidence_level ? 'outline' : 'secondary'}>
                 {triplet.evidence_level || 'N/A'}
               </Badge>
+              {!triplet.evidence_level && (
+                <EnrichButton tripletId={triplet.id} field="evidence_level" onEnriched={fetchTriplets} />
+              )}
             </div>
             
             {/* Intensity - Always show */}
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">{t('tripletCuration.intensity', 'Intensidade')}:</span>
               <span>{triplet.intensity !== null ? `${(triplet.intensity * 100).toFixed(0)}%` : 'N/A'}</span>
+              {triplet.intensity === null && (
+                <EnrichButton tripletId={triplet.id} field="intensity" onEnriched={fetchTriplets} />
+              )}
             </div>
             
             {/* Species - Always show */}
