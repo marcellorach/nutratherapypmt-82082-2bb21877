@@ -954,6 +954,7 @@
       "geminiAnalyzing": "🤖 Gemini AI analisando documento... {{progress}}%",
       "vectorizedChunks": "{{count}} chunks vetorizados para busca semântica",
       "clickToVectorize": "Clique para vetorizar e habilitar busca semântica",
+      "abstract": "Abstract",
       "summary": "Resumo",
       "noSummary": "Resumo não disponível",
       "digestionStats": "Digestão",
