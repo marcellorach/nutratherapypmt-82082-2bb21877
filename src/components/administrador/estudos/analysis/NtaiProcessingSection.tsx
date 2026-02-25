@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Settings } from "lucide-react";
+import { Brain, Settings, FileText, Microscope, GitBranch, Database, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
@@ -252,31 +252,62 @@ const NtaiProcessingSection: React.FC = () => {
           </Button>
         </div>
         
-        {/* Processing Pipeline Info */}
-        <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-sm font-semibold text-blue-900">🧬 {t('studies.vetgraphrag.processing.info')}</h4>
+        {/* Processing Pipeline Infographic */}
+        <div className="bg-gradient-to-br from-blue-50 via-indigo-50/30 to-violet-50/20 p-5 rounded-xl border border-blue-200/60 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h4 className="text-sm font-semibold text-blue-900">🧬 VetGraphRAG Digestion Pipeline</h4>
             <div className="flex items-center gap-4 text-xs">
               <span><span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.model')}:</span> <span className="text-blue-900">Gemini 3 Pro Preview</span></span>
-              <span><span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.vetgraphrag.processing.statusProcessing') : t('studies.vetgraphrag.processing.statusIdle')}</span></span>
+              <span><span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.status')}:</span> <span className={processingActive ? "text-green-700 font-medium" : "text-blue-900"}>{processingActive ? t('studies.vetgraphrag.processing.statusProcessing') : t('studies.vetgraphrag.processing.statusIdle')}</span></span>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex gap-3 p-3 bg-white/60 rounded-md border border-blue-100">
-                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-                  {step}
+          {/* Pipeline Flow */}
+          <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-0">
+            {([
+              { step: 1, Icon: FileText, color: 'blue', borderColor: 'border-l-blue-500', bgFrom: 'from-blue-50', bgTo: 'to-white', iconBg: 'bg-blue-100', iconColor: 'text-blue-600' },
+              { step: 2, Icon: Microscope, color: 'indigo', borderColor: 'border-l-indigo-500', bgFrom: 'from-indigo-50', bgTo: 'to-white', iconBg: 'bg-indigo-100', iconColor: 'text-indigo-600' },
+              { step: 3, Icon: GitBranch, color: 'violet', borderColor: 'border-l-violet-500', bgFrom: 'from-violet-50', bgTo: 'to-white', iconBg: 'bg-violet-100', iconColor: 'text-violet-600' },
+              { step: 4, Icon: Database, color: 'purple', borderColor: 'border-l-purple-500', bgFrom: 'from-purple-50', bgTo: 'to-white', iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
+            ] as const).map(({ step, Icon, borderColor, bgFrom, bgTo, iconBg, iconColor }, index) => (
+              <React.Fragment key={step}>
+                {/* Arrow connector (desktop only) */}
+                {index > 0 && (
+                  <div className="hidden md:flex items-center justify-center px-1 flex-shrink-0">
+                    <ChevronRight className="h-5 w-5 text-blue-300" />
+                  </div>
+                )}
+                
+                {/* Step Card */}
+                <div className={`flex-1 bg-gradient-to-br ${bgFrom} ${bgTo} rounded-lg border border-blue-100/80 border-l-[3px] ${borderColor} p-4 transition-all hover:shadow-md hover:scale-[1.02]`}>
+                  <div className="flex items-start gap-3">
+                    {/* Icon */}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center`}>
+                      <Icon className={`h-5 w-5 ${iconColor}`} />
+                    </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      {/* Step number + title */}
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">0{step}</span>
+                        <h5 className="text-xs font-bold text-gray-900 leading-tight">
+                          {t(`studies.vetgraphrag.processing.step${step}Title`)}
+                        </h5>
+                      </div>
+                      
+                      {/* Description */}
+                      <p className="text-[10px] leading-relaxed text-gray-600 mb-2">
+                        {t(`studies.vetgraphrag.processing.step${step}Desc`)}
+                      </p>
+                      
+                      {/* Tech badge */}
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold ${iconBg} ${iconColor} border border-current/10`}>
+                        {t(`studies.vetgraphrag.processing.step${step}Badge`)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h5 className="text-xs font-semibold text-blue-900 mb-0.5">
-                    {t(`studies.vetgraphrag.processing.step${step}Title`)}
-                  </h5>
-                  <p className="text-[11px] leading-relaxed text-blue-700">
-                    {t(`studies.vetgraphrag.processing.step${step}Desc`)}
-                  </p>
-                </div>
-              </div>
+              </React.Fragment>
             ))}
           </div>
         </div>
