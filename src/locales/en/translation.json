@@ -4897,7 +4897,14 @@
     "thresholdDesc": "Triplets with confidence ≥ this value will be bulk approved",
     "confidenceRationale": "Confidence Rationale",
     "doseRange": "Dose",
-    "hallucinationWarning": "Possible hallucination detected"
+    "hallucinationWarning": "Possible hallucination detected",
+    "sourceExcerpt": "Source Excerpt",
+    "sourceExcerptDesc": "Relevant excerpt from the scientific study for this triplet",
+    "viewInStudy": "View in study",
+    "askAI": "Ask AI",
+    "sourceStudy": "Source",
+    "noSourceAvailable": "Original text not available (study not vectorized)",
+    "loadingSource": "Loading study excerpt..."
   },
   "ontologyAudit": {
     "title": "Ontology Audit",

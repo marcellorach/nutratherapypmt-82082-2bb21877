@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Slider } from "@/components/ui/slider";
 import { MessageCircle, BarChart3, Bug, GitPullRequest, CheckCircle, Loader2, AlertTriangle } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
@@ -46,6 +47,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   const [isApproving, setIsApproving] = useState(false);
   const [tripletSummary, setTripletSummary] = useState<TripletSummary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [approvalThreshold, setApprovalThreshold] = useState(70);
   const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
 
   // Fetch triplet summary when dialog opens, estudo changes, or tab changes
@@ -70,10 +72,11 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
       const approved = triplets?.filter(t => t.curation_status === 'approved').length || 0;
       const rejected = triplets?.filter(t => t.curation_status === 'rejected').length || 0;
       
-      // Count triplets that will be auto-approved (confidence >= 0.7 and still pending)
+      // Count triplets that will be auto-approved (using configurable threshold)
+      const thresholdDecimal = approvalThreshold / 100;
       const willAutoApprove = triplets?.filter(t => 
         (t.curation_status === 'pending' || !t.curation_status) && 
-        (t.extraction_confidence || 0) >= 0.7
+        (t.extraction_confidence || 0) >= thresholdDecimal
       ).length || 0;
       
       const needsManualReview = pending - willAutoApprove;
@@ -98,7 +101,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   const handleAdvanceApproval = async () => {
     setIsApproving(true);
     try {
-      const result = await executeApprovalWorkflow(estudo.id);
+      const result = await executeApprovalWorkflow(estudo.id, approvalThreshold / 100);
       
       toast.success(t('studies.approval.success'), {
         description: t('studies.approval.successDetails', {
@@ -208,6 +211,10 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
               studyId={estudo.id}
               studyTitle={estudo.title}
               onTripletsUpdated={() => fetchTripletSummary(estudo.id)}
+              onNavigateToChat={(question) => {
+                setActiveTab('chat');
+                // The chat interface will pick up the question if needed
+              }}
             />
           </TabsContent>
 
@@ -297,7 +304,29 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                             </div>
                           </div>
                           
-                          <div className="border-t pt-3 space-y-2">
+                          <div className="border-t pt-3 space-y-3">
+                            {/* Threshold Slider */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">{t('tripletCuration.confidenceThreshold', 'Nota de Corte')}:</span>
+                                <span className="font-semibold text-primary">{approvalThreshold}%</span>
+                              </div>
+                              <Slider
+                                value={[approvalThreshold]}
+                                onValueChange={(v) => {
+                                  setApprovalThreshold(v[0]);
+                                  // Recalculate summary with new threshold
+                                  if (tripletSummary) {
+                                    fetchTripletSummary(estudo.id);
+                                  }
+                                }}
+                                min={50}
+                                max={99}
+                                step={5}
+                                className="w-full"
+                              />
+                            </div>
+                            
                             <div className="flex items-center justify-between text-sm">
                               <span className="flex items-center gap-1.5">
                                 <CheckCircle className="h-4 w-4 text-green-600" />

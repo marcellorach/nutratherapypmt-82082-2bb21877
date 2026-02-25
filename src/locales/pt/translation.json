@@ -4897,7 +4897,14 @@
     "thresholdDesc": "Triplets com confiança ≥ este valor serão aprovados em massa",
     "confidenceRationale": "Racional da Nota",
     "doseRange": "Dose",
-    "hallucinationWarning": "Possível alucinação detectada"
+    "hallucinationWarning": "Possível alucinação detectada",
+    "sourceExcerpt": "Trecho de Origem",
+    "sourceExcerptDesc": "Trecho do estudo científico relevante para este triplet",
+    "viewInStudy": "Ver no estudo",
+    "askAI": "Perguntar à IA",
+    "sourceStudy": "Fonte",
+    "noSourceAvailable": "Texto original não disponível (estudo não vetorizado)",
+    "loadingSource": "Buscando trecho do estudo..."
   },
   "ontologyAudit": {
     "title": "Auditoria de Ontologia",
