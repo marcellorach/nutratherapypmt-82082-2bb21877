@@ -858,7 +858,8 @@
         "step1Badge": "Tabelas + Figuras + Meta",
         "step2Badge": "Ontologia 5 camadas (L0–L4)",
         "step3Badge": "Cadeias causais + confiança",
-        "step4Badge": "Embeddings 768-dim"
+        "step4Badge": "Embeddings 768-dim",
+        "expand": "(expandir)"
       },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",

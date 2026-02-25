@@ -387,9 +387,30 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
-    const fullTextContent = (study.full_text_content || '').substring(0, 12000);
+    const rawFullText = study.full_text_content || '';
     
-    console.log(`🔬 PHASE 1: Free Discovery for study: ${studyId}`);
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TEXT CHUNKING: Split long studies into ~10K char chunks with 500 char overlap
+    // This prevents timeouts on long papers while preserving ALL content
+    // ═══════════════════════════════════════════════════════════════════════════
+    const CHUNK_SIZE = 10000;
+    const CHUNK_OVERLAP = 500;
+    
+    function splitIntoChunks(text: string): string[] {
+      if (text.length <= CHUNK_SIZE) return [text];
+      const chunks: string[] = [];
+      let start = 0;
+      while (start < text.length) {
+        const end = Math.min(start + CHUNK_SIZE, text.length);
+        chunks.push(text.substring(start, end));
+        if (end >= text.length) break;
+        start = end - CHUNK_OVERLAP;
+      }
+      return chunks;
+    }
+    
+    const textChunks = splitIntoChunks(rawFullText);
+    console.log(`🔬 PHASE 1: Free Discovery for study: ${studyId} (${textChunks.length} chunk(s), ${rawFullText.length} chars total)`);
     console.log(`📄 Title: ${study.title}`);
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -446,15 +467,26 @@ For each compound, list:
 ## OUTPUT FORMAT
 Write in natural language, organized by sections. Be EXHAUSTIVE. Don't skip any mechanism or pathway mentioned in the study.`;
 
-    const phase1UserPrompt = `Analyze this veterinary nutraceutical study and extract ALL biological mechanisms and pathways:
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PHASE 1: Process each chunk separately, then concatenate discoveries
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    const chunkDiscoveries: string[] = [];
+    
+    for (let ci = 0; ci < textChunks.length; ci++) {
+      const chunk = textChunks[ci];
+      console.log(`📄 Phase 1 chunk ${ci + 1}/${textChunks.length} (${chunk.length} chars)`);
+      
+      const phase1UserPrompt = `Analyze this veterinary nutraceutical study and extract ALL biological mechanisms and pathways:
 
 **Title:** ${study.title || 'N/A'}
 **Authors:** ${Array.isArray(study.authors) ? study.authors.join(', ') : 'N/A'}
 **Year:** ${study.year || 'N/A'}
 **Journal:** ${study.journal || 'N/A'}
 
-**FULL TEXT:**
-${fullTextContent}
+${textChunks.length > 1 ? `**[SECTION ${ci + 1} of ${textChunks.length}]**` : ''}
+**TEXT:**
+${chunk}
 
 ---
 
@@ -467,46 +499,59 @@ Please provide a comprehensive analysis covering:
 6. Adverse effects
 7. Compound interactions/synergies
 
-Be thorough - capture EVERY biological relationship mentioned in this study.`;
+Be thorough - capture EVERY biological relationship mentioned in this section.`;
 
-    const phase1Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
-        messages: [
-          { role: 'system', content: phase1SystemPrompt },
-          { role: 'user', content: phase1UserPrompt }
-        ]
-        // NO response_format - we want free text
-      }),
-    });
+      const phase1Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-3-pro-preview',
+          messages: [
+            { role: 'system', content: phase1SystemPrompt },
+            { role: 'user', content: phase1UserPrompt }
+          ]
+        }),
+      });
 
-    if (!phase1Response.ok) {
-      if (phase1Response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      if (!phase1Response.ok) {
+        if (phase1Response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (phase1Response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        const errorText = await phase1Response.text();
+        console.error(`Phase 1 chunk ${ci + 1} AI error:`, phase1Response.status, errorText);
+        // Continue with other chunks instead of failing entirely
+        continue;
       }
-      if (phase1Response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+
+      const phase1Data = await phase1Response.json();
+      const chunkResult = phase1Data.choices?.[0]?.message?.content;
+      if (chunkResult) {
+        chunkDiscoveries.push(chunkResult);
+        console.log(`✅ Phase 1 chunk ${ci + 1} complete (${chunkResult.length} chars)`);
       }
-      const errorText = await phase1Response.text();
-      console.error('Phase 1 AI error:', phase1Response.status, errorText);
-      throw new Error(`Phase 1 AI request failed: ${phase1Response.status}`);
     }
-
-    const phase1Data = await phase1Response.json();
-    const freeDiscoveryText = phase1Data.choices[0].message.content;
     
-    console.log(`✅ Phase 1 complete. Discovery length: ${freeDiscoveryText.length} chars`);
+    if (chunkDiscoveries.length === 0) {
+      throw new Error('Phase 1 failed: no chunks produced discoveries');
+    }
+    
+    const freeDiscoveryText = chunkDiscoveries.length === 1 
+      ? chunkDiscoveries[0] 
+      : chunkDiscoveries.map((d, i) => `=== SECTION ${i + 1} ===\n${d}`).join('\n\n');
+    
+    console.log(`✅ Phase 1 complete. ${chunkDiscoveries.length} chunk(s), total discovery: ${freeDiscoveryText.length} chars`);
     console.log(`📝 Discovery preview: ${freeDiscoveryText.substring(0, 500)}...`);
 
     // ═══════════════════════════════════════════════════════════════════════════

@@ -265,11 +265,11 @@ const NtaiProcessingSection: React.FC = () => {
           
           <div className="space-y-0">
             {([
-              { step: 1, Icon: FileText, iconBg: 'bg-blue-100', iconColor: 'text-blue-600' },
-              { step: 2, Icon: Microscope, iconBg: 'bg-indigo-100', iconColor: 'text-indigo-600' },
-              { step: 3, Icon: GitBranch, iconBg: 'bg-violet-100', iconColor: 'text-violet-600' },
-              { step: 4, Icon: Database, iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
-            ] as const).map(({ step, Icon, iconBg, iconColor }, index) => (
+              { step: 1, Icon: FileText, iconBg: 'bg-sky-100', iconColor: 'text-sky-600', borderColor: 'border-sky-200' },
+              { step: 2, Icon: Microscope, iconBg: 'bg-amber-100', iconColor: 'text-amber-600', borderColor: 'border-amber-200' },
+              { step: 3, Icon: GitBranch, iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600', borderColor: 'border-emerald-200' },
+              { step: 4, Icon: Database, iconBg: 'bg-rose-100', iconColor: 'text-rose-600', borderColor: 'border-rose-200' },
+            ] as const).map(({ step, Icon, iconBg, iconColor, borderColor }, index) => (
               <Collapsible key={step}>
                 <div className="flex items-start gap-3 py-2">
                   {/* Vertical connector line + icon */}
@@ -277,7 +277,7 @@ const NtaiProcessingSection: React.FC = () => {
                     <div className={`w-7 h-7 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
                     </div>
-                    {index < 3 && <div className="w-px h-3 bg-blue-200 mt-1" />}
+                    {index < 3 && <div className="w-px h-3 bg-gray-200 mt-1" />}
                   </div>
                   
                   {/* Content */}
@@ -291,11 +291,12 @@ const NtaiProcessingSection: React.FC = () => {
                       <span className="text-[10px] text-gray-500 truncate hidden sm:inline">
                         {t(`studies.vetgraphrag.processing.step${step}Badge`)}
                       </span>
-                      <ChevronDown className="h-3 w-3 text-gray-400 ml-auto transition-transform group-data-[state=open]:rotate-180 flex-shrink-0" />
+                      <span className="text-[10px] text-gray-400 ml-1 group-data-[state=open]:hidden">{t('studies.vetgraphrag.processing.expand', '(expandir)')}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 text-gray-600 ml-auto transition-transform group-data-[state=open]:rotate-180 flex-shrink-0`} />
                     </CollapsibleTrigger>
                     
                     <CollapsibleContent className="mt-1.5">
-                      <p className="text-[11px] leading-relaxed text-gray-600 pl-5 border-l-2 border-blue-100 ml-1">
+                      <p className={`text-[11px] leading-relaxed text-gray-600 pl-5 border-l-2 ${borderColor} ml-1`}>
                         {t(`studies.vetgraphrag.processing.step${step}Desc`)}
                       </p>
                     </CollapsibleContent>

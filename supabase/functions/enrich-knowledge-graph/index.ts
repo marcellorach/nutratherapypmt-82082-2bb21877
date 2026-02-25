@@ -283,6 +283,33 @@ serve(async (req) => {
             send('step_error', { index: qi, step: 'syncing_neo4j', error: String(err) });
           }
 
+          // Only mark as success if triplets were actually generated
+          if (tripletsGenerated === 0) {
+            // Mark study as error instead of approved
+            await supabase
+              .from('processed_studies')
+              .update({ kanban_status: 'error', error_message: 'No triplets generated (possible timeout or empty extraction)' })
+              .eq('id', studyId);
+
+            send('query_complete', {
+              index: qi,
+              query,
+              status: 'error_no_triplets',
+              title: study.title,
+              studyId,
+              tripletsGenerated: 0,
+              tripletsApproved: 0,
+            });
+
+            results.push({
+              query,
+              status: 'error_no_triplets',
+              title: study.title,
+              studyId,
+            });
+            continue;
+          }
+
           totalStudiesProcessed++;
           send('query_complete', {
             index: qi,
