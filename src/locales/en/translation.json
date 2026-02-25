@@ -364,7 +364,7 @@
       "confirmTitle": "Confirm Approval",
       "confirmDescription": "You are about to approve this study. This action will:",
       "actionChangeStatus": "Change the study status to 'Approved'",
-      "actionAutoApprove": "Auto-approve triplets with confidence ≥70%",
+      "actionAutoApprove": "Auto-approve triplets with confidence ≥{{threshold}}%",
       "actionUpdateKG": "Update the Knowledge Graph",
       "confirm": "Yes, Approve",
       "processing": "Processing...",

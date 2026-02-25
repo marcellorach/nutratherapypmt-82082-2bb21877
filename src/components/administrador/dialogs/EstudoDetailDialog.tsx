@@ -60,7 +60,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
     }
   }, [open, estudo?.id, activeTab]);
 
-  const fetchTripletSummary = async (studyId: string) => {
+  const fetchTripletSummary = async (studyId: string, thresholdOverride?: number) => {
     setLoadingSummary(true);
     try {
       const { data: triplets, error } = await supabase
@@ -75,8 +75,8 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
       const approved = triplets?.filter(t => t.curation_status === 'approved').length || 0;
       const rejected = triplets?.filter(t => t.curation_status === 'rejected').length || 0;
       
-      // Count triplets that will be auto-approved (using configurable threshold)
-      const thresholdDecimal = approvalThreshold / 100;
+      const effectiveThreshold = thresholdOverride ?? approvalThreshold;
+      const thresholdDecimal = effectiveThreshold / 100;
       const willAutoApprove = triplets?.filter(t => 
         (t.curation_status === 'pending' || !t.curation_status) && 
         (t.extraction_confidence || 0) >= thresholdDecimal
@@ -331,10 +331,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                                 onValueChange={(v) => {
                                   setApprovalThreshold(v[0]);
                                   localStorage.setItem('triplet_approval_threshold', String(v[0]));
-                                  // Recalculate summary with new threshold
-                                  if (tripletSummary) {
-                                    fetchTripletSummary(estudo.id);
-                                  }
+                                  fetchTripletSummary(estudo.id, v[0]);
                                 }}
                                 min={50}
                                 max={99}
@@ -365,7 +362,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                       
                       <ul className="list-disc list-inside text-sm space-y-1">
                         <li>{t('studies.approval.actionChangeStatus')}</li>
-                        <li>{t('studies.approval.actionAutoApprove')}</li>
+                        <li>{t('studies.approval.actionAutoApprove', { threshold: approvalThreshold })}</li>
                         <li>{t('studies.approval.actionUpdateKG')}</li>
                       </ul>
                     </div>
