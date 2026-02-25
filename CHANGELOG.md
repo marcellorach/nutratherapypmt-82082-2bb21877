@@ -20,6 +20,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - ✅ **i18n completo em NtaiProcessCard**: ~15 textos hardcoded em português migrados para sistema de tradução bilíngue
 - ✅ **Correção de namespace i18n**: `studies.ntai.*` corrigido para `studies.vetgraphrag.*` (namespace correto)
 
+### Fixed - 2026-02-25 🧠 Correção crítica da vetorização
+
+- ✅ **Compatibilidade de dimensão restaurada no `vectorize-study`**: embeddings agora são solicitados com `outputDimensionality: 768` para compatibilidade com `study_embeddings.embedding` (`vector(768)`)
+- ✅ **Guard rail para drift de modelo**: quando a API retornar dimensão inesperada, o vetor é ajustado para 768 antes do upsert, evitando erro 500
+- ✅ **Diagnóstico de erro melhorado**: respostas 500 agora propagam `message` de erros do banco ao invés de retornar apenas "Vectorization failed"
+
 ### Added - 2026-02-08 🔐 Sistema de Acesso com Google OAuth + Aprovação de Admin
 
 - ✅ **Google OAuth**: Login via Google configurado com Lovable Cloud
