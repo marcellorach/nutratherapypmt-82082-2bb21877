@@ -116,10 +116,19 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [enrichDialogOpen, setEnrichDialogOpen] = useState(false);
   const [use3DGraph, setUse3DGraph] = useState(false);
 
+  // Load data sources once on mount
   useEffect(() => {
-    loadGraphData();
     loadDataSourceStats();
   }, []);
+
+  // Load graph data with debounce when edgeLimit changes
+  useEffect(() => {
+    if (studyFilter !== 'all') return; // study filter has its own useEffect
+    const timer = setTimeout(() => {
+      loadGraphData();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [edgeLimit]);
 
   useEffect(() => {
     if (studyFilter !== 'all') {
@@ -905,8 +914,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
             value={edgeLimit}
             onChange={(newLimit) => {
               setEdgeLimit(newLimit);
-              // Reload with new limit after a short delay
-              setTimeout(() => loadGraphData(), 100);
             }}
           />
         </CardContent>
@@ -915,6 +922,15 @@ export const KnowledgeGraphViewer: React.FC = () => {
       {/* Graph - Full Width */}
       <Card>
         <CardContent className="p-4">
+          {/* Node/Edge count badge */}
+          {stats && !loading && (
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline" className="font-mono text-xs">
+                {stats.totalNodes.toLocaleString()} {t('knowledgeGraph.nodes', 'nodes')} · {stats.totalEdges.toLocaleString()} {t('knowledgeGraph.edges', 'edges')}
+              </Badge>
+              <Badge className="bg-emerald-600 text-white text-[10px]">Neo4j</Badge>
+            </div>
+          )}
           {loading ? (
             <div className="flex items-center justify-center h-[calc(100vh-320px)] min-h-[500px]">
               <div className="text-center">
