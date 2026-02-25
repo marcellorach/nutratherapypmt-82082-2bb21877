@@ -64,24 +64,9 @@ const NutraceuticosExpandableTable = ({
     return "bg-red-100 text-red-800";
   };
 
-  // Função para gerar números realistas de estudos
-  const getRealisticStudyCount = (nutraceutical: Nutraceutical) => {
-    const name = nutraceutical.name.toLowerCase();
-    
-    // Nutracêuticos muito populares (150-300 estudos)
-    const popularNutraceuticals = ['ômega-3', 'omega-3', 'curcumina', 'resveratrol', 'coenzima q10', 'coq10'];
-    if (popularNutraceuticals.some(popular => name.includes(popular))) {
-      return Math.floor(Math.random() * 150) + 150; // 150-300
-    }
-    
-    // Nutracêuticos médios (50-150 estudos)
-    const mediumNutraceuticals = ['vitamina', 'magnésio', 'zinco', 'selênio', 'probiótico'];
-    if (mediumNutraceuticals.some(medium => name.includes(medium))) {
-      return Math.floor(Math.random() * 100) + 50; // 50-150
-    }
-    
-    // Nutracêuticos menos conhecidos (10-50 estudos)
-    return Math.floor(Math.random() * 40) + 10; // 10-50
+  // Função para obter contagem real de estudos do banco de dados
+  const getRealStudyCount = (nutraceutical: Nutraceutical) => {
+    return nutraceutical.studies?.length || nutraceutical.studyCount || 0;
   };
 
   console.log('📊 [TABLE] Total de nutracêuticos:', nutraceuticals.length);
@@ -113,7 +98,7 @@ const NutraceuticosExpandableTable = ({
               ) : (
                 nutraceuticals.map((nutraceutical) => {
                   const convergence = calculateConvergence(nutraceutical);
-                  const studyCount = getRealisticStudyCount(nutraceutical);
+                  const studyCount = getRealStudyCount(nutraceutical);
                   
                   console.log(`📊 [TABLE] Renderizando ${nutraceutical.name}:`, {
                     preventionConditions: nutraceutical.preventionConditions?.length || 0,
