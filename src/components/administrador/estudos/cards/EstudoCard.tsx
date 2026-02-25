@@ -309,11 +309,16 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             )}
           </div>
         </div>
-        {/* Summary - max 3 lines */}
+        {/* Abstract / Summary - max 3 lines */}
         {summaryText && (
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-3 leading-relaxed">
-            {summaryText}
-          </p>
+          <div className="mt-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+              {t('studies.card.abstract')}
+            </p>
+            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+              {summaryText}
+            </p>
+          </div>
         )}
         {!summaryText && (
           <CardDescription>{t('studies.card.importedStudy')}</CardDescription>
