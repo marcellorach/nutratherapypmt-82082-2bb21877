@@ -252,19 +252,32 @@ const NtaiProcessingSection: React.FC = () => {
           </Button>
         </div>
         
-        {/* Processing info */}
-        <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-          <h4 className="text-sm font-medium mb-2 text-blue-900">{t('studies.vetgraphrag.processing.info')}</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.model')}:</span> <span className="text-blue-900">Google Gemini 3 Pro Preview</span>
-            </div>
-            <div>
-              <span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.vetgraphrag.processing.statusProcessing') : t('studies.vetgraphrag.processing.statusIdle')}</span>
+        {/* Processing Pipeline Info */}
+        <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-blue-900">🧬 {t('studies.vetgraphrag.processing.info')}</h4>
+            <div className="flex items-center gap-4 text-xs">
+              <span><span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.model')}:</span> <span className="text-blue-900">Gemini 3 Pro Preview</span></span>
+              <span><span className="text-blue-600 font-medium">{t('studies.vetgraphrag.processing.status')}:</span> <span className="text-blue-900">{processingActive ? t('studies.vetgraphrag.processing.statusProcessing') : t('studies.vetgraphrag.processing.statusIdle')}</span></span>
             </div>
           </div>
-          <div className="mt-2 text-xs text-blue-700">
-            {t('studies.vetgraphrag.processing.description')}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className="flex gap-3 p-3 bg-white/60 rounded-md border border-blue-100">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                  {step}
+                </div>
+                <div className="min-w-0">
+                  <h5 className="text-xs font-semibold text-blue-900 mb-0.5">
+                    {t(`studies.vetgraphrag.processing.step${step}Title`)}
+                  </h5>
+                  <p className="text-[11px] leading-relaxed text-blue-700">
+                    {t(`studies.vetgraphrag.processing.step${step}Desc`)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
         

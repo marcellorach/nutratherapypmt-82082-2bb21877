@@ -840,13 +840,21 @@
       },
       "processing": {
         "title": "AI Processing",
-        "info": "Processing Information",
+        "info": "VetGraphRAG Digestion Pipeline",
         "model": "Model",
         "status": "Status",
         "statusProcessing": "Processing",
         "statusIdle": "Idle",
         "description": "Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.",
-        "pipeline": "Processing Pipeline"
+        "pipeline": "Processing Pipeline",
+        "step1Title": "PDF Parsing & OCR",
+        "step1Desc": "Layout-aware full-text extraction with table recognition, figure detection, and structured metadata harvesting (authors, journal, year, DOI).",
+        "step2Title": "Entity Extraction (NER)",
+        "step2Desc": "AI-powered Named Entity Recognition identifying nutraceuticals, health conditions, molecular mechanisms, dosages and species across the 5-layer VetGraphRAG ontology (L0–L4).",
+        "step3Title": "Knowledge Triplet Generation",
+        "step3Desc": "Causal relationship mapping: Compound → Molecular Target → Mechanism → Biological Effect → Clinical Outcome, with extraction confidence scores and evidence level classification.",
+        "step4Title": "Vectorization & Semantic Indexing",
+        "step4Desc": "768-dimensional embeddings via text-embedding-004 model for semantic similarity search, enabling cross-study retrieval and context-aware recommendations."
       },
       "liveLog": "Real-Time Log",
       "events": "events",

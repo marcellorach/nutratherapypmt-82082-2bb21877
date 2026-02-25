@@ -840,13 +840,21 @@
       },
       "processing": {
         "title": "Processamento IA",
-        "info": "Informações do Processamento",
+        "info": "Pipeline de Digestão VetGraphRAG",
         "model": "Modelo",
         "status": "Status",
         "statusProcessing": "Processando",
         "statusIdle": "Ocioso",
         "description": "Extrai automaticamente nutracêuticos, condições de saúde e metadados de estudos científicos usando IA generativa.",
-        "pipeline": "Pipeline de Processamento"
+        "pipeline": "Pipeline de Processamento",
+        "step1Title": "PDF Parsing & OCR",
+        "step1Desc": "Extração full-text com reconhecimento de layout, detecção de tabelas e figuras, e colheita estruturada de metadados (autores, periódico, ano, DOI).",
+        "step2Title": "Extração de Entidades (NER)",
+        "step2Desc": "Reconhecimento de Entidades Nomeadas via IA identificando nutracêuticos, condições de saúde, mecanismos moleculares, dosagens e espécies na ontologia VetGraphRAG de 5 camadas (L0–L4).",
+        "step3Title": "Geração de Triplets de Conhecimento",
+        "step3Desc": "Mapeamento de relações causais: Composto → Alvo Molecular → Mecanismo → Efeito Biológico → Desfecho Clínico, com scores de confiança e classificação de nível de evidência.",
+        "step4Title": "Vetorização & Indexação Semântica",
+        "step4Desc": "Embeddings de 768 dimensões via modelo text-embedding-004 para busca por similaridade semântica, permitindo recuperação entre estudos e recomendações contextuais."
       },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",
