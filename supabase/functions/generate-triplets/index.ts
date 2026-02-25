@@ -1065,7 +1065,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       const isTreatsRelation = ['TREATS', 'PREVENTS', 'AMELIORATES'].includes(tripletPredicate);
       
       // Rule 6: ANTI-HALLUCINATION - Check if entity names appear in original text
-      const searchableText = (fullTextContent + ' ' + freeDiscoveryText).toLowerCase();
+      const searchableText = (rawFullText + ' ' + freeDiscoveryText).toLowerCase();
       const subjectNameLower = (t.subject_name || '').toLowerCase().trim();
       const objectNameLower = (t.object_name || '').toLowerCase().trim();
       
