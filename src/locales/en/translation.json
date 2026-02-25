@@ -498,7 +498,7 @@
       "libraryTab": "Library",
       "importsTab": "Imports",
       "title": "Study Import",
-      "description": "Import scientific studies via PDF or search external databases",
+      "description": "Manage, import and process scientific studies — from PDF upload to intelligent AI extraction",
       "uploadTab": "Upload PDFs",
       "aiProcessingTab": "AI Processing",
       "successInline": "{{count}} file(s) imported successfully!",

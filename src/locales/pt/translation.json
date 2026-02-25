@@ -498,7 +498,7 @@
       "libraryTab": "Biblioteca",
       "importsTab": "Imports",
       "title": "Importação de Estudos",
-      "description": "Importe estudos científicos via PDF ou busque em bases de dados",
+      "description": "Gerencie, importe e processe estudos científicos — do upload de PDFs à extração inteligente com IA",
       "uploadTab": "Upload PDFs",
       "aiProcessingTab": "Processamento IA",
       "successInline": "{{count}} arquivo(s) importado(s) com sucesso!",
