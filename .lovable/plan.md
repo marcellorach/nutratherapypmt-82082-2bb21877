@@ -1,61 +1,94 @@
 
-# Corrigir Inconsistencias nos Stats do Knowledge Graph
 
-## Problemas Identificados
+## Diagnóstico: Catalog vs Relations vs Matrix
 
-### Problema B: Todos os cards abrem o mesmo dialog
-O mapeamento `cardIdToStatType` no `openStatDialog` (linha 595-617 de KnowledgeGraphViewer.tsx) faz varios cards apontarem para o mesmo dialog:
-- `pathways` -> `ontology` (abre "Ontology Entities" generico)
-- `outcomes` -> `ontology` (mesmo dialog)
-- `ontology-chebi` -> `ontology` (mesmo dialog)
-- `nutraceuticals` -> `nutraceuticals` (correto mas usa Neo4j, nao a tabela `nutraceuticals`)
-- `conditions` -> `conditions` (correto mas usa Neo4j)
+### O que cada aba faz HOJE
 
-**Solucao**: Criar stat types especificos para cada card e carregar dados da tabela correta. Ex: `pathways` deve abrir um dialog com dados de pathways, `nutraceuticals` deve listar da tabela `nutraceuticals`, etc.
+| Aba | Estado | Fonte de dados | Componente de tabela |
+|-----|--------|----------------|---------------------|
+| **Catalog** | Funcional | `useNutraceuticalContext()` → mesma query Supabase | `NutraceuticalTable` (pesquisa/nutraceuticoGerenciamento/) — tabela simples com nome, outcome, estudos, ações + CRUD + migração |
+| **Relations** | **Stub vazio** | Nenhuma | 3 cards estáticos dizendo "em desenvolvimento" |
+| **Matrix** | Funcional | `useNutraceuticalContext()` → **mesma query Supabase** | `NutraceuticosExpandableTable` (nutraceuticos/) — tabela expandível com prevenção/tratamento/suporte, convergência, estudos |
 
-### Problema D: Pathways = 0 vs Graph Nodes mostra pathways
-- O card "Pathways" na Base de Conhecimento conta da tabela `pathway_nodes` (linha 94 de useKnowledgeGraphStats.ts) = **vazia**
-- O dialog "Graph Nodes" filtra por tipo "Pathway" no Neo4j onde existem AMPK, mTOR, NF-kB etc.
-- Essas entidades existem na `veterinary_ontology` como type `pathway` / layer `layer_2_mechanism` mas o card nao conta de la
+### Problema central: duplicidade real
 
-**Solucao**: Mudar a query do card "Pathways" para contar pathways da `veterinary_ontology` (onde realmente existem) em vez da tabela `pathway_nodes` (vazia e sem uso).
+**Catalog e Matrix buscam exatamente os mesmos dados** do mesmo contexto (`NutraceuticalContext`), que faz uma única query na tabela `nutraceuticals` com joins em `nutraceutical_conditions`, `nutraceutical_studies`, `nutraceutical_benefits`, etc.
 
-## Mudancas Tecnicas
+A diferença é apenas a **visualização**:
+- Catalog = tabela CRUD simples (gerenciamento)
+- Matrix = tabela expandível com colunas de prevenção/tratamento/suporte (visualização científica)
 
-### 1. `src/hooks/useKnowledgeGraphStats.ts`
-- Substituir a query de `pathway_nodes` por query em `veterinary_ontology` filtrando por `entity_type = 'pathway'` ou `layer LIKE '%pathway%'`
-- Isso corrige o "0" no card Pathways
+Relations está 100% vazio — é um placeholder.
 
-### 2. `src/components/administrador/visualizations/KnowledgeGraphViewer.tsx`
-- Expandir o union type `StatType` para incluir: `'pathways'`, `'outcomes'`, `'chebi'`, `'entities-ai'`, `'relations-ai'`, `'approved-triplets'`, `'pending-triplets'`
-- Atualizar `openStatDialog` para mapear cada card ID ao seu tipo especifico em vez de colapsar tudo em `'ontology'`
+### Duplicidade no backend (serviços)
 
-### 3. `src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx`
-- Adicionar suporte aos novos stat types:
-  - `pathways`: carrega pathways da `veterinary_ontology` WHERE entity_type='pathway'
-  - `outcomes`: carrega da tabela `outcome_families`
-  - `chebi`: carrega da `veterinary_ontology` WHERE source='ChEBI'
-  - `entities-ai`: carrega da `veterinary_ontology` WHERE source='gemini_extraction'
-  - `relations-ai`: carrega de `hierarchical_edges` com study_ids
-  - `approved-triplets`: carrega de `triplet_extractions` WHERE curation_status='approved'
-  - `pending-triplets`: carrega de `triplet_extractions` WHERE curation_status='pending'
-- Cada tipo tera titulo, descricao e renderizacao proprios
+Existem **dois serviços paralelos** que fazem essencialmente a mesma coisa:
 
-### 4. Traducoes
-- Adicionar chaves i18n para os novos tipos de dialog (titulos e descricoes)
-- Atualizar `src/locales/pt/translation.json` e `src/locales/en/translation.json`
-- Incrementar versao no `src/i18n.ts`
+1. **`src/services/nutraceuticals.ts`** — classe `NutraceuticalsService` com `getAll()`, `create()`, `update()`, `delete()`, `addConditionRelation()`, etc.
+2. **`src/services/nutraceuticals/index.ts`** — agregador que importa de `base-service.ts`, `query-service.ts`, `mutation-service.ts`, `relations-service.ts`
 
-## Sobre o Ponto A (Patient Analysis)
-Para testar o Patient Analysis, o caminho e: pagina do veterinario -> selecionar um pet -> clicar "Analisar com VetGraphRAG". Isso requer ter um pet cadastrado no sistema. Se nao houver pets, precisaremos usar dados de teste. Isso sera tratado separadamente apos estas correcoes.
+Ambos fazem queries à mesma tabela `nutraceuticals` com selects quase idênticos. O serviço modular (`/nutraceuticals/`) é a versão refatorada, mas o antigo (`nutraceuticals.ts`) ainda existe e pode estar em uso em outros lugares.
 
-## Sobre o Ponto C ("Aguardando processamento")
-O status "Aguardando processamento" indica que o estudo foi importado mas o pipeline de extracao de triplets ainda nao rodou para ele. Isso e comportamento esperado - quando voce processar os 30 novos estudos, eles passarao por esse estado antes de terem triplets extraidos.
+### Sua intuição está correta
 
-## Arquivos Afetados
-1. `src/hooks/useKnowledgeGraphStats.ts` - corrigir query de pathways
-2. `src/components/administrador/visualizations/KnowledgeGraphViewer.tsx` - expandir StatType e mapeamento
-3. `src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx` - adicionar renders para novos tipos
-4. `src/locales/pt/translation.json` - novas chaves
-5. `src/locales/en/translation.json` - novas chaves
-6. `src/i18n.ts` - incrementar versao
+Você disse: *"a lista de nutracêuticos demanda estudos atrelados, mas nem todos os nutracêuticos dos estudos precisam estar nessas listas — são nutracêuticos disponíveis para tratamentos"*.
+
+Isso é exatamente o propósito. O **Catálogo** deveria ser a lista curada de nutracêuticos **disponíveis para prescrição/tratamento** — a base autoritativa. As relações com condições e estudos são atributos desses nutracêuticos, não uma coisa separada.
+
+---
+
+## Proposta de reorganização
+
+### Conceito: Uma aba com dois modos de visualização
+
+Em vez de 3 abas com sobreposição, consolidar em **uma interface única com alternância de visualização**:
+
+```text
+┌─────────────────────────────────────────────────────┐
+│  Nutraceuticals Available for Treatment             │
+│  [Stats cards: total, com condições, com estudos]   │
+│                                                     │
+│  [Search] [Filters] [View: 📋 Simple | 📊 Matrix]  │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ Tabela (alterna entre simples e expandível) │    │
+│  │ - CRUD sempre disponível                    │    │
+│  │ - Colunas de condições visíveis no modo     │    │
+│  │   Matrix                                    │    │
+│  │ - Gerenciamento de relações via diálogo     │    │
+│  │   (já existe: ManageRelationshipsDialog)    │    │
+│  └─────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+```
+
+### Ações concretas
+
+1. **Eliminar a aba Relations** — está vazia, e a funcionalidade que promete (associar nutracêuticos a condições/estudos) já existe nos diálogos de CRUD e no `ManageRelationshipsDialog`
+
+2. **Fundir Catalog + Matrix** — manter uma única aba com toggle de visualização:
+   - **Modo Simples** (atual Catalog): tabela CRUD rápida para gestão
+   - **Modo Matrix** (atual Matrix): tabela expandível com prevenção/tratamento/suporte e convergência
+   
+3. **Limpar serviços duplicados** — consolidar `src/services/nutraceuticals.ts` (classe) com `src/services/nutraceuticals/index.ts` (modular), mantendo apenas um
+
+4. **Remover dados mockados** — a `NutraceuticosExpandableTable` gera números de estudos aleatórios com `Math.random()` em vez de usar dados reais. Isso deve usar os dados reais de `nutraceutical_studies`
+
+### Detalhes técnicos da implementação
+
+**Componentes a manter:**
+- `NutraceuticosExpandableTable` (a melhor tabela, mais rica)
+- `ManageRelationshipsDialog` (já gerencia relações)
+- `NutraceuticalCRUDDialog` (CRUD completo)
+- `StatsGrid` (cards de estatísticas)
+- `NutraceuticalSearchFilters` (filtros avançados)
+
+**Componentes a remover/deprecar:**
+- `RelationsTab.tsx` (stub vazio)
+- `NutraceuticalTable` do `pesquisa/nutraceuticoGerenciamento/` (duplica funcionalidade)
+- Serviço antigo `src/services/nutraceuticals.ts` (se não estiver em uso exclusivo em outro lugar)
+
+**Arquivo principal a modificar:**
+- `NutraceuticalsUnifiedTab.tsx` — remover as 3 abas, substituir por interface unificada com toggle de visualização
+
+**Estimativa**: 1 lote de implementação
+
