@@ -746,6 +746,12 @@
       "cardAddedDesc": "O estudo foi analisado com sucesso e um card foi gerado no kanban na coluna \"Novos Estudos\".",
       "curationWarning": "⚠️ Este estudo foi processado mas não será incorporado ao VetGraphRAG até ser curado e aprovado no painel de Curadoria.",
       "curationWarningTitle": "Curadoria Pendente",
+      "errorTitle": "Erro no Processamento",
+      "errorInvalidUuid": "ID de estudo inválido. Tente reimportar o estudo.",
+      "errorDuplicate": "Este estudo já existe no sistema. Verifique duplicatas.",
+      "errorNetwork": "Erro de conexão de rede. Verifique sua internet e tente novamente.",
+      "errorAlreadyProcessed": "Este estudo já foi processado anteriormente.",
+      "errorCriticalData": "Erro crítico nos dados do estudo. Verifique o arquivo original.",
       "processCard": {
         "statusComplete": "Processado",
         "statusError": "Erro",
