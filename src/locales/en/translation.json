@@ -858,7 +858,8 @@
         "step1Badge": "Tables + Figures + Meta",
         "step2Badge": "5-layer ontology (L0–L4)",
         "step3Badge": "Causal chains + confidence",
-        "step4Badge": "768-dim embeddings"
+        "step4Badge": "768-dim embeddings",
+        "expand": "(expand)"
       },
       "liveLog": "Real-Time Log",
       "events": "events",
