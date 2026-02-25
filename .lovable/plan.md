@@ -1,99 +1,65 @@
 
 
-## Plano: Reorganização do Fluxo de Estudos Científicos
+## Plano: Descrição Impressionante do Pipeline de Digestão
 
-### Contexto atual
+Sim, sei o que "pavonear" significa — exibir-se como um pavão! Vamos transformar aquela caixa azul simples numa apresentação digna de Stanford.
 
-O fluxo de estudos tem duas camadas de navegação:
-1. **Nível superior** (EstudosTab): "Import & Process" | "Manage Studies" (kanban)  
-2. **Nível inferior** (SciImportSection): Library → Upload PDFs → Imports → AI Processing
+### O que mudar
 
-Há problemas de redundância, chaves i18n quebradas e informações repetitivas.
+A caixa azul "Processing Information" atualmente mostra apenas modelo, status e uma frase genérica. Vamos substituir por uma descrição detalhada das 4 etapas do pipeline, mostrando a sofisticação tecnológica:
 
-### Mudanças propostas
-
-#### (a) Remover "Imports" do fluxo principal
-
-A aba "Imports" (HistoryTab) é um gerenciador de arquivos SciSpace — não faz parte do fluxo de digestão. Será movida para dentro do TabHeader como um botão/link discreto (ícone de histórico), acessível mas fora do fluxo sequencial.
-
-**Fluxo resultante**: Library → Upload PDFs → AI Processing
-
-**Arquivos afetados:**
-- `TabNavigation.tsx` — remover entry "import-history" do array de tabs
-- `SciImportSection.tsx` — mover o acesso ao HistoryTab para um botão no header ou collapsible section no final
-- `TabHeader.tsx` — adicionar botão de acesso ao histórico de imports
-
-#### (b) "Manage Studies" (kanban) depois do AI Processing + rename
-
-O kanban é a etapa final do fluxo de digestão. A estrutura de duas abas superiores ("Import & Process" | "Manage Studies") será eliminada — tudo ficará numa única seção linear:
+**Estrutura proposta:**
 
 ```text
-Scientific Studies Digestion Pipeline
-Library → Upload PDFs → AI Processing → Curation (kanban)
+┌─────────────────────────────────────────────────────────┐
+│ 🧬 VetGraphRAG Digestion Pipeline                      │
+│                                                         │
+│ Model: Gemini 3 Pro Preview    Status: Idle             │
+│                                                         │
+│ ① PDF Parsing & OCR                                     │
+│    Full-text extraction with layout-aware parsing,      │
+│    table recognition and metadata harvesting            │
+│                                                         │
+│ ② Entity Extraction (NER)                               │
+│    AI-powered Named Entity Recognition identifying      │
+│    nutraceuticals, conditions, mechanisms, dosages      │
+│    and species across the 5-layer VetGraphRAG ontology  │
+│                                                         │
+│ ③ Knowledge Triplet Generation                          │
+│    Causal relationship mapping: Compound → Mechanism    │
+│    → Effect → Clinical Outcome, with confidence scores  │
+│    and evidence level classification                    │
+│                                                         │
+│ ④ Vectorization & Semantic Indexing                     │
+│    768-dim embeddings (text-embedding-004) for          │
+│    semantic search and similarity-based retrieval       │
+└─────────────────────────────────────────────────────────┘
 ```
 
-O kanban será incorporado como 4ª aba no fluxo sequencial dentro do SciImportSection, em vez de ficar separado no nível superior.
+### Arquivos afetados
 
-**Arquivos afetados:**
-- `EstudosTab.tsx` — remover sistema de duas abas superiores, renderizar tudo linearmente
-- `TabNavigation.tsx` — adicionar "Curation" como 4ª aba após AI Processing
-- `SciImportSection.tsx` — adicionar TabsContent para kanban, importar componentes de kanban
-- `TabHeader.tsx` — alterar título para "Scientific Studies Digestion" / "Digestão de Estudos Científicos"
-- Traduções PT/EN — novas chaves para título, descrição e nomes de abas
+1. **`src/locales/pt/translation.json`** — Substituir `processing.description` por 4 chaves de etapas com títulos e descrições detalhadas
+2. **`src/locales/en/translation.json`** — Mesmo em inglês
+3. **`NtaiProcessingSection.tsx`** (linhas 256-269) — Redesenhar o bloco azul para mostrar as 4 etapas com ícones e descrições expandidas
+4. **`src/i18n.ts`** — Incrementar versão
 
-#### (c) Corrigir chaves i18n quebradas
+### Chaves i18n novas
 
-`NtaiProcessCard.tsx` tem ~15 textos hardcoded em português:
-- Linha 68: `'Processado'` → `t('studies.processing.status.complete')`
-- Linha 70: `'Erro'` → `t('studies.processing.status.error')`
-- Linha 72-78: todos os status → chaves i18n
-- Linha 194: `"Remover da fila"` → `t()`
-- Linha 213: `"Fonte:"` → `t()`
-- Linha 219: `"Importado: há menos de um dia"` → `t()`
-- Linha 247: `"Estudo processado com sucesso..."` → `t()`
-- Linhas 256-269: textos do AlertDialog → `t()`
-
-**Arquivos afetados:**
-- `NtaiProcessCard.tsx` — substituir todos os hardcoded por `t()`
-- `translation.json` (PT e EN) — adicionar chaves correspondentes
-
-#### (d) Resumo compacto em vez de card redundante com kanban
-
-Após processamento completo, em vez de mostrar o card verde verboso "Card added to kanban" + toda a análise detalhada (que já estará disponível no kanban), mostrar um **resumo compacto inline**:
-
-```text
-✅ d2a1a584 | Quality: Média | Relevance: Média | 3 nutraceuticals, 5 conditions, 12 triplets
+```
+studies.vetgraphrag.processing.step1Title: "PDF Parsing & OCR"
+studies.vetgraphrag.processing.step1Desc: (descrição técnica)
+studies.vetgraphrag.processing.step2Title: "Entity Extraction (NER)"
+studies.vetgraphrag.processing.step2Desc: (descrição técnica)
+studies.vetgraphrag.processing.step3Title: "Knowledge Triplet Generation"
+studies.vetgraphrag.processing.step3Desc: (descrição técnica)
+studies.vetgraphrag.processing.step4Title: "Vectorization & Semantic Indexing"
+studies.vetgraphrag.processing.step4Desc: (descrição técnica)
 ```
 
-Uma linha com badges, sem duplicar informações do kanban.
+### Design
 
-**Arquivos afetados:**
-- `NtaiProcessingSection.tsx` — simplificar bloco de `analysisResult` (linhas 336-354) para resumo compacto
-- `NtaiAnalysisResults.tsx` — pode ser mantido, mas só aparece no kanban (EstudoDetailDialog), não mais aqui
-
-#### (e) Warning em vez de card verde de sucesso
-
-Substituir o bloco verde "Card added to kanban" (linhas 347-353 do NtaiProcessingSection) por um **alerta amarelo/laranja** avisando:
-
-> ⚠️ Este estudo foi processado mas **não será incorporado ao VetGraphRAG** até ser curado e aprovado no painel de Curadoria.
-
-**Arquivos afetados:**
-- `NtaiProcessingSection.tsx` — trocar `bg-green-50` por `bg-amber-50` com texto de warning
-- `NtaiProcessCard.tsx` — trocar o card verde (linha 246-249) pela mesma mensagem de warning
-- Traduções PT/EN — chaves para a mensagem de warning
-
-### Ordem de implementação
-
-1. Traduções i18n (base para tudo)
-2. Corrigir hardcoded em NtaiProcessCard (c)
-3. Reorganizar TabNavigation + SciImportSection (a + b)
-4. Simplificar resultado pós-processamento (d + e)
-5. Incrementar versão i18n
-6. Atualizar documentação
-
-### Detalhes técnicos
-
-- O componente de kanban (`EstudosColumn`) + seus hooks/state serão movidos para dentro do `SciImportSection`
-- O `EstudosTab` ficará muito mais simples — basicamente renderiza `EstudosHeader` + `SciImportSection` (que agora contém tudo)
-- O `HistoryTab` será acessível via um botão `📁 Import History` no header do card, abrindo um collapsible ou dialog
+- Manter o fundo azul claro (`bg-blue-50`)
+- Cada etapa com número circundado + título em bold + descrição em texto menor
+- Layout vertical com separadores sutis entre etapas
+- Manter modelo e status no topo
 
