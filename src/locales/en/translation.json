@@ -389,6 +389,9 @@
       "workflowDescription": "This will auto-approve high-confidence triplets, consolidate the knowledge graph and sync to Neo4j.",
       "studyApproved": "Study Approved"
     },
+    "scores": {
+      "notEvaluated": "Not evaluated"
+    },
     "library": {
       "title": "Studies Library",
       "studies": "studies",

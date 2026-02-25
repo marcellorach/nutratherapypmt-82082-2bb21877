@@ -143,6 +143,27 @@ interface ExtractedStudyData {
   drug_interactions?: DrugInteraction[];
   // ✅ NEW: Synergies
   synergies?: Synergy[];
+  // ✅ NEW: Study assessment scores
+  study_assessment?: {
+    methodology_type?: string;
+    sample_size?: number;
+    randomization?: boolean;
+    blinding?: string;
+    placebo_controlled?: boolean;
+    statistical_significance?: boolean;
+    follow_up_duration?: string;
+    species_tested?: string[];
+    quality_score?: number;
+    relevance_score?: number;
+    novelty_score?: number;
+  };
+  // ✅ NEW: Study summary
+  study_summary?: {
+    objective?: string;
+    key_findings?: string[];
+    clinical_implications?: string;
+    limitations?: string[];
+  };
 }
 
 interface GeminiFile {
@@ -1328,7 +1349,28 @@ Return using extract_study_data function with ALL arrays fully populated, INCLUD
         enhanced_effect: s.enhanced_effect,
         mechanism: s.mechanism,
         optimal_ratio: s.optimal_ratio
-      }))
+      })),
+      // ✅ NEW: Study assessment scores from LLM
+      study_assessment: extractedArgs.study_assessment ? {
+        methodology_type: extractedArgs.study_assessment.methodology_type,
+        sample_size: extractedArgs.study_assessment.sample_size,
+        randomization: extractedArgs.study_assessment.randomization,
+        blinding: extractedArgs.study_assessment.blinding,
+        placebo_controlled: extractedArgs.study_assessment.placebo_controlled,
+        statistical_significance: extractedArgs.study_assessment.statistical_significance,
+        follow_up_duration: extractedArgs.study_assessment.follow_up_duration,
+        species_tested: extractedArgs.study_assessment.species_tested,
+        quality_score: extractedArgs.study_assessment.quality_score,
+        relevance_score: extractedArgs.study_assessment.relevance_score,
+        novelty_score: extractedArgs.study_assessment.novelty_score,
+      } : undefined,
+      // ✅ NEW: Study summary from LLM
+      study_summary: extractedArgs.study_summary ? {
+        objective: extractedArgs.study_summary.objective,
+        key_findings: extractedArgs.study_summary.key_findings,
+        clinical_implications: extractedArgs.study_summary.clinical_implications,
+        limitations: extractedArgs.study_summary.limitations,
+      } : undefined,
     };
 
     // Validação crítica - agora mais flexível
@@ -1888,6 +1930,14 @@ serve(async (req) => {
           extractedContraindications: extractedData.contraindications || [],
           extractedDrugInteractions: extractedData.drug_interactions || [],
           extractedSynergies: extractedData.synergies || [],
+          // ✅ NEW: Study assessment scores - explicit keys for frontend
+          studyAssessment: extractedData.study_assessment || {},
+          study_assessment: extractedData.study_assessment || {},
+          studySummary: extractedData.study_summary || {},
+          study_summary: extractedData.study_summary || {},
+          qualityScore: extractedData.study_assessment?.quality_score || 0,
+          relevanceScore: extractedData.study_assessment?.relevance_score || 0,
+          noveltyScore: extractedData.study_assessment?.novelty_score || 0,
           // ✅ Metadata summary for quick reference
           extraction_summary: {
             total_nutraceuticals: extractedData.nutraceuticals.length,
@@ -1967,6 +2017,9 @@ serve(async (req) => {
           contraindications: extractedData.contraindications || [],
           drug_interactions: extractedData.drug_interactions || [],
           synergies: extractedData.synergies || [],
+          // ✅ NEW: Study assessment and summary for study_extractions
+          study_assessment: extractedData.study_assessment || {},
+          study_summary: extractedData.study_summary || {},
           // Clinical outcomes for chat context
           clinical_outcomes: extractedData.conditions.map(c => ({
             condition: c.name,
