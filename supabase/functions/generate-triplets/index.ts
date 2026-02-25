@@ -1127,10 +1127,33 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       };
     }));
 
+    // Filter out null triplets (skipped due to low confidence)
+    const validTriplets = tripletsWithScores.filter((t: any) => t !== null && t !== undefined);
+    
+    if (validTriplets.length === 0) {
+      console.log('⚠️ No valid triplets after filtering');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          studyId,
+          triplets: [],
+          tripletsGenerated: 0,
+          count: 0,
+          autoApproved: 0,
+          pathwayChainsDiscovered: pathwayChains,
+          synergiesExtracted: synergies.length,
+          hierarchicalEdgesCreated: 0,
+          phase1DiscoveryLength: freeDiscoveryText.length,
+          neo4jSync: null
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Insert triplets
     const { data: insertedTriplets, error: insertError } = await supabase
       .from('triplet_extractions')
-      .insert(tripletsWithScores)
+      .insert(validTriplets)
       .select();
 
     if (insertError) {
@@ -1139,7 +1162,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
     }
 
     // Create hierarchical_edges for high-confidence triplets
-    const highConfidenceTriplets = tripletsWithScores.filter(t => t && t.extraction_confidence >= 0.7);
+    const highConfidenceTriplets = validTriplets.filter((t: any) => t && t.extraction_confidence >= 0.7);
     if (highConfidenceTriplets.length > 0) {
       const hierarchicalEdges = highConfidenceTriplets
         .filter(t => t && t.subject_type && t.object_type && t.predicate) // Ensure required fields exist
@@ -1178,7 +1201,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       .from('processed_studies')
       .update({
         analysis_data: {
-          ...(study.analysis_data || {}),
+          ...(typeof study.analysis_data === 'object' && study.analysis_data !== null ? study.analysis_data : {}),
           phase1_discovery: freeDiscoveryText,
           pathway_chains: pathwayChains,
           extraction_timestamp: new Date().toISOString()
