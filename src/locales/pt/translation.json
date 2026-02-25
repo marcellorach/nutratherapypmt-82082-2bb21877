@@ -908,6 +908,12 @@
       "startCuration": "Iniciar Curadoria",
       "viewDetails": "Ver Detalhes"
     },
+    "curation": {
+      "inCurationTab": "Em Curadoria",
+      "approvedTab": "Aprovados",
+      "noStudiesInCuration": "Nenhum estudo em curadoria",
+      "noStudiesApproved": "Nenhum estudo aprovado"
+    },
     "card": {
       "ragAnalysis": "Análise RAG",
       "vetgraphragAnalysis": "Análise VetGraphRAG",

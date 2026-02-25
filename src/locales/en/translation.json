@@ -908,6 +908,12 @@
       "startCuration": "Start Curation",
       "viewDetails": "View Details"
     },
+    "curation": {
+      "inCurationTab": "In Curation",
+      "approvedTab": "Approved",
+      "noStudiesInCuration": "No studies in curation",
+      "noStudiesApproved": "No approved studies"
+    },
     "card": {
       "ragAnalysis": "RAG Analysis",
       "vetgraphragAnalysis": "VetGraphRAG Analysis",
