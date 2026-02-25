@@ -1,94 +1,99 @@
 
 
-## Diagnóstico: Catalog vs Relations vs Matrix
+## Plano: Reorganização do Fluxo de Estudos Científicos
 
-### O que cada aba faz HOJE
+### Contexto atual
 
-| Aba | Estado | Fonte de dados | Componente de tabela |
-|-----|--------|----------------|---------------------|
-| **Catalog** | Funcional | `useNutraceuticalContext()` → mesma query Supabase | `NutraceuticalTable` (pesquisa/nutraceuticoGerenciamento/) — tabela simples com nome, outcome, estudos, ações + CRUD + migração |
-| **Relations** | **Stub vazio** | Nenhuma | 3 cards estáticos dizendo "em desenvolvimento" |
-| **Matrix** | Funcional | `useNutraceuticalContext()` → **mesma query Supabase** | `NutraceuticosExpandableTable` (nutraceuticos/) — tabela expandível com prevenção/tratamento/suporte, convergência, estudos |
+O fluxo de estudos tem duas camadas de navegação:
+1. **Nível superior** (EstudosTab): "Import & Process" | "Manage Studies" (kanban)  
+2. **Nível inferior** (SciImportSection): Library → Upload PDFs → Imports → AI Processing
 
-### Problema central: duplicidade real
+Há problemas de redundância, chaves i18n quebradas e informações repetitivas.
 
-**Catalog e Matrix buscam exatamente os mesmos dados** do mesmo contexto (`NutraceuticalContext`), que faz uma única query na tabela `nutraceuticals` com joins em `nutraceutical_conditions`, `nutraceutical_studies`, `nutraceutical_benefits`, etc.
+### Mudanças propostas
 
-A diferença é apenas a **visualização**:
-- Catalog = tabela CRUD simples (gerenciamento)
-- Matrix = tabela expandível com colunas de prevenção/tratamento/suporte (visualização científica)
+#### (a) Remover "Imports" do fluxo principal
 
-Relations está 100% vazio — é um placeholder.
+A aba "Imports" (HistoryTab) é um gerenciador de arquivos SciSpace — não faz parte do fluxo de digestão. Será movida para dentro do TabHeader como um botão/link discreto (ícone de histórico), acessível mas fora do fluxo sequencial.
 
-### Duplicidade no backend (serviços)
+**Fluxo resultante**: Library → Upload PDFs → AI Processing
 
-Existem **dois serviços paralelos** que fazem essencialmente a mesma coisa:
+**Arquivos afetados:**
+- `TabNavigation.tsx` — remover entry "import-history" do array de tabs
+- `SciImportSection.tsx` — mover o acesso ao HistoryTab para um botão no header ou collapsible section no final
+- `TabHeader.tsx` — adicionar botão de acesso ao histórico de imports
 
-1. **`src/services/nutraceuticals.ts`** — classe `NutraceuticalsService` com `getAll()`, `create()`, `update()`, `delete()`, `addConditionRelation()`, etc.
-2. **`src/services/nutraceuticals/index.ts`** — agregador que importa de `base-service.ts`, `query-service.ts`, `mutation-service.ts`, `relations-service.ts`
+#### (b) "Manage Studies" (kanban) depois do AI Processing + rename
 
-Ambos fazem queries à mesma tabela `nutraceuticals` com selects quase idênticos. O serviço modular (`/nutraceuticals/`) é a versão refatorada, mas o antigo (`nutraceuticals.ts`) ainda existe e pode estar em uso em outros lugares.
-
-### Sua intuição está correta
-
-Você disse: *"a lista de nutracêuticos demanda estudos atrelados, mas nem todos os nutracêuticos dos estudos precisam estar nessas listas — são nutracêuticos disponíveis para tratamentos"*.
-
-Isso é exatamente o propósito. O **Catálogo** deveria ser a lista curada de nutracêuticos **disponíveis para prescrição/tratamento** — a base autoritativa. As relações com condições e estudos são atributos desses nutracêuticos, não uma coisa separada.
-
----
-
-## Proposta de reorganização
-
-### Conceito: Uma aba com dois modos de visualização
-
-Em vez de 3 abas com sobreposição, consolidar em **uma interface única com alternância de visualização**:
+O kanban é a etapa final do fluxo de digestão. A estrutura de duas abas superiores ("Import & Process" | "Manage Studies") será eliminada — tudo ficará numa única seção linear:
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│  Nutraceuticals Available for Treatment             │
-│  [Stats cards: total, com condições, com estudos]   │
-│                                                     │
-│  [Search] [Filters] [View: 📋 Simple | 📊 Matrix]  │
-│                                                     │
-│  ┌─────────────────────────────────────────────┐    │
-│  │ Tabela (alterna entre simples e expandível) │    │
-│  │ - CRUD sempre disponível                    │    │
-│  │ - Colunas de condições visíveis no modo     │    │
-│  │   Matrix                                    │    │
-│  │ - Gerenciamento de relações via diálogo     │    │
-│  │   (já existe: ManageRelationshipsDialog)    │    │
-│  └─────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
+Scientific Studies Digestion Pipeline
+Library → Upload PDFs → AI Processing → Curation (kanban)
 ```
 
-### Ações concretas
+O kanban será incorporado como 4ª aba no fluxo sequencial dentro do SciImportSection, em vez de ficar separado no nível superior.
 
-1. **Eliminar a aba Relations** — está vazia, e a funcionalidade que promete (associar nutracêuticos a condições/estudos) já existe nos diálogos de CRUD e no `ManageRelationshipsDialog`
+**Arquivos afetados:**
+- `EstudosTab.tsx` — remover sistema de duas abas superiores, renderizar tudo linearmente
+- `TabNavigation.tsx` — adicionar "Curation" como 4ª aba após AI Processing
+- `SciImportSection.tsx` — adicionar TabsContent para kanban, importar componentes de kanban
+- `TabHeader.tsx` — alterar título para "Scientific Studies Digestion" / "Digestão de Estudos Científicos"
+- Traduções PT/EN — novas chaves para título, descrição e nomes de abas
 
-2. **Fundir Catalog + Matrix** — manter uma única aba com toggle de visualização:
-   - **Modo Simples** (atual Catalog): tabela CRUD rápida para gestão
-   - **Modo Matrix** (atual Matrix): tabela expandível com prevenção/tratamento/suporte e convergência
-   
-3. **Limpar serviços duplicados** — consolidar `src/services/nutraceuticals.ts` (classe) com `src/services/nutraceuticals/index.ts` (modular), mantendo apenas um
+#### (c) Corrigir chaves i18n quebradas
 
-4. **Remover dados mockados** — a `NutraceuticosExpandableTable` gera números de estudos aleatórios com `Math.random()` em vez de usar dados reais. Isso deve usar os dados reais de `nutraceutical_studies`
+`NtaiProcessCard.tsx` tem ~15 textos hardcoded em português:
+- Linha 68: `'Processado'` → `t('studies.processing.status.complete')`
+- Linha 70: `'Erro'` → `t('studies.processing.status.error')`
+- Linha 72-78: todos os status → chaves i18n
+- Linha 194: `"Remover da fila"` → `t()`
+- Linha 213: `"Fonte:"` → `t()`
+- Linha 219: `"Importado: há menos de um dia"` → `t()`
+- Linha 247: `"Estudo processado com sucesso..."` → `t()`
+- Linhas 256-269: textos do AlertDialog → `t()`
 
-### Detalhes técnicos da implementação
+**Arquivos afetados:**
+- `NtaiProcessCard.tsx` — substituir todos os hardcoded por `t()`
+- `translation.json` (PT e EN) — adicionar chaves correspondentes
 
-**Componentes a manter:**
-- `NutraceuticosExpandableTable` (a melhor tabela, mais rica)
-- `ManageRelationshipsDialog` (já gerencia relações)
-- `NutraceuticalCRUDDialog` (CRUD completo)
-- `StatsGrid` (cards de estatísticas)
-- `NutraceuticalSearchFilters` (filtros avançados)
+#### (d) Resumo compacto em vez de card redundante com kanban
 
-**Componentes a remover/deprecar:**
-- `RelationsTab.tsx` (stub vazio)
-- `NutraceuticalTable` do `pesquisa/nutraceuticoGerenciamento/` (duplica funcionalidade)
-- Serviço antigo `src/services/nutraceuticals.ts` (se não estiver em uso exclusivo em outro lugar)
+Após processamento completo, em vez de mostrar o card verde verboso "Card added to kanban" + toda a análise detalhada (que já estará disponível no kanban), mostrar um **resumo compacto inline**:
 
-**Arquivo principal a modificar:**
-- `NutraceuticalsUnifiedTab.tsx` — remover as 3 abas, substituir por interface unificada com toggle de visualização
+```text
+✅ d2a1a584 | Quality: Média | Relevance: Média | 3 nutraceuticals, 5 conditions, 12 triplets
+```
 
-**Estimativa**: 1 lote de implementação
+Uma linha com badges, sem duplicar informações do kanban.
+
+**Arquivos afetados:**
+- `NtaiProcessingSection.tsx` — simplificar bloco de `analysisResult` (linhas 336-354) para resumo compacto
+- `NtaiAnalysisResults.tsx` — pode ser mantido, mas só aparece no kanban (EstudoDetailDialog), não mais aqui
+
+#### (e) Warning em vez de card verde de sucesso
+
+Substituir o bloco verde "Card added to kanban" (linhas 347-353 do NtaiProcessingSection) por um **alerta amarelo/laranja** avisando:
+
+> ⚠️ Este estudo foi processado mas **não será incorporado ao VetGraphRAG** até ser curado e aprovado no painel de Curadoria.
+
+**Arquivos afetados:**
+- `NtaiProcessingSection.tsx` — trocar `bg-green-50` por `bg-amber-50` com texto de warning
+- `NtaiProcessCard.tsx` — trocar o card verde (linha 246-249) pela mesma mensagem de warning
+- Traduções PT/EN — chaves para a mensagem de warning
+
+### Ordem de implementação
+
+1. Traduções i18n (base para tudo)
+2. Corrigir hardcoded em NtaiProcessCard (c)
+3. Reorganizar TabNavigation + SciImportSection (a + b)
+4. Simplificar resultado pós-processamento (d + e)
+5. Incrementar versão i18n
+6. Atualizar documentação
+
+### Detalhes técnicos
+
+- O componente de kanban (`EstudosColumn`) + seus hooks/state serão movidos para dentro do `SciImportSection`
+- O `EstudosTab` ficará muito mais simples — basicamente renderiza `EstudosHeader` + `SciImportSection` (que agora contém tudo)
+- O `HistoryTab` será acessível via um botão `📁 Import History` no header do card, abrindo um collapsible ou dialog
 
