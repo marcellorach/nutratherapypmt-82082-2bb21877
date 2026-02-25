@@ -944,7 +944,17 @@
       "processWithGemini": "Processar com Gemini AI",
       "geminiAnalyzing": "🤖 Gemini AI analisando documento... {{progress}}%",
       "vectorizedChunks": "{{count}} chunks vetorizados para busca semântica",
-      "clickToVectorize": "Clique para vetorizar e habilitar busca semântica"
+      "clickToVectorize": "Clique para vetorizar e habilitar busca semântica",
+      "summary": "Resumo",
+      "noSummary": "Resumo não disponível",
+      "digestionStats": "Digestão",
+      "entities": "Entidades",
+      "triplets": "Triplets",
+      "embeddings": "Embeddings",
+      "mechanisms": "Mecanismos",
+      "outcomes": "Desfechos",
+      "processingTime": "Tempo",
+      "notProcessed": "Não processado"
     },
     "deletion": {
       "success": "Estudo movido para lixeira",

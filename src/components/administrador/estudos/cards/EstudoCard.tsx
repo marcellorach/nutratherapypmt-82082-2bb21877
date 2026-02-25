@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle, Trash2, Clock, Database, FileText, Brain } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
@@ -45,11 +45,13 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [embeddingsCount, setEmbeddingsCount] = useState<number | null>(null);
   const [checkingEmbeddings, setCheckingEmbeddings] = useState(false);
+  const [tripletCount, setTripletCount] = useState<number | null>(null);
 
   // Update local estudo when prop changes
   useEffect(() => {
     setLocalEstudo(estudo);
     checkVectorizationStatus();
+    loadTripletCount();
   }, [estudo]);
 
   const checkVectorizationStatus = async () => {
@@ -68,6 +70,19 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
       console.error('Error checking embeddings:', error);
     } finally {
       setCheckingEmbeddings(false);
+    }
+  };
+
+  const loadTripletCount = async () => {
+    if (!localEstudo.id) return;
+    try {
+      const { count, error } = await supabase
+        .from('triplet_extractions')
+        .select('*', { count: 'exact', head: true })
+        .eq('study_id', localEstudo.id);
+      if (!error) setTripletCount(count || 0);
+    } catch (error) {
+      console.error('Error loading triplet count:', error);
     }
   };
 
@@ -152,7 +167,20 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   const conditions = analysisData?.extractedConditions || [];
   const interactions = analysisData?.extractedInteractions || [];
   const sideEffects = analysisData?.extractedSideEffects || [];
+  const mechanisms = analysisData?.molecularMechanisms || [];
+  const clinicalOutcomes = analysisData?.clinicalOutcomes || [];
   const hasAnalysisData = !!analysisData && (nutraceuticals.length > 0 || conditions.length > 0);
+
+  // Summary text (from study_summary or description)
+  const summaryText = analysisData?.study_summary?.summary || analysisData?.study_summary?.main_findings || localEstudo.description || '';
+
+  // Processing time calculation
+  const processingTime = localEstudo.created_at && localEstudo.updated_at && localEstudo.kanban_status !== 'new'
+    ? Math.round((new Date(localEstudo.updated_at).getTime() - new Date(localEstudo.created_at).getTime()) / 1000 / 60)
+    : null;
+
+  // Total entities count
+  const totalEntities = nutraceuticals.length + conditions.length;
 
   return (
     <Card className={needsProcessing && !isProcessing ? 'border-2 border-yellow-500 bg-yellow-50/30' : ''}>
@@ -247,7 +275,54 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             )}
           </div>
         </div>
-        <CardDescription>{localEstudo.description || t('studies.card.importedStudy')}</CardDescription>
+        {/* Summary - max 3 lines */}
+        {summaryText && (
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-3 leading-relaxed">
+            {summaryText}
+          </p>
+        )}
+        {!summaryText && (
+          <CardDescription>{t('studies.card.importedStudy')}</CardDescription>
+        )}
+
+        {/* Digestion Stats */}
+        {hasAnalysisData && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1" title={t('studies.card.entities')}>
+              <Database className="h-3 w-3" />
+              <span>{totalEntities} {t('studies.card.entities')}</span>
+            </div>
+            <span className="text-border">•</span>
+            <div className="flex items-center gap-1" title={t('studies.card.triplets')}>
+              <FileText className="h-3 w-3" />
+              <span>{tripletCount !== null ? tripletCount : '...'} {t('studies.card.triplets')}</span>
+            </div>
+            {mechanisms.length > 0 && (
+              <>
+                <span className="text-border">•</span>
+                <div className="flex items-center gap-1">
+                  <Brain className="h-3 w-3" />
+                  <span>{mechanisms.length} {t('studies.card.mechanisms')}</span>
+                </div>
+              </>
+            )}
+            {embeddingsCount !== null && embeddingsCount > 0 && (
+              <>
+                <span className="text-border">•</span>
+                <span>{embeddingsCount} {t('studies.card.embeddings')}</span>
+              </>
+            )}
+            {processingTime !== null && processingTime > 0 && (
+              <>
+                <span className="text-border">•</span>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>{processingTime}min</span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
         
         {/* Progress Bar durante processamento */}
         {isProcessing && (
