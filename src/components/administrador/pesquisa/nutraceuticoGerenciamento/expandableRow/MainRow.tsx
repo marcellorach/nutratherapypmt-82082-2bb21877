@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import ActionButtons from './ActionButtons';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 
 interface MainRowProps {
   nutraceutical: any;
@@ -23,6 +24,8 @@ const MainRow: React.FC<MainRowProps> = ({
   onDeleteClick,
   onManageRelationships
 }) => {
+  const { localizedField } = useLocalizedField();
+
   // Helper para obter o nome do outcome
   const getOutcomeName = () => {
     if (!nutraceutical) return "Não definido";
@@ -100,7 +103,7 @@ const MainRow: React.FC<MainRowProps> = ({
           >
             {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
-          <span>{nutraceutical.name || "Sem nome"}</span>
+          <span>{localizedField(nutraceutical, 'name', 'Sem nome')}</span>
         </div>
       </TableCell>
       <TableCell>

@@ -4,6 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticosTableProps {
   nutraceuticals: any[];
@@ -14,6 +16,8 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
   nutraceuticals, 
   onEditClick
 }) => {
+  const { localizedField } = useLocalizedField();
+  const { t } = useTranslation();
   // Função para formatar a eficácia com cores
   const getEfficacyDisplay = (score: number) => {
     const color = score >= 4 ? 'bg-green-100 text-green-800' : 
@@ -61,12 +65,15 @@ export const NutraceuticosTable: React.FC<NutraceuticosTableProps> = ({
           ) : (
             nutraceuticals.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell className="font-medium">{localizedField(item, 'name')}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{item.category || 'Sem categoria'}</Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {item.source || '-'}
+                  {localizedField(item, 'source') || '-'}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {localizedField(item, 'dosage') || '-'}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {item.dosage || '-'}

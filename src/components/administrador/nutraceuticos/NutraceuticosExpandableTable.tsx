@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { Nutraceutical } from "@/types";
 import HealthConditionTags from './table/HealthConditionTags';
 import { useTranslation } from 'react-i18next';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 
 interface NutraceuticosExpandableTableProps {
   nutraceuticals: Nutraceutical[];
@@ -20,6 +21,7 @@ const NutraceuticosExpandableTable = ({
   onConditionClick
 }) => {
   const { t } = useTranslation();
+  const { localizedField } = useLocalizedField();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   
   const toggleRow = (id: string) => {
@@ -139,8 +141,8 @@ const NutraceuticosExpandableTable = ({
                           </Button>
                         </TableCell>
                         <TableCell className="font-medium">
-                          <div className="truncate" title={nutraceutical.name}>
-                            {nutraceutical.name}
+                          <div className="truncate" title={localizedField(nutraceutical, 'name')}>
+                            {localizedField(nutraceutical, 'name')}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -201,7 +203,7 @@ const NutraceuticosExpandableTable = ({
                               <div>
                                 <h4 className="font-medium mb-2">{t('nutraceuticals.table.expanded.description')}</h4>
                                 <p className="text-sm text-muted-foreground break-words">
-                                  {nutraceutical.description || t('nutraceuticals.table.expanded.noDescription')}
+                                  {localizedField(nutraceutical, 'description') || t('nutraceuticals.table.expanded.noDescription')}
                                 </p>
                               </div>
                               
