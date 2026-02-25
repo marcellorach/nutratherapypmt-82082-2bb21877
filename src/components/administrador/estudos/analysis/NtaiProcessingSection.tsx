@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Settings, FileText, Microscope, GitBranch, Database, ChevronRight } from "lucide-react";
+import { Brain, Settings, FileText, Microscope, GitBranch, Database, ChevronRight, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useNtaiProcessing } from '@/hooks/useNtaiProcessing';
 import { useAvailableStudies } from '@/hooks/ntai/useAvailableStudies';
 import { useStudyDeletion } from '@/hooks/useStudyDeletion';
@@ -269,27 +270,38 @@ const NtaiProcessingSection: React.FC = () => {
               { step: 3, Icon: GitBranch, iconBg: 'bg-violet-100', iconColor: 'text-violet-600' },
               { step: 4, Icon: Database, iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
             ] as const).map(({ step, Icon, iconBg, iconColor }, index) => (
-              <div key={step} className="flex items-center gap-3 py-2">
-                {/* Vertical connector line + icon */}
-                <div className="flex flex-col items-center">
-                  <div className={`w-7 h-7 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+              <Collapsible key={step}>
+                <div className="flex items-start gap-3 py-2">
+                  {/* Vertical connector line + icon */}
+                  <div className="flex flex-col items-center">
+                    <div className={`w-7 h-7 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+                    </div>
+                    {index < 3 && <div className="w-px h-3 bg-blue-200 mt-1" />}
                   </div>
-                  {index < 3 && <div className="w-px h-3 bg-blue-200 mt-1" />}
+                  
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <CollapsibleTrigger className="flex items-center gap-2 w-full group cursor-pointer">
+                      <span className="text-[10px] font-bold text-gray-300">0{step}</span>
+                      <span className="text-xs font-semibold text-gray-800 whitespace-nowrap">
+                        {t(`studies.vetgraphrag.processing.step${step}Title`)}
+                      </span>
+                      <span className="text-[10px] text-gray-400 hidden sm:inline">—</span>
+                      <span className="text-[10px] text-gray-500 truncate hidden sm:inline">
+                        {t(`studies.vetgraphrag.processing.step${step}Badge`)}
+                      </span>
+                      <ChevronDown className="h-3 w-3 text-gray-400 ml-auto transition-transform group-data-[state=open]:rotate-180 flex-shrink-0" />
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="mt-1.5">
+                      <p className="text-[11px] leading-relaxed text-gray-600 pl-5 border-l-2 border-blue-100 ml-1">
+                        {t(`studies.vetgraphrag.processing.step${step}Desc`)}
+                      </p>
+                    </CollapsibleContent>
+                  </div>
                 </div>
-                
-                {/* Content - single line */}
-                <div className="flex items-baseline gap-2 min-w-0 flex-1">
-                  <span className="text-[10px] font-bold text-gray-300">0{step}</span>
-                  <span className="text-xs font-semibold text-gray-800 whitespace-nowrap">
-                    {t(`studies.vetgraphrag.processing.step${step}Title`)}
-                  </span>
-                  <span className="text-[10px] text-gray-400 hidden sm:inline">—</span>
-                  <span className="text-[10px] text-gray-500 truncate hidden sm:inline">
-                    {t(`studies.vetgraphrag.processing.step${step}Badge`)}
-                  </span>
-                </div>
-              </div>
+              </Collapsible>
             ))}
           </div>
         </div>
