@@ -854,7 +854,11 @@
         "step3Title": "Geração de Triplets de Conhecimento",
         "step3Desc": "Mapeamento de relações causais: Composto → Alvo Molecular → Mecanismo → Efeito Biológico → Desfecho Clínico, com scores de confiança e classificação de nível de evidência.",
         "step4Title": "Vetorização & Indexação Semântica",
-        "step4Desc": "Embeddings de 768 dimensões via modelo text-embedding-004 para busca por similaridade semântica, permitindo recuperação entre estudos e recomendações contextuais."
+        "step4Desc": "Embeddings de 768 dimensões via modelo text-embedding-004 para busca por similaridade semântica, permitindo recuperação entre estudos e recomendações contextuais.",
+        "step1Badge": "Tabelas + Figuras + Meta",
+        "step2Badge": "Ontologia 5 camadas (L0–L4)",
+        "step3Badge": "Cadeias causais + confiança",
+        "step4Badge": "Embeddings 768-dim"
       },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",

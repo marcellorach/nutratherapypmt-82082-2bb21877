@@ -854,7 +854,11 @@
         "step3Title": "Knowledge Triplet Generation",
         "step3Desc": "Causal relationship mapping: Compound → Molecular Target → Mechanism → Biological Effect → Clinical Outcome, with extraction confidence scores and evidence level classification.",
         "step4Title": "Vectorization & Semantic Indexing",
-        "step4Desc": "768-dimensional embeddings via text-embedding-004 model for semantic similarity search, enabling cross-study retrieval and context-aware recommendations."
+        "step4Desc": "768-dimensional embeddings via text-embedding-004 model for semantic similarity search, enabling cross-study retrieval and context-aware recommendations.",
+        "step1Badge": "Tables + Figures + Meta",
+        "step2Badge": "5-layer ontology (L0–L4)",
+        "step3Badge": "Causal chains + confidence",
+        "step4Badge": "768-dim embeddings"
       },
       "liveLog": "Real-Time Log",
       "events": "events",
