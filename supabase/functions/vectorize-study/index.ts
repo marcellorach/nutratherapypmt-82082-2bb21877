@@ -110,9 +110,9 @@ serve(async (req) => {
     let errorCount = 0;
 
     // Try multiple model endpoints in order of preference
+    // text-embedding-004 was deprecated on Jan 14, 2026. Use gemini-embedding-001
     const embeddingEndpoints = [
-      { url: 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent', model: 'text-embedding-004' },
-      { url: 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-005:embedContent', model: 'text-embedding-005' },
+      { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent', model: 'gemini-embedding-001' },
     ];
 
     // Detect working endpoint with first chunk
