@@ -1,15 +1,18 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Brain, BookOpen, ClipboardCheck } from "lucide-react";
+import { Upload, Brain, BookOpen, ClipboardCheck, Loader2 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { Badge } from "@/components/ui/badge";
 
 interface TabNavigationProps {
   activeTab: string;
   onTabChange: (value: string) => void;
+  isProcessing?: boolean;
+  pendingCurationCount?: number;
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
+const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, isProcessing, pendingCurationCount }) => {
   const { t } = useTranslation();
   
   const tabs = [
@@ -29,8 +32,17 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
               className="flex items-center gap-1"
               onClick={() => onTabChange(tab.value)}
             >
-              <tab.icon className="h-4 w-4" />
+              {tab.value === "ai-processing" && isProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <tab.icon className="h-4 w-4" />
+              )}
               <span>{tab.label}</span>
+              {tab.value === "curation" && pendingCurationCount != null && pendingCurationCount > 0 && (
+                <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-[10px] leading-4 min-w-[20px] justify-center">
+                  {pendingCurationCount}
+                </Badge>
+              )}
             </TabsTrigger>
             {idx < tabs.length - 1 && (
               <span className="text-muted-foreground font-bold mx-3 select-none">→</span>
