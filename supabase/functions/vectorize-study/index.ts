@@ -104,30 +104,53 @@ serve(async (req) => {
     }
 
     // 3. Gerar embeddings para cada chunk usando Google Gemini API
-    console.log('🔢 Gerando embeddings com Google Gemini API (text-embedding-004)...');
+    console.log('🔢 Gerando embeddings com Google Gemini API...');
     const embeddingsData = [];
     let successCount = 0;
     let errorCount = 0;
+
+    // Try multiple model endpoints in order of preference
+    const embeddingEndpoints = [
+      { url: 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent', model: 'text-embedding-004' },
+      { url: 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-005:embedContent', model: 'text-embedding-005' },
+    ];
+
+    // Detect working endpoint with first chunk
+    let workingEndpoint = embeddingEndpoints[0];
+    for (const ep of embeddingEndpoints) {
+      try {
+        const testResp = await fetch(ep.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GOOGLE_AI_API_KEY },
+          body: JSON.stringify({ content: { parts: [{ text: 'test' }] } }),
+        });
+        if (testResp.ok) {
+          workingEndpoint = ep;
+          console.log(`✅ Using embedding model: ${ep.model}`);
+          await testResp.text(); // consume body
+          break;
+        }
+        await testResp.text(); // consume body
+        console.warn(`⚠️ Model ${ep.model} not available, trying next...`);
+      } catch { console.warn(`⚠️ Endpoint ${ep.model} failed`); }
+    }
 
     for (let i = 0; i < chunks.length; i++) {
       try {
         console.log(`   Processing chunk ${i + 1}/${chunks.length}...`);
         
-        const response = await fetch(
-          'https://generativelanguage.googleapis.com/v1/models/text-embedding-004:embedContent',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': GOOGLE_AI_API_KEY,
-            },
-            body: JSON.stringify({
-              content: {
-                parts: [{ text: chunks[i] }]
-              }
-            }),
-          }
-        );
+        const response = await fetch(workingEndpoint.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': GOOGLE_AI_API_KEY,
+          },
+          body: JSON.stringify({
+            content: {
+              parts: [{ text: chunks[i] }]
+            }
+          }),
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -198,7 +221,7 @@ serve(async (req) => {
           vectorized: true,
           vectorized_at: new Date().toISOString(),
           chunks_count: embeddingsData.length,
-          embedding_model: 'text-embedding-004',
+          embedding_model: workingEndpoint.model,
           embedding_provider: 'Google AI'
         }
       })
@@ -220,7 +243,7 @@ serve(async (req) => {
           text_length: study.full_text_content.length,
           chunks_generated: chunks.length,
           embeddings_saved: embeddingsData.length,
-          embedding_model: 'text-embedding-004',
+          embedding_model: workingEndpoint.model,
           embedding_provider: 'Google AI',
           embedding_dimension: 768
         }
