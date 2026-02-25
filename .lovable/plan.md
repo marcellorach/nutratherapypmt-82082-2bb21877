@@ -1,75 +1,46 @@
 
 
-## Diagnóstico da Página Knowledge Graph
+## Análise das suas perguntas e plano
 
-### O que encontrei
+### Sobre o modelo (Gemini 3 vs 2.5)
 
-**O gráfico ESTÁ atualizado com os dados do Neo4j.** Testei diretamente a edge function e confirmei:
-- Neo4j tem **1.206 nós** e **2.110 relações** (de 9 estudos sincronizados)
-- Os estudos mais recentes (sincronizados hoje às 05:39) estão lá
-- Com limit 5K, todos os 2.110 edges são retornados
+Você tem razão em questionar. Revisando o código atual, a função `generate-triplets` já usa `gemini-3-pro-preview` para ambas as fases e trunca o texto para **12.000 caracteres** (linha 390). O problema real de timeout não é o modelo em si — é que duas chamadas sequenciais ao Gemini 3 Pro com textos longos somam tempo demais para o limite de 150s da edge function.
 
-### Por que parece "igual"
+**Solução corrigida**: Manter `gemini-3-pro-preview` para ambas as fases, mas implementar **chunking** do texto em vez de truncar/rejeitar.
 
-Existem **2 problemas reais** e **1 problema de percepção**:
+### Sobre chunking de estudos longos
 
-**Problema 1: Race condition no slider** — O slider default é 500. Quando monta, carrega com 500 edges. Quando você clica em "5K", o `setTimeout(() => loadGraphData(), 100)` pode capturar o valor antigo do `edgeLimit` pela closure do React. Resultado: pode carregar 500 em vez de 5000.
+Concordo completamente — rejeitar estudos longos seria perder informação valiosa. A estratégia será:
 
-**Problema 2: Sem dependência no `edgeLimit`** — O `useEffect` que chama `loadGraphData()` roda apenas no mount (`[]`). Mudar o slider NÃO re-renderiza automaticamente. Depende do `setTimeout` com o bug de closure.
+1. **Dividir o `full_text_content` em chunks de ~10.000 caracteres** com overlap de 500 chars
+2. **Phase 1**: Executar a descoberta livre em cada chunk separadamente, depois concatenar os resultados
+3. **Phase 2**: Usar o resultado consolidado da Phase 1 (que é um resumo bem menor que o texto original) para gerar os triplets estruturados
+4. **Se o estudo tiver apenas 1 chunk** (< 10K chars): comportamento idêntico ao atual, sem overhead
 
-**Problema 3 (Percepção): Classificação incorreta de entidades** — Nos logs do Neo4j vi nós como "SIRT1", "NF-κB", "AMPK", "mTORC1", "HSP90" classificados como tipo `Nutraceutical` quando são targets/mecanismos. Isso faz o gráfico parecer "mais do mesmo" porque muitas bolhas verdes (Nutraceutical) são na verdade entidades diferentes que deveriam ter outras cores.
+Isso resolve o timeout porque:
+- Cada chamada individual processa menos texto → resposta mais rápida
+- A Phase 2 recebe apenas o resumo da Phase 1, não o texto inteiro
 
-### Plano de Correção
+### Sobre os ícones (ponto b) — Implementação direta
 
-**A. Corrigir reload do gráfico quando o limit muda**
+Mudanças no `NtaiProcessingSection.tsx` (linhas 267-305):
 
-No `KnowledgeGraphViewer.tsx`:
-- Adicionar `edgeLimit` como dependência de um `useEffect` que recarrega o gráfico
-- Remover o `setTimeout` hacky do slider onChange
-- Usar `useCallback` no `loadGraphData` com `edgeLimit` como dependência
+| Etapa | Antes | Depois |
+|-------|-------|--------|
+| Step 1 (PDF Parsing) | `bg-blue-100` / `text-blue-600` | `bg-sky-100` / `text-sky-600` |
+| Step 2 (Entity Extraction) | `bg-indigo-100` / `text-indigo-600` | `bg-amber-100` / `text-amber-600` |
+| Step 3 (Triplets) | `bg-violet-100` / `text-violet-600` | `bg-emerald-100` / `text-emerald-600` |
+| Step 4 (Vectorization) | `bg-purple-100` / `text-purple-600` | `bg-rose-100` / `text-rose-600` |
 
-```tsx
-// Antes:
-useEffect(() => {
-  loadGraphData();
-  loadDataSourceStats();
-}, []);
-
-// Depois:
-useEffect(() => {
-  if (studyFilter === 'all') {
-    loadGraphData();
-  }
-}, [edgeLimit]);
-
-useEffect(() => {
-  loadDataSourceStats();
-}, []);
-```
-
-E no slider:
-```tsx
-onChange={(newLimit) => {
-  setEdgeLimit(newLimit);
-  // Remove setTimeout - useEffect handles reload
-}}
-```
-
-**B. Mostrar contadores no header do gráfico para confirmar dados carregados**
-
-Adicionar um mini-badge acima do gráfico mostrando: `"1206 nodes · 2110 edges · Neo4j"` — assim o usuário tem feedback imediato de que os dados mudaram.
-
-**C. Debounce no slider para não disparar muitos requests**
-
-Adicionar um debounce de 500ms no `useEffect` do `edgeLimit` para que arrastar o slider não faça dezenas de requests.
+Além disso:
+- Tornar o `ChevronDown` mais visível: cor mais escura (`text-gray-600`) e tamanho `h-3.5 w-3.5`
+- Adicionar um label textual "(expandir)" ao lado da setinha para indicar que há conteúdo oculto
 
 ### Arquivos a modificar
 
 | Arquivo | Mudança |
 |---------|---------|
-| `KnowledgeGraphViewer.tsx` | Fix useEffect + edgeLimit dependency, remover setTimeout do slider, adicionar badge de contagem, debounce |
-
-### Sobre a classificação incorreta de entidades
-
-Isso é um problema de qualidade dos dados no pipeline de extração (o `generate-triplets` classifica "SIRT1" como "Nutraceutical" em vez de "Target"). É uma correção separada e mais profunda no prompt do LLM. Posso abordar isso depois se quiser.
+| `supabase/functions/generate-triplets/index.ts` | Implementar chunking do texto (dividir em blocos de ~10K chars), executar Phase 1 em cada chunk, concatenar resultados antes da Phase 2 |
+| `supabase/functions/enrich-knowledge-graph/index.ts` | Não marcar "completed" se triplets = 0 → marcar como `error` |
+| `src/components/administrador/estudos/analysis/NtaiProcessingSection.tsx` | Cores pastéis distintas + setinha dropdown mais visível |
 
