@@ -33,7 +33,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
               <span>{tab.label}</span>
             </TabsTrigger>
             {idx < tabs.length - 1 && (
-              <span className="text-muted-foreground/50 mx-1 select-none">→</span>
+              <span className="text-muted-foreground font-bold mx-3 select-none">→</span>
             )}
           </React.Fragment>
         ))}
