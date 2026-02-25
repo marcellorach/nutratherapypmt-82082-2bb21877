@@ -364,7 +364,7 @@
       "confirmTitle": "Confirmar Aprovação",
       "confirmDescription": "Você está prestes a aprovar este estudo. Esta ação irá:",
       "actionChangeStatus": "Alterar o status do estudo para 'Aprovado'",
-      "actionAutoApprove": "Auto-aprovar triplets com confiança ≥70%",
+      "actionAutoApprove": "Auto-aprovar triplets com confiança ≥{{threshold}}%",
       "actionUpdateKG": "Atualizar o Grafo de Conhecimento",
       "confirm": "Sim, Aprovar",
       "processing": "Processando...",
