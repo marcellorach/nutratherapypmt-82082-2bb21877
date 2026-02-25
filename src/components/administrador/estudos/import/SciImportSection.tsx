@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +15,9 @@ import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import AIProcessingTab from './AIProcessingTab';
 import StudiesLibraryTab from '../library/StudiesLibraryTab';
-import EstudosColumn from '../EstudosColumn';
+import EstudoCard from '../cards/EstudoCard';
 import EstudoSearch from '../EstudoSearch';
-import AdicionarEstudoDialog from '../../dialogs/AdicionarEstudoDialog';
+// AdicionarEstudoDialog removed - no longer needed in sub-tab layout
 import EstudoDetailDialog from '../../dialogs/EstudoDetailDialog';
 import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
 
@@ -32,7 +32,7 @@ const SciImportSection: React.FC = () => {
   const [estudos, setEstudos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEstudo, setSelectedEstudo] = useState<any>(null);
   const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
@@ -158,8 +158,9 @@ const SciImportSection: React.FC = () => {
     (estudo.journal && estudo.journal.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const novoEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "new");
-  const emRevEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "parsed" || estudo.kanban_status === "review" || estudo.kanban_status === "processed");
+  const inCurationEstudos = filteredEstudos.filter(estudo => 
+    estudo.kanban_status === "new" || estudo.kanban_status === "parsed" || estudo.kanban_status === "review" || estudo.kanban_status === "processed"
+  );
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "approved");
 
   return (
@@ -209,53 +210,66 @@ const SciImportSection: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Kanban columns */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <EstudosColumn
-                    title={t('studies.kanban.newStudies')}
-                    icon="new"
-                    estudos={novoEstudos}
-                    onViewEstudo={handleViewEstudo}
-                    onAddEstudo={() => setDialogOpen(true)}
-                    buttonLabel={t('studies.kanban.startCuration')}
-                    getNutraceuticalScore={getNutraceuticalScore}
-                    onDeleteEstudo={handleDeleteEstudo}
-                  />
-                  <EstudosColumn
-                    title={t('studies.kanban.inReview')}
-                    icon="review"
-                    estudos={emRevEstudos}
-                    onViewEstudo={handleViewEstudo}
-                    getNutraceuticalScore={getNutraceuticalScore}
-                    onDeleteEstudo={handleDeleteEstudo}
-                  />
-                  <EstudosColumn
-                    title={t('studies.kanban.approved')}
-                    icon="approved"
-                    estudos={aprovadosEstudos}
-                    onViewEstudo={handleViewEstudo}
-                    getNutraceuticalScore={getNutraceuticalScore}
-                    onDeleteEstudo={handleDeleteEstudo}
-                  />
-                </div>
+                {/* Sub-tabs: In Curation / Approved */}
+                <Tabs defaultValue="in-curation" className="w-full">
+                  <TabsList>
+                    <TabsTrigger value="in-curation" className="gap-2">
+                      {t('studies.curation.inCurationTab')}
+                      <Badge variant="secondary" className="text-xs">{inCurationEstudos.length}</Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="approved" className="gap-2">
+                      {t('studies.curation.approvedTab')}
+                      <Badge variant="secondary" className="text-xs">{aprovadosEstudos.length}</Badge>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="in-curation">
+                    {inCurationEstudos.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+                        <p>{t('studies.curation.noStudiesInCuration')}</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {inCurationEstudos.map(estudo => (
+                          <EstudoCard
+                            key={estudo.id}
+                            estudo={estudo}
+                            onView={handleViewEstudo}
+                            buttonLabel={estudo.kanban_status === 'new' ? t('studies.kanban.startCuration') : undefined}
+                            getNutraceuticalScore={getNutraceuticalScore}
+                            onDelete={handleDeleteEstudo}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="approved">
+                    {aprovadosEstudos.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+                        <p>{t('studies.curation.noStudiesApproved')}</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {aprovadosEstudos.map(estudo => (
+                          <EstudoCard
+                            key={estudo.id}
+                            estudo={estudo}
+                            onView={handleViewEstudo}
+                            getNutraceuticalScore={getNutraceuticalScore}
+                            onDelete={handleDeleteEstudo}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             </TabsContent>
           </div>
         </Tabs>
       </Card>
 
-      <AdicionarEstudoDialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)}
-        onEstudoAdicionado={() => {
-          setDialogOpen(false);
-          fetchEstudos();
-          toast({
-            title: t('studies.toast.studyAdded'),
-            description: t('studies.toast.studyAddedDesc'),
-          });
-        }}
-      />
       
       <EstudoDetailDialog
         open={detailDialogOpen}
