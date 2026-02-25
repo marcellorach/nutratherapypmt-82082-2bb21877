@@ -112,7 +112,7 @@ export const KnowledgeGraphViewer: React.FC = () => {
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
   
   // New states for configurable limit and 3D toggle
-  const [edgeLimit, setEdgeLimit] = useState(500);
+  const [edgeLimit, setEdgeLimit] = useState(2000);
   const [enrichDialogOpen, setEnrichDialogOpen] = useState(false);
   const [use3DGraph, setUse3DGraph] = useState(false);
 
