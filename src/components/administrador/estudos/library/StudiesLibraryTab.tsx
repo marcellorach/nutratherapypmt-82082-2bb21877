@@ -126,7 +126,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
             {studies.filter(s => !s.is_simulated).length} {t('studies.library.real')}
           </Badge>
           <Badge variant="outline" className="text-xs gap-1 text-amber-600 border-amber-300">
-            <FlaskConical className="h-3 w-3" />
+            <Search className="h-3 w-3" />
             {studies.filter(s => s.is_simulated).length} {t('studies.library.simulated')}
           </Badge>
         </div>
