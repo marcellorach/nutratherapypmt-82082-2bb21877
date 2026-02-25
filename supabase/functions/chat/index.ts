@@ -6,13 +6,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages, stream: shouldStream = true } = body;
     
     if (!messages || !Array.isArray(messages)) {
       throw new Error('Messages array is required');
@@ -24,7 +24,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Calling Lovable AI Gateway with', messages.length, 'messages');
+    console.log('Calling Lovable AI Gateway with', messages.length, 'messages, stream:', shouldStream);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -35,7 +35,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: messages,
-        stream: true,
+        stream: shouldStream,
       }),
     });
 
@@ -62,12 +62,19 @@ serve(async (req) => {
       });
     }
 
-    console.log('Streaming response from AI gateway');
-
-    // Return the streaming response
-    return new Response(response.body, {
-      headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
-    });
+    if (shouldStream) {
+      console.log('Streaming response from AI gateway');
+      return new Response(response.body, {
+        headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
+      });
+    } else {
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      console.log('Non-streaming response, length:', content.length);
+      return new Response(JSON.stringify({ response: content }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
     console.error('Chat function error:', error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {

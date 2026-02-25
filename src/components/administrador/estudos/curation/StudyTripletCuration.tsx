@@ -895,6 +895,9 @@ const TripletCard: React.FC<TripletCardProps> = ({
                     <TripletInlineChat
                       studyId={triplet.study_id}
                       studyTitle={studyTitle}
+                      subject={triplet.subject_name}
+                      predicate={triplet.predicate}
+                      object={triplet.object_name}
                       initialQuestion={`Explain the relationship between "${triplet.subject_name}" and "${triplet.object_name}" (${triplet.predicate}) based on this study.`}
                     />
                   </div>

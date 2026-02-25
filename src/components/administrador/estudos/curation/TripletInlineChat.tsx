@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
@@ -18,12 +18,18 @@ interface TripletInlineChatProps {
   studyId: string;
   studyTitle?: string;
   initialQuestion: string;
+  subject?: string;
+  predicate?: string;
+  object?: string;
 }
 
 const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
   studyId,
   studyTitle,
-  initialQuestion
+  initialQuestion,
+  subject,
+  predicate,
+  object
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +37,7 @@ const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasAskedInitial, setHasAskedInitial] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && !hasAskedInitial && messages.length === 0) {
@@ -41,10 +47,15 @@ const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
+
+  const buildSystemMessage = (): Message => ({
+    role: 'system',
+    content: `You are a veterinary science expert analyzing a scientific relationship extracted from the study "${studyTitle || 'Unknown'}".
+Triplet: ${subject || 'Unknown'} → ${predicate || 'Unknown'} → ${object || 'Unknown'}.
+Answer questions about this relationship concisely and scientifically. Use markdown formatting. Respond in the same language as the user's question.`
+  });
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -56,17 +67,22 @@ const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('document-chat', {
+      const systemMsg = buildSystemMessage();
+      const chatMessages = [
+        systemMsg,
+        ...updatedMessages.map(m => ({ role: m.role, content: m.content }))
+      ];
+
+      const { data, error } = await supabase.functions.invoke('chat', {
         body: {
-          studyId,
-          question: text,
-          conversationHistory: updatedMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content }))
+          messages: chatMessages,
+          stream: false
         }
       });
 
       if (error) throw error;
 
-      const answer = data?.answer || data?.response || t('tripletCuration.inlineChat.noResponse', 'Sem resposta da IA.');
+      const answer = data?.response || t('tripletCuration.inlineChat.noResponse', 'Sem resposta da IA.');
       setMessages(prev => [...prev, { role: 'assistant', content: answer }]);
     } catch (err) {
       console.error('Inline chat error:', err);
@@ -98,10 +114,9 @@ const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
       
       <CollapsibleContent>
         <div className="mt-2 border rounded-lg bg-background overflow-hidden">
-          {/* Messages area */}
-          <ScrollArea className="max-h-48 p-3" ref={scrollRef}>
-            <div className="space-y-3">
-              {messages.map((msg, idx) => (
+          <ScrollArea className="h-52">
+            <div className="p-3 space-y-3">
+              {messages.filter(m => m.role !== 'system').map((msg, idx) => (
                 <div key={idx} className={cn(
                   "text-[11px] leading-relaxed",
                   msg.role === 'user' 
@@ -126,10 +141,10 @@ const TripletInlineChat: React.FC<TripletInlineChatProps> = ({
                   {t('tripletCuration.inlineChat.thinking', 'Analisando...')}
                 </div>
               )}
+              <div ref={bottomRef} />
             </div>
           </ScrollArea>
           
-          {/* Input area */}
           <div className="border-t p-2 flex gap-2">
             <Input
               value={input}
