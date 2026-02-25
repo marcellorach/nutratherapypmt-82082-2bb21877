@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { NutraceuticalTableProps } from './types';
 import { useTranslation } from 'react-i18next';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 
 const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   filteredNutraceuticals,
@@ -24,6 +25,7 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
   getOutcomeName,
 }) => {
   const { t } = useTranslation();
+  const { localizedField } = useLocalizedField();
   
   // Renderiza linhas de skeleton quando estiver carregando
   if (isLoading) {
@@ -79,8 +81,8 @@ const NutraceuticalTable: React.FC<NutraceuticalTableProps> = ({
         <TableBody>
           {filteredNutraceuticals.map((nutra) => (
             <TableRow key={nutra.id}>
-              <TableCell className="font-medium">{nutra.name}</TableCell>
-              <TableCell>{nutra.description?.substring(0, 100) || "-"}{nutra.description?.length > 100 ? "..." : ""}</TableCell>
+              <TableCell className="font-medium">{localizedField(nutra, 'name')}</TableCell>
+              <TableCell>{(localizedField(nutra, 'description') || "-").substring(0, 100)}{(localizedField(nutra, 'description') || "").length > 100 ? "..." : ""}</TableCell>
               <TableCell>
                 {nutra.outcome_id ? (
                   <Badge variant="outline" className="bg-blue-50">

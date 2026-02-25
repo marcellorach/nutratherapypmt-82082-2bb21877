@@ -5,6 +5,7 @@ import { Nutraceutical, NutraceuticalCondition } from "@/types";
 import HealthConditionTags from './HealthConditionTags';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 
 interface NutraceuticalRowProps {
   nutraceutical: Nutraceutical;
@@ -23,6 +24,8 @@ const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({
   onToggleExpand,
   onConditionClick
 }) => {
+  const { localizedField } = useLocalizedField();
+  
   return (
     <TableRow className="hover:bg-gray-50">
       <TableCell className="font-medium">
@@ -37,7 +40,7 @@ const NutraceuticalRow: React.FC<NutraceuticalRowProps> = ({
               <ChevronDown className="h-4 w-4" /> : 
               <ChevronRight className="h-4 w-4" />}
           </Button>
-          {nutraceutical.name}
+          {localizedField(nutraceutical, 'name')}
         </div>
       </TableCell>
       <TableCell>

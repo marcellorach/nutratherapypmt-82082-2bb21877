@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { DialogHeader as UIDialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Nutraceutical } from "@/types";
 import { useTranslation } from 'react-i18next';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 
 interface DialogHeaderProps {
   nutraceutical: Nutraceutical;
@@ -12,6 +13,7 @@ interface DialogHeaderProps {
 
 export const DialogHeader: React.FC<DialogHeaderProps> = ({ nutraceutical, getEfficacyColor }) => {
   const { t } = useTranslation();
+  const { localizedField } = useLocalizedField();
   
   return (
     <UIDialogHeader>
@@ -23,9 +25,9 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({ nutraceutical, getEf
           {nutraceutical.condition}
         </Badge>
       </div>
-      <DialogTitle className="text-xl">{nutraceutical.name}</DialogTitle>
+      <DialogTitle className="text-xl">{localizedField(nutraceutical, 'name')}</DialogTitle>
       <DialogDescription>
-        {nutraceutical.description}
+        {localizedField(nutraceutical, 'description')}
       </DialogDescription>
     </UIDialogHeader>
   );
