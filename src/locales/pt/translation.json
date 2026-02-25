@@ -935,8 +935,12 @@
     }
   },
   "nutraceuticalsUnified": {
-    "title": "Nutracêuticos Unificados",
-    "subtitle": "Pesquise e gerencie nutracêuticos, relações e visualizações",
+    "title": "Nutracêuticos Disponíveis para Tratamento",
+    "subtitle": "Gerencie o catálogo de nutracêuticos disponíveis para prescrição e tratamento",
+    "views": {
+      "simple": "Simples",
+      "matrix": "Matriz"
+    },
     "tabs": {
       "catalog": "Catálogo",
       "relations": "Relações",
