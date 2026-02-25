@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-02-25 🔬 Reorganização do Pipeline de Estudos Científicos
+
+- ✅ **Rename para "Scientific Studies Digestion"**: Título e descrição refletem o pipeline completo de digestão
+- ✅ **Pipeline linear unificado**: Library → Upload PDFs → AI Processing → Curation (kanban) — tudo em uma única seção
+- ✅ **Kanban integrado como 4ª aba**: Curadoria movida de tab separada para dentro do fluxo sequencial
+- ✅ **"Imports" movido para dialog**: Histórico de importações acessível via botão discreto no header, fora do fluxo principal
+- ✅ **EstudosTab simplificado**: Removidas abas superiores redundantes ("Import & Process" / "Manage Studies")
+- ✅ **Warning de curadoria**: Card verde de sucesso substituído por alerta âmbar informando que estudo não será incorporado ao VetGraphRAG sem curadoria
+- ✅ **i18n completo em NtaiProcessCard**: ~15 textos hardcoded em português migrados para sistema de tradução bilíngue
+- ✅ **Correção de namespace i18n**: `studies.ntai.*` corrigido para `studies.vetgraphrag.*` (namespace correto)
+
 ### Added - 2026-02-08 🔐 Sistema de Acesso com Google OAuth + Aprovação de Admin
 
 - ✅ **Google OAuth**: Login via Google configurado com Lovable Cloud
