@@ -434,28 +434,65 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
               </div>
             )}
 
-            {/* Seção Interações Positivas */}
-            {interactions.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-1">{t('studies.card.positiveInteractions')}</p>
-                <div className="flex flex-wrap gap-1">
-                  {interactions.slice(0, 3).map((interaction: any, idx: number) => (
-                    <Badge 
-                      key={idx}
-                      variant="outline" 
-                      className="bg-green-50 text-green-700 border-green-200 text-xs"
-                    >
-                      🟢 {interaction.nutraceutical || 'N/A'}: {(interaction.interaction || interaction.effect || '').substring(0, 30)}...
-                    </Badge>
-                  ))}
-                  {interactions.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{interactions.length - 3} {t('studies.card.more')}
-                    </Badge>
+            {/* Seção Interações Positivas (stimulation/modulation) */}
+            {(() => {
+              const positiveInteractions = interactions.filter((i: any) => i.type !== 'inhibition');
+              const negativeInteractions = interactions.filter((i: any) => i.type === 'inhibition');
+              const getLabel = (i: any) => {
+                const name = i.from || i.nutraceutical || i.name || '';
+                const target = i.to || '';
+                const desc = i.description || i.interaction || i.effect || '';
+                if (name && target) return `${name} → ${target}`;
+                if (name && desc) return `${name}: ${desc.substring(0, 30)}`;
+                return desc.substring(0, 40) || name;
+              };
+              return (
+                <>
+                  {positiveInteractions.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">{t('studies.card.positiveInteractions')}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {positiveInteractions.slice(0, 3).map((interaction: any, idx: number) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline" 
+                            className="bg-green-50 text-green-700 border-green-200 text-xs"
+                          >
+                            🟢 {getLabel(interaction)}
+                          </Badge>
+                        ))}
+                        {positiveInteractions.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{positiveInteractions.length - 3} {t('studies.card.more')}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </div>
-              </div>
-            )}
+                  {negativeInteractions.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">{t('studies.card.negativeInteractions')}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {negativeInteractions.slice(0, 3).map((interaction: any, idx: number) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline" 
+                            className="bg-red-50 text-red-700 border-red-200 text-xs"
+                          >
+                            🔴 {getLabel(interaction)}
+                          </Badge>
+                        ))}
+                        {negativeInteractions.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{negativeInteractions.length - 3} {t('studies.card.more')}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Seção Efeitos Colaterais */}
             {sideEffects.length > 0 && (
