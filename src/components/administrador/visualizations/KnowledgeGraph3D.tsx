@@ -303,9 +303,9 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
   useEffect(() => {
     if (!fgRef.current) return;
     const fg = fgRef.current;
-    fg.d3Force('charge')?.strength(-350).distanceMax(1500);
-    fg.d3Force('link')?.distance(100);
-    fg.d3Force('center')?.strength(0.03);
+    fg.d3Force('charge')?.strength(-800).distanceMax(3000);
+    fg.d3Force('link')?.distance(200);
+    fg.d3Force('center')?.strength(0.01);
     fg.d3ReheatSimulation();
   }, [graphData, is3D]);
 
