@@ -37,6 +37,38 @@ const SciImportSection: React.FC = () => {
   const [selectedEstudo, setSelectedEstudo] = useState<any>(null);
   const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
 
+  // Tab indicator states
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [pendingCurationCount, setPendingCurationCount] = useState(0);
+
+  // Fetch tab indicators on mount and periodically
+  useEffect(() => {
+    const fetchIndicators = async () => {
+      try {
+        // Check if any study is currently being processed
+        const { count: processingCount } = await supabase
+          .from('processed_studies')
+          .select('*', { count: 'exact', head: true })
+          .is('deleted_at', null)
+          .in('kanban_status', ['processing', 'parsed']);
+        setIsAiProcessing((processingCount ?? 0) > 0);
+
+        // Count pending curation triplets
+        const { count: curationCount } = await supabase
+          .from('triplet_extractions')
+          .select('*', { count: 'exact', head: true })
+          .eq('curation_status', 'pending');
+        setPendingCurationCount(curationCount ?? 0);
+      } catch (e) {
+        console.error('Error fetching tab indicators:', e);
+      }
+    };
+
+    fetchIndicators();
+    const interval = setInterval(fetchIndicators, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Listen for custom event to navigate to AI Processing tab
   useEffect(() => {
     const handleStudyImportedToAI = (e: CustomEvent) => {
@@ -135,7 +167,7 @@ const SciImportSection: React.FC = () => {
       <Card>
         <Tabs value={activeTab} className="w-full">
           <TabHeader activeTab={activeTab} scispaceLogo={SCISPACE_LOGO_URL} onProcessWithAI={handleProcessWithAI} />
-          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} />
 
           <div className="p-6">
             <TabsContent value="library">
