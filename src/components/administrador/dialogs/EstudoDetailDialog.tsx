@@ -47,7 +47,10 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   const [isApproving, setIsApproving] = useState(false);
   const [tripletSummary, setTripletSummary] = useState<TripletSummary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [approvalThreshold, setApprovalThreshold] = useState(70);
+  const [approvalThreshold, setApprovalThreshold] = useState(() => {
+    const saved = localStorage.getItem('triplet_approval_threshold');
+    return saved ? parseInt(saved, 10) : 50;
+  });
   const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
 
   // Fetch triplet summary when dialog opens, estudo changes, or tab changes
@@ -315,6 +318,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
                                 value={[approvalThreshold]}
                                 onValueChange={(v) => {
                                   setApprovalThreshold(v[0]);
+                                  localStorage.setItem('triplet_approval_threshold', String(v[0]));
                                   // Recalculate summary with new threshold
                                   if (tripletSummary) {
                                     fetchTripletSummary(estudo.id);
