@@ -746,6 +746,12 @@
       "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column.",
       "curationWarning": "⚠️ This study has been processed but will not be incorporated into VetGraphRAG until it is curated and approved in the Curation panel.",
       "curationWarningTitle": "Pending Curation",
+      "errorTitle": "Processing Error",
+      "errorInvalidUuid": "Invalid study ID. Try reimporting the study.",
+      "errorDuplicate": "This study already exists in the system. Check for duplicates.",
+      "errorNetwork": "Network connection error. Check your internet and try again.",
+      "errorAlreadyProcessed": "This study has already been processed.",
+      "errorCriticalData": "Critical error in study data. Check the original file.",
       "processCard": {
         "statusComplete": "Processed",
         "statusError": "Error",
