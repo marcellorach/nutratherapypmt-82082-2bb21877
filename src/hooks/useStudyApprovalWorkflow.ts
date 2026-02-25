@@ -17,17 +17,17 @@ export const useStudyApprovalWorkflow = () => {
   /**
    * Auto-approves high-confidence triplets for a specific study
    */
-  const autoApproveTriplets = async (studyId: string): Promise<number> => {
+  const autoApproveTriplets = async (studyId: string, threshold: number = 0.7): Promise<number> => {
     const { data, error } = await supabase
       .from('triplet_extractions')
       .update({
         curation_status: 'approved',
         auto_approved: true,
         review_date: new Date().toISOString(),
-        review_notes: 'Auto-approved by workflow (confidence >= 0.7)'
+        review_notes: `Auto-approved by workflow (confidence >= ${(threshold * 100).toFixed(0)}%)`
       })
       .eq('study_id', studyId)
-      .gte('extraction_confidence', 0.7)
+      .gte('extraction_confidence', threshold)
       .eq('curation_status', 'pending')
       .select('id');
 
@@ -78,7 +78,7 @@ export const useStudyApprovalWorkflow = () => {
    * 3. Consolidates knowledge graph
    * 4. Syncs to Neo4j
    */
-  const executeApprovalWorkflow = async (studyId: string): Promise<WorkflowResult> => {
+  const executeApprovalWorkflow = async (studyId: string, threshold: number = 0.7): Promise<WorkflowResult> => {
     setIsProcessing(true);
 
     try {
@@ -91,7 +91,7 @@ export const useStudyApprovalWorkflow = () => {
       if (updateError) throw updateError;
 
       // Step 2: Auto-approve high-confidence triplets
-      const tripletsApproved = await autoApproveTriplets(studyId);
+      const tripletsApproved = await autoApproveTriplets(studyId, threshold);
 
       // Step 3: Consolidate knowledge graph
       let edgesCreated = 0;

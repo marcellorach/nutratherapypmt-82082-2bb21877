@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +23,10 @@ import {
   Check,
   X,
   ThumbsDown,
-  Settings2
+  Settings2,
+  FileText,
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -61,12 +64,14 @@ interface StudyTripletCurationProps {
   studyId: string;
   studyTitle?: string;
   onTripletsUpdated?: () => void;
+  onNavigateToChat?: (question?: string) => void;
 }
 
 const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   studyId,
   studyTitle,
-  onTripletsUpdated
+  onTripletsUpdated,
+  onNavigateToChat
 }) => {
   const { t } = useTranslation();
   const [triplets, setTriplets] = useState<Triplet[]>([]);
@@ -75,6 +80,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   const [expandedTriplet, setExpandedTriplet] = useState<string | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const sourceChunkCache = useRef<Record<string, { chunks: any[]; loaded: boolean }>>({});
   
   // Editable threshold state
   const [confidenceThreshold, setConfidenceThreshold] = useState(85);
@@ -492,6 +498,9 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   getLayerColor={getLayerColor}
                   threshold={threshold}
                   t={t}
+                  studyTitle={studyTitle}
+                  onNavigateToChat={onNavigateToChat}
+                  sourceChunkCache={sourceChunkCache}
                 />
               ))}
             </TripletSection>
@@ -522,6 +531,9 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   threshold={threshold}
                   t={t}
                   readonly
+                  studyTitle={studyTitle}
+                  onNavigateToChat={onNavigateToChat}
+                  sourceChunkCache={sourceChunkCache}
                 />
               ))}
             </TripletSection>
@@ -551,6 +563,9 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
                   getLayerColor={getLayerColor}
                   threshold={threshold}
                   t={t}
+                  studyTitle={studyTitle}
+                  onNavigateToChat={onNavigateToChat}
+                  sourceChunkCache={sourceChunkCache}
                 />
               ))}
             </TripletSection>
@@ -620,6 +635,9 @@ interface TripletCardProps {
   threshold: number;
   t: any;
   readonly?: boolean;
+  studyTitle?: string;
+  onNavigateToChat?: (question?: string) => void;
+  sourceChunkCache: React.MutableRefObject<Record<string, { chunks: any[]; loaded: boolean }>>;
 }
 
 const TripletCard: React.FC<TripletCardProps> = ({
@@ -634,10 +652,55 @@ const TripletCard: React.FC<TripletCardProps> = ({
   getLayerColor,
   threshold,
   t,
-  readonly = false
+  readonly = false,
+  studyTitle,
+  onNavigateToChat,
+  sourceChunkCache
 }) => {
   const showActions = triplet.curation_status !== 'approved' || !readonly;
   const isAboveThreshold = triplet.extraction_confidence >= threshold;
+  
+  const [sourceChunks, setSourceChunks] = useState<any[]>([]);
+  const [loadingChunks, setLoadingChunks] = useState(false);
+  const [chunksLoaded, setChunksLoaded] = useState(false);
+  
+  // Fetch source chunks when expanded
+  useEffect(() => {
+    if (!isExpanded || chunksLoaded) return;
+    
+    const cacheKey = triplet.id;
+    const cached = sourceChunkCache.current[cacheKey];
+    if (cached) {
+      setSourceChunks(cached.chunks);
+      setChunksLoaded(true);
+      return;
+    }
+    
+    const fetchChunks = async () => {
+      setLoadingChunks(true);
+      try {
+        const { data, error } = await supabase
+          .from('study_embeddings')
+          .select('chunk_text, chunk_index')
+          .eq('study_id', triplet.study_id)
+          .or(`chunk_text.ilike.%${triplet.subject_name}%,chunk_text.ilike.%${triplet.object_name}%`)
+          .order('chunk_index', { ascending: true })
+          .limit(2);
+        
+        if (error) throw error;
+        const chunks = data || [];
+        setSourceChunks(chunks);
+        sourceChunkCache.current[cacheKey] = { chunks, loaded: true };
+      } catch (err) {
+        console.error('Error fetching source chunks:', err);
+      } finally {
+        setLoadingChunks(false);
+        setChunksLoaded(true);
+      }
+    };
+    
+    fetchChunks();
+  }, [isExpanded, chunksLoaded, triplet.id, triplet.study_id, triplet.subject_name, triplet.object_name, sourceChunkCache]);
   
   return (
     <Card className={cn(
@@ -762,6 +825,54 @@ const TripletCard: React.FC<TripletCardProps> = ({
         {/* Expanded Details */}
         {isExpanded && (
           <div className="pt-2 border-t space-y-2 text-xs">
+            {/* Source Excerpt - Most important for reviewer */}
+            <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg space-y-2 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-1.5 font-medium text-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                {t('tripletCuration.sourceExcerpt', 'Trecho de Origem')}
+              </div>
+              
+              {loadingChunks ? (
+                <div className="flex items-center gap-2 text-muted-foreground py-2">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  {t('tripletCuration.loadingSource', 'Buscando trecho do estudo...')}
+                </div>
+              ) : sourceChunks.length > 0 ? (
+                <div className="space-y-2">
+                  {sourceChunks.map((chunk, idx) => (
+                    <div key={idx} className="bg-background/80 p-2 rounded border text-[11px] leading-relaxed italic text-muted-foreground">
+                      "{chunk.chunk_text.length > 400 ? chunk.chunk_text.substring(0, 400) + '...' : chunk.chunk_text}"
+                      <span className="block text-[9px] mt-1 not-italic opacity-60">— chunk #{chunk.chunk_index}</span>
+                    </div>
+                  ))}
+                  {studyTitle && (
+                    <p className="text-[10px] text-muted-foreground">
+                      {t('tripletCuration.sourceStudy', 'Fonte')}: <span className="font-medium">{studyTitle}</span>
+                    </p>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    {onNavigateToChat && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px] gap-1"
+                        onClick={() => onNavigateToChat(
+                          `Explain the relationship between "${triplet.subject_name}" and "${triplet.object_name}" (${triplet.predicate}) based on this study.`
+                        )}
+                      >
+                        <MessageCircle className="h-3 w-3" />
+                        {t('tripletCuration.askAI', 'Perguntar à IA')}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground italic">
+                  {t('tripletCuration.noSourceAvailable', 'Texto original não disponível (estudo não vetorizado)')}
+                </p>
+              )}
+            </div>
+            
             {/* Confidence Rationale - Most important for decision */}
             {triplet.confidence_rationale && (
               <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded space-y-1">

@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-02-25 📄 Trecho de Origem nos Triplets + Threshold Unificado
+
+- ✅ **Trecho de Origem nos Details expandidos**: Ao expandir um triplet, o sistema busca automaticamente chunks do `study_embeddings` que mencionam o subject/object, exibindo o trecho científico original para suporte à decisão do revisor
+- ✅ **Botão "Perguntar à IA"**: Link direto para a tab de Chat do estudo com pergunta pré-formulada sobre a relação do triplet
+- ✅ **Cache local de chunks**: Chunks buscados são cacheados em memória (useRef) para evitar queries repetidas ao expandir/colapsar
+- ✅ **Threshold de aprovação unificado**: O threshold hardcoded de 0.7 em `useStudyApprovalWorkflow` e `EstudoDetailDialog` foi parametrizado — agora usa slider configurável (50-99%, default 70%) no dialog de confirmação
+- ✅ **Preview dinâmico**: O painel de confirmação de aprovação recalcula "Will auto-approve" em tempo real conforme o slider é ajustado
+- ✅ **i18n**: Novas chaves bilíngues para sourceExcerpt, viewInStudy, askAI, noSourceAvailable, loadingSource
+
 ### Changed - 2026-02-25 🔬 Reorganização do Pipeline de Estudos Científicos
 
 - ✅ **Rename para "Scientific Studies Digestion"**: Título e descrição refletem o pipeline completo de digestão
