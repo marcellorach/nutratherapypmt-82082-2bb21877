@@ -10,6 +10,8 @@ interface VectorizeRequest {
   studyId: string;
 }
 
+const TARGET_EMBEDDING_DIMENSION = 768;
+
 // Função para dividir texto em chunks com overlap
 function chunkText(text: string, maxChunkSize = 500, overlap = 50): string[] {
   if (!text || text.trim().length === 0) {
@@ -122,23 +124,31 @@ serve(async (req) => {
         const testResp = await fetch(ep.url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GOOGLE_AI_API_KEY },
-          body: JSON.stringify({ content: { parts: [{ text: 'test' }] } }),
+          body: JSON.stringify({
+            content: { parts: [{ text: 'test' }] },
+            taskType: 'RETRIEVAL_DOCUMENT',
+            outputDimensionality: TARGET_EMBEDDING_DIMENSION,
+          }),
         });
+
         if (testResp.ok) {
           workingEndpoint = ep;
           console.log(`✅ Using embedding model: ${ep.model}`);
           await testResp.text(); // consume body
           break;
         }
+
         await testResp.text(); // consume body
         console.warn(`⚠️ Model ${ep.model} not available, trying next...`);
-      } catch { console.warn(`⚠️ Endpoint ${ep.model} failed`); }
+      } catch {
+        console.warn(`⚠️ Endpoint ${ep.model} failed`);
+      }
     }
 
     for (let i = 0; i < chunks.length; i++) {
       try {
         console.log(`   Processing chunk ${i + 1}/${chunks.length}...`);
-        
+
         const response = await fetch(workingEndpoint.url, {
           method: 'POST',
           headers: {
@@ -148,7 +158,9 @@ serve(async (req) => {
           body: JSON.stringify({
             content: {
               parts: [{ text: chunks[i] }]
-            }
+            },
+            taskType: 'RETRIEVAL_DOCUMENT',
+            outputDimensionality: TARGET_EMBEDDING_DIMENSION,
           }),
         });
 
@@ -160,12 +172,27 @@ serve(async (req) => {
         }
 
         const embeddingResult = await response.json();
-        const embedding = embeddingResult.embedding?.values;
+        const rawEmbedding = embeddingResult.embedding?.values;
 
-        if (!embedding || !Array.isArray(embedding)) {
+        if (!rawEmbedding || !Array.isArray(rawEmbedding)) {
           console.error(`❌ Embedding inválido retornado para chunk ${i + 1}`);
           errorCount++;
           continue;
+        }
+
+        let embedding = rawEmbedding as number[];
+
+        // Safety guard for model dimension drift
+        if (embedding.length !== TARGET_EMBEDDING_DIMENSION) {
+          console.warn(
+            `⚠️ Chunk ${i + 1}: dimensão ${embedding.length} recebida, ajustando para ${TARGET_EMBEDDING_DIMENSION}`
+          );
+
+          if (embedding.length > TARGET_EMBEDDING_DIMENSION) {
+            embedding = embedding.slice(0, TARGET_EMBEDDING_DIMENSION);
+          } else {
+            embedding = [...embedding, ...new Array(TARGET_EMBEDDING_DIMENSION - embedding.length).fill(0)];
+          }
         }
 
         // Calcular posição do chunk no texto original
@@ -179,7 +206,8 @@ serve(async (req) => {
           chunk_metadata: {
             char_start: chunkPosition >= 0 ? chunkPosition : null,
             char_count: chunks[i].length,
-            word_count: chunks[i].split(/\s+/).length
+            word_count: chunks[i].split(/\s+/).length,
+            embedding_dimension: embedding.length,
           }
         });
 
@@ -222,7 +250,8 @@ serve(async (req) => {
           vectorized_at: new Date().toISOString(),
           chunks_count: embeddingsData.length,
           embedding_model: workingEndpoint.model,
-          embedding_provider: 'Google AI'
+          embedding_provider: 'Google AI',
+          embedding_dimension: TARGET_EMBEDDING_DIMENSION
         }
       })
       .eq('id', studyId);
@@ -245,18 +274,25 @@ serve(async (req) => {
           embeddings_saved: embeddingsData.length,
           embedding_model: workingEndpoint.model,
           embedding_provider: 'Google AI',
-          embedding_dimension: 768
+          embedding_dimension: TARGET_EMBEDDING_DIMENSION
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : (error && typeof error === 'object' && 'message' in error)
+          ? String((error as { message?: unknown }).message)
+          : 'Vectorization failed';
+
     console.error('❌ Error in vectorize-study:', error);
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : 'Vectorization failed',
-        details: error instanceof Error ? error.stack : undefined
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : JSON.stringify(error)
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
