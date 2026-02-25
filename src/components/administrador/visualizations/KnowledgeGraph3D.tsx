@@ -198,6 +198,7 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     }
   }, []);
 
+
   // Process data with diagnostics
   const { graphData, diagnostics } = useMemo(() => {
     const inputNodesCount = data.nodes?.length || 0;
@@ -297,6 +298,16 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       diagnostics: diagnosticsData
     };
   }, [data]);
+
+  // Configure d3 forces to reduce center congestion
+  useEffect(() => {
+    if (!fgRef.current) return;
+    const fg = fgRef.current;
+    fg.d3Force('charge')?.strength(-350).distanceMax(1500);
+    fg.d3Force('link')?.distance(100);
+    fg.d3Force('center')?.strength(0.03);
+    fg.d3ReheatSimulation();
+  }, [graphData, is3D]);
 
   const handleNodeClick = useCallback((node: any) => {
     if (onNodeClick) {
@@ -559,10 +570,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleSpeed={0.005}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={100}
-              d3AlphaDecay={0.02}
-              d3VelocityDecay={0.3}
-              warmupTicks={50}
+              cooldownTicks={200}
+              d3AlphaDecay={0.008}
+              d3VelocityDecay={0.15}
+              warmupTicks={150}
             />
           ) : (
             <ForceGraph2D
@@ -580,7 +591,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleWidth={2}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={100}
+              cooldownTicks={200}
+              d3AlphaDecay={0.008}
+              d3VelocityDecay={0.15}
+              warmupTicks={150}
             />
           )}
         </Suspense>
