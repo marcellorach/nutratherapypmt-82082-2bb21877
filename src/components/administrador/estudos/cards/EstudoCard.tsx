@@ -171,8 +171,42 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   const clinicalOutcomes = analysisData?.clinicalOutcomes || [];
   const hasAnalysisData = !!analysisData && (nutraceuticals.length > 0 || conditions.length > 0);
 
-  // Summary text (from study_summary or description)
-  const summaryText = analysisData?.study_summary?.summary || analysisData?.study_summary?.main_findings || localEstudo.description || '';
+  // Summary text - try multiple sources in priority order
+  const getSummaryText = (): string => {
+    // 1. From study_summary (new extraction format)
+    if (analysisData?.study_summary?.summary) return analysisData.study_summary.summary;
+    if (analysisData?.study_summary?.main_findings) return analysisData.study_summary.main_findings;
+    if (analysisData?.studySummary?.summary) return analysisData.studySummary.summary;
+    
+    // 2. From description if it's not the default placeholder
+    const desc = localEstudo.description;
+    if (desc && desc !== 'Awaiting processing' && desc !== 'Aguardando processamento' && desc.length > 20) {
+      return desc;
+    }
+    
+    // 3. Extract first meaningful sentences from full_text_content
+    if (localEstudo.full_text_content) {
+      const text = localEstudo.full_text_content as string;
+      // Skip markdown headers and metadata lines
+      const lines = text.split('\n').filter(line => {
+        const trimmed = line.trim();
+        return trimmed.length > 30 && 
+               !trimmed.startsWith('#') && 
+               !trimmed.startsWith('**Authors') && 
+               !trimmed.startsWith('**Year') && 
+               !trimmed.startsWith('**Journal') &&
+               !trimmed.startsWith('**DOI');
+      });
+      if (lines.length > 0) {
+        // Take first 2-3 sentences (up to ~300 chars)
+        const excerpt = lines.slice(0, 3).join(' ').substring(0, 300);
+        return excerpt.endsWith('.') ? excerpt : excerpt + '...';
+      }
+    }
+    
+    return '';
+  };
+  const summaryText = getSummaryText();
 
   // Processing time calculation
   const processingTime = localEstudo.created_at && localEstudo.updated_at && localEstudo.kanban_status !== 'new'
