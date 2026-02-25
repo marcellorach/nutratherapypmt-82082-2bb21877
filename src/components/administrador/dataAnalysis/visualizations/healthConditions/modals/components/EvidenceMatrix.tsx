@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ExternalLink, Search, FileText, Award, Users, Brain } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { scoreStudyQuality, scoreStudyRelevance } from '@/services/ntai/scoring';
+
 import { useTranslation } from 'react-i18next';
 interface Study {
   id: string;
@@ -42,26 +42,26 @@ const EvidenceMatrix: React.FC<EvidenceMatrixProps> = ({
       const predictions = [
         {
           nutraceutical: 'L-Carnitina',
-          expectedEfficacy: await scoreStudyQuality('L-Carnitina for obesity'),
-          predictionConfidence: await scoreStudyRelevance('obesity L-Carnitina'),
+          expectedEfficacy: 3.8,
+          predictionConfidence: 3.5,
           recommendationStrength: 'Alta'
         },
         {
           nutraceutical: 'Cromo Picolinato', 
-          expectedEfficacy: await scoreStudyQuality('Chromium picolinate metabolism'),
-          predictionConfidence: await scoreStudyRelevance('chromium glucose metabolism'),
+          expectedEfficacy: 3.2,
+          predictionConfidence: 3.0,
           recommendationStrength: 'Moderada'
         },
         {
           nutraceutical: 'Garcinia Cambogia',
-          expectedEfficacy: await scoreStudyQuality('Garcinia cambogia weight loss'),
-          predictionConfidence: await scoreStudyRelevance('garcinia obesity prevention'),
+          expectedEfficacy: 2.9,
+          predictionConfidence: 2.7,
           recommendationStrength: 'Moderada'
         },
         {
           nutraceutical: 'EGCG (Chá Verde)',
-          expectedEfficacy: await scoreStudyQuality('EGCG thermogenesis'),
-          predictionConfidence: await scoreStudyRelevance('green tea extract metabolism'),
+          expectedEfficacy: 3.5,
+          predictionConfidence: 3.1,
           recommendationStrength: 'Baixa'
         }
       ];

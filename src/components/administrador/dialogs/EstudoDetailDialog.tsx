@@ -135,9 +135,21 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
   const studyAssessment = analysisData.study_assessment || {};
   
   const studyScores = {
-    qualityScore: studyAssessment.quality_score || analysisData.qualityScore || 3.0,
-    relevanceScore: studyAssessment.relevance_score || analysisData.relevanceScore || 3.0,
-    noveltyScore: studyAssessment.novelty_score || analysisData.noveltyScore || 3.0,
+    qualityScore: 
+      studyAssessment.quality_score || 
+      analysisData.qualityScore || 
+      analysisData.study_assessment?.quality_score || 
+      0,
+    relevanceScore: 
+      studyAssessment.relevance_score || 
+      analysisData.relevanceScore || 
+      analysisData.study_assessment?.relevance_score || 
+      0,
+    noveltyScore: 
+      studyAssessment.novelty_score || 
+      analysisData.noveltyScore || 
+      analysisData.study_assessment?.novelty_score || 
+      0,
   };
   
   // Get average score for EvidenceTag
