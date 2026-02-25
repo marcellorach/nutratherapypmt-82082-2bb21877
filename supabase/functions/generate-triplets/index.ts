@@ -647,7 +647,7 @@ EVERY triplet MUST include these properties:
 - species_context: REQUIRED - Array of species studied. Use ["canine"], ["feline"], ["equine"], or combinations. DEFAULT to ["canine"] if unclear.
 - evidence_level: REQUIRED - One of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "in_vivo", "expert_opinion"
 - confidence: REQUIRED - 0.0 to 1.0, calculated using the SCORING CRITERIA above
-- intensity: OPTIONAL - 0.0 to 1.0, strength of effect using INTENSITY CALCULATION above
+- intensity: REQUIRED - 0.0 to 1.0, strength of effect using INTENSITY CALCULATION above. DEFAULT to 0.5 if not determinable.
 - dose_range: REQUIRED if doses mentioned - {"min": X, "max": Y, "unit": "mg/kg/day"}
 - ic50: OPTIONAL - IC50 value if mentioned (e.g., "5 µM")
 - ec50: OPTIONAL - EC50 value if mentioned
@@ -739,21 +739,22 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
                   predicate: { type: "string", description: "Relationship type" },
                   object_type: { type: "string", description: "Entity type of object" },
                   object_name: { type: "string", description: "Name of object entity" },
-                  properties: {
+                    properties: {
                     type: "object",
                     properties: {
-                      intensity: { type: "number" },
-                      confidence: { type: "number" },
-                      evidence_level: { type: "string" },
-                      species_context: { type: "array", items: { type: "string" } },
+                      intensity: { type: "number", description: "Strength of effect 0.0-1.0. REQUIRED. Default 0.5." },
+                      confidence: { type: "number", description: "Confidence score 0.0-1.0. REQUIRED." },
+                      evidence_level: { type: "string", description: "One of: meta_analysis, rct, cohort, case_control, case_report, in_vitro, in_vivo, expert_opinion. REQUIRED." },
+                      species_context: { type: "array", items: { type: "string" }, description: "Array of species. REQUIRED. Default [\"canine\"]." },
                       dose_range: { type: "object" },
                       ic50: { type: "string" },
                       ec50: { type: "string" }
-                    }
+                    },
+                    required: ["intensity", "confidence", "evidence_level", "species_context"]
                   },
                   mechanism_path: { type: "array", items: { type: "object" } }
                 },
-                required: ["subject_type", "subject_name", "predicate", "object_type", "object_name"]
+                required: ["subject_type", "subject_name", "predicate", "object_type", "object_name", "properties"]
               }
             },
             pathway_chains: {
@@ -1099,7 +1100,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         object_id: objectId,
         object_layer: validatedObjectLayer,
         // Hierarchical fields - with validated mandatory fields
-        intensity: props.intensity || null,
+        intensity: props.intensity ?? null,
         direction: mapDirection(props.direction, tripletPredicate),
         evidence_level: validatedEvidenceLevel,
         dose_dependent: props.dose_dependent || false,
@@ -1120,6 +1121,10 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         extraction_confidence: extractionConfidence,
         // Hallucination flag
         hallucination_flag: hallucinationFlag,
+        // Confidence rationale
+        confidence_rationale: validationWarnings.length > 0
+          ? `Base: ${validatedEvidenceLevel} (${llmConfidence.toFixed(2)}) → Adjusted: ${adjustedConfidence.toFixed(2)}. ${validationWarnings.join('; ')}`
+          : `Base: ${validatedEvidenceLevel} (${llmConfidence.toFixed(2)}). No adjustments needed.`,
         // Curation status
         curation_status: autoApproved ? 'approved' : 'pending',
         auto_approved: autoApproved,
