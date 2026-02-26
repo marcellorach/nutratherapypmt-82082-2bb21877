@@ -6679,5 +6679,37 @@
       "studies": "Estudos",
       "actions": "Ações"
     }
+  },
+  "petProfile": {
+    "recommendation": {
+      "stackTitle": "Stack Geroprotetor Recomendado",
+      "stackDescription": "Recomendação personalizada para {{name}} com {{count}} composto(s)",
+      "recommended": "Recomendado",
+      "modified": "Modificado",
+      "restore": "Restaurar",
+      "approve": "Aprovar Stack",
+      "approveModified": "Aprovar com Modificações",
+      "reject": "Rejeitar",
+      "disclaimer": "Esta recomendação é gerada por IA com base no Knowledge Graph e deve ser validada pelo veterinário responsável. Ajuste as dosagens conforme o quadro clínico individual.",
+      "approvedTitle": "Stack Aprovado",
+      "approvedDesc": "{{count}} composto(s) aprovado(s) para o protocolo do paciente.",
+      "rejectedTitle": "Stack Rejeitado",
+      "rejectedDesc": "A recomendação foi rejeitada. Você pode gerar uma nova análise.",
+      "generateMock": "Gerar Dados de Exemplo",
+      "mockGenerated": "Dados de exemplo gerados",
+      "mockGeneratedDesc": "Stack geroprotetor de exemplo com 5 compostos para demonstração.",
+      "confidence": {
+        "high": "Confiança Alta",
+        "medium": "Confiança Média",
+        "low": "Confiança Baixa",
+        "insufficient": "Dados Insuficientes"
+      }
+    },
+    "treatability": {
+      "title": "Tratabilidade por Condição",
+      "description": "Potencial de tratamento baseado em evidência científica e experiência do plano de saúde",
+      "scientificEvidence": "Evidência Científica",
+      "planExperience": "Experiência do Plano"
+    }
   }
 }

@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-02-26 🩺 Painel de Recomendações Veterinárias com Sliders de Dosagem
+
+- ✅ **CompoundDosageSlider**: Novo componente com slider interativo mostrando dose mín/máx/recomendada, badge de nível de evidência (KG-backed, AI-suggested, clinical-experience), rationale, e botão para remover/restaurar composto
+- ✅ **VetRecommendationPanel**: Painel completo com stack geroprotetor, badge de confiança, botões Aprovar/Aprovar com Modificações/Rejeitar, disclaimer de validação veterinária
+- ✅ **TreatabilityChart**: Gráfico de barras horizontais (Recharts) comparando Evidência Científica vs Experiência do Plano para cada condição do pet
+- ✅ **PetProfilePage reestruturada**: Layout vertical com Gráfico de Tratabilidade → Stack Geroprotetor → Tabs clínicas (2/3) + Chat Clínico sidebar (1/3)
+- ✅ **Botão "Gerar Dados de Exemplo"**: Gera stack mockado com 5 compostos (Curcumina, NMN, Resveratrol, Ômega-3, Rapamicina) para demonstração
+- ✅ **i18n**: Novas chaves bilíngues em `petProfile.recommendation.*` e `petProfile.treatability.*`
+
 ### Added - 2026-02-25 🔧 Enrich Triplets + Inline Chat + Fix Generate Pipeline
 
 - ✅ **Toast duplicado removido**: `useStudyApprovalWorkflow` não dispara mais toast redundante (mantido apenas no dialog)

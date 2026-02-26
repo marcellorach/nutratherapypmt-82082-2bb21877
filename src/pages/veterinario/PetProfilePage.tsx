@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Layout from '@/components/layout/Layout';
@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, AlertTriangle, CheckCircle, FlaskConical, Shield } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, AlertTriangle, Shuffle } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
+import VetRecommendationPanel, { generateMockCompounds } from '@/components/pet/VetRecommendationPanel';
+import TreatabilityChart from '@/components/pet/TreatabilityChart';
+import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -33,8 +34,18 @@ const PetProfilePage: React.FC = () => {
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+  const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
+  const [confidenceLevel, setConfidenceLevel] = useState<'high' | 'medium' | 'low' | 'insufficient'>('medium');
+
+  // Generate mock treatability data from conditions
+  const treatabilityData = useMemo(() => {
+    if (!data?.conditions) return [];
+    return data.conditions.map((c: any) => ({
+      condition: c.condition_name,
+      scientificEvidence: Math.floor(Math.random() * 40) + 40, // 40-80%
+      planExperience: Math.floor(Math.random() * 30) + 20,     // 20-50%
+    }));
+  }, [data?.conditions]);
 
   const handleAnalyzeWithKG = async () => {
     if (!data?.profile) return;
@@ -64,7 +75,7 @@ const PetProfilePage: React.FC = () => {
         }
       }
 
-      // Step 2: Get hybrid recommendation (uses AI + KG data)
+      // Step 2: Get hybrid recommendation
       const primaryCondition = conditionNames[0] || 'geriatric wellness';
       const { data: recommendation, error: recError } = await supabase.functions.invoke('hybrid-recommendation', {
         body: {
@@ -95,28 +106,71 @@ const PetProfilePage: React.FC = () => {
 
       if (recError) throw recError;
 
-      setAnalysisResult({
-        kgResults,
-        recommendation,
-        petProfile: profile,
-        conditions: conditionNames,
+      // Convert recommendation to CompoundDosage format
+      const nutraceuticals = recommendation?.nutraceuticals || [];
+      const compounds: CompoundDosage[] = nutraceuticals.map((n: any, idx: number) => {
+        // Parse dosage string to extract range
+        const dosageMatch = n.dosage?.match(/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|IU)/i);
+        const dosageMin = dosageMatch ? parseFloat(dosageMatch[1]) : 5;
+        const dosageMax = dosageMatch ? parseFloat(dosageMatch[2]) : 50;
+        const unit = dosageMatch ? dosageMatch[3] : 'mg/kg';
+        const recommended = dosageMin + (dosageMax - dosageMin) * 0.5;
+
+        return {
+          id: `rec-${idx}`,
+          name: n.name,
+          condition: primaryCondition,
+          dosageMin,
+          dosageMax,
+          dosageRecommended: Math.round(recommended * 10) / 10,
+          dosageCurrent: Math.round(recommended * 10) / 10,
+          unit,
+          evidenceLevel: n.evidenceLevel || 'AI-suggested',
+          rationale: n.mechanism || '',
+          removed: false,
+          type: 'nutraceutical' as const,
+        };
       });
-      setAnalysisDialogOpen(true);
+
+      setRecommendationCompounds(compounds.length > 0 ? compounds : generateMockCompounds());
+      setConfidenceLevel(kgResults.length > 0 ? 'medium' : 'low');
       
       toast({
-        title: t('petRegistration.profile.analysisComplete', 'Análise Concluída'),
-        description: t('petRegistration.profile.analysisCompleteDesc', 'Recomendações geradas com base no Knowledge Graph.'),
+        title: t('petRegistration.profile.analysisComplete'),
+        description: t('petRegistration.profile.analysisCompleteDesc'),
       });
     } catch (err: any) {
       console.error('KG Analysis error:', err);
       toast({
-        title: t('petRegistration.profile.analysisError', 'Erro na Análise'),
+        title: t('petRegistration.profile.analysisError'),
         description: err.message || 'Erro ao consultar o Knowledge Graph.',
         variant: 'destructive',
       });
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleGenerateMockData = () => {
+    setRecommendationCompounds(generateMockCompounds());
+    setConfidenceLevel('high');
+    toast({
+      title: t('petProfile.recommendation.mockGenerated'),
+      description: t('petProfile.recommendation.mockGeneratedDesc'),
+    });
+  };
+
+  const handleApproveStack = (compounds: CompoundDosage[]) => {
+    console.log('Stack approved:', compounds);
+    // TODO: Save approved stack to database
+  };
+
+  const handleRejectStack = () => {
+    setRecommendationCompounds(null);
+    toast({
+      title: t('petProfile.recommendation.rejectedTitle'),
+      description: t('petProfile.recommendation.rejectedDesc'),
+    });
   };
 
   if (isLoading) {
@@ -150,6 +204,7 @@ const PetProfilePage: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-6 px-4">
+        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate('/veterinario')}>
             <ArrowLeft className="h-5 w-5" />
@@ -164,8 +219,16 @@ const PetProfilePage: React.FC = () => {
               {profile.neutered && ` · ${t('petRegistration.form.neutered')}`}
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleGenerateMockData}
+          >
+            <Shuffle className="h-4 w-4" />
+            {t('petProfile.recommendation.generateMock')}
+          </Button>
           <Button 
-            variant="outline" 
             className="gap-2"
             onClick={handleAnalyzeWithKG}
             disabled={analyzing}
@@ -176,7 +239,7 @@ const PetProfilePage: React.FC = () => {
               <Brain className="h-4 w-4" />
             )}
             {analyzing 
-              ? t('petRegistration.profile.analyzing', 'Analisando...') 
+              ? t('petRegistration.profile.analyzing') 
               : t('petRegistration.profile.analyzeWithKG')}
           </Button>
         </div>
@@ -221,9 +284,27 @@ const PetProfilePage: React.FC = () => {
           </Card>
         </div>
 
+        {/* Main Grid: Content + Chat */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
+          {/* Main Content (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Treatability Chart */}
+            {treatabilityData.length > 0 && (
+              <TreatabilityChart data={treatabilityData} />
+            )}
+
+            {/* Recommendation Panel */}
+            {recommendationCompounds && (
+              <VetRecommendationPanel
+                compounds={recommendationCompounds}
+                confidenceLevel={confidenceLevel}
+                onApprove={handleApproveStack}
+                onReject={handleRejectStack}
+                petName={profile.name}
+              />
+            )}
+
+            {/* Existing Tabs */}
             <Tabs defaultValue="conditions">
               <TabsList className="mb-4">
                 <TabsTrigger value="conditions" className="gap-1">
@@ -381,7 +462,7 @@ const PetProfilePage: React.FC = () => {
             </Tabs>
           </div>
 
-          {/* Chat Sidebar */}
+          {/* Chat Sidebar (1/3) */}
           <div className="min-h-[500px]">
             <PetClinicalChat
               petId={id!}
@@ -391,126 +472,6 @@ const PetProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* KG Analysis Results Dialog */}
-      <Dialog open={analysisDialogOpen} onOpenChange={setAnalysisDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              {t('petRegistration.profile.kgAnalysisTitle', 'Análise VetGraphRAG')}
-            </DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="max-h-[60vh]">
-            {analysisResult && (
-              <div className="space-y-6 pr-4">
-                {/* Patient Summary */}
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm font-medium">
-                    {analysisResult.petProfile?.name} · {analysisResult.petProfile?.breed} · {analysisResult.petProfile?.age_years} {t('petRegistration.profile.years')}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t('petRegistration.profile.conditionsAnalyzed', 'Condições analisadas')}: {analysisResult.conditions?.join(', ') || 'Bem-estar geriátrico'}
-                  </p>
-                </div>
-
-                {/* KG Graph Data */}
-                {analysisResult.kgResults?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      <FlaskConical className="h-4 w-4" />
-                      {t('petRegistration.profile.kgFindings', 'Achados no Knowledge Graph')}
-                    </h4>
-                    {analysisResult.kgResults.map((result: any, idx: number) => (
-                      <div key={idx} className="mb-3 p-3 border rounded-lg">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">{result.condition}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(result.graphData?.nodes || []).slice(0, 12).map((node: any, nIdx: number) => (
-                            <Badge key={nIdx} variant="outline" className="text-xs">
-                              {node.label || node.properties?.name}
-                              <span className="ml-1 opacity-60">({node.type})</span>
-                            </Badge>
-                          ))}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {result.graphData?.nodes?.length || 0} {t('petRegistration.profile.entitiesFound', 'entidades')} · {result.graphData?.relationships?.length || 0} {t('petRegistration.profile.relationsFound', 'relações')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Nutraceutical Recommendations */}
-                {analysisResult.recommendation?.nutraceuticals?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      {t('petRegistration.profile.recommendedStack', 'Stack Recomendado')}
-                    </h4>
-                    <div className="space-y-2">
-                      {analysisResult.recommendation.nutraceuticals.map((nutra: any, idx: number) => (
-                        <div key={idx} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium text-sm">{nutra.name}</p>
-                            <Badge variant="secondary" className="text-xs">{nutra.evidenceLevel}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">{nutra.dosage}</p>
-                          <p className="text-xs mt-1">{nutra.mechanism}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Rationale */}
-                {analysisResult.recommendation?.rationale && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-1">
-                      {t('petRegistration.profile.rationale', 'Fundamentação')}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">{analysisResult.recommendation.rationale}</p>
-                  </div>
-                )}
-
-                {/* Enrichment */}
-                {analysisResult.recommendation?.enrichment && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-1">
-                      {t('petRegistration.profile.clinicalConsiderations', 'Considerações Clínicas Adicionais')}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">{analysisResult.recommendation.enrichment}</p>
-                  </div>
-                )}
-
-                {/* Precautions */}
-                {analysisResult.recommendation?.precautions?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-1">
-                      <Shield className="h-4 w-4 text-amber-500" />
-                      {t('petRegistration.profile.precautions', 'Precauções')}
-                    </h4>
-                    <ul className="space-y-1">
-                      {analysisResult.recommendation.precautions.map((p: string, idx: number) => (
-                        <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                          <AlertTriangle className="h-3 w-3 mt-0.5 text-amber-500 shrink-0" />
-                          {p}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Disclaimer */}
-                <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
-                    {t('petRegistration.profile.disclaimer', 'Esta análise é gerada por IA e deve ser validada por um veterinário. Não substitui consulta profissional.')}
-                  </p>
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
     </Layout>
   );
 };

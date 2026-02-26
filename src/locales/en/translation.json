@@ -6679,5 +6679,37 @@
       "studies": "Studies",
       "actions": "Actions"
     }
+  },
+  "petProfile": {
+    "recommendation": {
+      "stackTitle": "Recommended Geroprotective Stack",
+      "stackDescription": "Personalized recommendation for {{name}} with {{count}} compound(s)",
+      "recommended": "Recommended",
+      "modified": "Modified",
+      "restore": "Restore",
+      "approve": "Approve Stack",
+      "approveModified": "Approve with Modifications",
+      "reject": "Reject",
+      "disclaimer": "This recommendation is AI-generated based on the Knowledge Graph and must be validated by the responsible veterinarian. Adjust dosages according to the individual clinical picture.",
+      "approvedTitle": "Stack Approved",
+      "approvedDesc": "{{count}} compound(s) approved for the patient protocol.",
+      "rejectedTitle": "Stack Rejected",
+      "rejectedDesc": "The recommendation was rejected. You can generate a new analysis.",
+      "generateMock": "Generate Sample Data",
+      "mockGenerated": "Sample data generated",
+      "mockGeneratedDesc": "Sample geroprotective stack with 5 compounds for demonstration.",
+      "confidence": {
+        "high": "High Confidence",
+        "medium": "Medium Confidence",
+        "low": "Low Confidence",
+        "insufficient": "Insufficient Data"
+      }
+    },
+    "treatability": {
+      "title": "Treatability by Condition",
+      "description": "Treatment potential based on scientific evidence and health plan experience",
+      "scientificEvidence": "Scientific Evidence",
+      "planExperience": "Plan Experience"
+    }
   }
 }
