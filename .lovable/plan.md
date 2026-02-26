@@ -1,116 +1,110 @@
 
 
-## Plano: Corrigir Scoring de Estudos (Quality, Relevance, Novelty)
+## Plano: Reconstruir a Página do Perfil do Pet para o Veterinário
 
-### Diagnóstico do Problema
+### Contexto
+A página atual (`PetProfilePage.tsx`) mostra apenas dados clínicos básicos (condições, medicações, exames, notas) e um chat clínico. Falta o componente mais importante: a **seção de recomendações do VetGraphRAG** com sliders individuais para cada nutracêutico/droga, gráficos de tratabilidade e o fluxo de aprovação veterinária.
 
-Investigação completa revelou que os scores **sempre mostram 3.0** por uma cadeia de falhas:
+O sistema de sliders já existe em `ActiveIngredientTag.tsx` (com dose mín/máx e posição recomendada), mas está confinado ao módulo de `recommendations/` e não integrado na página do veterinário.
 
-1. **A LLM extrai os scores corretamente** — o prompt no `gemini-file-search` pede `quality_score`, `relevance_score`, `novelty_score` dentro de `study_assessment` (e os marca como `required`)
-2. **Mas os scores são descartados** — a interface `ExtractedStudyData` (linha 67-146) **não inclui** `study_assessment`, então o mapeamento (linhas 1227-1332) ignora esses dados
-3. **`analysis_data` nunca recebe os scores** — o spread `...extractedData` na linha 1835 não contém `study_assessment`
-4. **`study_extractions` também não salva** — o objeto `extractionData` (linhas 1935-1980) omite `study_assessment`
-5. **O fallback é 3.0** — Em `EstudoDetailDialog.tsx` (linha 138): `studyAssessment.quality_score || 3.0`
+### O que será construído
 
-Dados reais no banco confirmam: `processed_studies.analysis_data` contém `"studyAssessment": {}` e `"qualityScore": 3`. Enquanto `study_extractions.extracted_data.study_assessment` tem `quality_score: 4` mas `relevance_score: null`, `novelty_score: null`.
+A página será reestruturada em **3 seções verticais** no conteúdo principal (2/3 da tela), mantendo o Chat Clínico no sidebar (1/3):
 
-### Solução em 3 Partes
+---
 
-#### Parte 1: Edge Function `gemini-file-search` — Capturar os scores
+### Etapa 1: Criar componente `VetRecommendationPanel`
+Novo componente em `src/components/pet/VetRecommendationPanel.tsx` que renderiza o stack de recomendações do VetGraphRAG para o pet. Conterá:
 
-**Arquivo: `supabase/functions/gemini-file-search/index.ts`**
+- **Header**: "Stack Geroprotetor Recomendado" com badge de confiança geral
+- **Lista de compostos** (nutracêuticos/drogas), cada um como um card individual com:
+  - Nome do composto + condição alvo
+  - **Slider de dosagem** com dose mínima, dose máxima, e a bolinha posicionada na dose recomendada pelo sistema
+  - Labels: dose mín (esquerda), dose recomendada (centro/bolinha), dose máx (direita)
+  - Botão X para remover composto do stack
+  - Badge de nível de evidência
+  - Mini rationale (1 linha)
+- **Botões de ação**: "Aprovar Stack", "Aprovar com Modificações", "Rejeitar"
 
-1. Adicionar `study_assessment` à interface `ExtractedStudyData`:
-```typescript
-study_assessment?: {
-  methodology_type?: string;
-  sample_size?: number;
-  randomization?: boolean;
-  blinding?: string;
-  placebo_controlled?: boolean;
-  statistical_significance?: boolean;
-  follow_up_duration?: string;
-  species_tested?: string[];
-  quality_score?: number;
-  relevance_score?: number;
-  novelty_score?: number;
-};
-study_summary?: {
-  objective?: string;
-  key_findings?: string[];
-  clinical_implications?: string;
-  limitations?: string[];
-};
+### Etapa 2: Criar componente `TreatabilityChart`
+Novo componente `src/components/pet/TreatabilityChart.tsx`:
+- Gráfico de barras horizontais mostrando o potencial de tratabilidade de cada condição do pet
+- Duas barras por condição: "Evidência Científica" (dados do KG) e "Experiência do Plano" (dados de outros cães similares tratados)
+- Usa Recharts (já instalado)
+
+### Etapa 3: Reestruturar `PetProfilePage.tsx`
+Reorganizar o layout da página:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  ← Mel   Golden Retriever · 10 anos · 28kg     [Analisar]  │
+├─────────────────────────────────────────────────────────────┤
+│  [3 Condições] [2 Medicações] [2 Exames] [0 Notas]         │
+├───────────────────────────────────┬──────────────────────── ─┤
+│                                   │                          │
+│  ┌─ Tratabilidade por Condição ─┐ │  ┌─ Chat Clínico ─────┐ │
+│  │  [Gráfico barras horiz.]     │ │  │                     │ │
+│  └──────────────────────────────┘ │  │                     │ │
+│                                   │  │                     │ │
+│  ┌─ Stack Geroprotetor ─────────┐ │  │                     │ │
+│  │  Curcumin ──[====●=====]──   │ │  │                     │ │
+│  │  10mg        25mg      50mg  │ │  │                     │ │
+│  │                              │ │  │                     │ │
+│  │  NMN ───[=======●===]────   │ │  │                     │ │
+│  │  50mg        150mg   250mg  │ │  │                     │ │
+│  │                              │ │  │                     │ │
+│  │  [Aprovar] [Modificar]       │ │  │                     │ │
+│  └──────────────────────────────┘ │  └─────────────────────┘ │
+│                                   │                          │
+│  ┌─ Tabs: Condições | Meds... ──┐ │                          │
+│  │  (conteúdo existente)        │ │                          │
+│  └──────────────────────────────┘ │                          │
+└───────────────────────────────────┴──────────────────────────┘
 ```
 
-2. No mapeamento de `extractedArgs` → `extractedData` (após linha ~1332), adicionar:
+**Ordenação vertical no painel principal:**
+1. Gráfico de Tratabilidade (novo)
+2. Stack Geroprotetor com Sliders (novo)
+3. Tabs existentes (Condições, Medicações, Exams, Notas) — mantidas intactas
+
+### Etapa 4: Dados e Integração
+- Os dados do stack virão da chamada existente `hybrid-recommendation` (já implementada no `handleAnalyzeWithKG`)
+- O resultado da análise será armazenado no state e passado ao `VetRecommendationPanel`
+- **Botão "Gerar Dados de Exemplo"**: Para demo/prototipação, gera um stack mockado com 4-5 compostos com doses min/max/recomendadas
+- Os dados de tratabilidade para o gráfico serão consultados via `get_conditions_with_treatability` (RPC existente) filtrados pelas condições do pet
+
+### Etapa 5: Traduções i18n
+- Incrementar versão no `i18n.ts`
+- Adicionar chaves em PT e EN para todos os novos textos:
+  - `petProfile.recommendation.*` (stack, approve, reject, dosage labels, etc.)
+  - `petProfile.treatability.*` (chart labels)
+
+### Detalhes Técnicos do Slider de Dosagem
+
+Cada composto terá:
 ```typescript
-study_assessment: extractedArgs.study_assessment || {},
-study_summary: extractedArgs.study_summary || {},
+interface CompoundDosage {
+  name: string;
+  condition: string;
+  dosageMin: number;    // mg/kg
+  dosageMax: number;    // mg/kg
+  dosageRecommended: number;  // posição inicial do slider
+  dosageCurrent: number;      // posição atual (editável)
+  unit: string;               // "mg/kg" ou "mg"
+  evidenceLevel: string;      // "KG-backed" | "AI-suggested"
+  rationale: string;
+  removed: boolean;
+}
 ```
 
-3. No objeto `analysisData` (linha ~1835), adicionar explicitamente:
-```typescript
-studyAssessment: extractedData.study_assessment || {},
-study_assessment: extractedData.study_assessment || {},
-studySummary: extractedData.study_summary || {},
-study_summary: extractedData.study_summary || {},
-qualityScore: extractedData.study_assessment?.quality_score || 0,
-relevanceScore: extractedData.study_assessment?.relevance_score || 0,
-noveltyScore: extractedData.study_assessment?.novelty_score || 0,
-```
+O slider usará o componente `@radix-ui/react-slider` já existente, com `min={dosageMin}`, `max={dosageMax}`, `defaultValue={[dosageRecommended]}`.
 
-4. No `extractionData` (para `study_extractions`), adicionar:
-```typescript
-study_assessment: extractedData.study_assessment || {},
-study_summary: extractedData.study_summary || {},
-```
-
-#### Parte 2: Frontend — Leitura robusta dos scores
-
-**Arquivo: `src/components/administrador/dialogs/EstudoDetailDialog.tsx`**
-
-Melhorar a lógica de resolução dos scores (linhas 134-141) para buscar de múltiplas fontes possíveis:
-```typescript
-const studyScores = {
-  qualityScore: 
-    studyAssessment.quality_score || 
-    analysisData.qualityScore || 
-    analysisData.study_assessment?.quality_score || 
-    0,
-  relevanceScore: 
-    studyAssessment.relevance_score || 
-    analysisData.relevanceScore || 
-    analysisData.study_assessment?.relevance_score || 
-    0,
-  noveltyScore: 
-    studyAssessment.novelty_score || 
-    analysisData.noveltyScore || 
-    analysisData.study_assessment?.novelty_score || 
-    0,
-};
-```
-
-Mudar fallback de `3.0` para `0` — assim fica explícito quando não há score real (em vez de parecer que foi avaliado como "médio").
-
-#### Parte 3: Remover mock em `scoring.ts`
-
-**Arquivo: `src/services/ntai/scoring.ts`**
-
-Substituir as funções mock que retornam `3.0 + Math.random()` por funções que calculam scores baseados em metadados reais do `study_assessment`:
-- `quality_score`: baseado em `methodology_type`, `sample_size`, `randomization`, `blinding`, `statistical_significance`
-- `relevance_score`: baseado em `species_tested` (canine/feline = maior peso), `follow_up_duration`
-- `novelty_score`: manter como input da LLM (não há como calcular deterministicamente)
-
-### Sobre Estudos Já Processados
-
-Os estudos já processados **não vão receber retroativamente** os scores corretos — seria necessário reprocessá-los. Porém, novos estudos terão os 3 scores reais extraídos pela LLM. Para os existentes, o fallback `0` deixará claro que precisam de reprocessamento, e o card de score pode exibir "Não avaliado" quando score = 0.
-
-### Arquivos Modificados
-- `supabase/functions/gemini-file-search/index.ts` — interface + mapeamento + salvamento
-- `src/components/administrador/dialogs/EstudoDetailDialog.tsx` — leitura multi-fonte
-- `src/services/ntai/scoring.ts` — substituir mock por cálculo real
-- `src/components/administrador/tags/ScoreSummaryCard.tsx` — exibir "Não avaliado" quando score = 0
-- `src/locales/pt/translation.json` e `src/locales/en/translation.json` — chave para "Não avaliado" / "Not evaluated"
-- `src/i18n.ts` — incrementar versão
+### Arquivos que serão criados/modificados
+- **Criar**: `src/components/pet/VetRecommendationPanel.tsx`
+- **Criar**: `src/components/pet/CompoundDosageSlider.tsx`
+- **Criar**: `src/components/pet/TreatabilityChart.tsx`
+- **Modificar**: `src/pages/veterinario/PetProfilePage.tsx` (reestruturar layout)
+- **Modificar**: `src/locales/pt/translation.json` + `en/translation.json`
+- **Modificar**: `src/i18n.ts` (incrementar versão)
+- **Atualizar**: `CHANGELOG.md`, `docs/CURRENT_STATE.md`
 
