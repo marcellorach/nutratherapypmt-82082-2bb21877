@@ -27,7 +27,7 @@ const SAMPLE_PETS = [
     notes: 'Senior dog with joint stiffness. Active lifestyle, showing signs of aging.',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
-      { condition_name: 'Aging', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily' },
@@ -48,8 +48,8 @@ const SAMPLE_PETS = [
     owner_email: 'joao@example.com',
     notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
     conditions: [
-      { condition_name: 'Cardiovascular Disease', severity: 'moderate', status: 'active' },
-      { condition_name: 'Cognitive Decline', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Heart Disease', severity: 'moderate', status: 'active' },
+      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
@@ -72,7 +72,7 @@ const SAMPLE_PETS = [
     notes: 'Working dog. Joint stress from activity. Chronic low-grade inflammation.',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
-      { condition_name: 'Inflammation', severity: 'mild', status: 'active' },
+      { condition_name: 'Chronic Low-Grade Inflammation (Inflammaging)', severity: 'mild', status: 'active' },
     ],
     medications: [
       { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
@@ -93,7 +93,7 @@ const SAMPLE_PETS = [
     owner_email: 'pedro@example.com',
     notes: 'Geriatric patient. Cognitive decline observed in last 6 months. Joint pain and aging signs.',
     conditions: [
-      { condition_name: 'Canine Cognitive Dysfunction', severity: 'moderate', status: 'active' },
+      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'moderate', status: 'active' },
       { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active' },
       { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
     ],
@@ -116,8 +116,8 @@ const SAMPLE_PETS = [
     owner_email: 'lucia@example.com',
     notes: 'Senior beagle. Early cognitive changes and general aging. Overweight.',
     conditions: [
-      { condition_name: 'Cognitive Decline', severity: 'mild', status: 'active' },
-      { condition_name: 'Aging', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'mild', status: 'active' },
+      { condition_name: 'Inflammation', severity: 'mild', status: 'monitoring' },
     ],
     medications: [],
     exams: [
