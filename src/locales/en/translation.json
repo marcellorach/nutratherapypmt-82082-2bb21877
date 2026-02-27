@@ -6710,6 +6710,19 @@
       "description": "Treatment potential based on scientific evidence and health plan experience",
       "scientificEvidence": "Scientific Evidence",
       "planExperience": "Plan Experience"
+    },
+    "evidence": {
+      "title": "Scientific Evidence",
+      "description": "Knowledge Graph triplets supporting the recommendations",
+      "studies": "studies"
+    },
+    "pathway": {
+      "title": "Biological Pathway",
+      "description": "Causal flow: Compound → Mechanism → Effect → Clinical Outcome"
+    },
+    "projection": {
+      "title": "Improvement Projection (12 months)",
+      "description": "Estimated patient evolution with the recommended protocol"
     }
   }
 }

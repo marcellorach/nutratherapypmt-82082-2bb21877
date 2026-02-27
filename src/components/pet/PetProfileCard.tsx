@@ -17,6 +17,7 @@ interface PetProfileCardProps {
     neutered: boolean;
     species: string;
     owner_name?: string | null;
+    photo_url?: string | null;
   };
 }
 
@@ -26,8 +27,16 @@ const PetProfileCard: React.FC<PetProfileCardProps> = ({ pet }) => {
 
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-      <div className="relative h-32 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-        <PawPrint className="h-16 w-16 text-muted-foreground/30" />
+      <div className="relative h-32 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden">
+        {pet.photo_url ? (
+          <img
+            src={pet.photo_url}
+            alt={`${pet.name} - ${pet.breed}`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <PawPrint className="h-16 w-16 text-muted-foreground/30" />
+        )}
         <div className="absolute top-2 right-2 flex gap-1">
           <Badge variant="outline" className="bg-background/80 text-xs">
             {pet.sex === 'male' ? '♂' : '♀'}
