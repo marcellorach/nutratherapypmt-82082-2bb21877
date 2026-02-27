@@ -1106,7 +1106,9 @@
     "poweredBy": "Powered by",
     "refresh": "Atualizar",
     "update": "Atualizar",
-    "updating": "Atualizando..."
+    "updating": "Atualizando...",
+    "details": "Detalhes",
+    "error": "Erro"
   },
   "sampleGroup": {
     "badge": "Grupo {{id}}",
