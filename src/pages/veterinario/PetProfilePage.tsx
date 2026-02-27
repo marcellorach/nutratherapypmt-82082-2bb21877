@@ -415,23 +415,15 @@ const PetProfilePage: React.FC = () => {
                                 <span className="text-xs text-muted-foreground">{e.exam_date}</span>
                               )}
                             </div>
-                            {e.results && typeof e.results === 'object' && (
-                              <div className="mt-2 rounded-md border overflow-hidden">
-                                <table className="w-full text-sm">
-                                  <tbody>
-                                    {Object.entries(e.results as Record<string, any>).map(([key, value]) => (
-                                      <tr key={key} className="border-b last:border-0">
-                                        <td className="px-3 py-1.5 font-medium text-muted-foreground bg-muted/50 w-1/3 capitalize">
-                                          {key.replace(/_/g, ' ')}
-                                        </td>
-                                        <td className="px-3 py-1.5">
-                                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                            {e.results && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {typeof e.results === 'object' 
+                                  ? Object.entries(e.results as Record<string, any>)
+                                      .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
+                                      .join(' · ')
+                                  : String(e.results)
+                                }
+                              </p>
                             )}
                             {e.notes && <p className="text-xs text-muted-foreground mt-1">{e.notes}</p>}
                           </div>
