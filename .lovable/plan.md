@@ -1,110 +1,125 @@
 
 
-## Plano: Reconstruir a Página do Perfil do Pet para o Veterinário
+## Plano: Melhorar Pets de Exemplo e Análise Real no Veterinário
 
-### Contexto
-A página atual (`PetProfilePage.tsx`) mostra apenas dados clínicos básicos (condições, medicações, exames, notas) e um chat clínico. Falta o componente mais importante: a **seção de recomendações do VetGraphRAG** com sliders individuais para cada nutracêutico/droga, gráficos de tratabilidade e o fluxo de aprovação veterinária.
+### Diagnóstico
 
-O sistema de sliders já existe em `ActiveIngredientTag.tsx` (com dose mín/máx e posição recomendada), mas está confinado ao módulo de `recommendations/` e não integrado na página do veterinário.
+1. **Imagens dos pets**: O `PetProfileCard.tsx` usa apenas um ícone genérico de pata. Não há imagens de raça. O campo `photo_url` existe na tabela `pet_profiles` mas não é usado.
 
-### O que será construído
+2. **Doenças**: As condições atuais dos pets de exemplo incluem algumas que o KG **pode** tratar (Osteoarthritis, Canine Cognitive Dysfunction) mas outras são irrelevantes ao escopo (Exocrine Pancreatic Insufficiency, Idiopathic Epilepsy, Syringomyelia). O MRI Brain já foi removido dos exames, mas as condições precisam ser alinhadas.
 
-A página será reestruturada em **3 seções verticais** no conteúdo principal (2/3 da tela), mantendo o Chat Clínico no sidebar (1/3):
+3. **Análise real**: O pipeline `handleAnalyzeWithKG` já é real — consulta Neo4j via `graph-rag-search` e gera recomendações via `hybrid-recommendation` com Lovable AI. **Está funcional**. O que falta é enriquecer a **apresentação dos resultados** com:
+   - Caminho biológico (pathway visualization)
+   - Embasamento científico (triplets e estudos de suporte)
+   - Gráfico de expectativa de melhora ao longo do tempo
+
+### Condições do KG confirmadas (aprovadas em triplet_extractions):
+- Osteoarthritis / Canine Osteoarthritis — Curcumin, Chondroitin Sulfate, Vitamin E, Selenium, L-carnitine, MSM, etc.
+- Canine Cognitive Dysfunction Syndrome — CoQ10, NAD+ precursor, Probiotics, MCTs, Ginkgo Biloba, etc.
+- Cardiovascular Disease — múltiplos compostos
+- Aging / Cellular Senescence — Rapamycin, Metformin, Senolytics
+- Arthritis — Curcumin, Gallic Acid, etc.
+- Cognitive Decline — vários
 
 ---
 
-### Etapa 1: Criar componente `VetRecommendationPanel`
-Novo componente em `src/components/pet/VetRecommendationPanel.tsx` que renderiza o stack de recomendações do VetGraphRAG para o pet. Conterá:
+### Etapa 1: Imagens de raça nos cards de pet
 
-- **Header**: "Stack Geroprotetor Recomendado" com badge de confiança geral
-- **Lista de compostos** (nutracêuticos/drogas), cada um como um card individual com:
-  - Nome do composto + condição alvo
-  - **Slider de dosagem** com dose mínima, dose máxima, e a bolinha posicionada na dose recomendada pelo sistema
-  - Labels: dose mín (esquerda), dose recomendada (centro/bolinha), dose máx (direita)
-  - Botão X para remover composto do stack
-  - Badge de nível de evidência
-  - Mini rationale (1 linha)
-- **Botões de ação**: "Aprovar Stack", "Aprovar com Modificações", "Rejeitar"
+- Usar a Lovable AI Image Generation (Gemini) para gerar imagens no momento da criação dos pets de exemplo seria lento e caro. Em vez disso, usaremos **URLs de fotos de cães por raça** de bancos de imagens gratuitos (Dog API ou URLs estáticas confiáveis).
+- Modificar `GenerateSamplePetsButton.tsx` para incluir `photo_url` ao inserir os pets.
+- Modificar `PetProfileCard.tsx` para exibir a `photo_url` em vez do ícone de pata.
+- Modificar `PetProfilePage.tsx` no header para mostrar foto do pet.
 
-### Etapa 2: Criar componente `TreatabilityChart`
-Novo componente `src/components/pet/TreatabilityChart.tsx`:
-- Gráfico de barras horizontais mostrando o potencial de tratabilidade de cada condição do pet
-- Duas barras por condição: "Evidência Científica" (dados do KG) e "Experiência do Plano" (dados de outros cães similares tratados)
-- Usa Recharts (já instalado)
+### Etapa 2: Atualizar condições dos pets de exemplo
 
-### Etapa 3: Reestruturar `PetProfilePage.tsx`
-Reorganizar o layout da página:
+Trocar condições que o VetGraphRAG não tem dados por condições com cobertura real no KG:
+
+| Pet | Raça | Condições Atuais | Condições Novas |
+|-----|------|-------------------|-----------------|
+| Rex | Labrador | Hip Dysplasia, Osteoarthritis | **Osteoarthritis** (moderate), **Aging/Frailty** (mild) |
+| Luna | Cavalier | Mitral Valve Disease, Syringomyelia | **Cardiovascular Disease** (moderate), **Cognitive Decline** (mild) |
+| Thor | German Shepherd | EPI, Atopic Dermatitis | **Osteoarthritis** (moderate), **Inflammation** (mild) |
+| Mel | Golden Retriever | CCD, Hypothyroidism, Spondylosis | **Canine Cognitive Dysfunction** (moderate), **Osteoarthritis** (mild), **Cellular Senescence** (mild) |
+| Max | Beagle | Idiopathic Epilepsy | **Cognitive Decline** (mild), **Aging** (monitoring) |
+
+Exames e medicações serão ajustados para corresponder.
+
+### Etapa 3: Enriquecer a apresentação dos resultados da análise
+
+Após o `handleAnalyzeWithKG` retornar dados, além do VetRecommendationPanel com sliders, adicionar:
+
+**a) Seção "Embasamento Científico"** — Novo componente `ScientificEvidencePanel.tsx`:
+- Para cada condição, listar os triplets TREATS do KG que fundamentam a recomendação
+- Mostrar: Composto → [TREATS] → Condição, com contagem de estudos e score de confiança
+- Badge de nível de evidência (KG-backed vs AI-suggested)
+
+**b) Seção "Caminho Biológico"** — Novo componente `BiologicalPathway.tsx`:
+- Diagrama vertical simplificado mostrando: Composto → Mecanismo → Efeito → Resultado Clínico
+- Baseado nos triplets HAS_MECHANISM, ACTIVATES, TREATS do KG
+- Usa cards conectados por linhas (CSS, não biblioteca de grafos) para manter leve
+
+**c) Seção "Projeção de Melhora"** — Novo componente `ImprovementProjectionChart.tsx`:
+- Gráfico de linha (Recharts) mostrando projeção de melhora ao longo de 12 meses
+- Curvas baseadas nos scores de tratabilidade e evidência
+- Faixas de confiança (área sombreada)
+
+### Etapa 4: Integrar dados reais do KG na análise
+
+Modificar `handleAnalyzeWithKG` em `PetProfilePage.tsx` para:
+- Após consultar Neo4j, salvar também os triplets relevantes encontrados no state
+- Passar esses dados aos novos componentes de embasamento e pathway
+- O `graph-rag-search` com queryType `context` já retorna nodes e relationships — basta processá-los
+
+### Etapa 5: Traduções i18n e versionamento
+
+- Incrementar versão no `i18n.ts`
+- Adicionar chaves para todos os novos componentes em PT e EN
+- Atualizar CHANGELOG.md
+
+### Arquivos a criar/modificar
+
+- **Criar**: `src/components/pet/ScientificEvidencePanel.tsx`
+- **Criar**: `src/components/pet/BiologicalPathway.tsx`
+- **Criar**: `src/components/pet/ImprovementProjectionChart.tsx`
+- **Modificar**: `src/components/pet/GenerateSamplePetsButton.tsx` (condições + photo_url)
+- **Modificar**: `src/components/pet/PetProfileCard.tsx` (exibir foto)
+- **Modificar**: `src/pages/veterinario/PetProfilePage.tsx` (foto no header + novos painéis + dados do KG)
+- **Modificar**: `src/locales/pt/translation.json` + `en/translation.json`
+- **Modificar**: `src/i18n.ts`
+- **Atualizar**: `CHANGELOG.md`
+
+### Layout atualizado da página do pet
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  ← Mel   Golden Retriever · 10 anos · 28kg     [Analisar]  │
-├─────────────────────────────────────────────────────────────┤
-│  [3 Condições] [2 Medicações] [2 Exames] [0 Notas]         │
-├───────────────────────────────────┬──────────────────────── ─┤
-│                                   │                          │
-│  ┌─ Tratabilidade por Condição ─┐ │  ┌─ Chat Clínico ─────┐ │
-│  │  [Gráfico barras horiz.]     │ │  │                     │ │
-│  └──────────────────────────────┘ │  │                     │ │
-│                                   │  │                     │ │
-│  ┌─ Stack Geroprotetor ─────────┐ │  │                     │ │
-│  │  Curcumin ──[====●=====]──   │ │  │                     │ │
-│  │  10mg        25mg      50mg  │ │  │                     │ │
-│  │                              │ │  │                     │ │
-│  │  NMN ───[=======●===]────   │ │  │                     │ │
-│  │  50mg        150mg   250mg  │ │  │                     │ │
-│  │                              │ │  │                     │ │
-│  │  [Aprovar] [Modificar]       │ │  │                     │ │
-│  └──────────────────────────────┘ │  └─────────────────────┘ │
-│                                   │                          │
-│  ┌─ Tabs: Condições | Meds... ──┐ │                          │
-│  │  (conteúdo existente)        │ │                          │
-│  └──────────────────────────────┘ │                          │
-└───────────────────────────────────┴──────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│  [foto] Mel   Golden Retriever · 10a · 28kg    [Analisar] │
+├────────────────────────────────────┬───────────────────────┤
+│                                    │                       │
+│  ┌─ Tratabilidade por Condição ──┐ │  ┌─ Chat Clínico ──┐ │
+│  │  [Gráfico barras horizontais] │ │  │                  │ │
+│  └───────────────────────────────┘ │  │                  │ │
+│                                    │  │                  │ │
+│  ┌─ Stack Geroprotetor ──────────┐ │  │                  │ │
+│  │  [Sliders de dosagem]         │ │  │                  │ │
+│  │  [Aprovar] [Modificar]        │ │  │                  │ │
+│  └───────────────────────────────┘ │  │                  │ │
+│                                    │  │                  │ │
+│  ┌─ Embasamento Científico ──────┐ │  │                  │ │
+│  │  Curcumin → TREATS → OA (12)  │ │  │                  │ │
+│  │  CoQ10 → TREATS → CCD (8)    │ │  │                  │ │
+│  └───────────────────────────────┘ │  │                  │ │
+│                                    │  │                  │ │
+│  ┌─ Caminho Biológico ───────────┐ │  └──────────────────┘ │
+│  │  Composto → Mecanismo → Efeito│ │                       │
+│  └───────────────────────────────┘ │                       │
+│                                    │                       │
+│  ┌─ Projeção de Melhora ─────────┐ │                       │
+│  │  [Gráfico 12 meses]          │ │                       │
+│  └───────────────────────────────┘ │                       │
+│                                    │                       │
+│  ┌─ Tabs: Condições | Meds... ───┐│                       │
+│  │  (conteúdo existente)         ││                       │
+│  └───────────────────────────────┘│                       │
+└────────────────────────────────────┴───────────────────────┘
 ```
-
-**Ordenação vertical no painel principal:**
-1. Gráfico de Tratabilidade (novo)
-2. Stack Geroprotetor com Sliders (novo)
-3. Tabs existentes (Condições, Medicações, Exams, Notas) — mantidas intactas
-
-### Etapa 4: Dados e Integração
-- Os dados do stack virão da chamada existente `hybrid-recommendation` (já implementada no `handleAnalyzeWithKG`)
-- O resultado da análise será armazenado no state e passado ao `VetRecommendationPanel`
-- **Botão "Gerar Dados de Exemplo"**: Para demo/prototipação, gera um stack mockado com 4-5 compostos com doses min/max/recomendadas
-- Os dados de tratabilidade para o gráfico serão consultados via `get_conditions_with_treatability` (RPC existente) filtrados pelas condições do pet
-
-### Etapa 5: Traduções i18n
-- Incrementar versão no `i18n.ts`
-- Adicionar chaves em PT e EN para todos os novos textos:
-  - `petProfile.recommendation.*` (stack, approve, reject, dosage labels, etc.)
-  - `petProfile.treatability.*` (chart labels)
-
-### Detalhes Técnicos do Slider de Dosagem
-
-Cada composto terá:
-```typescript
-interface CompoundDosage {
-  name: string;
-  condition: string;
-  dosageMin: number;    // mg/kg
-  dosageMax: number;    // mg/kg
-  dosageRecommended: number;  // posição inicial do slider
-  dosageCurrent: number;      // posição atual (editável)
-  unit: string;               // "mg/kg" ou "mg"
-  evidenceLevel: string;      // "KG-backed" | "AI-suggested"
-  rationale: string;
-  removed: boolean;
-}
-```
-
-O slider usará o componente `@radix-ui/react-slider` já existente, com `min={dosageMin}`, `max={dosageMax}`, `defaultValue={[dosageRecommended]}`.
-
-### Arquivos que serão criados/modificados
-- **Criar**: `src/components/pet/VetRecommendationPanel.tsx`
-- **Criar**: `src/components/pet/CompoundDosageSlider.tsx`
-- **Criar**: `src/components/pet/TreatabilityChart.tsx`
-- **Modificar**: `src/pages/veterinario/PetProfilePage.tsx` (reestruturar layout)
-- **Modificar**: `src/locales/pt/translation.json` + `en/translation.json`
-- **Modificar**: `src/i18n.ts` (incrementar versão)
-- **Atualizar**: `CHANGELOG.md`, `docs/CURRENT_STATE.md`
 
