@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-02-27 🐾 Imagens de Raça, Condições KG-Aligned e Painéis de Evidência Científica
+
+- ✅ **Imagens de raça nos cards**: `PetProfileCard` e `PetProfilePage` agora exibem foto real da raça do pet (Labrador, Cavalier, German Shepherd, Golden Retriever, Beagle) com fallback para ícone de pata
+- ✅ **Condições alinhadas ao KG**: Pets de exemplo atualizados com condições que possuem cobertura real no Knowledge Graph (Osteoarthritis, Cardiovascular Disease, Cognitive Decline, Inflammation, Cellular Senescence, Aging)
+- ✅ **ScientificEvidencePanel**: Novo componente exibindo triplets TREATS/PREVENTS/ALLEVIATES do KG com sujeito → predicado → objeto, contagem de estudos e score de confiança
+- ✅ **BiologicalPathway**: Novo componente com diagrama vertical L0→L2→L3→L4 mostrando Composto → Mecanismo → Efeito → Resultado Clínico
+- ✅ **ImprovementProjectionChart**: Gráfico de projeção de melhora ao longo de 12 meses com curva sigmoide e faixas de confiança (Recharts AreaChart)
+- ✅ **Integração real KG→Painéis**: `handleAnalyzeWithKG` agora extrai triplets, pathways e projeções dos resultados do graph-rag-search e passa aos novos componentes
+- ✅ **Dados mock enriquecidos**: Botão "Gerar Dados de Exemplo" agora também popula os painéis de evidência, pathway e projeção
+- ✅ **i18n v1.9.80**: Novas chaves `petProfile.evidence.*`, `petProfile.pathway.*`, `petProfile.projection.*` em PT e EN
+
 ### Added - 2026-02-26 🩺 Painel de Recomendações Veterinárias com Sliders de Dosagem
 
 - ✅ **CompoundDosageSlider**: Novo componente com slider interativo mostrando dose mín/máx/recomendada, badge de nível de evidência (KG-backed, AI-suggested, clinical-experience), rationale, e botão para remover/restaurar composto

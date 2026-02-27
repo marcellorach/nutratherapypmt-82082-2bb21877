@@ -6,6 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
+const BREED_PHOTOS: Record<string, string> = {
+  'Labrador Retriever': '/images/breeds/labrador-retriever.jpg',
+  'Cavalier King Charles Spaniel': '/images/breeds/cavalier-king-charles.jpg',
+  'German Shepherd': '/images/breeds/german-shepherd.jpg',
+  'Golden Retriever': '/images/breeds/golden-retriever.jpg',
+  'Beagle': '/images/breeds/beagle.jpg',
+};
+
 const SAMPLE_PETS = [
   {
     name: 'Rex',
@@ -16,10 +24,10 @@ const SAMPLE_PETS = [
     neutered: true,
     owner_name: 'Maria Silva',
     owner_email: 'maria@example.com',
-    notes: 'Senior dog with joint issues. Active lifestyle.',
+    notes: 'Senior dog with joint stiffness. Active lifestyle, showing signs of aging.',
     conditions: [
-      { condition_name: 'Hip Dysplasia', severity: 'moderate', status: 'active' },
-      { condition_name: 'Osteoarthritis', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
+      { condition_name: 'Aging', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily' },
@@ -38,17 +46,17 @@ const SAMPLE_PETS = [
     neutered: true,
     owner_name: 'João Pereira',
     owner_email: 'joao@example.com',
-    notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring.',
+    notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
     conditions: [
-      { condition_name: 'Mitral Valve Disease', severity: 'moderate', status: 'active' },
-      { condition_name: 'Syringomyelia', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Cardiovascular Disease', severity: 'moderate', status: 'active' },
+      { condition_name: 'Cognitive Decline', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
       { medication_name: 'Furosemide', dosage: '2mg/kg', frequency: 'Once daily' },
     ],
     exams: [
-      { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: 32, murmur_grade: '4/6' } },
+      { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: '32%', murmur_grade: '4/6' } },
       { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5 } },
     ],
   },
@@ -61,17 +69,17 @@ const SAMPLE_PETS = [
     neutered: false,
     owner_name: 'Ana Costa',
     owner_email: 'ana@example.com',
-    notes: 'Working dog. Digestive sensitivity. Mild allergies.',
+    notes: 'Working dog. Joint stress from activity. Chronic low-grade inflammation.',
     conditions: [
-      { condition_name: 'Exocrine Pancreatic Insufficiency', severity: 'moderate', status: 'active' },
-      { condition_name: 'Atopic Dermatitis', severity: 'mild', status: 'active' },
+      { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
+      { condition_name: 'Inflammation', severity: 'mild', status: 'active' },
     ],
     medications: [
-      { medication_name: 'Pancreatic Enzymes', dosage: '1 tsp/meal', frequency: 'With every meal' },
+      { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
     ],
     exams: [
-      { exam_type: 'TLI Test', results: { tli: 1.8, reference: '5.7-45.2', interpretation: 'Low - EPI confirmed' } },
-      { exam_type: 'Allergy Panel', results: { dust_mites: 'positive', grass_pollen: 'positive', beef: 'negative' } },
+      { exam_type: 'Joint Evaluation', results: { hips: 'mild dysplasia', elbows: 'normal', gait: 'slight stiffness' } },
+      { exam_type: 'Inflammatory Markers', results: { crp: 15.2, reference: '<10', interpretation: 'Mildly elevated' } },
     ],
   },
   {
@@ -83,42 +91,38 @@ const SAMPLE_PETS = [
     neutered: true,
     owner_name: 'Pedro Santos',
     owner_email: 'pedro@example.com',
-    notes: 'Geriatric patient. Cognitive decline observed in last 6 months.',
+    notes: 'Geriatric patient. Cognitive decline observed in last 6 months. Joint pain and aging signs.',
     conditions: [
       { condition_name: 'Canine Cognitive Dysfunction', severity: 'moderate', status: 'active' },
-      { condition_name: 'Hypothyroidism', severity: 'mild', status: 'active' },
-      { condition_name: 'Lumbar Spondylosis', severity: 'moderate', status: 'monitoring' },
+      { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active' },
+      { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Selegiline', dosage: '0.5mg/kg', frequency: 'Once daily morning' },
-      { medication_name: 'Levothyroxine', dosage: '0.02mg/kg', frequency: 'Twice daily' },
     ],
     exams: [
-      { exam_type: 'Thyroid Panel', results: { t4: 0.8, tsh: 0.65, reference_t4: '1.0-4.0' } },
-      { exam_type: 'Spinal X-Ray', results: { spondylosis: 'L3-L5', severity: 'moderate' } },
+      { exam_type: 'Cognitive Assessment', results: { disorientation: 'moderate', sleep_wake_cycle: 'altered', interaction: 'reduced', house_soiling: 'occasional' } },
+      { exam_type: 'Complete Blood Count', results: { wbc: 10200, rbc: 6.5, platelets: 265000 } },
     ],
   },
   {
     name: 'Max',
     breed: 'Beagle',
-    age_years: 3,
+    age_years: 9,
     weight_kg: 14,
     sex: 'male' as const,
     neutered: true,
     owner_name: 'Lucia Oliveira',
     owner_email: 'lucia@example.com',
-    notes: 'Young adult. History of seizures starting at 2 years. Well controlled.',
+    notes: 'Senior beagle. Early cognitive changes and general aging. Overweight.',
     conditions: [
-      { condition_name: 'Idiopathic Epilepsy', severity: 'moderate', status: 'active' },
+      { condition_name: 'Cognitive Decline', severity: 'mild', status: 'active' },
+      { condition_name: 'Aging', severity: 'mild', status: 'monitoring' },
     ],
-    medications: [
-      { medication_name: 'Phenobarbital', dosage: '2.5mg/kg', frequency: 'Twice daily' },
-      { medication_name: 'Potassium Bromide', dosage: '30mg/kg', frequency: 'Once daily' },
-    ],
+    medications: [],
     exams: [
-      { exam_type: 'MRI Brain', results: { findings: 'No structural abnormalities', contrast: 'normal' } },
-      { exam_type: 'Complete Blood Count', results: { wbc: 9800, rbc: 6.8, platelets: 310000 } },
-      { exam_type: 'Liver Panel', results: { alt: 85, alp: 120, albumin: 3.2, note: 'Mild elevation due to phenobarbital' } },
+      { exam_type: 'Geriatric Panel', results: { glucose: 95, bun: 22, creatinine: 1.1, alt: 45, albumin: 3.4 } },
+      { exam_type: 'Cognitive Assessment', results: { disorientation: 'mild', sleep_wake_cycle: 'normal', interaction: 'slightly_reduced' } },
     ],
   },
 ];
@@ -138,7 +142,6 @@ const GenerateSamplePetsButton: React.FC = () => {
       for (const pet of SAMPLE_PETS) {
         const { conditions, medications, exams, ...profileData } = pet;
 
-        // Insert pet profile
         const { data: profile, error: profileError } = await supabase
           .from('pet_profiles')
           .insert({
@@ -146,13 +149,13 @@ const GenerateSamplePetsButton: React.FC = () => {
             species: 'canine',
             created_by: userId,
             veterinarian_id: userId,
+            photo_url: BREED_PHOTOS[pet.breed] || null,
           })
           .select()
           .single();
 
         if (profileError) throw profileError;
 
-        // Insert conditions
         if (conditions.length > 0) {
           const { error: condError } = await supabase
             .from('pet_conditions')
@@ -160,7 +163,6 @@ const GenerateSamplePetsButton: React.FC = () => {
           if (condError) throw condError;
         }
 
-        // Insert medications
         if (medications.length > 0) {
           const { error: medError } = await supabase
             .from('pet_medications')
@@ -168,7 +170,6 @@ const GenerateSamplePetsButton: React.FC = () => {
           if (medError) throw medError;
         }
 
-        // Insert exams
         if (exams.length > 0) {
           const { error: examError } = await supabase
             .from('pet_exams')

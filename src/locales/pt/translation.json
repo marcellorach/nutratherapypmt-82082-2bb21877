@@ -6710,6 +6710,19 @@
       "description": "Potencial de tratamento baseado em evidência científica e experiência do plano de saúde",
       "scientificEvidence": "Evidência Científica",
       "planExperience": "Experiência do Plano"
+    },
+    "evidence": {
+      "title": "Embasamento Científico",
+      "description": "Triplets do Knowledge Graph que fundamentam as recomendações",
+      "studies": "estudos"
+    },
+    "pathway": {
+      "title": "Caminho Biológico",
+      "description": "Fluxo causal: Composto → Mecanismo → Efeito → Resultado Clínico"
+    },
+    "projection": {
+      "title": "Projeção de Melhora (12 meses)",
+      "description": "Estimativa de evolução do paciente com o protocolo recomendado"
     }
   }
 }
