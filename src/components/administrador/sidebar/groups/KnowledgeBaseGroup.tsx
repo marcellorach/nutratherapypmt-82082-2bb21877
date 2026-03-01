@@ -27,6 +27,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <BookOpen className={`h-4 w-4 mr-2 ${currentStep === "estudos" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.studies')}</span>
+              <span className="ml-1.5 px-1.5 py-0 text-[9px] font-semibold leading-4 rounded bg-yellow-400 text-yellow-900 whitespace-nowrap">100% real</span>
             </div>
             {currentStep === "estudos" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
