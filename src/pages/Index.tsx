@@ -166,9 +166,14 @@ const Index: React.FC = () => {
           </div>
         )}
         {/* Scroll indicator */}
-        <div className="flex flex-col items-center mt-12 mb-4 animate-fade-in">
-          <p className="text-sm text-gray-400 mb-2">{t('landing.scrollIndicator')}</p>
-          <ChevronDown size={24} className="text-gray-400 animate-bounce" />
+        <div 
+          className="flex flex-col items-center mt-16 mb-4 cursor-pointer group"
+          onClick={() => document.getElementById('vision')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <span className="inline-block px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold text-sm tracking-wide shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/50 group-hover:scale-105 transition-all duration-300">
+            {t('landing.scrollIndicator')} ↓
+          </span>
+          <ChevronDown size={28} className="text-amber-500 animate-bounce mt-3" />
         </div>
       </div>
 
