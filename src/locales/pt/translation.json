@@ -1513,7 +1513,9 @@
     "sidebar": {
       "knowledgeBase": {
         "title": "Base Conhecimento/Relacional",
-        "studies": "Estudos Científicos",
+        "studies": "Digestão Científica",
+        "studiesStatus": "100% operacional",
+        "studiesStatusTooltip": "Pipeline completo funcionando: upload de PDFs, extração por IA, geração de triplets e curadoria — tudo com dados reais.",
         "nutraceuticalsUnified": "Nutracêuticos",
         "veterinaryTargets": "Alvos Veterinários",
         "tripletCuration": "Curadoria de Triplets",

@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2, ClipboardCheck } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2, ClipboardCheck, CircleCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
 
 interface KnowledgeBaseGroupProps {
@@ -27,7 +28,17 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <BookOpen className={`h-4 w-4 mr-2 ${currentStep === "estudos" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.studies')}</span>
-              <span className="ml-1.5 px-1.5 py-0 text-[9px] font-semibold leading-4 rounded bg-yellow-400 text-yellow-900 whitespace-nowrap">100% real</span>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CircleCheck className="h-3.5 w-3.5 ml-1.5 text-emerald-500 flex-shrink-0 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[220px] text-xs">
+                    <p className="font-semibold text-emerald-600 mb-1">{t('admin.sidebar.knowledgeBase.studiesStatus')}</p>
+                    <p className="text-muted-foreground">{t('admin.sidebar.knowledgeBase.studiesStatusTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             {currentStep === "estudos" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

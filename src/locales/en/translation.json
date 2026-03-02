@@ -1513,7 +1513,9 @@
     "sidebar": {
       "knowledgeBase": {
         "title": "Knowledge/Relational Base",
-        "studies": "Scientific Studies",
+        "studies": "Scientific Digestion",
+        "studiesStatus": "100% operational",
+        "studiesStatusTooltip": "Full pipeline working: PDF upload, AI extraction, triplet generation and curation — all with real data.",
         "nutraceuticalsUnified": "Nutraceuticals",
         "veterinaryTargets": "Veterinary Targets",
         "tripletCuration": "Triplet Curation",
