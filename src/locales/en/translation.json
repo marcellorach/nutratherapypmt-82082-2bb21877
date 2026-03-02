@@ -1568,7 +1568,7 @@
         "plannedStudiesStatusTooltip": "Full CRUD and visual recruitment. Missing calendar and notification integration.",
         "ongoingStudies": "Ongoing Studies",
         "ongoingStudiesStatus": "90% Functional",
-        "ongoingStudiesStatusTooltip": "Detailed panel with progress and metrics. Missing real-time data integration.",
+        "ongoingStudiesStatusTooltip": "Detailed panel with progress and metrics. Invoxia collar integration active. Missing clinical exam tracking.",
         "completedStudies": "Completed Studies",
         "predictiveModels": "Predictive Models"
       },
