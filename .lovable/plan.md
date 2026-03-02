@@ -1,125 +1,78 @@
 
 
-## Plano: Melhorar Pets de Exemplo e Análise Real no Veterinário
+## Plano: Badges de Status + Botoes "About" por Grupo
 
-### Diagnóstico
+### Resumo
 
-1. **Imagens dos pets**: O `PetProfileCard.tsx` usa apenas um ícone genérico de pata. Não há imagens de raça. O campo `photo_url` existe na tabela `pet_profiles` mas não é usado.
+Duas funcionalidades distintas:
 
-2. **Doenças**: As condições atuais dos pets de exemplo incluem algumas que o KG **pode** tratar (Osteoarthritis, Canine Cognitive Dysfunction) mas outras são irrelevantes ao escopo (Exocrine Pancreatic Insufficiency, Idiopathic Epilepsy, Syringomyelia). O MRI Brain já foi removido dos exames, mas as condições precisam ser alinhadas.
+**1. Badges de status (CircleCheck + tooltip)** em itens do sidebar com percentuais de completude:
+- **Knowledge Base**: Nutraceuticals (100%), Veterinary Targets (100%), Ontology Audit (100%), Knowledge Graph (100%), Relations (100%)
+- **Data Processing**: Patient Analysis (60%), Visualization (60%)  
+- **Actions**: Analytics (40%)
 
-3. **Análise real**: O pipeline `handleAnalyzeWithKG` já é real — consulta Neo4j via `graph-rag-search` e gera recomendações via `hybrid-recommendation` com Lovable AI. **Está funcional**. O que falta é enriquecer a **apresentação dos resultados** com:
-   - Caminho biológico (pathway visualization)
-   - Embasamento científico (triplets e estudos de suporte)
-   - Gráfico de expectativa de melhora ao longo do tempo
+**2. Botoes amarelos "About" estilo "About VetGraphRAG"** na primeira pagina de cada grupo:
+- **Data Processing** (primeira pagina: Import) 
+- **Actions** (primeira pagina: Analytics/SmartCampaignSystem)
+- **R&D / Research** (primeira pagina: Proposed Studies)
 
-### Condições do KG confirmadas (aprovadas em triplet_extractions):
-- Osteoarthritis / Canine Osteoarthritis — Curcumin, Chondroitin Sulfate, Vitamin E, Selenium, L-carnitine, MSM, etc.
-- Canine Cognitive Dysfunction Syndrome — CoQ10, NAD+ precursor, Probiotics, MCTs, Ginkgo Biloba, etc.
-- Cardiovascular Disease — múltiplos compostos
-- Aging / Cellular Senescence — Rapamycin, Metformin, Senolytics
-- Arthritis — Curcumin, Gallic Acid, etc.
-- Cognitive Decline — vários
+Cada botao abre um dialog explicativo com overview, metodologia e fundamentos, igual ao existente em "Digestao Cientifica".
 
 ---
 
-### Etapa 1: Imagens de raça nos cards de pet
+### Detalhes Tecnicos
 
-- Usar a Lovable AI Image Generation (Gemini) para gerar imagens no momento da criação dos pets de exemplo seria lento e caro. Em vez disso, usaremos **URLs de fotos de cães por raça** de bancos de imagens gratuitos (Dog API ou URLs estáticas confiáveis).
-- Modificar `GenerateSamplePetsButton.tsx` para incluir `photo_url` ao inserir os pets.
-- Modificar `PetProfileCard.tsx` para exibir a `photo_url` em vez do ícone de pata.
-- Modificar `PetProfilePage.tsx` no header para mostrar foto do pet.
+#### Parte 1: Badges de Status no Sidebar
 
-### Etapa 2: Atualizar condições dos pets de exemplo
+**Arquivos modificados:**
 
-Trocar condições que o VetGraphRAG não tem dados por condições com cobertura real no KG:
+1. **`KnowledgeBaseGroup.tsx`** -- Adicionar CircleCheck + Tooltip nos itens: nutraceuticals-unified, veterinary-targets, ontology-audit, knowledge-graph, relacoes (todos 100%)
 
-| Pet | Raça | Condições Atuais | Condições Novas |
-|-----|------|-------------------|-----------------|
-| Rex | Labrador | Hip Dysplasia, Osteoarthritis | **Osteoarthritis** (moderate), **Aging/Frailty** (mild) |
-| Luna | Cavalier | Mitral Valve Disease, Syringomyelia | **Cardiovascular Disease** (moderate), **Cognitive Decline** (mild) |
-| Thor | German Shepherd | EPI, Atopic Dermatitis | **Osteoarthritis** (moderate), **Inflammation** (mild) |
-| Mel | Golden Retriever | CCD, Hypothyroidism, Spondylosis | **Canine Cognitive Dysfunction** (moderate), **Osteoarthritis** (mild), **Cellular Senescence** (mild) |
-| Max | Beagle | Idiopathic Epilepsy | **Cognitive Decline** (mild), **Aging** (monitoring) |
+2. **`DataProcessingGroup.tsx`** -- Adicionar CircleCheck + Tooltip nos itens: analysis/patient-analysis (60%, amarelo), visualization (60%, amarelo)
 
-Exames e medicações serão ajustados para corresponder.
+3. **`ActionsGroup.tsx`** -- Adicionar CircleCheck + Tooltip no item: analytics (40%, laranja/vermelho)
 
-### Etapa 3: Enriquecer a apresentação dos resultados da análise
+**Logica de cores por percentual:**
+- 100% = verde (emerald-500) com CircleCheck
+- 60% = amarelo (yellow-500) com CircleCheck  
+- 40% = laranja (orange-500) com CircleCheck
 
-Após o `handleAnalyzeWithKG` retornar dados, além do VetRecommendationPanel com sliders, adicionar:
+**Cada tooltip mostrara:**
+- Nome do status (ex: "100% Functional" / "60% Implemented")
+- Descricao breve do que funciona e o que falta
 
-**a) Seção "Embasamento Científico"** — Novo componente `ScientificEvidencePanel.tsx`:
-- Para cada condição, listar os triplets TREATS do KG que fundamentam a recomendação
-- Mostrar: Composto → [TREATS] → Condição, com contagem de estudos e score de confiança
-- Badge de nível de evidência (KG-backed vs AI-suggested)
+#### Parte 2: Botoes "About" nos Grupos
 
-**b) Seção "Caminho Biológico"** — Novo componente `BiologicalPathway.tsx`:
-- Diagrama vertical simplificado mostrando: Composto → Mecanismo → Efeito → Resultado Clínico
-- Baseado nos triplets HAS_MECHANISM, ACTIVATES, TREATS do KG
-- Usa cards conectados por linhas (CSS, não biblioteca de grafos) para manter leve
+**Arquivos modificados:**
 
-**c) Seção "Projeção de Melhora"** — Novo componente `ImprovementProjectionChart.tsx`:
-- Gráfico de linha (Recharts) mostrando projeção de melhora ao longo de 12 meses
-- Curvas baseadas nos scores de tratabilidade e evidência
-- Faixas de confiança (área sombreada)
+4. **`ImportStep.tsx`** (primeira pagina de Data Processing) -- Adicionar TabInfoButton com conteudo explicativo do grupo
 
-### Etapa 4: Integrar dados reais do KG na análise
+5. **`ActionsStep.tsx` ou `SmartCampaignSystem.tsx`** (primeira pagina de Actions) -- Adicionar TabInfoButton  
 
-Modificar `handleAnalyzeWithKG` em `PetProfilePage.tsx` para:
-- Após consultar Neo4j, salvar também os triplets relevantes encontrados no state
-- Passar esses dados aos novos componentes de embasamento e pathway
-- O `graph-rag-search` com queryType `context` já retorna nodes e relationships — basta processá-los
+6. **Componente da primeira pagina de Research** (sugestoes-ai) -- Adicionar TabInfoButton
 
-### Etapa 5: Traduções i18n e versionamento
+7. **`admin-tabs-info.ts`** -- Adicionar entries de conteudo para: `import` (Data Processing), `analytics` (Actions), `sugestoes-ai` (Research)
 
-- Incrementar versão no `i18n.ts`
-- Adicionar chaves para todos os novos componentes em PT e EN
-- Atualizar CHANGELOG.md
+#### Parte 3: i18n
+
+8. **`src/locales/pt/translation.json`** -- Chaves para tooltips de status de cada item + conteudo dos About
+9. **`src/locales/en/translation.json`** -- Mesmas chaves em ingles
+10. **`src/i18n.ts`** -- Incrementar versao
+
+---
 
 ### Arquivos a criar/modificar
 
-- **Criar**: `src/components/pet/ScientificEvidencePanel.tsx`
-- **Criar**: `src/components/pet/BiologicalPathway.tsx`
-- **Criar**: `src/components/pet/ImprovementProjectionChart.tsx`
-- **Modificar**: `src/components/pet/GenerateSamplePetsButton.tsx` (condições + photo_url)
-- **Modificar**: `src/components/pet/PetProfileCard.tsx` (exibir foto)
-- **Modificar**: `src/pages/veterinario/PetProfilePage.tsx` (foto no header + novos painéis + dados do KG)
-- **Modificar**: `src/locales/pt/translation.json` + `en/translation.json`
-- **Modificar**: `src/i18n.ts`
-- **Atualizar**: `CHANGELOG.md`
-
-### Layout atualizado da página do pet
-
-```text
-┌────────────────────────────────────────────────────────────┐
-│  [foto] Mel   Golden Retriever · 10a · 28kg    [Analisar] │
-├────────────────────────────────────┬───────────────────────┤
-│                                    │                       │
-│  ┌─ Tratabilidade por Condição ──┐ │  ┌─ Chat Clínico ──┐ │
-│  │  [Gráfico barras horizontais] │ │  │                  │ │
-│  └───────────────────────────────┘ │  │                  │ │
-│                                    │  │                  │ │
-│  ┌─ Stack Geroprotetor ──────────┐ │  │                  │ │
-│  │  [Sliders de dosagem]         │ │  │                  │ │
-│  │  [Aprovar] [Modificar]        │ │  │                  │ │
-│  └───────────────────────────────┘ │  │                  │ │
-│                                    │  │                  │ │
-│  ┌─ Embasamento Científico ──────┐ │  │                  │ │
-│  │  Curcumin → TREATS → OA (12)  │ │  │                  │ │
-│  │  CoQ10 → TREATS → CCD (8)    │ │  │                  │ │
-│  └───────────────────────────────┘ │  │                  │ │
-│                                    │  │                  │ │
-│  ┌─ Caminho Biológico ───────────┐ │  └──────────────────┘ │
-│  │  Composto → Mecanismo → Efeito│ │                       │
-│  └───────────────────────────────┘ │                       │
-│                                    │                       │
-│  ┌─ Projeção de Melhora ─────────┐ │                       │
-│  │  [Gráfico 12 meses]          │ │                       │
-│  └───────────────────────────────┘ │                       │
-│                                    │                       │
-│  ┌─ Tabs: Condições | Meds... ───┐│                       │
-│  │  (conteúdo existente)         ││                       │
-│  └───────────────────────────────┘│                       │
-└────────────────────────────────────┴───────────────────────┘
-```
+| Arquivo | Acao |
+|---------|------|
+| `KnowledgeBaseGroup.tsx` | Adicionar badges 100% em 5 itens |
+| `DataProcessingGroup.tsx` | Adicionar badges 60% em 2 itens + importar Tooltip |
+| `ActionsGroup.tsx` | Adicionar badge 40% em 1 item + importar Tooltip |
+| `ImportStep.tsx` | Adicionar TabInfoButton amarelo |
+| `ActionsStep.tsx` | Adicionar TabInfoButton amarelo |
+| Componente sugestoes-ai | Adicionar TabInfoButton amarelo |
+| `admin-tabs-info.ts` | 3 novos blocos de conteudo |
+| `translation.json` (PT) | ~30 novas chaves |
+| `translation.json` (EN) | ~30 novas chaves |
+| `i18n.ts` | Incrementar versao |
 
