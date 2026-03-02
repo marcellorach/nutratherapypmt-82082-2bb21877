@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Target, Brain, Calculator, TrendingUp, Zap, Command, Send, BarChart3 } from "lucide-react";
 import { useROIIntelligence } from "@/hooks/roi/useROIIntelligence";
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 // Módulos refatorados do sistema de campanhas inteligentes
 import CommandModule from './modules/CommandModule';
@@ -155,6 +157,11 @@ const SmartCampaignSystem: React.FC = () => {
         <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white">
           {t('bulkActions.badges.aiActive')}
         </Badge>
+        <TabInfoButton
+          tabId="analytics"
+          title={t('admin.sidebar.actions.title')}
+          content={adminTabsInfo['analytics']}
+        />
       </div>
 
       <Tabs value={selectedModule} onValueChange={setSelectedModule} className="w-full">

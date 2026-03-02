@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, GitPullRequest, Share2, ClipboardCheck, CircleCheck } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,23 @@ interface KnowledgeBaseGroupProps {
   currentStep: string;
   handleStepClick: (step: string) => void;
 }
+
+const StatusBadge: React.FC<{ statusKey: string; tooltipKey: string; color: string }> = ({ statusKey, tooltipKey, color }) => {
+  const { t } = useTranslation();
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <CircleCheck className={`h-3.5 w-3.5 ml-1.5 ${color} flex-shrink-0 cursor-help`} />
+        </TooltipTrigger>
+        <TooltipContent side="right" className="max-w-[220px] text-xs">
+          <p className={`font-semibold mb-1 ${color}`}>{t(statusKey)}</p>
+          <p className="text-muted-foreground">{t(tooltipKey)}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({ 
   currentStep, 
@@ -57,6 +74,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <Beaker className={`h-4 w-4 mr-2 ${currentStep === "nutraceuticals-unified" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.nutraceuticalsUnified')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.nutraceuticalsStatus" tooltipKey="admin.sidebar.knowledgeBase.nutraceuticalsStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "nutraceuticals-unified" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -75,6 +93,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <Target className={`h-4 w-4 mr-2 ${currentStep === "veterinary-targets" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.veterinaryTargets')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.veterinaryTargetsStatus" tooltipKey="admin.sidebar.knowledgeBase.veterinaryTargetsStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "veterinary-targets" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -95,6 +114,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <Share2 className={`h-4 w-4 mr-2 ${currentStep === "knowledge-graph" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.knowledgeGraph')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.knowledgeGraphStatus" tooltipKey="admin.sidebar.knowledgeBase.knowledgeGraphStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "knowledge-graph" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -113,6 +133,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <ClipboardCheck className={`h-4 w-4 mr-2 ${currentStep === "ontology-audit" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.ontologyAudit')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.ontologyAuditStatus" tooltipKey="admin.sidebar.knowledgeBase.ontologyAuditStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "ontology-audit" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
@@ -131,6 +152,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <Network className={`h-4 w-4 mr-2 ${currentStep === "relacoes" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.relationsStatus" tooltipKey="admin.sidebar.knowledgeBase.relationsStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "relacoes" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

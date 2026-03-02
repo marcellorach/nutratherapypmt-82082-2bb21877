@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useSugestoes } from './hooks/useSugestoes';
 import SugestaoCard from './components/SugestaoCard';
 import SugestaoDetailsDialog from './components/SugestaoDetailsDialog';
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 const SugestoesAITab: React.FC = () => {
   const { t } = useTranslation();
@@ -38,6 +40,11 @@ const SugestoesAITab: React.FC = () => {
             <Sparkles className="mr-2 h-4 w-4" />
             {t('studyProposals.requestNew')}
           </Button>
+          <TabInfoButton
+            tabId="sugestoes-ai"
+            title={t('admin.sidebar.research.title')}
+            content={adminTabsInfo['sugestoes-ai']}
+          />
         </div>
       </div>
       

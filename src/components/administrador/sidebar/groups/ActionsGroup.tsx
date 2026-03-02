@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Zap, Gauge, ChevronRight, Activity } from "lucide-react";
+import { Zap, Gauge, ChevronRight, Activity, CircleCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
 
 interface ActionsGroupProps {
@@ -27,6 +28,17 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
             <div className="flex items-center">
               <Zap className={`h-4 w-4 mr-2 ${currentStep === "analytics" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.actions.analytics')}</span>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CircleCheck className="h-3.5 w-3.5 ml-1.5 text-orange-500 flex-shrink-0 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[220px] text-xs">
+                    <p className="font-semibold text-orange-600 mb-1">{t('admin.sidebar.actions.analyticsStatus')}</p>
+                    <p className="text-muted-foreground">{t('admin.sidebar.actions.analyticsStatusTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             {currentStep === "analytics" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />

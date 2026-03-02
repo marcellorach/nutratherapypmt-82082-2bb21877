@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Import, Database, CheckCircle, X, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowDown } from "lucide-react";
+import TabInfoButton from '../common/TabInfoButton';
+import { adminTabsInfo } from '@/data/admin-tabs-info';
 
 const ImportStep: React.FC = () => {
   const { t } = useTranslation();
@@ -54,6 +56,13 @@ const ImportStep: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold">{t('dataImport.title')}</h2>
           <p className="text-gray-600">{t('dataImport.description')}</p>
+        </div>
+        <div className="flex gap-2">
+          <TabInfoButton
+            tabId="import"
+            title={t('admin.sidebar.dataProcessing.title')}
+            content={adminTabsInfo['import']}
+          />
         </div>
       </div>
       
