@@ -1561,8 +1561,14 @@
       "research": {
         "title": "Pesquisa e Desenvolvimento",
         "proposedStudies": "Proposição de Estudos",
+        "proposedStudiesStatus": "70% Funcional",
+        "proposedStudiesStatusTooltip": "Sistema de propostas por IA funcional. Falta integração com pipeline de aprovação automatizado.",
         "plannedStudies": "Estudos Planejados",
+        "plannedStudiesStatus": "90% Funcional",
+        "plannedStudiesStatusTooltip": "CRUD completo e recrutamento visual. Falta integração com calendário e notificações.",
         "ongoingStudies": "Estudos em Andamento",
+        "ongoingStudiesStatus": "90% Funcional",
+        "ongoingStudiesStatusTooltip": "Painel detalhado com progresso e métricas. Falta integração com dados em tempo real.",
         "completedStudies": "Estudos Concluídos",
         "predictiveModels": "Modelos Preditivos"
       },
