@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Shuffle } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
 import VetRecommendationPanel, { generateMockCompounds } from '@/components/pet/VetRecommendationPanel';
+import CompoundSpecificChat from '@/components/pet/CompoundSpecificChat';
 import TreatabilityChart from '@/components/pet/TreatabilityChart';
 import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
@@ -220,38 +221,6 @@ const PetProfilePage: React.FC = () => {
     }
   };
 
-  const handleGenerateMockData = () => {
-    setRecommendationCompounds(generateMockCompounds());
-    setConfidenceLevel('high');
-    // Generate mock evidence data too
-    setKgTriplets([
-      { subject: 'Curcumin', predicate: 'TREATS', object: 'Osteoarthritis', confidence: 0.85, evidenceLevel: 'KG-backed', studyCount: 12 },
-      { subject: 'CoQ10', predicate: 'TREATS', object: 'Cognitive Decline', confidence: 0.78, evidenceLevel: 'KG-backed', studyCount: 8 },
-      { subject: 'Omega-3', predicate: 'ALLEVIATES', object: 'Inflammation', confidence: 0.82, evidenceLevel: 'KG-backed', studyCount: 15 },
-    ]);
-    setKgPathways([
-      { condition: 'Osteoarthritis', steps: [
-        { label: 'Curcumin', type: 'compound' },
-        { label: 'NF-κB Inhibition', type: 'mechanism' },
-        { label: 'Anti-inflammatory', type: 'effect' },
-        { label: 'Joint Health', type: 'outcome' },
-      ]},
-      { condition: 'Cognitive Decline', steps: [
-        { label: 'CoQ10', type: 'compound' },
-        { label: 'Mitochondrial Support', type: 'mechanism' },
-        { label: 'Neuroprotection', type: 'effect' },
-        { label: 'Cognitive Function', type: 'outcome' },
-      ]},
-    ]);
-    setKgProjections([
-      { condition: 'Osteoarthritis', baselineScore: 35, projectedImprovement: 30, confidenceBand: 8 },
-      { condition: 'Cognitive Decline', baselineScore: 40, projectedImprovement: 25, confidenceBand: 12 },
-    ]);
-    toast({
-      title: t('petProfile.recommendation.mockGenerated'),
-      description: t('petProfile.recommendation.mockGeneratedDesc'),
-    });
-  };
 
   const handleApproveStack = (compounds: CompoundDosage[]) => {
     console.log('Stack approved:', compounds);
@@ -322,10 +291,6 @@ const PetProfilePage: React.FC = () => {
               {profile.neutered && ` · ${t('petRegistration.form.neutered')}`}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-2" onClick={handleGenerateMockData}>
-            <Shuffle className="h-4 w-4" />
-            {t('petProfile.recommendation.generateMock')}
-          </Button>
           <Button className="gap-2" onClick={handleAnalyzeWithKG} disabled={analyzing}>
             {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
             {analyzing ? t('petRegistration.profile.analyzing') : t('petRegistration.profile.analyzeWithKG')}
@@ -381,30 +346,97 @@ const PetProfilePage: React.FC = () => {
               <TreatabilityChart data={treatabilityData} />
             )}
 
-            {/* Recommendation Panel */}
+            {/* Analysis Results Tabs */}
             {recommendationCompounds && (
-              <VetRecommendationPanel
-                compounds={recommendationCompounds}
-                confidenceLevel={confidenceLevel}
-                onApprove={handleApproveStack}
-                onReject={handleRejectStack}
-                petName={profile.name}
-              />
-            )}
+              <Tabs defaultValue="recommendations">
+                <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                  <TabsTrigger value="recommendations" className="gap-1">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.recommendations')}
+                  </TabsTrigger>
+                  <TabsTrigger value="biological-pathway" className="gap-1">
+                    <GitBranch className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.biologicalPathway')}
+                  </TabsTrigger>
+                  <TabsTrigger value="scientific-evidence" className="gap-1">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.scientificEvidence')}
+                  </TabsTrigger>
+                  <TabsTrigger value="projection" className="gap-1">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.projection')}
+                  </TabsTrigger>
+                  <TabsTrigger value="compound-chat" className="gap-1">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.compoundChat')}
+                  </TabsTrigger>
+                </TabsList>
 
-            {/* Scientific Evidence Panel */}
-            {kgTriplets.length > 0 && (
-              <ScientificEvidencePanel triplets={kgTriplets} />
-            )}
+                <TabsContent value="recommendations">
+                  <VetRecommendationPanel
+                    compounds={recommendationCompounds}
+                    confidenceLevel={confidenceLevel}
+                    onApprove={handleApproveStack}
+                    onReject={handleRejectStack}
+                    petName={profile.name}
+                  />
+                </TabsContent>
 
-            {/* Biological Pathway */}
-            {kgPathways.length > 0 && (
-              <BiologicalPathway pathways={kgPathways} />
-            )}
+                <TabsContent value="biological-pathway">
+                  {kgPathways.length > 0 ? (
+                    <BiologicalPathway pathways={kgPathways} />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                        {t('petProfile.pathway.description')}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
 
-            {/* Improvement Projection */}
-            {kgProjections.length > 0 && (
-              <ImprovementProjectionChart projections={kgProjections} />
+                <TabsContent value="scientific-evidence">
+                  {kgTriplets.length > 0 ? (
+                    <ScientificEvidencePanel triplets={kgTriplets} />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                        {t('petProfile.evidence.description')}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="projection">
+                  {kgProjections.length > 0 ? (
+                    <ImprovementProjectionChart projections={kgProjections} />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                        {t('petProfile.projection.description')}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="compound-chat">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        {t('petProfile.analysisTabs.compoundChat')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CompoundSpecificChat
+                        compounds={recommendationCompounds}
+                        petName={profile.name}
+                        petBreed={profile.breed}
+                        petAge={profile.age_years}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             )}
 
             {/* Existing Tabs */}

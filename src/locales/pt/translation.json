@@ -6749,6 +6749,24 @@
     "projection": {
       "title": "Projeção de Melhora (12 meses)",
       "description": "Estimativa de evolução do paciente com o protocolo recomendado"
+    },
+    "analysisTabs": {
+      "recommendations": "Recomendações",
+      "biologicalPathway": "Caminho Biológico",
+      "scientificEvidence": "Evidência Científica",
+      "projection": "Projeção de Melhora",
+      "compoundChat": "Chat por Composto"
+    },
+    "compoundChat": {
+      "selectPrompt": "Selecione um composto recomendado para iniciar uma conversa especializada:",
+      "backToList": "Voltar à lista",
+      "placeholder": "Faça perguntas sobre {{compound}} para {{condition}}",
+      "inputPlaceholder": "Pergunte sobre {{compound}}...",
+      "noResponse": "Sem resposta do assistente.",
+      "error": "Erro ao obter resposta. Tente novamente.",
+      "suggestion1": "Quais são os mecanismos de ação de {{compound}}?",
+      "suggestion2": "Qual a dosagem ideal de {{compound}} para cães idosos?",
+      "suggestion3": "Existem contraindicações de {{compound}} para {{condition}}?"
     }
   }
 }
