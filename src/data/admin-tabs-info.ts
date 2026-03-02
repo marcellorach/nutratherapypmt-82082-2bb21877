@@ -502,4 +502,119 @@ Action: AUTO-SUGGEST for veterinary review`
       ]
     }
   },
+
+  'import': {
+    version: '1.0.0',
+    lastUpdate: '2025-03-02',
+    keyExcerpts: [],
+    overview: {
+      objective: 'Módulo de Processamento de Dados: importação, simulação RAG, visualização de resultados e análise de pacientes. Conecta dados clínicos ao motor de recomendação nutracêutica.',
+      workflow: [
+        'Importação de dados clínicos de sistemas veterinários (Petlove, PetShop, etc.)',
+        'Simulação RAG multi-agente para processamento inteligente dos dados',
+        'Visualização de resultados e métricas de qualidade dos dados',
+        'Análise individual de pacientes com perfil completo e histórico'
+      ],
+      benefits: [
+        'Automatização do pipeline de dados clínicos',
+        'Validação e normalização de dados de múltiplas fontes',
+        'Identificação de pacientes elegíveis para protocolos nutracêuticos',
+        'Base para recomendações personalizadas por paciente'
+      ]
+    },
+    methodology: {
+      description: 'Pipeline ETL veterinário com 4 estágios: Extração → Transformação → Validação → Carga, otimizado para dados clínicos de pets.',
+      decisions: [
+        'Suporte a múltiplas fontes de dados (CSV, API, JSON)',
+        'Normalização automática de raças, condições e medicamentos',
+        'Matching fuzzy para correlação de entidades existentes',
+        'Threshold de elegibilidade baseado em completude dos dados (>70%)'
+      ]
+    },
+    scientific: {
+      foundation: 'ETL pipeline baseado em padrões FHIR (Fast Healthcare Interoperability Resources) adaptado para medicina veterinária.',
+      studies: [],
+      references: [
+        'FHIR R4 - HL7 International',
+        'VeNom Veterinary Nomenclature - Purdue University'
+      ]
+    }
+  },
+
+  'analytics': {
+    version: '1.0.0',
+    lastUpdate: '2025-03-02',
+    keyExcerpts: [],
+    overview: {
+      objective: 'Módulo de Ações: campanhas inteligentes, análise de ROI, acompanhamento de resultados e monitoramento clínico. Motor de decisão para operações comerciais e clínicas.',
+      workflow: [
+        'Segmentação inteligente de audiência por perfil de ROI e risco',
+        'Criação de campanhas educativas, retenção e upsell com IA',
+        'Análise de custo-benefício por protocolo nutracêutico',
+        'Monitoramento clínico longitudinal dos pacientes em tratamento'
+      ],
+      benefits: [
+        'Maximização de ROI por segmento de clientes',
+        'Campanhas personalizadas baseadas em perfil veterinário',
+        'Tracking de conversão e eficácia por tipo de campanha',
+        'Visibilidade do impacto clínico das recomendações'
+      ]
+    },
+    methodology: {
+      description: 'Motor de campanhas baseado em segmentação preditiva com 4 módulos: Comando, Criação, Execução e Analytics.',
+      decisions: [
+        'Segmentação por potencial de ROI e taxa de conversão estimada',
+        '4 tipos de campanha: Opportunity Gaps, Educational, Retention, Upsell',
+        'Simulação de execução com estimativas de conversão',
+        'Dashboard de analytics com métricas de performance em tempo real'
+      ]
+    },
+    scientific: {
+      foundation: 'Modelo de segmentação inspirado em RFM (Recency, Frequency, Monetary) adaptado para veterinária.',
+      studies: [],
+      references: [
+        'RFM Analysis - Marketing Analytics',
+        'Customer Lifetime Value Models'
+      ]
+    }
+  },
+
+  'sugestoes-ai': {
+    version: '1.0.0',
+    lastUpdate: '2025-03-02',
+    keyExcerpts: [],
+    overview: {
+      objective: 'Módulo de Pesquisa & Desenvolvimento: proposição de estudos pela IA, planejamento de pesquisas, acompanhamento de estudos em andamento e análise de resultados. Motor de inovação científica.',
+      workflow: [
+        'IA analisa gaps no Knowledge Graph e propõe estudos prioritários',
+        'Sistema de aprovação multi-nível (IA → Pesquisador → Comitê)',
+        'Planejamento detalhado com metodologia, cronograma e orçamento',
+        'Acompanhamento de estudos em andamento com milestones e resultados'
+      ],
+      benefits: [
+        'Identificação automática de oportunidades de pesquisa',
+        'Priorização baseada em impacto clínico e viabilidade',
+        'Pipeline organizado de estudos (proposto → planejado → em andamento → concluído)',
+        'Feedback loop: resultados de estudos alimentam o Knowledge Graph'
+      ]
+    },
+    methodology: {
+      description: 'Motor de proposição baseado em análise de gaps do Knowledge Graph com scoring de prioridade multi-fatorial.',
+      decisions: [
+        'Scoring de prioridade: Impacto Clínico (40%) + Viabilidade (30%) + Novidade (30%)',
+        'Classificação por tipo: Observacional, Intervencional, Meta-análise',
+        'Pipeline Kanban com 4 estágios de maturidade',
+        'Integração com base de evidências para evitar duplicação de esforço'
+      ]
+    },
+    scientific: {
+      foundation: 'Modelo de priorização de pesquisa inspirado em PCORI (Patient-Centered Outcomes Research Institute) adaptado para veterinária.',
+      studies: [],
+      references: [
+        'PCORI Methodology Standards',
+        'PRISMA Guidelines for Systematic Reviews',
+        'CONSORT Statement for Randomized Trials'
+      ]
+    }
+  },
 };
