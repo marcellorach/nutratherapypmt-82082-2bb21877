@@ -6749,6 +6749,24 @@
     "projection": {
       "title": "Improvement Projection (12 months)",
       "description": "Estimated patient evolution with the recommended protocol"
+    },
+    "analysisTabs": {
+      "recommendations": "Recommendations",
+      "biologicalPathway": "Biological Pathway",
+      "scientificEvidence": "Scientific Evidence",
+      "projection": "Improvement Projection",
+      "compoundChat": "Compound Chat"
+    },
+    "compoundChat": {
+      "selectPrompt": "Select a recommended compound to start a specialized conversation:",
+      "backToList": "Back to list",
+      "placeholder": "Ask questions about {{compound}} for {{condition}}",
+      "inputPlaceholder": "Ask about {{compound}}...",
+      "noResponse": "No response from assistant.",
+      "error": "Error getting response. Please try again.",
+      "suggestion1": "What are the mechanisms of action of {{compound}}?",
+      "suggestion2": "What is the ideal dosage of {{compound}} for elderly dogs?",
+      "suggestion3": "Are there contraindications of {{compound}} for {{condition}}?"
     }
   }
 }
