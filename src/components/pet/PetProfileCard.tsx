@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PawPrint, Info, Stethoscope } from 'lucide-react';
+import { PawPrint, Info, Stethoscope, Trash2 } from 'lucide-react';
 
 interface PetProfileCardProps {
   pet: {
@@ -19,9 +19,10 @@ interface PetProfileCardProps {
     owner_name?: string | null;
     photo_url?: string | null;
   };
+  onDelete?: (id: string) => void;
 }
 
-const PetProfileCard: React.FC<PetProfileCardProps> = ({ pet }) => {
+const PetProfileCard: React.FC<PetProfileCardProps> = ({ pet, onDelete }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -74,24 +75,36 @@ const PetProfileCard: React.FC<PetProfileCardProps> = ({ pet }) => {
       </CardContent>
 
       <CardFooter className="pt-2 flex justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/veterinario/pet/${pet.id}`)}
-          className="gap-1"
-        >
-          <Stethoscope className="h-3.5 w-3.5" />
-          {t('petRegistration.profile.viewProfile')}
-        </Button>
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => navigate(`/veterinario/pet/${pet.id}`)}
-          className="gap-1"
-        >
-          <Info className="h-3.5 w-3.5" />
-          {t('common.details')}
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/veterinario/pet/${pet.id}`)}
+            className="gap-1"
+          >
+            <Stethoscope className="h-3.5 w-3.5" />
+            {t('petRegistration.profile.viewProfile')}
+          </Button>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => navigate(`/veterinario/pet/${pet.id}`)}
+            className="gap-1"
+          >
+            <Info className="h-3.5 w-3.5" />
+            {t('common.details')}
+          </Button>
+        </div>
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(pet.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
