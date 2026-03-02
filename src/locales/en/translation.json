@@ -1561,8 +1561,14 @@
       "research": {
         "title": "Research and Development",
         "proposedStudies": "Study Proposals",
+        "proposedStudiesStatus": "70% Functional",
+        "proposedStudiesStatusTooltip": "AI-powered proposal system functional. Missing automated approval pipeline integration.",
         "plannedStudies": "Planned Studies",
+        "plannedStudiesStatus": "90% Functional",
+        "plannedStudiesStatusTooltip": "Full CRUD and visual recruitment. Missing calendar and notification integration.",
         "ongoingStudies": "Ongoing Studies",
+        "ongoingStudiesStatus": "90% Functional",
+        "ongoingStudiesStatusTooltip": "Detailed panel with progress and metrics. Missing real-time data integration.",
         "completedStudies": "Completed Studies",
         "predictiveModels": "Predictive Models"
       },
