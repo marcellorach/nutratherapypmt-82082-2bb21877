@@ -1568,7 +1568,7 @@
         "plannedStudiesStatusTooltip": "CRUD completo e recrutamento visual. Falta integração com calendário e notificações.",
         "ongoingStudies": "Estudos em Andamento",
         "ongoingStudiesStatus": "90% Funcional",
-        "ongoingStudiesStatusTooltip": "Painel detalhado com progresso e métricas. Falta integração com dados em tempo real.",
+        "ongoingStudiesStatusTooltip": "Painel detalhado com progresso e métricas. Integração com coleiras Invoxia ativa. Falta acompanhamento de exames clínicos.",
         "completedStudies": "Estudos Concluídos",
         "predictiveModels": "Modelos Preditivos"
       },
