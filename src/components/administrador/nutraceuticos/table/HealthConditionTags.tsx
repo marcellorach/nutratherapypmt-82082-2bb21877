@@ -34,7 +34,10 @@ const HealthConditionTags = ({
   if (!conditions || conditions.length === 0) {
     return (
       <div className="flex items-center justify-center h-8">
-        <span className="text-muted-foreground text-xs">{t('healthTags.noCondition')}</span>
+        <Badge variant="outline" className="text-xs text-muted-foreground border-dashed border-muted-foreground/40 gap-1">
+          <span className="opacity-60">—</span>
+          {t('healthTags.noCondition')}
+        </Badge>
       </div>
     );
   }
