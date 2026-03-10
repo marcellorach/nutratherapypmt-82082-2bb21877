@@ -1535,7 +1535,10 @@
         "relationsStatusTooltip": "Visualização Sankey e tabular das relações nutracêutico-condição com dados reais.",
         "manageOutcomes": "Gerenciar Outcomes",
         "aiProcessing": "Processar com IA",
-        "settings": "Configurações"
+        "settings": "Configurações",
+        "breedsManagement": "Raças & Predisposições",
+        "labReferences": "Referências Lab",
+        "baseKnowledge": "Dados Base"
       },
       "dataProcessing": {
         "title": "Processamento de Dados",
@@ -1580,6 +1583,66 @@
         "translationAudit": "Auditoria de Traduções"
       },
       "settingsButton": "Configurações"
+    },
+    "breeds": {
+      "title": "Raças & Predisposições",
+      "description": "Gerencie raças e suas predisposições genéticas vinculadas a condições de saúde",
+      "addBreed": "Adicionar Raça",
+      "searchPlaceholder": "Buscar raças...",
+      "allSizes": "Todos os portes",
+      "sizeSmall": "Pequeno",
+      "sizeMedium": "Médio",
+      "sizeLarge": "Grande",
+      "sizeGiant": "Gigante",
+      "totalBreeds": "Total de Raças",
+      "totalPredispositions": "Predisposições",
+      "predispositions": "predisposições",
+      "noResults": "Nenhuma raça encontrada",
+      "addSuccess": "Raça adicionada com sucesso",
+      "predispositionsFor": "Predisposições para {{breed}}",
+      "addPredisposition": "Adicionar Predisposição",
+      "predispositionAdded": "Predisposição adicionada",
+      "predispositionRemoved": "Predisposição removida",
+      "noPredispositions": "Nenhuma predisposição cadastrada para esta raça",
+      "riskFactor": "Fator de risco",
+      "evidenceHigh": "Alta",
+      "evidenceModerate": "Moderada",
+      "evidenceLow": "Baixa",
+      "evidencePreliminary": "Preliminar",
+      "form": {
+        "name": "Nome (PT)",
+        "nameEn": "Nome (EN)",
+        "size": "Porte",
+        "breedGroup": "Grupo da Raça",
+        "selectGroup": "Selecione o grupo",
+        "condition": "Condição de Saúde",
+        "selectCondition": "Selecione uma condição",
+        "evidenceGrade": "Grau de Evidência"
+      }
+    },
+    "labReferences": {
+      "title": "Referências Laboratoriais",
+      "description": "Intervalos de referência para exames laboratoriais veterinários",
+      "addReference": "Adicionar Referência",
+      "editReference": "Editar Referência",
+      "searchPlaceholder": "Buscar exame...",
+      "allAges": "Todas as idades",
+      "agePuppy": "Filhote",
+      "ageAdult": "Adulto",
+      "ageSenior": "Sênior",
+      "totalRanges": "Total de Faixas",
+      "uniqueTests": "Exames Únicos",
+      "seniorSpecific": "Específicas Sênior",
+      "testName": "Nome do Exame",
+      "unit": "Unidade",
+      "range": "Faixa Normal",
+      "ageGroup": "Faixa Etária",
+      "significance": "Significância Clínica",
+      "minNormal": "Mínimo Normal",
+      "maxNormal": "Máximo Normal",
+      "added": "Referência adicionada",
+      "updated": "Referência atualizada",
+      "deleted": "Referência removida"
     },
     "veterinaryTargets": {
       "header": {
@@ -6783,6 +6846,21 @@
       "suggestion1": "Quais são os mecanismos de ação de {{compound}}?",
       "suggestion2": "Qual a dosagem ideal de {{compound}} para cães idosos?",
       "suggestion3": "Existem contraindicações de {{compound}} para {{condition}}?"
+    },
+    "pipeline": {
+      "profile": "Perfil",
+      "predispositions": "Predisposições",
+      "labs": "Exames",
+      "knowledgeGraph": "KG",
+      "interactions": "Interações",
+      "recommendation": "Recomendação",
+      "dataPoints": "dados",
+      "risks": "riscos",
+      "alerts": "alertas",
+      "triplets": "triplets",
+      "conflicts": "conflitos",
+      "compounds": "compostos",
+      "processing": "processando..."
     }
   }
 }

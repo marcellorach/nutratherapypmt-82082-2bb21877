@@ -1,96 +1,73 @@
 
 
-## Plano: Governança de Entidades Base + Pipeline de Análise Clínica Visual
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-### Diagnóstico Atual
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-O sistema já possui:
-- **Breeds** (tabela `breeds` com FK para `breed_groups`) — sem UI de gerenciamento
-- **Health Conditions / Veterinary Targets** (tabela `health_conditions` com UI CRUD completa)
-- **Breed Predispositions** (tabela `breed_predispositions` com FK para `breeds` e `health_conditions`) — sem UI de gerenciamento
-- **Lab Reference Ranges** (tabela `lab_reference_ranges`) — sem UI de gerenciamento
-- **Base Knowledge Candidates** (tabela + UI CandidatesQueue) — sandbox para entidades vindas de fontes externas (ChEBI, PubChem, etc.)
-- **Pipeline clínico** (`clinical-analysis-pipeline.ts`) — já funcional mas sem visualização do workflow
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-**O que falta:**
-1. UI para gerenciar **Breeds** e suas **Predispositions** (link breed ↔ condition)
-2. UI para gerenciar **Lab Reference Ranges**
-3. Extensão do sandbox (CandidatesQueue) para receber predisposições de fontes públicas
-4. Visualização clara do workflow do pipeline clínico
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
----
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-### 1. Nova aba: "Raças & Predisposições" no Admin
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-Criar `src/components/administrador/breeds/BreedsManagementTab.tsx`:
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-- **Lista de raças** com search, filtro por grupo/porte, contagem de predisposições
-- **Expandir raça** → mostra predisposições vinculadas (condition_name, risk_factor, evidence_grade)
-- **CRUD**: Adicionar/editar raça, adicionar/remover predisposição (selecionando de `health_conditions`)
-- **Importar de fonte pública**: botão que busca predisposições de APIs externas → cai no sandbox (`base_knowledge_candidates` com `entity_type = 'breed_predisposition'`) aguardando aprovação humana
+### 3. Novo componente: Chat Especializado por Composto
 
-Registrar no sidebar do admin no grupo "Base de Conhecimento".
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
 
-### 2. Nova aba: "Referências Laboratoriais" no Admin
+### 4. Chat Clínico Geral (sidebar)
 
-Criar `src/components/administrador/lab-references/LabReferencesTab.tsx`:
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
 
-- Tabela editável com test_name, species, unit, min/max, age_group, clinical_significance
-- CRUD inline
-- Importação futura de fontes públicas → sandbox
-
-Registrar no sidebar do admin.
-
-### 3. Extensão do Sandbox para Predisposições
-
-O `base_knowledge_candidates` já suporta `entity_type` genérico. Adicionar suporte para:
-- `entity_type = 'breed_predisposition'` — ao aprovar, insere em `breed_predispositions`
-- `entity_type = 'lab_reference'` — ao aprovar, insere em `lab_reference_ranges`
-
-Modificar `CandidatesQueue.tsx` para tratar esses tipos na aprovação.
-
-### 4. Workflow Visual do Pipeline Clínico
-
-Criar `src/components/pet/ClinicalPipelineWorkflow.tsx`:
-
-- Diagrama visual de 6 etapas (Steps/Stepper) mostrando o estado de cada fase durante a análise
-- Cada etapa mostra: ícone, nome, status (pendente/processando/concluído/erro), contagem de resultados
-- Integrar no `PetProfilePage` — aparece durante e após a análise
-
-```text
-[1. Perfil] → [2. Predisposições] → [3. Exames] → [4. KG] → [5. Interações] → [6. Recomendação]
-   ✓ 8 dados     ✓ 3 riscos        ✓ 2 alertas    ✓ 12 triplets  ✓ 0 conflitos   ✓ 5 compostos
-```
-
-### 5. Arquivos a criar/modificar
+### 5. Arquivos a modificar/criar
 
 | Arquivo | Ação |
 |---------|------|
-| `src/components/administrador/breeds/BreedsManagementTab.tsx` (novo) | CRUD de raças + predisposições |
-| `src/components/administrador/breeds/BreedPredispositionsPanel.tsx` (novo) | Painel expandível de predisposições por raça |
-| `src/components/administrador/lab-references/LabReferencesTab.tsx` (novo) | CRUD de referências laboratoriais |
-| `src/components/pet/ClinicalPipelineWorkflow.tsx` (novo) | Visualização do workflow de análise |
-| `src/components/administrador/base-knowledge/CandidatesQueue.tsx` | Suporte a novos entity_types na aprovação |
-| `src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx` | Adicionar links para novas abas |
-| `src/components/administrador/AdminPainel.tsx` | Registrar novas abas |
-| `PetProfilePage.tsx` | Integrar workflow visual |
-| Traduções PT/EN | ~30 novas chaves |
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-### 6. Fluxo de dados públicos (sandbox)
+### 6. Estrutura visual resultante
 
 ```text
-Fonte Pública (API/CSV) → base_knowledge_candidates (status: pending)
-                                    ↓
-                          Curadoria Humana (CandidatesQueue)
-                                    ↓
-                    Aprovado → breed_predispositions / lab_reference_ranges
-                    Rejeitado → marcado como rejected
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
 ```
 
-### Resultado
+### Detalhes técnicos
 
-- Todas as entidades base (raças, condições, predisposições, referências lab) têm CRUD no admin
-- Dados de fontes públicas passam obrigatoriamente por sandbox antes de entrar no sistema
-- O pipeline clínico é visualmente rastreável com um stepper de 6 etapas
-- Tudo "conversa com tudo": breed → predisposition → health_condition → KG → recommendation
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

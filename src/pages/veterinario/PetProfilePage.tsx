@@ -17,6 +17,7 @@ import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
 import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
+import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +49,14 @@ const PetProfilePage: React.FC = () => {
   const [predispositions, setPredispositions] = useState<BreedPredisposition[]>([]);
   const [labAlerts, setLabAlerts] = useState<LabAlert[]>([]);
   const [interactionAlerts, setInteractionAlerts] = useState<InteractionAlert[]>([]);
+  const [pipelineState, setPipelineState] = useState<PipelineState>({
+    stage1_profile: 'idle',
+    stage2_predispositions: 'idle',
+    stage3_labs: 'idle',
+    stage4_kg: 'idle',
+    stage5_interactions: 'idle',
+    stage6_recommendation: 'idle',
+  });
 
   // Generate treatability data from conditions using real data when available
   const treatabilityData = useMemo(() => {
@@ -75,6 +84,11 @@ const PetProfilePage: React.FC = () => {
     try {
       const { profile, conditions, medications, exams } = data;
 
+      // Stage 1: Profile
+      setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
+      await new Promise(r => setTimeout(r, 200)); // Small delay to show step
+      setPipelineState(s => ({ ...s, stage1_profile: 'complete', stage2_predispositions: 'running' }));
+
       const result = await runClinicalAnalysisPipeline(
         {
           id: profile.id,
@@ -90,6 +104,9 @@ const PetProfilePage: React.FC = () => {
         medications,
         exams
       );
+
+      // Update pipeline stages progressively
+      setPipelineState(s => ({ ...s, stage2_predispositions: 'complete', stage3_labs: 'complete', stage4_kg: 'complete', stage5_interactions: 'complete', stage6_recommendation: 'complete' }));
 
       // Update all state from pipeline result
       setPredispositions(result.predispositions);
@@ -252,6 +269,20 @@ const PetProfilePage: React.FC = () => {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* Pipeline Workflow Stepper */}
+        <div className="mb-6">
+          <ClinicalPipelineWorkflow
+            pipelineState={pipelineState}
+            isAnalyzing={analyzing}
+            profileDataCount={conditions.length + medications.length + exams.length}
+            predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
+            labAlertCount={labAlerts.length}
+            tripletCount={kgTriplets.length}
+            interactionCount={interactionAlerts.length}
+            compoundCount={recommendationCompounds?.length || 0}
+          />
         </div>
 
         {/* Main Grid: Content + Chat */}

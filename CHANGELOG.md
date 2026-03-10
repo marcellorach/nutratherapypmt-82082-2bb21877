@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-10 🏗️ Governança de Entidades Base + Pipeline Visual
+
+- ✅ **Raças & Predisposições (Admin)**: Nova aba `BreedsManagementTab` com CRUD de raças, painel expandível de predisposições por raça vinculadas a `health_conditions`, filtro por porte e busca
+- ✅ **Referências Laboratoriais (Admin)**: Nova aba `LabReferencesTab` com CRUD inline de intervalos de referência (test_name, min/max, age_group, clinical_significance)
+- ✅ **Pipeline Visual de 6 Etapas**: Componente `ClinicalPipelineWorkflow` com stepper visual mostrando progresso da análise em tempo real (perfil → predisposições → exames → KG → interações → recomendação)
+- ✅ **Sidebar atualizado**: Novos links "Raças & Predisposições", "Referências Lab" e "Dados Base" no grupo Base de Conhecimento
+- ✅ **Traduções PT/EN**: ~60 novas chaves para breeds, labReferences e pipeline
+
 ### Added - 2026-03-10 🏥 Motor de Decisão Clínica Completo (6 Etapas)
 
 - ✅ **Pipeline de Análise Clínica**: Novo serviço `clinical-analysis-pipeline.ts` com 6 etapas de análise individualizada (perfil → predisposições → exames → KG → interações → recomendação híbrida)

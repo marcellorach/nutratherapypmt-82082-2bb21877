@@ -63,6 +63,8 @@ const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visua
 const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
 const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
+const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
+const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -128,6 +130,20 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: BaseKnowledgeTab,
     description: 'Importação e curadoria de dados de ontologias externas'
+  },
+  {
+    id: 'breeds-management',
+    label: 'Raças & Predisposições',
+    group: 'knowledge-base',
+    component: BreedsManagementTab,
+    description: 'Gerenciamento de raças e predisposições genéticas'
+  },
+  {
+    id: 'lab-references',
+    label: 'Referências Laboratoriais',
+    group: 'knowledge-base',
+    component: LabReferencesTab,
+    description: 'Intervalos de referência para exames laboratoriais'
   },
   {
     id: 'knowledge-base-settings',

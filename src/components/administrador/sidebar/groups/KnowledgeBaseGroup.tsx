@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -144,6 +144,54 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       
       <SidebarMenuItem>
         <SidebarMenuButton 
+          isActive={currentStep === "breeds-management"} 
+          onClick={() => handleStepClick("breeds-management")}
+          className={currentStep === "breeds-management" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.breedsManagement')}</span>
+            </div>
+            {currentStep === "breeds-management" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "lab-references"} 
+          onClick={() => handleStepClick("lab-references")}
+          className={currentStep === "lab-references" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "lab-references" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.labReferences')}</span>
+            </div>
+            {currentStep === "lab-references" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "base-knowledge"} 
+          onClick={() => handleStepClick("base-knowledge")}
+          className={currentStep === "base-knowledge" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Database className={`h-4 w-4 mr-2 ${currentStep === "base-knowledge" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.baseKnowledge')}</span>
+            </div>
+            {currentStep === "base-knowledge" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
           isActive={currentStep === "relacoes"}
           onClick={() => handleStepClick("relacoes")}
           className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
@@ -154,9 +202,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
               <StatusBadge statusKey="admin.sidebar.knowledgeBase.relationsStatus" tooltipKey="admin.sidebar.knowledgeBase.relationsStatusTooltip" color="text-emerald-500" />
             </div>
-            {currentStep === "relacoes" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+            {currentStep === "relacoes" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

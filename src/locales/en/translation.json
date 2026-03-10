@@ -1535,7 +1535,10 @@
         "relationsStatusTooltip": "Sankey and tabular visualization of nutraceutical-condition relations with real data.",
         "manageOutcomes": "Manage Outcomes",
         "aiProcessing": "AI Processing",
-        "settings": "Settings"
+        "settings": "Settings",
+        "breedsManagement": "Breeds & Predispositions",
+        "labReferences": "Lab References",
+        "baseKnowledge": "Base Data"
       },
       "dataProcessing": {
         "title": "Data Processing",
@@ -1580,6 +1583,66 @@
         "translationAudit": "Translation Audit"
       },
       "settingsButton": "Settings"
+    },
+    "breeds": {
+      "title": "Breeds & Predispositions",
+      "description": "Manage breeds and their genetic predispositions linked to health conditions",
+      "addBreed": "Add Breed",
+      "searchPlaceholder": "Search breeds...",
+      "allSizes": "All sizes",
+      "sizeSmall": "Small",
+      "sizeMedium": "Medium",
+      "sizeLarge": "Large",
+      "sizeGiant": "Giant",
+      "totalBreeds": "Total Breeds",
+      "totalPredispositions": "Predispositions",
+      "predispositions": "predispositions",
+      "noResults": "No breeds found",
+      "addSuccess": "Breed added successfully",
+      "predispositionsFor": "Predispositions for {{breed}}",
+      "addPredisposition": "Add Predisposition",
+      "predispositionAdded": "Predisposition added",
+      "predispositionRemoved": "Predisposition removed",
+      "noPredispositions": "No predispositions registered for this breed",
+      "riskFactor": "Risk factor",
+      "evidenceHigh": "High",
+      "evidenceModerate": "Moderate",
+      "evidenceLow": "Low",
+      "evidencePreliminary": "Preliminary",
+      "form": {
+        "name": "Name (PT)",
+        "nameEn": "Name (EN)",
+        "size": "Size",
+        "breedGroup": "Breed Group",
+        "selectGroup": "Select group",
+        "condition": "Health Condition",
+        "selectCondition": "Select a condition",
+        "evidenceGrade": "Evidence Grade"
+      }
+    },
+    "labReferences": {
+      "title": "Lab References",
+      "description": "Reference ranges for veterinary laboratory tests",
+      "addReference": "Add Reference",
+      "editReference": "Edit Reference",
+      "searchPlaceholder": "Search test...",
+      "allAges": "All ages",
+      "agePuppy": "Puppy",
+      "ageAdult": "Adult",
+      "ageSenior": "Senior",
+      "totalRanges": "Total Ranges",
+      "uniqueTests": "Unique Tests",
+      "seniorSpecific": "Senior Specific",
+      "testName": "Test Name",
+      "unit": "Unit",
+      "range": "Normal Range",
+      "ageGroup": "Age Group",
+      "significance": "Clinical Significance",
+      "minNormal": "Min Normal",
+      "maxNormal": "Max Normal",
+      "added": "Reference added",
+      "updated": "Reference updated",
+      "deleted": "Reference removed"
     },
     "veterinaryTargets": {
       "header": {
@@ -6783,6 +6846,21 @@
       "suggestion1": "What are the mechanisms of action of {{compound}}?",
       "suggestion2": "What is the ideal dosage of {{compound}} for elderly dogs?",
       "suggestion3": "Are there contraindications of {{compound}} for {{condition}}?"
+    },
+    "pipeline": {
+      "profile": "Profile",
+      "predispositions": "Predispositions",
+      "labs": "Labs",
+      "knowledgeGraph": "KG",
+      "interactions": "Interactions",
+      "recommendation": "Recommendation",
+      "dataPoints": "data",
+      "risks": "risks",
+      "alerts": "alerts",
+      "triplets": "triplets",
+      "conflicts": "conflicts",
+      "compounds": "compounds",
+      "processing": "processing..."
     }
   }
 }
