@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-10T20:44:08.032Z",
+  "timestamp": "2026-03-10T23:36:38.070Z",
   "summary": {
-    "totalFiles": 759,
-    "totalIssues": 354,
+    "totalFiles": 766,
+    "totalIssues": 362,
     "hardcodedTexts": 36,
-    "missingKeys": 318,
+    "missingKeys": 326,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -426,6 +426,48 @@
       "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
       "line": 30,
       "text": "id, name, name_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 34,
+      "text": "*, health_conditions:condition_id(id, name, name_en)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 47,
+      "text": "id, name, name_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 108,
+      "text": "common.unknown",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 44,
+      "text": "*, breed_predispositions(count)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 55,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 224,
+      "text": "common.description",
       "severity": "high"
     },
     {
@@ -1504,6 +1546,20 @@
       "file": "src/components/administrador/estudos/import/SciSpace2StepImport.tsx",
       "line": 87,
       "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 43,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 169,
+      "text": "common.actions",
       "severity": "high"
     },
     {
