@@ -17,6 +17,7 @@ import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
 import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
+import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
