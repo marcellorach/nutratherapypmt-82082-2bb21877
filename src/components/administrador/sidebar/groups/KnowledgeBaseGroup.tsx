@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
