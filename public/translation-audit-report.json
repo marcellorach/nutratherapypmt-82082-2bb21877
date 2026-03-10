@@ -1,0 +1,2490 @@
+{
+  "timestamp": "2026-03-10T20:44:08.032Z",
+  "summary": {
+    "totalFiles": 759,
+    "totalIssues": 354,
+    "hardcodedTexts": 36,
+    "missingKeys": 318,
+    "incompleteTranslations": 0
+  },
+  "issues": [
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/AccessRequestsPanel.tsx",
+      "line": 53,
+      "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 52,
+      "text": "analytics.trends.performance.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 54,
+      "text": "analytics.trends.performance.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 73,
+      "text": "analytics.trends.metrics.efficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 74,
+      "text": "analytics.trends.metrics.sustainability",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 75,
+      "text": "analytics.trends.metrics.satisfaction",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 107,
+      "text": "analytics.trends.benchmark.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 109,
+      "text": "analytics.trends.benchmark.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 134,
+      "text": "analytics.trends.metrics.bestInClass",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 135,
+      "text": "analytics.trends.metrics.average",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 136,
+      "text": "analytics.trends.metrics.current",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 170,
+      "text": "analytics.trends.comparison.aboveAverage",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 176,
+      "text": "analytics.trends.comparison.average",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PerformanceTrends.tsx",
+      "line": 182,
+      "text": "analytics.trends.comparison.belowAverage",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 37,
+      "text": "analytics.prescription.tooltip.efficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 40,
+      "text": "analytics.prescription.tooltip.sustainability",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 43,
+      "text": "analytics.prescription.tooltip.conditions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 46,
+      "text": "analytics.prescription.tooltip.studies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 76,
+      "text": "analytics.prescription.axes.sustainability",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 79,
+      "text": "analytics.prescription.axes.sustainability",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 89,
+      "text": "analytics.prescription.axes.efficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 92,
+      "text": "analytics.prescription.axes.efficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 112,
+      "text": "analytics.prescription.insights.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 115,
+      "text": "analytics.prescription.insights.topPerformers",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 129,
+      "text": "analytics.prescription.insights.opportunities",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 147,
+      "text": "analytics.prescription.categories.highValue.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 148,
+      "text": "analytics.prescription.categories.highValue.desc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 151,
+      "text": "analytics.prescription.categories.highPerformance.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 152,
+      "text": "analytics.prescription.categories.highPerformance.desc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 155,
+      "text": "analytics.prescription.categories.sustainable.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 156,
+      "text": "analytics.prescription.categories.sustainable.desc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 159,
+      "text": "analytics.prescription.categories.reevaluate.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/PrescriptionScatter.tsx",
+      "line": 160,
+      "text": "analytics.prescription.categories.reevaluate.desc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 111,
+      "text": "analytics.treatability.types.prevention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 112,
+      "text": "analytics.treatability.types.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 113,
+      "text": "analytics.treatability.types.support",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 121,
+      "text": "analytics.treatability.types.prevention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 122,
+      "text": "analytics.treatability.types.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 123,
+      "text": "analytics.treatability.types.support",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 138,
+      "text": "analytics.treatability.metrics.maxCoverage",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 145,
+      "text": "analytics.treatability.metrics.conditionsCovered",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 147,
+      "text": "analytics.treatability.metrics.filtered",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TreatabilityMatrix.tsx",
+      "line": 151,
+      "text": "analytics.treatability.metrics.active",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TripletQualityDashboard.tsx",
+      "line": 67,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/analytics/TripletQualityDashboard.tsx",
+      "line": 81,
+      "text": "id, title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/AISuggestionPanel.tsx",
+      "line": 56,
+      "text": "id, subject_name, subject_type, object_name, object_type",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/AISuggestionPanel.tsx",
+      "line": 99,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/OntologyAuditTab.tsx",
+      "line": 97,
+      "text": "id, subject_name, subject_type, subject_layer, object_name, object_type, object_layer, curation_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/OntologyAuditTab.tsx",
+      "line": 336,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/OntologyAuditTab.tsx",
+      "line": 338,
+      "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDictionaryDialog.tsx",
+      "line": 74,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDictionaryDialog.tsx",
+      "line": 277,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDictionaryDialog.tsx",
+      "line": 279,
+      "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDictionaryDialog.tsx",
+      "line": 286,
+      "text": "input",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDictionaryDialog.tsx",
+      "line": 302,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDuplicateChecker.tsx",
+      "line": 56,
+      "text": "id, category, term, term_normalized",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TaxonomyDuplicateChecker.tsx",
+      "line": 116,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TranslationAuditTab.tsx",
+      "line": 59,
+      "text": "report_data, created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/auditoria/TranslationAuditTab.tsx",
+      "line": 67,
+      "text": "content-type",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
+      "line": 30,
+      "text": "id, name, name_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 36,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 41,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/AIModelSelector.tsx",
+      "line": 50,
+      "text": "config_key, config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/Neo4jStatusCard.tsx",
+      "line": 46,
+      "text": "synced_to_neo4j, synced_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/PromptEditor.tsx",
+      "line": 116,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictCard.tsx",
+      "line": 111,
+      "text": "conflicts.card.varianceTooltip",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictCard.tsx",
+      "line": 122,
+      "text": "conflicts.card.dosageBreakdown",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictCard.tsx",
+      "line": 146,
+      "text": "conflicts.card.noDose",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictCard.tsx",
+      "line": 156,
+      "text": "conflicts.card.moreClaims",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 71,
+      "text": "conflicts.panel.loadClaimsError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 93,
+      "text": "conflicts.panel.dismissError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 109,
+      "text": "conflicts.panel.detectionError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 157,
+      "text": "conflicts.panel.runDetection",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 170,
+      "text": "conflicts.status.pending",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 179,
+      "text": "conflicts.status.inReview",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 183,
+      "text": "conflicts.status.resolved",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 187,
+      "text": "conflicts.status.dismissed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 196,
+      "text": "conflicts.panel.filterByLevel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 199,
+      "text": "conflicts.panel.allLevels",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 200,
+      "text": "conflicts.level.high",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 201,
+      "text": "conflicts.level.moderate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
+      "line": 202,
+      "text": "conflicts.level.low",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/GenerateTestDataButton.tsx",
+      "line": 66,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/GenerateTestDataButton.tsx",
+      "line": 100,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/GenerateTestDataButton.tsx",
+      "line": 131,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/GenerateTestDataButton.tsx",
+      "line": 150,
+      "text": "id, dose_value, dose_min, dose_max, study_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/GenerateTestDataButton.tsx",
+      "line": 187,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 86,
+      "text": "conflicts.resolution.rationaleRequired",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 168,
+      "text": "conflicts.resolution.typeLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 177,
+      "text": "conflicts.resolution.types.singleStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 180,
+      "text": "conflicts.resolution.types.singleStudyDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 190,
+      "text": "conflicts.resolution.types.weightedAverage",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 193,
+      "text": "conflicts.resolution.types.weightedAverageDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 203,
+      "text": "conflicts.resolution.types.manualValue",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 206,
+      "text": "conflicts.resolution.types.manualValueDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 220,
+      "text": "conflicts.resolution.selectStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 261,
+      "text": "conflicts.resolution.calculatedValue",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 277,
+      "text": "conflicts.resolution.doseMin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 287,
+      "text": "conflicts.resolution.doseMax",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 299,
+      "text": "conflicts.resolution.doseUnit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 308,
+      "text": "conflicts.resolution.doseFrequency",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 318,
+      "text": "conflicts.resolution.notes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 323,
+      "text": "conflicts.resolution.notesPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 334,
+      "text": "conflicts.resolution.rationale",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 340,
+      "text": "conflicts.resolution.rationalePlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 344,
+      "text": "conflicts.resolution.rationaleHint",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/conflicts/ResolutionDialog.tsx",
+      "line": 361,
+      "text": "common.saving",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 16,
+      "text": "multiAgentAnalysis.result.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 22,
+      "text": "multiAgentAnalysis.result.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 29,
+      "text": "multiAgentAnalysis.result.dataProcessing.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 32,
+      "text": "multiAgentAnalysis.result.dataProcessing.petsProcessed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 33,
+      "text": "multiAgentAnalysis.result.dataProcessing.examsAnalyzed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 34,
+      "text": "multiAgentAnalysis.result.dataProcessing.breedsCategorized",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 35,
+      "text": "multiAgentAnalysis.result.dataProcessing.conditionsIdentified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 42,
+      "text": "multiAgentAnalysis.result.analysisCorrelations.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 45,
+      "text": "multiAgentAnalysis.result.analysisCorrelations.healthPatternsIdentified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 46,
+      "text": "multiAgentAnalysis.result.analysisCorrelations.nutritionalGaps",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 47,
+      "text": "multiAgentAnalysis.result.analysisCorrelations.treatmentsEvaluated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 48,
+      "text": "multiAgentAnalysis.result.analysisCorrelations.significantCorrelations",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 55,
+      "text": "multiAgentAnalysis.result.recommendations.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 58,
+      "text": "multiAgentAnalysis.result.recommendations.generated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 59,
+      "text": "multiAgentAnalysis.result.recommendations.confidenceRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 60,
+      "text": "multiAgentAnalysis.result.recommendations.scientificEvidence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 61,
+      "text": "multiAgentAnalysis.result.recommendations.recurrentNutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 67,
+      "text": "multiAgentAnalysis.result.nextSteps.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 70,
+      "text": "multiAgentAnalysis.result.nextSteps.viewDetailed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
+      "line": 73,
+      "text": "multiAgentAnalysis.result.nextSteps.sendToVet",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/visualizations/TreatmentsTab.tsx",
+      "line": 78,
+      "text": "visualization.treatments.search",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/visualizations/TreatmentsTab.tsx",
+      "line": 103,
+      "text": "visualization.treatments.filters.dogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/visualizations/TreatmentsTab.tsx",
+      "line": 104,
+      "text": "visualization.treatments.filters.cats",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/visualizations/TreatmentsTab.tsx",
+      "line": 224,
+      "text": "visualization.treatments.details.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dialogs/EstudoDetailDialog.tsx",
+      "line": 68,
+      "text": "curation_status, extraction_confidence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dialogs/nutraceutico/DialogFooter.tsx",
+      "line": 16,
+      "text": "nutraceuticals.details.exportInfo",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dialogs/nutraceutico/DialogFooter.tsx",
+      "line": 20,
+      "text": "nutraceuticals.details.viewFullStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dialogs/nutraceutico/DialogHeader.tsx",
+      "line": 22,
+      "text": "nutraceuticals.details.efficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/BulkDeleteConfirmDialog.tsx",
+      "line": 153,
+      "text": "common.deleting",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 32,
+      "text": "config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 45,
+      "text": "studies.systemStatus.neo4jConnectionFailed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 50,
+      "text": "studies.systemStatus.neo4jError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 58,
+      "text": "config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 68,
+      "text": "studies.systemStatus.llmError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 77,
+      "text": "studies.systemStatus.storageError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/CompactSystemStatus.tsx",
+      "line": 82,
+      "text": "studies.systemStatus.storageError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 56,
+      "text": "studies.diagnostics.resetSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 57,
+      "text": "studies.diagnostics.studyReset",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 72,
+      "text": "studies.diagnostics.noSelection",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 73,
+      "text": "studies.diagnostics.noSelectionDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 85,
+      "text": "studies.diagnostics.bulkResetSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 131,
+      "text": "studies.diagnostics.totalStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 142,
+      "text": "studies.diagnostics.processingRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 155,
+      "text": "studies.diagnostics.avgTime",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 168,
+      "text": "studies.diagnostics.imports",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 185,
+      "text": "studies.diagnostics.problematicTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 202,
+      "text": "studies.diagnostics.noProblems",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 203,
+      "text": "studies.diagnostics.allHealthy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 216,
+      "text": "studies.diagnostics.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 217,
+      "text": "studies.diagnostics.problem",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 218,
+      "text": "studies.diagnostics.status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 219,
+      "text": "studies.diagnostics.actions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 239,
+      "text": "studies.diagnostics.hasError",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 240,
+      "text": "studies.diagnostics.missingData",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 260,
+      "text": "studies.diagnostics.reset",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/DiagnosticsTab.tsx",
+      "line": 277,
+      "text": "studies.diagnostics.resetConfirmDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 55,
+      "text": "studies.emergency.cleanSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 89,
+      "text": "studies.emergency.resetSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 135,
+      "text": "studies.emergency.duplicatesSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 156,
+      "text": "studies.emergency.healthCheck",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 159,
+      "text": "studies.diagnostics.totalStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 160,
+      "text": "studies.diagnostics.processingRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 161,
+      "text": "studies.diagnostics.avgTime",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 163,
+      "text": "studies.diagnostics.imports",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 187,
+      "text": "studies.emergency.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 200,
+      "text": "studies.emergency.cleanOldImports",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 202,
+      "text": "studies.emergency.cleanOldImportsDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 215,
+      "text": "studies.emergency.resetErrored",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 217,
+      "text": "studies.emergency.resetErroredDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 230,
+      "text": "studies.emergency.removeDuplicates",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 232,
+      "text": "studies.emergency.removeDuplicatesDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 245,
+      "text": "studies.emergency.checkHealth",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 247,
+      "text": "studies.emergency.checkHealthDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 260,
+      "text": "studies.emergency.cleanOldImports",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 261,
+      "text": "studies.emergency.cleanConfirmDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 270,
+      "text": "studies.emergency.resetErrored",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 271,
+      "text": "studies.emergency.resetConfirmDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 280,
+      "text": "studies.emergency.removeDuplicates",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EmergencyActionsPanel.tsx",
+      "line": 281,
+      "text": "studies.emergency.duplicatesConfirmDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/EstudoSearch.tsx",
+      "line": 17,
+      "text": "studies.search.placeholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/SystemStatusBar.tsx",
+      "line": 33,
+      "text": "config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/SystemStatusBar.tsx",
+      "line": 61,
+      "text": "config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/NtaiActiveProcessingCard.tsx",
+      "line": 156,
+      "text": ":",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/NtaiProcessCard.tsx",
+      "line": 201,
+      "text": "studies.vetgraphrag.resetAndReprocess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/NtaiProcessingLog.tsx",
+      "line": 48,
+      "text": ":",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/NtaiProcessingSection.tsx",
+      "line": 78,
+      "text": "studies.vetgraphrag.noStudiesSelected",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/results/NtaiConditionsTab.tsx",
+      "line": 16,
+      "text": "studies.ntai.conditions.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/results/NtaiConditionsTab.tsx",
+      "line": 28,
+      "text": "studies.ntai.conditions.none",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/analysis/results/NtaiTripletsStatsTab.tsx",
+      "line": 23,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
+      "line": 119,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
+      "line": 191,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/chat/DocumentChatInterface.tsx",
+      "line": 61,
+      "text": "question, answer, created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/chat/DocumentChatInterface.tsx",
+      "line": 222,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/AutoDiscoveryReview.tsx",
+      "line": 46,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/CurationDashboard.tsx",
+      "line": 49,
+      "text": "curation_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/CurationDashboard.tsx",
+      "line": 66,
+      "text": "status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
+      "line": 97,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
+      "line": 725,
+      "text": "chunk_text, chunk_index",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/TripletCurationBoard.tsx",
+      "line": 68,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
+      "line": 55,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/sections/EstudoDetailSections.tsx",
+      "line": 76,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/tabs/PipelineDebugTab.tsx",
+      "line": 55,
+      "text": "id, subject_name, predicate, object_name, synced_to_neo4j, curation_status, extraction_confidence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/FileUploadTab.tsx",
+      "line": 167,
+      "text": "common.tryAgain",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/HistoryTab.tsx",
+      "line": 43,
+      "text": "id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/HistoryTab.tsx",
+      "line": 92,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "line": 107,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciSpace2StepImport.tsx",
+      "line": 87,
+      "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/nutraceuticos/NutraceuticosHeader.tsx",
+      "line": 17,
+      "text": "nutraceuticals-imported",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/nutraceuticos/NutraceuticosHeader.tsx",
+      "line": 23,
+      "text": "nutraceuticals-imported",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/nutraceuticos/table/EmptyState.tsx",
+      "line": 12,
+      "text": "nutraceuticals.table.emptyState",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 27,
+      "text": "research.oraBiomedical.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 29,
+      "text": "research.oraBiomedical.activePartnership",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 33,
+      "text": "research.oraBiomedical.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 43,
+      "text": "research.oraBiomedical.liveDashboard",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 47,
+      "text": "research.oraBiomedical.newStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 54,
+      "text": "research.oraBiomedical.totalStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 55,
+      "text": "research.oraBiomedical.studiesSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 57,
+      "text": "research.oraBiomedical.lastDays",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 60,
+      "text": "research.oraBiomedical.analyzedCompounds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 61,
+      "text": "research.oraBiomedical.compoundsSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 63,
+      "text": "research.oraBiomedical.ofPlanned",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 66,
+      "text": "research.oraBiomedical.successRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 67,
+      "text": "research.oraBiomedical.successSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 69,
+      "text": "research.oraBiomedical.positiveEffect",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 76,
+      "text": "research.tabs.ongoing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 79,
+      "text": "research.tabs.completed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/OraBiomedicalTab.tsx",
+      "line": 82,
+      "text": "research.tabs.planned",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyNotesCard.tsx",
+      "line": 22,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/ActivityChart.tsx",
+      "line": 26,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 29,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 28,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 29,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
+      "line": 25,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 57,
+      "text": "nutraceuticals.conditions.addTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 67,
+      "text": "nutraceuticals.conditions.conditionName",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 69,
+      "text": "nutraceuticals.conditions.conditionNamePlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 81,
+      "text": "nutraceuticals.conditions.conditionDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 85,
+      "text": "nutraceuticals.conditions.conditionDescriptionPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 98,
+      "text": "nutraceuticals.conditions.savingCondition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddConditionDialog.tsx",
+      "line": 98,
+      "text": "nutraceuticals.conditions.saveCondition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/nutraceuticoGerenciamento/dialogs/AddNutraceuticalDialog.tsx",
+      "line": 105,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/PromptManagementPanel.tsx",
+      "line": 70,
+      "text": "id, config_key, config_value, description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 37,
+      "text": "nutraceuticals.table.name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 38,
+      "text": "nutraceuticals.table.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 39,
+      "text": "nutraceuticals.table.outcomes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 40,
+      "text": "nutraceuticals.table.actions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 63,
+      "text": "nutraceuticals.table.notFound",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 75,
+      "text": "nutraceuticals.table.name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 76,
+      "text": "nutraceuticals.table.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 77,
+      "text": "nutraceuticals.table.outcomes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 78,
+      "text": "nutraceuticals.table.actions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 92,
+      "text": "nutraceuticals.table.notDefined",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 101,
+      "text": "nutraceuticals.table.editTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 109,
+      "text": "nutraceuticals.table.manageOutcomes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/NutraceuticalTable.tsx",
+      "line": 118,
+      "text": "nutraceuticals.table.deleteTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/form/DialogContent.tsx",
+      "line": 79,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/nutraceuticalManagement/form/DialogContentBilingual.tsx",
+      "line": 225,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/DeleteDialog.tsx",
+      "line": 33,
+      "text": "outcomeManagement.delete.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/DeleteDialog.tsx",
+      "line": 43,
+      "text": "outcomeManagement.delete.cancel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/DeleteDialog.tsx",
+      "line": 49,
+      "text": "outcomeManagement.delete.confirm",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/OutcomeTable.tsx",
+      "line": 61,
+      "text": "outcomeManagement.noOutcomesFound",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/OutcomeTable.tsx",
+      "line": 74,
+      "text": "outcomeManagement.table.family",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/OutcomeTable.tsx",
+      "line": 90,
+      "text": "outcomeManagement.table.noFamily",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/PanelHeader.tsx",
+      "line": 17,
+      "text": "outcomeManagement.newOutcome",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/useOutcomeManagement.ts",
+      "line": 70,
+      "text": "common.success",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/useOutcomeManagement.ts",
+      "line": 99,
+      "text": "common.success",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/panels/outcomeManagement/useOutcomeManagement.ts",
+      "line": 121,
+      "text": "common.success",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/traducoes/TranslationManager.tsx",
+      "line": 47,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/traducoes/TranslationManager.tsx",
+      "line": 138,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 114,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 115,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 123,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 124,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 133,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 134,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 248,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EnrichKnowledgeGraphDialog.tsx",
+      "line": 98,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraph3D.tsx",
+      "line": 32,
+      "text": "react-force-graph-3d",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraph3D.tsx",
+      "line": 44,
+      "text": "react-force-graph-2d",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphChat.tsx",
+      "line": 119,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphChat.tsx",
+      "line": 200,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 171,
+      "text": "id, entity_name, entity_type, layer, description, synonyms",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 332,
+      "text": "id, name, name_en, description, description_en, chemical_compound, source",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 341,
+      "text": "id, name, name_en, description, description_en, category, severity_level",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 350,
+      "text": "id, entity_name, entity_type, layer, description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 360,
+      "text": "id, name, name_en, description, description_en, color, icon, sort_order",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 368,
+      "text": "id, entity_name, entity_type, layer, description, synonyms",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 378,
+      "text": "id, entity_name, entity_type, layer, description, synonyms",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 388,
+      "text": "id, source_type, target_type, relationship, confidence, evidence_level, source_id, target_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
+      "line": 398,
+      "text": "id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphViewer.tsx",
+      "line": 152,
+      "text": "id, title, description, authors, journal, year",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphViewer.tsx",
+      "line": 161,
+      "text": "subject_name, subject_type, predicate, object_name, object_type, curation_status, extraction_confidence, synced_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/auth/StanfordDemoForm.tsx",
+      "line": 47,
+      "text": "@",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/layout/Header.tsx",
+      "line": 79,
+      "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 179,
+      "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/PetRegistrationForm.tsx",
+      "line": 194,
+      "text": "common.yes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/PetRegistrationForm.tsx",
+      "line": 194,
+      "text": "common.no",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/PetRegistrationForm.tsx",
+      "line": 270,
+      "text": "common.saving",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useAccessRequests.ts",
+      "line": 34,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useSafeTranslation.ts",
+      "line": 10,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyApprovalWorkflow.ts",
+      "line": 32,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyApprovalWorkflow.ts",
+      "line": 128,
+      "text": "curation_status, created_at, review_date",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyApprovalWorkflow.ts",
+      "line": 134,
+      "text": "created_at, kanban_status, analysis_data, full_text_metadata",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyDeletion.ts",
+      "line": 32,
+      "text": "id, title, kanban_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyDeletion.ts",
+      "line": 98,
+      "text": "id, title, kanban_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyDeletion.ts",
+      "line": 177,
+      "text": "id, title, kanban_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyDeletion.ts",
+      "line": 234,
+      "text": "id, title, kanban_status, deleted_at, deleted_by",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useStudyDeletion.ts",
+      "line": 253,
+      "text": "id, title, kanban_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/AdministradorPage.tsx",
+      "line": 13,
+      "text": "tab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/auth/AccessPendingPage.tsx",
+      "line": 31,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/auth/AccessRejectedPage.tsx",
+      "line": 27,
+      "text": "rejection_reason",
+      "severity": "high"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AIInsightsTab.tsx",
+      "line": 74,
+      "text": "All Confidence",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AIInsightsTab.tsx",
+      "line": 101,
+      "text": "No insights found",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 92,
+      "text": "Based On",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 138,
+      "text": "Approval Chain",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 180,
+      "text": "Data Source",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 190,
+      "text": "Sample Size",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 220,
+      "text": "Key Findings",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 239,
+      "text": "Study Population",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 244,
+      "text": "Total Dogs",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 252,
+      "text": "Age Range",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 268,
+      "text": "Size Distribution",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/ai-insights/InsightDetailsDialog.tsx",
+      "line": 290,
+      "text": "Breeds with Predisposition",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
+      "line": 101,
+      "text": "ChEBI",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
+      "line": 102,
+      "text": "PubChem",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/dataAnalysis/visualizations/healthConditions/modals/components/EpidemiologicalTree.tsx",
+      "line": 274,
+      "text": "Origem Mista",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/dataAnalysis/visualizations/healthConditions/modals/components/EpidemiologicalTree.tsx",
+      "line": 278,
+      "text": "Alta responsividade",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/dataAnalysis/visualizations/healthConditions/modals/components/EpidemiologicalTree.tsx",
+      "line": 282,
+      "text": "Origem Ambiental",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/dataAnalysis/visualizations/healthConditions/modals/components/EvidenceMatrix.tsx",
+      "line": 363,
+      "text": "In Vitro",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/BulkDeleteConfirmDialog.tsx",
+      "line": 61,
+      "text": "In Curation",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/analysis/NtaiProcessingLog.tsx",
+      "line": 83,
+      "text": "RAG Processing Log",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/analysis/NtaiStudySelectionTable.tsx",
+      "line": 82,
+      "text": "VetGraphRAG",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/curation/AutoDiscoveryReview.tsx",
+      "line": 239,
+      "text": "TransE Score",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/curation/AutoDiscoveryReview.tsx",
+      "line": 243,
+      "text": "Evidence Mult.",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
+      "line": 273,
+      "text": "KG Match",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
+      "line": 277,
+      "text": "LLM Conf.",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/migrations/DatabaseMigrationsTab.tsx",
+      "line": 255,
+      "text": "Database Migrations",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/settings/panels/PromptManagementPanel.tsx",
+      "line": 305,
+      "text": "Configure which AI models are used for each task",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/traducoes/TranslationManager.tsx",
+      "line": 186,
+      "text": "Total de Chaves",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphChat.tsx",
+      "line": 545,
+      "text": "AI Response",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/visualizations/KnowledgeGraphDataSources.tsx",
+      "line": 46,
+      "text": "Loading data sources...",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/landing/InvestmentSection.tsx",
+      "line": 129,
+      "text": "Contact Marcello Rachlyn",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/landing/InvestmentSection.tsx",
+      "line": 159,
+      "text": "Contact Marcello Rachlyn",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/landing/OpportunitySection.tsx",
+      "line": 51,
+      "text": "PetLove",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/layout/Footer.tsx",
+      "line": 32,
+      "text": "Google Cloud",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/layout/Footer.tsx",
+      "line": 44,
+      "text": "OpenAI",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/layout/Footer.tsx",
+      "line": 79,
+      "text": "Co-Scientist",
+      "severity": "medium"
+    }
+  ]
+}
