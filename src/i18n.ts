@@ -59,7 +59,7 @@ i18next
     resources,
     lng: getSavedLanguage(),
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV !== 'production',
+    debug: import.meta.env.DEV,
     interpolation: {
       escapeValue: false
     },
