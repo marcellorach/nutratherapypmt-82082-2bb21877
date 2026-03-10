@@ -63,6 +63,8 @@ const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visua
 const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
 const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
+const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
+const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
