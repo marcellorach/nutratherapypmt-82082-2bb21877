@@ -8,20 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Trash2, Loader2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import PredispositionTag from '@/components/administrador/tags/PredispositionTag';
 
 interface Props {
   breedId: string;
   breedName: string;
 }
 
-const evidenceColors: Record<string, string> = {
-  high: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  moderate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  low: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  preliminary: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-};
 
 const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
   const { t } = useTranslation();
@@ -108,28 +103,23 @@ const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
       {predispositions && predispositions.length > 0 ? (
         <div className="space-y-2">
           {predispositions.map((pred: any) => (
-            <div key={pred.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                <div>
-                  <p className="font-medium text-sm">{pred.health_conditions?.name || t('common.unknown')}</p>
-                  <p className="text-xs text-muted-foreground">{pred.health_conditions?.name_en}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{t('admin.breeds.riskFactor')}: {pred.risk_factor}x</Badge>
-                <Badge className={evidenceColors[pred.evidence_grade] || evidenceColors.preliminary}>
-                  {pred.evidence_grade}
-                </Badge>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7 text-destructive"
-                  onClick={() => deleteMutation.mutate(pred.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+            <div key={pred.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <PredispositionTag
+                conditionName={pred.health_conditions?.name || t('common.unknown')}
+                riskFactor={pred.risk_factor}
+                evidenceGrade={pred.evidence_grade}
+                conditionId={pred.health_conditions?.id}
+                notes={pred.notes}
+                navigable
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-destructive"
+                onClick={() => deleteMutation.mutate(pred.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
           ))}
         </div>

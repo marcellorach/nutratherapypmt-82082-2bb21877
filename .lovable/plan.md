@@ -1,45 +1,73 @@
 
 
-## Plano: Predisposições como Tags Integradas ao Sistema de Tags Existente
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-### Situação Atual
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-A boa notícia: a estrutura de dados **já está correta**. A tabela `breed_predispositions` usa `condition_id` como FK para `health_conditions` (Veterinary Targets). Ou seja, cada predisposição já aponta para uma condição curada da base.
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-O problema é apenas de **apresentação**: no `BreedPredispositionsPanel`, as predisposições aparecem como linhas de texto simples com badges genéricos, em vez de usar os componentes de tag já existentes no sistema (`ConditionTag`, `EvidenceTag`, `NutraceuticalTag`, etc.).
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-### O Que Mudar
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-#### 1. Refatorar `BreedPredispositionsPanel` para usar Tags
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-Substituir as linhas de texto por:
-- **`ConditionTag`** para exibir o nome da condição (com score = risk_factor)
-- **`EvidenceTag`** para exibir o grau de evidência (convertendo "high"→4.5, "moderate"→3.0, etc.)
-- Badge de risco com cor por severidade (risk_factor >= 3 = vermelho, >= 2 = amarelo, < 2 = verde)
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-#### 2. Criar `PredispositionTag` reutilizável
+### 3. Novo componente: Chat Especializado por Composto
 
-Novo componente `src/components/administrador/tags/PredispositionTag.tsx`:
-- Recebe: `conditionName`, `riskFactor`, `evidenceGrade`, `conditionId` (opcional, para navegação)
-- Exibe: tag com ícone AlertTriangle, nome da condição, badge de risco colorido, indicador de evidência
-- Tooltip: mostra detalhes (risco, evidência, link para a condição nos Veterinary Targets)
-- Clicável: pode navegar para a condição no admin (ou abrir detalhes)
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
 
-#### 3. Usar `PredispositionTag` em todos os contextos
+### 4. Chat Clínico Geral (sidebar)
 
-| Local | Uso |
-|-------|-----|
-| `BreedPredispositionsPanel` (admin) | Lista de predisposições de uma raça |
-| `ClinicalAlertsPanel` (pet profile) | Alertas de predisposição racial do cão |
-| `ClinicalPipelineWorkflow` (step 2) | Resumo visual dos riscos identificados |
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
 
-#### 4. Arquivos a criar/modificar
+### 5. Arquivos a modificar/criar
 
 | Arquivo | Ação |
 |---------|------|
-| `src/components/administrador/tags/PredispositionTag.tsx` (novo) | Tag reutilizável de predisposição |
-| `src/components/administrador/breeds/BreedPredispositionsPanel.tsx` | Usar PredispositionTag em vez de linhas de texto |
-| `src/components/pet/ClinicalAlertsPanel.tsx` | Usar PredispositionTag nos alertas raciais |
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-Resultado: predisposições são tags visuais consistentes com o resto do sistema, clicáveis, com tooltip, e que "conversam" com ConditionTag/EvidenceTag usando a mesma linguagem visual.
+### 6. Estrutura visual resultante
+
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
+
+### Detalhes técnicos
+
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

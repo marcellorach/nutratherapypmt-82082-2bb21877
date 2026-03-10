@@ -6652,6 +6652,12 @@
   "evidenceTag": {
     "qualityTooltip": "Scientific evidence quality"
   },
+  "predispositionTag": {
+    "riskFactor": "Risk factor",
+    "evidence": "Evidence",
+    "alreadyDiagnosed": "Already diagnosed",
+    "clickToView": "Click to view in Veterinary Targets"
+  },
   "formDialog": {
     "save": "Save",
     "cancel": "Cancel",
