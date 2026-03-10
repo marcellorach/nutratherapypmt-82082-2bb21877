@@ -131,8 +131,8 @@ async function interpretLabResults(
   const ageGroup = ageYears >= 7 ? 'senior' : ageYears < 1 ? 'puppy' : 'adult';
 
   // Fetch reference ranges, preferring age-specific
-  const { data: ranges } = await supabase
-    .from('lab_reference_ranges' as any)
+  const { data: ranges } = await (supabase as any)
+    .from('lab_reference_ranges')
     .select('*')
     .eq('species', 'canine')
     .in('age_group', [ageGroup, 'adult']);
@@ -141,8 +141,8 @@ async function interpretLabResults(
 
   // Build a map, preferring age-specific ranges
   const rangeMap = new Map<string, any>();
-  for (const r of ranges) {
-    const key = r.test_name.toLowerCase();
+  for (const r of ranges as any[]) {
+    const key = (r.test_name as string).toLowerCase();
     if (!rangeMap.has(key) || r.age_group === ageGroup) {
       rangeMap.set(key, r);
     }
