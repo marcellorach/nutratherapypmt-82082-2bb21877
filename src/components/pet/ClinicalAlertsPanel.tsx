@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Shield, TestTube, Pill, CheckCircle2, XCircle } from 'lucide-react';
 import type { BreedPredisposition, LabAlert, InteractionAlert } from '@/services/clinical-analysis-pipeline';
+import PredispositionTag from '@/components/administrador/tags/PredispositionTag';
 
 interface ClinicalAlertsPanelProps {
   predispositions: BreedPredisposition[];
