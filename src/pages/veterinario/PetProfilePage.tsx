@@ -84,6 +84,11 @@ const PetProfilePage: React.FC = () => {
     try {
       const { profile, conditions, medications, exams } = data;
 
+      // Stage 1: Profile
+      setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
+      await new Promise(r => setTimeout(r, 200)); // Small delay to show step
+      setPipelineState(s => ({ ...s, stage1_profile: 'complete', stage2_predispositions: 'running' }));
+
       const result = await runClinicalAnalysisPipeline(
         {
           id: profile.id,
