@@ -2,7 +2,7 @@
 
 ---
 **Versão:** 1.8.0  
-**Última Atualização:** 2026-02-08  
+**Última Atualização:** 2026-03-10  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
