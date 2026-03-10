@@ -961,6 +961,45 @@ export type Database = {
           },
         ]
       }
+      lab_reference_ranges: {
+        Row: {
+          age_group: string | null
+          clinical_significance: string | null
+          created_at: string | null
+          id: string
+          max_normal: number | null
+          min_normal: number | null
+          species: string
+          test_name: string
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_group?: string | null
+          clinical_significance?: string | null
+          created_at?: string | null
+          id?: string
+          max_normal?: number | null
+          min_normal?: number | null
+          species?: string
+          test_name: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_group?: string | null
+          clinical_significance?: string | null
+          created_at?: string | null
+          id?: string
+          max_normal?: number | null
+          min_normal?: number | null
+          species?: string
+          test_name?: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       mechanism_nodes: {
         Row: {
           action_type: string | null
