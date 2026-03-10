@@ -1535,7 +1535,10 @@
         "relationsStatusTooltip": "Sankey and tabular visualization of nutraceutical-condition relations with real data.",
         "manageOutcomes": "Manage Outcomes",
         "aiProcessing": "AI Processing",
-        "settings": "Settings"
+        "settings": "Settings",
+        "breedsManagement": "Breeds & Predispositions",
+        "labReferences": "Lab References",
+        "baseKnowledge": "Base Data"
       },
       "dataProcessing": {
         "title": "Data Processing",
