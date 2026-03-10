@@ -44,7 +44,7 @@ export function useSafeTranslation() {
     // Se retornou a própria chave, usa o fallback
     if (result === key) {
       // Log apenas em desenvolvimento
-      if (process.env.NODE_ENV !== 'production') {
+      if (import.meta.env.DEV) {
         console.warn(`⚠️ Translation missing: ${key} [${i18n.language}]`);
       }
       

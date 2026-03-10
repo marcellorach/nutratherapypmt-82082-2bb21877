@@ -73,7 +73,7 @@ i18next
     returnNull: false,
     saveMissing: false,
     missingKeyHandler: (lng, ns, key) => {
-      if (process.env.NODE_ENV !== 'production') {
+      if (import.meta.env.DEV) {
         console.warn(`⚠️ Missing translation key: ${key} [${lng}/${ns}]`);
       }
     }

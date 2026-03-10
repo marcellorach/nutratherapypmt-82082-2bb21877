@@ -17,7 +17,7 @@ export const useCampaignEffects = () => {
 
   // Monitor active execution
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     
     if (state.activeExecution) {
       interval = setInterval(() => {
