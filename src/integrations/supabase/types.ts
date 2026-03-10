@@ -2758,6 +2758,27 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_conditions_with_treatability_v2: {
+        Args: never
+        Returns: {
+          avg_efficacy: number
+          breed_predisposition_count: number
+          category: string
+          category_en: string
+          created_at: string
+          description: string
+          description_en: string
+          id: string
+          name: string
+          name_en: string
+          nutraceutical_count: number
+          prevention_count: number
+          severity_level: string
+          support_count: number
+          treatment_count: number
+          updated_at: string
+        }[]
+      }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       search_study_chunks: {

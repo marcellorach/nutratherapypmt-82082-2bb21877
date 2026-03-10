@@ -1695,6 +1695,12 @@
         "expandedDescription": "Descrição:",
         "noDescription": "Sem descrição disponível."
       },
+      "connections": {
+        "breeds": "raças",
+        "nutraceuticals": "nutracêuticos",
+        "breedsTooltip": "{{count}} raça(s) predisposta(s) a esta condição",
+        "nutraceuticalsTooltip": "{{count}} nutracêutico(s) catalogado(s) para esta condição"
+      },
       "deleteDialog": {
         "title": "Confirmar Exclusão",
         "description": "Tem certeza que deseja excluir esta condição? Esta ação não pode ser desfeita.",
