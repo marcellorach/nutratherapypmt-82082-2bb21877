@@ -112,7 +112,7 @@ interface ErrorFallbackProps {
 }
 
 const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = import.meta.env.DEV;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

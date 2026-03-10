@@ -12,7 +12,7 @@ export const useOptimizedState = <T>(
 ) => {
   const { debounceMs = 0, compareFunction } = options;
   const [state, setState] = useState<T>(initialValue);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const prevValueRef = useRef<T>(initialValue);
 
   const optimizedSetState = useCallback((newValue: T | ((prev: T) => T)) => {

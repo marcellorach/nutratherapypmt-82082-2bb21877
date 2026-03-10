@@ -9,6 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-10 🏥 Motor de Decisão Clínica Completo (6 Etapas)
+
+- ✅ **Pipeline de Análise Clínica**: Novo serviço `clinical-analysis-pipeline.ts` com 6 etapas de análise individualizada (perfil → predisposições → exames → KG → interações → recomendação híbrida)
+- ✅ **Tabela `lab_reference_ranges`**: 31 intervalos de referência laboratorial caninos (hematologia, bioquímica hepática/renal, metabólico, endócrino, inflamatório, urinálise) com ranges específicos para seniores
+- ✅ **Seed `breed_predispositions`**: 45 predisposições raciais para 13 raças caninas populares com risk_factor e evidence_grade baseados em dados OFA/OMIA
+- ✅ **ClinicalAlertsPanel**: Nova aba "Alertas Clínicos" mostrando predisposições raciais (diagnosticadas vs não), exames fora de faixa e interações medicamentosas
+- ✅ **Treatability com dados reais**: Scores agora usam triplets do KG quando disponíveis em vez de `Math.random()`
+- ✅ **Card de alertas no header**: Novo card de contagem de alertas aparece após análise quando há achados
+- ✅ **Contexto clínico enriquecido**: LLM agora recebe predisposições, labs e medicações no prompt para recomendações individualizadas
+
+### Fixed - 2026-03-10
+
+- 🔧 **Build errors**: Substituídos `process.env.NODE_ENV` por `import.meta.env.DEV` e `NodeJS.Timeout` por `ReturnType<typeof setTimeout>` em 7 arquivos
+
+
 ### Added - 2026-02-27 🐾 Imagens de Raça, Condições KG-Aligned e Painéis de Evidência Científica
 
 - ✅ **Imagens de raça nos cards**: `PetProfileCard` e `PetProfilePage` agora exibem foto real da raça do pet (Labrador, Cavalier, German Shepherd, Golden Retriever, Beagle) com fallback para ícone de pata

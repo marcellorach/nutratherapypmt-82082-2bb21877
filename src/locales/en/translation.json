@@ -6755,7 +6755,23 @@
       "biologicalPathway": "Biological Pathway",
       "scientificEvidence": "Scientific Evidence",
       "projection": "Improvement Projection",
-      "compoundChat": "Compound Chat"
+      "compoundChat": "Compound Chat",
+      "clinicalAlerts": "Clinical Alerts"
+    },
+    "clinicalAlerts": {
+      "title": "Alerts",
+      "alertsFound": "{{count}} clinical alert(s) identified",
+      "noAlerts": "No clinical alerts identified",
+      "noDataAvailable": "Run VetGraphRAG analysis to identify clinical alerts",
+      "breedPredispositions": "Breed Predispositions",
+      "labAbnormalities": "Abnormal Lab Results",
+      "interactions": "Drug Interactions",
+      "alreadyDiagnosed": "already diagnosed",
+      "low": "Low",
+      "high": "High",
+      "criticalLow": "Critically Low",
+      "criticalHigh": "Critically High",
+      "labValue": "{{value}} {{unit}} (ref: {{min}}-{{max}})"
     },
     "compoundChat": {
       "selectPrompt": "Select a recommended compound to start a specialized conversation:",

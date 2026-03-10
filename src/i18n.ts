@@ -6,7 +6,7 @@ import translationEN from './locales/en/translation.json';
 import translationPT from './locales/pt/translation.json';
 
 // Versão para controle de cache - incrementar quando houver mudanças significativas
-const I18N_VERSION = '1.9.85';
+const I18N_VERSION = '1.9.86';
 
 const resources = {
   en: {
@@ -59,7 +59,7 @@ i18next
     resources,
     lng: getSavedLanguage(),
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV !== 'production',
+    debug: import.meta.env.DEV,
     interpolation: {
       escapeValue: false
     },
@@ -73,7 +73,7 @@ i18next
     returnNull: false,
     saveMissing: false,
     missingKeyHandler: (lng, ns, key) => {
-      if (process.env.NODE_ENV !== 'production') {
+      if (import.meta.env.DEV) {
         console.warn(`⚠️ Missing translation key: ${key} [${lng}/${ns}]`);
       }
     }

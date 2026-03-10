@@ -28,7 +28,7 @@ export const useFormValidation = <T>({
   const [isValidating, setIsValidating] = useState(false);
 
   // Debounced validation
-  const [validationTimeout, setValidationTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [validationTimeout, setValidationTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const validateField = useCallback(
     (fieldName: string, value: any): string | null => {

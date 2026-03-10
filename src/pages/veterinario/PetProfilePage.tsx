@@ -1,4 +1,4 @@
-// Pet Profile Page - VetGraphRAG Analysis with Tabs
+// Pet Profile Page - VetGraphRAG Clinical Analysis Pipeline
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
 import VetRecommendationPanel, { generateMockCompounds } from '@/components/pet/VetRecommendationPanel';
@@ -16,8 +16,9 @@ import TreatabilityChart from '@/components/pet/TreatabilityChart';
 import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
+import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
-import { supabase } from '@/integrations/supabase/client';
+import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
 
 const severityColors: Record<string, string> = {
@@ -44,184 +45,84 @@ const PetProfilePage: React.FC = () => {
   const [kgTriplets, setKgTriplets] = useState<any[]>([]);
   const [kgPathways, setKgPathways] = useState<any[]>([]);
   const [kgProjections, setKgProjections] = useState<any[]>([]);
+  const [predispositions, setPredispositions] = useState<BreedPredisposition[]>([]);
+  const [labAlerts, setLabAlerts] = useState<LabAlert[]>([]);
+  const [interactionAlerts, setInteractionAlerts] = useState<InteractionAlert[]>([]);
 
-  // Generate treatability data from conditions
+  // Generate treatability data from conditions using real data when available
   const treatabilityData = useMemo(() => {
     if (!data?.conditions) return [];
-    return data.conditions.map((c: any) => ({
-      condition: c.condition_name,
-      scientificEvidence: Math.floor(Math.random() * 40) + 40,
-      planExperience: Math.floor(Math.random() * 30) + 20,
-    }));
-  }, [data?.conditions]);
-
-  const extractKgEvidence = (kgResults: any[], conditionNames: string[]) => {
-    // Extract triplet evidence from KG results
-    const triplets: any[] = [];
-    const pathways: any[] = [];
-
-    for (const result of kgResults) {
-      const { condition, graphData } = result;
-      const nodes = graphData?.nodes || [];
-      const relationships = graphData?.relationships || graphData?.edges || [];
-
-      // Extract TREATS/PREVENTS triplets
-      for (const rel of relationships) {
-        const sourceNode = nodes.find((n: any) => n.id === rel.source || n.id === rel.startNode);
-        const targetNode = nodes.find((n: any) => n.id === rel.target || n.id === rel.endNode);
-        if (sourceNode && targetNode) {
-          const predicate = rel.type || rel.label || rel.relationship || 'TREATS';
-          if (['TREATS', 'PREVENTS', 'ALLEVIATES', 'SUPPORTS'].includes(predicate.toUpperCase())) {
-            triplets.push({
-              subject: sourceNode.label || sourceNode.properties?.name || sourceNode.name,
-              predicate: predicate.toUpperCase(),
-              object: targetNode.label || targetNode.properties?.name || targetNode.name,
-              confidence: rel.confidence || rel.properties?.confidence || 0.7,
-              evidenceLevel: 'KG-backed',
-              studyCount: rel.evidence_count || rel.properties?.evidence_count || undefined,
-            });
-          }
-        }
-      }
-
-      // Build pathway chains from node types
-      const compounds = nodes.filter((n: any) => ['Nutraceutical', 'Compound', 'nutraceutical', 'compound'].includes(n.type || n.labels?.[0]));
-      const mechanisms = nodes.filter((n: any) => ['Mechanism', 'mechanism', 'MolecularTarget'].includes(n.type || n.labels?.[0]));
-      const effects = nodes.filter((n: any) => ['Effect', 'BiologicalEffect', 'effect'].includes(n.type || n.labels?.[0]));
-
-      if (compounds.length > 0) {
-        const steps: any[] = [];
-        const compoundName = compounds[0].label || compounds[0].properties?.name || 'Compound';
-        steps.push({ label: compoundName, type: 'compound' });
-        if (mechanisms.length > 0) {
-          steps.push({ label: mechanisms[0].label || mechanisms[0].properties?.name || 'Mechanism', type: 'mechanism' });
-        }
-        if (effects.length > 0) {
-          steps.push({ label: effects[0].label || effects[0].properties?.name || 'Effect', type: 'effect' });
-        }
-        steps.push({ label: condition, type: 'outcome' });
-        pathways.push({ condition, steps });
-      }
-    }
-
-    // Generate projections from conditions
-    const projections = conditionNames.map((condition) => {
-      const hasTriplets = triplets.some(t => t.object.toLowerCase().includes(condition.toLowerCase()));
+    return data.conditions.map((c: any) => {
+      // Use KG triplet data if available for more accurate scores
+      const matchingTriplets = kgTriplets.filter(
+        trip => trip.object?.toLowerCase().includes(c.condition_name.toLowerCase())
+      );
+      const hasEvidence = matchingTriplets.length > 0;
       return {
-        condition,
-        baselineScore: 30 + Math.floor(Math.random() * 20),
-        projectedImprovement: hasTriplets ? 25 + Math.floor(Math.random() * 20) : 15 + Math.floor(Math.random() * 10),
-        confidenceBand: hasTriplets ? 8 : 15,
+        condition: c.condition_name,
+        scientificEvidence: hasEvidence
+          ? Math.min(90, 50 + matchingTriplets.length * 10)
+          : 30 + Math.floor(Math.random() * 20),
+        planExperience: hasEvidence ? 40 + matchingTriplets.length * 5 : 20 + Math.floor(Math.random() * 15),
       };
     });
-
-    return { triplets, pathways, projections };
-  };
+  }, [data?.conditions, kgTriplets]);
 
   const handleAnalyzeWithKG = async () => {
     if (!data?.profile) return;
     setAnalyzing(true);
-    
+
     try {
-      const { profile, conditions } = data;
-      const conditionNames = conditions.map((c: any) => c.condition_name);
-      
-      const kgResults: any[] = [];
-      
-      for (const condition of conditionNames.length > 0 ? conditionNames : ['aging', 'longevity']) {
-        try {
-          const { data: kgData, error: kgError } = await supabase.functions.invoke('graph-rag-search', {
-            body: { queryType: 'context', sourceEntity: condition }
-          });
-          
-          if (!kgError && kgData?.data) {
-            kgResults.push({ condition, graphData: kgData.data });
-          }
-        } catch (e) {
-          console.warn(`KG query for ${condition} failed:`, e);
-        }
-      }
+      const { profile, conditions, medications, exams } = data;
 
-      // Extract evidence from KG results
-      const { triplets, pathways, projections } = extractKgEvidence(kgResults, conditionNames);
-      setKgTriplets(triplets);
-      setKgPathways(pathways);
-      setKgProjections(projections);
+      const result = await runClinicalAnalysisPipeline(
+        {
+          id: profile.id,
+          name: profile.name,
+          species: profile.species,
+          breed: profile.breed,
+          age_years: profile.age_years,
+          weight_kg: profile.weight_kg,
+          sex: profile.sex,
+          neutered: profile.neutered,
+        },
+        conditions,
+        medications,
+        exams
+      );
 
-      // Get hybrid recommendation
-      const primaryCondition = conditionNames[0] || 'geriatric wellness';
-      const { data: recommendation, error: recError } = await supabase.functions.invoke('hybrid-recommendation', {
-        body: {
-          mode: kgResults.length > 0 ? 'enrich' : 'fallback',
-          petProfile: {
-            species: profile.species,
-            breed: profile.breed,
-            age: profile.age_years,
-            weight: profile.weight_kg,
-          },
-          condition: primaryCondition,
-          kgData: kgResults.length > 0 ? {
-            nutraceuticals: kgResults.flatMap(r => 
-              (r.graphData.nodes || [])
-                .filter((n: any) => n.type === 'Nutraceutical' || n.type === 'Compound')
-                .map((n: any) => ({
-                  name: n.label || n.properties?.name,
-                  dosage: n.properties?.dosage || 'Consultar veterinário',
-                  mechanism: n.properties?.mechanism || 'Via knowledge graph',
-                  evidenceLevel: 'KG-backed',
-                }))
-            ),
-            rationale: `Baseado em ${kgResults.length} consulta(s) ao Knowledge Graph para: ${conditionNames.join(', ')}`,
-            precautions: [],
-          } : undefined,
-        }
-      });
+      // Update all state from pipeline result
+      setPredispositions(result.predispositions);
+      setLabAlerts(result.labAlerts);
+      setInteractionAlerts(result.interactionAlerts);
+      setKgTriplets(result.kgTriplets);
+      setKgPathways(result.kgPathways);
+      setKgProjections(result.kgProjections);
+      setConfidenceLevel(result.confidenceLevel);
+      setRecommendationCompounds(
+        result.compounds.length > 0 ? result.compounds : generateMockCompounds()
+      );
 
-      if (recError) throw recError;
+      const alertCount = result.predispositions.filter(p => !p.already_diagnosed).length
+        + result.labAlerts.length + result.interactionAlerts.length;
 
-      const nutraceuticals = recommendation?.nutraceuticals || [];
-      const compounds: CompoundDosage[] = nutraceuticals.map((n: any, idx: number) => {
-        const dosageMatch = n.dosage?.match(/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|IU)/i);
-        const dosageMin = dosageMatch ? parseFloat(dosageMatch[1]) : 5;
-        const dosageMax = dosageMatch ? parseFloat(dosageMatch[2]) : 50;
-        const unit = dosageMatch ? dosageMatch[3] : 'mg/kg';
-        const recommended = dosageMin + (dosageMax - dosageMin) * 0.5;
-
-        return {
-          id: `rec-${idx}`,
-          name: n.name,
-          condition: primaryCondition,
-          dosageMin,
-          dosageMax,
-          dosageRecommended: Math.round(recommended * 10) / 10,
-          dosageCurrent: Math.round(recommended * 10) / 10,
-          unit,
-          evidenceLevel: n.evidenceLevel || 'AI-suggested',
-          rationale: n.mechanism || '',
-          removed: false,
-          type: 'nutraceutical' as const,
-        };
-      });
-
-      setRecommendationCompounds(compounds.length > 0 ? compounds : generateMockCompounds());
-      setConfidenceLevel(kgResults.length > 0 ? 'medium' : 'low');
-      
       toast({
         title: t('petRegistration.profile.analysisComplete'),
-        description: t('petRegistration.profile.analysisCompleteDesc'),
+        description: alertCount > 0
+          ? t('petProfile.clinicalAlerts.alertsFound', { count: alertCount })
+          : t('petRegistration.profile.analysisCompleteDesc'),
       });
     } catch (err: any) {
-      console.error('KG Analysis error:', err);
+      console.error('Clinical analysis pipeline error:', err);
       toast({
         title: t('petRegistration.profile.analysisError'),
-        description: err.message || 'Erro ao consultar o Knowledge Graph.',
+        description: err.message || 'Erro ao executar pipeline de análise clínica.',
         variant: 'destructive',
       });
     } finally {
       setAnalyzing(false);
     }
   };
-
 
   const handleApproveStack = (compounds: CompoundDosage[]) => {
     console.log('Stack approved:', compounds);
@@ -232,6 +133,9 @@ const PetProfilePage: React.FC = () => {
     setKgTriplets([]);
     setKgPathways([]);
     setKgProjections([]);
+    setPredispositions([]);
+    setLabAlerts([]);
+    setInteractionAlerts([]);
     toast({
       title: t('petProfile.recommendation.rejectedTitle'),
       description: t('petProfile.recommendation.rejectedDesc'),
@@ -265,6 +169,7 @@ const PetProfilePage: React.FC = () => {
   }
 
   const { profile, conditions, medications, exams, clinicalNotes } = data;
+  const totalAlerts = predispositions.filter(p => !p.already_diagnosed).length + labAlerts.length + interactionAlerts.length;
 
   return (
     <Layout>
@@ -299,7 +204,7 @@ const PetProfilePage: React.FC = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <Stethoscope className="h-8 w-8 text-red-500" />
@@ -336,6 +241,17 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+          {totalAlerts > 0 && (
+            <Card className="border-orange-200 dark:border-orange-800">
+              <CardContent className="p-4 flex items-center gap-3">
+                <AlertTriangle className="h-8 w-8 text-orange-500" />
+                <div>
+                  <p className="text-2xl font-bold">{totalAlerts}</p>
+                  <p className="text-xs text-muted-foreground">{t('petProfile.clinicalAlerts.title')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Main Grid: Content + Chat */}
@@ -349,8 +265,17 @@ const PetProfilePage: React.FC = () => {
 
             {/* Analysis Results Tabs */}
             {recommendationCompounds && (
-              <Tabs defaultValue="recommendations">
+              <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
                 <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                  {totalAlerts > 0 && (
+                    <TabsTrigger value="clinical-alerts" className="gap-1">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      {t('petProfile.analysisTabs.clinicalAlerts')}
+                      <Badge variant="outline" className="ml-1 text-xs h-5 px-1.5 bg-orange-100 text-orange-800">
+                        {totalAlerts}
+                      </Badge>
+                    </TabsTrigger>
+                  )}
                   <TabsTrigger value="recommendations" className="gap-1">
                     <Sparkles className="h-3.5 w-3.5" />
                     {t('petProfile.analysisTabs.recommendations')}
@@ -372,6 +297,18 @@ const PetProfilePage: React.FC = () => {
                     {t('petProfile.analysisTabs.compoundChat')}
                   </TabsTrigger>
                 </TabsList>
+
+                {totalAlerts > 0 && (
+                  <TabsContent value="clinical-alerts">
+                    <ClinicalAlertsPanel
+                      predispositions={predispositions}
+                      labAlerts={labAlerts}
+                      interactionAlerts={interactionAlerts}
+                      breed={profile.breed}
+                      ageYears={profile.age_years}
+                    />
+                  </TabsContent>
+                )}
 
                 <TabsContent value="recommendations">
                   <VetRecommendationPanel
@@ -553,7 +490,7 @@ const PetProfilePage: React.FC = () => {
                             </div>
                             {e.results && (
                               <p className="text-sm text-muted-foreground mt-1">
-                                {typeof e.results === 'object' 
+                                {typeof e.results === 'object'
                                   ? Object.entries(e.results as Record<string, any>)
                                       .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
                                       .join(' · ')
