@@ -49,6 +49,14 @@ const PetProfilePage: React.FC = () => {
   const [predispositions, setPredispositions] = useState<BreedPredisposition[]>([]);
   const [labAlerts, setLabAlerts] = useState<LabAlert[]>([]);
   const [interactionAlerts, setInteractionAlerts] = useState<InteractionAlert[]>([]);
+  const [pipelineState, setPipelineState] = useState<PipelineState>({
+    stage1_profile: 'idle',
+    stage2_predispositions: 'idle',
+    stage3_labs: 'idle',
+    stage4_kg: 'idle',
+    stage5_interactions: 'idle',
+    stage6_recommendation: 'idle',
+  });
 
   // Generate treatability data from conditions using real data when available
   const treatabilityData = useMemo(() => {
