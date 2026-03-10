@@ -83,43 +83,16 @@ const ClinicalAlertsPanel: React.FC<ClinicalAlertsPanelProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
               {predispositions.map((p) => (
-                <div
+                <PredispositionTag
                   key={p.id}
-                  className={`flex items-center justify-between p-2 rounded-md text-sm ${
-                    p.already_diagnosed
-                      ? 'bg-muted/50 opacity-70'
-                      : 'bg-orange-50 dark:bg-orange-900/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    {p.already_diagnosed ? (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
-                    )}
-                    <div>
-                      <span className="font-medium">{p.condition_name}</span>
-                      {p.already_diagnosed && (
-                        <span className="text-xs text-muted-foreground ml-1">
-                          ({t('petProfile.clinicalAlerts.alreadyDiagnosed')})
-                        </span>
-                      )}
-                      {p.notes && (
-                        <p className="text-xs text-muted-foreground">{p.notes}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="outline" className={riskBadgeColor(p.risk_factor)}>
-                      {p.risk_factor}x
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {p.evidence_grade}
-                    </Badge>
-                  </div>
-                </div>
+                  conditionName={p.condition_name}
+                  riskFactor={p.risk_factor}
+                  evidenceGrade={p.evidence_grade}
+                  alreadyDiagnosed={p.already_diagnosed}
+                  notes={p.notes}
+                />
               ))}
             </div>
           </CardContent>
