@@ -103,28 +103,23 @@ const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
       {predispositions && predispositions.length > 0 ? (
         <div className="space-y-2">
           {predispositions.map((pred: any) => (
-            <div key={pred.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                <div>
-                  <p className="font-medium text-sm">{pred.health_conditions?.name || t('common.unknown')}</p>
-                  <p className="text-xs text-muted-foreground">{pred.health_conditions?.name_en}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{t('admin.breeds.riskFactor')}: {pred.risk_factor}x</Badge>
-                <Badge className={evidenceColors[pred.evidence_grade] || evidenceColors.preliminary}>
-                  {pred.evidence_grade}
-                </Badge>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7 text-destructive"
-                  onClick={() => deleteMutation.mutate(pred.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+            <div key={pred.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+              <PredispositionTag
+                conditionName={pred.health_conditions?.name || t('common.unknown')}
+                riskFactor={pred.risk_factor}
+                evidenceGrade={pred.evidence_grade}
+                conditionId={pred.health_conditions?.id}
+                notes={pred.notes}
+                navigable
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-destructive"
+                onClick={() => deleteMutation.mutate(pred.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
           ))}
         </div>
