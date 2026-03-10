@@ -105,6 +105,9 @@ const PetProfilePage: React.FC = () => {
         exams
       );
 
+      // Update pipeline stages progressively
+      setPipelineState(s => ({ ...s, stage2_predispositions: 'complete', stage3_labs: 'complete', stage4_kg: 'complete', stage5_interactions: 'complete', stage6_recommendation: 'complete' }));
+
       // Update all state from pipeline result
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
