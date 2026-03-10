@@ -132,6 +132,20 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Importação e curadoria de dados de ontologias externas'
   },
   {
+    id: 'breeds-management',
+    label: 'Raças & Predisposições',
+    group: 'knowledge-base',
+    component: BreedsManagementTab,
+    description: 'Gerenciamento de raças e predisposições genéticas'
+  },
+  {
+    id: 'lab-references',
+    label: 'Referências Laboratoriais',
+    group: 'knowledge-base',
+    component: LabReferencesTab,
+    description: 'Intervalos de referência para exames laboratoriais'
+  },
+  {
     id: 'knowledge-base-settings',
     label: 'Configurações',
     group: 'knowledge-base',
