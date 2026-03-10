@@ -271,6 +271,20 @@ const PetProfilePage: React.FC = () => {
           )}
         </div>
 
+        {/* Pipeline Workflow Stepper */}
+        <div className="mb-6">
+          <ClinicalPipelineWorkflow
+            pipelineState={pipelineState}
+            isAnalyzing={analyzing}
+            profileDataCount={conditions.length + medications.length + exams.length}
+            predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
+            labAlertCount={labAlerts.length}
+            tripletCount={kgTriplets.length}
+            interactionCount={interactionAlerts.length}
+            compoundCount={recommendationCompounds?.length || 0}
+          />
+        </div>
+
         {/* Main Grid: Content + Chat */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content (2/3) */}
