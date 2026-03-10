@@ -6846,6 +6846,21 @@
       "suggestion1": "Quais são os mecanismos de ação de {{compound}}?",
       "suggestion2": "Qual a dosagem ideal de {{compound}} para cães idosos?",
       "suggestion3": "Existem contraindicações de {{compound}} para {{condition}}?"
+    },
+    "pipeline": {
+      "profile": "Perfil",
+      "predispositions": "Predisposições",
+      "labs": "Exames",
+      "knowledgeGraph": "KG",
+      "interactions": "Interações",
+      "recommendation": "Recomendação",
+      "dataPoints": "dados",
+      "risks": "riscos",
+      "alerts": "alertas",
+      "triplets": "triplets",
+      "conflicts": "conflitos",
+      "compounds": "compostos",
+      "processing": "processando..."
     }
   }
 }
