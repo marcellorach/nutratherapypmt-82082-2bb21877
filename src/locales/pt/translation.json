@@ -6755,7 +6755,23 @@
       "biologicalPathway": "Caminho Biológico",
       "scientificEvidence": "Evidência Científica",
       "projection": "Projeção de Melhora",
-      "compoundChat": "Chat por Composto"
+      "compoundChat": "Chat por Composto",
+      "clinicalAlerts": "Alertas Clínicos"
+    },
+    "clinicalAlerts": {
+      "title": "Alertas",
+      "alertsFound": "{{count}} alerta(s) clínico(s) identificado(s)",
+      "noAlerts": "Nenhum alerta clínico identificado",
+      "noDataAvailable": "Execute a análise VetGraphRAG para identificar alertas clínicos",
+      "breedPredispositions": "Predisposições Raciais",
+      "labAbnormalities": "Exames Alterados",
+      "interactions": "Interações Medicamentosas",
+      "alreadyDiagnosed": "já diagnosticado",
+      "low": "Baixo",
+      "high": "Alto",
+      "criticalLow": "Criticamente Baixo",
+      "criticalHigh": "Criticamente Alto",
+      "labValue": "{{value}} {{unit}} (ref: {{min}}-{{max}})"
     },
     "compoundChat": {
       "selectPrompt": "Selecione um composto recomendado para iniciar uma conversa especializada:",
