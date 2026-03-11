@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import TripletReviewDialog from './kg-stats/TripletReviewDialog';
 import {
   Dialog,
   DialogContent,
@@ -102,8 +103,9 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const [studyContributions, setStudyContributions] = useState<StudyContribution[]>([]);
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
   const [graphRelations, setGraphRelations] = useState<GraphRelation[]>([]);
-  // Generic data state for new stat types
   const [genericData, setGenericData] = useState<any[]>([]);
+  const [reviewingTriplet, setReviewingTriplet] = useState<any | null>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -395,11 +397,15 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const loadTripletsData = async (status: 'approved' | 'pending') => {
     const { data } = await supabase
       .from('triplet_extractions')
-      .select('id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status')
+      .select('id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status, confidence_rationale, evidence_level, species_context, study_id')
       .eq('curation_status', status)
       .order('extraction_confidence', { ascending: false })
       .limit(300);
     setGenericData(data || []);
+  };
+
+  const handleTripletReviewed = (tripletId: string, newStatus: string) => {
+    setGenericData(prev => prev.filter(item => item.id !== tripletId));
   };
 
   const getTitle = () => {
@@ -789,7 +795,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                       )}
                     </div>
                   )}
-                  {(statType === 'approved-triplets' || statType === 'pending-triplets') && (
+                   {(statType === 'approved-triplets' || statType === 'pending-triplets') && (
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-primary">{item.subject_name}</span>
@@ -808,6 +814,21 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                         <Badge variant={statType === 'approved-triplets' ? 'default' : 'secondary'} className="text-[10px]">
                           {item.curation_status}
                         </Badge>
+                        {statType === 'pending-triplets' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-auto h-6 text-[10px] px-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReviewingTriplet(item);
+                              setReviewDialogOpen(true);
+                            }}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            {t('knowledgeGraph.tripletReview.reviewButton', 'Review')}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -831,6 +852,13 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
           )}
         </ScrollArea>
       </DialogContent>
+
+      <TripletReviewDialog
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        triplet={reviewingTriplet}
+        onReviewed={handleTripletReviewed}
+      />
     </Dialog>
   );
 };
