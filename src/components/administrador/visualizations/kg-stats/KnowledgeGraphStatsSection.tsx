@@ -59,6 +59,7 @@ export const KnowledgeGraphStatsSection: React.FC<KnowledgeGraphStatsSectionProp
           stats={stats?.extracted || null}
           isLoading={isLoading}
           onCardClick={onCardClick}
+          studyName={studyName}
         />
 
         {/* Row 3: Graph Structure */}
