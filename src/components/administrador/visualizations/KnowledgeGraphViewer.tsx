@@ -703,7 +703,12 @@ export const KnowledgeGraphViewer: React.FC = () => {
     <TooltipProvider>
       <div className="space-y-4">
         {/* Stats Section - 3 Rows: Base Knowledge, Extracted Knowledge, Graph Structure */}
-        <KnowledgeGraphStatsSection onCardClick={openStatDialog} />
+        <KnowledgeGraphStatsSection 
+          onCardClick={openStatDialog}
+          studyId={studyFilter !== 'all' ? studyFilter : undefined}
+          studyName={selectedStudyDetails?.title}
+          onClearStudyFilter={() => setStudyFilter('all')}
+        />
 
         {/* Actions Row */}
         <div className="flex items-center justify-end gap-2">
