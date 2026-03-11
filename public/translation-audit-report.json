@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-10T23:36:38.070Z",
+  "timestamp": "2026-03-11T17:11:45.487Z",
   "summary": {
     "totalFiles": 766,
-    "totalIssues": 362,
+    "totalIssues": 363,
     "hardcodedTexts": 36,
-    "missingKeys": 326,
+    "missingKeys": 327,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -452,21 +452,28 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
-      "line": 44,
-      "text": "*, breed_predispositions(count)",
+      "line": 45,
+      "text": "*, breed_predispositions(id, risk_factor, evidence_grade, notes, health_conditions:condition_id(id, name, name_en))",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
-      "line": 55,
+      "line": 56,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
-      "line": 224,
+      "line": 179,
+      "text": "common.unknown",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 250,
       "text": "common.description",
       "severity": "high"
     },
