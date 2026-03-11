@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-11 🔍 Detecção de Estudos Duplicados no Upload
+- ✅ **Hash SHA-256**: Cálculo de hash do arquivo via Web Crypto API para detecção exata de duplicatas
+- ✅ **Similaridade de nome**: Levenshtein distance para detectar nomes similares (threshold 75%)
+- ✅ **Coluna `content_hash`**: Nova coluna na tabela `processed_studies` para armazenar hash
+- ✅ **Alertas inline**: Componente `DuplicateAlert` com alertas visuais (🔴 exato / 🟡 similar)
+- ✅ **Opções do usuário**: Remover da fila ou importar mesmo assim (dismiss alerta)
+- ✅ **Hash salvo**: Hash SHA-256 salvo no registro para futuras verificações
+
 ### Changed - 2026-03-11 📊 Stats filtradas por estudo + Remoção Enrich
 - ✅ **Stats de triplets filtradas por estudo**: Hook `useKnowledgeGraphStats` agora aceita `studyId` opcional e filtra contagens de pending/approved por estudo selecionado
 - ✅ **Banner de estudo selecionado**: Indicador visual nos stats cards mostrando qual estudo está filtrado, com botão X para limpar

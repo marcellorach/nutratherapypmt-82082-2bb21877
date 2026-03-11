@@ -5895,7 +5895,16 @@
     "importing": "Importing {{current}}/{{total}}...",
     "importFiles": "Import {{count}} file(s)",
     "importButton": "Import Files",
-    "importError": "Import error"
+    "importError": "Import error",
+    "duplicate": {
+      "checking": "Checking for duplicates...",
+      "exactMatch": "Identical file already imported",
+      "similarName": "Similar name to existing study ({{similarity}}%)",
+      "existingStudy": "Existing study",
+      "remove": "Remove",
+      "keepAnyway": "Import anyway",
+      "blockingWarning": "Duplicate files detected. Remove them or click ✕ to import anyway."
+    }
   },
   "healthTags": {
     "noCondition": "No condition",
