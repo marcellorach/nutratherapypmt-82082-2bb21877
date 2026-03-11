@@ -159,7 +159,7 @@ const SciImportSection: React.FC = () => {
   );
 
   const inCurationEstudos = filteredEstudos.filter(estudo => 
-    estudo.kanban_status === "new" || estudo.kanban_status === "parsed" || estudo.kanban_status === "review" || estudo.kanban_status === "processed"
+    estudo.kanban_status === "parsed" || estudo.kanban_status === "review" || estudo.kanban_status === "processed"
   );
   const aprovadosEstudos = filteredEstudos.filter(estudo => estudo.kanban_status === "approved");
 
