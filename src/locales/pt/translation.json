@@ -1604,6 +1604,7 @@
       "predispositionAdded": "Predisposição adicionada",
       "predispositionRemoved": "Predisposição removida",
       "noPredispositions": "Nenhuma predisposição cadastrada para esta raça",
+      "managePredispositions": "Gerenciar predisposições ({{count}})",
       "riskFactor": "Fator de risco",
       "evidenceHigh": "Alta",
       "evidenceModerate": "Moderada",

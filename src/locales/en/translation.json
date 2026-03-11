@@ -1604,6 +1604,7 @@
       "predispositionAdded": "Predisposition added",
       "predispositionRemoved": "Predisposition removed",
       "noPredispositions": "No predispositions registered for this breed",
+      "managePredispositions": "Manage predispositions ({{count}})",
       "riskFactor": "Risk factor",
       "evidenceHigh": "High",
       "evidenceModerate": "Moderate",
