@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NetworkGraph from '../../NetworkGraph';
 import EfficacyMatrix from '../../EfficacyMatrix';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Search } from 'lucide-react';
+
+const RelationsAuditorChat = lazy(() => import('@/components/administrador/relations/RelationsAuditorChat'));
 
 interface VisualizationTabsProps {
   relationView: string;
@@ -50,6 +52,10 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
       <TabsList className="mb-4">
         <TabsTrigger value="network">{t('relations.tabs.network')}</TabsTrigger>
         <TabsTrigger value="matrix">{t('relations.tabs.matrix')}</TabsTrigger>
+        <TabsTrigger value="auditor" className="flex items-center gap-1">
+          <Search className="h-3 w-3" />
+          {t('relations.tabs.auditor')}
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="network" className="pt-4">
@@ -99,6 +105,12 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
         ) : (
           <NoDataMessage />
         )}
+      </TabsContent>
+
+      <TabsContent value="auditor" className="pt-4">
+        <Suspense fallback={<LoadingState />}>
+          <RelationsAuditorChat />
+        </Suspense>
       </TabsContent>
     </Tabs>
   );

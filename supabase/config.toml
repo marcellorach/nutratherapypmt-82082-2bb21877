@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.enrich-triplet]
 verify_jwt = false
+
+[functions.relations-auditor]
+verify_jwt = false

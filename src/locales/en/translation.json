@@ -2375,7 +2375,8 @@
     "newRelation": "New Relation",
     "tabs": {
       "network": "Network",
-      "matrix": "Matrix"
+      "matrix": "Matrix",
+      "auditor": "Auditor"
     },
     "loading": "Loading data...",
     "noData": {
@@ -2425,6 +2426,29 @@
       "aboutData": "About the data",
       "dataDescription": "The data represents scientific connections between nutraceuticals, health conditions, and published studies.",
       "colorDescription": "Colors and line types indicate different types of relationships and their levels of scientific evidence."
+    },
+    "auditor": {
+      "loadingContext": "Loading database data for analysis...",
+      "contextLoaded": "Context loaded",
+      "contextError": "Error loading database context",
+      "relationsCount": "relations",
+      "predispositionsCount": "predispositions",
+      "tripletsCount": "triplets",
+      "studiesCount": "studies",
+      "welcomeTitle": "Conversational Auditor on Relations and Connections",
+      "welcomeDescription": "Ask about the relationships between nutraceuticals and conditions in the database. The auditor will critically analyze the data and generate connection diagrams.",
+      "inputPlaceholder": "Ask about relations, efficacy, inconsistencies...",
+      "analyzing": "Analyzing data and generating diagram...",
+      "sendError": "Error sending message to auditor",
+      "emptyResponse": "The auditor did not return a response.",
+      "rateLimited": "Rate limit exceeded. Please wait a moment.",
+      "paymentRequired": "Insufficient credits for the auditor.",
+      "examples": {
+        "whyLowEfficacy": "Why does quercetin have a low efficacy score for inflammation?",
+        "inconsistencies": "Are there nutraceuticals with high scores but few studies?",
+        "bestEvidence": "Which relations have the best scientific evidence base?",
+        "missingData": "Where are data or connections missing in the system?"
+      }
     }
   },
   "sankey": {
