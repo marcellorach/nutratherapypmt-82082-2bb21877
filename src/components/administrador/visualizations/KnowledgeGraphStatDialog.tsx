@@ -795,7 +795,7 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                       )}
                     </div>
                   )}
-                  {(statType === 'approved-triplets' || statType === 'pending-triplets') && (
+                   {(statType === 'approved-triplets' || statType === 'pending-triplets') && (
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-primary">{item.subject_name}</span>
@@ -814,6 +814,21 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
                         <Badge variant={statType === 'approved-triplets' ? 'default' : 'secondary'} className="text-[10px]">
                           {item.curation_status}
                         </Badge>
+                        {statType === 'pending-triplets' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-auto h-6 text-[10px] px-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReviewingTriplet(item);
+                              setReviewDialogOpen(true);
+                            }}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            {t('knowledgeGraph.tripletReview.reviewButton', 'Review')}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}
