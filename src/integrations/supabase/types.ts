@@ -1876,6 +1876,7 @@ export type Database = {
         Row: {
           analysis_data: Json | null
           authors: string[] | null
+          content_hash: string | null
           created_at: string | null
           deleted_at: string | null
           deleted_by: string | null
@@ -1899,6 +1900,7 @@ export type Database = {
         Insert: {
           analysis_data?: Json | null
           authors?: string[] | null
+          content_hash?: string | null
           created_at?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
@@ -1922,6 +1924,7 @@ export type Database = {
         Update: {
           analysis_data?: Json | null
           authors?: string[] | null
+          content_hash?: string | null
           created_at?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
