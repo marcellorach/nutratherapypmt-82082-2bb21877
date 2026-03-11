@@ -29,7 +29,7 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
   matrixData
 }) => {
   const { t } = useTranslation();
-  const [auditorOpen, setAuditorOpen] = useState(false);
+  const [auditorOpen, setAuditorOpen] = useState(true);
 
   return (
     <Card>
