@@ -10,6 +10,7 @@ interface KGExtractedKnowledgeRowProps {
   stats: ExtractedKnowledgeStats | null;
   isLoading: boolean;
   onCardClick?: (type: string) => void;
+  studyName?: string;
 }
 
 export const KGExtractedKnowledgeRow: React.FC<KGExtractedKnowledgeRowProps> = ({
