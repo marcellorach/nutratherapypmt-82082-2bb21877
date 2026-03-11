@@ -1249,6 +1249,13 @@ export const KnowledgeGraphViewer: React.FC = () => {
         onStudyClick={handleStudyFromDialogClick}
       />
 
+      {/* Triplet Bank Dialog */}
+      <TripletBankDialog
+        open={tripletBankOpen}
+        onOpenChange={setTripletBankOpen}
+        initialTab={tripletBankInitialTab}
+      />
+
       {/* Node Details Sidebar */}
       <NodeDetailsSidebar
         open={nodeDetailsSidebarOpen}
