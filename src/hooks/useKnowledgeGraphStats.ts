@@ -44,7 +44,7 @@ interface UseKnowledgeGraphStatsReturn {
   refresh: () => Promise<void>;
 }
 
-export function useKnowledgeGraphStats(): UseKnowledgeGraphStatsReturn {
+export function useKnowledgeGraphStats(studyId?: string): UseKnowledgeGraphStatsReturn {
   const [stats, setStats] = useState<KnowledgeGraphStatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
