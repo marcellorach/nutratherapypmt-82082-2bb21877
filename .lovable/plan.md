@@ -1,46 +1,73 @@
 
 
-## Plano: System Guide Interativo com Conexões Visuais e Painéis Explicativos
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-### Desafio 1 — Conexões gráficas entre seções + luz "working"
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-Transformar o grid estático atual em um **diagrama de fluxo visual** usando SVG lines/paths entre os cards para representar o pipeline de dados. As conexões mostram:
-- **Ingestão → Ontologia**: estudos alimentam as entidades
-- **Ontologia → Grafo**: entidades formam nós e arestas
-- **Grafo → Inteligência**: relações geram insights
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-A **luz "working"** será um indicador animado (pulsing dot) no card da seção que estiver atualmente ativa (baseado no `?tab=` atual dos `searchParams`). Quando o admin está na tab `veterinary-targets`, o card correspondente no guia pulsa com uma luz verde.
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-### Desafio 2 — Click abre explicação gráfica inline
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-Em vez de navegar, o click expande um **painel inline** abaixo do card clicado com:
-- Descrição detalhada do módulo (2-3 parágrafos)
-- **Estatísticas em tempo real** do banco (contagem de registros, última atualização)
-- Mini diagrama de inputs/outputs daquele módulo
-- Botão "Ir para seção" para navegar de fato
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-As estatísticas serão consultadas via queries simples (count) nas tabelas relevantes de cada seção.
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-### Mudanças
+### 3. Novo componente: Chat Especializado por Composto
+
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+
+### 4. Chat Clínico Geral (sidebar)
+
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+
+### 5. Arquivos a modificar/criar
 
 | Arquivo | Ação |
-|---|---|
-| `src/components/administrador/estudos/SystemGuideCard.tsx` | **Reescrever** — Adicionar SVG flow lines entre grupos, pulsing indicator na tab ativa, click expande painel explicativo inline em vez de navegar |
-| `src/components/administrador/estudos/SystemGuideDetailPanel.tsx` | **Criar** — Componente do painel expandido com stats real-time, descrição rica e mini diagrama de I/O |
-| `src/hooks/useSystemGuideStats.ts` | **Criar** — Hook que busca contagens (estudos, nutracêuticos, condições, relações, etc.) para exibir no painel |
-| `src/locales/pt/translation.json` | **Editar** — Adicionar descrições longas e labels para cada painel de seção |
-| `src/locales/en/translation.json` | **Editar** — Idem em inglês |
-| `src/i18n.ts` | **Editar** — Bump versão |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-### Detalhes de implementação
+### 6. Estrutura visual resultante
 
-**Conexões visuais**: Setas SVG curvas (tipo flowchart) desenhadas entre os blocos de grupo usando posicionamento relativo. Cada grupo tem um "connector" saindo do lado direito/inferior apontando para o próximo grupo, com gradiente de cor.
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
 
-**Luz working**: Lê `searchParams.get('tab')` e compara com o `step` de cada seção. O card ativo recebe uma classe com `animate-pulse` em um dot verde ao lado do ícone.
+### Detalhes técnicos
 
-**Painel de detalhes**: State local `expandedSection`. Ao clicar, expande com animação (framer-motion) mostrando:
-- Descrição expandida (i18n key `systemGuide.details.{step}`)
-- Stats: query count nas tabelas mapeadas (ex: `nutraceuticals` → count de `nutraceuticals`, `veterinary-targets` → count de `health_conditions`)
-- Inputs/Outputs: lista visual do que entra e sai daquele módulo
-- CTA "Abrir seção" para navegar
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

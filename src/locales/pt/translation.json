@@ -6969,7 +6969,8 @@
   "systemGuide": {
     "title": "Base de Conhecimento — Guia do Sistema",
     "description": "Navegue pelas seções que compõem a base de conhecimento veterinário. Cada módulo desempenha um papel específico no pipeline científico.",
-    "footer": "Clique em qualquer seção para navegar diretamente",
+    "footer": "Clique em qualquer seção para expandir detalhes • Luz verde indica a seção ativa",
+    "openSection": "Abrir seção",
     "groups": {
       "ingestion": "Ingestão de Dados",
       "ontology": "Ontologia & Dados Base",
@@ -6994,6 +6995,52 @@
       "ontologyAudit": "Auditoria de consistência, conflitos e resoluções canônicas",
       "aiInsights": "Descobertas automáticas e predições geradas por IA",
       "settings": "Configurações de modelos de IA, embeddings e parâmetros do pipeline"
+    },
+    "details": {
+      "estudos": "Módulo responsável pela ingestão de literatura científica veterinária. Permite importação via PubMed, OpenAlex, upload de PDFs e entrada manual. Os estudos importados são indexados, seus textos completos extraídos e preparados para processamento pela IA. Este é o ponto de entrada principal do pipeline de conhecimento.",
+      "processamento-ia": "Pipeline automatizado que analisa o texto completo dos estudos científicos usando modelos de linguagem. Extrai triplets (sujeito-predicado-objeto), identifica entidades biomédicas, gera embeddings vetoriais e produz claims de evidência estruturados. Cada extração passa por validação de confiança antes de integrar o grafo.",
+      "nutraceuticals-unified": "Catálogo unificado de substâncias nutracêuticas com informações detalhadas: composição química, dosagens recomendadas, benefícios documentados, contraindicações e associações com condições de saúde. Cada nutracêutico é vinculado aos estudos que o fundamentam e às evidências extraídas.",
+      "veterinary-targets": "Registro das condições de saúde veterinárias (doenças, síndromes), mecanismos de ação biológicos, vias metabólicas (pathways) e efeitos biológicos. Estas entidades formam os nós-alvo do grafo de conhecimento, conectando nutracêuticos a resultados clínicos.",
+      "breeds-management": "Gestão completa de raças organizadas por espécie e grupo racial. Inclui predisposições genéticas a condições específicas com graus de evidência e fatores de risco quantificados. Essencial para personalização das recomendações por perfil do animal.",
+      "lab-references": "Valores de referência para exames laboratoriais segmentados por espécie e faixa etária. Permitem que o sistema interprete resultados de exames e identifique desvios que podem indicar condições tratáveis com nutracêuticos.",
+      "base-knowledge": "Candidatos a entidades importados automaticamente de bases de dados externas como PubChem, KEGG e UniProt. Cada candidato passa por um processo de harmonização — verificação de duplicatas, mapeamento para entidades existentes e revisão manual antes de integrar a ontologia.",
+      "knowledge-graph": "Visualização interativa 2D/3D do grafo de conhecimento completo. Mostra todos os nós (nutracêuticos, condições, mecanismos, efeitos) e suas relações com códigos de cor por tipo de entidade. Permite exploração visual das conexões e descoberta de padrões.",
+      "relacoes": "Gerenciamento das arestas hierárquicas do grafo de conhecimento. Cada relação possui nível de evidência, score de confiança, contexto de espécie e pode ser vinculada a claims e resoluções canônicas. Suporta curadoria manual e validação automatizada.",
+      "ontology-audit": "Sistema de auditoria que detecta conflitos entre evidências, inconsistências na ontologia e gaps de conhecimento. Gera relatórios de qualidade, permite resolução de conflitos com justificativas documentadas e mantém o histórico de decisões canônicas.",
+      "ai-insights": "Módulo de inteligência artificial que analisa padrões no grafo de conhecimento para descobrir relações não documentadas, sugerir categorizações taxonômicas e predizer interações potenciais entre nutracêuticos e condições. Cada descoberta passa por validação científica.",
+      "knowledge-base-settings": "Painel de configuração central do pipeline: seleção de modelos de IA, parâmetros de extração de triplets, limiares de confiança, configurações de embeddings e regras de processamento automático."
+    },
+    "statsLabels": {
+      "studies": "estudos",
+      "processed": "processados",
+      "triplets": "triplets",
+      "claims": "claims",
+      "embeddings": "embeddings",
+      "nutraceuticals": "nutracêuticos",
+      "categories": "categorias",
+      "associations": "associações",
+      "conditions": "condições",
+      "mechanisms": "mecanismos",
+      "pathways": "pathways",
+      "effects": "efeitos",
+      "breeds": "raças",
+      "groups": "grupos",
+      "predispositions": "predisposições",
+      "ranges": "faixas",
+      "candidates": "candidatos",
+      "nodes": "nós",
+      "edges": "arestas",
+      "resolutions": "resoluções",
+      "conflicts": "conflitos",
+      "reports": "relatórios",
+      "discoveries": "descobertas",
+      "suggestions": "sugestões",
+      "configs": "configurações",
+      "settings": "configurações"
+    },
+    "io": {
+      "inputs": "Entradas",
+      "outputs": "Saídas"
     }
   }
 }
