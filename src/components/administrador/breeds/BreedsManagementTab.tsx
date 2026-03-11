@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PawPrint, Search, Plus, ChevronDown, ChevronRight, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import BreedPredispositionsPanel from './BreedPredispositionsPanel';
+import PredispositionTag from '@/components/administrador/tags/PredispositionTag';
 
 interface Breed {
   id: string;
