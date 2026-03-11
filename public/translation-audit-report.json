@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-11T17:57:40.134Z",
+  "timestamp": "2026-03-11T23:29:56.107Z",
   "summary": {
-    "totalFiles": 768,
-    "totalIssues": 365,
+    "totalFiles": 775,
+    "totalIssues": 369,
     "hardcodedTexts": 36,
-    "missingKeys": 329,
+    "missingKeys": 333,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -1368,6 +1368,13 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/estudos/SystemGuideCard.tsx",
+      "line": 58,
+      "text": "tab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/estudos/SystemStatusBar.tsx",
       "line": 33,
       "text": "config_value",
@@ -1523,22 +1530,29 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/FileUploadTab.tsx",
-      "line": 167,
+      "line": 40,
+      "text": "id, study_id, title, original_filename, kanban_status, content_hash",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/FileUploadTab.tsx",
+      "line": 283,
       "text": "common.tryAgain",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/HistoryTab.tsx",
-      "line": 43,
-      "text": "id, imported_at, meta_summary_filename, meta_summary_storage_path, base_studies_filename, base_studies_storage_path, scispace_status",
+      "line": 49,
+      "text": "id, imported_at, import_type, scispace_status",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/HistoryTab.tsx",
-      "line": 92,
-      "text": "id",
+      "line": 63,
+      "text": "id, title, original_filename, kanban_status, source_import_id, duplicate_check_log",
       "severity": "high"
     },
     {
@@ -1824,7 +1838,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/settings/panels/PromptManagementPanel.tsx",
-      "line": 70,
+      "line": 72,
       "text": "id, config_key, config_value, description",
       "severity": "high"
     },
@@ -2104,78 +2118,92 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 171,
+      "line": 173,
       "text": "id, entity_name, entity_type, layer, description, synonyms",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 332,
+      "line": 334,
       "text": "id, name, name_en, description, description_en, chemical_compound, source",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 341,
+      "line": 343,
       "text": "id, name, name_en, description, description_en, category, severity_level",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 350,
+      "line": 352,
       "text": "id, entity_name, entity_type, layer, description",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 360,
+      "line": 362,
       "text": "id, name, name_en, description, description_en, color, icon, sort_order",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 368,
+      "line": 370,
       "text": "id, entity_name, entity_type, layer, description, synonyms",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 378,
+      "line": 380,
       "text": "id, entity_name, entity_type, layer, description, synonyms",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 388,
+      "line": 390,
       "text": "id, source_type, target_type, relationship, confidence, evidence_level, source_id, target_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx",
-      "line": 398,
-      "text": "id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status",
+      "line": 400,
+      "text": "id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status, confidence_rationale, evidence_level, species_context, study_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphViewer.tsx",
-      "line": 152,
+      "line": 153,
       "text": "id, title, description, authors, journal, year",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraphViewer.tsx",
-      "line": 161,
+      "line": 162,
       "text": "subject_name, subject_type, predicate, object_name, object_type, curation_status, extraction_confidence, synced_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/kg-stats/TripletReviewDialog.tsx",
+      "line": 82,
+      "text": "title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/kg-stats/TripletReviewDialog.tsx",
+      "line": 95,
+      "text": "chunk_text, chunk_index",
       "severity": "high"
     },
     {
@@ -2454,7 +2482,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/estudos/analysis/NtaiStudySelectionTable.tsx",
-      "line": 82,
+      "line": 80,
       "text": "VetGraphRAG",
       "severity": "medium"
     },
@@ -2496,7 +2524,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/settings/panels/PromptManagementPanel.tsx",
-      "line": 305,
+      "line": 308,
       "text": "Configure which AI models are used for each task",
       "severity": "medium"
     },
