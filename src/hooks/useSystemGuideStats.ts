@@ -1,16 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type TableName = keyof Database['public']['Tables'];
 
 interface SectionStats {
   count: number;
   label: string;
 }
 
-interface SystemGuideStats {
-  [key: string]: SectionStats[];
-}
-
-const fetchCount = async (table: string): Promise<number> => {
+const fetchCount = async (table: TableName): Promise<number> => {
   const { count, error } = await supabase
     .from(table)
     .select('*', { count: 'exact', head: true });
