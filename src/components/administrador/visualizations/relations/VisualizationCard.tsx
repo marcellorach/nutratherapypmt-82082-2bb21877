@@ -29,7 +29,7 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
   matrixData
 }) => {
   const { t } = useTranslation();
-  const [auditorOpen, setAuditorOpen] = useState(false);
+  const [auditorOpen, setAuditorOpen] = useState(true);
 
   return (
     <Card>
@@ -55,16 +55,16 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
           <CollapsibleTrigger asChild>
             <Button
               variant="outline"
-              className="w-full flex items-center justify-between gap-2 border-dashed"
+              className="w-full flex items-center justify-between gap-2 border-primary/30 bg-primary/5 hover:bg-primary/10"
             >
               <div className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                <span className="font-medium">{t('relations.auditor.title', 'Auditor de Relações')}</span>
+                <Search className="h-4 w-4 text-primary" />
+                <span className="font-medium text-primary">{t('relations.auditor.title', 'Auditor de Relações')}</span>
               </div>
-              {auditorOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+              {auditorOpen ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronUp className="h-4 w-4 text-primary" />}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 border rounded-lg p-4">
+          <CollapsibleContent className="mt-3 border border-primary/20 rounded-lg p-4 bg-primary/[0.02]">
             <Suspense fallback={
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
