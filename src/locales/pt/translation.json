@@ -2375,7 +2375,8 @@
     "newRelation": "Nova Relação",
     "tabs": {
       "network": "Rede",
-      "matrix": "Matriz"
+      "matrix": "Matriz",
+      "auditor": "Auditor"
     },
     "loading": "Carregando dados...",
     "noData": {
