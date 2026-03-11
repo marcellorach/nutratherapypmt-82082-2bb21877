@@ -184,6 +184,7 @@ const PromptManagementPanel: React.FC = () => {
       case 2: return 'Mechanisms and relationships: pathways, enzymes, interactions';
       case 3: return 'Clinical outcomes: dosages, efficacy scores, biomarkers';
       case 4: return 'VetGraphRAG triplet generation for knowledge graph';
+      case 5: return 'Relations Auditor: conversational analysis of nutraceutical-condition relationships with Mermaid diagrams (gemini-3.1-pro-preview)';
       default: return '';
     }
   };
