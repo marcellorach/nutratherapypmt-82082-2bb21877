@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
 import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
+import { TripletBankDialog } from './kg-stats/TripletBankDialog';
 import { KnowledgeGraphChat } from './KnowledgeGraphChat';
 import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar';
 import { GraphLimitSlider } from './GraphLimitSlider';
