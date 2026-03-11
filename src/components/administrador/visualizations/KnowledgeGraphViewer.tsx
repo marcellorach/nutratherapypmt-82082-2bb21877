@@ -115,7 +115,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
   
   // New states for configurable limit and 3D toggle
   const [edgeLimit, setEdgeLimit] = useState(2000);
-  const [enrichDialogOpen, setEnrichDialogOpen] = useState(false);
   const [use3DGraph, setUse3DGraph] = useState(false);
 
   // Load data sources once on mount
