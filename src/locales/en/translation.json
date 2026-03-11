@@ -6969,7 +6969,8 @@
   "systemGuide": {
     "title": "Knowledge Base — System Guide",
     "description": "Navigate through the sections that make up the veterinary knowledge base. Each module plays a specific role in the scientific pipeline.",
-    "footer": "Click any section to navigate directly",
+    "footer": "Click any section to expand details • Green light indicates active section",
+    "openSection": "Open section",
     "groups": {
       "ingestion": "Data Ingestion",
       "ontology": "Ontology & Base Data",
@@ -6994,6 +6995,52 @@
       "ontologyAudit": "Consistency audit, conflicts, and canonical resolutions",
       "aiInsights": "Automatic discoveries and AI-generated predictions",
       "settings": "AI model settings, embeddings, and pipeline parameters"
+    },
+    "details": {
+      "estudos": "Module responsible for ingesting veterinary scientific literature. Supports import via PubMed, OpenAlex, PDF upload, and manual entry. Imported studies are indexed, their full texts extracted, and prepared for AI processing. This is the main entry point of the knowledge pipeline.",
+      "processamento-ia": "Automated pipeline that analyzes the full text of scientific studies using language models. Extracts triplets (subject-predicate-object), identifies biomedical entities, generates vector embeddings, and produces structured evidence claims. Each extraction undergoes confidence validation before integrating the graph.",
+      "nutraceuticals-unified": "Unified catalog of nutraceutical substances with detailed information: chemical composition, recommended dosages, documented benefits, contraindications, and health condition associations. Each nutraceutical is linked to supporting studies and extracted evidence.",
+      "veterinary-targets": "Registry of veterinary health conditions (diseases, syndromes), biological mechanisms of action, metabolic pathways, and biological effects. These entities form the target nodes of the knowledge graph, connecting nutraceuticals to clinical outcomes.",
+      "breeds-management": "Complete breed management organized by species and breed group. Includes genetic predispositions to specific conditions with evidence grades and quantified risk factors. Essential for personalizing recommendations by animal profile.",
+      "lab-references": "Laboratory reference values segmented by species and age group. Allow the system to interpret exam results and identify deviations that may indicate conditions treatable with nutraceuticals.",
+      "base-knowledge": "Entity candidates automatically imported from external databases such as PubChem, KEGG, and UniProt. Each candidate undergoes a harmonization process — duplicate checking, mapping to existing entities, and manual review before integrating the ontology.",
+      "knowledge-graph": "Interactive 2D/3D visualization of the complete knowledge graph. Shows all nodes (nutraceuticals, conditions, mechanisms, effects) and their relationships with color codes by entity type. Enables visual exploration of connections and pattern discovery.",
+      "relacoes": "Management of hierarchical edges in the knowledge graph. Each relationship has evidence level, confidence score, species context, and can be linked to claims and canonical resolutions. Supports manual curation and automated validation.",
+      "ontology-audit": "Audit system that detects evidence conflicts, ontology inconsistencies, and knowledge gaps. Generates quality reports, enables conflict resolution with documented justifications, and maintains the history of canonical decisions.",
+      "ai-insights": "AI module that analyzes patterns in the knowledge graph to discover undocumented relationships, suggest taxonomic categorizations, and predict potential interactions between nutraceuticals and conditions. Each discovery undergoes scientific validation.",
+      "knowledge-base-settings": "Central pipeline configuration panel: AI model selection, triplet extraction parameters, confidence thresholds, embedding settings, and automatic processing rules."
+    },
+    "statsLabels": {
+      "studies": "studies",
+      "processed": "processed",
+      "triplets": "triplets",
+      "claims": "claims",
+      "embeddings": "embeddings",
+      "nutraceuticals": "nutraceuticals",
+      "categories": "categories",
+      "associations": "associations",
+      "conditions": "conditions",
+      "mechanisms": "mechanisms",
+      "pathways": "pathways",
+      "effects": "effects",
+      "breeds": "breeds",
+      "groups": "groups",
+      "predispositions": "predispositions",
+      "ranges": "ranges",
+      "candidates": "candidates",
+      "nodes": "nodes",
+      "edges": "edges",
+      "resolutions": "resolutions",
+      "conflicts": "conflicts",
+      "reports": "reports",
+      "discoveries": "discoveries",
+      "suggestions": "suggestions",
+      "configs": "configurations",
+      "settings": "settings"
+    },
+    "io": {
+      "inputs": "Inputs",
+      "outputs": "Outputs"
     }
   }
 }
