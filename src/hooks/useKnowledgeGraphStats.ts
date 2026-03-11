@@ -206,7 +206,7 @@ export function useKnowledgeGraphStats(studyId?: string): UseKnowledgeGraphStats
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [studyId]);
 
   useEffect(() => {
     fetchStats();
