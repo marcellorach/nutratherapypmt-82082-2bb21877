@@ -23,7 +23,7 @@ export const useSystemGuideStats = (sectionStep: string | null) => {
     queryFn: async (): Promise<SectionStats[]> => {
       if (!sectionStep) return [];
 
-      const tableMap: Record<string, { table: string; labelKey: string }[]> = {
+      const tableMap: Record<string, { table: TableName; labelKey: string }[]> = {
         'estudos': [
           { table: 'scientific_studies', labelKey: 'studies' },
           { table: 'processed_studies', labelKey: 'processed' },
