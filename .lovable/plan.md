@@ -1,73 +1,50 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+## Plano: Triplet Review Enriquecido + Banco de Triplets
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+Faz total sentido. A ideia é transformar o Review Dialog num painel completo de decisão — com as mesmas ferramentas que já existem na curadoria dos estudos — e criar um "Banco de Triplets" centralizado com abas (Pendentes, Aprovados, Rejeitados) acessível do KG.
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+### 1. Enriquecer o TripletReviewDialog
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+Expandir o dialog atual (`TripletReviewDialog.tsx`) para incluir:
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+| Funcionalidade | Origem | Descrição |
+|---|---|---|
+| **Source Excerpts** | `study_embeddings` | Buscar trechos do estudo original que mencionam subject/object — mesma lógica do `sourceChunkCache` em `StudyTripletCuration` |
+| **Inline Chat contextual** | `TripletInlineChat` | Reutilizar o componente já existente, passando subject/predicate/object + studyId para Q&A específico sobre o triplet |
+| **Metadados expandidos** | `triplet_extractions` | Mostrar evidence_level, intensity, direction, mechanism_path, dose_range, hallucination_flag, layers (L0-L4) |
+| **Informação externa** | Badge visual | O chat já pode trazer informações externas via LLM — adicionar um disclaimer visual claro ("⚠️ Fonte: IA / Conhecimento externo") vs ("📄 Fonte: Estudo original") para distinguir |
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+### 2. Criar Banco de Triplets centralizado
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+Novo componente `TripletBankDialog.tsx` acessível do painel do Knowledge Graph (botão no header ou nos stats):
 
-### 3. Novo componente: Chat Especializado por Composto
+- **3 abas**: Pendentes, Aprovados, Rejeitados
+- Cada aba com busca, paginação e contadores
+- Cada triplet com botão "Revisar" que abre o TripletReviewDialog enriquecido
+- Triplets aprovados/rejeitados podem ser **revertidos** (mudar status de volta)
+- Filtragem por estudo de origem, tipo de entidade, predicate
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
-
-### 4. Chat Clínico Geral (sidebar)
-
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
-
-### 5. Arquivos a modificar/criar
+### Mudanças
 
 | Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
+|---|---|
+| `src/components/administrador/visualizations/kg-stats/TripletReviewDialog.tsx` | Expandir com: source excerpts (busca em study_embeddings), TripletInlineChat integrado, metadados completos (layers, intensity, direction, dose_range, hallucination_flag), disclaimer visual fonte interna vs externa |
+| `src/components/administrador/visualizations/kg-stats/TripletBankDialog.tsx` | **Novo** — Dialog com Tabs (Pending/Approved/Rejected), busca, filtros por estudo e tipo, botão Revisar em cada item, ações de reverter status |
+| `src/components/administrador/visualizations/KnowledgeGraphStatDialog.tsx` | Remover lógica inline de pending/approved-triplets e redirecionar para o TripletBankDialog |
+| `src/components/administrador/visualizations/KnowledgeGraphStats.tsx` (ou equivalente) | Adicionar botão "Banco de Triplets" no header do KG stats para abrir o TripletBankDialog |
 
-### 6. Estrutura visual resultante
+### Fluxo do usuário
 
 ```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
+KG Stats → clica "Pending Triplets" ou "Banco de Triplets"
+  → TripletBankDialog abre com 3 abas
+    → Clica "Revisar" num triplet
+      → TripletReviewDialog abre com:
+        ├── Cadeia visual (subject → predicate → object)
+        ├── Metadados completos (confidence, evidence, layers, intensity...)
+        ├── Trechos do estudo original (📄)
+        ├── Chat contextual com disclaimer (📄 vs ⚠️ externo)
+        └── Botões Aprovar / Rejeitar com notas
 ```
-
-### Detalhes técnicos
-
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 
