@@ -34,6 +34,7 @@ const PROMPT_KEYS = [
   { key: 'prompt_extraction_stage3_user', label: 'Stage 3 User', stage: 3, type: 'user' },
   { key: 'prompt_triplet_extraction_system', label: 'Triplet System', stage: 4, type: 'system' },
   { key: 'prompt_triplet_extraction_user', label: 'Triplet User', stage: 4, type: 'user' },
+  { key: 'prompt_relations_auditor_system', label: 'Auditor System', stage: 5, type: 'system' },
 ];
 
 const MODEL_KEYS = [
