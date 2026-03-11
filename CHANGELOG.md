@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-11 🏦 Banco de Triplets + Review Enriquecido
+
+- ✅ **TripletBankDialog**: Novo dialog centralizado com 3 abas (Pendentes/Aprovados/Rejeitados), busca, contadores e botão "Revisar" em cada triplet
+- ✅ **TripletReviewDialog enriquecido**: Dialog de revisão com 3 abas internas (Detalhes, Fonte, Chat) — source excerpts do estudo original, TripletInlineChat contextual, metadados expandidos (intensity, evidence_level, dose_range, mechanism_path, KG Match, LLM Confidence, hallucination_flag)
+- ✅ **Disclaimer visual fonte interna vs externa**: Badges "📄 Fonte interna" e "⚠️ Conhecimento externo IA" para distinguir origens
+- ✅ **Revert de status**: Botão para reverter triplets aprovados/rejeitados de volta para pendente
+- ✅ **Integração KG Stats**: Clique em "Triplets Aprovados" ou "Triplets Pendentes" nos stats agora abre o TripletBankDialog
+- ✅ **Traduções PT/EN**: ~40 novas chaves para tripletReview e tripletBank
+
 ### Added - 2026-03-11 🔍 Auditor Conversacional sobre Relações e Conexões
 
 - ✅ **Auditor Conversacional**: Nova aba "Auditor" na tab Relações com chat de IA (gemini-2.5-pro) para interrogar o banco de dados sobre relações nutracêutico-condição, identificar inconsistências e validar premissas
