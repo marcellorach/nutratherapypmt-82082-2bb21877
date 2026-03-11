@@ -64,7 +64,7 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
               {auditorOpen ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronUp className="h-4 w-4 text-primary" />}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 border rounded-lg p-4">
+          <CollapsibleContent className="mt-3 border border-primary/20 rounded-lg p-4 bg-primary/[0.02]">
             <Suspense fallback={
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
