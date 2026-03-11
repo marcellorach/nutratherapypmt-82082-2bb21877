@@ -16,7 +16,8 @@ interface KGExtractedKnowledgeRowProps {
 export const KGExtractedKnowledgeRow: React.FC<KGExtractedKnowledgeRowProps> = ({
   stats,
   isLoading,
-  onCardClick
+  onCardClick,
+  studyName
 }) => {
   const { t } = useTranslation();
 
