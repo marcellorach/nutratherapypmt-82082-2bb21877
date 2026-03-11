@@ -44,7 +44,7 @@ const AdminFooter: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Anthropic_logo.svg/2560px-Anthropic_logo.svg.png" 
+                  src="/images/anthropic-logo.png" 
                   alt="Anthropic" 
                   className="h-4 w-auto transition-all"
                 />
