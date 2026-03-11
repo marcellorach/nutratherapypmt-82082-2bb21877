@@ -1,9 +1,15 @@
 
-import React from 'react';
+import React, { lazy, Suspense, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { Search, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import VisualizationHeader from './components/VisualizationHeader';
 import VisualizationTabs from './components/VisualizationTabs';
 import VisualizationLegend from './components/VisualizationLegend';
+
+const RelationsAuditorChat = lazy(() => import('@/components/administrador/relations/RelationsAuditorChat'));
 
 interface VisualizationCardProps {
   efficacyFilter: string;
@@ -22,6 +28,9 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
   networkData,
   matrixData
 }) => {
+  const { t } = useTranslation();
+  const [auditorOpen, setAuditorOpen] = useState(false);
+
   return (
     <Card>
       <CardHeader>
@@ -40,6 +49,31 @@ const VisualizationCard: React.FC<VisualizationCardProps> = ({
           isLoading={false}
         />
         <VisualizationLegend />
+
+        {/* Auditor Conversacional - Fixed Footer */}
+        <Collapsible open={auditorOpen} onOpenChange={setAuditorOpen} className="mt-4">
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-between gap-2 border-dashed"
+            >
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                <span className="font-medium">{t('relations.auditor.title', 'Auditor de Relações')}</span>
+              </div>
+              {auditorOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3 border rounded-lg p-4">
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            }>
+              <RelationsAuditorChat />
+            </Suspense>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );

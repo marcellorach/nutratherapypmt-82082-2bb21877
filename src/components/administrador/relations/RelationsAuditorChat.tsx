@@ -232,7 +232,7 @@ const RelationsAuditorChat: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-[600px]">
+    <div className="flex flex-col h-[450px]">
       {/* Context Stats Bar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Database className="h-4 w-4 text-muted-foreground" />

@@ -101,11 +101,6 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
         )}
       </TabsContent>
 
-      <TabsContent value="auditor" className="pt-4">
-        <Suspense fallback={<LoadingState />}>
-          <RelationsAuditorChat />
-        </Suspense>
-      </TabsContent>
     </Tabs>
   );
 };
