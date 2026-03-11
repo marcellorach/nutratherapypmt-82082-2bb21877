@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-03-11 📋 Reformulação do Import History
+- ✅ **Coluna `duplicate_check_log`**: Nova coluna JSONB em `processed_studies` para log de verificação
+- ✅ **Log persistido no upload**: Resultado da verificação salvo automaticamente ao importar
+- ✅ **HistoryTab reformulado**: Importações com estudos expandíveis, datas formatadas, ícones de duplicidade
+- ✅ **Correção formatDate**: Removido hardcoded "há menos de um dia", usa `date-fns`
+
 ### Added - 2026-03-11 🔍 Detecção de Estudos Duplicados no Upload
 - ✅ **Hash SHA-256**: Cálculo de hash do arquivo via Web Crypto API para detecção exata de duplicatas
 - ✅ **Similaridade de nome**: Levenshtein distance para detectar nomes similares (threshold 75%)

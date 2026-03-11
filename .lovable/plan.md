@@ -1,48 +1,73 @@
 
 
-## Plano: Reformular Import History com Estudos e Log de Duplicidade
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-### Problema atual
-O HistoryTab mostra dados do `scispace_imports` (meta_summary_filename, base_studies_filename) que são campos do fluxo SciSpace antigo. Para uploads manuais de PDF, esses campos ficam vazios/sem sentido. Falta: nomes dos estudos importados, data formatada corretamente, e log da verificação de duplicidade.
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-### Abordagem
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-Reformular o HistoryTab para mostrar dados centrados nos **estudos importados** (via `processed_studies`), agrupados por `source_import_id`. A verificação de duplicidade será registrada no momento do upload e exibida no histórico.
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-### Mudanças
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+
+As abas só aparecem após a análise ser concluída (quando há dados).
+
+### 3. Novo componente: Chat Especializado por Composto
+
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+
+### 4. Chat Clínico Geral (sidebar)
+
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+
+### 5. Arquivos a modificar/criar
 
 | Arquivo | Ação |
-|---|---|
-| **Migração SQL** | Adicionar coluna `duplicate_check_log JSONB DEFAULT '[]'` em `processed_studies` para armazenar o resultado da verificação |
-| `FileUploadTab.tsx` | Ao inserir em `processed_studies`, salvar o resultado do duplicate check no campo `duplicate_check_log` |
-| `HistoryTab.tsx` | Reformular completamente: buscar `scispace_imports` com os `processed_studies` associados via join. Mostrar tabela com: data/hora formatada, lista de estudos (title/original_filename), contagem, e status da verificação de duplicidade |
-| `SciImportHistoryRow.tsx` | Reformular para mostrar: data formatada (corrigir o bug "há menos de um dia"), nomes dos estudos expandíveis, ícones de status de duplicidade (verde = limpo, amarelo = similar ignorado, vermelho = exato ignorado) |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-### Detalhes
+### 6. Estrutura visual resultante
 
-**1. Log de duplicidade no upload** — No `FileUploadTab.tsx`, ao inserir cada `processed_study`, incluir:
-```json
-{
-  "check_type": "none" | "similar" | "exact",
-  "similar_to": "nome do estudo existente",
-  "similarity": 0.87,
-  "action": "imported" | "skipped",
-  "checked_at": "2026-03-11T..."
-}
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
 ```
 
-**2. Query do histórico** — Buscar `scispace_imports` com contagem de estudos:
-```sql
-scispace_imports(id, imported_at, import_type, scispace_status)
-+ processed_studies(id, title, original_filename, kanban_status, duplicate_check_log) via source_import_id
-```
+### Detalhes técnicos
 
-**3. UI do histórico reformulado** — Cada linha mostra:
-- Data/hora formatada corretamente (usando `date-fns`)
-- Tipo de importação (manual/scispace)
-- Contagem de estudos (ex: "3 estudos")
-- Expandir para ver lista de estudos com ícone de verificação de duplicidade
-- Status geral da importação
-
-**4. Correção do formatDate** — Remover o hardcoded "há menos de um dia" e usar `date-fns/formatDistanceToNow` ou formato `dd/MM/yyyy HH:mm`.
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

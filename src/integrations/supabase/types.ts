@@ -1881,6 +1881,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           description: string | null
+          duplicate_check_log: Json | null
           error_message: string | null
           full_text_content: string | null
           full_text_metadata: Json | null
@@ -1905,6 +1906,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          duplicate_check_log?: Json | null
           error_message?: string | null
           full_text_content?: string | null
           full_text_metadata?: Json | null
@@ -1929,6 +1931,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          duplicate_check_log?: Json | null
           error_message?: string | null
           full_text_content?: string | null
           full_text_metadata?: Json | null
