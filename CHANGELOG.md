@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-11 🔍 Auditor Conversacional sobre Relações e Conexões
+
+- ✅ **Auditor Conversacional**: Nova aba "Auditor" na tab Relações com chat de IA (gemini-2.5-pro) para interrogar o banco de dados sobre relações nutracêutico-condição, identificar inconsistências e validar premissas
+- ✅ **Diagramas Mermaid Inline**: Componente reutilizável `MermaidBlock` que renderiza diagramas Mermaid como SVG inline nas respostas do chat — disponível para uso em qualquer chat futuro
+- ✅ **Edge Function dedicada**: `relations-auditor` com system prompt especializado e contexto profundo (relações, predisposições, triplets, estudos)
+- ✅ **Contexto profundo do banco**: Carrega automaticamente nutraceutical_conditions, breed_predispositions, triplet_extractions e nutraceutical_studies como contexto para o LLM
+- ✅ **Traduções PT/EN**: ~20 novas chaves para o auditor conversacional
+
+
 ### Added - 2026-03-10 🏗️ Governança de Entidades Base + Pipeline Visual
 
 - ✅ **Raças & Predisposições (Admin)**: Nova aba `BreedsManagementTab` com CRUD de raças, painel expandível de predisposições por raça vinculadas a `health_conditions`, filtro por porte e busca
