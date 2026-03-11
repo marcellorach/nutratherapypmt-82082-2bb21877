@@ -35,16 +35,16 @@ const BreedsManagementTab: React.FC = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newBreed, setNewBreed] = useState({ name: '', name_en: '', size_category: 'medium', description: '' });
 
-  // Fetch breeds with predisposition count
+  // Fetch breeds with full predisposition data for inline tags
   const { data: breeds, isLoading } = useQuery({
     queryKey: ['admin-breeds'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('breeds')
-        .select('*, breed_predispositions(count)')
+        .select('*, breed_predispositions(id, risk_factor, evidence_grade, notes, health_conditions:condition_id(id, name, name_en))')
         .order('name');
       if (error) throw error;
-      return data as (Breed & { breed_predispositions: { count: number }[] })[];
+      return data as (Breed & { breed_predispositions: any[] })[];
     }
   });
 
