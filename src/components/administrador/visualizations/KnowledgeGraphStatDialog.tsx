@@ -852,6 +852,13 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
           )}
         </ScrollArea>
       </DialogContent>
+
+      <TripletReviewDialog
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        triplet={reviewingTriplet}
+        onReviewed={handleTripletReviewed}
+      />
     </Dialog>
   );
 };
