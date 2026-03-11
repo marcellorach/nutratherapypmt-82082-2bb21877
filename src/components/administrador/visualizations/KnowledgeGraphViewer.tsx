@@ -1250,11 +1250,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
         nodeData={selectedNodeDetails}
       />
 
-      {/* Enrich Knowledge Graph Dialog */}
-      <EnrichKnowledgeGraphDialog
-        open={enrichDialogOpen}
-        onOpenChange={setEnrichDialogOpen}
-      />
     </TooltipProvider>
   );
 };
