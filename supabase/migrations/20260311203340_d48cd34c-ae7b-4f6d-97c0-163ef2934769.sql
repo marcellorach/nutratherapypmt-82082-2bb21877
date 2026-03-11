@@ -1,0 +1,1 @@
+ALTER TABLE processed_studies ADD COLUMN IF NOT EXISTS duplicate_check_log JSONB DEFAULT '[]'::jsonb;
