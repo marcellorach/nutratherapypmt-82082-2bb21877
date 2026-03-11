@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NetworkGraph from '../../NetworkGraph';
 import EfficacyMatrix from '../../EfficacyMatrix';
-import { AlertCircle, Loader2, Search } from 'lucide-react';
-
-const RelationsAuditorChat = lazy(() => import('@/components/administrador/relations/RelationsAuditorChat'));
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface VisualizationTabsProps {
   relationView: string;
