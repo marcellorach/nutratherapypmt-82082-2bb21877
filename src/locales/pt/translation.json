@@ -6965,5 +6965,35 @@
       "compounds": "compostos",
       "processing": "processando..."
     }
+  },
+  "systemGuide": {
+    "title": "Base de Conhecimento — Guia do Sistema",
+    "description": "Navegue pelas seções que compõem a base de conhecimento veterinário. Cada módulo desempenha um papel específico no pipeline científico.",
+    "footer": "Clique em qualquer seção para navegar diretamente",
+    "groups": {
+      "ingestion": "Ingestão de Dados",
+      "ontology": "Ontologia & Dados Base",
+      "graph": "Grafo de Conhecimento & Relações",
+      "intelligence": "Inteligência & Configuração"
+    },
+    "status": {
+      "live": "Operacional",
+      "dev": "Em desenvolvimento",
+      "planned": "Planejado"
+    },
+    "sections": {
+      "estudos": "Upload, extração e curadoria de estudos científicos veterinários",
+      "processamentoIa": "Pipeline de IA para extração automática de triplets e entidades",
+      "nutraceuticals": "Catálogo completo de nutracêuticos com dosagens e evidências",
+      "veterinaryTargets": "Condições de saúde, mecanismos e vias biológicas alvo",
+      "breeds": "Raças, grupos raciais e predisposições genéticas a condições",
+      "labReferences": "Valores de referência laboratorial por espécie e faixa etária",
+      "baseKnowledge": "Candidatos a entidades importados de bases externas (PubChem, KEGG)",
+      "knowledgeGraph": "Visualização interativa das relações entre todas as entidades",
+      "relations": "Arestas hierárquicas com níveis de evidência e confiança",
+      "ontologyAudit": "Auditoria de consistência, conflitos e resoluções canônicas",
+      "aiInsights": "Descobertas automáticas e predições geradas por IA",
+      "settings": "Configurações de modelos de IA, embeddings e parâmetros do pipeline"
+    }
   }
 }
