@@ -715,22 +715,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="default"
-                size="sm"
-                onClick={() => setEnrichDialogOpen(true)}
-                className="gap-1.5"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('enrich.button', 'Enrich with Studies')}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-[250px]">
-              <p>{t('enrich.buttonTooltip', 'Search, download and process real scientific studies to enrich the knowledge graph')}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
                 variant="outline"
                 size="sm"
                 onClick={testNeo4jConnection}
