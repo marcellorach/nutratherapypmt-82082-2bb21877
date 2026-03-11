@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import NetworkGraph from './NetworkGraph';
 import KnowledgeGraphDataSources from './KnowledgeGraphDataSources';
 import { KnowledgeGraphStatDialog } from './KnowledgeGraphStatDialog';
+import { TripletBankDialog } from './kg-stats/TripletBankDialog';
 import { KnowledgeGraphChat } from './KnowledgeGraphChat';
 import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar';
 import { GraphLimitSlider } from './GraphLimitSlider';
@@ -107,6 +108,8 @@ export const KnowledgeGraphViewer: React.FC = () => {
   // New states for dialogs, chat and node details
   const [statDialogOpen, setStatDialogOpen] = useState(false);
   const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions' | 'pathways' | 'outcomes' | 'chebi' | 'entities-ai' | 'relations-ai' | 'approved-triplets' | 'pending-triplets'>('ontology');
+  const [tripletBankOpen, setTripletBankOpen] = useState(false);
+  const [tripletBankInitialTab, setTripletBankInitialTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [chatOpen, setChatOpen] = useState(false);
   const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
@@ -602,6 +605,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
   };
 
   const openStatDialog = (cardId: string) => {
+    // Redirect triplet clicks to TripletBankDialog
+    if (cardId === 'approved-triplets') {
+      setTripletBankInitialTab('approved');
+      setTripletBankOpen(true);
+      return;
+    }
+    if (cardId === 'pending-triplets') {
+      setTripletBankInitialTab('pending');
+      setTripletBankOpen(true);
+      return;
+    }
+
     const cardIdToStatType: Record<string, typeof selectedStatType> = {
       'ontology-manual': 'ontology',
       'ontology-chebi': 'chebi',
@@ -612,8 +627,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
       'entities-ai': 'entities-ai',
       'relations-ai': 'relations-ai',
       'active-studies': 'studies',
-      'approved-triplets': 'approved-triplets',
-      'pending-triplets': 'pending-triplets',
       'total-nodes': 'nodes',
       'total-relations': 'edges',
       'positive-relations': 'positive',
@@ -1234,6 +1247,13 @@ export const KnowledgeGraphViewer: React.FC = () => {
         }}
         onEntityClick={handleEntityClick}
         onStudyClick={handleStudyFromDialogClick}
+      />
+
+      {/* Triplet Bank Dialog */}
+      <TripletBankDialog
+        open={tripletBankOpen}
+        onOpenChange={setTripletBankOpen}
+        initialTab={tripletBankInitialTab}
       />
 
       {/* Node Details Sidebar */}
