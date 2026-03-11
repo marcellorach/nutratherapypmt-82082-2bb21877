@@ -381,6 +381,14 @@ const PromptManagementPanel: React.FC = () => {
               </Alert>
               {PROMPT_KEYS.filter(p => p.stage === 4).map(renderPromptEditor)}
             </TabsContent>
+            
+            <TabsContent value="auditor" className="space-y-4 mt-4">
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{getStageDescription(5)}</AlertDescription>
+              </Alert>
+              {PROMPT_KEYS.filter(p => p.stage === 5).map(renderPromptEditor)}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
