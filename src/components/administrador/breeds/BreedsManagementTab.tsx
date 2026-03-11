@@ -143,33 +143,58 @@ const BreedsManagementTab: React.FC = () => {
         <div className="space-y-2">
           {filtered.map(breed => {
             const isExpanded = expandedBreed === breed.id;
-            const predCount = breed.breed_predispositions?.[0]?.count || 0;
+            const preds = breed.breed_predispositions || [];
+            const predCount = preds.length;
+            // Sort by risk_factor descending
+            const sortedPreds = [...preds].sort((a, b) => (b.risk_factor || 0) - (a.risk_factor || 0));
             return (
               <Card key={breed.id}>
                 <CardContent className="p-0">
-                  <button
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-left"
-                    onClick={() => setExpandedBreed(isExpanded ? null : breed.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <PawPrint className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{breed.name}</p>
-                        <p className="text-sm text-muted-foreground">{breed.name_en}</p>
+                  <div className="p-4 space-y-3">
+                    {/* Header row */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <PawPrint className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{breed.name}</p>
+                          <p className="text-sm text-muted-foreground">{breed.name_en}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {breed.size_category && (
+                          <Badge variant="outline">{breed.size_category}</Badge>
+                        )}
+                        {breed.average_weight_kg && (
+                          <span className="text-sm text-muted-foreground">{breed.average_weight_kg}kg</span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {breed.size_category && (
-                        <Badge variant="outline">{breed.size_category}</Badge>
-                      )}
-                      {breed.average_weight_kg && (
-                        <span className="text-sm text-muted-foreground">{breed.average_weight_kg}kg</span>
-                      )}
-                      <Badge variant={predCount > 0 ? 'default' : 'secondary'}>
-                        {predCount} {t('admin.breeds.predispositions')}
-                      </Badge>
-                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </div>
+
+                    {/* Inline predisposition tags */}
+                    {predCount > 0 && (
+                      <div className="flex flex-wrap gap-2 pl-8">
+                        {sortedPreds.map((pred: any) => (
+                          <PredispositionTag
+                            key={pred.id}
+                            conditionName={pred.health_conditions?.name || t('common.unknown')}
+                            riskFactor={pred.risk_factor}
+                            evidenceGrade={pred.evidence_grade}
+                            conditionId={pred.health_conditions?.id}
+                            notes={pred.notes}
+                            navigable
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expand for management */}
+                  <button
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border-t text-xs text-muted-foreground hover:bg-muted/50 transition-colors"
+                    onClick={() => setExpandedBreed(isExpanded ? null : breed.id)}
+                  >
+                    {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    {isExpanded ? t('common.collapse') : t('admin.breeds.managePredispositions', { count: predCount })}
                   </button>
                   {isExpanded && (
                     <div className="border-t p-4">
