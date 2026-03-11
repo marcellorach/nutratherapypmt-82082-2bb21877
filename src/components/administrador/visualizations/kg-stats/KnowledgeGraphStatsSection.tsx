@@ -7,12 +7,18 @@ import { useKnowledgeGraphStats } from '@/hooks/useKnowledgeGraphStats';
 
 interface KnowledgeGraphStatsSectionProps {
   onCardClick?: (type: string) => void;
+  studyId?: string;
+  studyName?: string;
+  onClearStudyFilter?: () => void;
 }
 
 export const KnowledgeGraphStatsSection: React.FC<KnowledgeGraphStatsSectionProps> = ({
-  onCardClick
+  onCardClick,
+  studyId,
+  studyName,
+  onClearStudyFilter
 }) => {
-  const { stats, isLoading } = useKnowledgeGraphStats();
+  const { stats, isLoading } = useKnowledgeGraphStats(studyId);
 
   return (
     <TooltipProvider>
