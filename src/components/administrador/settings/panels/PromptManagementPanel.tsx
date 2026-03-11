@@ -43,6 +43,7 @@ const MODEL_KEYS = [
   { key: 'ai_model_chat', label: 'Chat Model', description: 'Model for chat/conversational tasks' },
   { key: 'ai_model_embeddings', label: 'Embeddings Model', description: 'Model for vector embeddings' },
   { key: 'ai_model_translate', label: 'Translation Model', description: 'Model for translation tasks' },
+  { key: 'ai_model_relations_auditor', label: 'Relations Auditor Model', description: 'Model for Relations Auditor chat (google/gemini-3.1-pro-preview)' },
 ];
 
 const PromptManagementPanel: React.FC = () => {

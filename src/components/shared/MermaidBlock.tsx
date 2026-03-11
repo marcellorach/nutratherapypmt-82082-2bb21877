@@ -17,6 +17,47 @@ const initMermaid = (isDark: boolean) => {
   mermaidInitialized = true;
 };
 
+/**
+ * Sanitize Mermaid code to fix common LLM-generated syntax issues
+ * that are incompatible with mermaid.js v11
+ */
+const sanitizeMermaidCode = (code: string): string => {
+  let sanitized = code.trim();
+
+  // Remove :::className patterns (e.g., A["Label"]:::nutra)
+  sanitized = sanitized.replace(/:::[\w-]+/g, '');
+
+  // Remove classDef lines entirely
+  sanitized = sanitized.replace(/^\s*classDef\s+.*$/gm, '');
+
+  // Remove class assignment lines (e.g., class A,B nutra)
+  sanitized = sanitized.replace(/^\s*class\s+[\w,\s]+\s+\w+\s*$/gm, '');
+
+  // Replace -.-> with -->
+  sanitized = sanitized.replace(/-\.->|-.->|–.->|—.->|-\.\s*->/g, '-->');
+
+  // Replace ==> with -->
+  sanitized = sanitized.replace(/==>/g, '-->');
+
+  // Replace ===> with -->
+  sanitized = sanitized.replace(/===>/g, '-->');
+
+  // Fix hexagon syntax {{label}} -> ["label"]
+  sanitized = sanitized.replace(/\{\{([^}]+)\}\}/g, '["$1"]');
+
+  // Fix cylinder syntax [("label")] or [(label)] -> ["label"]
+  sanitized = sanitized.replace(/\[\(([^)]+)\)\]/g, '["$1"]');
+
+  // Fix diamond syntax {label} that's not inside {{ }} -> ["label"]
+  // Only match single braces used as node shapes, not edge labels
+  sanitized = sanitized.replace(/(\w+)\{([^{}|]+)\}/g, '$1["$2"]');
+
+  // Remove empty lines (multiple blank lines -> single)
+  sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+
+  return sanitized;
+};
+
 const MermaidBlock: React.FC<MermaidBlockProps> = ({ code }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>('');
@@ -32,7 +73,8 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code }) => {
     const renderDiagram = async () => {
       try {
         setError(null);
-        const { svg: renderedSvg } = await mermaid.render(`mermaid-${uniqueId}`, code.trim());
+        const sanitizedCode = sanitizeMermaidCode(code);
+        const { svg: renderedSvg } = await mermaid.render(`mermaid-${uniqueId}`, sanitizedCode);
         setSvg(renderedSvg);
       } catch (e) {
         console.error('Mermaid render error:', e);
