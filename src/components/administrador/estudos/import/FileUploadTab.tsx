@@ -195,6 +195,20 @@ const FileUploadTab: React.FC = () => {
           // Calculate hash to store
           const contentHash = await calculateFileHash(file);
 
+          // Build duplicate check log
+          const dupCheck = duplicateChecks[fileName];
+          const duplicateLog = dupCheck && dupCheck.type !== 'none' ? [{
+            check_type: dupCheck.type,
+            similar_to: dupCheck.existingStudy?.title || dupCheck.existingStudy?.original_filename || '',
+            similarity: dupCheck.similarity || (dupCheck.type === 'exact' ? 1.0 : 0),
+            action: 'imported',
+            checked_at: new Date().toISOString(),
+          }] : [{
+            check_type: 'none',
+            action: 'imported',
+            checked_at: new Date().toISOString(),
+          }];
+
           const { error: dbError } = await supabase
             .from('processed_studies')
             .insert({
@@ -208,6 +222,7 @@ const FileUploadTab: React.FC = () => {
               description: 'Awaiting processing',
               journal: 'Manual Import',
               content_hash: contentHash,
+              duplicate_check_log: duplicateLog,
               analysis_data: {
                 studyId: studyId,
                 qualityScore: 0,
@@ -217,7 +232,7 @@ const FileUploadTab: React.FC = () => {
                 extractedInteractions: [],
                 extractedSideEffects: []
               }
-            });
+            } as any);
 
           if (dbError) throw dbError;
 
