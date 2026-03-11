@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NetworkGraph from '../../NetworkGraph';
