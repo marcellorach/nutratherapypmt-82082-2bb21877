@@ -397,11 +397,15 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const loadTripletsData = async (status: 'approved' | 'pending') => {
     const { data } = await supabase
       .from('triplet_extractions')
-      .select('id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status')
+      .select('id, subject_name, subject_type, predicate, object_name, object_type, extraction_confidence, curation_status, confidence_rationale, evidence_level, species_context, study_id')
       .eq('curation_status', status)
       .order('extraction_confidence', { ascending: false })
       .limit(300);
     setGenericData(data || []);
+  };
+
+  const handleTripletReviewed = (tripletId: string, newStatus: string) => {
+    setGenericData(prev => prev.filter(item => item.id !== tripletId));
   };
 
   const getTitle = () => {
