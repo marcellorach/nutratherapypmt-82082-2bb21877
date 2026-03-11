@@ -6965,5 +6965,35 @@
       "compounds": "compounds",
       "processing": "processing..."
     }
+  },
+  "systemGuide": {
+    "title": "Knowledge Base — System Guide",
+    "description": "Navigate through the sections that make up the veterinary knowledge base. Each module plays a specific role in the scientific pipeline.",
+    "footer": "Click any section to navigate directly",
+    "groups": {
+      "ingestion": "Data Ingestion",
+      "ontology": "Ontology & Base Data",
+      "graph": "Knowledge Graph & Relations",
+      "intelligence": "Intelligence & Configuration"
+    },
+    "status": {
+      "live": "Operational",
+      "dev": "In development",
+      "planned": "Planned"
+    },
+    "sections": {
+      "estudos": "Upload, extraction, and curation of veterinary scientific studies",
+      "processamentoIa": "AI pipeline for automatic triplet and entity extraction",
+      "nutraceuticals": "Complete nutraceutical catalog with dosages and evidence",
+      "veterinaryTargets": "Health conditions, mechanisms, and biological target pathways",
+      "breeds": "Breeds, breed groups, and genetic predispositions to conditions",
+      "labReferences": "Lab reference values by species and age group",
+      "baseKnowledge": "Entity candidates imported from external databases (PubChem, KEGG)",
+      "knowledgeGraph": "Interactive visualization of relationships between all entities",
+      "relations": "Hierarchical edges with evidence levels and confidence scores",
+      "ontologyAudit": "Consistency audit, conflicts, and canonical resolutions",
+      "aiInsights": "Automatic discoveries and AI-generated predictions",
+      "settings": "AI model settings, embeddings, and pipeline parameters"
+    }
   }
 }
