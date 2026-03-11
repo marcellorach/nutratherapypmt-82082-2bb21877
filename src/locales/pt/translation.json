@@ -2426,6 +2426,29 @@
       "aboutData": "Sobre os dados",
       "dataDescription": "Os dados representam conexões científicas entre nutracêuticos, condições de saúde e estudos publicados.",
       "colorDescription": "As cores e tipos de linha indicam diferentes tipos de relações e seus níveis de evidência científica."
+    },
+    "auditor": {
+      "loadingContext": "Carregando dados do banco para análise...",
+      "contextLoaded": "Contexto carregado",
+      "contextError": "Erro ao carregar contexto do banco de dados",
+      "relationsCount": "relações",
+      "predispositionsCount": "predisposições",
+      "tripletsCount": "triplets",
+      "studiesCount": "estudos",
+      "welcomeTitle": "Auditor Conversacional sobre Relações e Conexões",
+      "welcomeDescription": "Pergunte sobre as relações entre nutracêuticos e condições no banco de dados. O auditor analisará criticamente os dados e gerará diagramas das conexões.",
+      "inputPlaceholder": "Pergunte sobre relações, eficácia, inconsistências...",
+      "analyzing": "Analisando dados e gerando diagrama...",
+      "sendError": "Erro ao enviar mensagem ao auditor",
+      "emptyResponse": "O auditor não retornou uma resposta.",
+      "rateLimited": "Limite de requisições excedido. Aguarde alguns instantes.",
+      "paymentRequired": "Créditos insuficientes para o auditor.",
+      "examples": {
+        "whyLowEfficacy": "Por que a quercetina tem baixo score de eficácia para inflamação?",
+        "inconsistencies": "Existem nutracêuticos com scores altos mas poucos estudos?",
+        "bestEvidence": "Quais relações têm a melhor base de evidência científica?",
+        "missingData": "Onde faltam dados ou conexões no sistema?"
+      }
     }
   },
   "sankey": {
