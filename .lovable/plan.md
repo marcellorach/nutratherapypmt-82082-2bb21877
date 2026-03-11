@@ -1,73 +1,32 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+## Diagnóstico e Plano de Correção
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+### Problemas identificados
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+**a) Chat não responde**: As duas requisições à edge function `relations-auditor` falharam com "Failed to fetch" — a função provavelmente não foi implantada ou está dando timeout. A função está registrada no `config.toml` mas precisa de deploy. Além disso, o contexto enviado é enorme (~77 relações com notas completas + 500 triplets + 45 predisposições), o que pode causar timeout no `gemini-2.5-pro` com `stream: false`.
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+**b) Posicionamento do Auditor**: Atualmente é uma aba separada (ao lado de Network e Matrix). O correto é ficar como um componente fixo no rodapé do `VisualizationCard`, abaixo da legenda, visível em todas as abas (Network e Matrix).
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+**c) Legenda incompleta**: O `VisualizationLegend.tsx` mostra apenas círculos coloridos e linhas genéricas. Faltam os sinais biológicos consensuados (→ ativação, ⊣ inibição, ⟷ ligação, --→ modulação) que já existem no `BiologicalLegend.tsx` do Knowledge Graph.
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+**d) Modelo**: O projeto já usa `gemini-3-pro-preview` diretamente via Google AI na extração de dados (ver `gemini-file-search`). Via Lovable AI Gateway, o melhor disponível para raciocínio complexo é `google/gemini-3.1-pro-preview`. Faz sentido usar esse em vez do `2.5-pro`.
 
-As abas só aparecem após a análise ser concluída (quando há dados).
-
-### 3. Novo componente: Chat Especializado por Composto
-
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
-
-### 4. Chat Clínico Geral (sidebar)
-
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
-
-### 5. Arquivos a modificar/criar
+### Mudanças
 
 | Arquivo | Ação |
 |---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
-
-### 6. Estrutura visual resultante
-
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
-```
+| `supabase/functions/relations-auditor/index.ts` | Trocar modelo para `google/gemini-3.1-pro-preview`. Deploy da função. |
+| `src/components/administrador/visualizations/relations/components/VisualizationTabs.tsx` | Remover aba "Auditor" — o chat sai daqui |
+| `src/components/administrador/visualizations/relations/VisualizationCard.tsx` | Adicionar `RelationsAuditorChat` como seção fixa no rodapé, abaixo da legenda, colapsável (Collapsible) |
+| `src/components/administrador/visualizations/relations/components/VisualizationLegend.tsx` | Substituir legenda genérica pela notação biológica padrão (→ ativação, ⊣ inibição, ⟷ ligação, --→ modulação) com cores, alinhada ao `BiologicalLegend` |
+| `src/components/administrador/relations/RelationsAuditorChat.tsx` | Ajustar para funcionar como componente embutido (altura menor, responsivo) |
 
 ### Detalhes técnicos
 
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+**Edge function fix**: O problema principal é que a função não foi deployada após criação. Será redeployada com modelo atualizado para `google/gemini-3.1-pro-preview`.
+
+**Layout do auditor no rodapé**: O chat ficará em um `Collapsible` abaixo da legenda, com um botão "🔍 Auditor de Relações" que expande o painel de chat. Altura fixa de ~400px quando aberto, fechado por padrão.
+
+**Legenda biológica**: Reutilizar os conceitos do `BiologicalLegend.tsx` (já existente no KG) — setas (→) verde para ativação, T-bars (⊣) vermelho para inibição, setas duplas (⟷) azul para ligação, setas tracejadas (- -→) laranja para modulação, linhas simples (——) amarelo para associação.
 
