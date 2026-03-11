@@ -1,73 +1,61 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+## Plano: Detecção de Estudos Duplicados no Upload de PDFs
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+### Problema
+Atualmente, o sistema aceita qualquer PDF sem verificar se o mesmo estudo ja existe no banco (`processed_studies`), permitindo digestão duplicada mesmo que o arquivo tenha nome diferente.
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+### Estrategia Multi-camada de Detecção
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+Uma abordagem robusta combina 3 niveis de verificação:
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+| Nivel | Metodo | Quando | Confianca |
+|---|---|---|---|
+| 1. **Hash do arquivo** | SHA-256 do conteudo binario do PDF | Antes do upload | 100% — mesmo arquivo fisico |
+| 2. **Similaridade de nome** | Levenshtein (ja existe em `name-harmonization-service.ts`) | Antes do upload | Media — nomes podem variar |
+| 3. **Fingerprint de conteudo** | Hash dos primeiros N bytes de texto extraido | Apos upload, antes do AI processing | Alta — detecta reupload com nome diferente |
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+### Implementacao
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+**1. Coluna `content_hash` na tabela `processed_studies`**
+- Migração: `ALTER TABLE processed_studies ADD COLUMN content_hash TEXT;`
+- Armazena SHA-256 do arquivo para detecção exata
 
-### 3. Novo componente: Chat Especializado por Composto
+**2. Componente `DuplicateCheckResult`**
+- Exibe alertas inline por arquivo: "Possivel duplicata de [titulo existente]"
+- Opcoes: "Importar mesmo assim" / "Remover da fila"
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+**3. Logica de verificação em `FileUploadTab.tsx`**
+- Antes do upload: calcular SHA-256 do File via Web Crypto API
+- Consultar `processed_studies` por `content_hash` (match exato)
+- Consultar `processed_studies` por similaridade de `original_filename` usando a funcao `calculateSimilarity` existente
+- Marcar arquivos com alertas visuais (amarelo = nome similar, vermelho = hash identico)
 
-### 4. Chat Clínico Geral (sidebar)
+**4. Mesma logica em `StudyPdfUpload.tsx`** (upload individual da Library)
+- Ao clicar "Send to AI Processing", verificar se ja existe em `processed_studies`
 
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+### Mudancas
 
-### 5. Arquivos a modificar/criar
+| Arquivo | Acao |
+|---|---|
+| **Migracao SQL** | Adicionar coluna `content_hash TEXT` em `processed_studies` |
+| `src/components/administrador/estudos/import/FileUploadTab.tsx` | Adicionar verificacao de duplicatas apos selecao de arquivos (hash + nome), exibir alertas inline, permitir pular duplicatas |
+| `src/components/administrador/estudos/library/StudyPdfUpload.tsx` | Verificar duplicata antes de `sendToAIProcessing` |
+| `src/utils/fileHashUtils.ts` | **Novo** — funcao `calculateFileHash(file: File): Promise<string>` usando Web Crypto API |
+| `src/components/administrador/estudos/import/DuplicateAlert.tsx` | **Novo** — componente visual de alerta de duplicata com opcoes |
 
-| Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
-
-### 6. Estrutura visual resultante
+### Fluxo do usuario
 
 ```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
+Usuario seleciona PDFs
+  → Sistema calcula hash de cada arquivo (Web Crypto API)
+  → Consulta processed_studies por content_hash
+  → Consulta processed_studies por similaridade de filename
+  → Exibe alertas:
+    ├── 🔴 "Arquivo identico ja importado: [titulo] — [status]"
+    ├── 🟡 "Nome similar a estudo existente: [titulo] (87% similar)"
+    └── ✅ Sem duplicatas
+  → Usuario decide: importar, pular, ou cancelar
+  → Hash salvo no registro para futuras verificacoes
 ```
-
-### Detalhes técnicos
-
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 
