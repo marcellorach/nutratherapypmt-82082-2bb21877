@@ -111,29 +111,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
                     {getStatusText(estudo.kanban_status || estudo.scispace_status)}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  {onRegenerateVetGraphRAG && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onRegenerateVetGraphRAG(estudo.id)}
-                            className="h-7 text-xs gap-1"
-                          >
-                            <Network className="h-3 w-3" />
-                            <RefreshCw className="h-3 w-3" />
-                            <span>{t('studies.vetgraphrag.vetGraphRAG.regenerate')}</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t('studies.vetgraphrag.vetGraphRAG.regenerateTooltip')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </TableCell>
+                <TableCell></TableCell>
               </TableRow>
             ))
           ) : (
