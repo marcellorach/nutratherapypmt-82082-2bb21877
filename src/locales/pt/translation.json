@@ -546,6 +546,7 @@
       "title": "Digestão de Estudos Científicos",
       "description": "Pipeline completo: do upload de PDFs à extração com IA e curadoria para o VetGraphRAG",
       "uploadTab": "Upload PDFs",
+      "auditLogTab": "Upload Audit Log",
       "aiProcessingTab": "Processamento IA",
       "curationTab": "Curadoria",
       "importHistory": "Histórico de Importações",
