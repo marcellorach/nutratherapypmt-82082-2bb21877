@@ -605,6 +605,18 @@ export const KnowledgeGraphViewer: React.FC = () => {
   };
 
   const openStatDialog = (cardId: string) => {
+    // Redirect triplet clicks to TripletBankDialog
+    if (cardId === 'approved-triplets') {
+      setTripletBankInitialTab('approved');
+      setTripletBankOpen(true);
+      return;
+    }
+    if (cardId === 'pending-triplets') {
+      setTripletBankInitialTab('pending');
+      setTripletBankOpen(true);
+      return;
+    }
+
     const cardIdToStatType: Record<string, typeof selectedStatType> = {
       'ontology-manual': 'ontology',
       'ontology-chebi': 'chebi',
@@ -615,8 +627,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
       'entities-ai': 'entities-ai',
       'relations-ai': 'relations-ai',
       'active-studies': 'studies',
-      'approved-triplets': 'approved-triplets',
-      'pending-triplets': 'pending-triplets',
       'total-nodes': 'nodes',
       'total-relations': 'edges',
       'positive-relations': 'positive',
