@@ -2375,7 +2375,8 @@
     "newRelation": "New Relation",
     "tabs": {
       "network": "Network",
-      "matrix": "Matrix"
+      "matrix": "Matrix",
+      "auditor": "Auditor"
     },
     "loading": "Loading data...",
     "noData": {
