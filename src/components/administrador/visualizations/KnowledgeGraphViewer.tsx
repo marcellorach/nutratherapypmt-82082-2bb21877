@@ -20,8 +20,7 @@ import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar'
 import { GraphLimitSlider } from './GraphLimitSlider';
 import { KnowledgeGraph3D } from './KnowledgeGraph3D';
 import { KnowledgeGraphStatsSection } from './kg-stats';
-import { EnrichKnowledgeGraphDialog } from './EnrichKnowledgeGraphDialog';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square, Sparkles } from 'lucide-react';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
