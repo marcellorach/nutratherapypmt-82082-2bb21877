@@ -108,6 +108,8 @@ export const KnowledgeGraphViewer: React.FC = () => {
   // New states for dialogs, chat and node details
   const [statDialogOpen, setStatDialogOpen] = useState(false);
   const [selectedStatType, setSelectedStatType] = useState<'ontology' | 'studies' | 'nodes' | 'edges' | 'positive' | 'negative' | 'nutraceuticals' | 'conditions' | 'pathways' | 'outcomes' | 'chebi' | 'entities-ai' | 'relations-ai' | 'approved-triplets' | 'pending-triplets'>('ontology');
+  const [tripletBankOpen, setTripletBankOpen] = useState(false);
+  const [tripletBankInitialTab, setTripletBankInitialTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [chatOpen, setChatOpen] = useState(false);
   const [nodeDetailsSidebarOpen, setNodeDetailsSidebarOpen] = useState(false);
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<NodeDetailsData | null>(null);
