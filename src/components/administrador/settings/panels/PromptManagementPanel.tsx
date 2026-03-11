@@ -34,6 +34,7 @@ const PROMPT_KEYS = [
   { key: 'prompt_extraction_stage3_user', label: 'Stage 3 User', stage: 3, type: 'user' },
   { key: 'prompt_triplet_extraction_system', label: 'Triplet System', stage: 4, type: 'system' },
   { key: 'prompt_triplet_extraction_user', label: 'Triplet User', stage: 4, type: 'user' },
+  { key: 'prompt_relations_auditor_system', label: 'Auditor System', stage: 5, type: 'system' },
 ];
 
 const MODEL_KEYS = [
@@ -42,6 +43,7 @@ const MODEL_KEYS = [
   { key: 'ai_model_chat', label: 'Chat Model', description: 'Model for chat/conversational tasks' },
   { key: 'ai_model_embeddings', label: 'Embeddings Model', description: 'Model for vector embeddings' },
   { key: 'ai_model_translate', label: 'Translation Model', description: 'Model for translation tasks' },
+  { key: 'ai_model_relations_auditor', label: 'Relations Auditor Model', description: 'Model for Relations Auditor chat (google/gemini-3.1-pro-preview)' },
 ];
 
 const PromptManagementPanel: React.FC = () => {
@@ -182,6 +184,7 @@ const PromptManagementPanel: React.FC = () => {
       case 2: return 'Mechanisms and relationships: pathways, enzymes, interactions';
       case 3: return 'Clinical outcomes: dosages, efficacy scores, biomarkers';
       case 4: return 'VetGraphRAG triplet generation for knowledge graph';
+      case 5: return 'Relations Auditor: conversational analysis of nutraceutical-condition relationships with Mermaid diagrams (gemini-3.1-pro-preview)';
       default: return '';
     }
   };
@@ -339,11 +342,12 @@ const PromptManagementPanel: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="stage1">Stage 1</TabsTrigger>
               <TabsTrigger value="stage2">Stage 2</TabsTrigger>
               <TabsTrigger value="stage3">Stage 3</TabsTrigger>
               <TabsTrigger value="triplets">Triplets</TabsTrigger>
+              <TabsTrigger value="auditor">Auditor</TabsTrigger>
             </TabsList>
             
             <TabsContent value="stage1" className="space-y-4 mt-4">
@@ -376,6 +380,14 @@ const PromptManagementPanel: React.FC = () => {
                 <AlertDescription>{getStageDescription(4)}</AlertDescription>
               </Alert>
               {PROMPT_KEYS.filter(p => p.stage === 4).map(renderPromptEditor)}
+            </TabsContent>
+            
+            <TabsContent value="auditor" className="space-y-4 mt-4">
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{getStageDescription(5)}</AlertDescription>
+              </Alert>
+              {PROMPT_KEYS.filter(p => p.stage === 5).map(renderPromptEditor)}
             </TabsContent>
           </Tabs>
         </CardContent>
