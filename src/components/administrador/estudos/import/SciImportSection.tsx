@@ -180,10 +180,6 @@ const SciImportSection: React.FC = () => {
               <FileUploadTab />
             </TabsContent>
 
-            <TabsContent value="audit-log">
-              <HistoryTab />
-            </TabsContent>
-
             <TabsContent value="scispace-api">
               <SciSpace2StepImport />
             </TabsContent>

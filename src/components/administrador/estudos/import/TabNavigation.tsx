@@ -18,7 +18,6 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
   const tabs = [
     { value: "library", icon: BookOpen, label: t('studies.import.libraryTab', 'Library') },
     { value: "file-upload", icon: Upload, label: t('studies.import.uploadTab') },
-    { value: "audit-log", icon: FolderInput, label: t('studies.import.auditLogTab', 'Upload Audit Log') },
     { value: "ai-processing", icon: Brain, label: t('studies.import.aiProcessingTab') },
     { value: "curation", icon: ClipboardCheck, label: t('studies.import.curationTab', 'Curation') },
   ];

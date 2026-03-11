@@ -466,6 +466,10 @@ const FileUploadTab: React.FC = () => {
           {t('fileUpload.duplicate.blockingWarning')}
         </p>
       )}
+
+      <Separator className="my-4" />
+
+      <HistoryTab />
     </div>
   );
 };
