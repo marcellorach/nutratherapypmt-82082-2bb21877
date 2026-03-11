@@ -699,9 +699,12 @@
     "history": {
       "loading": "Loading history...",
       "updateList": "Update list",
-      "processWithAI": "Process with AI",
+      "auditLogTitle": "Import Audit Log",
+      "totalImports": "{{imports}} imports · {{studies}} studies",
+      "searchPlaceholder": "Search by study name...",
       "importDate": "Date / Time",
       "importType": "Type",
+      "studies": "Studies",
       "studyCount": "Studies",
       "duplicateCheck": "Duplicate Check",
       "studiesCount": "{{count}} study(ies)",
@@ -712,6 +715,9 @@
       "duplicateSimilar": "{{similarity}}% similar to: {{name}}",
       "status": "Status",
       "noImports": "No previous imports registered.",
+      "noStudies": "No studies",
+      "noResults": "No results for this search.",
+      "more": "more",
       "errorFetching": "Error fetching history"
     },
     "cleanup": {

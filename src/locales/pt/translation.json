@@ -699,9 +699,12 @@
     "history": {
       "loading": "Carregando histórico...",
       "updateList": "Atualizar lista",
-      "processWithAI": "Processar com IA",
+      "auditLogTitle": "Log de Auditoria de Importações",
+      "totalImports": "{{imports}} importações · {{studies}} estudos",
+      "searchPlaceholder": "Buscar por nome do estudo...",
       "importDate": "Data / Hora",
       "importType": "Tipo",
+      "studies": "Estudos",
       "studyCount": "Estudos",
       "duplicateCheck": "Verificação Duplicidade",
       "studiesCount": "{{count}} estudo(s)",
@@ -712,6 +715,9 @@
       "duplicateSimilar": "{{similarity}}% similar a: {{name}}",
       "status": "Status",
       "noImports": "Nenhuma importação anterior registrada.",
+      "noStudies": "Sem estudos",
+      "noResults": "Nenhum resultado para esta busca.",
+      "more": "mais",
       "errorFetching": "Erro ao buscar histórico"
     },
     "cleanup": {
