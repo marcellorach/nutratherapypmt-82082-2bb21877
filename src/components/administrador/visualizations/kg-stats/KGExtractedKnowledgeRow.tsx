@@ -10,12 +10,14 @@ interface KGExtractedKnowledgeRowProps {
   stats: ExtractedKnowledgeStats | null;
   isLoading: boolean;
   onCardClick?: (type: string) => void;
+  studyName?: string;
 }
 
 export const KGExtractedKnowledgeRow: React.FC<KGExtractedKnowledgeRowProps> = ({
   stats,
   isLoading,
-  onCardClick
+  onCardClick,
+  studyName
 }) => {
   const { t } = useTranslation();
 
@@ -77,8 +79,11 @@ export const KGExtractedKnowledgeRow: React.FC<KGExtractedKnowledgeRowProps> = (
           </h3>
         </div>
         {!isLoading && stats && (
-          <span className="text-xs text-muted-foreground">
-            {t('knowledgeGraph.statsSection.extracted.subtotal', 'De {{count}} estudos ativos', { count: stats.activeStudies })}
+          <span className="text-xs text-muted-foreground truncate max-w-[300px]">
+            {studyName 
+              ? t('knowledgeGraph.statsSection.extracted.fromStudy', 'De: {{name}}', { name: studyName })
+              : t('knowledgeGraph.statsSection.extracted.subtotal', 'De {{count}} estudos ativos', { count: stats.activeStudies })
+            }
           </span>
         )}
       </div>

@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-03-11 📊 Stats filtradas por estudo + Remoção Enrich
+- ✅ **Stats de triplets filtradas por estudo**: Hook `useKnowledgeGraphStats` agora aceita `studyId` opcional e filtra contagens de pending/approved por estudo selecionado
+- ✅ **Banner de estudo selecionado**: Indicador visual nos stats cards mostrando qual estudo está filtrado, com botão X para limpar
+- ✅ **Subtítulo contextual**: `KGExtractedKnowledgeRow` mostra nome do estudo filtrado no subtítulo
+- ✅ **Remoção do Enrich with Studies**: Removido botão, dialog e imports do `EnrichKnowledgeGraphDialog`
+
+
 ### Added - 2026-03-11 🏦 Banco de Triplets + Review Enriquecido
 
 - ✅ **TripletBankDialog**: Novo dialog centralizado com 3 abas (Pendentes/Aprovados/Rejeitados), busca, contadores e botão "Revisar" em cada triplet

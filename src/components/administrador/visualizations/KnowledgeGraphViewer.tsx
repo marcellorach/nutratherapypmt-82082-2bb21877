@@ -20,8 +20,7 @@ import { NodeDetailsSidebar, NodeDetailsData } from './graph/NodeDetailsSidebar'
 import { GraphLimitSlider } from './GraphLimitSlider';
 import { KnowledgeGraph3D } from './KnowledgeGraph3D';
 import { KnowledgeGraphStatsSection } from './kg-stats';
-import { EnrichKnowledgeGraphDialog } from './EnrichKnowledgeGraphDialog';
-import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square, Sparkles } from 'lucide-react';
+import { Network, GitBranch, Activity, Database, RefreshCcw, Filter, HelpCircle, FileText, X, Calendar, CheckCircle2, AlertCircle, BookOpen, MessageCircle, MousePointerClick, ExternalLink, Box, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GraphStats {
@@ -116,7 +115,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
   
   // New states for configurable limit and 3D toggle
   const [edgeLimit, setEdgeLimit] = useState(2000);
-  const [enrichDialogOpen, setEnrichDialogOpen] = useState(false);
   const [use3DGraph, setUse3DGraph] = useState(false);
 
   // Load data sources once on mount
@@ -705,26 +703,15 @@ export const KnowledgeGraphViewer: React.FC = () => {
     <TooltipProvider>
       <div className="space-y-4">
         {/* Stats Section - 3 Rows: Base Knowledge, Extracted Knowledge, Graph Structure */}
-        <KnowledgeGraphStatsSection onCardClick={openStatDialog} />
+        <KnowledgeGraphStatsSection 
+          onCardClick={openStatDialog}
+          studyId={studyFilter !== 'all' ? studyFilter : undefined}
+          studyName={selectedStudyDetails?.title}
+          onClearStudyFilter={() => setStudyFilter('all')}
+        />
 
         {/* Actions Row */}
         <div className="flex items-center justify-end gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setEnrichDialogOpen(true)}
-                className="gap-1.5"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('enrich.button', 'Enrich with Studies')}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-[250px]">
-              <p>{t('enrich.buttonTooltip', 'Search, download and process real scientific studies to enrich the knowledge graph')}</p>
-            </TooltipContent>
-          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -1263,11 +1250,6 @@ export const KnowledgeGraphViewer: React.FC = () => {
         nodeData={selectedNodeDetails}
       />
 
-      {/* Enrich Knowledge Graph Dialog */}
-      <EnrichKnowledgeGraphDialog
-        open={enrichDialogOpen}
-        onOpenChange={setEnrichDialogOpen}
-      />
     </TooltipProvider>
   );
 };

@@ -44,7 +44,7 @@ interface UseKnowledgeGraphStatsReturn {
   refresh: () => Promise<void>;
 }
 
-export function useKnowledgeGraphStats(): UseKnowledgeGraphStatsReturn {
+export function useKnowledgeGraphStats(studyId?: string): UseKnowledgeGraphStatsReturn {
   const [stats, setStats] = useState<KnowledgeGraphStatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,19 +103,33 @@ export function useKnowledgeGraphStats(): UseKnowledgeGraphStatsReturn {
           .from('hierarchical_edges')
           .select('*', { count: 'exact', head: true })
           .not('study_ids', 'is', null),
-        supabase
-          .from('processed_studies')
-          .select('*', { count: 'exact', head: true })
-          .eq('kanban_status', 'approved')
-          .is('deleted_at', null),
-        supabase
-          .from('triplet_extractions')
-          .select('*', { count: 'exact', head: true })
-          .eq('curation_status', 'pending'),
-        supabase
-          .from('triplet_extractions')
-          .select('*', { count: 'exact', head: true })
-          .eq('curation_status', 'approved'),
+        studyId
+          ? supabase
+              .from('processed_studies')
+              .select('*', { count: 'exact', head: true })
+              .eq('id', studyId)
+              .is('deleted_at', null)
+          : supabase
+              .from('processed_studies')
+              .select('*', { count: 'exact', head: true })
+              .eq('kanban_status', 'approved')
+              .is('deleted_at', null),
+        (() => {
+          let q = supabase
+            .from('triplet_extractions')
+            .select('*', { count: 'exact', head: true })
+            .eq('curation_status', 'pending');
+          if (studyId) q = q.eq('study_id', studyId);
+          return q;
+        })(),
+        (() => {
+          let q = supabase
+            .from('triplet_extractions')
+            .select('*', { count: 'exact', head: true })
+            .eq('curation_status', 'approved');
+          if (studyId) q = q.eq('study_id', studyId);
+          return q;
+        })(),
         // Graph structure from Neo4j
         supabase.functions.invoke('graph-rag-search', {
           body: {
@@ -192,11 +206,11 @@ export function useKnowledgeGraphStats(): UseKnowledgeGraphStatsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [studyId]);
 
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+  }, [fetchStats, studyId]);
 
   return {
     stats,
