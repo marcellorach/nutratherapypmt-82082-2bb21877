@@ -14,7 +14,6 @@ import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import AIProcessingTab from './AIProcessingTab';
-import HistoryTab from './HistoryTab';
 import StudiesLibraryTab from '../library/StudiesLibraryTab';
 import EstudoCard from '../cards/EstudoCard';
 import EstudoSearch from '../EstudoSearch';
@@ -178,10 +177,6 @@ const SciImportSection: React.FC = () => {
 
             <TabsContent value="file-upload">
               <FileUploadTab />
-            </TabsContent>
-
-            <TabsContent value="audit-log">
-              <HistoryTab />
             </TabsContent>
 
             <TabsContent value="scispace-api">

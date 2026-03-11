@@ -11,6 +11,8 @@ import { createSafeStoragePath, sanitizeFileName } from '@/utils/fileNameSanitiz
 import { calculateFileHash, DuplicateCheckResult } from '@/utils/fileHashUtils';
 import { calculateSimilarity } from '@/services/name-harmonization-service';
 import DuplicateAlert from './DuplicateAlert';
+import HistoryTab from './HistoryTab';
+import { Separator } from "@/components/ui/separator";
 
 const NAME_SIMILARITY_THRESHOLD = 0.75;
 
@@ -464,6 +466,10 @@ const FileUploadTab: React.FC = () => {
           {t('fileUpload.duplicate.blockingWarning')}
         </p>
       )}
+
+      <Separator className="my-4" />
+
+      <HistoryTab />
     </div>
   );
 };
