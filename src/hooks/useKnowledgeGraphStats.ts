@@ -210,7 +210,7 @@ export function useKnowledgeGraphStats(studyId?: string): UseKnowledgeGraphStats
 
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+  }, [fetchStats, studyId]);
 
   return {
     stats,
