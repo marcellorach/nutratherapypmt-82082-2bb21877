@@ -103,8 +103,9 @@ export const KnowledgeGraphStatDialog: React.FC<KnowledgeGraphStatDialogProps> =
   const [studyContributions, setStudyContributions] = useState<StudyContribution[]>([]);
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
   const [graphRelations, setGraphRelations] = useState<GraphRelation[]>([]);
-  // Generic data state for new stat types
   const [genericData, setGenericData] = useState<any[]>([]);
+  const [reviewingTriplet, setReviewingTriplet] = useState<any | null>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
