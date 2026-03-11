@@ -50,10 +50,6 @@ const VisualizationTabs: React.FC<VisualizationTabsProps> = ({
       <TabsList className="mb-4">
         <TabsTrigger value="network">{t('relations.tabs.network')}</TabsTrigger>
         <TabsTrigger value="matrix">{t('relations.tabs.matrix')}</TabsTrigger>
-        <TabsTrigger value="auditor" className="flex items-center gap-1">
-          <Search className="h-3 w-3" />
-          {t('relations.tabs.auditor')}
-        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="network" className="pt-4">
