@@ -1,0 +1,1 @@
+ALTER TABLE public.processed_studies ADD COLUMN content_hash TEXT;

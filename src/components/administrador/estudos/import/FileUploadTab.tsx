@@ -1,13 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from "@/components/ui/button";
-import { Upload, File, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { createSafeStoragePath, sanitizeFileName } from '@/utils/fileNameSanitizer';
+import { calculateFileHash, DuplicateCheckResult } from '@/utils/fileHashUtils';
+import { calculateSimilarity } from '@/services/name-harmonization-service';
+import DuplicateAlert from './DuplicateAlert';
+
+const NAME_SIMILARITY_THRESHOLD = 0.75;
 
 const FileUploadTab: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -16,8 +21,82 @@ const FileUploadTab: React.FC = () => {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [importedStudyIds, setImportedStudyIds] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<{ count: number; studyIds: string[] } | null>(null);
+  const [duplicateChecks, setDuplicateChecks] = useState<Record<string, DuplicateCheckResult>>({});
+  const [checkingDuplicates, setCheckingDuplicates] = useState(false);
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const checkForDuplicates = useCallback(async (files: File[]) => {
+    setCheckingDuplicates(true);
+    const results: Record<string, DuplicateCheckResult> = {};
+
+    try {
+      // Fetch existing studies for comparison
+      const { data: existingStudies } = await supabase
+        .from('processed_studies')
+        .select('id, study_id, title, original_filename, kanban_status, content_hash')
+        .is('deleted_at', null);
+
+      if (!existingStudies || existingStudies.length === 0) {
+        files.forEach(f => { results[f.name] = { type: 'none' }; });
+        setDuplicateChecks(prev => ({ ...prev, ...results }));
+        setCheckingDuplicates(false);
+        return;
+      }
+
+      for (const file of files) {
+        // 1. Check hash (exact match)
+        const hash = await calculateFileHash(file);
+        const hashMatch = existingStudies.find(s => (s as any).content_hash === hash);
+        if (hashMatch) {
+          results[file.name] = {
+            type: 'exact',
+            existingStudy: {
+              id: hashMatch.id,
+              title: hashMatch.title || '',
+              study_id: hashMatch.study_id || '',
+              kanban_status: hashMatch.kanban_status || '',
+              original_filename: hashMatch.original_filename || '',
+            },
+          };
+          continue;
+        }
+
+        // 2. Check filename similarity
+        let bestMatch: { study: typeof existingStudies[0]; similarity: number } | null = null;
+        for (const study of existingStudies) {
+          if (!study.original_filename) continue;
+          const sim = calculateSimilarity(file.name, study.original_filename);
+          if (sim >= NAME_SIMILARITY_THRESHOLD && (!bestMatch || sim > bestMatch.similarity)) {
+            bestMatch = { study, similarity: sim };
+          }
+        }
+
+        if (bestMatch) {
+          results[file.name] = {
+            type: 'similar',
+            existingStudy: {
+              id: bestMatch.study.id,
+              title: bestMatch.study.title || '',
+              study_id: bestMatch.study.study_id || '',
+              kanban_status: bestMatch.study.kanban_status || '',
+              original_filename: bestMatch.study.original_filename || '',
+            },
+            similarity: bestMatch.similarity,
+          };
+        } else {
+          results[file.name] = { type: 'none' };
+        }
+      }
+    } catch (err) {
+      console.error('Duplicate check error:', err);
+      files.forEach(f => { results[f.name] = { type: 'none' }; });
+    }
+
+    setDuplicateChecks(prev => ({ ...prev, ...results }));
+    setCheckingDuplicates(false);
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const pdfFiles = acceptedFiles.filter(file => file.type === 'application/pdf');
@@ -30,8 +109,12 @@ const FileUploadTab: React.FC = () => {
       });
     }
     
-    setSelectedFiles(prev => [...prev, ...pdfFiles]);
-  }, [toast, t]);
+    setSelectedFiles(prev => {
+      const newFiles = [...prev, ...pdfFiles];
+      checkForDuplicates(pdfFiles);
+      return newFiles;
+    });
+  }, [toast, t, checkForDuplicates]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -40,7 +123,17 @@ const FileUploadTab: React.FC = () => {
   });
 
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => {
+      const removed = prev[index];
+      if (removed) {
+        setDuplicateChecks(dc => {
+          const copy = { ...dc };
+          delete copy[removed.name];
+          return copy;
+        });
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleImport = async () => {
@@ -99,6 +192,9 @@ const FileUploadTab: React.FC = () => {
 
           setUploadProgress(prev => ({ ...prev, [fileName]: 100 }));
 
+          // Calculate hash to store
+          const contentHash = await calculateFileHash(file);
+
           const { error: dbError } = await supabase
             .from('processed_studies')
             .insert({
@@ -111,6 +207,7 @@ const FileUploadTab: React.FC = () => {
               source_import_id: importData.id,
               description: 'Awaiting processing',
               journal: 'Manual Import',
+              content_hash: contentHash,
               analysis_data: {
                 studyId: studyId,
                 qualityScore: 0,
@@ -154,6 +251,8 @@ const FileUploadTab: React.FC = () => {
         setSelectedFiles([]);
         setUploadProgress({});
         setUploadedCount(0);
+        setDuplicateChecks({});
+        setDismissedAlerts(new Set());
       }, 2000);
 
       setTimeout(() => {
@@ -171,6 +270,10 @@ const FileUploadTab: React.FC = () => {
       setImporting(false);
     }
   };
+
+  const hasBlockingDuplicates = selectedFiles.some(
+    f => duplicateChecks[f.name]?.type === 'exact' && !dismissedAlerts.has(f.name)
+  );
 
   return (
     <div className="space-y-6">
@@ -235,6 +338,13 @@ const FileUploadTab: React.FC = () => {
         )}
       </div>
 
+      {checkingDuplicates && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {t('fileUpload.duplicate.checking')}
+        </div>
+      )}
+
       {selectedFiles.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-4">
@@ -251,6 +361,8 @@ const FileUploadTab: React.FC = () => {
           {selectedFiles.map((file, index) => {
             const progress = uploadProgress[file.name] || 0;
             const hasError = progress === -1;
+            const dupCheck = duplicateChecks[file.name];
+            const showAlert = dupCheck && dupCheck.type !== 'none' && !dismissedAlerts.has(file.name);
             
             return (
               <div key={index} className="border rounded-lg p-4 space-y-2">
@@ -285,6 +397,15 @@ const FileUploadTab: React.FC = () => {
                     <AlertCircle className="h-5 w-5 text-destructive" />
                   )}
                 </div>
+
+                {showAlert && (
+                  <DuplicateAlert
+                    fileName={file.name}
+                    result={dupCheck}
+                    onDismiss={() => setDismissedAlerts(prev => new Set([...prev, file.name]))}
+                    onRemoveFile={() => removeFile(index)}
+                  />
+                )}
                 
                 {importing && !hasError && (
                   <div className="space-y-1">
@@ -309,7 +430,7 @@ const FileUploadTab: React.FC = () => {
       <div className="flex justify-end">
         <Button 
           onClick={handleImport}
-          disabled={selectedFiles.length === 0 || importing}
+          disabled={selectedFiles.length === 0 || importing || checkingDuplicates}
           className="min-w-[200px]"
         >
           {importing ? (
@@ -322,6 +443,12 @@ const FileUploadTab: React.FC = () => {
           )}
         </Button>
       </div>
+
+      {hasBlockingDuplicates && (
+        <p className="text-xs text-destructive text-center">
+          {t('fileUpload.duplicate.blockingWarning')}
+        </p>
+      )}
     </div>
   );
 };
