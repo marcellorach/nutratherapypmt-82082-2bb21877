@@ -546,6 +546,7 @@
       "title": "Scientific Studies Digestion",
       "description": "Complete pipeline: from PDF upload to AI extraction and curation for VetGraphRAG",
       "uploadTab": "Upload PDFs",
+      "auditLogTab": "Upload Audit Log",
       "aiProcessingTab": "AI Processing",
       "curationTab": "Curation",
       "importHistory": "Import History",
