@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Brain, BookOpen, ClipboardCheck, Loader2 } from "lucide-react";
+import { Upload, Brain, BookOpen, ClipboardCheck, Loader2, FolderInput } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 
