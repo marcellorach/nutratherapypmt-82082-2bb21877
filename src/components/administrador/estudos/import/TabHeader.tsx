@@ -58,7 +58,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, scispaceLogo, onProces
           <DialogHeader>
             <DialogTitle>{t('studies.import.importHistory')}</DialogTitle>
           </DialogHeader>
-          <HistoryTab onProcessWithAI={onProcessWithAI || (() => {})} />
+          <HistoryTab />
         </DialogContent>
       </Dialog>
     </>
