@@ -1,73 +1,63 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+# Recovering Biological Pathway and Scientific Evidence Panels
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+## Problem
+The **Biological Pathway** and **Scientific Evidence** tabs are empty because `extractKgEvidence()` in `clinical-analysis-pipeline.ts` is too restrictive:
+- **Triplets**: Only captures `TREATS`, `PREVENTS`, `ALLEVIATES`, `SUPPORTS` — misses `INHIBITS`, `MODULATES`, `ACTIVATES`, `CONTRAINDICATES`
+- **Pathways**: Only builds one minimal chain per condition (first compound → first mechanism → first effect → outcome), ignoring relationship labels
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+The data is there in the KG results but gets filtered out.
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+## Plan
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+### 1. Enrich `extractKgEvidence()` in `clinical-analysis-pipeline.ts`
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+**Triplets** — expand predicate filter to include ALL clinically relevant predicates:
+`TREATS, PREVENTS, AMELIORATES, INHIBITS, MODULATES, ACTIVATES, CONTRAINDICATES, INTERACTS_WITH, SUPPORTS, CAUSES, AGGRAVATES`
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+This populates the Scientific Evidence panel with rich data including inhibition (⊣), modulation (- -→), and contraindications.
 
-### 3. Novo componente: Chat Especializado por Composto
+**Pathways** — build ALL possible chains (not just the first compound). For each compound found in the KG results, trace through mechanisms and effects to build a complete pathway chain. Include the relationship predicate as a label between steps so the UI can show `[inibe]`, `[modula]`, `[ativa]`, etc.
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+### 2. Enhance `BiologicalPathway.tsx` component
 
-### 4. Chat Clínico Geral (sidebar)
+- Add a new `predicate` field to `PathwayStep` interface to carry the relationship type between steps
+- Display the predicate as a labeled arrow between steps (e.g., `↓ [INHIBITS]`, `↓ [MODULATES]`) with color-coding matching the standard biomedical notation (red for inhibits, orange for modulates, blue for activates, green for treats)
+- Add a new step type `contraindication` with red styling
+- Support rendering multiple pathways per condition (currently limited to one)
 
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+### 3. Enhance `ScientificEvidencePanel.tsx`
 
-### 5. Arquivos a modificar/criar
+- Add `CONTRAINDICATES` and `CAUSES` to `predicateBadgeColors` and `predicateSymbols` maps
+- Add a "Contraindications" section separated visually from treatments (red border/background) so they stand out
+- Add a "Synergistic Treatments" section at the bottom showing compounds that treat 2+ conditions simultaneously (data already available from `condition-insights`)
 
-| Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
+### 4. Wire synergistic and contraindication data
 
-### 6. Estrutura visual resultante
+- Pass `conditionInsights.data?.synergisticCompounds` to the Scientific Evidence tab so it can display synergistic treatments alongside the triplet evidence
+- Pass contraindication triplets separately so they render in a warning section
 
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
+### Technical Details
+
+**`PathwayStep` interface change:**
+```typescript
+interface PathwayStep {
+  label: string;
+  type: 'compound' | 'mechanism' | 'effect' | 'outcome' | 'contraindication';
+  predicate?: string; // e.g. 'INHIBITS', 'MODULATES'
+}
 ```
 
-### Detalhes técnicos
+**`extractKgEvidence` pathway building logic:**
+- Iterate ALL compounds (not just `[0]`)
+- For each compound, find connected mechanisms via relationships, then effects, then outcomes
+- Store the predicate on each step transition
+- Deduplicate by compound+condition key
 
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+**Files to modify:**
+1. `src/services/clinical-analysis-pipeline.ts` — `extractKgEvidence()`: expand predicate filters, build richer pathways
+2. `src/components/pet/BiologicalPathway.tsx` — show predicate labels between steps, support contraindication type, color-coded arrows
+3. `src/components/pet/ScientificEvidencePanel.tsx` — add contraindication section, synergistic treatments section, expand predicate maps
+4. `src/pages/veterinario/PetProfilePage.tsx` — pass synergistic compound data to Scientific Evidence tab
 
