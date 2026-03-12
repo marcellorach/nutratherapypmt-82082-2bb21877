@@ -210,6 +210,62 @@ async function interpretLabResults(
   return alerts;
 }
 
+// ─── Condition Name Canonicalization ─────────────────────────────────────────
+
+/**
+ * Maps clinical condition names to canonical KG names.
+ * The KG uses specific terminology; clinical records may use different names.
+ */
+const CONDITION_CANONICAL_MAP: Record<string, string[]> = {
+  'heart disease': ['Cardiovascular Disease', 'Heart failure', 'Cardiac Disease'],
+  'canine cognitive dysfunction syndrome (cds)': ['Cognitive Dysfunction Syndrome', 'Canine Cognitive Dysfunction Syndrome', 'Canine Cognitive Dysfunction'],
+  'canine cognitive dysfunction syndrome': ['Cognitive Dysfunction Syndrome', 'Canine Cognitive Dysfunction Syndrome'],
+  'cognitive dysfunction': ['Cognitive Dysfunction Syndrome', 'Canine Cognitive Dysfunction Syndrome'],
+  'cds': ['Cognitive Dysfunction Syndrome'],
+  'cellular senescence': ['Cellular Senescence', 'Senescence'],
+  'chronic low-grade inflammation (inflammaging)': ['Inflammaging', 'Chronic Inflammation', 'Inflammation'],
+  'inflammaging': ['Inflammaging', 'Chronic Inflammation'],
+  'inflammation': ['Inflammation', 'Inflammaging'],
+  'hip dysplasia': ['Hip Dysplasia', 'Canine Hip Dysplasia'],
+  'obesity': ['Obesity', 'Canine Obesity'],
+  'diabetes': ['Diabetes Mellitus', 'Diabetes'],
+  'kidney disease': ['Chronic Kidney Disease', 'Renal Disease'],
+  'liver disease': ['Hepatic Disease', 'Liver Disease'],
+  'cancer': ['Neoplasia', 'Cancer'],
+  'anxiety': ['Anxiety', 'Canine Anxiety'],
+};
+
+/**
+ * Get canonical names to try for KG queries.
+ * Returns the original name plus any mapped alternatives.
+ */
+function getCanonicalConditionNames(conditionName: string): string[] {
+  const lower = conditionName.toLowerCase().trim();
+  const candidates = [conditionName]; // always try original first
+  
+  // Check exact match
+  if (CONDITION_CANONICAL_MAP[lower]) {
+    candidates.push(...CONDITION_CANONICAL_MAP[lower]);
+  }
+  
+  // Check partial matches
+  for (const [key, values] of Object.entries(CONDITION_CANONICAL_MAP)) {
+    if (lower.includes(key) || key.includes(lower)) {
+      for (const v of values) {
+        if (!candidates.includes(v)) candidates.push(v);
+      }
+    }
+  }
+  
+  // Strip parenthetical suffixes as fallback: "Something (ABC)" -> "Something"
+  const withoutParens = conditionName.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  if (withoutParens !== conditionName && !candidates.includes(withoutParens)) {
+    candidates.push(withoutParens);
+  }
+  
+  return candidates;
+}
+
 // ─── Stage 4: KG Query ──────────────────────────────────────────────────────
 
 async function queryKnowledgeGraph(
@@ -218,16 +274,28 @@ async function queryKnowledgeGraph(
   const kgResults: any[] = [];
 
   for (const condition of conditionNames.length > 0 ? conditionNames : ['aging', 'longevity']) {
-    try {
-      const { data: kgData, error: kgError } = await supabase.functions.invoke('graph-rag-search', {
-        body: { queryType: 'context', sourceEntity: condition }
-      });
+    const candidates = getCanonicalConditionNames(condition);
+    let found = false;
+    
+    for (const candidate of candidates) {
+      try {
+        const { data: kgData, error: kgError } = await supabase.functions.invoke('graph-rag-search', {
+          body: { queryType: 'context', sourceEntity: candidate }
+        });
 
-      if (!kgError && kgData?.data) {
-        kgResults.push({ condition, graphData: kgData.data });
+        if (!kgError && kgData?.data && (kgData.data.nodes?.length > 0 || kgData.data.relationships?.length > 0)) {
+          kgResults.push({ condition, graphData: kgData.data });
+          console.log(`✅ KG hit for "${condition}" using canonical name "${candidate}": ${kgData.data.nodes?.length || 0} nodes`);
+          found = true;
+          break; // found a match, stop trying alternatives
+        }
+      } catch (e) {
+        console.warn(`KG query for "${candidate}" (from "${condition}") failed:`, e);
       }
-    } catch (e) {
-      console.warn(`KG query for ${condition} failed:`, e);
+    }
+    
+    if (!found) {
+      console.warn(`⚠️ No KG data found for "${condition}" after trying: ${candidates.join(', ')}`);
     }
   }
 

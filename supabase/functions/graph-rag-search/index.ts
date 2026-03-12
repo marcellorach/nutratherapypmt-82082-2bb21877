@@ -311,15 +311,25 @@ serve(async (req) => {
         parameters = { name: request.sourceEntity };
         break;
 
-      case 'context':
+      case 'context': {
+        // Escape regex special characters to prevent query failures
+        const rawEntity = request.sourceEntity || '';
+        const escapedEntity = rawEntity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        // Use both regex pattern AND case-insensitive CONTAINS for resilience
         cypherQuery = `
           MATCH (n)-[r]->(m)
           WHERE n.name =~ $pattern OR m.name =~ $pattern
+             OR toLower(n.name) CONTAINS $lowerName OR toLower(m.name) CONTAINS $lowerName
           RETURN n, r, m
           LIMIT 100
         `;
-        parameters = { pattern: `(?i).*${request.sourceEntity || ''}.*` };
+        parameters = { 
+          pattern: `(?i).*${escapedEntity}.*`,
+          lowerName: rawEntity.toLowerCase()
+        };
         break;
+      }
 
       case 'byStudy':
         if (!request.studyId) {

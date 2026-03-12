@@ -1,74 +1,73 @@
 
-Diagnóstico verificado (estado atual)
-1) Sim, o app consulta o VetGraphRAG hoje (via backend function `graph-rag-search`), mas no seu caso as queries estão falhando por nome:
-- `Heart Disease` → 0 nós/0 relações
-- `Canine Cognitive Dysfunction Syndrome (CDS)` → 0 nós/0 relações
-2) O grafo está vivo e grande (não está vazio): ~1938 nós e ~3430 relações. Ex.: `Cardiovascular Disease` e `Cognitive Dysfunction Syndrome` retornam dados.
-3) Há um bug crítico no fluxo de recomendação:
-- modo `enrich` retorna só texto (`enrichment`)
-- pipeline espera `nutraceuticals[]`
-- resultado: lista vazia e UI cai em `generateMockCompounds(...)` (por isso aparecem sempre as mesmas recomendações).
-4) Há também problema de matching por regex/termo:
-- termos com parênteses (ex.: `(CDS)`) quebram o match regex atual
-- nomes clínicos dos pets não estão canônicos para o grafo (ex.: `Heart Disease` vs `Heart failure`/`Cardiovascular Disease`).
 
-Direção aprovada por você
-- Fallback: permitir IA sem KG.
-- Estratégia de nomes: mapear internamente + migrar dados existentes.
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-Plano de implementação
-1) Corrigir contrato da recomendação híbrida (fim do mock “mascarado”)
-- Ajustar `hybrid-recommendation` para sempre retornar payload estruturado (`nutraceuticals`, `rationale`, `precautions`) também em `enrich` (não só texto livre).
-- No pipeline, tratar robustamente parse/falha sem cair em mock estático.
-Arquivos:
-- `supabase/functions/hybrid-recommendation/index.ts`
-- `src/services/clinical-analysis-pipeline.ts`
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-2) Canonicalização real de condições antes de consultar KG
-- Criar resolução de termos clínicos para nomes canônicos (via `veterinary_ontology` + heurística/aliases).
-- Exemplo esperado:
-  - `Heart Disease` → tentar `Cardiovascular Disease`, `Heart failure`
-  - `Canine Cognitive Dysfunction Syndrome (CDS)` → `Canine Cognitive Dysfunction Syndrome`, `Cognitive Dysfunction Syndrome (CDS)`
-- Consultar KG com termos candidatos até obter hit.
-Arquivo:
-- `src/services/clinical-analysis-pipeline.ts`
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-3) Tornar a query de contexto do grafo resiliente
-- Escapar caracteres regex do `sourceEntity` (parênteses, +, etc.).
-- Adicionar fallback `toLower(name) CONTAINS ...` para não depender só de regex.
-Arquivo:
-- `supabase/functions/graph-rag-search/index.ts`
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-4) Remover fallback mock da tela clínica
-- Em `PetProfilePage`, parar de usar `generateMockCompounds` quando a análise vier vazia.
-- Exibir estado explícito:
-  - “LLM-only (sem evidência KG para esta condição)” quando aplicável.
-  - badges de fonte: KG / Híbrido / LLM-only.
-Arquivo:
-- `src/pages/veterinario/PetProfilePage.tsx`
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-5) Migrar dados existentes (mapear + migrar)
-- Atualizar `pet_conditions` existentes para nomes canônicos e preencher `condition_id` quando possível.
-- Atualizar gerador de pets de exemplo para gravar nomes canônicos já alinhados ao grafo.
-Arquivos:
-- `src/components/pet/GenerateSamplePetsButton.tsx`
-- (operação de dados no backend para atualizar registros existentes)
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-6) Garantir função de insights clínicos ativa
-- Verificar disponibilidade/deploy de `condition-insights` (hoje está retornando 404 no endpoint).
-- Tratar erro no hook sem quebrar experiência (degradação elegante).
-Arquivos:
-- `src/hooks/useConditionInsights.ts`
-- backend function `condition-insights` (deploy/registro)
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-Validação (aceite)
-1) Para Luna:
-- Stage KG deixa de mostrar 0 absoluto quando há termo equivalente no grafo.
-- Recomendações deixam de ser o bloco fixo Curcumin/NMN/Resveratrol/Omega-3.
-2) Entre pets diferentes:
-- conjuntos de compostos e racional clínico passam a variar por condição/exames/medicações.
-3) Quando não houver KG:
-- sistema ainda recomenda via IA (como você escolheu), mas com rótulo claro “LLM-only”, sem mock estático.
-4) Conferência técnica:
-- requests de KG mostram termos canônicos/mapeados;
-- respostas de recomendação trazem `nutraceuticals[]` estruturado em todos os modos.
+### 3. Novo componente: Chat Especializado por Composto
+
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+
+### 4. Chat Clínico Geral (sidebar)
+
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+
+### 5. Arquivos a modificar/criar
+
+| Arquivo | Ação |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
+
+### 6. Estrutura visual resultante
+
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
+
+### Detalhes técnicos
+
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+

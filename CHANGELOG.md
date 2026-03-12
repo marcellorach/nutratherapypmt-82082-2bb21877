@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-03-12 🐛 Recomendações Genéricas → Individualizadas (Root Cause Fix)
+- ✅ **Canonicalização de condições**: Mapa de nomes clínicos → nomes canônicos do KG (ex: "Heart Disease" → "Cardiovascular Disease", "CDS" → "Cognitive Dysfunction Syndrome") com fallback progressivo
+- ✅ **graph-rag-search resiliente**: Escape de caracteres regex em nomes de condições + fallback `CONTAINS` case-insensitive no Cypher
+- ✅ **hybrid-recommendation enrich mode**: Agora retorna `nutraceuticals[]` estruturado (antes retornava só texto, causando lista vazia → fallback mock)
+- ✅ **Remoção total de mock estático**: `generateMockCompounds()` não é mais usado como fallback — se KG retorna 0, LLM gera recomendação individualizada
+- ✅ **Migração de dados existentes**: `pet_conditions` atualizados para nomes canônicos ("Heart Disease" → "Cardiovascular Disease", etc.)
+- ✅ **GenerateSamplePetsButton**: Novos pets agora usam nomes canônicos alinhados ao grafo
+
+
 ### Added - 2026-03-12 🔬 Recomendações Individualizadas + Descobertas Clínicas
 - ✅ **`generateClinicalDiscoveries()`**: Função que cruza predisposições raciais, exames, medicações e condições para identificar padrões clínicos não-óbvios (correlações lab-condição, monitoramento medicamentoso, confirmação por exames, oportunidades terapêuticas)
 - ✅ **`prioritizeCompoundsByLabFindings()`**: Re-ranqueamento de compostos recomendados com base em achados laboratoriais específicos do paciente (inflamação → anti-inflamatórios, estresse oxidativo → antioxidantes, etc.)

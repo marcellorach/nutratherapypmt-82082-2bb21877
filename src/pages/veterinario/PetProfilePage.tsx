@@ -11,7 +11,7 @@ import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Load
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
-import VetRecommendationPanel, { generateMockCompounds } from '@/components/pet/VetRecommendationPanel';
+import VetRecommendationPanel from '@/components/pet/VetRecommendationPanel';
 import CompoundSpecificChat from '@/components/pet/CompoundSpecificChat';
 import TreatabilityChart from '@/components/pet/TreatabilityChart';
 import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
@@ -120,7 +120,7 @@ const PetProfilePage: React.FC = () => {
       setKgProjections(result.kgProjections);
       setConfidenceLevel(result.confidenceLevel);
       setRecommendationCompounds(
-        result.compounds.length > 0 ? result.compounds : generateMockCompounds(t)
+        result.compounds.length > 0 ? result.compounds : []
       );
 
       const alertCount = result.predispositions.filter(p => !p.already_diagnosed).length

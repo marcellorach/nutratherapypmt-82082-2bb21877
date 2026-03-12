@@ -76,6 +76,22 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 5. For each compound, specify WHICH CONDITION it targets (not generic)
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
+
+IMPORTANT: Return your response as valid JSON with this structure:
+{
+  "nutraceuticals": [
+    {
+      "name": "string",
+      "dosage": "string (weight-adjusted dosage)",
+      "mechanism": "string (why this compound for THIS patient)",
+      "evidenceLevel": "AI-enriched",
+      "condition": "string (specific condition this targets)"
+    }
+  ],
+  "rationale": "string (patient-specific reasoning)",
+  "precautions": ["array of patient-specific precautions"]
+}
+
 Respond in Portuguese (Brazilian).`;
 
 const SYSTEM_PROMPT_FALLBACK = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
@@ -219,7 +235,55 @@ Return your response as valid JSON following the structure specified.`;
     console.log('AI response received:', content.substring(0, 300));
 
     if (mode === 'enrich') {
-      return new Response(JSON.stringify({ enrichment: content }), {
+      // Try to parse structured JSON from enrich mode too
+      // The LLM may return structured recommendations or free text
+      try {
+        let jsonContent = content;
+        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) jsonContent = jsonMatch[1];
+        
+        const parsed = JSON.parse(jsonContent);
+        if (parsed.nutraceuticals && Array.isArray(parsed.nutraceuticals)) {
+          // Merge KG compounds with LLM-enriched ones
+          const enrichedNutraceuticals = [
+            ...(kgData?.nutraceuticals || []).map((n: any) => ({
+              ...n,
+              evidenceLevel: n.evidenceLevel || 'KG-backed',
+              condition: n.condition || condition,
+            })),
+            ...parsed.nutraceuticals.filter((n: any) => {
+              const existingNames = (kgData?.nutraceuticals || []).map((k: any) => k.name?.toLowerCase());
+              return !existingNames.includes(n.name?.toLowerCase());
+            }).map((n: any) => ({
+              ...n,
+              evidenceLevel: 'AI-enriched',
+              condition: n.condition || n.targetCondition || condition,
+            })),
+          ];
+          return new Response(JSON.stringify({
+            nutraceuticals: enrichedNutraceuticals,
+            rationale: parsed.rationale || kgData?.rationale || `Recomendação enriquecida por IA para ${condition}.`,
+            precautions: [...(kgData?.precautions || []), ...(parsed.precautions || [])],
+            enrichment: content,
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      } catch (_) {
+        // Not JSON — treat as text enrichment, but still return structured payload
+      }
+
+      // Fallback: return KG compounds + text enrichment
+      return new Response(JSON.stringify({
+        nutraceuticals: (kgData?.nutraceuticals || []).map((n: any) => ({
+          ...n,
+          evidenceLevel: n.evidenceLevel || 'KG-backed',
+          condition: n.condition || condition,
+        })),
+        rationale: `${kgData?.rationale || ''}\n\nConsiderações adicionais: ${content}`,
+        precautions: [...(kgData?.precautions || []), 'Alguns dados foram enriquecidos por IA - verificar com veterinário'],
+        enrichment: content,
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
