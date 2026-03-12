@@ -25,6 +25,19 @@ const VeterinarioPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const { data: petProfiles, isLoading } = usePetProfiles();
+  const deletePet = useDeletePetProfile();
+  const { toast } = useToast();
+
+  const handleDeletePet = (id: string) => {
+    deletePet.mutate(id, {
+      onSuccess: () => {
+        toast({ title: t('admin.patients.deleted', 'Pet removido com sucesso') });
+        setDeleteTarget(null);
+      },
+    });
+  };
   const { data: petProfiles, isLoading } = usePetProfiles();
 
   // Filter pets based on search
