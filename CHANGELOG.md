@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-03-12 🔗 Unificação Relations ← Knowledge Graph
+- ✅ **useSankeyData reescrito**: Agora consulta `hierarchical_edges` via RPC (`get_relations_graph_data`) em vez de tabelas legadas manuais
+- ✅ **DB function criada**: `get_relations_graph_data(p_limit)` faz JOIN com `triplet_extractions` para resolver nomes de entidades
+- ✅ **Cores sincronizadas com KG**: 9 tipos de entidade com cores do Knowledge Graph 3D (Nutraceutical=verde, Condition=laranja, etc.)
+- ✅ **Links simulados removidos**: `relations/utils.ts` não gera mais conexões falsas (extraLinks)
+- ✅ **Filtros por tipo de entidade**: Novo filtro por `source_type`/`target_type` no header
+- ✅ **Filtros por predicado real**: `TREATS`, `INHIBITS`, `ACTIVATES`, etc. em vez dos 3 tipos legados
+- ✅ **Badge de status**: Header mostra contagem de nodes/edges e fonte "Knowledge Graph"
+
+
 ### Changed - 2026-03-11 📋 Reformulação do Import History
 - ✅ **Coluna `duplicate_check_log`**: Nova coluna JSONB em `processed_studies` para log de verificação
 - ✅ **Log persistido no upload**: Resultado da verificação salvo automaticamente ao importar

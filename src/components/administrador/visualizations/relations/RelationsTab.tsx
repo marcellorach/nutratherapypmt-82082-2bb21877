@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import RelationsHeader from './RelationsHeader';
 import VisualizationCard from './VisualizationCard';
@@ -15,8 +15,9 @@ const RelationsTab: React.FC = () => {
   const [efficacyFilter, setEfficacyFilter] = useState<string>("all");
   const [relationView, setRelationView] = useState<string>('network');
   const [relationshipFilter, setRelationshipFilter] = useState<string>("all");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
   
-  const { sankeyData, isLoading, error, refresh } = useSankeyData();
+  const { sankeyData, isLoading, error, refresh, relationshipTypes, entityTypes } = useSankeyData();
   
   // Filtragem dos dados
   const filteredSankeyData = useMemo(() => {
@@ -27,35 +28,14 @@ const RelationsTab: React.FC = () => {
     // Filtro por termo de busca
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      
-      // Encontrar nós que correspondem à pesquisa
       const matchingNodeIndices = sankeyData.nodes
         .map((node, index) => node.name.toLowerCase().includes(lowerSearchTerm) ? index : -1)
         .filter(index => index !== -1);
       
-      // Filtrar links que contêm esses nós
       filteredLinks = filteredLinks.filter(link => 
         matchingNodeIndices.includes(link.source) || 
         matchingNodeIndices.includes(link.target)
       );
-    }
-    
-    // Filtro por eficácia
-    if (efficacyFilter !== 'all') {
-      filteredLinks = filteredLinks.filter(link => {
-        const efficacyScore = link.value / 20; // Convertendo de volta para escala 0-5
-        
-        switch(efficacyFilter) {
-          case 'high':
-            return efficacyScore >= 4;
-          case 'medium':
-            return efficacyScore >= 3 && efficacyScore < 4;
-          case 'low':
-            return efficacyScore < 3;
-          default:
-            return true;
-        }
-      });
     }
     
     // Filtro por tipo de relacionamento
@@ -64,14 +44,39 @@ const RelationsTab: React.FC = () => {
         link.relationshipType === relationshipFilter
       );
     }
+
+    // Filtro por tipo de entidade
+    if (entityTypeFilter !== 'all') {
+      const lowerFilter = entityTypeFilter.toLowerCase();
+      const matchingNodeIndices = sankeyData.nodes
+        .map((node, index) => node.category === lowerFilter ? index : -1)
+        .filter(index => index !== -1);
+      
+      filteredLinks = filteredLinks.filter(link =>
+        matchingNodeIndices.includes(link.source) ||
+        matchingNodeIndices.includes(link.target)
+      );
+    }
+    
+    // Filtro por eficácia/confiança
+    if (efficacyFilter !== 'all') {
+      filteredLinks = filteredLinks.filter(link => {
+        const score = link.value;
+        switch(efficacyFilter) {
+          case 'high': return score >= 60;
+          case 'medium': return score >= 20 && score < 60;
+          case 'low': return score < 20;
+          default: return true;
+        }
+      });
+    }
     
     return {
       nodes: sankeyData.nodes,
       links: filteredLinks
     };
-  }, [sankeyData, searchTerm, efficacyFilter, relationshipFilter, isLoading]);
+  }, [sankeyData, searchTerm, efficacyFilter, relationshipFilter, entityTypeFilter, isLoading]);
   
-  // Preparar dados para visualizações
   const networkData = useMemo(() => prepareNetworkData(filteredSankeyData), [filteredSankeyData]);
   const matrixData = useMemo(() => prepareMatrixData(filteredSankeyData), [filteredSankeyData]);
   
@@ -96,7 +101,14 @@ const RelationsTab: React.FC = () => {
         onSearchChange={setSearchTerm}
         relationshipFilter={relationshipFilter}
         onRelationshipFilterChange={setRelationshipFilter}
+        entityTypeFilter={entityTypeFilter}
+        onEntityTypeFilterChange={setEntityTypeFilter}
+        relationshipTypes={relationshipTypes}
+        entityTypes={entityTypes}
         isLoading={isLoading}
+        onRefresh={refresh}
+        nodeCount={filteredSankeyData.nodes.length}
+        linkCount={filteredSankeyData.links.length}
       />
       
       {isLoading ? (

@@ -13,25 +13,18 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   
   // Preparar nós para visualização em rede
   const networkNodes = nodes.map((node, index) => ({
-    id: `node_${index}_${node.name}`, // Garantindo IDs únicos
+    id: `node_${index}_${node.name}`,
     label: node.name,
     group: node.category,
     type: node.category,
     title: node.description || node.name,
     color: node.color,
-    value: 1, // Tamanho base do nó
-    // Usar um objeto vazio se metadata não existir
+    value: 1,
     metadata: ((node as any).metadata || {})
   }));
   
-  // Criar um mapa dos nós por nome para facilitar a busca
-  const nodeMap = new Map();
-  nodes.forEach((node, index) => {
-    nodeMap.set(node.name, index);
-  });
-  
-  // Contar quantas conexões cada nó tem
-  const nodeConnections = new Map();
+  // Contar conexões por nó
+  const nodeConnections = new Map<string, number>();
   links.forEach(link => {
     const sourceName = nodes[link.source]?.name || '';
     const targetName = nodes[link.target]?.name || '';
@@ -45,7 +38,6 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
   // Ajustar tamanho do nó com base no número de conexões
   networkNodes.forEach(node => {
     const connections = nodeConnections.get(node.label) || 0;
-    // Valor mínimo de 1, aumentando com o número de conexões
     node.value = Math.max(1, Math.min(5, 1 + connections / 5));
   });
   
@@ -54,194 +46,36 @@ export const prepareNetworkData = (sankeyData: SankeyData) => {
     const sourceName = nodes[link.source]?.name || '';
     const targetName = nodes[link.target]?.name || '';
     
-    // Encontrar IDs dos nós correspondentes
     const sourceNode = networkNodes.find(node => node.label === sourceName);
     const targetNode = networkNodes.find(node => node.label === targetName);
     
-    if (!sourceNode || !targetNode) {
-      return null;
-    }
+    if (!sourceNode || !targetNode) return null;
     
-    // Determinar largura da linha com base no valor
     const width = Math.max(1, Math.min(5, link.value / 20));
     
     return {
       id: `link_${index}`,
       from: sourceNode.id,
       to: targetNode.id,
-      value: link.value / 10, // Ajustar para escala apropriada
+      value: link.value / 10,
       title: link.description || `${sourceName} → ${targetName}`,
       color: link.color || undefined,
-      width: width,
+      width,
       arrows: {
         to: {
           enabled: true,
           scaleFactor: 0.5
         }
       },
-      dashes: link.relationshipType === 'study'
+      dashes: link.relationshipType === 'SYNERGIZES_WITH' || link.relationshipType === 'ANTAGONISM'
     };
   });
   
-  // Filtrar quaisquer links inválidos
-  const validNetworkLinks = networkLinks.filter(
-    link => Boolean(link)
-  );
+  const validNetworkLinks = networkLinks.filter(link => Boolean(link));
   
-  // Identificar nós sem conexões (especialmente condições de saúde)
-  const nodesWithoutConnections = [];
-  const conditionsWithoutConnections = [];
-  
-  networkNodes.forEach(node => {
-    const hasConnection = validNetworkLinks.some(
-      link => link.from === node.id || link.to === node.id
-    );
-    
-    if (!hasConnection) {
-      nodesWithoutConnections.push(node);
-      if (node.group === 'condicao') {
-        conditionsWithoutConnections.push(node);
-      }
-    }
-  });
-  
-  // Criar conexões extras para condições sem ligações
-  const extraLinks = [];
-  
-  // Encontrar nutracêuticos com maior número de conexões para conectar às condições isoladas
-  const nutraceuticoNodes = networkNodes.filter(node => node.group === 'nutraceutico');
-  
-  // Para cada condição sem conexão, criar até 3 ligações com nutracêuticos (aumentado de 2 para 3)
-  conditionsWithoutConnections.forEach((condition, idx) => {
-    // Escolher 2-3 nutracêuticos para conectar
-    const numConnections = Math.min(3, nutraceuticoNodes.length);
-    
-    for (let i = 0; i < numConnections; i++) {
-      // Usar o índice rotacionado para distribuir as conexões
-      const nutraceuticoIndex = (idx + i) % nutraceuticoNodes.length;
-      const nutraceutico = nutraceuticoNodes[nutraceuticoIndex];
-      
-      // Valor de eficácia simulado - variando entre baixo e médio para novas conexões
-      const efficacyValue = 20 + Math.floor(Math.random() * 40); // 20-60
-      
-      extraLinks.push({
-        id: `extra_link_${idx}_${i}`,
-        from: nutraceutico.id,
-        to: condition.id,
-        value: efficacyValue / 10,
-        title: `Relação Potencial: ${nutraceutico.label} → ${condition.label}`,
-        color: '#9ca3af', // Cor cinza para diferenciar das conexões normais
-        width: Math.max(1, Math.min(3, efficacyValue / 20)),
-        arrows: {
-          to: { enabled: true, scaleFactor: 0.5 }
-        },
-        dashes: true // Linhas pontilhadas para indicar que são conexões simuladas
-      });
-    }
-  });
-  
-  // Conectar condições entre si para criar uma rede mais densa
-  // Isso criará relações entre condições que podem estar relacionadas
-  if (conditionsWithoutConnections.length > 1) {
-    for (let i = 0; i < conditionsWithoutConnections.length; i++) {
-      const condition1 = conditionsWithoutConnections[i];
-      
-      // Conectar com 1-2 outras condições
-      const maxConnections = Math.min(2, conditionsWithoutConnections.length - 1);
-      for (let j = 1; j <= maxConnections; j++) {
-        const nextIndex = (i + j) % conditionsWithoutConnections.length;
-        if (nextIndex !== i) {
-          const condition2 = conditionsWithoutConnections[nextIndex];
-          
-          extraLinks.push({
-            id: `condition_relation_${i}_${nextIndex}`,
-            from: condition1.id,
-            to: condition2.id,
-            value: 2, // Valor reduzido para indicar que é uma relação secundária
-            title: `Possível correlação: ${condition1.label} ↔ ${condition2.label}`,
-            color: '#d1d5db', // Cor cinza claro
-            width: 1,
-            arrows: {
-              to: { enabled: false } // Sem setas para indicar relação bidirecional
-            },
-            dashes: [5, 5] // Padrão tracejado diferente
-          });
-        }
-      }
-    }
-  }
-  
-  // Também conectar alguns nutracêuticos isolados a condições com conexões
-  const nutraceuticosWithoutConnections = nodesWithoutConnections.filter(
-    node => node.group === 'nutraceutico'
-  );
-  
-  const connectedConditions = networkNodes.filter(node => {
-    return node.group === 'condicao' && !conditionsWithoutConnections.includes(node);
-  });
-  
-  nutraceuticosWithoutConnections.forEach((nutraceutico, idx) => {
-    if (connectedConditions.length > 0) {
-      // Escolher 2-3 condições para conectar (aumentado de 2 para 3)
-      const numConnections = Math.min(3, connectedConditions.length);
-      
-      for (let i = 0; i < numConnections; i++) {
-        const conditionIndex = (idx + i) % connectedConditions.length;
-        const condition = connectedConditions[conditionIndex];
-        
-        // Valor de eficácia simulado
-        const efficacyValue = 30 + Math.floor(Math.random() * 30); // 30-60
-        
-        extraLinks.push({
-          id: `extra_link_n_${idx}_${i}`,
-          from: nutraceutico.id,
-          to: condition.id,
-          value: efficacyValue / 10,
-          title: `Relação Potencial: ${nutraceutico.label} → ${condition.label}`,
-          color: '#9ca3af',
-          width: Math.max(1, Math.min(3, efficacyValue / 20)),
-          arrows: {
-            to: { enabled: true, scaleFactor: 0.5 }
-          },
-          dashes: true
-        });
-      }
-    }
-  });
-  
-  // Conectar nutracêuticos entre si com base em possíveis sinergias
-  // Esta parte simula sinergias entre nutracêuticos
-  if (nutraceuticoNodes.length > 3) {
-    const synergiesCount = Math.ceil(nutraceuticoNodes.length / 3);
-    
-    for (let i = 0; i < synergiesCount; i++) {
-      const nutraceutico1 = nutraceuticoNodes[i % nutraceuticoNodes.length];
-      const nutraceutico2 = nutraceuticoNodes[(i + 2) % nutraceuticoNodes.length];
-      
-      if (nutraceutico1.id !== nutraceutico2.id) {
-        extraLinks.push({
-          id: `synergy_${i}`,
-          from: nutraceutico1.id,
-          to: nutraceutico2.id,
-          value: 2,
-          title: `Sinergia Potencial: ${nutraceutico1.label} + ${nutraceutico2.label}`,
-          color: '#8b5cf6', // Cor roxa para indicar sinergia
-          width: 1.5,
-          arrows: {
-            to: { enabled: false } // Sem setas para indicar relação bidirecional
-          },
-          dashes: [2, 2] // Padrão tracejado curto
-        });
-      }
-    }
-  }
-  
-  console.log(`NetworkGraph - Adicionadas ${extraLinks.length} conexões simuladas`);
-  
-  // Combinar os links válidos com os extras
   return {
     nodes: networkNodes,
-    links: [...validNetworkLinks, ...extraLinks]
+    links: validNetworkLinks
   };
 };
 
@@ -256,15 +90,18 @@ export const prepareMatrixData = (sankeyData: SankeyData) => {
   }
   
   // Separar nós por categoria
-  const nutraceuticoNodes = nodes.filter(node => node.category === 'nutraceutico');
-  const condicaoNodes = nodes.filter(node => node.category === 'condicao');
+  const nutraceuticoNodes = nodes.filter(node => 
+    node.category === 'nutraceutical' || node.category === 'compound'
+  );
+  const condicaoNodes = nodes.filter(node => 
+    node.category === 'condition' || node.category === 'disease'
+  );
   
-  // Preparar listas de nutracêuticos e condições
   const nutraceuticos = nutraceuticoNodes.map((node, index) => ({
     id: index,
     name: node.name,
     description: node.description || '',
-    originalId: nodes.indexOf(node) // Índice original no array de nós
+    originalId: nodes.indexOf(node)
   }));
   
   const condicoes = condicaoNodes.map((node, index) => ({
@@ -279,29 +116,25 @@ export const prepareMatrixData = (sankeyData: SankeyData) => {
     .filter(link => {
       const sourceNode = nodes[link.source];
       const targetNode = nodes[link.target];
-      return sourceNode?.category === 'nutraceutico' && targetNode?.category === 'condicao';
+      const sourceIsNutra = sourceNode?.category === 'nutraceutical' || sourceNode?.category === 'compound';
+      const targetIsCond = targetNode?.category === 'condition' || targetNode?.category === 'disease';
+      return sourceIsNutra && targetIsCond;
     })
     .map(link => {
-      const sourceNode = nodes[link.source];
-      const targetNode = nodes[link.target];
-      
-      // Encontrar índices na nova lista
       const nutraceuticoIndex = nutraceuticos.findIndex(n => n.originalId === link.source);
       const condicaoIndex = condicoes.findIndex(c => c.originalId === link.target);
       
-      if (nutraceuticoIndex === -1 || condicaoIndex === -1) {
-        return null;
-      }
+      if (nutraceuticoIndex === -1 || condicaoIndex === -1) return null;
       
-      const efficacyScore = link.value / 20; // Normalizar o valor
+      const efficacyScore = Math.min(5, Math.max(0, link.value / 20));
       
       return {
         nutraceuticoId: nutraceuticoIndex,
         condicaoId: condicaoIndex,
-        efficacyScore: Math.min(5, Math.max(0, efficacyScore)), // Limitar entre 0 e 5
-        relationshipType: link.relationshipType || 'support',
-        evidenceLevel: Math.floor(Math.random() * 5) + 1, // Aleatório para demonstração
-        studyCount: Math.floor(Math.random() * 10) + 1, // Aleatório para demonstração
+        efficacyScore,
+        relationshipType: link.relationshipType || 'TREATS',
+        evidenceLevel: 0,
+        studyCount: 0,
         description: link.description || ''
       };
     })
