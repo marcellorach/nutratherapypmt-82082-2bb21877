@@ -23,6 +23,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - ✅ **Fase 3 — Duplicações consolidadas**: `examEnhancer.ts` refatorado para consultar `lab_reference_ranges` do banco em vez de valores hardcoded locais
 - ✅ **Fase 4 — Páginas conectadas a dados reais**: `RecommendationsList.tsx` e `TutorPage.tsx` migrados de mock (`@/data`) para queries reais (`pet_profiles`, `recommendation_logs`); `useNutraceuticalsData.ts` sem mais fallback mock
 
+### Added - 2026-03-12 🌐 Full Bilingual System + Clinical Reasoning + Inline Compound Chat
+- ✅ **Evidence levels i18n**: All 7 levels ("Very High" → "Very Low") + recommendation strengths now use i18n keys
+- ✅ **Bilingual tags**: `NutraceuticalTag`, `ConditionTag`, `EvidenceTag`, `PredispositionTag` all translated
+- ✅ **Bilingual mock compounds**: `generateMockCompounds()` uses `t()` for names, conditions, rationales (EN/PT)
+- ✅ **`ScientificScoreIndex` & `EvidenceLegend`**: Fully translated with i18n keys
+- ✅ **Clinical Reasoning section**: `ConditionInsightCard` now shows *why* a condition is relevant (age, breed, causal connections)
+- ✅ **Suggested Pre-Treatment Exams**: 26 exam types mapped to conditions (Inflammatory Markers, Telomere Length, etc.)
+- ✅ **Inline Compound Chat**: Each compound in `CompoundDosageSlider` has a collapsible "Discuss this recommendation" chat with biological pathway awareness
+- ✅ **`PredispositionTag` bilingual**: Accepts `conditionNameEn` prop, displays based on active language
+- ✅ **~80 new translation keys** added to EN/PT locale files
+
 
 ### Changed - 2026-03-12 🔗 Unificação Relations ← Knowledge Graph
 - ✅ **useSankeyData reescrito**: Agora consulta `hierarchical_edges` via RPC (`get_relations_graph_data`) em vez de tabelas legadas manuais
