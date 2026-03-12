@@ -43,6 +43,7 @@ const PetProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
+  const conditionInsights = useConditionInsights(data?.conditions);
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
   const [confidenceLevel, setConfidenceLevel] = useState<'high' | 'medium' | 'low' | 'insufficient'>('medium');
