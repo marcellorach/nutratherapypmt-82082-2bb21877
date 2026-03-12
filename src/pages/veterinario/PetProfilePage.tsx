@@ -114,6 +114,7 @@ const PetProfilePage: React.FC = () => {
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
       setInteractionAlerts(result.interactionAlerts);
+      setClinicalDiscoveries(result.clinicalDiscoveries);
       setKgTriplets(result.kgTriplets);
       setKgPathways(result.kgPathways);
       setKgProjections(result.kgProjections);
