@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-11T23:29:56.107Z",
+  "timestamp": "2026-03-12T15:40:37.079Z",
   "summary": {
-    "totalFiles": 775,
-    "totalIssues": 369,
-    "hardcodedTexts": 36,
-    "missingKeys": 333,
+    "totalFiles": 768,
+    "totalIssues": 375,
+    "hardcodedTexts": 38,
+    "missingKeys": 337,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2090,14 +2090,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraph3D.tsx",
-      "line": 32,
+      "line": 33,
       "text": "react-force-graph-3d",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/KnowledgeGraph3D.tsx",
-      "line": 44,
+      "line": 45,
       "text": "react-force-graph-2d",
       "severity": "high"
     },
@@ -2340,6 +2340,34 @@
       "severity": "high"
     },
     {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 49,
+      "text": "id, name, species, breed, age_years, weight_kg, sex, owner_name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 74,
+      "text": "id, recommendation_data, rationale, confidence_overall, confidence_level, recommendation_source, created_at, warnings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/veterinario/RecommendationsList.tsx",
+      "line": 46,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/veterinario/RecommendationsList.tsx",
+      "line": 53,
+      "text": "*",
+      "severity": "high"
+    },
+    {
       "type": "hardcoded",
       "file": "src/components/administrador/AIInsightsTab.tsx",
       "line": 74,
@@ -2551,6 +2579,13 @@
     },
     {
       "type": "hardcoded",
+      "file": "src/components/administrador/visualizations/relations/RelationsHeader.tsx",
+      "line": 94,
+      "text": "All Entities",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
       "file": "src/components/landing/InvestmentSection.tsx",
       "line": 129,
       "text": "Contact Marcello Rachlyn",
@@ -2589,6 +2624,13 @@
       "file": "src/components/layout/Footer.tsx",
       "line": 79,
       "text": "Co-Scientist",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 98,
+      "text": "Carregando dados...",
       "severity": "medium"
     }
   ]
