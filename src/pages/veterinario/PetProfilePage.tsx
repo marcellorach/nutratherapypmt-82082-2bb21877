@@ -1,5 +1,6 @@
 // Pet Profile Page - VetGraphRAG Clinical Analysis Pipeline
 import React, { useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Layout from '@/components/layout/Layout';
