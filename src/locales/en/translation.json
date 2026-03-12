@@ -7192,5 +7192,25 @@
       "inputs": "Inputs",
       "outputs": "Outputs"
     }
+  },
+  "petRegistration": {
+    "chat": {
+      "title": "Intelligent Clinical Chat",
+      "description": "Describe the clinical picture or ask questions about this patient. AI extracts entities and answers clinical queries.",
+      "placeholder": "Describe symptoms, conditions, medications... or ask a question about this patient.",
+      "example": "E.g.: \"Patient presents with moderate osteoarthritis, taking Meloxicam 0.1mg/kg\"",
+      "questionExample": "Or ask: \"What is the most severe condition?\"",
+      "inputPlaceholder": "Describe clinical data or ask a question...",
+      "entitiesFound": "{{count}} clinical entities identified. Confirm to save to the record:",
+      "noEntitiesFound": "No clinical entities identified in the text. Try being more specific or ask a question about the patient.",
+      "noResponse": "No response received. Please try again.",
+      "extractionError": "Error processing your message. Please try again.",
+      "extracting": "Analyzing...",
+      "confirm": "Confirm & Save",
+      "discard": "Discard",
+      "entitiesSaved": "Entities saved",
+      "entitiesSavedDesc": "{{count}} clinical entities added to the record.",
+      "entitiesConfirmed": "Entities saved to patient record"
+    }
   }
 }

@@ -7192,5 +7192,25 @@
       "inputs": "Entradas",
       "outputs": "Saídas"
     }
+  },
+  "petRegistration": {
+    "chat": {
+      "title": "Chat Clínico Inteligente",
+      "description": "Descreva o quadro clínico ou faça perguntas sobre este paciente. A IA extrai entidades e responde consultas clínicas.",
+      "placeholder": "Descreva sintomas, condições, medicamentos... ou faça uma pergunta sobre o paciente.",
+      "example": "Ex.: \"Paciente apresenta osteoartrite moderada, tomando Meloxicam 0.1mg/kg\"",
+      "questionExample": "Ou pergunte: \"Qual a condição mais grave?\"",
+      "inputPlaceholder": "Descreva dados clínicos ou faça uma pergunta...",
+      "entitiesFound": "{{count}} entidades clínicas identificadas. Confirme para salvar no prontuário:",
+      "noEntitiesFound": "Nenhuma entidade clínica identificada no texto. Tente ser mais específico ou faça uma pergunta sobre o paciente.",
+      "noResponse": "Nenhuma resposta recebida. Tente novamente.",
+      "extractionError": "Erro ao processar sua mensagem. Tente novamente.",
+      "extracting": "Analisando...",
+      "confirm": "Confirmar e Salvar",
+      "discard": "Descartar",
+      "entitiesSaved": "Entidades salvas",
+      "entitiesSavedDesc": "{{count}} entidades clínicas adicionadas ao prontuário.",
+      "entitiesConfirmed": "Entidades salvas no prontuário do paciente"
+    }
   }
 }
