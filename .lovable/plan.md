@@ -1,73 +1,55 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+# O que mudou e como testar
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+## Resumo das mudanças implementadas (Fases 1–4)
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+### Fase 1 — Código morto removido
+- **Arquivos deletados**: `active-ingredients-service.ts`, `nutraceutical-outcomes-service.ts`, `scientific-studies-service.ts`, `useVetGraphRAGProcessingLegacy.ts`, `useVetGraphRAGProcessing.tsx`, `nutraceuticals/index.ts`
+- **Impacto**: Nenhum — nada importava esses arquivos. O app deve funcionar exatamente como antes.
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+### Fase 2 — Simulações eliminadas
+- **`vetgraphrag-service.ts`**: Antes gerava dados ALEATÓRIOS com `Math.random()` e salvava no banco. Agora chama a edge function `process-study` real.
+- **`openai.ts`**: Antes retornava texto hardcoded por keyword. Agora chama a edge function `chat` via Supabase (IA real).
+- **`simulation.ts`**: Deletado inteiramente.
+- **Impacto**: Processamento de estudos agora depende da edge function funcionar. Chat veterinário agora retorna respostas reais de IA.
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+### Fase 3 — Consolidações
+- **`examEnhancer.ts`**: Agora busca ranges de referência do banco (`lab_reference_ranges`) em vez de usar valores hardcoded locais.
+- **Impacto**: Interpretação de exames agora é assíncrona e usa dados reais.
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+### Fase 4 — Páginas conectadas a dados reais
+- **`RecommendationsList.tsx`**: Agora busca de `pet_profiles` + `recommendation_logs` do banco. Se não há recomendações, mostra call-to-action.
+- **`TutorPage.tsx`**: Agora busca pets reais de `pet_profiles` e recomendações de `recommendation_logs`.
+- **Impacto**: Essas páginas mostrarão dados REAIS do banco. Se o banco estiver vazio, mostram estado vazio com orientação.
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+### Fase extra — Relations tab (anterior)
+- **`useSankeyData.ts`**: Agora busca de `hierarchical_edges` via RPC `get_relations_graph_data` em vez de tabelas legadas.
 
-### 3. Novo componente: Chat Especializado por Composto
+---
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+## Como testar manualmente
 
-### 4. Chat Clínico Geral (sidebar)
+| Área | O que verificar |
+|---|---|
+| **Knowledge Graph** (tab atual) | Deve renderizar normalmente com os dados existentes |
+| **Relations** (tab) | Deve mostrar nós e links do Knowledge Graph real (hierarchical_edges) |
+| **Veterinário → Recomendações** | Se tem pet_profiles no banco, deve listar pets. Se não, mostra estado vazio. |
+| **Tutor** | Mesma lógica — lista pets reais do banco |
+| **Processamento de Estudos** (NTAI) | Ao processar um estudo, deve chamar a edge function `process-study`. Se a edge function não existir ou falhar, mostrará erro (esperado). |
+| **Chat no ExamViewer** | Ao perguntar algo, deve chamar a edge function `chat` e retornar resposta real de IA |
+| **Build/Console** | Sem erros de import ou referências quebradas |
 
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+## O que posso testar automaticamente
 
-### 5. Arquivos a modificar/criar
+Posso testar via browser:
+1. **Navegação**: Verificar que as tabs do admin carregam sem erros (Knowledge Graph, Relations, NTAI)
+2. **Console**: Verificar ausência de erros de import/runtime
+3. **Relations tab**: Verificar que renderiza dados do KG
 
-| Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
+Não posso testar automaticamente:
+- Edge functions (process-study, chat) — requerem dados reais e autenticação
+- Páginas de veterinário/tutor — requerem pet_profiles no banco com dados reais
 
-### 6. Estrutura visual resultante
-
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
-```
-
-### Detalhes técnicos
-
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+Quer que eu execute os testes automáticos de navegação e console agora?
 
