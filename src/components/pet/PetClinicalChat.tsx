@@ -9,6 +9,7 @@ import { MessageSquare, Send, Loader2, Check, X, Stethoscope, Pill, TestTube, Al
 import { supabase } from '@/integrations/supabase/client';
 import { useAddPetCondition, useAddPetMedication, useAddPetExam, useAddClinicalNote } from '@/hooks/usePetProfile';
 import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
 
 interface ExtractedEntity {
   type: 'condition' | 'medication' | 'symptom' | 'exam' | 'biomarker';
@@ -21,6 +22,7 @@ interface ChatMessage {
   content: string;
   entities?: ExtractedEntity[];
   confirmed?: boolean;
+  isQA?: boolean;
 }
 
 interface PetClinicalChatProps {
@@ -45,12 +47,24 @@ const entityColors: Record<string, string> = {
   biomarker: 'bg-purple-100 text-purple-800 border-purple-200',
 };
 
+// Detect if the input is a question vs clinical description
+const isQuestion = (text: string): boolean => {
+  const questionPatterns = [
+    /^(qual|quais|como|por que|porque|quando|onde|o que|quanto|quantos|quantas)\b/i,
+    /^(what|which|how|why|when|where|who|can|could|should|is|are|do|does|tell|explain|describe)\b/i,
+    /\?$/,
+    /^(me |nos )?(diga|fale|explique|conte|mostre|liste|resuma)/i,
+    /^(suggest|recommend|analyze|compare|summarize|list)/i,
+  ];
+  return questionPatterns.some(p => p.test(text.trim()));
+};
+
 const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petAge }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [isExtracting, setIsExtracting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const addCondition = useAddPetCondition();
   const addMedication = useAddPetMedication();
@@ -63,61 +77,99 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isExtracting) return;
+  // Fetch pet context for Q&A mode
+  const fetchPetContext = async () => {
+    const [conditionsRes, medsRes, examsRes] = await Promise.all([
+      supabase.from('pet_conditions').select('*').eq('pet_id', petId),
+      supabase.from('pet_medications').select('*').eq('pet_id', petId),
+      supabase.from('pet_exams').select('*').eq('pet_id', petId).order('exam_date', { ascending: false }).limit(10),
+    ]);
+    return {
+      conditions: conditionsRes.data || [],
+      medications: medsRes.data || [],
+      exams: examsRes.data || [],
+    };
+  };
 
-    const userMessage: ChatMessage = { role: 'user', content: input.trim() };
+  const handleSend = async () => {
+    if (!input.trim() || isProcessing) return;
+
+    const userText = input.trim();
+    const userMessage: ChatMessage = { role: 'user', content: userText };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setIsExtracting(true);
+    setIsProcessing(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('extract-pet-clinical-data', {
-        body: {
-          petId,
-          clinicalText: userMessage.content,
-          existingProfile: { breed: petBreed, age: petAge },
-        },
-      });
+      if (isQuestion(userText)) {
+        // Q&A mode: use the chat edge function with patient context
+        const petContext = await fetchPetContext();
+        
+        const systemPrompt = `You are a veterinary clinical intelligence assistant with access to a patient's complete medical record.
 
-      if (error) throw error;
+Patient Profile:
+- Species: Canine
+- Breed: ${petBreed || 'Unknown'}
+- Age: ${petAge || 'Unknown'} years
+- Active Conditions: ${petContext.conditions.filter(c => c.status === 'active').map(c => `${c.condition_name} (${c.severity || 'unspecified severity'})`).join(', ') || 'None recorded'}
+- Medications: ${petContext.medications.map(m => `${m.medication_name}${m.dosage ? ` (${m.dosage})` : ''}`).join(', ') || 'None recorded'}
+- Recent Exams: ${petContext.exams.map(e => `${e.exam_type}${e.exam_date ? ` (${e.exam_date})` : ''}`).join(', ') || 'None recorded'}
 
-      const entities: ExtractedEntity[] = [];
+Answer the veterinarian's question based on this patient's data. Be clinically precise and reference the patient's specific conditions when relevant. If the question requires information not available in the record, say so clearly. Respond in the same language the user writes in.`;
 
-      if (data.conditions) {
-        data.conditions.forEach((c: any) => entities.push({ type: 'condition', name: c.name, details: c }));
-      }
-      if (data.medications) {
-        data.medications.forEach((m: any) => entities.push({ type: 'medication', name: m.name, details: m }));
-      }
-      if (data.symptoms) {
-        data.symptoms.forEach((s: any) => entities.push({ type: 'symptom', name: s.name, details: s }));
-      }
-      if (data.examResults) {
-        data.examResults.forEach((e: any) => entities.push({ type: 'exam', name: e.type || e.name, details: e }));
-      }
-      if (data.biomarkers) {
-        data.biomarkers.forEach((b: any) => entities.push({ type: 'biomarker', name: b.name, details: b }));
-      }
+        const allMessages = [
+          { role: 'system', content: systemPrompt },
+          ...messages.filter(m => m.role === 'user' || m.isQA).map(m => ({ role: m.role, content: m.content })),
+          { role: 'user', content: userText },
+        ];
 
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: entities.length > 0
-          ? t('petRegistration.chat.entitiesFound', { count: entities.length })
-          : t('petRegistration.chat.noEntitiesFound'),
-        entities,
-        confirmed: false,
-      };
+        const { data, error } = await supabase.functions.invoke('chat', {
+          body: { messages: allMessages, stream: false },
+        });
 
-      setMessages(prev => [...prev, assistantMessage]);
+        if (error) throw error;
+
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data?.response || t('petRegistration.chat.noResponse', 'No response received.'),
+          isQA: true,
+        }]);
+      } else {
+        // Entity extraction mode: use extract-pet-clinical-data
+        const { data, error } = await supabase.functions.invoke('extract-pet-clinical-data', {
+          body: {
+            petId,
+            clinicalText: userText,
+            existingProfile: { breed: petBreed, age: petAge },
+          },
+        });
+
+        if (error) throw error;
+
+        const entities: ExtractedEntity[] = [];
+        if (data.conditions) data.conditions.forEach((c: any) => entities.push({ type: 'condition', name: c.name, details: c }));
+        if (data.medications) data.medications.forEach((m: any) => entities.push({ type: 'medication', name: m.name, details: m }));
+        if (data.symptoms) data.symptoms.forEach((s: any) => entities.push({ type: 'symptom', name: s.name, details: s }));
+        if (data.examResults) data.examResults.forEach((e: any) => entities.push({ type: 'exam', name: e.type || e.name, details: e }));
+        if (data.biomarkers) data.biomarkers.forEach((b: any) => entities.push({ type: 'biomarker', name: b.name, details: b }));
+
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: entities.length > 0
+            ? t('petRegistration.chat.entitiesFound', { count: entities.length })
+            : t('petRegistration.chat.noEntitiesFound'),
+          entities,
+          confirmed: false,
+        }]);
+      }
     } catch (error: any) {
-      console.error('Error extracting clinical data:', error);
+      console.error('Error in clinical chat:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: t('petRegistration.chat.extractionError'),
       }]);
     } finally {
-      setIsExtracting(false);
+      setIsProcessing(false);
     }
   };
 
@@ -163,7 +215,6 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
         }
       }
 
-      // Also save the original text as a clinical note
       await addNote.mutateAsync({
         pet_id: petId,
         content: messages[messageIndex - 1]?.content || '',
@@ -215,6 +266,7 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
                 <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">{t('petRegistration.chat.placeholder')}</p>
                 <p className="text-xs mt-2 italic">{t('petRegistration.chat.example')}</p>
+                <p className="text-xs mt-1 italic text-primary">{t('petRegistration.chat.questionExample', 'Or ask: "What is the most severe condition?"')}</p>
               </div>
             )}
 
@@ -230,7 +282,13 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
                       : 'bg-muted'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.isQA ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  )}
 
                   {message.entities && message.entities.length > 0 && (
                     <div className="mt-3 space-y-2">
@@ -289,7 +347,7 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
               </div>
             ))}
 
-            {isExtracting && (
+            {isProcessing && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-lg px-4 py-3 flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -308,11 +366,11 @@ const PetClinicalChat: React.FC<PetClinicalChatProps> = ({ petId, petBreed, petA
             placeholder={t('petRegistration.chat.inputPlaceholder')}
             rows={2}
             className="resize-none"
-            disabled={isExtracting}
+            disabled={isProcessing}
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isExtracting}
+            disabled={!input.trim() || isProcessing}
             size="icon"
             className="shrink-0 h-auto"
           >
