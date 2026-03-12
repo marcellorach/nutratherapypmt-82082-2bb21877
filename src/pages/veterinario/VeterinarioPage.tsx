@@ -51,7 +51,7 @@ const VeterinarioPage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">{t('veterinarian.portal')}</h1>
-            <p className="text-gray-600">{t('veterinarian.portalDesc')}</p>
+            <p className="text-muted-foreground">{t('veterinarian.portalDesc')}</p>
           </div>
           
           <div className="flex gap-4 mt-4 md:mt-0">
