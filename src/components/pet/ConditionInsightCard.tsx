@@ -77,11 +77,11 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
           )}
           {condition.severity && (
             <Badge variant="outline" className={severityColors[condition.severity]}>
-              {t(`petProfile.conditionInsights.severity.${condition.severity}`, condition.severity)}
+              {String(t(`petProfile.conditionInsights.severity.${condition.severity}`, condition.severity))}
             </Badge>
           )}
           <Badge variant="outline" className={statusColors[condition.status]}>
-            {t(`petProfile.conditionInsights.status.${condition.status}`, condition.status)}
+            {String(t(`petProfile.conditionInsights.status.${condition.status}`, condition.status))}
           </Badge>
           {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
