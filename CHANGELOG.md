@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-12 📋 Proposta de Tratamento para o Tutor (Owner Portal)
+- ✅ **Nova tabela `treatment_proposals`**: Armazena propostas geradas na aprovação do stack pelo veterinário (pet_id, compounds, conditions, scientific_summary, pricing, status)
+- ✅ **`TreatmentProposalCard`**: Componente bilíngue com seções: Gerociência, Condições, Evidência Científica (triplets/studies/KG coverage), Compostos, Aprovação Veterinária, Programa Vivo, Preço (R$105-270/mês)
+- ✅ **Geração automática de proposta**: `handleApproveStack` em PetProfilePage agora insere proposta no banco com dados clínicos snapshot, preço calculado por complexidade
+- ✅ **Tab "Propostas" no Owner Portal**: TutorPage exibe propostas pendentes com badge de contagem, aceite com atualização de status
+- ✅ **i18n completo**: ~35 novas chaves PT/EN para toda a feature de propostas
+
 ### Fixed - 2026-03-12 🐛 Recomendações Genéricas → Individualizadas (Root Cause Fix)
 - ✅ **Canonicalização de condições**: Mapa de nomes clínicos → nomes canônicos do KG (ex: "Heart Disease" → "Cardiovascular Disease", "CDS" → "Cognitive Dysfunction Syndrome") com fallback progressivo
 - ✅ **graph-rag-search resiliente**: Escape de caracteres regex em nomes de condições + fallback `CONTAINS` case-insensitive no Cypher
