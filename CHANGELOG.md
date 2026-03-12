@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-12 📊 Gráfico de Progressão por Condição na Proposta do Tutor
+- ✅ **ConditionProgressionChart**: Gráfico AreaChart com duas curvas — "Com Tratamento" (melhora sigmoide) vs "Sem Tratamento" (declínio gradual) por condição
+- ✅ **Dropdown de condições**: Quando há múltiplas condições, dropdown permite selecionar qual visualizar
+- ✅ **Pontos de calibração**: Exames de baseline (M0) e calibração (M11) destacados com ReferenceDot/ReferenceLine
+- ✅ **Badges de projeção**: Exibe baseline, projeção com e sem tratamento como badges informativos
+- ✅ **i18n completo**: 13 novas chaves PT/EN para o gráfico de progressão
+
 ### Added - 2026-03-12 🚀 Owner Portal Enriquecido — Proposta Rica + Chat IA + Timeline + Exames
 - ✅ **Filtro de pets por propostas**: Owner Portal agora mostra apenas pets que possuem propostas de tratamento
 - ✅ **Pathways Biológicos na proposta**: Visualização simplificada Composto → Mecanismo → Efeito → Resultado para o tutor
