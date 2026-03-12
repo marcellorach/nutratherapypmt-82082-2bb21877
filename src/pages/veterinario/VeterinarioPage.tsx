@@ -108,6 +108,23 @@ const VeterinarioPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin.patients.deleteConfirmTitle', 'Confirmar exclusão')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin.patients.deleteConfirmDesc', 'Tem certeza que deseja remover este pet? Esta ação não pode ser desfeita.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => deleteTarget && handleDeletePet(deleteTarget)}>
+              {t('common.delete', 'Apagar')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
