@@ -46,14 +46,30 @@ const TutorPage: React.FC = () => {
     const loadPets = async () => {
       setIsLoading(true);
       try {
+        // First get pet_ids that have proposals
+        const { data: proposalPetIds, error: propError } = await (supabase as any)
+          .from('treatment_proposals')
+          .select('pet_id');
+        
+        const petIdsWithProposals = new Set(
+          (proposalPetIds || []).map((p: any) => p.pet_id)
+        );
+
         const { data, error } = await supabase
           .from('pet_profiles')
           .select('id, name, species, breed, age_years, weight_kg, sex, owner_name')
           .order('name');
         
         if (!error && data && data.length > 0) {
-          setPets(data);
-          setSelectedPetId(data[0].id);
+          // Filter to only pets with proposals
+          const filteredPets = petIdsWithProposals.size > 0
+            ? data.filter(p => petIdsWithProposals.has(p.id))
+            : [];
+          
+          setPets(filteredPets);
+          if (filteredPets.length > 0) {
+            setSelectedPetId(filteredPets[0].id);
+          }
         }
       } catch (err) {
         console.error('Error loading pets:', err);

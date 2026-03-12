@@ -1,71 +1,73 @@
 
 
-## Plan: Enrich Owner Portal — Filter Pets + Rich Proposal + AI Chat + Treatment Timeline + Periodic Exams
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-### Overview
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-Two changes: (a) Only show pets that have proposals in the tutor portal; (b) Massively enrich the `TreatmentProposalCard` and save richer data from `handleApproveStack`.
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-### 1. Filter Pets to Only Those with Proposals
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-In `TutorPage.tsx`:
-- After loading all pets, query `treatment_proposals` to get distinct `pet_id`s that have proposals
-- Filter the pets list to only those with at least one proposal
-- Auto-select the first pet that has proposals
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-### 2. Save Richer Data in `handleApproveStack`
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-In `PetProfilePage.tsx`, expand the `proposalData` to include:
-- `biological_pathways`: snapshot of `kgPathways` (compound → mechanism → effect → outcome chains)
-- `key_triplets`: top 10 most relevant triplets from `kgTriplets` with subject/predicate/object/confidence
-- `treatment_timeline`: generated 12-month expected milestones (month 1: adaptation, month 2-3: early effects, month 4-6: measurable improvement, month 7-12: maintenance & optimization)
-- `periodic_exams`: stack of recommended periodic exams based on conditions (e.g., inflammatory markers at 3mo, liver/kidney panel at 6mo, full reassessment at 12mo)
-- `predispositions`: breed risk data
-- `lab_alerts`: any current lab abnormalities
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-Update the DB column — these all go into existing JSONB fields (`scientific_summary` can hold all of this).
+### 3. Novo componente: Chat Especializado por Composto
 
-### 3. Enrich `TreatmentProposalCard` with New Sections
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
 
-Rewrite `TreatmentProposalCard.tsx` to be a much richer, multi-section proposal:
+### 4. Chat Clínico Geral (sidebar)
 
-1. **Header** (keep, improve gradient)
-2. **Geroscience Explanation** (keep, slightly richer text)
-3. **Conditions** (keep badges, add severity indicator)
-4. **Biological Pathways** — visual chain: Compound → Mechanism → Effect → Outcome (simplified version of BiologicalPathway for tutors, no L0/L2 jargon — use plain language like "How it works")
-5. **Scientific Evidence** (keep triplet/study stats, add top 3 key relationships as readable sentences: "Quercetin TREATS Osteoarthritis — 4 studies, 87% confidence")
-6. **Compounds** (keep, add brief mechanism per compound)
-7. **Expected Treatment Timeline** — 12-month visual timeline with milestones (month markers with expected effects)
-8. **Periodic Exam Schedule** — table/list of recommended exams at 3, 6, 9, 12 months
-9. **Vet Approval** (keep)
-10. **AI Q&A Chat** — collapsible section with a chat powered by the existing `chat` edge function, system prompt contextualized with this pet's proposal data (conditions, compounds, pathways). The "I Have Questions" button opens this chat.
-11. **Living Program** (keep)
-12. **Pricing** (keep)
-13. **Accept / Chat buttons** (keep, wire "I Have Questions" to toggle chat)
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
 
-### 4. New Component: `ProposalAIChat`
+### 5. Arquivos a modificar/criar
 
-Create `src/components/tutor/ProposalAIChat.tsx`:
-- Simple chat UI (reuse pattern from `CompoundSpecificChat`)
-- System prompt includes: pet name/breed/age, conditions, compounds with dosages, pathways summary, rationale
-- Uses `supabase.functions.invoke('chat', ...)` 
-- Renders markdown responses
-- Bilingual (responds in user's language)
+| Arquivo | Ação |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-### 5. i18n Keys
+### 6. Estrutura visual resultante
 
-Add ~30 new translation keys for:
-- Biological pathway section titles
-- Timeline milestone descriptions (month 1, 3, 6, 12)
-- Periodic exam schedule labels
-- AI chat placeholder/suggestions
-- All in PT and EN
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
 
-### Files
+### Detalhes técnicos
 
-- **Edit**: `src/pages/tutor/TutorPage.tsx` (filter pets by proposals)
-- **Edit**: `src/pages/veterinario/PetProfilePage.tsx` (richer proposalData with pathways, triplets, timeline, exams)
-- **Rewrite**: `src/components/tutor/TreatmentProposalCard.tsx` (all new sections)
-- **Create**: `src/components/tutor/ProposalAIChat.tsx` (AI chat for tutor questions)
-- **Edit**: `src/locales/pt/translation.json` and `src/locales/en/translation.json`
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

@@ -167,6 +167,7 @@ const PetProfilePage: React.FC = () => {
         name: c.name,
         dosage: `${c.dosageCurrent} ${c.unit}`,
         reason: c.rationale || '',
+        mechanism: c.condition || '',
         enabled: !c.removed,
       })),
       scientific_summary: {
@@ -174,6 +175,51 @@ const PetProfilePage: React.FC = () => {
         studyCount: new Set(kgTriplets.map((t: any) => t.study_id).filter(Boolean)).size,
         kgCoverage: kgTriplets.length > 0 ? Math.min(1, kgTriplets.length / 20) : 0,
         pathwayCount: kgPathways.length,
+        // Biological pathways snapshot
+        biological_pathways: kgPathways.slice(0, 6).map((p: any) => ({
+          condition: p.condition,
+          steps: (p.steps || []).map((s: any) => ({
+            label: s.label,
+            type: s.type,
+            predicate: s.predicate,
+          })),
+        })),
+        // Top key triplets
+        key_triplets: kgTriplets.slice(0, 10).map((t: any) => ({
+          subject: t.subject,
+          predicate: t.predicate,
+          object: t.object,
+          confidence: t.confidence,
+          studies: t.study_count || 1,
+        })),
+        // Treatment timeline
+        treatment_timeline: [
+          { month: 1, phase: 'adaptation' },
+          { month: 2, phase: 'early_effects' },
+          { month: 4, phase: 'measurable_improvement' },
+          { month: 7, phase: 'consolidation' },
+          { month: 10, phase: 'reassessment' },
+        ],
+        // Periodic exam schedule
+        periodic_exams: [
+          { month: 3, exams: ['inflammatory', 'cbc'] },
+          { month: 6, exams: ['liver_kidney', 'inflammatory', 'oxidative_stress'] },
+          { month: 9, exams: ['cbc', 'metabolic'] },
+          { month: 12, exams: ['full_reassessment', 'liver_kidney', 'inflammatory', 'oxidative_stress'] },
+        ],
+        // Predispositions snapshot
+        predispositions: predispositions.slice(0, 5).map(p => ({
+          condition: p.condition_name,
+          risk_factor: p.risk_factor,
+          already_diagnosed: p.already_diagnosed,
+        })),
+        // Lab alerts snapshot
+        lab_alerts: labAlerts.slice(0, 5).map(a => ({
+          test: a.test_name,
+          value: a.value,
+          status: a.status,
+          unit: a.unit,
+        })),
       },
       confidence_level: confidenceLevel,
       rationale: t('petProfile.recommendation.approvedRationale'),

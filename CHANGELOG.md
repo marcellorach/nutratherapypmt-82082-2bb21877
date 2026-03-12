@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-12 🚀 Owner Portal Enriquecido — Proposta Rica + Chat IA + Timeline + Exames
+- ✅ **Filtro de pets por propostas**: Owner Portal agora mostra apenas pets que possuem propostas de tratamento
+- ✅ **Pathways Biológicos na proposta**: Visualização simplificada Composto → Mecanismo → Efeito → Resultado para o tutor
+- ✅ **Triplets-chave como frases legíveis**: Top 5 relações científicas exibidas como "Curcumina TRATA Artrite — 87% confiança"
+- ✅ **Timeline de Tratamento 12 meses**: Adaptação → Primeiros Efeitos → Melhora Mensurável → Consolidação → Reavaliação
+- ✅ **Cronograma de Exames Periódicos**: Marcadores inflamatórios (3m), painel hepático/renal (6m), reavaliação completa (12m)
+- ✅ **Chat IA contextualizado para tutores**: ProposalAIChat com system prompt incluindo pet, condições, compostos e pathways — sugestões rápidas de perguntas
+- ✅ **handleApproveStack enriquecido**: Agora salva biological_pathways, key_triplets, treatment_timeline, periodic_exams, predispositions, lab_alerts no scientific_summary JSONB
+- ✅ **i18n expandido**: ~30 novas chaves PT/EN para pathways, timeline, exames e chat
+
 ### Added - 2026-03-12 📋 Proposta de Tratamento para o Tutor (Owner Portal)
 - ✅ **Nova tabela `treatment_proposals`**: Armazena propostas geradas na aprovação do stack pelo veterinário (pet_id, compounds, conditions, scientific_summary, pricing, status)
 - ✅ **`TreatmentProposalCard`**: Componente bilíngue com seções: Gerociência, Condições, Evidência Científica (triplets/studies/KG coverage), Compostos, Aprovação Veterinária, Programa Vivo, Preço (R$105-270/mês)
