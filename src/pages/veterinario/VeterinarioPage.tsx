@@ -92,7 +92,7 @@ const VeterinarioPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredPets.map((pet) => (
-                <PetProfileCard key={pet.id} pet={pet} />
+                <PetProfileCard key={pet.id} pet={pet} onDelete={(id) => setDeleteTarget(id)} />
               ))}
 
               {filteredPets.length === 0 && (
