@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle, Dna } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
@@ -21,6 +21,7 @@ import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
+import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
@@ -293,6 +294,16 @@ const PetProfilePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content (2/3) */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Digital Twin */}
+            {conditions.length > 0 && (
+              <DigitalTwinDog
+                conditions={conditions}
+                petName={profile.name}
+                petBreed={profile.breed}
+                petAge={profile.age_years}
+              />
+            )}
+
             {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
