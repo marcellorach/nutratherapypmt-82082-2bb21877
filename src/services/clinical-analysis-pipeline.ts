@@ -729,14 +729,18 @@ export async function runClinicalAnalysisPipeline(
   );
   const interactionAlerts = checkInteractions(recommendedCompoundNames, medicationNames, kgResults);
 
-  // Stage 6: Hybrid recommendation
-  const recommendation = await getHybridRecommendation(
-    profile, conditionNames, kgResults, predispositions, labAlerts, medicationNames
+  // Generate clinical discoveries
+  const clinicalDiscoveries = generateClinicalDiscoveries(
+    predispositions, labAlerts, conditions, medications, exams, profile.breed, profile.age_years
   );
 
-  // Build compounds from recommendation
+  // Stage 6: Hybrid recommendation with full context
+  const recommendation = await getHybridRecommendation(
+    profile, conditionNames, kgResults, predispositions, labAlerts, medicationNames, conditions, exams
+  );
+
+  // Build compounds from recommendation with per-condition mapping
   const nutraceuticals = recommendation?.nutraceuticals || [];
-  const primaryCondition = conditionNames[0] || 'geriatric wellness';
   const compounds = nutraceuticals.map((n: any, idx: number) => {
     const dosageMatch = n.dosage?.match(/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|IU)/i);
     const dosageMin = dosageMatch ? parseFloat(dosageMatch[1]) : 5;
@@ -747,29 +751,33 @@ export async function runClinicalAnalysisPipeline(
     return {
       id: `rec-${idx}`,
       name: n.name,
-      condition: primaryCondition,
+      condition: n.condition || n.targetCondition || conditionNames[idx % conditionNames.length] || 'geriatric wellness',
       dosageMin,
       dosageMax,
       dosageRecommended: Math.round(recommended * 10) / 10,
       dosageCurrent: Math.round(recommended * 10) / 10,
       unit,
       evidenceLevel: n.evidenceLevel || 'AI-suggested',
-      rationale: n.mechanism || '',
+      rationale: n.mechanism || n.rationale || '',
       removed: false,
       type: 'nutraceutical' as const,
     };
   });
 
+  // Prioritize compounds based on lab findings
+  const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions);
+
   return {
     predispositions,
     labAlerts,
     interactionAlerts,
+    clinicalDiscoveries,
     kgResults,
     kgTriplets: triplets,
     kgPathways: pathways,
     kgProjections: projections,
     recommendation,
-    compounds,
+    compounds: prioritizedCompounds,
     confidenceLevel: kgResults.length > 0 ? 'medium' : 'low',
     analysisTimestamp: new Date().toISOString(),
   };
