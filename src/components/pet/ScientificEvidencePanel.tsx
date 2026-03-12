@@ -167,7 +167,7 @@ const ScientificEvidencePanel: React.FC<ScientificEvidencePanelProps> = ({ tripl
                 <div key={idx} className="flex items-center gap-2 text-sm flex-wrap">
                   <NutraceuticalTag name={compound.compound} score={compound.score || 0.8} showScore={false} />
                   <span className="text-[10px] text-muted-foreground">→</span>
-                  {compound.conditions.map((cond, cIdx) => (
+                  {compound.conditionsTreated.map((cond, cIdx) => (
                     <ConditionTag key={cIdx} condition={cond} score={0} showScore={false} />
                   ))}
                 </div>
