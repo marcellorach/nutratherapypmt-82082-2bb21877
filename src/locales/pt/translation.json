@@ -1219,7 +1219,40 @@
       "errorDesc": "Não foi possível aceitar a proposta. Tente novamente.",
       "alreadyAccepted": "Proposta aceita ✓",
       "noPendingTitle": "Nenhuma Proposta Pendente",
-      "noPendingDesc": "Quando seu veterinário aprovar um protocolo, a proposta aparecerá aqui."
+      "noPendingDesc": "Quando seu veterinário aprovar um protocolo, a proposta aparecerá aqui.",
+      "pathwaysTitle": "Como Funciona o Tratamento",
+      "pathwaysDesc": "Caminho biológico simplificado mostrando como cada composto atua no organismo do seu pet.",
+      "keyRelationshipsTitle": "Principais Relações Científicas",
+      "relationshipSentence": "{{compound}} {{predicate}} {{condition}} — {{studies}} estudos, {{confidence}}% confiança",
+      "timelineTitle": "Plano de Tratamento Esperado (12 meses)",
+      "timelineMonth": "Mês {{month}}",
+      "timeline": {
+        "month1": "Adaptação — Introdução gradual dos compostos. Monitoramento de tolerância e efeitos iniciais.",
+        "month2_3": "Primeiros Efeitos — Redução inicial de marcadores inflamatórios. Melhora sutil de energia e mobilidade.",
+        "month4_6": "Melhora Mensurável — Resultados visíveis em exames de acompanhamento. Ajuste fino de dosagens conforme resposta individual.",
+        "month7_9": "Consolidação — Estabilização dos ganhos clínicos. Protocolo otimizado para manutenção de longo prazo.",
+        "month10_12": "Reavaliação Completa — Comparação com baseline. Renovação do plano com ajustes baseados em 12 meses de dados."
+      },
+      "periodicExamsTitle": "Cronograma de Exames Periódicos",
+      "periodicExamsDesc": "Exames recomendados para monitoramento e ajuste do tratamento.",
+      "examMonth": "Mês {{month}}",
+      "examTypes": {
+        "inflammatory": "Marcadores Inflamatórios (PCR, IL-6)",
+        "liver_kidney": "Painel Hepático e Renal",
+        "cbc": "Hemograma Completo",
+        "full_reassessment": "Reavaliação Clínica Completa",
+        "oxidative_stress": "Marcadores de Estresse Oxidativo",
+        "metabolic": "Painel Metabólico"
+      },
+      "aiChatTitle": "Assistente de Dúvidas",
+      "aiChatDesc": "Pergunte sobre o tratamento, compostos, efeitos esperados ou qualquer dúvida sobre a proposta.",
+      "aiChatPlaceholder": "Ex: Qual o efeito da Curcumina na inflamação?",
+      "aiChatSuggestions": [
+        "Quais são os efeitos colaterais possíveis?",
+        "Como devo administrar os compostos?",
+        "Em quanto tempo verei resultados?",
+        "Posso combinar com a ração atual?"
+      ]
     },
     "plan": {
       "startDate": "Data de início",

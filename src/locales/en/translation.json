@@ -1219,7 +1219,40 @@
       "errorDesc": "Could not accept the proposal. Please try again.",
       "alreadyAccepted": "Proposal accepted ✓",
       "noPendingTitle": "No Pending Proposals",
-      "noPendingDesc": "When your veterinarian approves a protocol, the proposal will appear here."
+      "noPendingDesc": "When your veterinarian approves a protocol, the proposal will appear here.",
+      "pathwaysTitle": "How the Treatment Works",
+      "pathwaysDesc": "Simplified biological pathway showing how each compound acts in your pet's body.",
+      "keyRelationshipsTitle": "Key Scientific Relationships",
+      "relationshipSentence": "{{compound}} {{predicate}} {{condition}} — {{studies}} studies, {{confidence}}% confidence",
+      "timelineTitle": "Expected Treatment Plan (12 months)",
+      "timelineMonth": "Month {{month}}",
+      "timeline": {
+        "month1": "Adaptation — Gradual compound introduction. Monitoring tolerance and initial effects.",
+        "month2_3": "Early Effects — Initial reduction in inflammatory markers. Subtle improvements in energy and mobility.",
+        "month4_6": "Measurable Improvement — Visible results in follow-up exams. Fine-tuning dosages based on individual response.",
+        "month7_9": "Consolidation — Stabilization of clinical gains. Protocol optimized for long-term maintenance.",
+        "month10_12": "Full Reassessment — Comparison with baseline. Plan renewal with adjustments based on 12 months of data."
+      },
+      "periodicExamsTitle": "Periodic Exam Schedule",
+      "periodicExamsDesc": "Recommended exams for treatment monitoring and adjustment.",
+      "examMonth": "Month {{month}}",
+      "examTypes": {
+        "inflammatory": "Inflammatory Markers (CRP, IL-6)",
+        "liver_kidney": "Liver & Kidney Panel",
+        "cbc": "Complete Blood Count",
+        "full_reassessment": "Complete Clinical Reassessment",
+        "oxidative_stress": "Oxidative Stress Markers",
+        "metabolic": "Metabolic Panel"
+      },
+      "aiChatTitle": "Question Assistant",
+      "aiChatDesc": "Ask about the treatment, compounds, expected effects or any question about the proposal.",
+      "aiChatPlaceholder": "E.g.: What is the effect of Curcumin on inflammation?",
+      "aiChatSuggestions": [
+        "What are the possible side effects?",
+        "How should I administer the compounds?",
+        "How long until I see results?",
+        "Can I combine this with the current diet?"
+      ]
     },
     "plan": {
       "startDate": "Start date",
