@@ -727,14 +727,14 @@ async function getHybridRecommendation(
   const allKgCompounds = Object.values(perConditionCompounds).flat()
     .filter(c => !medNamesLower.some(m => (c.name || '').toLowerCase().includes(m)));
 
-  // Deduplicate by name, keeping first occurrence
+  // Deduplicate by name, keeping first occurrence, cap at 8 for LLM
   const seenNames = new Set<string>();
   const uniqueCompounds = allKgCompounds.filter(c => {
     const key = (c.name || '').toLowerCase();
     if (seenNames.has(key)) return false;
     seenNames.add(key);
     return true;
-  });
+  }).slice(0, 8);
 
   const { data: recommendation, error: recError } = await supabase.functions.invoke('hybrid-recommendation', {
     body: {
