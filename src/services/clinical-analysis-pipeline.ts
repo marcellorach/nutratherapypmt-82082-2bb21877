@@ -53,10 +53,19 @@ export interface InteractionAlert {
   description: string;
 }
 
+export interface ClinicalDiscovery {
+  type: 'lab-condition-correlation' | 'medication-monitoring' | 'breed-lab-confirmation' | 'compound-opportunity';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  description: string;
+  relatedEntities: string[];
+}
+
 export interface ClinicalAnalysisResult {
   predispositions: BreedPredisposition[];
   labAlerts: LabAlert[];
   interactionAlerts: InteractionAlert[];
+  clinicalDiscoveries: ClinicalDiscovery[];
   kgResults: any[];
   kgTriplets: any[];
   kgPathways: any[];
@@ -418,6 +427,191 @@ function extractKgEvidence(kgResults: any[], conditionNames: string[]) {
   return { triplets, pathways, projections };
 }
 
+// ─── Clinical Discoveries Generator ─────────────────────────────────────────
+
+function generateClinicalDiscoveries(
+  predispositions: BreedPredisposition[],
+  labAlerts: LabAlert[],
+  conditions: any[],
+  medications: any[],
+  exams: any[],
+  breed: string,
+  ageYears: number
+): ClinicalDiscovery[] {
+  const discoveries: ClinicalDiscovery[] = [];
+  const conditionNames = conditions.map((c: any) => (c.condition_name || '').toLowerCase());
+  const medNames = medications.map((m: any) => (m.medication_name || '').toLowerCase());
+
+  // 1. Lab-Condition correlations
+  for (const alert of labAlerts) {
+    const testLower = alert.test_name.toLowerCase();
+    // CRP/IL-6 elevated + Osteoarthritis/Inflammation
+    if ((testLower.includes('crp') || testLower.includes('il6') || testLower.includes('il-6')) && alert.status.includes('high')) {
+      const inflammCondition = conditionNames.find(c => c.includes('osteoarthritis') || c.includes('inflam'));
+      if (inflammCondition) {
+        discoveries.push({
+          type: 'lab-condition-correlation',
+          severity: 'warning',
+          title: `${alert.test_name} elevado correlacionado com ${inflammCondition}`,
+          description: `${alert.test_name} = ${alert.value} ${alert.unit} (ref: ${alert.min_normal}-${alert.max_normal}). Marcador inflamatório elevado pode indicar resposta inflamatória crônica associada a ${inflammCondition}. Considerar antioxidantes e anti-inflamatórios naturais.`,
+          relatedEntities: [alert.test_name, inflammCondition],
+        });
+      }
+    }
+    // Creatinine/BUN elevated + medications
+    if ((testLower.includes('creatinine') || testLower.includes('bun') || testLower.includes('sdma')) && alert.status.includes('high')) {
+      const nephrotoxicMed = medNames.find(m => m.includes('meloxicam') || m.includes('carprofen') || m.includes('furosemide'));
+      if (nephrotoxicMed) {
+        discoveries.push({
+          type: 'medication-monitoring',
+          severity: 'critical',
+          title: `Monitoramento renal necessário — ${nephrotoxicMed} + ${alert.test_name} alterado`,
+          description: `${alert.test_name} = ${alert.value} ${alert.unit} (limítrofe/elevado). O uso contínuo de ${nephrotoxicMed} requer monitoramento renal frequente. Considerar nefroprotetores (Astaxantina, Omega-3).`,
+          relatedEntities: [nephrotoxicMed, alert.test_name],
+        });
+      }
+    }
+    // ALT/ALP elevated + medication hepatotoxicity
+    if ((testLower.includes('alt') || testLower.includes('alkaline_phosphatase') || testLower.includes('alp')) && alert.status.includes('high')) {
+      const hepatotoxicMed = medNames.find(m => m.includes('selegiline') || m.includes('carprofen') || m.includes('meloxicam'));
+      if (hepatotoxicMed) {
+        discoveries.push({
+          type: 'medication-monitoring',
+          severity: 'warning',
+          title: `Enzimas hepáticas elevadas — monitorar ${hepatotoxicMed}`,
+          description: `${alert.test_name} = ${alert.value} ${alert.unit} (elevado). Possível estresse hepático associado ao uso prolongado de ${hepatotoxicMed}. Considerar hepatoprotetores (Silimarina, SAMe).`,
+          relatedEntities: [hepatotoxicMed, alert.test_name],
+        });
+      }
+    }
+    // NT-proBNP/Troponin elevated
+    if ((testLower.includes('nt_probnp') || testLower.includes('troponin')) && alert.status.includes('high')) {
+      const cardiacCondition = conditionNames.find(c => c.includes('heart') || c.includes('cardí') || c.includes('cardiac'));
+      if (cardiacCondition) {
+        discoveries.push({
+          type: 'lab-condition-correlation',
+          severity: 'critical',
+          title: `Biomarcadores cardíacos confirmam ${cardiacCondition}`,
+          description: `${alert.test_name} = ${alert.value} ${alert.unit} (significativamente elevado). Confirma progressão de ${cardiacCondition}. Considerar cardioprotetores: CoQ10, Taurina, L-Carnitina.`,
+          relatedEntities: [alert.test_name, cardiacCondition],
+        });
+      }
+    }
+    // WBC elevated
+    if (testLower.includes('wbc') && alert.status.includes('high')) {
+      discoveries.push({
+        type: 'lab-condition-correlation',
+        severity: 'info',
+        title: `WBC elevado — possível processo inflamatório ativo`,
+        description: `WBC = ${alert.value} ${alert.unit} (ref: ${alert.min_normal}-${alert.max_normal}). Leucocitose pode indicar inflamação sistêmica ativa. Correlacionar com sintomas clínicos e considerar painel inflamatório completo.`,
+        relatedEntities: ['WBC', ...conditionNames.filter(c => c.includes('inflam'))],
+      });
+    }
+    // Oxidative stress markers
+    if ((testLower.includes('mda') || testLower.includes('sod') || testLower.includes('glutathione')) && (alert.status.includes('high') || alert.status.includes('low'))) {
+      discoveries.push({
+        type: 'compound-opportunity',
+        severity: 'warning',
+        title: `Estresse oxidativo detectado — oportunidade terapêutica`,
+        description: `${alert.test_name} fora do normal (${alert.value} ${alert.unit}). Estresse oxidativo acelerado contribui para envelhecimento celular. Compostos antioxidantes prioritários: Resveratrol, NAC, Vitamina E, Astaxantina.`,
+        relatedEntities: [alert.test_name, 'Estresse Oxidativo'],
+      });
+    }
+    // Cortisol elevated + cognitive dysfunction
+    if (testLower.includes('cortisol') && alert.status.includes('high')) {
+      const cogCondition = conditionNames.find(c => c.includes('cognitive') || c.includes('cds'));
+      if (cogCondition) {
+        discoveries.push({
+          type: 'lab-condition-correlation',
+          severity: 'warning',
+          title: `Cortisol elevado associado a disfunção cognitiva`,
+          description: `Cortisol = ${alert.value} ${alert.unit} (elevado). Hipercortisolemia crônica acelera neurodegeneração. Compostos neuroprotetores indicados: Fosfatidilserina, DHA, Vitamina E.`,
+          relatedEntities: ['Cortisol', cogCondition],
+        });
+      }
+    }
+  }
+
+  // 2. Breed predisposition + lab confirmation
+  for (const pred of predispositions) {
+    if (pred.already_diagnosed) continue;
+    const predLower = pred.condition_name.toLowerCase();
+    
+    // Check if any exam suggests early signs
+    for (const exam of exams) {
+      if (!exam.results || typeof exam.results !== 'object') continue;
+      const resultsStr = JSON.stringify(exam.results).toLowerCase();
+      
+      if (predLower.includes('hip dysplasia') && resultsStr.includes('dysplasia')) {
+        discoveries.push({
+          type: 'breed-lab-confirmation',
+          severity: 'warning',
+          title: `Predisposição a ${pred.condition_name} com sinais em exame`,
+          description: `${breed} tem risco ${pred.risk_factor}x para ${pred.condition_name} (evidência ${pred.evidence_grade}). Exame "${exam.exam_type}" mostra sinais compatíveis. Considerar intervenção precoce com condroprotetores.`,
+          relatedEntities: [pred.condition_name, exam.exam_type],
+        });
+        break;
+      }
+    }
+  }
+
+  // 3. Age-related compound opportunities
+  if (ageYears >= 7 && conditionNames.some(c => c.includes('senescence') || c.includes('aging'))) {
+    const hasOxStress = labAlerts.some(a => a.test_name.toLowerCase().includes('mda') || a.test_name.toLowerCase().includes('sod'));
+    if (hasOxStress) {
+      discoveries.push({
+        type: 'compound-opportunity',
+        severity: 'info',
+        title: `Perfil geriátrico + estresse oxidativo — stack senolítico indicado`,
+        description: `Paciente geriátrico (${ageYears} anos) com marcadores de estresse oxidativo elevados e senescência celular. Considerar stack senolítico: Fisetin + Quercetina + NMN para clearance de células senescentes.`,
+        relatedEntities: ['Senescência Celular', 'Estresse Oxidativo', 'Fisetin', 'Quercetina', 'NMN'],
+      });
+    }
+  }
+
+  return discoveries;
+}
+
+// ─── Prioritize Compounds by Lab Findings ────────────────────────────────────
+
+function prioritizeCompoundsByLabFindings(
+  compounds: any[],
+  labAlerts: LabAlert[],
+  conditions: any[]
+): any[] {
+  if (labAlerts.length === 0) return compounds;
+
+  const hasInflammation = labAlerts.some(a => 
+    ['crp', 'il6', 'il-6', 'tnf'].some(m => a.test_name.toLowerCase().includes(m)) && a.status.includes('high')
+  );
+  const hasOxidativeStress = labAlerts.some(a =>
+    ['mda', 'sod', 'glutathione'].some(m => a.test_name.toLowerCase().includes(m))
+  );
+  const hasRenalIssue = labAlerts.some(a =>
+    ['creatinine', 'bun', 'sdma'].some(m => a.test_name.toLowerCase().includes(m)) && a.status.includes('high')
+  );
+  const hasHepaticIssue = labAlerts.some(a =>
+    ['alt', 'alkaline_phosphatase', 'ast'].some(m => a.test_name.toLowerCase().includes(m)) && a.status.includes('high')
+  );
+  const hasCardiacIssue = labAlerts.some(a =>
+    ['nt_probnp', 'troponin'].some(m => a.test_name.toLowerCase().includes(m)) && a.status.includes('high')
+  );
+
+  // Assign priority scores based on lab findings
+  return compounds.map(c => {
+    let priorityBoost = 0;
+    const nameLower = (c.name || '').toLowerCase();
+    
+    if (hasInflammation && ['curcumin', 'omega-3', 'boswellia', 'resveratrol'].some(x => nameLower.includes(x))) priorityBoost += 3;
+    if (hasOxidativeStress && ['resveratrol', 'nac', 'astaxanthin', 'vitamin e', 'coq10'].some(x => nameLower.includes(x))) priorityBoost += 3;
+    if (hasRenalIssue && ['astaxanthin', 'omega-3'].some(x => nameLower.includes(x))) priorityBoost += 2;
+    if (hasHepaticIssue && ['silymarin', 'same', 'milk thistle'].some(x => nameLower.includes(x))) priorityBoost += 2;
+    if (hasCardiacIssue && ['coq10', 'taurine', 'l-carnitine', 'omega-3'].some(x => nameLower.includes(x))) priorityBoost += 3;
+
+    return { ...c, _priorityBoost: priorityBoost };
+  }).sort((a, b) => (b._priorityBoost || 0) - (a._priorityBoost || 0));
+}
+
 // ─── Stage 6: Hybrid Recommendation ─────────────────────────────────────────
 
 async function getHybridRecommendation(
@@ -426,20 +620,53 @@ async function getHybridRecommendation(
   kgResults: any[],
   predispositions: BreedPredisposition[],
   labAlerts: LabAlert[],
-  medications: string[]
+  medications: string[],
+  conditions: any[],
+  exams: any[]
 ) {
   const primaryCondition = conditionNames[0] || 'geriatric wellness';
 
-  // Build enriched context for the LLM
+  // Build FULL enriched context for the LLM
   const clinicalContext = {
+    allConditions: conditionNames,
     predispositions: predispositions
       .filter(p => !p.already_diagnosed)
       .map(p => `${p.condition_name} (risco ${p.risk_factor}x, evidência ${p.evidence_grade})`),
     labAlerts: labAlerts.map(a => 
-      `${a.test_name}: ${a.value} ${a.unit} (ref: ${a.min_normal}-${a.max_normal}) → ${a.clinical_significance}`
+      `${a.test_name}: ${a.value} ${a.unit} (ref: ${a.min_normal}-${a.max_normal}, status: ${a.status}) → ${a.clinical_significance}`
     ),
     currentMedications: medications,
+    examSummary: exams.map(e => `${e.exam_type}: ${e.notes || JSON.stringify(e.results)}`).slice(0, 10),
   };
+
+  // Build per-condition compound mapping from KG
+  const perConditionCompounds: Record<string, any[]> = {};
+  for (const result of kgResults) {
+    const compounds = (result.graphData?.nodes || [])
+      .filter((n: any) => n.type === 'Nutraceutical' || n.type === 'Compound')
+      .map((n: any) => ({
+        name: n.label || n.properties?.name,
+        dosage: n.properties?.dosage || 'Consultar veterinário',
+        mechanism: n.properties?.mechanism || 'Via knowledge graph',
+        evidenceLevel: 'KG-backed',
+        condition: result.condition,
+      }));
+    perConditionCompounds[result.condition] = compounds;
+  }
+
+  // Deduplicate: remove compounds already prescribed as medications
+  const medNamesLower = medications.map(m => m.toLowerCase());
+  const allKgCompounds = Object.values(perConditionCompounds).flat()
+    .filter(c => !medNamesLower.some(m => (c.name || '').toLowerCase().includes(m)));
+
+  // Deduplicate by name, keeping first occurrence
+  const seenNames = new Set<string>();
+  const uniqueCompounds = allKgCompounds.filter(c => {
+    const key = (c.name || '').toLowerCase();
+    if (seenNames.has(key)) return false;
+    seenNames.add(key);
+    return true;
+  });
 
   const { data: recommendation, error: recError } = await supabase.functions.invoke('hybrid-recommendation', {
     body: {
@@ -453,16 +680,7 @@ async function getHybridRecommendation(
       condition: primaryCondition,
       clinicalContext,
       kgData: kgResults.length > 0 ? {
-        nutraceuticals: kgResults.flatMap(r =>
-          (r.graphData.nodes || [])
-            .filter((n: any) => n.type === 'Nutraceutical' || n.type === 'Compound')
-            .map((n: any) => ({
-              name: n.label || n.properties?.name,
-              dosage: n.properties?.dosage || 'Consultar veterinário',
-              mechanism: n.properties?.mechanism || 'Via knowledge graph',
-              evidenceLevel: 'KG-backed',
-            }))
-        ),
+        nutraceuticals: uniqueCompounds,
         rationale: `Baseado em ${kgResults.length} consulta(s) ao Knowledge Graph para: ${conditionNames.join(', ')}`,
         precautions: [],
       } : undefined,
@@ -511,14 +729,18 @@ export async function runClinicalAnalysisPipeline(
   );
   const interactionAlerts = checkInteractions(recommendedCompoundNames, medicationNames, kgResults);
 
-  // Stage 6: Hybrid recommendation
-  const recommendation = await getHybridRecommendation(
-    profile, conditionNames, kgResults, predispositions, labAlerts, medicationNames
+  // Generate clinical discoveries
+  const clinicalDiscoveries = generateClinicalDiscoveries(
+    predispositions, labAlerts, conditions, medications, exams, profile.breed, profile.age_years
   );
 
-  // Build compounds from recommendation
+  // Stage 6: Hybrid recommendation with full context
+  const recommendation = await getHybridRecommendation(
+    profile, conditionNames, kgResults, predispositions, labAlerts, medicationNames, conditions, exams
+  );
+
+  // Build compounds from recommendation with per-condition mapping
   const nutraceuticals = recommendation?.nutraceuticals || [];
-  const primaryCondition = conditionNames[0] || 'geriatric wellness';
   const compounds = nutraceuticals.map((n: any, idx: number) => {
     const dosageMatch = n.dosage?.match(/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|IU)/i);
     const dosageMin = dosageMatch ? parseFloat(dosageMatch[1]) : 5;
@@ -529,29 +751,33 @@ export async function runClinicalAnalysisPipeline(
     return {
       id: `rec-${idx}`,
       name: n.name,
-      condition: primaryCondition,
+      condition: n.condition || n.targetCondition || conditionNames[idx % conditionNames.length] || 'geriatric wellness',
       dosageMin,
       dosageMax,
       dosageRecommended: Math.round(recommended * 10) / 10,
       dosageCurrent: Math.round(recommended * 10) / 10,
       unit,
       evidenceLevel: n.evidenceLevel || 'AI-suggested',
-      rationale: n.mechanism || '',
+      rationale: n.mechanism || n.rationale || '',
       removed: false,
       type: 'nutraceutical' as const,
     };
   });
 
+  // Prioritize compounds based on lab findings
+  const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions);
+
   return {
     predispositions,
     labAlerts,
     interactionAlerts,
+    clinicalDiscoveries,
     kgResults,
     kgTriplets: triplets,
     kgPathways: pathways,
     kgProjections: projections,
     recommendation,
-    compounds,
+    compounds: prioritizedCompounds,
     confidenceLevel: kgResults.length > 0 ? 'medium' : 'low',
     analysisTimestamp: new Date().toISOString(),
   };

@@ -23,7 +23,7 @@ import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
-import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
+import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
 
 const severityColors: Record<string, string> = {
@@ -54,6 +54,7 @@ const PetProfilePage: React.FC = () => {
   const [predispositions, setPredispositions] = useState<BreedPredisposition[]>([]);
   const [labAlerts, setLabAlerts] = useState<LabAlert[]>([]);
   const [interactionAlerts, setInteractionAlerts] = useState<InteractionAlert[]>([]);
+  const [clinicalDiscoveries, setClinicalDiscoveries] = useState<ClinicalDiscovery[]>([]);
   const [pipelineState, setPipelineState] = useState<PipelineState>({
     stage1_profile: 'idle',
     stage2_predispositions: 'idle',
@@ -113,6 +114,7 @@ const PetProfilePage: React.FC = () => {
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
       setInteractionAlerts(result.interactionAlerts);
+      setClinicalDiscoveries(result.clinicalDiscoveries);
       setKgTriplets(result.kgTriplets);
       setKgPathways(result.kgPathways);
       setKgProjections(result.kgProjections);
@@ -154,6 +156,7 @@ const PetProfilePage: React.FC = () => {
     setPredispositions([]);
     setLabAlerts([]);
     setInteractionAlerts([]);
+    setClinicalDiscoveries([]);
     toast({
       title: t('petProfile.recommendation.rejectedTitle'),
       description: t('petProfile.recommendation.rejectedDesc'),
@@ -187,7 +190,7 @@ const PetProfilePage: React.FC = () => {
   }
 
   const { profile, conditions, medications, exams, clinicalNotes } = data;
-  const totalAlerts = predispositions.filter(p => !p.already_diagnosed).length + labAlerts.length + interactionAlerts.length;
+  const totalAlerts = predispositions.filter(p => !p.already_diagnosed).length + labAlerts.length + interactionAlerts.length + clinicalDiscoveries.length;
 
   return (
     <Layout>
@@ -494,6 +497,7 @@ const PetProfilePage: React.FC = () => {
                     predispositions={predispositions}
                     labAlerts={labAlerts}
                     interactionAlerts={interactionAlerts}
+                    clinicalDiscoveries={clinicalDiscoveries}
                     breed={profile.breed}
                     ageYears={profile.age_years}
                   />

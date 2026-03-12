@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-12 🔬 Recomendações Individualizadas + Descobertas Clínicas
+- ✅ **`generateClinicalDiscoveries()`**: Função que cruza predisposições raciais, exames, medicações e condições para identificar padrões clínicos não-óbvios (correlações lab-condição, monitoramento medicamentoso, confirmação por exames, oportunidades terapêuticas)
+- ✅ **`prioritizeCompoundsByLabFindings()`**: Re-ranqueamento de compostos recomendados com base em achados laboratoriais específicos do paciente (inflamação → anti-inflamatórios, estresse oxidativo → antioxidantes, etc.)
+- ✅ **Seção "Descobertas Clínicas" no ClinicalAlertsPanel**: Cards categorizados por severidade (critical/warning/info) mostrando correlações lab-condição, alertas de monitoramento medicamentoso, confirmações breed-lab e oportunidades de compostos
+- ✅ **Dados clínicos enriquecidos para 5 pets demo**: Rex (Painel Geriátrico + Inflamatório + Estresse Oxidativo), Luna (Biomarcadores Cardíacos + Renal), Mel (Tireoide + Rim + Fígado), Max (Neurocognitivo + Inflamatório), Thor (Metabólico + Líquido Sinovial)
+
+### Changed - 2026-03-12 🎯 Edge Function hybrid-recommendation individualizada
+- ✅ **`clinicalContext` agora aceito e usado**: Interface ampliada para receber allConditions, labAlerts, currentMedications, examSummary — injetados nos prompts do LLM
+- ✅ **Prompts individualizados**: System prompts ENRICH e FALLBACK agora exigem recomendações específicas ao paciente (baseadas em labs, meds, breed)
+- ✅ **Mapeamento compound→condition corrigido**: Cada composto agora mapeia para sua condição específica em vez de todos para a primaryCondition
+- ✅ **Deduplicação**: Compostos já prescritos como medicação são filtrados; compostos duplicados do KG são removidos
+
 ### Added - 2026-03-12 🔬 Diagnóstico Clínico Profundo com Conexões Inter-Condições
 - ✅ **Edge function `condition-insights`**: Consulta `triplet_extractions` para tratamentos (TREATS/PREVENTS), caminhos causais (CAUSES/AGGRAVATES/LEADS_TO), mecanismos (HAS_MECHANISM) e compostos sinérgicos por condição
 - ✅ **`ConditionInsightCard`**: Card expansível por condição mostrando tratamentos do KG com confidence, conexões causais, mecanismos biológicos e medicações vinculadas

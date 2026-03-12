@@ -6939,7 +6939,9 @@
       "high": "High",
       "criticalLow": "Critically Low",
       "criticalHigh": "Critically High",
-      "labValue": "{{value}} {{unit}} (ref: {{min}}-{{max}})"
+      "labValue": "{{value}} {{unit}} (ref: {{min}}-{{max}})",
+      "clinicalDiscoveries": "Clinical Discoveries",
+      "discoveriesCount": "clinical discovery(ies)"
     },
     "compoundChat": {
       "selectPrompt": "Select a recommended compound to start a specialized conversation:",

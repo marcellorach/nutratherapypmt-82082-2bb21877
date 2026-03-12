@@ -1,72 +1,73 @@
 
 
-# Fixing Individualized Recommendations and Enriching Clinical Discovery
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-## Two Critical Problems Identified
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-### Problem A: Only breed predispositions shown — no insights from exams/history/anamnesis
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-The ClinicalAlertsPanel currently shows breed predispositions and abnormal lab results, but does NOT show **cross-referencing discoveries** — patterns the VetGraphRAG should identify by correlating exams + conditions + medications + breed risks. For example:
-- Rex has WBC 12,500 (flagged high) + Osteoarthritis + Cellular Senescence + takes Meloxicam → the system should note "Elevated WBC may indicate chronic inflammatory response linked to Osteoarthritis" and "Long-term Meloxicam use requires hepatorenal monitoring"
-- This is the NON-OBVIOUS pattern detection that differentiates VetGraphRAG
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
 
-Additionally, the exam data is too sparse for meaningful cross-referencing — Rex only has an X-Ray and a CBC. To demonstrate the power of the system, we need richer clinical data.
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
 
-### Problem B: All animals get the same recommendations (Curcumin, NMN, Resveratrol, Omega-3)
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
 
-Root cause identified: **the `hybrid-recommendation` edge function ignores all individualized context**. The function's interface only accepts `mode, petProfile, condition, kgData` — it completely discards the `clinicalContext` object (predispositions, lab alerts, current medications) that the pipeline sends.
+As abas só aparecem após a análise ser concluída (quando há dados).
 
-Furthermore, the KG query uses a generic `context` query type that returns ALL relationships matching a condition name pattern. Every pet with "Osteoarthritis" gets the exact same KG nodes, producing the same compounds.
+### 3. Novo componente: Chat Especializado por Composto
 
-The LLM prompt in `enrich` mode only says "add clinical considerations" without any patient-specific data.
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
 
-## Plan
+### 4. Chat Clínico Geral (sidebar)
 
-### 1. Enrich seed exam/clinical data for demo pets (Migration)
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
 
-Add richer, differentiated clinical data for each of the 5 demo pets:
+### 5. Arquivos a modificar/criar
 
-- **Rex** (Labrador, 8y): Add Geriatric Panel (ALT elevated 85, Creatinine borderline 1.4), Inflammatory Markers (CRP 18, IL-6 elevated), Oxidative Stress Panel (MDA elevated, SOD low)
-- **Mel** (Golden, 10y): Add Thyroid Panel (T4 low-normal), Kidney Panel (BUN borderline), Liver Panel (ALT elevated)
-- **Luna** (CKCS, 6y): Add Cardiac Biomarkers (NT-proBNP elevated, troponin I elevated)
-- **Max** (Beagle, 9y): Add Neurocognitive Markers, Geriatric Panel with specific cognitive markers
-- **Thor** (GSD, 5y): Add Complete metabolic panel, Joint-specific inflammatory markers
+| Arquivo | Ação |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-This creates distinct clinical profiles that force differentiated recommendations.
+### 6. Estrutura visual resultante
 
-### 2. Add "Clinical Discoveries" section to ClinicalAlertsPanel
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
 
-Add a new section between "Abnormal Lab Results" and "Interaction Alerts" called **"Clinical Discoveries"** (Descobertas Clínicas). This section will show AI-identified cross-references:
+### Detalhes técnicos
 
-- Correlations between elevated lab values and existing conditions (e.g., "Elevated CRP may be linked to active Osteoarthritis")
-- Medication-condition interactions (e.g., "Long-term Meloxicam — monitor renal function given borderline creatinine")
-- Breed-predisposition + lab confirmation patterns (e.g., "Labrador predisposition to Hip Dysplasia confirmed by X-Ray grade 3")
-
-These discoveries will be generated in the pipeline by a new `generateClinicalDiscoveries()` function that cross-references predispositions, lab alerts, conditions, and medications.
-
-### 3. Fix hybrid-recommendation to use ALL patient context
-
-Update the edge function to:
-- Accept `clinicalContext` in the request interface (predispositions, labAlerts, currentMedications, existingConditions, examResults)
-- Inject this full context into BOTH the `enrich` and `fallback` LLM prompts
-- Instruct the LLM to differentiate recommendations based on: (a) specific lab abnormalities, (b) current medications (avoid redundancy/interactions), (c) breed-specific risks, (d) age-appropriate dosing
-- Use `tool_choice` to force structured JSON output with per-condition compound mapping
-
-### 4. Make KG queries condition-specific with compound deduplication
-
-Update `queryKnowledgeGraph()` to query each condition separately AND filter out compounds already prescribed as medications. The pipeline should also weight KG results by relevance to the specific patient's lab findings (e.g., if CRP is elevated, prioritize anti-inflammatory compounds; if oxidative stress markers are abnormal, prioritize antioxidants).
-
-Add a new `prioritizeByLabFindings()` function that re-ranks KG-returned compounds based on which lab abnormalities they address.
-
-### 5. Map compounds to specific conditions (not just primaryCondition)
-
-Currently line 532: `condition: primaryCondition` — ALL compounds are assigned to the first condition only. Fix to map each compound to the condition it was retrieved for, using the per-condition KG results.
-
-## Files to modify
-
-1. **Migration SQL** — Insert richer exam data for all 5 demo pets
-2. **`src/services/clinical-analysis-pipeline.ts`** — Add `generateClinicalDiscoveries()`, `prioritizeByLabFindings()`, fix compound-to-condition mapping
-3. **`src/components/pet/ClinicalAlertsPanel.tsx`** — Add "Clinical Discoveries" section with cross-reference insights
-4. **`supabase/functions/hybrid-recommendation/index.ts`** — Accept and use `clinicalContext`, differentiate prompts per patient
-5. **`src/pages/veterinario/PetProfilePage.tsx`** — Pass clinical discoveries to alerts panel, wire new data flow
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 
