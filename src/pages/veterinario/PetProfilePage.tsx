@@ -497,6 +497,7 @@ const PetProfilePage: React.FC = () => {
                     predispositions={predispositions}
                     labAlerts={labAlerts}
                     interactionAlerts={interactionAlerts}
+                    clinicalDiscoveries={clinicalDiscoveries}
                     breed={profile.breed}
                     ageYears={profile.age_years}
                   />
