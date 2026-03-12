@@ -573,8 +573,8 @@ const PetProfilePage: React.FC = () => {
             </Tabs>
             )}
 
-            {/* Treatability Chart */}
-            {treatabilityData.length > 0 && (
+            {/* Treatability Chart - only after VetGraphRAG analysis */}
+            {recommendationCompounds && treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}
           </div>
