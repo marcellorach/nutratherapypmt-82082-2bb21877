@@ -7005,6 +7005,41 @@
         "MODULATES": "modulates",
         "ACTIVATES": "activates"
       }
+    },
+    "compounds": {
+      "curcumin": {
+        "name": "Curcumin",
+        "condition": "Osteoarthritis",
+        "rationale": "Anti-inflammatory action via NF-κB inhibition, with evidence in 12 veterinary studies."
+      },
+      "nmn": {
+        "name": "NMN (Nicotinamide Mononucleotide)",
+        "condition": "Cellular Aging",
+        "rationale": "NAD+ precursor with evidence for mitochondrial function restoration in geriatric dogs."
+      },
+      "resveratrol": {
+        "name": "Resveratrol",
+        "condition": "Oxidative Stress",
+        "rationale": "SIRT1/AMPK activator. Synergistic effect with NMN on NAD+ metabolism."
+      },
+      "omega3": {
+        "name": "Omega-3 (EPA/DHA)",
+        "condition": "Hip Dysplasia",
+        "rationale": "Modulation of pro-inflammatory eicosanoids, joint mobility support."
+      },
+      "rapamycin": {
+        "name": "Rapamycin (low dose)",
+        "condition": "Immune Senescence",
+        "rationale": "mTOR inhibitor with weekly protocol. Data from Dog Aging Project (University of Washington)."
+      }
+    },
+    "compoundSlider": {
+      "discuss": "Discuss this recommendation",
+      "chatPlaceholder": "Ask questions about {{compound}} — biological pathways, dosage, interactions...",
+      "q1": "What are the biological pathways of {{compound}}?",
+      "q2": "How does {{compound}} interact with {{condition}} at molecular level?",
+      "q3": "Are there safety concerns with {{compound}} in geriatric dogs?",
+      "inputPlaceholder": "Ask about this compound..."
     }
   },
   "evidenceLevels": {
