@@ -4,7 +4,7 @@ import { Nutraceutical } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { mapDbToUiFormat } from '@/utils/nutraceuticals-mapper';
-import { nutraceuticals as mockNutraceuticals } from '@/data';
+// Mock data removed — production mode only uses DB data
 import { useDataManagement } from '@/hooks/useDataManagement';
 
 export const useNutraceuticalsData = () => {
