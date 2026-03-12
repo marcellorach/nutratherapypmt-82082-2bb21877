@@ -597,10 +597,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleWidth={2}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={200}
-              d3AlphaDecay={0.008}
-              d3VelocityDecay={0.15}
-              warmupTicks={150}
+              cooldownTicks={300}
+              d3AlphaDecay={0.005}
+              d3VelocityDecay={0.2}
+              warmupTicks={200}
             />
           )}
         </Suspense>
