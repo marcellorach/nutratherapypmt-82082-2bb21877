@@ -300,19 +300,49 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     };
   }, [data]);
 
-  // Configure d3 forces - spread nodes widely, minimal gravity
+  // Configure d3 forces - aggressive spreading to avoid center blob
   useEffect(() => {
     if (!fgRef.current) return;
     const fg = fgRef.current;
     const nodeCount = graphData.nodes.length;
     
-    // Scale repulsion with node count for better spreading
-    const chargeStrength = Math.min(-50, -Math.max(1500, nodeCount * 3));
+    // 1. Very strong repulsion that scales with graph size
+    const chargeStrength = -Math.max(3000, nodeCount * 8);
+    fg.d3Force('charge', d3Force.forceManyBody()
+      .strength((node: any) => {
+        // Highly connected nodes push harder to break the core
+        const connections = node.connections || 1;
+        return chargeStrength * (1 + Math.log2(connections + 1));
+      })
+      .distanceMax(8000)
+      .distanceMin(20)
+    );
     
-    fg.d3Force('charge')?.strength(chargeStrength).distanceMax(5000);
-    fg.d3Force('link')?.distance(350);
-    // Remove center gravity almost entirely to let nodes spread
-    fg.d3Force('center')?.strength(0.002);
+    // 2. Links with longer distance
+    fg.d3Force('link')?.distance(400).strength(0.05);
+    
+    // 3. Remove default center force entirely
+    fg.d3Force('center', null);
+    
+    // 4. Add radial force to push nodes outward from center
+    fg.d3Force('radial', d3Force.forceRadial(
+      (node: any) => {
+        const connections = node.connections || 0;
+        // Hub nodes go to outer ring, leaf nodes spread in middle
+        if (connections > 15) return 600;
+        if (connections > 5) return 350;
+        return 150 + Math.random() * 200;
+      },
+      0, 0
+    ).strength(0.08));
+    
+    // 5. Collision detection to prevent overlap
+    fg.d3Force('collision', d3Force.forceCollide()
+      .radius((node: any) => Math.max(12, (node.val || 3) * 1.5))
+      .strength(0.7)
+      .iterations(3)
+    );
+    
     fg.d3ReheatSimulation();
   }, [graphData, is3D]);
 
