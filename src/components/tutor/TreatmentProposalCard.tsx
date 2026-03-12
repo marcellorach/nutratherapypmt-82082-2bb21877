@@ -13,6 +13,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ProposalAIChat from './ProposalAIChat';
+import ConditionProgressionChart from './ConditionProgressionChart';
 
 interface TreatmentProposal {
   id: string;
@@ -258,6 +259,15 @@ const TreatmentProposalCard: React.FC<Props> = ({
         </div>
 
         <Separator />
+
+        {/* Condition Progression Charts */}
+        {proposal.conditions.length > 0 && (
+          <>
+            <ConditionProgressionChart conditions={proposal.conditions} />
+            <Separator />
+          </>
+        )}
+
 
         {/* Treatment Timeline */}
         {timeline.length > 0 && (

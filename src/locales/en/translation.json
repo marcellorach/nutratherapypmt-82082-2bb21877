@@ -1252,7 +1252,20 @@
         "How should I administer the compounds?",
         "How long until I see results?",
         "Can I combine this with the current diet?"
-      ]
+      ],
+      "progression": {
+        "title": "Condition Progression Projection",
+        "description": "Visualize how each condition may evolve with and without treatment over 12 months, including calibration exam points.",
+        "condition": "Condition",
+        "withTreatment": "With Treatment",
+        "withoutTreatment": "Without Treatment",
+        "baseline": "Baseline",
+        "projectedWith": "Projected w/ treat.",
+        "projectedWithout": "Projected w/o treat.",
+        "examBaseline": "Baseline Exam",
+        "examCalibration": "Calibration (11m)",
+        "examPoints": "Calibration Exams"
+      }
     },
     "plan": {
       "startDate": "Start date",
