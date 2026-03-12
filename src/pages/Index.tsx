@@ -140,7 +140,7 @@ const Index: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="p-6 bg-gray-50 transition-colors opacity-60 min-w-0 overflow-hidden">
+                <div className="p-6 bg-gray-50 hover:bg-gray-100 transition-colors min-w-0 overflow-hidden">
                   <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Book size={28} className="text-gray-800" />
@@ -151,14 +151,11 @@ const Index: React.FC = () => {
                     </p>
                     <Button 
                       variant="outline" 
-                      className="w-full flex items-center justify-center gap-1 opacity-50 cursor-not-allowed" 
-                      disabled
+                      className="w-full flex items-center justify-center gap-1" 
+                      onClick={() => navigate('/tutor')}
                     >
                       {t('home.tutorAreaButton')} <ArrowRight size={16} />
                     </Button>
-                    <p className="text-xs text-orange-600 mt-2 font-medium">
-                      🚧 {t('home.underConstruction')}
-                    </p>
                   </div>
                 </div>
               </div>
