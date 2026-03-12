@@ -6926,7 +6926,12 @@
         "medium": "Medium Confidence",
         "low": "Low Confidence",
         "insufficient": "Insufficient Data"
-      }
+      },
+      "proposalSentTitle": "Proposal Sent to Owner",
+      "proposalSentDesc": "The geroprotective treatment proposal has been sent to the owner portal.",
+      "proposalErrorTitle": "Error Creating Proposal",
+      "proposalErrorDesc": "Could not send the proposal. Please try again.",
+      "approvedRationale": "Personalized geroprotective protocol based on veterinary Knowledge Graph analysis, reviewed and approved by the responsible veterinarian."
     },
     "treatability": {
       "title": "Treatability by Condition",
