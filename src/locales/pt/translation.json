@@ -1190,7 +1190,36 @@
     "tabs": {
       "plan": "Plano Terapêutico",
       "history": "Histórico",
-      "orders": "Pedidos"
+      "orders": "Pedidos",
+      "proposals": "Propostas"
+    },
+    "proposal": {
+      "title": "Proposta de Tratamento Geroprotetor",
+      "geroscienceTitle": "Análise sob a Ótica da Gerociência",
+      "geroscienceDesc": "O caso de {{petName}} foi analisado utilizando os princípios da Gerociência Veterinária. Cães envelhecem aproximadamente 7x mais rápido que humanos, tornando essencial a intervenção geroprotetiva precoce para prevenir doenças degenerativas e promover longevidade saudável.",
+      "conditionsTitle": "Condições Identificadas",
+      "evidenceTitle": "Evidência Científica",
+      "triplets": "Conexões no Grafo",
+      "studies": "Estudos Científicos",
+      "kgCoverage": "Cobertura do KG",
+      "confidenceLabel": "Nível de Confiança",
+      "compoundsTitle": "Compostos Recomendados",
+      "vetApproval": "Protocolo Revisado e Aprovado",
+      "vetApprovalBy": "Este protocolo foi revisado e aprovado pelo {{name}}",
+      "livingProgramTitle": "Programa Vivo de Acompanhamento",
+      "livingProgramDesc": "Este é um programa contínuo que acompanha a evolução do seu pet. Os compostos e dosagens serão ajustados periodicamente com base em exames de acompanhamento e resposta clínica.",
+      "pricingLabel": "Investimento Mensal",
+      "perMonth": "mês",
+      "annualSubscription": "Assinatura de {{months}} meses — Total: {{total}}",
+      "accept": "Aceitar Proposta",
+      "questions": "Tenho Dúvidas",
+      "acceptedTitle": "Proposta Aceita!",
+      "acceptedDesc": "Sua proposta foi aceita com sucesso. Em breve entraremos em contato.",
+      "errorTitle": "Erro",
+      "errorDesc": "Não foi possível aceitar a proposta. Tente novamente.",
+      "alreadyAccepted": "Proposta aceita ✓",
+      "noPendingTitle": "Nenhuma Proposta Pendente",
+      "noPendingDesc": "Quando seu veterinário aprovar um protocolo, a proposta aparecerá aqui."
     },
     "plan": {
       "startDate": "Data de início",
@@ -6897,7 +6926,12 @@
         "medium": "Confiança Média",
         "low": "Confiança Baixa",
         "insufficient": "Dados Insuficientes"
-      }
+      },
+      "proposalSentTitle": "Proposta Enviada ao Tutor",
+      "proposalSentDesc": "A proposta de tratamento geroprotetor foi enviada para o portal do tutor.",
+      "proposalErrorTitle": "Erro ao Criar Proposta",
+      "proposalErrorDesc": "Não foi possível enviar a proposta. Tente novamente.",
+      "approvedRationale": "Protocolo geroprotetor personalizado baseado em análise do Knowledge Graph veterinário, revisado e aprovado pelo veterinário responsável."
     },
     "treatability": {
       "title": "Tratabilidade por Condição",

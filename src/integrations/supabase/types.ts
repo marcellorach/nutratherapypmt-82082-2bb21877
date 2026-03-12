@@ -2485,6 +2485,65 @@ export type Database = {
         }
         Relationships: []
       }
+      treatment_proposals: {
+        Row: {
+          accepted_at: string | null
+          compounds: Json
+          conditions: Json
+          confidence_level: string | null
+          created_at: string | null
+          id: string
+          monthly_price_brl: number
+          pet_id: string
+          rationale: string | null
+          scientific_summary: Json | null
+          status: string
+          subscription_months: number
+          updated_at: string | null
+          veterinarian_name: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          compounds?: Json
+          conditions?: Json
+          confidence_level?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_price_brl: number
+          pet_id: string
+          rationale?: string | null
+          scientific_summary?: Json | null
+          status?: string
+          subscription_months?: number
+          updated_at?: string | null
+          veterinarian_name: string
+        }
+        Update: {
+          accepted_at?: string | null
+          compounds?: Json
+          conditions?: Json
+          confidence_level?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_price_brl?: number
+          pet_id?: string
+          rationale?: string | null
+          scientific_summary?: Json | null
+          status?: string
+          subscription_months?: number
+          updated_at?: string | null
+          veterinarian_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_proposals_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       triplet_extractions: {
         Row: {
           approval_chain: Json | null
