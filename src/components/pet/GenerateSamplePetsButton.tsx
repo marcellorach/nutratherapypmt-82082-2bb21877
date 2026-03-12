@@ -72,7 +72,7 @@ const SAMPLE_PETS = [
     notes: 'Working dog. Joint stress from activity. Chronic low-grade inflammation.',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
-      { condition_name: 'Chronic Low-Grade Inflammation (Inflammaging)', severity: 'mild', status: 'active' },
+      { condition_name: 'Inflammaging', severity: 'mild', status: 'active' },
     ],
     medications: [
       { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
