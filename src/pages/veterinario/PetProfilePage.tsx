@@ -120,7 +120,7 @@ const PetProfilePage: React.FC = () => {
       setKgProjections(result.kgProjections);
       setConfidenceLevel(result.confidenceLevel);
       setRecommendationCompounds(
-        result.compounds.length > 0 ? result.compounds : generateMockCompounds(t)
+        result.compounds.length > 0 ? result.compounds : []
       );
 
       const alertCount = result.predispositions.filter(p => !p.already_diagnosed).length

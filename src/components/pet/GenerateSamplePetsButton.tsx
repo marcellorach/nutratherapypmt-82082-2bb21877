@@ -116,7 +116,7 @@ const SAMPLE_PETS = [
     owner_email: 'lucia@example.com',
     notes: 'Senior beagle. Early cognitive changes and general aging. Overweight.',
     conditions: [
-      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'mild', status: 'active' },
+      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active' },
       { condition_name: 'Inflammation', severity: 'mild', status: 'monitoring' },
     ],
     medications: [],
