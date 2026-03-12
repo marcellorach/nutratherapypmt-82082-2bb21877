@@ -272,23 +272,12 @@ const PetProfilePage: React.FC = () => {
           )}
         </div>
 
-        {/* Pipeline Workflow Stepper */}
-        <div className="mb-6">
-          <ClinicalPipelineWorkflow
-            pipelineState={pipelineState}
-            isAnalyzing={analyzing}
-            profileDataCount={conditions.length + medications.length + exams.length}
-            predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
-            labAlertCount={labAlerts.length}
-            tripletCount={kgTriplets.length}
-            interactionCount={interactionAlerts.length}
-            compoundCount={recommendationCompounds?.length || 0}
-          />
-        </div>
-
-        {/* Patient Clinical Data - full width, right after pipeline */}
-        <div className="mb-6">
-          <Tabs defaultValue="conditions">
+        {/* 3-column layout: left 2/3 clinical content, right 1/3 chat + twin */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 columns */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Patient Clinical Data */}
+            <Tabs defaultValue="conditions">
             <TabsList className="mb-4">
               <TabsTrigger value="conditions" className="gap-1">
                 <Stethoscope className="h-3.5 w-3.5" />
