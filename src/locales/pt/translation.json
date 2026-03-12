@@ -1252,7 +1252,20 @@
         "Como devo administrar os compostos?",
         "Em quanto tempo verei resultados?",
         "Posso combinar com a ração atual?"
-      ]
+      ],
+      "progression": {
+        "title": "Projeção de Progressão por Condição",
+        "description": "Visualize como cada condição pode evoluir com e sem tratamento ao longo de 12 meses, incluindo pontos de calibração com exames.",
+        "condition": "Condição",
+        "withTreatment": "Com Tratamento",
+        "withoutTreatment": "Sem Tratamento",
+        "baseline": "Baseline",
+        "projectedWith": "Projeção c/ trat.",
+        "projectedWithout": "Projeção s/ trat.",
+        "examBaseline": "Exame Inicial",
+        "examCalibration": "Calibração (11m)",
+        "examPoints": "Exames de Calibração"
+      }
     },
     "plan": {
       "startDate": "Data de início",

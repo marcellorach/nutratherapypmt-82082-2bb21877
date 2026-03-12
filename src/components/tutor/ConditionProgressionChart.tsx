@@ -13,6 +13,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceD
 
 interface ConditionData {
   name: string;
+  condition_name?: string;
   severity?: string;
   baselineScore?: number;
 }

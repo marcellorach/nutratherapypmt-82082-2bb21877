@@ -260,6 +260,15 @@ const TreatmentProposalCard: React.FC<Props> = ({
 
         <Separator />
 
+        {/* Condition Progression Charts */}
+        {proposal.conditions.length > 0 && (
+          <>
+            <ConditionProgressionChart conditions={proposal.conditions} />
+            <Separator />
+          </>
+        )}
+
+
         {/* Treatment Timeline */}
         {timeline.length > 0 && (
           <>
