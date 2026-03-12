@@ -190,7 +190,7 @@ const PetProfilePage: React.FC = () => {
   }
 
   const { profile, conditions, medications, exams, clinicalNotes } = data;
-  const totalAlerts = predispositions.filter(p => !p.already_diagnosed).length + labAlerts.length + interactionAlerts.length;
+  const totalAlerts = predispositions.filter(p => !p.already_diagnosed).length + labAlerts.length + interactionAlerts.length + clinicalDiscoveries.length;
 
   return (
     <Layout>
