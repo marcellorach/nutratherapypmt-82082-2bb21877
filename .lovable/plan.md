@@ -1,90 +1,73 @@
 
 
-# Plano de Implementação: Limpeza e Consolidação do Sistema (Fases 1–4)
+## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
 
-## Fase 1: Eliminar Código Morto (baixo risco)
+### 1. Remover botão "Gerar Dados de Exemplo"
 
-### 1.1 Remover serviços sem importação
-| Arquivo a remover | Motivo |
-|---|---|
-| `src/services/active-ingredients-service.ts` | 0 imports no projeto |
-| `src/services/nutraceutical-outcomes-service.ts` | 0 imports no projeto |
-| `src/services/scientific-studies-service.ts` | 0 imports no projeto |
+Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
 
-### 1.2 Remover hooks mortos
+### 2. Reorganizar resultados da análise VetGraphRAG em abas
+
+Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+
+| Aba | Componente | Ícone |
+|-----|-----------|-------|
+| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
+| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
+| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
+| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
+| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+
+As abas só aparecem após a análise ser concluída (quando há dados).
+
+### 3. Novo componente: Chat Especializado por Composto
+
+Criar `src/components/pet/CompoundSpecificChat.tsx`:
+- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
+- Usuário seleciona um composto para abrir chat focado
+- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
+- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+
+### 4. Chat Clínico Geral (sidebar)
+
+Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+
+### 5. Arquivos a modificar/criar
+
 | Arquivo | Ação |
-|---|---|
-| `src/hooks/useVetGraphRAGProcessing.tsx` | Remover — 0 imports externos (apenas re-exportado pelo `useNtaiProcessing.tsx`) |
-| `src/hooks/useNtaiProcessing.tsx` | Reescrever — apontar diretamente para os hooks que `NtaiProcessingSection` realmente usa, sem depender do hook morto |
-| `src/hooks/ntai/useVetGraphRAGProcessingLegacy.ts` | Remover — 0 imports |
+|---------|------|
+| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
+| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
+| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
+| `i18n.ts` | Incrementar versão |
 
-### 1.3 Remover aggregador modular não utilizado
-O `NutraceuticalsService` (uppercase) em `src/services/nutraceuticals/index.ts` é exportado mas nunca importado. Os sub-módulos (`relations-service`, `relations`) são importados diretamente por 4 componentes. Manter os sub-módulos, remover apenas o `index.ts` que agrega sem ser usado, e atualizar a estrutura para que não confunda.
+### 6. Estrutura visual resultante
 
-**Atenção**: Os imports `from '@/services/nutraceuticals'` resolvem para `nutraceuticals.ts` (a classe), NÃO para `nutraceuticals/index.ts`. O sistema funciona corretamente sem o `index.ts`.
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
+├──────────────────────────────────────────────────────────────────┤
+│  Summary Cards (Condições | Medicações | Exames | Notas)        │
+├──────────────────────────────────┬───────────────────────────────┤
+│  Treatability Chart              │  Intelligent Clinical Chat    │
+│                                  │  (geral sobre o cão)          │
+│  ┌─────────────────────────────┐ │                               │
+│  │ Tabs: Recomendações |       │ │                               │
+│  │  Caminho Bio | Evidência |  │ │                               │
+│  │  Projeção | Chat Composto   │ │                               │
+│  │                             │ │                               │
+│  │  [conteúdo da aba ativa]    │ │                               │
+│  └─────────────────────────────┘ │                               │
+│                                  │                               │
+│  Clinical Data Tabs              │                               │
+│  (Condições | Medicações | ...)  │                               │
+└──────────────────────────────────┴───────────────────────────────┘
+```
 
----
+### Detalhes técnicos
 
-## Fase 2: Eliminar Simulações Perigosas (alto impacto)
-
-### 2.1 Reescrever `vetgraphrag-service.ts`
-**Problema**: `analyzeStudy()` chama `simulateAnalysisResult()` que gera dados ALEATÓRIOS com `Math.random()` e os salva no banco como dados reais.
-
-**Solução**: Substituir `simulateAnalysisResult()` pela chamada real à edge function `process-study` (que já existe e funciona). Manter `scoring.ts` (que é legítimo — calcula scores a partir de metadados reais do LLM).
-
-**Ação**: Reescrever `analyzeStudy()` para usar `processStudyWithAI()` de `ntai/processing.ts` como fonte primária.
-
-### 2.2 Remover `src/services/ntai/simulation.ts`
-Todas as funções são baseadas em `Math.random()`. A única importação é `vetgraphrag-service.ts` que será reescrita na etapa anterior.
-
-### 2.3 Reescrever `src/services/openai.ts` → usar edge function `chat`
-**Problema**: `askVeterinaryAI()` retorna texto hardcoded por keyword matching. Usado apenas pelo `EnhancedExamViewer.tsx`.
-
-**Solução**: Substituir pela chamada real via Lovable AI (edge function que invoca um modelo suportado como `google/gemini-2.5-flash`). Criar edge function `veterinary-chat` que recebe o contexto do pet + pergunta e retorna resposta real do LLM.
-
----
-
-## Fase 3: Consolidar Duplicações
-
-### 3.1 Unificar serviço de nutracêuticos
-Situação: `src/services/nutraceuticals.ts` (classe, 326 linhas) é usada por 5 importadores. `src/services/nutraceuticals/index.ts` (aggregador modular) não é importado por ninguém.
-
-**Ação**: Remover `src/services/nutraceuticals/index.ts`. Manter `nutraceuticals.ts` e os sub-módulos individuais (`relations-service.ts`, etc.) que são importados diretamente.
-
-### 3.2 Consolidar `examEnhancer.ts` com pipeline clínico
-**Problema**: `examEnhancer.ts` usa ranges de referência hardcoded localmente. O `clinical-analysis-pipeline.ts` já consulta `lab_reference_ranges` do banco.
-
-**Ação**: Refatorar `examEnhancer.ts` para consultar a tabela `lab_reference_ranges` do banco em vez de usar valores locais hardcoded. Manter a interface `EnhancedExam` que o `EnhancedExamViewer` consome.
-
----
-
-## Fase 4: Conectar Páginas a Dados Reais
-
-### 4.1 `RecommendationsList.tsx` (veterinário)
-**Problema**: Importa `treatmentPlans` e `nutraceuticals` de `@/data` (mock).
-
-**Solução**: Substituir por queries ao banco de dados — buscar `recommendation_logs` e `pet_conditions` do pet selecionado. Se não houver recomendações reais ainda, mostrar call-to-action para executar análise VetGraphRAG.
-
-### 4.2 `TutorPage.tsx` (tutor)
-**Problema**: Importa `owners`, `pets`, `treatmentPlans`, `nutraceuticals` de `@/data`.
-
-**Solução**: Substituir por queries reais a `pet_profiles`, `pet_conditions`, `recommendation_logs`. O tutor deve ver seus pets reais e recomendações geradas pelo sistema.
-
-### 4.3 Outros usos de `@/data` mock
-- `CardActions.tsx`: Importa `examResults`, `pets` de `@/data` — migrar para dados reais
-- `AnalyticsTab.tsx`: Importa `nutraceuticals` de `@/data` — migrar para query ao banco
-- `useNutraceuticalsData.ts`: Usa mock como fallback — remover fallback mock
-
-**Nota**: `admin-tabs-info`, `biomedical-taxonomy`, `sampleGroups`, `types/tabInfoTypes` em `@/data` são dados estáticos de configuração/UI — estes são legítimos e permanecem.
-
----
-
-## Ordem de Execução e Segurança
-
-1. **Fase 1** primeiro — risco zero pois remove apenas código sem referências
-2. **Fase 2** em seguida — corrige contaminação do banco com dados fictícios
-3. **Fase 3** depois — consolida serviços duplicados
-4. **Fase 4** por último — depende das fases anteriores estarem estáveis
-
-Cada fase será testada via console logs e verificação de imports antes de prosseguir.
+- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
+- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
+- Renderiza respostas com `react-markdown` para formatação científica
+- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
 

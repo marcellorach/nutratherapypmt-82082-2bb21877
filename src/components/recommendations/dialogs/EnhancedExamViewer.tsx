@@ -31,27 +31,29 @@ const EnhancedExamViewer: React.FC<EnhancedExamViewerProps> = ({
   const [selectedParam, setSelectedParam] = useState<string>("");
   const chatRef = useRef<HTMLDivElement>(null);
 
-  // Processar exames com dados enriquecidos
+  // Processar exames com dados enriquecidos (async - busca ranges do banco)
   useEffect(() => {
-    if (exams.length > 0) {
-      const enriched = enhanceExams(exams, nutraceutical.condition);
-      setEnhancedExams(enriched);
-      
-      // Selecionar o exame mais recente por padrão
-      setSelectedExam(enriched[enriched.length - 1]);
-      
-      // Extrair parâmetros disponíveis para o gráfico
-      const params = Object.keys(enriched[0].results);
-      setChartParameters(params);
-      if (params.length > 0) {
-        // Tentar encontrar um parâmetro relevante automaticamente
-        const relevantParams = ['hemoglobina', 'leucócitos', 'plaquetas', 'vitamina_d', 'cálcio'];
-        const found = params.find(p => 
-          relevantParams.some(rp => p.toLowerCase().includes(rp.toLowerCase()))
-        );
-        setSelectedParam(found || params[0]);
+    const loadEnhancedExams = async () => {
+      if (exams.length > 0) {
+        const enriched = await enhanceExams(exams, nutraceutical.condition);
+        setEnhancedExams(enriched);
+        
+        // Selecionar o exame mais recente por padrão
+        setSelectedExam(enriched[enriched.length - 1]);
+        
+        // Extrair parâmetros disponíveis para o gráfico
+        const params = Object.keys(enriched[0].results);
+        setChartParameters(params);
+        if (params.length > 0) {
+          const relevantParams = ['hemoglobina', 'leucócitos', 'plaquetas', 'vitamina_d', 'cálcio'];
+          const found = params.find(p => 
+            relevantParams.some(rp => p.toLowerCase().includes(rp.toLowerCase()))
+          );
+          setSelectedParam(found || params[0]);
+        }
       }
-    }
+    };
+    loadEnhancedExams();
   }, [exams, nutraceutical.condition]);
 
   // Rolar o chat para baixo quando houver novas mensagens

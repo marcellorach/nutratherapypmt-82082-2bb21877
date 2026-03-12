@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-03-12 🧹 Auditoria e Limpeza do Sistema (Fases 1–4)
+- ✅ **Fase 1 — Código morto removido**: `active-ingredients-service.ts`, `nutraceutical-outcomes-service.ts`, `scientific-studies-service.ts`, `useVetGraphRAGProcessing.tsx`, `useVetGraphRAGProcessingLegacy.ts`, aggregador `nutraceuticals/index.ts`
+- ✅ **Fase 2 — Simulações perigosas eliminadas**: `ntai/simulation.ts` (Math.random) removido; `vetgraphrag-service.ts` reescrito para usar edge function `process-study`; `openai.ts` reescrito para usar edge function `chat` via Lovable AI (sem mais respostas hardcoded)
+- ✅ **Fase 3 — Duplicações consolidadas**: `examEnhancer.ts` refatorado para consultar `lab_reference_ranges` do banco em vez de valores hardcoded locais
+- ✅ **Fase 4 — Páginas conectadas a dados reais**: `RecommendationsList.tsx` e `TutorPage.tsx` migrados de mock (`@/data`) para queries reais (`pet_profiles`, `recommendation_logs`); `useNutraceuticalsData.ts` sem mais fallback mock
+
+
 ### Changed - 2026-03-12 🔗 Unificação Relations ← Knowledge Graph
 - ✅ **useSankeyData reescrito**: Agora consulta `hierarchical_edges` via RPC (`get_relations_graph_data`) em vez de tabelas legadas manuais
 - ✅ **DB function criada**: `get_relations_graph_data(p_limit)` faz JOIN com `triplet_extractions` para resolver nomes de entidades
