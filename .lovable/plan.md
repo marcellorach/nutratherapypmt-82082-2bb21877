@@ -1,73 +1,55 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+# Plano: Tags coloridas + predicados MODULATES/INHIBITS nos insights clínicos
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+## Problemas identificados
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+**a) Tags sem cor**: O `ConditionInsightCard` e `ScientificEvidencePanel` usam `Badge` genéricos cinza. O projeto já tem `NutraceuticalTag` (verde, com score de evidência) e `ConditionTag` (azul) prontos — basta usá-los.
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+**b) Predicados faltantes**: A edge function `condition-insights` só busca `TREATS, PREVENTS, AMELIORATES` para tratamentos e `HAS_MECHANISM, MODULATES, ACTIVATES, INHIBITS` apenas para mecanismos. Mas `MODULATES` e `INHIBITS` são fundamentais para ponderar tratamento — um composto que INHIBITS uma via inflamatória é tão relevante quanto um que TREATS a condição diretamente.
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+## Mudanças
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+### 1. `ConditionInsightCard.tsx` — usar tags coloridas
+- Substituir `Badge variant="secondary"` dos tratamentos por `NutraceuticalTag` (verde, com confidence)
+- Nos causal links, renderizar subject/object como `ConditionTag` (azul) quando forem condições
+- Nos mecanismos, usar `NutraceuticalTag` para compostos e mostrar o predicado (MODULATES, INHIBITS) como badge colorido
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+### 2. `ScientificEvidencePanel.tsx` — usar tags coloridas
+- Subject (composto) → `NutraceuticalTag`
+- Object (condição) → `ConditionTag`
+- Predicate badge → cor semântica: verde para TREATS/PREVENTS, vermelho para INHIBITS, laranja para MODULATES, azul para ACTIVATES
 
-### 3. Novo componente: Chat Especializado por Composto
+### 3. `ComorbidityMap.tsx` — usar tags coloridas
+- Compostos sinérgicos → `NutraceuticalTag`
+- Condições tratadas → `ConditionTag`
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+### 4. Edge function `condition-insights` — incluir mais predicados nos tratamentos
+- Adicionar `INHIBITS`, `MODULATES` e `ACTIVATES` à query de tratamentos (seção 1), não só mecanismos
+- Criar uma nova seção "modulators" que retorna compostos que INHIBITS/MODULATES vias biológicas ligadas às condições do pet
+- Isso permite ao veterinário ver: "Fisetin INHIBITS NF-κB → reduz inflamação → ajuda Osteoartrite"
 
-### 4. Chat Clínico Geral (sidebar)
+### 5. `ConditionInsightCard.tsx` — nova seção "Moduladores"
+- Exibir compostos que INHIBITS/MODULATES/ACTIVATES vias relevantes
+- Usar ícone de bionotação: ⊣ para INHIBITS, → para ACTIVATES, --→ para MODULATES
 
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+## Mapa de predicados → cor
 
-### 5. Arquivos a modificar/criar
+| Predicado | Cor | Significado clínico |
+|---|---|---|
+| TREATS | verde | Tratamento direto |
+| PREVENTS | verde-claro | Prevenção |
+| INHIBITS | vermelho | Inibição de via patológica |
+| MODULATES | laranja | Modulação |
+| ACTIVATES | azul | Ativação de via protetora |
+| AMELIORATES | teal | Melhora |
+
+## Arquivos editados
 
 | Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
-
-### 6. Estrutura visual resultante
-
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
-```
-
-### Detalhes técnicos
-
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+|---|---|
+| `src/components/pet/ConditionInsightCard.tsx` | Importar NutraceuticalTag/ConditionTag, adicionar seção moduladores |
+| `src/components/pet/ScientificEvidencePanel.tsx` | Usar NutraceuticalTag/ConditionTag + predicate colors |
+| `src/components/pet/ComorbidityMap.tsx` | Usar NutraceuticalTag/ConditionTag nos sinérgicos |
+| `supabase/functions/condition-insights/index.ts` | Adicionar INHIBITS/MODULATES/ACTIVATES aos tratamentos, retornar `modulators` |
 
