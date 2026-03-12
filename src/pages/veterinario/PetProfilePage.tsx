@@ -67,7 +67,6 @@ const PetProfilePage: React.FC = () => {
   const treatabilityData = useMemo(() => {
     if (!data?.conditions) return [];
     return data.conditions.map((c: any) => {
-      // Use KG triplet data if available for more accurate scores
       const matchingTriplets = kgTriplets.filter(
         trip => trip.object?.toLowerCase().includes(c.condition_name.toLowerCase())
       );
@@ -89,9 +88,8 @@ const PetProfilePage: React.FC = () => {
     try {
       const { profile, conditions, medications, exams } = data;
 
-      // Stage 1: Profile
       setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
-      await new Promise(r => setTimeout(r, 200)); // Small delay to show step
+      await new Promise(r => setTimeout(r, 200));
       setPipelineState(s => ({ ...s, stage1_profile: 'complete', stage2_predispositions: 'running' }));
 
       const result = await runClinicalAnalysisPipeline(
@@ -110,10 +108,8 @@ const PetProfilePage: React.FC = () => {
         exams
       );
 
-      // Update pipeline stages progressively
       setPipelineState(s => ({ ...s, stage2_predispositions: 'complete', stage3_labs: 'complete', stage4_kg: 'complete', stage5_interactions: 'complete', stage6_recommendation: 'complete' }));
 
-      // Update all state from pipeline result
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
       setInteractionAlerts(result.interactionAlerts);
@@ -290,7 +286,174 @@ const PetProfilePage: React.FC = () => {
           />
         </div>
 
-        {/* Analysis Results Tabs - Primary highlight after pipeline */}
+        {/* Patient Clinical Data - full width, right after pipeline */}
+        <div className="mb-6">
+          <Tabs defaultValue="conditions">
+            <TabsList className="mb-4">
+              <TabsTrigger value="conditions" className="gap-1">
+                <Stethoscope className="h-3.5 w-3.5" />
+                {t('petRegistration.conditions.title')}
+              </TabsTrigger>
+              <TabsTrigger value="medications" className="gap-1">
+                <Pill className="h-3.5 w-3.5" />
+                {t('petRegistration.medications.title')}
+              </TabsTrigger>
+              <TabsTrigger value="exams" className="gap-1">
+                <TestTube className="h-3.5 w-3.5" />
+                {t('petRegistration.exams.title')}
+              </TabsTrigger>
+              <TabsTrigger value="notes" className="gap-1">
+                <FileText className="h-3.5 w-3.5" />
+                {t('petRegistration.profile.clinicalNotes')}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="conditions">
+              {conditionInsights.data && (
+                <div className="mb-4">
+                  <ComorbidityMap
+                    conditions={conditions.map((c: any) => c.condition_name)}
+                    causalPathways={conditionInsights.data.causalPathways}
+                    synergisticCompounds={conditionInsights.data.synergisticCompounds}
+                  />
+                </div>
+              )}
+              {conditions.length === 0 ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <p className="text-sm text-muted-foreground text-center">
+                      {t('petRegistration.conditions.none')}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {conditions.map((c: any) => {
+                    const insight = conditionInsights.data?.conditionInsights?.find(
+                      (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
+                    );
+                    return (
+                      <ConditionInsightCard
+                        key={c.id}
+                        condition={c}
+                        insight={insight}
+                        medications={medications}
+                        petBreed={profile.breed}
+                        petAge={profile.age_years}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="medications">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">{t('petRegistration.medications.current')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {medications.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      {t('petRegistration.medications.none')}
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {medications.map((m: any) => (
+                        <div key={m.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                          <div>
+                            <p className="font-medium text-sm">{m.medication_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {m.dosage && `${m.dosage}`}
+                              {m.frequency && ` · ${m.frequency}`}
+                            </p>
+                          </div>
+                          {!m.end_date && (
+                            <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                              {t('petRegistration.medications.active')}
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="exams">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">{t('petRegistration.exams.results')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {exams.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      {t('petRegistration.exams.none')}
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {exams.map((e: any) => (
+                        <div key={e.id} className="border-b pb-3 last:border-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium text-sm">{e.exam_type}</p>
+                            {e.exam_date && (
+                              <span className="text-xs text-muted-foreground">{e.exam_date}</span>
+                            )}
+                          </div>
+                          {e.results && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {typeof e.results === 'object'
+                                ? Object.entries(e.results as Record<string, any>)
+                                    .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
+                                    .join(' · ')
+                                : String(e.results)
+                              }
+                            </p>
+                          )}
+                          {e.notes && <p className="text-xs text-muted-foreground mt-1">{e.notes}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="notes">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">{t('petRegistration.profile.clinicalHistory')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {clinicalNotes.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      {t('petRegistration.profile.noNotes')}
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {clinicalNotes.map((n: any) => (
+                        <div key={n.id} className="border-b pb-3 last:border-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">
+                              {n.note_type}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(n.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm">{n.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Analysis Results Tabs - after patient clinical data */}
         {recommendationCompounds && (
           <div className="mb-6">
             <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
@@ -412,181 +575,13 @@ const PetProfilePage: React.FC = () => {
           </div>
         )}
 
-        {/* Main Grid: Content + Chat */}
+        {/* Main Grid: Treatability + Chat */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content (2/3) */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}
-
-            {/* Existing Tabs */}
-            <Tabs defaultValue="conditions">
-              <TabsList className="mb-4">
-                <TabsTrigger value="conditions" className="gap-1">
-                  <Stethoscope className="h-3.5 w-3.5" />
-                  {t('petRegistration.conditions.title')}
-                </TabsTrigger>
-                <TabsTrigger value="medications" className="gap-1">
-                  <Pill className="h-3.5 w-3.5" />
-                  {t('petRegistration.medications.title')}
-                </TabsTrigger>
-                <TabsTrigger value="exams" className="gap-1">
-                  <TestTube className="h-3.5 w-3.5" />
-                  {t('petRegistration.exams.title')}
-                </TabsTrigger>
-                <TabsTrigger value="notes" className="gap-1">
-                  <FileText className="h-3.5 w-3.5" />
-                  {t('petRegistration.profile.clinicalNotes')}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="conditions">
-                {/* Comorbidity Map - shows inter-condition connections */}
-                {conditionInsights.data && (
-                  <div className="mb-4">
-                    <ComorbidityMap
-                      conditions={conditions.map((c: any) => c.condition_name)}
-                      causalPathways={conditionInsights.data.causalPathways}
-                      synergisticCompounds={conditionInsights.data.synergisticCompounds}
-                    />
-                  </div>
-                )}
-
-                {conditions.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-8">
-                      <p className="text-sm text-muted-foreground text-center">
-                        {t('petRegistration.conditions.none')}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-2">
-                    {conditions.map((c: any) => {
-                      const insight = conditionInsights.data?.conditionInsights?.find(
-                        (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
-                      );
-                      return (
-                        <ConditionInsightCard
-                          key={c.id}
-                          condition={c}
-                          insight={insight}
-                          medications={medications}
-                          petBreed={profile.breed}
-                          petAge={profile.age_years}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="medications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('petRegistration.medications.current')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {medications.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
-                        {t('petRegistration.medications.none')}
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {medications.map((m: any) => (
-                          <div key={m.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                            <div>
-                              <p className="font-medium text-sm">{m.medication_name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {m.dosage && `${m.dosage}`}
-                                {m.frequency && ` · ${m.frequency}`}
-                              </p>
-                            </div>
-                            {!m.end_date && (
-                              <Badge variant="outline" className="bg-blue-100 text-blue-800">
-                                {t('petRegistration.medications.active')}
-                              </Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="exams">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('petRegistration.exams.results')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {exams.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
-                        {t('petRegistration.exams.none')}
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {exams.map((e: any) => (
-                          <div key={e.id} className="border-b pb-3 last:border-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="font-medium text-sm">{e.exam_type}</p>
-                              {e.exam_date && (
-                                <span className="text-xs text-muted-foreground">{e.exam_date}</span>
-                              )}
-                            </div>
-                            {e.results && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {typeof e.results === 'object'
-                                  ? Object.entries(e.results as Record<string, any>)
-                                      .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
-                                      .join(' · ')
-                                  : String(e.results)
-                                }
-                              </p>
-                            )}
-                            {e.notes && <p className="text-xs text-muted-foreground mt-1">{e.notes}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="notes">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('petRegistration.profile.clinicalHistory')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {clinicalNotes.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
-                        {t('petRegistration.profile.noNotes')}
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {clinicalNotes.map((n: any) => (
-                          <div key={n.id} className="border-b pb-3 last:border-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-xs">
-                                {n.note_type}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(n.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-sm">{n.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
           </div>
 
           {/* Chat Sidebar (1/3) */}
