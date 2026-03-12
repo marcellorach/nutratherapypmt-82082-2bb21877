@@ -74,6 +74,11 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 3. Factor in BREED PREDISPOSITIONS — preventive compounds for undiagnosed risks
 4. Age-appropriate dosing — geriatric patients need adjusted doses
 5. For each compound, specify WHICH CONDITION it targets (not generic)
+6. MAXIMUM 8 COMPOUNDS — select only the most effective and synergistic ones. Prioritize compounds that:
+   a) Address the most critical lab abnormalities
+   b) Have synergistic effects with each other
+   c) Cover the most important conditions
+   d) Have the strongest evidence base
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
 
