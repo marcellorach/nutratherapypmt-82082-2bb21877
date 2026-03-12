@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Beaker, GitBranch, Link2, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Beaker, GitBranch, Link2, Shield, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ConditionInsight } from '@/hooks/useConditionInsights';
+import NutraceuticalTag from '@/components/administrador/tags/NutraceuticalTag';
+import ConditionTag from '@/components/administrador/tags/ConditionTag';
 
 const severityColors: Record<string, string> = {
   mild: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -18,12 +20,27 @@ const statusColors: Record<string, string> = {
   resolved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
 };
 
-const predicateLabels: Record<string, { label: string; color: string }> = {
-  CAUSES: { label: 'causes', color: 'text-red-600 dark:text-red-400' },
-  AGGRAVATES: { label: 'aggravates', color: 'text-orange-600 dark:text-orange-400' },
-  LEADS_TO: { label: 'leads to', color: 'text-amber-600 dark:text-amber-400' },
-  TRIGGERS: { label: 'triggers', color: 'text-red-500 dark:text-red-400' },
-  ASSOCIATED_WITH: { label: 'associated with', color: 'text-blue-600 dark:text-blue-400' },
+const predicateStyles: Record<string, { color: string; symbol: string }> = {
+  TREATS: { color: 'text-emerald-600 dark:text-emerald-400', symbol: '→' },
+  PREVENTS: { color: 'text-green-500 dark:text-green-400', symbol: '→' },
+  AMELIORATES: { color: 'text-teal-600 dark:text-teal-400', symbol: '→' },
+  INHIBITS: { color: 'text-red-600 dark:text-red-400', symbol: '⊣' },
+  MODULATES: { color: 'text-orange-600 dark:text-orange-400', symbol: '- -→' },
+  ACTIVATES: { color: 'text-blue-600 dark:text-blue-400', symbol: '→' },
+  CAUSES: { color: 'text-red-600 dark:text-red-400', symbol: '→' },
+  AGGRAVATES: { color: 'text-orange-600 dark:text-orange-400', symbol: '→' },
+  LEADS_TO: { color: 'text-amber-600 dark:text-amber-400', symbol: '→' },
+  TRIGGERS: { color: 'text-red-500 dark:text-red-400', symbol: '→' },
+  ASSOCIATED_WITH: { color: 'text-blue-600 dark:text-blue-400', symbol: '——' },
+};
+
+const predicateBadgeColors: Record<string, string> = {
+  TREATS: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+  PREVENTS: 'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+  AMELIORATES: 'bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700',
+  INHIBITS: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  MODULATES: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700',
+  ACTIVATES: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
 };
 
 interface ConditionInsightCardProps {
@@ -44,6 +61,7 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
   const treatmentCount = insight?.treatments?.length || 0;
   const causalCount = insight?.causalLinks?.length || 0;
   const mechanismCount = insight?.mechanisms?.length || 0;
+  const modulatorCount = insight?.modulators?.length || 0;
 
   return (
     <Card className={cn(
@@ -67,6 +85,12 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
             <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 gap-1">
               <Beaker className="h-3 w-3" />
               {treatmentCount}
+            </Badge>
+          )}
+          {modulatorCount > 0 && (
+            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 gap-1">
+              <Zap className="h-3 w-3" />
+              {modulatorCount}
             </Badge>
           )}
           {causalCount > 0 && (
@@ -98,24 +122,50 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
               </h4>
               <div className="flex flex-wrap gap-1.5">
                 {insight.treatments.slice(0, 10).map((tr, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="text-xs gap-1"
-                  >
-                    {tr.subject_name}
-                    {tr.extraction_confidence && (
-                      <span className="text-muted-foreground">
-                        {Math.round(tr.extraction_confidence * 100)}%
-                      </span>
-                    )}
-                  </Badge>
+                  <div key={i} className="flex items-center gap-1">
+                    <Badge variant="outline" className={cn('text-[10px] px-1.5 h-5', predicateBadgeColors[tr.predicate] || predicateBadgeColors.TREATS)}>
+                      {predicateStyles[tr.predicate]?.symbol || '→'} {t(`petProfile.conditionInsights.predicates.${tr.predicate}`, tr.predicate.toLowerCase())}
+                    </Badge>
+                    <NutraceuticalTag
+                      name={tr.subject_name}
+                      score={tr.extraction_confidence || 0}
+                      showScore={!!tr.extraction_confidence}
+                    />
+                  </div>
                 ))}
                 {insight.treatments.length > 10 && (
                   <Badge variant="outline" className="text-xs">
                     +{insight.treatments.length - 10}
                   </Badge>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Modulators (INHIBITS/MODULATES/ACTIVATES) */}
+          {insight.modulators && insight.modulators.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-orange-500" />
+                {t('petProfile.conditionInsights.modulators')}
+              </h4>
+              <div className="space-y-1.5">
+                {insight.modulators.slice(0, 8).map((mod, i) => {
+                  const style = predicateStyles[mod.predicate] || predicateStyles.MODULATES;
+                  return (
+                    <div key={i} className="flex items-center gap-1.5 text-xs">
+                      <NutraceuticalTag
+                        name={mod.subject_name}
+                        score={mod.extraction_confidence || 0}
+                        showScore={!!mod.extraction_confidence}
+                      />
+                      <Badge variant="outline" className={cn('text-[10px] px-1.5 h-5', predicateBadgeColors[mod.predicate] || predicateBadgeColors.MODULATES)}>
+                        {style.symbol} {t(`petProfile.conditionInsights.predicates.${mod.predicate}`, mod.predicate.toLowerCase())}
+                      </Badge>
+                      <span className="font-medium text-muted-foreground">{mod.object_name}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -127,16 +177,16 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
                 <GitBranch className="h-3.5 w-3.5 text-amber-500" />
                 {t('petProfile.conditionInsights.causalConnections')}
               </h4>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {insight.causalLinks.map((link, i) => {
-                  const pred = predicateLabels[link.predicate] || { label: link.predicate.toLowerCase(), color: 'text-muted-foreground' };
+                  const pred = predicateStyles[link.predicate] || { color: 'text-muted-foreground', symbol: '→' };
                   return (
                     <div key={i} className="text-xs flex items-center gap-1.5 py-0.5">
-                      <span className="font-medium">{link.subject_name}</span>
-                      <span className={cn('italic', pred.color)}>
-                        {t(`petProfile.conditionInsights.predicates.${link.predicate}`, pred.label)}
+                      <ConditionTag condition={link.subject_name} score={0} showScore={false} />
+                      <span className={cn('italic font-medium', pred.color)}>
+                        {pred.symbol} {t(`petProfile.conditionInsights.predicates.${link.predicate}`, link.predicate.toLowerCase().replace('_', ' '))}
                       </span>
-                      <span className="font-medium">{link.object_name}</span>
+                      <ConditionTag condition={link.object_name} score={0} showScore={false} />
                     </div>
                   );
                 })}
@@ -152,11 +202,18 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
                 {t('petProfile.conditionInsights.mechanisms')}
               </h4>
               <div className="flex flex-wrap gap-1.5">
-                {insight.mechanisms.slice(0, 8).map((m, i) => (
-                  <Badge key={i} variant="outline" className="text-xs">
-                    {m.subject_name} → {m.object_name}
-                  </Badge>
-                ))}
+                {insight.mechanisms.slice(0, 8).map((m, i) => {
+                  const style = predicateStyles[m.predicate] || predicateStyles.MODULATES;
+                  return (
+                    <div key={i} className="flex items-center gap-1 text-xs">
+                      <NutraceuticalTag name={m.subject_name} score={m.extraction_confidence || 0} showScore={false} />
+                      <Badge variant="outline" className={cn('text-[10px] px-1.5 h-5', predicateBadgeColors[m.predicate] || 'bg-muted')}>
+                        {style.symbol}
+                      </Badge>
+                      <span className="text-muted-foreground">{m.object_name}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

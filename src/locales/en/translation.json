@@ -6986,12 +6986,19 @@
         "monitoring": "Monitoring",
         "resolved": "Resolved"
       },
+      "modulators": "Modulators & Inhibitors",
       "predicates": {
         "CAUSES": "causes",
         "AGGRAVATES": "aggravates",
         "LEADS_TO": "leads to",
         "TRIGGERS": "triggers",
-        "ASSOCIATED_WITH": "associated with"
+        "ASSOCIATED_WITH": "associated with",
+        "TREATS": "treats",
+        "PREVENTS": "prevents",
+        "AMELIORATES": "ameliorates",
+        "INHIBITS": "inhibits",
+        "MODULATES": "modulates",
+        "ACTIVATES": "activates"
       }
     }
   },
