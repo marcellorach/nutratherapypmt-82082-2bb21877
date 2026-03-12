@@ -290,140 +290,132 @@ const PetProfilePage: React.FC = () => {
           />
         </div>
 
+        {/* Analysis Results Tabs - Primary highlight after pipeline */}
+        {recommendationCompounds && (
+          <div className="mb-6">
+            <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
+              <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                {totalAlerts > 0 && (
+                  <TabsTrigger value="clinical-alerts" className="gap-1">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    {t('petProfile.analysisTabs.clinicalAlerts')}
+                    <Badge variant="outline" className="ml-1 text-xs h-5 px-1.5 bg-orange-100 text-orange-800">
+                      {totalAlerts}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="recommendations" className="gap-1">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.recommendations')}
+                </TabsTrigger>
+                <TabsTrigger value="biological-pathway" className="gap-1">
+                  <GitBranch className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.biologicalPathway')}
+                </TabsTrigger>
+                <TabsTrigger value="scientific-evidence" className="gap-1">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.scientificEvidence')}
+                </TabsTrigger>
+                <TabsTrigger value="projection" className="gap-1">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.projection')}
+                </TabsTrigger>
+                <TabsTrigger value="compound-chat" className="gap-1">
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.compoundChat')}
+                </TabsTrigger>
+              </TabsList>
+
+              {totalAlerts > 0 && (
+                <TabsContent value="clinical-alerts">
+                  <ClinicalAlertsPanel
+                    predispositions={predispositions}
+                    labAlerts={labAlerts}
+                    interactionAlerts={interactionAlerts}
+                    breed={profile.breed}
+                    ageYears={profile.age_years}
+                  />
+                </TabsContent>
+              )}
+
+              <TabsContent value="recommendations">
+                <VetRecommendationPanel
+                  compounds={recommendationCompounds}
+                  confidenceLevel={confidenceLevel}
+                  onApprove={handleApproveStack}
+                  onReject={handleRejectStack}
+                  petName={profile.name}
+                  petBreed={profile.breed}
+                  petAge={profile.age_years}
+                  petConditions={conditions?.map((c: any) => c.condition_name) || []}
+                />
+              </TabsContent>
+
+              <TabsContent value="biological-pathway">
+                {kgPathways.length > 0 ? (
+                  <BiologicalPathway pathways={kgPathways} />
+                ) : (
+                  <Card>
+                    <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                      {t('petProfile.pathway.description')}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="scientific-evidence">
+                {kgTriplets.length > 0 ? (
+                  <ScientificEvidencePanel triplets={kgTriplets} />
+                ) : (
+                  <Card>
+                    <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                      {t('petProfile.evidence.description')}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="projection">
+                {kgProjections.length > 0 ? (
+                  <ImprovementProjectionChart projections={kgProjections} />
+                ) : (
+                  <Card>
+                    <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                      {t('petProfile.projection.description')}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="compound-chat">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      {t('petProfile.analysisTabs.compoundChat')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CompoundSpecificChat
+                      compounds={recommendationCompounds}
+                      petName={profile.name}
+                      petBreed={profile.breed}
+                      petAge={profile.age_years}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
         {/* Main Grid: Content + Chat */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content (2/3) */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Digital Twin */}
-            {conditions.length > 0 && (
-              <DigitalTwinDog
-                conditions={conditions}
-                petName={profile.name}
-                petBreed={profile.breed}
-                petAge={profile.age_years}
-              />
-            )}
-
             {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
-            )}
-
-            {/* Analysis Results Tabs */}
-            {recommendationCompounds && (
-              <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
-                <TabsList className="mb-4 flex-wrap h-auto gap-1">
-                  {totalAlerts > 0 && (
-                    <TabsTrigger value="clinical-alerts" className="gap-1">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      {t('petProfile.analysisTabs.clinicalAlerts')}
-                      <Badge variant="outline" className="ml-1 text-xs h-5 px-1.5 bg-orange-100 text-orange-800">
-                        {totalAlerts}
-                      </Badge>
-                    </TabsTrigger>
-                  )}
-                  <TabsTrigger value="recommendations" className="gap-1">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.recommendations')}
-                  </TabsTrigger>
-                  <TabsTrigger value="biological-pathway" className="gap-1">
-                    <GitBranch className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.biologicalPathway')}
-                  </TabsTrigger>
-                  <TabsTrigger value="scientific-evidence" className="gap-1">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.scientificEvidence')}
-                  </TabsTrigger>
-                  <TabsTrigger value="projection" className="gap-1">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.projection')}
-                  </TabsTrigger>
-                  <TabsTrigger value="compound-chat" className="gap-1">
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.compoundChat')}
-                  </TabsTrigger>
-                </TabsList>
-
-                {totalAlerts > 0 && (
-                  <TabsContent value="clinical-alerts">
-                    <ClinicalAlertsPanel
-                      predispositions={predispositions}
-                      labAlerts={labAlerts}
-                      interactionAlerts={interactionAlerts}
-                      breed={profile.breed}
-                      ageYears={profile.age_years}
-                    />
-                  </TabsContent>
-                )}
-
-                <TabsContent value="recommendations">
-                  <VetRecommendationPanel
-                    compounds={recommendationCompounds}
-                    confidenceLevel={confidenceLevel}
-                    onApprove={handleApproveStack}
-                    onReject={handleRejectStack}
-                    petName={profile.name}
-                    petBreed={profile.breed}
-                    petAge={profile.age_years}
-                    petConditions={conditions?.map((c: any) => c.condition_name) || []}
-                  />
-                </TabsContent>
-
-                <TabsContent value="biological-pathway">
-                  {kgPathways.length > 0 ? (
-                    <BiologicalPathway pathways={kgPathways} />
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                        {t('petProfile.pathway.description')}
-                      </CardContent>
-                    </Card>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="scientific-evidence">
-                  {kgTriplets.length > 0 ? (
-                    <ScientificEvidencePanel triplets={kgTriplets} />
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                        {t('petProfile.evidence.description')}
-                      </CardContent>
-                    </Card>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="projection">
-                  {kgProjections.length > 0 ? (
-                    <ImprovementProjectionChart projections={kgProjections} />
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                        {t('petProfile.projection.description')}
-                      </CardContent>
-                    </Card>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="compound-chat">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" />
-                        {t('petProfile.analysisTabs.compoundChat')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CompoundSpecificChat
-                        compounds={recommendationCompounds}
-                        petName={profile.name}
-                        petBreed={profile.breed}
-                        petAge={profile.age_years}
-                      />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
             )}
 
             {/* Existing Tabs */}
@@ -595,12 +587,29 @@ const PetProfilePage: React.FC = () => {
           </div>
 
           {/* Chat Sidebar (1/3) */}
-          <div className="min-h-[500px]">
-            <PetClinicalChat
-              petId={id!}
-              petBreed={profile.breed}
-              petAge={profile.age_years}
-            />
+          <div className="space-y-4">
+            <div className="min-h-[500px]">
+              <PetClinicalChat
+                petId={id!}
+                petBreed={profile.breed}
+                petAge={profile.age_years}
+              />
+            </div>
+
+            {/* Digital Twin - compact, under construction */}
+            {conditions.length > 0 && (
+              <div className="relative">
+                <Badge className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] px-1.5 py-0.5">
+                  🚧 {t('common.underConstruction', 'Em construção')}
+                </Badge>
+                <DigitalTwinDog
+                  conditions={conditions}
+                  petName={profile.name}
+                  petBreed={profile.breed}
+                  petAge={profile.age_years}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
