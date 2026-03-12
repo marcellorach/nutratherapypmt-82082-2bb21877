@@ -274,24 +274,53 @@ function checkInteractions(
 
 // ─── Extract Evidence from KG ────────────────────────────────────────────────
 
+// All clinically relevant predicates for triplet extraction
+const CLINICAL_PREDICATES = [
+  'TREATS', 'PREVENTS', 'AMELIORATES', 'INHIBITS', 'MODULATES', 'ACTIVATES',
+  'CONTRAINDICATES', 'INTERACTS_WITH', 'SUPPORTS', 'CAUSES', 'AGGRAVATES',
+  'ALLEVIATES', 'BLOCKS', 'STIMULATES', 'REDUCES', 'INCREASES',
+];
+
+// Map predicates to Portuguese labels for pathway display
+const PREDICATE_PT_LABELS: Record<string, string> = {
+  TREATS: 'trata',
+  PREVENTS: 'previne',
+  AMELIORATES: 'melhora',
+  INHIBITS: 'inibe',
+  MODULATES: 'modula',
+  ACTIVATES: 'ativa',
+  CONTRAINDICATES: 'contraindica',
+  INTERACTS_WITH: 'interage',
+  SUPPORTS: 'suporta',
+  CAUSES: 'causa',
+  AGGRAVATES: 'agrava',
+  ALLEVIATES: 'alivia',
+  BLOCKS: 'bloqueia',
+  STIMULATES: 'estimula',
+  REDUCES: 'reduz',
+  INCREASES: 'aumenta',
+};
+
 function extractKgEvidence(kgResults: any[], conditionNames: string[]) {
   const triplets: any[] = [];
   const pathways: any[] = [];
+  const seenPathwayKeys = new Set<string>();
 
   for (const result of kgResults) {
     const { condition, graphData } = result;
     const nodes = graphData?.nodes || [];
     const relationships = graphData?.relationships || graphData?.edges || [];
 
+    // Extract ALL clinically relevant triplets
     for (const rel of relationships) {
       const sourceNode = nodes.find((n: any) => n.id === rel.source || n.id === rel.startNode);
       const targetNode = nodes.find((n: any) => n.id === rel.target || n.id === rel.endNode);
       if (sourceNode && targetNode) {
-        const predicate = rel.type || rel.label || rel.relationship || 'TREATS';
-        if (['TREATS', 'PREVENTS', 'ALLEVIATES', 'SUPPORTS'].includes(predicate.toUpperCase())) {
+        const predicate = (rel.type || rel.label || rel.relationship || 'TREATS').toUpperCase();
+        if (CLINICAL_PREDICATES.includes(predicate)) {
           triplets.push({
             subject: sourceNode.label || sourceNode.properties?.name || sourceNode.name,
-            predicate: predicate.toUpperCase(),
+            predicate,
             object: targetNode.label || targetNode.properties?.name || targetNode.name,
             confidence: rel.confidence || rel.properties?.confidence || 0.7,
             evidenceLevel: 'KG-backed',
@@ -301,20 +330,77 @@ function extractKgEvidence(kgResults: any[], conditionNames: string[]) {
       }
     }
 
+    // Build pathway chains for ALL compounds (not just first)
     const compounds = nodes.filter((n: any) => ['Nutraceutical', 'Compound', 'nutraceutical', 'compound'].includes(n.type || n.labels?.[0]));
     const mechanisms = nodes.filter((n: any) => ['Mechanism', 'mechanism', 'MolecularTarget'].includes(n.type || n.labels?.[0]));
     const effects = nodes.filter((n: any) => ['Effect', 'BiologicalEffect', 'effect'].includes(n.type || n.labels?.[0]));
 
-    if (compounds.length > 0) {
+    for (const compound of compounds) {
+      const compoundName = compound.label || compound.properties?.name || 'Compound';
+      const pathwayKey = `${compoundName}-${condition}`;
+      if (seenPathwayKeys.has(pathwayKey)) continue;
+      seenPathwayKeys.add(pathwayKey);
+
       const steps: any[] = [];
-      steps.push({ label: compounds[0].label || compounds[0].properties?.name || 'Compound', type: 'compound' });
-      if (mechanisms.length > 0) {
-        steps.push({ label: mechanisms[0].label || mechanisms[0].properties?.name || 'Mechanism', type: 'mechanism' });
+      steps.push({ label: compoundName, type: 'compound' });
+
+      // Find relationship predicate from compound to mechanism
+      const compoundRels = relationships.filter((r: any) => {
+        const srcId = r.source || r.startNode;
+        return srcId === compound.id;
+      });
+
+      // Add mechanisms connected to this compound
+      for (const mech of mechanisms) {
+        const connectingRel = compoundRels.find((r: any) => (r.target || r.endNode) === mech.id);
+        const predicate = connectingRel ? (connectingRel.type || connectingRel.label || '').toUpperCase() : 'MODULATES';
+        const ptLabel = PREDICATE_PT_LABELS[predicate] || predicate.toLowerCase();
+        steps.push({
+          label: mech.label || mech.properties?.name || 'Mechanism',
+          type: 'mechanism',
+          predicate: ptLabel,
+        });
+        break; // one mechanism per pathway chain
       }
-      if (effects.length > 0) {
-        steps.push({ label: effects[0].label || effects[0].properties?.name || 'Effect', type: 'effect' });
+
+      // Add effects
+      for (const eff of effects) {
+        const mechNode = mechanisms[0];
+        let predicate = 'MODULATES';
+        if (mechNode) {
+          const mechRels = relationships.filter((r: any) => (r.source || r.startNode) === mechNode.id);
+          const connectingRel = mechRels.find((r: any) => (r.target || r.endNode) === eff.id);
+          if (connectingRel) predicate = (connectingRel.type || connectingRel.label || '').toUpperCase();
+        }
+        const ptLabel = PREDICATE_PT_LABELS[predicate] || predicate.toLowerCase();
+        steps.push({
+          label: eff.label || eff.properties?.name || 'Effect',
+          type: 'effect',
+          predicate: ptLabel,
+        });
+        break; // one effect per pathway chain
       }
-      steps.push({ label: condition, type: 'outcome' });
+
+      // Check if this compound has contraindication relationships
+      const contraindicationRel = relationships.find((r: any) => {
+        const pred = (r.type || r.label || '').toUpperCase();
+        return (pred === 'CONTRAINDICATES' || pred === 'AGGRAVATES') &&
+          ((r.source || r.startNode) === compound.id || (r.target || r.endNode) === compound.id);
+      });
+
+      if (contraindicationRel) {
+        const targetId = (contraindicationRel.target || contraindicationRel.endNode);
+        const contraNode = nodes.find((n: any) => n.id === targetId);
+        if (contraNode) {
+          steps.push({
+            label: contraNode.label || contraNode.properties?.name || 'Contraindication',
+            type: 'contraindication',
+            predicate: 'contraindica',
+          });
+        }
+      }
+
+      steps.push({ label: condition, type: 'outcome', predicate: steps.length > 1 ? 'trata' : undefined });
       pathways.push({ condition, steps });
     }
   }

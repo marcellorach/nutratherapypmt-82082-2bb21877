@@ -365,7 +365,10 @@ const PetProfilePage: React.FC = () => {
 
               <TabsContent value="scientific-evidence">
                 {kgTriplets.length > 0 ? (
-                  <ScientificEvidencePanel triplets={kgTriplets} />
+                  <ScientificEvidencePanel
+                    triplets={kgTriplets}
+                    synergisticCompounds={conditionInsights.data?.synergisticCompounds}
+                  />
                 ) : (
                   <Card>
                     <CardContent className="py-8 text-center text-sm text-muted-foreground">
