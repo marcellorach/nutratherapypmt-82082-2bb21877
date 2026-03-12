@@ -88,6 +88,7 @@ const ClinicalAlertsPanel: React.FC<ClinicalAlertsPanelProps> = ({
                 <PredispositionTag
                   key={p.id}
                   conditionName={p.condition_name}
+                  conditionNameEn={p.condition_name_en || undefined}
                   riskFactor={p.risk_factor}
                   evidenceGrade={p.evidence_grade}
                   alreadyDiagnosed={p.already_diagnosed}
