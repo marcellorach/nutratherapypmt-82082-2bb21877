@@ -2785,6 +2785,19 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_relations_graph_data: {
+        Args: { p_limit?: number }
+        Returns: {
+          confidence: number
+          evidence_count: number
+          evidence_level: string
+          relationship: string
+          source_name: string
+          source_type: string
+          target_name: string
+          target_type: string
+        }[]
+      }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       search_study_chunks: {
