@@ -7042,6 +7042,34 @@
       "q2": "How does {{compound}} interact with {{condition}} at molecular level?",
       "q3": "Are there safety concerns with {{compound}} in geriatric dogs?",
       "inputPlaceholder": "Ask about this compound..."
+    },
+    "digitalTwin": {
+      "title": "Digital Twin",
+      "description": "Anatomical condition mapping for {{name}} ({{breed}}, {{age}} years)",
+      "silhouetteAlt": "Dog anatomical silhouette with condition markers",
+      "regions": {
+        "joints": "Joints",
+        "hip": "Hip",
+        "elbow": "Elbow",
+        "spine": "Spine",
+        "brain": "Brain / Neurological",
+        "heart": "Cardiovascular",
+        "liver": "Hepatic",
+        "kidney": "Renal",
+        "thyroid": "Endocrine (Thyroid)",
+        "pancreas": "Endocrine (Pancreas)",
+        "adrenal": "Endocrine (Adrenal)",
+        "skin": "Dermatological",
+        "eyes": "Ocular",
+        "gi": "Gastrointestinal",
+        "systemic": "Systemic / Cellular",
+        "respiratory": "Respiratory"
+      }
+    },
+    "severity": {
+      "mild": "Mild",
+      "moderate": "Moderate",
+      "severe": "Severe"
     }
   },
   "evidenceLevels": {

@@ -7042,6 +7042,34 @@
       "q2": "Como {{compound}} interage com {{condition}} a nível molecular?",
       "q3": "Há preocupações de segurança com {{compound}} em cães geriátricos?",
       "inputPlaceholder": "Pergunte sobre este composto..."
+    },
+    "digitalTwin": {
+      "title": "Gêmeo Digital",
+      "description": "Mapeamento anatômico de condições de {{name}} ({{breed}}, {{age}} anos)",
+      "silhouetteAlt": "Silhueta anatômica do cão com marcadores de condições",
+      "regions": {
+        "joints": "Articulações",
+        "hip": "Quadril",
+        "elbow": "Cotovelo",
+        "spine": "Coluna Vertebral",
+        "brain": "Cérebro / Neurológico",
+        "heart": "Cardiovascular",
+        "liver": "Hepático",
+        "kidney": "Renal",
+        "thyroid": "Endócrino (Tireoide)",
+        "pancreas": "Endócrino (Pâncreas)",
+        "adrenal": "Endócrino (Adrenal)",
+        "skin": "Dermatológico",
+        "eyes": "Ocular",
+        "gi": "Gastrointestinal",
+        "systemic": "Sistêmico / Celular",
+        "respiratory": "Respiratório"
+      }
+    },
+    "severity": {
+      "mild": "Leve",
+      "moderate": "Moderada",
+      "severe": "Grave"
     }
   },
   "evidenceLevels": {
