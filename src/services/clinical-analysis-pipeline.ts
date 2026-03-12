@@ -832,8 +832,10 @@ export async function runClinicalAnalysisPipeline(
     };
   });
 
-  // Prioritize compounds based on lab findings
-  const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions);
+  // Prioritize compounds based on lab findings and cap at 8
+  const MAX_COMPOUNDS = 8;
+  const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions)
+    .slice(0, MAX_COMPOUNDS);
 
   return {
     predispositions,

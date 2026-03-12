@@ -110,6 +110,7 @@ INDIVIDUALIZATION REQUIREMENTS:
 3. Factor in breed predispositions → include preventive compounds
 4. Each compound MUST specify which condition/finding it targets
 5. Dosages must be adjusted for the patient's weight and age
+6. MAXIMUM 8 COMPOUNDS — select only the top compounds by efficacy, synergy, and relevance to this patient's specific clinical picture
 
 Your response MUST follow this JSON structure:
 {
