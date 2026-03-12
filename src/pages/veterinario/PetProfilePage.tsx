@@ -294,6 +294,16 @@ const PetProfilePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content (2/3) */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Digital Twin */}
+            {conditions.length > 0 && (
+              <DigitalTwinDog
+                conditions={conditions}
+                petName={profile.name}
+                petBreed={profile.breed}
+                petAge={profile.age_years}
+              />
+            )}
+
             {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
