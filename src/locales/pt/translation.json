@@ -6964,6 +6964,35 @@
       "conflicts": "conflitos",
       "compounds": "compostos",
       "processing": "processando..."
+    },
+    "conditionInsights": {
+      "treatments": "Tratamentos do KG",
+      "causalConnections": "Conexões Causais",
+      "mechanisms": "Mecanismos Biológicos",
+      "linkedMedications": "Medicações Atuais",
+      "comorbidityMap": "Mapa de Comorbidades & Inter-Condições",
+      "comorbidityDesc": "Como as condições deste paciente se conectam via processos biológicos compartilhados",
+      "interConditionPaths": "Caminhos Inter-Condições",
+      "synergisticCompounds": "Compostos Sinérgicos",
+      "synergisticDesc": "Nutracêuticos que tratam 2+ condições simultaneamente",
+      "conditions": "condições",
+      "severity": {
+        "mild": "Leve",
+        "moderate": "Moderada",
+        "severe": "Grave"
+      },
+      "status": {
+        "active": "Ativa",
+        "monitoring": "Monitorando",
+        "resolved": "Resolvida"
+      },
+      "predicates": {
+        "CAUSES": "causa",
+        "AGGRAVATES": "agrava",
+        "LEADS_TO": "leva a",
+        "TRIGGERS": "dispara",
+        "ASSOCIATED_WITH": "associado a"
+      }
     }
   },
   "systemGuide": {
