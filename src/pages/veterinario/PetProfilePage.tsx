@@ -352,6 +352,9 @@ const PetProfilePage: React.FC = () => {
                     onApprove={handleApproveStack}
                     onReject={handleRejectStack}
                     petName={profile.name}
+                    petBreed={profile.breed}
+                    petAge={profile.age_years}
+                    petConditions={conditions?.map((c: any) => c.condition_name) || []}
                   />
                 </TabsContent>
 
