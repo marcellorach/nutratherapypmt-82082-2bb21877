@@ -26,20 +26,17 @@ Deno.serve(async (req) => {
 
     const conditionNames = conditions.map((c: any) => c.condition_name || c.name || c);
 
-    // Build ILIKE patterns for each condition
-    const ilikePatterns = conditionNames.map((name: string) => `%${name}%`);
-
-    // 1. Treatments: compounds that TREATS/PREVENTS each condition
+    // 1. Treatments: compounds that TREATS/PREVENTS/INHIBITS/MODULATES/ACTIVATES each condition
     const treatmentResults: Record<string, any[]> = {};
     for (const condName of conditionNames) {
       const { data: treatments } = await supabase
         .from('triplet_extractions')
         .select('subject_name, subject_type, predicate, object_name, extraction_confidence, evidence_level, study_id')
         .ilike('object_name', `%${condName}%`)
-        .in('predicate', ['TREATS', 'PREVENTS', 'AMELIORATES'])
+        .in('predicate', ['TREATS', 'PREVENTS', 'AMELIORATES', 'INHIBITS', 'MODULATES', 'ACTIVATES'])
         .eq('curation_status', 'approved')
         .order('extraction_confidence', { ascending: false })
-        .limit(15);
+        .limit(20);
 
       treatmentResults[condName] = treatments || [];
     }
@@ -88,7 +85,53 @@ Deno.serve(async (req) => {
       mechanismResults[condName] = mechanisms || [];
     }
 
-    // 4. Synergistic compounds: treat 2+ conditions
+    // 4. Modulators: compounds that INHIBITS/MODULATES/ACTIVATES biological pathways linked to conditions
+    const modulatorResults: Record<string, any[]> = {};
+    for (const condName of conditionNames) {
+      // Find pathways/mechanisms linked to this condition
+      const { data: pathways } = await supabase
+        .from('triplet_extractions')
+        .select('subject_name, object_name')
+        .or(`subject_name.ilike.%${condName}%,object_name.ilike.%${condName}%`)
+        .in('predicate', ['HAS_MECHANISM', 'CAUSES', 'AGGRAVATES', 'LEADS_TO'])
+        .eq('curation_status', 'approved')
+        .limit(20);
+
+      const pathwayNames = new Set<string>();
+      (pathways || []).forEach((p: any) => {
+        if (!p.subject_name.toLowerCase().includes(condName.toLowerCase())) {
+          pathwayNames.add(p.subject_name);
+        }
+        if (!p.object_name.toLowerCase().includes(condName.toLowerCase())) {
+          pathwayNames.add(p.object_name);
+        }
+      });
+
+      // Find compounds that INHIBITS/MODULATES/ACTIVATES those pathways
+      const modulators: any[] = [];
+      for (const pathway of Array.from(pathwayNames).slice(0, 10)) {
+        const { data: mods } = await supabase
+          .from('triplet_extractions')
+          .select('subject_name, subject_type, predicate, object_name, extraction_confidence')
+          .ilike('object_name', `%${pathway}%`)
+          .in('predicate', ['INHIBITS', 'MODULATES', 'ACTIVATES'])
+          .eq('curation_status', 'approved')
+          .limit(5);
+
+        if (mods) modulators.push(...mods);
+      }
+
+      // Deduplicate
+      const seen = new Set<string>();
+      modulatorResults[condName] = modulators.filter(m => {
+        const key = `${m.subject_name}|${m.predicate}|${m.object_name}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    // 5. Synergistic compounds: treat 2+ conditions
     const compoundConditionMap: Record<string, Set<string>> = {};
     for (const [condName, treatments] of Object.entries(treatmentResults)) {
       for (const t of treatments as any[]) {
@@ -108,10 +151,18 @@ Deno.serve(async (req) => {
       }))
       .sort((a, b) => b.coverageCount - a.coverageCount);
 
-    // 5. Build per-condition insights
+    // 6. Build per-condition insights
     const conditionInsights = conditionNames.map((condName: string) => ({
       condition: condName,
-      treatments: treatmentResults[condName] || [],
+      treatments: (treatmentResults[condName] || []).filter(
+        (t: any) => ['TREATS', 'PREVENTS', 'AMELIORATES'].includes(t.predicate)
+      ),
+      modulators: [
+        ...(treatmentResults[condName] || []).filter(
+          (t: any) => ['INHIBITS', 'MODULATES', 'ACTIVATES'].includes(t.predicate)
+        ),
+        ...(modulatorResults[condName] || []),
+      ],
       mechanisms: mechanismResults[condName] || [],
       causalLinks: uniqueCausalLinks.filter(
         (link) =>

@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { GitBranch, Zap, ArrowRight } from 'lucide-react';
 import { CausalLink, SynergisticCompound } from '@/hooks/useConditionInsights';
 import { cn } from '@/lib/utils';
+import NutraceuticalTag from '@/components/administrador/tags/NutraceuticalTag';
+import ConditionTag from '@/components/administrador/tags/ConditionTag';
 
 interface ComorbidityMapProps {
   conditions: string[];
@@ -48,13 +50,13 @@ const ComorbidityMap: React.FC<ComorbidityMapProps> = ({ conditions, causalPathw
                 const predStyle = predicateColors[path.predicate] || predicateColors.ASSOCIATED_WITH;
                 return (
                   <div key={i} className={cn('flex items-center gap-2 p-2 rounded-md border text-xs', predStyle)}>
-                    <span className="font-semibold">{path.subject_name}</span>
+                    <ConditionTag condition={path.subject_name} score={0} showScore={false} />
                     <ArrowRight className="h-3 w-3 flex-shrink-0" />
                     <span className="italic opacity-80">
                       {t(`petProfile.conditionInsights.predicates.${path.predicate}`, path.predicate.toLowerCase().replace('_', ' '))}
                     </span>
                     <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                    <span className="font-semibold">{path.object_name}</span>
+                    <ConditionTag condition={path.object_name} score={0} showScore={false} />
                     {path.extraction_confidence && (
                       <Badge variant="outline" className="ml-auto text-[10px] h-4 px-1">
                         {Math.round(path.extraction_confidence * 100)}%
@@ -84,14 +86,10 @@ const ComorbidityMap: React.FC<ComorbidityMapProps> = ({ conditions, causalPathw
                   className="flex items-start gap-2 p-2 rounded-md border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/20"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                      {sc.compound}
-                    </p>
+                    <NutraceuticalTag name={sc.compound} score={0} showScore={false} />
                     <div className="flex flex-wrap gap-1 mt-1">
                       {sc.conditionsTreated.map((cond, j) => (
-                        <Badge key={j} variant="outline" className="text-[10px] h-4 px-1">
-                          {cond}
-                        </Badge>
+                        <ConditionTag key={j} condition={cond} score={0} showScore={false} />
                       ))}
                     </div>
                   </div>

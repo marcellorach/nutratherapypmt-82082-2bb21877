@@ -30,6 +30,7 @@ export interface ConditionMechanism {
 export interface ConditionInsight {
   condition: string;
   treatments: ConditionTreatment[];
+  modulators?: ConditionTreatment[];
   mechanisms: ConditionMechanism[];
   causalLinks: CausalLink[];
 }
