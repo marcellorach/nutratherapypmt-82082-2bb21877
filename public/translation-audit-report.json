@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-12T16:33:10.762Z",
+  "timestamp": "2026-03-12T21:19:12.427Z",
   "summary": {
-    "totalFiles": 768,
-    "totalIssues": 375,
+    "totalFiles": 775,
+    "totalIssues": 380,
     "hardcodedTexts": 38,
-    "missingKeys": 337,
+    "missingKeys": 342,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2229,6 +2229,27 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/pet/PetClinicalChat.tsx",
+      "line": 83,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/PetClinicalChat.tsx",
+      "line": 84,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/PetClinicalChat.tsx",
+      "line": 85,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/pet/PetRegistrationForm.tsx",
       "line": 194,
       "text": "common.yes",
@@ -2342,15 +2363,29 @@
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 49,
+      "line": 52,
+      "text": "pet_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 60,
       "text": "id, name, species, breed, age_years, weight_kg, sex, owner_name",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 74,
+      "line": 91,
       "text": "id, recommendation_data, rationale, confidence_overall, confidence_level, recommendation_source, created_at, warnings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 110,
+      "text": "*",
       "severity": "high"
     },
     {
@@ -2629,7 +2664,7 @@
     {
       "type": "hardcoded",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 98,
+      "line": 137,
       "text": "Carregando dados...",
       "severity": "medium"
     }

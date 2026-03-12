@@ -109,7 +109,8 @@ const TutorPage: React.FC = () => {
           .from('treatment_proposals')
           .select('*')
           .eq('pet_id', selectedPetId)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(1);
         
         if (!error && data) {
           setProposals(data);
