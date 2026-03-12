@@ -21,6 +21,7 @@ import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
+import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
