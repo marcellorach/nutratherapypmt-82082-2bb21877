@@ -4,10 +4,11 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2 } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2, FileText } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import TreatmentProposalCard from '@/components/tutor/TreatmentProposalCard';
 
 interface PetProfile {
   id: string;
@@ -36,10 +37,11 @@ const TutorPage: React.FC = () => {
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [recommendations, setRecommendations] = useState<RecommendationLog[]>([]);
+  const [proposals, setProposals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
+  const [isLoadingProposals, setIsLoadingProposals] = useState(false);
   
-  // Load pets from database
   useEffect(() => {
     const loadPets = async () => {
       setIsLoading(true);
@@ -54,7 +56,7 @@ const TutorPage: React.FC = () => {
           setSelectedPetId(data[0].id);
         }
       } catch (err) {
-        console.error('Erro ao carregar pets:', err);
+        console.error('Error loading pets:', err);
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +64,6 @@ const TutorPage: React.FC = () => {
     loadPets();
   }, []);
   
-  // Load recommendations when pet changes
   useEffect(() => {
     if (!selectedPetId) return;
     
@@ -79,16 +80,38 @@ const TutorPage: React.FC = () => {
           setRecommendations(data as RecommendationLog[]);
         }
       } catch (err) {
-        console.error('Erro ao carregar recomendações:', err);
+        console.error('Error loading recommendations:', err);
       } finally {
         setIsLoadingRecs(false);
       }
     };
+
+    const loadProposals = async () => {
+      setIsLoadingProposals(true);
+      try {
+        const { data, error } = await (supabase as any)
+          .from('treatment_proposals')
+          .select('*')
+          .eq('pet_id', selectedPetId)
+          .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+          setProposals(data);
+        }
+      } catch (err) {
+        console.error('Error loading proposals:', err);
+      } finally {
+        setIsLoadingProposals(false);
+      }
+    };
+
     loadRecommendations();
+    loadProposals();
   }, [selectedPetId]);
   
   const selectedPet = pets.find(p => p.id === selectedPetId);
   const ownerName = selectedPet?.owner_name || t('tutor.greeting');
+  const pendingProposals = proposals.filter(p => p.status === 'pending');
   
   if (isLoading) {
     return (
@@ -148,13 +171,20 @@ const TutorPage: React.FC = () => {
                       </p>
                     </div>
                     
-                    {recommendations.length === 0 && !isLoadingRecs && (
-                      <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mt-4 md:mt-0 rounded-r">
+                    {pendingProposals.length > 0 && (
+                      <Badge variant="default" className="h-fit self-start gap-1 text-sm">
+                        <FileText className="h-4 w-4" />
+                        {pendingProposals.length} {t('tutor.tabs.proposals')}
+                      </Badge>
+                    )}
+
+                    {recommendations.length === 0 && !isLoadingRecs && pendingProposals.length === 0 && (
+                      <div className="bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-400 p-4 mt-4 md:mt-0 rounded-r">
                         <div className="flex items-start">
                           <Info className="h-5 w-5 text-amber-600 mr-2 mt-0.5" />
                           <div>
-                            <h3 className="font-medium text-amber-800">{t('tutor.noTreatmentPlan')}</h3>
-                            <p className="text-amber-700 text-sm">{t('tutor.noTreatmentPlanDesc')}</p>
+                            <h3 className="font-medium text-amber-800 dark:text-amber-300">{t('tutor.noTreatmentPlan')}</h3>
+                            <p className="text-amber-700 dark:text-amber-400 text-sm">{t('tutor.noTreatmentPlanDesc')}</p>
                           </div>
                         </div>
                       </div>
@@ -162,18 +192,63 @@ const TutorPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <Tabs defaultValue="plano" className="w-full">
+                <Tabs defaultValue={pendingProposals.length > 0 ? "propostas" : "plano"} className="w-full">
                   <TabsList className="mb-6">
+                    <TabsTrigger value="propostas" className="relative">
+                      {t('tutor.tabs.proposals')}
+                      {pendingProposals.length > 0 && (
+                        <span className="ml-1.5 bg-primary text-primary-foreground rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                          {pendingProposals.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
                     <TabsTrigger value="plano">{t('tutor.tabs.plan')}</TabsTrigger>
                     <TabsTrigger value="historico">{t('tutor.tabs.history')}</TabsTrigger>
                     <TabsTrigger value="pedidos">{t('tutor.tabs.orders')}</TabsTrigger>
                   </TabsList>
+
+                  {/* Proposals Tab */}
+                  <TabsContent value="propostas">
+                    {isLoadingProposals ? (
+                      <div className="text-center py-12">
+                        <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-primary" />
+                      </div>
+                    ) : proposals.length > 0 ? (
+                      <div className="space-y-6 max-w-2xl mx-auto">
+                        {proposals.map(proposal => (
+                          <TreatmentProposalCard
+                            key={proposal.id}
+                            proposal={proposal}
+                            petName={selectedPet.name}
+                            petBreed={selectedPet.breed}
+                            petAge={selectedPet.age_years}
+                            onAccepted={() => {
+                              setProposals(prev =>
+                                prev.map(p =>
+                                  p.id === proposal.id
+                                    ? { ...p, status: 'accepted', accepted_at: new Date().toISOString() }
+                                    : p
+                                )
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="text-center py-12">
+                        <CardContent>
+                          <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <h3 className="text-xl font-semibold text-foreground mb-2">{t('tutor.proposal.noPendingTitle')}</h3>
+                          <p className="text-muted-foreground">{t('tutor.proposal.noPendingDesc')}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
                   
                   <TabsContent value="plano">
                     {isLoadingRecs ? (
                       <div className="text-center py-12">
                         <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-primary" />
-                        <p className="text-muted-foreground">Carregando recomendações...</p>
                       </div>
                     ) : recommendations.length > 0 ? (
                       <div>
@@ -212,7 +287,7 @@ const TutorPage: React.FC = () => {
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg font-medium flex items-center gap-2">
                                 <Brain className="h-5 w-5 text-primary" />
-                                Confiança Geral
+                                {t('tutor.proposal.confidenceLabel') || 'Confiança Geral'}
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -222,7 +297,7 @@ const TutorPage: React.FC = () => {
                                   : '-'}
                               </p>
                               <p className="text-muted-foreground text-sm">
-                                Fonte: {recommendations[0]?.recommendation_source || 'VetGraphRAG'}
+                                {recommendations[0]?.recommendation_source || 'VetGraphRAG'}
                               </p>
                             </CardContent>
                           </Card>
@@ -268,10 +343,10 @@ const TutorPage: React.FC = () => {
                                   </div>
                                   
                                   {rec.warnings && rec.warnings.length > 0 && (
-                                    <div className="mt-3 bg-amber-50 p-3 rounded text-sm">
-                                      <p className="font-medium text-amber-800 mb-1">⚠️ Avisos:</p>
+                                    <div className="mt-3 bg-amber-50 dark:bg-amber-950/30 p-3 rounded text-sm">
+                                      <p className="font-medium text-amber-800 dark:text-amber-300 mb-1">⚠️ Avisos:</p>
                                       {rec.warnings.map((w, i) => (
-                                        <p key={i} className="text-amber-700">• {w}</p>
+                                        <p key={i} className="text-amber-700 dark:text-amber-400">• {w}</p>
                                       ))}
                                     </div>
                                   )}
