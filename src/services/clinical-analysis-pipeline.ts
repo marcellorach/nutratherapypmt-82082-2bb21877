@@ -53,10 +53,19 @@ export interface InteractionAlert {
   description: string;
 }
 
+export interface ClinicalDiscovery {
+  type: 'lab-condition-correlation' | 'medication-monitoring' | 'breed-lab-confirmation' | 'compound-opportunity';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  description: string;
+  relatedEntities: string[];
+}
+
 export interface ClinicalAnalysisResult {
   predispositions: BreedPredisposition[];
   labAlerts: LabAlert[];
   interactionAlerts: InteractionAlert[];
+  clinicalDiscoveries: ClinicalDiscovery[];
   kgResults: any[];
   kgTriplets: any[];
   kgPathways: any[];
