@@ -38,7 +38,6 @@ const VeterinarioPage: React.FC = () => {
       },
     });
   };
-  const { data: petProfiles, isLoading } = usePetProfiles();
 
   // Filter pets based on search
   const filteredPets = (petProfiles || []).filter(pet =>
