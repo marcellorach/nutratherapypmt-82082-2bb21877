@@ -607,10 +607,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleSpeed={0.005}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={300}
-              d3AlphaDecay={0.005}
-              d3VelocityDecay={0.2}
-              warmupTicks={200}
+              cooldownTicks={400}
+              d3AlphaDecay={0.003}
+              d3VelocityDecay={0.25}
+              warmupTicks={250}
             />
           ) : (
             <ForceGraph2D
