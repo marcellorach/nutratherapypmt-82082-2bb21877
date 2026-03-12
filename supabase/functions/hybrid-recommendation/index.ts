@@ -76,6 +76,22 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 5. For each compound, specify WHICH CONDITION it targets (not generic)
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
+
+IMPORTANT: Return your response as valid JSON with this structure:
+{
+  "nutraceuticals": [
+    {
+      "name": "string",
+      "dosage": "string (weight-adjusted dosage)",
+      "mechanism": "string (why this compound for THIS patient)",
+      "evidenceLevel": "AI-enriched",
+      "condition": "string (specific condition this targets)"
+    }
+  ],
+  "rationale": "string (patient-specific reasoning)",
+  "precautions": ["array of patient-specific precautions"]
+}
+
 Respond in Portuguese (Brazilian).`;
 
 const SYSTEM_PROMPT_FALLBACK = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
