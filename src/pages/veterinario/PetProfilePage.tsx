@@ -571,21 +571,17 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-          </div>
-        )}
+            )}
 
-        {/* Main Grid: Treatability + Chat */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
+            {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}
           </div>
 
-          {/* Chat Sidebar (1/3) */}
+          {/* Right column: Chat + Digital Twin */}
           <div className="space-y-4">
-            <div className="min-h-[500px]">
+            <div className="min-h-[500px] lg:sticky lg:top-4">
               <PetClinicalChat
                 petId={id!}
                 petBreed={profile.breed}
@@ -593,7 +589,6 @@ const PetProfilePage: React.FC = () => {
               />
             </div>
 
-            {/* Digital Twin - compact, under construction */}
             {conditions.length > 0 && (
               <div className="relative">
                 <Badge className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] px-1.5 py-0.5">
