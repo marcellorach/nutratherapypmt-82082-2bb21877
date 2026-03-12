@@ -439,13 +439,23 @@ const PetProfilePage: React.FC = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
-        </div>
+            </Tabs>
 
-        {/* Analysis Results Tabs - after patient clinical data */}
-        {recommendationCompounds && (
-          <div className="mb-6">
-            <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
+            {/* Pipeline Workflow Stepper - after clinical data */}
+            <ClinicalPipelineWorkflow
+              pipelineState={pipelineState}
+              isAnalyzing={analyzing}
+              profileDataCount={conditions.length + medications.length + exams.length}
+              predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
+              labAlertCount={labAlerts.length}
+              tripletCount={kgTriplets.length}
+              interactionCount={interactionAlerts.length}
+              compoundCount={recommendationCompounds?.length || 0}
+            />
+
+            {/* Analysis Results Tabs */}
+            {recommendationCompounds && (
+              <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
                 {totalAlerts > 0 && (
                   <TabsTrigger value="clinical-alerts" className="gap-1">
