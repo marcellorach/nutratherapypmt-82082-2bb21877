@@ -93,7 +93,7 @@ const SAMPLE_PETS = [
     owner_email: 'pedro@example.com',
     notes: 'Geriatric patient. Cognitive decline observed in last 6 months. Joint pain and aging signs.',
     conditions: [
-      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'moderate', status: 'active' },
+      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'moderate', status: 'active' },
       { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active' },
       { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
     ],
