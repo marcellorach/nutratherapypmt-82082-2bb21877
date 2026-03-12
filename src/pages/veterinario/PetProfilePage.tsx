@@ -272,23 +272,12 @@ const PetProfilePage: React.FC = () => {
           )}
         </div>
 
-        {/* Pipeline Workflow Stepper */}
-        <div className="mb-6">
-          <ClinicalPipelineWorkflow
-            pipelineState={pipelineState}
-            isAnalyzing={analyzing}
-            profileDataCount={conditions.length + medications.length + exams.length}
-            predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
-            labAlertCount={labAlerts.length}
-            tripletCount={kgTriplets.length}
-            interactionCount={interactionAlerts.length}
-            compoundCount={recommendationCompounds?.length || 0}
-          />
-        </div>
-
-        {/* Patient Clinical Data - full width, right after pipeline */}
-        <div className="mb-6">
-          <Tabs defaultValue="conditions">
+        {/* 3-column layout: left 2/3 clinical content, right 1/3 chat + twin */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 columns */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Patient Clinical Data */}
+            <Tabs defaultValue="conditions">
             <TabsList className="mb-4">
               <TabsTrigger value="conditions" className="gap-1">
                 <Stethoscope className="h-3.5 w-3.5" />
@@ -450,13 +439,23 @@ const PetProfilePage: React.FC = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
-        </div>
+            </Tabs>
 
-        {/* Analysis Results Tabs - after patient clinical data */}
-        {recommendationCompounds && (
-          <div className="mb-6">
-            <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
+            {/* Pipeline Workflow Stepper - after clinical data */}
+            <ClinicalPipelineWorkflow
+              pipelineState={pipelineState}
+              isAnalyzing={analyzing}
+              profileDataCount={conditions.length + medications.length + exams.length}
+              predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
+              labAlertCount={labAlerts.length}
+              tripletCount={kgTriplets.length}
+              interactionCount={interactionAlerts.length}
+              compoundCount={recommendationCompounds?.length || 0}
+            />
+
+            {/* Analysis Results Tabs */}
+            {recommendationCompounds && (
+              <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
                 {totalAlerts > 0 && (
                   <TabsTrigger value="clinical-alerts" className="gap-1">
@@ -572,21 +571,17 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-          </div>
-        )}
+            )}
 
-        {/* Main Grid: Treatability + Chat */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
+            {/* Treatability Chart */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}
           </div>
 
-          {/* Chat Sidebar (1/3) */}
+          {/* Right column: Chat + Digital Twin */}
           <div className="space-y-4">
-            <div className="min-h-[500px]">
+            <div className="min-h-[500px] lg:sticky lg:top-4">
               <PetClinicalChat
                 petId={id!}
                 petBreed={profile.breed}
@@ -594,7 +589,6 @@ const PetProfilePage: React.FC = () => {
               />
             </div>
 
-            {/* Digital Twin - compact, under construction */}
             {conditions.length > 0 && (
               <div className="relative">
                 <Badge className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] px-1.5 py-0.5">
