@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, FlaskConical, Pill } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export interface CompoundDosage {
   id: string;
@@ -21,11 +26,20 @@ export interface CompoundDosage {
   type: 'nutraceutical' | 'drug';
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface CompoundDosageSliderProps {
   compound: CompoundDosage;
   onChange: (id: string, newDosage: number) => void;
   onRemove: (id: string) => void;
   onRestore: (id: string) => void;
+  petName?: string;
+  petBreed?: string;
+  petAge?: number;
+  petConditions?: string[];
 }
 
 const evidenceBadgeStyles: Record<string, string> = {
@@ -39,6 +53,10 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   onChange,
   onRemove,
   onRestore,
+  petName,
+  petBreed,
+  petAge,
+  petConditions,
 }) => {
   const { t } = useTranslation();
   const {
@@ -46,8 +64,65 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
     dosageCurrent, unit, evidenceLevel, rationale, removed, type,
   } = compound;
 
+  const [chatOpen, setChatOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const isModified = dosageCurrent !== dosageRecommended;
   const recommendedPercent = ((dosageRecommended - dosageMin) / (dosageMax - dosageMin)) * 100;
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: input.trim() };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const conditionsContext = petConditions?.length
+        ? `Current conditions: ${petConditions.join(', ')}.`
+        : '';
+
+      const systemPrompt = `You are a veterinary pharmacology and nutraceutical specialist. You are discussing ${name} for treating ${condition} in a ${petBreed || 'dog'} named ${petName || 'the patient'}, ${petAge || '?'} years old. ${conditionsContext}
+
+Current dosage: ${dosageCurrent} ${unit} (range: ${dosageMin}-${dosageMax} ${unit}, recommended: ${dosageRecommended} ${unit}).
+Evidence level: ${evidenceLevel}.
+Scientific rationale: ${rationale || 'N/A'}.
+
+IMPORTANT: When explaining mechanisms, describe the biological pathways involved (e.g., "Curcumin → inhibits NF-κB → reduces pro-inflammatory cytokines → decreases joint inflammation"). Always ground your answers in scientific evidence. Be concise and clinically relevant. Respond in the same language the user writes in.`;
+
+      const allMessages = [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: input.trim() },
+      ];
+
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { messages: allMessages, stream: false },
+      });
+
+      if (error) throw error;
+      const assistantContent = data?.response || t('petProfile.compoundChat.noResponse');
+      setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
+    } catch (err: any) {
+      console.error('Compound chat error:', err);
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: t('petProfile.compoundChat.error') },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (removed) {
     return (
@@ -102,7 +177,6 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
 
       {/* Slider */}
       <div className="relative px-1">
-        {/* Recommended marker */}
         <div
           className="absolute -top-1 z-10 flex flex-col items-center pointer-events-none"
           style={{ left: `calc(${recommendedPercent}% - 1px)` }}
@@ -119,7 +193,6 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
           className="my-2"
         />
 
-        {/* Labels */}
         <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1">
           <span>{dosageMin} {unit}</span>
           <span className="text-emerald-600 font-medium">
@@ -128,7 +201,6 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
           <span>{dosageMax} {unit}</span>
         </div>
 
-        {/* Current value */}
         <div className="text-center mt-1">
           <span className={cn(
             "text-sm font-semibold",
@@ -138,6 +210,79 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Inline Discuss Chat */}
+      <Collapsible open={chatOpen} onOpenChange={setChatOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full mt-2 text-xs gap-1.5 text-muted-foreground hover:text-foreground">
+            <MessageSquare className="h-3.5 w-3.5" />
+            {t('petProfile.compoundSlider.discuss')}
+            {chatOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2 space-y-2">
+          <ScrollArea className="h-[200px] pr-2 border rounded-lg p-2 bg-muted/20" ref={scrollRef as any}>
+            <div className="space-y-2">
+              {messages.length === 0 && (
+                <div className="text-center py-4">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {t('petProfile.compoundSlider.chatPlaceholder', { compound: name })}
+                  </p>
+                  <div className="space-y-1">
+                    {[
+                      t('petProfile.compoundSlider.q1', { compound: name }),
+                      t('petProfile.compoundSlider.q2', { compound: name, condition }),
+                      t('petProfile.compoundSlider.q3', { compound: name }),
+                    ].map((q, i) => (
+                      <button
+                        key={i}
+                        className="block w-full text-left text-xs text-primary hover:underline px-2 py-0.5 rounded hover:bg-muted/50"
+                        onClick={() => setInput(q)}
+                      >
+                        💬 {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {messages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={cn(
+                    'max-w-[85%] rounded-lg px-3 py-1.5 text-xs',
+                    msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  )}>
+                    {msg.role === 'assistant' ? (
+                      <div className="prose prose-xs dark:prose-invert max-w-none">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : msg.content}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-lg px-3 py-1.5">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          <div className="flex gap-1.5">
+            <Input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              placeholder={t('petProfile.compoundSlider.inputPlaceholder')}
+              disabled={loading}
+              className="text-xs h-8"
+            />
+            <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleSend} disabled={loading || !input.trim()}>
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 };
