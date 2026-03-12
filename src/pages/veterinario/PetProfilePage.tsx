@@ -156,6 +156,7 @@ const PetProfilePage: React.FC = () => {
     setPredispositions([]);
     setLabAlerts([]);
     setInteractionAlerts([]);
+    setClinicalDiscoveries([]);
     toast({
       title: t('petProfile.recommendation.rejectedTitle'),
       description: t('petProfile.recommendation.rejectedDesc'),
