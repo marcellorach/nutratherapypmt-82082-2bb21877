@@ -434,39 +434,42 @@ const PetProfilePage: React.FC = () => {
               </TabsList>
 
               <TabsContent value="conditions">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('petRegistration.conditions.active')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {conditions.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
+                {/* Comorbidity Map - shows inter-condition connections */}
+                {conditionInsights.data && (
+                  <div className="mb-4">
+                    <ComorbidityMap
+                      conditions={conditions.map((c: any) => c.condition_name)}
+                      causalPathways={conditionInsights.data.causalPathways}
+                      synergisticCompounds={conditionInsights.data.synergisticCompounds}
+                    />
+                  </div>
+                )}
+
+                {conditions.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8">
+                      <p className="text-sm text-muted-foreground text-center">
                         {t('petRegistration.conditions.none')}
                       </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {conditions.map((c: any) => (
-                          <div key={c.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                            <div>
-                              <p className="font-medium text-sm">{c.condition_name}</p>
-                              {c.notes && <p className="text-xs text-muted-foreground">{c.notes}</p>}
-                            </div>
-                            <div className="flex gap-2">
-                              {c.severity && (
-                                <Badge variant="outline" className={severityColors[c.severity]}>
-                                  {c.severity}
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className={statusColors[c.status]}>
-                                {c.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-2">
+                    {conditions.map((c: any) => {
+                      const insight = conditionInsights.data?.conditionInsights?.find(
+                        (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
+                      );
+                      return (
+                        <ConditionInsightCard
+                          key={c.id}
+                          condition={c}
+                          insight={insight}
+                          medications={medications}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="medications">
