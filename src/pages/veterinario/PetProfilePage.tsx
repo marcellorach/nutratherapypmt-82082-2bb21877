@@ -54,6 +54,7 @@ const PetProfilePage: React.FC = () => {
   const [predispositions, setPredispositions] = useState<BreedPredisposition[]>([]);
   const [labAlerts, setLabAlerts] = useState<LabAlert[]>([]);
   const [interactionAlerts, setInteractionAlerts] = useState<InteractionAlert[]>([]);
+  const [clinicalDiscoveries, setClinicalDiscoveries] = useState<ClinicalDiscovery[]>([]);
   const [pipelineState, setPipelineState] = useState<PipelineState>({
     stage1_profile: 'idle',
     stage2_predispositions: 'idle',
