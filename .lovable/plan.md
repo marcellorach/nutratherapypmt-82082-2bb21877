@@ -1,73 +1,71 @@
 
 
-## Plano: Reestruturação do Perfil do Pet com Abas de Análise e Chat por Recomendação
+# Plan: Bilingual Clinical System + Enhanced Condition Reasoning + Compound Chat
 
-### 1. Remover botão "Gerar Dados de Exemplo"
+## Problem Analysis
 
-Remover o botão `Shuffle` (linha 325-328 do `PetProfilePage.tsx`) que chama `handleGenerateMockData`. Os dados clínicos já são gerados junto com os cães de exemplo no `GenerateSamplePetsButton`. Remover também a função `handleGenerateMockData` (linhas 223-254).
+### a) Portuguese hardcoded everywhere
+- `evidence-levels.ts`: All levels hardcoded in PT ("Muito Alta", "Média-Baixa", etc.)
+- `generateMockCompounds()` in `VetRecommendationPanel.tsx`: Names ("Curcumina", "Ômega-3"), conditions ("Artrite", "Estresse Oxidativo"), and rationales all in Portuguese
+- `ClinicalAlertsPanel.tsx`: Lab alert `clinical_significance` comes from DB in PT
+- `PredispositionTag.tsx`: `conditionName` comes from DB — needs `name_en` field support
 
-### 2. Reorganizar resultados da análise VetGraphRAG em abas
+### b) Condition cards lack clinical reasoning
+- Current `ConditionInsightCard` expands to show KG treatments and causal links, but no clinical reasoning explaining *why* this condition was diagnosed or how it connects to the patient's overall profile
+- No suggested complementary exams (e.g., "Before treating Cellular Senescence, consider: Telomere Length Assay, Inflammatory Markers Panel")
 
-Atualmente, após clicar "Analisar com VetGraphRAG", os painéis aparecem empilhados verticalmente (Recommendations → Scientific Evidence → Biological Pathway → Improvement Projection). A proposta é agrupar tudo dentro de um componente com **Tabs**:
+### c) Recommendation compounds need sophistication
+- Mock data is in Portuguese — needs bilingual support
+- No per-compound expandable chat with biological pathway awareness
+- `CompoundSpecificChat` exists but is a separate tab — should be inline as a collapsible section per compound
 
-| Aba | Componente | Ícone |
-|-----|-----------|-------|
-| **Recomendações** | `VetRecommendationPanel` (stack geroprotetor) | Sparkles |
-| **Caminho Biológico** | `BiologicalPathway` | GitBranch |
-| **Evidência Científica** | `ScientificEvidencePanel` (triplets KG) | BookOpen |
-| **Projeção de Melhora** | `ImprovementProjectionChart` | TrendingUp |
-| **Chat por Composto** | Novo componente com chat especializado | MessageSquare |
+## Changes
 
-As abas só aparecem após a análise ser concluída (quando há dados).
+### 1. `evidence-levels.ts` — Full i18n
+- Replace hardcoded PT strings with i18n keys
+- Accept a `t` function parameter or return keys instead of strings
+- Add EN/PT translations for all 7 evidence levels + recommendation strengths
 
-### 3. Novo componente: Chat Especializado por Composto
+### 2. `VetRecommendationPanel.tsx` — Bilingual mock data
+- `generateMockCompounds()` should use `t()` for names, conditions, rationales
+- Add all compound translations to EN/PT locale files
 
-Criar `src/components/pet/CompoundSpecificChat.tsx`:
-- Lista os compostos recomendados (ex: Curcumina → Artrite, NMN → Envelhecimento)
-- Usuário seleciona um composto para abrir chat focado
-- O chat usa a edge function `chat` (modo não-streaming) com system prompt contextualizado: *"Você é um especialista em {composto} para tratamento de {condição} em cães. Responda com base em evidências científicas."*
-- Interface similar ao `PetClinicalChat` mas com contexto restrito ao composto selecionado
+### 3. `CompoundDosageSlider.tsx` — Inline expandable chat + rationale
+- Add a collapsible "Discuss this recommendation" section below each compound
+- When expanded, shows:
+  - **Scientific rationale** with KG-backed evidence (study count, predicate)
+  - **Inline chat** (reuse CompoundSpecificChat logic) pre-loaded with full patient context + biological pathway awareness
+- System prompt includes: patient profile, all conditions, all medications, the specific compound's KG evidence, and instruction to reference biological pathways
 
-### 4. Chat Clínico Geral (sidebar)
+### 4. `ConditionInsightCard.tsx` — Clinical reasoning + suggested exams
+- Add a "Clinical Reasoning" section showing *why* this condition is relevant:
+  - Link to breed predispositions (if breed is predisposed)
+  - Connection to other conditions (from causal links)
+  - Age-related plausibility
+- Add "Suggested Pre-Treatment Exams" section:
+  - Map conditions to relevant lab tests (e.g., Osteoarthritis → Inflammatory Markers, X-ray; Cellular Senescence → Telomere Length, Oxidative Stress Markers)
+  - Store mappings in a const or fetch from KG where available
 
-Permanece como está na coluna 1/3 à direita, para perguntas gerais sobre o cão.
+### 5. `PredispositionTag.tsx` — Bilingual condition names
+- Accept optional `conditionNameEn` prop
+- Use `useLocalizedField` pattern to show EN or PT based on language
 
-### 5. Arquivos a modificar/criar
+### 6. Translation files — Add all missing keys
+- Evidence levels: "Very High", "High", "Medium-High", "Medium", "Medium-Low", "Low", "Very Low"
+- Recommendation strengths: "Strong", "Moderate", "Weak"
+- Mock compound data in EN
+- Suggested exam names in EN/PT
+- Clinical reasoning labels
 
-| Arquivo | Ação |
-|---------|------|
-| `PetProfilePage.tsx` | Remover botão mock, reorganizar em abas de análise |
-| `CompoundSpecificChat.tsx` (novo) | Chat especializado por composto |
-| `translation.json` (PT/EN) | ~15 novas chaves para abas e chat por composto |
-| `i18n.ts` | Incrementar versão |
+## Files
 
-### 6. Estrutura visual resultante
-
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  ← [Pet Name] · Breed · Age · Weight    [Analisar com VetGraph] │
-├──────────────────────────────────────────────────────────────────┤
-│  Summary Cards (Condições | Medicações | Exames | Notas)        │
-├──────────────────────────────────┬───────────────────────────────┤
-│  Treatability Chart              │  Intelligent Clinical Chat    │
-│                                  │  (geral sobre o cão)          │
-│  ┌─────────────────────────────┐ │                               │
-│  │ Tabs: Recomendações |       │ │                               │
-│  │  Caminho Bio | Evidência |  │ │                               │
-│  │  Projeção | Chat Composto   │ │                               │
-│  │                             │ │                               │
-│  │  [conteúdo da aba ativa]    │ │                               │
-│  └─────────────────────────────┘ │                               │
-│                                  │                               │
-│  Clinical Data Tabs              │                               │
-│  (Condições | Medicações | ...)  │                               │
-└──────────────────────────────────┴───────────────────────────────┘
-```
-
-### Detalhes técnicos
-
-- O `CompoundSpecificChat` recebe a lista de `CompoundDosage[]` e permite selecionar qual composto conversar
-- Usa `supabase.functions.invoke('chat', { body: { messages, stream: false } })` com system prompt contextualizado
-- Renderiza respostas com `react-markdown` para formatação científica
-- i18n: chaves sob `petProfile.analysis.*` e `petProfile.compoundChat.*`
+| File | Action |
+|---|---|
+| `src/rules/general/evidence-levels.ts` | Refactor to accept `t()` or return i18n keys |
+| `src/components/pet/VetRecommendationPanel.tsx` | Bilingual mock data with `t()` |
+| `src/components/pet/CompoundDosageSlider.tsx` | Add collapsible rationale + inline chat |
+| `src/components/pet/ConditionInsightCard.tsx` | Add clinical reasoning + suggested exams sections |
+| `src/components/administrador/tags/PredispositionTag.tsx` | Support bilingual condition names |
+| `src/locales/en/translation.json` | Add ~50 keys for evidence, compounds, exams |
+| `src/locales/pt/translation.json` | Add matching PT keys |
 
