@@ -95,3 +95,6 @@ verify_jwt = false
 
 [functions.relations-auditor]
 verify_jwt = false
+
+[functions.condition-insights]
+verify_jwt = false

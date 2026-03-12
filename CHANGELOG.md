@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-12 🔬 Diagnóstico Clínico Profundo com Conexões Inter-Condições
+- ✅ **Edge function `condition-insights`**: Consulta `triplet_extractions` para tratamentos (TREATS/PREVENTS), caminhos causais (CAUSES/AGGRAVATES/LEADS_TO), mecanismos (HAS_MECHANISM) e compostos sinérgicos por condição
+- ✅ **`ConditionInsightCard`**: Card expansível por condição mostrando tratamentos do KG com confidence, conexões causais, mecanismos biológicos e medicações vinculadas
+- ✅ **`ComorbidityMap`**: Mapa visual de comorbidades mostrando caminhos inter-condições e compostos sinérgicos (nutracêuticos que tratam 2+ condições simultaneamente)
+- ✅ **`useConditionInsights` hook**: Query reativa que chama a edge function automaticamente quando condições estão disponíveis
+- ✅ **Substituição da lista plana de condições**: Tab "Condições" no perfil do pet agora exibe cards inteligentes em vez de linhas simples
+- ✅ **i18n completo**: 30+ novas chaves em PT/EN para toda a interface de insights
+
 ### Changed - 2026-03-12 🧹 Auditoria e Limpeza do Sistema (Fases 1–4)
 - ✅ **Fase 1 — Código morto removido**: `active-ingredients-service.ts`, `nutraceutical-outcomes-service.ts`, `scientific-studies-service.ts`, `useVetGraphRAGProcessing.tsx`, `useVetGraphRAGProcessingLegacy.ts`, aggregador `nutraceuticals/index.ts`
 - ✅ **Fase 2 — Simulações perigosas eliminadas**: `ntai/simulation.ts` (Math.random) removido; `vetgraphrag-service.ts` reescrito para usar edge function `process-study`; `openai.ts` reescrito para usar edge function `chat` via Lovable AI (sem mais respostas hardcoded)
