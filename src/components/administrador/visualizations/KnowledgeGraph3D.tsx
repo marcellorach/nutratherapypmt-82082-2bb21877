@@ -299,13 +299,19 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     };
   }, [data]);
 
-  // Configure d3 forces to reduce center congestion
+  // Configure d3 forces - spread nodes widely, minimal gravity
   useEffect(() => {
     if (!fgRef.current) return;
     const fg = fgRef.current;
-    fg.d3Force('charge')?.strength(-800).distanceMax(3000);
-    fg.d3Force('link')?.distance(200);
-    fg.d3Force('center')?.strength(0.01);
+    const nodeCount = graphData.nodes.length;
+    
+    // Scale repulsion with node count for better spreading
+    const chargeStrength = Math.min(-50, -Math.max(1500, nodeCount * 3));
+    
+    fg.d3Force('charge')?.strength(chargeStrength).distanceMax(5000);
+    fg.d3Force('link')?.distance(350);
+    // Remove center gravity almost entirely to let nodes spread
+    fg.d3Force('center')?.strength(0.002);
     fg.d3ReheatSimulation();
   }, [graphData, is3D]);
 
@@ -570,10 +576,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleSpeed={0.005}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={200}
-              d3AlphaDecay={0.008}
-              d3VelocityDecay={0.15}
-              warmupTicks={150}
+              cooldownTicks={300}
+              d3AlphaDecay={0.005}
+              d3VelocityDecay={0.2}
+              warmupTicks={200}
             />
           ) : (
             <ForceGraph2D
@@ -591,10 +597,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               linkDirectionalParticleWidth={2}
               onNodeClick={handleNodeClick}
               onEngineStop={handleEngineStop}
-              cooldownTicks={200}
-              d3AlphaDecay={0.008}
-              d3VelocityDecay={0.15}
-              warmupTicks={150}
+              cooldownTicks={300}
+              d3AlphaDecay={0.005}
+              d3VelocityDecay={0.2}
+              warmupTicks={200}
             />
           )}
         </Suspense>
