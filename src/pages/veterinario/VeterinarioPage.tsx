@@ -7,8 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Filter, Loader2 } from "lucide-react";
 import PetProfileCard from '@/components/pet/PetProfileCard';
 import GenerateSamplePetsButton from '@/components/pet/GenerateSamplePetsButton';
-import { usePetProfiles } from '@/hooks/usePetProfile';
+import { usePetProfiles, useDeletePetProfile } from '@/hooks/usePetProfile';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const VeterinarioPage: React.FC = () => {
   const { t } = useTranslation();
