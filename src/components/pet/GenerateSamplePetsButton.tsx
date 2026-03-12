@@ -48,8 +48,8 @@ const SAMPLE_PETS = [
     owner_email: 'joao@example.com',
     notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
     conditions: [
-      { condition_name: 'Heart Disease', severity: 'moderate', status: 'active' },
-      { condition_name: 'Canine Cognitive Dysfunction Syndrome (CDS)', severity: 'mild', status: 'monitoring' },
+      { condition_name: 'Cardiovascular Disease', severity: 'moderate', status: 'active' },
+      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring' },
     ],
     medications: [
       { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
