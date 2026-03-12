@@ -138,24 +138,9 @@ export const useNutraceuticalsData = () => {
     });
   };
 
-  // Combinar dados baseado no modo configurado
+  // Only use database data (no more mock fallback)
   const getAllNutraceuticals = (): Nutraceutical[] => {
-    const dbData = mapDbToUiFormat(dbNutraceuticals);
-    
-    switch (settings.data_mode) {
-      case 'production':
-        // Apenas dados do banco (sem mock)
-        return dbData;
-      
-      case 'development':
-        // Priorizar dados mock sobre dados do banco
-        return [...mockNutraceuticals, ...dbData];
-      
-      case 'hybrid':
-      default:
-        // Combinar dados do banco com dados mock (padrão atual)
-        return [...dbData, ...mockNutraceuticals];
-    }
+    return mapDbToUiFormat(dbNutraceuticals);
   };
 
   const allNutraceuticals: Nutraceutical[] = getAllNutraceuticals();
