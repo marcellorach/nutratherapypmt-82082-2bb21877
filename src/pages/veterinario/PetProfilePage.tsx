@@ -468,6 +468,8 @@ const PetProfilePage: React.FC = () => {
                           condition={c}
                           insight={insight}
                           medications={medications}
+                          petBreed={profile.breed}
+                          petAge={profile.age_years}
                         />
                       );
                     })}
