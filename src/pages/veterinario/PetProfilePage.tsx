@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
+import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
 import VetRecommendationPanel, { generateMockCompounds } from '@/components/pet/VetRecommendationPanel';
 import CompoundSpecificChat from '@/components/pet/CompoundSpecificChat';
