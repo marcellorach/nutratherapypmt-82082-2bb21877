@@ -18,7 +18,7 @@ interface TripletEvidence {
 
 interface SynergisticCompound {
   compound: string;
-  conditions: string[];
+  conditionsTreated: string[];
   score?: number;
 }
 
