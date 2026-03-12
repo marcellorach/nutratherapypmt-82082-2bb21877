@@ -121,7 +121,7 @@ const PetProfilePage: React.FC = () => {
       setKgProjections(result.kgProjections);
       setConfidenceLevel(result.confidenceLevel);
       setRecommendationCompounds(
-        result.compounds.length > 0 ? result.compounds : generateMockCompounds()
+        result.compounds.length > 0 ? result.compounds : generateMockCompounds(t)
       );
 
       const alertCount = result.predispositions.filter(p => !p.already_diagnosed).length
@@ -352,6 +352,9 @@ const PetProfilePage: React.FC = () => {
                     onApprove={handleApproveStack}
                     onReject={handleRejectStack}
                     petName={profile.name}
+                    petBreed={profile.breed}
+                    petAge={profile.age_years}
+                    petConditions={conditions?.map((c: any) => c.condition_name) || []}
                   />
                 </TabsContent>
 
@@ -465,6 +468,8 @@ const PetProfilePage: React.FC = () => {
                           condition={c}
                           insight={insight}
                           medications={medications}
+                          petBreed={profile.breed}
+                          petAge={profile.age_years}
                         />
                       );
                     })}

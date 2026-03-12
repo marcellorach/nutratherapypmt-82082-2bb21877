@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { getEvidenceLevel } from '@/rules/general/evidence-levels';
@@ -8,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface PredispositionTagProps {
   conditionName: string;
+  conditionNameEn?: string;
   riskFactor: number;
   evidenceGrade: string;
   conditionId?: string;
@@ -34,6 +36,7 @@ const riskColor = (risk: number) => {
 
 const PredispositionTag: React.FC<PredispositionTagProps> = ({
   conditionName,
+  conditionNameEn,
   riskFactor,
   evidenceGrade,
   conditionId,
@@ -44,11 +47,14 @@ const PredispositionTag: React.FC<PredispositionTagProps> = ({
   navigable = false,
   className = '',
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const evidenceScore = evidenceGradeToScore[evidenceGrade] ?? 1.5;
   const evidenceLevel = getEvidenceLevel(evidenceScore);
   const risk = riskColor(riskFactor);
+  const isEnglish = i18n.language?.startsWith('en');
+
+  const displayName = isEnglish && conditionNameEn ? conditionNameEn : conditionName;
 
   const handleClick = () => {
     if (navigable && conditionId) {
@@ -71,7 +77,7 @@ const PredispositionTag: React.FC<PredispositionTagProps> = ({
             role={navigable ? 'button' : undefined}
           >
             <AlertTriangle className="h-3 w-3 shrink-0" />
-            <span>{conditionName}</span>
+            <span>{displayName}</span>
             {showRisk && (
               <Badge
                 variant="outline"
@@ -91,19 +97,19 @@ const PredispositionTag: React.FC<PredispositionTagProps> = ({
                   borderColor: `${evidenceLevel.color}50`,
                 }}
               >
-                {evidenceLevel.level}
+                {t(evidenceLevel.level)}
               </Badge>
             )}
           </div>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <div className="space-y-1">
-            <p className="font-medium">{conditionName}</p>
+            <p className="font-medium">{displayName}</p>
             <p className="text-xs">
               {t('predispositionTag.riskFactor')}: <span className="font-semibold">{riskFactor}x</span>
             </p>
             <p className="text-xs">
-              {t('predispositionTag.evidence')}: <span className="font-semibold">{evidenceLevel.level}</span> ({evidenceScore.toFixed(1)}/5)
+              {t('predispositionTag.evidence')}: <span className="font-semibold">{t(evidenceLevel.level)}</span> ({evidenceScore.toFixed(1)}/5)
             </p>
             {alreadyDiagnosed && (
               <p className="text-xs text-muted-foreground">✓ {t('predispositionTag.alreadyDiagnosed')}</p>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, Edit3, Shield, AlertTriangle, Sparkles, Shuffle } from 'lucide-react';
+import { CheckCircle, XCircle, Edit3, AlertTriangle, Sparkles } from 'lucide-react';
 import CompoundDosageSlider, { CompoundDosage } from './CompoundDosageSlider';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,78 +14,81 @@ interface VetRecommendationPanelProps {
   onApprove: (compounds: CompoundDosage[]) => void;
   onReject: () => void;
   petName?: string;
+  petBreed?: string;
+  petAge?: number;
+  petConditions?: string[];
 }
 
-// Mock data generator for demo
-export function generateMockCompounds(): CompoundDosage[] {
+// Mock data generator - uses i18n keys for bilingual support
+export function generateMockCompounds(t: (key: string) => string): CompoundDosage[] {
   return [
     {
       id: '1',
-      name: 'Curcumina',
-      condition: 'Artrite',
+      name: t('petProfile.compounds.curcumin.name'),
+      condition: t('petProfile.compounds.curcumin.condition'),
       dosageMin: 5,
       dosageMax: 50,
       dosageRecommended: 25,
       dosageCurrent: 25,
       unit: 'mg/kg',
       evidenceLevel: 'KG-backed',
-      rationale: 'Ação anti-inflamatória via inibição de NF-κB, com evidência em 12 estudos veterinários.',
+      rationale: t('petProfile.compounds.curcumin.rationale'),
       removed: false,
       type: 'nutraceutical',
     },
     {
       id: '2',
-      name: 'NMN (Nicotinamida Mononucleotídeo)',
-      condition: 'Envelhecimento Celular',
+      name: t('petProfile.compounds.nmn.name'),
+      condition: t('petProfile.compounds.nmn.condition'),
       dosageMin: 50,
       dosageMax: 300,
       dosageRecommended: 150,
       dosageCurrent: 150,
       unit: 'mg',
       evidenceLevel: 'KG-backed',
-      rationale: 'Precursor de NAD+ com evidência em restauração da função mitocondrial em cães geriátricos.',
+      rationale: t('petProfile.compounds.nmn.rationale'),
       removed: false,
       type: 'nutraceutical',
     },
     {
       id: '3',
-      name: 'Resveratrol',
-      condition: 'Estresse Oxidativo',
+      name: t('petProfile.compounds.resveratrol.name'),
+      condition: t('petProfile.compounds.resveratrol.condition'),
       dosageMin: 2,
       dosageMax: 20,
       dosageRecommended: 10,
       dosageCurrent: 10,
       unit: 'mg/kg',
       evidenceLevel: 'AI-suggested',
-      rationale: 'Ativador de SIRT1/AMPK. Efeito sinérgico com NMN no metabolismo de NAD+.',
+      rationale: t('petProfile.compounds.resveratrol.rationale'),
       removed: false,
       type: 'nutraceutical',
     },
     {
       id: '4',
-      name: 'Ômega-3 (EPA/DHA)',
-      condition: 'Displasia Coxofemoral',
+      name: t('petProfile.compounds.omega3.name'),
+      condition: t('petProfile.compounds.omega3.condition'),
       dosageMin: 20,
       dosageMax: 100,
       dosageRecommended: 50,
       dosageCurrent: 50,
       unit: 'mg/kg',
       evidenceLevel: 'KG-backed',
-      rationale: 'Modulação de eicosanoides pró-inflamatórios, suporte à mobilidade articular.',
+      rationale: t('petProfile.compounds.omega3.rationale'),
       removed: false,
       type: 'nutraceutical',
     },
     {
       id: '5',
-      name: 'Rapamicina (dose baixa)',
-      condition: 'Senescência Imune',
+      name: t('petProfile.compounds.rapamycin.name'),
+      condition: t('petProfile.compounds.rapamycin.condition'),
       dosageMin: 0.05,
       dosageMax: 0.2,
       dosageRecommended: 0.1,
       dosageCurrent: 0.1,
       unit: 'mg/kg',
       evidenceLevel: 'clinical-experience',
-      rationale: 'Inibidor de mTOR com protocolo semanal. Dados do Dog Aging Project (Universidade de Washington).',
+      rationale: t('petProfile.compounds.rapamycin.rationale'),
       removed: false,
       type: 'drug',
     },
@@ -105,6 +108,9 @@ const VetRecommendationPanel: React.FC<VetRecommendationPanelProps> = ({
   onApprove,
   onReject,
   petName,
+  petBreed,
+  petAge,
+  petConditions,
 }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -153,7 +159,6 @@ const VetRecommendationPanel: React.FC<VetRecommendationPanelProps> = ({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Compounds list */}
         {compounds.map(compound => (
           <CompoundDosageSlider
             key={compound.id}
@@ -161,10 +166,13 @@ const VetRecommendationPanel: React.FC<VetRecommendationPanelProps> = ({
             onChange={handleDosageChange}
             onRemove={handleRemove}
             onRestore={handleRestore}
+            petName={petName}
+            petBreed={petBreed}
+            petAge={petAge}
+            petConditions={petConditions}
           />
         ))}
 
-        {/* Disclaimer */}
         <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800 flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-300">
@@ -174,7 +182,6 @@ const VetRecommendationPanel: React.FC<VetRecommendationPanelProps> = ({
 
         <Separator />
 
-        {/* Action Buttons */}
         <div className="flex items-center gap-2">
           <Button
             className="flex-1 gap-2"

@@ -1,18 +1,21 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface EvidenceLegendProps {
   compact?: boolean;
 }
 
 export const EvidenceLegend: React.FC<EvidenceLegendProps> = ({ compact = false }) => {
+  const { t } = useTranslation();
+  
   const evidenceLevels = [
-    { score: 0, label: 'Sem evidência', color: '#e5e7eb' },
-    { score: 1, label: 'Anedótica', color: '#fde68a' },
-    { score: 2, label: 'Pouca evidência', color: '#fcd34d' },
-    { score: 3, label: 'Moderada', color: '#60a5fa' },
-    { score: 4, label: 'Boa evidência', color: '#34d399' },
-    { score: 5, label: 'Excelente', color: '#10b981' },
+    { score: 0, labelKey: 'evidenceLegend.noEvidence', color: '#e5e7eb' },
+    { score: 1, labelKey: 'evidenceLegend.anecdotal', color: '#fde68a' },
+    { score: 2, labelKey: 'evidenceLegend.limited', color: '#fcd34d' },
+    { score: 3, labelKey: 'evidenceLegend.moderate', color: '#60a5fa' },
+    { score: 4, labelKey: 'evidenceLegend.good', color: '#34d399' },
+    { score: 5, labelKey: 'evidenceLegend.excellent', color: '#10b981' },
   ];
 
   return (
@@ -24,7 +27,7 @@ export const EvidenceLegend: React.FC<EvidenceLegendProps> = ({ compact = false 
             style={{ backgroundColor: level.color }}
           />
           <span className={compact ? 'text-xs' : 'text-sm'}>
-            {level.label} ({level.score}/5)
+            {t(level.labelKey)} ({level.score}/5)
           </span>
         </div>
       ))}

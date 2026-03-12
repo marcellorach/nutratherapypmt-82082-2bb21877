@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { getEvidenceLevel } from '@/rules/general/evidence-levels';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { normalizeScore, toPercentage } from '@/utils/score-normalization';
+import { useTranslation } from 'react-i18next';
 
 interface NutraceuticalTagProps {
   name: string;
@@ -18,7 +19,7 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
   showScore = true,
   className = ""
 }) => {
-  // Normalize score to 0-1 scale (handles both 0-5 and 0-1 inputs)
+  const { t } = useTranslation();
   const normalizedScore = normalizeScore(score);
   const percentScore = toPercentage(score);
   const level = getEvidenceLevel(normalizedScore);
@@ -45,9 +46,9 @@ const NutraceuticalTag: React.FC<NutraceuticalTagProps> = ({
         <TooltipContent>
           <p>
             <span className="font-medium">{name}</span>
-            {score !== undefined && !isNaN(score) && ` - Confiança: ${Math.round(percentScore)}%`}
+            {score !== undefined && !isNaN(score) && ` - ${t('tags.confidence')}: ${Math.round(percentScore)}%`}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">Nível de evidência científica</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('tags.scientificEvidenceLevel')}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -6987,6 +6987,11 @@
         "resolved": "Resolvida"
       },
       "modulators": "Moduladores & Inibidores",
+      "clinicalReasoning": "Raciocínio Clínico",
+      "ageRelevance": "Aos {{age}} anos, {{condition}} é significativamente mais prevalente em pacientes geriátricos",
+      "breedRelevance": "A raça {{breed}} tem predisposição genética documentada para {{condition}}",
+      "causalRelevance": "{{count}} conexão(ões) causal(ais) liga(m) {{condition}} a outras condições do paciente",
+      "suggestedExams": "Exames Complementares Sugeridos",
       "predicates": {
         "CAUSES": "causa",
         "AGGRAVATES": "agrava",
@@ -7000,7 +7005,116 @@
         "MODULATES": "modula",
         "ACTIVATES": "ativa"
       }
+    },
+    "compounds": {
+      "curcumin": {
+        "name": "Curcumina",
+        "condition": "Osteoartrite",
+        "rationale": "Ação anti-inflamatória via inibição de NF-κB, com evidência em 12 estudos veterinários."
+      },
+      "nmn": {
+        "name": "NMN (Nicotinamida Mononucleotídeo)",
+        "condition": "Envelhecimento Celular",
+        "rationale": "Precursor de NAD+ com evidência em restauração da função mitocondrial em cães geriátricos."
+      },
+      "resveratrol": {
+        "name": "Resveratrol",
+        "condition": "Estresse Oxidativo",
+        "rationale": "Ativador de SIRT1/AMPK. Efeito sinérgico com NMN no metabolismo de NAD+."
+      },
+      "omega3": {
+        "name": "Ômega-3 (EPA/DHA)",
+        "condition": "Displasia Coxofemoral",
+        "rationale": "Modulação de eicosanoides pró-inflamatórios, suporte à mobilidade articular."
+      },
+      "rapamycin": {
+        "name": "Rapamicina (dose baixa)",
+        "condition": "Senescência Imune",
+        "rationale": "Inibidor de mTOR com protocolo semanal. Dados do Dog Aging Project (Universidade de Washington)."
+      }
+    },
+    "compoundSlider": {
+      "discuss": "Discutir esta recomendação",
+      "chatPlaceholder": "Pergunte sobre {{compound}} — vias biológicas, dosagem, interações...",
+      "q1": "Quais são as vias biológicas de {{compound}}?",
+      "q2": "Como {{compound}} interage com {{condition}} a nível molecular?",
+      "q3": "Há preocupações de segurança com {{compound}} em cães geriátricos?",
+      "inputPlaceholder": "Pergunte sobre este composto..."
     }
+  },
+  "evidenceLevels": {
+    "veryHigh": "Muito Alta",
+    "high": "Alta",
+    "mediumHigh": "Média-Alta",
+    "medium": "Média",
+    "mediumLow": "Média-Baixa",
+    "low": "Baixa",
+    "veryLow": "Muito Baixa",
+    "strength": {
+      "strong": "Forte",
+      "moderate": "Moderada",
+      "weak": "Fraca",
+      "veryWeak": "Muito fraca ou insuficiente"
+    },
+    "desc": {
+      "veryHigh": "Revisões sistemáticas e meta-análises de ensaios clínicos randomizados com alta qualidade metodológica",
+      "high": "Múltiplos ensaios clínicos randomizados com resultados consistentes",
+      "mediumHigh": "Ensaios clínicos randomizados ou estudos observacionais bem conduzidos",
+      "medium": "Estudos de caso-controle ou coorte com boa qualidade metodológica",
+      "mediumLow": "Séries de casos, estudos com limitações metodológicas",
+      "low": "Opiniões de especialistas, estudos de caso isolados",
+      "veryLow": "Evidência anedótica ou sem estudos formais"
+    }
+  },
+  "tags": {
+    "confidence": "Confiança",
+    "scientificEvidenceLevel": "Nível de evidência científica",
+    "efficacy": "Eficácia",
+    "conditionRelevance": "Relevância da condição para este nutracêutico"
+  },
+  "scientificScore": {
+    "title": "Índice de Pontuação Científica",
+    "basedOn": "Pontuação baseada em",
+    "methodological": "Qualidade metodológica",
+    "reproducibility": "Reprodutibilidade",
+    "clinicalApplicability": "Aplicabilidade clínica",
+    "scientificSupport": "Sustentação científica"
+  },
+  "evidenceLegend": {
+    "noEvidence": "Sem evidência",
+    "anecdotal": "Anedótica",
+    "limited": "Pouca evidência",
+    "moderate": "Moderada",
+    "good": "Boa evidência",
+    "excellent": "Excelente"
+  },
+  "conditionExams": {
+    "inflammatoryMarkers": "Painel de Marcadores Inflamatórios (PCR, IL-6)",
+    "jointXray": "Raio-X Articular",
+    "synovialFluid": "Análise do Líquido Sinovial",
+    "pelvicXray": "Raio-X Pélvico (OFA/PennHIP)",
+    "gaitAnalysis": "Análise de Marcha",
+    "telomereLength": "Ensaio de Comprimento de Telômeros",
+    "oxidativeStress": "Marcadores de Estresse Oxidativo",
+    "sasp": "Painel de Biomarcadores SASP",
+    "lymphocytePanel": "Painel de Subpopulações Linfocitárias",
+    "immunoglobulins": "Níveis de Imunoglobulinas",
+    "cbc": "Hemograma Completo (CBC)",
+    "antioxidantCapacity": "Capacidade Antioxidante Total",
+    "lipidPeroxidation": "Peroxidação Lipídica (MDA)",
+    "neurologicalExam": "Exame Neurológico",
+    "brainMri": "Ressonância Magnética Cerebral",
+    "cognitiveAssessment": "Escala de Avaliação Cognitiva Canina",
+    "crp": "Proteína C-Reativa (PCR)",
+    "renalPanel": "Painel Renal (BUN, Creatinina)",
+    "urinalysis": "Urinálise",
+    "sdma": "SDMA",
+    "hepaticPanel": "Painel Hepático (ALT, FA, GGT)",
+    "bileAcids": "Ácidos Biliares",
+    "abdominalUltrasound": "Ultrassonografia Abdominal",
+    "echocardiogram": "Ecocardiograma",
+    "bnp": "NT-proBNP",
+    "ecg": "Eletrocardiograma (ECG)"
   },
   "systemGuide": {
     "title": "Base de Conhecimento — Guia do Sistema",

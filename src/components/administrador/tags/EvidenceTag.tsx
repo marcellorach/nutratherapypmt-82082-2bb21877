@@ -32,11 +32,11 @@ const EvidenceTag: React.FC<EvidenceTagProps> = ({
               borderColor: `${level.color}50`
             }}
           >
-            <span>{showLabel ? level.level : `${score.toFixed(1)}/5`}</span>
+            <span>{showLabel ? t(level.level) : `${score.toFixed(1)}/5`}</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p><span className="font-medium">{level.level}</span> ({score.toFixed(1)}/5)</p>
+          <p><span className="font-medium">{t(level.level)}</span> ({score.toFixed(1)}/5)</p>
           <p className="text-xs text-muted-foreground mt-1">{t('evidenceTag.qualityTooltip')}</p>
         </TooltipContent>
       </Tooltip>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Beaker, GitBranch, Link2, Shield, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, Beaker, GitBranch, Link2, Shield, Zap, Stethoscope, Brain, ClipboardList } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -43,13 +43,38 @@ const predicateBadgeColors: Record<string, string> = {
   ACTIVATES: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
 };
 
+// Suggested pre-treatment exams per condition category
+const suggestedExamsMap: Record<string, string[]> = {
+  'osteoarthritis': ['conditionExams.inflammatoryMarkers', 'conditionExams.jointXray', 'conditionExams.synovialFluid'],
+  'arthritis': ['conditionExams.inflammatoryMarkers', 'conditionExams.jointXray', 'conditionExams.synovialFluid'],
+  'hip dysplasia': ['conditionExams.pelvicXray', 'conditionExams.inflammatoryMarkers', 'conditionExams.gaitAnalysis'],
+  'cellular senescence': ['conditionExams.telomereLength', 'conditionExams.oxidativeStress', 'conditionExams.sasp'],
+  'immune senescence': ['conditionExams.lymphocytePanel', 'conditionExams.immunoglobulins', 'conditionExams.cbc'],
+  'oxidative stress': ['conditionExams.oxidativeStress', 'conditionExams.antioxidantCapacity', 'conditionExams.lipidPeroxidation'],
+  'cognitive dysfunction': ['conditionExams.neurologicalExam', 'conditionExams.brainMri', 'conditionExams.cognitiveAssessment'],
+  'chronic inflammation': ['conditionExams.crp', 'conditionExams.inflammatoryMarkers', 'conditionExams.cbc'],
+  'renal': ['conditionExams.renalPanel', 'conditionExams.urinalysis', 'conditionExams.sdma'],
+  'hepatic': ['conditionExams.hepaticPanel', 'conditionExams.bileAcids', 'conditionExams.abdominalUltrasound'],
+  'cardiac': ['conditionExams.echocardiogram', 'conditionExams.bnp', 'conditionExams.ecg'],
+};
+
+function getSuggestedExams(conditionName: string): string[] {
+  const lowerName = conditionName.toLowerCase();
+  for (const [key, exams] of Object.entries(suggestedExamsMap)) {
+    if (lowerName.includes(key)) return exams;
+  }
+  return [];
+}
+
 interface ConditionInsightCardProps {
   condition: any;
   insight?: ConditionInsight;
   medications?: any[];
+  petBreed?: string;
+  petAge?: number;
 }
 
-const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, insight, medications }) => {
+const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, insight, medications, petBreed, petAge }) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
@@ -62,6 +87,14 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
   const causalCount = insight?.causalLinks?.length || 0;
   const mechanismCount = insight?.mechanisms?.length || 0;
   const modulatorCount = insight?.modulators?.length || 0;
+  const suggestedExams = getSuggestedExams(condition.condition_name);
+
+  // Clinical reasoning
+  const hasBreedRelevance = petBreed && insight?.causalLinks?.some(l => 
+    l.subject_name.toLowerCase().includes('breed') || l.subject_name.toLowerCase().includes('genetic')
+  );
+  const hasAgeRelevance = petAge && petAge >= 7;
+  const hasCausalConnections = causalCount > 0;
 
   return (
     <Card className={cn(
@@ -99,6 +132,12 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
               {causalCount}
             </Badge>
           )}
+          {suggestedExams.length > 0 && (
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 gap-1">
+              <ClipboardList className="h-3 w-3" />
+              {suggestedExams.length}
+            </Badge>
+          )}
           {condition.severity && (
             <Badge variant="outline" className={severityColors[condition.severity]}>
               {String(t(`petProfile.conditionInsights.severity.${condition.severity}`, condition.severity))}
@@ -111,10 +150,58 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
         </div>
       </button>
 
-      {expanded && insight && (
+      {expanded && (
         <CardContent className="pt-0 pb-4 px-4 space-y-4">
+          {/* Clinical Reasoning */}
+          {(hasBreedRelevance || hasAgeRelevance || hasCausalConnections) && (
+            <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Brain className="h-3.5 w-3.5 text-blue-500" />
+                {t('petProfile.conditionInsights.clinicalReasoning')}
+              </h4>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                {hasAgeRelevance && (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-blue-500 mt-0.5">•</span>
+                    {t('petProfile.conditionInsights.ageRelevance', { age: petAge, condition: condition.condition_name })}
+                  </li>
+                )}
+                {petBreed && (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-blue-500 mt-0.5">•</span>
+                    {t('petProfile.conditionInsights.breedRelevance', { breed: petBreed, condition: condition.condition_name })}
+                  </li>
+                )}
+                {hasCausalConnections && (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-blue-500 mt-0.5">•</span>
+                    {t('petProfile.conditionInsights.causalRelevance', { count: causalCount, condition: condition.condition_name })}
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {/* Suggested Pre-Treatment Exams */}
+          {suggestedExams.length > 0 && (
+            <div className="p-3 bg-purple-50/50 dark:bg-purple-950/20 rounded-lg border border-purple-200/50 dark:border-purple-800/50">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Stethoscope className="h-3.5 w-3.5 text-purple-500" />
+                {t('petProfile.conditionInsights.suggestedExams')}
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestedExams.map((examKey, i) => (
+                  <Badge key={i} variant="outline" className="text-xs bg-purple-100/50 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+                    <ClipboardList className="h-3 w-3 mr-1" />
+                    {t(examKey)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Treatments from KG */}
-          {insight.treatments.length > 0 && (
+          {insight && insight.treatments.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Beaker className="h-3.5 w-3.5 text-emerald-500" />
@@ -142,8 +229,8 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
             </div>
           )}
 
-          {/* Modulators (INHIBITS/MODULATES/ACTIVATES) */}
-          {insight.modulators && insight.modulators.length > 0 && (
+          {/* Modulators */}
+          {insight && insight.modulators && insight.modulators.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Zap className="h-3.5 w-3.5 text-orange-500" />
@@ -171,7 +258,7 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
           )}
 
           {/* Causal links */}
-          {insight.causalLinks.length > 0 && (
+          {insight && insight.causalLinks.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <GitBranch className="h-3.5 w-3.5 text-amber-500" />
@@ -195,7 +282,7 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
           )}
 
           {/* Mechanisms */}
-          {insight.mechanisms.length > 0 && (
+          {insight && insight.mechanisms.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5 text-blue-500" />
