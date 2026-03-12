@@ -6926,7 +6926,12 @@
         "medium": "Confiança Média",
         "low": "Confiança Baixa",
         "insufficient": "Dados Insuficientes"
-      }
+      },
+      "proposalSentTitle": "Proposta Enviada ao Tutor",
+      "proposalSentDesc": "A proposta de tratamento geroprotetor foi enviada para o portal do tutor.",
+      "proposalErrorTitle": "Erro ao Criar Proposta",
+      "proposalErrorDesc": "Não foi possível enviar a proposta. Tente novamente.",
+      "approvedRationale": "Protocolo geroprotetor personalizado baseado em análise do Knowledge Graph veterinário, revisado e aprovado pelo veterinário responsável."
     },
     "treatability": {
       "title": "Tratabilidade por Condição",
