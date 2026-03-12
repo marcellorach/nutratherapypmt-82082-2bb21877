@@ -713,9 +713,9 @@ async function getHybridRecommendation(
     const compounds = (result.graphData?.nodes || [])
       .filter((n: any) => n.type === 'Nutraceutical' || n.type === 'Compound')
       .map((n: any) => ({
-        name: n.label || n.properties?.name,
+        name: n.properties?.name || n.label,
         dosage: n.properties?.dosage || 'Consultar veterinário',
-        mechanism: n.properties?.mechanism || 'Via knowledge graph',
+        mechanism: n.properties?.mechanism || n.properties?.description || 'Via knowledge graph',
         evidenceLevel: 'KG-backed',
         condition: result.condition,
       }));
@@ -727,11 +727,15 @@ async function getHybridRecommendation(
   const allKgCompounds = Object.values(perConditionCompounds).flat()
     .filter(c => !medNamesLower.some(m => (c.name || '').toLowerCase().includes(m)));
 
-  // Deduplicate by name, keeping first occurrence, cap at 8 for LLM
+  // Filter out internal codes (e.g. "LY-D6", "AB-123") — keep only real compound names
+  const isInternalCode = (name: string) => /^[A-Z]{1,4}-[A-Z]?\d/.test(name);
+  const meaningfulCompounds = allKgCompounds.filter(c => !isInternalCode(c.name || ''));
+
+  // Deduplicate by normalized name, keeping first occurrence, cap at 8 for LLM
   const seenNames = new Set<string>();
-  const uniqueCompounds = allKgCompounds.filter(c => {
-    const key = (c.name || '').toLowerCase();
-    if (seenNames.has(key)) return false;
+  const uniqueCompounds = meaningfulCompounds.filter(c => {
+    const key = (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!key || seenNames.has(key)) return false;
     seenNames.add(key);
     return true;
   }).slice(0, 8);
