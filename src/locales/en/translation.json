@@ -6987,6 +6987,11 @@
         "resolved": "Resolved"
       },
       "modulators": "Modulators & Inhibitors",
+      "clinicalReasoning": "Clinical Reasoning",
+      "ageRelevance": "At {{age}} years, {{condition}} is significantly more prevalent in geriatric patients",
+      "breedRelevance": "{{breed}} breed has documented genetic predisposition to {{condition}}",
+      "causalRelevance": "{{count}} causal connection(s) link {{condition}} to other patient conditions",
+      "suggestedExams": "Suggested Pre-Treatment Exams",
       "predicates": {
         "CAUSES": "causes",
         "AGGRAVATES": "aggravates",
@@ -7002,6 +7007,116 @@
       }
     }
   },
+  "evidenceLevels": {
+    "veryHigh": "Very High",
+    "high": "High",
+    "mediumHigh": "Medium-High",
+    "medium": "Medium",
+    "mediumLow": "Medium-Low",
+    "low": "Low",
+    "veryLow": "Very Low",
+    "strength": {
+      "strong": "Strong",
+      "moderate": "Moderate",
+      "weak": "Weak",
+      "veryWeak": "Very weak or insufficient"
+    },
+    "desc": {
+      "veryHigh": "Systematic reviews and meta-analyses of high-quality randomized clinical trials",
+      "high": "Multiple randomized clinical trials with consistent results",
+      "mediumHigh": "Randomized clinical trials or well-conducted observational studies",
+      "medium": "Case-control or cohort studies with good methodological quality",
+      "mediumLow": "Case series, studies with methodological limitations",
+      "low": "Expert opinions, isolated case studies",
+      "veryLow": "Anecdotal evidence or no formal studies"
+    }
+  },
+  "tags": {
+    "confidence": "Confidence",
+    "scientificEvidenceLevel": "Scientific evidence level",
+    "efficacy": "Efficacy",
+    "conditionRelevance": "Condition relevance for this nutraceutical"
+  },
+  "scientificScore": {
+    "title": "Scientific Score Index",
+    "basedOn": "Score based on",
+    "methodological": "Methodological quality",
+    "reproducibility": "Reproducibility",
+    "clinicalApplicability": "Clinical applicability",
+    "scientificSupport": "Scientific support"
+  },
+  "evidenceLegend": {
+    "noEvidence": "No evidence",
+    "anecdotal": "Anecdotal",
+    "limited": "Limited evidence",
+    "moderate": "Moderate",
+    "good": "Good evidence",
+    "excellent": "Excellent"
+  },
+  "conditionExams": {
+    "inflammatoryMarkers": "Inflammatory Markers Panel (CRP, IL-6)",
+    "jointXray": "Joint X-ray",
+    "synovialFluid": "Synovial Fluid Analysis",
+    "pelvicXray": "Pelvic X-ray (OFA/PennHIP)",
+    "gaitAnalysis": "Gait Analysis",
+    "telomereLength": "Telomere Length Assay",
+    "oxidativeStress": "Oxidative Stress Markers",
+    "sasp": "SASP Biomarker Panel",
+    "lymphocytePanel": "Lymphocyte Subpopulation Panel",
+    "immunoglobulins": "Immunoglobulin Levels",
+    "cbc": "Complete Blood Count (CBC)",
+    "antioxidantCapacity": "Total Antioxidant Capacity",
+    "lipidPeroxidation": "Lipid Peroxidation (MDA)",
+    "neurologicalExam": "Neurological Examination",
+    "brainMri": "Brain MRI",
+    "cognitiveAssessment": "Canine Cognitive Assessment Scale",
+    "crp": "C-Reactive Protein (CRP)",
+    "renalPanel": "Renal Panel (BUN, Creatinine)",
+    "urinalysis": "Urinalysis",
+    "sdma": "SDMA",
+    "hepaticPanel": "Hepatic Panel (ALT, ALP, GGT)",
+    "bileAcids": "Bile Acids",
+    "abdominalUltrasound": "Abdominal Ultrasound",
+    "echocardiogram": "Echocardiogram",
+    "bnp": "NT-proBNP",
+    "ecg": "Electrocardiogram (ECG)"
+  },
+  "petProfile": {
+    "compounds": {
+      "curcumin": {
+        "name": "Curcumin",
+        "condition": "Osteoarthritis",
+        "rationale": "Anti-inflammatory action via NF-κB inhibition, with evidence in 12 veterinary studies."
+      },
+      "nmn": {
+        "name": "NMN (Nicotinamide Mononucleotide)",
+        "condition": "Cellular Aging",
+        "rationale": "NAD+ precursor with evidence for mitochondrial function restoration in geriatric dogs."
+      },
+      "resveratrol": {
+        "name": "Resveratrol",
+        "condition": "Oxidative Stress",
+        "rationale": "SIRT1/AMPK activator. Synergistic effect with NMN on NAD+ metabolism."
+      },
+      "omega3": {
+        "name": "Omega-3 (EPA/DHA)",
+        "condition": "Hip Dysplasia",
+        "rationale": "Modulation of pro-inflammatory eicosanoids, joint mobility support."
+      },
+      "rapamycin": {
+        "name": "Rapamycin (low dose)",
+        "condition": "Immune Senescence",
+        "rationale": "mTOR inhibitor with weekly protocol. Data from Dog Aging Project (University of Washington)."
+      }
+    },
+    "compoundSlider": {
+      "discuss": "Discuss this recommendation",
+      "chatPlaceholder": "Ask questions about {{compound}} — biological pathways, dosage, interactions...",
+      "q1": "What are the biological pathways of {{compound}}?",
+      "q2": "How does {{compound}} interact with {{condition}} at molecular level?",
+      "q3": "Are there safety concerns with {{compound}} in geriatric dogs?",
+      "inputPlaceholder": "Ask about this compound..."
+    },
   "systemGuide": {
     "title": "Knowledge Base — System Guide",
     "description": "Navigate through the sections that make up the veterinary knowledge base. Each module plays a specific role in the scientific pipeline.",
