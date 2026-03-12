@@ -165,9 +165,9 @@ const PetProfilePage: React.FC = () => {
       })),
       compounds: compounds.map(c => ({
         name: c.name,
-        dosage: c.dosage,
-        reason: c.reason || '',
-        enabled: c.enabled,
+        dosage: `${c.dosageCurrent} ${c.unit}`,
+        reason: c.rationale || '',
+        enabled: !c.removed,
       })),
       scientific_summary: {
         tripletCount: kgTriplets.length,
