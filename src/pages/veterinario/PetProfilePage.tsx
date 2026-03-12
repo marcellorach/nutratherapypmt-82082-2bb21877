@@ -228,6 +228,12 @@ const PetProfilePage: React.FC = () => {
     };
 
     try {
+      // Delete previous proposals for this pet (keep only the newest)
+      await (supabase as any)
+        .from('treatment_proposals')
+        .delete()
+        .eq('pet_id', profile.id);
+
       const { error } = await (supabase as any)
         .from('treatment_proposals')
         .insert(proposalData);
