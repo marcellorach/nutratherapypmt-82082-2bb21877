@@ -7,14 +7,37 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Filter, Loader2 } from "lucide-react";
 import PetProfileCard from '@/components/pet/PetProfileCard';
 import GenerateSamplePetsButton from '@/components/pet/GenerateSamplePetsButton';
-import { usePetProfiles } from '@/hooks/usePetProfile';
+import { usePetProfiles, useDeletePetProfile } from '@/hooks/usePetProfile';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const VeterinarioPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const { data: petProfiles, isLoading } = usePetProfiles();
+  const deletePet = useDeletePetProfile();
+  const { toast } = useToast();
+
+  const handleDeletePet = (id: string) => {
+    deletePet.mutate(id, {
+      onSuccess: () => {
+        toast({ title: t('admin.patients.deleted', 'Pet removido com sucesso') });
+        setDeleteTarget(null);
+      },
+    });
+  };
 
   // Filter pets based on search
   const filteredPets = (petProfiles || []).filter(pet =>
@@ -28,7 +51,7 @@ const VeterinarioPage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">{t('veterinarian.portal')}</h1>
-            <p className="text-gray-600">{t('veterinarian.portalDesc')}</p>
+            <p className="text-muted-foreground">{t('veterinarian.portalDesc')}</p>
           </div>
           
           <div className="flex gap-4 mt-4 md:mt-0">
@@ -69,7 +92,7 @@ const VeterinarioPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredPets.map((pet) => (
-                <PetProfileCard key={pet.id} pet={pet} />
+                <PetProfileCard key={pet.id} pet={pet} onDelete={(id) => setDeleteTarget(id)} />
               ))}
 
               {filteredPets.length === 0 && (
@@ -85,6 +108,23 @@ const VeterinarioPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin.patients.deleteConfirmTitle', 'Confirmar exclusão')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin.patients.deleteConfirmDesc', 'Tem certeza que deseja remover este pet? Esta ação não pode ser desfeita.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => deleteTarget && handleDeletePet(deleteTarget)}>
+              {t('common.delete', 'Apagar')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
