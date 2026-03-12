@@ -12,6 +12,7 @@ import LandingContent from '@/components/landing/LandingContent';
 const Index: React.FC = () => {
   const { t } = useTranslation();
   const { user, hasRole } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <Layout>
