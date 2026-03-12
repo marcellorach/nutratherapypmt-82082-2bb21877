@@ -144,8 +144,61 @@ const PetProfilePage: React.FC = () => {
     }
   };
 
-  const handleApproveStack = (compounds: CompoundDosage[]) => {
-    console.log('Stack approved:', compounds);
+  const handleApproveStack = async (compounds: CompoundDosage[]) => {
+    if (!data?.profile) return;
+    const { profile, conditions } = data;
+
+    // Calculate price based on compound count and complexity
+    const basePrice = 105;
+    const perCompoundIncrement = (270 - 105) / 8; // max 8 compounds
+    const monthlyPrice = Math.min(270, Math.round(basePrice + compounds.length * perCompoundIncrement));
+
+    const proposalData = {
+      pet_id: profile.id,
+      veterinarian_name: 'Dr. ' + (profile.veterinarian_id ? 'Veterinário' : 'Especialista'),
+      status: 'pending',
+      conditions: (conditions || []).map((c: any) => ({
+        name: c.condition_name,
+        severity: c.severity,
+        status: c.status,
+      })),
+      compounds: compounds.map(c => ({
+        name: c.name,
+        dosage: c.dosage,
+        reason: c.reason || '',
+        enabled: c.enabled,
+      })),
+      scientific_summary: {
+        tripletCount: kgTriplets.length,
+        studyCount: new Set(kgTriplets.map((t: any) => t.study_id).filter(Boolean)).size,
+        kgCoverage: kgTriplets.length > 0 ? Math.min(1, kgTriplets.length / 20) : 0,
+        pathwayCount: kgPathways.length,
+      },
+      confidence_level: confidenceLevel,
+      rationale: t('petProfile.recommendation.approvedRationale'),
+      monthly_price_brl: monthlyPrice,
+      subscription_months: 12,
+    };
+
+    try {
+      const { error } = await (supabase as any)
+        .from('treatment_proposals')
+        .insert(proposalData);
+
+      if (error) throw error;
+
+      toast({
+        title: t('petProfile.recommendation.proposalSentTitle'),
+        description: t('petProfile.recommendation.proposalSentDesc'),
+      });
+    } catch (err) {
+      console.error('Error creating proposal:', err);
+      toast({
+        title: t('petProfile.recommendation.proposalErrorTitle'),
+        description: t('petProfile.recommendation.proposalErrorDesc'),
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleRejectStack = () => {
