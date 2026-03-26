@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-12T21:19:12.427Z",
+  "timestamp": "2026-03-26T06:45:38.280Z",
   "summary": {
     "totalFiles": 775,
     "totalIssues": 380,
@@ -2664,7 +2664,7 @@
     {
       "type": "hardcoded",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 137,
+      "line": 138,
       "text": "Carregando dados...",
       "severity": "medium"
     }
