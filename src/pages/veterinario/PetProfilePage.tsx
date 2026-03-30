@@ -409,15 +409,6 @@ const PetProfilePage: React.FC = () => {
             </TabsList>
 
             <TabsContent value="conditions">
-              {conditionInsights.data && (
-                <div className="mb-4">
-                  <ComorbidityMap
-                    conditions={conditions.map((c: any) => c.condition_name)}
-                    causalPathways={conditionInsights.data.causalPathways}
-                    synergisticCompounds={conditionInsights.data.synergisticCompounds}
-                  />
-                </div>
-              )}
               {conditions.length === 0 ? (
                 <Card>
                   <CardContent className="py-8">
@@ -428,21 +419,13 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {conditions.map((c: any) => {
-                    const insight = conditionInsights.data?.conditionInsights?.find(
-                      (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
-                    );
-                    return (
-                      <ConditionInsightCard
-                        key={c.id}
-                        condition={c}
-                        insight={insight}
-                        medications={medications}
-                        petBreed={profile.breed}
-                        petAge={profile.age_years}
-                      />
-                    );
-                  })}
+                  {conditions.map((c: any) => (
+                    <ConditionInsightCard
+                      key={c.id}
+                      condition={c}
+                      mode="simple"
+                    />
+                  ))}
                 </div>
               )}
             </TabsContent>
