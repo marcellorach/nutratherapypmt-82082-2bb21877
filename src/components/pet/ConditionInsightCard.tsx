@@ -66,17 +66,37 @@ function getSuggestedExams(conditionName: string): string[] {
   return [];
 }
 
+const originBadgeConfig: Record<string, { icon: string; colorClass: string; key: string }> = {
+  vet_diagnosis: { icon: '🩺', colorClass: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', key: 'petProfile.conditionOrigin.vetDiagnosis' },
+  exam_suggested: { icon: '🧪', colorClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', key: 'petProfile.conditionOrigin.examSuggested' },
+  breed_predisposition: { icon: '🧬', colorClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', key: 'petProfile.conditionOrigin.breedPredisposition' },
+  inferred_comorbidity: { icon: '🔬', colorClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300', key: 'petProfile.conditionOrigin.inferredComorbidity' },
+};
+
+function inferOrigin(condition: any): string {
+  if (condition.notes && condition.notes.trim().length > 0) return 'vet_diagnosis';
+  if (condition.diagnosis_date) return 'vet_diagnosis';
+  if (condition.condition_name?.toLowerCase().includes('senescen') || 
+      condition.condition_name?.toLowerCase().includes('inflamm') ||
+      condition.condition_name?.toLowerCase().includes('oxidative')) return 'inferred_comorbidity';
+  return 'vet_diagnosis';
+}
+
 interface ConditionInsightCardProps {
   condition: any;
   insight?: ConditionInsight;
   medications?: any[];
   petBreed?: string;
   petAge?: number;
+  mode?: 'simple' | 'full';
+  origin?: string;
 }
 
-const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, insight, medications, petBreed, petAge }) => {
+const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, insight, medications, petBreed, petAge, mode = 'full', origin }) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const resolvedOrigin = origin || inferOrigin(condition);
+  const originConfig = originBadgeConfig[resolvedOrigin] || originBadgeConfig.vet_diagnosis;
 
   const matchingMeds = medications?.filter(m =>
     m.medication_name?.toLowerCase().includes(condition.condition_name.toLowerCase()) ||
@@ -96,6 +116,37 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
   const hasAgeRelevance = petAge && petAge >= 7;
   const hasCausalConnections = causalCount > 0;
 
+  // Simple mode: just show name, severity, status, origin badge
+  if (mode === 'simple') {
+    return (
+      <Card>
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="font-medium text-sm">{condition.condition_name}</p>
+              {condition.notes && (
+                <p className="text-xs text-muted-foreground mt-0.5">{condition.notes}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={cn('text-xs gap-1', originConfig.colorClass)}>
+              {originConfig.icon} {t(originConfig.key)}
+            </Badge>
+            {condition.severity && (
+              <Badge variant="outline" className={severityColors[condition.severity]}>
+                {String(t(`petProfile.conditionInsights.severity.${condition.severity}`, condition.severity))}
+              </Badge>
+            )}
+            <Badge variant="outline" className={statusColors[condition.status]}>
+              {String(t(`petProfile.conditionInsights.status.${condition.status}`, condition.status))}
+            </Badge>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className={cn(
       'transition-all duration-200',
@@ -114,6 +165,9 @@ const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, 
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Badge variant="outline" className={cn('text-xs gap-1', originConfig.colorClass)}>
+            {originConfig.icon} {t(originConfig.key)}
+          </Badge>
           {treatmentCount > 0 && (
             <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 gap-1">
               <Beaker className="h-3 w-3" />

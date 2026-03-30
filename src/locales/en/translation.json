@@ -7006,6 +7006,16 @@
       "compoundChat": "Compound Chat",
       "clinicalAlerts": "Clinical Alerts"
     },
+    "conditionOrigin": {
+      "vetDiagnosis": "Veterinary Diagnosis",
+      "examSuggested": "Suggested by Exams",
+      "breedPredisposition": "Breed Predisposition",
+      "inferredComorbidity": "Inferred Comorbidity"
+    },
+    "analysisByCondition": {
+      "title": "Analysis by Condition (VetGraphRAG)",
+      "description": "Treatments, biological mechanisms and causal connections identified by the Knowledge Graph for each patient condition."
+    },
     "clinicalAlerts": {
       "title": "Alerts",
       "alertsFound": "{{count}} clinical alert(s) identified",
