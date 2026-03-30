@@ -7047,7 +7047,7 @@
         "effect": "Effect",
         "outcome": "Outcome"
       }
-    }
+    },
     "compoundChat": {
       "selectPrompt": "Select a recommended compound to start a specialized conversation:",
       "backToList": "Back to list",

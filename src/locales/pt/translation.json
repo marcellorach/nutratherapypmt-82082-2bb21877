@@ -7047,7 +7047,7 @@
         "effect": "Efeito",
         "outcome": "Desfecho"
       }
-    }
+    },
     "compoundChat": {
       "selectPrompt": "Selecione um composto recomendado para iniciar uma conversa especializada:",
       "backToList": "Voltar à lista",
