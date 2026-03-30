@@ -1,0 +1,1 @@
+ALTER TABLE public.pet_profiles ADD COLUMN is_demo BOOLEAN NOT NULL DEFAULT false;

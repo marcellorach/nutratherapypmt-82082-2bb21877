@@ -17,6 +17,7 @@ export interface PetProfileData {
   owner_email?: string;
   veterinarian_id?: string;
   notes?: string;
+  is_demo?: boolean;
 }
 
 export interface PetConditionData {
@@ -214,6 +215,23 @@ export function useDeletePetProfile() {
         .from('pet_profiles')
         .delete()
         .eq('id', petId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pet-profiles'] });
+    },
+  });
+}
+
+// Delete all demo pet profiles
+export function useDeleteDemoPets() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await (supabase as any)
+        .from('pet_profiles')
+        .delete()
+        .eq('is_demo', true);
       if (error) throw error;
     },
     onSuccess: () => {

@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter, Loader2, Users, UserPlus, Trash2 } from "lucide-react";
+import { Search, Plus, Filter, Loader2, Users, UserPlus, Trash2, Eye, EyeOff } from "lucide-react";
 import PetProfileCard from '@/components/pet/PetProfileCard';
 import GenerateSamplePetsButton from '@/components/pet/GenerateSamplePetsButton';
 import PetRegistrationForm from '@/components/pet/PetRegistrationForm';
-import { usePetProfiles, useCreatePetProfile, useDeletePetProfile } from '@/hooks/usePetProfile';
+import { usePetProfiles, useCreatePetProfile, useDeletePetProfile, useDeleteDemoPets } from '@/hooks/usePetProfile';
 import type { PetProfileData } from '@/hooks/usePetProfile';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -28,10 +28,12 @@ const AdminPetManagementTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('list');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [deleteAllDemoOpen, setDeleteAllDemoOpen] = useState(false);
+  const [showDemo, setShowDemo] = useState(true);
   const { data: petProfiles, isLoading } = usePetProfiles();
   const createPet = useCreatePetProfile();
   const deletePet = useDeletePetProfile();
+  const deleteDemoPets = useDeleteDemoPets();
 
   const handleCreatePet = (data: PetProfileData) => {
     createPet.mutate(data, {
@@ -51,19 +53,23 @@ const AdminPetManagementTab: React.FC = () => {
     });
   };
 
-  const handleDeleteAll = async () => {
-    const ids = (petProfiles || []).map(p => p.id);
-    for (const id of ids) {
-      await deletePet.mutateAsync(id);
-    }
-    toast({ title: t('admin.patients.allDeleted', 'Todos os pets foram removidos') });
-    setDeleteAllOpen(false);
+  const handleDeleteAllDemo = () => {
+    deleteDemoPets.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: t('admin.patients.allDemoDeleted', 'Todos os pets demo foram removidos') });
+        setDeleteAllDemoOpen(false);
+      },
+    });
   };
 
-  const filteredPets = (petProfiles || []).filter(pet =>
-    pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pet.breed.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const demoCount = (petProfiles || []).filter((p: any) => p.is_demo).length;
+
+  const filteredPets = (petProfiles || [])
+    .filter((pet: any) => showDemo || !pet.is_demo)
+    .filter((pet: any) =>
+      pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pet.breed.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   return (
     <div className="space-y-6">
@@ -101,6 +107,17 @@ const AdminPetManagementTab: React.FC = () => {
                 />
               </div>
               <div className="flex gap-2">
+                <Button
+                  variant={showDemo ? "outline" : "secondary"}
+                  size="sm"
+                  onClick={() => setShowDemo(!showDemo)}
+                  className="gap-1"
+                >
+                  {showDemo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showDemo
+                    ? t('admin.patients.hideDemo', 'Ocultar Demo')
+                    : t('admin.patients.showDemo', 'Mostrar Demo')}
+                </Button>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Filter size={16} />
                   {t('veterinarian.filter')}
@@ -109,10 +126,10 @@ const AdminPetManagementTab: React.FC = () => {
                   <Plus className="mr-2 h-4 w-4" />
                   {t('veterinarian.newPet')}
                 </Button>
-                {(petProfiles || []).length > 0 && (
-                  <Button variant="destructive" size="sm" onClick={() => setDeleteAllOpen(true)}>
+                {demoCount > 0 && (
+                  <Button variant="destructive" size="sm" onClick={() => setDeleteAllDemoOpen(true)}>
                     <Trash2 className="mr-2 h-4 w-4" />
-                    {t('admin.patients.deleteAll', 'Apagar Todos')}
+                    {t('admin.patients.deleteAllDemo', 'Apagar Demo')} ({demoCount})
                   </Button>
                 )}
               </div>
@@ -130,7 +147,7 @@ const AdminPetManagementTab: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredPets.map((pet) => (
+                {filteredPets.map((pet: any) => (
                   <PetProfileCard key={pet.id} pet={pet} onDelete={(id) => setDeleteTarget(id)} />
                 ))}
 
@@ -167,19 +184,19 @@ const AdminPetManagementTab: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete all pets dialog */}
-      <AlertDialog open={deleteAllOpen} onOpenChange={setDeleteAllOpen}>
+      {/* Delete all demo pets dialog */}
+      <AlertDialog open={deleteAllDemoOpen} onOpenChange={setDeleteAllDemoOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.patients.deleteAllTitle', 'Apagar todos os pets')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.patients.deleteAllDemoTitle', 'Apagar todos os pets demo')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.patients.deleteAllDesc', 'Tem certeza que deseja remover TODOS os pets? Esta ação não pode ser desfeita.')}
+              {t('admin.patients.deleteAllDemoDesc', 'Tem certeza que deseja remover TODOS os pets marcados como DEMO? Pets reais não serão afetados.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={handleDeleteAll}>
-              {t('admin.patients.deleteAllConfirm', 'Sim, apagar todos')}
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={handleDeleteAllDemo}>
+              {t('admin.patients.deleteAllDemoConfirm', 'Sim, apagar todos demo')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
