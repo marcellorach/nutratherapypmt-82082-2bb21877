@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle, Dna } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle, Dna, Network } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
@@ -22,6 +22,8 @@ import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
+import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel';
+import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
@@ -561,6 +563,30 @@ const PetProfilePage: React.FC = () => {
               interactionCount={interactionAlerts.length}
               compoundCount={recommendationCompounds?.length || 0}
             />
+
+            {/* VetGraphRAG Insights Panel - 3 sections */}
+            {recommendationCompounds && (
+              <VetGraphRAGInsightsPanel
+                conditions={conditions}
+                clinicalDiscoveries={clinicalDiscoveries}
+                predispositions={predispositions}
+                labAlerts={labAlerts}
+                kgTriplets={kgTriplets}
+                kgPathways={kgPathways}
+                breed={profile.breed}
+                ageYears={profile.age_years}
+              />
+            )}
+
+            {/* Patient Knowledge Subgraph */}
+            {recommendationCompounds && kgTriplets.length > 0 && (
+              <PatientKnowledgeSubgraph
+                kgTriplets={kgTriplets}
+                kgPathways={kgPathways}
+                conditions={conditions.map((c: any) => c.condition_name)}
+                recommendedCompounds={recommendationCompounds.filter((c: any) => !c.removed).map((c: any) => c.name)}
+              />
+            )}
 
             {/* Analysis Results Tabs */}
             {recommendationCompounds && (

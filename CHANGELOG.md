@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-30 🧠 Reorganização do Perfil do Pet — Separação Dados vs Análise VetGraphRAG
+- ✅ **VetGraphRAGInsightsPanel**: Novo painel de 3 seções (Condições Atuais, Comorbidades Ocultas, Prevenção Futura)
+- ✅ **PatientKnowledgeSubgraph**: Subgrafo interativo do KG utilizado nas recomendações do paciente
+- ✅ **Inferência de gerociência**: Detecção automática de comorbidades ocultas via KG
+- ✅ **Razões de inferência**: Cada insight mostra "por que inferimos isso"
+- ✅ **i18n completo**: Chaves PT/EN para novos componentes
+
 ### Added - 2026-03-12 📊 Gráfico de Progressão por Condição na Proposta do Tutor
 - ✅ **ConditionProgressionChart**: Gráfico AreaChart com duas curvas — "Com Tratamento" (melhora sigmoide) vs "Sem Tratamento" (declínio gradual) por condição
 - ✅ **Dropdown de condições**: Quando há múltiplas condições, dropdown permite selecionar qual visualizar
