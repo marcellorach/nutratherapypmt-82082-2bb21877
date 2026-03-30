@@ -571,6 +571,46 @@ const PetProfilePage: React.FC = () => {
               />
             )}
 
+            {/* Analysis by Condition - ComorbidityMap + full ConditionInsightCards */}
+            {recommendationCompounds && conditions.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Stethoscope className="h-4 w-4 text-primary" />
+                    {t('petProfile.analysisByCondition.title')}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">{t('petProfile.analysisByCondition.description')}</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {conditionInsights.data && (
+                    <ComorbidityMap
+                      conditions={conditions.map((c: any) => c.condition_name)}
+                      causalPathways={conditionInsights.data.causalPathways}
+                      synergisticCompounds={conditionInsights.data.synergisticCompounds}
+                    />
+                  )}
+                  <div className="space-y-2">
+                    {conditions.map((c: any) => {
+                      const insight = conditionInsights.data?.conditionInsights?.find(
+                        (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
+                      );
+                      return (
+                        <ConditionInsightCard
+                          key={c.id}
+                          condition={c}
+                          insight={insight}
+                          medications={medications}
+                          petBreed={profile.breed}
+                          petAge={profile.age_years}
+                          mode="full"
+                        />
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Analysis Results Tabs */}
             {recommendationCompounds && (
               <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
