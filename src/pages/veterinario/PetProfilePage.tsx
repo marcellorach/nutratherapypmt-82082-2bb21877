@@ -564,6 +564,30 @@ const PetProfilePage: React.FC = () => {
               compoundCount={recommendationCompounds?.length || 0}
             />
 
+            {/* VetGraphRAG Insights Panel - 3 sections */}
+            {recommendationCompounds && (
+              <VetGraphRAGInsightsPanel
+                conditions={conditions}
+                clinicalDiscoveries={clinicalDiscoveries}
+                predispositions={predispositions}
+                labAlerts={labAlerts}
+                kgTriplets={kgTriplets}
+                kgPathways={kgPathways}
+                breed={profile.breed}
+                ageYears={profile.age_years}
+              />
+            )}
+
+            {/* Patient Knowledge Subgraph */}
+            {recommendationCompounds && kgTriplets.length > 0 && (
+              <PatientKnowledgeSubgraph
+                kgTriplets={kgTriplets}
+                kgPathways={kgPathways}
+                conditions={conditions.map((c: any) => c.condition_name)}
+                recommendedCompounds={recommendationCompounds.filter((c: any) => !c.removed).map((c: any) => c.name)}
+              />
+            )}
+
             {/* Analysis Results Tabs */}
             {recommendationCompounds && (
               <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
