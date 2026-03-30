@@ -40,6 +40,11 @@ const PetProfileCard: React.FC<PetProfileCardProps> = ({ pet, onDelete }) => {
           <PawPrint className="h-16 w-16 text-muted-foreground/30" />
         )}
         <div className="absolute top-2 right-2 flex gap-1">
+          {pet.is_demo && (
+            <Badge className="bg-amber-500 text-white border-amber-600 text-xs">
+              DEMO
+            </Badge>
+          )}
           <Badge variant="outline" className="bg-background/80 text-xs">
             {pet.sex === 'male' ? '♂' : '♀'}
           </Badge>

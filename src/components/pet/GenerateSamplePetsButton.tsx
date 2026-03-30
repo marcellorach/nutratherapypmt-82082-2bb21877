@@ -150,6 +150,7 @@ const GenerateSamplePetsButton: React.FC = () => {
             created_by: userId,
             veterinarian_id: userId,
             photo_url: BREED_PHOTOS[pet.breed] || null,
+            is_demo: true,
           })
           .select()
           .single();

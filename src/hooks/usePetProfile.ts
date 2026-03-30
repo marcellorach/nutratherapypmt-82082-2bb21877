@@ -17,6 +17,7 @@ export interface PetProfileData {
   owner_email?: string;
   veterinarian_id?: string;
   notes?: string;
+  is_demo?: boolean;
 }
 
 export interface PetConditionData {
