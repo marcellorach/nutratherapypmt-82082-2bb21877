@@ -222,3 +222,20 @@ export function useDeletePetProfile() {
     },
   });
 }
+
+// Delete all demo pet profiles
+export function useDeleteDemoPets() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await (supabase as any)
+        .from('pet_profiles')
+        .delete()
+        .eq('is_demo', true);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pet-profiles'] });
+    },
+  });
+}
