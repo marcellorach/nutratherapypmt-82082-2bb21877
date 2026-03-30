@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-30 🏷️ Separação Clara: Dados Clínicos vs Análise VetGraphRAG
+- ✅ **ConditionInsightCard modo "simple"**: Tab Conditions mostra apenas dados clínicos puros (nome, severidade, status) sem KG
+- ✅ **Badges de origem**: 🩺 Diagnóstico Veterinário, 🧪 Sugerida por Exames, 🧬 Predisposição Racial, 🔬 Comorbidade Inferida
+- ✅ **Análise por Condição (pós-VetGraphRAG)**: ComorbidityMap + ConditionInsightCards completos movidos para após análise
+- ✅ **i18n v1.19.0**: Novas chaves PT/EN para badges de origem e seção de análise
+
 ### Added - 2026-03-30 🧠 Reorganização do Perfil do Pet — Separação Dados vs Análise VetGraphRAG
 - ✅ **VetGraphRAGInsightsPanel**: Novo painel de 3 seções (Condições Atuais, Comorbidades Ocultas, Prevenção Futura)
 - ✅ **PatientKnowledgeSubgraph**: Subgrafo interativo do KG utilizado nas recomendações do paciente
