@@ -7023,6 +7023,31 @@
       "clinicalDiscoveries": "Clinical Discoveries",
       "discoveriesCount": "clinical discovery(ies)"
     },
+    "insights": {
+      "title": "VetGraphRAG Analysis",
+      "subtitle": "Clinical intelligence from the Knowledge Graph — separated from medical record data",
+      "currentConditions": "Confirmed Current Conditions",
+      "currentConditionsDesc": "Diagnosed conditions enriched with Knowledge Graph data",
+      "hiddenComorbidities": "Hidden Comorbidities (Geroscience)",
+      "hiddenComorbiditiesDesc": "Conditions inferred through biological connections in the Knowledge Graph",
+      "futurePrevention": "Future Prevention",
+      "futurePreventionDesc": "Risks based on breed predispositions and lab patterns",
+      "noItems": "No items identified in this category."
+    },
+    "subgraph": {
+      "title": "Patient Subgraph",
+      "description": "Knowledge Graph fragment used in this patient's recommendations",
+      "nodes": "nodes",
+      "edges": "connections",
+      "triplets": "triplets",
+      "nodeType": {
+        "compound": "Compound",
+        "condition": "Condition",
+        "mechanism": "Mechanism",
+        "effect": "Effect",
+        "outcome": "Outcome"
+      }
+    }
     "compoundChat": {
       "selectPrompt": "Select a recommended compound to start a specialized conversation:",
       "backToList": "Back to list",

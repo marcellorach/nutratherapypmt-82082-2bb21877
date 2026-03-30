@@ -7023,6 +7023,31 @@
       "clinicalDiscoveries": "Descobertas Clínicas",
       "discoveriesCount": "descoberta(s) clínica(s)"
     },
+    "insights": {
+      "title": "Análise VetGraphRAG",
+      "subtitle": "Inteligência clínica gerada pelo Knowledge Graph — separada dos dados do prontuário",
+      "currentConditions": "Condições Atuais Confirmadas",
+      "currentConditionsDesc": "Condições diagnosticadas, enriquecidas com dados do Knowledge Graph",
+      "hiddenComorbidities": "Comorbidades Ocultas (Gerociência)",
+      "hiddenComorbiditiesDesc": "Condições inferidas por conexões biológicas no Knowledge Graph",
+      "futurePrevention": "Prevenção Futura",
+      "futurePreventionDesc": "Riscos baseados em predisposições de raça e padrões laboratoriais",
+      "noItems": "Nenhum item identificado nesta categoria."
+    },
+    "subgraph": {
+      "title": "Subgrafo do Paciente",
+      "description": "Fragmento do Knowledge Graph utilizado nas recomendações deste paciente",
+      "nodes": "nós",
+      "edges": "conexões",
+      "triplets": "triplets",
+      "nodeType": {
+        "compound": "Composto",
+        "condition": "Condição",
+        "mechanism": "Mecanismo",
+        "effect": "Efeito",
+        "outcome": "Desfecho"
+      }
+    }
     "compoundChat": {
       "selectPrompt": "Selecione um composto recomendado para iniciar uma conversa especializada:",
       "backToList": "Voltar à lista",
