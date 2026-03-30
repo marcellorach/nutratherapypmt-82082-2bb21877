@@ -18,6 +18,7 @@ interface PetProfileCardProps {
     species: string;
     owner_name?: string | null;
     photo_url?: string | null;
+    is_demo?: boolean;
   };
   onDelete?: (id: string) => void;
 }
