@@ -1,105 +1,66 @@
 
 
-# Integração SNOMED-CT VetSCT + UMLS — Com Auditoria de Origem e Deduplicação
+# Implementação Completa: SNOMED-CT/UMLS — Edge Function + Mapping Service + Admin UI + Pipeline
 
-## Princípios Adicionais (conforme sua solicitação)
-- **Auditoria de origem**: Cada código SNOMED/UMLS gravado registra *quem* mapeou, *quando*, *de qual fonte*, e *com qual método* (automático vs manual). Rastreável.
-- **Deduplicação**: Antes de gravar qualquer mapeamento, verificar se já existe entidade com mesmo `snomed_code` ou `umls_cui` — impedir duplicatas e alertar.
+## O que já foi feito
+- Migration SQL executada (colunas `snomed_code`, `umls_cui`, `ontology_mapped_at`, `ontology_mapped_by`, `ontology_mapping_source` em `health_conditions` e `nutraceuticals` com partial unique indexes)
 
-## Mudanças
+## O que será implementado agora
 
-### 1. Migration SQL (colunas nullable + auditoria)
+### 1. Edge Function: adicionar `searchUMLS()` e `searchSNOMED()` ao `fetch-external-ontologies`
+- Nova função `searchUMLS()` que usa UMLS REST API (`https://uts-ws.nlm.nih.gov/rest/search/current`)
+- Verifica se `NLM_UMLS_API_KEY` existe via `Deno.env.get()` — se ausente, retorna array vazio + log "UMLS API key not configured"
+- Retorna: CUI, nome canônico, semantic types, SNOMED codes no `source_metadata`
+- Nova função `searchSNOMED()` que busca via UMLS filtrando por `rootSource=SNOMEDCT_VET`
+- Novos cases `'umls'` e `'snomed'` no switch existente
+- Campo `mapping_method: 'api_lookup'` no `source_metadata` para auditoria
 
-```sql
--- health_conditions
-ALTER TABLE public.health_conditions
-  ADD COLUMN IF NOT EXISTS snomed_code TEXT,
-  ADD COLUMN IF NOT EXISTS umls_cui TEXT,
-  ADD COLUMN IF NOT EXISTS ontology_mapped_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS ontology_mapped_by TEXT,
-  ADD COLUMN IF NOT EXISTS ontology_mapping_source TEXT;
+### 2. Novo serviço: `src/services/ontology-mapping-service.ts`
+- `mapEntityToStandards(name, entityType)`: invoca edge function source='umls', retorna snomed + cui
+- `checkDuplicateMapping(snomedCode?, umlsCui?, table)`: consulta DB, retorna entidade existente se já mapeada (usa os unique indexes)
+- `saveMapping(entityId, table, snomedCode, umlsCui, source, userId)`: grava com campos de auditoria
+- `batchMapUnmapped(table, batchSize)`: busca entidades sem códigos, tenta mapear, retorna preview antes de confirmar
+- `getMappingStats(table)`: retorna contagem de mapeados vs não mapeados
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_hc_snomed_unique 
-  ON public.health_conditions(snomed_code) WHERE snomed_code IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_hc_umls_unique 
-  ON public.health_conditions(umls_cui) WHERE umls_cui IS NOT NULL;
+### 3. Novo componente: `src/components/administrador/OntologyMappingTab.tsx`
+- Tabela com colunas: Nome | Tipo | SNOMED | UMLS CUI | Mapeado por | Data | Fonte
+- Filtros: Todos | Mapeado | Pendente | Sem mapeamento
+- Toggle para alternar entre `health_conditions` e `nutraceuticals`
+- Botão "Auto-map" com **preview obrigatório** antes de confirmar
+- Alertas de deduplicação: "CUI X já atribuído a Y"
+- Badge de status UMLS API (configurada/não configurada)
+- Mapeamento manual: campo de busca UMLS inline por entidade
+- Registrado como nova tab no `admin-tabs.ts` no grupo `knowledge-base`
 
--- nutraceuticals (mesma estrutura)
-ALTER TABLE public.nutraceuticals
-  ADD COLUMN IF NOT EXISTS snomed_code TEXT,
-  ADD COLUMN IF NOT EXISTS umls_cui TEXT,
-  ADD COLUMN IF NOT EXISTS ontology_mapped_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS ontology_mapped_by TEXT,
-  ADD COLUMN IF NOT EXISTS ontology_mapping_source TEXT;
+### 4. Enriquecer pipeline de curadoria
+- Em `useBaseKnowledgeCandidates.ts` no `useApproveCandidate`:
+  - Se candidato tem `source_metadata.cui` ou `source_metadata.snomed_code`, propagar para tabela destino
+  - Verificar duplicata antes de inserir (se código já existe, rejeitar com mensagem)
+  - Gravar `ontology_mapping_source`, `ontology_mapped_at`, `ontology_mapped_by`
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_nutra_snomed_unique 
-  ON public.nutraceuticals(snomed_code) WHERE snomed_code IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_nutra_umls_unique 
-  ON public.nutraceuticals(umls_cui) WHERE umls_cui IS NOT NULL;
-```
+### 5. Traduções i18n (PT/EN)
+- Incrementar versão para `1.20.0`
+- Chaves para: `ontologyMapping.title`, `ontologyMapping.filters.*`, `ontologyMapping.columns.*`, `ontologyMapping.autoMap.*`, `ontologyMapping.duplicateAlert`, `ontologyMapping.umls.*`, etc.
 
-Campos de auditoria:
-- `ontology_mapped_at`: timestamp do mapeamento
-- `ontology_mapped_by`: user_id ou "system/auto"
-- `ontology_mapping_source`: ex. "UMLS API", "manual", "SNOMED browser"
-
-Indexes UNIQUE parciais garantem **zero duplicatas** de código.
-
-### 2. Edge Function: adicionar source `umls` ao `fetch-external-ontologies`
-
-- Nova função `searchUMLS()` usando UMLS REST API (`https://uts-ws.nlm.nih.gov/rest/`)
-- Retorna: CUI, nome canônico, SNOMED codes mapeados, semantic types
-- Requer secret `NLM_UMLS_API_KEY` (gratuita) — solicitar via `add_secret`
-- Adicionar case `'umls'` e `'snomed'` no switch existente
-- Incluir no `source_metadata` o campo `mapping_method: 'api_lookup'` para rastreabilidade
-
-### 3. Novo serviço: `src/services/ontology-mapping-service.ts`
-
-- `mapEntityToStandards(name, entityType)`: chama edge function source='umls', retorna snomed + cui
-- `checkDuplicateMapping(snomedCode?, umlsCui?, table)`: consulta DB antes de gravar, retorna entidade existente se já mapeada
-- `saveMapping(entityId, table, snomedCode, umlsCui, source)`: grava com campos de auditoria (quem, quando, de onde)
-- `batchMapUnmapped(table, batchSize)`: busca entidades sem códigos, tenta mapear, retorna preview com duplicatas detectadas
-
-### 4. Novo componente: `src/components/administrador/OntologyMappingTab.tsx`
-
-Painel admin com:
-- Tabela: entidades com colunas Nome | SNOMED | UMLS CUI | Mapeado por | Data | Fonte
-- Filtros: ✅ Mapeado, ⚠️ Sugestão pendente, ❌ Sem mapeamento
-- Botão "Auto-map" com **preview obrigatório**: mostra sugestões + alertas de duplicata antes de confirmar
-- Alertas visuais de deduplicação: "⚠️ CUI C0018799 já atribuído a 'Heart Failure' — não pode ser reatribuído a 'Cardiac Disease'"
-- Log de auditoria inline: quem mapeou, quando, método usado
-- Nenhuma gravação sem confirmação explícita do admin
-
-### 5. Enriquecer curation pipeline
-
-No `useBaseKnowledgeCandidates.ts` — quando candidato é aprovado:
-- Se veio de busca UMLS, propagar `snomed_code` e `umls_cui` para tabela destino
-- Verificar duplicata antes de inserir (rejeitar se código já existe)
-- Registrar origem no campo `ontology_mapping_source`
-
-### 6. Traduções i18n (PT/EN)
-
-Chaves para: títulos de colunas, badges de status, alertas de duplicata, botões, tooltips de auditoria.
-
-### Pré-requisito
-
-Solicitar `NLM_UMLS_API_KEY` via `add_secret` antes de implementar chamada UMLS.
+### 6. Documentação
+- CHANGELOG.md: registrar todas as mudanças em [Unreleased]
 
 ### Arquivos
 
-| Ação | Arquivo | Risco |
-|------|---------|-------|
-| Migration | Nova SQL (ADD COLUMN nullable + UNIQUE indexes) | **Nenhum** |
-| Editar | `supabase/functions/fetch-external-ontologies/index.ts` | **Baixo** — novo case |
-| Criar | `src/services/ontology-mapping-service.ts` | **Nenhum** — código novo |
-| Criar | `src/components/administrador/OntologyMappingTab.tsx` | **Nenhum** — componente novo |
-| Editar | `src/hooks/useBaseKnowledgeCandidates.ts` | **Baixo** — propagar campos extras |
-| Editar | Traduções PT/EN + `i18n.ts` | **Nenhum** |
-| Editar | `CHANGELOG.md` | **Nenhum** |
+| Ação | Arquivo |
+|------|---------|
+| Editar | `supabase/functions/fetch-external-ontologies/index.ts` |
+| Criar | `src/services/ontology-mapping-service.ts` |
+| Criar | `src/components/administrador/OntologyMappingTab.tsx` |
+| Editar | `src/config/admin-tabs.ts` |
+| Editar | `src/hooks/useBaseKnowledgeCandidates.ts` |
+| Editar | `src/locales/pt/translation.json` |
+| Editar | `src/locales/en/translation.json` |
+| Editar | `src/i18n.ts` |
+| Editar | `CHANGELOG.md` |
 
-### O que NÃO muda
-
-- Nenhum componente/fluxo existente é alterado em sua lógica
-- VetGraphRAG, recomendações, pipeline clínica — tudo intacto
-- Colunas novas são nullable — queries existentes não quebram
+### Segurança
+- Nenhuma coluna existente é alterada
+- Fallback graceful se UMLS API key ausente
+- Deduplicação validada tanto no client (preview) quanto no DB (unique indexes)
 
