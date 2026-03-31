@@ -243,13 +243,24 @@ export function useApproveCandidate() {
         if (error) throw error;
         targetId = data.id;
       } else if (targetTable === 'health_conditions') {
+        // Dedup check
+        if (candidateSnomed) {
+          const { data: existing } = await supabase.from('health_conditions').select('id, name').eq('snomed_code', candidateSnomed).limit(1);
+          if (existing && existing.length > 0) throw new Error(`SNOMED ${candidateSnomed} já atribuído a "${existing[0].name}"`);
+        }
+        if (candidateCui) {
+          const { data: existing } = await supabase.from('health_conditions').select('id, name').eq('umls_cui', candidateCui).limit(1);
+          if (existing && existing.length > 0) throw new Error(`UMLS CUI ${candidateCui} já atribuído a "${existing[0].name}"`);
+        }
+
         const { data, error } = await supabase
           .from('health_conditions')
           .insert({
             name: candidate.entity_name,
             name_en: candidate.entity_name_en || candidate.entity_name,
             description: candidate.description,
-            description_en: candidate.description_en
+            description_en: candidate.description_en,
+            ...ontologyAudit
           })
           .select('id')
           .single();

@@ -344,6 +344,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Auditoria e correção de classificações de entidades no Knowledge Graph'
   },
   {
+    id: 'ontology-mapping',
+    label: 'Mapeamento SNOMED/UMLS',
+    group: 'knowledge-base',
+    component: OntologyMappingTab,
+    description: 'Mapeamento de entidades para padrões SNOMED-CT e UMLS com auditoria'
+  },
+  {
     id: 'access-requests',
     label: 'Solicitações de Acesso',
     group: 'configuration',
