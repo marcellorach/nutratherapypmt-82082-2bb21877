@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-03-31 🏥 Integração SNOMED-CT VetSCT + UMLS com Auditoria e Deduplicação
+- ✅ **Edge Function `fetch-external-ontologies`**: Novas funções `searchUMLS()` e `searchSNOMED()` com fallback graceful (retorna vazio se API key ausente)
+- ✅ **Ontology Mapping Service** (`src/services/ontology-mapping-service.ts`): Serviço completo com `searchStandardMappings`, `checkDuplicateMapping`, `saveMapping`, `batchMapUnmapped`, `getMappingStats`, `checkApiStatus`
+- ✅ **OntologyMappingTab admin UI**: Dashboard com tabela de entidades, filtros (All/Mapped/Unmapped), toggle health_conditions/nutraceuticals, auto-map com preview obrigatório, busca manual UMLS inline, alertas de deduplicação, badge de status API
+- ✅ **Pipeline de curadoria enriquecido**: `useApproveCandidate` propaga `snomed_code`, `umls_cui` e metadados de auditoria para tabelas destino com verificação de duplicatas
+- ✅ **Auditoria completa**: Cada mapeamento registra quem mapeou, quando, de qual fonte e com qual método
+- ✅ **i18n v1.20.0**: 50+ chaves PT/EN para mapeamento de ontologia
+
 ### Added - 2026-03-30 🏷️ Separação Clara: Dados Clínicos vs Análise VetGraphRAG
 - ✅ **ConditionInsightCard modo "simple"**: Tab Conditions mostra apenas dados clínicos puros (nome, severidade, status) sem KG
 - ✅ **Badges de origem**: 🩺 Diagnóstico Veterinário, 🧪 Sugerida por Exames, 🧬 Predisposição Racial, 🔬 Comorbidade Inferida
