@@ -7339,5 +7339,59 @@
       "inputs": "Inputs",
       "outputs": "Outputs"
     }
+  },
+  "ontologyMapping": {
+    "title": "SNOMED-CT / UMLS Mapping",
+    "description": "Map entities to standardized nomenclature with full traceability",
+    "searchPlaceholder": "Search entity by name...",
+    "noEntities": "No entities found",
+    "noResults": "No results found",
+    "searchError": "Error searching mappings",
+    "mappingSaved": "Mapping saved successfully",
+    "duplicateAlert": "already assigned to",
+    "tables": {
+      "healthConditions": "Health Conditions",
+      "nutraceuticals": "Nutraceuticals"
+    },
+    "filters": {
+      "all": "All",
+      "mapped": "Mapped",
+      "unmapped": "Unmapped"
+    },
+    "stats": {
+      "total": "Total",
+      "mapped": "Mapped",
+      "unmapped": "Unmapped",
+      "both": "SNOMED + UMLS",
+      "coverage": "Coverage"
+    },
+    "columns": {
+      "name": "Name",
+      "suggestedCUI": "Suggested CUI",
+      "suggestedName": "Suggested Name",
+      "status": "Status",
+      "mappedBy": "Mapped by",
+      "date": "Date",
+      "source": "Source"
+    },
+    "umls": {
+      "configured": "Configured",
+      "notConfigured": "Not Configured"
+    },
+    "autoMap": {
+      "button": "Auto-map",
+      "previewTitle": "Auto-map Preview",
+      "confirm": "Confirm",
+      "dismiss": "Dismiss",
+      "duplicate": "Duplicate",
+      "ready": "Ready",
+      "noMatch": "No match",
+      "noUnmapped": "All entities are already mapped",
+      "error": "Error running auto-map"
+    },
+    "manualSearch": {
+      "placeholder": "Search UMLS...",
+      "apply": "Apply"
+    }
   }
 }

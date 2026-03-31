@@ -7339,5 +7339,59 @@
       "inputs": "Entradas",
       "outputs": "Saídas"
     }
+  },
+  "ontologyMapping": {
+    "title": "Mapeamento SNOMED-CT / UMLS",
+    "description": "Mapeie entidades para nomenclatura padronizada com rastreabilidade completa",
+    "searchPlaceholder": "Buscar entidade por nome...",
+    "noEntities": "Nenhuma entidade encontrada",
+    "noResults": "Nenhum resultado encontrado",
+    "searchError": "Erro ao buscar mapeamentos",
+    "mappingSaved": "Mapeamento salvo com sucesso",
+    "duplicateAlert": "já atribuído a",
+    "tables": {
+      "healthConditions": "Condições de Saúde",
+      "nutraceuticals": "Nutracêuticos"
+    },
+    "filters": {
+      "all": "Todos",
+      "mapped": "Mapeados",
+      "unmapped": "Sem Mapeamento"
+    },
+    "stats": {
+      "total": "Total",
+      "mapped": "Mapeados",
+      "unmapped": "Sem Mapeamento",
+      "both": "SNOMED + UMLS",
+      "coverage": "Cobertura"
+    },
+    "columns": {
+      "name": "Nome",
+      "suggestedCUI": "CUI Sugerido",
+      "suggestedName": "Nome Sugerido",
+      "status": "Status",
+      "mappedBy": "Mapeado por",
+      "date": "Data",
+      "source": "Fonte"
+    },
+    "umls": {
+      "configured": "Configurada",
+      "notConfigured": "Não Configurada"
+    },
+    "autoMap": {
+      "button": "Auto-map",
+      "previewTitle": "Preview de Mapeamento Automático",
+      "confirm": "Confirmar",
+      "dismiss": "Fechar",
+      "duplicate": "Duplicata",
+      "ready": "Pronto",
+      "noMatch": "Sem correspondência",
+      "noUnmapped": "Todas as entidades já estão mapeadas",
+      "error": "Erro ao executar mapeamento automático"
+    },
+    "manualSearch": {
+      "placeholder": "Buscar no UMLS...",
+      "apply": "Aplicar"
+    }
   }
 }
