@@ -202,7 +202,30 @@ export function useApproveCandidate() {
       let targetId: string | null = null;
 
       // Create entity in target table
+      // Extract standardized codes from source_metadata if available
+      const sourceMetadata = candidate.source_metadata || {};
+      const candidateCui = (sourceMetadata as Record<string, unknown>).cui as string | undefined;
+      const candidateSnomed = (sourceMetadata as Record<string, unknown>).snomed_code as string | undefined;
+      const ontologyAudit = {
+        ...(candidateSnomed ? { snomed_code: candidateSnomed } : {}),
+        ...(candidateCui ? { umls_cui: candidateCui } : {}),
+        ...((candidateSnomed || candidateCui) ? {
+          ontology_mapping_source: candidate.external_source,
+          ontology_mapped_at: new Date().toISOString(),
+        } : {})
+      };
+
       if (targetTable === 'nutraceuticals') {
+        // Dedup check
+        if (candidateSnomed) {
+          const { data: existing } = await supabase.from('nutraceuticals').select('id, name').eq('snomed_code', candidateSnomed).limit(1);
+          if (existing && existing.length > 0) throw new Error(`SNOMED ${candidateSnomed} já atribuído a "${existing[0].name}"`);
+        }
+        if (candidateCui) {
+          const { data: existing } = await supabase.from('nutraceuticals').select('id, name').eq('umls_cui', candidateCui).limit(1);
+          if (existing && existing.length > 0) throw new Error(`UMLS CUI ${candidateCui} já atribuído a "${existing[0].name}"`);
+        }
+
         const { data, error } = await supabase
           .from('nutraceuticals')
           .insert({
@@ -211,7 +234,8 @@ export function useApproveCandidate() {
             description: candidate.description,
             description_en: candidate.description_en,
             chemical_compound: candidate.chemical_formula,
-            source: candidate.external_source
+            source: candidate.external_source,
+            ...ontologyAudit
           })
           .select('id')
           .single();
