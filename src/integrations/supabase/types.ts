@@ -785,7 +785,12 @@ export type Database = {
           id: string
           name: string
           name_en: string | null
+          ontology_mapped_at: string | null
+          ontology_mapped_by: string | null
+          ontology_mapping_source: string | null
           severity_level: string | null
+          snomed_code: string | null
+          umls_cui: string | null
           updated_at: string | null
         }
         Insert: {
@@ -797,7 +802,12 @@ export type Database = {
           id?: string
           name: string
           name_en?: string | null
+          ontology_mapped_at?: string | null
+          ontology_mapped_by?: string | null
+          ontology_mapping_source?: string | null
           severity_level?: string | null
+          snomed_code?: string | null
+          umls_cui?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -809,7 +819,12 @@ export type Database = {
           id?: string
           name?: string
           name_en?: string | null
+          ontology_mapped_at?: string | null
+          ontology_mapped_by?: string | null
+          ontology_mapping_source?: string | null
           severity_level?: string | null
+          snomed_code?: string | null
+          umls_cui?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1502,9 +1517,14 @@ export type Database = {
           id: string
           name: string
           name_en: string | null
+          ontology_mapped_at: string | null
+          ontology_mapped_by: string | null
+          ontology_mapping_source: string | null
           outcome_id: string | null
+          snomed_code: string | null
           source: string | null
           source_en: string | null
+          umls_cui: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1517,9 +1537,14 @@ export type Database = {
           id?: string
           name: string
           name_en?: string | null
+          ontology_mapped_at?: string | null
+          ontology_mapped_by?: string | null
+          ontology_mapping_source?: string | null
           outcome_id?: string | null
+          snomed_code?: string | null
           source?: string | null
           source_en?: string | null
+          umls_cui?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1532,9 +1557,14 @@ export type Database = {
           id?: string
           name?: string
           name_en?: string | null
+          ontology_mapped_at?: string | null
+          ontology_mapped_by?: string | null
+          ontology_mapping_source?: string | null
           outcome_id?: string | null
+          snomed_code?: string | null
           source?: string | null
           source_en?: string | null
+          umls_cui?: string | null
           updated_at?: string | null
         }
         Relationships: []
