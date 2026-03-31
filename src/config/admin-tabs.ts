@@ -54,6 +54,7 @@ const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migr
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
 const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
+const OntologyMappingTab = lazy(() => import('@/components/administrador/OntologyMappingTab'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
 const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
 
