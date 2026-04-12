@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-12 🔬 Taxonomia de Condições: Separação Clínica vs Molecular
+- ✅ **Coluna `origin` em pet_conditions**: Rastreamento real de origem (vet_diagnosis, exam_suggested, breed_predisposition, kg_inference) — substituiu inferência por string matching
+- ✅ **Dados de exemplo corrigidos**: Removidos "Cellular Senescence", "Inflammaging" e "Inflammation" dos dados seed — processos moleculares agora são inferidos exclusivamente pelo VetGraphRAG
+- ✅ **inferOrigin() reescrita**: Lê coluna `origin` do banco em vez de adivinhar pelo nome da condição
+- ✅ **VetGraphRAG panel**: Renomeado "Comorbidades Ocultas" → "Processos Biológicos Inferidos" com descrições contextuais explicando a via molecular
+- ✅ **Nova badge "kg_inference"**: Processo Biológico Inferido (roxo) distinto de Comorbidade Inferida
+- ✅ **i18n v1.22.0**: Novas chaves PT/EN para taxonomia de origem
+
 ### Changed - 2026-04-12 📊 Projeção de Melhora Baseada em Evidências Reais
 - ✅ **Motor de Projeção Evidence-Based**: Substituído `Math.random()` por cálculo baseado em triplets aprovados do KG (intensidade ponderada × nível de evidência × confiança)
 - ✅ **3 camadas de dados**: Knowledge Graph (prioridade) → Hybrid KG+LLM → LLM-only, cada uma com metadados de transparência

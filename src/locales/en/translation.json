@@ -7026,7 +7026,8 @@
       "vetDiagnosis": "Veterinary Diagnosis",
       "examSuggested": "Suggested by Exams",
       "breedPredisposition": "Breed Predisposition",
-      "inferredComorbidity": "Inferred Comorbidity"
+      "inferredComorbidity": "Inferred Comorbidity",
+      "kgInference": "Inferred Biological Process"
     },
     "analysisByCondition": {
       "title": "Analysis by Condition (VetGraphRAG)",

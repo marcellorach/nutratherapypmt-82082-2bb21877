@@ -77,30 +77,33 @@ function classifyInsights(
     });
   }
 
-  // Infer geroscience conditions from pathways
-  const geroscience = ['Cellular Senescence', 'Inflammaging', 'Chronic Inflammation', 'Oxidative Stress', 'Mitochondrial Dysfunction'];
+  // Infer biological processes from KG pathways (these are NOT clinical diagnoses)
+  const biologicalProcesses = ['Cellular Senescence', 'Inflammaging', 'Oxidative Stress', 'Mitochondrial Dysfunction'];
   const conditionNamesLower = conditions.map((c: any) => (c.condition_name || '').toLowerCase());
-  for (const gero of geroscience) {
-    const alreadyDiagnosed = conditionNamesLower.some(cn => cn.includes(gero.toLowerCase()));
-    if (alreadyDiagnosed) continue;
+  for (const process of biologicalProcesses) {
+    // Skip if already present as a condition (legacy data)
+    const alreadyPresent = conditionNamesLower.some(cn => cn.includes(process.toLowerCase()));
+    if (alreadyPresent) continue;
     const relatedTriplets = kgTriplets.filter(t =>
-      t.subject?.toLowerCase().includes(gero.toLowerCase()) || t.object?.toLowerCase().includes(gero.toLowerCase())
+      t.subject?.toLowerCase().includes(process.toLowerCase()) || t.object?.toLowerCase().includes(process.toLowerCase())
     );
     if (relatedTriplets.length > 0) {
       const connectedConditions = conditions.map((c: any) => c.condition_name).filter((cn: string) =>
         kgTriplets.some(t =>
-          (t.subject?.toLowerCase().includes(cn.toLowerCase()) && t.object?.toLowerCase().includes(gero.toLowerCase())) ||
-          (t.object?.toLowerCase().includes(cn.toLowerCase()) && t.subject?.toLowerCase().includes(gero.toLowerCase()))
+          (t.subject?.toLowerCase().includes(cn.toLowerCase()) && t.object?.toLowerCase().includes(process.toLowerCase())) ||
+          (t.object?.toLowerCase().includes(cn.toLowerCase()) && t.subject?.toLowerCase().includes(process.toLowerCase()))
         )
       );
       insights.push({
         category: 'hidden_comorbidity',
-        title: gero,
-        description: `Comorbidade inferida pelo Knowledge Graph: ${gero} está conectada às condições do paciente via mecanismos biológicos compartilhados.`,
+        title: process,
+        description: connectedConditions.length > 0
+          ? `Processo biológico inferido: ${connectedConditions.join(', ')} compartilham vias moleculares com ${process} segundo o Knowledge Graph.`
+          : `Processo biológico ${process} identificado no Knowledge Graph como relevante para o perfil deste paciente.`,
         confidence: Math.min(0.85, 0.5 + relatedTriplets.length * 0.05),
         inferenceReason: connectedConditions.length > 0
-          ? `Conectada via KG: ${connectedConditions.join(', ')} → ${gero} (${relatedTriplets.length} triplets)`
-          : `${relatedTriplets.length} conexões encontradas no Knowledge Graph`,
+          ? `Via KG: ${connectedConditions.join(', ')} → ${process} (${relatedTriplets.length} triplets)`
+          : `${relatedTriplets.length} conexões no Knowledge Graph`,
         relatedEntities: relatedTriplets.slice(0, 3).map((t: any) => `${t.subject} ${t.predicate} ${t.object}`),
         source: 'kg_inference',
       });
@@ -195,9 +198,9 @@ const VetGraphRAGInsightsPanel: React.FC<VetGraphRAGInsightsPanelProps> = ({
     {
       key: 'hidden_comorbidity',
       titleKey: 'petProfile.insights.hiddenComorbidities',
-      titleFallback: 'Comorbidades Ocultas (Gerociência)',
+      titleFallback: 'Processos Biológicos Inferidos (Gerociência)',
       descKey: 'petProfile.insights.hiddenComorbiditiesDesc',
-      descFallback: 'Condições inferidas por conexões biológicas no Knowledge Graph',
+      descFallback: 'Processos moleculares inferidos pelo Knowledge Graph — não são diagnósticos clínicos',
       items: hiddenInsights,
       config: categoryConfig.hidden_comorbidity,
     },
