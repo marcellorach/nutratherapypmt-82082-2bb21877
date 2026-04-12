@@ -400,7 +400,8 @@ function extractKgEvidence(kgResults: any[], conditionNames: string[]) {
             predicate,
             object: targetNode.label || targetNode.properties?.name || targetNode.name,
             confidence: rel.confidence || rel.properties?.confidence || 0.7,
-            evidenceLevel: 'KG-backed',
+            evidenceLevel: rel.evidence_level || rel.properties?.evidence_level || 'KG-backed',
+            intensity: rel.intensity ?? rel.properties?.intensity ?? null,
             studyCount: rel.evidence_count || rel.properties?.evidence_count || undefined,
           });
         }
