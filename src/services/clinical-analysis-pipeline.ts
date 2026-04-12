@@ -482,13 +482,118 @@ function extractKgEvidence(kgResults: any[], conditionNames: string[]) {
     }
   }
 
+  // ── Evidence-Based Projections ──
+  const EVIDENCE_WEIGHTS: Record<string, number> = {
+    meta_analysis: 1.0, systematic_review: 0.95, rct: 0.85, cohort: 0.7,
+    observational: 0.6, case_control: 0.55, in_vitro: 0.35, theoretical: 0.15,
+  };
+
   const projections = conditionNames.map((condition) => {
-    const hasTriplets = triplets.some(t => t.object.toLowerCase().includes(condition.toLowerCase()));
+    const condLower = condition.toLowerCase();
+
+    // Gather all triplets relevant to this condition
+    const relevantTriplets = triplets.filter(t =>
+      t.object.toLowerCase().includes(condLower) || t.subject?.toLowerCase().includes(condLower)
+    );
+
+    const therapeuticTriplets = relevantTriplets.filter(t =>
+      ['TREATS', 'AMELIORATES', 'PREVENTS', 'SUPPORTS', 'ALLEVIATES'].includes(t.predicate)
+    );
+
+    const tripletCount = therapeuticTriplets.length;
+    const uniqueStudyIds = [...new Set(therapeuticTriplets.map(t => t.studyCount).filter(Boolean))];
+    const compoundsInvolved = [...new Set(therapeuticTriplets.map(t => t.subject).filter(Boolean))];
+
+    // Calculate weighted intensity from real data
+    let weightedIntensitySum = 0;
+    let weightSum = 0;
+    const confidences: number[] = [];
+
+    for (const t of therapeuticTriplets) {
+      const evLevel = (t.evidenceLevel || '').toLowerCase().replace(/[\s-]+/g, '_');
+      const evWeight = EVIDENCE_WEIGHTS[evLevel] || 0.2;
+      const intensity = typeof t.intensity === 'number' ? t.intensity : 0.5; // conservative default
+      const conf = typeof t.confidence === 'number' ? t.confidence : 0.3;
+      
+      weightedIntensitySum += intensity * evWeight * conf;
+      weightSum += evWeight * conf;
+      confidences.push(conf);
+    }
+
+    // Determine dominant evidence level
+    const evidenceLevelCounts: Record<string, number> = {};
+    for (const t of therapeuticTriplets) {
+      const lev = t.evidenceLevel || 'unknown';
+      evidenceLevelCounts[lev] = (evidenceLevelCounts[lev] || 0) + 1;
+    }
+    const dominantEvidenceLevel = Object.entries(evidenceLevelCounts)
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'unknown';
+
+    let baselineScore: number;
+    let projectedImprovement: number;
+    let confidenceBand: number;
+    let dataSource: 'knowledge_graph' | 'hybrid_kg_llm' | 'llm_only';
+    let confidenceLevel: 'high' | 'medium' | 'low' | 'insufficient';
+    let studyGaps: string | undefined;
+
+    if (tripletCount >= 3) {
+      // Layer 1: Knowledge Graph — sufficient data
+      const avgWeightedIntensity = weightSum > 0 ? weightedIntensitySum / weightSum : 0.3;
+      const synergyFactor = compoundsInvolved.length > 1 ? 1 + (compoundsInvolved.length - 1) * 0.08 : 1;
+      
+      projectedImprovement = Math.round(Math.min(55, avgWeightedIntensity * 60 * synergyFactor));
+      baselineScore = 35; // conservative fixed baseline
+      
+      const confStdDev = confidences.length > 1
+        ? Math.sqrt(confidences.reduce((s, c) => s + (c - confidences.reduce((a, b) => a + b, 0) / confidences.length) ** 2, 0) / confidences.length)
+        : 0.15;
+      confidenceBand = Math.round(Math.max(4, Math.min(18, confStdDev * 30)));
+      
+      const avgConf = confidences.reduce((a, b) => a + b, 0) / confidences.length;
+      const bestEvWeight = Math.max(...therapeuticTriplets.map(t => EVIDENCE_WEIGHTS[(t.evidenceLevel || '').toLowerCase().replace(/[\s-]+/g, '_')] || 0.2));
+      const overallConfScore = (Math.min(tripletCount / 8, 1) * 0.3) + (bestEvWeight * 0.4) + (avgConf * 0.3);
+      
+      confidenceLevel = overallConfScore >= 0.7 ? 'high' : overallConfScore >= 0.45 ? 'medium' : 'low';
+      dataSource = 'knowledge_graph';
+      
+      if (tripletCount < 5) {
+        studyGaps = condition;
+      }
+    } else if (tripletCount > 0) {
+      // Layer 2: Hybrid — some KG data, needs AI enrichment
+      const avgWeightedIntensity = weightSum > 0 ? weightedIntensitySum / weightSum : 0.25;
+      projectedImprovement = Math.round(Math.min(40, avgWeightedIntensity * 50));
+      baselineScore = 40;
+      confidenceBand = 14;
+      confidenceLevel = 'low';
+      dataSource = 'hybrid_kg_llm';
+      studyGaps = condition;
+    } else {
+      // Layer 3: LLM-only — no KG data
+      projectedImprovement = 15;
+      baselineScore = 45;
+      confidenceBand = 20;
+      confidenceLevel = 'insufficient';
+      dataSource = 'llm_only';
+      studyGaps = condition;
+    }
+
     return {
       condition,
-      baselineScore: 30 + Math.floor(Math.random() * 20),
-      projectedImprovement: hasTriplets ? 25 + Math.floor(Math.random() * 20) : 15 + Math.floor(Math.random() * 10),
-      confidenceBand: hasTriplets ? 8 : 15,
+      baselineScore,
+      projectedImprovement,
+      confidenceBand,
+      // Evidence-based metadata
+      dataSource,
+      confidenceLevel,
+      evidenceSummary: {
+        tripletCount,
+        studyCount: uniqueStudyIds.length,
+        dominantEvidenceLevel,
+        compoundsInvolved,
+        avgIntensity: weightSum > 0 ? Math.round((weightedIntensitySum / weightSum) * 100) / 100 : null,
+      },
+      studyGaps,
     };
   });
 
