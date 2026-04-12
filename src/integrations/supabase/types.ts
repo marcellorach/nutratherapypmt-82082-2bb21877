@@ -1705,6 +1705,7 @@ export type Database = {
           diagnosis_date: string | null
           id: string
           notes: string | null
+          origin: string
           pet_id: string
           severity: string | null
           status: string
@@ -1717,6 +1718,7 @@ export type Database = {
           diagnosis_date?: string | null
           id?: string
           notes?: string | null
+          origin?: string
           pet_id: string
           severity?: string | null
           status?: string
@@ -1729,6 +1731,7 @@ export type Database = {
           diagnosis_date?: string | null
           id?: string
           notes?: string | null
+          origin?: string
           pet_id?: string
           severity?: string | null
           status?: string
