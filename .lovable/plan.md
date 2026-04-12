@@ -1,88 +1,146 @@
 
 
-# Projeção de Melhora Baseada em Evidências Reais
+# Análise Profunda: Problemas na Classificação de Condições e Geração de Exemplos
 
-## Problema Atual
+## Problema Identificado
 
-A projeção de melhora usa `Math.random()` para gerar `baselineScore`, `projectedImprovement` e `confidenceBand` — valores completamente fictícios. A curva sigmoid é genérica e não reflete a realidade clínica.
+Você tem razão — há **dois problemas sérios e interligados**:
 
-## Solução: Motor de Projeção Evidence-Based com 3 Camadas
+### Problema 1: "Cellular Senescence" é gravada como condição real no banco de dados
 
-### Camada 1 — Dados do Knowledge Graph (prioridade máxima)
-
-Para cada condição do paciente, consultar os triplets aprovados (`triplet_extractions`) que já estão disponíveis na pipeline:
-
-- **Contar triplets TREATS/AMELIORATES/PREVENTS** por condição
-- **Extrair `intensity` média** (0-1) dos triplets com evidence_level (meta_analysis > rct > observational > in_vitro)
-- **Ponderar por `extraction_confidence`** e `evidence_level`
-- **Calcular `projectedImprovement`** = intensidade média × peso do nível de evidência × fator de compostos sinérgicos
-
-Fórmula de confiança:
-```text
-confidence = (n_triplets × weight_evidence_level × avg_confidence) / normalization_factor
-
-evidence_weight: meta_analysis=1.0, rct=0.85, observational=0.6, in_vitro=0.35, null=0.2
+No `GenerateSamplePetsButton.tsx`, o Rex é criado com **Cellular Senescence como condição diagnosticada**:
+```
+conditions: [
+  { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
+  { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
+]
 ```
 
-### Camada 2 — Fallback LLM (quando KG insuficiente)
+Isso é gravado diretamente na tabela `pet_conditions` — **como se um veterinário tivesse diagnosticado senescência celular**. Um veterinário **nunca** diagnosticaria "senescência celular" — isso é um **processo biológico molecular**, não um diagnóstico clínico. Nenhum exame veterinário de rotina detecta isso.
 
-Se < 3 triplets aprovados para uma condição, invocar a edge function `hybrid-recommendation` (já existente) para obter estimativas baseadas em literatura, marcando claramente como "AI-assisted projection".
+### Problema 2: A classificação de origem é baseada em nome, não em fonte real
 
-### Camada 3 — Metadados de Transparência
-
-Cada projeção retorna:
+Em `ConditionInsightCard.tsx`, a função `inferOrigin()` decide a badge por **string matching**:
 ```typescript
-interface EvidenceBasedProjection {
-  condition: string;
-  baselineScore: number;        // derivado da severidade + predisposição
-  projectedImprovement: number; // calculado, não random
-  confidenceBand: number;       // derivado da variância dos dados
-  // NOVOS CAMPOS:
-  dataSource: 'knowledge_graph' | 'hybrid_kg_llm' | 'llm_only';
-  confidenceLevel: 'high' | 'medium' | 'low' | 'insufficient';
-  evidenceSummary: {
-    tripletCount: number;
-    studyCount: number;
-    dominantEvidenceLevel: string;
-    compoundsInvolved: string[];
-    avgIntensity: number | null;
-  };
-  studyGaps?: string;  // sugestão de mais estudos se dados insuficientes
+if (condition.condition_name?.includes('senescen')) return 'inferred_comorbidity';
+if (condition.condition_name?.includes('inflamm')) return 'inferred_comorbidity';
+return 'vet_diagnosis';
+```
+
+Ou seja: a origem não é rastreada — é **adivinhada pelo nome**. Não existe coluna `origin` na tabela `pet_conditions`.
+
+### Problema 3: O pipeline de insights mistura categorias
+
+No `VetGraphRAGInsightsPanel.tsx`, condições de geociência são adicionadas automaticamente se existirem triplets no KG:
+```typescript
+const geroscience = ['Cellular Senescence', 'Inflammaging', ...];
+// Se existir qualquer triplet mencionando o termo → vira "hidden_comorbidity"
+```
+
+Mas o mesmo termo já existe como condição real no banco (inserido pelo sample generator), criando **duplicação e confusão categórica**.
+
+---
+
+## Fluxo Atual (problemático)
+
+```text
+GenerateSamplePetsButton
+  |
+  +-- Grava "Cellular Senescence" em pet_conditions
+  |   (como se fosse diagnóstico veterinário)
+  |
+  v
+ConditionInsightCard.inferOrigin()
+  |
+  +-- Vê "senescen" no nome → badge "Comorbidade Inferida"
+  |   (mas está no banco como condição real!)
+  |
+  v
+VetGraphRAGInsightsPanel
+  |
+  +-- Também tenta inferir geociência do KG
+  |   (duplica se já está no banco)
+  |
+  v
+RESULTADO: Senescência aparece como "condição do paciente"
+com badge de "inferida" — sem lógica clínica
+```
+
+---
+
+## Plano de Correção
+
+### 1. Adicionar coluna `origin` à tabela `pet_conditions`
+
+Migração SQL para adicionar rastreamento real de origem:
+```sql
+ALTER TABLE pet_conditions ADD COLUMN origin TEXT DEFAULT 'vet_diagnosis';
+-- Valores: 'vet_diagnosis', 'exam_suggested', 'breed_predisposition', 'kg_inference'
+```
+
+### 2. Corrigir dados de exemplo (`GenerateSamplePetsButton.tsx`)
+
+**Remover** condições que veterinários não diagnosticam (Cellular Senescence, Inflammaging, Oxidative Stress) dos dados seed. Manter apenas condições clínicas reais:
+- Rex: Osteoarthritis (diagnóstico vet real)
+- Max: Cognitive Dysfunction Syndrome (diagnóstico vet real)
+
+As condições gerocientíficas (senescência, inflamaging, stress oxidativo) devem ser **inferidas pela análise VetGraphRAG**, nunca pré-gravadas.
+
+### 3. Reescrever `inferOrigin()` → usar coluna real
+
+Em vez de adivinhar pelo nome, ler `condition.origin` do banco:
+```typescript
+function inferOrigin(condition: any): string {
+  return condition.origin || 'vet_diagnosis';
 }
 ```
 
-### O que muda em cada arquivo
+### 4. Separar condições clínicas de inferências moleculares no VetGraphRAGInsightsPanel
 
-| Arquivo | Mudança |
-|---------|---------|
-| `src/services/clinical-analysis-pipeline.ts` | Reescrever `projections` (linhas 485-493) com motor evidence-based que consulta `triplet_extractions` via Supabase |
-| `src/components/pet/ImprovementProjectionChart.tsx` | Adicionar badge de fonte de dados (KG/Hybrid/LLM), indicador de confiança, tooltip com evidenceSummary, e alerta de "estudos recomendados" quando dados insuficientes |
-| `src/i18n.ts` + locales PT/EN | Novas chaves para labels de transparência |
-| `CHANGELOG.md` | Registrar mudança |
+O pipeline de insights deve:
+- **Nunca gravar** inferências gerocientíficas na tabela `pet_conditions`
+- Mantê-las apenas como insights temporários (categoria `hidden_comorbidity`) exibidos no painel de análise
+- Exibir com badge diferente: "🧬 Inferência Molecular" em vez de "🔬 Comorbidade Inferida"
 
-### Regra do Baseline
+### 5. Criar taxonomia clara de tipos de condição
 
-Em vez de `30 + Math.random() * 20`, o baseline será derivado de:
-- Severidade da condição (se disponível no perfil do pet)
-- Risk factor da predisposição da raça (já disponível via `breed_predispositions`)
-- Default conservador de 40% se sem dados
+```text
+NÍVEL 1 — Diagnósticos Clínicos (veterinário registra)
+  Ex.: Osteoarthritis, Hip Dysplasia, MVD, CKD, Hypothyroidism
+  Badge: 🩺 Diagnóstico Veterinário (verde)
 
-### Regra da Curva
+NÍVEL 2 — Suspeitas por Exames (sistema sugere com base em labs)
+  Ex.: Kidney Insufficiency (creatinina alta), Anemia (RBC baixo)
+  Badge: 🧪 Sugerido por Exames (azul)
 
-A curva sigmoid continua, mas os parâmetros são calibrados pelos dados reais:
-- **Taxa de resposta** (steepness) = f(evidence_level, intensity)
-- **Plateau** = projectedImprovement calculado
-- **Banda de confiança** = desvio padrão das confidences dos triplets × 1.5
+NÍVEL 3 — Riscos Raciais (predisposição genética, não diagnosticado)
+  Ex.: "Labrador: risco 3.2x para Displasia" 
+  Badge: 🧬 Predisposição Racial (âmbar)
+  NÃO deve aparecer como "condição" — apenas como alerta
 
-### Indicadores Visuais no Gráfico
+NÍVEL 4 — Processos Biológicos Inferidos (KG infere de evidências)
+  Ex.: Cellular Senescence, Inflammaging, Mitochondrial Dysfunction
+  Badge: 🔬 Processo Biológico Inferido (roxo)
+  NÃO aparece na lista de condições — apenas no painel VetGraphRAG
+  Inclui explicação: "Inferido porque Osteoarthritis → NF-κB → Senescence"
+```
 
-- Badge colorido: verde "Evidência KG" / amarelo "KG + IA" / vermelho "Apenas IA"
-- Tooltip expandido mostrando: N triplets, N estudos, compostos, nível de evidência
-- Alerta inferior: "Para aumentar a confiança desta projeção, considere curar estudos sobre [condição X]" quando < 3 triplets
+### 6. Atualizar i18n e documentação
 
-### Impacto Zero em Funcionalidades Existentes
+- Novas chaves para "Processo Biológico Inferido" vs "Comorbidade Inferida"
+- CHANGELOG.md, CURRENT_STATE.md
 
-- A pipeline clínica continua retornando `projections` no mesmo formato (campos existentes mantidos)
-- Campos novos são adicionais — o chart renderiza mesmo sem eles
-- Nenhuma outra tab/componente é afetada
+---
+
+## Arquivos Afetados
+
+| Ação | Arquivo | Risco |
+|------|---------|-------|
+| Migração | `pet_conditions` — coluna `origin` | Baixo (nullable, default) |
+| Editar | `src/components/pet/GenerateSamplePetsButton.tsx` | Baixo |
+| Editar | `src/components/pet/ConditionInsightCard.tsx` | Médio |
+| Editar | `src/components/pet/VetGraphRAGInsightsPanel.tsx` | Médio |
+| Editar | `src/locales/pt/translation.json` + EN | Nenhum |
+| Editar | `src/i18n.ts` | Nenhum |
+| Editar | `CHANGELOG.md` | Nenhum |
 
