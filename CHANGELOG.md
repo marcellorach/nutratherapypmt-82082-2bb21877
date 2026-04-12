@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-04-12 📊 Projeção de Melhora Baseada em Evidências Reais
+- ✅ **Motor de Projeção Evidence-Based**: Substituído `Math.random()` por cálculo baseado em triplets aprovados do KG (intensidade ponderada × nível de evidência × confiança)
+- ✅ **3 camadas de dados**: Knowledge Graph (prioridade) → Hybrid KG+LLM → LLM-only, cada uma com metadados de transparência
+- ✅ **Badges de fonte**: Indicadores visuais verde (KG) / amarelo (KG+IA) / vermelho (Apenas IA) no gráfico
+- ✅ **Tooltip de evidência**: Mostra N triplets, N estudos, nível de evidência dominante, compostos envolvidos, intensidade média
+- ✅ **Alerta de lacunas**: Sugere curadoria de mais estudos quando dados insuficientes para uma condição
+- ✅ **Confiança calibrada**: Banda de confiança derivada do desvio padrão real das confidences dos triplets
+- ✅ **i18n v1.21.0**: Novas chaves PT/EN para transparência de projeções
+
 ### Added - 2026-03-31 🏥 Integração SNOMED-CT VetSCT + UMLS com Auditoria e Deduplicação
 - ✅ **Edge Function `fetch-external-ontologies`**: Novas funções `searchUMLS()` e `searchSNOMED()` com fallback graceful (retorna vazio se API key ausente)
 - ✅ **Ontology Mapping Service** (`src/services/ontology-mapping-service.ts`): Serviço completo com `searchStandardMappings`, `checkDuplicateMapping`, `saveMapping`, `batchMapUnmapped`, `getMappingStats`, `checkApiStatus`

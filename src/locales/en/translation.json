@@ -6996,7 +6996,23 @@
     },
     "projection": {
       "title": "Improvement Projection (12 months)",
-      "description": "Estimated patient evolution with the recommended protocol"
+      "description": "Evidence-based patient evolution estimate from the Knowledge Graph",
+      "sourceKG": "KG Evidence",
+      "sourceHybrid": "KG + AI",
+      "sourceLLM": "AI Only",
+      "evidenceDetail": "Evidence Details",
+      "triplets": "Relationships found",
+      "studies": "Studies",
+      "evidenceLevel": "Evidence level",
+      "avgIntensity": "Average intensity",
+      "compounds": "Compounds",
+      "studyGapAlert": "To increase projection confidence for {{conditions}}, consider curating more studies on these conditions.",
+      "confidence": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "insufficient": "Insufficient"
+      }
     },
     "analysisTabs": {
       "recommendations": "Recommendations",
