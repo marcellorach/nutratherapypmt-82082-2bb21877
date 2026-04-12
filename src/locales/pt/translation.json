@@ -7026,7 +7026,8 @@
       "vetDiagnosis": "Diagnóstico Veterinário",
       "examSuggested": "Sugerida por Exames",
       "breedPredisposition": "Predisposição Racial",
-      "inferredComorbidity": "Comorbidade Inferida"
+      "inferredComorbidity": "Comorbidade Inferida",
+      "kgInference": "Processo Biológico Inferido"
     },
     "analysisByCondition": {
       "title": "Análise por Condição (VetGraphRAG)",

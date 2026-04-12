@@ -70,15 +70,15 @@ const originBadgeConfig: Record<string, { icon: string; colorClass: string; key:
   vet_diagnosis: { icon: '🩺', colorClass: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', key: 'petProfile.conditionOrigin.vetDiagnosis' },
   exam_suggested: { icon: '🧪', colorClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', key: 'petProfile.conditionOrigin.examSuggested' },
   breed_predisposition: { icon: '🧬', colorClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', key: 'petProfile.conditionOrigin.breedPredisposition' },
-  inferred_comorbidity: { icon: '🔬', colorClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300', key: 'petProfile.conditionOrigin.inferredComorbidity' },
+  kg_inference: { icon: '🔬', colorClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300', key: 'petProfile.conditionOrigin.kgInference' },
 };
 
 function inferOrigin(condition: any): string {
-  if (condition.notes && condition.notes.trim().length > 0) return 'vet_diagnosis';
-  if (condition.diagnosis_date) return 'vet_diagnosis';
-  if (condition.condition_name?.toLowerCase().includes('senescen') || 
-      condition.condition_name?.toLowerCase().includes('inflamm') ||
-      condition.condition_name?.toLowerCase().includes('oxidative')) return 'inferred_comorbidity';
+  // Use the real origin column from the database when available
+  if (condition.origin && originBadgeConfig[condition.origin]) {
+    return condition.origin;
+  }
+  // Fallback for legacy data without origin column
   return 'vet_diagnosis';
 }
 
