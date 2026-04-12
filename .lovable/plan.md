@@ -1,66 +1,88 @@
 
 
-# Implementação Completa: SNOMED-CT/UMLS — Edge Function + Mapping Service + Admin UI + Pipeline
+# Projeção de Melhora Baseada em Evidências Reais
 
-## O que já foi feito
-- Migration SQL executada (colunas `snomed_code`, `umls_cui`, `ontology_mapped_at`, `ontology_mapped_by`, `ontology_mapping_source` em `health_conditions` e `nutraceuticals` com partial unique indexes)
+## Problema Atual
 
-## O que será implementado agora
+A projeção de melhora usa `Math.random()` para gerar `baselineScore`, `projectedImprovement` e `confidenceBand` — valores completamente fictícios. A curva sigmoid é genérica e não reflete a realidade clínica.
 
-### 1. Edge Function: adicionar `searchUMLS()` e `searchSNOMED()` ao `fetch-external-ontologies`
-- Nova função `searchUMLS()` que usa UMLS REST API (`https://uts-ws.nlm.nih.gov/rest/search/current`)
-- Verifica se `NLM_UMLS_API_KEY` existe via `Deno.env.get()` — se ausente, retorna array vazio + log "UMLS API key not configured"
-- Retorna: CUI, nome canônico, semantic types, SNOMED codes no `source_metadata`
-- Nova função `searchSNOMED()` que busca via UMLS filtrando por `rootSource=SNOMEDCT_VET`
-- Novos cases `'umls'` e `'snomed'` no switch existente
-- Campo `mapping_method: 'api_lookup'` no `source_metadata` para auditoria
+## Solução: Motor de Projeção Evidence-Based com 3 Camadas
 
-### 2. Novo serviço: `src/services/ontology-mapping-service.ts`
-- `mapEntityToStandards(name, entityType)`: invoca edge function source='umls', retorna snomed + cui
-- `checkDuplicateMapping(snomedCode?, umlsCui?, table)`: consulta DB, retorna entidade existente se já mapeada (usa os unique indexes)
-- `saveMapping(entityId, table, snomedCode, umlsCui, source, userId)`: grava com campos de auditoria
-- `batchMapUnmapped(table, batchSize)`: busca entidades sem códigos, tenta mapear, retorna preview antes de confirmar
-- `getMappingStats(table)`: retorna contagem de mapeados vs não mapeados
+### Camada 1 — Dados do Knowledge Graph (prioridade máxima)
 
-### 3. Novo componente: `src/components/administrador/OntologyMappingTab.tsx`
-- Tabela com colunas: Nome | Tipo | SNOMED | UMLS CUI | Mapeado por | Data | Fonte
-- Filtros: Todos | Mapeado | Pendente | Sem mapeamento
-- Toggle para alternar entre `health_conditions` e `nutraceuticals`
-- Botão "Auto-map" com **preview obrigatório** antes de confirmar
-- Alertas de deduplicação: "CUI X já atribuído a Y"
-- Badge de status UMLS API (configurada/não configurada)
-- Mapeamento manual: campo de busca UMLS inline por entidade
-- Registrado como nova tab no `admin-tabs.ts` no grupo `knowledge-base`
+Para cada condição do paciente, consultar os triplets aprovados (`triplet_extractions`) que já estão disponíveis na pipeline:
 
-### 4. Enriquecer pipeline de curadoria
-- Em `useBaseKnowledgeCandidates.ts` no `useApproveCandidate`:
-  - Se candidato tem `source_metadata.cui` ou `source_metadata.snomed_code`, propagar para tabela destino
-  - Verificar duplicata antes de inserir (se código já existe, rejeitar com mensagem)
-  - Gravar `ontology_mapping_source`, `ontology_mapped_at`, `ontology_mapped_by`
+- **Contar triplets TREATS/AMELIORATES/PREVENTS** por condição
+- **Extrair `intensity` média** (0-1) dos triplets com evidence_level (meta_analysis > rct > observational > in_vitro)
+- **Ponderar por `extraction_confidence`** e `evidence_level`
+- **Calcular `projectedImprovement`** = intensidade média × peso do nível de evidência × fator de compostos sinérgicos
 
-### 5. Traduções i18n (PT/EN)
-- Incrementar versão para `1.20.0`
-- Chaves para: `ontologyMapping.title`, `ontologyMapping.filters.*`, `ontologyMapping.columns.*`, `ontologyMapping.autoMap.*`, `ontologyMapping.duplicateAlert`, `ontologyMapping.umls.*`, etc.
+Fórmula de confiança:
+```text
+confidence = (n_triplets × weight_evidence_level × avg_confidence) / normalization_factor
 
-### 6. Documentação
-- CHANGELOG.md: registrar todas as mudanças em [Unreleased]
+evidence_weight: meta_analysis=1.0, rct=0.85, observational=0.6, in_vitro=0.35, null=0.2
+```
 
-### Arquivos
+### Camada 2 — Fallback LLM (quando KG insuficiente)
 
-| Ação | Arquivo |
-|------|---------|
-| Editar | `supabase/functions/fetch-external-ontologies/index.ts` |
-| Criar | `src/services/ontology-mapping-service.ts` |
-| Criar | `src/components/administrador/OntologyMappingTab.tsx` |
-| Editar | `src/config/admin-tabs.ts` |
-| Editar | `src/hooks/useBaseKnowledgeCandidates.ts` |
-| Editar | `src/locales/pt/translation.json` |
-| Editar | `src/locales/en/translation.json` |
-| Editar | `src/i18n.ts` |
-| Editar | `CHANGELOG.md` |
+Se < 3 triplets aprovados para uma condição, invocar a edge function `hybrid-recommendation` (já existente) para obter estimativas baseadas em literatura, marcando claramente como "AI-assisted projection".
 
-### Segurança
-- Nenhuma coluna existente é alterada
-- Fallback graceful se UMLS API key ausente
-- Deduplicação validada tanto no client (preview) quanto no DB (unique indexes)
+### Camada 3 — Metadados de Transparência
+
+Cada projeção retorna:
+```typescript
+interface EvidenceBasedProjection {
+  condition: string;
+  baselineScore: number;        // derivado da severidade + predisposição
+  projectedImprovement: number; // calculado, não random
+  confidenceBand: number;       // derivado da variância dos dados
+  // NOVOS CAMPOS:
+  dataSource: 'knowledge_graph' | 'hybrid_kg_llm' | 'llm_only';
+  confidenceLevel: 'high' | 'medium' | 'low' | 'insufficient';
+  evidenceSummary: {
+    tripletCount: number;
+    studyCount: number;
+    dominantEvidenceLevel: string;
+    compoundsInvolved: string[];
+    avgIntensity: number | null;
+  };
+  studyGaps?: string;  // sugestão de mais estudos se dados insuficientes
+}
+```
+
+### O que muda em cada arquivo
+
+| Arquivo | Mudança |
+|---------|---------|
+| `src/services/clinical-analysis-pipeline.ts` | Reescrever `projections` (linhas 485-493) com motor evidence-based que consulta `triplet_extractions` via Supabase |
+| `src/components/pet/ImprovementProjectionChart.tsx` | Adicionar badge de fonte de dados (KG/Hybrid/LLM), indicador de confiança, tooltip com evidenceSummary, e alerta de "estudos recomendados" quando dados insuficientes |
+| `src/i18n.ts` + locales PT/EN | Novas chaves para labels de transparência |
+| `CHANGELOG.md` | Registrar mudança |
+
+### Regra do Baseline
+
+Em vez de `30 + Math.random() * 20`, o baseline será derivado de:
+- Severidade da condição (se disponível no perfil do pet)
+- Risk factor da predisposição da raça (já disponível via `breed_predispositions`)
+- Default conservador de 40% se sem dados
+
+### Regra da Curva
+
+A curva sigmoid continua, mas os parâmetros são calibrados pelos dados reais:
+- **Taxa de resposta** (steepness) = f(evidence_level, intensity)
+- **Plateau** = projectedImprovement calculado
+- **Banda de confiança** = desvio padrão das confidences dos triplets × 1.5
+
+### Indicadores Visuais no Gráfico
+
+- Badge colorido: verde "Evidência KG" / amarelo "KG + IA" / vermelho "Apenas IA"
+- Tooltip expandido mostrando: N triplets, N estudos, compostos, nível de evidência
+- Alerta inferior: "Para aumentar a confiança desta projeção, considere curar estudos sobre [condição X]" quando < 3 triplets
+
+### Impacto Zero em Funcionalidades Existentes
+
+- A pipeline clínica continua retornando `projections` no mesmo formato (campos existentes mantidos)
+- Campos novos são adicionais — o chart renderiza mesmo sem eles
+- Nenhuma outra tab/componente é afetada
 
