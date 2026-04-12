@@ -6996,7 +6996,23 @@
     },
     "projection": {
       "title": "Projeção de Melhora (12 meses)",
-      "description": "Estimativa de evolução do paciente com o protocolo recomendado"
+      "description": "Estimativa de evolução baseada em evidências do Knowledge Graph",
+      "sourceKG": "Evidência KG",
+      "sourceHybrid": "KG + IA",
+      "sourceLLM": "Apenas IA",
+      "evidenceDetail": "Detalhes da Evidência",
+      "triplets": "Relações encontradas",
+      "studies": "Estudos",
+      "evidenceLevel": "Nível de evidência",
+      "avgIntensity": "Intensidade média",
+      "compounds": "Compostos",
+      "studyGapAlert": "Para aumentar a confiança das projeções de {{conditions}}, considere curar mais estudos sobre essas condições.",
+      "confidence": {
+        "high": "Alta",
+        "medium": "Média",
+        "low": "Baixa",
+        "insufficient": "Insuficiente"
+      }
     },
     "analysisTabs": {
       "recommendations": "Recomendações",
