@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
         <div className="text-center mb-4 space-y-1">
           <div className="text-xs text-gray-500">{t('footer.copyright')}</div>
           <div className="text-sm font-semibold text-gray-800">{t('footer.sloganLine1')}</div>
-          <div className="text-sm text-gray-600 italic">{t('footer.sloganLine2')}</div>
+          
         </div>
         
         {/* Seção Powered by com logos */}
