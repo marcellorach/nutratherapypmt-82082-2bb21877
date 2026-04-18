@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-16T12:24:38.352Z",
+  "timestamp": "2026-04-18T17:30:50.098Z",
   "summary": {
     "totalFiles": 779,
     "totalIssues": 382,
@@ -2223,7 +2223,7 @@
     {
       "type": "missing-key",
       "file": "src/components/layout/Header.tsx",
-      "line": 79,
+      "line": 76,
       "text": " ",
       "severity": "high"
     },
