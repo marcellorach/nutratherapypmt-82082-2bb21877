@@ -1,68 +1,99 @@
 /**
- * Biological Timeline Engine — Phase 1 (Heuristic)
+ * Biological Timeline Engine — v2 (Honest, KG-grounded)
  *
- * Projects a dog's clinical trajectory across future years using:
- * - Current active conditions (with severity)
- * - Breed predispositions from `breed_predispositions` table
- * - Breed average lifespan + size-based aging acceleration
- * - Gompertz-inspired hazard accumulation
+ * Replaces the v1 global multipliers with per-condition logic that requires
+ * actual KG evidence (compound × condition with efficacy_score >= 3) before
+ * any reduction is applied. Adds protocol penalties (polypharmacy, adherence)
+ * so the toggle is a fair comparison, not an optimistic assumption.
  *
- * IMPORTANT: This is a Phase 1 heuristic engine. It produces transparent,
- * defensible estimates for UX validation. Phase 2 will replace the math with
- * an edge function backed by KG triplets + Lovable AI for citation-grounded
- * projections. Every output here is labeled "Heuristic Beta" in the UI.
+ * Phase 2 (edge function) overrides this when AI projection is available.
  */
 
 export interface BreedPredispositionInput {
   condition_id: string;
   condition_name: string;
   condition_name_en?: string | null;
-  risk_factor: number; // 1.0 - 10.0
+  risk_factor: number;
   evidence_grade: 'high' | 'moderate' | 'low' | 'very_low';
 }
 
 export interface ActiveConditionInput {
   id: string;
   condition_name: string;
-  severity?: string | null; // 'mild' | 'moderate' | 'severe'
+  severity?: string | null;
   status?: string | null;
+}
+
+/**
+ * KG coverage entry: per condition, a list of supporting compounds with
+ * efficacy and evidence grade. Empty/missing = no protective effect modeled.
+ */
+export interface KgCoverageEntry {
+  conditionKey: string; // lowercased condition name
+  compounds: Array<{
+    name: string;
+    efficacy_0_5: number;
+    relationship_type?: string | null;
+  }>;
+  bestEfficacy: number; // 0..5
+  supportCount: number; // distinct compounds with efficacy >= 3
 }
 
 export interface ProjectedExistingCondition {
   id: string;
   name: string;
   currentSeverity: 'mild' | 'moderate' | 'severe';
-  projectedSeverityScore: number; // 0..1 (mild=0.2, moderate=0.55, severe=0.9)
+  projectedSeverityScore: number;
   projectedSeverityLabel: 'mild' | 'moderate' | 'severe';
-  deltaPercent: number; // change vs baseline
+  deltaPercent: number;
+  kgCovered: boolean;
+  protectionApplied: number; // 0..0.40
+  anchorCompounds: string[]; // names of supporting compounds
 }
 
 export interface ProjectedNewCondition {
   conditionId: string;
   name: string;
-  probability: number; // 0..1
+  probability: number;
   evidenceGrade: BreedPredispositionInput['evidence_grade'];
   riskFactor: number;
+  kgCovered: boolean;
+  protectionApplied: number;
+  anchorCompounds: string[];
+}
+
+export interface ProtocolCaveat {
+  type: 'polypharmacy' | 'adherence' | 'no_kg_coverage' | 'partial_coverage';
+  message: string;
+  conditionName?: string;
 }
 
 export interface YearProjection {
-  year: number; // years from now (0 = today)
+  year: number;
   ageAtYear: number;
   biologicalAge: number;
   existingConditions: ProjectedExistingCondition[];
   newConditions: ProjectedNewCondition[];
   expectedRemainingYears: number;
+  protocolCaveats: ProtocolCaveat[];
+  coverageRatio: number; // 0..1, fraction of conditions with KG support
 }
 
 export interface TimelineParams {
   currentAgeYears: number;
-  averageLifespanYears: number; // breed lifespan
-  sizeCategory?: string | null; // 'small' | 'medium' | 'large' | 'giant'
+  averageLifespanYears: number;
+  sizeCategory?: string | null;
   averageWeightKg?: number | null;
   activeConditions: ActiveConditionInput[];
   breedPredispositions: BreedPredispositionInput[];
-  withIntervention: boolean; // applies a generic protective factor
-  maxYearsAhead?: number; // default = lifespan + 4 - currentAge
+  withIntervention: boolean;
+  maxYearsAhead?: number;
+  /** Optional KG coverage map. Without this, intervention applies ZERO benefit. */
+  kgCoverage?: KgCoverageEntry[];
+  /** Estimated daily compound count when intervention is on (for polypharmacy penalty). */
+  protocolCompoundCount?: number;
+  /** Estimated adherence factor 0..1 (default 0.75). */
+  adherenceFactor?: number;
 }
 
 const SEVERITY_TO_SCORE: Record<string, number> = {
@@ -71,16 +102,19 @@ const SEVERITY_TO_SCORE: Record<string, number> = {
   severe: 0.9,
 };
 
+const EVIDENCE_GRADE_FACTOR: Record<string, number> = {
+  high: 1.0,
+  moderate: 0.7,
+  low: 0.4,
+  very_low: 0.2,
+};
+
 function scoreToSeverity(score: number): 'mild' | 'moderate' | 'severe' {
   if (score >= 0.75) return 'severe';
   if (score >= 0.4) return 'moderate';
   return 'mild';
 }
 
-/**
- * Aging acceleration by body size — large/giant breeds age faster.
- * Source: Dog Aging Project / Kraus et al. 2013 (allometric scaling).
- */
 function sizeAgingFactor(size?: string | null, weightKg?: number | null): number {
   if (size) {
     switch (size.toLowerCase()) {
@@ -100,89 +134,121 @@ function sizeAgingFactor(size?: string | null, weightKg?: number | null): number
 }
 
 /**
- * Gompertz-style hazard: probability accelerates with age, scaled by breed
- * lifespan. Returns cumulative incidence by `targetAge` for a baseline risk.
+ * Looks up KG coverage for a condition (case-insensitive, partial match).
  */
+function lookupCoverage(
+  conditionName: string,
+  coverage: KgCoverageEntry[] | undefined,
+): KgCoverageEntry | null {
+  if (!coverage || coverage.length === 0) return null;
+  const key = conditionName.toLowerCase().trim();
+  // exact
+  const exact = coverage.find(c => c.conditionKey === key);
+  if (exact) return exact;
+  // partial (covers Inflammaging matches Chronic Inflammation, etc.)
+  const partial = coverage.find(
+    c => key.includes(c.conditionKey) || c.conditionKey.includes(key),
+  );
+  return partial || null;
+}
+
+/**
+ * Compute per-condition protection from KG evidence.
+ * Returns 0..0.40 reduction multiplier (max 40% reduction).
+ * Without KG support → 0 (toggle has NO effect on this condition).
+ */
+function conditionProtection(
+  conditionName: string,
+  coverage: KgCoverageEntry[] | undefined,
+  withIntervention: boolean,
+): { reduction: number; anchors: string[]; covered: boolean } {
+  if (!withIntervention) return { reduction: 0, anchors: [], covered: false };
+  const entry = lookupCoverage(conditionName, coverage);
+  if (!entry || entry.supportCount === 0) {
+    return { reduction: 0, anchors: [], covered: false };
+  }
+  // Top 2 anchors by efficacy
+  const top = [...entry.compounds]
+    .filter(c => c.efficacy_0_5 >= 3)
+    .sort((a, b) => b.efficacy_0_5 - a.efficacy_0_5)
+    .slice(0, 2);
+  if (top.length === 0) {
+    return { reduction: 0, anchors: [], covered: false };
+  }
+  // Sum of efficacies / 10, capped at 0.40
+  const rawReduction = Math.min(
+    top.reduce((s, c) => s + c.efficacy_0_5, 0) / 10,
+    0.4,
+  );
+  return {
+    reduction: rawReduction,
+    anchors: top.map(c => c.name),
+    covered: true,
+  };
+}
+
+function progressSeverity(
+  baselineScore: number,
+  yearsAhead: number,
+  sizeFactor: number,
+  protection: number,
+  adherence: number,
+): number {
+  const k = 0.55 * sizeFactor;
+  const t0 = 2.5;
+  const sigmoid = 1 / (1 + Math.exp(-k * (yearsAhead - t0)));
+  const ceiling = 0.95;
+  const headroom = Math.max(ceiling - baselineScore, 0);
+  let projected = baselineScore + headroom * sigmoid;
+  // Effective protection = KG protection × adherence
+  const effectiveProtection = protection * adherence;
+  if (effectiveProtection > 0) {
+    const delta = projected - baselineScore;
+    projected = projected - delta * effectiveProtection;
+  }
+  return Math.min(projected, ceiling);
+}
+
 function cumulativeIncidence(
   currentAge: number,
   targetAge: number,
   riskFactor: number,
   lifespan: number,
   sizeFactor: number,
-  evidenceGrade: BreedPredispositionInput['evidence_grade']
+  evidenceGrade: BreedPredispositionInput['evidence_grade'],
+  protection: number,
+  adherence: number,
 ): number {
   if (targetAge <= currentAge) return 0;
-  // Normalized "biological clock": fraction of expected life consumed.
   const lifeFraction = Math.min(targetAge / lifespan, 1.6);
-  // Hazard accelerates ~quadratically past 50% of lifespan.
   const hazardBase = Math.pow(Math.max(lifeFraction - 0.45, 0), 2.1);
-  // Risk factor (1..10) scaled to a reasonable multiplier (0.05..0.5).
   const riskMultiplier = (riskFactor / 10) * 0.5;
-  // Evidence dampener — low-evidence predispositions get smaller contribution.
-  const evidenceDamp = {
-    high: 1.0,
-    moderate: 0.85,
-    low: 0.65,
-    very_low: 0.5,
-  }[evidenceGrade];
-
-  const lambda = hazardBase * riskMultiplier * sizeFactor * evidenceDamp * (targetAge - currentAge);
+  const evidenceDamp = EVIDENCE_GRADE_FACTOR[evidenceGrade] ?? 0.5;
+  let lambda = hazardBase * riskMultiplier * sizeFactor * evidenceDamp * (targetAge - currentAge);
+  // Incidence reduction is 60% of severity reduction (preventive < curative)
+  const effectiveProtection = protection * adherence * 0.6;
+  if (effectiveProtection > 0) {
+    lambda = lambda * (1 - effectiveProtection);
+  }
   return 1 - Math.exp(-lambda);
 }
 
-/**
- * Severity progression for an existing condition over time.
- * Sigmoid-shaped: slow at first, accelerating after ~2 years untreated.
- */
-function progressSeverity(
-  baselineScore: number,
-  yearsAhead: number,
-  sizeFactor: number,
-  withIntervention: boolean
-): number {
-  const k = 0.55 * sizeFactor; // growth rate
-  const t0 = 2.5; // inflection (years)
-  const sigmoid = 1 / (1 + Math.exp(-k * (yearsAhead - t0)));
-  // Untreated: condition can climb up to severity 0.95
-  const ceiling = 0.95;
-  const headroom = Math.max(ceiling - baselineScore, 0);
-  let projected = baselineScore + headroom * sigmoid;
-  if (withIntervention) {
-    // Generic geroprotector effect: reduces progression by ~35% (Phase 2 will
-    // pull this from KG triplets per condition+compound).
-    const reduction = (projected - baselineScore) * 0.35;
-    projected = projected - reduction;
-  }
-  return Math.min(projected, ceiling);
-}
-
-/**
- * Heuristic "biological age": chronological age adjusted by:
- * - number and severity of active conditions
- * - size-based aging factor
- */
 function estimateBiologicalAge(
   chronologicalAge: number,
   activeConditions: ActiveConditionInput[],
-  sizeFactor: number
+  sizeFactor: number,
 ): number {
   const conditionLoad = activeConditions
     .filter(c => c.status === 'active' || !c.status)
     .reduce((sum, c) => sum + (SEVERITY_TO_SCORE[c.severity || 'mild'] || 0.2), 0);
-  // Each unit of severity load adds ~0.6 biological years; size accelerates.
   const ageDelta = conditionLoad * 0.6 * sizeFactor + (sizeFactor - 1) * chronologicalAge * 0.08;
   return Math.max(chronologicalAge + ageDelta, chronologicalAge);
 }
 
-/**
- * Expected remaining years using a Gompertz-derived survival curve calibrated
- * to breed `average_lifespan_years`, penalized by biological-age excess and
- * severe condition burden.
- */
 function estimateRemainingYears(
   biologicalAge: number,
   lifespan: number,
-  severeConditionsCount: number
+  severeConditionsCount: number,
 ): number {
   const base = Math.max(lifespan - biologicalAge, 0);
   const severePenalty = severeConditionsCount * 0.6;
@@ -198,6 +264,9 @@ export function buildBiologicalTimeline(params: TimelineParams): YearProjection[
     activeConditions,
     breedPredispositions,
     withIntervention,
+    kgCoverage,
+    protocolCompoundCount = 0,
+    adherenceFactor = 0.75,
   } = params;
 
   const sizeFactor = sizeAgingFactor(sizeCategory, averageWeightKg);
@@ -207,14 +276,25 @@ export function buildBiologicalTimeline(params: TimelineParams): YearProjection[
   const activeFiltered = activeConditions.filter(c => c.status === 'active' || !c.status);
   const activeNames = new Set(activeFiltered.map(c => c.condition_name.toLowerCase()));
 
+  // Polypharmacy adherence penalty: every compound beyond 4 reduces adherence by 5%
+  const polyAdherence = withIntervention && protocolCompoundCount > 4
+    ? Math.max(adherenceFactor - (protocolCompoundCount - 4) * 0.05, 0.4)
+    : adherenceFactor;
+
   const projections: YearProjection[] = [];
+
   for (let y = 0; y <= maxYears; y++) {
     const ageAtYear = currentAgeYears + y;
+    const caveats: ProtocolCaveat[] = [];
+    let coveredCount = 0;
+    let totalConditions = activeFiltered.length + breedPredispositions.length;
 
     const existingConditions: ProjectedExistingCondition[] = activeFiltered.map(c => {
       const baselineLabel = (c.severity as 'mild' | 'moderate' | 'severe') || 'mild';
       const baselineScore = SEVERITY_TO_SCORE[baselineLabel] || 0.2;
-      const projectedScore = progressSeverity(baselineScore, y, sizeFactor, withIntervention);
+      const prot = conditionProtection(c.condition_name, kgCoverage, withIntervention);
+      if (prot.covered) coveredCount++;
+      const projectedScore = progressSeverity(baselineScore, y, sizeFactor, prot.reduction, polyAdherence);
       return {
         id: c.id,
         name: c.condition_name,
@@ -222,35 +302,70 @@ export function buildBiologicalTimeline(params: TimelineParams): YearProjection[
         projectedSeverityScore: projectedScore,
         projectedSeverityLabel: scoreToSeverity(projectedScore),
         deltaPercent: Math.round(((projectedScore - baselineScore) / Math.max(baselineScore, 0.01)) * 100),
+        kgCovered: prot.covered,
+        protectionApplied: prot.reduction,
+        anchorCompounds: prot.anchors,
       };
     });
 
     const newConditions: ProjectedNewCondition[] = breedPredispositions
-      // exclude predispositions the dog already has
       .filter(p => !activeNames.has(p.condition_name.toLowerCase()) &&
                    !activeNames.has((p.condition_name_en || '').toLowerCase()))
       .map(p => {
-        let prob = cumulativeIncidence(
+        const prot = conditionProtection(p.condition_name, kgCoverage, withIntervention);
+        if (prot.covered) coveredCount++;
+        const prob = cumulativeIncidence(
           currentAgeYears,
           ageAtYear,
           p.risk_factor,
           lifespan,
           sizeFactor,
-          p.evidence_grade
+          p.evidence_grade,
+          prot.reduction,
+          polyAdherence,
         );
-        if (withIntervention) prob = prob * 0.7; // generic preventive effect
         return {
           conditionId: p.condition_id,
           name: p.condition_name,
           probability: prob,
           evidenceGrade: p.evidence_grade,
           riskFactor: p.risk_factor,
+          kgCovered: prot.covered,
+          protectionApplied: prot.reduction,
+          anchorCompounds: prot.anchors,
         };
       })
-      .filter(p => p.probability >= 0.05) // hide noise
+      .filter(p => p.probability >= 0.05)
       .sort((a, b) => b.probability - a.probability);
 
-    // Biological age recomputed at each step using projected severities
+    if (withIntervention && y === 0) {
+      const uncovered = [
+        ...existingConditions.filter(c => !c.kgCovered).map(c => c.name),
+        ...newConditions.filter(c => !c.kgCovered).map(c => c.name),
+      ];
+      if (uncovered.length > 0 && coveredCount === 0) {
+        caveats.push({
+          type: 'no_kg_coverage',
+          message: `Nenhuma condição deste pet tem evidência KG suficiente para benefício do protocolo (${uncovered.length} condição(ões) sem cobertura).`,
+        });
+      } else if (uncovered.length > coveredCount) {
+        caveats.push({
+          type: 'partial_coverage',
+          message: `${coveredCount} de ${coveredCount + uncovered.length} condição(ões) têm evidência KG. As demais não recebem benefício do protocolo.`,
+        });
+      }
+      if (protocolCompoundCount > 4) {
+        caveats.push({
+          type: 'polypharmacy',
+          message: `Polifarmácia: ${protocolCompoundCount} compostos diários. Adesão ajustada para ${Math.round(polyAdherence * 100)}%.`,
+        });
+      }
+      caveats.push({
+        type: 'adherence',
+        message: `Adesão estimada: ${Math.round(polyAdherence * 100)}%. Benefício real depende da regularidade.`,
+      });
+    }
+
     const projectedActiveForBio: ActiveConditionInput[] = existingConditions.map(e => ({
       id: e.id,
       condition_name: e.name,
@@ -268,6 +383,8 @@ export function buildBiologicalTimeline(params: TimelineParams): YearProjection[
       existingConditions,
       newConditions,
       expectedRemainingYears: remaining,
+      protocolCaveats: caveats,
+      coverageRatio: totalConditions > 0 ? coveredCount / totalConditions : 0,
     });
   }
 
