@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network, Maximize2 } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network, Maximize2, ExternalLink, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
@@ -35,6 +35,7 @@ export interface CompoundDosage {
     pmid?: string | null;
     link?: string | null;
     excerpt?: string | null;
+    provenance?: 'paired' | 'compound-only';
   }>;
   kgTriplets?: Array<{
     subject: string;
