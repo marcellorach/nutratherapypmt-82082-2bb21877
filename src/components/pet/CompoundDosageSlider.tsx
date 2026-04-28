@@ -27,6 +27,15 @@ export interface CompoundDosage {
   removed: boolean;
   type: 'nutraceutical' | 'drug';
   mechanism?: string | null;
+  /** Provenance of the dose range itself (separate from clinical evidenceLevel). */
+  doseSource?: 'kg_triplet' | 'curated_study' | 'web_authoritative' | 'llm_estimate' | 'default_class';
+  doseSourceUrl?: string | null;
+  doseSourceCitation?: string | null;
+  doseConfidence?: number;
+  doseNeedsReview?: boolean;
+  doseAdjustments?: string[];
+  doseTotalDailyMg?: number | null;
+  doseFrequencyPerDay?: number | null;
   studies?: Array<{
     id: string;
     title: string;
