@@ -219,6 +219,43 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
         </div>
       </div>
 
+      {/* Scientific studies backing this recommendation */}
+      {studies && studies.length > 0 && (
+        <div className="mt-3 pl-1 space-y-1">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+            <BookOpen className="h-3 w-3" />
+            {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')}
+          </p>
+          <div className="space-y-1">
+            {studies.map((s) => {
+              const href = s.link
+                || (s.doi ? `https://doi.org/${s.doi}` : null)
+                || (s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}` : null);
+              const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
+              if (!href) {
+                return (
+                  <span key={s.id} className="block text-xs text-muted-foreground line-clamp-2">
+                    • {label}
+                  </span>
+                );
+              }
+              return (
+                <a
+                  key={s.id}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-xs text-primary hover:underline line-clamp-2"
+                  title={label}
+                >
+                  • {label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Inline Discuss Chat */}
       <Collapsible open={chatOpen} onOpenChange={setChatOpen}>
         <CollapsibleTrigger asChild>
