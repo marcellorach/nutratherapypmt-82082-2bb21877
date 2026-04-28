@@ -7257,7 +7257,21 @@
       "disclaimerTitle": "Projeção heurística",
       "disclaimerBody": "Estimativa estatística baseada em raça, idade, condições atuais e literatura veterinária. Não substitui avaliação clínica individual. Versão 2 usará Knowledge Graph + IA com citações.",
       "noBreedData": "Raça \"{{breed}}\" não encontrada na base — usando valores genéricos.",
-      "noPredispositionsForBreed": "Sem predisposições cadastradas para esta raça. Apenas progressão das condições atuais é projetada."
+      "noPredispositionsForBreed": "Sem predisposições cadastradas para esta raça. Apenas progressão das condições atuais é projetada.",
+      "aiBadge": "IA + Knowledge Graph {{confidence}}",
+      "aiLoading": "Calculando projeção com IA...",
+      "disclaimerBodyAi": "Projeção gerada por IA (Gemini 2.5 Pro) com base no Knowledge Graph clínico, predisposições raciais e curva de envelhecimento Gompertz por porte. Cada projeção cita as evidências usadas. Não substitui avaliação veterinária individual.",
+      "evidenceUsed": "{{count}} evidências utilizadas",
+      "confidence": {
+        "high": "(alta confiança)",
+        "medium": "(confiança moderada)",
+        "low": "(baixa confiança)"
+      },
+      "citationType": {
+        "kg_evidence": "KG",
+        "breed_predisposition": "Raça",
+        "gompertz_curve": "Gompertz"
+      }
     },
     "severity": {
       "mild": "Leve",
