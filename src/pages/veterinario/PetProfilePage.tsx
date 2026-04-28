@@ -743,6 +743,7 @@ const PetProfilePage: React.FC = () => {
                 petName={profile.name}
                 petBreed={profile.breed}
                 petAge={profile.age_years}
+                petId={id!}
               />
               <div className="min-h-[420px]">
                 <PetClinicalChat

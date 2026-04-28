@@ -6,13 +6,15 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dna, Activity, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown, Heart } from 'lucide-react';
+import { Dna, Activity, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown, Heart, BrainCircuit, BookOpen, Loader2 } from 'lucide-react';
 import dogSilhouette from '@/assets/dog-silhouette.png';
 import {
   buildBiologicalTimeline,
   type ActiveConditionInput,
+  type YearProjection,
 } from '@/services/biological-timeline-engine';
 import { useBreedPredispositionsForPet } from '@/hooks/useBreedPredispositionsForPet';
+import { usePetTrajectoryProjection } from '@/hooks/usePetTrajectoryProjection';
 
 // Same body region map as the legacy DigitalTwinDog (kept for visual continuity)
 const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
@@ -82,6 +84,7 @@ interface BiologicalTimelineProps {
   petName: string;
   petBreed: string;
   petAge: number;
+  petId?: string | null;
 }
 
 const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
@@ -89,12 +92,22 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   petName,
   petBreed,
   petAge,
+  petId,
 }) => {
   const { t } = useTranslation();
   const { data: breedCtx, isLoading: breedLoading } = useBreedPredispositionsForPet(petBreed);
 
   const [yearsAhead, setYearsAhead] = useState(0);
   const [withIntervention, setWithIntervention] = useState(false);
+
+  // Phase 2: AI-grounded projection (Gemini 2.5 Pro + KG + breed predispositions).
+  // Falls back to the heuristic engine while loading or on error.
+  const aiQuery = usePetTrajectoryProjection(petId || null, withIntervention, !!petId);
+  const aiYears = aiQuery.data?.projection?.years || null;
+  const aiCitations = aiQuery.data?.citations || [];
+  const aiConfidence = aiQuery.data?.projection?.confidence || null;
+  const aiYearsGained = aiQuery.data?.years_gained ?? null;
+  const aiSource: 'ai' | 'heuristic' = aiYears && aiYears.length > 0 ? 'ai' : 'heuristic';
 
   const activeConditionInputs: ActiveConditionInput[] = useMemo(
     () => conditions.map(c => ({
@@ -111,7 +124,7 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   const weightKg = breedCtx?.breed?.average_weight_kg || null;
 
   const projections = useMemo(() => {
-    return buildBiologicalTimeline({
+    const heuristic = buildBiologicalTimeline({
       currentAgeYears: petAge,
       averageLifespanYears: lifespan,
       sizeCategory,
@@ -120,7 +133,30 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
       breedPredispositions: breedCtx?.predispositions || [],
       withIntervention,
     });
-  }, [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, withIntervention]);
+    if (!aiYears || aiYears.length === 0) return heuristic;
+    // Map AI years onto the YearProjection structure used by the UI.
+    return aiYears.map<YearProjection>((y, idx) => ({
+      year: y.year,
+      ageAtYear: y.age_at_year,
+      biologicalAge: y.biological_age,
+      existingConditions: (y.existing_conditions || []).map(ec => ({
+        id: `${ec.name}-${idx}`,
+        name: ec.name,
+        currentSeverity: (heuristic[0]?.existingConditions.find(h => h.name.toLowerCase() === ec.name.toLowerCase())?.currentSeverity) || 'mild',
+        projectedSeverityScore: ec.projected_severity_score,
+        projectedSeverityLabel: ec.projected_severity_label,
+        deltaPercent: 0,
+      })),
+      newConditions: (y.new_conditions || []).map(nc => ({
+        conditionId: nc.name,
+        name: nc.name,
+        probability: nc.probability,
+        evidenceGrade: (nc.evidence_grade as any) || 'moderate',
+        riskFactor: 1,
+      })),
+      expectedRemainingYears: y.expected_remaining_years,
+    }));
+  }, [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, withIntervention, aiYears]);
 
   const maxSlider = projections.length > 0 ? projections[projections.length - 1].year : 8;
   const safeIndex = Math.min(yearsAhead, projections.length - 1);
@@ -141,9 +177,11 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
     return opposite[Math.min(yearsAhead, opposite.length - 1)];
   }, [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, withIntervention, yearsAhead]);
 
-  const yearsGained = withIntervention
+  const yearsGainedLocal = withIntervention
     ? current?.expectedRemainingYears - counterfactual?.expectedRemainingYears
     : counterfactual?.expectedRemainingYears - current?.expectedRemainingYears;
+  // Prefer AI's calculated years_gained when available (it's per-condition KG-grounded).
+  const yearsGained = aiYearsGained != null ? aiYearsGained : yearsGainedLocal;
 
   // Conditions to render on the silhouette at the current slider position
   const silhouetteMarkers = useMemo(() => {
@@ -198,10 +236,22 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
               {t('petProfile.biologicalTimeline.subtitle', { name: petName, breed: petBreed, age: petAge })}
             </p>
           </div>
-          <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/30 border-amber-300 text-amber-700 dark:text-amber-400 text-[10px] whitespace-nowrap">
-            <FlaskConical className="h-3 w-3 mr-1" />
-            {t('petProfile.biologicalTimeline.heuristicBadge')}
-          </Badge>
+          {aiQuery.isLoading ? (
+            <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950/30 border-blue-300 text-blue-700 dark:text-blue-400 text-[10px] whitespace-nowrap">
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              {t('petProfile.biologicalTimeline.aiLoading')}
+            </Badge>
+          ) : aiSource === 'ai' ? (
+            <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400 text-[10px] whitespace-nowrap">
+              <BrainCircuit className="h-3 w-3 mr-1" />
+              {t('petProfile.biologicalTimeline.aiBadge', { confidence: aiConfidence ? t(`petProfile.biologicalTimeline.confidence.${aiConfidence}`) : '' })}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/30 border-amber-300 text-amber-700 dark:text-amber-400 text-[10px] whitespace-nowrap">
+              <FlaskConical className="h-3 w-3 mr-1" />
+              {t('petProfile.biologicalTimeline.heuristicBadge')}
+            </Badge>
+          )}
         </div>
       </CardHeader>
 
@@ -438,7 +488,9 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
               <strong>{t('petProfile.biologicalTimeline.disclaimerTitle')}:</strong>{' '}
-              {t('petProfile.biologicalTimeline.disclaimerBody')}
+              {aiSource === 'ai'
+                ? t('petProfile.biologicalTimeline.disclaimerBodyAi')
+                : t('petProfile.biologicalTimeline.disclaimerBody')}
             </span>
           </p>
           {!hasBreedData && !breedLoading && (
@@ -452,6 +504,29 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             </p>
           )}
         </div>
+
+        {/* AI evidence citations (Phase 2) */}
+        {aiSource === 'ai' && aiCitations.length > 0 && (
+          <div className="rounded-md border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/10 p-2 space-y-1.5">
+            <p className="text-[11px] font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <BookOpen className="h-3 w-3" />
+              {t('petProfile.biologicalTimeline.evidenceUsed', { count: aiCitations.length })}
+            </p>
+            <ul className="space-y-1 max-h-[140px] overflow-y-auto pr-1">
+              {aiCitations.slice(0, 6).map((c, i) => (
+                <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] h-4 px-1 flex-shrink-0 bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-300"
+                  >
+                    {t(`petProfile.biologicalTimeline.citationType.${c.type}`, c.type)}
+                  </Badge>
+                  <span className="leading-tight">{c.summary}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
