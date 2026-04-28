@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network, Maximize2 } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network, Maximize2, ExternalLink, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
@@ -35,6 +35,7 @@ export interface CompoundDosage {
     pmid?: string | null;
     link?: string | null;
     excerpt?: string | null;
+    provenance?: 'paired' | 'compound-only';
   }>;
   kgTriplets?: Array<{
     subject: string;
@@ -76,6 +77,30 @@ const evidenceBadgeStyles: Record<string, string> = {
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Returns a short label + tailwind classes describing where a study link
+// will land (DOI registry, PubMed, PMC, Scholar or other external host).
+const getLinkSource = (
+  href: string | null | undefined,
+  t: (k: string, def?: string) => string,
+): { label: string; cls: string } | null => {
+  if (!href) return null;
+  let host = '';
+  try {
+    host = new URL(href).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  if (host === 'doi.org' || host.endsWith('.doi.org'))
+    return { label: t('petProfile.recommendation.linkSource.doi', 'DOI'), cls: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300' };
+  if (host.includes('pubmed.ncbi.nlm.nih.gov'))
+    return { label: t('petProfile.recommendation.linkSource.pubmed', 'PubMed'), cls: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300' };
+  if (host.includes('pmc.ncbi.nlm.nih.gov') || host.includes('ncbi.nlm.nih.gov'))
+    return { label: t('petProfile.recommendation.linkSource.pmc', 'PMC'), cls: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300' };
+  if (host.includes('scholar.google'))
+    return { label: t('petProfile.recommendation.linkSource.scholar', 'Scholar'), cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' };
+  return { label: t('petProfile.recommendation.linkSource.external', 'Externo'), cls: 'bg-muted text-muted-foreground' };
+};
 
 const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   compound,
@@ -368,26 +393,47 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                   <BookOpen className="h-3 w-3" />
                   {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')} ({studies.length})
                 </p>
+                {studies.every((s: any) => s.provenance === 'compound-only') && (
+                  <div className="flex items-start gap-1.5 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40 rounded px-2 py-1">
+                    <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{t('petProfile.recommendation.studiesCompoundOnly', 'Estudos sobre o composto (não específicos a esta condição).')}</span>
+                  </div>
+                )}
                 <div className="space-y-2">
                   {studies.map((s) => {
                     // The pipeline now always normalizes `link` (DOI → PubMed → Scholar fallback).
                     const href = s.link || null;
                     const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
+                    const source = getLinkSource(href, t as any);
                     return (
                       <div key={s.id} className="border-l-2 border-primary/40 pl-3 py-1">
-                        {href ? (
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline font-medium line-clamp-2 block"
-                            title={label}
-                          >
-                            {label}
-                          </a>
-                        ) : (
-                          <span className="text-xs text-foreground font-medium line-clamp-2 block">{label}</span>
-                        )}
+                        <div className="flex items-start gap-1.5 flex-wrap">
+                          {href ? (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline font-medium line-clamp-2 inline-flex items-start gap-1"
+                              title={`${label} — ${t('petProfile.recommendation.openExternal', 'Abrir estudo')}`}
+                              aria-label={t('petProfile.recommendation.openExternal', 'Abrir estudo')}
+                            >
+                              <span>{label}</span>
+                              <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 opacity-70" />
+                            </a>
+                          ) : (
+                            <span className="text-xs text-foreground font-medium line-clamp-2">{label}</span>
+                          )}
+                          {source && (
+                            <span className={cn('text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5', source.cls)}>
+                              {source.label}
+                            </span>
+                          )}
+                          {(s as any).provenance === 'compound-only' && (
+                            <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                              {t('petProfile.recommendation.linkSource.generic', 'Geral')}
+                            </span>
+                          )}
+                        </div>
                         {s.excerpt && (
                           <p
                             className="text-[11px] text-muted-foreground italic mt-1 leading-relaxed"

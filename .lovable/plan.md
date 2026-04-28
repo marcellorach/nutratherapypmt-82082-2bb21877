@@ -1,95 +1,65 @@
+## Objetivo
+
+Garantir que todos os cards de recomendação exibam links clicáveis para os estudos que embasam o composto, mesmo quando não há triplet aprovado para o par exato (composto, condição), e adicionar pequenos selos de proveniência (DOI / PubMed / Scholar) ao lado de cada link para deixar claro para onde leva.
+
 ## Diagnóstico
 
-**(a) Links dos estudos não funcionam.** No `attachStudiesToCompounds` (`clinical-analysis-pipeline.ts`) o `link` vem direto da tabela `scientific_studies.link` — quando vazio, o `CompoundDosageSlider` cai no fallback DOI/PMID, mas se os três campos estiverem ausentes não há link. Além disso, alguns DOIs vêm com URL completa (`https://doi.org/...`), o que duplica o prefixo. Faltam normalização e fallback final para PubMed/Google Scholar por título.
-
-**(b) "Embasamento Científico" e "Conexões KG" estão na aba e não no card.** Hoje o `CompoundDosageSlider` mostra apenas estudos enxutos. Toda a riqueza (predicado TREATS/PREVENTS, contagem de estudos, % de confiança, sinergias) vive no `ScientificEvidencePanel` (aba "Embasamento Científico") e no painel KG. O usuário quer essa informação **dentro de cada card de composto**, mantendo nas abas apenas **Caminho Biológico** e **Projeção de Melhora**.
-
----
-
-## Plano de Implementação
-
-### 1. Corrigir links de estudos (`clinical-analysis-pipeline.ts`)
-
-Em `attachStudiesToCompounds`, normalizar `link` antes de devolver:
+O renderizador de estudos no card (`CompoundDosageSlider`) já está correto: cada estudo vira um `<a target="_blank">` apontando para `s.link`, e a pipeline já normaliza esse link com a cadeia de fallback:
 
 ```text
-resolvedLink =
-  s.link (se começar com http)
-  || (s.doi → "https://doi.org/" + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, ''))
-  || (s.pmid → "https://pubmed.ncbi.nlm.nih.gov/" + pmid)
-  || "https://scholar.google.com/scholar?q=" + encodeURIComponent(title)
+link absoluto (http/https)
+  → DOI (https://doi.org/<doi>)
+  → PubMed (https://pubmed.ncbi.nlm.nih.gov/<pmid>)
+  → Google Scholar (busca pelo título)
 ```
 
-Sempre retornar `link` preenchido. No `CompoundDosageSlider`, simplificar para usar somente `s.link` (já normalizado) e abrir em nova aba com `rel="noopener noreferrer"`.
+O motivo de o usuário não ver links em alguns cards é que a Stage 6.5 só anexa estudos quando existe **triplet aprovado** para o par exato `(composto ILIKE %name%, condição ILIKE %condition%)` em `triplet_extractions`. Quando não há, o card recebe `studies: []` e a seção "Estudos científicos" some.
 
-### 2. Trazer KG e Evidência Científica para dentro do card
+## O que vamos mudar
 
-**a) Pipeline** — em `attachStudiesToCompounds`, além de `studies` e `mechanism`, anexar a cada composto:
+### 1. Fallback de estudos por composto (clinical-analysis-pipeline.ts)
 
-- `kgTriplets`: array de triplets (`subject`, `predicate`, `object`, `confidence`, `evidenceLevel`, `studyCount`) onde o composto é sujeito **e** a condição do card é objeto. Filtrar de `triplet_extractions` aprovados, agrupar por `(predicate, object_name)` e contar `study_id` distintos.
-- `synergies`: outras condições do paciente também tratadas pelo mesmo composto (cruzar com `petConditions`).
+Em `attachStudiesToCompounds`, quando a busca pareada `(subject_name ~ composto, object_name ~ condição)` retornar zero triplets aprovados, fazer uma segunda busca **apenas por composto** (qualquer condição) restrita aos predicados terapêuticos e curadoria aprovada, pegando os 3 estudos com maior `extraction_confidence`. Esses estudos entram no card marcados internamente como `provenance: 'compound-only'` para diferenciar da evidência pareada.
 
-**b) Tipo `CompoundDosage`** (`CompoundDosageSlider.tsx`) — adicionar:
+### 2. Selo de proveniência do link (CompoundDosageSlider.tsx)
 
-```text
-kgTriplets?: Array<{ subject; predicate; object; confidence; evidenceLevel; studyCount }>
-synergies?: Array<{ condition; predicate }>
-```
+Ao renderizar cada estudo, adicionar um pequeno badge ao lado do título indicando o destino real do link, derivado da URL final:
 
-**c) UI dentro do collapsible "Ver evidências e contexto"** — reordenar e expandir:
+- `DOI` quando `host = doi.org`
+- `PubMed` quando `host` contém `pubmed.ncbi.nlm.nih.gov`
+- `PMC` quando contém `pmc.ncbi.nlm.nih.gov`
+- `Scholar` quando contém `scholar.google.com`
+- `Externo` para qualquer outro domínio
 
-```text
-[Compound Card]
-  - Slider + Discutir
-  - Collapsible "Ver evidências e contexto"
-    1. Mecanismo molecular (com Expandir, já existe)
-    2. NOVO: Bloco "Knowledge Graph"
-        - Linhas estilo ScientificEvidencePanel:
-            [🧪 Composto] [→ TREATS] [Condição] [N estudos] [KG-backed] [70%]
-        - Inclui também as triplets de sinergia (outras condições do pet)
-    3. Estudos científicos (já existe, com links corrigidos e excerpts)
-    4. Conexões no KG (manter mini-resumo composto → condição)
-```
+Também adicionar um ícone `ExternalLink` discreto ao lado do título para reforçar visualmente que abre fora da plataforma, e `aria-label` apropriado.
 
-Reaproveitar paleta de cores de predicados (`predicateBadgeColors`) extraindo para `src/components/pet/utils/predicateStyles.ts` e importando em ambos os componentes (sem duplicar).
+### 3. Mensagem de "evidência geral" (CompoundDosageSlider.tsx)
 
-### 3. Limpar abas
+Quando os estudos vierem do fallback (`provenance === 'compound-only'`), mostrar uma linha pequena acima da lista: "Estudos sobre o composto (não específicos a esta condição)" para manter a transparência clínica exigida pelo princípio de transparência de recomendações.
 
-Em `PetProfilePage.tsx` remover **"Embasamento Científico"** e **"Chat por Composto"** das tabs (o chat já vive dentro de cada card via "Discutir esta recomendação"). Manter apenas:
+### 4. i18n + versionamento
 
-```text
-Tabs: [Recomendações (default)] [Caminho Biológico] [Projeção de Melhora]
-```
+Adicionar chaves em PT/EN:
+- `petProfile.recommendation.openExternal` — "Abrir estudo"
+- `petProfile.recommendation.linkSource.doi|pubmed|pmc|scholar|external`
+- `petProfile.recommendation.studiesCompoundOnly` — "Estudos sobre o composto (não específicos a esta condição)"
 
-`kgTriplets` continua sendo computado para alimentar os cards (via `attachStudiesToCompounds`) e o `VetGraphRAGInsightsPanel`.
-
-### 4. i18n e versão
-
-- Adicionar chaves em PT/EN: `petProfile.recommendation.knowledgeGraph` ("Knowledge Graph"), `petProfile.recommendation.synergies` ("Sinergias com outras condições"), `petProfile.recommendation.noKgEvidence` ("Sem evidência direta no KG para esta condição").
-- Incrementar `I18N_VERSION` em `src/i18n.ts` (1.25.1 → 1.26.0).
+Bumpar `I18N_VERSION` em `src/i18n.ts` (1.26.0 → 1.26.1).
 
 ### 5. Documentação
 
-- `CHANGELOG.md` → seção `[Unreleased] / Changed`: links de estudos com fallback robusto; KG e evidência científica movidos para dentro de cada card; abas reduzidas a Recomendações/Caminho Biológico/Projeção.
-- `ARCHITECTURE.md` (se houver tópico de tabs do PetProfile): atualizar contagem de tabs.
-
----
+- `CHANGELOG.md` em `[Unreleased] → Fixed/Added`: registrar fallback de estudos por composto e selos de proveniência do link.
+- Sem mudanças em ARCHITECTURE/CURRENT_STATE (ajuste pontual de UX/dados, não muda arquitetura).
 
 ## Arquivos afetados
 
-- `src/services/clinical-analysis-pipeline.ts` — normalizar `link`, anexar `kgTriplets` e `synergies` por composto.
-- `src/components/pet/CompoundDosageSlider.tsx` — novo bloco "Knowledge Graph" + sinergias dentro do collapsible; usar link já normalizado.
-- `src/components/pet/VetRecommendationPanel.tsx` — passar `petConditions` (já passa) e propagar tipos.
-- `src/components/pet/utils/predicateStyles.ts` *(novo)* — extrair `predicateBadgeColors` / `predicateSymbols` para reuso.
-- `src/components/pet/ScientificEvidencePanel.tsx` — passar a importar de `predicateStyles.ts` (sem mudança visual; ele será removido do uso, mas mantido caso seja referenciado em outro lugar).
-- `src/pages/veterinario/PetProfilePage.tsx` — remover tabs "Embasamento Científico" e "Chat por Composto".
-- `src/i18n.ts` + `src/locales/{pt,en}/translation.json` — novas chaves + versão.
-- `CHANGELOG.md`.
+- `src/services/clinical-analysis-pipeline.ts` — fallback de estudos
+- `src/components/pet/CompoundDosageSlider.tsx` — selo de fonte do link + ícone externo + linha de proveniência
+- `src/i18n.ts` — bump de versão
+- `src/locales/pt/translation.json`, `src/locales/en/translation.json` — novas chaves
+- `CHANGELOG.md` — entrada em [Unreleased]
 
----
+## Fora de escopo
 
-## Resultado esperado
-
-- Cliques nos títulos de estudos abrem o paper (DOI, PubMed ou Scholar como fallback) em nova aba.
-- Cada card de composto exibe — sem precisar trocar de aba — o predicado KG (TREATS/PREVENTS/etc.), confiança, contagem de estudos, sinergias com outras condições do pet, mecanismo, excerpts e links.
-- Abas ficam enxutas: apenas Recomendações, Caminho Biológico e Projeção.
+- Não alterar o componente de abas nem outros painéis.
+- Não criar viewer interno de PDF — links continuam abrindo em nova aba (target=`_blank`, `rel="noopener noreferrer"`), conforme já implementado.

@@ -6965,6 +6965,16 @@
       "knowledgeGraph": "Knowledge Graph",
       "synergies": "Synergies with the patient's other conditions",
       "noKgEvidence": "No direct Knowledge Graph evidence for this condition",
+      "openExternal": "Open study in new tab",
+      "studiesCompoundOnly": "Studies about the compound (not specific to this condition).",
+      "linkSource": {
+        "doi": "DOI",
+        "pubmed": "PubMed",
+        "pmc": "PMC",
+        "scholar": "Scholar",
+        "external": "External",
+        "generic": "General"
+      },
       "approve": "Approve Stack",
       "approveModified": "Approve with Modifications",
       "reject": "Reject",
