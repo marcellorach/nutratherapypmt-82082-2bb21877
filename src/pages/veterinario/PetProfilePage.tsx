@@ -8,14 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, BookOpen, TrendingUp, MessageSquare, AlertTriangle, Dna, Network } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, TrendingUp, AlertTriangle, Dna, Network } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
 import VetRecommendationPanel from '@/components/pet/VetRecommendationPanel';
-import CompoundSpecificChat from '@/components/pet/CompoundSpecificChat';
 import TreatabilityChart from '@/components/pet/TreatabilityChart';
-import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
@@ -622,17 +620,9 @@ const PetProfilePage: React.FC = () => {
                   <GitBranch className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.biologicalPathway')}
                 </TabsTrigger>
-                <TabsTrigger value="scientific-evidence" className="gap-1">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.scientificEvidence')}
-                </TabsTrigger>
                 <TabsTrigger value="projection" className="gap-1">
                   <TrendingUp className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.projection')}
-                </TabsTrigger>
-                <TabsTrigger value="compound-chat" className="gap-1">
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.compoundChat')}
                 </TabsTrigger>
               </TabsList>
 
@@ -661,21 +651,6 @@ const PetProfilePage: React.FC = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="scientific-evidence">
-                {kgTriplets.length > 0 ? (
-                  <ScientificEvidencePanel
-                    triplets={kgTriplets}
-                    synergisticCompounds={conditionInsights.data?.synergisticCompounds}
-                  />
-                ) : (
-                  <Card>
-                    <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                      {t('petProfile.evidence.description')}
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
               <TabsContent value="projection">
                 {kgProjections.length > 0 ? (
                   <ImprovementProjectionChart projections={kgProjections} />
@@ -686,25 +661,6 @@ const PetProfilePage: React.FC = () => {
                     </CardContent>
                   </Card>
                 )}
-              </TabsContent>
-
-              <TabsContent value="compound-chat">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      {t('petProfile.analysisTabs.compoundChat')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CompoundSpecificChat
-                      compounds={recommendationCompounds}
-                      petName={profile.name}
-                      petBreed={profile.breed}
-                      petAge={profile.age_years}
-                    />
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
             )}

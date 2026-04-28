@@ -1,89 +1,95 @@
-## Objetivo
+## Diagnóstico
 
-Reorganizar abas da página do paciente, eliminar duplicação entre "Alertas Clínicos" e "Análise VetGraphRAG → Alvos para Prevenção", e enriquecer cada card do stack geroprotetor com evidências científicas (estudos + trechos destacados) e mini-grafo do composto/condição.
+**(a) Links dos estudos não funcionam.** No `attachStudiesToCompounds` (`clinical-analysis-pipeline.ts`) o `link` vem direto da tabela `scientific_studies.link` — quando vazio, o `CompoundDosageSlider` cai no fallback DOI/PMID, mas se os três campos estiverem ausentes não há link. Além disso, alguns DOIs vêm com URL completa (`https://doi.org/...`), o que duplica o prefixo. Faltam normalização e fallback final para PubMed/Google Scholar por título.
+
+**(b) "Embasamento Científico" e "Conexões KG" estão na aba e não no card.** Hoje o `CompoundDosageSlider` mostra apenas estudos enxutos. Toda a riqueza (predicado TREATS/PREVENTS, contagem de estudos, % de confiança, sinergias) vive no `ScientificEvidencePanel` (aba "Embasamento Científico") e no painel KG. O usuário quer essa informação **dentro de cada card de composto**, mantendo nas abas apenas **Caminho Biológico** e **Projeção de Melhora**.
 
 ---
 
-## a) Eliminar "Alertas Clínicos" duplicado
+## Plano de Implementação
 
-A aba "Alertas Clínicos" (foto 1) hoje mostra predisposições não diagnosticadas — exatamente o que o `VetGraphRAGInsightsPanel` já apresenta como "Alvos para Prevenção" (foto 3). 
+### 1. Corrigir links de estudos (`clinical-analysis-pipeline.ts`)
 
-**Mudanças em `src/pages/veterinario/PetProfilePage.tsx`:**
-- Remover a `<TabsTrigger value="clinical-alerts">` e o respectivo `<TabsContent>`.
-- Remover o import de `ClinicalAlertsPanel`.
-- Mover `labAlerts` e `interactionAlerts` (que ainda são úteis e não estão no VetGraphRAG) para dentro do `VetGraphRAGInsightsPanel` como subseções adicionais ("Alterações laboratoriais" e "Interações medicamentosas"), ou mantê-los como banner compacto acima do painel — preferência: integrar ao painel VetGraphRAG para consolidar tudo num só lugar.
-- Ajustar `defaultValue` das tabs para sempre `'recommendations'`.
-
-## b) Reordenar tabs
-
-Nova ordem da `TabsList`:
-1. **Recomendações** (default)
-2. **Caminho Biológico**
-3. **Evidência Científica**
-4. **Projeção de Melhora**
-5. **Chat por Composto**
-
-(Alertas Clínicos removido conforme item a.)
-
-## c) Enriquecer cards do stack geroprotetor
-
-Cada card de composto em `CompoundDosageSlider.tsx` ganha um bloco colapsável **"Ver evidências e contexto"** com 3 sub-seções:
-
-### c.1) Estudos científicos com trechos destacados
-- Já temos `studies[]` anexado pelo `attachStudiesToCompounds` em `clinical-analysis-pipeline.ts`.
-- **Ampliar o backend** (`attachStudiesToCompounds`) para também retornar, por estudo:
-  - `excerpt`: trecho relevante puxado de `study_embeddings.chunk_text` filtrando o chunk que contenha tanto o nome do composto quanto o nome da condição (ILIKE simples). Limitar a ~280 caracteres, com `...` antes/depois do match.
-  - Já temos `doi`/`pmid`/`link` para o link externo.
-- **Frontend**: cada estudo vira um item expansível mostrando título + ano + link + trecho destacado (com o termo do composto em `<mark>`).
-
-### c.2) Mini-grafo do composto e condições
-- Reutilizar `PatientKnowledgeSubgraph` (já existe) em modo compacto, filtrado para o composto atual + a condição alvo do card.
-- Renderizar em um `<Collapsible>` separado ("Ver grafo de conexões"), altura fixa ~280px.
-
-### c.3) Mecanismo molecular resumido
-- Aproveitar campos `mechanism_path` das triplets já buscadas em `attachStudiesToCompounds` para mostrar a via biológica (ex.: "Curcumin → inibe NF-κB → reduz IL-6"). Texto curto, sem componente novo.
-
-### Layout do card resultante:
+Em `attachStudiesToCompounds`, normalizar `link` antes de devolver:
 
 ```text
-[ícone] Composto → Condição           [KG-backed] [X]
-        Via knowledge graph
-        ━━━━━●━━━━━━━━━ slider
-        5 mg/kg     Recomendado: 27.5     50 mg/kg
-                    27.5 mg/kg
-
-        💬 Discutir esta recomendação           ▾
-        📚 Ver evidências e contexto            ▾
-            ├─ Mecanismo: Composto → via X → efeito Y
-            ├─ Estudos (3):
-            │   • Título (2024) [link]
-            │       "...trecho destacado com <mark>composto</mark>..."
-            │   • ...
-            └─ 🕸 Ver grafo de conexões         ▾
-                  [mini PatientKnowledgeSubgraph]
+resolvedLink =
+  s.link (se começar com http)
+  || (s.doi → "https://doi.org/" + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, ''))
+  || (s.pmid → "https://pubmed.ncbi.nlm.nih.gov/" + pmid)
+  || "https://scholar.google.com/scholar?q=" + encodeURIComponent(title)
 ```
+
+Sempre retornar `link` preenchido. No `CompoundDosageSlider`, simplificar para usar somente `s.link` (já normalizado) e abrir em nova aba com `rel="noopener noreferrer"`.
+
+### 2. Trazer KG e Evidência Científica para dentro do card
+
+**a) Pipeline** — em `attachStudiesToCompounds`, além de `studies` e `mechanism`, anexar a cada composto:
+
+- `kgTriplets`: array de triplets (`subject`, `predicate`, `object`, `confidence`, `evidenceLevel`, `studyCount`) onde o composto é sujeito **e** a condição do card é objeto. Filtrar de `triplet_extractions` aprovados, agrupar por `(predicate, object_name)` e contar `study_id` distintos.
+- `synergies`: outras condições do paciente também tratadas pelo mesmo composto (cruzar com `petConditions`).
+
+**b) Tipo `CompoundDosage`** (`CompoundDosageSlider.tsx`) — adicionar:
+
+```text
+kgTriplets?: Array<{ subject; predicate; object; confidence; evidenceLevel; studyCount }>
+synergies?: Array<{ condition; predicate }>
+```
+
+**c) UI dentro do collapsible "Ver evidências e contexto"** — reordenar e expandir:
+
+```text
+[Compound Card]
+  - Slider + Discutir
+  - Collapsible "Ver evidências e contexto"
+    1. Mecanismo molecular (com Expandir, já existe)
+    2. NOVO: Bloco "Knowledge Graph"
+        - Linhas estilo ScientificEvidencePanel:
+            [🧪 Composto] [→ TREATS] [Condição] [N estudos] [KG-backed] [70%]
+        - Inclui também as triplets de sinergia (outras condições do pet)
+    3. Estudos científicos (já existe, com links corrigidos e excerpts)
+    4. Conexões no KG (manter mini-resumo composto → condição)
+```
+
+Reaproveitar paleta de cores de predicados (`predicateBadgeColors`) extraindo para `src/components/pet/utils/predicateStyles.ts` e importando em ambos os componentes (sem duplicar).
+
+### 3. Limpar abas
+
+Em `PetProfilePage.tsx` remover **"Embasamento Científico"** e **"Chat por Composto"** das tabs (o chat já vive dentro de cada card via "Discutir esta recomendação"). Manter apenas:
+
+```text
+Tabs: [Recomendações (default)] [Caminho Biológico] [Projeção de Melhora]
+```
+
+`kgTriplets` continua sendo computado para alimentar os cards (via `attachStudiesToCompounds`) e o `VetGraphRAGInsightsPanel`.
+
+### 4. i18n e versão
+
+- Adicionar chaves em PT/EN: `petProfile.recommendation.knowledgeGraph` ("Knowledge Graph"), `petProfile.recommendation.synergies` ("Sinergias com outras condições"), `petProfile.recommendation.noKgEvidence` ("Sem evidência direta no KG para esta condição").
+- Incrementar `I18N_VERSION` em `src/i18n.ts` (1.25.1 → 1.26.0).
+
+### 5. Documentação
+
+- `CHANGELOG.md` → seção `[Unreleased] / Changed`: links de estudos com fallback robusto; KG e evidência científica movidos para dentro de cada card; abas reduzidas a Recomendações/Caminho Biológico/Projeção.
+- `ARCHITECTURE.md` (se houver tópico de tabs do PetProfile): atualizar contagem de tabs.
 
 ---
 
-## Detalhes técnicos
+## Arquivos afetados
 
-**Arquivos modificados:**
-- `src/pages/veterinario/PetProfilePage.tsx` — remover aba Alertas Clínicos, reordenar tabs, ajustar `defaultValue`.
-- `src/components/pet/VetGraphRAGInsightsPanel.tsx` — receber `labAlerts` e `interactionAlerts` e exibir como subseções extras.
-- `src/services/clinical-analysis-pipeline.ts` — em `attachStudiesToCompounds`, também buscar `mechanism_path` da triplet de maior confiança e, para cada estudo, buscar 1 chunk relevante de `study_embeddings` (ILIKE composto + condição) → campo `excerpt`.
-- `src/components/pet/CompoundDosageSlider.tsx` — extender interface `CompoundDosage` com `excerpt`, `mechanism`; novo bloco `Collapsible` "Evidências e contexto" com estudos expandíveis, mecanismo e mini-grafo.
-- `src/components/pet/PatientKnowledgeSubgraph.tsx` — aceitar prop opcional `compactMode` + filtro `focusCompound` / `focusConditions` para renderizar subgrafo enxuto dentro do card.
-- `src/i18n.ts` — incrementar `I18N_VERSION` (ex.: `1.24.0` → `1.25.0`).
-- `src/locales/pt/translation.json` + `src/locales/en/translation.json` — novas chaves: `petProfile.recommendation.evidenceAndContext`, `mechanism`, `viewGraph`, `excerpt`.
+- `src/services/clinical-analysis-pipeline.ts` — normalizar `link`, anexar `kgTriplets` e `synergies` por composto.
+- `src/components/pet/CompoundDosageSlider.tsx` — novo bloco "Knowledge Graph" + sinergias dentro do collapsible; usar link já normalizado.
+- `src/components/pet/VetRecommendationPanel.tsx` — passar `petConditions` (já passa) e propagar tipos.
+- `src/components/pet/utils/predicateStyles.ts` *(novo)* — extrair `predicateBadgeColors` / `predicateSymbols` para reuso.
+- `src/components/pet/ScientificEvidencePanel.tsx` — passar a importar de `predicateStyles.ts` (sem mudança visual; ele será removido do uso, mas mantido caso seja referenciado em outro lugar).
+- `src/pages/veterinario/PetProfilePage.tsx` — remover tabs "Embasamento Científico" e "Chat por Composto".
+- `src/i18n.ts` + `src/locales/{pt,en}/translation.json` — novas chaves + versão.
+- `CHANGELOG.md`.
 
-**Sem migrações de banco.** As colunas e dados (`study_embeddings.chunk_text`, `triplet_extractions.mechanism_path`) já existem.
+---
 
-**Documentação:**
-- `CHANGELOG.md` — entrada em `[Unreleased] → Changed` (consolidação de alertas) e `Added` (evidências expandidas no card).
-- Bumpar versão de `ARCHITECTURE.md` se aplicável (mudança estrutural de navegação).
+## Resultado esperado
 
-## Resposta às perguntas
-
-> Possível? Razoável?
-
-Sim, totalmente possível e razoável — todos os dados já estão no banco (chunks vetorizados em `study_embeddings`, mechanism_path em `triplet_extractions`, grafo do paciente já renderizado em outra aba). É só reaproveitar e consolidar dentro do card. O ganho de UX é alto: o veterinário vê dose + porquê + evidência + grafo sem sair do card.
+- Cliques nos títulos de estudos abrem o paper (DOI, PubMed ou Scholar como fallback) em nova aba.
+- Cada card de composto exibe — sem precisar trocar de aba — o predicado KG (TREATS/PREVENTS/etc.), confiança, contagem de estudos, sinergias com outras condições do pet, mecanismo, excerpts e links.
+- Abas ficam enxutas: apenas Recomendações, Caminho Biológico e Projeção.

@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-04-28 🔗 Links Robustos + Evidência Completa Dentro do Card
+- ✅ **Links de estudos com fallback robusto**: pipeline agora normaliza `link` (DOI/PubMed/Scholar) antes de devolver — sem mais cliques mortos. DOIs salvos como URL completa não duplicam mais o prefixo
+- ✅ **Knowledge Graph dentro de cada card de composto**: `CompoundDosageSlider` ganhou bloco com triplets reais `[composto] → [predicado] → [condição]` (estilo "Embasamento Científico"), incluindo contagem de estudos, evidência e % de confiança — não precisa mais trocar de aba
+- ✅ **Sinergias por paciente**: cada card mostra outras condições do pet que o mesmo composto também trata (cruzando `triplet_extractions` aprovados com a lista de condições do paciente)
+- ✅ **Abas reduzidas**: removidas "Embasamento Científico" e "Chat por Composto" (este último já vive dentro de cada card via "Discutir esta recomendação"). Restam: **Recomendações** · **Caminho Biológico** · **Projeção de Melhora**
+- ✅ **Util compartilhado `predicateStyles.ts`**: cores/símbolos de predicados agora são reutilizados entre `CompoundDosageSlider` e `ScientificEvidencePanel`
+- ✅ **i18n v1.26.0**: chaves `knowledgeGraph`, `synergies`, `noKgEvidence`
+
 ### Changed - 2026-04-28 🧭 Consolidação de Alertas + Cards com Evidência Profunda
 - ✅ **Aba "Alertas Clínicos" removida**: predisposições não-diagnosticadas já aparecem em "Análise VetGraphRAG → Alvos para Prevenção" — fim da duplicação
 - ✅ **Reordenação de tabs**: Recomendações (default) → Caminho Biológico → Evidência Científica → Projeção → Chat por Composto
