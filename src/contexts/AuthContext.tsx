@@ -69,6 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (currentSession?.user && !isEmailAllowed(currentSession.user.email)) {
+        supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
