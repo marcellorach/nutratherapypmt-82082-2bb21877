@@ -94,7 +94,7 @@ interface ConditionInsightCardProps {
 
 const ConditionInsightCard: React.FC<ConditionInsightCardProps> = ({ condition, insight, medications, petBreed, petAge, mode = 'full', origin }) => {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const resolvedOrigin = origin || inferOrigin(condition);
   const originConfig = originBadgeConfig[resolvedOrigin] || originBadgeConfig.vet_diagnosis;
 

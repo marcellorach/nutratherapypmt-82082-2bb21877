@@ -1,87 +1,133 @@
-# Substituir categorias genéricas por doenças específicas
+## Visão Geral
 
-## Problema
+Quatro melhorias no fluxo do veterinário:
 
-Você está certo: **"Cardiovascular Disease" é uma categoria**, não uma doença. O mesmo se aplica a "Chronic Inflammation". O perfil clínico exige a doença real (ex: Cardiomiopatia Dilatada, Doença Valvar Mitral Mixomatosa, etc.) para que o motor de recomendação consiga cruzar com o Knowledge Graph corretamente.
+a) Pets de exemplo com **gradiente real de complexidade clínica** (1→4 doenças).
+b) Nova subdivisão **"Alvos para Prevenção"** no painel VetGraphRAG, alimentada pela tabela `breed_predispositions`.
+c) **Análise por Condição** abre **expandida por padrão**.
+d) Cada slider de recomendação exibe **links para os estudos científicos** que embasam aquele composto→condição.
 
-Verifiquei o banco — temos as doenças canônicas corretas em `health_conditions`:
-- `Doença Valvular Degenerativa` / `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)`
-- `Cardiomiopatia dilatada` / `Dilated Cardiomyopathy`
-- `Aterosclerose` / `Atherosclerosis`
-- `Insuficiência cardíaca` / `Heart Disease`
+---
 
-E os pets demo atualmente no banco têm:
-- **Luna** (Cavalier King Charles, sopro 4/6, VHS 11.5): hoje gravada como `Cardiovascular Disease` ❌
-- **Thor** (Pastor Alemão, CRP elevado): hoje gravada como `Chronic Inflammation` ❌ (também é categoria)
+## a) Gradiente de complexidade dos sample pets
 
-## Correções
+Refatorar `SAMPLE_PETS` em `src/components/pet/GenerateSamplePetsButton.tsx` para que o nº de condições cresça de 1 → 4 ao longo dos 5 pets, sempre usando doenças que naturalmente coexistem na faixa etária/raça (não comorbidades obrigatórias):
 
-### 1. Pets de exemplo (`GenerateSamplePetsButton.tsx`)
+| # | Pet | Raça | Idade | Condições (não-categorias) |
+|---|-----|------|-------|----------------------------|
+| 1 | Buddy | Beagle | 4y | **1**: Mild Periodontal Disease |
+| 2 | Max | Beagle | 9y | **2**: Cognitive Dysfunction Syndrome (mild) + Mild Sarcopenia |
+| 3 | Rex | Labrador Retriever | 8y | **3**: Osteoarthritis (moderate) + Hip Dysplasia (mild) + Overweight |
+| 4 | Thor | German Shepherd | 7y | **3**: Osteoarthritis + Hip Dysplasia + Degenerative Myelopathy (early) |
+| 5 | Luna | Cavalier King Charles | 9y | **4**: MMVD (moderate) + Cognitive Dysfunction Syndrome (mild) + Chronic Mitral Regurgitation–related Pulmonary Hypertension + Mild Chronic Kidney Disease (IRIS stage 2) |
 
-Trocar nas definições do `SAMPLE_PETS`:
+Critérios:
+- Todas são **doenças específicas** (passa pelo `warnIfGenericCategory`).
+- Coexistências plausíveis pela idade/raça (ex.: Cavalier idoso com cardiopatia + DRC iatrogênica leve por uso crônico de furosemida; Pastor Alemão com OA + displasia + mielopatia).
+- Medicações e exames acompanham a complexidade (Buddy: 1 exame; Luna: polifarmácia + ecocardio + painel renal).
 
-| Pet | Antes | Depois | Justificativa clínica |
-|-----|-------|--------|-----------------------|
-| **Luna** (Cavalier King Charles, 6a, sopro 4/6, coração aumentado) | `Cardiovascular Disease` | `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)` | MMVD é a doença #1 da raça, compatível com sopro mitral e VHS aumentado |
-| **Thor** (Pastor Alemão, CRP 15.2) | `Chronic Inflammation` | `Hip Dysplasia` (já indicado no exame `hips: 'mild dysplasia'`) | Doença real, não categoria; CRP elevado é achado, não diagnóstico |
+---
 
-Os demais pets (Rex, Mel, Max) já usam doenças específicas corretas (`Osteoarthritis`, `Cognitive Dysfunction Syndrome`).
+## b) Nova categoria "Alvos para Prevenção" (predisposição racial/etária)
 
-### 2. Migração de dados existentes no banco
+No `VetGraphRAGInsightsPanel.tsx`:
 
-Como já existe a Luna no banco com a condição errada, criar migração que faz UPDATE:
+- **Renomear** "Prevenção Futura" para **"Alvos para Prevenção"** (key `petProfile.insights.preventionTargets`).
+- A categoria já é alimentada por `predispositions` vindas de `breed_predispositions` (tabela já existe — ver `clinical-analysis-pipeline.ts` linha 81-130). A lógica está quase pronta; vamos:
+  - Garantir que **todas** as predisposições não diagnosticadas apareçam (hoje filtra implicitamente por já ter ≥1 triplet).
+  - Adicionar **filtro etário**: priorizar predisposições cujo `risk_factor` é relevante para a faixa etária do pet (ex.: pet sênior → mostrar primeiro doenças degenerativas).
+  - Mostrar badge com `risk_factor` (ex.: "3.2× risco") e `evidence_grade`.
+  - Texto descritivo: "Doença comum em {breed} a partir de {age} anos. Estratégias de prevenção sugeridas pelo KG."
 
-```sql
-UPDATE pet_conditions
-SET condition_name = 'Degenerative Valve Disease (Myxomatous Mitral Valve Disease)'
-WHERE condition_name = 'Cardiovascular Disease';
+Banco de dados: **já existe** (`breed_predispositions` com `breed_id`, `condition_id`, `risk_factor`, `evidence_grade`, `notes`). Não precisa migração.
 
-UPDATE pet_conditions
-SET condition_name = 'Hip Dysplasia'
-WHERE condition_name = 'Chronic Inflammation';
-```
+---
 
-### 3. Guard-rail: validação anti-categoria
+## c) Análise por Condição expandida por padrão
 
-Criar lista pequena de "termos proibidos" (categorias genéricas) em `src/utils/conditionValidation.ts`:
+Em `src/components/pet/ConditionInsightCard.tsx` (linha 97):
 
 ```ts
-export const GENERIC_CATEGORY_TERMS = [
-  'Cardiovascular Disease', 'Cardiovascular',
-  'Chronic Inflammation', 'Inflammation',
-  'Heart Disease', 'Renal Disease', 'Liver Disease',
-  'Metabolic Disease', 'Neurological Disease',
-];
-
-export function isGenericCategory(name: string): boolean { ... }
+const [expanded, setExpanded] = useState(true); // antes: false
 ```
 
-Usar em dois lugares:
-- **`GenerateSamplePetsButton`**: dev-warning no console se algum sample usar termo proibido (previne regressão)
-- **Edge function `extract-pet-clinical-data`**: quando IA extrair texto livre, rejeitar/sinalizar nomes genéricos pedindo doença específica
+Mantém o botão de colapsar/expandir — só inverte o default.
 
-### 4. Tradução PT/EN
+---
 
-Adicionar entradas em `src/locales/{pt,en}/translation.json` para a nova condição visível na UI da Luna:
-- `conditions.degenerativeValveDisease` → "Doença Valvular Degenerativa (MMVD)" / "Degenerative Valve Disease (MMVD)"
-- `conditions.hipDysplasia` → "Displasia Coxofemoral" / "Hip Dysplasia"
+## d) Links de estudos sob cada recomendação
 
-Incrementar `I18N_VERSION` em `src/i18n.ts`.
+### Backend
+1. Estender `CompoundDosage` (em `CompoundDosageSlider.tsx`) com:
+   ```ts
+   studies?: Array<{ id: string; title: string; year?: number; doi?: string; pmid?: string; link?: string }>;
+   ```
+
+2. Em `clinical-analysis-pipeline.ts` (bloco `compounds = nutraceuticals.map(...)`, linhas 922-943):
+   - Para cada composto recomendado, consultar `hierarchical_edges` filtrando por `subject_name = compound.name` AND `object_name ILIKE condition` AND `predicate IN ('TREATS','AMELIORATES','PREVENTS','MODULATES')`.
+   - Pegar o array `study_ids` e fazer JOIN com `scientific_studies` (`id, title, year, doi, pmid, link`).
+   - Limitar aos top 3 estudos por composto (ordenar por confidence desc).
+   - Anexar ao objeto `compound.studies`.
+
+### Frontend
+Em `CompoundDosageSlider.tsx`, abaixo do bloco `Rationale` (linha 176) e acima do slider, ou logo abaixo do slider e antes do "Discutir esta recomendação":
+
+```tsx
+{studies && studies.length > 0 && (
+  <div className="mt-3 pl-6 space-y-1">
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+      {t('petProfile.recommendation.evidenceStudies')}
+    </p>
+    {studies.map(s => (
+      <a key={s.id} href={s.link || (s.doi ? `https://doi.org/${s.doi}` : `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}`)}
+         target="_blank" rel="noopener noreferrer"
+         className="flex items-start gap-1.5 text-xs text-primary hover:underline">
+        <BookOpen className="h-3 w-3 mt-0.5 shrink-0" />
+        <span className="line-clamp-2">{s.title} {s.year && `(${s.year})`}</span>
+      </a>
+    ))}
+  </div>
+)}
+```
+
+Quando o composto não tiver estudos no KG, ocultar a seção (sem mock).
+
+---
+
+## i18n & Versionamento
+
+Adicionar chaves em `src/locales/pt/translation.json` e `src/locales/en/translation.json`:
+- `petProfile.insights.preventionTargets`
+- `petProfile.insights.preventionTargetsDesc`
+- `petProfile.recommendation.evidenceStudies`
+- `petProfile.recommendation.noStudies` (opcional)
+
+Incrementar `I18N_VERSION` em `src/i18n.ts` (1.23.0 → **1.24.0**).
+
+---
+
+## Memória de projeto
+
+Atualizar `mem://features/sample-pets-complexity-order` com a nova distribuição (1→4 doenças).
+
+---
+
+## Documentação
+
+- `CHANGELOG.md` em `[Unreleased]` → Added/Changed conforme cada item.
+
+---
 
 ## Arquivos afetados
 
-| Ação | Arquivo | Risco |
-|------|---------|-------|
-| Editar | `src/components/pet/GenerateSamplePetsButton.tsx` | Baixo |
-| Criar | `src/utils/conditionValidation.ts` | Nenhum |
-| Editar | `supabase/functions/extract-pet-clinical-data/index.ts` | Baixo (só warning) |
-| Migração | UPDATE em `pet_conditions` (Luna + Thor) | Baixo |
-| Editar | `src/locales/pt/translation.json` + EN | Nenhum |
-| Editar | `src/i18n.ts` (bump versão) | Nenhum |
-| Editar | `CHANGELOG.md` | Nenhum |
+- `src/components/pet/GenerateSamplePetsButton.tsx` (a)
+- `src/components/pet/VetGraphRAGInsightsPanel.tsx` (b)
+- `src/components/pet/ConditionInsightCard.tsx` (c — 1 linha)
+- `src/components/pet/CompoundDosageSlider.tsx` (d — UI dos estudos)
+- `src/services/clinical-analysis-pipeline.ts` (d — anexar estudos aos compostos)
+- `src/locales/{pt,en}/translation.json` (chaves novas)
+- `src/i18n.ts` (versão)
+- `mem://features/sample-pets-complexity-order`
+- `CHANGELOG.md`
 
-## O que NÃO vou mexer
-
-- Categorias em `health_conditions` (a tabela `category = 'Cardiovascular'` continua válida — categoria é categoria, doença é doença).
-- Filtros de UI que listam categorias (ex: `NutraceuticalSearchFilters`).
-- Rótulos de gráficos agrupados por sistema (ex: "Eventos Cardiovasculares" no Stanford demo — ali é eixo agregador, faz sentido).
+Sem migrações de banco — a tabela `breed_predispositions` e o array `study_ids` em `hierarchical_edges` já existem.

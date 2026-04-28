@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2 } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
@@ -24,6 +24,14 @@ export interface CompoundDosage {
   rationale: string;
   removed: boolean;
   type: 'nutraceutical' | 'drug';
+  studies?: Array<{
+    id: string;
+    title: string;
+    year?: number;
+    doi?: string | null;
+    pmid?: string | null;
+    link?: string | null;
+  }>;
 }
 
 interface ChatMessage {
@@ -61,7 +69,7 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   const { t } = useTranslation();
   const {
     id, name, condition, dosageMin, dosageMax, dosageRecommended,
-    dosageCurrent, unit, evidenceLevel, rationale, removed, type,
+    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies,
   } = compound;
 
   const [chatOpen, setChatOpen] = useState(false);
@@ -210,6 +218,43 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
           </span>
         </div>
       </div>
+
+      {/* Scientific studies backing this recommendation */}
+      {studies && studies.length > 0 && (
+        <div className="mt-3 pl-1 space-y-1">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+            <BookOpen className="h-3 w-3" />
+            {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')}
+          </p>
+          <div className="space-y-1">
+            {studies.map((s) => {
+              const href = s.link
+                || (s.doi ? `https://doi.org/${s.doi}` : null)
+                || (s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}` : null);
+              const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
+              if (!href) {
+                return (
+                  <span key={s.id} className="block text-xs text-muted-foreground line-clamp-2">
+                    • {label}
+                  </span>
+                );
+              }
+              return (
+                <a
+                  key={s.id}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-xs text-primary hover:underline line-clamp-2"
+                  title={label}
+                >
+                  • {label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Inline Discuss Chat */}
       <Collapsible open={chatOpen} onOpenChange={setChatOpen}>
