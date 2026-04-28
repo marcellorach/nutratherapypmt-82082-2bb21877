@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     // 2) Active conditions
     const { data: petConditions } = await supabase
       .from("pet_conditions")
-      .select("id, condition_name, severity, status, diagnosed_at")
+      .select("id, condition_name, severity, status, diagnosis_date")
       .eq("pet_id", body.pet_id);
     const activeConditions = (petConditions || []).filter(
       (c: any) => !c.status || c.status === "active",
@@ -110,13 +110,14 @@ Deno.serve(async (req) => {
       : { data: [] as any[] };
 
     // 5) Active medications / supplements (compounds in use)
+    const todayIso = new Date().toISOString().slice(0, 10);
     const { data: petMeds } = await supabase
       .from("pet_medications")
-      .select("id, name, status, dose")
+      .select("id, medication_name, dosage, end_date")
       .eq("pet_id", body.pet_id);
-    const activeCompounds = (petMeds || []).filter(
-      (m: any) => !m.status || m.status === "active",
-    );
+    const activeCompounds = (petMeds || [])
+      .filter((m: any) => !m.end_date || m.end_date >= todayIso)
+      .map((m: any) => ({ name: m.medication_name, dose: m.dosage }));
 
     // 6) Top KG evidence for active conditions (compound × condition links)
     const conditionIds = (predispositions || [])
@@ -149,7 +150,7 @@ Deno.serve(async (req) => {
         .map((c: any) => `${c.condition_name}|${c.severity || "mild"}`)
         .sort()
         .join(";"),
-      compounds: activeCompounds.map((m: any) => m.name).sort().join(";"),
+      compounds: activeCompounds.map((m: any) => m.name).filter(Boolean).sort().join(";"),
       breedId: breed?.id || null,
       maxYears,
       version: "v2.0",
@@ -223,7 +224,7 @@ You MUST output through the function tool.`;
         severity: c.severity || "mild",
       })),
       breed_predispositions: compactPredisp,
-      active_compounds: activeCompounds.map((m: any) => ({ name: m.name, dose: m.dose })),
+      active_compounds: activeCompounds,
       kg_compound_condition_evidence: compactEvidence.slice(0, 30),
       simulate_with_geroprotective_protocol: withIntervention,
       max_years_ahead: maxYears,
