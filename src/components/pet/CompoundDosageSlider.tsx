@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2 } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
@@ -24,6 +24,14 @@ export interface CompoundDosage {
   rationale: string;
   removed: boolean;
   type: 'nutraceutical' | 'drug';
+  studies?: Array<{
+    id: string;
+    title: string;
+    year?: number;
+    doi?: string | null;
+    pmid?: string | null;
+    link?: string | null;
+  }>;
 }
 
 interface ChatMessage {
@@ -61,7 +69,7 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   const { t } = useTranslation();
   const {
     id, name, condition, dosageMin, dosageMax, dosageRecommended,
-    dosageCurrent, unit, evidenceLevel, rationale, removed, type,
+    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies,
   } = compound;
 
   const [chatOpen, setChatOpen] = useState(false);
