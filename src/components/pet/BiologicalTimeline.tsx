@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import {
@@ -84,6 +83,97 @@ function buildRegionStates(
 
   return { states, systemic };
 }
+
+const SEV_DOT: Record<Severity, string> = {
+  mild: 'bg-yellow-400',
+  moderate: 'bg-orange-400',
+  severe: 'bg-red-500',
+};
+
+/**
+ * Compact list of likely conditions shown beneath each anatomy panel.
+ * Merges projected existing conditions (with severity) and emergent risks
+ * (with probability). Caps at 6 lines to stay scannable.
+ */
+const ConditionsMiniList: React.FC<{
+  projection: YearProjection | undefined;
+  tone: 'neutral' | 'protected';
+  emptyLabel: string;
+  t: (k: string, opts?: any) => string;
+}> = ({ projection, tone, emptyLabel, t }) => {
+  if (!projection) return null;
+  const items: Array<{
+    key: string;
+    name: string;
+    kind: 'existing' | 'new';
+    severity?: Severity;
+    probability?: number;
+    protectedHere?: boolean;
+  }> = [];
+
+  for (const c of projection.existingConditions) {
+    items.push({
+      key: `e-${c.id}`,
+      name: c.name,
+      kind: 'existing',
+      severity: c.projectedSeverityLabel as Severity,
+      protectedHere: tone === 'protected' && c.kgCovered && c.anchorCompounds.length > 0,
+    });
+  }
+  for (const c of projection.newConditions) {
+    if (c.probability < 0.25) continue;
+    items.push({
+      key: `n-${c.conditionId}`,
+      name: c.name,
+      kind: 'new',
+      probability: c.probability,
+    });
+  }
+
+  if (items.length === 0) {
+    return (
+      <p className="text-[10px] text-muted-foreground italic text-center py-1">
+        {emptyLabel}
+      </p>
+    );
+  }
+
+  const visible = items.slice(0, 6);
+  const extra = items.length - visible.length;
+
+  return (
+    <ul className="space-y-0.5 mt-1">
+      {visible.map((it) => (
+        <li key={it.key} className="flex items-center gap-1.5 text-[10px] leading-tight">
+          {it.kind === 'existing' && it.severity ? (
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
+          ) : (
+            <Sparkles className="h-2.5 w-2.5 text-amber-500 flex-shrink-0" />
+          )}
+          <span className="flex-1 truncate text-foreground/90">{it.name}</span>
+          {it.kind === 'existing' && it.severity && (
+            <span className="text-[9px] text-muted-foreground">
+              {t(`petProfile.severity.${it.severity}`, it.severity)}
+            </span>
+          )}
+          {it.kind === 'new' && it.probability != null && (
+            <span className="text-[9px] text-amber-700 dark:text-amber-400">
+              {Math.round(it.probability * 100)}%
+            </span>
+          )}
+          {it.protectedHere && (
+            <span className="text-emerald-600 dark:text-emerald-400 text-[10px]">★</span>
+          )}
+        </li>
+      ))}
+      {extra > 0 && (
+        <li className="text-[9px] text-muted-foreground italic text-center pt-0.5">
+          +{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}
+        </li>
+      )}
+    </ul>
+  );
+};
 
 const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   conditions,
