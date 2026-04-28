@@ -34,15 +34,19 @@ function App() {
           <Router>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<Index />} />
+                {/* Public auth routes */}
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/access-pending" element={<AccessPendingPage />} />
                 <Route path="/access-rejected" element={<AccessRejectedPage />} />
-                <Route path="/tutor" element={<TutorPage />} />
-                <Route path="/veterinario" element={<VeterinarioPage />} />
-                <Route path="/veterinario/pet/new" element={<PetRegistrationPage />} />
-                <Route path="/veterinario/pet/:id" element={<PetProfilePage />} />
-                <Route path="/administrador" element={<AdministradorPage />} />
+
+                {/* Private routes — require login */}
+                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/tutor" element={<ProtectedRoute><TutorPage /></ProtectedRoute>} />
+                <Route path="/veterinario" element={<ProtectedRoute><VeterinarioPage /></ProtectedRoute>} />
+                <Route path="/veterinario/pet/new" element={<ProtectedRoute><PetRegistrationPage /></ProtectedRoute>} />
+                <Route path="/veterinario/pet/:id" element={<ProtectedRoute><PetProfilePage /></ProtectedRoute>} />
+                <Route path="/administrador" element={<ProtectedRoute><AdministradorPage /></ProtectedRoute>} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
