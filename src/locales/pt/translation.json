@@ -7254,6 +7254,7 @@
       "atAgeProjection": "Aos {{age}} anos, este pet provavelmente terá:",
       "newRisk": "Novo risco",
       "noProjectedRisks": "Nenhuma condição com risco significativo neste horizonte.",
+      "moreConditions": "mais",
       "disclaimerTitle": "Projeção heurística",
       "disclaimerBody": "Estimativa estatística baseada em raça, idade, condições atuais e literatura veterinária. Não substitui avaliação clínica individual. Versão 2 usará Knowledge Graph + IA com citações.",
       "noBreedData": "Raça \"{{breed}}\" não encontrada na base — usando valores genéricos.",
