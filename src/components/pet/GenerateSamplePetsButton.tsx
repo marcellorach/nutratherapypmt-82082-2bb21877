@@ -5,6 +5,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { warnIfGenericCategory } from '@/utils/conditionValidation';
 
 const BREED_PHOTOS: Record<string, string> = {
   'Labrador Retriever': '/images/breeds/labrador-retriever.jpg',
@@ -155,6 +156,11 @@ const GenerateSamplePetsButton: React.FC = () => {
         if (profileError) throw profileError;
 
         if (conditions.length > 0) {
+          // Guard-rail: alerta se algum sample usar termo genérico (categoria)
+          // em vez de doença específica.
+          conditions.forEach((c) =>
+            warnIfGenericCategory(c.condition_name, `sample pet "${pet.name}"`),
+          );
           const { error: condError } = await supabase
             .from('pet_conditions')
             .insert(conditions.map(c => ({ ...c, pet_id: profile.id })));
