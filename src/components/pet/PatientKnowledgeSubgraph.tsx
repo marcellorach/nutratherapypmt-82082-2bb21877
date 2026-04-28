@@ -113,17 +113,38 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
 
   const customOptions = {
     physics: {
-      stabilization: { iterations: 150, fit: true },
-      barnesHut: { gravitationalConstant: -8000, centralGravity: 0.5, springLength: 120, springConstant: 0.06 },
+      enabled: true,
+      solver: 'barnesHut',
+      stabilization: { enabled: true, iterations: 400, fit: true, updateInterval: 25 },
+      barnesHut: {
+        gravitationalConstant: -28000,
+        centralGravity: 0.05,
+        springLength: 220,
+        springConstant: 0.02,
+        damping: 0.3,
+        avoidOverlap: 0.6,
+      },
+      maxVelocity: 40,
+      minVelocity: 0.5,
     },
     edges: {
       font: { size: 9, color: '#64748b', strokeWidth: 2, strokeColor: '#ffffff' },
       smooth: { enabled: true, type: 'curvedCW', roundness: 0.2 },
+      length: 220,
     },
     nodes: {
       font: { size: 12, face: 'Inter, system-ui, sans-serif' },
       borderWidth: 2,
       shadow: { enabled: true, color: 'rgba(0,0,0,0.15)', size: 4 },
+    },
+    interaction: {
+      hover: true,
+      zoomView: true,
+      dragView: true,
+      navigationButtons: false,
+    },
+    layout: {
+      improvedLayout: true,
     },
     groups: {
       compound: { color: NODE_COLORS.compound, shape: 'dot', size: 18 },
