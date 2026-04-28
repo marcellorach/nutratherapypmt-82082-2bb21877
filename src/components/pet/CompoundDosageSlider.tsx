@@ -5,11 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export interface CompoundDosage {
   id: string;
@@ -80,6 +81,7 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [mechanismOpen, setMechanismOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -247,11 +249,31 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
             {/* Mechanism */}
             {mechanism && (
               <div className="rounded-md border bg-muted/30 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1 mb-1">
-                  <GitBranch className="h-3 w-3" />
-                  {t('petProfile.recommendation.mechanism', 'Mecanismo molecular')}
-                </p>
-                <p className="text-xs text-foreground/80 leading-relaxed">{mechanism}</p>
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+                    <GitBranch className="h-3 w-3" />
+                    {t('petProfile.recommendation.mechanism', 'Mecanismo molecular')}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-[10px] gap-1"
+                    onClick={() => setMechanismOpen(true)}
+                    title={t('common.expand', 'Expandir')}
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                    {t('common.expand', 'Expandir')}
+                  </Button>
+                </div>
+                <p className="text-xs text-foreground/80 leading-relaxed line-clamp-3">{mechanism}</p>
+                <button
+                  type="button"
+                  onClick={() => setMechanismOpen(true)}
+                  className="text-[10px] text-primary hover:underline mt-1"
+                >
+                  {t('common.readMore', 'Ler mais')}
+                </button>
               </div>
             )}
 
@@ -396,6 +418,28 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
           </div>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Mechanism full-view dialog */}
+      {mechanism && (
+        <Dialog open={mechanismOpen} onOpenChange={setMechanismOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="h-4 w-4" />
+                {t('petProfile.recommendation.mechanism', 'Mecanismo molecular')}
+              </DialogTitle>
+              <DialogDescription>
+                {name} — {condition}
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                {mechanism}
+              </p>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
