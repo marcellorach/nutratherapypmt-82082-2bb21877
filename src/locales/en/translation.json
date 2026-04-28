@@ -6975,6 +6975,15 @@
         "external": "External",
         "generic": "General"
       },
+      "totalDaily": "Daily total",
+      "doseSource": {
+        "kg": "Dose from Knowledge Graph",
+        "curated": "Curated dose (study)",
+        "web": "Dose from authoritative vet source",
+        "llm": "AI estimate — source pending",
+        "estimate": "Generic estimate — no source",
+        "needsReview": "Needs curation"
+      },
       "approve": "Approve Stack",
       "approveModified": "Approve with Modifications",
       "reject": "Reject",
