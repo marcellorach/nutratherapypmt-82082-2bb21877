@@ -16,6 +16,54 @@ const BREED_PHOTOS: Record<string, string> = {
 };
 
 const SAMPLE_PETS = [
+  // ───────────────────────────────────────────────────────────────
+  // Regra de complexidade crescente:
+  // Os 5 pets de exemplo são ordenados do caso mais simples
+  // (jovem saudável, sem condições) ao mais complexo
+  // (múltiplas condições crônicas + polifarmácia + exames).
+  // Assim o veterinário vê uma curva natural de uso da plataforma.
+  // ───────────────────────────────────────────────────────────────
+
+  // 1) MAIS SIMPLES — jovem saudável, sem condições, sem medicação
+  {
+    name: 'Buddy',
+    breed: 'Beagle',
+    age_years: 2,
+    weight_kg: 12,
+    sex: 'male' as const,
+    neutered: true,
+    owner_name: 'Carla Mendes',
+    owner_email: 'carla@example.com',
+    notes: 'Cão jovem e saudável. Check-up anual de rotina, sem queixas clínicas.',
+    conditions: [],
+    medications: [],
+    exams: [
+      { exam_type: 'Complete Blood Count', results: { wbc: 9800, rbc: 7.0, platelets: 290000, interpretation: 'normal' } },
+    ],
+  },
+
+  // 2) SIMPLES — 1 condição leve, sem medicação contínua
+  {
+    name: 'Max',
+    breed: 'Beagle',
+    age_years: 9,
+    weight_kg: 14,
+    sex: 'male' as const,
+    neutered: true,
+    owner_name: 'Lucia Oliveira',
+    owner_email: 'lucia@example.com',
+    notes: 'Beagle sênior. Sinais cognitivos iniciais e leve sobrepeso.',
+    conditions: [
+      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+    ],
+    medications: [],
+    exams: [
+      { exam_type: 'Geriatric Panel', results: { glucose: 95, bun: 22, creatinine: 1.1, alt: 45, albumin: 3.4 } },
+      { exam_type: 'Cognitive Assessment', results: { disorientation: 'mild', sleep_wake_cycle: 'normal', interaction: 'slightly_reduced' } },
+    ],
+  },
+
+  // 3) INTERMEDIÁRIO — 1 condição moderada + 1 medicação contínua
   {
     name: 'Rex',
     breed: 'Labrador Retriever',
@@ -37,29 +85,8 @@ const SAMPLE_PETS = [
       { exam_type: 'Complete Blood Count', results: { wbc: 12500, rbc: 7.2, platelets: 280000 } },
     ],
   },
-  {
-    name: 'Luna',
-    breed: 'Cavalier King Charles Spaniel',
-    age_years: 6,
-    weight_kg: 7.5,
-    sex: 'female' as const,
-    neutered: true,
-    owner_name: 'João Pereira',
-    owner_email: 'joao@example.com',
-    notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
-    conditions: [
-      { condition_name: 'Degenerative Valve Disease (Myxomatous Mitral Valve Disease)', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
-    ],
-    medications: [
-      { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
-      { medication_name: 'Furosemide', dosage: '2mg/kg', frequency: 'Once daily' },
-    ],
-    exams: [
-      { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: '32%', murmur_grade: '4/6' } },
-      { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5 } },
-    ],
-  },
+
+  // 4) COMPLEXO — 2 condições + medicação + exames ortopédicos e inflamatórios
   {
     name: 'Thor',
     breed: 'German Shepherd',
@@ -82,45 +109,29 @@ const SAMPLE_PETS = [
       { exam_type: 'Inflammatory Markers', results: { crp: 15.2, reference: '<10', interpretation: 'Mildly elevated' } },
     ],
   },
+
+  // 5) MAIS COMPLEXO — múltiplas condições crônicas + polifarmácia + cardiologia
   {
-    name: 'Mel',
-    breed: 'Golden Retriever',
-    age_years: 10,
-    weight_kg: 28,
+    name: 'Luna',
+    breed: 'Cavalier King Charles Spaniel',
+    age_years: 6,
+    weight_kg: 7.5,
     sex: 'female' as const,
     neutered: true,
-    owner_name: 'Pedro Santos',
-    owner_email: 'pedro@example.com',
-    notes: 'Geriatric patient. Cognitive decline observed in last 6 months. Joint pain and aging signs.',
+    owner_name: 'João Pereira',
+    owner_email: 'joao@example.com',
+    notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
     conditions: [
-      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+      { condition_name: 'Degenerative Valve Disease (Myxomatous Mitral Valve Disease)', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
+      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
     ],
     medications: [
-      { medication_name: 'Selegiline', dosage: '0.5mg/kg', frequency: 'Once daily morning' },
+      { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
+      { medication_name: 'Furosemide', dosage: '2mg/kg', frequency: 'Once daily' },
     ],
     exams: [
-      { exam_type: 'Cognitive Assessment', results: { disorientation: 'moderate', sleep_wake_cycle: 'altered', interaction: 'reduced', house_soiling: 'occasional' } },
-      { exam_type: 'Complete Blood Count', results: { wbc: 10200, rbc: 6.5, platelets: 265000 } },
-    ],
-  },
-  {
-    name: 'Max',
-    breed: 'Beagle',
-    age_years: 9,
-    weight_kg: 14,
-    sex: 'male' as const,
-    neutered: true,
-    owner_name: 'Lucia Oliveira',
-    owner_email: 'lucia@example.com',
-    notes: 'Senior beagle. Early cognitive changes and general aging. Overweight.',
-    conditions: [
-      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
-    ],
-    medications: [],
-    exams: [
-      { exam_type: 'Geriatric Panel', results: { glucose: 95, bun: 22, creatinine: 1.1, alt: 45, albumin: 3.4 } },
-      { exam_type: 'Cognitive Assessment', results: { disorientation: 'mild', sleep_wake_cycle: 'normal', interaction: 'slightly_reduced' } },
+      { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: '32%', murmur_grade: '4/6' } },
+      { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5 } },
     ],
   },
 ];
