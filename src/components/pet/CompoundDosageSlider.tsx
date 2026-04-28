@@ -102,6 +102,31 @@ const getLinkSource = (
   return { label: t('petProfile.recommendation.linkSource.external', 'Externo'), cls: 'bg-muted text-muted-foreground' };
 };
 
+const resolveStudyHref = (study: {
+  link?: string | null;
+  doi?: string | null;
+  pmid?: string | null;
+  title?: string | null;
+}) => {
+  if (study.link && /^https?:\/\//i.test(study.link)) return study.link;
+
+  if (study.doi) {
+    const doi = String(study.doi).replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').trim();
+    if (doi) return `https://doi.org/${doi}`;
+  }
+
+  if (study.pmid) {
+    const pmid = String(study.pmid).trim();
+    if (pmid) return `https://pubmed.ncbi.nlm.nih.gov/${pmid}`;
+  }
+
+  if (study.title) {
+    return `https://scholar.google.com/scholar?q=${encodeURIComponent(study.title)}`;
+  }
+
+  return null;
+};
+
 const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   compound,
   onChange,
@@ -402,7 +427,7 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                 <div className="space-y-2">
                   {studies.map((s) => {
                     // The pipeline now always normalizes `link` (DOI → PubMed → Scholar fallback).
-                    const href = s.link || null;
+                    const href = resolveStudyHref(s);
                     const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
                     const source = getLinkSource(href, t as any);
                     return (
