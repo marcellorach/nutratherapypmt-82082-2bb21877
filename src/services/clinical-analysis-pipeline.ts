@@ -947,6 +947,11 @@ export async function runClinicalAnalysisPipeline(
   const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions)
     .slice(0, MAX_COMPOUNDS);
 
+  // Stage 6.5: Attach supporting scientific studies to each compound
+  // by querying hierarchical_edges (compound → condition) and resolving
+  // study_ids against scientific_studies.
+  const compoundsWithStudies = await attachStudiesToCompounds(prioritizedCompounds);
+
   return {
     predispositions,
     labAlerts,
@@ -957,8 +962,66 @@ export async function runClinicalAnalysisPipeline(
     kgPathways: pathways,
     kgProjections: projections,
     recommendation,
-    compounds: prioritizedCompounds,
+    compounds: compoundsWithStudies,
     confidenceLevel: kgResults.length > 0 ? 'medium' : 'low',
     analysisTimestamp: new Date().toISOString(),
   };
+}
+
+// ─── Stage 6.5: Attach scientific studies per compound ────────────────────────
+
+async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
+  if (!compounds || compounds.length === 0) return compounds;
+
+  const TREATMENT_PREDICATES = ['TREATS', 'AMELIORATES', 'PREVENTS', 'MODULATES', 'INHIBITS', 'ACTIVATES'];
+  const MAX_STUDIES_PER_COMPOUND = 3;
+
+  const enriched = await Promise.all(
+    compounds.map(async (c) => {
+      try {
+        // Find edges where the compound (subject) targets the condition (object).
+        // hierarchical_edges stores entity ids — but we don't have ids here.
+        // Use triplet_extractions instead, which has subject_name / object_name as text.
+        const { data: triplets } = await supabase
+          .from('triplet_extractions')
+          .select('study_id, extraction_confidence, predicate, subject_name, object_name')
+          .ilike('subject_name', `%${c.name}%`)
+          .ilike('object_name', `%${c.condition}%`)
+          .in('predicate', TREATMENT_PREDICATES)
+          .eq('curation_status', 'approved')
+          .order('extraction_confidence', { ascending: false })
+          .limit(10);
+
+        const studyIds = Array.from(
+          new Set((triplets || []).map((t: any) => t.study_id).filter(Boolean))
+        ).slice(0, MAX_STUDIES_PER_COMPOUND);
+
+        if (studyIds.length === 0) {
+          return { ...c, studies: [] };
+        }
+
+        const { data: studies } = await supabase
+          .from('scientific_studies')
+          .select('id, title, title_en, year, doi, pmid, link')
+          .in('id', studyIds);
+
+        return {
+          ...c,
+          studies: (studies || []).map((s: any) => ({
+            id: s.id,
+            title: s.title || s.title_en,
+            year: s.year,
+            doi: s.doi,
+            pmid: s.pmid,
+            link: s.link,
+          })),
+        };
+      } catch (err) {
+        console.warn(`[attachStudiesToCompounds] Failed for ${c.name}:`, err);
+        return { ...c, studies: [] };
+      }
+    })
+  );
+
+  return enriched;
 }
