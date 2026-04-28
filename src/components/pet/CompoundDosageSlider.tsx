@@ -58,6 +58,10 @@ const evidenceBadgeStyles: Record<string, string> = {
   'clinical-experience': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
 };
 
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   compound,
   onChange,
