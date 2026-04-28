@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,6 +84,97 @@ function buildRegionStates(
   return { states, systemic };
 }
 
+const SEV_DOT: Record<Severity, string> = {
+  mild: 'bg-yellow-400',
+  moderate: 'bg-orange-400',
+  severe: 'bg-red-500',
+};
+
+/**
+ * Compact list of likely conditions shown beneath each anatomy panel.
+ * Merges projected existing conditions (with severity) and emergent risks
+ * (with probability). Caps at 6 lines to stay scannable.
+ */
+const ConditionsMiniList: React.FC<{
+  projection: YearProjection | undefined;
+  tone: 'neutral' | 'protected';
+  emptyLabel: string;
+  t: (k: string, opts?: any) => string;
+}> = ({ projection, tone, emptyLabel, t }) => {
+  if (!projection) return null;
+  const items: Array<{
+    key: string;
+    name: string;
+    kind: 'existing' | 'new';
+    severity?: Severity;
+    probability?: number;
+    protectedHere?: boolean;
+  }> = [];
+
+  for (const c of projection.existingConditions) {
+    items.push({
+      key: `e-${c.id}`,
+      name: c.name,
+      kind: 'existing',
+      severity: c.projectedSeverityLabel as Severity,
+      protectedHere: tone === 'protected' && c.kgCovered && c.anchorCompounds.length > 0,
+    });
+  }
+  for (const c of projection.newConditions) {
+    if (c.probability < 0.25) continue;
+    items.push({
+      key: `n-${c.conditionId}`,
+      name: c.name,
+      kind: 'new',
+      probability: c.probability,
+    });
+  }
+
+  if (items.length === 0) {
+    return (
+      <p className="text-[10px] text-muted-foreground italic text-center py-1">
+        {emptyLabel}
+      </p>
+    );
+  }
+
+  const visible = items.slice(0, 6);
+  const extra = items.length - visible.length;
+
+  return (
+    <ul className="space-y-0.5 mt-1">
+      {visible.map((it) => (
+        <li key={it.key} className="flex items-center gap-1.5 text-[10px] leading-tight">
+          {it.kind === 'existing' && it.severity ? (
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
+          ) : (
+            <Sparkles className="h-2.5 w-2.5 text-amber-500 flex-shrink-0" />
+          )}
+          <span className="flex-1 truncate text-foreground/90">{it.name}</span>
+          {it.kind === 'existing' && it.severity && (
+            <span className="text-[9px] text-muted-foreground">
+              {t(`petProfile.severity.${it.severity}`, it.severity)}
+            </span>
+          )}
+          {it.kind === 'new' && it.probability != null && (
+            <span className="text-[9px] text-amber-700 dark:text-amber-400">
+              {Math.round(it.probability * 100)}%
+            </span>
+          )}
+          {it.protectedHere && (
+            <span className="text-emerald-600 dark:text-emerald-400 text-[10px]">★</span>
+          )}
+        </li>
+      ))}
+      {extra > 0 && (
+        <li className="text-[9px] text-muted-foreground italic text-center pt-0.5">
+          +{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}
+        </li>
+      )}
+    </ul>
+  );
+};
+
 const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   conditions,
   petName,
@@ -96,8 +186,11 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   const { data: breedCtx, isLoading: breedLoading } = useBreedPredispositionsForPet(petBreed);
 
   const [yearsAhead, setYearsAhead] = useState(0);
-  const [withIntervention, setWithIntervention] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  // The compare view always shows BOTH scenarios side-by-side. The "active" one
+  // (used for the AI projection toggle and for the projected-conditions list)
+  // is always the with-protocol scenario, since that is the recommended path.
+  const withIntervention = true;
 
   // AI projection (Gemini 3.1 Pro Preview)
   const aiQuery = usePetTrajectoryProjection(petId || null, withIntervention, !!petId);
@@ -339,6 +432,12 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   className="w-full h-full"
                 />
               </div>
+              <ConditionsMiniList
+                projection={projectionsWithout[safeIndex]}
+                tone="neutral"
+                emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')}
+                t={t}
+              />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -358,6 +457,12 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   className="w-full h-full"
                 />
               </div>
+              <ConditionsMiniList
+                projection={projectionsWith[safeIndex]}
+                tone="protected"
+                emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')}
+                t={t}
+              />
             </div>
           </div>
           {/* Visual legend */}
@@ -413,20 +518,6 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <span>{t('petProfile.biologicalTimeline.today')}</span>
             <span>{petAge + Math.floor(maxSlider / 2)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
             <span>{petAge + maxSlider}{t('petProfile.biologicalTimeline.yearsShort')}</span>
-          </div>
-
-          <div className="flex items-center justify-between rounded-md border bg-muted/20 p-2 mt-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className={`h-4 w-4 ${withIntervention ? 'text-emerald-500' : 'text-muted-foreground'}`} />
-              <Label className="text-xs cursor-pointer" htmlFor="intervention-toggle">
-                {t('petProfile.biologicalTimeline.withInterventionLabel')}
-              </Label>
-            </div>
-            <Switch
-              id="intervention-toggle"
-              checked={withIntervention}
-              onCheckedChange={setWithIntervention}
-            />
           </div>
         </div>
 
