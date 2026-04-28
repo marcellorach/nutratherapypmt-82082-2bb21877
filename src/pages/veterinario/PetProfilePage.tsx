@@ -18,7 +18,6 @@ import TreatabilityChart from '@/components/pet/TreatabilityChart';
 import ScientificEvidencePanel from '@/components/pet/ScientificEvidencePanel';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
-import ClinicalAlertsPanel from '@/components/pet/ClinicalAlertsPanel';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
@@ -613,17 +612,8 @@ const PetProfilePage: React.FC = () => {
 
             {/* Analysis Results Tabs */}
             {recommendationCompounds && (
-              <Tabs defaultValue={totalAlerts > 0 ? 'clinical-alerts' : 'recommendations'}>
+              <Tabs defaultValue="recommendations">
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
-                {totalAlerts > 0 && (
-                  <TabsTrigger value="clinical-alerts" className="gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {t('petProfile.analysisTabs.clinicalAlerts')}
-                    <Badge variant="outline" className="ml-1 text-xs h-5 px-1.5 bg-orange-100 text-orange-800">
-                      {totalAlerts}
-                    </Badge>
-                  </TabsTrigger>
-                )}
                 <TabsTrigger value="recommendations" className="gap-1">
                   <Sparkles className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.recommendations')}
@@ -645,19 +635,6 @@ const PetProfilePage: React.FC = () => {
                   {t('petProfile.analysisTabs.compoundChat')}
                 </TabsTrigger>
               </TabsList>
-
-              {totalAlerts > 0 && (
-                <TabsContent value="clinical-alerts">
-                  <ClinicalAlertsPanel
-                    predispositions={predispositions}
-                    labAlerts={labAlerts}
-                    interactionAlerts={interactionAlerts}
-                    clinicalDiscoveries={clinicalDiscoveries}
-                    breed={profile.breed}
-                    ageYears={profile.age_years}
-                  />
-                </TabsContent>
-              )}
 
               <TabsContent value="recommendations">
                 <VetRecommendationPanel

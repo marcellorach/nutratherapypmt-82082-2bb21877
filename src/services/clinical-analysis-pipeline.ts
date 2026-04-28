@@ -984,7 +984,7 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
         // Use triplet_extractions instead, which has subject_name / object_name as text.
         const { data: triplets } = await supabase
           .from('triplet_extractions')
-          .select('study_id, extraction_confidence, predicate, subject_name, object_name')
+          .select('study_id, extraction_confidence, predicate, subject_name, object_name, mechanism_path')
           .ilike('subject_name', `%${c.name}%`)
           .ilike('object_name', `%${c.condition}%`)
           .in('predicate', TREATMENT_PREDICATES)
@@ -996,8 +996,27 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
           new Set((triplets || []).map((t: any) => t.study_id).filter(Boolean))
         ).slice(0, MAX_STUDIES_PER_COMPOUND);
 
+        // Mechanism: pick the most-confident triplet that has a non-empty mechanism_path
+        const topMechTriplet = (triplets || []).find((t: any) => {
+          const mp = t.mechanism_path;
+          if (!mp) return false;
+          if (Array.isArray(mp)) return mp.length > 0;
+          if (typeof mp === 'string') return mp.trim().length > 0;
+          if (typeof mp === 'object') return Object.keys(mp).length > 0;
+          return false;
+        });
+        let mechanism: string | null = null;
+        if (topMechTriplet) {
+          const mp = topMechTriplet.mechanism_path;
+          if (Array.isArray(mp)) mechanism = mp.map((s: any) => String(s)).join(' → ');
+          else if (typeof mp === 'string') mechanism = mp;
+          else if (typeof mp === 'object' && Array.isArray((mp as any).steps)) {
+            mechanism = (mp as any).steps.map((s: any) => s.label || s.name || s).join(' → ');
+          } else mechanism = JSON.stringify(mp);
+        }
+
         if (studyIds.length === 0) {
-          return { ...c, studies: [] };
+          return { ...c, studies: [], mechanism };
         }
 
         const { data: studies } = await supabase
@@ -1005,16 +1024,55 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
           .select('id, title, title_en, year, doi, pmid, link')
           .in('id', studyIds);
 
+        // For each study, fetch a single relevant chunk that contains the compound name.
+        // Prefer chunks that also contain the condition. Cap text to ~280 chars.
+        const studiesWithExcerpts = await Promise.all(
+          (studies || []).map(async (s: any) => {
+            let excerpt: string | null = null;
+            try {
+              const { data: chunks } = await supabase
+                .from('study_embeddings')
+                .select('chunk_text')
+                .eq('study_id', s.id)
+                .ilike('chunk_text', `%${c.name}%`)
+                .limit(5);
+
+              if (chunks && chunks.length > 0) {
+                // Prefer one that also mentions the condition
+                const condLower = String(c.condition || '').toLowerCase();
+                const best =
+                  chunks.find((ch: any) =>
+                    ch.chunk_text?.toLowerCase().includes(condLower)
+                  ) || chunks[0];
+                const text = String(best.chunk_text || '');
+                const idx = text.toLowerCase().indexOf(String(c.name).toLowerCase());
+                if (idx >= 0) {
+                  const start = Math.max(0, idx - 100);
+                  const end = Math.min(text.length, idx + c.name.length + 180);
+                  excerpt = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+                } else {
+                  excerpt = text.slice(0, 280) + (text.length > 280 ? '…' : '');
+                }
+              }
+            } catch (e) {
+              // ignore — excerpt is optional
+            }
+            return {
+              id: s.id,
+              title: s.title || s.title_en,
+              year: s.year,
+              doi: s.doi,
+              pmid: s.pmid,
+              link: s.link,
+              excerpt,
+            };
+          })
+        );
+
         return {
           ...c,
-          studies: (studies || []).map((s: any) => ({
-            id: s.id,
-            title: s.title || s.title_en,
-            year: s.year,
-            doi: s.doi,
-            pmid: s.pmid,
-            link: s.link,
-          })),
+          mechanism,
+          studies: studiesWithExcerpts,
         };
       } catch (err) {
         console.warn(`[attachStudiesToCompounds] Failed for ${c.name}:`, err);

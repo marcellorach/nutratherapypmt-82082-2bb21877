@@ -1,133 +1,89 @@
-## Visão Geral
+## Objetivo
 
-Quatro melhorias no fluxo do veterinário:
-
-a) Pets de exemplo com **gradiente real de complexidade clínica** (1→4 doenças).
-b) Nova subdivisão **"Alvos para Prevenção"** no painel VetGraphRAG, alimentada pela tabela `breed_predispositions`.
-c) **Análise por Condição** abre **expandida por padrão**.
-d) Cada slider de recomendação exibe **links para os estudos científicos** que embasam aquele composto→condição.
+Reorganizar abas da página do paciente, eliminar duplicação entre "Alertas Clínicos" e "Análise VetGraphRAG → Alvos para Prevenção", e enriquecer cada card do stack geroprotetor com evidências científicas (estudos + trechos destacados) e mini-grafo do composto/condição.
 
 ---
 
-## a) Gradiente de complexidade dos sample pets
+## a) Eliminar "Alertas Clínicos" duplicado
 
-Refatorar `SAMPLE_PETS` em `src/components/pet/GenerateSamplePetsButton.tsx` para que o nº de condições cresça de 1 → 4 ao longo dos 5 pets, sempre usando doenças que naturalmente coexistem na faixa etária/raça (não comorbidades obrigatórias):
+A aba "Alertas Clínicos" (foto 1) hoje mostra predisposições não diagnosticadas — exatamente o que o `VetGraphRAGInsightsPanel` já apresenta como "Alvos para Prevenção" (foto 3). 
 
-| # | Pet | Raça | Idade | Condições (não-categorias) |
-|---|-----|------|-------|----------------------------|
-| 1 | Buddy | Beagle | 4y | **1**: Mild Periodontal Disease |
-| 2 | Max | Beagle | 9y | **2**: Cognitive Dysfunction Syndrome (mild) + Mild Sarcopenia |
-| 3 | Rex | Labrador Retriever | 8y | **3**: Osteoarthritis (moderate) + Hip Dysplasia (mild) + Overweight |
-| 4 | Thor | German Shepherd | 7y | **3**: Osteoarthritis + Hip Dysplasia + Degenerative Myelopathy (early) |
-| 5 | Luna | Cavalier King Charles | 9y | **4**: MMVD (moderate) + Cognitive Dysfunction Syndrome (mild) + Chronic Mitral Regurgitation–related Pulmonary Hypertension + Mild Chronic Kidney Disease (IRIS stage 2) |
+**Mudanças em `src/pages/veterinario/PetProfilePage.tsx`:**
+- Remover a `<TabsTrigger value="clinical-alerts">` e o respectivo `<TabsContent>`.
+- Remover o import de `ClinicalAlertsPanel`.
+- Mover `labAlerts` e `interactionAlerts` (que ainda são úteis e não estão no VetGraphRAG) para dentro do `VetGraphRAGInsightsPanel` como subseções adicionais ("Alterações laboratoriais" e "Interações medicamentosas"), ou mantê-los como banner compacto acima do painel — preferência: integrar ao painel VetGraphRAG para consolidar tudo num só lugar.
+- Ajustar `defaultValue` das tabs para sempre `'recommendations'`.
 
-Critérios:
-- Todas são **doenças específicas** (passa pelo `warnIfGenericCategory`).
-- Coexistências plausíveis pela idade/raça (ex.: Cavalier idoso com cardiopatia + DRC iatrogênica leve por uso crônico de furosemida; Pastor Alemão com OA + displasia + mielopatia).
-- Medicações e exames acompanham a complexidade (Buddy: 1 exame; Luna: polifarmácia + ecocardio + painel renal).
+## b) Reordenar tabs
 
----
+Nova ordem da `TabsList`:
+1. **Recomendações** (default)
+2. **Caminho Biológico**
+3. **Evidência Científica**
+4. **Projeção de Melhora**
+5. **Chat por Composto**
 
-## b) Nova categoria "Alvos para Prevenção" (predisposição racial/etária)
+(Alertas Clínicos removido conforme item a.)
 
-No `VetGraphRAGInsightsPanel.tsx`:
+## c) Enriquecer cards do stack geroprotetor
 
-- **Renomear** "Prevenção Futura" para **"Alvos para Prevenção"** (key `petProfile.insights.preventionTargets`).
-- A categoria já é alimentada por `predispositions` vindas de `breed_predispositions` (tabela já existe — ver `clinical-analysis-pipeline.ts` linha 81-130). A lógica está quase pronta; vamos:
-  - Garantir que **todas** as predisposições não diagnosticadas apareçam (hoje filtra implicitamente por já ter ≥1 triplet).
-  - Adicionar **filtro etário**: priorizar predisposições cujo `risk_factor` é relevante para a faixa etária do pet (ex.: pet sênior → mostrar primeiro doenças degenerativas).
-  - Mostrar badge com `risk_factor` (ex.: "3.2× risco") e `evidence_grade`.
-  - Texto descritivo: "Doença comum em {breed} a partir de {age} anos. Estratégias de prevenção sugeridas pelo KG."
+Cada card de composto em `CompoundDosageSlider.tsx` ganha um bloco colapsável **"Ver evidências e contexto"** com 3 sub-seções:
 
-Banco de dados: **já existe** (`breed_predispositions` com `breed_id`, `condition_id`, `risk_factor`, `evidence_grade`, `notes`). Não precisa migração.
+### c.1) Estudos científicos com trechos destacados
+- Já temos `studies[]` anexado pelo `attachStudiesToCompounds` em `clinical-analysis-pipeline.ts`.
+- **Ampliar o backend** (`attachStudiesToCompounds`) para também retornar, por estudo:
+  - `excerpt`: trecho relevante puxado de `study_embeddings.chunk_text` filtrando o chunk que contenha tanto o nome do composto quanto o nome da condição (ILIKE simples). Limitar a ~280 caracteres, com `...` antes/depois do match.
+  - Já temos `doi`/`pmid`/`link` para o link externo.
+- **Frontend**: cada estudo vira um item expansível mostrando título + ano + link + trecho destacado (com o termo do composto em `<mark>`).
 
----
+### c.2) Mini-grafo do composto e condições
+- Reutilizar `PatientKnowledgeSubgraph` (já existe) em modo compacto, filtrado para o composto atual + a condição alvo do card.
+- Renderizar em um `<Collapsible>` separado ("Ver grafo de conexões"), altura fixa ~280px.
 
-## c) Análise por Condição expandida por padrão
+### c.3) Mecanismo molecular resumido
+- Aproveitar campos `mechanism_path` das triplets já buscadas em `attachStudiesToCompounds` para mostrar a via biológica (ex.: "Curcumin → inibe NF-κB → reduz IL-6"). Texto curto, sem componente novo.
 
-Em `src/components/pet/ConditionInsightCard.tsx` (linha 97):
+### Layout do card resultante:
 
-```ts
-const [expanded, setExpanded] = useState(true); // antes: false
+```text
+[ícone] Composto → Condição           [KG-backed] [X]
+        Via knowledge graph
+        ━━━━━●━━━━━━━━━ slider
+        5 mg/kg     Recomendado: 27.5     50 mg/kg
+                    27.5 mg/kg
+
+        💬 Discutir esta recomendação           ▾
+        📚 Ver evidências e contexto            ▾
+            ├─ Mecanismo: Composto → via X → efeito Y
+            ├─ Estudos (3):
+            │   • Título (2024) [link]
+            │       "...trecho destacado com <mark>composto</mark>..."
+            │   • ...
+            └─ 🕸 Ver grafo de conexões         ▾
+                  [mini PatientKnowledgeSubgraph]
 ```
 
-Mantém o botão de colapsar/expandir — só inverte o default.
-
 ---
 
-## d) Links de estudos sob cada recomendação
+## Detalhes técnicos
 
-### Backend
-1. Estender `CompoundDosage` (em `CompoundDosageSlider.tsx`) com:
-   ```ts
-   studies?: Array<{ id: string; title: string; year?: number; doi?: string; pmid?: string; link?: string }>;
-   ```
+**Arquivos modificados:**
+- `src/pages/veterinario/PetProfilePage.tsx` — remover aba Alertas Clínicos, reordenar tabs, ajustar `defaultValue`.
+- `src/components/pet/VetGraphRAGInsightsPanel.tsx` — receber `labAlerts` e `interactionAlerts` e exibir como subseções extras.
+- `src/services/clinical-analysis-pipeline.ts` — em `attachStudiesToCompounds`, também buscar `mechanism_path` da triplet de maior confiança e, para cada estudo, buscar 1 chunk relevante de `study_embeddings` (ILIKE composto + condição) → campo `excerpt`.
+- `src/components/pet/CompoundDosageSlider.tsx` — extender interface `CompoundDosage` com `excerpt`, `mechanism`; novo bloco `Collapsible` "Evidências e contexto" com estudos expandíveis, mecanismo e mini-grafo.
+- `src/components/pet/PatientKnowledgeSubgraph.tsx` — aceitar prop opcional `compactMode` + filtro `focusCompound` / `focusConditions` para renderizar subgrafo enxuto dentro do card.
+- `src/i18n.ts` — incrementar `I18N_VERSION` (ex.: `1.24.0` → `1.25.0`).
+- `src/locales/pt/translation.json` + `src/locales/en/translation.json` — novas chaves: `petProfile.recommendation.evidenceAndContext`, `mechanism`, `viewGraph`, `excerpt`.
 
-2. Em `clinical-analysis-pipeline.ts` (bloco `compounds = nutraceuticals.map(...)`, linhas 922-943):
-   - Para cada composto recomendado, consultar `hierarchical_edges` filtrando por `subject_name = compound.name` AND `object_name ILIKE condition` AND `predicate IN ('TREATS','AMELIORATES','PREVENTS','MODULATES')`.
-   - Pegar o array `study_ids` e fazer JOIN com `scientific_studies` (`id, title, year, doi, pmid, link`).
-   - Limitar aos top 3 estudos por composto (ordenar por confidence desc).
-   - Anexar ao objeto `compound.studies`.
+**Sem migrações de banco.** As colunas e dados (`study_embeddings.chunk_text`, `triplet_extractions.mechanism_path`) já existem.
 
-### Frontend
-Em `CompoundDosageSlider.tsx`, abaixo do bloco `Rationale` (linha 176) e acima do slider, ou logo abaixo do slider e antes do "Discutir esta recomendação":
+**Documentação:**
+- `CHANGELOG.md` — entrada em `[Unreleased] → Changed` (consolidação de alertas) e `Added` (evidências expandidas no card).
+- Bumpar versão de `ARCHITECTURE.md` se aplicável (mudança estrutural de navegação).
 
-```tsx
-{studies && studies.length > 0 && (
-  <div className="mt-3 pl-6 space-y-1">
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-      {t('petProfile.recommendation.evidenceStudies')}
-    </p>
-    {studies.map(s => (
-      <a key={s.id} href={s.link || (s.doi ? `https://doi.org/${s.doi}` : `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}`)}
-         target="_blank" rel="noopener noreferrer"
-         className="flex items-start gap-1.5 text-xs text-primary hover:underline">
-        <BookOpen className="h-3 w-3 mt-0.5 shrink-0" />
-        <span className="line-clamp-2">{s.title} {s.year && `(${s.year})`}</span>
-      </a>
-    ))}
-  </div>
-)}
-```
+## Resposta às perguntas
 
-Quando o composto não tiver estudos no KG, ocultar a seção (sem mock).
+> Possível? Razoável?
 
----
-
-## i18n & Versionamento
-
-Adicionar chaves em `src/locales/pt/translation.json` e `src/locales/en/translation.json`:
-- `petProfile.insights.preventionTargets`
-- `petProfile.insights.preventionTargetsDesc`
-- `petProfile.recommendation.evidenceStudies`
-- `petProfile.recommendation.noStudies` (opcional)
-
-Incrementar `I18N_VERSION` em `src/i18n.ts` (1.23.0 → **1.24.0**).
-
----
-
-## Memória de projeto
-
-Atualizar `mem://features/sample-pets-complexity-order` com a nova distribuição (1→4 doenças).
-
----
-
-## Documentação
-
-- `CHANGELOG.md` em `[Unreleased]` → Added/Changed conforme cada item.
-
----
-
-## Arquivos afetados
-
-- `src/components/pet/GenerateSamplePetsButton.tsx` (a)
-- `src/components/pet/VetGraphRAGInsightsPanel.tsx` (b)
-- `src/components/pet/ConditionInsightCard.tsx` (c — 1 linha)
-- `src/components/pet/CompoundDosageSlider.tsx` (d — UI dos estudos)
-- `src/services/clinical-analysis-pipeline.ts` (d — anexar estudos aos compostos)
-- `src/locales/{pt,en}/translation.json` (chaves novas)
-- `src/i18n.ts` (versão)
-- `mem://features/sample-pets-complexity-order`
-- `CHANGELOG.md`
-
-Sem migrações de banco — a tabela `breed_predispositions` e o array `study_ids` em `hierarchical_edges` já existem.
+Sim, totalmente possível e razoável — todos os dados já estão no banco (chunks vetorizados em `study_embeddings`, mechanism_path em `triplet_extractions`, grafo do paciente já renderizado em outra aba). É só reaproveitar e consolidar dentro do card. O ganho de UX é alto: o veterinário vê dose + porquê + evidência + grafo sem sair do card.
