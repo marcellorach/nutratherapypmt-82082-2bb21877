@@ -148,20 +148,32 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Cache check
-    const { data: cached } = await supabase
-      .from("compound_dosage_reference")
-      .select("*")
-      .ilike("compound_name_en", compound)
-      .eq("species", species)
-      .or(
-        condition
-          ? `condition_name_en.ilike.${condition},condition_name_en.is.null`
-          : "condition_name_en.is.null",
-      )
-      .order("condition_name_en", { ascending: true, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
+    // Cache check — try condition-specific first, then generic (condition is null)
+    let cached: any = null;
+    if (condition) {
+      const { data } = await supabase
+        .from("compound_dosage_reference")
+        .select("*")
+        .ilike("compound_name_en", `%${compound}%`)
+        .ilike("condition_name_en", `%${condition}%`)
+        .eq("species", species)
+        .order("confidence", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      cached = data;
+    }
+    if (!cached) {
+      const { data } = await supabase
+        .from("compound_dosage_reference")
+        .select("*")
+        .ilike("compound_name_en", `%${compound}%`)
+        .is("condition_name_en", null)
+        .eq("species", species)
+        .order("confidence", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      cached = data;
+    }
 
     if (cached) {
       return new Response(
@@ -196,18 +208,41 @@ Deno.serve(async (req) => {
       notes: result.notes ?? null,
     };
 
-    const { data: inserted, error: insErr } = await supabase
+    // Manual SELECT-then-INSERT/UPDATE (the table uses a functional unique
+    // index that PostgREST upsert cannot target via onConflict).
+    let existingQuery = supabase
       .from("compound_dosage_reference")
-      .upsert(insertRow, {
-        onConflict: "compound_name_en,condition_name_en,species",
-        ignoreDuplicates: false,
-      })
-      .select()
-      .maybeSingle();
+      .select("id")
+      .ilike("compound_name_en", compound)
+      .eq("species", species);
+    existingQuery = condition
+      ? existingQuery.ilike("condition_name_en", condition)
+      : existingQuery.is("condition_name_en", null);
+    const { data: existing } = await existingQuery.limit(1).maybeSingle();
 
-    if (insErr) {
-      console.error("Insert error", insErr);
-      // Fall back: return result without persisting
+    let saved: any = null;
+    let saveErr: any = null;
+    if (existing?.id) {
+      const { data, error } = await supabase
+        .from("compound_dosage_reference")
+        .update(insertRow)
+        .eq("id", existing.id)
+        .select()
+        .maybeSingle();
+      saved = data;
+      saveErr = error;
+    } else {
+      const { data, error } = await supabase
+        .from("compound_dosage_reference")
+        .insert(insertRow)
+        .select()
+        .maybeSingle();
+      saved = data;
+      saveErr = error;
+    }
+
+    if (saveErr) {
+      console.error("Persist error", saveErr);
       return new Response(
         JSON.stringify({ source: "ai", reference: insertRow }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -215,7 +250,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ source: "ai", reference: inserted ?? insertRow }),
+      JSON.stringify({ source: "ai", reference: saved ?? insertRow }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
