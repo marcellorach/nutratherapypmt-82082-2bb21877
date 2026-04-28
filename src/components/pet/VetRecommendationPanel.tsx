@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -115,6 +115,10 @@ const VetRecommendationPanel: React.FC<VetRecommendationPanelProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [compounds, setCompounds] = useState<CompoundDosage[]>(initialCompounds);
+
+  useEffect(() => {
+    setCompounds(initialCompounds);
+  }, [initialCompounds]);
 
   const handleDosageChange = (id: string, newDosage: number) => {
     setCompounds(prev => prev.map(c => c.id === id ? { ...c, dosageCurrent: newDosage } : c));
