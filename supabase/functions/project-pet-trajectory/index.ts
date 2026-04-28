@@ -267,7 +267,37 @@ OUTPUT REQUIREMENTS:
             properties: {
               confidence: { type: "string", enum: ["high", "medium", "low"] },
               rationale: { type: "string" },
-              years_gained: { type: "number" },
+              years_gained_total: { type: "number" },
+              years_gained_breakdown: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    condition: { type: "string" },
+                    years_contribution: { type: "number" },
+                    anchor_compound: { type: "string" },
+                    citation: { type: "string" },
+                  },
+                  required: ["condition", "years_contribution"],
+                },
+              },
+              protocol_caveats: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["polypharmacy", "adherence", "no_kg_coverage", "partial_coverage", "contraindication"],
+                    },
+                    message: { type: "string" },
+                    related_condition: { type: "string" },
+                  },
+                  required: ["type", "message"],
+                },
+              },
               years: {
                 type: "array",
                 items: {
@@ -338,7 +368,7 @@ OUTPUT REQUIREMENTS:
                 },
               },
             },
-            required: ["confidence", "rationale", "years_gained", "years", "citations"],
+            required: ["confidence", "rationale", "years_gained_total", "years_gained_breakdown", "protocol_caveats", "years", "citations"],
           },
         },
       },
