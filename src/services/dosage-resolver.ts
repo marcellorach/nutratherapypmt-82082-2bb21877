@@ -72,37 +72,59 @@ async function lookupCuratedReference(
   condition: string | null,
   species: string,
 ) {
-  // Tier A: exact compound + condition
-  if (condition) {
-    const { data: exact } = await supabase
+  // Build candidate variants (case/diacritics/whitespace insensitive via ilike + %)
+  const stripped = compound.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+  const root = stripped.split(/\s+/)[0]; // first significant token
+  const compoundCandidates = Array.from(
+    new Set([compound.trim(), stripped, root].filter(Boolean)),
+  );
+
+  const tryCompound = async (
+    pattern: string,
+    cond: string | null,
+  ) => {
+    let q = supabase
       .from("compound_dosage_reference")
       .select("*")
-      .ilike("compound_name_en", compound)
-      .ilike("condition_name_en", condition)
-      .eq("species", species)
+      .ilike("compound_name_en", `%${pattern}%`)
+      .eq("species", species);
+    if (cond === null) {
+      q = q.is("condition_name_en", null);
+    } else {
+      q = q.ilike("condition_name_en", `%${cond}%`);
+    }
+    const { data } = await q
+      .order("confidence", { ascending: false })
+      .limit(1)
       .maybeSingle();
-    if (exact) return { row: exact, tier: "exact" as const };
+    return data;
+  };
+
+  // Tier A: exact compound + condition
+  if (condition) {
+    for (const c of compoundCandidates) {
+      const exact = await tryCompound(c, condition);
+      if (exact) return { row: exact, tier: "exact" as const };
+    }
   }
   // Tier B: compound only
-  const { data: generic } = await supabase
-    .from("compound_dosage_reference")
-    .select("*")
-    .ilike("compound_name_en", compound)
-    .is("condition_name_en", null)
-    .eq("species", species)
-    .maybeSingle();
-  if (generic) return { row: generic, tier: "generic" as const };
+  for (const c of compoundCandidates) {
+    const generic = await tryCompound(c, null);
+    if (generic) return { row: generic, tier: "generic" as const };
+  }
 
   // Tier C: any condition for this compound
-  const { data: any } = await supabase
-    .from("compound_dosage_reference")
-    .select("*")
-    .ilike("compound_name_en", compound)
-    .eq("species", species)
-    .order("confidence", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (any) return { row: any, tier: "any" as const };
+  for (const c of compoundCandidates) {
+    const { data: anyRow } = await supabase
+      .from("compound_dosage_reference")
+      .select("*")
+      .ilike("compound_name_en", `%${c}%`)
+      .eq("species", species)
+      .order("confidence", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (anyRow) return { row: anyRow, tier: "any" as const };
+  }
 
   return null;
 }

@@ -11,6 +11,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCompoundDosage } from './dosage-resolver';
+import {
+  canonicalCompoundName,
+  canonicalConditionName,
+} from './clinical-name-canonicalizer';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -949,9 +953,11 @@ export async function runClinicalAnalysisPipeline(
 
   const compounds = await Promise.all(nutraceuticals.map(async (n: any, idx: number) => {
     const condition = n.condition || n.targetCondition || conditionNames[idx % conditionNames.length] || 'geriatric wellness';
+    const canonicalCompound = canonicalCompoundName(n.name || '');
+    const canonicalCondition = canonicalConditionName(condition);
     const resolved = await resolveCompoundDosage({
-      compoundName: n.name,
-      conditionName: condition,
+      compoundName: canonicalCompound,
+      conditionName: canonicalCondition,
       species: profile.species || 'canine',
       petWeightKg: profile.weight_kg ?? null,
       petAgeYears: profile.age_years ?? null,
