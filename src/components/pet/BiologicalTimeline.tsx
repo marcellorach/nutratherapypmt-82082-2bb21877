@@ -488,7 +488,9 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
               <strong>{t('petProfile.biologicalTimeline.disclaimerTitle')}:</strong>{' '}
-              {t('petProfile.biologicalTimeline.disclaimerBody')}
+              {aiSource === 'ai'
+                ? t('petProfile.biologicalTimeline.disclaimerBodyAi')
+                : t('petProfile.biologicalTimeline.disclaimerBody')}
             </span>
           </p>
           {!hasBreedData && !breedLoading && (
@@ -502,6 +504,29 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             </p>
           )}
         </div>
+
+        {/* AI evidence citations (Phase 2) */}
+        {aiSource === 'ai' && aiCitations.length > 0 && (
+          <div className="rounded-md border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/10 p-2 space-y-1.5">
+            <p className="text-[11px] font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <BookOpen className="h-3 w-3" />
+              {t('petProfile.biologicalTimeline.evidenceUsed', { count: aiCitations.length })}
+            </p>
+            <ul className="space-y-1 max-h-[140px] overflow-y-auto pr-1">
+              {aiCitations.slice(0, 6).map((c, i) => (
+                <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] h-4 px-1 flex-shrink-0 bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-300"
+                  >
+                    {t(`petProfile.biologicalTimeline.citationType.${c.type}`, c.type)}
+                  </Badge>
+                  <span className="leading-tight">{c.summary}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
