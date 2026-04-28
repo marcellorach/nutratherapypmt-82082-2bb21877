@@ -7127,7 +7127,14 @@
       "triplets": "triplets",
       "conflicts": "conflicts",
       "compounds": "compounds",
-      "processing": "processing..."
+      "processing": "processing...",
+      "log": {
+        "title": "Clinical Pipeline Console",
+        "eventCount": "{{count}} events",
+        "clear": "Clear",
+        "export": "Export",
+        "waiting": "Waiting for pipeline events..."
+      }
     },
     "conditionInsights": {
       "treatments": "KG Treatments",
