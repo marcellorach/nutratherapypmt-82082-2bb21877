@@ -1109,14 +1109,41 @@ async function attachStudiesToCompounds(
           // synergies are optional
         }
 
-        if (studyIds.length === 0) {
+        // Fallback: if no paired (compound, condition) approved triplet exists,
+        // surface up to 3 high-confidence studies that mention the compound
+        // alone (any condition) so the vet still has clickable references.
+        let provenance: 'paired' | 'compound-only' = 'paired';
+        let effectiveStudyIds = studyIds;
+        if (effectiveStudyIds.length === 0) {
+          try {
+            const { data: fallbackTriplets } = await supabase
+              .from('triplet_extractions')
+              .select('study_id, extraction_confidence')
+              .ilike('subject_name', `%${c.name}%`)
+              .in('predicate', TREATMENT_PREDICATES)
+              .eq('curation_status', 'approved')
+              .order('extraction_confidence', { ascending: false })
+              .limit(20);
+            const ids = Array.from(
+              new Set((fallbackTriplets || []).map((t: any) => t.study_id).filter(Boolean))
+            ).slice(0, MAX_STUDIES_PER_COMPOUND);
+            if (ids.length > 0) {
+              effectiveStudyIds = ids;
+              provenance = 'compound-only';
+            }
+          } catch (e) {
+            // fallback is best-effort
+          }
+        }
+
+        if (effectiveStudyIds.length === 0) {
           return { ...c, studies: [], mechanism, kgTriplets, synergies };
         }
 
         const { data: studies } = await supabase
           .from('scientific_studies')
           .select('id, title, title_en, year, doi, pmid, link')
-          .in('id', studyIds);
+          .in('id', effectiveStudyIds);
 
         // For each study, fetch a single relevant chunk that contains the compound name.
         // Prefer chunks that also contain the condition. Cap text to ~280 chars.
@@ -1161,6 +1188,7 @@ async function attachStudiesToCompounds(
               pmid: s.pmid,
               link: resolvedLink,
               excerpt,
+              provenance,
             };
           })
         );
