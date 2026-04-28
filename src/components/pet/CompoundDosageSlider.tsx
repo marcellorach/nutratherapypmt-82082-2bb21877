@@ -393,26 +393,47 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                   <BookOpen className="h-3 w-3" />
                   {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')} ({studies.length})
                 </p>
+                {studies.every((s: any) => s.provenance === 'compound-only') && (
+                  <div className="flex items-start gap-1.5 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40 rounded px-2 py-1">
+                    <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{t('petProfile.recommendation.studiesCompoundOnly', 'Estudos sobre o composto (não específicos a esta condição).')}</span>
+                  </div>
+                )}
                 <div className="space-y-2">
                   {studies.map((s) => {
                     // The pipeline now always normalizes `link` (DOI → PubMed → Scholar fallback).
                     const href = s.link || null;
                     const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
+                    const source = getLinkSource(href, t as any);
                     return (
                       <div key={s.id} className="border-l-2 border-primary/40 pl-3 py-1">
-                        {href ? (
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline font-medium line-clamp-2 block"
-                            title={label}
-                          >
-                            {label}
-                          </a>
-                        ) : (
-                          <span className="text-xs text-foreground font-medium line-clamp-2 block">{label}</span>
-                        )}
+                        <div className="flex items-start gap-1.5 flex-wrap">
+                          {href ? (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline font-medium line-clamp-2 inline-flex items-start gap-1"
+                              title={`${label} — ${t('petProfile.recommendation.openExternal', 'Abrir estudo')}`}
+                              aria-label={t('petProfile.recommendation.openExternal', 'Abrir estudo')}
+                            >
+                              <span>{label}</span>
+                              <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 opacity-70" />
+                            </a>
+                          ) : (
+                            <span className="text-xs text-foreground font-medium line-clamp-2">{label}</span>
+                          )}
+                          {source && (
+                            <span className={cn('text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5', source.cls)}>
+                              {source.label}
+                            </span>
+                          )}
+                          {(s as any).provenance === 'compound-only' && (
+                            <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                              {t('petProfile.recommendation.linkSource.generic', 'Geral')}
+                            </span>
+                          )}
+                        </div>
                         {s.excerpt && (
                           <p
                             className="text-[11px] text-muted-foreground italic mt-1 leading-relaxed"
