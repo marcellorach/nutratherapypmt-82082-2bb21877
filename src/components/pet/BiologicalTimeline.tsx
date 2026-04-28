@@ -5,9 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dna, Activity, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown, Heart, BrainCircuit, BookOpen, Loader2 } from 'lucide-react';
-import dogSilhouette from '@/assets/dog-silhouette.png';
+import { Dna, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown, Heart, BrainCircuit, BookOpen, Loader2, ShieldCheck } from 'lucide-react';
 import {
   buildBiologicalTimeline,
   type ActiveConditionInput,
@@ -15,6 +13,9 @@ import {
 } from '@/services/biological-timeline-engine';
 import { useBreedPredispositionsForPet } from '@/hooks/useBreedPredispositionsForPet';
 import { usePetTrajectoryProjection } from '@/hooks/usePetTrajectoryProjection';
+import { usePetCompoundCoverage } from '@/hooks/usePetCompoundCoverage';
+import { mapConditionToRegions, type AnatomyRegionId } from '@/services/anatomy-region-map';
+import DogAnatomySVG, { type RegionState, type Severity } from './DogAnatomySVG';
 
 // Same body region map as the legacy DigitalTwinDog (kept for visual continuity)
 const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
@@ -61,18 +62,6 @@ const severityPulseColors: Record<string, string> = {
   moderate: 'bg-orange-400',
   severe: 'bg-red-500',
 };
-
-const severityRingColors: Record<string, string> = {
-  mild: 'ring-yellow-400/50',
-  moderate: 'ring-orange-400/50',
-  severe: 'ring-red-500/50',
-};
-
-function findRegion(name: string) {
-  const key = name.toLowerCase();
-  const match = Object.entries(bodyRegionMap).find(([k]) => key.includes(k));
-  return match ? match[1] : { x: 50, y: 30, region: 'systemic' };
-}
 
 interface BiologicalTimelineProps {
   conditions: Array<{
