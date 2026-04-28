@@ -29,6 +29,28 @@ export interface PatientProfile {
   neutered: boolean;
 }
 
+// ─── Progress reporting ──────────────────────────────────────────────────────
+
+export type PipelineStageId =
+  | 'stage2_predispositions'
+  | 'stage3_labs'
+  | 'stage4_kg'
+  | 'stage5_interactions'
+  | 'stage6_recommendation';
+
+export type PipelineLogLevel = 'info' | 'success' | 'warn' | 'error';
+
+export type PipelineProgressEvent =
+  | { kind: 'stage-start'; stage: PipelineStageId; message: string; meta?: Record<string, any> }
+  | { kind: 'stage-end'; stage: PipelineStageId; message: string; meta?: Record<string, any> }
+  | { kind: 'log'; level: PipelineLogLevel; message: string; meta?: Record<string, any> };
+
+export type PipelineProgressCallback = (event: PipelineProgressEvent) => void;
+
+export interface RunClinicalAnalysisOptions {
+  onProgress?: PipelineProgressCallback;
+}
+
 export interface BreedPredisposition {
   id: string;
   condition_name: string;
@@ -274,13 +296,20 @@ function getCanonicalConditionNames(conditionName: string): string[] {
 // ─── Stage 4: KG Query ──────────────────────────────────────────────────────
 
 async function queryKnowledgeGraph(
-  conditionNames: string[]
+  conditionNames: string[],
+  onProgress?: PipelineProgressCallback,
 ): Promise<any[]> {
   const kgResults: any[] = [];
 
   for (const condition of conditionNames.length > 0 ? conditionNames : ['aging', 'longevity']) {
     const candidates = getCanonicalConditionNames(condition);
     let found = false;
+    onProgress?.({
+      kind: 'log',
+      level: 'info',
+      message: `Consultando Knowledge Graph para "${condition}"...`,
+      meta: { condition, candidates },
+    });
     
     for (const candidate of candidates) {
       try {
@@ -290,17 +319,35 @@ async function queryKnowledgeGraph(
 
         if (!kgError && kgData?.data && (kgData.data.nodes?.length > 0 || kgData.data.relationships?.length > 0)) {
           kgResults.push({ condition, graphData: kgData.data });
-          console.log(`✅ KG hit for "${condition}" using canonical name "${candidate}": ${kgData.data.nodes?.length || 0} nodes`);
+          const nodes = kgData.data.nodes?.length || 0;
+          const edges = (kgData.data.relationships?.length || kgData.data.edges?.length || 0);
+          console.debug(`✅ KG hit for "${condition}" via "${candidate}": ${nodes} nodes / ${edges} edges`);
+          onProgress?.({
+            kind: 'log',
+            level: 'success',
+            message: `KG: ${nodes} nós · ${edges} relações para "${condition}" (via "${candidate}")`,
+            meta: { condition, canonical: candidate, nodes, edges },
+          });
           found = true;
           break; // found a match, stop trying alternatives
         }
       } catch (e) {
         console.warn(`KG query for "${candidate}" (from "${condition}") failed:`, e);
+        onProgress?.({
+          kind: 'log',
+          level: 'warn',
+          message: `Falha ao consultar KG para "${candidate}" (${(e as Error).message || 'erro'})`,
+        });
       }
     }
     
     if (!found) {
       console.warn(`⚠️ No KG data found for "${condition}" after trying: ${candidates.join(', ')}`);
+      onProgress?.({
+        kind: 'log',
+        level: 'warn',
+        message: `Sem dados no KG para "${condition}" após tentar ${candidates.length} variantes`,
+      });
     }
   }
 
