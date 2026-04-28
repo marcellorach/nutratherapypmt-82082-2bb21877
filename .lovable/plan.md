@@ -1,146 +1,87 @@
+# Substituir categorias genéricas por doenças específicas
 
+## Problema
 
-# Análise Profunda: Problemas na Classificação de Condições e Geração de Exemplos
+Você está certo: **"Cardiovascular Disease" é uma categoria**, não uma doença. O mesmo se aplica a "Chronic Inflammation". O perfil clínico exige a doença real (ex: Cardiomiopatia Dilatada, Doença Valvar Mitral Mixomatosa, etc.) para que o motor de recomendação consiga cruzar com o Knowledge Graph corretamente.
 
-## Problema Identificado
+Verifiquei o banco — temos as doenças canônicas corretas em `health_conditions`:
+- `Doença Valvular Degenerativa` / `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)`
+- `Cardiomiopatia dilatada` / `Dilated Cardiomyopathy`
+- `Aterosclerose` / `Atherosclerosis`
+- `Insuficiência cardíaca` / `Heart Disease`
 
-Você tem razão — há **dois problemas sérios e interligados**:
+E os pets demo atualmente no banco têm:
+- **Luna** (Cavalier King Charles, sopro 4/6, VHS 11.5): hoje gravada como `Cardiovascular Disease` ❌
+- **Thor** (Pastor Alemão, CRP elevado): hoje gravada como `Chronic Inflammation` ❌ (também é categoria)
 
-### Problema 1: "Cellular Senescence" é gravada como condição real no banco de dados
+## Correções
 
-No `GenerateSamplePetsButton.tsx`, o Rex é criado com **Cellular Senescence como condição diagnosticada**:
-```
-conditions: [
-  { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active' },
-  { condition_name: 'Cellular Senescence', severity: 'mild', status: 'monitoring' },
-]
-```
+### 1. Pets de exemplo (`GenerateSamplePetsButton.tsx`)
 
-Isso é gravado diretamente na tabela `pet_conditions` — **como se um veterinário tivesse diagnosticado senescência celular**. Um veterinário **nunca** diagnosticaria "senescência celular" — isso é um **processo biológico molecular**, não um diagnóstico clínico. Nenhum exame veterinário de rotina detecta isso.
+Trocar nas definições do `SAMPLE_PETS`:
 
-### Problema 2: A classificação de origem é baseada em nome, não em fonte real
+| Pet | Antes | Depois | Justificativa clínica |
+|-----|-------|--------|-----------------------|
+| **Luna** (Cavalier King Charles, 6a, sopro 4/6, coração aumentado) | `Cardiovascular Disease` | `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)` | MMVD é a doença #1 da raça, compatível com sopro mitral e VHS aumentado |
+| **Thor** (Pastor Alemão, CRP 15.2) | `Chronic Inflammation` | `Hip Dysplasia` (já indicado no exame `hips: 'mild dysplasia'`) | Doença real, não categoria; CRP elevado é achado, não diagnóstico |
 
-Em `ConditionInsightCard.tsx`, a função `inferOrigin()` decide a badge por **string matching**:
-```typescript
-if (condition.condition_name?.includes('senescen')) return 'inferred_comorbidity';
-if (condition.condition_name?.includes('inflamm')) return 'inferred_comorbidity';
-return 'vet_diagnosis';
-```
+Os demais pets (Rex, Mel, Max) já usam doenças específicas corretas (`Osteoarthritis`, `Cognitive Dysfunction Syndrome`).
 
-Ou seja: a origem não é rastreada — é **adivinhada pelo nome**. Não existe coluna `origin` na tabela `pet_conditions`.
+### 2. Migração de dados existentes no banco
 
-### Problema 3: O pipeline de insights mistura categorias
+Como já existe a Luna no banco com a condição errada, criar migração que faz UPDATE:
 
-No `VetGraphRAGInsightsPanel.tsx`, condições de geociência são adicionadas automaticamente se existirem triplets no KG:
-```typescript
-const geroscience = ['Cellular Senescence', 'Inflammaging', ...];
-// Se existir qualquer triplet mencionando o termo → vira "hidden_comorbidity"
-```
-
-Mas o mesmo termo já existe como condição real no banco (inserido pelo sample generator), criando **duplicação e confusão categórica**.
-
----
-
-## Fluxo Atual (problemático)
-
-```text
-GenerateSamplePetsButton
-  |
-  +-- Grava "Cellular Senescence" em pet_conditions
-  |   (como se fosse diagnóstico veterinário)
-  |
-  v
-ConditionInsightCard.inferOrigin()
-  |
-  +-- Vê "senescen" no nome → badge "Comorbidade Inferida"
-  |   (mas está no banco como condição real!)
-  |
-  v
-VetGraphRAGInsightsPanel
-  |
-  +-- Também tenta inferir geociência do KG
-  |   (duplica se já está no banco)
-  |
-  v
-RESULTADO: Senescência aparece como "condição do paciente"
-com badge de "inferida" — sem lógica clínica
-```
-
----
-
-## Plano de Correção
-
-### 1. Adicionar coluna `origin` à tabela `pet_conditions`
-
-Migração SQL para adicionar rastreamento real de origem:
 ```sql
-ALTER TABLE pet_conditions ADD COLUMN origin TEXT DEFAULT 'vet_diagnosis';
--- Valores: 'vet_diagnosis', 'exam_suggested', 'breed_predisposition', 'kg_inference'
+UPDATE pet_conditions
+SET condition_name = 'Degenerative Valve Disease (Myxomatous Mitral Valve Disease)'
+WHERE condition_name = 'Cardiovascular Disease';
+
+UPDATE pet_conditions
+SET condition_name = 'Hip Dysplasia'
+WHERE condition_name = 'Chronic Inflammation';
 ```
 
-### 2. Corrigir dados de exemplo (`GenerateSamplePetsButton.tsx`)
+### 3. Guard-rail: validação anti-categoria
 
-**Remover** condições que veterinários não diagnosticam (Cellular Senescence, Inflammaging, Oxidative Stress) dos dados seed. Manter apenas condições clínicas reais:
-- Rex: Osteoarthritis (diagnóstico vet real)
-- Max: Cognitive Dysfunction Syndrome (diagnóstico vet real)
+Criar lista pequena de "termos proibidos" (categorias genéricas) em `src/utils/conditionValidation.ts`:
 
-As condições gerocientíficas (senescência, inflamaging, stress oxidativo) devem ser **inferidas pela análise VetGraphRAG**, nunca pré-gravadas.
+```ts
+export const GENERIC_CATEGORY_TERMS = [
+  'Cardiovascular Disease', 'Cardiovascular',
+  'Chronic Inflammation', 'Inflammation',
+  'Heart Disease', 'Renal Disease', 'Liver Disease',
+  'Metabolic Disease', 'Neurological Disease',
+];
 
-### 3. Reescrever `inferOrigin()` → usar coluna real
-
-Em vez de adivinhar pelo nome, ler `condition.origin` do banco:
-```typescript
-function inferOrigin(condition: any): string {
-  return condition.origin || 'vet_diagnosis';
-}
+export function isGenericCategory(name: string): boolean { ... }
 ```
 
-### 4. Separar condições clínicas de inferências moleculares no VetGraphRAGInsightsPanel
+Usar em dois lugares:
+- **`GenerateSamplePetsButton`**: dev-warning no console se algum sample usar termo proibido (previne regressão)
+- **Edge function `extract-pet-clinical-data`**: quando IA extrair texto livre, rejeitar/sinalizar nomes genéricos pedindo doença específica
 
-O pipeline de insights deve:
-- **Nunca gravar** inferências gerocientíficas na tabela `pet_conditions`
-- Mantê-las apenas como insights temporários (categoria `hidden_comorbidity`) exibidos no painel de análise
-- Exibir com badge diferente: "🧬 Inferência Molecular" em vez de "🔬 Comorbidade Inferida"
+### 4. Tradução PT/EN
 
-### 5. Criar taxonomia clara de tipos de condição
+Adicionar entradas em `src/locales/{pt,en}/translation.json` para a nova condição visível na UI da Luna:
+- `conditions.degenerativeValveDisease` → "Doença Valvular Degenerativa (MMVD)" / "Degenerative Valve Disease (MMVD)"
+- `conditions.hipDysplasia` → "Displasia Coxofemoral" / "Hip Dysplasia"
 
-```text
-NÍVEL 1 — Diagnósticos Clínicos (veterinário registra)
-  Ex.: Osteoarthritis, Hip Dysplasia, MVD, CKD, Hypothyroidism
-  Badge: 🩺 Diagnóstico Veterinário (verde)
+Incrementar `I18N_VERSION` em `src/i18n.ts`.
 
-NÍVEL 2 — Suspeitas por Exames (sistema sugere com base em labs)
-  Ex.: Kidney Insufficiency (creatinina alta), Anemia (RBC baixo)
-  Badge: 🧪 Sugerido por Exames (azul)
-
-NÍVEL 3 — Riscos Raciais (predisposição genética, não diagnosticado)
-  Ex.: "Labrador: risco 3.2x para Displasia" 
-  Badge: 🧬 Predisposição Racial (âmbar)
-  NÃO deve aparecer como "condição" — apenas como alerta
-
-NÍVEL 4 — Processos Biológicos Inferidos (KG infere de evidências)
-  Ex.: Cellular Senescence, Inflammaging, Mitochondrial Dysfunction
-  Badge: 🔬 Processo Biológico Inferido (roxo)
-  NÃO aparece na lista de condições — apenas no painel VetGraphRAG
-  Inclui explicação: "Inferido porque Osteoarthritis → NF-κB → Senescence"
-```
-
-### 6. Atualizar i18n e documentação
-
-- Novas chaves para "Processo Biológico Inferido" vs "Comorbidade Inferida"
-- CHANGELOG.md, CURRENT_STATE.md
-
----
-
-## Arquivos Afetados
+## Arquivos afetados
 
 | Ação | Arquivo | Risco |
 |------|---------|-------|
-| Migração | `pet_conditions` — coluna `origin` | Baixo (nullable, default) |
 | Editar | `src/components/pet/GenerateSamplePetsButton.tsx` | Baixo |
-| Editar | `src/components/pet/ConditionInsightCard.tsx` | Médio |
-| Editar | `src/components/pet/VetGraphRAGInsightsPanel.tsx` | Médio |
+| Criar | `src/utils/conditionValidation.ts` | Nenhum |
+| Editar | `supabase/functions/extract-pet-clinical-data/index.ts` | Baixo (só warning) |
+| Migração | UPDATE em `pet_conditions` (Luna + Thor) | Baixo |
 | Editar | `src/locales/pt/translation.json` + EN | Nenhum |
-| Editar | `src/i18n.ts` | Nenhum |
+| Editar | `src/i18n.ts` (bump versão) | Nenhum |
 | Editar | `CHANGELOG.md` | Nenhum |
 
+## O que NÃO vou mexer
+
+- Categorias em `health_conditions` (a tabela `category = 'Cardiovascular'` continua válida — categoria é categoria, doença é doença).
+- Filtros de UI que listam categorias (ex: `NutraceuticalSearchFilters`).
+- Rótulos de gráficos agrupados por sistema (ex: "Eventos Cardiovasculares" no Stanford demo — ali é eixo agregador, faz sentido).
