@@ -17,13 +17,14 @@ import TreatabilityChart from '@/components/pet/TreatabilityChart';
 import BiologicalPathway from '@/components/pet/BiologicalPathway';
 import ImprovementProjectionChart from '@/components/pet/ImprovementProjectionChart';
 import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/ClinicalPipelineWorkflow';
+import ClinicalPipelineLogPanel, { type ClinicalLogEntry } from '@/components/pet/ClinicalPipelineLogPanel';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
 import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
-import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert } from '@/services/clinical-analysis-pipeline';
+import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
 
 const severityColors: Record<string, string> = {
@@ -63,6 +64,42 @@ const PetProfilePage: React.FC = () => {
     stage5_interactions: 'idle',
     stage6_recommendation: 'idle',
   });
+  const [pipelineLog, setPipelineLog] = useState<ClinicalLogEntry[]>([]);
+  const [currentStageLabel, setCurrentStageLabel] = useState<string | null>(null);
+
+  const STAGE_LABELS: Record<PipelineStageId, string> = {
+    stage2_predispositions: t('petProfile.pipeline.predispositions'),
+    stage3_labs: t('petProfile.pipeline.labs'),
+    stage4_kg: t('petProfile.pipeline.knowledgeGraph'),
+    stage5_interactions: t('petProfile.pipeline.interactions'),
+    stage6_recommendation: t('petProfile.pipeline.recommendation'),
+  };
+
+  const appendLog = (level: ClinicalLogEntry['level'], message: string, stage?: string) => {
+    setPipelineLog(prev => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        timestamp: Date.now(),
+        level,
+        message,
+        stage,
+      },
+    ].slice(-200));
+  };
+
+  const handlePipelineEvent = (e: PipelineProgressEvent) => {
+    if (e.kind === 'stage-start') {
+      setPipelineState(s => ({ ...s, [e.stage]: 'running' }));
+      setCurrentStageLabel(STAGE_LABELS[e.stage]);
+      appendLog('info', `▶ ${e.message}`, STAGE_LABELS[e.stage]);
+    } else if (e.kind === 'stage-end') {
+      setPipelineState(s => ({ ...s, [e.stage]: 'complete' }));
+      appendLog('success', `✓ ${e.message}`, STAGE_LABELS[e.stage]);
+    } else {
+      appendLog(e.level, e.message);
+    }
+  };
 
   // Generate treatability data from conditions using real data when available
   const treatabilityData = useMemo(() => {
@@ -85,13 +122,29 @@ const PetProfilePage: React.FC = () => {
   const handleAnalyzeWithKG = async () => {
     if (!data?.profile) return;
     setAnalyzing(true);
+    setPipelineLog([]);
+    setPipelineState({
+      stage1_profile: 'idle',
+      stage2_predispositions: 'idle',
+      stage3_labs: 'idle',
+      stage4_kg: 'idle',
+      stage5_interactions: 'idle',
+      stage6_recommendation: 'idle',
+    });
 
     try {
       const { profile, conditions, medications, exams } = data;
 
+      // Stage 1: profile collection (synchronous — data already loaded)
       setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
-      await new Promise(r => setTimeout(r, 200));
-      setPipelineState(s => ({ ...s, stage1_profile: 'complete', stage2_predispositions: 'running' }));
+      const profileDataCount = (conditions?.length || 0) + (medications?.length || 0) + (exams?.length || 0);
+      appendLog(
+        'info',
+        `▶ Coletando perfil clínico de ${profile.name} (${profile.breed}, ${profile.age_years}a, ${profile.weight_kg}kg) · ${profileDataCount} pontos de dados`,
+      );
+      await new Promise(r => setTimeout(r, 80)); // breath for UI
+      setPipelineState(s => ({ ...s, stage1_profile: 'complete' }));
+      appendLog('success', `✓ Perfil clínico carregado: ${conditions?.length || 0} condições, ${medications?.length || 0} medicações, ${exams?.length || 0} exames`);
 
       const result = await runClinicalAnalysisPipeline(
         {
@@ -106,10 +159,11 @@ const PetProfilePage: React.FC = () => {
         },
         conditions,
         medications,
-        exams
+        exams,
+        { onProgress: handlePipelineEvent },
       );
 
-      setPipelineState(s => ({ ...s, stage2_predispositions: 'complete', stage3_labs: 'complete', stage4_kg: 'complete', stage5_interactions: 'complete', stage6_recommendation: 'complete' }));
+      setCurrentStageLabel(null);
 
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
@@ -134,6 +188,7 @@ const PetProfilePage: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Clinical analysis pipeline error:', err);
+      appendLog('error', `✗ ${err?.message || 'Erro desconhecido no pipeline'}`);
       toast({
         title: t('petRegistration.profile.analysisError'),
         description: err.message || 'Erro ao executar pipeline de análise clínica.',
@@ -141,6 +196,7 @@ const PetProfilePage: React.FC = () => {
       });
     } finally {
       setAnalyzing(false);
+      setCurrentStageLabel(null);
     }
   };
 
@@ -542,6 +598,14 @@ const PetProfilePage: React.FC = () => {
               tripletCount={kgTriplets.length}
               interactionCount={interactionAlerts.length}
               compoundCount={recommendationCompounds?.length || 0}
+            />
+
+            {/* Live log panel — scientific-digestion style */}
+            <ClinicalPipelineLogPanel
+              entries={pipelineLog}
+              isAnalyzing={analyzing}
+              currentStageLabel={currentStageLabel}
+              onClear={() => setPipelineLog([])}
             />
 
             {/* VetGraphRAG Insights Panel - 3 sections */}
