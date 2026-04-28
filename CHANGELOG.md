@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-28 🔗 Links de Estudos Persistindo nos Cards
+- ✅ **Sincronização do `VetRecommendationPanel`**: os cards de recomendação agora reagem a novas análises/atualizações de `compounds`, evitando ficar presos a um estado inicial sem links de estudos
+- ✅ **Fallback de link no frontend**: `CompoundDosageSlider` passou a reconstruir o URL clicável localmente a partir de `link`, `doi`, `pmid` ou título, mesmo se algum card receber payload parcial
+- ✅ **i18n v1.26.2**: bump para forçar refresh de cache do navegador após a correção dos cards
+
 ### Added - 2026-04-28 🔗 Selo de Fonte do Link + Fallback de Estudos
 - ✅ **Selo de proveniência do link**: cada estudo no card mostra um pequeno badge (DOI / PubMed / PMC / Scholar / Externo) derivado da URL final, deixando claro para onde o clique leva
 - ✅ **Ícone `ExternalLink` + `aria-label`**: títulos de estudos sinalizam visualmente que abrem em nova aba (`target="_blank" rel="noopener noreferrer"`, sem mudança de comportamento)
