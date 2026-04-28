@@ -47,7 +47,7 @@ const SAMPLE_PETS = [
     owner_email: 'joao@example.com',
     notes: 'Heart murmur detected at 4 years old. Regular cardiac monitoring. Early cognitive signs.',
     conditions: [
-      { condition_name: 'Cardiovascular Disease', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
+      { condition_name: 'Degenerative Valve Disease (Myxomatous Mitral Valve Disease)', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
       { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
     ],
     medications: [
@@ -71,7 +71,7 @@ const SAMPLE_PETS = [
     notes: 'Working dog. Joint stress from activity. Chronic low-grade inflammation.',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Chronic Inflammation', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+      { condition_name: 'Hip Dysplasia', severity: 'mild', status: 'active', origin: 'exam_suggested' },
     ],
     medications: [
       { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
