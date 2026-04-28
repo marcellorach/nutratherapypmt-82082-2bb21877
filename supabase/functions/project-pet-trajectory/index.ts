@@ -229,15 +229,29 @@ You MUST output through the function tool.`;
       simulate_with_geroprotective_protocol: withIntervention,
       max_years_ahead: maxYears,
       instructions: `Produce one projection point for each year from y=0 to y=${maxYears}.
+
+CORE PRINCIPLE: This system MUST be honest about uncertainty. It is NORMAL and EXPECTED to report years_gained_total close to 0 when KG evidence is sparse for THIS pet's specific conditions. Do NOT inflate benefit. An honest "no significant benefit" answer is better than an optimistic guess.
+
 - biological_age: use Gompertz curve + condition load + size factor.
 - existing_conditions[].projected_severity_score in [0,1] (mild ~0.2, moderate ~0.55, severe ~0.9).
 - new_conditions[]: include only breed_predispositions whose cumulative incidence by that year >= 0.05.
 - expected_remaining_years: derived from Gompertz survival, penalized by severe conditions.
-- If simulate_with_geroprotective_protocol=true, apply ONLY effects supported by kg_compound_condition_evidence (per-condition).
-  Reduce probabilities/severities proportional to the strongest 2-3 supporting compounds; never exceed 50% reduction for a single condition.
-- citations[]: list condition+compound+evidence-source combinations you actually relied on.
-- years_gained: difference vs no-protocol scenario at the final year (>=0 if protocol helps).
-- confidence: "high" if >=5 evidence rows AND breed predisposition data; "medium" if partial; "low" if missing core inputs.`,
+
+PROTOCOL EFFECTS (only when simulate_with_geroprotective_protocol=true):
+- For EACH condition, check kg_compound_condition_evidence for compounds with relation supportive of that specific condition AND efficacy_0_5 >= 3.
+- If no such evidence exists for a condition, that condition gets ZERO reduction. Do NOT assume a "general geroprotective effect".
+- When evidence exists, reduce severity by AT MOST 0.40 × adherence (default adherence 0.75) using the top 1-2 compounds.
+- For NEW condition incidence, reduction is at most 0.6 × the severity reduction (prevention is harder than treatment).
+- HARD CAP: years_gained_total MUST be in [-0.5, +1.5] years. Values above 1.5 require >=8 high-grade evidence rows AND multi-condition coverage. Negative values are valid when polypharmacy outweighs benefit.
+
+POLYPHARMACY PENALTY: if estimated active compound count > 4, reduce adherence by 5 percentage points per extra compound (floor 40%). Mention this in protocol_caveats.
+
+OUTPUT REQUIREMENTS:
+- years_gained_total: net difference vs no-protocol at final year. Can be negative.
+- years_gained_breakdown[]: one entry per condition that received non-zero protection, with anchor compound name and citation source.
+- protocol_caveats[]: list ALL of: (a) conditions WITHOUT KG coverage, (b) polypharmacy if applicable, (c) adherence assumption, (d) any contraindications.
+- citations[]: every condition+compound+evidence row you relied on.
+- confidence: "high" only if >=5 evidence rows AND >=50% of pet's conditions have KG coverage; "medium" if partial; "low" otherwise. When low, years_gained_total should be near 0.`,
     };
 
     // 10) Call Lovable AI gateway with tool calling
