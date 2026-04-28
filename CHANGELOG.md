@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-28 💊 Painel Admin de Curadoria de Doses + i18n v1.28.0
+- ✅ **Nova tab admin "Curadoria de Doses"** (`Knowledge Base → Curadoria de Doses`) com 3 visões:
+  - **Pendentes**: doses com `needs_review=true` (vindas de web lookup ou estimativas de IA) prontas para edição inline (faixa mg/kg, frequência, fonte, citação, confiança) e aprovação canônica
+  - **Curadas**: doses já validadas por especialista
+  - **Mais Usadas**: ranking dos pares (composto, condição) mais consultados pelo pipeline (via `dosage_lookup_log`) — guia o esforço de curadoria pelos casos de maior impacto clínico
+- ✅ **Selos de proveniência**: badges visuais por origem (Curado / Web Autoritativo / KG Triplet / Estimativa IA / Default) replicando o padrão usado no `CompoundDosageSlider`
+- ✅ **Aprovação registra autor + timestamp** em `curated_by` / `curated_at` e remove `needs_review`, tornando a dose canônica para o pipeline
+- ✅ **i18n v1.28.0**: bump de versão para refresh de cache
+
 ### Fixed - 2026-04-28 🔗 Links de Estudos Persistindo nos Cards
 - ✅ **Sincronização do `VetRecommendationPanel`**: os cards de recomendação agora reagem a novas análises/atualizações de `compounds`, evitando ficar presos a um estado inicial sem links de estudos
 - ✅ **Fallback de link no frontend**: `CompoundDosageSlider` passou a reconstruir o URL clicável localmente a partir de `link`, `doi`, `pmid` ou título, mesmo se algum card receber payload parcial
