@@ -330,7 +330,7 @@ You MUST output through the function tool.`;
       },
     ];
 
-    const model = "google/gemini-2.5-pro";
+    const model = "google/gemini-3.1-pro-preview";
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
