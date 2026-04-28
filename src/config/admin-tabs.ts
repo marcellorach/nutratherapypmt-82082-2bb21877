@@ -66,6 +66,7 @@ const ConflictReviewPanel = lazy(() => import('@/components/administrador/confli
 const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
+const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -145,6 +146,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: LabReferencesTab,
     description: 'Intervalos de referência para exames laboratoriais'
+  },
+  {
+    id: 'dosage-curation',
+    label: 'Curadoria de Doses',
+    group: 'knowledge-base',
+    component: DosageCurationPanel,
+    description: 'Revisão e aprovação de doses extraídas da web ou estimadas por IA'
   },
   {
     id: 'knowledge-base-settings',
