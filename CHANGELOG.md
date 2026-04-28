@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-04-28 ⏱️ Pipeline Clínico com Progresso Real + Console ao Vivo (i18n v1.30.0)
+- ✅ **Progresso real por estágio**: `runClinicalAnalysisPipeline` agora aceita um callback `onProgress` que emite eventos `stage-start` / `stage-end` / `log` para cada etapa (predisposições, exames, KG, interações, recomendação). O workflow visual em `ClinicalPipelineWorkflow` deixa de "completar tudo de uma vez" no final — cada estágio acende e apaga conforme realmente termina, com duração medida via `performance.now()`
+- ✅ **Novo `ClinicalPipelineLogPanel`**: console ao vivo (estilo digestão científica) renderizado abaixo do workflow na `PetProfilePage`. Mostra timestamp `HH:MM:SS.mmm`, ícone por nível (info/sucesso/aviso/erro), badge do estágio ativo, contador de eventos, autoscroll e ações **Limpar** / **Exportar `.log`**. Limite circular de 200 entradas
+- ✅ **Logs informativos por consulta KG**: cada hit/miss no Knowledge Graph agora aparece no console com nome canônico utilizado, contagem de nós e relações — substituindo os `console.log/warn` que só ficavam no devtools
+- ✅ **i18n v1.30.0**: novas chaves `petProfile.pipeline.log.{title,eventCount,clear,export,waiting}` em PT/EN
+
 ### Added - 2026-04-28 💊 Painel Admin de Curadoria de Doses + i18n v1.28.0
 - ✅ **Nova tab admin "Curadoria de Doses"** (`Knowledge Base → Curadoria de Doses`) com 3 visões:
   - **Pendentes**: doses com `needs_review=true` (vindas de web lookup ou estimativas de IA) prontas para edição inline (faixa mg/kg, frequência, fonte, citação, confiança) e aprovação canônica
