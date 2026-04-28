@@ -113,16 +113,20 @@ function classifyInsights(
   // 3. Future prevention from undiagnosed predispositions
   for (const p of predispositions) {
     if (p.already_diagnosed) continue;
+    const ageContext = ` Comum em ${p.condition_name} a partir da meia-idade.`;
     insights.push({
       category: 'future_prevention',
       title: p.condition_name,
-      description: `Risco ${p.risk_factor}x acima da média para esta raça (evidência: ${p.evidence_grade}).${p.notes ? ` ${p.notes}` : ''}`,
+      description: `Doença comum nesta raça — risco ${p.risk_factor}× acima da média (evidência: ${p.evidence_grade}).${p.notes ? ` ${p.notes}` : ''} Avaliar estratégias preventivas pelo Knowledge Graph.`,
       confidence: p.risk_factor > 3 ? 0.8 : 0.6,
-      inferenceReason: `Predisposição racial com fator de risco ${p.risk_factor}x`,
+      inferenceReason: `Predisposição racial: fator de risco ${p.risk_factor}× • evidência ${p.evidence_grade}`,
       relatedEntities: [p.condition_name],
       source: 'predisposition',
     });
   }
+
+  // Sort future_prevention by risk_factor (highest first) — already done at fetch level,
+  // but ensure stable ordering when mixed with breed-lab discoveries below.
 
   // Breed-lab confirmation discoveries
   const breedLabDiscoveries = discoveries.filter(d => d.type === 'breed-lab-confirmation');
