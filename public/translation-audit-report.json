@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-28T15:10:17.785Z",
+  "timestamp": "2026-04-28T17:06:40.818Z",
   "summary": {
-    "totalFiles": 780,
-    "totalIssues": 383,
+    "totalFiles": 784,
+    "totalIssues": 382,
     "hardcodedTexts": 39,
     "missingKeys": 343,
-    "incompleteTranslations": 1
+    "incompleteTranslations": 0
   },
   "issues": [
     {
@@ -2407,13 +2407,6 @@
       "file": "src/pages/veterinario/RecommendationsList.tsx",
       "line": 53,
       "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "incomplete-translation",
-      "file": "src/locales/en/translation.json",
-      "line": 0,
-      "text": "Missing EN translation for: petProfile.recommendation.evidenceStudies",
       "severity": "high"
     },
     {
