@@ -927,17 +927,47 @@ export async function runClinicalAnalysisPipeline(
   profile: PatientProfile,
   conditions: any[],
   medications: any[],
-  exams: any[]
+  exams: any[],
+  options: RunClinicalAnalysisOptions = {},
 ): Promise<ClinicalAnalysisResult> {
+  const { onProgress } = options;
+  const t0 = performance.now();
+
   // Stage 1: Collect patient data (already passed as params)
   const conditionNames = conditions.map((c: any) => c.condition_name);
   const medicationNames = medications.map((m: any) => m.medication_name);
 
   // Stage 2: Breed predispositions
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage2_predispositions',
+    message: `Buscando predisposições raciais para "${profile.breed}"...`,
+  });
+  const ts2 = performance.now();
   const predispositions = await fetchBreedPredispositions(profile.breed, conditionNames);
+  const undiagnosed = predispositions.filter(p => !p.already_diagnosed).length;
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage2_predispositions',
+    message: `${predispositions.length} predisposições · ${undiagnosed} não diagnosticadas (${((performance.now() - ts2) / 1000).toFixed(2)}s)`,
+    meta: { count: predispositions.length, undiagnosed, durationMs: performance.now() - ts2 },
+  });
 
   // Stage 3: Lab interpretation
+  const ageGroup = profile.age_years >= 7 ? 'senior' : profile.age_years < 1 ? 'puppy' : 'adult';
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage3_labs',
+    message: `Interpretando ${exams.length} exames vs faixas de referência (${ageGroup})...`,
+  });
+  const ts3 = performance.now();
   const labAlerts = await interpretLabResults(exams, profile.age_years);
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage3_labs',
+    message: `${labAlerts.length} alertas laboratoriais detectados (${((performance.now() - ts3) / 1000).toFixed(2)}s)`,
+    meta: { count: labAlerts.length, durationMs: performance.now() - ts3 },
+  });
 
   // Build extended condition list (existing + undiagnosed predispositions)
   const undiagnosedRisks = predispositions
@@ -946,7 +976,21 @@ export async function runClinicalAnalysisPipeline(
   const allConditionsToQuery = [...new Set([...conditionNames, ...undiagnosedRisks])];
 
   // Stage 4: KG Query
-  const kgResults = await queryKnowledgeGraph(allConditionsToQuery);
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage4_kg',
+    message: `Consultando Knowledge Graph para ${allConditionsToQuery.length} condições...`,
+    meta: { conditions: allConditionsToQuery },
+  });
+  const ts4 = performance.now();
+  const kgResults = await queryKnowledgeGraph(allConditionsToQuery, onProgress);
+  const totalNodes = kgResults.reduce((sum, r) => sum + (r.graphData?.nodes?.length || 0), 0);
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage4_kg',
+    message: `${kgResults.length}/${allConditionsToQuery.length} condições com evidência no KG · ${totalNodes} nós totais (${((performance.now() - ts4) / 1000).toFixed(2)}s)`,
+    meta: { hits: kgResults.length, totalNodes, durationMs: performance.now() - ts4 },
+  });
 
   // Extract evidence
   const { triplets, pathways, projections } = extractKgEvidence(kgResults, conditionNames);
@@ -957,7 +1001,19 @@ export async function runClinicalAnalysisPipeline(
       .filter((n: any) => ['Nutraceutical', 'Compound'].includes(n.type))
       .map((n: any) => n.label || n.properties?.name || '')
   );
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage5_interactions',
+    message: `Verificando interações entre ${recommendedCompoundNames.length} compostos e ${medicationNames.length} medicações...`,
+  });
+  const ts5 = performance.now();
   const interactionAlerts = checkInteractions(recommendedCompoundNames, medicationNames, kgResults);
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage5_interactions',
+    message: `${interactionAlerts.length} interações detectadas · ${triplets.length} triplets clínicos extraídos (${((performance.now() - ts5) / 1000).toFixed(2)}s)`,
+    meta: { interactions: interactionAlerts.length, triplets: triplets.length, durationMs: performance.now() - ts5 },
+  });
 
   // Generate clinical discoveries
   const clinicalDiscoveries = generateClinicalDiscoveries(
@@ -965,9 +1021,20 @@ export async function runClinicalAnalysisPipeline(
   );
 
   // Stage 6: Hybrid recommendation with full context
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage6_recommendation',
+    message: `Gerando recomendação híbrida (KG + LLM) para ${profile.name}...`,
+  });
+  const ts6 = performance.now();
   const recommendation = await getHybridRecommendation(
     profile, conditionNames, kgResults, predispositions, labAlerts, medicationNames, conditions, exams
   );
+  onProgress?.({
+    kind: 'log',
+    level: 'info',
+    message: `Recomendação base recebida: ${(recommendation?.nutraceuticals || []).length} compostos candidatos. Resolvendo posologias...`,
+  });
 
   // Build compounds from recommendation with per-condition mapping
   const nutraceuticals = recommendation?.nutraceuticals || [];
@@ -1055,6 +1122,13 @@ export async function runClinicalAnalysisPipeline(
     prioritizedCompounds,
     patientConditionNames,
   );
+
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage6_recommendation',
+    message: `${compoundsWithStudies.length} compostos finais com posologia resolvida (${((performance.now() - ts6) / 1000).toFixed(2)}s) · pipeline total: ${((performance.now() - t0) / 1000).toFixed(2)}s`,
+    meta: { compounds: compoundsWithStudies.length, totalDurationMs: performance.now() - t0 },
+  });
 
   return {
     predispositions,
