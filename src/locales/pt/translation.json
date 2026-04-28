@@ -7282,7 +7282,12 @@
       "noProtection": "Sem evidência KG suficiente — toggle não altera esta condição.",
       "debugTitle": "Detalhamento clínico (auditoria)",
       "showDebug": "Ver auditoria",
-      "hideDebug": "Ocultar auditoria"
+      "hideDebug": "Ocultar auditoria",
+      "legend": {
+        "futureRisk": "risco futuro",
+        "protected": "protegido",
+        "systemic": "carga sistêmica"
+      }
     },
     "anatomy": {
       "regions": {

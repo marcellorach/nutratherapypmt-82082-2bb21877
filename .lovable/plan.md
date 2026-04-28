@@ -1,209 +1,104 @@
+## Diagnóstico (por que ficou "infantil")
 
-## Diagnóstico: por que o geroprotetor parece sempre melhor
+Olhando a captura de tela, identifiquei 3 problemas estruturais que se combinam:
 
-Auditei `biological-timeline-engine.ts` e a edge function `project-pet-trajectory`. O viés é estrutural — não é coincidência:
+### 1. As proporções do SVG estão erradas — parece um "porquinho de banho"
+O `path` da silhueta atual em `DogAnatomySVG.tsx` (linhas 188-212) desenha um **retângulo arredondado** muito alto e curto, sem pescoço definido, sem peitoral, sem garupa, sem cauda articulada. As pernas são **trapézios paralelos** todas iguais (linhas 263-302), o que faz o cão parecer uma mesa. Não há estrutura de cabeça (focinho colado no crânio), nem orelha real, nem articulação visível.
 
-**Heurística (Phase 1):**
-- `progressSeverity` aplica **−35%** em **qualquer** condição quando o toggle está ligado, sem checar se existe composto com evidência para aquela condição.
-- `cumulativeIncidence` multiplica probabilidade por **0.7** para **toda** predisposição, sempre.
-- Resultado: toggle ON = melhora garantida, independentemente do pet.
+### 2. O "fundo rosa" é o `systemicTint` — não são as condições aparecendo
+O bloco em `DogAnatomySVG.tsx` linhas 304-307 pinta um `<rect>` enorme de 560×280 cobrindo a viewBox inteira sempre que houver qualquer condição mapeada como `systemic` no `anatomy-region-map.ts`. Como `Inflammaging`, `oxidative stress`, `cellular senescence`, `cancer`, etc. são TODOS marcados como `systemic`, qualquer pet acaba com um retângulo rosa cobrindo tudo — e isso esconde os órgãos por baixo. Foi isso que você viu: o "fundo" mudando, e os órgãos mal aparecendo.
 
-**Edge function (Phase 2 / Gemini 3.1 Pro):**
-- O prompt pede "use só evidência do KG", mas `activeCompounds` lê só de `pet_medications`. Pets sem medicação ativa = sem âncora → o flag `simulate_with_geroprotective_protocol=true` empurra o modelo a assumir um stack genérico.
-- `years_gained` é um número único global, sem custo (efeitos adversos, polifarmácia, adesão, contraindicações).
-- Sem teto de plausibilidade — o LLM pode reportar +2 anos sem que nada valide.
+### 3. Os órgãos só aparecem se a condição mapear para a região exata
+O `anatomy-region-map.ts` cobre cerca de 40 condições, mas cobertura KG = 0/8 significa que `withProtection` não muda nada, e `regionStates` provavelmente está quase vazio porque a maioria das condições do pet caiu no balde `systemic` (ver lista grande no fim do mapa). Resultado: a única coisa "visual" que sobra é a mancha vermelha no canto (provavelmente um hotspot solitário da orelha/cabeça mal posicionado).
 
-**Ou seja: a comparação "com vs sem" não é uma comparação real.** É um número otimista vs um baseline pessimista, sem simetria.
+### 4. Falta espaço, sim — mas o problema maior é a viewBox
+A viewBox é `600×400` mas o card renderiza em ~290px de largura no grid de 2 colunas. Os hotspots têm raio fixo de 14px no espaço SVG, o que significa que ficam minúsculos quando reduzidos. Os labels e badges não têm onde respirar.
 
 ---
 
-## Parte 1 — Reescrever a lógica para ser honesta
+## Plano de correção
 
-### 1.1 Heurística per-condition + per-compound (engine)
+### Fase A — Redesenhar a silhueta com anatomia real de cão
 
-Remover os multiplicadores globais. Em vez disso:
+Substituir o path da silhueta por uma **lateral de cão de pé com proporções caninas reais**, baseada em referências veterinárias:
 
 ```
-para cada condição C do pet:
-  candidatos = compostos com evidência KG para C (efficacy_score >= 3)
-  se candidatos vazio:
-    redução = 0  (geroprotetor não atua nesta condição)
-  senão:
-    melhor = top 1-2 compostos por efficacy_score
-    redução_severidade = clamp(0, 0.40, soma(efficacy_score)/10 × evidence_grade_factor)
-    redução_incidência = redução_severidade × 0.6
+- Crânio arredondado com stop frontal
+- Focinho separado com nariz
+- Orelha pendente OU em pé (parametrizável por raça depois)
+- Pescoço inclinado com cernelha (withers) marcada
+- Linha dorsal levemente côncava
+- Peito profundo (cavidade torácica), abdômen retraído
+- Garupa arredondada ligando à cauda
+- Cauda em curva natural
+- 4 patas com articulações visíveis: ombro, cotovelo, carpo (anterior); 
+  quadril, joelho, jarrete, metatarso (posterior)
+- Pata dianteira reta, pata traseira angulada para trás (postura natural)
 ```
 
-`evidence_grade_factor`: high=1.0, moderate=0.7, low=0.4, very_low=0.2.
+Vou aumentar a viewBox para `800×500` para dar mais espaço, e usar paths com curvas Bézier suaves. A silhueta inteira terá `fill="hsl(var(--muted))"` neutro com `stroke` mais fino e elegante, no estilo "ilustração científica clean" que combina com o resto do app.
 
-### 1.2 Penalidades realistas de protocolo
+### Fase B — Eliminar o "fundo rosa" e tornar systemic visível DENTRO do corpo
 
-Adicionar custo ao toggle ON:
-- **Polifarmácia**: a partir de 5 compostos, +5% de chance de evento adverso por composto adicional → reduz o ganho líquido.
-- **Adesão**: aplicar fator de adesão estimado (0.75 default) sobre a redução.
-- **Contraindicações**: se o pet tem condição que contraindica um composto candidato (ex.: doença renal + altas doses de certas substâncias), excluir o composto e logar.
+Remover o `<rect>` de fundo (linhas 304-307). No lugar:
 
-### 1.3 `years_gained` per-condition no edge function
+1. **Recolorir a própria silhueta** quando há carga sistêmica — mudando o `fill` do path do tronco para um `hsl()` mais quente (amarelo→laranja→vermelho conforme severidade), com `opacity` baixo (~0.35). Isso mostra a inflamação/senescência **no corpo**, não atrás dele.
+2. **Adicionar partículas/pontos sutis** distribuídos pelo tronco para systemic severo (pequenos círculos pulsantes representando inflamação difusa).
+3. **Halo externo verde-esmeralda** quando `showProtectionAura` está ativo (drop-shadow com `feGaussianBlur` na silhueta inteira).
 
-Mudar o schema do tool call:
-- `years_gained_total` (global, com cap de +1.5 ano, raramente >2)
-- `years_gained_breakdown[]`: por condição, com composto âncora e citação
-- `protocol_caveats[]`: lista textual de riscos/limitações ("Polifarmácia: 6 compostos", "Adesão estimada: 75%", "Sem evidência para Hip Dysplasia neste KG")
+### Fase C — Tornar cada disfunção visualmente distinta e localizada
 
-Se o LLM não conseguir justificar com evidência, deve reportar `years_gained_total` próximo de zero e `confidence: "low"`. Adicionar no prompt: **"It is normal and expected to report years_gained close to 0 when KG evidence is sparse. Do not inflate."**
+Para cada condição não-sistêmica, em vez de só uma "bola vermelha" genérica, usar **glifos específicos** desenhados sobre a região:
 
-### 1.4 Validação cruzada cliente
+| Condição | Glifo visual |
+|---|---|
+| Artrite/displasia | Anel pulsante laranja na articulação + faíscas curtas (representando dor/inflamação) |
+| Cardíaca | Coração estilizado pulsando no ritmo `animate` (já existe, melhorar) |
+| Hepática | Mancha amarela-âmbar contornada no fígado + textura de "pontilhado" |
+| Renal | Dois feijões nos rins com gradiente da severidade |
+| Cognitiva/cerebral | Onda cerebral pequena (linha sinusoidal) sobre o crânio |
+| Ocular | Círculo claro no olho com retícula |
+| Dermatite | Pequenos `x` distribuídos sobre a pele/orelha/patas |
+| Dental | Pontinhos brancos/amarelos na boca |
+| GI/intestinal | Linha serpenteada animada no abdômen |
+| Endócrino | Gota colorida sobre a glândula (tireoide, adrenal, pâncreas) |
 
-No `BiologicalTimeline.tsx`, sempre rodar **as duas projeções** (com e sem) e mostrar o delta real, não confiar só no `years_gained` do LLM. Se delta calculado ≠ `years_gained` reportado em mais de 0.3 ano, exibir badge "Divergência metodológica" (transparência).
+Cada glifo tem 3 níveis de severidade (cor + intensidade da animação). Glifos de **risco emergente** (`isNew`) são desenhados em **traço tracejado** com `opacity` 0.5 (você "vê o futuro chegando").
 
-### 1.5 UI da comparação honesta
+### Fase D — Layout responsivo + contraste com o card
 
-Substituir o "+X anos com protocolo" simples por um painel:
-- Ganho líquido estimado: **±X.X anos** (mostrar negativo quando aplicável)
-- Condições efetivamente cobertas pelo KG: lista
-- Condições **não** cobertas: lista (com badge "Sem evidência no KG")
-- Custos do protocolo: caveats listados
+1. Em telas <768px (você está em 1212px, mas o card divide em 2 colunas → ~290px efetivo), empilhar os dois cães verticalmente em vez de lado-a-lado para que cada um tenha a largura cheia do card.
+2. Aumentar o `aspect-ratio` para ~16:10 e usar `preserveAspectRatio="xMidYMid meet"` para nunca distorcer.
+3. Cor de fundo do card SVG = `bg-background` neutro (não muted/30) para que os glifos saltem.
+4. Legenda compacta abaixo de cada cão mostrando as 2-3 condições mais relevantes com ícone-chip da região.
 
-Quando não houver evidência suficiente, mostrar mensagem: **"Não há evidência KG suficiente para projetar benefício significativo deste protocolo neste pet."**
+### Fase E — Garantir que `systemic` aparece e é diferenciada de "órgão específico"
 
----
+Criar **dois canais visuais separados** e legendados:
+- **Carga sistêmica** = recoloração da silhueta + halo + partículas no tronco
+- **Disfunção localizada** = glifo no órgão/articulação correto
 
-## Parte 2 — Visualização anatômica precisa no desenho
-
-A silhueta atual (`dog-silhouette.png`) é uma imagem rasterizada com pontos genéricos sobrepostos. Para representar precisamente patas, articulações, órgãos com cor de gravidade, precisamos de um **SVG anatômico vetorial** com regiões nomeadas.
-
-### 2.1 Substituir PNG por `DogAnatomySVG.tsx`
-
-Criar um componente SVG inline (~600x400 viewBox) com um cão vetorial simplificado lateral, contendo `<g>` nomeados para cada região:
-
-```text
-Regiões nomeadas (path id):
-  brain, eyes, ears, mouth, throat, neck-spine
-  shoulder, chest, heart, lungs
-  liver, stomach, pancreas, kidneys, intestines, bladder
-  spine-thoracic, spine-lumbar, hips, tail
-  front-leg-L, front-leg-R, elbow-L, elbow-R, paw-front-L, paw-front-R
-  hind-leg-L, hind-leg-R, knee-L, knee-R, hock-L, hock-R, paw-hind-L, paw-hind-R
-  skin, coat
+Adicionar uma mini-legenda abaixo:
+```
+○ órgão afetado    ◌ risco futuro    ✦ protegido pelo protocolo    ░ carga sistêmica
 ```
 
-### 2.2 Mapeamento condição → região(ões) anatômica(s)
+---
 
-Tabela canônica em `src/services/anatomy-region-map.ts`:
+## Arquivos a modificar
 
-```text
-osteoarthritis → [knee-L, knee-R, elbow-L, elbow-R, hips]
-hip dysplasia → [hips]
-elbow dysplasia → [elbow-L, elbow-R]
-spondylosis → [spine-lumbar]
-IVDD → [spine-thoracic, spine-lumbar]
-cardiomyopathy → [heart]
-mitral valve disease → [heart]
-CKD → [kidneys]
-liver disease → [liver]
-hepatic lipidosis → [liver]
-diabetes → [pancreas]
-pancreatitis → [pancreas]
-hypothyroidism → [throat]
-cushing's → [adrenal] (área renal-superior)
-atopic dermatitis → [skin, paw-front-L, paw-front-R, paw-hind-L, paw-hind-R]
-cataracts / PRA → [eyes]
-cognitive dysfunction → [brain]
-brachycephalic syndrome → [mouth, throat]
-cancer → [systemic - efeito de cor global suave]
-```
-
-### 2.3 Renderização gráfica por gravidade
-
-Cada região afetada recebe **fill dinâmico**, não um ponto sobreposto:
-
-- **mild**: fill `hsl(48 95% 60% / 0.35)` (amarelo translúcido) + leve glow
-- **moderate**: fill `hsl(25 95% 55% / 0.55)` (laranja) + glow médio
-- **severe**: fill `hsl(0 85% 55% / 0.75)` (vermelho) + animação de pulso suave
-- **new risk** (predisposição emergente): contorno tracejado animado na cor da gravidade projetada, sem fill cheio
-
-Para condições articulares (osteoartrite, displasia), além da cor adicionar **ícone de inflamação** (radial concentric rings) animado sobre a articulação.
-
-Para condições sistêmicas, sobrepor um **filtro SVG** com gradient tênue cobrindo o corpo todo.
-
-### 2.4 Animação na transição do slider
-
-Quando o slider muda:
-- `<animate>` SMIL ou framer-motion no `fill-opacity` e `fill` de cada região (transição 400ms ease-out)
-- Pulso de "evolução": breve flash quando uma severidade aumenta
-- Sparkle (★) que aparece e some quando uma região é "protegida" pelo protocolo (reduzindo a cor)
-
-### 2.5 Comparação visual lado-a-lado (opcional, desktop)
-
-Em viewport ≥ md: mostrar **dois cães** lado a lado quando o slider > 0:
-- Esquerda: trajetória SEM protocolo
-- Direita: trajetória COM protocolo
-- Diferenças destacadas com halo verde (regiões poupadas) ou vermelho (regiões que pioraram igual)
-
-Em mobile: manter um cão só, com toggle de comparação.
-
-### 2.6 Tooltip rico por região
-
-Hover/tap em qualquer região:
-- Nome anatômico
-- Condições afetando essa região (atual + projetada)
-- Severidade atual e projetada
-- Compostos do KG que protegem aquela região (se houver)
-- Botão "Ver no Knowledge Graph" (link para a página do KG já existente)
-
-### 2.7 Legenda visual
-
-Pequena legenda abaixo do desenho:
-- Quadrados de cor: leve / moderado / grave / novo risco / protegido
-- Toggle "Mostrar órgãos internos" (on/off) para reduzir poluição visual
+- `src/components/pet/DogAnatomySVG.tsx` — reescrever a silhueta + glifos por condição + remover `<rect>` sistêmico + adicionar recoloração interna
+- `src/components/pet/BiologicalTimeline.tsx` — ajustar layout do compare (responsividade + altura do SVG + mini-legenda)
+- `src/services/anatomy-region-map.ts` — adicionar campo `glyph` em cada mapping para escolher o glifo certo (`joint-inflammation` | `cardiac-pulse` | `hepatic-stain` | `renal-gradient` | `brain-wave` | `eye-ring` | `skin-x` | `gi-serpentine` | `endocrine-drop`)
+- `src/locales/pt/translation.json` + `en/translation.json` — adicionar chaves da mini-legenda
+- `src/i18n.ts` — incrementar `I18N_VERSION`
 
 ---
 
-## Parte 3 — Telemetria e auditoria
+## O que NÃO vou mudar (fora de escopo)
 
-Para você confirmar que a lógica está honesta:
+- A lógica honesta do `biological-timeline-engine.ts` (já está correta)
+- A edge function `project-pet-trajectory` (já está correta)
+- A barra deslizante de anos, switches de protocolo, painel de auditoria
 
-- Painel debug colapsado no fim do componente (só visível para vet, não para tutor) com:
-  - Compostos âncora encontrados no KG por condição
-  - Reduções aplicadas por condição (números crus)
-  - Caveats do protocolo
-  - Hash do contexto e fonte (cache vs fresh AI)
-
-- Edge function passa a logar no Supabase logs: `pet_id`, `years_gained_total`, `evidence_count`, `compound_count` — para análise agregada.
-
----
-
-## Arquivos afetados
-
-**Lógica (Parte 1):**
-- `src/services/biological-timeline-engine.ts` — reescrever `progressSeverity` e `cumulativeIncidence` per-condition; adicionar penalidades.
-- `src/services/protocol-coverage.ts` (novo) — função pura que cruza condições × KG evidence × compostos ativos.
-- `src/hooks/usePetTrajectoryProjection.ts` — passar evidência KG já carregada como input opcional para o engine.
-- `src/hooks/usePetCompoundCoverage.ts` (novo) — busca KG evidence por condição.
-- `supabase/functions/project-pet-trajectory/index.ts` — schema do tool call expandido (`years_gained_breakdown`, `protocol_caveats`); prompt revisado; cap de plausibilidade.
-- `src/components/pet/BiologicalTimeline.tsx` — exibir caveats, breakdown, divergência metodológica, painel debug.
-
-**Visualização (Parte 2):**
-- `src/components/pet/DogAnatomySVG.tsx` (novo) — SVG vetorial com regiões nomeadas + props `severityByRegion`, `newRisksByRegion`, `protectedRegions`.
-- `src/services/anatomy-region-map.ts` (novo) — mapeamento canônico condição → região(ões).
-- `src/components/pet/AnatomyLegend.tsx` (novo) — legenda + toggle de órgãos internos.
-- `src/components/pet/BiologicalTimeline.tsx` — substituir o `<img>` + markers atuais pelo novo SVG; adicionar comparação lado-a-lado em desktop.
-
-**i18n:**
-- `src/i18n.ts` — bump para `1.34.0`.
-- `src/locales/pt/translation.json` + `en/translation.json` — adicionar chaves para regiões anatômicas, caveats, breakdown, legenda.
-
-**Documentação:**
-- `CHANGELOG.md` — entrada em `[Unreleased]`.
-- `ARCHITECTURE.md` v? — nova seção sobre anatomia vetorial e lógica honesta de projeção.
-- `docs/CURRENT_STATE.md` — atualizar maturidade da feature Biological Timeline.
-
----
-
-## Critérios de aceitação
-
-1. Existe pelo menos um pet de demo onde toggle ON resulta em **0 ou ganho < 0.2 ano** (porque o KG não cobre as condições dele) — comprovando que a lógica não é viesada.
-2. Existe pelo menos um pet onde o ganho é claro e cada ano ganho é citado a um composto×condição específico do KG.
-3. Cada região do desenho destacada corresponde anatomicamente à condição (ex.: osteoartrite acende joelhos e quadris, não o tórax).
-4. Cores das regiões refletem gravidade projetada com transição suave ao mover o slider.
-5. Painel debug expõe os números crus para auditoria veterinária.
+Pode aprovar?

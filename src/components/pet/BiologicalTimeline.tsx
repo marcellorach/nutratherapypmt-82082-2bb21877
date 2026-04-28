@@ -321,8 +321,8 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
             {t('petProfile.biologicalTimeline.compareTitle')}
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-[10px] bg-muted/40">
                   {t('petProfile.biologicalTimeline.withoutProtocol')}
@@ -331,14 +331,16 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   {projectionsWithout[safeIndex]?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}
                 </span>
               </div>
-              <DogAnatomySVG
-                regionStates={regionsWithout.states}
-                systemicSeverity={regionsWithout.systemic}
-                showProtectionAura={false}
-                className="w-full h-auto"
-              />
+              <div className="rounded-md bg-background border border-border/50 p-2 aspect-[8/5]">
+                <DogAnatomySVG
+                  regionStates={regionsWithout.states}
+                  systemicSeverity={regionsWithout.systemic}
+                  showProtectionAura={false}
+                  className="w-full h-full"
+                />
+              </div>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-[10px] bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400">
                   <Sparkles className="h-2.5 w-2.5 mr-0.5" />
@@ -348,13 +350,41 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   {projectionsWith[safeIndex]?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}
                 </span>
               </div>
-              <DogAnatomySVG
-                regionStates={regionsWith.states}
-                systemicSeverity={regionsWith.systemic}
-                showProtectionAura={true}
-                className="w-full h-auto"
-              />
+              <div className="rounded-md bg-background border border-emerald-200 dark:border-emerald-900/50 p-2 aspect-[8/5]">
+                <DogAnatomySVG
+                  regionStates={regionsWith.states}
+                  systemicSeverity={regionsWith.systemic}
+                  showProtectionAura={true}
+                  className="w-full h-full"
+                />
+              </div>
             </div>
+          </div>
+          {/* Visual legend */}
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-3 pt-2 border-t border-border/50 text-[10px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(48, 95%, 55%)' }} />
+              {t('petProfile.severity.mild')}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(25, 95%, 52%)' }} />
+              {t('petProfile.severity.moderate')}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(0, 80%, 52%)' }} />
+              {t('petProfile.severity.severe')}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-3 h-3 rounded-full border border-dashed border-amber-500" />
+              {t('petProfile.biologicalTimeline.legend.futureRisk', 'risco futuro')}
+            </span>
+            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+              ★ {t('petProfile.biologicalTimeline.legend.protected', 'protegido')}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: 'hsl(0, 80%, 52%)', opacity: 0.3 }} />
+              {t('petProfile.biologicalTimeline.legend.systemic', 'carga sistêmica')}
+            </span>
           </div>
           <p className="text-[10px] text-muted-foreground mt-2 text-center">
             {t('petProfile.biologicalTimeline.coverage', { covered: coveredCount, total: conditionNames.length })}

@@ -7282,7 +7282,12 @@
       "noProtection": "No sufficient KG evidence — toggle does not affect this condition.",
       "debugTitle": "Clinical breakdown (audit)",
       "showDebug": "Show audit",
-      "hideDebug": "Hide audit"
+      "hideDebug": "Hide audit",
+      "legend": {
+        "futureRisk": "future risk",
+        "protected": "protected",
+        "systemic": "systemic load"
+      }
     },
     "anatomy": {
       "regions": {
