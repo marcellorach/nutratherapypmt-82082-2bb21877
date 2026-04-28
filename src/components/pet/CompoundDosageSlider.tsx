@@ -78,6 +78,30 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Returns a short label + tailwind classes describing where a study link
+// will land (DOI registry, PubMed, PMC, Scholar or other external host).
+const getLinkSource = (
+  href: string | null | undefined,
+  t: (k: string, def?: string) => string,
+): { label: string; cls: string } | null => {
+  if (!href) return null;
+  let host = '';
+  try {
+    host = new URL(href).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  if (host === 'doi.org' || host.endsWith('.doi.org'))
+    return { label: t('petProfile.recommendation.linkSource.doi', 'DOI'), cls: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300' };
+  if (host.includes('pubmed.ncbi.nlm.nih.gov'))
+    return { label: t('petProfile.recommendation.linkSource.pubmed', 'PubMed'), cls: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300' };
+  if (host.includes('pmc.ncbi.nlm.nih.gov') || host.includes('ncbi.nlm.nih.gov'))
+    return { label: t('petProfile.recommendation.linkSource.pmc', 'PMC'), cls: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300' };
+  if (host.includes('scholar.google'))
+    return { label: t('petProfile.recommendation.linkSource.scholar', 'Scholar'), cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' };
+  return { label: t('petProfile.recommendation.linkSource.external', 'Externo'), cls: 'bg-muted text-muted-foreground' };
+};
+
 const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   compound,
   onChange,
