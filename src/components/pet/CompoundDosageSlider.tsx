@@ -150,6 +150,8 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   const {
     id, name, condition, dosageMin, dosageMax, dosageRecommended,
     dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies, mechanism, kgTriplets, synergies,
+    doseSource, doseSourceUrl, doseSourceCitation, doseConfidence, doseNeedsReview,
+    doseAdjustments, doseTotalDailyMg, doseFrequencyPerDay,
   } = compound;
 
   const [chatOpen, setChatOpen] = useState(false);
@@ -298,7 +300,73 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
           )}>
             {dosageCurrent} {unit}
           </span>
+          {typeof doseTotalDailyMg === 'number' && doseTotalDailyMg > 0 && (
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              {t('petProfile.recommendation.totalDaily', 'Total/dia')}: ~{doseTotalDailyMg} mg
+              {doseFrequencyPerDay ? ` (${doseFrequencyPerDay}x/dia)` : ''}
+            </div>
+          )}
         </div>
+
+        {/* Dose source provenance + adjustments */}
+        {doseSource && (
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+            {doseSource === 'kg_triplet' && (
+              <Badge variant="secondary" className="text-[10px] gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                <Network className="h-3 w-3" /> {t('petProfile.recommendation.doseSource.kg', 'Dose do Knowledge Graph')}
+              </Badge>
+            )}
+            {doseSource === 'curated_study' && (
+              <Badge variant="secondary" className="text-[10px] gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                <BookOpen className="h-3 w-3" /> {t('petProfile.recommendation.doseSource.curated', 'Dose curada (estudo)')}
+              </Badge>
+            )}
+            {doseSource === 'web_authoritative' && (
+              <a
+                href={doseSourceUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="no-underline"
+                title={doseSourceCitation || ''}
+              >
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 cursor-pointer hover:bg-amber-200">
+                  <ExternalLink className="h-3 w-3" />
+                  {t('petProfile.recommendation.doseSource.web', 'Dose de fonte vet. autoritativa')}
+                </Badge>
+              </a>
+            )}
+            {doseSource === 'llm_estimate' && (
+              <Badge variant="outline" className="text-[10px] gap-1 border-amber-400 text-amber-700">
+                <Info className="h-3 w-3" /> {t('petProfile.recommendation.doseSource.llm', 'Estimativa de IA — pendente de fonte')}
+              </Badge>
+            )}
+            {doseSource === 'default_class' && (
+              <Badge variant="outline" className="text-[10px] gap-1 border-muted-foreground/40 text-muted-foreground">
+                <Info className="h-3 w-3" /> {t('petProfile.recommendation.doseSource.estimate', 'Estimativa genérica — sem fonte')}
+              </Badge>
+            )}
+            {doseNeedsReview && doseSource !== 'kg_triplet' && doseSource !== 'curated_study' && (
+              <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700">
+                {t('petProfile.recommendation.doseSource.needsReview', 'Requer curadoria')}
+              </Badge>
+            )}
+          </div>
+        )}
+        {doseSourceCitation && (doseSource === 'web_authoritative' || doseSource === 'curated_study') && (
+          <p className="mt-1 text-center text-[10px] text-muted-foreground italic line-clamp-2">
+            {doseSourceCitation}
+          </p>
+        )}
+        {doseAdjustments && doseAdjustments.length > 0 && (
+          <ul className="mt-1.5 space-y-0.5 text-[10px] text-muted-foreground">
+            {doseAdjustments.map((adj, i) => (
+              <li key={i} className="flex items-start gap-1">
+                <span className="text-amber-500 mt-0.5">•</span>
+                <span>{adj}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Evidence & Context — collapsible block with mechanism, KG triplets,
