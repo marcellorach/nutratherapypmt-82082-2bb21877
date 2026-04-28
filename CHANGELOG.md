@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-28 🔗 Selo de Fonte do Link + Fallback de Estudos
+- ✅ **Selo de proveniência do link**: cada estudo no card mostra um pequeno badge (DOI / PubMed / PMC / Scholar / Externo) derivado da URL final, deixando claro para onde o clique leva
+- ✅ **Ícone `ExternalLink` + `aria-label`**: títulos de estudos sinalizam visualmente que abrem em nova aba (`target="_blank" rel="noopener noreferrer"`, sem mudança de comportamento)
+- ✅ **Fallback "compound-only" em `attachStudiesToCompounds`**: quando não existe triplet aprovado para o par exato (composto, condição), a pipeline busca até 3 estudos de alta confiança que mencionam o composto sozinho — assim todo card sempre tem referências clicáveis. Esses estudos são sinalizados como "Geral" e o card exibe o aviso "Estudos sobre o composto (não específicos a esta condição)" para preservar transparência clínica
+- ✅ **i18n v1.26.1**: novas chaves `petProfile.recommendation.openExternal`, `studiesCompoundOnly` e bloco `linkSource.{doi,pubmed,pmc,scholar,external,generic}`
+
 ### Changed - 2026-04-28 🔗 Links Robustos + Evidência Completa Dentro do Card
 - ✅ **Links de estudos com fallback robusto**: pipeline agora normaliza `link` (DOI/PubMed/Scholar) antes de devolver — sem mais cliques mortos. DOIs salvos como URL completa não duplicam mais o prefixo
 - ✅ **Knowledge Graph dentro de cada card de composto**: `CompoundDosageSlider` ganhou bloco com triplets reais `[composto] → [predicado] → [condição]` (estilo "Embasamento Científico"), incluindo contagem de estudos, evidência e % de confiança — não precisa mais trocar de aba
