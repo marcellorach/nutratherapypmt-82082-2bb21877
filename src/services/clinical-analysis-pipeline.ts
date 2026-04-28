@@ -920,28 +920,72 @@ export async function runClinicalAnalysisPipeline(
 
   // Build compounds from recommendation with per-condition mapping
   const nutraceuticals = recommendation?.nutraceuticals || [];
-  const compounds = nutraceuticals.map((n: any, idx: number) => {
-    const dosageMatch = n.dosage?.match(/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|IU)/i);
-    const dosageMin = dosageMatch ? parseFloat(dosageMatch[1]) : 5;
-    const dosageMax = dosageMatch ? parseFloat(dosageMatch[2]) : 50;
-    const unit = dosageMatch ? dosageMatch[3] : 'mg/kg';
-    const recommended = dosageMin + (dosageMax - dosageMin) * 0.5;
+  // Build interaction list once for the resolver (CONTRAINDICATES/INTERACTS/AGGRAVATES)
+  const kgInteractions: Array<{ a: string; b: string; type: 'CONTRAINDICATES' | 'INTERACTS' | 'AGGRAVATES' }> = [];
+  for (const r of kgResults) {
+    const nodes = r.graphData?.nodes || [];
+    const rels = r.graphData?.relationships || r.graphData?.edges || [];
+    for (const rel of rels) {
+      const pred = (rel.type || rel.label || '').toUpperCase();
+      if (!['CONTRAINDICATES', 'INTERACTS', 'INTERACTS_WITH', 'AGGRAVATES'].includes(pred)) continue;
+      const s = nodes.find((n: any) => n.id === rel.source || n.id === rel.startNode);
+      const t = nodes.find((n: any) => n.id === rel.target || n.id === rel.endNode);
+      if (s && t) {
+        kgInteractions.push({
+          a: s.label || s.properties?.name || '',
+          b: t.label || t.properties?.name || '',
+          type: pred === 'INTERACTS_WITH' ? 'INTERACTS' : (pred as any),
+        });
+      }
+    }
+  }
+
+  const hepaticOrRenalRisk = labAlerts.some(a =>
+    /alt|ast|alp|ggt|bilirrubin|creatinin|ureia|bun|sdma/i.test(a.test_name) &&
+    (a.status === 'high' || a.status === 'critical_high')
+  );
+
+  const allCompoundNames = nutraceuticals.map((n: any) => n.name).filter(Boolean);
+
+  const compounds = await Promise.all(nutraceuticals.map(async (n: any, idx: number) => {
+    const condition = n.condition || n.targetCondition || conditionNames[idx % conditionNames.length] || 'geriatric wellness';
+    const resolved = await resolveCompoundDosage({
+      compoundName: n.name,
+      conditionName: condition,
+      species: profile.species || 'canine',
+      petWeightKg: profile.weight_kg ?? null,
+      petAgeYears: profile.age_years ?? null,
+      stackCompounds: allCompoundNames.filter((x: string) => x !== n.name),
+      petMedications: medicationNames,
+      kgInteractions,
+      hepaticOrRenalRisk,
+      kgDosageString: n.dosage || null,
+    });
 
     return {
       id: `rec-${idx}`,
       name: n.name,
-      condition: n.condition || n.targetCondition || conditionNames[idx % conditionNames.length] || 'geriatric wellness',
-      dosageMin,
-      dosageMax,
-      dosageRecommended: Math.round(recommended * 10) / 10,
-      dosageCurrent: Math.round(recommended * 10) / 10,
-      unit,
+      condition,
+      dosageMin: resolved.minPerKg,
+      dosageMax: resolved.maxPerKg,
+      dosageRecommended: resolved.recommendedPerKg,
+      dosageCurrent: resolved.recommendedPerKg,
+      unit: resolved.unit,
       evidenceLevel: n.evidenceLevel || 'AI-suggested',
       rationale: n.mechanism || n.rationale || '',
       removed: false,
       type: 'nutraceutical' as const,
+      // Dose provenance forwarded to the UI
+      doseSource: resolved.source,
+      doseSourceUrl: resolved.sourceUrl ?? null,
+      doseSourceCitation: resolved.sourceCitation ?? null,
+      doseConfidence: resolved.confidence,
+      doseNeedsReview: resolved.needsReview,
+      doseAdjustments: resolved.adjustments,
+      doseTotalDailyMg: resolved.totalDailyMg ?? null,
+      doseFrequencyPerDay: resolved.frequencyPerDay ?? null,
     };
-  });
+  }));
 
   // Prioritize compounds based on lab findings and cap at 8
   const MAX_COMPOUNDS = 8;
