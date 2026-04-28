@@ -947,10 +947,16 @@ export async function runClinicalAnalysisPipeline(
   const prioritizedCompounds = prioritizeCompoundsByLabFindings(compounds, labAlerts, conditions)
     .slice(0, MAX_COMPOUNDS);
 
-  // Stage 6.5: Attach supporting scientific studies to each compound
-  // by querying hierarchical_edges (compound → condition) and resolving
-  // study_ids against scientific_studies.
-  const compoundsWithStudies = await attachStudiesToCompounds(prioritizedCompounds);
+  // Stage 6.5: Attach supporting scientific studies + KG triplets + synergies
+  // to each compound. The card now renders this evidence inline so vets don't
+  // have to switch tabs to see it.
+  const patientConditionNames = (conditions || [])
+    .map((c: any) => c?.condition_name || c?.name)
+    .filter(Boolean);
+  const compoundsWithStudies = await attachStudiesToCompounds(
+    prioritizedCompounds,
+    patientConditionNames,
+  );
 
   return {
     predispositions,
@@ -970,7 +976,28 @@ export async function runClinicalAnalysisPipeline(
 
 // ─── Stage 6.5: Attach scientific studies per compound ────────────────────────
 
-async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
+function buildStudyLink(s: { link?: string | null; doi?: string | null; pmid?: string | null; title?: string | null }): string {
+  // 1. Direct link (only if absolute http(s))
+  if (s.link && /^https?:\/\//i.test(s.link)) return s.link;
+  // 2. DOI (strip any embedded https://doi.org/ prefix)
+  if (s.doi) {
+    const doi = String(s.doi).replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').trim();
+    if (doi) return `https://doi.org/${doi}`;
+  }
+  // 3. PubMed
+  if (s.pmid) {
+    const pmid = String(s.pmid).trim();
+    if (pmid) return `https://pubmed.ncbi.nlm.nih.gov/${pmid}`;
+  }
+  // 4. Fallback: Google Scholar by title
+  if (s.title) return `https://scholar.google.com/scholar?q=${encodeURIComponent(s.title)}`;
+  return 'https://scholar.google.com/';
+}
+
+async function attachStudiesToCompounds(
+  compounds: any[],
+  patientConditions: string[] = [],
+): Promise<any[]> {
   if (!compounds || compounds.length === 0) return compounds;
 
   const TREATMENT_PREDICATES = ['TREATS', 'AMELIORATES', 'PREVENTS', 'MODULATES', 'INHIBITS', 'ACTIVATES'];
@@ -1015,8 +1042,75 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
           } else mechanism = JSON.stringify(mp);
         }
 
+        // ── Aggregated KG triplets for THIS (compound, condition) pair ───────
+        const aggregatedKg: Record<string, any> = {};
+        for (const t of triplets || []) {
+          const pred = String(t.predicate || 'TREATS');
+          const obj = String(t.object_name || c.condition);
+          const key = `${pred}::${obj.toLowerCase()}`;
+          if (!aggregatedKg[key]) {
+            aggregatedKg[key] = {
+              subject: c.name,
+              predicate: pred,
+              object: obj,
+              confidence: Number(t.extraction_confidence || 0),
+              evidenceLevel: 'KG-backed',
+              studyIds: new Set<string>(),
+            };
+          }
+          if (t.study_id) aggregatedKg[key].studyIds.add(t.study_id);
+          aggregatedKg[key].confidence = Math.max(
+            aggregatedKg[key].confidence,
+            Number(t.extraction_confidence || 0),
+          );
+        }
+        const kgTriplets = Object.values(aggregatedKg).map((row: any) => ({
+          subject: row.subject,
+          predicate: row.predicate,
+          object: row.object,
+          confidence: row.confidence,
+          evidenceLevel: row.evidenceLevel,
+          studyCount: row.studyIds.size,
+        }));
+
+        // ── Synergies: same compound treating OTHER patient conditions ───────
+        let synergies: Array<{ condition: string; predicate: string; studyCount: number }> = [];
+        try {
+          const otherConditions = (patientConditions || []).filter(
+            (cond) => cond && cond.toLowerCase() !== String(c.condition || '').toLowerCase(),
+          );
+          if (otherConditions.length > 0) {
+            const { data: synTriplets } = await supabase
+              .from('triplet_extractions')
+              .select('predicate, object_name, study_id, extraction_confidence')
+              .ilike('subject_name', `%${c.name}%`)
+              .in('predicate', TREATMENT_PREDICATES)
+              .eq('curation_status', 'approved')
+              .limit(50);
+            const map: Record<string, { predicate: string; condition: string; studyIds: Set<string> }> = {};
+            for (const st of synTriplets || []) {
+              const obj = String(st.object_name || '');
+              if (!obj) continue;
+              const matched = otherConditions.find(
+                (cond) => obj.toLowerCase().includes(cond.toLowerCase()) || cond.toLowerCase().includes(obj.toLowerCase()),
+              );
+              if (!matched) continue;
+              const key = `${matched.toLowerCase()}::${st.predicate}`;
+              if (!map[key]) map[key] = { predicate: String(st.predicate), condition: matched, studyIds: new Set() };
+              if (st.study_id) map[key].studyIds.add(st.study_id);
+            }
+            synergies = Object.values(map).map((s) => ({
+              condition: s.condition,
+              predicate: s.predicate,
+              studyCount: s.studyIds.size,
+            }));
+          }
+        } catch (e) {
+          // synergies are optional
+        }
+
         if (studyIds.length === 0) {
-          return { ...c, studies: [], mechanism };
+          return { ...c, studies: [], mechanism, kgTriplets, synergies };
         }
 
         const { data: studies } = await supabase
@@ -1057,13 +1151,15 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
             } catch (e) {
               // ignore — excerpt is optional
             }
+            const title = s.title || s.title_en;
+            const resolvedLink = buildStudyLink({ link: s.link, doi: s.doi, pmid: s.pmid, title });
             return {
               id: s.id,
-              title: s.title || s.title_en,
+              title,
               year: s.year,
               doi: s.doi,
               pmid: s.pmid,
-              link: s.link,
+              link: resolvedLink,
               excerpt,
             };
           })
@@ -1073,10 +1169,12 @@ async function attachStudiesToCompounds(compounds: any[]): Promise<any[]> {
           ...c,
           mechanism,
           studies: studiesWithExcerpts,
+          kgTriplets,
+          synergies,
         };
       } catch (err) {
         console.warn(`[attachStudiesToCompounds] Failed for ${c.name}:`, err);
-        return { ...c, studies: [] };
+        return { ...c, studies: [], kgTriplets: [], synergies: [] };
       }
     })
   );
