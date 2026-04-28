@@ -50,12 +50,8 @@ async function sha256Hex(input: string): Promise<string> {
     .join("");
 }
 
-function ageInYears(birthdate: string | null, fallback: number | null): number {
-  if (birthdate) {
-    const ms = Date.now() - new Date(birthdate).getTime();
-    return Math.max(ms / (365.25 * 24 * 3600 * 1000), 0);
-  }
-  return fallback ?? 0;
+function safeAge(ageYears: number | null | undefined): number {
+  return Math.max(Number(ageYears) || 0, 0);
 }
 
 Deno.serve(async (req) => {
@@ -70,7 +66,7 @@ Deno.serve(async (req) => {
     // 1) Pet
     const { data: pet, error: petErr } = await supabase
       .from("pet_profiles")
-      .select("id, name, breed, birthdate, weight_kg, gender")
+      .select("id, name, breed, age_years, weight_kg, sex")
       .eq("id", body.pet_id)
       .maybeSingle();
     if (petErr || !pet) return jsonResponse({ error: "pet not found" }, 404);
@@ -145,7 +141,7 @@ Deno.serve(async (req) => {
     }
 
     // 7) Build context hash for cache lookup
-    const ageNow = ageInYears(pet.birthdate, null);
+    const ageNow = safeAge(pet.age_years);
     const cacheCtx = {
       petId: pet.id,
       ageBucket: Math.floor(ageNow * 4) / 4, // quarter-year resolution
@@ -209,7 +205,7 @@ You MUST output through the function tool.`;
         size_category: sizeCategory,
         weight_kg: pet.weight_kg ?? breed?.average_weight_kg ?? null,
         chronological_age_years: Number(ageNow.toFixed(2)),
-        sex: pet.gender,
+        sex: pet.sex,
       },
       breed_lifespan_years: breed?.average_lifespan_years ?? agingCurves?.median_lifespan_years ?? 12,
       gompertz_curve: agingCurves
