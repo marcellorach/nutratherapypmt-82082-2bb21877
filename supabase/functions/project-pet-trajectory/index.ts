@@ -175,6 +175,9 @@ Deno.serve(async (req) => {
           projection: cached.projection_data,
           citations: cached.citations,
           years_gained: cached.years_gained,
+          years_gained_breakdown: (cached.projection_data as any)?.years_gained_breakdown || [],
+          protocol_caveats: (cached.projection_data as any)?.protocol_caveats || [],
+          confidence: (cached.projection_data as any)?.confidence || null,
           baseline_biological_age: cached.baseline_biological_age,
           baseline_remaining_years: cached.baseline_remaining_years,
         });
@@ -425,6 +428,17 @@ OUTPUT REQUIREMENTS:
     }
 
     const baseline = parsed.years?.[0] || null;
+    // Hard cap: clamp years_gained_total to plausible range [-0.5, 1.5]
+    const rawGain = Number(parsed.years_gained_total ?? parsed.years_gained ?? 0);
+    const cappedGain = Math.max(Math.min(rawGain, 1.5), -0.5);
+    parsed.years_gained_total = cappedGain;
+    if (cappedGain !== rawGain) {
+      parsed.protocol_caveats = parsed.protocol_caveats || [];
+      parsed.protocol_caveats.push({
+        type: "adherence",
+        message: `Estimativa do modelo (${rawGain.toFixed(2)}a) ajustada para o teto de plausibilidade (${cappedGain.toFixed(2)}a).`,
+      });
+    }
 
     // 11) Cache result
     const { error: cacheErr } = await supabase
@@ -436,7 +450,7 @@ OUTPUT REQUIREMENTS:
           with_intervention: withIntervention,
           projection_data: parsed,
           citations: parsed.citations || [],
-          years_gained: parsed.years_gained ?? null,
+          years_gained: parsed.years_gained_total ?? null,
           baseline_biological_age: baseline?.biological_age ?? null,
           baseline_remaining_years: baseline?.expected_remaining_years ?? null,
           model_used: model,
@@ -453,7 +467,10 @@ OUTPUT REQUIREMENTS:
       model_used: model,
       projection: parsed,
       citations: parsed.citations || [],
-      years_gained: parsed.years_gained ?? null,
+      years_gained: parsed.years_gained_total ?? null,
+      years_gained_breakdown: parsed.years_gained_breakdown || [],
+      protocol_caveats: parsed.protocol_caveats || [],
+      confidence: parsed.confidence || null,
       baseline_biological_age: baseline?.biological_age ?? null,
       baseline_remaining_years: baseline?.expected_remaining_years ?? null,
     });
