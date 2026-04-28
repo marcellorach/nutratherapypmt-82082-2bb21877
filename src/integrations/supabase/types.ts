@@ -344,6 +344,48 @@ export type Database = {
         }
         Relationships: []
       }
+      breed_aging_curves: {
+        Row: {
+          aging_acceleration_factor: number
+          created_at: string
+          gompertz_alpha: number
+          gompertz_beta: number
+          id: string
+          median_lifespan_years: number
+          mortality_doubling_years: number
+          notes: string | null
+          size_category: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          aging_acceleration_factor?: number
+          created_at?: string
+          gompertz_alpha: number
+          gompertz_beta: number
+          id?: string
+          median_lifespan_years: number
+          mortality_doubling_years: number
+          notes?: string | null
+          size_category: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          aging_acceleration_factor?: number
+          created_at?: string
+          gompertz_alpha?: number
+          gompertz_beta?: number
+          id?: string
+          median_lifespan_years?: number
+          mortality_doubling_years?: number
+          notes?: string | null
+          size_category?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       breed_groups: {
         Row: {
           created_at: string | null
@@ -2036,6 +2078,57 @@ export type Database = {
           updated_at?: string
           veterinarian_id?: string | null
           weight_kg?: number
+        }
+        Relationships: []
+      }
+      pet_trajectory_projections: {
+        Row: {
+          baseline_biological_age: number | null
+          baseline_remaining_years: number | null
+          citations: Json | null
+          context_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          model_used: string | null
+          pet_id: string
+          projection_data: Json
+          source: string
+          updated_at: string
+          with_intervention: boolean
+          years_gained: number | null
+        }
+        Insert: {
+          baseline_biological_age?: number | null
+          baseline_remaining_years?: number | null
+          citations?: Json | null
+          context_hash: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          model_used?: string | null
+          pet_id: string
+          projection_data: Json
+          source?: string
+          updated_at?: string
+          with_intervention?: boolean
+          years_gained?: number | null
+        }
+        Update: {
+          baseline_biological_age?: number | null
+          baseline_remaining_years?: number | null
+          citations?: Json | null
+          context_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          model_used?: string | null
+          pet_id?: string
+          projection_data?: Json
+          source?: string
+          updated_at?: string
+          with_intervention?: boolean
+          years_gained?: number | null
         }
         Relationships: []
       }
