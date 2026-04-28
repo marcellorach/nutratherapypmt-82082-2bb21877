@@ -10,6 +10,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { resolveCompoundDosage } from './dosage-resolver';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
