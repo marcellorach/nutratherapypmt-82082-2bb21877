@@ -96,8 +96,11 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   const { data: breedCtx, isLoading: breedLoading } = useBreedPredispositionsForPet(petBreed);
 
   const [yearsAhead, setYearsAhead] = useState(0);
-  const [withIntervention, setWithIntervention] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  // The compare view always shows BOTH scenarios side-by-side. The "active" one
+  // (used for the AI projection toggle and for the projected-conditions list)
+  // is always the with-protocol scenario, since that is the recommended path.
+  const withIntervention = true;
 
   // AI projection (Gemini 3.1 Pro Preview)
   const aiQuery = usePetTrajectoryProjection(petId || null, withIntervention, !!petId);
