@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-04-28T17:06:40.818Z",
+  "timestamp": "2026-04-28T18:26:26.065Z",
   "summary": {
-    "totalFiles": 784,
-    "totalIssues": 382,
+    "totalFiles": 793,
+    "totalIssues": 383,
     "hardcodedTexts": 39,
-    "missingKeys": 343,
+    "missingKeys": 344,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2225,6 +2225,13 @@
       "file": "src/components/layout/Header.tsx",
       "line": 76,
       "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/ClinicalPipelineLogPanel.tsx",
+      "line": 68,
+      "text": "a",
       "severity": "high"
     },
     {
