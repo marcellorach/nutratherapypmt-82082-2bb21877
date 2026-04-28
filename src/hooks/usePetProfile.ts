@@ -209,16 +209,31 @@ export function useAddClinicalNote() {
 // Delete a pet profile
 export function useDeletePetProfile() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async (petId: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('pet_profiles')
         .delete()
-        .eq('id', petId);
+        .eq('id', petId)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(
+          'Não foi possível remover este pet. Você não tem permissão (apenas o criador, veterinário responsável ou admin pode deletar).'
+        );
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pet-profiles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao remover pet',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
@@ -226,16 +241,31 @@ export function useDeletePetProfile() {
 // Delete all demo pet profiles
 export function useDeleteDemoPets() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
-      const { error } = await (supabase as any)
+      const { data, error } = await (supabase as any)
         .from('pet_profiles')
         .delete()
-        .eq('is_demo', true);
+        .eq('is_demo', true)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(
+          'Nenhum pet demo foi removido. Verifique se você é admin ou o criador dos registros.'
+        );
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pet-profiles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao remover pets demo',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
