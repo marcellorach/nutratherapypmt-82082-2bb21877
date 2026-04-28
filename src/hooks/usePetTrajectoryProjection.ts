@@ -27,6 +27,19 @@ export interface AIProjectionCitation {
   related_compound?: string;
 }
 
+export interface AIYearsGainedBreakdown {
+  condition: string;
+  years_contribution: number;
+  anchor_compound?: string;
+  citation?: string;
+}
+
+export interface AIProtocolCaveat {
+  type: 'polypharmacy' | 'adherence' | 'no_kg_coverage' | 'partial_coverage' | 'contraindication';
+  message: string;
+  related_condition?: string;
+}
+
 export interface AIProjectionResult {
   source: 'ai_kg_grounded' | 'heuristic_fallback';
   cached: boolean;
@@ -34,12 +47,18 @@ export interface AIProjectionResult {
   projection: {
     confidence: 'high' | 'medium' | 'low';
     rationale: string;
-    years_gained: number;
+    years_gained_total?: number;
+    years_gained?: number;
+    years_gained_breakdown?: AIYearsGainedBreakdown[];
+    protocol_caveats?: AIProtocolCaveat[];
     years: AIProjectionYear[];
     citations: AIProjectionCitation[];
   } | null;
   citations: AIProjectionCitation[];
   years_gained: number | null;
+  years_gained_breakdown?: AIYearsGainedBreakdown[];
+  protocol_caveats?: AIProtocolCaveat[];
+  confidence?: 'high' | 'medium' | 'low' | null;
   baseline_biological_age: number | null;
   baseline_remaining_years: number | null;
   error?: string;
