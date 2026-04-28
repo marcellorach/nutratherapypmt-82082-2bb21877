@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen } from 'lucide-react';
+import { X, RotateCcw, FlaskConical, Pill, MessageSquare, ChevronDown, ChevronUp, Send, Loader2, BookOpen, GitBranch, Network } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
@@ -24,6 +24,7 @@ export interface CompoundDosage {
   rationale: string;
   removed: boolean;
   type: 'nutraceutical' | 'drug';
+  mechanism?: string | null;
   studies?: Array<{
     id: string;
     title: string;
@@ -31,6 +32,7 @@ export interface CompoundDosage {
     doi?: string | null;
     pmid?: string | null;
     link?: string | null;
+    excerpt?: string | null;
   }>;
 }
 
@@ -69,10 +71,11 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   const { t } = useTranslation();
   const {
     id, name, condition, dosageMin, dosageMax, dosageRecommended,
-    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies,
+    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies, mechanism,
   } = compound;
 
   const [chatOpen, setChatOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -219,41 +222,102 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
         </div>
       </div>
 
-      {/* Scientific studies backing this recommendation */}
-      {studies && studies.length > 0 && (
-        <div className="mt-3 pl-1 space-y-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
-            <BookOpen className="h-3 w-3" />
-            {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')}
-          </p>
-          <div className="space-y-1">
-            {studies.map((s) => {
-              const href = s.link
-                || (s.doi ? `https://doi.org/${s.doi}` : null)
-                || (s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}` : null);
-              const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
-              if (!href) {
-                return (
-                  <span key={s.id} className="block text-xs text-muted-foreground line-clamp-2">
-                    • {label}
-                  </span>
-                );
-              }
-              return (
-                <a
-                  key={s.id}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-xs text-primary hover:underline line-clamp-2"
-                  title={label}
-                >
-                  • {label}
-                </a>
-              );
-            })}
-          </div>
-        </div>
+      {/* Evidence & Context — collapsible block with mechanism, studies+excerpts, mini relations */}
+      {((studies && studies.length > 0) || mechanism) && (
+        <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              {t('petProfile.recommendation.evidenceAndContext', 'Ver evidências e contexto')}
+              {studies && studies.length > 0 && (
+                <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded">{studies.length}</span>
+              )}
+              {evidenceOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 space-y-3 px-1">
+            {/* Mechanism */}
+            {mechanism && (
+              <div className="rounded-md border bg-muted/30 px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1 mb-1">
+                  <GitBranch className="h-3 w-3" />
+                  {t('petProfile.recommendation.mechanism', 'Mecanismo molecular')}
+                </p>
+                <p className="text-xs text-foreground/80 leading-relaxed">{mechanism}</p>
+              </div>
+            )}
+
+            {/* Studies with highlighted excerpts */}
+            {studies && studies.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+                  <BookOpen className="h-3 w-3" />
+                  {t('petProfile.recommendation.evidenceStudies', 'Estudos científicos')} ({studies.length})
+                </p>
+                <div className="space-y-2">
+                  {studies.map((s) => {
+                    const href = s.link
+                      || (s.doi ? `https://doi.org/${s.doi}` : null)
+                      || (s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}` : null);
+                    const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
+                    return (
+                      <div key={s.id} className="border-l-2 border-primary/40 pl-3 py-1">
+                        {href ? (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline font-medium line-clamp-2 block"
+                            title={label}
+                          >
+                            {label}
+                          </a>
+                        ) : (
+                          <span className="text-xs text-foreground font-medium line-clamp-2 block">{label}</span>
+                        )}
+                        {s.excerpt && (
+                          <p
+                            className="text-[11px] text-muted-foreground italic mt-1 leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: `“${escapeHtml(s.excerpt).replace(
+                                new RegExp(`(${escapeRegex(name)})`, 'gi'),
+                                '<mark class="bg-yellow-200 dark:bg-yellow-900/50 text-foreground rounded px-0.5">$1</mark>',
+                              )}”`,
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Mini relations — composto → condição (inline, sem grafo pesado) */}
+            <div className="rounded-md border bg-muted/20 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1 mb-1">
+                <Network className="h-3 w-3" />
+                {t('petProfile.recommendation.relations', 'Conexões no Knowledge Graph')}
+              </p>
+              <div className="flex items-center gap-2 text-xs flex-wrap">
+                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium">
+                  {name}
+                </span>
+                <span className="text-muted-foreground">→ {t('petProfile.recommendation.targets', 'atua em')} →</span>
+                <span className="px-2 py-0.5 rounded bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 font-medium">
+                  {condition}
+                </span>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {t('petProfile.recommendation.relationsHint', 'Veja o grafo completo do paciente na aba "Caminho Biológico".')}
+              </p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {/* Inline Discuss Chat */}
