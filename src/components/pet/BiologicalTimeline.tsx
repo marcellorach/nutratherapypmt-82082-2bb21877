@@ -342,6 +342,12 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   className="w-full h-full"
                 />
               </div>
+              <ConditionsMiniList
+                projection={projectionsWithout[safeIndex]}
+                tone="neutral"
+                emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')}
+                t={t}
+              />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -361,6 +367,12 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   className="w-full h-full"
                 />
               </div>
+              <ConditionsMiniList
+                projection={projectionsWith[safeIndex]}
+                tone="protected"
+                emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')}
+                t={t}
+              />
             </div>
           </div>
           {/* Visual legend */}
@@ -416,20 +428,6 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <span>{t('petProfile.biologicalTimeline.today')}</span>
             <span>{petAge + Math.floor(maxSlider / 2)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
             <span>{petAge + maxSlider}{t('petProfile.biologicalTimeline.yearsShort')}</span>
-          </div>
-
-          <div className="flex items-center justify-between rounded-md border bg-muted/20 p-2 mt-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className={`h-4 w-4 ${withIntervention ? 'text-emerald-500' : 'text-muted-foreground'}`} />
-              <Label className="text-xs cursor-pointer" htmlFor="intervention-toggle">
-                {t('petProfile.biologicalTimeline.withInterventionLabel')}
-              </Label>
-            </div>
-            <Switch
-              id="intervention-toggle"
-              checked={withIntervention}
-              onCheckedChange={setWithIntervention}
-            />
           </div>
         </div>
 
