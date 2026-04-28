@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-28T18:26:26.065Z",
+  "timestamp": "2026-04-28T20:00:44.747Z",
   "summary": {
     "totalFiles": 793,
-    "totalIssues": 383,
+    "totalIssues": 393,
     "hardcodedTexts": 39,
-    "missingKeys": 344,
-    "incompleteTranslations": 0
+    "missingKeys": 353,
+    "incompleteTranslations": 1
   },
   "issues": [
     {
@@ -2236,6 +2236,69 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 178,
+      "text": "brain",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 206,
+      "text": "eyes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 220,
+      "text": "heart",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 245,
+      "text": "intestines",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 296,
+      "text": "skin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 438,
+      "text": "ears",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 447,
+      "text": "mouth",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 473,
+      "text": "paw-hind",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/DogAnatomySVG.tsx",
+      "line": 479,
+      "text": "paw-front",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
       "line": 208,
       "text": "T",
@@ -2414,6 +2477,13 @@
       "file": "src/pages/veterinario/RecommendationsList.tsx",
       "line": 53,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: petProfile.biologicalTimeline.moreConditions",
       "severity": "high"
     },
     {
