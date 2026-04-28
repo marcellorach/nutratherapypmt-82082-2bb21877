@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { predicateBadgeColors, predicateSymbols } from './utils/predicateStyles';
 
 export interface CompoundDosage {
   id: string;
@@ -34,6 +35,19 @@ export interface CompoundDosage {
     pmid?: string | null;
     link?: string | null;
     excerpt?: string | null;
+  }>;
+  kgTriplets?: Array<{
+    subject: string;
+    predicate: string;
+    object: string;
+    confidence: number;
+    evidenceLevel: string;
+    studyCount?: number;
+  }>;
+  synergies?: Array<{
+    condition: string;
+    predicate: string;
+    studyCount?: number;
   }>;
 }
 
@@ -76,7 +90,7 @@ const CompoundDosageSlider: React.FC<CompoundDosageSliderProps> = ({
   const { t } = useTranslation();
   const {
     id, name, condition, dosageMin, dosageMax, dosageRecommended,
-    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies, mechanism,
+    dosageCurrent, unit, evidenceLevel, rationale, removed, type, studies, mechanism, kgTriplets, synergies,
   } = compound;
 
   const [chatOpen, setChatOpen] = useState(false);
@@ -228,8 +242,9 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
         </div>
       </div>
 
-      {/* Evidence & Context — collapsible block with mechanism, studies+excerpts, mini relations */}
-      {((studies && studies.length > 0) || mechanism) && (
+      {/* Evidence & Context — collapsible block with mechanism, KG triplets,
+          synergies, studies+excerpts, mini relations. */}
+      {((studies && studies.length > 0) || mechanism || (kgTriplets && kgTriplets.length > 0) || (synergies && synergies.length > 0)) && (
         <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>
           <CollapsibleTrigger asChild>
             <Button
@@ -277,6 +292,75 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
               </div>
             )}
 
+            {/* Knowledge Graph triplets — what the KG says about (compound, condition) */}
+            {kgTriplets && kgTriplets.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
+                  <Network className="h-3 w-3" />
+                  {t('petProfile.recommendation.knowledgeGraph', 'Knowledge Graph')}
+                </p>
+                <div className="space-y-1.5">
+                  {kgTriplets.map((kg, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-1.5 p-1.5 rounded-md border bg-muted/30 text-xs flex-wrap"
+                    >
+                      <FlaskConical className="h-3 w-3 text-primary shrink-0" />
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium">
+                        {kg.subject}
+                      </span>
+                      <span className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded border', predicateBadgeColors[kg.predicate] || 'bg-muted text-muted-foreground border-border')}>
+                        {predicateSymbols[kg.predicate] || '→'} {kg.predicate}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 font-medium">
+                        {kg.object}
+                      </span>
+                      <div className="ml-auto flex items-center gap-1.5 shrink-0">
+                        {!!kg.studyCount && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {kg.studyCount} {t('petProfile.evidence.studies', 'estudos')}
+                          </span>
+                        )}
+                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                          {kg.evidenceLevel}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">
+                          {Math.round((kg.confidence || 0) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Synergies — same compound treats other patient conditions */}
+            {synergies && synergies.length > 0 && (
+              <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 space-y-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-primary font-semibold flex items-center gap-1">
+                  <Network className="h-3 w-3" />
+                  {t('petProfile.recommendation.synergies', 'Sinergias com outras condições do paciente')}
+                </p>
+                <div className="flex flex-col gap-1">
+                  {synergies.map((s, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5 text-xs flex-wrap">
+                      <span className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded border', predicateBadgeColors[s.predicate] || 'bg-muted text-muted-foreground border-border')}>
+                        {predicateSymbols[s.predicate] || '→'} {s.predicate}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 font-medium">
+                        {s.condition}
+                      </span>
+                      {!!s.studyCount && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {s.studyCount} {t('petProfile.evidence.studies', 'estudos')}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Studies with highlighted excerpts */}
             {studies && studies.length > 0 && (
               <div className="space-y-2">
@@ -286,9 +370,8 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                 </p>
                 <div className="space-y-2">
                   {studies.map((s) => {
-                    const href = s.link
-                      || (s.doi ? `https://doi.org/${s.doi}` : null)
-                      || (s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${s.pmid}` : null);
+                    // The pipeline now always normalizes `link` (DOI → PubMed → Scholar fallback).
+                    const href = s.link || null;
                     const label = `${s.title}${s.year ? ` (${s.year})` : ''}`;
                     return (
                       <div key={s.id} className="border-l-2 border-primary/40 pl-3 py-1">
