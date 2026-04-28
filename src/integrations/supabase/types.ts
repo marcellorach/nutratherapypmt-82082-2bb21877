@@ -563,6 +563,78 @@ export type Database = {
           },
         ]
       }
+      compound_dosage_reference: {
+        Row: {
+          compound_name_en: string
+          condition_name_en: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string | null
+          curated_at: string | null
+          curated_by: string | null
+          frequency_per_day: number | null
+          id: string
+          max_daily_mg: number | null
+          max_mg_per_kg: number | null
+          min_mg_per_kg: number | null
+          needs_review: boolean
+          notes: string | null
+          route: string | null
+          source_citation: string | null
+          source_type: string
+          source_url: string | null
+          species: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          compound_name_en: string
+          condition_name_en?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          curated_at?: string | null
+          curated_by?: string | null
+          frequency_per_day?: number | null
+          id?: string
+          max_daily_mg?: number | null
+          max_mg_per_kg?: number | null
+          min_mg_per_kg?: number | null
+          needs_review?: boolean
+          notes?: string | null
+          route?: string | null
+          source_citation?: string | null
+          source_type: string
+          source_url?: string | null
+          species?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          compound_name_en?: string
+          condition_name_en?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          curated_at?: string | null
+          curated_by?: string | null
+          frequency_per_day?: number | null
+          id?: string
+          max_daily_mg?: number | null
+          max_mg_per_kg?: number | null
+          min_mg_per_kg?: number | null
+          needs_review?: boolean
+          notes?: string | null
+          route?: string | null
+          source_citation?: string | null
+          source_type?: string
+          source_url?: string | null
+          species?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
@@ -589,6 +661,65 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      dosage_lookup_log: {
+        Row: {
+          compound_name: string
+          condition_name: string | null
+          created_at: string
+          fallback_reason: string | null
+          id: string
+          pet_id: string | null
+          pet_weight_kg: number | null
+          reference_id: string | null
+          resolved_max_per_kg: number | null
+          resolved_min_per_kg: number | null
+          resolved_recommended_mg_total: number | null
+          resolved_source: string
+          species: string
+          user_id: string | null
+        }
+        Insert: {
+          compound_name: string
+          condition_name?: string | null
+          created_at?: string
+          fallback_reason?: string | null
+          id?: string
+          pet_id?: string | null
+          pet_weight_kg?: number | null
+          reference_id?: string | null
+          resolved_max_per_kg?: number | null
+          resolved_min_per_kg?: number | null
+          resolved_recommended_mg_total?: number | null
+          resolved_source: string
+          species?: string
+          user_id?: string | null
+        }
+        Update: {
+          compound_name?: string
+          condition_name?: string | null
+          created_at?: string
+          fallback_reason?: string | null
+          id?: string
+          pet_id?: string | null
+          pet_weight_kg?: number | null
+          reference_id?: string | null
+          resolved_max_per_kg?: number | null
+          resolved_min_per_kg?: number | null
+          resolved_recommended_mg_total?: number | null
+          resolved_source?: string
+          species?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dosage_lookup_log_reference_id_fkey"
+            columns: ["reference_id"]
+            isOneToOne: false
+            referencedRelation: "compound_dosage_reference"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       evidence_claims: {
         Row: {

@@ -6975,6 +6975,15 @@
         "external": "Externo",
         "generic": "Geral"
       },
+      "totalDaily": "Total/dia",
+      "doseSource": {
+        "kg": "Dose do Knowledge Graph",
+        "curated": "Dose curada (estudo)",
+        "web": "Dose de fonte vet. autoritativa",
+        "llm": "Estimativa de IA — pendente de fonte",
+        "estimate": "Estimativa genérica — sem fonte",
+        "needsReview": "Requer curadoria"
+      },
       "approve": "Aprovar Stack",
       "approveModified": "Aprovar com Modificações",
       "reject": "Rejeitar",
