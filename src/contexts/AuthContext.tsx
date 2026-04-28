@@ -18,7 +18,19 @@ type AuthContextType = {
   hasRole: (role: 'admin' | 'veterinarian' | 'tutor') => boolean;
 };
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const defaultAuthContext: AuthContextType = {
+  session: null,
+  user: null,
+  userProfile: null,
+  userRoles: [],
+  loading: true,
+  signIn: async () => {},
+  signUp: async () => {},
+  signOut: async () => {},
+  hasRole: () => false,
+};
+
+const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
