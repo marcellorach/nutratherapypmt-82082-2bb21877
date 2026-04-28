@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-28T13:54:25.464Z",
+  "timestamp": "2026-04-28T14:29:49.996Z",
   "summary": {
-    "totalFiles": 779,
+    "totalFiles": 780,
     "totalIssues": 382,
     "hardcodedTexts": 39,
     "missingKeys": 343,
@@ -2230,7 +2230,7 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 177,
+      "line": 183,
       "text": "T",
       "severity": "high"
     },
