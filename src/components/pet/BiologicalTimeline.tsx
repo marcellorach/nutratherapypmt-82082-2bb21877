@@ -5,63 +5,23 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Dna, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown, Heart, BrainCircuit, BookOpen, Loader2, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dna, Sparkles, AlertTriangle, FlaskConical, Info, TrendingUp, TrendingDown,
+  Heart, BrainCircuit, BookOpen, Loader2, ShieldCheck, ChevronDown, ChevronUp,
+} from 'lucide-react';
 import {
   buildBiologicalTimeline,
   type ActiveConditionInput,
   type YearProjection,
+  type ProjectedExistingCondition,
+  type ProjectedNewCondition,
 } from '@/services/biological-timeline-engine';
 import { useBreedPredispositionsForPet } from '@/hooks/useBreedPredispositionsForPet';
 import { usePetTrajectoryProjection } from '@/hooks/usePetTrajectoryProjection';
 import { usePetCompoundCoverage } from '@/hooks/usePetCompoundCoverage';
 import { mapConditionToRegions, type AnatomyRegionId } from '@/services/anatomy-region-map';
 import DogAnatomySVG, { type RegionState, type Severity } from './DogAnatomySVG';
-
-// Same body region map as the legacy DigitalTwinDog (kept for visual continuity)
-const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
-  'osteoarthritis': { x: 30, y: 75, region: 'joints' },
-  'arthritis': { x: 30, y: 75, region: 'joints' },
-  'osteoartrite': { x: 30, y: 75, region: 'joints' },
-  'hip dysplasia': { x: 20, y: 55, region: 'hip' },
-  'displasia coxofemoral': { x: 20, y: 55, region: 'hip' },
-  'elbow dysplasia': { x: 72, y: 65, region: 'elbow' },
-  'intervertebral disc disease': { x: 45, y: 25, region: 'spine' },
-  'spondylosis': { x: 40, y: 25, region: 'spine' },
-  'canine cognitive dysfunction': { x: 85, y: 15, region: 'brain' },
-  'cognitive dysfunction': { x: 85, y: 15, region: 'brain' },
-  'disfunção cognitiva': { x: 85, y: 15, region: 'brain' },
-  'epilepsy': { x: 85, y: 15, region: 'brain' },
-  'dilated cardiomyopathy': { x: 65, y: 40, region: 'heart' },
-  'mitral valve disease': { x: 65, y: 40, region: 'heart' },
-  'heart disease': { x: 65, y: 40, region: 'heart' },
-  'cardiomiopatia': { x: 65, y: 40, region: 'heart' },
-  'hepatic lipidosis': { x: 50, y: 45, region: 'liver' },
-  'liver disease': { x: 50, y: 45, region: 'liver' },
-  'chronic kidney disease': { x: 35, y: 40, region: 'kidney' },
-  'renal failure': { x: 35, y: 40, region: 'kidney' },
-  'doença renal': { x: 35, y: 40, region: 'kidney' },
-  'hypothyroidism': { x: 78, y: 35, region: 'thyroid' },
-  'diabetes': { x: 48, y: 48, region: 'pancreas' },
-  "cushing's disease": { x: 45, y: 35, region: 'adrenal' },
-  'atopic dermatitis': { x: 50, y: 60, region: 'skin' },
-  'allergies': { x: 50, y: 60, region: 'skin' },
-  'cataracts': { x: 88, y: 18, region: 'eyes' },
-  'progressive retinal atrophy': { x: 88, y: 18, region: 'eyes' },
-  'inflammatory bowel disease': { x: 45, y: 55, region: 'gi' },
-  'pancreatitis': { x: 48, y: 48, region: 'pancreas' },
-  'cellular senescence': { x: 50, y: 30, region: 'systemic' },
-  'oxidative stress': { x: 50, y: 30, region: 'systemic' },
-  'chronic inflammation': { x: 50, y: 30, region: 'systemic' },
-  'cancer': { x: 50, y: 30, region: 'systemic' },
-  'brachycephalic syndrome': { x: 90, y: 22, region: 'respiratory' },
-  'laryngeal paralysis': { x: 80, y: 30, region: 'respiratory' },
-};
-
-const severityPulseColors: Record<string, string> = {
-  mild: 'bg-yellow-400',
-  moderate: 'bg-orange-400',
-  severe: 'bg-red-500',
-};
 
 interface BiologicalTimelineProps {
   conditions: Array<{
@@ -76,6 +36,55 @@ interface BiologicalTimelineProps {
   petId?: string | null;
 }
 
+function buildRegionStates(
+  existing: ProjectedExistingCondition[],
+  emergent: ProjectedNewCondition[],
+  protectionActive: boolean,
+): { states: Partial<Record<AnatomyRegionId, RegionState>>; systemic: Severity | null } {
+  const states: Partial<Record<AnatomyRegionId, RegionState>> = {};
+  let systemic: Severity | null = null;
+
+  const upgrade = (cur: Severity | null, next: Severity): Severity => {
+    const order: Severity[] = ['mild', 'moderate', 'severe'];
+    if (!cur) return next;
+    return order.indexOf(next) > order.indexOf(cur) ? next : cur;
+  };
+
+  const apply = (
+    name: string,
+    severity: Severity,
+    isNew: boolean,
+    probability: number | undefined,
+    protectedBy: string[],
+  ) => {
+    const mapping = mapConditionToRegions(name);
+    if (mapping.systemic) systemic = upgrade(systemic, severity);
+    for (const region of mapping.regions) {
+      if (region === 'systemic') continue;
+      const prev = states[region];
+      const conditions = prev?.conditions || [];
+      conditions.push({ name, severity, isNew, probability, protectedBy });
+      states[region] = {
+        severity: upgrade(prev?.severity ?? null, severity),
+        isNew: prev?.isNew || isNew,
+        protected: (prev?.protected || (protectionActive && protectedBy.length > 0)),
+        conditions,
+      };
+    }
+  };
+
+  for (const c of existing) {
+    apply(c.name, c.projectedSeverityLabel as Severity, false, undefined, c.anchorCompounds || []);
+  }
+  for (const c of emergent) {
+    if (c.probability < 0.2) continue;
+    const sev: Severity = c.probability >= 0.6 ? 'moderate' : 'mild';
+    apply(c.name, sev, true, c.probability, c.anchorCompounds || []);
+  }
+
+  return { states, systemic };
+}
+
 const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   conditions,
   petName,
@@ -88,9 +97,9 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
 
   const [yearsAhead, setYearsAhead] = useState(0);
   const [withIntervention, setWithIntervention] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
-  // Phase 2: AI-grounded projection (Gemini 2.5 Pro + KG + breed predispositions).
-  // Falls back to the heuristic engine while loading or on error.
+  // AI projection (Gemini 3.1 Pro Preview)
   const aiQuery = usePetTrajectoryProjection(petId || null, withIntervention, !!petId);
   const aiYears = aiQuery.data?.projection?.years || null;
   const aiCitations = aiQuery.data?.citations || [];
@@ -112,105 +121,112 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
   const sizeCategory = breedCtx?.breed?.size_category || null;
   const weightKg = breedCtx?.breed?.average_weight_kg || null;
 
-  const projections = useMemo(() => {
-    const heuristic = buildBiologicalTimeline({
-      currentAgeYears: petAge,
-      averageLifespanYears: lifespan,
-      sizeCategory,
-      averageWeightKg: weightKg,
-      activeConditions: activeConditionInputs,
-      breedPredispositions: breedCtx?.predispositions || [],
-      withIntervention,
+  // KG coverage for honest protection logic
+  const conditionNames = useMemo(() => {
+    const names = activeConditionInputs.map(c => c.condition_name);
+    (breedCtx?.predispositions || []).forEach(p => {
+      names.push(p.condition_name);
+      if (p.condition_name_en) names.push(p.condition_name_en);
     });
+    return Array.from(new Set(names));
+  }, [activeConditionInputs, breedCtx?.predispositions]);
+
+  const coverageQuery = usePetCompoundCoverage(petId || null, conditionNames, !!petId);
+  const kgCoverage = coverageQuery.data || [];
+
+  const protocolCompoundCount = useMemo(() => {
+    const set = new Set<string>();
+    kgCoverage.forEach(c => c.compounds.forEach(comp => set.add(comp.name)));
+    return Math.min(set.size, 8); // cap at 8 per project memory
+  }, [kgCoverage]);
+
+  const buildLocal = (intervention: boolean) => buildBiologicalTimeline({
+    currentAgeYears: petAge,
+    averageLifespanYears: lifespan,
+    sizeCategory,
+    averageWeightKg: weightKg,
+    activeConditions: activeConditionInputs,
+    breedPredispositions: breedCtx?.predispositions || [],
+    withIntervention: intervention,
+    kgCoverage,
+    protocolCompoundCount,
+  });
+
+  // Always compute both scenarios for the side-by-side compare
+  const projectionsWith = useMemo(() => buildLocal(true), [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, kgCoverage, protocolCompoundCount]);
+  const projectionsWithout = useMemo(() => buildLocal(false), [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, kgCoverage, protocolCompoundCount]);
+
+  // Choose primary projection (AI overrides heuristic for the active toggle)
+  const projections = useMemo(() => {
+    const heuristic = withIntervention ? projectionsWith : projectionsWithout;
     if (!aiYears || aiYears.length === 0) return heuristic;
-    // Map AI years onto the YearProjection structure used by the UI.
     return aiYears.map<YearProjection>((y, idx) => ({
       year: y.year,
       ageAtYear: y.age_at_year,
       biologicalAge: y.biological_age,
-      existingConditions: (y.existing_conditions || []).map(ec => ({
-        id: `${ec.name}-${idx}`,
-        name: ec.name,
-        currentSeverity: (heuristic[0]?.existingConditions.find(h => h.name.toLowerCase() === ec.name.toLowerCase())?.currentSeverity) || 'mild',
-        projectedSeverityScore: ec.projected_severity_score,
-        projectedSeverityLabel: ec.projected_severity_label,
-        deltaPercent: 0,
-      })),
+      existingConditions: (y.existing_conditions || []).map(ec => {
+        const h = heuristic[Math.min(idx, heuristic.length - 1)]?.existingConditions
+          .find(he => he.name.toLowerCase() === ec.name.toLowerCase());
+        return {
+          id: `${ec.name}-${idx}`,
+          name: ec.name,
+          currentSeverity: h?.currentSeverity || 'mild',
+          projectedSeverityScore: ec.projected_severity_score,
+          projectedSeverityLabel: ec.projected_severity_label as Severity,
+          deltaPercent: 0,
+          kgCovered: h?.kgCovered ?? false,
+          protectionApplied: h?.protectionApplied ?? 0,
+          anchorCompounds: h?.anchorCompounds ?? [],
+        };
+      }),
       newConditions: (y.new_conditions || []).map(nc => ({
         conditionId: nc.name,
         name: nc.name,
         probability: nc.probability,
         evidenceGrade: (nc.evidence_grade as any) || 'moderate',
         riskFactor: 1,
+        kgCovered: false,
+        protectionApplied: 0,
+        anchorCompounds: [],
       })),
       expectedRemainingYears: y.expected_remaining_years,
+      protocolCaveats: heuristic[Math.min(idx, heuristic.length - 1)]?.protocolCaveats || [],
+      coverageRatio: heuristic[Math.min(idx, heuristic.length - 1)]?.coverageRatio || 0,
     }));
-  }, [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, withIntervention, aiYears]);
+  }, [aiYears, withIntervention, projectionsWith, projectionsWithout]);
 
   const maxSlider = projections.length > 0 ? projections[projections.length - 1].year : 8;
   const safeIndex = Math.min(yearsAhead, projections.length - 1);
   const current = projections[safeIndex];
-  const baseline = projections[0];
 
-  // For comparison: with vs without intervention at same year (to show "years gained")
-  const counterfactual = useMemo(() => {
-    const opposite = buildBiologicalTimeline({
-      currentAgeYears: petAge,
-      averageLifespanYears: lifespan,
-      sizeCategory,
-      averageWeightKg: weightKg,
-      activeConditions: activeConditionInputs,
-      breedPredispositions: breedCtx?.predispositions || [],
-      withIntervention: !withIntervention,
-    });
-    return opposite[Math.min(yearsAhead, opposite.length - 1)];
-  }, [petAge, lifespan, sizeCategory, weightKg, activeConditionInputs, breedCtx?.predispositions, withIntervention, yearsAhead]);
+  // Counterpart for compare view
+  const oppositeProjections = withIntervention ? projectionsWithout : projectionsWith;
+  const opposite = oppositeProjections[Math.min(yearsAhead, oppositeProjections.length - 1)];
 
-  const yearsGainedLocal = withIntervention
-    ? current?.expectedRemainingYears - counterfactual?.expectedRemainingYears
-    : counterfactual?.expectedRemainingYears - current?.expectedRemainingYears;
-  // Prefer AI's calculated years_gained when available (it's per-condition KG-grounded).
+  const yearsGainedLocal = (projectionsWith[safeIndex]?.expectedRemainingYears || 0)
+    - (projectionsWithout[safeIndex]?.expectedRemainingYears || 0);
   const yearsGained = aiYearsGained != null ? aiYearsGained : yearsGainedLocal;
 
-  // Conditions to render on the silhouette at the current slider position
-  const silhouetteMarkers = useMemo(() => {
-    if (!current) return [];
-    const existingMarkers = current.existingConditions.map(c => ({
-      key: `existing-${c.id}`,
-      label: c.name,
-      severity: c.projectedSeverityLabel,
-      isNew: false,
-      probability: 1,
-      region: findRegion(c.name),
-    }));
-    const newMarkers = current.newConditions
-      .filter(c => c.probability >= 0.25)
-      .map(c => ({
-        key: `new-${c.conditionId}`,
-        label: c.name,
-        severity: 'mild' as const,
-        isNew: true,
-        probability: c.probability,
-        region: findRegion(c.name),
-      }));
-    return [...existingMarkers, ...newMarkers];
-  }, [current]);
+  // Region states for the two side-by-side dogs
+  const regionsWith = useMemo(() => {
+    const p = projectionsWith[safeIndex];
+    if (!p) return { states: {}, systemic: null as Severity | null };
+    return buildRegionStates(p.existingConditions, p.newConditions, true);
+  }, [projectionsWith, safeIndex]);
 
-  // Group markers by region
-  const groupedMarkers = useMemo(() => {
-    const map = new Map<string, typeof silhouetteMarkers>();
-    silhouetteMarkers.forEach(m => {
-      const arr = map.get(m.region.region) || [];
-      arr.push(m);
-      map.set(m.region.region, arr);
-    });
-    return Array.from(map.entries());
-  }, [silhouetteMarkers]);
+  const regionsWithout = useMemo(() => {
+    const p = projectionsWithout[safeIndex];
+    if (!p) return { states: {}, systemic: null as Severity | null };
+    return buildRegionStates(p.existingConditions, p.newConditions, false);
+  }, [projectionsWithout, safeIndex]);
 
   if (!current) return null;
 
   const hasBreedData = !!breedCtx?.breed;
   const noPredispositions = (breedCtx?.predispositions.length || 0) === 0;
+  const caveats = (withIntervention ? projectionsWith : projectionsWithout)[0]?.protocolCaveats || [];
+  const coverageRatio = projectionsWith[0]?.coverageRatio || 0;
+  const coveredCount = Math.round(coverageRatio * conditionNames.length);
 
   return (
     <Card className="overflow-hidden">
@@ -299,75 +315,50 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
           </div>
         </div>
 
-        {/* Silhouette with markers */}
-        <div className="relative w-full max-w-[420px] mx-auto">
-          <img
-            src={dogSilhouette}
-            alt={t('petProfile.biologicalTimeline.silhouetteAlt')}
-            className="w-full h-auto opacity-40 dark:opacity-25 dark:invert"
-          />
-          <TooltipProvider delayDuration={100}>
-            {groupedMarkers.map(([region, markers]) => {
-              const pos = markers[0].region;
-              const worst = markers.reduce((w, m) => {
-                const order = ['mild', 'moderate', 'severe'];
-                return order.indexOf(m.severity) > order.indexOf(w) ? m.severity : w;
-              }, 'mild');
-              const hasNew = markers.some(m => m.isNew);
-              return (
-                <Tooltip key={region}>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="absolute cursor-pointer"
-                      style={{
-                        left: `${pos.x}%`,
-                        top: `${pos.y}%`,
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                    >
-                      <div
-                        className={`absolute inset-0 rounded-full animate-ping opacity-30 ${severityPulseColors[worst]}`}
-                        style={{ width: 24, height: 24, margin: '-4px' }}
-                      />
-                      <div
-                        className={`relative w-4 h-4 rounded-full ring-2 ${severityPulseColors[worst]} ${severityRingColors[worst]} shadow-lg flex items-center justify-center`}
-                      >
-                        {markers.length > 1 && (
-                          <span className="text-[8px] text-white font-bold">{markers.length}</span>
-                        )}
-                        {hasNew && markers.length === 1 && (
-                          <Sparkles className="h-2.5 w-2.5 text-white" />
-                        )}
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[240px]">
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold capitalize flex items-center gap-1">
-                        <Activity className="h-3 w-3" />
-                        {t(`petProfile.digitalTwin.regions.${region}`, region)}
-                      </p>
-                      {markers.map(m => (
-                        <div key={m.key} className="flex items-center gap-1.5">
-                          <div className={`w-2 h-2 rounded-full ${severityPulseColors[m.severity]}`} />
-                          <span className="text-xs">{m.label}</span>
-                          {m.isNew ? (
-                            <Badge variant="outline" className="text-[9px] h-3.5 px-1 text-amber-600 border-amber-300">
-                              {Math.round(m.probability * 100)}%
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-[9px] h-3.5 px-1">
-                              {t(`petProfile.severity.${m.severity}`, m.severity)}
-                            </Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </TooltipProvider>
+        {/* Side-by-side anatomical compare */}
+        <div className="rounded-md border bg-card p-3">
+          <p className="text-xs font-semibold flex items-center gap-1.5 mb-2">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            {t('petProfile.biologicalTimeline.compareTitle')}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-[10px] bg-muted/40">
+                  {t('petProfile.biologicalTimeline.withoutProtocol')}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">
+                  {projectionsWithout[safeIndex]?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}
+                </span>
+              </div>
+              <DogAnatomySVG
+                regionStates={regionsWithout.states}
+                systemicSeverity={regionsWithout.systemic}
+                showProtectionAura={false}
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-[10px] bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400">
+                  <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                  {t('petProfile.biologicalTimeline.withProtocolLabel')}
+                </Badge>
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">
+                  {projectionsWith[safeIndex]?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}
+                </span>
+              </div>
+              <DogAnatomySVG
+                regionStates={regionsWith.states}
+                systemicSeverity={regionsWith.systemic}
+                showProtectionAura={true}
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2 text-center">
+            {t('petProfile.biologicalTimeline.coverage', { covered: coveredCount, total: conditionNames.length })}
+          </p>
         </div>
 
         {/* Time slider */}
@@ -394,7 +385,6 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             <span>{petAge + maxSlider}{t('petProfile.biologicalTimeline.yearsShort')}</span>
           </div>
 
-          {/* Intervention toggle */}
           <div className="flex items-center justify-between rounded-md border bg-muted/20 p-2 mt-2">
             <div className="flex items-center gap-2">
               <Sparkles className={`h-4 w-4 ${withIntervention ? 'text-emerald-500' : 'text-muted-foreground'}`} />
@@ -418,31 +408,49 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
               {t('petProfile.biologicalTimeline.atAgeProjection', { age: current.ageAtYear.toFixed(0) })}
             </p>
             <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
-              {/* Existing conditions progression */}
               {current.existingConditions.map(c => {
-                const baselineCondition = baseline.existingConditions.find(b => b.id === c.id);
+                const baselineCondition = projections[0].existingConditions.find(b => b.id === c.id);
                 const worsened = baselineCondition && c.projectedSeverityScore > baselineCondition.projectedSeverityScore + 0.05;
                 return (
-                  <div key={c.id} className="flex items-center justify-between rounded-md border bg-card px-2 py-1.5 text-xs">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${severityPulseColors[c.projectedSeverityLabel]}`} />
-                      <span className="truncate">{c.name}</span>
+                  <div key={c.id} className="rounded-md border bg-card px-2 py-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          c.projectedSeverityLabel === 'severe' ? 'bg-red-500' :
+                          c.projectedSeverityLabel === 'moderate' ? 'bg-orange-400' : 'bg-yellow-400'
+                        }`} />
+                        <span className="truncate">{c.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Badge variant="outline" className="text-[9px] h-4 px-1">
+                          {t(`petProfile.severity.${c.projectedSeverityLabel}`, c.projectedSeverityLabel)}
+                        </Badge>
+                        {worsened && (
+                          <span className="text-[10px] text-orange-600 dark:text-orange-400 inline-flex items-center gap-0.5">
+                            <TrendingUp className="h-2.5 w-2.5" />
+                            +{c.deltaPercent}%
+                          </span>
+                        )}
+                        {withIntervention && c.kgCovered && c.anchorCompounds.length > 0 && (
+                          <Badge variant="outline" className="text-[9px] h-4 px-1 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">
+                            ★ −{Math.round(c.protectionApplied * 100)}%
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <Badge variant="outline" className="text-[9px] h-4 px-1">
-                        {t(`petProfile.severity.${c.projectedSeverityLabel}`, c.projectedSeverityLabel)}
-                      </Badge>
-                      {worsened && (
-                        <span className="text-[10px] text-orange-600 dark:text-orange-400 inline-flex items-center gap-0.5">
-                          <TrendingUp className="h-2.5 w-2.5" />
-                          +{c.deltaPercent}%
-                        </span>
-                      )}
-                    </div>
+                    {withIntervention && c.kgCovered && c.anchorCompounds.length > 0 && (
+                      <p className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5 ml-4">
+                        {c.anchorCompounds.join(' • ')}
+                      </p>
+                    )}
+                    {withIntervention && !c.kgCovered && (
+                      <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-4">
+                        {t('petProfile.biologicalTimeline.noProtection')}
+                      </p>
+                    )}
                   </div>
                 );
               })}
-              {/* Emergent (predisposition-driven) conditions */}
               {current.newConditions.slice(0, 6).map(c => (
                 <div
                   key={c.conditionId}
@@ -455,11 +463,9 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                       {t('petProfile.biologicalTimeline.newRisk')}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-100 dark:bg-amber-900/40 border-amber-300">
-                      {Math.round(c.probability * 100)}%
-                    </Badge>
-                  </div>
+                  <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-100 dark:bg-amber-900/40 border-amber-300">
+                    {Math.round(c.probability * 100)}%
+                  </Badge>
                 </div>
               ))}
               {current.existingConditions.length === 0 && current.newConditions.length === 0 && (
@@ -468,6 +474,24 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Caveats panel */}
+        {caveats.length > 0 && (
+          <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 p-2 space-y-1">
+            <p className="text-[11px] font-semibold flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="h-3 w-3" />
+              {t('petProfile.biologicalTimeline.caveatsTitle')}
+            </p>
+            <ul className="space-y-0.5">
+              {caveats.map((cv, i) => (
+                <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1">
+                  <span className="text-amber-600 dark:text-amber-400 mt-0.5">•</span>
+                  <span>{cv.message}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -494,7 +518,7 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
           )}
         </div>
 
-        {/* AI evidence citations (Phase 2) */}
+        {/* AI evidence citations */}
         {aiSource === 'ai' && aiCitations.length > 0 && (
           <div className="rounded-md border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/10 p-2 space-y-1.5">
             <p className="text-[11px] font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
@@ -516,6 +540,37 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
             </ul>
           </div>
         )}
+
+        {/* Clinical debug panel */}
+        <div className="border-t pt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] h-6 w-full justify-between"
+            onClick={() => setShowDebug(s => !s)}
+          >
+            <span className="flex items-center gap-1">
+              <FlaskConical className="h-3 w-3" />
+              {showDebug ? t('petProfile.biologicalTimeline.hideDebug') : t('petProfile.biologicalTimeline.showDebug')}
+            </span>
+            {showDebug ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </Button>
+          {showDebug && (
+            <div className="rounded-md border bg-muted/20 p-2 mt-1 space-y-1 text-[10px] font-mono">
+              <p>KG entries: {kgCoverage.length} / Compounds: {protocolCompoundCount}</p>
+              <p>Coverage ratio: {(coverageRatio * 100).toFixed(0)}%</p>
+              <p>Years gained (heuristic): {yearsGainedLocal.toFixed(2)}</p>
+              {aiYearsGained != null && <p>Years gained (AI): {aiYearsGained.toFixed(2)}</p>}
+              <p>Source: {aiSource}</p>
+              <p>Lifespan: {lifespan}y / Size: {sizeCategory || 'unknown'}</p>
+              {kgCoverage.slice(0, 5).map((c, i) => (
+                <p key={i} className="truncate">
+                  {c.conditionKey}: {c.compounds.map(co => `${co.name}(${co.efficacy_0_5})`).join(', ')}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
