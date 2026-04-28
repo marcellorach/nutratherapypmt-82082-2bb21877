@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Layout from '../components/layout/Layout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, Book, UserCog, LogIn, ArrowRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,9 +11,21 @@ import LandingContent from '@/components/landing/LandingContent';
 
 const Index: React.FC = () => {
   const { t } = useTranslation();
-  const { user, hasRole } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  
+
+  // Plataforma em modo privado: força autenticação inclusive na home.
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-gray-900" />
+      </div>
+    );
+  }
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden min-w-0">

@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+import { isEmailAllowed } from '@/config/access-allowlist';
 
 type AuthContextType = {
   session: Session | null;
@@ -30,6 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        // Hard gate: block any session whose email is not on the allowlist.
+        if (currentSession?.user && !isEmailAllowed(currentSession.user.email)) {
+          setTimeout(async () => {
+            await supabase.auth.signOut();
+            toast({
+              title: 'Acesso negado',
+              description: 'Este email não está autorizado a acessar a plataforma.',
+              variant: 'destructive',
+            });
+            navigate('/auth');
+          }, 0);
+          setSession(null);
+          setUser(null);
+          setUserProfile(null);
+          setUserRoles([]);
+          return;
+        }
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -51,6 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (currentSession?.user && !isEmailAllowed(currentSession.user.email)) {
+        supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
