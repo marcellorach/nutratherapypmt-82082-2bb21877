@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-04-28 🧭 Consolidação de Alertas + Cards com Evidência Profunda
+- ✅ **Aba "Alertas Clínicos" removida**: predisposições não-diagnosticadas já aparecem em "Análise VetGraphRAG → Alvos para Prevenção" — fim da duplicação
+- ✅ **Reordenação de tabs**: Recomendações (default) → Caminho Biológico → Evidência Científica → Projeção → Chat por Composto
+- ✅ **CompoundDosageSlider — bloco "Ver evidências e contexto"**: novo dropdown por card mostrando
+  - Mecanismo molecular (mechanism_path da triplet de maior confiança)
+  - Estudos científicos (até 3) com link externo (DOI/PubMed) **e trecho destacado** do `study_embeddings.chunk_text` com o nome do composto em `<mark>`
+  - Mini-bloco de conexões composto → condição
+- ✅ **Backend `attachStudiesToCompounds`**: agora também consulta `study_embeddings` por chunks contendo o composto + condição e retorna `excerpt` + `mechanism`
+- ✅ **i18n v1.25.0**: novas chaves `evidenceAndContext`, `mechanism`, `relations`, `targets`, `relationsHint`
+
 ### Fixed - 2026-04-28 🩺 Categorias Genéricas → Doenças Específicas
 - ✅ **Pets demo**: Luna agora tem `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)` (MMVD — doença real do Cavalier King Charles compatível com sopro 4/6) em vez da categoria genérica "Cardiovascular Disease"
 - ✅ **Pets demo**: Thor agora tem `Hip Dysplasia` (já indicada no exame) em vez de "Chronic Inflammation" (categoria, não doença)
