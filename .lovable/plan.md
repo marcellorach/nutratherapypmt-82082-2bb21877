@@ -1,104 +1,125 @@
-## Diagnóstico: por que "Predisposições" demora e os outros pulam
 
-Em `src/pages/veterinario/PetProfilePage.tsx` (linhas 92–112), o handler `handleAnalyzeWithKG` faz isto:
+# Gêmeo Digital → Linha do Tempo Biológica do Pet
 
-```ts
-setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
-await new Promise(r => setTimeout(r, 200));
-setPipelineState(s => ({ ...s, stage1_profile: 'complete', stage2_predispositions: 'running' }));
+## Parte 1 — Mudança rápida (já aprovada implicitamente)
 
-const result = await runClinicalAnalysisPipeline(...);   // ← TUDO acontece aqui (estágios 2 a 6)
+Inverter a ordem na coluna direita de `PetProfilePage.tsx`:
+- **Topo:** Gêmeo Digital (sticky, protagonista visual)
+- **Abaixo:** Chat Clínico Inteligente
 
-setPipelineState(s => ({
-  ...s,
-  stage2_predispositions: 'complete', stage3_labs: 'complete',
-  stage4_kg: 'complete', stage5_interactions: 'complete', stage6_recommendation: 'complete',
-}));
+---
+
+## Parte 2 — Análise: por que o Gêmeo Digital atual é fraco
+
+Hoje é apenas uma silhueta PNG com bolinhas coloridas marcando órgãos das condições já diagnosticadas. Não responde à pergunta que o veterinário realmente faz: **"o que vai acontecer com este cão se eu não intervir? E se eu intervir?"**
+
+## Parte 3 — Benchmarks (humanos → tradução para cães)
+
+| Inspiração humana | Aplicação canina realista |
+|---|---|
+| **Levine PhenoAge / GrimAge** (idade biológica por biomarcadores) | Idade biológica canina via peso, escore corporal, hemograma, ALT, creatinina, glicemia — temos esses exames |
+| **Framingham/QRISK** (risco cardiovascular a 10 anos) | Risco a N anos para cada condição, ponderado por raça (`risk_factor` 1–10 já existe) |
+| **Dog Aging Project** (Universidade de Washington) | Curvas de incidência por raça/porte; cães grandes envelhecem ~2x mais rápido que pequenos |
+| **Siemens Healthineers Digital Twin** (gêmeo de paciente cardíaco) | Simulação de trajetória sob diferentes intervenções terapêuticas |
+| **Modelo de Mortalidade de Gompertz** | Curva matemática validada de aceleração de risco com a idade — base do slider |
+
+## Parte 4 — A funcionalidade matadora: Linha do Tempo Biológica Interativa
+
+### Componentes da UI
+
+```text
+┌─ Gêmeo Digital — Thor (German Shepherd, 7a) ────────────┐
+│  Idade biológica: 8.2 anos  (cronológica: 7.0)  ⚠ +1.2  │
+│  Expectativa raça: 10–12a   |   Estágio: Sênior inicial │
+│                                                          │
+│  [silhueta com pontos ativos das condições atuais]       │
+│                                                          │
+│  ── SLIDER DE PROJEÇÃO ──────────────────────────────    │
+│  Hoje  •━━━━━━●━━━━━━━━━━━━━━━━━  +8 anos                │
+│         7a    10a    12a    15a                          │
+│                                                          │
+│  Cenário: ⦿ Sem intervenção  ◯ Com protocolo atual       │
+│                                                          │
+│  Aos 10 anos, Thor provavelmente terá:                   │
+│  • Osteoartrite — moderada → severa  (já tem, +47%)      │
+│  • Displasia coxofemoral — risco 73% (raça)  ⚡ NOVO     │
+│  • Disfunção cognitiva — risco 31%           ⚡ NOVO     │
+│  • Cardiomiopatia dilatada — risco 22%       ⚡ NOVO     │
+│  Expectativa de vida residual: 2.8 anos                  │
+└──────────────────────────────────────────────────────────┘
 ```
 
-Ou seja: enquanto o `runClinicalAnalysisPipeline` (que roda os 5 estágios pesados — breed, labs, KG, interações, recomendação híbrida) executa em uma única `await`, o UI fica preso em **"Predisposições — processando..."**. Quando a Promise resolve, os 5 estágios viram `complete` no mesmo tick → parecem "instantâneos". O tempo real é 100% real, mas a UI não recebe os marcos intermediários.
+### Como funciona (motor de cálculo)
 
-O serviço `clinical-analysis-pipeline.ts` é monolítico hoje (uma `runClinicalAnalysisPipeline` que chama tudo internamente sem callbacks), por isso a página não tem como avançar os estágios.
+Para cada ano `t` à frente da idade atual:
 
----
+1. **Progressão das condições atuais** — usa o `ImprovementProjectionChart` invertido: severidade aumenta segundo curva sigmoide se não tratada, atenuada se "Com protocolo atual" estiver ativo (reaproveita pesos KG TREATS/AMELIORATES já implementados).
 
-## Plano
+2. **Emergência de novas condições** — para cada predisposição da raça em `breed_predispositions`, calcula probabilidade cumulativa:
+   ```
+   P(condição em idade t) = 1 − exp(−risk_factor × hazard_base(t) × age_accel)
+   ```
+   onde `age_accel` reflete que cães grandes envelhecem mais rápido (derivado de `size_category` e `average_weight_kg`).
 
-### 1. Emitir progresso real do pipeline (callbacks)
+3. **Idade biológica** — fórmula tipo PhenoAge adaptada: peso vs ideal da raça, n.º de condições ativas ponderado por severidade, escore lab (se existir). Já temos todos esses campos.
 
-Em `src/services/clinical-analysis-pipeline.ts`:
+4. **Expectativa de vida residual** — Gompertz calibrado por `average_lifespan_years` da raça, ajustado por desvio idade biológica − cronológica e por condições graves ativas.
 
-- Adicionar um parâmetro opcional `onProgress` em `runClinicalAnalysisPipeline`:
-  ```ts
-  type StageId = 'stage2_predispositions' | 'stage3_labs' | 'stage4_kg' | 'stage5_interactions' | 'stage6_recommendation';
-  type ProgressEvent =
-    | { kind: 'stage-start'; stage: StageId; message: string }
-    | { kind: 'stage-end';   stage: StageId; message: string; meta?: Record<string, any> }
-    | { kind: 'log';         level: 'info'|'warn'|'success'|'error'; message: string };
-  type OnProgress = (e: ProgressEvent) => void;
-  ```
-- Envolver cada bloco interno (`fetchBreedPredispositions`, `interpretLabResults`, `queryKnowledgeGraph`, `checkInteractions`, geração de recomendação híbrida) com `onProgress?.({ kind: 'stage-start', ... })` antes e `stage-end` depois, com contagens reais (raças encontradas, alertas, hits/misses do KG por condição, interações detectadas, compostos finais).
-- Trocar os `console.log/warn` ruidosos do KG por chamadas a `onProgress({ kind: 'log', ... })` (mantendo um `console.debug` para devtools).
+5. **Cenário "Com protocolo"** — aplica a redução de risco dos compostos do `recommendationCompounds` atual (que já vem do KG), mostrando o ganho concreto: *"protocolo recomendado adia osteoartrite severa de 9.2a para 11.5a"*.
 
-### 2. Consumir o progresso na página
+### Conexão com o propósito da plataforma
 
-Em `src/pages/veterinario/PetProfilePage.tsx`:
+Isto é **a materialização visual da tese**: nutracêuticos como geroprotetores. O slider transforma uma recomendação abstrata ("dê resveratrol") em um benefício mensurável e visceral ("seu cão viverá 1.4 anos a mais com qualidade"). É exatamente o gancho emocional que converte tutor + dá ao veterinário ferramenta de comunicação.
 
-- Substituir o "completar tudo de uma vez" (linha 112) por um callback passado ao serviço:
-  ```ts
-  const result = await runClinicalAnalysisPipeline(profile, conditions, medications, exams, {
-    onProgress: handlePipelineEvent,
-  });
-  ```
-- `handlePipelineEvent` faz o `setPipelineState` apropriado (`running`/`complete`) por estágio E faz `appendLog(entry)` no novo painel de log.
-- Garantir `flushSync`/`setTimeout(0)` apenas se necessário para evitar batching que esconda transições rápidas (na prática o KG e a recomendação levam centenas de ms cada, então o React renderiza naturalmente).
+## Parte 5 — Arquitetura técnica
 
-### 3. Painel de log estilo "Digestão Científica"
+### Edge function nova: `project-pet-trajectory`
+- **Input:** `petId`, `targetYears` (slider), `withIntervention: boolean`
+- **Pipeline:**
+  1. Busca pet (idade, peso, raça, condições, exames)
+  2. Busca `breed_predispositions` da raça
+  3. Busca triplets KG das condições (severity progression + treatment effects)
+  4. Para condições com <3 triplets, usa Lovable AI (`google/gemini-2.5-pro`) com prompt estruturado (tool calling) pedindo curvas de progressão fundamentadas em literatura veterinária — **com citações obrigatórias**
+  5. Calcula trajetória ano a ano e retorna JSON estruturado
+- **Cache:** salva em nova tabela `pet_trajectory_projections` (invalidada quando condições mudam)
 
-Criar `src/components/pet/ClinicalPipelineLogPanel.tsx`, inspirado em `NtaiActiveProcessingCard` / `NtaiProcessingSection`:
+### Tabelas novas (migration)
+- `pet_trajectory_projections` — cache de projeções por pet/cenário
+- `breed_aging_curves` — curvas de hazard por porte/raça (seeded com dados do Dog Aging Project como base)
 
-- Lista rolável com no máximo ~200 entradas, autoscroll para o fim.
-- Cada entrada: timestamp `HH:MM:SS.mmm`, ícone por nível (✅ success, ℹ️ info, ⚠️ warn, ❌ error) + cor pastel discreta, e mensagem.
-- Cabeçalho compacto com: stage atual, contador de eventos, botões "Limpar" e "Exportar .log" (texto puro, mesma UX do export do NTAI).
-- Visual: card fino com `border-primary/20`, fundo `bg-muted/40`, fonte `font-mono text-[11px]`, altura `max-h-48`.
-- Só aparece quando `isAnalyzing || logs.length > 0`.
+### Componente refatorado: `DigitalTwinDog.tsx` → `BiologicalTimeline.tsx`
+- Mantém silhueta atual como camada visual
+- Adiciona slider (shadcn `Slider`)
+- Painel lateral com lista de condições projetadas (atuais piorando + novas emergentes)
+- Toggle "Sem intervenção / Com protocolo"
+- Cards numéricos: idade biológica, expectativa residual, anos ganhos com protocolo
+- Cada condição projetada é **clicável** → abre detalhes com fonte (KG triplet ou IA com citação)
 
-Renderizá-lo logo abaixo do `<ClinicalPipelineWorkflow />` na `PetProfilePage`.
+### Princípios de honestidade clínica (regras do projeto)
+- **Sempre** mostrar badge de fonte: "Evidência KG" / "KG + IA" / "IA com citação"
+- **Nunca** mostrar números sem intervalo de confiança quando derivados de IA
+- Disclaimer permanente: *"Projeção estatística baseada em literatura. Não substitui avaliação clínica individual."*
+- Bilíngue PT/EN completo (incrementar `I18N_VERSION`)
 
-### 4. Mensagens de log (PT/EN) — exemplos
+## Parte 6 — Entregáveis em fases
 
-- "Coletando perfil clínico de {{name}} ({{breed}}, {{age}}a, {{weight}}kg)" 
-- "Buscando predisposições raciais para {{breed}}..." → "{{count}} predisposições encontradas, {{undiagnosed}} não diagnosticadas"
-- "Comparando {{n}} resultados de exames com faixas de referência ({{ageGroup}})" → "{{alerts}} alertas laboratoriais detectados"
-- "Consultando Knowledge Graph para {{condition}}..." → "✓ KG: {{nodes}} nós, {{edges}} relações via '{{canonical}}'" ou "⚠ Sem dados no KG para {{condition}}"
-- "Verificando interações entre {{nC}} compostos e {{nM}} medicações" → "{{n}} interações detectadas"
-- "Gerando recomendação híbrida (top {{k}} compostos sinérgicos)..." → "{{count}} compostos finais com posologia resolvida"
+**Fase 1 (esta task):**
+- Inverter ordem Chat ↔ Gêmeo Digital
+- Criar slider funcional com **dados ainda heurísticos** (sem edge function), usando apenas `breed_predispositions` + curva Gompertz simples
+- Remover badge "Em construção" e substituir por "Beta — Projeção Heurística"
+- Mostrar visualmente o conceito completo para validar UX
 
-Todas as strings via `t()` em `src/locales/{pt,en}/translation.json` sob `petProfile.pipeline.log.*` (com interpolação).
+**Fase 2 (próxima task, mediante aprovação):**
+- Edge function `project-pet-trajectory` com Lovable AI
+- Tabelas de cache + curvas de raça
+- Modo "Com protocolo" conectado às recomendações reais do KG
 
-### 5. Polimento bilíngue + versionamento
-
-- Bump `I18N_VERSION` em `src/i18n.ts` para `1.30.0`.
-- Adicionar entradas em `CHANGELOG.md` (Unreleased → Changed/Added):
-  - "Pipeline clínico VetGraphRAG agora reporta progresso real de cada estágio (não mais avanço em bloco no final)."
-  - "Novo painel de log ao vivo abaixo do workflow, estilo digestão de estudos científicos."
-- Atualizar `docs/CURRENT_STATE.md` mencionando o novo feedback granular.
-
-### 6. Não-objetivos
-
-- Não mudar a lógica clínica nem os resultados.
-- Não adicionar artificial `setTimeout` para "fingir" tempo — todo timing exibido será o real.
-- Não tocar em `ClinicalPipelineWorkflow.tsx` além de garantir compatibilidade (talvez exibir o nome do estágio ativo no card; opcional).
+**Fase 3:**
+- Calibração com dados reais do Dog Aging Project (download público)
+- Validação retrospectiva contra cohort interno
 
 ---
 
-## Arquivos afetados
+## Pergunta para você antes de implementar
 
-- `src/services/clinical-analysis-pipeline.ts` (callbacks de progresso)
-- `src/pages/veterinario/PetProfilePage.tsx` (consumir eventos, montar painel)
-- `src/components/pet/ClinicalPipelineLogPanel.tsx` (novo)
-- `src/locales/pt/translation.json`, `src/locales/en/translation.json`
-- `src/i18n.ts` (bump versão)
-- `CHANGELOG.md`, `docs/CURRENT_STATE.md`
-
-Aprova para eu implementar?
+Quer que eu execute a **Fase 1 completa agora** (inversão + slider conceitual funcional com dados heurísticos honestos) e deixe a Fase 2 (edge function com IA real) para a próxima rodada? Isso dá pra você ver e validar a UX antes de investir em backend pesado.
