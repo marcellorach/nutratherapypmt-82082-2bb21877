@@ -22,7 +22,7 @@ import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
 import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
-import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
+import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
@@ -735,29 +735,23 @@ const PetProfilePage: React.FC = () => {
             )}
           </div>
 
-          {/* Right column: Chat + Digital Twin */}
+          {/* Right column: Biological Timeline (top) + Chat (below) */}
           <div className="space-y-4">
-            <div className="min-h-[500px] lg:sticky lg:top-4">
-              <PetClinicalChat
-                petId={id!}
+            <div className="lg:sticky lg:top-4 space-y-4">
+              <BiologicalTimeline
+                conditions={conditions}
+                petName={profile.name}
                 petBreed={profile.breed}
                 petAge={profile.age_years}
               />
-            </div>
-
-            {conditions.length > 0 && (
-              <div className="relative">
-                <Badge className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-[10px] px-1.5 py-0.5">
-                  🚧 {t('common.underConstruction', 'Em construção')}
-                </Badge>
-                <DigitalTwinDog
-                  conditions={conditions}
-                  petName={profile.name}
+              <div className="min-h-[420px]">
+                <PetClinicalChat
+                  petId={id!}
                   petBreed={profile.breed}
                   petAge={profile.age_years}
                 />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

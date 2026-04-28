@@ -7235,6 +7235,30 @@
         "respiratory": "Respiratory"
       }
     },
+    "biologicalTimeline": {
+      "title": "Biological Timeline",
+      "subtitle": "Aging projection for {{name}} ({{breed}}, {{age}}y) with and without intervention",
+      "silhouetteAlt": "Dog silhouette with current conditions and projected risks",
+      "heuristicBadge": "Beta — Heuristic Projection",
+      "biologicalAge": "Biological Age",
+      "chronologicalAge": "Chronological Age",
+      "remainingYears": "Remaining Lifespan",
+      "vsChrono": "vs. chrono",
+      "breedLifespan": "Breed: {{years}}y avg",
+      "yearsShort": "y",
+      "withProtocol": "with protocol",
+      "projectionLabel": "Project ahead",
+      "today": "Today",
+      "yearsFromNow": "+{{years}} years",
+      "withInterventionLabel": "Simulate with geroprotective protocol",
+      "atAgeProjection": "By age {{age}}, this pet is likely to have:",
+      "newRisk": "New risk",
+      "noProjectedRisks": "No conditions with meaningful risk in this horizon.",
+      "disclaimerTitle": "Heuristic projection",
+      "disclaimerBody": "Statistical estimate based on breed, age, current conditions and veterinary literature. Does not replace individual clinical assessment. v2 will use Knowledge Graph + AI with citations.",
+      "noBreedData": "Breed \"{{breed}}\" not found in database — using generic defaults.",
+      "noPredispositionsForBreed": "No predispositions registered for this breed. Only progression of current conditions is projected."
+    },
     "severity": {
       "mild": "Mild",
       "moderate": "Moderate",
