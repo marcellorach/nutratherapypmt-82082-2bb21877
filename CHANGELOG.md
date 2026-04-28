@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-28 🩺 Categorias Genéricas → Doenças Específicas
+- ✅ **Pets demo**: Luna agora tem `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)` (MMVD — doença real do Cavalier King Charles compatível com sopro 4/6) em vez da categoria genérica "Cardiovascular Disease"
+- ✅ **Pets demo**: Thor agora tem `Hip Dysplasia` (já indicada no exame) em vez de "Chronic Inflammation" (categoria, não doença)
+- ✅ **Migração de dados**: UPDATE em `pet_conditions` para corrigir registros existentes
+- ✅ **Guard-rail `conditionValidation.ts`**: Lista de termos genéricos proibidos + função `warnIfGenericCategory()` que alerta no console se sample/extração tentar gravar uma categoria como doença
+- ✅ **i18n v1.23.0**
+
 ### Fixed - 2026-04-12 🔬 Taxonomia de Condições: Separação Clínica vs Molecular
 - ✅ **Coluna `origin` em pet_conditions**: Rastreamento real de origem (vet_diagnosis, exam_suggested, breed_predisposition, kg_inference) — substituiu inferência por string matching
 - ✅ **Dados de exemplo corrigidos**: Removidos "Cellular Senescence", "Inflammaging" e "Inflammation" dos dados seed — processos moleculares agora são inferidos exclusivamente pelo VetGraphRAG
