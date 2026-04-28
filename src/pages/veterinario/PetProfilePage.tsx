@@ -622,17 +622,9 @@ const PetProfilePage: React.FC = () => {
                   <GitBranch className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.biologicalPathway')}
                 </TabsTrigger>
-                <TabsTrigger value="scientific-evidence" className="gap-1">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.scientificEvidence')}
-                </TabsTrigger>
                 <TabsTrigger value="projection" className="gap-1">
                   <TrendingUp className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.projection')}
-                </TabsTrigger>
-                <TabsTrigger value="compound-chat" className="gap-1">
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.compoundChat')}
                 </TabsTrigger>
               </TabsList>
 
@@ -661,21 +653,6 @@ const PetProfilePage: React.FC = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="scientific-evidence">
-                {kgTriplets.length > 0 ? (
-                  <ScientificEvidencePanel
-                    triplets={kgTriplets}
-                    synergisticCompounds={conditionInsights.data?.synergisticCompounds}
-                  />
-                ) : (
-                  <Card>
-                    <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                      {t('petProfile.evidence.description')}
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
               <TabsContent value="projection">
                 {kgProjections.length > 0 ? (
                   <ImprovementProjectionChart projections={kgProjections} />
@@ -686,25 +663,6 @@ const PetProfilePage: React.FC = () => {
                     </CardContent>
                   </Card>
                 )}
-              </TabsContent>
-
-              <TabsContent value="compound-chat">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      {t('petProfile.analysisTabs.compoundChat')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CompoundSpecificChat
-                      compounds={recommendationCompounds}
-                      petName={profile.name}
-                      petBreed={profile.breed}
-                      petAge={profile.age_years}
-                    />
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
             )}
