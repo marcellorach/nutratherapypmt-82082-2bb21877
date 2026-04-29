@@ -6960,6 +6960,9 @@
       "protected": "protegido",
       "markersLabel": "marcadores",
       "protectedLabel": "protegidos",
+      "previewPendingToggle": "👁 Pré-visualizar com pendentes (admin)",
+      "previewPendingBanner": "Visualização provisória — inclui {{count}} triplet(s) ainda pendentes de aprovação.",
+      "provisional": "provisório",
       "regions": {
         "joints": "Articulações",
         "hip": "Quadril",
