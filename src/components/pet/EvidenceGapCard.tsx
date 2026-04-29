@@ -14,9 +14,13 @@ interface EvidenceGapCardProps {
   petId: string;
   yearsGained: number;
   hasCoverage: boolean; // true if at least one condition is KG-covered
+  /** Called when the gap-fill returns at least one new pending triplet, so the
+   *  parent (DigitalTwinDog) can auto-enable the "preview pending" toggle and
+   *  invalidate the trajectory query. */
+  onTripletsAdded?: (count: number) => void;
 }
 
-const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, hasCoverage }) => {
+const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, hasCoverage, onTripletsAdded }) => {
   const { t } = useTranslation();
   const { userRoles } = useAuth();
   const isAdmin = (userRoles || []).includes('admin');
@@ -51,6 +55,9 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         toast.info(t('evidenceGap.toastNoTriplets', { pairs: result.pairs_searched }));
       } else {
         toast.success(msg);
+        // Notify parent so the digital twin can re-project including these
+        // pending triplets and the patient subgraph can render them.
+        onTripletsAdded?.(result.triplets_pending || 0);
       }
       refetch();
     } catch (e: any) {

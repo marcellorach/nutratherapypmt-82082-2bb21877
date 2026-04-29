@@ -689,6 +689,7 @@ const PetProfilePage: React.FC = () => {
                 kgPathways={kgPathways}
                 conditions={conditions.map((c: any) => c.condition_name)}
                 recommendedCompounds={recommendationCompounds.filter((c: any) => !c.removed).map((c: any) => c.name)}
+                petId={id}
               />
             )}
 

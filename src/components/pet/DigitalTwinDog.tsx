@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
@@ -186,6 +187,16 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const isAdmin = (userRoles || []).includes('admin');
   const [yearsAhead, setYearsAhead] = useState(0);
   const [previewPending, setPreviewPending] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Triggered by EvidenceGapCard when gap-fill returns new pending triplets:
+  // auto-enable preview mode and refetch the trajectory + the patient subgraph
+  // so the user instantly sees the impact without toggling anything manually.
+  const handleTripletsAdded = (_count: number) => {
+    setPreviewPending(true);
+    queryClient.invalidateQueries({ queryKey: ['pet-trajectory-projection', petId] });
+    queryClient.invalidateQueries({ queryKey: ['patient-pending-gap-fill-triplets', petId] });
+  };
 
   const { data: snapshot, isLoading: snapshotLoading } = usePetClinicalAnalysisSnapshot(petId || null);
 
@@ -565,6 +576,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         petId={petId}
         yearsGained={yearsGained}
         hasCoverage={coveredCount > 0}
+        onTripletsAdded={handleTripletsAdded}
       />
     )}
     </div>
