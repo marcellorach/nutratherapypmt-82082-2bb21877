@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T19:19:17.019Z
+// Última geração: 2026-04-29T19:31:59.121Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,53 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-29";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-29",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Monitor de saúde + aba de API key para Perplexity",
+    "bullets": [
+      "Nova edge function `perplexity-health` (verify_jwt) que executa um ping `sonar` (\"ping\" → \"ok\", `max_tokens: 5`) e retorna `{ configured, connected, latency_ms, model, checked_at, error? }`. Detecta ausência de `PERPLEXITY_API_KEY`, falhas HTTP do upstream e mede latência real do round-trip.",
+      "Novo componente `PerplexityStatusCard` em Configurações IA: roda o health-check no mount + botão \"Testar\", mostra badges Conectado/Falha/Não configurado/Verificando com modelo e latência, exibindo `checked_at` formatado.",
+      "`ConfiguracoesIATab`: adicionada aba Perplexity (TabsList agora `grid-cols-8`) com `ApiKeyForm` + validador (`pplx-` + ≥ 20 chars) + card explicativo do uso no KG Gap-Fill, novo `ApiStatusItem` ✨ \"Perplexity – Sonar Academic – KG Gap-Fill\" no painel \"Status das Conexões\", e `<PerplexityStatusCard />` montado abaixo do Neo4jStatusCard.",
+      "`supabase/config.toml`: registrada `[functions.perplexity-health] verify_jwt = true`.",
+      "Files: supabase/functions/perplexity-health/index.ts, src/components/administrador/configuracoes/PerplexityStatusCard.tsx, src/components/administrador/ConfiguracoesIATab.tsx, supabase/config.toml, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/perplexity-health/index.ts",
+      "src/components/administrador/configuracoes/PerplexityStatusCard.tsx",
+      "src/components/administrador/ConfiguracoesIATab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.41.6"
+  },
+  {
+    "date": "2026-04-29",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Auto-preview da projeção e arestas provisórias no subgrafo após gap-fill",
+    "bullets": [
+      "`EvidenceGapCard`: novo callback `onTripletsAdded(count)` disparado quando o gap-fill (Perplexity → PubMed) retorna `triplets_pending > 0`. Antes o vet precisava ativar manualmente o toggle \"Pré-visualizar com pendentes\" no Digital Twin para ver o impacto.",
+      "`DigitalTwinDog`: ao receber `onTripletsAdded`, liga `previewPending=true` e invalida `['pet-trajectory-projection', petId]` + `['patient-pending-gap-fill-triplets', petId]` — a projeção é re-fetchada incluindo os triplets recém-importados e o KPI \"Ganho com protocolo\" reage instantaneamente.",
+      "`usePatientPendingGapFillTriplets`: novo hook que busca triplets `pending` cujo `approval_chain.source ∈ {pubmed_gap_fill, perplexity_gap_fill}` filtrando client-side por compostos do stack OU condições do pet (matching `subject_name`/`object_name`).",
+      "`PatientKnowledgeSubgraph`: aceita `petId` opcional; quando presente, renderiza arestas tracejadas âmbar (`color: #f59e0b`, `dashes: [6,4]`, label com `⏳`) para os triplets provisórios. Adicionados badge `+N provisórios`, legenda dedicada e contador inferior. Hover mostra `[provisional · perplexity_gap_fill] subject predicate object · evidence_level`.",
+      "i18n 1.41.5: novas chaves `petProfile.subgraph.provisionalBadge|provisionalLegend|provisionalCount` em PT/EN.",
+      "Files: src/components/pet/EvidenceGapCard.tsx, src/components/pet/DigitalTwinDog.tsx, src/components/pet/PatientKnowledgeSubgraph.tsx, src/hooks/useKgEvidenceGapFill.ts, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/components/pet/PatientKnowledgeSubgraph.tsx",
+      "src/hooks/useKgEvidenceGapFill.ts",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.41.5"
+  },
   {
     "date": "2026-04-29",
     "kind": "added",
