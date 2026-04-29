@@ -6953,6 +6953,13 @@
       "title": "Gêmeo Digital",
       "description": "Mapeamento anatômico de condições de {{name}} ({{breed}}, {{age}} anos)",
       "silhouetteAlt": "Silhueta anatômica do cão com marcadores de condições",
+      "lockedTitle": "Aguardando análise VetGraphRAG",
+      "lockedBody": "A comparação temporal sem vs. com protocolo só é gerada após a análise VetGraphRAG, para refletir o stack realmente recomendado para este pet.",
+      "aiLoading": "Calculando trajetória do gêmeo digital...",
+      "newRisk": "Novo",
+      "protected": "protegido",
+      "markersLabel": "marcadores",
+      "protectedLabel": "protegidos",
       "regions": {
         "joints": "Articulações",
         "hip": "Quadril",

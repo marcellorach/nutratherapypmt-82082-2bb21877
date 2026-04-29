@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T15:14:39.247Z
+// Última geração: 2026-04-29T15:37:49.686Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,30 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-29";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-29",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Digital Twin agora compara cenários ao longo dos anos",
+    "bullets": [
+      "`DigitalTwinDog` reescrito para consumir `usePetTrajectoryProjection` (mesma fonte do `BiologicalTimeline`): renderiza duas silhuetas lado a lado (Sem protocolo × Com protocolo) e um slider 0–8 anos. Antes só mostrava o estado atual, sem variação temporal nem cenário comparativo.",
+      "Para cada ano projetado, os marcadores anatômicos refletem severidade real (`existing_conditions[].projected_severity_label`), risco emergente (`new_conditions[].probability` ≥ 20% com anel tracejado âmbar) e cobertura do stack (`coverage_by_condition[].kg_covered` → estrela ★ verde no marcador).",
+      "KPIs alinhados com o `BiologicalTimeline`: idade biológica, cronológica, anos restantes e ganho com protocolo (`years_gained` da edge function `project-pet-trajectory`).",
+      "Estados `locked` (sem snapshot VetGraphRAG), `loading` (projeção rodando) e `noKgBenefit` (cobertura zero) mostram banners coerentes com o resto do perfil — nenhuma simulação, nada de mock.",
+      "`PetProfilePage` passa `petId`, `onRequestAnalysis` e `isAnalyzing` para o componente.",
+      "I18N_VERSION 1.41.0 → 1.41.1; novas chaves em `petProfile.digitalTwin.{lockedTitle,lockedBody,aiLoading,newRisk,protected,markersLabel,protectedLabel}` (PT+EN).",
+      "Files: src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.41.1"
+  },
   {
     "date": "2026-04-29",
     "kind": "added",
