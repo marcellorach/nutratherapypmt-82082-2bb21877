@@ -121,7 +121,11 @@ function parseChangelog(md) {
     if (!cur) continue;
     if (/^##\s/.test(ln)) { pushCur(); continue; }
     const meta = parseMetaComment(ln);
-    if (Object.keys(meta).length) { Object.assign(cur.meta, meta); continue; }
+    // só aceita meta-comment se a linha for *apenas* o comentário (não dentro de bullet)
+    if (Object.keys(meta).length && /^\s*<!--/.test(ln)) {
+      Object.assign(cur.meta, meta);
+      continue;
+    }
     if (/^[-*]\s+/.test(ln)) cur.bullets.push(ln);
     else if (/^\s+[-*]\s+/.test(ln)) cur.bullets.push(ln);
   }
