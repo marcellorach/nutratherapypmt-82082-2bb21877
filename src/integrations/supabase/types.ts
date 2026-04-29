@@ -1829,6 +1829,66 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_clinical_analysis_snapshots: {
+        Row: {
+          analysis_version: string
+          clinical_discoveries: Json
+          completed_at: string | null
+          confidence_level: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          interaction_alerts: Json
+          kg_pathways: Json
+          kg_projections: Json
+          kg_triplets: Json
+          lab_alerts: Json
+          pet_id: string
+          predispositions: Json
+          recommendation_compounds: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_version?: string
+          clinical_discoveries?: Json
+          completed_at?: string | null
+          confidence_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_alerts?: Json
+          kg_pathways?: Json
+          kg_projections?: Json
+          kg_triplets?: Json
+          lab_alerts?: Json
+          pet_id: string
+          predispositions?: Json
+          recommendation_compounds?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_version?: string
+          clinical_discoveries?: Json
+          completed_at?: string | null
+          confidence_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_alerts?: Json
+          kg_pathways?: Json
+          kg_projections?: Json
+          kg_triplets?: Json
+          lab_alerts?: Json
+          pet_id?: string
+          predispositions?: Json
+          recommendation_compounds?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pet_clinical_notes: {
         Row: {
           content: string

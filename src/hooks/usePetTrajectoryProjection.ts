@@ -52,6 +52,9 @@ export interface AIProjectionResult {
     years_gained_breakdown?: AIYearsGainedBreakdown[];
     protocol_caveats?: AIProtocolCaveat[];
     years: AIProjectionYear[];
+    years_with_protocol?: AIProjectionYear[];
+    years_without_protocol?: AIProjectionYear[];
+    coverage_by_condition?: AICoverageEntry[];
     citations: AIProjectionCitation[];
   } | null;
   citations: AIProjectionCitation[];
@@ -59,9 +62,20 @@ export interface AIProjectionResult {
   years_gained_breakdown?: AIYearsGainedBreakdown[];
   protocol_caveats?: AIProtocolCaveat[];
   confidence?: 'high' | 'medium' | 'low' | null;
+  coverage_by_condition?: AICoverageEntry[];
+  years_with_protocol?: AIProjectionYear[];
+  years_without_protocol?: AIProjectionYear[];
   baseline_biological_age: number | null;
   baseline_remaining_years: number | null;
   error?: string;
+}
+
+export interface AICoverageEntry {
+  condition: string;
+  origin?: 'active' | 'predisposition';
+  kg_covered: boolean;
+  supporting_compounds?: string[];
+  best_efficacy_0_5?: number;
 }
 
 /**
@@ -72,11 +86,12 @@ export interface AIProjectionResult {
  */
 export function usePetTrajectoryProjection(
   petId: string | null | undefined,
-  withIntervention: boolean,
+  recommendedCompounds: string[] | null,
   enabled: boolean = true,
 ) {
+  const stackKey = (recommendedCompounds || []).slice().sort().join('|');
   return useQuery<AIProjectionResult>({
-    queryKey: ['pet-trajectory-projection', petId, withIntervention],
+    queryKey: ['pet-trajectory-projection', petId, stackKey],
     enabled: !!petId && enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -85,7 +100,8 @@ export function usePetTrajectoryProjection(
       const { data, error } = await supabase.functions.invoke('project-pet-trajectory', {
         body: {
           pet_id: petId,
-          with_intervention: withIntervention,
+          with_intervention: true, // legacy flag; function now returns both
+          recommended_compounds: recommendedCompounds || [],
           max_years_ahead: 8,
         },
       });

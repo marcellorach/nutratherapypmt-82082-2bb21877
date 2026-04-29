@@ -33,6 +33,12 @@ interface RequestBody {
   with_intervention?: boolean;
   force_refresh?: boolean;
   max_years_ahead?: number;
+  /** When provided, the projection uses this stack as the "with protocol"
+   * scenario instead of relying solely on currently-prescribed medications.
+   * Each entry is a free-form compound name. */
+  recommended_compounds?: string[];
+  /** Optional analysis snapshot id for traceability/citations. */
+  analysis_snapshot_id?: string;
 }
 
 function jsonResponse(data: unknown, status = 200) {
@@ -60,8 +66,16 @@ Deno.serve(async (req) => {
   try {
     const body = (await req.json()) as RequestBody;
     if (!body?.pet_id) return jsonResponse({ error: "pet_id required" }, 400);
-    const withIntervention = !!body.with_intervention;
+    // Always compute BOTH scenarios in a single call so the UI can show a
+    // coherent comparison from one source of truth. The legacy
+    // `with_intervention` flag is honored for caching by being baked into the
+    // context hash, but the response now contains `scenarios.with_protocol`
+    // and `scenarios.without_protocol`.
+    const withIntervention = body.with_intervention !== false;
     const maxYears = Math.min(Math.max(body.max_years_ahead ?? 8, 3), 18);
+    const recommendedStack = Array.isArray(body.recommended_compounds)
+      ? body.recommended_compounds.filter(s => typeof s === 'string' && s.trim().length > 0)
+      : [];
 
     // 1) Pet
     const { data: pet, error: petErr } = await supabase
@@ -119,10 +133,45 @@ Deno.serve(async (req) => {
       .filter((m: any) => !m.end_date || m.end_date >= todayIso)
       .map((m: any) => ({ name: m.medication_name, dose: m.dosage }));
 
-    // 6) Top KG evidence for active conditions (compound × condition links)
-    const conditionIds = (predispositions || [])
+    // Effective compounds for the "with protocol" scenario: union of the
+    // currently-prescribed compounds AND the geroprotector stack proposed by
+    // the VetGraphRAG analysis (if provided by the client). This is what the
+    // LLM must use to look up evidence.
+    const protocolCompoundNames = Array.from(new Set([
+      ...activeCompounds.map((m: any) => (m.name || '').toLowerCase().trim()).filter(Boolean),
+      ...recommendedStack.map(s => s.toLowerCase().trim()),
+    ]));
+
+    // 6) Top KG evidence for active conditions AND breed predispositions.
+    // We need the union so the LLM can reason about both worsening of
+    // existing diagnoses and prevention of likely future ones.
+    const predispositionIds = (predispositions || [])
       .map((p: any) => p.condition_id)
       .filter(Boolean);
+
+    // Resolve active condition NAMES to condition_ids by canonical match
+    // against `health_conditions` (case-insensitive PT/EN). Active records
+    // may not carry an FK, so we look them up here.
+    let activeConditionIds: string[] = [];
+    if (activeConditions.length > 0) {
+      const { data: hcs } = await supabase
+        .from("health_conditions")
+        .select("id, name, name_en");
+      const lower = (s: string) => (s || '').toLowerCase().trim();
+      activeConditionIds = activeConditions
+        .map((c: any) => {
+          const target = lower(c.condition_name);
+          const found = (hcs || []).find((h: any) =>
+            lower(h.name) === target ||
+            lower(h.name_en) === target ||
+            (target && (lower(h.name).includes(target) || lower(h.name_en).includes(target))) ||
+            (target && (target.includes(lower(h.name)) || target.includes(lower(h.name_en))))
+          );
+          return found?.id || null;
+        })
+        .filter(Boolean) as string[];
+    }
+    const conditionIds = Array.from(new Set([...predispositionIds, ...activeConditionIds]));
     let kgEvidence: any[] = [];
     if (conditionIds.length > 0) {
       const { data: ev } = await supabase
@@ -151,9 +200,10 @@ Deno.serve(async (req) => {
         .sort()
         .join(";"),
       compounds: activeCompounds.map((m: any) => m.name).filter(Boolean).sort().join(";"),
+      recommendedStack: recommendedStack.slice().sort().join(";"),
       breedId: breed?.id || null,
       maxYears,
-      version: "v2.0",
+      version: "v3.0-dual-scenario",
     };
     const ctxHash = await sha256Hex(JSON.stringify(cacheCtx));
 
@@ -178,6 +228,9 @@ Deno.serve(async (req) => {
           years_gained_breakdown: (cached.projection_data as any)?.years_gained_breakdown || [],
           protocol_caveats: (cached.projection_data as any)?.protocol_caveats || [],
           confidence: (cached.projection_data as any)?.confidence || null,
+          coverage_by_condition: (cached.projection_data as any)?.coverage_by_condition || [],
+          years_with_protocol: (cached.projection_data as any)?.years_with_protocol || (cached.projection_data as any)?.years || [],
+          years_without_protocol: (cached.projection_data as any)?.years_without_protocol || (cached.projection_data as any)?.years || [],
           baseline_biological_age: cached.baseline_biological_age,
           baseline_remaining_years: cached.baseline_remaining_years,
         });
@@ -228,10 +281,15 @@ You MUST output through the function tool.`;
       })),
       breed_predispositions: compactPredisp,
       active_compounds: activeCompounds,
+      vetgraphrag_recommended_stack: recommendedStack,
+      effective_protocol_compounds: protocolCompoundNames,
       kg_compound_condition_evidence: compactEvidence.slice(0, 30),
-      simulate_with_geroprotective_protocol: withIntervention,
+      simulate_both_scenarios: true,
       max_years_ahead: maxYears,
-      instructions: `Produce one projection point for each year from y=0 to y=${maxYears}.
+      instructions: `Produce TWO complete year-by-year projections (y=0..y=${maxYears}):
+  (A) "without_protocol": no geroprotector intervention, only current standard care.
+  (B) "with_protocol": adds the VetGraphRAG-recommended geroprotector stack on top of (A).
+Both scenarios MUST share the same baseline (y=0) values for biological_age, severities, and remaining years. They must diverge only in subsequent years and only for conditions that have actual KG evidence.
 
 CORE PRINCIPLE: This system MUST be honest about uncertainty. It is NORMAL and EXPECTED to report years_gained_total close to 0 when KG evidence is sparse for THIS pet's specific conditions. Do NOT inflate benefit. An honest "no significant benefit" answer is better than an optimistic guess.
 
@@ -240,16 +298,17 @@ CORE PRINCIPLE: This system MUST be honest about uncertainty. It is NORMAL and E
 - new_conditions[]: include only breed_predispositions whose cumulative incidence by that year >= 0.05.
 - expected_remaining_years: derived from Gompertz survival, penalized by severe conditions.
 
-PROTOCOL EFFECTS (only when simulate_with_geroprotective_protocol=true):
-- For EACH condition, check kg_compound_condition_evidence for compounds with relation supportive of that specific condition AND efficacy_0_5 >= 3.
+PROTOCOL EFFECTS (apply ONLY to scenario B "with_protocol"):
+- For EACH condition, check kg_compound_condition_evidence for compounds in effective_protocol_compounds with relation supportive of that specific condition AND efficacy_0_5 >= 3.
 - If no such evidence exists for a condition, that condition gets ZERO reduction. Do NOT assume a "general geroprotective effect".
 - When evidence exists, reduce severity by AT MOST 0.40 × adherence (default adherence 0.75) using the top 1-2 compounds.
 - For NEW condition incidence, reduction is at most 0.6 × the severity reduction (prevention is harder than treatment).
 - HARD CAP: years_gained_total MUST be in [-0.5, +1.5] years. Values above 1.5 require >=8 high-grade evidence rows AND multi-condition coverage. Negative values are valid when polypharmacy outweighs benefit.
 
-POLYPHARMACY PENALTY: if estimated active compound count > 4, reduce adherence by 5 percentage points per extra compound (floor 40%). Mention this in protocol_caveats.
+POLYPHARMACY PENALTY: if effective_protocol_compounds count > 4, reduce adherence by 5 percentage points per extra compound (floor 40%). Mention this in protocol_caveats.
 
 OUTPUT REQUIREMENTS:
+- coverage_by_condition[]: one entry per pet condition or predisposition, with kg_covered:boolean, supporting_compounds[], best_efficacy_0_5.
 - years_gained_total: net difference vs no-protocol at final year. Can be negative.
 - years_gained_breakdown[]: one entry per condition that received non-zero protection, with anchor compound name and citation source.
 - protocol_caveats[]: list ALL of: (a) conditions WITHOUT KG coverage, (b) polypharmacy if applicable, (c) adherence assumption, (d) any contraindications.
@@ -271,6 +330,21 @@ OUTPUT REQUIREMENTS:
               confidence: { type: "string", enum: ["high", "medium", "low"] },
               rationale: { type: "string" },
               years_gained_total: { type: "number" },
+              coverage_by_condition: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    condition: { type: "string" },
+                    origin: { type: "string", enum: ["active", "predisposition"] },
+                    kg_covered: { type: "boolean" },
+                    supporting_compounds: { type: "array", items: { type: "string" } },
+                    best_efficacy_0_5: { type: "number" },
+                  },
+                  required: ["condition", "kg_covered"],
+                },
+              },
               years_gained_breakdown: {
                 type: "array",
                 items: {
@@ -301,7 +375,11 @@ OUTPUT REQUIREMENTS:
                   required: ["type", "message"],
                 },
               },
-              years: {
+              years_without_protocol: {
+                type: "array",
+                items: { $ref: "#/properties/years_with_protocol/items" },
+              },
+              years_with_protocol: {
                 type: "array",
                 items: {
                   type: "object",
@@ -371,7 +449,7 @@ OUTPUT REQUIREMENTS:
                 },
               },
             },
-            required: ["confidence", "rationale", "years_gained_total", "years_gained_breakdown", "protocol_caveats", "years", "citations"],
+            required: ["confidence", "rationale", "years_gained_total", "years_gained_breakdown", "protocol_caveats", "years_with_protocol", "years_without_protocol", "citations"],
           },
         },
       },
@@ -427,7 +505,17 @@ OUTPUT REQUIREMENTS:
       return jsonResponse({ error: "ai_invalid_json" }, 500);
     }
 
-    const baseline = parsed.years?.[0] || null;
+    // Backward-compatible: some upstream prompts may still emit `years`.
+    if (!parsed.years_with_protocol && Array.isArray(parsed.years)) {
+      parsed.years_with_protocol = parsed.years;
+    }
+    if (!parsed.years_without_protocol && Array.isArray(parsed.years)) {
+      parsed.years_without_protocol = parsed.years;
+    }
+    // Convenience legacy alias
+    parsed.years = parsed.years_with_protocol || parsed.years_without_protocol || [];
+
+    const baseline = parsed.years_with_protocol?.[0] || parsed.years_without_protocol?.[0] || null;
     // Hard cap: clamp years_gained_total to plausible range [-0.5, 1.5]
     const rawGain = Number(parsed.years_gained_total ?? parsed.years_gained ?? 0);
     const cappedGain = Math.max(Math.min(rawGain, 1.5), -0.5);
@@ -438,6 +526,22 @@ OUTPUT REQUIREMENTS:
         type: "adherence",
         message: `Estimativa do modelo (${rawGain.toFixed(2)}a) ajustada para o teto de plausibilidade (${cappedGain.toFixed(2)}a).`,
       });
+    }
+
+    // If both scenarios are identical (no KG benefit), surface that
+    // explicitly so the UI does not silently mislead the vet.
+    const coverage = Array.isArray(parsed.coverage_by_condition) ? parsed.coverage_by_condition : [];
+    const coveredCount = coverage.filter((c: any) => c?.kg_covered).length;
+    const totalCovered = coverage.length || 0;
+    if (coveredCount === 0 && totalCovered > 0) {
+      parsed.protocol_caveats = parsed.protocol_caveats || [];
+      const already = parsed.protocol_caveats.some((c: any) => c?.type === 'no_kg_coverage');
+      if (!already) {
+        parsed.protocol_caveats.push({
+          type: 'no_kg_coverage',
+          message: 'Nenhuma condição deste pet tem evidência KG suficiente para que o protocolo geroprotetor altere a trajetória.',
+        });
+      }
     }
 
     // 11) Cache result
@@ -471,6 +575,9 @@ OUTPUT REQUIREMENTS:
       years_gained_breakdown: parsed.years_gained_breakdown || [],
       protocol_caveats: parsed.protocol_caveats || [],
       confidence: parsed.confidence || null,
+      coverage_by_condition: parsed.coverage_by_condition || [],
+      years_with_protocol: parsed.years_with_protocol || [],
+      years_without_protocol: parsed.years_without_protocol || [],
       baseline_biological_age: baseline?.biological_age ?? null,
       baseline_remaining_years: baseline?.expected_remaining_years ?? null,
     });
