@@ -16,6 +16,7 @@ import {
   type ChangelogEntry,
   type ChangelogStatus,
 } from "@/data/projectChangelog";
+import { lastChangelogDate } from "@/data/projectChangelog";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
 
 const STATUS_META: Record<
