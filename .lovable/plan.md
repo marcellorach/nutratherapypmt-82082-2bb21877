@@ -1,91 +1,97 @@
-## Contexto dos 3 problemas
+## Diagnóstico
 
-**(a) "Buscar evidências" não retornou nada**
-A função `kg-evidence-gap-fill` não tem **nenhum log** no servidor — o clique nunca chegou a executar do lado backend (ou falhou antes do primeiro `console.log`). Hipóteses prováveis:
-1. A função foi criada mas o deploy automático ainda não a registrou.
-2. Erro de auth/CORS silencioso no `supabase.functions.invoke` (o toast de erro pode ter ficado fora do viewport).
-3. Falha ao discoverar pares (sem `name_en` em condições/nutracêuticos do pet) → retorna 200 com `pairs_searched: 0` e o toast aparece como "sucesso com 0".
+**Estado atual (Max — Cognitive Dysfunction + Sarcopenia):**
 
-**(b) Gêmeos não mudam mesmo após gap-fill**
-Por design: triplets do gap-fill entram com `curation_status = 'pending'` e **só impactam o Digital Twin após aprovação manual**. Isso é correto (governança), mas hoje o admin não consegue ver o efeito potencial sem aprovar. Falta um modo **preview** ("E se eu aprovasse esses pendentes?").
+1. **Stack KG-backed mas sem ganho projetado** — o `project-pet-trajectory` reporta `Coverage: 0/0` mesmo com 8 compostos rotulados como "KG-backed" no painel. Isso indica desconexão entre o que o `hybrid-recommendation` considera "KG-backed" (provavelmente match canônico de composto) e o que o projetor exige (triplet aprovado `compound × condition` com `efficacy_0_5 ≥ 3` e `extraction_confidence ≥ 0.6` no KG real). Resultado: o card mostra "Confiança Média / KG-backed", mas o twin diz "No knowledge graph evidence available".
 
-**(c) Sumiu a listinha de condições sob as silhuetas**
-O `BiologicalTimeline` tem `<ConditionsMiniList>` debaixo de cada silhueta — listando condições projetadas com severidade, "novo X%", "★ protegido". O novo `DigitalTwinDog` (que substituiu visualmente esse bloco no perfil) só mostra "4 marcadores". Precisa portar a mini-lista.
+2. **`Failed to send a request to the Edge Function` em "Ver triplets faltantes"** — a função `kg-missing-triplets` existe no repo, **não tem nenhum log no servidor** e **não está declarada em `supabase/config.toml`**. A função `kg-evidence-gap-fill` está no mesmo estado (sem logs). Isso é compatível com falha de boot/deploy ou com o cliente sendo bloqueado antes de chegar à função (CORS de preflight, ou simplesmente função não publicada). O erro genérico "Failed to send a request" vem do SDK quando o fetch falha antes de receber resposta.
 
----
+3. **Botão "Buscar evidências" sumiu da UI** — o `EvidenceGapCard` só aparece quando `yearsGained < 0.3` **E** o usuário é admin. Como `years_gained = 0`, ele deveria aparecer — provavelmente está renderizando, mas o usuário não consegue distingui-lo do diálogo de "triplets faltantes" que abriu por cima. Além disso, o card hoje **só usa PubMed E-utilities** (foi a tentativa anterior que "não retornava resultados").
+
+4. **Triplets gerados pelo gap-fill não aparecem no grafo** — por design: ficam como `pending` em `triplet_extractions` e só vão para o KG depois de aprovação manual em `/administrador?tab=triplet-curation`. Mas ainda não chegam lá porque a função não está rodando.
 
 ## Plano
 
-### 1. Diagnóstico + robustez do gap-fill (problema a)
+### 1. Destravar as edge functions de KG (causa raiz do "Failed to send a request")
 
-**`src/components/pet/EvidenceGapCard.tsx`**
-- Mostrar mensagem específica quando `pairs_searched === 0` ("Não encontrei pares (compound × condition) sem cobertura — pode ser que faltem `name_en` no perfil ou todos já tenham evidência ≥0.6").
-- Mostrar contagem detalhada no toast: `X pares pesquisados · Y estudos novos · Z triplets pendentes`.
-- Capturar e exibir mensagens de erro do Supabase com mais detalhe (status HTTP, mensagem da função).
-- Após executar, mostrar inline um pequeno **resumo dos `details`** (até 5 pares, com status: `ok | no_pubmed_results | assessment_failed | error`) para o admin entender o que aconteceu.
+- Acrescentar blocos no `supabase/config.toml` para garantir deploy:
+  ```toml
+  [functions.kg-missing-triplets]
+  verify_jwt = true
 
-**`supabase/functions/kg-evidence-gap-fill/index.ts`**
-- Adicionar `console.log` no início (`req.method`, body resumido, userId), no fim, e em cada falha — para que sempre exista log.
-- Tornar o `pubmedSearch` mais tolerante: se a query restritiva (`canine[Title/Abstract] OR dog…`) retorna 0, fazer fallback sem o filtro de espécie e marcar `species_context: ['unspecified']` no triplet resultante.
-- Aumentar `max_pairs` default para 8 mas filtrar a shortlist de compounds para os que estão no **stack recomendado do pet** (snapshot), não os 40 primeiros aleatórios. Isso aumenta drasticamente a chance de hit.
-- Garantir resposta com `Cache-Control: no-store` e CORS sempre incluído nos `catch`.
+  [functions.kg-evidence-gap-fill]
+  verify_jwt = true
+  ```
+- Reforçar tratamento de erro nas duas funções: try/catch em volta de `Deno.serve`, retornar JSON com `{ error, stage }` em qualquer falha (hoje `kg-missing-triplets` ainda pode estourar antes do `try` se faltar env var).
+- Adicionar logging estruturado (`console.log('[kg-missing-triplets] start', { petId })`) para que possamos diagnosticar via `supabase--edge_function_logs` na próxima execução.
 
-### 2. Preview "what-if" de pendentes no Digital Twin (problema b)
+### 2. Substituir/Complementar PubMed pelo **Perplexity** no gap-fill
 
-**`supabase/functions/project-pet-trajectory/index.ts`** (leitura primeiro para confirmar shape)
-- Aceitar novo flag opcional `include_pending_gap_fill: boolean` (default `false`).
-- Quando `true`, considerar também triplets com `curation_status = 'pending' AND approval_chain.source = 'pubmed_gap_fill'` no cálculo de `coverage_by_condition` e `years_gained`. Marcar essas contribuições com `provisional: true` em `years_gained_breakdown`.
+O usuário aprovou testar Perplexity. A diferença é grande para este caso: PubMed E-utilities exige termos exatos no `[Title/Abstract]` (e por isso "não retornava nada" para pares como `Quercetin × Cognitive Dysfunction Syndrome` em cães). Perplexity Sonar faz busca semântica + LLM, devolve resposta estruturada e **citações reais** já filtradas por relevância.
 
-**`src/hooks/usePetTrajectoryProjection.ts`**
-- Adicionar parâmetro opcional `includePending?: boolean` que entra na query key e no body.
+- Adicionar Perplexity como connector (tool `standard_connectors--connect`) → injeta `PERPLEXITY_API_KEY` automaticamente nos edge functions.
+- Refatorar `kg-evidence-gap-fill` para uma estratégia em 3 passos por par (composto × condição):
+  1. **Perplexity Sonar** com `search_mode: 'academic'`, prompt pedindo JSON estruturado (`efficacy_0_5`, `evidence_level`, `mechanism`, `species_context`, `cited_pmids`, `cited_dois`, `summary_pt`).
+  2. **Fallback PubMed** (lógica atual) só se Perplexity devolver `efficacy_0_5 = null` ou sem citações.
+  3. Persistir as citações como `scientific_studies` (com `source: 'perplexity_gap_fill'`) e `triplet_extractions` `pending` exatamente como hoje.
+- Trocar o uso de Gemini interno (que estava só re-estruturando abstracts) — Perplexity já entrega estruturado via `response_format: json_schema`.
+- Manter `max_pairs` e log detalhado por par (`status: 'perplexity_hit' | 'pubmed_fallback' | 'no_evidence' | 'low_efficacy'`).
 
-**`src/components/pet/DigitalTwinDog.tsx`**
-- Para admin: novo toggle pequeno "👁 Pré-visualizar com pendentes (admin)" acima da grid de KPIs. Quando ligado, refaz a query com `includePending: true` e adiciona um banner sutil "Visualização provisória — inclui N triplets ainda pendentes de aprovação".
-- A barra "+ X anos" do KPI mostra um sub-rótulo `(provisório)` quando o toggle está ligado.
+### 3. Conciliar "KG-backed" do stack com o projetor
 
-### 3. Restaurar mini-lista de condições sob cada silhueta (problema c)
+Existe inconsistência semântica que confunde o vet (e me confundiu): o `hybrid-recommendation` chama de "KG-backed" o composto que tem **qualquer** triplet, mas o `project-pet-trajectory` exige eficácia ≥ 3 contra a **condição específica do pet**. Solução:
 
-**`src/components/pet/DigitalTwinDog.tsx`**
-- Adicionar componente local `ConditionsMiniList` (≈40 LOC) replicando o do `BiologicalTimeline`:
-  - Itera `markersWith` / `markersWithout`.
-  - Cada item: dot de severidade + nome + badge "Novo X%" se `isNew` + "★ protegido" se `protectedHere`.
-  - Lista com `max-h-[180px] overflow-y-auto`, vazia mostra `t('petProfile.biologicalTimeline.noProjectedRisks')`.
-- Renderizar uma instância sob cada silhueta (substituindo a linha "4 marcadores").
+- Em `hybrid-recommendation`, marcar o link com nível mais granular: `kg_link_status: 'evidence' | 'partial' | 'mechanism_only' | 'inferred'`.
+- No card de stack (UI), mostrar o nível real (ex.: "Mecanismo (sem ECR)" ao invés de "KG-backed" indistinto), com tooltip explicando que ganho projetado exige `evidence`.
+- No banner amarelo do twin ("No knowledge graph evidence available..."), citar **explicitamente** quais compostos do stack faltam evidência forte para aquela condição, com botão "Buscar via Perplexity para esses N pares" que dispara o gap-fill direcionado (`compound_ids` + `condition_id`).
 
-### 4. i18n
+### 4. UX dos triplets faltantes
 
-Bumpar `src/i18n.ts` versão `1.41.2` → `1.41.3` e adicionar chaves em PT/EN:
-- `evidenceGap.noPairsFound`, `evidenceGap.detailsTitle`, `evidenceGap.detailStatus.{ok|no_pubmed_results|assessment_failed|error|dry_run}`
-- `petProfile.digitalTwin.previewPendingToggle`, `petProfile.digitalTwin.previewPendingBanner` (com `{{count}}`)
-- `petProfile.digitalTwin.provisional`
+- Quando `kg-missing-triplets` retornar a matriz, mostrar no diálogo um botão **"Buscar evidências para todos via Perplexity"** que chama `kg-evidence-gap-fill` com a lista exata de pares já calculada (em vez de o gap-fill recalcular).
+- Após o run, mostrar inline: "X pares processados → Y citações encontradas → Z triplets pendentes para curadoria" + link direto.
+- Adicionar **toast persistente** quando o gap-fill termina com `triplets_pending > 0` lembrando que o ganho projetado **só atualiza após aprovação na curadoria**.
 
-### 5. Documentação
-- Entrada em `CHANGELOG.md` `[Unreleased]` (Fixed + Added) com `<!-- area: digital-twin · status: improvement · i18n: 1.41.3 -->`.
-- Rodar `npm run sync:changelog`.
-- Atualizar memória `mem://architecture/kg-evidence-gap-fill-pipeline` com o modo preview e o fallback de espécie.
+### 5. i18n & changelog
 
-### 6. Como testar
-1. Recarregar a página do pet (Ctrl+Shift+R).
-2. Clicar em "Buscar evidências no PubMed" e observar o toast detalhado + lista de pares processados que aparecerá no card.
-3. Conferir os logs de edge (agora vão existir) — caso ainda dê erro, vou ver a causa exata.
-4. Ligar o toggle "Pré-visualizar com pendentes" — KPI deve mostrar `+X.Y a (provisório)` se o gap-fill encontrou algo aprovável.
-5. Verificar que sob cada silhueta voltou a lista de condições.
+- Bump `I18N_VERSION` para `1.41.4`.
+- Novas chaves: `evidenceGap.viaPerplexity`, `evidenceGap.providerLabel`, `evidenceGap.fallbackPubmed`, `kgLinkStatus.evidence|partial|mechanism|inferred`.
+- Entrada no `CHANGELOG.md` (área: KG / Evidence) + `npm run sync:changelog`.
 
----
-
-## Arquivos afetados
+## Detalhes técnicos
 
 ```text
-edit  src/components/pet/EvidenceGapCard.tsx          (toast detalhado + resumo inline)
-edit  src/components/pet/DigitalTwinDog.tsx           (mini-lista + toggle preview)
-edit  src/hooks/usePetTrajectoryProjection.ts         (param includePending)
-edit  supabase/functions/kg-evidence-gap-fill/index.ts (logs, fallback espécie, stack do pet)
-edit  supabase/functions/project-pet-trajectory/index.ts (suporte a pending preview)
-edit  src/i18n.ts                                     (1.41.3)
-edit  src/locales/pt/translation.json + en/translation.json
-edit  CHANGELOG.md                                    (entrada Unreleased)
-edit  mem://architecture/kg-evidence-gap-fill-pipeline
-regen .lovable/CONTEXT.md, src/data/projectChangelog.generated.ts (npm run sync:changelog)
+┌──────────────────────┐    busca pares faltantes    ┌────────────────────────┐
+│ MissingTriplets UI   │ ──────────────────────────► │ kg-missing-triplets    │
+└─────────┬────────────┘                             └────────────────────────┘
+          │ "Buscar evidências para todos"
+          ▼
+┌──────────────────────────────────────────────────────────────┐
+│ kg-evidence-gap-fill                                          │
+│  for pair in pairs:                                           │
+│    1. Perplexity Sonar (academic, json_schema)                │
+│    2. if no hit → PubMed fallback                             │
+│    3. persist scientific_studies + triplet_extractions(pending)│
+└─────────────────────────────────────────────────────────────┘
+          │
+          ▼  toast / inline summary  →  /administrador?tab=triplet-curation
 ```
 
-Aprovando, eu implemento tudo de uma vez.
+**Arquivos a modificar:**
+- `supabase/config.toml` (declarar 2 functions)
+- `supabase/functions/kg-evidence-gap-fill/index.ts` (Perplexity-first, fallback PubMed, logging)
+- `supabase/functions/kg-missing-triplets/index.ts` (try/catch defensivo + log)
+- `supabase/functions/hybrid-recommendation/index.ts` (`kg_link_status` granular)
+- `src/components/pet/EvidenceGapCard.tsx` (provider label, melhor empty state)
+- `src/components/pet/MissingTripletsDialog.tsx` (botão "Buscar evidências para todos")
+- `src/components/pet/DigitalTwinDog.tsx` (banner com pares específicos faltando)
+- `src/hooks/useKgEvidenceGapFill.ts` (aceitar `pairs` direcionados)
+- `src/i18n.ts`, `src/locales/{pt,en}/translation.json`
+- `CHANGELOG.md` + `npm run sync:changelog`
+
+**Pré-requisito de aprovação:** Conectar Perplexity via `standard_connectors--connect` (você precisa autorizar uma vez para que a chave fique disponível nos edge functions).
+
+## Riscos & mitigação
+
+- **Perplexity pode alucinar PMIDs** → validamos cada `cited_pmid` contra `efetch` do PubMed antes de persistir; só salvamos os que existem.
+- **Custo** → cap rígido `max_pairs = 10` por execução + cache 24h por par no `triplet_extractions` (não re-buscar par já tentado).
+- **Inconsistência KG-backed** → introduzir `kg_link_status` é mudança de contrato; vamos manter campo `kg_backed: boolean` por compatibilidade durante a transição.
