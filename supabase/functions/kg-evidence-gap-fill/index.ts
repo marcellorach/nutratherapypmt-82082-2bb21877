@@ -23,9 +23,18 @@ const corsHeaders = {
 
 const PUBMED_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 const NCBI_API_KEY = Deno.env.get('NCBI_API_KEY') || '';
-const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY') || '';
+const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY') || '';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+console.log('[gap-fill] boot', {
+  hasLovable: !!LOVABLE_API_KEY,
+  hasPerplexity: !!PERPLEXITY_API_KEY,
+  hasNcbi: !!NCBI_API_KEY,
+  hasUrl: !!SUPABASE_URL,
+  hasServiceRole: !!SERVICE_ROLE,
+});
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
