@@ -228,6 +228,9 @@ Deno.serve(async (req) => {
           years_gained_breakdown: (cached.projection_data as any)?.years_gained_breakdown || [],
           protocol_caveats: (cached.projection_data as any)?.protocol_caveats || [],
           confidence: (cached.projection_data as any)?.confidence || null,
+          coverage_by_condition: (cached.projection_data as any)?.coverage_by_condition || [],
+          years_with_protocol: (cached.projection_data as any)?.years_with_protocol || (cached.projection_data as any)?.years || [],
+          years_without_protocol: (cached.projection_data as any)?.years_without_protocol || (cached.projection_data as any)?.years || [],
           baseline_biological_age: cached.baseline_biological_age,
           baseline_remaining_years: cached.baseline_remaining_years,
         });
