@@ -6783,6 +6783,10 @@
       "clinicalAlerts": "Clinical Alerts",
       "trajectory": "Digital Twin · Biological Trajectory"
     },
+    "sectionTabs": {
+      "analysis": "Clinical Analysis",
+      "digitalTwin": "Digital Twin"
+    },
     "conditionOrigin": {
       "vetDiagnosis": "Veterinary Diagnosis",
       "examSuggested": "Suggested by Exams",
