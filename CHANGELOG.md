@@ -23,6 +23,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-29 — Pipeline KG Evidence Gap-Fill (PubMed → triplets pendentes)
+<!-- area: kg · status: entregue · i18n: 1.41.2 -->
+- Nova edge function `kg-evidence-gap-fill`: para cada par (composto canônico × condição do pet) sem evidência forte no KG (`approved` com `extraction_confidence ≥ 0.6`), busca o PubMed via NCBI E-utilities (`esearch` + `efetch`), extrai abstracts e usa Gemini (`google/gemini-3-flash-preview`, tool-calling) para gerar `efficacy_0_5`, `evidence_level`, `rationale` e `cited_pmids`.
+- Persiste estudos em `scientific_studies` (`source_api='pubmed_gap_fill'`, dedup por `pmid`) e cria triplets em `triplet_extractions` SEMPRE como `curation_status='pending'` (mesmo com alta confiança — protocolo Curation Gatekeeper). `approval_chain` registra `{source: 'pubmed_gap_fill', cited_pmids}` para rastreabilidade.
+- Acesso restrito a admin (validação via `getClaims` + `user_roles`). Rate limit serial: 360ms entre chamadas PubMed (110ms se `NCBI_API_KEY` for configurada).
+- Novo componente `EvidenceGapCard` integrado ao `DigitalTwinDog`, visível apenas para admin quando `years_gained < 0.3`. Mostra explicação contextual (sem cobertura vs. cobertura sem eficácia ≥ 3), botão de busca, contador de triplets pendentes do gap-fill e link direto para a curadoria.
+- Novo hook `useKgEvidenceGapFill` (`useTriggerGapFill` + `usePendingGapFillTriplets`).
+- i18n: namespace `evidenceGap.*` em PT/EN. Bump `I18N_VERSION` 1.41.1 → 1.41.2.
+- Decisão arquitetural: PubMed direto (não Perplexity) — citações 100% rastreáveis (PMID/DOI), zero novos secrets, custo zero. Perplexity reservado para missões futuras (vigilância de contraindicações, sumários narrativos, raças raras, descoberta exploratória).
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/hooks/useKgEvidenceGapFill.ts, src/components/pet/EvidenceGapCard.tsx, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Changed - 2026-04-29 — Digital Twin agora compara cenários ao longo dos anos
 <!-- area: vet-ui · status: entregue · i18n: 1.41.1 -->
 - `DigitalTwinDog` reescrito para consumir `usePetTrajectoryProjection` (mesma fonte do `BiologicalTimeline`): renderiza duas silhuetas lado a lado (Sem protocolo × Com protocolo) e um slider 0–8 anos. Antes só mostrava o estado atual, sem variação temporal nem cenário comparativo.
