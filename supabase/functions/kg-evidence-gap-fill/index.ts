@@ -415,15 +415,35 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { pet_id, condition_id, compound_ids, max_pairs = 12, dry_run = false } = body;
-    console.log('[gap-fill] body', { pet_id, condition_id, compound_ids_count: compound_ids?.length, max_pairs, dry_run });
+    const { pet_id, condition_id, compound_ids, pairs: directedPairs, max_pairs = 12, dry_run = false } = body;
+    console.log('[gap-fill] body', {
+      pet_id, condition_id,
+      compound_ids_count: compound_ids?.length,
+      directed_pairs_count: Array.isArray(directedPairs) ? directedPairs.length : 0,
+      max_pairs, dry_run,
+    });
 
     // ---------- Build the (compound × condition) pair list ----------
     type Pair = { compound_id?: string; compound_en: string; condition_id?: string; condition_en: string };
     const pairs: Pair[] = [];
     const discoveryNotes: string[] = [];
 
-    if (pet_id) {
+    // Direct pair list (from MissingTripletsDialog "Buscar evidências para todos") wins.
+    if (Array.isArray(directedPairs) && directedPairs.length > 0) {
+      for (const p of directedPairs) {
+        if (pairs.length >= max_pairs) break;
+        const compoundEn = String(p?.compound_en || p?.compound || '').trim();
+        const conditionEn = String(p?.condition_en || p?.condition || '').trim();
+        if (!compoundEn || !conditionEn) continue;
+        pairs.push({
+          compound_id: p?.compound_id,
+          compound_en: compoundEn,
+          condition_id: p?.condition_id,
+          condition_en: conditionEn,
+        });
+      }
+      console.log('[gap-fill] using directed pair list', pairs.length);
+    } else if (pet_id) {
       const { data: pet } = await supabase
         .from('pet_conditions')
         .select('condition_id, health_conditions(id, name, name_en)')
