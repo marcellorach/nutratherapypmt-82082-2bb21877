@@ -103,9 +103,11 @@ export function parseChangelog(md) {
       kind: KIND_MAP[cur.kind.toLowerCase()] || "changed",
       area,
       status,
-      title: cur.title.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]\s*/u, "").trim(),
+      title: cur.title
+        .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}](?:\uFE0F|\u200D[\p{Emoji_Presentation}\p{Extended_Pictographic}])*\s*/u, "")
+        .trim(),
       bullets: cur.bullets
-        .map((b) => b.replace(/^[-*]\s*(?:✅\s*)?/, "").replace(/\*\*/g, "").trim())
+        .map((b) => b.replace(/^\s*[-*]\s*(?:✅\s*)?/, "").replace(/\*\*/g, "").trim())
         .filter(Boolean),
       files: files.length ? files : undefined,
       i18nVersion,

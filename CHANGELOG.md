@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-29 — Testes de inferArea e ordenação real do parser
+<!-- area: admin · status: entregue -->
+- 17 novos testes em `scripts/__tests__/sync-changelog.test.mjs` cobrindo: prioridade `kg > infra` em `supabase/functions/kg-*`, `triplet`/`process-pdf`/`extract` → `curation`, `biomedical-taxonomy` e qualquer path com `knowledge-graph|neo4j` → `kg`, `base-knowledge` antes de regras genéricas, `i18n` para `src/locales/**` e `src/i18n.ts`, `auth` para `AuthContext`/`pages/Auth`, `projectOrganograma`/`projectChangelog` → `admin`, ordem-importa quando múltiplos paths casam, fallback `meta`
+- Testes de ordenação validando: data desc estrita com seções intercaladas (`## [Unreleased]` × `## [1.0.0]`), cabeçalhos `### Added - YYYY-MM-DD 🗺️ Título` (emoji direto, sem separador), múltiplas linhas em branco e bullets indentados, datas duplicadas mantendo entradas distintas, `## [versão]` não confundido com cabeçalho de entrada, fallback para `inferArea` quando metadata não declara área
+- **Bugs corrigidos no parser** (descobertos pelos testes):
+  - Emoji com variation selector (`🗺️` = `U+1F5FA U+FE0F`) deixava caractere invisível no início do título — regex de limpeza estendida para aceitar `\uFE0F` e sequências ZWJ
+  - Bullets indentados (`   - texto`) preservavam o `- ` literal por o strip não tolerar espaços iniciais — `^[-*]` virou `^\s*[-*]`
+- Files: scripts/__tests__/sync-changelog.test.mjs, scripts/sync-changelog.mjs
+
 ### Added - 2026-04-29 — Testes automatizados do parser do CHANGELOG (vitest)
 <!-- area: admin · status: entregue -->
 - Setup mínimo de Vitest (`vitest.config.ts`, `src/test/setup.ts`, scripts `test` / `test:watch` em `package.json`) — inclui `scripts/**/*.test.mjs` no glob
