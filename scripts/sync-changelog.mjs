@@ -5,6 +5,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ROOT = process.cwd();
 const CHANGELOG = path.join(ROOT, "CHANGELOG.md");
@@ -12,13 +13,13 @@ const OUT_TS = path.join(ROOT, "src/data/projectChangelog.generated.ts");
 const ORG_TS = path.join(ROOT, "src/data/projectOrganograma.ts");
 const CTX_MD = path.join(ROOT, ".lovable/CONTEXT.md");
 
-const KIND_MAP = {
+export const KIND_MAP = {
   added: "added", changed: "changed", fixed: "fixed",
   removed: "removed", security: "security", deprecated: "changed",
 };
 
 // Inferência de área por path. Ordem importa: mais específico primeiro.
-const AREA_RULES = [
+export const AREA_RULES = [
   [/^supabase\/functions\/kg-/i, "kg"],
   [/^supabase\/functions\/.*triplet/i, "curation"],
   [/^supabase\/functions\/process-pdf|digest|extract/i, "curation"],
@@ -42,17 +43,18 @@ const AREA_RULES = [
   [/^src\/data\/projectOrganograma|projectChangelog/i, "admin"],
 ];
 
-function inferArea(files) {
+export function inferArea(files) {
   for (const f of files) {
     for (const [rx, area] of AREA_RULES) if (rx.test(f)) return area;
   }
   return "meta";
 }
 
-function extractFiles(text) {
+export function extractFiles(text) {
   const found = new Set();
   // padrões: src/..., supabase/..., scripts/..., .lovable/...
-  const rx = /(?:^|[\s`(,])([a-zA-Z0-9_./-]*(?:src|supabase|scripts|\.lovable|public)\/[a-zA-Z0-9_./-]+\.(?:tsx?|jsx?|mjs|cjs|json|sql|md|css))/g;
+  // Ordem importa: extensões mais longas primeiro (json antes de js, tsx antes de ts).
+  const rx = /(?:^|[\s`(,])([a-zA-Z0-9_./-]*(?:src|supabase|scripts|\.lovable|public)\/[a-zA-Z0-9_./-]+\.(?:tsx|ts|jsx|mjs|cjs|json|js|sql|md|css))(?![a-zA-Z0-9])/g;
   let m;
   while ((m = rx.exec(text)) !== null) {
     found.add(m[1].replace(/^[`(,]+/, ""));
@@ -60,7 +62,7 @@ function extractFiles(text) {
   return [...found];
 }
 
-function parseMetaComment(line) {
+export function parseMetaComment(line) {
   // <!-- area: admin · status: entregue · i18n: 1.38.0 · pr: 123 -->
   const m = line.match(/<!--\s*(.+?)\s*-->/);
   if (!m) return {};
@@ -72,7 +74,7 @@ function parseMetaComment(line) {
   return out;
 }
 
-function parseChangelog(md) {
+export function parseChangelog(md) {
   const lines = md.split("\n");
   const entries = [];
   let cur = null;
@@ -224,4 +226,12 @@ function main() {
   console.log(`[sync-changelog] OK — ${entries.length} entries · last: ${entries[0].date} · area: ${entries[0].area}`);
 }
 
-main();
+const isCli = (() => {
+  try {
+    return fileURLToPath(import.meta.url) === fs.realpathSync(process.argv[1] || "");
+  } catch {
+    return false;
+  }
+})();
+
+if (isCli) main();

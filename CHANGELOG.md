@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-29 — Testes automatizados do parser do CHANGELOG (vitest)
+<!-- area: admin · status: entregue -->
+- Setup mínimo de Vitest (`vitest.config.ts`, `src/test/setup.ts`, scripts `test` / `test:watch` em `package.json`) — inclui `scripts/**/*.test.mjs` no glob
+- Refactor de `scripts/sync-changelog.mjs`: `parseMetaComment`, `extractFiles`, `inferArea`, `parseChangelog`, `KIND_MAP` e `AREA_RULES` agora são exportados; `main()` só roda quando o script é chamado como CLI (detecção via `import.meta.url` × `process.argv[1]`)
+- 22 testes em `scripts/__tests__/sync-changelog.test.mjs` cobrindo: separadores variados (`·`, `,`, `;`, `|`), `commit:` no metadata-comment, captura de paths em prosa/listas/crases, dedup, todas as extensões suportadas, inferência de área por path, ordenação por data, fallback de `status`/`area`, limpeza de ✅/`**`/emoji, hífen e em-dash em cabeçalhos, mapping `deprecated → changed`
+- Bug fix descoberto pelos testes: regex de `extractFiles` agora coloca `tsx`/`ts`/`json` antes de `js` e adiciona `(?![a-zA-Z0-9])` no fim — antes `translation.json` era capturado como `translation.js`
+- Files: scripts/sync-changelog.mjs, scripts/__tests__/sync-changelog.test.mjs, vitest.config.ts, src/test/setup.ts, package.json
+
 ### Added - 2026-04-29 — Mini-timeline por área no Organograma com links de arquivos e commits
 <!-- area: admin · status: entregue · i18n: 1.40.0 -->
 - Novo `src/components/administrador/organograma/AreaMiniTimeline.tsx`: timeline vertical com bolinhas coloridas por tipo (added=verde, changed=âmbar, fixed=azul, removed=vermelho, security=roxo), expandir/recolher por entrada, filtros toggle por tipo e botão "Ver mais" (3 → 8)
