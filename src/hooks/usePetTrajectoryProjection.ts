@@ -44,6 +44,8 @@ export interface AIProjectionResult {
   source: 'ai_kg_grounded' | 'heuristic_fallback';
   cached: boolean;
   model_used: string | null;
+  preview_mode?: boolean;
+  pending_preview_count?: number;
   projection: {
     confidence: 'high' | 'medium' | 'low';
     rationale: string;
@@ -88,12 +90,13 @@ export function usePetTrajectoryProjection(
   petId: string | null | undefined,
   recommendedCompounds: string[] | null,
   enabled: boolean = true,
+  includePending: boolean = false,
 ) {
   const stackKey = (recommendedCompounds || []).slice().sort().join('|');
   return useQuery<AIProjectionResult>({
-    queryKey: ['pet-trajectory-projection', petId, stackKey],
+    queryKey: ['pet-trajectory-projection', petId, stackKey, includePending ? 'preview' : 'normal'],
     enabled: !!petId && enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: includePending ? 0 : 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,
     queryFn: async () => {
@@ -103,6 +106,7 @@ export function usePetTrajectoryProjection(
           with_intervention: true, // legacy flag; function now returns both
           recommended_compounds: recommendedCompounds || [],
           max_years_ahead: 8,
+          include_pending_gap_fill: includePending,
         },
       });
       if (error) throw error;

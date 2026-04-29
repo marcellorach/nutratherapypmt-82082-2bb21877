@@ -34,17 +34,34 @@ function withApiKey(url: string): string {
   return url + (url.includes('?') ? '&' : '?') + `api_key=${NCBI_API_KEY}`;
 }
 
-async function pubmedSearch(compound: string, condition: string, retmax = 8): Promise<string[]> {
-  const term = encodeURIComponent(
-    `("${compound}"[Title/Abstract]) AND ("${condition}"[Title/Abstract]) AND (canine[Title/Abstract] OR dog[Title/Abstract] OR dogs[Title/Abstract])`,
-  );
+async function pubmedSearchOnce(term: string, retmax: number): Promise<string[]> {
   const url = withApiKey(
-    `${PUBMED_BASE}/esearch.fcgi?db=pubmed&term=${term}&retmax=${retmax}&sort=relevance&retmode=json`,
+    `${PUBMED_BASE}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(term)}&retmax=${retmax}&sort=relevance&retmode=json`,
   );
   const res = await fetch(url);
   if (!res.ok) throw new Error(`esearch HTTP ${res.status}`);
   const json = await res.json();
   return json?.esearchresult?.idlist || [];
+}
+
+/**
+ * Search PubMed with two passes:
+ *  1. Strict — restrict to canine/dog literature.
+ *  2. Fallback — drop the species filter so we still catch reviews / mechanistic
+ *     studies. Returned alongside the species hint so the caller can stamp
+ *     `species_context` accordingly.
+ */
+async function pubmedSearch(
+  compound: string,
+  condition: string,
+  retmax = 8,
+): Promise<{ pmids: string[]; speciesHint: 'canine' | 'unspecified' }> {
+  const strictTerm = `("${compound}"[Title/Abstract]) AND ("${condition}"[Title/Abstract]) AND (canine[Title/Abstract] OR dog[Title/Abstract] OR dogs[Title/Abstract])`;
+  const strict = await pubmedSearchOnce(strictTerm, retmax);
+  if (strict.length > 0) return { pmids: strict, speciesHint: 'canine' };
+  const looseTerm = `("${compound}"[Title/Abstract]) AND ("${condition}"[Title/Abstract])`;
+  const loose = await pubmedSearchOnce(looseTerm, retmax);
+  return { pmids: loose, speciesHint: 'unspecified' };
 }
 
 interface PubmedRecord {
@@ -193,8 +210,10 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    console.log('[gap-fill] request received', req.method, req.url);
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
+      console.warn('[gap-fill] missing Authorization header');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -207,6 +226,7 @@ Deno.serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: claims, error: claimsErr } = await userClient.auth.getClaims(token);
     if (claimsErr || !claims?.claims) {
+      console.warn('[gap-fill] auth.getClaims failed', claimsErr?.message);
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -215,6 +235,7 @@ Deno.serve(async (req) => {
     const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', userId);
     const isAdmin = (roles || []).some((r: any) => r.role === 'admin');
     if (!isAdmin) {
+      console.warn('[gap-fill] non-admin user blocked', userId);
       return new Response(JSON.stringify({ error: 'Admin role required' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -222,10 +243,12 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { pet_id, condition_id, compound_ids, max_pairs = 12, dry_run = false } = body;
+    console.log('[gap-fill] body', { pet_id, condition_id, compound_ids_count: compound_ids?.length, max_pairs, dry_run });
 
     // ---------- Build the (compound × condition) pair list ----------
     type Pair = { compound_id?: string; compound_en: string; condition_id?: string; condition_en: string };
     const pairs: Pair[] = [];
+    const discoveryNotes: string[] = [];
 
     if (pet_id) {
       const { data: pet } = await supabase
@@ -235,15 +258,57 @@ Deno.serve(async (req) => {
       const conds = (pet || [])
         .map((row: any) => row.health_conditions)
         .filter(Boolean);
+      console.log('[gap-fill] pet conditions found', conds.length);
+      const condsWithEn = conds.filter((c: any) => c?.name_en);
+      if (conds.length > 0 && condsWithEn.length === 0) {
+        discoveryNotes.push('Conditions found but none has name_en — gap-fill needs canonical English to query PubMed.');
+      }
 
-      // Compound shortlist: top geriatric compounds canonical English names
-      const { data: nutras } = await supabase
-        .from('nutraceuticals')
-        .select('id, name, name_en')
-        .limit(40);
-      const compounds = (nutras || []).filter((n: any) => n.name_en);
+      // Prefer the compounds the VetGraphRAG analysis actually recommended for
+      // THIS pet. Falls back to the top geriatric shortlist if no snapshot.
+      let compounds: Array<{ id?: string; name_en: string }> = [];
+      const { data: snap } = await supabase
+        .from('pet_clinical_analysis_snapshots')
+        .select('recommendation_compounds')
+        .eq('pet_id', pet_id)
+        .eq('status', 'complete')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const stackNames: string[] = Array.isArray(snap?.recommendation_compounds)
+        ? (snap!.recommendation_compounds as any[])
+            .map((c: any) => (typeof c === 'string' ? c : c?.name))
+            .filter((s: any): s is string => typeof s === 'string' && s.trim().length > 0)
+        : [];
+      if (stackNames.length > 0) {
+        const lower = stackNames.map(s => s.toLowerCase().trim());
+        const { data: nutras } = await supabase
+          .from('nutraceuticals')
+          .select('id, name, name_en');
+        compounds = (nutras || [])
+          .filter((n: any) =>
+            n.name_en &&
+            (lower.includes(String(n.name_en).toLowerCase().trim()) ||
+             lower.includes(String(n.name || '').toLowerCase().trim())),
+          )
+          .map((n: any) => ({ id: n.id, name_en: n.name_en }));
+        console.log('[gap-fill] using stack-derived compounds', compounds.length, 'from', stackNames.length);
+        if (compounds.length === 0) {
+          discoveryNotes.push(`Stack has ${stackNames.length} compound(s) but none matched any nutraceutical with name_en in DB.`);
+        }
+      }
+      if (compounds.length === 0) {
+        const { data: nutras } = await supabase
+          .from('nutraceuticals')
+          .select('id, name, name_en')
+          .limit(40);
+        compounds = (nutras || [])
+          .filter((n: any) => n.name_en)
+          .map((n: any) => ({ id: n.id, name_en: n.name_en }));
+        console.log('[gap-fill] using fallback geriatric shortlist', compounds.length);
+      }
 
-      for (const cond of conds) {
+      for (const cond of condsWithEn) {
         for (const cmp of compounds) {
           if (pairs.length >= max_pairs) break;
           // skip if KG already has efficacy >= 3 for this pair
@@ -276,10 +341,14 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log('[gap-fill] pairs to search', pairs.length);
     if (!pairs.length) {
       return new Response(JSON.stringify({
         pairs_searched: 0, studies_added: 0, triplets_pending: 0,
-        message: 'No gaps found for the given inputs.',
+        message: discoveryNotes.length
+          ? `No gaps found. ${discoveryNotes.join(' ')}`
+          : 'No gaps found for the given inputs (every relevant pair already has approved KG evidence ≥0.6).',
+        discovery_notes: discoveryNotes,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -290,7 +359,7 @@ Deno.serve(async (req) => {
 
     for (const pair of pairs) {
       try {
-        const pmids = await pubmedSearch(pair.compound_en, pair.condition_en);
+        const { pmids, speciesHint } = await pubmedSearch(pair.compound_en, pair.condition_en);
         await sleep(NCBI_API_KEY ? 110 : 360);
         if (!pmids.length) {
           details.push({ pair, status: 'no_pubmed_results' });
@@ -310,7 +379,7 @@ Deno.serve(async (req) => {
         }
 
         if (dry_run) {
-          details.push({ pair, status: 'dry_run', assessment, pmids: records.map(r => r.pmid) });
+          details.push({ pair, status: 'dry_run', assessment, pmids: records.map(r => r.pmid), species_hint: speciesHint });
           continue;
         }
 
@@ -369,12 +438,12 @@ Deno.serve(async (req) => {
           extraction_confidence: efficacyNorm,
           llm_confidence: assessment.llm_confidence,
           evidence_level: assessment.evidence_level,
-          species_context: ['canine'],
+          species_context: [speciesHint],
           confidence_rationale: assessment.rationale,
           curation_status: 'pending', // gap-fill is ALWAYS reviewed
           auto_approved: false,
           hallucination_flag: false,
-          approval_chain: { source: 'pubmed_gap_fill', cited_pmids: assessment.cited_pmids },
+          approval_chain: { source: 'pubmed_gap_fill', cited_pmids: assessment.cited_pmids, species_hint: speciesHint },
         });
         if (tErr) {
           console.error('triplet insert error', tErr);
@@ -386,6 +455,7 @@ Deno.serve(async (req) => {
           pair, status: 'ok',
           efficacy_0_5: assessment.efficacy_0_5,
           evidence_level: assessment.evidence_level,
+          species_hint: speciesHint,
           studies: studyIds.length,
           cited_pmids: assessment.cited_pmids,
         });
@@ -395,10 +465,12 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log('[gap-fill] done', { pairs: pairs.length, studiesAdded, tripletsPending });
     return new Response(JSON.stringify({
       pairs_searched: pairs.length,
       studies_added: studiesAdded,
       triplets_pending: tripletsPending,
+      discovery_notes: discoveryNotes,
       details,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (e) {

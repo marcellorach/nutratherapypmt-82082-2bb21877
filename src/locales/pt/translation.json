@@ -7318,6 +7318,18 @@
     "openCuration": "Abrir curadoria",
     "disclaimer": "Os achados entram como pendentes para curadoria humana e só impactam o gêmeo digital após aprovação. Fontes: PubMed/PMC (NCBI E-utilities). Estruturação: Lovable AI (Gemini).",
     "toastSuccess": "{{studies}} estudo(s) adicionado(s) e {{triplets}} triplet(s) pendente(s) ({{pairs}} par(es) pesquisado(s))",
-    "toastError": "Falha na busca: {{error}}"
+    "toastError": "Falha na busca: {{error}}",
+    "toastNoPairs": "Nenhum par (composto × condição) elegível para gap-fill. Verifique se as condições do pet e o stack recomendado têm nome canônico em inglês (name_en).",
+    "toastNoTriplets": "{{pairs}} par(es) pesquisado(s) no PubMed mas nenhum gerou triplet. Veja o detalhamento abaixo.",
+    "detailsTitle": "Detalhamento da última busca",
+    "detailStatus": {
+      "ok": "✓ ok",
+      "no_pubmed_results": "sem resultados",
+      "no_records": "sem registros",
+      "assessment_failed": "IA falhou",
+      "triplet_failed": "insert falhou",
+      "dry_run": "dry-run",
+      "error": "erro"
+    }
   }
 }
