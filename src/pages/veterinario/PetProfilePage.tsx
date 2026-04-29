@@ -741,7 +741,7 @@ const PetProfilePage: React.FC = () => {
                 </TabsTrigger>
                 <TabsTrigger value="trajectory" className="gap-1">
                   <Dna className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.trajectory', 'Trajetória Biológica')}
+                  {t('petProfile.analysisTabs.trajectory', 'Digital Twin · Trajetória Biológica')}
                 </TabsTrigger>
                 <TabsTrigger value="biological-pathway" className="gap-1">
                   <GitBranch className="h-3.5 w-3.5" />
