@@ -67,6 +67,7 @@ const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-know
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
+const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
