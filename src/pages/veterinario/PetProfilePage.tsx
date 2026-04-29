@@ -693,7 +693,21 @@ const PetProfilePage: React.FC = () => {
             )}
 
             {/* Analysis by Condition - ComorbidityMap + full ConditionInsightCards */}
-            {recommendationCompounds && conditions.length > 0 && (
+            {recommendationCompounds && (
+              <Tabs defaultValue="analysis" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="analysis" className="gap-1">
+                    <Stethoscope className="h-3.5 w-3.5" />
+                    {t('petProfile.sectionTabs.analysis', 'Análise Clínica')}
+                  </TabsTrigger>
+                  <TabsTrigger value="digitalTwin" className="gap-1">
+                    <Dna className="h-3.5 w-3.5" />
+                    {t('petProfile.sectionTabs.digitalTwin', 'Digital Twin')}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="analysis" className="space-y-4">
+            {conditions.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
@@ -733,7 +747,6 @@ const PetProfilePage: React.FC = () => {
             )}
 
             {/* Analysis Results Tabs */}
-            {recommendationCompounds && (
               <Tabs defaultValue="recommendations">
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
                 <TabsTrigger value="recommendations" className="gap-1">
@@ -803,11 +816,22 @@ const PetProfilePage: React.FC = () => {
                 )}
               </TabsContent>
             </Tabs>
-            )}
 
             {/* Treatability Chart - only after VetGraphRAG analysis */}
-            {recommendationCompounds && treatabilityData.length > 0 && (
+            {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
+            )}
+                </TabsContent>
+
+                <TabsContent value="digitalTwin">
+                  <DigitalTwinDog
+                    conditions={conditions}
+                    petName={profile.name}
+                    petBreed={profile.breed}
+                    petAge={profile.age_years}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
           </div>
 
