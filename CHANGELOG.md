@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-29 — Auto-preview da projeção e arestas provisórias no subgrafo após gap-fill
+<!-- area: vet-ui · status: entregue · i18n: 1.41.5 -->
+- `EvidenceGapCard`: novo callback `onTripletsAdded(count)` disparado quando o gap-fill (Perplexity → PubMed) retorna `triplets_pending > 0`. Antes o vet precisava ativar manualmente o toggle "Pré-visualizar com pendentes" no Digital Twin para ver o impacto.
+- `DigitalTwinDog`: ao receber `onTripletsAdded`, liga `previewPending=true` e invalida `['pet-trajectory-projection', petId]` + `['patient-pending-gap-fill-triplets', petId]` — a projeção é re-fetchada incluindo os triplets recém-importados e o KPI "Ganho com protocolo" reage instantaneamente.
+- `usePatientPendingGapFillTriplets`: novo hook que busca triplets `pending` cujo `approval_chain.source ∈ {pubmed_gap_fill, perplexity_gap_fill}` filtrando client-side por compostos do stack OU condições do pet (matching `subject_name`/`object_name`).
+- `PatientKnowledgeSubgraph`: aceita `petId` opcional; quando presente, renderiza arestas tracejadas âmbar (`color: #f59e0b`, `dashes: [6,4]`, label com `⏳`) para os triplets provisórios. Adicionados badge `+N provisórios`, legenda dedicada e contador inferior. Hover mostra `[provisional · perplexity_gap_fill] subject predicate object · evidence_level`.
+- i18n 1.41.5: novas chaves `petProfile.subgraph.provisionalBadge|provisionalLegend|provisionalCount` em PT/EN.
+- Files: src/components/pet/EvidenceGapCard.tsx, src/components/pet/DigitalTwinDog.tsx, src/components/pet/PatientKnowledgeSubgraph.tsx, src/hooks/useKgEvidenceGapFill.ts, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-04-29 — Perplexity-first no Gap-Fill + busca a partir do diálogo de triplets faltantes
 <!-- area: kg · status: entregue · i18n: 1.41.4 -->
 - `kg-evidence-gap-fill`: nova estratégia em duas passadas — **Perplexity Sonar (academic, json_schema)** primeiro, **PubMed E-utilities + Gemini** como fallback. Perplexity retorna JSON estruturado com `efficacy_0_5`, `evidence_level`, `species_context`, `cited_pmids`, `cited_dois`, `cited_urls`, `llm_confidence`. PMIDs citados pelo Perplexity são **validados via NCBI esummary** antes de virarem `scientific_studies` (anti-alucinação). `source_api` distingue `perplexity_gap_fill` × `pubmed_gap_fill`; `approval_chain` registra `cited_urls` e provider.
