@@ -354,6 +354,11 @@ PROTOCOL EFFECTS (apply ONLY to scenario B "with_protocol"):
 - For NEW condition incidence, reduction is at most 0.6 × the severity reduction (prevention is harder than treatment).
 - HARD CAP: years_gained_total MUST be in [-0.5, +1.5] years. Values above 1.5 require >=8 high-grade evidence rows AND multi-condition coverage. Negative values are valid when polypharmacy outweighs benefit.
 
+PREVIEW MODE (only when preview_mode is true):
+- Treat entries from pending_gap_fill_preview EXACTLY like kg_compound_condition_evidence — they are real PubMed-derived assessments awaiting human curation.
+- For every condition that received protection ONLY because of a preview entry, append "(provisório)" to the citation summary and add a protocol_caveat of type "partial_coverage" with message starting with "PREVIEW:" so the UI can render a provisional badge.
+- The hard cap still applies.
+
 POLYPHARMACY PENALTY: if effective_protocol_compounds count > 4, reduce adherence by 5 percentage points per extra compound (floor 40%). Mention this in protocol_caveats.
 
 OUTPUT REQUIREMENTS:
