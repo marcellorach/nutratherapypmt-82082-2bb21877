@@ -9,6 +9,13 @@ export interface GapFillResult {
   details?: any[];
 }
 
+export interface DirectedPair {
+  compound_en: string;
+  condition_en: string;
+  compound_id?: string;
+  condition_id?: string;
+}
+
 export function usePendingGapFillTriplets() {
   return useQuery({
     queryKey: ['kg-gap-fill-pending'],
@@ -28,7 +35,13 @@ export function usePendingGapFillTriplets() {
 export function useTriggerGapFill() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { pet_id?: string; condition_id?: string; compound_ids?: string[]; max_pairs?: number }) => {
+    mutationFn: async (input: {
+      pet_id?: string;
+      condition_id?: string;
+      compound_ids?: string[];
+      pairs?: DirectedPair[];
+      max_pairs?: number;
+    }) => {
       const { data, error } = await supabase.functions.invoke('kg-evidence-gap-fill', { body: input });
       if (error) throw error;
       return data as GapFillResult;
