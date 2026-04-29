@@ -16,4 +16,6 @@ A aba admin "Organograma do Projeto" (/administrador?tab=organograma) consome do
 
 Se houver mudança de strings de UI: incrementar `I18N_VERSION` em `src/i18n.ts` e espelhar chaves PT/EN.
 
+**Metadata estendido do CHANGELOG**: o comentário `<!--  -->` aceita `area`, `status`, `i18n` e `commit`. Ex: `<!-- area: admin · status: entregue · i18n: 1.40.0 · commit: a1b2c3d -->`. O `commit` faz a entrada renderizar um chip clicável no mini-timeline quando `REPO_CONFIG.baseUrl` está preenchido em `src/data/repoConfig.ts` (vazio por default — chips ficam estáticos).
+
 Ver também: `mem://workflow/changelog-driven-context` para o protocolo de leitura antes de iniciar tarefas.
