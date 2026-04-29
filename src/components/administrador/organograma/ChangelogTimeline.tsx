@@ -99,6 +99,14 @@ export const ChangelogTimeline: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground rounded-md border border-dashed bg-muted/30 px-3 py-2">
+        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+        <span>
+          Auto-sincronizado a partir de <code className="font-mono">CHANGELOG.md</code>
+          {lastChangelogDate ? <> · última entrada em <strong>{lastChangelogDate}</strong></> : null}
+          . Para adicionar mudanças: edite o CHANGELOG e rode <code className="font-mono">npm run sync:changelog</code>.
+        </span>
+      </div>
       <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
