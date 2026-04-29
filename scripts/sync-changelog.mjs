@@ -225,4 +225,12 @@ function main() {
   console.log(`[sync-changelog] OK — ${entries.length} entries · last: ${entries[0].date} · area: ${entries[0].area}`);
 }
 
-main();
+const isCli = (() => {
+  try {
+    return fileURLToPath(import.meta.url) === fs.realpathSync(process.argv[1] || "");
+  } catch {
+    return false;
+  }
+})();
+
+if (isCli) main();
