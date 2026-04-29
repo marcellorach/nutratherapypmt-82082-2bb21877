@@ -7033,7 +7033,25 @@
       "coverageHint": "conditions with specific evidence for the proposed stack",
       "legendTitle": "Legend",
       "kpiGain": "Gain with protocol",
-      "kpiGainHint": "based on KG coverage"
+      "kpiGainHint": "based on KG coverage",
+      "viewMissingTriplets": "View missing triplets"
+    },
+    "missingTriplets": {
+      "title": "Missing triplets in the Knowledge Graph",
+      "subtitle": "(condition × compound) pairs without curated KG evidence for {{pet}}. Approving/extracting these triplets is what will allow the protocol to generate measurable life-years gain.",
+      "statConditions": "Pet conditions",
+      "statCompounds": "Compounds in stack",
+      "statMissingPairs": "Missing pairs",
+      "statOrphans": "Conditions with no link",
+      "fullyCovered": "All stack compounds already have valid KG evidence (efficacy ≥ 3/5).",
+      "orphan": "This condition has NO curated triplet in the KG. No compound in the protocol can act on it.",
+      "partial": "{{covered}}/{{total}} compounds have evidence. The rest need new triplets or studies to raise efficacy.",
+      "missingHere": "Missing triplets for this condition",
+      "originActive": "Active diagnosis",
+      "originPredisp": "Breed predisposition",
+      "legendReason": "Red = no evidence at all · Amber = weak evidence (<3/5)",
+      "openTripletBank": "Open triplet bank",
+      "empty": "No condition/predisposition found for this pet."
     },
     "anatomy": {
       "regions": {

@@ -14,6 +14,8 @@ import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePe
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { mapConditionToRegions, type AnatomyRegionId } from '@/services/anatomy-region-map';
 import DogAnatomySVG, { type RegionState, type Severity } from './DogAnatomySVG';
+import { useAuth } from '@/contexts/AuthContext';
+import MissingTripletsDialog from './MissingTripletsDialog';
 
 interface BiologicalTimelineProps {
   conditions: Array<{
@@ -157,6 +159,9 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
 
   const [yearsAhead, setYearsAhead] = useState(0);
   const [showDebug, setShowDebug] = useState(false);
+  const [showMissing, setShowMissing] = useState(false);
+  const { userRoles } = useAuth();
+  const isAdmin = (userRoles || []).includes('admin');
 
   const recommendedCompoundNames = useMemo(() => {
     if (!snapshot || snapshot.status !== 'complete') return null;
@@ -361,9 +366,22 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
         {noKgBenefit && (
           <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/10 p-3 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800 dark:text-amber-300">
-              {t('petProfile.biologicalTimeline.noBenefitBanner', 'Para este pet, o protocolo geroprotetor NÃO altera a trajetória: nenhuma das condições/predisposições tem evidência KG suficiente no estado atual da base.')}
-            </p>
+            <div className="flex-1 flex items-start justify-between gap-3">
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                {t('petProfile.biologicalTimeline.noBenefitBanner', 'Para este pet, o protocolo geroprotetor NÃO altera a trajetória: nenhuma das condições/predisposições tem evidência KG suficiente no estado atual da base.')}
+              </p>
+              {isAdmin && petId && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-[11px] flex-shrink-0 border-amber-400 text-amber-800 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                  onClick={() => setShowMissing(true)}
+                >
+                  <ShieldCheck className="h-3 w-3 mr-1" />
+                  {t('petProfile.biologicalTimeline.viewMissingTriplets', 'Ver triplets faltantes')}
+                </Button>
+              )}
+            </div>
           </div>
         )}
 
@@ -504,6 +522,20 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
 
         {/* Debug */}
         <div className="border-t pt-2">
+          {isAdmin && petId && !noKgBenefit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full h-8 text-[11px] mb-2 border-dashed"
+              onClick={() => setShowMissing(true)}
+            >
+              <ShieldCheck className="h-3 w-3 mr-1.5" />
+              {t('petProfile.biologicalTimeline.viewMissingTriplets', 'Ver triplets faltantes')}
+              <Badge variant="outline" className="ml-2 text-[9px] h-4 px-1 bg-amber-50 dark:bg-amber-950/30 border-amber-300 text-amber-700">
+                <Lock className="h-2.5 w-2.5 mr-0.5" />Admin
+              </Badge>
+            </Button>
+          )}
           <Button variant="ghost" size="sm" className="text-[10px] h-6 w-full justify-between" onClick={() => setShowDebug(s => !s)}>
             <span className="flex items-center gap-1"><FlaskConical className="h-3 w-3" />{showDebug ? t('petProfile.biologicalTimeline.hideDebug') : t('petProfile.biologicalTimeline.showDebug')}</span>
             {showDebug ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -519,6 +551,16 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
           )}
         </div>
       </CardContent>
+
+      {isAdmin && petId && (
+        <MissingTripletsDialog
+          open={showMissing}
+          onOpenChange={setShowMissing}
+          petId={petId}
+          petName={petName}
+          recommendedCompounds={recommendedCompoundNames || []}
+        />
+      )}
     </Card>
   );
 };
