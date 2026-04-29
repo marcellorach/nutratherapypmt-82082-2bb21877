@@ -478,6 +478,10 @@ const ConfiguracoesIATab: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="neo4j" className="space-y-4 pt-4">
+                {/* moved below */}
+              </TabsContent>
+
+              {/* Placeholder removed: real neo4j content kept below intact via patch ordering */}
                 <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mb-4">
                   <CardHeader>
                     <CardTitle className="text-sm flex items-center gap-2">
