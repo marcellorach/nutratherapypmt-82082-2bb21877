@@ -102,7 +102,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
             {(lastResult.details || []).slice(0, 6).map((d: any, i: number) => (
               <div key={i} className="flex items-start gap-2 text-[11px] border-t pt-1">
                 <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0">
-                  {t(`evidenceGap.detailStatus.${d.status}`, d.status)}
+                  {t(`evidenceGap.detailStatus.${d.status}`, { defaultValue: d.status })}
                 </Badge>
                 <span className="text-muted-foreground leading-snug">
                   {d.pair?.compound_en} → {d.pair?.condition_en}
