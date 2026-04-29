@@ -532,27 +532,79 @@ Deno.serve(async (req) => {
 
     for (const pair of pairs) {
       try {
-        const { pmids, speciesHint } = await pubmedSearch(pair.compound_en, pair.condition_en);
-        await sleep(NCBI_API_KEY ? 110 : 360);
-        if (!pmids.length) {
-          details.push({ pair, status: 'no_pubmed_results' });
-          continue;
-        }
-        const records = await pubmedFetch(pmids);
-        await sleep(NCBI_API_KEY ? 110 : 360);
-        if (!records.length) {
-          details.push({ pair, status: 'no_records' });
-          continue;
+        // ---- Pass 1: Perplexity (semantic + grounded) ----
+        let provider: 'perplexity' | 'pubmed' = 'perplexity';
+        let speciesHint: 'canine' | 'unspecified' = 'unspecified';
+        let citedPmids: string[] = [];
+        let citedUrls: string[] = [];
+        let assessmentEfficacy = 0;
+        let assessmentEvidenceLevel: GeminiAssessment['evidence_level'] = 'unclear';
+        let assessmentRationale = '';
+        let assessmentLlmConf = 0;
+        let records: PubmedRecord[] = [];
+
+        const px = await assessWithPerplexity(pair.compound_en, pair.condition_en);
+        await sleep(400); // be polite to Perplexity
+
+        if (px.assessment && px.assessment.efficacy_0_5 > 0) {
+          // Validate PMIDs against PubMed before persisting (anti-hallucination).
+          const validPmids = await validatePmids(px.assessment.cited_pmids.slice(0, 10));
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          assessmentEfficacy = px.assessment.efficacy_0_5;
+          assessmentEvidenceLevel = px.assessment.evidence_level;
+          assessmentRationale = px.assessment.rationale;
+          assessmentLlmConf = px.assessment.llm_confidence;
+          citedPmids = validPmids;
+          citedUrls = (px.assessment.cited_urls || []).concat(px.raw_citations).slice(0, 8);
+          speciesHint = px.assessment.species_context === 'canine' ? 'canine' : 'unspecified';
+          if (validPmids.length > 0) {
+            records = await pubmedFetch(validPmids);
+            await sleep(NCBI_API_KEY ? 110 : 360);
+          }
+          provider = 'perplexity';
+        } else {
+          // ---- Pass 2: PubMed fallback ----
+          provider = 'pubmed';
+          const { pmids, speciesHint: sh } = await pubmedSearch(pair.compound_en, pair.condition_en);
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          speciesHint = sh;
+          if (!pmids.length) {
+            details.push({ pair, status: 'no_evidence', provider, perplexity_tried: !!PERPLEXITY_API_KEY });
+            continue;
+          }
+          records = await pubmedFetch(pmids);
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          if (!records.length) {
+            details.push({ pair, status: 'no_records', provider });
+            continue;
+          }
+          const assessment = await assessWithGemini(pair.compound_en, pair.condition_en, records);
+          if (!assessment) {
+            details.push({ pair, status: 'assessment_failed', provider, pmids: records.length });
+            continue;
+          }
+          assessmentEfficacy = assessment.efficacy_0_5;
+          assessmentEvidenceLevel = assessment.evidence_level;
+          assessmentRationale = assessment.rationale;
+          assessmentLlmConf = assessment.llm_confidence;
+          citedPmids = assessment.cited_pmids;
         }
 
-        const assessment = await assessWithGemini(pair.compound_en, pair.condition_en, records);
-        if (!assessment) {
-          details.push({ pair, status: 'assessment_failed', pmids: records.length });
-          continue;
-        }
+        // Synthesize a single object so the persistence block stays unchanged.
+        const assessment: GeminiAssessment = {
+          efficacy_0_5: assessmentEfficacy,
+          evidence_level: assessmentEvidenceLevel,
+          rationale: assessmentRationale,
+          cited_pmids: citedPmids,
+          llm_confidence: assessmentLlmConf,
+        };
 
         if (dry_run) {
-          details.push({ pair, status: 'dry_run', assessment, pmids: records.map(r => r.pmid), species_hint: speciesHint });
+          details.push({
+            pair, status: 'dry_run', provider, assessment,
+            pmids: records.map(r => r.pmid), species_hint: speciesHint,
+            cited_urls: citedUrls,
+          });
           continue;
         }
 
@@ -579,7 +631,7 @@ Deno.serve(async (req) => {
               authors: r.authors,
               pmid: r.pmid,
               external_id: `pmid:${r.pmid}`,
-              source_api: 'pubmed_gap_fill',
+              source_api: provider === 'perplexity' ? 'perplexity_gap_fill' : 'pubmed_gap_fill',
               link: `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/`,
               is_simulated: false,
             }).select('id').single();
@@ -616,7 +668,12 @@ Deno.serve(async (req) => {
           curation_status: 'pending', // gap-fill is ALWAYS reviewed
           auto_approved: false,
           hallucination_flag: false,
-          approval_chain: { source: 'pubmed_gap_fill', cited_pmids: assessment.cited_pmids, species_hint: speciesHint },
+          approval_chain: {
+            source: provider === 'perplexity' ? 'perplexity_gap_fill' : 'pubmed_gap_fill',
+            cited_pmids: assessment.cited_pmids,
+            cited_urls: citedUrls,
+            species_hint: speciesHint,
+          },
         });
         if (tErr) {
           console.error('triplet insert error', tErr);
@@ -625,12 +682,13 @@ Deno.serve(async (req) => {
         }
         tripletsPending++;
         details.push({
-          pair, status: 'ok',
+          pair, status: 'ok', provider,
           efficacy_0_5: assessment.efficacy_0_5,
           evidence_level: assessment.evidence_level,
           species_hint: speciesHint,
           studies: studyIds.length,
           cited_pmids: assessment.cited_pmids,
+          cited_urls: citedUrls,
         });
       } catch (e) {
         console.error('pair error', pair, e);
