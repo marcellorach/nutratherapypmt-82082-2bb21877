@@ -5,9 +5,36 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+> **Formato estruturado (parseável)** — adicione novas entradas no topo de `[Unreleased]` assim:
+>
+> ```
+> ### Added - YYYY-MM-DD — Título curto
+> <!-- area: admin · status: entregue · i18n: 1.39.0 -->
+> - bullet 1
+> - bullet 2
+> - Files: src/foo.tsx, supabase/functions/bar/index.ts
+> ```
+>
+> Áreas válidas: `auth`, `curation`, `kg`, `base-knowledge`, `clinical-pipeline`, `vet-ui`, `tutor-ui`, `admin`, `i18n`, `infra`, `meta`.
+> Status: `entregue` (default), `parcial`, `revertido`.
+> Após editar este arquivo, rode `npm run sync:changelog` para regenerar o organograma + briefing.
+
 ---
 
 ## [Unreleased]
+
+### Added - 2026-04-29 — Sincronização automática do CHANGELOG → Organograma + briefing do agente
+<!-- area: admin · status: entregue · i18n: 1.39.0 -->
+- Novo `scripts/sync-changelog.mjs`: parser determinístico que lê CHANGELOG.md e regenera `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + atualiza `organogramaLastUpdated`
+- `src/data/projectChangelog.ts` virou shim re-exportando o gerado — fim da dupla manutenção
+- Inferência automática de `area` a partir dos arquivos citados (mapa explícito em AREA_RULES); override opcional via comentário `<!-- area: ... -->`
+- `.lovable/CONTEXT.md` autogerado com top 10 entradas + contagem por área nas últimas 2 semanas + última versão i18n — agente lê isso no início de cada tarefa
+- Novo `src/data/changelogQuery.ts` com helpers `recentChangesByArea`, `findChangesTouching`, `lastI18nVersion`
+- Bloco "Recentes nesta área" em `OrganogramaCards` mostra últimas 3 mudanças por área
+- Banner "auto-sincronizado" em `ChangelogTimeline`
+- Memory rule nova `mem://workflow/changelog-driven-context` (Core): consultar `.lovable/CONTEXT.md` antes de iniciar tarefas e rodar `npm run sync:changelog` ao final
+- i18n v1.39.0
+- Files: scripts/sync-changelog.mjs, src/data/projectChangelog.ts, src/data/changelogQuery.ts, src/components/administrador/organograma/OrganogramaCards.tsx, src/components/administrador/organograma/ChangelogTimeline.tsx, package.json
 
 ### Added - 2026-04-29 🗺️ Organograma do Projeto (admin) — 4 lentes + changelog visual (i18n v1.38.0)
 - ✅ **Nova tab `Organograma do Projeto`** em `/administrador?tab=organograma` (grupo Configurações), inspirada na `/admin/organograma` do Sleep Graph RAG
