@@ -1,122 +1,108 @@
-## Objetivo
+## Diagnóstico
 
-Em cada card de área do **Organograma** (`/administrador?tab=organograma` → lente Cards), exibir um mini-timeline visual com as últimas entradas do `CHANGELOG.md` daquela área, mostrando arquivos tocados como links clicáveis e — quando disponível — o commit que originou a mudança.
+Você tem **dois componentes anatômicos** no perfil do pet, e eles fazem coisas muito diferentes:
 
-Hoje já existe um bloco "Recentes nesta área" em `OrganogramaCards.tsx`, mas ele é apenas uma lista de 3 linhas em texto. Vamos transformá-lo em um timeline real, navegável e com proveniência.
+| Componente | Onde aparece | O que mostra hoje |
+|---|---|---|
+| `BiologicalTimeline.tsx` (com `DogAnatomySVG`) | Coluna direita do perfil (o print que você enviou) | Comparação **sem vs. com protocolo**, com slider temporal "Projetar até", regiões coloridas por severidade, ★ protegido, KPI de anos ganhos. **Já tem comparação ano a ano.** |
+| `DigitalTwinDog.tsx` | Aba nova "Digital Twin" (que acabamos de criar) | Apenas uma silhueta com **pontinhos pulsantes** das condições atuais. **Não tem eixo temporal, não tem cenário "com protocolo", não consome a projeção da IA.** É estático. |
 
-## O que muda na experiência
+Ou seja: a sua percepção está correta. O `DigitalTwinDog` hoje é só uma "vista decorativa" do estado atual — ele recebe `conditions`, `petName`, `petBreed`, `petAge` e nada mais. **Não está plugado** no `usePetTrajectoryProjection`, no snapshot da análise VetGraphRAG, nem no `recommendation_compounds`. Por isso não muda nada ao longo dos anos nem entre os cenários.
 
-- Cada card de área ganha um **mini-timeline vertical** (linha + bolinhas coloridas por tipo: Added=verde, Changed=âmbar, Fixed=azul, Removed=vermelho, Security=roxo).
-- Mostra por padrão as **3 entradas mais recentes** da área (últimos 90 dias). Botão "Ver mais" expande para até 8.
-- Cada entrada exibe: data, badge de tipo, badge de status (parcial/revertido se aplicável), título e — ao expandir — bullets resumidos (até 3) + chips de arquivos.
-- **Chips de arquivos** são links clicáveis que abrem o arquivo no repositório (configurável). Quando não há URL de repo configurada, ficam como chips estáticos com tooltip do path completo (comportamento atual preservado).
-- **Link de commit** (ícone `GitCommit`) aparece quando a entrada do CHANGELOG declara `<!-- commit: <hash> -->`. Sem hash, o ícone não aparece (sem ruído).
-- Seletor de tipo (chips toggle: Added/Changed/Fixed/...) no topo do timeline para filtrar só dentro daquele card.
+E sim, **temos os dados** para fazer essa inferência. O hook `usePetTrajectoryProjection` (edge function `project-pet-trajectory`, Gemini 2.5 Pro grounded no KG) já retorna, para cada ano de 0 até `max_years_ahead = 8`:
+- `years_with_protocol[]` e `years_without_protocol[]` (cenários separados)
+- por ano: `biological_age`, `expected_remaining_years`, `existing_conditions[]` com `projected_severity_score/label`, `new_conditions[]` com `probability`
+- `coverage_by_condition` (quais condições estão "protegidas" pelo stack — vira o ★)
+- `citations` (KG, raça, Gompertz)
 
-## Arquitetura técnica
+O `BiologicalTimeline` já consome tudo isso. O `DigitalTwinDog` simplesmente ignora.
 
-### 1. Configuração de repositório (novo)
+## O que vou fazer
 
-Novo arquivo `src/data/repoConfig.ts`:
-- Exporta `REPO_CONFIG = { baseUrl?: string, branch: string }` — `baseUrl` opcional (ex: `https://github.com/<owner>/<repo>`), `branch` default `"main"`.
-- Helpers: `fileUrl(path)` → `${baseUrl}/blob/${branch}/${path}` ou `null`; `commitUrl(hash)` → `${baseUrl}/commit/${hash}` ou `null`.
-- Documenta no header: deixe `baseUrl` vazio se não quiser links externos. (Lovable gerencia o git internamente, então o usuário pode preencher quando conectar GitHub via Connectors.)
+Refatorar o `DigitalTwinDog` para virar um **gêmeo digital temporal e comparativo de verdade**, reutilizando exatamente a mesma fonte de dados do `BiologicalTimeline` (sem duplicar lógica de IA — chamamos o mesmo hook, que é cacheado).
 
-### 2. Suporte a `commit` no parser do changelog
-
-`scripts/sync-changelog.mjs`:
-- `parseMetaComment` já captura pares `chave: valor` separados por `·`. Adicionar `commit` ao tipo emitido.
-- `pushCur()` passa `commit: cur.meta.commit` para a entrada.
-- `emitTs` continua serializando via `JSON.stringify(entries)` — automaticamente inclui o campo novo.
-
-`src/data/projectChangelog.generated.ts` (gerado): adicionar `commit?: string` na interface `ChangelogEntry`. Nada quebra para entradas antigas (campo opcional).
-
-`CHANGELOG.md`: atualizar o bloco de instruções no topo com exemplo:
-```
-<!-- area: admin · status: entregue · i18n: 1.40.0 · commit: a1b2c3d -->
-```
-
-### 3. Helper de query
-
-`src/data/changelogQuery.ts`:
-- Nova função `changesByAreaFiltered(area, { sinceDays?, limit?, kinds? })` aceitando filtro por tipo.
-- Mantém `recentChangesByArea` como wrapper (compat).
-
-### 4. Componente novo: `AreaMiniTimeline.tsx`
-
-`src/components/administrador/organograma/AreaMiniTimeline.tsx`:
-- Props: `areaKey: OrganogramaAreaKey`.
-- Estado local: `expanded` (mostra 3 vs 8), `kindFilter` (Set<ChangelogKind>), `openIds` (entradas expandidas com bullets).
-- Layout:
+### Novo layout do `DigitalTwinDog`
 
 ```text
-History  Recentes nesta área           [Added][Changed][Fixed]
-│
-●  2026-04-29  ADDED   Sincronização CHANGELOG → Organograma
-│   ⌄ (clica para expandir bullets + arquivos + commit)
-│       • bullet 1
-│       • bullet 2
-│       [scripts/sync-changelog.mjs] [src/data/...]   ⧉ a1b2c3d
-●  2026-04-28  CHANGED Pipeline Clínico com Progresso Real
-│
-●  2026-04-28  ADDED   Painel Admin de Curadoria de Doses
-                                                [Ver mais 5 →]
+┌──────────────────────────────────────────────────────────────┐
+│ Gêmeo Digital — Pituca · Golden Retriever · 9a               │
+│ [Aos 11 anos]                              Confiança: alta   │
+├──────────────────────────────────────────────────────────────┤
+│   SEM PROTOCOLO                  COM PROTOCOLO               │
+│   restantes: 4.2a                restantes: 6.0a (+1.8)      │
+│  ┌──────────────┐               ┌──────────────┐             │
+│  │  🐕 silhueta │               │  🐕 silhueta │             │
+│  │   amarelo    │               │   amarelo    │             │
+│  │   laranja    │               │   verde★     │             │
+│  │   vermelho   │               │   laranja    │             │
+│  └──────────────┘               └──────────────┘             │
+│   • Osteoartrite (severa)        • Osteoartrite (moderada)★  │
+│   • Disp. Quadril (severa)       • Disp. Quadril (moderada)★ |
+│   • +DCC (62% novo)              • +DCC (28% novo)           │
+├──────────────────────────────────────────────────────────────┤
+│ Idade biológica:  12.4a   →   10.1a   (–2.3a com protocolo)  │
+│ Anos restantes:    4.2a   →    6.0a   (+1.8a com protocolo)  │
+├──────────────────────────────────────────────────────────────┤
+│ Projetar até: [Hoje ●─────────────────────● +8a]             │
+│              9a    11a    13a    15a    17a                  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-- Bolinhas coloridas via `KIND_STYLES` dict (já existe padrão em `predicateStyles` — replicamos pequena versão local: `added`→`bg-emerald-500`, `changed`→`bg-amber-500`, `fixed`→`bg-sky-500`, `removed`→`bg-rose-500`, `security`→`bg-violet-500`).
-- Chips de arquivos: usam `fileUrl(path)`. Se retornar `null`, render como `<Badge>` (atual). Se URL existe, render como `<a target="_blank" rel="noopener noreferrer">` com mesmo estilo + ícone `ExternalLink` minúsculo.
-- Commit chip: render se `entry.commit && commitUrl(entry.commit)` — `<a>` com ícone `GitCommit` + 7 primeiros chars.
-- Botões de filtro de tipo: chips toggle pequenos; quando nenhum selecionado, mostra todos.
+Pontos visuais por região anatômica (mesma `bodyRegionMap` que já existe), com:
+- **cor** = severidade projetada **naquele ano** (`mild` amarelo · `moderate` laranja · `severe` vermelho)
+- **anel tracejado âmbar** = condição emergente (probabilidade ≥ 25%)
+- **★ verde** = condição coberta pelo stack (do `coverage_by_condition`)
+- **tooltip** mostra nome, severidade no ano, probabilidade (se nova), e compostos âncora que protegem
 
-### 5. Integração no Organograma
+### Como cada parte é alimentada (sem mock)
 
-`src/components/administrador/organograma/OrganogramaCards.tsx`:
-- Substituir o componente interno `RecentChanges` pela importação de `AreaMiniTimeline`.
-- Mesma posição (final do `CardContent`, com `border-t border-dashed`).
+| Elemento | Fonte real |
+|---|---|
+| Lista de condições por ano | `years_with_protocol[i].existing_conditions` + `new_conditions` |
+| Severidade por região | `projected_severity_label` (ou derivada de `projected_severity_score`) |
+| Marcação ★ protegido | `coverage_by_condition[].kg_covered` (lookup por nome) |
+| Idade biológica / restantes | `biological_age`, `expected_remaining_years` por ano |
+| Anos ganhos | `years_gained` (já vem da edge function) |
+| Estado bloqueado | `usePetClinicalAnalysisSnapshot` — se `status !== 'complete'`, mostra o mesmo card "Aguardando análise VetGraphRAG" do `BiologicalTimeline` |
 
-### 6. i18n (PT/EN obrigatório)
+### Mudanças concretas
 
-`src/i18n.ts`: bump para `1.40.0`.
+1. **`src/components/pet/DigitalTwinDog.tsx`** — reescrita:
+   - Receber também `petId` (passar da `PetProfilePage`).
+   - Chamar `usePetClinicalAnalysisSnapshot(petId)` e `usePetTrajectoryProjection(petId, recommendedCompounds, hasSnapshot)`.
+   - Adicionar estado local `yearsAhead` (slider 0..8).
+   - Para cada cenário (with/without): pegar `years[safeIndex]`, montar `mappedConditions` com posição (`bodyRegionMap`) + severidade do ano + flag `isNew` + flag `protected`.
+   - Renderizar **duas silhuetas lado a lado** (grid `md:grid-cols-2`) usando o `<img dogSilhouette>` que já existe.
+   - KPIs: idade biológica, anos restantes, delta com protocolo (mesmas regras numéricas do `BiologicalTimeline`).
+   - Slider idêntico ao do `BiologicalTimeline` (`Slider` shadcn, marcas a cada 1/4 do `maxSlider`).
+   - Estados: `locked` (sem snapshot), `loading` (snapshot ok mas projeção carregando), `ready`, `noKgBenefit` (banner âmbar).
 
-Novas chaves em `src/locales/{pt,en}/translation.json` sob `organograma.timeline.*`:
-- `title` ("Recentes nesta área" / "Recent in this area")
-- `showMore` ("Ver mais {{count}}" / "Show {{count}} more")
-- `showLess` ("Ver menos" / "Show less")
-- `noChanges` ("Sem mudanças recentes" / "No recent changes")
-- `filterAll` ("Todos" / "All")
-- `kind.added/changed/fixed/removed/security`
-- `viewFile` ("Abrir arquivo no repositório" / "Open file in repo")
-- `viewCommit` ("Ver commit" / "View commit")
+2. **`src/pages/veterinario/PetProfilePage.tsx`**:
+   - Passar `petId={id}` (e `onRequestAnalysis={handleAnalyzeWithKG}`, `isAnalyzing={analyzing}`) para o `DigitalTwinDog`, mesmo padrão que já se usa para o `BiologicalTimeline`.
 
-### 7. Documentação + memory
+3. **`src/i18n.ts`** — incrementar `I18N_VERSION` (1.41.0 → 1.41.1).
 
-- `CHANGELOG.md`: adicionar entrada `### Added - 2026-04-29 — Mini-timeline por área no Organograma com links de arquivos e commits` com `<!-- area: admin · status: entregue · i18n: 1.40.0 -->`.
-- Rodar `npm run sync:changelog` (regenera `projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + `organogramaLastUpdated`).
-- Atualizar `mem://architecture/organograma-source-of-truth` mencionando que entradas do CHANGELOG suportam `commit:` e que `repoConfig.ts` controla URLs externas.
+4. **`src/locales/pt/translation.json`** e **`en/translation.json`** — novas chaves em `petProfile.digitalTwin.*`:
+   - `compareTitle`, `scenarioWithout`, `scenarioWith`, `withProtocolLabel`
+   - `projectionLabel`, `today`, `yearsFromNow`
+   - `biologicalAge`, `chronologicalAge`, `remainingYears`, `yearsGained`
+   - `lockedTitle`, `lockedBody`, `aiLoading`, `noBenefitBanner`
+   - `legend.future`, `legend.protected`, `legend.severe/moderate/mild`
+   - Reaproveitar onde fizer sentido as chaves existentes em `petProfile.biologicalTimeline.*` (importando os mesmos textos).
 
-## Arquivos
+5. **CHANGELOG.md** — entrada em `[Unreleased] / Changed`:
+   - `<!-- area: clinical · status: feature · i18n: pt+en -->`
+   - "Digital Twin do pet agora exibe comparação temporal sem vs. com protocolo, alimentado pelo `usePetTrajectoryProjection` (mesma fonte do BiologicalTimeline). Inclui slider de projeção 0–8 anos, KPIs de idade biológica/anos ganhos e marcação ★ de condições protegidas pelo stack. Antes mostrava só estado atual, sem variação temporal."
+   - Rodar `npm run sync:changelog`.
 
-**Novos**
-- `src/data/repoConfig.ts`
-- `src/components/administrador/organograma/AreaMiniTimeline.tsx`
+6. **`mem://index.md`** — atualizar a linha do `Patient Knowledge Subgraph`/`Vet Recommendation` *(não obrigatório, só se fizer sentido)*; criar memória curta `mem://features/digital-twin-temporal-comparison` descrevendo a fonte de dados única (hook `usePetTrajectoryProjection`) para evitar futura duplicação de lógica.
 
-**Editados**
-- `scripts/sync-changelog.mjs` (suporte ao campo `commit`)
-- `src/data/changelogQuery.ts` (filtro por kind)
-- `src/components/administrador/organograma/OrganogramaCards.tsx` (usa `AreaMiniTimeline`)
-- `src/i18n.ts` (v1.40.0)
-- `src/locales/pt/translation.json`, `src/locales/en/translation.json`
-- `CHANGELOG.md` (entrada nova + exemplo com `commit:`)
-- `.lovable/memory/architecture/organograma-source-of-truth.md`
+### Decisões já tomadas (sem precisar perguntar)
 
-**Auto-gerados (via `npm run sync:changelog`)**
-- `src/data/projectChangelog.generated.ts`
-- `.lovable/CONTEXT.md`
-- `src/data/projectOrganograma.ts` (campo `organogramaLastUpdated`)
+- **Mesma fonte de dados** que o `BiologicalTimeline` — não criamos pipeline paralelo, não geramos números diferentes do que o painel ao lado mostra. Coerência total.
+- **Não vamos animar a silhueta entre anos** (transições suaves dos pontos sim, animação de "envelhecimento" do desenho não — ficaria caro e fugaria do escopo do KG).
+- **Mantemos a regra `is_demo`/snapshot**: se o pet ainda não tem snapshot VetGraphRAG, o Digital Twin mostra o mesmo card "Aguardando análise" — nada de inventar projeção.
 
-## Notas / decisões
+### Resultado esperado
 
-- **Sem mudanças no Knowledge Graph.** Confirmado: feature é puramente UI + parser.
-- **Não vamos inferir commits automaticamente** do git (Lovable gerencia git internamente e o sandbox não tem `remote.origin.url` confiável). O hash entra **opcionalmente** via metadata do CHANGELOG — quem escreve a entrada cola o hash quando relevante.
-- **Sem `baseUrl` configurado** = experiência atual preservada (chips estáticos), apenas com layout de timeline + filtros + expand. Quando o usuário conectar GitHub via Connectors, basta preencher `REPO_CONFIG.baseUrl` para ativar todos os links.
-- Mantém o componente sob 200 linhas; usa apenas `lucide-react` (`History`, `GitCommit`, `ExternalLink`, `ChevronDown`) e shadcn `Badge`/`Button` já no projeto.
+Quando você abrir a aba "Digital Twin" e arrastar o slider, vai ver as duas silhuetas evoluírem lado a lado: condições atuais ficando mais severas, novas condições aparecendo (com anel tracejado), e do lado direito as mesmas condições aparecendo menos severas/protegidas (★) onde o stack do KG tem cobertura — exatamente o que o `BiologicalTimeline` já demonstra, mas com a estética anatômica do Digital Twin.
