@@ -6953,6 +6953,13 @@
       "title": "Digital Twin",
       "description": "Anatomical condition mapping for {{name}} ({{breed}}, {{age}} years)",
       "silhouetteAlt": "Dog anatomical silhouette with condition markers",
+      "lockedTitle": "Awaiting VetGraphRAG analysis",
+      "lockedBody": "The temporal without-vs-with-protocol comparison is only generated after the VetGraphRAG analysis, so it reflects the stack actually recommended for this pet.",
+      "aiLoading": "Computing digital twin trajectory...",
+      "newRisk": "New",
+      "protected": "protected",
+      "markersLabel": "markers",
+      "protectedLabel": "protected",
       "regions": {
         "joints": "Joints",
         "hip": "Hip",
