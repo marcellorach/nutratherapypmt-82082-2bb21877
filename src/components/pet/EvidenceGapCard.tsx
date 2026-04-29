@@ -108,6 +108,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                   {d.pair?.compound_en} → {d.pair?.condition_en}
                   {d.efficacy_0_5 != null && <> · ef {d.efficacy_0_5}/5</>}
                   {d.species_hint && d.species_hint !== 'canine' && <> · <em>{d.species_hint}</em></>}
+                  {d.provider && <> · <span className="font-medium">{d.provider}</span></>}
                 </span>
               </div>
             ))}

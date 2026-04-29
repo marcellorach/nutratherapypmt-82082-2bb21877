@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, AlertTriangle, ShieldAlert, CheckCircle2, ExternalLink, FlaskConical, Lock } from 'lucide-react';
+import { Loader2, AlertTriangle, ShieldAlert, CheckCircle2, ExternalLink, FlaskConical, Lock, Sparkles } from 'lucide-react';
 import { useKgMissingTriplets } from '@/hooks/useKgMissingTriplets';
+import { useTriggerGapFill, usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -20,6 +22,42 @@ const MissingTripletsDialog: React.FC<Props> = ({ open, onOpenChange, petId, pet
   const { t } = useTranslation();
   const query = useKgMissingTriplets(petId, recommendedCompounds, open);
   const data = query.data;
+  const trigger = useTriggerGapFill();
+  const { refetch: refetchPending } = usePendingGapFillTriplets();
+  const [lastRun, setLastRun] = useState<null | { added: number; pending: number; pairs: number }>(null);
+
+  const handleSearchAll = async () => {
+    if (!data?.missing_pairs?.length) return;
+    const pairs = data.missing_pairs.slice(0, 10).map((p: any) => ({
+      compound_en: p.compound,
+      condition_en: p.condition_display,
+      condition_id: p.condition_id || undefined,
+    }));
+    try {
+      const r = await trigger.mutateAsync({ pet_id: petId, pairs, max_pairs: 10 });
+      setLastRun({ added: r.studies_added, pending: r.triplets_pending, pairs: r.pairs_searched });
+      if (r.triplets_pending > 0) {
+        toast.success(t('petProfile.missingTriplets.gapFillSuccess', {
+          pending: r.triplets_pending,
+          pairs: r.pairs_searched,
+          defaultValue: '{{pending}} triplet(s) pendentes de curadoria gerados a partir de {{pairs}} pares.',
+        }));
+      } else {
+        toast.warning(t('petProfile.missingTriplets.gapFillNoTriplets', {
+          pairs: r.pairs_searched,
+          defaultValue: 'Busca processou {{pairs}} pares mas não gerou triplets utilizáveis.',
+        }));
+      }
+      refetchPending();
+      query.refetch();
+    } catch (e: any) {
+      console.error('[MissingTripletsDialog] gap-fill error', e);
+      toast.error(t('petProfile.missingTriplets.gapFillError', {
+        error: e?.message || String(e),
+        defaultValue: 'Erro: {{error}}',
+      }));
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -189,6 +227,20 @@ const MissingTripletsDialog: React.FC<Props> = ({ open, onOpenChange, petId, pet
                 {t('petProfile.missingTriplets.legendReason', 'Vermelho = sem evidência alguma · Âmbar = evidência fraca (<3/5)')}
               </p>
               <div className="flex gap-2">
+                {data.missing_pairs.length > 0 && (
+                  <Button
+                    onClick={handleSearchAll}
+                    disabled={trigger.isPending}
+                    size="sm"
+                    className="bg-violet-600 hover:bg-violet-700 text-white"
+                  >
+                    {trigger.isPending ? (
+                      <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {t('petProfile.missingTriplets.searching', 'Buscando...')}</>
+                    ) : (
+                      <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> {t('petProfile.missingTriplets.searchAllPerplexity', 'Buscar evidências via Perplexity')}</>
+                    )}
+                  </Button>
+                )}
                 <Button asChild variant="outline" size="sm">
                   <Link to="/administrador?tab=triplet-bank" target="_blank">
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
@@ -200,6 +252,28 @@ const MissingTripletsDialog: React.FC<Props> = ({ open, onOpenChange, petId, pet
                 </Button>
               </div>
             </div>
+
+            {lastRun && (
+              <div className="rounded-md border border-violet-300/50 bg-violet-50/40 dark:bg-violet-950/20 p-3 text-xs">
+                <p className="font-medium flex items-center gap-1.5 text-violet-800 dark:text-violet-300">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {t('petProfile.missingTriplets.gapFillResultTitle', 'Resultado da busca via Perplexity')}
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  {t('petProfile.missingTriplets.gapFillResultBody', {
+                    pairs: lastRun.pairs, studies: lastRun.added, pending: lastRun.pending,
+                    defaultValue: '{{pairs}} pares processados → {{studies}} estudos adicionados → {{pending}} triplets pendentes para curadoria.',
+                  })}
+                </p>
+                <Link
+                  to="/administrador?tab=triplet-curation"
+                  target="_blank"
+                  className="text-violet-700 dark:text-violet-300 underline mt-1 inline-block"
+                >
+                  {t('petProfile.missingTriplets.gapFillOpenCuration', 'Abrir curadoria de triplets')} →
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>

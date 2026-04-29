@@ -23,9 +23,18 @@ const corsHeaders = {
 
 const PUBMED_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 const NCBI_API_KEY = Deno.env.get('NCBI_API_KEY') || '';
-const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY') || '';
+const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY') || '';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+console.log('[gap-fill] boot', {
+  hasLovable: !!LOVABLE_API_KEY,
+  hasPerplexity: !!PERPLEXITY_API_KEY,
+  hasNcbi: !!NCBI_API_KEY,
+  hasUrl: !!SUPABASE_URL,
+  hasServiceRole: !!SERVICE_ROLE,
+});
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -206,6 +215,170 @@ async function assessWithGemini(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Perplexity-first assessment
+// ---------------------------------------------------------------------------
+interface PerplexityAssessment {
+  efficacy_0_5: number;
+  evidence_level: 'meta_analysis' | 'clinical_trial' | 'in_vivo' | 'in_vitro' | 'case_report' | 'review' | 'unclear';
+  rationale: string;
+  cited_pmids: string[];
+  cited_dois: string[];
+  cited_urls: string[];
+  llm_confidence: number;
+  species_context: 'canine' | 'feline' | 'rodent' | 'human' | 'mixed' | 'unspecified';
+}
+
+async function assessWithPerplexity(
+  compound: string,
+  condition: string,
+): Promise<{ assessment: PerplexityAssessment | null; raw_citations: string[] }> {
+  if (!PERPLEXITY_API_KEY) {
+    console.warn('[gap-fill] PERPLEXITY_API_KEY not set, skipping Perplexity pass');
+    return { assessment: null, raw_citations: [] };
+  }
+
+  const schema = {
+    type: 'object',
+    properties: {
+      efficacy_0_5: { type: 'number' },
+      evidence_level: {
+        type: 'string',
+        enum: ['meta_analysis', 'clinical_trial', 'in_vivo', 'in_vitro', 'case_report', 'review', 'unclear'],
+      },
+      rationale: { type: 'string' },
+      cited_pmids: { type: 'array', items: { type: 'string' } },
+      cited_dois: { type: 'array', items: { type: 'string' } },
+      cited_urls: { type: 'array', items: { type: 'string' } },
+      llm_confidence: { type: 'number' },
+      species_context: {
+        type: 'string',
+        enum: ['canine', 'feline', 'rodent', 'human', 'mixed', 'unspecified'],
+      },
+    },
+    required: [
+      'efficacy_0_5', 'evidence_level', 'rationale',
+      'cited_pmids', 'cited_dois', 'cited_urls',
+      'llm_confidence', 'species_context',
+    ],
+  };
+
+  const body = {
+    model: 'sonar-reasoning-pro',
+    search_mode: 'academic',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+          'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
+          'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
+          'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+          'Be conservative. Return ONLY structured JSON matching the schema.',
+      },
+      {
+        role: 'user',
+        content:
+          `COMPOUND: ${compound}\nCONDITION: ${condition} (canine target)\n\n` +
+          'Scoring scale (efficacy_0_5):\n' +
+          ' 0 = no evidence at all\n' +
+          ' 1 = anecdotal / case report only\n' +
+          ' 2 = in vitro / cell culture only\n' +
+          ' 3 = in vivo dog OR strong rodent model\n' +
+          ' 4 = controlled clinical trial in dogs\n' +
+          ' 5 = meta-analysis / multiple RCTs in dogs\n\n' +
+          'cited_pmids: PubMed IDs you actually relied on (digits only).\n' +
+          'cited_dois: DOIs you actually relied on.\n' +
+          'cited_urls: full URLs of the citations Perplexity returned.\n' +
+          'llm_confidence: 0..1 — how confident you are in your own assessment.\n' +
+          'species_context: which species the BEST evidence comes from.',
+      },
+    ],
+    temperature: 0.1,
+    response_format: {
+      type: 'json_schema',
+      json_schema: { name: 'evidence_assessment', schema },
+    },
+  };
+
+  let res: Response;
+  try {
+    res = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    console.error('[gap-fill] Perplexity fetch threw', e);
+    return { assessment: null, raw_citations: [] };
+  }
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    console.error('[gap-fill] Perplexity HTTP', res.status, txt.slice(0, 500));
+    return { assessment: null, raw_citations: [] };
+  }
+
+  const json = await res.json();
+  const content: string = json?.choices?.[0]?.message?.content || '';
+  const rawCitations: string[] = Array.isArray(json?.citations) ? json.citations : [];
+
+  // sonar-reasoning models often emit <think>...</think> before the JSON.
+  const cleaned = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}$/) || cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error('[gap-fill] Perplexity returned no JSON', cleaned.slice(0, 300));
+    return { assessment: null, raw_citations: rawCitations };
+  }
+  let parsed: PerplexityAssessment;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    console.error('[gap-fill] Perplexity JSON parse failed', e, jsonMatch[0].slice(0, 300));
+    return { assessment: null, raw_citations: rawCitations };
+  }
+
+  // Sanitize PMIDs (digits only).
+  parsed.cited_pmids = (parsed.cited_pmids || [])
+    .map((p) => String(p).match(/\d{4,9}/)?.[0] || '')
+    .filter(Boolean);
+  parsed.cited_dois = (parsed.cited_dois || []).filter((d) => typeof d === 'string' && d.includes('/'));
+  parsed.cited_urls = (parsed.cited_urls || []).filter((u) => typeof u === 'string' && u.startsWith('http'));
+  parsed.efficacy_0_5 = Math.max(0, Math.min(5, Number(parsed.efficacy_0_5) || 0));
+  parsed.llm_confidence = Math.max(0, Math.min(1, Number(parsed.llm_confidence) || 0));
+
+  return { assessment: parsed, raw_citations: rawCitations };
+}
+
+/**
+ * Validate PMIDs returned by Perplexity by hitting NCBI esummary.
+ * Returns the subset of PMIDs that actually exist in PubMed.
+ */
+async function validatePmids(pmids: string[]): Promise<string[]> {
+  if (!pmids.length) return [];
+  const url = withApiKey(
+    `${PUBMED_BASE}/esummary.fcgi?db=pubmed&id=${pmids.join(',')}&retmode=json`,
+  );
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const json = await res.json();
+    const result = json?.result;
+    if (!result) return [];
+    const valid: string[] = [];
+    for (const pmid of pmids) {
+      if (result[pmid] && !result[pmid].error) valid.push(pmid);
+    }
+    return valid;
+  } catch (e) {
+    console.warn('[gap-fill] validatePmids failed', e);
+    return [];
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -242,15 +415,35 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { pet_id, condition_id, compound_ids, max_pairs = 12, dry_run = false } = body;
-    console.log('[gap-fill] body', { pet_id, condition_id, compound_ids_count: compound_ids?.length, max_pairs, dry_run });
+    const { pet_id, condition_id, compound_ids, pairs: directedPairs, max_pairs = 12, dry_run = false } = body;
+    console.log('[gap-fill] body', {
+      pet_id, condition_id,
+      compound_ids_count: compound_ids?.length,
+      directed_pairs_count: Array.isArray(directedPairs) ? directedPairs.length : 0,
+      max_pairs, dry_run,
+    });
 
     // ---------- Build the (compound × condition) pair list ----------
     type Pair = { compound_id?: string; compound_en: string; condition_id?: string; condition_en: string };
     const pairs: Pair[] = [];
     const discoveryNotes: string[] = [];
 
-    if (pet_id) {
+    // Direct pair list (from MissingTripletsDialog "Buscar evidências para todos") wins.
+    if (Array.isArray(directedPairs) && directedPairs.length > 0) {
+      for (const p of directedPairs) {
+        if (pairs.length >= max_pairs) break;
+        const compoundEn = String(p?.compound_en || p?.compound || '').trim();
+        const conditionEn = String(p?.condition_en || p?.condition || '').trim();
+        if (!compoundEn || !conditionEn) continue;
+        pairs.push({
+          compound_id: p?.compound_id,
+          compound_en: compoundEn,
+          condition_id: p?.condition_id,
+          condition_en: conditionEn,
+        });
+      }
+      console.log('[gap-fill] using directed pair list', pairs.length);
+    } else if (pet_id) {
       const { data: pet } = await supabase
         .from('pet_conditions')
         .select('condition_id, health_conditions(id, name, name_en)')
@@ -359,27 +552,79 @@ Deno.serve(async (req) => {
 
     for (const pair of pairs) {
       try {
-        const { pmids, speciesHint } = await pubmedSearch(pair.compound_en, pair.condition_en);
-        await sleep(NCBI_API_KEY ? 110 : 360);
-        if (!pmids.length) {
-          details.push({ pair, status: 'no_pubmed_results' });
-          continue;
-        }
-        const records = await pubmedFetch(pmids);
-        await sleep(NCBI_API_KEY ? 110 : 360);
-        if (!records.length) {
-          details.push({ pair, status: 'no_records' });
-          continue;
+        // ---- Pass 1: Perplexity (semantic + grounded) ----
+        let provider: 'perplexity' | 'pubmed' = 'perplexity';
+        let speciesHint: 'canine' | 'unspecified' = 'unspecified';
+        let citedPmids: string[] = [];
+        let citedUrls: string[] = [];
+        let assessmentEfficacy = 0;
+        let assessmentEvidenceLevel: GeminiAssessment['evidence_level'] = 'unclear';
+        let assessmentRationale = '';
+        let assessmentLlmConf = 0;
+        let records: PubmedRecord[] = [];
+
+        const px = await assessWithPerplexity(pair.compound_en, pair.condition_en);
+        await sleep(400); // be polite to Perplexity
+
+        if (px.assessment && px.assessment.efficacy_0_5 > 0) {
+          // Validate PMIDs against PubMed before persisting (anti-hallucination).
+          const validPmids = await validatePmids(px.assessment.cited_pmids.slice(0, 10));
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          assessmentEfficacy = px.assessment.efficacy_0_5;
+          assessmentEvidenceLevel = px.assessment.evidence_level;
+          assessmentRationale = px.assessment.rationale;
+          assessmentLlmConf = px.assessment.llm_confidence;
+          citedPmids = validPmids;
+          citedUrls = (px.assessment.cited_urls || []).concat(px.raw_citations).slice(0, 8);
+          speciesHint = px.assessment.species_context === 'canine' ? 'canine' : 'unspecified';
+          if (validPmids.length > 0) {
+            records = await pubmedFetch(validPmids);
+            await sleep(NCBI_API_KEY ? 110 : 360);
+          }
+          provider = 'perplexity';
+        } else {
+          // ---- Pass 2: PubMed fallback ----
+          provider = 'pubmed';
+          const { pmids, speciesHint: sh } = await pubmedSearch(pair.compound_en, pair.condition_en);
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          speciesHint = sh;
+          if (!pmids.length) {
+            details.push({ pair, status: 'no_evidence', provider, perplexity_tried: !!PERPLEXITY_API_KEY });
+            continue;
+          }
+          records = await pubmedFetch(pmids);
+          await sleep(NCBI_API_KEY ? 110 : 360);
+          if (!records.length) {
+            details.push({ pair, status: 'no_records', provider });
+            continue;
+          }
+          const assessment = await assessWithGemini(pair.compound_en, pair.condition_en, records);
+          if (!assessment) {
+            details.push({ pair, status: 'assessment_failed', provider, pmids: records.length });
+            continue;
+          }
+          assessmentEfficacy = assessment.efficacy_0_5;
+          assessmentEvidenceLevel = assessment.evidence_level;
+          assessmentRationale = assessment.rationale;
+          assessmentLlmConf = assessment.llm_confidence;
+          citedPmids = assessment.cited_pmids;
         }
 
-        const assessment = await assessWithGemini(pair.compound_en, pair.condition_en, records);
-        if (!assessment) {
-          details.push({ pair, status: 'assessment_failed', pmids: records.length });
-          continue;
-        }
+        // Synthesize a single object so the persistence block stays unchanged.
+        const assessment: GeminiAssessment = {
+          efficacy_0_5: assessmentEfficacy,
+          evidence_level: assessmentEvidenceLevel,
+          rationale: assessmentRationale,
+          cited_pmids: citedPmids,
+          llm_confidence: assessmentLlmConf,
+        };
 
         if (dry_run) {
-          details.push({ pair, status: 'dry_run', assessment, pmids: records.map(r => r.pmid), species_hint: speciesHint });
+          details.push({
+            pair, status: 'dry_run', provider, assessment,
+            pmids: records.map(r => r.pmid), species_hint: speciesHint,
+            cited_urls: citedUrls,
+          });
           continue;
         }
 
@@ -406,7 +651,7 @@ Deno.serve(async (req) => {
               authors: r.authors,
               pmid: r.pmid,
               external_id: `pmid:${r.pmid}`,
-              source_api: 'pubmed_gap_fill',
+              source_api: provider === 'perplexity' ? 'perplexity_gap_fill' : 'pubmed_gap_fill',
               link: `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/`,
               is_simulated: false,
             }).select('id').single();
@@ -443,7 +688,12 @@ Deno.serve(async (req) => {
           curation_status: 'pending', // gap-fill is ALWAYS reviewed
           auto_approved: false,
           hallucination_flag: false,
-          approval_chain: { source: 'pubmed_gap_fill', cited_pmids: assessment.cited_pmids, species_hint: speciesHint },
+          approval_chain: {
+            source: provider === 'perplexity' ? 'perplexity_gap_fill' : 'pubmed_gap_fill',
+            cited_pmids: assessment.cited_pmids,
+            cited_urls: citedUrls,
+            species_hint: speciesHint,
+          },
         });
         if (tErr) {
           console.error('triplet insert error', tErr);
@@ -452,12 +702,13 @@ Deno.serve(async (req) => {
         }
         tripletsPending++;
         details.push({
-          pair, status: 'ok',
+          pair, status: 'ok', provider,
           efficacy_0_5: assessment.efficacy_0_5,
           evidence_level: assessment.evidence_level,
           species_hint: speciesHint,
           studies: studyIds.length,
           cited_pmids: assessment.cited_pmids,
+          cited_urls: citedUrls,
         });
       } catch (e) {
         console.error('pair error', pair, e);

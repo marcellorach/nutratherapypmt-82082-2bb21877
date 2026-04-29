@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T18:40:01.976Z
+// Última geração: 2026-04-29T19:12:56.664Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,59 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-29";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-29",
+    "kind": "added",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Perplexity-first no Gap-Fill + busca a partir do diálogo de triplets faltantes",
+    "bullets": [
+      "`kg-evidence-gap-fill`: nova estratégia em duas passadas — Perplexity Sonar (academic, json_schema) primeiro, PubMed E-utilities + Gemini como fallback. Perplexity retorna JSON estruturado com `efficacy_0_5`, `evidence_level`, `species_context`, `cited_pmids`, `cited_dois`, `cited_urls`, `llm_confidence`. PMIDs citados pelo Perplexity são validados via NCBI esummary antes de virarem `scientific_studies` (anti-alucinação). `source_api` distingue `perplexity_gap_fill` × `pubmed_gap_fill`; `approval_chain` registra `cited_urls` e provider.",
+      "`kg-evidence-gap-fill`: aceita lista direta `pairs: [{ compound_en, condition_en, condition_id? }]` no body, permitindo o `MissingTripletsDialog` mandar exatamente os pares que ele já calculou em vez de o gap-fill recalcular.",
+      "`kg-missing-triplets` + `kg-evidence-gap-fill`: declarados em `supabase/config.toml` (`verify_jwt = true`) — ambos não estavam no toml e por isso não tinham logs no servidor (causa do `Failed to send a request to the Edge Function` no botão \"Ver triplets faltantes\"). Adicionado log de boot + early-return 500 com mensagem clara se faltar `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`.",
+      "`MissingTripletsDialog`: novo botão violeta \"Buscar evidências via Perplexity\" que envia até 10 pares faltantes para o gap-fill, mostra resultado inline (pairs/studies/pending) e link direto para `/administrador?tab=triplet-curation`.",
+      "`EvidenceGapCard`: detalhes da última busca agora exibem o provider (`perplexity` × `pubmed`) por par.",
+      "Conector Perplexity ligado ao projeto; `PERPLEXITY_API_KEY` disponível em runtime nas edge functions.",
+      "Files: supabase/config.toml, supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/kg-missing-triplets/index.ts, src/components/pet/MissingTripletsDialog.tsx, src/components/pet/EvidenceGapCard.tsx, src/hooks/useKgEvidenceGapFill.ts, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "supabase/functions/kg-missing-triplets/index.ts",
+      "src/components/pet/MissingTripletsDialog.tsx",
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/hooks/useKgEvidenceGapFill.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.41.4"
+  },
+  {
+    "date": "2026-04-29",
+    "kind": "fixed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Gap-Fill robusto + preview de pendentes + lista de condições no Digital Twin",
+    "bullets": [
+      "`kg-evidence-gap-fill`: logging detalhado em todas as etapas (auth, discovery, busca, geração de triplets); shortlist de compounds prioriza o stack recomendado do pet (snapshot `pet_clinical_analysis_snapshots`) antes do fallback geriátrico; busca PubMed em duas passadas (estrita canine → relaxada `unspecified`) com `species_hint` registrado no triplet; CORS/`Cache-Control: no-store` garantidos em todos os retornos.",
+      "`EvidenceGapCard`: toasts diferenciados (sucesso, sem pares, sem triplets, erro) e card inline com breakdown da última busca (pairs/studies/pending + lista por par com status `ok | no_pubmed_results | assessment_failed | error | dry_run` e `species_hint`).",
+      "`project-pet-trajectory`: aceita flag `include_pending_gap_fill` e, quando ativo, inclui triplets `pending` originados de `pubmed_gap_fill` no cálculo de cobertura/years_gained, marcando contribuições como `provisional: true`.",
+      "`usePetTrajectoryProjection`: novo parâmetro `includePending` (entra na queryKey, `staleTime: 0` no modo preview).",
+      "`DigitalTwinDog`: toggle admin-only \"Pré-visualizar com pendentes\" com banner violeta e sub-rótulo `(provisório)` no KPI de anos ganhos; restaurada a `ConditionsMiniList` sob cada silhueta (severidade + nome + \"Novo X%\" + \"★ protegido\"), substituindo a linha \"N marcadores\".",
+      "i18n: novas chaves `petProfile.digitalTwin.previewPendingToggle/previewPendingBanner/provisional` e `evidenceGap.detailsTitle/detailStatus.*/toastNoPairs/toastNoTriplets` em PT/EN. Bump `I18N_VERSION` 1.41.2 → 1.41.3.",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/hooks/usePetTrajectoryProjection.ts, src/hooks/useKgEvidenceGapFill.ts, src/components/pet/DigitalTwinDog.tsx, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "supabase/functions/project-pet-trajectory/index.ts",
+      "src/hooks/usePetTrajectoryProjection.ts",
+      "src/hooks/useKgEvidenceGapFill.ts",
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.41.3"
+  },
   {
     "date": "2026-04-29",
     "kind": "added",
