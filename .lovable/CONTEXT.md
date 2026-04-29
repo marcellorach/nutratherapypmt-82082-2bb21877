@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-04-29T05:57:28.584Z
+Generated: 2026-04-29T05:58:19.623Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -7,14 +7,13 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 
 ## Changes by area (last 14 days)
 - **meta**: 7
-- **...**: 1
-- **admin**: 1
+- **admin**: 2
 
 ## Top 10 recent entries
-### 2026-04-29 · [...] ADDED — Sincronização automática do CHANGELOG → Organograma + briefing do agente
+### 2026-04-29 · [admin] ADDED — Sincronização automática do CHANGELOG → Organograma + briefing do agente
 - Novo `scripts/sync-changelog.mjs`: parser determinístico que lê CHANGELOG.md e regenera `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + atualiza `organogramaLastUpdated`
 - `src/data/projectChangelog.ts` virou shim re-exportando o gerado — fim da dupla manutenção
-- `.lovable/CONTEXT.md` autogerado com top 10 entradas + contagem por área nas últimas 2 semanas + última versão i18n — agente lê isso no início de cada tarefa
+- Inferência automática de `area` a partir dos arquivos citados (mapa explícito em AREA_RULES); override opcional via comentário `<!-- area: ... -->`
 _files: scripts/sync-changelog.mjs, src/data/projectChangelog.generated.ts, .lovable/CONTEXT.md, src/data/projectChangelog.ts…_
 
 ### 2026-04-29 · [admin] ADDED — ️ Organograma do Projeto (admin) — 4 lentes + changelog visual (i18n v1.38.0)

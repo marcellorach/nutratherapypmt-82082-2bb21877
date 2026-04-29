@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T05:57:28.582Z
+// Última geração: 2026-04-29T05:58:19.620Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,12 +24,13 @@ export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-04-29",
     "kind": "added",
-    "area": "...",
+    "area": "admin",
     "status": "entregue",
     "title": "Sincronização automática do CHANGELOG → Organograma + briefing do agente",
     "bullets": [
       "Novo `scripts/sync-changelog.mjs`: parser determinístico que lê CHANGELOG.md e regenera `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + atualiza `organogramaLastUpdated`",
       "`src/data/projectChangelog.ts` virou shim re-exportando o gerado — fim da dupla manutenção",
+      "Inferência automática de `area` a partir dos arquivos citados (mapa explícito em AREA_RULES); override opcional via comentário `<!-- area: ... -->`",
       "`.lovable/CONTEXT.md` autogerado com top 10 entradas + contagem por área nas últimas 2 semanas + última versão i18n — agente lê isso no início de cada tarefa",
       "Novo `src/data/changelogQuery.ts` com helpers `recentChangesByArea`, `findChangesTouching`, `lastI18nVersion`",
       "Bloco \"Recentes nesta área\" em `OrganogramaCards` mostra últimas 3 mudanças por área",
