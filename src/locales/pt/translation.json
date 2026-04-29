@@ -7033,7 +7033,25 @@
       "coverageHint": "condições com evidência específica para o stack proposto",
       "legendTitle": "Legenda",
       "kpiGain": "Ganho com protocolo",
-      "kpiGainHint": "baseado na cobertura KG"
+      "kpiGainHint": "baseado na cobertura KG",
+      "viewMissingTriplets": "Ver triplets faltantes"
+    },
+    "missingTriplets": {
+      "title": "Triplets faltantes no Knowledge Graph",
+      "subtitle": "Pares (condição × composto) sem evidência curada no KG para {{pet}}. Aprovar/extrair esses triplets é o que permitirá ao protocolo gerar ganho mensurável de anos de vida.",
+      "statConditions": "Condições do pet",
+      "statCompounds": "Compostos no stack",
+      "statMissingPairs": "Pares faltantes",
+      "statOrphans": "Condições sem nenhum link",
+      "fullyCovered": "Todos os compostos do stack já têm evidência KG válida (efficacy ≥ 3/5).",
+      "orphan": "Esta condição NÃO tem nenhum triplet curado no KG. Nenhum composto do protocolo pode atuar sobre ela.",
+      "partial": "{{covered}}/{{total}} compostos têm evidência. Os demais precisam de novos triplets ou estudos para subir a eficácia.",
+      "missingHere": "Triplets faltantes para esta condição",
+      "originActive": "Diagnóstico ativo",
+      "originPredisp": "Predisposição racial",
+      "legendReason": "Vermelho = sem evidência alguma · Âmbar = evidência fraca (<3/5)",
+      "openTripletBank": "Abrir banco de triplets",
+      "empty": "Nenhuma condição/predisposição encontrada para este pet."
     },
     "anatomy": {
       "regions": {
