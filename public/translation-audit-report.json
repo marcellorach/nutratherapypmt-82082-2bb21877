@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-29T03:28:19.053Z",
+  "timestamp": "2026-04-29T05:16:40.178Z",
   "summary": {
-    "totalFiles": 793,
-    "totalIssues": 393,
+    "totalFiles": 794,
+    "totalIssues": 392,
     "hardcodedTexts": 39,
     "missingKeys": 353,
-    "incompleteTranslations": 1
+    "incompleteTranslations": 0
   },
   "issues": [
     {
@@ -2477,13 +2477,6 @@
       "file": "src/pages/veterinario/RecommendationsList.tsx",
       "line": 53,
       "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "incomplete-translation",
-      "file": "src/locales/en/translation.json",
-      "line": 0,
-      "text": "Missing EN translation for: petProfile.biologicalTimeline.moreConditions",
       "severity": "high"
     },
     {
