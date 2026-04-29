@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T15:37:49.686Z
+// Última geração: 2026-04-29T18:01:05.530Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,33 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-29";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-29",
+    "kind": "added",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Pipeline KG Evidence Gap-Fill (PubMed → triplets pendentes)",
+    "bullets": [
+      "Nova edge function `kg-evidence-gap-fill`: para cada par (composto canônico × condição do pet) sem evidência forte no KG (`approved` com `extraction_confidence ≥ 0.6`), busca o PubMed via NCBI E-utilities (`esearch` + `efetch`), extrai abstracts e usa Gemini (`google/gemini-3-flash-preview`, tool-calling) para gerar `efficacy_0_5`, `evidence_level`, `rationale` e `cited_pmids`.",
+      "Persiste estudos em `scientific_studies` (`source_api='pubmed_gap_fill'`, dedup por `pmid`) e cria triplets em `triplet_extractions` SEMPRE como `curation_status='pending'` (mesmo com alta confiança — protocolo Curation Gatekeeper). `approval_chain` registra `{source: 'pubmed_gap_fill', cited_pmids}` para rastreabilidade.",
+      "Acesso restrito a admin (validação via `getClaims` + `user_roles`). Rate limit serial: 360ms entre chamadas PubMed (110ms se `NCBI_API_KEY` for configurada).",
+      "Novo componente `EvidenceGapCard` integrado ao `DigitalTwinDog`, visível apenas para admin quando `years_gained < 0.3`. Mostra explicação contextual (sem cobertura vs. cobertura sem eficácia ≥ 3), botão de busca, contador de triplets pendentes do gap-fill e link direto para a curadoria.",
+      "Novo hook `useKgEvidenceGapFill` (`useTriggerGapFill` + `usePendingGapFillTriplets`).",
+      "i18n: namespace `evidenceGap.*` em PT/EN. Bump `I18N_VERSION` 1.41.1 → 1.41.2.",
+      "Decisão arquitetural: PubMed direto (não Perplexity) — citações 100% rastreáveis (PMID/DOI), zero novos secrets, custo zero. Perplexity reservado para missões futuras (vigilância de contraindicações, sumários narrativos, raças raras, descoberta exploratória).",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/hooks/useKgEvidenceGapFill.ts, src/components/pet/EvidenceGapCard.tsx, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "src/hooks/useKgEvidenceGapFill.ts",
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.41.2"
+  },
   {
     "date": "2026-04-29",
     "kind": "changed",
