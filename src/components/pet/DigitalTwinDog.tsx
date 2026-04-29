@@ -3,17 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dna, Sparkles, Activity, Loader2, Lock, BrainCircuit,
-  ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Heart,
+  ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Heart, Eye,
 } from 'lucide-react';
 import dogSilhouette from '@/assets/dog-silhouette.png';
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePetTrajectoryProjection';
 import EvidenceGapCard from '@/components/pet/EvidenceGapCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Map conditions (substring lookup) to body regions on the silhouette image.
 const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
@@ -152,7 +154,10 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   conditions, petName, petBreed, petAge, petId, onRequestAnalysis, isAnalyzing,
 }) => {
   const { t } = useTranslation();
+  const { userRoles } = useAuth();
+  const isAdmin = (userRoles || []).includes('admin');
   const [yearsAhead, setYearsAhead] = useState(0);
+  const [previewPending, setPreviewPending] = useState(false);
 
   const { data: snapshot, isLoading: snapshotLoading } = usePetClinicalAnalysisSnapshot(petId || null);
 
@@ -169,6 +174,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     petId || null,
     recommendedCompoundNames,
     !!petId && hasSnapshot,
+    previewPending,
   );
 
   const projection = aiQuery.data?.projection;
@@ -177,6 +183,8 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const coverage = projection?.coverage_by_condition || aiQuery.data?.coverage_by_condition || [];
   const aiYearsGained = aiQuery.data?.years_gained ?? null;
   const aiConfidence = projection?.confidence || aiQuery.data?.confidence || null;
+  const previewMode = aiQuery.data?.preview_mode === true;
+  const pendingPreviewCount = aiQuery.data?.pending_preview_count ?? 0;
 
   const coveredNames = useMemo(
     () => new Set(coverage.filter((c: any) => c?.kg_covered).map((c: any) => String(c.condition || ''))),
@@ -348,6 +356,35 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
       </CardHeader>
 
       <CardContent className="p-4 space-y-4">
+        {/* Admin preview toggle */}
+        {isAdmin && (
+          <div className="flex items-center justify-between rounded-md border border-dashed bg-muted/20 px-3 py-2">
+            <div className="flex items-center gap-2 text-xs">
+              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+              <Label htmlFor="preview-pending" className="text-xs font-medium cursor-pointer">
+                {t('petProfile.digitalTwin.previewPendingToggle')}
+              </Label>
+              <Badge variant="outline" className="text-[9px] h-4 px-1">admin</Badge>
+            </div>
+            <Switch
+              id="preview-pending"
+              checked={previewPending}
+              onCheckedChange={setPreviewPending}
+              disabled={aiQuery.isFetching}
+            />
+          </div>
+        )}
+
+        {/* Preview banner when active */}
+        {previewMode && (
+          <div className="rounded-md border border-violet-300/60 bg-violet-50/40 dark:bg-violet-950/10 p-2.5 flex items-start gap-2">
+            <Eye className="h-4 w-4 text-violet-600 dark:text-violet-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-violet-800 dark:text-violet-300">
+              {t('petProfile.digitalTwin.previewPendingBanner', { count: pendingPreviewCount })}
+            </p>
+          </div>
+        )}
+
         {/* KPI strip */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="rounded-lg border bg-muted/30 p-3">
@@ -395,6 +432,11 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
             <p className="text-2xl font-semibold mt-1 text-emerald-700 dark:text-emerald-400">
               {yearsGained > 0 ? '+' : ''}{yearsGained.toFixed(1)}
               <span className="text-sm text-emerald-700/70 dark:text-emerald-400/70 ml-1">{t('petProfile.biologicalTimeline.yearsShort', 'a')}</span>
+              {previewMode && (
+                <span className="ml-1 text-[10px] font-normal text-violet-600 dark:text-violet-400">
+                  ({t('petProfile.digitalTwin.provisional')})
+                </span>
+              )}
             </p>
             {totalCovered > 0 && (
               <p className="text-[11px] text-muted-foreground mt-1">
@@ -435,6 +477,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               <p className="text-[10px] text-muted-foreground text-center">
                 {markersWithout.length} {t('petProfile.digitalTwin.markersLabel', 'marcadores')}
               </p>
+              <ConditionsMiniList markers={markersWithout} t={t} />
             </div>
             {/* With */}
             <div className="space-y-2">
@@ -451,6 +494,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               <p className="text-[10px] text-muted-foreground text-center">
                 {markersWith.filter(m => m.protectedHere).length} {t('petProfile.digitalTwin.protectedLabel', 'protegidos')} · {markersWith.length} {t('petProfile.digitalTwin.markersLabel', 'marcadores')}
               </p>
+              <ConditionsMiniList markers={markersWith} t={t} />
             </div>
           </div>
 
