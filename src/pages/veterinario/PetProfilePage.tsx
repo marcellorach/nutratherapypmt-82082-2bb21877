@@ -68,6 +68,17 @@ const PetProfilePage: React.FC = () => {
   });
   const [pipelineLog, setPipelineLog] = useState<ClinicalLogEntry[]>([]);
   const [currentStageLabel, setCurrentStageLabel] = useState<string | null>(null);
+  // Per-stage live counters, populated as each stage emits 'stage-end'.
+  // This makes the workflow stepper light up its numbers progressively
+  // instead of staying at 0 until the entire pipeline finishes.
+  const [stageCounts, setStageCounts] = useState<{
+    profile: number;
+    predispositions: number;
+    labs: number;
+    triplets: number;
+    interactions: number;
+    compounds: number;
+  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
 
   const STAGE_LABELS: Record<PipelineStageId, string> = {
     stage2_predispositions: t('petProfile.pipeline.predispositions'),
@@ -98,6 +109,28 @@ const PetProfilePage: React.FC = () => {
     } else if (e.kind === 'stage-end') {
       setPipelineState(s => ({ ...s, [e.stage]: 'complete' }));
       appendLog('success', `✓ ${e.message}`, STAGE_LABELS[e.stage]);
+      // Live-update the counter for the stage that just completed
+      const meta = e.meta || {};
+      setStageCounts(prev => {
+        switch (e.stage) {
+          case 'stage2_predispositions':
+            return { ...prev, predispositions: meta.undiagnosed ?? meta.count ?? prev.predispositions };
+          case 'stage3_labs':
+            return { ...prev, labs: meta.count ?? prev.labs };
+          case 'stage4_kg':
+            return { ...prev, triplets: meta.totalNodes ?? prev.triplets };
+          case 'stage5_interactions':
+            return {
+              ...prev,
+              interactions: meta.interactions ?? prev.interactions,
+              triplets: meta.triplets ?? prev.triplets,
+            };
+          case 'stage6_recommendation':
+            return { ...prev, compounds: meta.compounds ?? prev.compounds };
+          default:
+            return prev;
+        }
+      });
     } else {
       appendLog(e.level, e.message);
     }
@@ -133,6 +166,7 @@ const PetProfilePage: React.FC = () => {
       stage5_interactions: 'idle',
       stage6_recommendation: 'idle',
     });
+    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
 
     try {
       const { profile, conditions, medications, exams } = data;
@@ -146,6 +180,7 @@ const PetProfilePage: React.FC = () => {
       );
       await new Promise(r => setTimeout(r, 80)); // breath for UI
       setPipelineState(s => ({ ...s, stage1_profile: 'complete' }));
+      setStageCounts(prev => ({ ...prev, profile: profileDataCount }));
       appendLog('success', `✓ Perfil clínico carregado: ${conditions?.length || 0} condições, ${medications?.length || 0} medicações, ${exams?.length || 0} exames`);
 
       const result = await runClinicalAnalysisPipeline(
@@ -616,12 +651,12 @@ const PetProfilePage: React.FC = () => {
             <ClinicalPipelineWorkflow
               pipelineState={pipelineState}
               isAnalyzing={analyzing}
-              profileDataCount={conditions.length + medications.length + exams.length}
-              predispositionCount={predispositions.filter(p => !p.already_diagnosed).length}
-              labAlertCount={labAlerts.length}
-              tripletCount={kgTriplets.length}
-              interactionCount={interactionAlerts.length}
-              compoundCount={recommendationCompounds?.length || 0}
+              profileDataCount={stageCounts.profile || (conditions.length + medications.length + exams.length)}
+              predispositionCount={stageCounts.predispositions || predispositions.filter(p => !p.already_diagnosed).length}
+              labAlertCount={stageCounts.labs || labAlerts.length}
+              tripletCount={stageCounts.triplets || kgTriplets.length}
+              interactionCount={stageCounts.interactions ?? interactionAlerts.length}
+              compoundCount={stageCounts.compounds || (recommendationCompounds?.length || 0)}
             />
 
             {/* Live log panel — scientific-digestion style */}
@@ -706,7 +741,7 @@ const PetProfilePage: React.FC = () => {
                 </TabsTrigger>
                 <TabsTrigger value="trajectory" className="gap-1">
                   <Dna className="h-3.5 w-3.5" />
-                  {t('petProfile.analysisTabs.trajectory', 'Trajetória Biológica')}
+                  {t('petProfile.analysisTabs.trajectory', 'Digital Twin · Trajetória Biológica')}
                 </TabsTrigger>
                 <TabsTrigger value="biological-pathway" className="gap-1">
                   <GitBranch className="h-3.5 w-3.5" />
