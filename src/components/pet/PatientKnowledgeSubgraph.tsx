@@ -2,14 +2,19 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Network, GitBranch } from 'lucide-react';
+import { Network, GitBranch, Sparkles } from 'lucide-react';
 import NetworkGraph from '@/components/administrador/visualizations/NetworkGraph';
+import { usePatientPendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
 
 interface PatientKnowledgeSubgraphProps {
   kgTriplets: any[];
   kgPathways: any[];
   conditions: string[];
   recommendedCompounds: string[];
+  /** Pet UUID — when present, the component fetches pending gap-fill triplets
+   *  for this pet and renders them as provisional (dashed amber) edges so vets
+   *  can see which evidence was just imported but is still awaiting curation. */
+  petId?: string | null;
 }
 
 // Color palette for node types
@@ -26,8 +31,17 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
   kgPathways,
   conditions,
   recommendedCompounds,
+  petId,
 }) => {
   const { t } = useTranslation();
+
+  // Pull pending triplets created by gap-fill that touch this pet's stack/conditions.
+  const { data: pendingProvisional = [] } = usePatientPendingGapFillTriplets(
+    petId,
+    recommendedCompounds,
+    conditions,
+    !!petId,
+  );
 
   const graphData = useMemo(() => {
     const nodeMap = new Map<string, any>();
@@ -103,11 +117,36 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       }
     }
 
+    // Add provisional gap-fill triplets (Perplexity / PubMed) as dashed amber edges.
+    for (const trip of (pendingProvisional || [])) {
+      const subject = String(trip.subject_name || '').trim();
+      const object = String(trip.object_name || '').trim();
+      if (!subject || !object) continue;
+      const subjectKey = addNode(subject, guessNodeType(subject, conditions, recommendedCompounds));
+      const objectKey = addNode(object, guessNodeType(object, conditions, recommendedCompounds));
+      const predLabel = String(trip.predicate || '').replace(/_/g, ' ');
+      const edgeKey = `prov-${subjectKey}-${trip.predicate}-${objectKey}`;
+      if (seenEdges.has(edgeKey)) continue;
+      seenEdges.add(edgeKey);
+      const provider = (trip.approval_chain && (trip.approval_chain.source || trip.approval_chain.provider)) || 'gap_fill';
+      links.push({
+        from: subjectKey,
+        to: objectKey,
+        label: `⏳ ${predLabel.length > 12 ? predLabel.slice(0, 10) + '…' : predLabel}`,
+        title: `[provisional · ${provider}] ${subject} ${trip.predicate} ${object}` +
+               (trip.evidence_level ? ` · ${trip.evidence_level}` : ''),
+        arrows: 'to',
+        color: '#f59e0b', // amber-500
+        width: 2,
+        dashes: [6, 4],
+      });
+    }
+
     return {
       nodes: Array.from(nodeMap.values()),
       links,
     };
-  }, [kgTriplets, kgPathways, conditions, recommendedCompounds]);
+  }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional]);
 
   if (graphData.nodes.length === 0) return null;
 
@@ -161,6 +200,12 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
         <CardTitle className="text-base flex items-center gap-2">
           <Network className="h-4 w-4 text-primary" />
           {t('petProfile.subgraph.title', 'Subgrafo do Paciente')}
+          {pendingProvisional.length > 0 && (
+            <Badge variant="outline" className="ml-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-[10px]">
+              <Sparkles className="h-3 w-3 mr-0.5" />
+              {t('petProfile.subgraph.provisionalBadge', { count: pendingProvisional.length, defaultValue: '+{{count}} provisórios' })}
+            </Badge>
+          )}
         </CardTitle>
         <p className="text-xs text-muted-foreground">
           {t('petProfile.subgraph.description', 'Fragmento do Knowledge Graph utilizado nas recomendações deste paciente')}
@@ -174,6 +219,17 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
               </span>
             </div>
           ))}
+          {pendingProvisional.length > 0 && (
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l">
+              <span
+                className="inline-block"
+                style={{ width: 18, height: 0, borderTop: '2px dashed #f59e0b' }}
+              />
+              <span className="text-[10px] text-amber-700 dark:text-amber-400">
+                {t('petProfile.subgraph.provisionalLegend', 'aresta provisória (gap-fill, aguardando curadoria)')}
+              </span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -187,6 +243,11 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
           <span>{graphData.nodes.length} {t('petProfile.subgraph.nodes', 'nós')}</span>
           <span>{graphData.links.length} {t('petProfile.subgraph.edges', 'conexões')}</span>
           <span>{kgTriplets.length} {t('petProfile.subgraph.triplets', 'triplets')}</span>
+          {pendingProvisional.length > 0 && (
+            <span className="text-amber-700 dark:text-amber-400">
+              ⏳ {pendingProvisional.length} {t('petProfile.subgraph.provisionalCount', 'provisórios')}
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>
