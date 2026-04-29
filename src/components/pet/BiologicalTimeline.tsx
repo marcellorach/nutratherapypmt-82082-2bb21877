@@ -121,29 +121,29 @@ const ConditionsMiniList: React.FC<{
     if (c.probability < 0.25) continue;
     items.push({ key: `n-${c.name}`, name: c.name, kind: 'new', probability: c.probability });
   }
-  if (items.length === 0) return <p className="text-[10px] text-muted-foreground italic text-center py-1">{emptyLabel}</p>;
-  const visible = items.slice(0, 6);
+  if (items.length === 0) return <p className="text-xs text-muted-foreground italic text-center py-1">{emptyLabel}</p>;
+  const visible = items.slice(0, 8);
   const extra = items.length - visible.length;
   return (
-    <ul className="space-y-0.5 mt-1">
+    <ul className="space-y-1 mt-1">
       {visible.map(it => (
-        <li key={it.key} className="flex items-center gap-1.5 text-[10px] leading-tight">
+        <li key={it.key} className="flex items-center gap-2 text-xs leading-tight">
           {it.kind === 'existing' && it.severity ? (
-            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
           ) : (
-            <Sparkles className="h-2.5 w-2.5 text-amber-500 flex-shrink-0" />
+            <Sparkles className="h-3 w-3 text-amber-500 flex-shrink-0" />
           )}
           <span className="flex-1 truncate text-foreground/90">{it.name}</span>
           {it.kind === 'existing' && it.severity && (
-            <span className="text-[9px] text-muted-foreground">{t(`petProfile.severity.${it.severity}`, it.severity)}</span>
+            <span className="text-[10px] text-muted-foreground">{t(`petProfile.severity.${it.severity}`, it.severity)}</span>
           )}
           {it.kind === 'new' && it.probability != null && (
-            <span className="text-[9px] text-amber-700 dark:text-amber-400">{Math.round(it.probability * 100)}%</span>
+            <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">{Math.round(it.probability * 100)}%</span>
           )}
-          {it.protectedHere && <span className="text-emerald-600 dark:text-emerald-400 text-[10px]">★</span>}
+          {it.protectedHere && <span className="text-emerald-600 dark:text-emerald-400 text-xs">★</span>}
         </li>
       ))}
-      {extra > 0 && <li className="text-[9px] text-muted-foreground italic text-center pt-0.5">+{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}</li>}
+      {extra > 0 && <li className="text-[10px] text-muted-foreground italic text-center pt-1">+{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}</li>}
     </ul>
   );
 };
