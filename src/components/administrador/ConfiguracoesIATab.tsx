@@ -14,6 +14,7 @@ import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 import ConfigurationsSummary from './configuracoes/ConfigurationsSummary';
 import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
 import AIModelSelector from './configuracoes/AIModelSelector';
+import PerplexityStatusCard from './configuracoes/PerplexityStatusCard';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -21,6 +22,7 @@ const ConfiguracoesIATab: React.FC = () => {
   const [grokKey, setGrokKey] = useState<string>("");
   const [unstructuredKey, setUnstructuredKey] = useState<string>("");
   const [googleGeminiKey, setGoogleGeminiKey] = useState<string>("");
+  const [perplexityKey, setPerplexityKey] = useState<string>("");
   const [neo4jUri, setNeo4jUri] = useState<string>("");
   const [neo4jUsername, setNeo4jUsername] = useState<string>("");
   const [neo4jPassword, setNeo4jPassword] = useState<string>("");
@@ -50,6 +52,7 @@ const ConfiguracoesIATab: React.FC = () => {
         setGrokKey(configs.grok_api_key || "");
         setUnstructuredKey(configs.unstructured_api_key || "");
         setGoogleGeminiKey(configs.google_gemini_api_key || "");
+        setPerplexityKey(configs.perplexity_api_key || "");
         setNeo4jUri(configs.neo4j_uri || "");
         setNeo4jUsername(configs.neo4j_username || "");
         setNeo4jPassword(configs.neo4j_password || "");
@@ -90,6 +93,9 @@ const ConfiguracoesIATab: React.FC = () => {
       }
       if (key === 'google_gemini_api_key' && value.length < 30) {
         throw new Error('Chave API do Google Gemini deve ter pelo menos 30 caracteres');
+      }
+      if (key === 'perplexity_api_key' && (!value.startsWith('pplx-') || value.length < 20)) {
+        throw new Error('Chave API do Perplexity inválida. Deve começar com "pplx-" e ter pelo menos 20 caracteres');
       }
       if (key === 'neo4j_uri' && !value.startsWith('neo4j+s://') && !value.startsWith('neo4j://')) {
         throw new Error('URI do Neo4j deve começar com "neo4j+s://" ou "neo4j://"');
@@ -162,6 +168,16 @@ const ConfiguracoesIATab: React.FC = () => {
     try {
       await saveConfigToSupabase('google_gemini_api_key', key);
       setGoogleGeminiKey(key);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const savePerplexityKey = async (key: string) => {
+    setIsSaving(true);
+    try {
+      await saveConfigToSupabase('perplexity_api_key', key);
+      setPerplexityKey(key);
     } finally {
       setIsSaving(false);
     }
@@ -353,11 +369,12 @@ const ConfiguracoesIATab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="openai" className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="openai">OpenAI</TabsTrigger>
                 <TabsTrigger value="claude">Claude</TabsTrigger>
                 <TabsTrigger value="grok">Grok</TabsTrigger>
                 <TabsTrigger value="google-gemini">Google Gemini</TabsTrigger>
+                <TabsTrigger value="perplexity">Perplexity</TabsTrigger>
                 <TabsTrigger value="neo4j">Neo4j</TabsTrigger>
                 <TabsTrigger value="unstructured">Unstructured</TabsTrigger>
                 <TabsTrigger value="prompts">Prompts</TabsTrigger>
