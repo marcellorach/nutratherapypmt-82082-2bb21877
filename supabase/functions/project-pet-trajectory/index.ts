@@ -39,6 +39,10 @@ interface RequestBody {
   recommended_compounds?: string[];
   /** Optional analysis snapshot id for traceability/citations. */
   analysis_snapshot_id?: string;
+  /** Admin-only "what-if" preview: when true, also feed pending gap-fill
+   * triplets to the LLM and mark resulting projections as provisional.
+   * Bypasses cache. */
+  include_pending_gap_fill?: boolean;
 }
 
 function jsonResponse(data: unknown, status = 200) {
@@ -76,6 +80,7 @@ Deno.serve(async (req) => {
     const recommendedStack = Array.isArray(body.recommended_compounds)
       ? body.recommended_compounds.filter(s => typeof s === 'string' && s.trim().length > 0)
       : [];
+    const includePending = body.include_pending_gap_fill === true;
 
     // 1) Pet
     const { data: pet, error: petErr } = await supabase
@@ -190,6 +195,46 @@ Deno.serve(async (req) => {
       kgEvidence = ev || [];
     }
 
+    // Optional preview: pending gap-fill triplets that match this pet's
+    // conditions AND the recommended stack. Surfaced to the LLM so admin can
+    // see "what would happen if these get approved".
+    let pendingPreviewEvidence: Array<{
+      compound: string;
+      condition: string;
+      relation: string;
+      efficacy_0_5: number;
+      provisional: true;
+    }> = [];
+    if (includePending && conditionIds.length > 0) {
+      const { data: hcRows } = await supabase
+        .from('health_conditions')
+        .select('id, name_en')
+        .in('id', conditionIds);
+      const condNames = (hcRows || []).map((h: any) => h.name_en).filter(Boolean);
+      if (condNames.length > 0) {
+        const { data: pending } = await supabase
+          .from('triplet_extractions')
+          .select('subject_name, object_name, intensity, predicate, approval_chain')
+          .eq('curation_status', 'pending')
+          .in('object_name', condNames)
+          .contains('approval_chain', { source: 'pubmed_gap_fill' })
+          .limit(60);
+        const stackLower = recommendedStack.map(s => s.toLowerCase().trim());
+        pendingPreviewEvidence = (pending || [])
+          .filter((t: any) =>
+            stackLower.length === 0 ||
+            stackLower.includes(String(t.subject_name || '').toLowerCase().trim()),
+          )
+          .map((t: any) => ({
+            compound: t.subject_name,
+            condition: t.object_name,
+            relation: t.predicate || 'treats',
+            efficacy_0_5: Math.round((Number(t.intensity) || 0) * 5),
+            provisional: true as const,
+          }));
+      }
+    }
+
     // 7) Build context hash for cache lookup
     const ageNow = safeAge(pet.age_years);
     const cacheCtx = {
@@ -203,12 +248,14 @@ Deno.serve(async (req) => {
       recommendedStack: recommendedStack.slice().sort().join(";"),
       breedId: breed?.id || null,
       maxYears,
-      version: "v3.0-dual-scenario",
+      version: "v3.1-dual-scenario",
+      includePending,
+      pendingPreviewCount: pendingPreviewEvidence.length,
     };
     const ctxHash = await sha256Hex(JSON.stringify(cacheCtx));
 
     // 8) Cache check
-    if (!body.force_refresh) {
+    if (!body.force_refresh && !includePending) {
       const { data: cached } = await supabase
         .from("pet_trajectory_projections")
         .select("*")
@@ -284,6 +331,8 @@ You MUST output through the function tool.`;
       vetgraphrag_recommended_stack: recommendedStack,
       effective_protocol_compounds: protocolCompoundNames,
       kg_compound_condition_evidence: compactEvidence.slice(0, 30),
+      pending_gap_fill_preview: pendingPreviewEvidence.slice(0, 30),
+      preview_mode: includePending,
       simulate_both_scenarios: true,
       max_years_ahead: maxYears,
       instructions: `Produce TWO complete year-by-year projections (y=0..y=${maxYears}):
@@ -580,6 +629,8 @@ OUTPUT REQUIREMENTS:
       years_without_protocol: parsed.years_without_protocol || [],
       baseline_biological_age: baseline?.biological_age ?? null,
       baseline_remaining_years: baseline?.expected_remaining_years ?? null,
+      preview_mode: includePending,
+      pending_preview_count: pendingPreviewEvidence.length,
     });
   } catch (e) {
     console.error("project-pet-trajectory error", e);
