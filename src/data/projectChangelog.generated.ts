@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T06:17:06.509Z
+// Última geração: 2026-04-29T06:21:33.874Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -1205,8 +1205,8 @@ export const changelog: ChangelogEntry[] = [
       "src/utils/fileNameSanitizer.ts",
       "src/components/administrador/estudos/import/FileUploadTab.tsx",
       "src/components/administrador/estudos/import/SciSpace2StepImport.tsx",
-      "src/locales/pt/translation.js",
-      "src/locales/en/translation.js",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
       "src/i18n.ts"
     ]
   },
