@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-04-29 — Digital Twin agora compara cenários ao longo dos anos
+<!-- area: vet-ui · status: entregue · i18n: 1.41.1 -->
+- `DigitalTwinDog` reescrito para consumir `usePetTrajectoryProjection` (mesma fonte do `BiologicalTimeline`): renderiza duas silhuetas lado a lado (Sem protocolo × Com protocolo) e um slider 0–8 anos. Antes só mostrava o estado atual, sem variação temporal nem cenário comparativo.
+- Para cada ano projetado, os marcadores anatômicos refletem severidade real (`existing_conditions[].projected_severity_label`), risco emergente (`new_conditions[].probability` ≥ 20% com anel tracejado âmbar) e cobertura do stack (`coverage_by_condition[].kg_covered` → estrela ★ verde no marcador).
+- KPIs alinhados com o `BiologicalTimeline`: idade biológica, cronológica, anos restantes e ganho com protocolo (`years_gained` da edge function `project-pet-trajectory`).
+- Estados `locked` (sem snapshot VetGraphRAG), `loading` (projeção rodando) e `noKgBenefit` (cobertura zero) mostram banners coerentes com o resto do perfil — nenhuma simulação, nada de mock.
+- `PetProfilePage` passa `petId`, `onRequestAnalysis` e `isAnalyzing` para o componente.
+- I18N_VERSION 1.41.0 → 1.41.1; novas chaves em `petProfile.digitalTwin.{lockedTitle,lockedBody,aiLoading,newRisk,protected,markersLabel,protectedLabel}` (PT+EN).
+- Files: src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-04-29 — Testes de inferArea e ordenação real do parser
 <!-- area: admin · status: entregue -->
 - 17 novos testes em `scripts/__tests__/sync-changelog.test.mjs` cobrindo: prioridade `kg > infra` em `supabase/functions/kg-*`, `triplet`/`process-pdf`/`extract` → `curation`, `biomedical-taxonomy` e qualquer path com `knowledge-graph|neo4j` → `kg`, `base-knowledge` antes de regras genéricas, `i18n` para `src/locales/**` e `src/i18n.ts`, `auth` para `AuthContext`/`pages/Auth`, `projectOrganograma`/`projectChangelog` → `admin`, ordem-importa quando múltiplos paths casam, fallback `meta`
