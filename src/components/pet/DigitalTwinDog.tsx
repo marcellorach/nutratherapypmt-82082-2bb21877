@@ -150,6 +150,34 @@ interface DigitalTwinDogProps {
   isAnalyzing?: boolean;
 }
 
+const ConditionsMiniList: React.FC<{ markers: ScenarioMarker[]; t: any }> = ({ markers, t }) => {
+  if (!markers || markers.length === 0) {
+    return (
+      <p className="text-[10px] text-muted-foreground italic text-center">
+        {t('petProfile.biologicalTimeline.noProjectedRisks', 'Nenhuma condição com risco significativo neste horizonte.')}
+      </p>
+    );
+  }
+  return (
+    <ul className="max-h-[180px] overflow-y-auto space-y-1 rounded-md border bg-muted/10 p-2">
+      {markers.map((m) => (
+        <li key={m.key} className="flex items-center gap-1.5 text-[11px]">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${SEV_DOT[m.severity]}`} />
+          <span className="truncate flex-1">{m.name}</span>
+          {m.isNew && m.probability != null && (
+            <Badge variant="outline" className="h-4 text-[9px] px-1 border-amber-500 text-amber-700 dark:text-amber-400">
+              {t('petProfile.digitalTwin.newRisk', 'Novo')} {Math.round(m.probability * 100)}%
+            </Badge>
+          )}
+          {m.protectedHere && (
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">★</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   conditions, petName, petBreed, petAge, petId, onRequestAnalysis, isAnalyzing,
 }) => {
