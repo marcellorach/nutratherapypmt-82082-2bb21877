@@ -477,11 +477,52 @@ const ConfiguracoesIATab: React.FC = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="neo4j" className="space-y-4 pt-4">
-                {/* moved below */}
-              </TabsContent>
+              <TabsContent value="perplexity" className="space-y-4 pt-4">
+                <Card className="bg-violet-50 dark:bg-violet-950/20 border-violet-200 dark:border-violet-900">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      ✨ Para que serve o Perplexity?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-foreground">
+                      <strong>Busca acadêmica grounded:</strong> usado no <strong>KG Evidence Gap-Fill</strong> para preencher pares (composto × condição) ausentes no Knowledge Graph com evidência citável.
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Modelo Sonar (Academic) com citações reais</li>
+                      <li>PMIDs validados via NCBI antes de salvar</li>
+                      <li>Fallback para PubMed + Gemini se sem evidência</li>
+                      <li>Triplets criados como pending (curadoria manual)</li>
+                    </ul>
+                    <div className="mt-4 p-2 bg-background rounded border border-violet-300 dark:border-violet-800">
+                      <p className="text-xs font-mono text-foreground">
+                        Gap → 🔎 Perplexity Sonar → ✅ PMID válido → 💾 Triplet pending
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Placeholder removed: real neo4j content kept below intact via patch ordering */}
+                <ApiKeyForm
+                  serviceName="Perplexity"
+                  saveKey={savePerplexityKey}
+                  initialKey={perplexityKey}
+                  placeholder="pplx-xxxxxxxxxxxxxxxxxxxxxxxx"
+                  isLoading={isLoading || isSaving}
+                />
+                <div className="text-sm text-gray-500 mt-4">
+                  <a
+                    href="https://www.perplexity.ai/settings/api"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Obter uma chave API do Perplexity →
+                  </a>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Dica: se a chave já está provisionada via conector (secret PERPLEXITY_API_KEY no backend), o card de saúde abaixo já mostrará Conectado — não é necessário inserir aqui.
+                </p>
+              </TabsContent>
                 <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mb-4">
                   <CardHeader>
                     <CardTitle className="text-sm flex items-center gap-2">
