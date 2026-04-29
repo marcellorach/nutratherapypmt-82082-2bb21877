@@ -78,6 +78,12 @@ verify_jwt = false
 [functions.calculate-recommendation-confidence]
 verify_jwt = true
 
+[functions.kg-missing-triplets]
+verify_jwt = true
+
+[functions.kg-evidence-gap-fill]
+verify_jwt = true
+
 [functions.hybrid-recommendation]
 verify_jwt = true
 
