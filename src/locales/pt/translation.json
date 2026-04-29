@@ -7306,5 +7306,18 @@
       "placeholder": "Buscar no UMLS...",
       "apply": "Aplicar"
     }
+  },
+  "evidenceGap": {
+    "title": "Lacuna de evidência detectada",
+    "adminOnly": "admin",
+    "explanationLowEfficacy": "A projeção do gêmeo digital está zerada porque o Knowledge Graph ainda não tem compostos com eficácia ≥ 3/5 para as condições deste pet. Podemos buscar evidências reais no PubMed para preencher essa lacuna.",
+    "explanationNoCoverage": "Nenhuma das condições deste pet tem cobertura no Knowledge Graph. Vamos buscar estudos reais no PubMed (canino) para popular essas relações.",
+    "button": "Buscar evidências no PubMed",
+    "searching": "Buscando no PubMed e estruturando com IA...",
+    "pendingStatus": "{{count}} triplet(s) aguardando curadoria",
+    "openCuration": "Abrir curadoria",
+    "disclaimer": "Os achados entram como pendentes para curadoria humana e só impactam o gêmeo digital após aprovação. Fontes: PubMed/PMC (NCBI E-utilities). Estruturação: Lovable AI (Gemini).",
+    "toastSuccess": "{{studies}} estudo(s) adicionado(s) e {{triplets}} triplet(s) pendente(s) ({{pairs}} par(es) pesquisado(s))",
+    "toastError": "Falha na busca: {{error}}"
   }
 }

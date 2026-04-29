@@ -7306,5 +7306,18 @@
       "placeholder": "Search UMLS...",
       "apply": "Apply"
     }
+  },
+  "evidenceGap": {
+    "title": "Evidence gap detected",
+    "adminOnly": "admin",
+    "explanationLowEfficacy": "The digital twin projection is flat because the Knowledge Graph has no compounds with efficacy ≥ 3/5 for this pet's conditions. We can pull real evidence from PubMed to fill that gap.",
+    "explanationNoCoverage": "None of this pet's conditions are covered in the Knowledge Graph. Let's search real canine studies on PubMed to populate these relationships.",
+    "button": "Search PubMed for evidence",
+    "searching": "Searching PubMed and structuring with AI...",
+    "pendingStatus": "{{count}} triplet(s) awaiting curation",
+    "openCuration": "Open curation",
+    "disclaimer": "Findings are stored as pending for human curation and only affect the digital twin after approval. Source: PubMed/PMC (NCBI E-utilities). Structuring: Lovable AI (Gemini).",
+    "toastSuccess": "{{studies}} study(ies) added, {{triplets}} pending triplet(s) ({{pairs}} pair(s) searched)",
+    "toastError": "Search failed: {{error}}"
   }
 }
