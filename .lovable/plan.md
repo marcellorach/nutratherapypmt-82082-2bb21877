@@ -1,120 +1,122 @@
 ## Objetivo
 
-Hoje há duas dores combinadas:
+Em cada card de área do **Organograma** (`/administrador?tab=organograma` → lente Cards), exibir um mini-timeline visual com as últimas entradas do `CHANGELOG.md` daquela área, mostrando arquivos tocados como links clicáveis e — quando disponível — o commit que originou a mudança.
 
-1. **Dupla manutenção**: cada mudança precisa ser escrita em `CHANGELOG.md` (texto livre) e espelhada à mão em `src/data/projectChangelog.ts` (tipado, consumido pela aba Organograma). É fácil esquecer um dos dois e o organograma fica defasado.
-2. **Perda de contexto entre tarefas**: o agente não consulta o histórico antes de começar e às vezes refaz/reverte coisas recentes.
+Hoje já existe um bloco "Recentes nesta área" em `OrganogramaCards.tsx`, mas ele é apenas uma lista de 3 linhas em texto. Vamos transformá-lo em um timeline real, navegável e com proveniência.
 
-A solução tem 3 partes: (a) padronizar o CHANGELOG para ser parseável e útil ao agente, (b) gerar o `projectChangelog.ts` automaticamente a partir dele, (c) institucionalizar via memory rule a leitura do changelog no início de cada tarefa.
+## O que muda na experiência
 
-## Como vai funcionar
+- Cada card de área ganha um **mini-timeline vertical** (linha + bolinhas coloridas por tipo: Added=verde, Changed=âmbar, Fixed=azul, Removed=vermelho, Security=roxo).
+- Mostra por padrão as **3 entradas mais recentes** da área (últimos 90 dias). Botão "Ver mais" expande para até 8.
+- Cada entrada exibe: data, badge de tipo, badge de status (parcial/revertido se aplicável), título e — ao expandir — bullets resumidos (até 3) + chips de arquivos.
+- **Chips de arquivos** são links clicáveis que abrem o arquivo no repositório (configurável). Quando não há URL de repo configurada, ficam como chips estáticos com tooltip do path completo (comportamento atual preservado).
+- **Link de commit** (ícone `GitCommit`) aparece quando a entrada do CHANGELOG declara `<!-- commit: <hash> -->`. Sem hash, o ícone não aparece (sem ruído).
+- Seletor de tipo (chips toggle: Added/Changed/Fixed/...) no topo do timeline para filtrar só dentro daquele card.
+
+## Arquitetura técnica
+
+### 1. Configuração de repositório (novo)
+
+Novo arquivo `src/data/repoConfig.ts`:
+- Exporta `REPO_CONFIG = { baseUrl?: string, branch: string }` — `baseUrl` opcional (ex: `https://github.com/<owner>/<repo>`), `branch` default `"main"`.
+- Helpers: `fileUrl(path)` → `${baseUrl}/blob/${branch}/${path}` ou `null`; `commitUrl(hash)` → `${baseUrl}/commit/${hash}` ou `null`.
+- Documenta no header: deixe `baseUrl` vazio se não quiser links externos. (Lovable gerencia o git internamente, então o usuário pode preencher quando conectar GitHub via Connectors.)
+
+### 2. Suporte a `commit` no parser do changelog
+
+`scripts/sync-changelog.mjs`:
+- `parseMetaComment` já captura pares `chave: valor` separados por `·`. Adicionar `commit` ao tipo emitido.
+- `pushCur()` passa `commit: cur.meta.commit` para a entrada.
+- `emitTs` continua serializando via `JSON.stringify(entries)` — automaticamente inclui o campo novo.
+
+`src/data/projectChangelog.generated.ts` (gerado): adicionar `commit?: string` na interface `ChangelogEntry`. Nada quebra para entradas antigas (campo opcional).
+
+`CHANGELOG.md`: atualizar o bloco de instruções no topo com exemplo:
+```
+<!-- area: admin · status: entregue · i18n: 1.40.0 · commit: a1b2c3d -->
+```
+
+### 3. Helper de query
+
+`src/data/changelogQuery.ts`:
+- Nova função `changesByAreaFiltered(area, { sinceDays?, limit?, kinds? })` aceitando filtro por tipo.
+- Mantém `recentChangesByArea` como wrapper (compat).
+
+### 4. Componente novo: `AreaMiniTimeline.tsx`
+
+`src/components/administrador/organograma/AreaMiniTimeline.tsx`:
+- Props: `areaKey: OrganogramaAreaKey`.
+- Estado local: `expanded` (mostra 3 vs 8), `kindFilter` (Set<ChangelogKind>), `openIds` (entradas expandidas com bullets).
+- Layout:
 
 ```text
-CHANGELOG.md  (fonte única, formato estruturado por área)
-      │
-      ▼
-scripts/sync-changelog.mjs   ← parser determinístico
-      │
-      ├─► src/data/projectChangelog.generated.ts   (autogerado)
-      └─► organogramaLastUpdated  (data da entrada mais recente)
-              │
-              ▼
-      Aba Organograma → Changelog (já existente) consome o .generated
+History  Recentes nesta área           [Added][Changed][Fixed]
+│
+●  2026-04-29  ADDED   Sincronização CHANGELOG → Organograma
+│   ⌄ (clica para expandir bullets + arquivos + commit)
+│       • bullet 1
+│       • bullet 2
+│       [scripts/sync-changelog.mjs] [src/data/...]   ⧉ a1b2c3d
+●  2026-04-28  CHANGED Pipeline Clínico com Progresso Real
+│
+●  2026-04-28  ADDED   Painel Admin de Curadoria de Doses
+                                                [Ver mais 5 →]
 ```
 
-## 1. Novo formato estruturado do CHANGELOG
+- Bolinhas coloridas via `KIND_STYLES` dict (já existe padrão em `predicateStyles` — replicamos pequena versão local: `added`→`bg-emerald-500`, `changed`→`bg-amber-500`, `fixed`→`bg-sky-500`, `removed`→`bg-rose-500`, `security`→`bg-violet-500`).
+- Chips de arquivos: usam `fileUrl(path)`. Se retornar `null`, render como `<Badge>` (atual). Se URL existe, render como `<a target="_blank" rel="noopener noreferrer">` com mesmo estilo + ícone `ExternalLink` minúsculo.
+- Commit chip: render se `entry.commit && commitUrl(entry.commit)` — `<a>` com ícone `GitCommit` + 7 primeiros chars.
+- Botões de filtro de tipo: chips toggle pequenos; quando nenhum selecionado, mostra todos.
 
-Cada entrada vira um bloco com cabeçalho parseável + metadados YAML opcionais. Exemplo:
+### 5. Integração no Organograma
 
-```markdown
-### Added - 2026-04-29 — Organograma do Projeto (admin)
-<!-- area: admin · status: entregue · i18n: 1.38.0 -->
-- Nova tab `/administrador?tab=organograma` com 4 lentes
-- Single source of truth tipada em src/data/projectOrganograma.ts
-- Files: src/data/projectOrganograma.ts, src/pages/administrador/OrganogramaTab.tsx
-```
+`src/components/administrador/organograma/OrganogramaCards.tsx`:
+- Substituir o componente interno `RecentChanges` pela importação de `AreaMiniTimeline`.
+- Mesma posição (final do `CardContent`, com `border-t border-dashed`).
 
-Regras:
-- `### <Kind> - YYYY-MM-DD — <título>` (kind ∈ Added/Changed/Fixed/Removed/Security)
-- Linha HTML-comment opcional com `area`, `status`, `i18n`, `pr` — vira metadado tipado
-- Bullets `- …` com texto livre
-- Linha `Files:` (ou caminhos `src/...`/`supabase/...` em qualquer bullet) extrai a lista de arquivos
-- Sem comment → `area` é inferida pelos arquivos (mapa explícito); sem files → `area: meta`
+### 6. i18n (PT/EN obrigatório)
 
-Vou migrar as ~10 entradas mais recentes para o novo formato (resto fica como histórico legível, parser tolera).
+`src/i18n.ts`: bump para `1.40.0`.
 
-## 2. Parser (`scripts/sync-changelog.mjs`)
+Novas chaves em `src/locales/{pt,en}/translation.json` sob `organograma.timeline.*`:
+- `title` ("Recentes nesta área" / "Recent in this area")
+- `showMore` ("Ver mais {{count}}" / "Show {{count}} more")
+- `showLess` ("Ver menos" / "Show less")
+- `noChanges` ("Sem mudanças recentes" / "No recent changes")
+- `filterAll` ("Todos" / "All")
+- `kind.added/changed/fixed/removed/security`
+- `viewFile` ("Abrir arquivo no repositório" / "Open file in repo")
+- `viewCommit` ("Ver commit" / "View commit")
 
-Lê `CHANGELOG.md`, gera `src/data/projectChangelog.generated.ts` com a mesma shape `ChangelogEntry` já usada hoje. Inclui:
+### 7. Documentação + memory
 
-- Inferência de área via mapa: `src/pages/administrador/` → `admin`, `supabase/functions/kg-*` → `kg`, `src/components/pet/` → `vet-ui`, `src/services/clinical/` → `clinical-pipeline`, etc.
-- `i18nVersion` extraída do comment ou de regex `i18n v?\d+\.\d+\.\d+` no título/bullets
-- Saída ordenada (mais recente primeiro)
-- Atualiza `organogramaLastUpdated` em `projectOrganograma.ts` via line-replace cirúrgico
-- Falha cedo se o CHANGELOG estiver malformado (não sobrescreve o gerado anterior)
-
-Comando: `npm run sync:changelog`. O agente passa a rodar isso ao final de toda mudança que toca o CHANGELOG.
-
-## 3. `projectChangelog.ts` vira shim
-
-```ts
-export { changelog } from "./projectChangelog.generated";
-export type { ChangelogEntry, ChangelogKind, ChangelogStatus } from "./projectChangelog.generated";
-```
-
-Zero impacto em `ChangelogTimeline.tsx` e demais consumidores.
-
-## 4. Helpers para o agente consultar o changelog
-
-Novo `src/data/changelogQuery.ts` (também usado por uma futura UI de busca):
-
-```ts
-recentChangesByArea(area, sinceDays)   // últimas mudanças de uma área
-findChangesTouching(filePath)          // mudanças que mexeram em um arquivo
-lastI18nVersion()                      // última versão registrada
-```
-
-E um arquivo curto `.lovable/CONTEXT.md` autogerado pelo script com um snapshot legível em ~40 linhas: top 10 entradas, contagem por área nas últimas 2 semanas, último `i18n` registrado. **Esse arquivo é o "briefing" que o agente lê no começo de cada tarefa.**
-
-## 5. Memory rule nova: leitura obrigatória do changelog
-
-Substituo `mem://architecture/organograma-source-of-truth` por um protocolo simplificado e adiciono `mem://workflow/changelog-driven-context` como **Core**:
-
-- **Antes** de iniciar qualquer tarefa não-trivial: ler `.lovable/CONTEXT.md` e, se a tarefa toca arquivos específicos, rodar mentalmente `findChangesTouching(file)` lendo o CHANGELOG.
-- **Ao terminar**: adicionar entrada estruturada no CHANGELOG.md + rodar `npm run sync:changelog`. Só editar `projectOrganograma.ts` quando a estrutura (não o histórico) muda.
-
-Isso reduz protocolo de 5 passos para 2 e adiciona o passo de "consultar antes" — que é o que você pediu.
-
-## 6. Mini-painel "Recentes nesta área" no Organograma
-
-Na aba Cards, ao clicar numa área, mostro as últimas 3 entradas do changelog daquela área (já temos os dados, é só filtrar). Útil pra ver de relance o que mudou recentemente sem ir até a aba Changelog.
+- `CHANGELOG.md`: adicionar entrada `### Added - 2026-04-29 — Mini-timeline por área no Organograma com links de arquivos e commits` com `<!-- area: admin · status: entregue · i18n: 1.40.0 -->`.
+- Rodar `npm run sync:changelog` (regenera `projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + `organogramaLastUpdated`).
+- Atualizar `mem://architecture/organograma-source-of-truth` mencionando que entradas do CHANGELOG suportam `commit:` e que `repoConfig.ts` controla URLs externas.
 
 ## Arquivos
 
 **Novos**
-- `scripts/sync-changelog.mjs`
-- `src/data/projectChangelog.generated.ts` (gerado)
-- `src/data/changelogQuery.ts`
-- `.lovable/CONTEXT.md` (gerado)
-- `.lovable/memory/workflow/changelog-driven-context.md`
+- `src/data/repoConfig.ts`
+- `src/components/administrador/organograma/AreaMiniTimeline.tsx`
 
 **Editados**
-- `CHANGELOG.md` — migrar últimas ~10 entradas para o novo formato + entrada da própria automação
-- `src/data/projectChangelog.ts` — vira shim
-- `src/data/projectOrganograma.ts` — só a linha `organogramaLastUpdated`
-- `package.json` — script `sync:changelog`
-- `src/components/administrador/organograma/OrganogramaCards.tsx` — bloco "Recentes nesta área"
-- `src/components/administrador/organograma/ChangelogTimeline.tsx` — banner "auto-sincronizado em <data>"
-- `.lovable/memory/architecture/organograma-source-of-truth.md` — protocolo simplificado
-- `src/i18n.ts` + `src/locales/{pt,en}/translation.json` — nova chave + bump I18N_VERSION → 1.39.0
-- `mem://index.md` — adicionar Core rule de "consultar changelog antes de iniciar"
+- `scripts/sync-changelog.mjs` (suporte ao campo `commit`)
+- `src/data/changelogQuery.ts` (filtro por kind)
+- `src/components/administrador/organograma/OrganogramaCards.tsx` (usa `AreaMiniTimeline`)
+- `src/i18n.ts` (v1.40.0)
+- `src/locales/pt/translation.json`, `src/locales/en/translation.json`
+- `CHANGELOG.md` (entrada nova + exemplo com `commit:`)
+- `.lovable/memory/architecture/organograma-source-of-truth.md`
 
-## Knowledge graph
+**Auto-gerados (via `npm run sync:changelog`)**
+- `src/data/projectChangelog.generated.ts`
+- `.lovable/CONTEXT.md`
+- `src/data/projectOrganograma.ts` (campo `organogramaLastUpdated`)
 
-**Nenhuma mudança no KG.** Tudo isso vive em código/markdown/memory; tabelas `medical_knowledge_graph*` ficam intactas.
+## Notas / decisões
 
-## Riscos & mitigação
-
-- **Parser quebra em entrada antiga** → tolerante: blocos não-conformes viram `area: meta` em vez de falhar.
-- **Agente esquece de rodar `sync:changelog`** → adicionar no fim da memory rule + na própria seção do CHANGELOG um comentário lembrete.
-- **CONTEXT.md desatualizado** → regenerado a cada `sync:changelog`; adicionar timestamp visível no topo.
+- **Sem mudanças no Knowledge Graph.** Confirmado: feature é puramente UI + parser.
+- **Não vamos inferir commits automaticamente** do git (Lovable gerencia git internamente e o sandbox não tem `remote.origin.url` confiável). O hash entra **opcionalmente** via metadata do CHANGELOG — quem escreve a entrada cola o hash quando relevante.
+- **Sem `baseUrl` configurado** = experiência atual preservada (chips estáticos), apenas com layout de timeline + filtros + expand. Quando o usuário conectar GitHub via Connectors, basta preencher `REPO_CONFIG.baseUrl` para ativar todos os links.
+- Mantém o componente sob 200 linhas; usa apenas `lucide-react` (`History`, `GitCommit`, `ExternalLink`, `ChevronDown`) e shadcn `Badge`/`Button` já no projeto.
