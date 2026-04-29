@@ -44,10 +44,10 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const [error, setError] = useState<string | null>(null);
   const source = useMemo(() => buildMermaid(orientation), [orientation]);
 
-  const { containerRef, innerRef, fit } = useScrollPanZoom<HTMLDivElement>({
-    min: 0.1,
+  const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
+    min: 0.2,
     max: 4,
-    fitMin: 0.08,
+    fitMin: 0.4,
   });
 
   useEffect(() => {
@@ -128,13 +128,14 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           <div
             ref={containerRef}
             className="relative rounded-md border bg-muted/20 overflow-hidden"
-            style={{ height: 600 }}
+            style={{ height: 820 }}
           >
             <div
               ref={innerRef}
-              className="absolute inset-0 [&_svg]:!block [&_svg]:!max-w-none origin-top-left"
+              className="absolute top-0 left-0 [&_svg]:!block [&_svg]:!max-w-none origin-top-left will-change-transform"
               style={{
-                transform: `translate3d(${0}px, ${0}px, 0)`,
+                transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
+                transformOrigin: "0 0",
               }}
             >
               <div
