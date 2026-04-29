@@ -67,6 +67,7 @@ const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-know
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
+const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -364,6 +365,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: AccessRequestsPanel,
     description: 'Gerenciamento de solicitações de acesso à plataforma'
+  },
+  {
+    id: 'organograma',
+    label: 'Organograma do Projeto',
+    group: 'configuration',
+    component: OrganogramaTab,
+    description: 'Mapa estrutural do projeto + changelog visual + grafo de áreas'
   }
 ];
 

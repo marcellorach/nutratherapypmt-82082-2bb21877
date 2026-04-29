@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-29 🗺️ Organograma do Projeto (admin) — 4 lentes + changelog visual (i18n v1.38.0)
+- ✅ **Nova tab `Organograma do Projeto`** em `/administrador?tab=organograma` (grupo Configurações), inspirada na `/admin/organograma` do Sleep Graph RAG
+- ✅ **4 lentes complementares**: Grafo (force-graph 2D com áreas como hubs coloridos + componentes como folhas + cross-links com partículas), Diagrama (Mermaid TD/LR com pan/zoom estilo Figma), Cards (árvore expansível por área com busca + ASCII fallback), Changelog (timeline filtrada por área e status)
+- ✅ **Single source of truth tipada**: `src/data/projectOrganograma.ts` (10 áreas: auth, curation, kg, base-knowledge, clinical-pipeline, vet-ui, tutor-ui, admin, i18n, infra), `src/data/projectChangelog.ts` (espelho do CHANGELOG visual filtrável), `src/data/organogramaAreaMeta.ts` (ícones + paleta hex por área)
+- ✅ **Card Convenções Core** extraído da knowledge base (No-Mock, Bilíngue, Canonical IDs, Curation Gatekeeper, etc.)
+- ✅ **Hook `useScrollPanZoom`**: zoom focado no cursor + pan via translate3d + ResizeObserver para re-fit ao trocar de tab
+- ✅ **Memory rule nova** (`mem://architecture/organograma-source-of-truth`): protocolo obrigatório de atualização simultânea (organograma + changelog + I18N_VERSION) a cada mudança estrutural — institucionaliza o padrão que tem reduzido erros do agente
+- ✅ **Itens da sidebar** agrupados em Configurações com ícone `ListTree`
+- ✅ **i18n v1.38.0**: bump de versão para forçar refresh de cache
+
 ### Changed - 2026-04-28 ⏱️ Pipeline Clínico com Progresso Real + Console ao Vivo (i18n v1.30.0)
 - ✅ **Progresso real por estágio**: `runClinicalAnalysisPipeline` agora aceita um callback `onProgress` que emite eventos `stage-start` / `stage-end` / `log` para cada etapa (predisposições, exames, KG, interações, recomendação). O workflow visual em `ClinicalPipelineWorkflow` deixa de "completar tudo de uma vez" no final — cada estágio acende e apaga conforme realmente termina, com duração medida via `performance.now()`
 - ✅ **Novo `ClinicalPipelineLogPanel`**: console ao vivo (estilo digestão científica) renderizado abaixo do workflow na `PetProfilePage`. Mostra timestamp `HH:MM:SS.mmm`, ícone por nível (info/sucesso/aviso/erro), badge do estágio ativo, contador de eventos, autoscroll e ações **Limpar** / **Exportar `.log`**. Limite circular de 200 entradas
