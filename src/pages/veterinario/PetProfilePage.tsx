@@ -26,6 +26,7 @@ import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
 import { useToast } from '@/hooks/use-toast';
+import { useUpsertPetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 
 const severityColors: Record<string, string> = {
   mild: 'bg-yellow-100 text-yellow-800',
@@ -46,6 +47,7 @@ const PetProfilePage: React.FC = () => {
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
   const conditionInsights = useConditionInsights(data?.conditions);
+  const upsertSnapshot = useUpsertPetClinicalAnalysisSnapshot();
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
   const [confidenceLevel, setConfidenceLevel] = useState<'high' | 'medium' | 'low' | 'insufficient'>('medium');
@@ -113,8 +115,8 @@ const PetProfilePage: React.FC = () => {
         condition: c.condition_name,
         scientificEvidence: hasEvidence
           ? Math.min(90, 50 + matchingTriplets.length * 10)
-          : 30 + Math.floor(Math.random() * 20),
-        planExperience: hasEvidence ? 40 + matchingTriplets.length * 5 : 20 + Math.floor(Math.random() * 15),
+          : 0,
+        planExperience: hasEvidence ? 40 + matchingTriplets.length * 5 : 0,
       };
     });
   }, [data?.conditions, kgTriplets]);
@@ -176,6 +178,28 @@ const PetProfilePage: React.FC = () => {
       setRecommendationCompounds(
         result.compounds.length > 0 ? result.compounds : []
       );
+
+      // Persist snapshot so the BiologicalTimeline (and any other consumer)
+      // can render projections grounded on this analysis.
+      try {
+        await upsertSnapshot.mutateAsync({
+          pet_id: profile.id,
+          status: 'complete',
+          analysis_version: 'v1',
+          completed_at: new Date().toISOString(),
+          confidence_level: result.confidenceLevel,
+          recommendation_compounds: result.compounds || [],
+          predispositions: result.predispositions || [],
+          lab_alerts: result.labAlerts || [],
+          interaction_alerts: result.interactionAlerts || [],
+          clinical_discoveries: result.clinicalDiscoveries || [],
+          kg_triplets: result.kgTriplets || [],
+          kg_pathways: result.kgPathways || [],
+          kg_projections: result.kgProjections || [],
+        });
+      } catch (snapErr) {
+        console.warn('Failed to persist analysis snapshot', snapErr);
+      }
 
       const alertCount = result.predispositions.filter(p => !p.already_diagnosed).length
         + result.labAlerts.length + result.interactionAlerts.length;
@@ -744,6 +768,8 @@ const PetProfilePage: React.FC = () => {
                 petBreed={profile.breed}
                 petAge={profile.age_years}
                 petId={id!}
+                onRequestAnalysis={handleAnalyzeWithKG}
+                isAnalyzing={analyzing}
               />
               <div className="min-h-[420px]">
                 <PetClinicalChat
