@@ -232,3 +232,162 @@ describe("parseChangelog", () => {
     expect(parseChangelog("# título\n\nsem entradas\n")).toEqual([]);
   });
 });
+
+describe("inferArea — variações reais de paths", () => {
+  it("kg vence sobre infra para edge functions kg-*", () => {
+    expect(inferArea(["supabase/functions/kg-missing-triplets/index.ts"])).toBe("kg");
+    expect(inferArea(["supabase/functions/kg-search/index.ts"])).toBe("kg");
+  });
+
+  it("triplet em qualquer edge function vai para curation", () => {
+    expect(inferArea(["supabase/functions/enrich-triplet/index.ts"])).toBe("curation");
+    expect(inferArea(["supabase/functions/batch-reprocess-triplets/index.ts"])).toBe("curation");
+  });
+
+  it("process-pdf / digest / extract caem em curation", () => {
+    expect(inferArea(["supabase/functions/process-pdf/index.ts"])).toBe("curation");
+    expect(inferArea(["supabase/functions/extract-pet-clinical-data/index.ts"])).toBe("curation");
+  });
+
+  it("componentes administrador/organograma → admin", () => {
+    expect(
+      inferArea(["src/components/administrador/organograma/AreaMiniTimeline.tsx"]),
+    ).toBe("admin");
+    expect(inferArea(["src/config/admin-tabs.ts"])).toBe("admin");
+  });
+
+  it("locales e i18n.ts → i18n", () => {
+    expect(inferArea(["src/locales/en/translation.json"])).toBe("i18n");
+    expect(inferArea(["src/i18n.ts"])).toBe("i18n");
+  });
+
+  it("biomedical-taxonomy e qualquer path com knowledge-graph → kg", () => {
+    expect(inferArea(["src/data/biomedical-taxonomy.ts"])).toBe("kg");
+    expect(inferArea(["src/services/knowledge-graph-utils.ts"])).toBe("kg");
+    expect(inferArea(["src/types/neo4j.ts"])).toBe("kg");
+  });
+
+  it("base-knowledge tem prioridade sobre regras genéricas posteriores", () => {
+    expect(inferArea(["src/hooks/useBaseKnowledgeCandidates.ts"])).toBe("base-knowledge");
+  });
+
+  it("AuthContext e páginas de auth → auth", () => {
+    expect(inferArea(["src/contexts/AuthContext.tsx"])).toBe("auth");
+    expect(inferArea(["src/pages/Auth.tsx"])).toBe("auth");
+  });
+
+  it("projectOrganograma e projectChangelog → admin", () => {
+    expect(inferArea(["src/data/projectOrganograma.ts"])).toBe("admin");
+    expect(inferArea(["src/data/projectChangelog.generated.ts"])).toBe("admin");
+  });
+
+  it("primeiro path determina a área (ordem de chegada importa)", () => {
+    // i18n vence porque é o primeiro path testado
+    expect(
+      inferArea(["src/locales/pt/translation.json", "src/pages/administrador/X.tsx"]),
+    ).toBe("i18n");
+  });
+
+  it("paths totalmente fora de regras → meta", () => {
+    expect(inferArea(["docs/README.md", "package.json", "vite.config.ts"])).toBe("meta");
+  });
+});
+
+describe("parseChangelog — ordenação e formatos reais", () => {
+  it("ordena estritamente por data desc mesmo com seções intercaladas", () => {
+    const md = `## [Unreleased]
+
+### Added - 2026-01-05 — Recente
+- a
+
+### Fixed - 2025-12-01 — Médio
+- b
+
+## [1.0.0] - 2025-01-01
+
+### Added - 2025-01-01 — Antigo
+- c
+
+### Changed - 2026-03-10 — Mais recente
+- d
+`;
+    const dates = parseChangelog(md).map((e) => e.date);
+    expect(dates).toEqual(["2026-03-10", "2026-01-05", "2025-12-01", "2025-01-01"]);
+  });
+
+  it("aceita cabeçalho com emoji direto após a data (sem separador)", () => {
+    const md = `### Added - 2026-04-29 🗺️ Mapa de mudanças
+- bullet
+
+### Fixed - 2026-04-28 🔗 Links de Estudos
+- bullet
+`;
+    const entries = parseChangelog(md);
+    expect(entries).toHaveLength(2);
+    // emoji removido do início do título
+    expect(entries[0].title).toBe("Mapa de mudanças");
+    expect(entries[1].title).toBe("Links de Estudos");
+  });
+
+  it("tolera múltiplas linhas em branco e bullets indentados entre cabeçalhos", () => {
+    const md = `### Added - 2026-04-29 — Com espaços
+
+
+- bullet 1
+
+   - bullet indentado
+
+
+### Fixed - 2026-04-28 — Próxima
+- outro
+`;
+    const entries = parseChangelog(md);
+    expect(entries).toHaveLength(2);
+    expect(entries[0].bullets).toEqual(
+      expect.arrayContaining(["bullet 1", "bullet indentado"]),
+    );
+  });
+
+  it("datas iguais mantêm entradas distintas (não deduplica) e ficam adjacentes", () => {
+    const md = `### Added - 2026-04-29 — Primeira
+- a
+
+### Fixed - 2026-04-29 — Segunda
+- b
+
+### Changed - 2026-04-28 — Terceira
+- c
+`;
+    const entries = parseChangelog(md);
+    expect(entries).toHaveLength(3);
+    expect(entries[0].date).toBe("2026-04-29");
+    expect(entries[1].date).toBe("2026-04-29");
+    expect(entries[2].date).toBe("2026-04-28");
+    // ambas entradas de 2026-04-29 preservadas
+    const titles = entries.filter((e) => e.date === "2026-04-29").map((e) => e.title);
+    expect(titles).toEqual(expect.arrayContaining(["Primeira", "Segunda"]));
+  });
+
+  it("não confunde linhas '## [versão]' com cabeçalhos de entrada", () => {
+    const md = `## [Unreleased]
+
+### Added - 2026-04-29 — X
+- a
+
+## [1.2.0] - 2026-04-28
+
+### Fixed - 2026-04-20 — Y
+- b
+`;
+    const entries = parseChangelog(md);
+    expect(entries.map((e) => e.date)).toEqual(["2026-04-29", "2026-04-20"]);
+  });
+
+  it("usa inferArea quando metadata não declara área (path real)", () => {
+    const md = `### Added - 2026-04-29 — Nova função KG
+- Criado supabase/functions/kg-search/index.ts
+`;
+    const [e] = parseChangelog(md);
+    expect(e.area).toBe("kg");
+  });
+});
