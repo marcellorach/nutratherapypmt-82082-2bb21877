@@ -13,6 +13,7 @@ import {
 import dogSilhouette from '@/assets/dog-silhouette.png';
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePetTrajectoryProjection';
+import EvidenceGapCard from '@/components/pet/EvidenceGapCard';
 
 // Map conditions (substring lookup) to body regions on the silhouette image.
 const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
@@ -324,6 +325,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   );
 
   return (
+    <div className="space-y-3">
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
@@ -486,6 +488,14 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         </div>
       </CardContent>
     </Card>
+    {petId && (
+      <EvidenceGapCard
+        petId={petId}
+        yearsGained={yearsGained}
+        hasCoverage={coveredCount > 0}
+      />
+    )}
+    </div>
   );
 };
 
