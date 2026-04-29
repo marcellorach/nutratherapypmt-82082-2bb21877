@@ -523,6 +523,8 @@ const ConfiguracoesIATab: React.FC = () => {
                   Dica: se a chave já está provisionada via conector (secret PERPLEXITY_API_KEY no backend), o card de saúde abaixo já mostrará Conectado — não é necessário inserir aqui.
                 </p>
               </TabsContent>
+
+              <TabsContent value="neo4j" className="space-y-4 pt-4">
                 <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mb-4">
                   <CardHeader>
                     <CardTitle className="text-sm flex items-center gap-2">
