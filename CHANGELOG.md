@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-29 — Gap-Fill robusto + preview de pendentes + lista de condições no Digital Twin
+<!-- area: vet-ui · status: entregue · i18n: 1.41.3 -->
+- `kg-evidence-gap-fill`: logging detalhado em todas as etapas (auth, discovery, busca, geração de triplets); shortlist de compounds prioriza o stack recomendado do pet (snapshot `pet_clinical_analysis_snapshots`) antes do fallback geriátrico; busca PubMed em duas passadas (estrita canine → relaxada `unspecified`) com `species_hint` registrado no triplet; CORS/`Cache-Control: no-store` garantidos em todos os retornos.
+- `EvidenceGapCard`: toasts diferenciados (sucesso, sem pares, sem triplets, erro) e card inline com breakdown da última busca (pairs/studies/pending + lista por par com status `ok | no_pubmed_results | assessment_failed | error | dry_run` e `species_hint`).
+- `project-pet-trajectory`: aceita flag `include_pending_gap_fill` e, quando ativo, inclui triplets `pending` originados de `pubmed_gap_fill` no cálculo de cobertura/years_gained, marcando contribuições como `provisional: true`.
+- `usePetTrajectoryProjection`: novo parâmetro `includePending` (entra na queryKey, `staleTime: 0` no modo preview).
+- `DigitalTwinDog`: toggle admin-only "Pré-visualizar com pendentes" com banner violeta e sub-rótulo `(provisório)` no KPI de anos ganhos; restaurada a `ConditionsMiniList` sob cada silhueta (severidade + nome + "Novo X%" + "★ protegido"), substituindo a linha "N marcadores".
+- i18n: novas chaves `petProfile.digitalTwin.previewPendingToggle/previewPendingBanner/provisional` e `evidenceGap.detailsTitle/detailStatus.*/toastNoPairs/toastNoTriplets` em PT/EN. Bump `I18N_VERSION` 1.41.2 → 1.41.3.
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/hooks/usePetTrajectoryProjection.ts, src/hooks/useKgEvidenceGapFill.ts, src/components/pet/DigitalTwinDog.tsx, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-04-29 — Pipeline KG Evidence Gap-Fill (PubMed → triplets pendentes)
 <!-- area: kg · status: entregue · i18n: 1.41.2 -->
 - Nova edge function `kg-evidence-gap-fill`: para cada par (composto canônico × condição do pet) sem evidência forte no KG (`approved` com `extraction_confidence ≥ 0.6`), busca o PubMed via NCBI E-utilities (`esearch` + `efetch`), extrai abstracts e usa Gemini (`google/gemini-3-flash-preview`, tool-calling) para gerar `efficacy_0_5`, `evidence_level`, `rationale` e `cited_pmids`.
