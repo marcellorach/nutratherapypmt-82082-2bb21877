@@ -6838,7 +6838,10 @@
         "mechanism": "Mechanism",
         "effect": "Effect",
         "outcome": "Outcome"
-      }
+      },
+      "provisionalBadge": "+{{count}} provisional",
+      "provisionalLegend": "provisional edge (gap-fill, awaiting curation)",
+      "provisionalCount": "provisional"
     },
     "compoundChat": {
       "selectPrompt": "Select a recommended compound to start a specialized conversation:",

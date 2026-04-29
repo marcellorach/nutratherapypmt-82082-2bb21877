@@ -6838,7 +6838,10 @@
         "mechanism": "Mecanismo",
         "effect": "Efeito",
         "outcome": "Desfecho"
-      }
+      },
+      "provisionalBadge": "+{{count}} provisórios",
+      "provisionalLegend": "aresta provisória (gap-fill, aguardando curadoria)",
+      "provisionalCount": "provisórios"
     },
     "compoundChat": {
       "selectPrompt": "Selecione um composto recomendado para iniciar uma conversa especializada:",
