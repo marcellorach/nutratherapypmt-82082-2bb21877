@@ -704,6 +704,10 @@ const PetProfilePage: React.FC = () => {
                   <Sparkles className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.recommendations')}
                 </TabsTrigger>
+                <TabsTrigger value="trajectory" className="gap-1">
+                  <Dna className="h-3.5 w-3.5" />
+                  {t('petProfile.analysisTabs.trajectory', 'Trajetória Biológica')}
+                </TabsTrigger>
                 <TabsTrigger value="biological-pathway" className="gap-1">
                   <GitBranch className="h-3.5 w-3.5" />
                   {t('petProfile.analysisTabs.biologicalPathway')}
@@ -724,6 +728,18 @@ const PetProfilePage: React.FC = () => {
                   petBreed={profile.breed}
                   petAge={profile.age_years}
                   petConditions={conditions?.map((c: any) => c.condition_name) || []}
+                />
+              </TabsContent>
+
+              <TabsContent value="trajectory">
+                <BiologicalTimeline
+                  conditions={conditions}
+                  petName={profile.name}
+                  petBreed={profile.breed}
+                  petAge={profile.age_years}
+                  petId={id!}
+                  onRequestAnalysis={handleAnalyzeWithKG}
+                  isAnalyzing={analyzing}
                 />
               </TabsContent>
 
@@ -762,16 +778,7 @@ const PetProfilePage: React.FC = () => {
           {/* Right column: Biological Timeline (top) + Chat (below) */}
           <div className="space-y-4">
             <div className="lg:sticky lg:top-4 space-y-4">
-              <BiologicalTimeline
-                conditions={conditions}
-                petName={profile.name}
-                petBreed={profile.breed}
-                petAge={profile.age_years}
-                petId={id!}
-                onRequestAnalysis={handleAnalyzeWithKG}
-                isAnalyzing={analyzing}
-              />
-              <div className="min-h-[420px]">
+              <div className="min-h-[640px]">
                 <PetClinicalChat
                   petId={id!}
                   petBreed={profile.breed}

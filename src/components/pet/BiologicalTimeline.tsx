@@ -121,29 +121,29 @@ const ConditionsMiniList: React.FC<{
     if (c.probability < 0.25) continue;
     items.push({ key: `n-${c.name}`, name: c.name, kind: 'new', probability: c.probability });
   }
-  if (items.length === 0) return <p className="text-[10px] text-muted-foreground italic text-center py-1">{emptyLabel}</p>;
-  const visible = items.slice(0, 6);
+  if (items.length === 0) return <p className="text-xs text-muted-foreground italic text-center py-1">{emptyLabel}</p>;
+  const visible = items.slice(0, 8);
   const extra = items.length - visible.length;
   return (
-    <ul className="space-y-0.5 mt-1">
+    <ul className="space-y-1 mt-1">
       {visible.map(it => (
-        <li key={it.key} className="flex items-center gap-1.5 text-[10px] leading-tight">
+        <li key={it.key} className="flex items-center gap-2 text-xs leading-tight">
           {it.kind === 'existing' && it.severity ? (
-            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${SEV_DOT[it.severity]}`} />
           ) : (
-            <Sparkles className="h-2.5 w-2.5 text-amber-500 flex-shrink-0" />
+            <Sparkles className="h-3 w-3 text-amber-500 flex-shrink-0" />
           )}
           <span className="flex-1 truncate text-foreground/90">{it.name}</span>
           {it.kind === 'existing' && it.severity && (
-            <span className="text-[9px] text-muted-foreground">{t(`petProfile.severity.${it.severity}`, it.severity)}</span>
+            <span className="text-[10px] text-muted-foreground">{t(`petProfile.severity.${it.severity}`, it.severity)}</span>
           )}
           {it.kind === 'new' && it.probability != null && (
-            <span className="text-[9px] text-amber-700 dark:text-amber-400">{Math.round(it.probability * 100)}%</span>
+            <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">{Math.round(it.probability * 100)}%</span>
           )}
-          {it.protectedHere && <span className="text-emerald-600 dark:text-emerald-400 text-[10px]">★</span>}
+          {it.protectedHere && <span className="text-emerald-600 dark:text-emerald-400 text-xs">★</span>}
         </li>
       ))}
-      {extra > 0 && <li className="text-[9px] text-muted-foreground italic text-center pt-0.5">+{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}</li>}
+      {extra > 0 && <li className="text-[10px] text-muted-foreground italic text-center pt-1">+{extra} {t('petProfile.biologicalTimeline.moreConditions', 'mais')}</li>}
     </ul>
   );
 };
@@ -299,169 +299,208 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 space-y-4">
-        {/* Vital stats row */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-md border bg-muted/30 p-2">
+      <CardContent className="p-4 lg:p-6 space-y-5">
+        {/* Vital stats row — 4 columns on lg, prominent typography */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="rounded-lg border bg-muted/30 p-3">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('petProfile.biologicalTimeline.biologicalAge')}</p>
-            <p className="text-lg font-semibold">
+            <p className="text-2xl font-semibold mt-1">
               {current.biologicalAge.toFixed(1)}
-              <span className="text-xs text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
+              <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
             </p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground mt-1">
               {current.biologicalAge > current.ageAtYear ? (
                 <span className="text-orange-600 dark:text-orange-400 inline-flex items-center gap-0.5">
-                  <TrendingUp className="h-2.5 w-2.5" />+{(current.biologicalAge - current.ageAtYear).toFixed(1)}
+                  <TrendingUp className="h-3 w-3" />+{(current.biologicalAge - current.ageAtYear).toFixed(1)}
                 </span>
               ) : (
                 <span className="text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5">
-                  <TrendingDown className="h-2.5 w-2.5" />{(current.biologicalAge - current.ageAtYear).toFixed(1)}
+                  <TrendingDown className="h-3 w-3" />{(current.biologicalAge - current.ageAtYear).toFixed(1)}
                 </span>
               )} {t('petProfile.biologicalTimeline.vsChrono')}
             </p>
           </div>
-          <div className="rounded-md border bg-muted/30 p-2">
+          <div className="rounded-lg border bg-muted/30 p-3">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('petProfile.biologicalTimeline.chronologicalAge')}</p>
-            <p className="text-lg font-semibold">
+            <p className="text-2xl font-semibold mt-1">
               {current.ageAtYear.toFixed(1)}
-              <span className="text-xs text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
+              <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
             </p>
-            <p className="text-[10px] text-muted-foreground">{t('petProfile.biologicalTimeline.breedLifespan', { years: lifespan })}</p>
+            <p className="text-[11px] text-muted-foreground mt-1">{t('petProfile.biologicalTimeline.breedLifespan', { years: lifespan })}</p>
           </div>
-          <div className="rounded-md border bg-muted/30 p-2">
+          <div className="rounded-lg border bg-muted/30 p-3">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-              <Heart className="h-2.5 w-2.5" />{t('petProfile.biologicalTimeline.remainingYears')}
+              <Heart className="h-3 w-3" />{t('petProfile.biologicalTimeline.remainingYears')}
             </p>
-            <p className="text-lg font-semibold">
+            <p className="text-2xl font-semibold mt-1">
               {current.expectedRemainingYears.toFixed(1)}
-              <span className="text-xs text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
+              <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
             </p>
             {Math.abs(yearsGained) >= 0.1 && (
-              <p className={`text-[10px] ${yearsGained > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              <p className={`text-[11px] mt-1 ${yearsGained > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'}`}>
                 {yearsGained > 0 ? '+' : ''}{yearsGained.toFixed(1)} {t('petProfile.biologicalTimeline.withProtocol')}
               </p>
             )}
           </div>
+          <div className="rounded-lg border bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 p-3">
+            <p className="text-[10px] uppercase tracking-wide text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />{t('petProfile.biologicalTimeline.kpiGain', 'Ganho com protocolo')}
+            </p>
+            <p className="text-2xl font-semibold mt-1 text-emerald-700 dark:text-emerald-400">
+              {yearsGained > 0 ? '+' : ''}{yearsGained.toFixed(1)}
+              <span className="text-sm text-emerald-700/70 dark:text-emerald-400/70 ml-1">{t('petProfile.biologicalTimeline.yearsShort')}</span>
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {totalCovered > 0
+                ? t('petProfile.biologicalTimeline.coverage', { covered: coveredCount, total: totalCovered })
+                : t('petProfile.biologicalTimeline.kpiGainHint', 'baseado na cobertura KG')}
+            </p>
+          </div>
         </div>
 
         {noKgBenefit && (
-          <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/10 p-2 flex items-start gap-2">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-amber-800 dark:text-amber-300">
+          <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/10 p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 dark:text-amber-300">
               {t('petProfile.biologicalTimeline.noBenefitBanner', 'Para este pet, o protocolo geroprotetor NÃO altera a trajetória: nenhuma das condições/predisposições tem evidência KG suficiente no estado atual da base.')}
             </p>
           </div>
         )}
 
-        {/* Side-by-side anatomical compare */}
-        <div className="rounded-md border bg-card p-3">
-          <p className="text-xs font-semibold flex items-center gap-1.5 mb-2">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            {t('petProfile.biologicalTimeline.compareTitle')}
-          </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-[10px] bg-muted/40">{t('petProfile.biologicalTimeline.withoutProtocol')}</Badge>
-                <span className="text-[10px] text-muted-foreground">{projWithout?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+        {/* Main grid: dogs comparison (left) + clinical evidence panel (right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          {/* LEFT: Side-by-side anatomical compare (3/5) */}
+          <div className="lg:col-span-3 rounded-lg border bg-card p-4">
+            <p className="text-sm font-semibold flex items-center gap-1.5 mb-3">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              {t('petProfile.biologicalTimeline.compareTitle')}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs bg-muted/40">{t('petProfile.biologicalTimeline.scenarioWithout', 'Sem protocolo')}</Badge>
+                  <span className="text-xs text-muted-foreground">{projWithout?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+                </div>
+                <div className="rounded-md bg-background border border-border/50 p-2 aspect-[4/3]">
+                  <DogAnatomySVG regionStates={regionsWithout.states} systemicSeverity={regionsWithout.systemic} showProtectionAura={false} className="w-full h-full" />
+                </div>
+                <ConditionsMiniList proj={projWithout} tone="neutral" emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')} t={t} />
               </div>
-              <div className="rounded-md bg-background border border-border/50 p-2 aspect-[8/5]">
-                <DogAnatomySVG regionStates={regionsWithout.states} systemicSeverity={regionsWithout.systemic} showProtectionAura={false} className="w-full h-full" />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400">
+                    <Sparkles className="h-3 w-3 mr-0.5" />{t('petProfile.biologicalTimeline.scenarioWith', 'Com protocolo')}
+                  </Badge>
+                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{projWith?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+                </div>
+                <div className={`rounded-md bg-background border p-2 aspect-[4/3] ${noKgBenefit ? 'border-border/50' : 'border-emerald-200 dark:border-emerald-900/50'}`}>
+                  <DogAnatomySVG regionStates={regionsWith.states} systemicSeverity={regionsWith.systemic} showProtectionAura={!noKgBenefit} className="w-full h-full" />
+                </div>
+                <ConditionsMiniList proj={projWith} tone="protected" emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')} t={t} />
               </div>
-              <ConditionsMiniList proj={projWithout} tone="neutral" emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')} t={t} />
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-[10px] bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400">
-                  <Sparkles className="h-2.5 w-2.5 mr-0.5" />{t('petProfile.biologicalTimeline.withProtocolLabel')}
-                </Badge>
-                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">{projWith?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
-              </div>
-              <div className={`rounded-md bg-background border p-2 aspect-[8/5] ${noKgBenefit ? 'border-border/50' : 'border-emerald-200 dark:border-emerald-900/50'}`}>
-                <DogAnatomySVG regionStates={regionsWith.states} systemicSeverity={regionsWith.systemic} showProtectionAura={!noKgBenefit} className="w-full h-full" />
-              </div>
-              <ConditionsMiniList proj={projWith} tone="protected" emptyLabel={t('petProfile.biologicalTimeline.noProjectedRisks')} t={t} />
             </div>
           </div>
 
-          {/* Visual legend */}
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-3 pt-2 border-t border-border/50 text-[10px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(48, 95%, 55%)' }} />{t('petProfile.severity.mild')}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(25, 95%, 52%)' }} />{t('petProfile.severity.moderate')}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(0, 80%, 52%)' }} />{t('petProfile.severity.severe')}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full border border-dashed border-amber-500" />{t('petProfile.biologicalTimeline.legend.futureRisk', 'risco futuro')}</span>
-            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">★ {t('petProfile.biologicalTimeline.legend.protected', 'protegido')}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: 'hsl(0, 80%, 52%)', opacity: 0.3 }} />{t('petProfile.biologicalTimeline.legend.systemic', 'carga sistêmica')}</span>
-          </div>
-          {totalCovered > 0 && (
-            <p className="text-[10px] text-muted-foreground mt-2 text-center">
-              {t('petProfile.biologicalTimeline.coverage', { covered: coveredCount, total: totalCovered })}
+          {/* RIGHT: Clinical evidence panel (2/5) */}
+          <div className="lg:col-span-2 rounded-lg border bg-card p-4 space-y-4">
+            <p className="text-sm font-semibold flex items-center gap-1.5">
+              <BookOpen className="h-4 w-4 text-primary" />
+              {t('petProfile.biologicalTimeline.evidencePanelTitle', 'Evidência clínica')}
             </p>
-          )}
+
+            {/* Coverage block */}
+            {totalCovered > 0 && (
+              <div className="rounded-md border bg-muted/20 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('petProfile.biologicalTimeline.coverageTitle', 'Cobertura KG')}</p>
+                <p className="text-lg font-semibold mt-0.5">{coveredCount}<span className="text-sm text-muted-foreground">/{totalCovered}</span></p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {t('petProfile.biologicalTimeline.coverageHint', 'condições com evidência específica para o stack proposto')}
+                </p>
+              </div>
+            )}
+
+            {/* Caveats */}
+            {caveats.length > 0 && (
+              <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 p-3 space-y-1.5">
+                <p className="text-xs font-semibold flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
+                  <AlertTriangle className="h-3.5 w-3.5" />{t('petProfile.biologicalTimeline.caveatsTitle')}
+                </p>
+                <ul className="space-y-1">
+                  {caveats.map((cv: any, i: number) => (
+                    <li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                      <span className="text-amber-600 dark:text-amber-400 mt-0.5">•</span>
+                      <span>{cv.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Citations */}
+            {aiCitations.length > 0 && (
+              <div className="rounded-md border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/10 p-3 space-y-2">
+                <p className="text-xs font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                  <BookOpen className="h-3.5 w-3.5" />{t('petProfile.biologicalTimeline.evidenceUsed', { count: aiCitations.length })}
+                </p>
+                <ul className="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
+                  {aiCitations.slice(0, 12).map((c: any, i: number) => (
+                    <li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                      <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0 bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-300">
+                        {t(`petProfile.biologicalTimeline.citationType.${c.type}`, { defaultValue: c.type })}
+                      </Badge>
+                      <span className="leading-snug">{c.summary}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Legend */}
+            <div className="rounded-md border bg-muted/10 p-3">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">{t('petProfile.biologicalTimeline.legendTitle', 'Legenda')}</p>
+              <div className="grid grid-cols-1 gap-1 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(48, 95%, 55%)' }} />{t('petProfile.severity.mild')}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(25, 95%, 52%)' }} />{t('petProfile.severity.moderate')}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'hsl(0, 80%, 52%)' }} />{t('petProfile.severity.severe')}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-full border border-dashed border-amber-500" />{t('petProfile.biologicalTimeline.legend.futureRisk', 'risco futuro')}</span>
+                <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">★ {t('petProfile.biologicalTimeline.legend.protected', 'protegido')}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: 'hsl(0, 80%, 52%)', opacity: 0.3 }} />{t('petProfile.biologicalTimeline.legend.systemic', 'carga sistêmica')}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Time slider */}
-        <div className="space-y-2 pt-2 border-t">
-          <div className="flex items-center justify-between text-xs">
+        {/* Time slider — full width */}
+        <div className="space-y-2 pt-3 border-t">
+          <div className="flex items-center justify-between text-sm">
             <Label className="font-medium">{t('petProfile.biologicalTimeline.projectionLabel')}</Label>
-            <span className="font-semibold text-primary">
+            <span className="font-semibold text-primary text-base">
               {yearsAhead === 0 ? t('petProfile.biologicalTimeline.today') : t('petProfile.biologicalTimeline.yearsFromNow', { years: yearsAhead })}
             </span>
           </div>
           <Slider value={[yearsAhead]} onValueChange={(v) => setYearsAhead(v[0])} min={0} max={maxSlider} step={1} className="w-full" />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>{t('petProfile.biologicalTimeline.today')}</span>
-            <span>{petAge + Math.floor(maxSlider / 2)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
-            <span>{petAge + maxSlider}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+          <div className="flex justify-between text-[11px] text-muted-foreground">
+            {Array.from({ length: 5 }).map((_, i) => {
+              const step = Math.round((maxSlider * i) / 4);
+              return (
+                <span key={i} className={i === 0 ? 'font-medium text-foreground/70' : ''}>
+                  {i === 0 ? t('petProfile.biologicalTimeline.today') : `${petAge + step}${t('petProfile.biologicalTimeline.yearsShort')}`}
+                </span>
+              );
+            })}
           </div>
         </div>
 
-        {/* Caveats panel */}
-        {caveats.length > 0 && (
-          <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 p-2 space-y-1">
-            <p className="text-[11px] font-semibold flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
-              <AlertTriangle className="h-3 w-3" />{t('petProfile.biologicalTimeline.caveatsTitle')}
-            </p>
-            <ul className="space-y-0.5">
-              {caveats.map((cv: any, i: number) => (
-                <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1">
-                  <span className="text-amber-600 dark:text-amber-400 mt-0.5">•</span>
-                  <span>{cv.message}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
         {/* Methodology */}
-        <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 p-2 text-[10px] text-muted-foreground space-y-1">
+        <div className="rounded-md border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 p-3 text-[11px] text-muted-foreground">
           <p className="flex items-start gap-1.5">
-            <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
               <strong>{t('petProfile.biologicalTimeline.disclaimerTitle')}:</strong>{' '}
               {t('petProfile.biologicalTimeline.disclaimerBodyAi')}
             </span>
           </p>
         </div>
-
-        {/* AI evidence citations */}
-        {aiCitations.length > 0 && (
-          <div className="rounded-md border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/10 p-2 space-y-1.5">
-            <p className="text-[11px] font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-              <BookOpen className="h-3 w-3" />{t('petProfile.biologicalTimeline.evidenceUsed', { count: aiCitations.length })}
-            </p>
-            <ul className="space-y-1 max-h-[140px] overflow-y-auto pr-1">
-              {aiCitations.slice(0, 6).map((c: any, i: number) => (
-                <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
-                  <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0 bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-300">
-                    {t(`petProfile.biologicalTimeline.citationType.${c.type}`, { defaultValue: c.type })}
-                  </Badge>
-                  <span className="leading-tight">{c.summary}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {/* Debug */}
         <div className="border-t pt-2">
