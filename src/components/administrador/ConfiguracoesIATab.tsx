@@ -714,6 +714,12 @@ const ConfiguracoesIATab: React.FC = () => {
               icon="🔍"
               description="File Search + Structured Output"
             />
+            <ApiStatusItem
+              service="Perplexity"
+              isConfigured={!!perplexityKey}
+              icon="✨"
+              description="Sonar Academic – KG Gap-Fill"
+            />
             <ApiStatusItem 
               service="Unstructured" 
               isConfigured={!!unstructuredKey} 
@@ -732,6 +738,8 @@ const ConfiguracoesIATab: React.FC = () => {
         <ConfigurationsSummary />
         
         <Neo4jStatusCard />
+
+        <PerplexityStatusCard />
         
         <ConsumoPainel />
       </div>
