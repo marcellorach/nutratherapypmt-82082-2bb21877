@@ -6960,6 +6960,9 @@
       "protected": "protected",
       "markersLabel": "markers",
       "protectedLabel": "protected",
+      "previewPendingToggle": "👁 Preview with pending (admin)",
+      "previewPendingBanner": "Provisional view — includes {{count}} triplet(s) still pending approval.",
+      "provisional": "provisional",
       "regions": {
         "joints": "Joints",
         "hip": "Hip",
@@ -7318,6 +7321,18 @@
     "openCuration": "Open curation",
     "disclaimer": "Findings are stored as pending for human curation and only affect the digital twin after approval. Source: PubMed/PMC (NCBI E-utilities). Structuring: Lovable AI (Gemini).",
     "toastSuccess": "{{studies}} study(ies) added, {{triplets}} pending triplet(s) ({{pairs}} pair(s) searched)",
-    "toastError": "Search failed: {{error}}"
+    "toastError": "Search failed: {{error}}",
+    "toastNoPairs": "No (compound × condition) pair eligible for gap-fill. Check that the pet's conditions and recommended stack have canonical English names (name_en).",
+    "toastNoTriplets": "{{pairs}} pair(s) searched on PubMed but none yielded a triplet. See breakdown below.",
+    "detailsTitle": "Last search breakdown",
+    "detailStatus": {
+      "ok": "✓ ok",
+      "no_pubmed_results": "no results",
+      "no_records": "no records",
+      "assessment_failed": "AI failed",
+      "triplet_failed": "insert failed",
+      "dry_run": "dry-run",
+      "error": "error"
+    }
   }
 }
