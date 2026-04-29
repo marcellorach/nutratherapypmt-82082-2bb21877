@@ -215,6 +215,170 @@ async function assessWithGemini(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Perplexity-first assessment
+// ---------------------------------------------------------------------------
+interface PerplexityAssessment {
+  efficacy_0_5: number;
+  evidence_level: 'meta_analysis' | 'clinical_trial' | 'in_vivo' | 'in_vitro' | 'case_report' | 'review' | 'unclear';
+  rationale: string;
+  cited_pmids: string[];
+  cited_dois: string[];
+  cited_urls: string[];
+  llm_confidence: number;
+  species_context: 'canine' | 'feline' | 'rodent' | 'human' | 'mixed' | 'unspecified';
+}
+
+async function assessWithPerplexity(
+  compound: string,
+  condition: string,
+): Promise<{ assessment: PerplexityAssessment | null; raw_citations: string[] }> {
+  if (!PERPLEXITY_API_KEY) {
+    console.warn('[gap-fill] PERPLEXITY_API_KEY not set, skipping Perplexity pass');
+    return { assessment: null, raw_citations: [] };
+  }
+
+  const schema = {
+    type: 'object',
+    properties: {
+      efficacy_0_5: { type: 'number' },
+      evidence_level: {
+        type: 'string',
+        enum: ['meta_analysis', 'clinical_trial', 'in_vivo', 'in_vitro', 'case_report', 'review', 'unclear'],
+      },
+      rationale: { type: 'string' },
+      cited_pmids: { type: 'array', items: { type: 'string' } },
+      cited_dois: { type: 'array', items: { type: 'string' } },
+      cited_urls: { type: 'array', items: { type: 'string' } },
+      llm_confidence: { type: 'number' },
+      species_context: {
+        type: 'string',
+        enum: ['canine', 'feline', 'rodent', 'human', 'mixed', 'unspecified'],
+      },
+    },
+    required: [
+      'efficacy_0_5', 'evidence_level', 'rationale',
+      'cited_pmids', 'cited_dois', 'cited_urls',
+      'llm_confidence', 'species_context',
+    ],
+  };
+
+  const body = {
+    model: 'sonar-reasoning-pro',
+    search_mode: 'academic',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+          'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
+          'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
+          'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+          'Be conservative. Return ONLY structured JSON matching the schema.',
+      },
+      {
+        role: 'user',
+        content:
+          `COMPOUND: ${compound}\nCONDITION: ${condition} (canine target)\n\n` +
+          'Scoring scale (efficacy_0_5):\n' +
+          ' 0 = no evidence at all\n' +
+          ' 1 = anecdotal / case report only\n' +
+          ' 2 = in vitro / cell culture only\n' +
+          ' 3 = in vivo dog OR strong rodent model\n' +
+          ' 4 = controlled clinical trial in dogs\n' +
+          ' 5 = meta-analysis / multiple RCTs in dogs\n\n' +
+          'cited_pmids: PubMed IDs you actually relied on (digits only).\n' +
+          'cited_dois: DOIs you actually relied on.\n' +
+          'cited_urls: full URLs of the citations Perplexity returned.\n' +
+          'llm_confidence: 0..1 — how confident you are in your own assessment.\n' +
+          'species_context: which species the BEST evidence comes from.',
+      },
+    ],
+    temperature: 0.1,
+    response_format: {
+      type: 'json_schema',
+      json_schema: { name: 'evidence_assessment', schema },
+    },
+  };
+
+  let res: Response;
+  try {
+    res = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    console.error('[gap-fill] Perplexity fetch threw', e);
+    return { assessment: null, raw_citations: [] };
+  }
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    console.error('[gap-fill] Perplexity HTTP', res.status, txt.slice(0, 500));
+    return { assessment: null, raw_citations: [] };
+  }
+
+  const json = await res.json();
+  const content: string = json?.choices?.[0]?.message?.content || '';
+  const rawCitations: string[] = Array.isArray(json?.citations) ? json.citations : [];
+
+  // sonar-reasoning models often emit <think>...</think> before the JSON.
+  const cleaned = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}$/) || cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error('[gap-fill] Perplexity returned no JSON', cleaned.slice(0, 300));
+    return { assessment: null, raw_citations: rawCitations };
+  }
+  let parsed: PerplexityAssessment;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    console.error('[gap-fill] Perplexity JSON parse failed', e, jsonMatch[0].slice(0, 300));
+    return { assessment: null, raw_citations: rawCitations };
+  }
+
+  // Sanitize PMIDs (digits only).
+  parsed.cited_pmids = (parsed.cited_pmids || [])
+    .map((p) => String(p).match(/\d{4,9}/)?.[0] || '')
+    .filter(Boolean);
+  parsed.cited_dois = (parsed.cited_dois || []).filter((d) => typeof d === 'string' && d.includes('/'));
+  parsed.cited_urls = (parsed.cited_urls || []).filter((u) => typeof u === 'string' && u.startsWith('http'));
+  parsed.efficacy_0_5 = Math.max(0, Math.min(5, Number(parsed.efficacy_0_5) || 0));
+  parsed.llm_confidence = Math.max(0, Math.min(1, Number(parsed.llm_confidence) || 0));
+
+  return { assessment: parsed, raw_citations: rawCitations };
+}
+
+/**
+ * Validate PMIDs returned by Perplexity by hitting NCBI esummary.
+ * Returns the subset of PMIDs that actually exist in PubMed.
+ */
+async function validatePmids(pmids: string[]): Promise<string[]> {
+  if (!pmids.length) return [];
+  const url = withApiKey(
+    `${PUBMED_BASE}/esummary.fcgi?db=pubmed&id=${pmids.join(',')}&retmode=json`,
+  );
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const json = await res.json();
+    const result = json?.result;
+    if (!result) return [];
+    const valid: string[] = [];
+    for (const pmid of pmids) {
+      if (result[pmid] && !result[pmid].error) valid.push(pmid);
+    }
+    return valid;
+  } catch (e) {
+    console.warn('[gap-fill] validatePmids failed', e);
+    return [];
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
