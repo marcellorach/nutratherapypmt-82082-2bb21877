@@ -6780,7 +6780,8 @@
       "scientificEvidence": "Evidência Científica",
       "projection": "Projeção de Melhora",
       "compoundChat": "Chat por Composto",
-      "clinicalAlerts": "Alertas Clínicos"
+      "clinicalAlerts": "Alertas Clínicos",
+      "trajectory": "Trajetória Biológica"
     },
     "conditionOrigin": {
       "vetDiagnosis": "Diagnóstico Veterinário",
@@ -7024,7 +7025,15 @@
       "lockedTitle": "Aguardando análise VetGraphRAG",
       "lockedBody": "A projeção de trajetória biológica só é gerada após a análise VetGraphRAG, para que o cenário \"com protocolo\" reflita o stack realmente recomendado para este pet.",
       "noBenefitBanner": "Para este pet, o protocolo geroprotetor NÃO altera a trajetória: nenhuma das condições/predisposições tem evidência KG suficiente no estado atual da base.",
-      "basedOnAnalysis": "Baseado na análise VetGraphRAG de {{when}}"
+      "basedOnAnalysis": "Baseado na análise VetGraphRAG de {{when}}",
+      "evidencePanelTitle": "Evidência clínica",
+      "scenarioWithout": "Sem protocolo",
+      "scenarioWith": "Com protocolo",
+      "coverageTitle": "Cobertura KG",
+      "coverageHint": "condições com evidência específica para o stack proposto",
+      "legendTitle": "Legenda",
+      "kpiGain": "Ganho com protocolo",
+      "kpiGainHint": "baseado na cobertura KG"
     },
     "anatomy": {
       "regions": {

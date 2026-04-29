@@ -6780,7 +6780,8 @@
       "scientificEvidence": "Scientific Evidence",
       "projection": "Improvement Projection",
       "compoundChat": "Compound Chat",
-      "clinicalAlerts": "Clinical Alerts"
+      "clinicalAlerts": "Clinical Alerts",
+      "trajectory": "Biological Trajectory"
     },
     "conditionOrigin": {
       "vetDiagnosis": "Veterinary Diagnosis",
@@ -7024,7 +7025,15 @@
       "lockedBody": "The biological trajectory projection is only generated after the VetGraphRAG analysis, so the \"with protocol\" scenario reflects the stack actually recommended for this pet.",
       "noBenefitBanner": "For this pet, the geroprotector protocol does NOT change the trajectory: none of the conditions/predispositions have sufficient KG evidence in the current knowledge base.",
       "moreConditions": "more",
-      "basedOnAnalysis": "Based on VetGraphRAG analysis from {{when}}"
+      "basedOnAnalysis": "Based on VetGraphRAG analysis from {{when}}",
+      "evidencePanelTitle": "Clinical evidence",
+      "scenarioWithout": "Without protocol",
+      "scenarioWith": "With protocol",
+      "coverageTitle": "KG coverage",
+      "coverageHint": "conditions with specific evidence for the proposed stack",
+      "legendTitle": "Legend",
+      "kpiGain": "Gain with protocol",
+      "kpiGainHint": "based on KG coverage"
     },
     "anatomy": {
       "regions": {
