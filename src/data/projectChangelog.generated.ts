@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T05:58:19.620Z
+// Última geração: 2026-04-29T06:16:40.437Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -16,6 +16,7 @@ export interface ChangelogEntry {
   files?: string[];
   status: ChangelogStatus;
   i18nVersion?: string;
+  commit?: string;
 }
 
 export const lastChangelogDate = "2026-04-29";
