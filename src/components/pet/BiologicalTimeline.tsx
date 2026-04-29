@@ -454,7 +454,7 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
               {aiCitations.slice(0, 6).map((c: any, i: number) => (
                 <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
                   <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0 bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-300">
-                    {t(`petProfile.biologicalTimeline.citationType.${c.type}`, c.type)}
+                    {t(`petProfile.biologicalTimeline.citationType.${c.type}`, { defaultValue: c.type })}
                   </Badge>
                   <span className="leading-tight">{c.summary}</span>
                 </li>
