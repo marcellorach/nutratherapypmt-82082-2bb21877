@@ -365,6 +365,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: AccessRequestsPanel,
     description: 'Gerenciamento de solicitações de acesso à plataforma'
+  },
+  {
+    id: 'organograma',
+    label: 'Organograma do Projeto',
+    group: 'configuration',
+    component: OrganogramaTab,
+    description: 'Mapa estrutural do projeto + changelog visual + grafo de áreas'
   }
 ];
 
