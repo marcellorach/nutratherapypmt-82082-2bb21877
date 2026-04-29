@@ -53,7 +53,8 @@ export function inferArea(files) {
 export function extractFiles(text) {
   const found = new Set();
   // padrões: src/..., supabase/..., scripts/..., .lovable/...
-  const rx = /(?:^|[\s`(,])([a-zA-Z0-9_./-]*(?:src|supabase|scripts|\.lovable|public)\/[a-zA-Z0-9_./-]+\.(?:tsx?|jsx?|mjs|cjs|json|sql|md|css))/g;
+  // Ordem importa: extensões mais longas primeiro (json antes de js, tsx antes de ts).
+  const rx = /(?:^|[\s`(,])([a-zA-Z0-9_./-]*(?:src|supabase|scripts|\.lovable|public)\/[a-zA-Z0-9_./-]+\.(?:tsx|ts|jsx|mjs|cjs|json|js|sql|md|css))(?![a-zA-Z0-9])/g;
   let m;
   while ((m = rx.exec(text)) !== null) {
     found.add(m[1].replace(/^[`(,]+/, ""));
