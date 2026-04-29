@@ -829,6 +829,9 @@ const PetProfilePage: React.FC = () => {
                     petName={profile.name}
                     petBreed={profile.breed}
                     petAge={profile.age_years}
+                    petId={id!}
+                    onRequestAnalysis={handleAnalyzeWithKG}
+                    isAnalyzing={analyzing}
                   />
                 </TabsContent>
               </Tabs>
