@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T05:58:19.620Z
+// Última geração: 2026-04-29T06:17:06.509Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -16,11 +16,37 @@ export interface ChangelogEntry {
   files?: string[];
   status: ChangelogStatus;
   i18nVersion?: string;
+  commit?: string;
 }
 
 export const lastChangelogDate = "2026-04-29";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-29",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Mini-timeline por área no Organograma com links de arquivos e commits",
+    "bullets": [
+      "Novo `src/components/administrador/organograma/AreaMiniTimeline.tsx`: timeline vertical com bolinhas coloridas por tipo (added=verde, changed=âmbar, fixed=azul, removed=vermelho, security=roxo), expandir/recolher por entrada, filtros toggle por tipo e botão \"Ver mais\" (3 → 8)",
+      "Cada entrada expandida mostra bullets resumidos (até 3), chips de arquivos (até 8) e — quando presente — chip de commit com hash curto e ícone `GitCommit`",
+      "Arquivos e commits viram links externos quando `REPO_CONFIG.baseUrl` está configurado em `src/data/repoConfig.ts` (default vazio = chips estáticos seguros). Quando o GitHub estiver conectado via Connectors, basta preencher `baseUrl` para ativar todos os links",
+      "Parser `scripts/sync-changelog.mjs` agora reconhece `<!-- commit: <hash> -->` no metadata-comment e propaga para `ChangelogEntry.commit`",
+      "Novo helper `changesByAreaFiltered(area, { sinceDays, limit, kinds })` em `src/data/changelogQuery.ts`",
+      "`OrganogramaCards` substituiu o bloco simples `RecentChanges` pelo novo componente",
+      "i18n v1.40.0",
+      "Files: src/components/administrador/organograma/AreaMiniTimeline.tsx, src/data/repoConfig.ts, src/data/changelogQuery.ts, src/components/administrador/organograma/OrganogramaCards.tsx, scripts/sync-changelog.mjs"
+    ],
+    "files": [
+      "src/components/administrador/organograma/AreaMiniTimeline.tsx",
+      "src/data/repoConfig.ts",
+      "scripts/sync-changelog.mjs",
+      "src/data/changelogQuery.ts",
+      "src/components/administrador/organograma/OrganogramaCards.tsx"
+    ],
+    "i18nVersion": "1.40.0"
+  },
   {
     "date": "2026-04-29",
     "kind": "added",

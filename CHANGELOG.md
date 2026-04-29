@@ -8,8 +8,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 > **Formato estruturado (parseável)** — adicione novas entradas no topo de `[Unreleased]` assim:
 >
 > ```
-> ### Added - YYYY-MM-DD — Título curto
-> <!-- area: admin · status: entregue · i18n: 1.39.0 -->
+ > ### Added - YYYY-MM-DD — Título curto
+ > <!-- area: admin · status: entregue · i18n: 1.40.0 · commit: a1b2c3d -->
 > - bullet 1
 > - bullet 2
 > - Files: src/foo.tsx, supabase/functions/bar/index.ts
@@ -22,6 +22,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
+
+### Added - 2026-04-29 — Mini-timeline por área no Organograma com links de arquivos e commits
+<!-- area: admin · status: entregue · i18n: 1.40.0 -->
+- Novo `src/components/administrador/organograma/AreaMiniTimeline.tsx`: timeline vertical com bolinhas coloridas por tipo (added=verde, changed=âmbar, fixed=azul, removed=vermelho, security=roxo), expandir/recolher por entrada, filtros toggle por tipo e botão "Ver mais" (3 → 8)
+- Cada entrada expandida mostra bullets resumidos (até 3), chips de arquivos (até 8) e — quando presente — chip de commit com hash curto e ícone `GitCommit`
+- Arquivos e commits viram links externos quando `REPO_CONFIG.baseUrl` está configurado em `src/data/repoConfig.ts` (default vazio = chips estáticos seguros). Quando o GitHub estiver conectado via Connectors, basta preencher `baseUrl` para ativar todos os links
+- Parser `scripts/sync-changelog.mjs` agora reconhece `<!-- commit: <hash> -->` no metadata-comment e propaga para `ChangelogEntry.commit`
+- Novo helper `changesByAreaFiltered(area, { sinceDays, limit, kinds })` em `src/data/changelogQuery.ts`
+- `OrganogramaCards` substituiu o bloco simples `RecentChanges` pelo novo componente
+- i18n v1.40.0
+- Files: src/components/administrador/organograma/AreaMiniTimeline.tsx, src/data/repoConfig.ts, src/data/changelogQuery.ts, src/components/administrador/organograma/OrganogramaCards.tsx, scripts/sync-changelog.mjs
 
 ### Added - 2026-04-29 — Sincronização automática do CHANGELOG → Organograma + briefing do agente
 <!-- area: admin · status: entregue · i18n: 1.39.0 -->

@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Search, Code2, History } from "lucide-react";
+import { ChevronDown, ChevronRight, Search, Code2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
-import { recentChangesByArea } from "@/data/changelogQuery";
+import { AreaMiniTimeline } from "./AreaMiniTimeline";
 import {
   organograma,
   organogramaAscii,
@@ -199,7 +199,7 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
                       forceOpen={isHighlighted}
                     />
                   ))}
-                  <RecentChanges areaKey={area.key} />
+                  <AreaMiniTimeline areaKey={area.key} />
                 </CardContent>
               </Card>
             );
@@ -211,27 +211,3 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
 };
 
 export default OrganogramaCards;
-
-function RecentChanges({ areaKey }: { areaKey: OrganogramaArea["key"] }) {
-  const recent = useMemo(() => recentChangesByArea(areaKey, 60, 3), [areaKey]);
-  if (recent.length === 0) return null;
-  return (
-    <div className="mt-3 pt-3 border-t border-dashed">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground flex items-center gap-1 mb-1.5">
-        <History className="h-3 w-3" />
-        Recentes nesta área
-      </p>
-      <ul className="space-y-1">
-        {recent.map((e, i) => (
-          <li key={`${e.date}-${i}`} className="text-xs leading-snug">
-            <span className="font-mono text-muted-foreground mr-1.5">{e.date}</span>
-            <Badge variant="outline" className="text-[9px] px-1 py-0 mr-1.5 uppercase">
-              {e.kind}
-            </Badge>
-            <span>{e.title}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}

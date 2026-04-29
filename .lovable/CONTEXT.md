@@ -1,15 +1,21 @@
 # Project context briefing (auto)
-Generated: 2026-04-29T05:58:19.623Z
+Generated: 2026-04-29T06:17:06.512Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.39.0
+## Latest i18n version: 1.40.0
 
 ## Changes by area (last 14 days)
 - **meta**: 7
-- **admin**: 2
+- **admin**: 3
 
 ## Top 10 recent entries
+### 2026-04-29 · [admin] ADDED — Mini-timeline por área no Organograma com links de arquivos e commits
+- Novo `src/components/administrador/organograma/AreaMiniTimeline.tsx`: timeline vertical com bolinhas coloridas por tipo (added=verde, changed=âmbar, fixed=azul, removed=vermelho, security=roxo), expandir/recolher por entrada, filtros toggle por tipo e botão "Ver mais" (3 → 8)
+- Cada entrada expandida mostra bullets resumidos (até 3), chips de arquivos (até 8) e — quando presente — chip de commit com hash curto e ícone `GitCommit`
+- Arquivos e commits viram links externos quando `REPO_CONFIG.baseUrl` está configurado em `src/data/repoConfig.ts` (default vazio = chips estáticos seguros). Quando o GitHub estiver conectado via Connectors, basta preencher `baseUrl` para ativar todos os links
+_files: src/components/administrador/organograma/AreaMiniTimeline.tsx, src/data/repoConfig.ts, scripts/sync-changelog.mjs, src/data/changelogQuery.ts…_
+
 ### 2026-04-29 · [admin] ADDED — Sincronização automática do CHANGELOG → Organograma + briefing do agente
 - Novo `scripts/sync-changelog.mjs`: parser determinístico que lê CHANGELOG.md e regenera `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + atualiza `organogramaLastUpdated`
 - `src/data/projectChangelog.ts` virou shim re-exportando o gerado — fim da dupla manutenção
@@ -57,11 +63,6 @@ _status: parcial_
 - Pets demo: Luna agora tem `Degenerative Valve Disease (Myxomatous Mitral Valve Disease)` (MMVD — doença real do Cavalier King Charles compatível com sopro 4/6) em vez da categoria genérica "Cardiovascular Disease"
 - Pets demo: Thor agora tem `Hip Dysplasia` (já indicada no exame) em vez de "Chronic Inflammation" (categoria, não doença)
 - Migração de dados: UPDATE em `pet_conditions` para corrigir registros existentes
-
-### 2026-04-12 · [meta] FIXED — Taxonomia de Condições: Separação Clínica vs Molecular
-- Coluna `origin` em pet_conditions: Rastreamento real de origem (vet_diagnosis, exam_suggested, breed_predisposition, kg_inference) — substituiu inferência por string matching
-- Dados de exemplo corrigidos: Removidos "Cellular Senescence", "Inflammaging" e "Inflammation" dos dados seed — processos moleculares agora são inferidos exclusivamente pelo VetGraphRAG
-- inferOrigin() reescrita: Lê coluna `origin` do banco em vez de adivinhar pelo nome da condição
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

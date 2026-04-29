@@ -95,6 +95,7 @@ function parseChangelog(md) {
         : "entregue");
     const i18nMatch = (cur.title + " " + blockText).match(/i18n[^\d]*v?(\d+\.\d+\.\d+)/i);
     const i18nVersion = cur.meta.i18n || (i18nMatch ? i18nMatch[1] : undefined);
+    const commit = cur.meta.commit || undefined;
     entries.push({
       date: cur.date,
       kind: KIND_MAP[cur.kind.toLowerCase()] || "changed",
@@ -106,6 +107,7 @@ function parseChangelog(md) {
         .filter(Boolean),
       files: files.length ? files : undefined,
       i18nVersion,
+      commit,
     });
     cur = null;
   };
@@ -154,6 +156,7 @@ export interface ChangelogEntry {
   files?: string[];
   status: ChangelogStatus;
   i18nVersion?: string;
+  commit?: string;
 }
 
 export const lastChangelogDate = ${JSON.stringify(entries[0]?.date ?? "")};
