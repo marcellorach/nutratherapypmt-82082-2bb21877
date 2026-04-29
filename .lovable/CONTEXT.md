@@ -1,15 +1,22 @@
 # Project context briefing (auto)
-Generated: 2026-04-29T15:14:39.249Z
+Generated: 2026-04-29T15:37:49.688Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.0.0
+## Latest i18n version: 1.41.1
 
 ## Changes by area (last 14 days)
 - **meta**: 7
 - **admin**: 5
+- **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-04-29 · [vet-ui] CHANGED — Digital Twin agora compara cenários ao longo dos anos
+- `DigitalTwinDog` reescrito para consumir `usePetTrajectoryProjection` (mesma fonte do `BiologicalTimeline`): renderiza duas silhuetas lado a lado (Sem protocolo × Com protocolo) e um slider 0–8 anos. Antes só mostrava o estado atual, sem variação temporal nem cenário comparativo.
+- Para cada ano projetado, os marcadores anatômicos refletem severidade real (`existing_conditions[].projected_severity_label`), risco emergente (`new_conditions[].probability` ≥ 20% com anel tracejado âmbar) e cobertura do stack (`coverage_by_condition[].kg_covered` → estrela ★ verde no marcador).
+- KPIs alinhados com o `BiologicalTimeline`: idade biológica, cronológica, anos restantes e ganho com protocolo (`years_gained` da edge function `project-pet-trajectory`).
+_files: src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json…_
+
 ### 2026-04-29 · [admin] ADDED — Testes de inferArea e ordenação real do parser
 - 17 novos testes em `scripts/__tests__/sync-changelog.test.mjs` cobrindo: prioridade `kg > infra` em `supabase/functions/kg-*`, `triplet`/`process-pdf`/`extract` → `curation`, `biomedical-taxonomy` e qualquer path com `knowledge-graph|neo4j` → `kg`, `base-knowledge` antes de regras genéricas, `i18n` para `src/locales/` e `src/i18n.ts`, `auth` para `AuthContext`/`pages/Auth`, `projectOrganograma`/`projectChangelog` → `admin`, ordem-importa quando múltiplos paths casam, fallback `meta`
 - Testes de ordenação validando: data desc estrita com seções intercaladas (`## [Unreleased]` × `## [1.0.0]`), cabeçalhos `### Added - YYYY-MM-DD 🗺️ Título` (emoji direto, sem separador), múltiplas linhas em branco e bullets indentados, datas duplicadas mantendo entradas distintas, `## [versão]` não confundido com cabeçalho de entrada, fallback para `inferArea` quando metadata não declara área
@@ -60,11 +67,6 @@ _status: parcial_
 - Selo de proveniência do link: cada estudo no card mostra um pequeno badge (DOI / PubMed / PMC / Scholar / Externo) derivado da URL final, deixando claro para onde o clique leva
 - Ícone `ExternalLink` + `aria-label`: títulos de estudos sinalizam visualmente que abrem em nova aba (`target="_blank" rel="noopener noreferrer"`, sem mudança de comportamento)
 - Fallback "compound-only" em `attachStudiesToCompounds`: quando não existe triplet aprovado para o par exato (composto, condição), a pipeline busca até 3 estudos de alta confiança que mencionam o composto sozinho — assim todo card sempre tem referências clicáveis. Esses estudos são sinalizados como "Geral" e o card exibe o aviso "Estudos sobre o composto (não específicos a esta condição)" para preservar transparência clínica
-
-### 2026-04-28 · [meta] CHANGED — Links Robustos + Evidência Completa Dentro do Card
-- Links de estudos com fallback robusto: pipeline agora normaliza `link` (DOI/PubMed/Scholar) antes de devolver — sem mais cliques mortos. DOIs salvos como URL completa não duplicam mais o prefixo
-- Knowledge Graph dentro de cada card de composto: `CompoundDosageSlider` ganhou bloco com triplets reais `[composto] → [predicado] → [condição]` (estilo "Embasamento Científico"), incluindo contagem de estudos, evidência e % de confiança — não precisa mais trocar de aba
-- Sinergias por paciente: cada card mostra outras condições do pet que o mesmo composto também trata (cruzando `triplet_extractions` aprovados com a lista de condições do paciente)
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
