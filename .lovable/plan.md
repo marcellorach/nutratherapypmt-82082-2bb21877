@@ -1,99 +1,120 @@
+## Objetivo
 
-# Organograma do Projeto — área admin (inspirada em Sleep Graph RAG)
+Hoje há duas dores combinadas:
 
-## Por que vale a pena
+1. **Dupla manutenção**: cada mudança precisa ser escrita em `CHANGELOG.md` (texto livre) e espelhada à mão em `src/data/projectChangelog.ts` (tipado, consumido pela aba Organograma). É fácil esquecer um dos dois e o organograma fica defasado.
+2. **Perda de contexto entre tarefas**: o agente não consulta o histórico antes de começar e às vezes refaz/reverte coisas recentes.
 
-O projeto Sleep Graph RAG resolveu o mesmo problema que enfrentamos: complexidade alta + agente AI cometendo erros por falta de visão estrutural. A solução deles é um **espelho tipado e visual da arquitetura** que vive no código (não em Markdown solto), com 4 lentes complementares e changelog integrado por área. Os ganhos relatados ("menos erros do agente") batem com nossa hipótese.
+A solução tem 3 partes: (a) padronizar o CHANGELOG para ser parseável e útil ao agente, (b) gerar o `projectChangelog.ts` automaticamente a partir dele, (c) institucionalizar via memory rule a leitura do changelog no início de cada tarefa.
 
-## O que vou construir
-
-Nova tab admin **"Organograma"** dentro do grupo `configuration` (rota `/administrador?tab=organograma`), com 4 sub-abas:
-
-```text
-Organograma do Projeto
-├─ Grafo       (force-graph 2D — áreas como hubs, componentes como folhas, cross-links)
-├─ Diagrama    (Mermaid hierárquico com pan/zoom estilo Figma)
-├─ Cards       (árvore expansível por área + busca + ASCII fallback)
-└─ Changelog   (timeline filtrada por área/status, lendo CHANGELOG.md estruturado)
-```
-
-Cabeçalho com data da última atualização + card "Convenções Core" (regras transversais do projeto: bilíngue obrigatório, no-mock, canonical IDs, etc — extraídas da memória).
-
-## Arquitetura de dados (single source of truth)
-
-Três arquivos novos em `src/data/` — tipados, versionados no git, lidos pela UI:
-
-1. **`src/data/projectOrganograma.ts`**
-   - `OrganogramaArea[]` com `key` (auth, curation, kg, rag, recommendations, clinical, vet-ui, tutor-ui, admin, infra, i18n)
-   - Cada área: `title`, `description`, `children: OrganogramaNode[]` com `files[]` apontando para os componentes/edge functions reais
-   - Constante `organogramaLastUpdated` + `organogramaConvencoes[]` + `organogramaAscii` (árvore ASCII gerada)
-
-2. **`src/data/organogramaAreaMeta.ts`**
-   - `AREA_META` mapeando cada `key` → ícone Lucide + paleta (tone, ring, badge) usando design tokens semânticos do projeto
-
-3. **`src/data/projectChangelog.ts`**
-   - `ChangelogEntry[]` tipado (`date`, `area`, `title`, `bullets[]`, `files[]`, `status: 'entregue'|'parcial'|'revertido'`)
-   - Inicialmente populado a partir das últimas ~30 entradas do `CHANGELOG.md` atual
-   - Reordenado por data desc
-
-## Componentes novos
+## Como vai funcionar
 
 ```text
-src/pages/administrador/OrganogramaTab.tsx        (página principal com Tabs)
-src/components/administrador/organograma/
-  ├─ OrganogramaForceGraph.tsx    (react-force-graph-2d — já temos a lib)
-  ├─ OrganogramaDiagram.tsx       (mermaid + hook useScrollPanZoom)
-  ├─ OrganogramaCards.tsx         (árvore expansível + busca + ASCII)
-  └─ ChangelogTimeline.tsx        (filtros por área/status + busca)
-src/hooks/useScrollPanZoom.ts     (zoom no scroll + pan por arrasto, estilo Figma)
+CHANGELOG.md  (fonte única, formato estruturado por área)
+      │
+      ▼
+scripts/sync-changelog.mjs   ← parser determinístico
+      │
+      ├─► src/data/projectChangelog.generated.ts   (autogerado)
+      └─► organogramaLastUpdated  (data da entrada mais recente)
+              │
+              ▼
+      Aba Organograma → Changelog (já existente) consome o .generated
 ```
 
-## Integrações com o que já existe
+## 1. Novo formato estruturado do CHANGELOG
 
-- **Reaproveita `react-force-graph-2d`** já presente (KG visualization)
-- **Lê de `CHANGELOG.md`** apenas no momento do bootstrap; depois a fonte canônica passa a ser `projectChangelog.ts` (espelho tipado)
-- **Bilíngue obrigatório**: todas as labels passam por `useTranslation()` + chaves em `pt/en/translation.json` + bump de `I18N_VERSION` em `src/i18n.ts` (regra do projeto)
-- **Registra-se em `admin-tabs.ts`** como nova entrada no grupo `configuration` (lazy-loaded)
-- **Atualiza `ARCHITECTURE.md` v1.MINOR+1** + `CURRENT_STATE.md` + `CHANGELOG.md` (regra do projeto)
+Cada entrada vira um bloco com cabeçalho parseável + metadados YAML opcionais. Exemplo:
 
-## Atualização da knowledge base (regra de manutenção)
+```markdown
+### Added - 2026-04-29 — Organograma do Projeto (admin)
+<!-- area: admin · status: entregue · i18n: 1.38.0 -->
+- Nova tab `/administrador?tab=organograma` com 4 lentes
+- Single source of truth tipada em src/data/projectOrganograma.ts
+- Files: src/data/projectOrganograma.ts, src/pages/administrador/OrganogramaTab.tsx
+```
 
-Adiciono uma nova **memory rule** (`mem://architecture/organograma-source-of-truth`) com o protocolo:
+Regras:
+- `### <Kind> - YYYY-MM-DD — <título>` (kind ∈ Added/Changed/Fixed/Removed/Security)
+- Linha HTML-comment opcional com `area`, `status`, `i18n`, `pr` — vira metadado tipado
+- Bullets `- …` com texto livre
+- Linha `Files:` (ou caminhos `src/...`/`supabase/...` em qualquer bullet) extrai a lista de arquivos
+- Sem comment → `area` é inferida pelos arquivos (mapa explícito); sem files → `area: meta`
 
-> Sempre que houver mudança estrutural (nova tab, novo componente principal, refactor de área, nova edge function relevante), atualizar **simultaneamente**:
-> 1. `src/data/projectOrganograma.ts` (nó da área afetada)
-> 2. `src/data/projectChangelog.ts` (nova entrada no topo)
-> 3. `organogramaLastUpdated`
-> 4. `CHANGELOG.md` ([Unreleased])
-> 5. `I18N_VERSION` se mexer em strings
+Vou migrar as ~10 entradas mais recentes para o novo formato (resto fica como histórico legível, parser tolera).
 
-E referência no `index.md` Core. Isso institucionaliza o padrão que tem reduzido seus erros.
+## 2. Parser (`scripts/sync-changelog.mjs`)
 
-## Conteúdo inicial das áreas (proposta — confirmo na execução)
+Lê `CHANGELOG.md`, gera `src/data/projectChangelog.generated.ts` com a mesma shape `ChangelogEntry` já usada hoje. Inclui:
 
-- **Auth & Acesso** — login, profiles, user_roles, access_requests
-- **Curadoria Científica** — upload PDFs, digestão, embeddings, triplet extraction, kanban de curadoria, dose curation
-- **Knowledge Graph** — Neo4j sync, hierarchical_edges, visualization, relations tab, ontologia
-- **Base de Conhecimento** — base entities, breeds, lab references, ontology mapping
-- **Pipeline Clínico VetGraphRAG** — runClinicalAnalysisPipeline (7 estágios), edge functions de projeção, missing triplets
-- **UI Veterinário** — PetProfilePage, BiologicalTimeline, recommendations, abas analíticas, chats
-- **UI Tutor** — landing, planos, acompanhamento
-- **Admin & Curadoria** — todas as tabs admin agrupadas
-- **i18n** — versionamento, audit, manager
-- **Infra** — Lovable Cloud (Supabase), edge functions config, secrets, storage
+- Inferência de área via mapa: `src/pages/administrador/` → `admin`, `supabase/functions/kg-*` → `kg`, `src/components/pet/` → `vet-ui`, `src/services/clinical/` → `clinical-pipeline`, etc.
+- `i18nVersion` extraída do comment ou de regex `i18n v?\d+\.\d+\.\d+` no título/bullets
+- Saída ordenada (mais recente primeiro)
+- Atualiza `organogramaLastUpdated` em `projectOrganograma.ts` via line-replace cirúrgico
+- Falha cedo se o CHANGELOG estiver malformado (não sobrescreve o gerado anterior)
 
-## O que NÃO faço nesta entrega
+Comando: `npm run sync:changelog`. O agente passa a rodar isso ao final de toda mudança que toca o CHANGELOG.
 
-- Não conecto changelog a webhook git (mantém-se manual via espelho tipado, igual Sleep Graph)
-- Não removo `CHANGELOG.md` — ele continua canônico para changelog técnico; `projectChangelog.ts` é a vista UI do admin
-- Não mexo em outras páginas ou design existente
+## 3. `projectChangelog.ts` vira shim
 
-## Detalhes técnicos
+```ts
+export { changelog } from "./projectChangelog.generated";
+export type { ChangelogEntry, ChangelogKind, ChangelogStatus } from "./projectChangelog.generated";
+```
 
-- **Lazy load** da tab via padrão atual em `admin-tabs.ts`
-- **Force-graph**: nodes = áreas (hub colorido grande) + componentes (folha pequena); links = parent-child + cross-area refs (ex.: pipeline clínico → KG)
-- **Mermaid**: orientação alternável TD/LR; SVG renderizado em `useEffect`; pan/zoom via translate+scale (não scroll), com `fit()` automático no mount/troca de tab/fullscreen — replica a solução já validada no Sleep Graph
-- **Busca**: full-text em title/description/files, com expansão automática dos nós que casam
-- **Permissão**: tab visível só com `role=admin` (igual à `MissingTripletsDialog` recém-adicionada)
+Zero impacto em `ChangelogTimeline.tsx` e demais consumidores.
 
-Após sua aprovação eu implemento ponta a ponta, popular dados iniciais a partir do código real do projeto e atualizar a documentação + memory rule.
+## 4. Helpers para o agente consultar o changelog
+
+Novo `src/data/changelogQuery.ts` (também usado por uma futura UI de busca):
+
+```ts
+recentChangesByArea(area, sinceDays)   // últimas mudanças de uma área
+findChangesTouching(filePath)          // mudanças que mexeram em um arquivo
+lastI18nVersion()                      // última versão registrada
+```
+
+E um arquivo curto `.lovable/CONTEXT.md` autogerado pelo script com um snapshot legível em ~40 linhas: top 10 entradas, contagem por área nas últimas 2 semanas, último `i18n` registrado. **Esse arquivo é o "briefing" que o agente lê no começo de cada tarefa.**
+
+## 5. Memory rule nova: leitura obrigatória do changelog
+
+Substituo `mem://architecture/organograma-source-of-truth` por um protocolo simplificado e adiciono `mem://workflow/changelog-driven-context` como **Core**:
+
+- **Antes** de iniciar qualquer tarefa não-trivial: ler `.lovable/CONTEXT.md` e, se a tarefa toca arquivos específicos, rodar mentalmente `findChangesTouching(file)` lendo o CHANGELOG.
+- **Ao terminar**: adicionar entrada estruturada no CHANGELOG.md + rodar `npm run sync:changelog`. Só editar `projectOrganograma.ts` quando a estrutura (não o histórico) muda.
+
+Isso reduz protocolo de 5 passos para 2 e adiciona o passo de "consultar antes" — que é o que você pediu.
+
+## 6. Mini-painel "Recentes nesta área" no Organograma
+
+Na aba Cards, ao clicar numa área, mostro as últimas 3 entradas do changelog daquela área (já temos os dados, é só filtrar). Útil pra ver de relance o que mudou recentemente sem ir até a aba Changelog.
+
+## Arquivos
+
+**Novos**
+- `scripts/sync-changelog.mjs`
+- `src/data/projectChangelog.generated.ts` (gerado)
+- `src/data/changelogQuery.ts`
+- `.lovable/CONTEXT.md` (gerado)
+- `.lovable/memory/workflow/changelog-driven-context.md`
+
+**Editados**
+- `CHANGELOG.md` — migrar últimas ~10 entradas para o novo formato + entrada da própria automação
+- `src/data/projectChangelog.ts` — vira shim
+- `src/data/projectOrganograma.ts` — só a linha `organogramaLastUpdated`
+- `package.json` — script `sync:changelog`
+- `src/components/administrador/organograma/OrganogramaCards.tsx` — bloco "Recentes nesta área"
+- `src/components/administrador/organograma/ChangelogTimeline.tsx` — banner "auto-sincronizado em <data>"
+- `.lovable/memory/architecture/organograma-source-of-truth.md` — protocolo simplificado
+- `src/i18n.ts` + `src/locales/{pt,en}/translation.json` — nova chave + bump I18N_VERSION → 1.39.0
+- `mem://index.md` — adicionar Core rule de "consultar changelog antes de iniciar"
+
+## Knowledge graph
+
+**Nenhuma mudança no KG.** Tudo isso vive em código/markdown/memory; tabelas `medical_knowledge_graph*` ficam intactas.
+
+## Riscos & mitigação
+
+- **Parser quebra em entrada antiga** → tolerante: blocos não-conformes viram `area: meta` em vez de falhar.
+- **Agente esquece de rodar `sync:changelog`** → adicionar no fim da memory rule + na própria seção do CHANGELOG um comentário lembrete.
+- **CONTEXT.md desatualizado** → regenerado a cada `sync:changelog`; adicionar timestamp visível no topo.
