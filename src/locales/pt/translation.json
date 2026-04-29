@@ -596,10 +596,22 @@
     },
     "pipeline": {
       "title": "Pipeline de Processamento",
-      "step1": { "name": "Upload PDF", "desc": "Envio do estudo científico" },
-      "step2": { "name": "Extração IA", "desc": "Processamento com Gemini AI" },
-      "step3": { "name": "Triplets", "desc": "Extração de entidades e relações" },
-      "step4": { "name": "Knowledge Graph", "desc": "Indexação em Neo4j + Vector Store" }
+      "step1": {
+        "name": "Upload PDF",
+        "desc": "Envio do estudo científico"
+      },
+      "step2": {
+        "name": "Extração IA",
+        "desc": "Processamento com Gemini AI"
+      },
+      "step3": {
+        "name": "Triplets",
+        "desc": "Extração de entidades e relações"
+      },
+      "step4": {
+        "name": "Knowledge Graph",
+        "desc": "Indexação em Neo4j + Vector Store"
+      }
     },
     "systemStatus": {
       "sectionTitle": "Status dos Sistemas",
@@ -783,7 +795,29 @@
       }
     },
     "vetgraphrag": {
-      "processing": "Processamento VetGraphRAG",
+      "processing": {
+        "title": "Processamento IA",
+        "info": "Pipeline de Digestão VetGraphRAG",
+        "model": "Modelo",
+        "status": "Status",
+        "statusProcessing": "Processando",
+        "statusIdle": "Ocioso",
+        "description": "Extrai automaticamente nutracêuticos, condições de saúde e metadados de estudos científicos usando IA generativa.",
+        "pipeline": "Pipeline de Processamento",
+        "step1Title": "PDF Parsing & OCR",
+        "step1Desc": "Extração full-text com reconhecimento de layout, detecção de tabelas e figuras, e colheita estruturada de metadados (autores, periódico, ano, DOI).",
+        "step2Title": "Extração de Entidades (NER)",
+        "step2Desc": "Reconhecimento de Entidades Nomeadas via IA identificando nutracêuticos, condições de saúde, mecanismos moleculares, dosagens e espécies na ontologia VetGraphRAG de 5 camadas (L0–L4).",
+        "step3Title": "Geração de Triplets de Conhecimento",
+        "step3Desc": "Mapeamento de relações causais: Composto → Alvo Molecular → Mecanismo → Efeito Biológico → Desfecho Clínico, com scores de confiança e classificação de nível de evidência.",
+        "step4Title": "Vetorização & Indexação Semântica",
+        "step4Desc": "Embeddings de 768 dimensões via modelo text-embedding-004 para busca por similaridade semântica, permitindo recuperação entre estudos e recomendações contextuais.",
+        "step1Badge": "Tabelas + Figuras + Meta",
+        "step2Badge": "Ontologia 5 camadas (L0–L4)",
+        "step3Badge": "Cadeias causais + confiança",
+        "step4Badge": "Embeddings 768-dim",
+        "expand": "(expandir)"
+      },
       "model": "Modelo",
       "temperature": "Temperature",
       "status": "Status",
@@ -902,29 +936,6 @@
           "chat": "Chat",
           "study": "Estudo"
         }
-      },
-      "processing": {
-        "title": "Processamento IA",
-        "info": "Pipeline de Digestão VetGraphRAG",
-        "model": "Modelo",
-        "status": "Status",
-        "statusProcessing": "Processando",
-        "statusIdle": "Ocioso",
-        "description": "Extrai automaticamente nutracêuticos, condições de saúde e metadados de estudos científicos usando IA generativa.",
-        "pipeline": "Pipeline de Processamento",
-        "step1Title": "PDF Parsing & OCR",
-        "step1Desc": "Extração full-text com reconhecimento de layout, detecção de tabelas e figuras, e colheita estruturada de metadados (autores, periódico, ano, DOI).",
-        "step2Title": "Extração de Entidades (NER)",
-        "step2Desc": "Reconhecimento de Entidades Nomeadas via IA identificando nutracêuticos, condições de saúde, mecanismos moleculares, dosagens e espécies na ontologia VetGraphRAG de 5 camadas (L0–L4).",
-        "step3Title": "Geração de Triplets de Conhecimento",
-        "step3Desc": "Mapeamento de relações causais: Composto → Alvo Molecular → Mecanismo → Efeito Biológico → Desfecho Clínico, com scores de confiança e classificação de nível de evidência.",
-        "step4Title": "Vetorização & Indexação Semântica",
-        "step4Desc": "Embeddings de 768 dimensões via modelo text-embedding-004 para busca por similaridade semântica, permitindo recuperação entre estudos e recomendações contextuais.",
-        "step1Badge": "Tabelas + Figuras + Meta",
-        "step2Badge": "Ontologia 5 camadas (L0–L4)",
-        "step3Badge": "Cadeias causais + confiança",
-        "step4Badge": "Embeddings 768-dim",
-        "expand": "(expandir)"
       },
       "liveLog": "Log em Tempo Real",
       "events": "eventos",
@@ -1073,43 +1084,262 @@
     }
   },
   "nutraceuticals": {
-    "details": {
-      "title": "Detalhes",
+    "header": {
+      "title": "Nutracêuticos",
+      "subtitle": "Gerencie os nutracêuticos e suas relações com condições de saúde",
+      "newButton": "Novo Nutracêutico",
+      "manageImportsButton": "Gerenciar Importações",
+      "importButton": "Importar Dados",
+      "help": {
+        "title": "Ajuda - Nutracêuticos",
+        "subtitle": "Aprenda como gerenciar e organizar os nutracêuticos no sistema.",
+        "importTitle": "Importação de Dados",
+        "importDesc": "A importação de planilhas permite carregar grandes volumes de dados de nutracêuticos para o sistema. Formatos suportados: CSV e Excel.",
+        "associationsTitle": "Associações com Condições",
+        "associationsDesc": "Cada nutracêutico pode ter relações com condições de saúde com diferentes níveis de eficácia para prevenção, tratamento ou suporte."
+      }
+    },
+    "management": {
+      "title": "Gerenciamento de Nutracêuticos",
+      "newButton": "Novo Nutracêutico",
+      "noCategory": "Sem categoria",
+      "categoryNotFound": "Categoria não encontrada"
+    },
+    "legend": {
+      "title": "Legenda da Evidência Científica",
+      "convergence": {
+        "title": "Convergência de Estudos",
+        "high": "≥4.0 Alta",
+        "moderate": "2.0-3.9 Moderada",
+        "low": "<2.0 Baixa",
+        "description": "Mede o grau de concordância entre diferentes estudos científicos"
+      },
+      "efficacy": {
+        "title": "Eficácia por Condição",
+        "high": "≥4.0 Alta",
+        "moderate": "2.0-3.9 Moderada",
+        "low": "<2.0 Baixa",
+        "description": "Eficácia específica para cada condição de saúde nas tags"
+      }
+    },
+    "search": {
+      "placeholder": "Buscar nutracêutico...",
+      "filterEfficacy": "Filtrar por eficácia",
+      "filterCondition": "Filtrar por condição",
+      "allEfficacies": "Todas as eficácias",
+      "allConditions": "Todas as condições",
+      "efficacyHigh": "Alta (4-5)",
+      "efficacyMedium": "Média (3)",
+      "efficacyLow": "Baixa (1-2)",
+      "clear": "Limpar",
+      "refresh": "Atualizar",
+      "add": "Adicionar",
+      "new": "Novo"
+    },
+    "table": {
+      "headers": {
+        "name": "Nome",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte",
+        "convergence": "Convergência",
+        "studies": "Estudos",
+        "actions": "Ações"
+      },
+      "noData": "Nenhum nutracêutico encontrado",
+      "expanded": {
+        "description": "Descrição:",
+        "noDescription": "Sem descrição disponível",
+        "chemicalCompound": "Composto Químico:",
+        "dosage": "Dosagem:",
+        "convergenceTitle": "Convergência de Estudos:",
+        "scientificBase": "Base Científica:",
+        "studiesAnalyzed": "{{count}} estudos científicos analisados",
+        "contraindications": "Contraindicações:",
+        "convergenceHigh": "Alta convergência - Estudos concordam",
+        "convergenceMedium": "Convergência moderada - Alguns estudos divergem",
+        "convergenceLow": "Baixa convergência - Estudos apresentam resultados conflitantes"
+      }
+    },
+    "dialog": {
+      "addTitle": "Adicionar Novo Nutracêutico",
+      "editTitle": "Editar Nutracêutico",
+      "tabs": {
+        "basicInfo": "Informações Básicas",
+        "relationships": "Relacionamentos"
+      }
+    },
+    "form": {
+      "name": "Nome do Nutracêutico*",
+      "namePlaceholder": "Nome do nutracêutico",
       "description": "Descrição",
-      "compound": "Composto Químico",
-      "source": "Origem",
+      "descriptionPlaceholder": "Descrição do nutracêutico",
       "dosage": "Dosagem",
-      "notDefined": "Não definida",
-      "exportInfo": "Exportar informações",
-      "viewFullStudies": "Ver estudos completos",
-      "efficacy": "Eficácia"
+      "dosagePlaceholder": "Ex: 500mg, 2 vezes ao dia",
+      "source": "Fonte",
+      "sourcePlaceholder": "Ex: Curcuma longa",
+      "chemicalCompound": "Composto Químico",
+      "chemicalPlaceholder": "Fórmula ou nome do composto químico",
+      "contraindications": "Contraindicações",
+      "contraindicationsPlaceholder": "Cada contraindicação em uma linha",
+      "contraindicationsHelp": "Digite cada contraindicação em uma linha separada.",
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "creating": "Criando...",
+      "save": "Salvar Nutracêutico",
+      "create": "Criar Nutracêutico",
+      "mainRelation": "Relação Principal",
+      "relationN": "Relação {{n}}",
+      "categoryOutcome": "Categoria / Outcome",
+      "selectCategory": "Selecione uma categoria",
+      "efficacyLevel": "Nível de Eficácia: {{score}}",
+      "notesObservations": "Notas / Observações",
+      "observationsPlaceholder": "Observações sobre esta relação",
+      "relatedStudies": "Estudos Relacionados",
+      "noStudiesAvailable": "Não há estudos disponíveis",
+      "addRelation": "Adicionar nova relação"
     },
     "conditions": {
-      "title": "Condições",
-      "none": "Nenhuma condição associada",
-      "unknown": "Desconhecida",
-      "types": {
+      "title": "Gerenciar Condições",
+      "manageTitle": "Gerenciar Condições de Saúde",
+      "manageDescription": "Associe condições de saúde ao nutracêutico {{name}}",
+      "close": "Fechar",
+      "form": {
+        "healthCondition": "Condição de Saúde",
+        "relationshipType": "Tipo de Relação",
+        "efficacy": "Eficácia (1-5)",
+        "notes": "Notas ou Observações",
+        "selectCondition": "Selecione uma condição",
+        "selectRelationship": "Selecione o tipo",
+        "addNotes": "Adicione notas sobre esta associação...",
+        "addNewRelation": "Adicionar nova relação",
+        "associate": "Adicionar Relação",
+        "associating": "Associando..."
+      },
+      "relationshipTypes": {
         "prevention": "Prevenção",
         "treatment": "Tratamento",
         "support": "Suporte"
       },
-      "table": {
-        "name": "Condição",
-        "type": "Relação",
-        "efficacy": "Eficácia"
+      "tabs": {
+        "all": "Todas",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "support": "Suporte"
+      },
+      "messages": {
+        "allAssociated": "Todas as condições já foram associadas",
+        "noRelations": "Este nutracêutico não possui relações com condições de saúde",
+        "noRelationsFiltered": "Nenhuma relação de {{type}} encontrada.",
+        "associationSuccess": "Condição associada com sucesso",
+        "associationError": "Não foi possível associar a condição",
+        "removeSuccess": "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
+        "selectCondition": "Selecione uma condição de saúde",
+        "partialFunctionality": "Funcionalidade parcial"
+      },
+      "efficacyLevels": {
+        "veryLow": "Muito Baixa",
+        "low": "Baixa",
+        "moderate": "Moderada",
+        "high": "Alta",
+        "veryHigh": "Muito Alta"
+      },
+      "labels": {
+        "efficacyScore": "Eficácia: {{score}}",
+        "notes": "Notas:",
+        "existingRelations": "Relações Existentes"
+      },
+      "remove": "Remover"
+    },
+    "relationships": {
+      "title": "Relacionamentos",
+      "manageButton": "Gerenciar Relacionamentos",
+      "studies": "Estudos Científicos",
+      "conditions": "Condições de Saúde",
+      "noStudies": "Nenhum estudo associado. Clique em \"Gerenciar Relacionamentos\" para adicionar estudos científicos.",
+      "noConditions": "Nenhuma condição associada. Clique em \"Gerenciar Relacionamentos\" para adicionar condições de saúde.",
+      "studyNoTitle": "Estudo sem título",
+      "studyNoJournal": "Revista não especificada",
+      "conditionNoName": "Condição sem nome",
+      "conditionNoDescription": "Sem descrição",
+      "relevance": "Relevância",
+      "typePrevention": "Prevenção",
+      "typeTreatment": "Tratamento",
+      "typeSupport": "Suporte",
+      "finish": "Finalizar"
+    },
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja excluir o nutracêutico",
+      "warning": "Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir"
+    },
+    "outcomes": {
+      "title": "Gerenciar Outcomes",
+      "description": "Gerencie as relações do nutracêutico {{name}} com outcomes.",
+      "loading": "Carregando...",
+      "placeholder": "Funcionalidade será refatorada posteriormente.",
+      "close": "Fechar"
+    },
+    "import": {
+      "title": {
+        "upload": "Importar Nutracêuticos e Estudos",
+        "review": "Revisar Dados Importados"
+      },
+      "description": {
+        "upload": "Importe planilhas de dados de nutracêuticos e PDFs de estudos científicos para processamento via IA.",
+        "review": "Revise os dados extraídos pela IA antes de confirmar a importação."
+      },
+      "tabs": {
+        "spreadsheet": "Planilha de Nutracêuticos",
+        "studies": "Estudos Científicos (PDF)"
+      },
+      "studies": {
+        "title": "Estudos Científicos em PDF",
+        "description": "Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos. Estes estudos serão importados para processamento RAG e associados automaticamente aos nutracêuticos."
+      },
+      "toast": {
+        "success": "Importação concluída",
+        "successDesc": "Dados importados com sucesso no banco de nutracêuticos.",
+        "error": "Erro",
+        "errorDesc": "Erro ao processar arquivos de estudos científicos"
       }
     },
-    "studies": {
-      "title": "Estudos",
-      "none": "Nenhum estudo associado",
-      "unknown": "Estudo desconhecido",
-      "viewFull": "Ver estudo completo",
-      "externalLink": "Link externo",
+    "manageImports": {
+      "title": "Gerenciar Importações de Nutracêuticos",
+      "description": "Visualize e gerencie as importações recentes. Você pode excluir importações para remover dados duplicados ou incorretos.",
       "table": {
-        "title": "Título",
-        "journal": "Journal",
-        "relevance": "Relevância"
+        "headers": {
+          "date": "Data/Hora",
+          "name": "Nome",
+          "source": "Fonte",
+          "nutraceuticals": "Nutracêuticos",
+          "actions": "Ações"
+        }
+      },
+      "noData": "Nenhuma importação encontrada.",
+      "loading": "Carregando...",
+      "close": "Fechar",
+      "deleteAction": "Excluir importação",
+      "delete": {
+        "title": "Confirmar exclusão",
+        "description": "Você tem certeza que deseja excluir esta importação? Esta ação removerá todos os nutracêuticos associados a esta importação e não pode ser desfeita.",
+        "cancel": "Cancelar",
+        "confirm": "Excluir",
+        "deleting": "Excluindo..."
       }
+    },
+    "toast": {
+      "success": "Sucesso",
+      "error": "Erro",
+      "created": "Nutracêutico criado com sucesso",
+      "updated": "Nutracêutico atualizado com sucesso",
+      "deleted": "Nutracêutico excluído com sucesso.",
+      "deleteError": "Erro ao excluir nutracêutico: {{message}}"
+    },
+    "validation": {
+      "nameRequired": "O nome é obrigatório"
     }
   },
   "enrich": {
@@ -1158,7 +1388,6 @@
     "processing": "Processando...",
     "close": "Fechar",
     "collapse": "Recolher",
-    "confirm": "Confirmar",
     "access": "Acessar",
     "poweredBy": "Powered by",
     "refresh": "Atualizar",
@@ -1936,344 +2165,343 @@
       "subtitle": "Gerencie e organize estudos científicos sobre nutracêuticos",
       "import": "Importar Estudos",
       "list": "Lista de Estudos",
-    "tabs": {
-      "ongoing": "Em Andamento",
-      "completed": "Concluídos",
-      "planned": "Planejados"
-    },
-    "plannedStudies": {
-      "title": "Estudos Planejados",
-      "description": "Gerencie os estudos científicos em fase de planejamento.",
-      "listTitle": "Lista de Estudos",
-      "listDescription": "Estudos científicos em fase de planejamento e análise prévia.",
-      "newStudy": "Novo Estudo",
-      "editStudy": "Editar Estudo",
-      "addStudy": "Adicionar Estudo",
-      "table": {
-        "title": "Título",
-        "objective": "Objetivo",
-        "population": "População",
-        "duration": "Duração",
-        "status": "Status",
-        "actions": "Ações",
-        "recruited": "recrutados",
-        "dogs": "cães"
-      },
-      "form": {
-        "title": "Título",
-        "objective": "Objetivo",
-        "population": "População",
-        "duration": "Duração",
-        "status": "Status",
-        "save": "Salvar"
-      },
-      "status": {
-        "recruiting": "Recrutando",
-        "pendingApproval": "Aprovação pendente",
-        "planning": "Planejamento"
-      },
-      "messages": {
-        "studyRemoved": "Estudo removido",
-        "studyRemovedDesc": "O estudo foi removido com sucesso.",
-        "studyUpdated": "Estudo atualizado",
-        "studyUpdatedDesc": "As alterações foram salvas com sucesso.",
-        "studyAdded": "Estudo adicionado",
-        "studyAddedDesc": "O novo estudo foi adicionado com sucesso."
-      }
-    },
-    "progress": {
-      "title": "Progresso do Estudo",
-      "currentDay": "Dia Atual:",
-      "of": "de",
-      "currentPhase": "Fase Atual:",
-      "schedule": "Cronograma",
-      "day": "Dia"
-    },
-    "ongoingStudies": {
-      "title": "Estudos em Andamento",
-      "stats": {
-        "totalDogs": "Total de Cães",
-        "totalDogsDesc": "Participantes ativos em estudos",
-        "activeStudies": "Estudos Ativos",
-        "activeStudiesDesc": "Pesquisas em andamento",
-        "averageProgress": "Progresso Médio",
-        "averageProgressDesc": "Percentual de conclusão",
-        "updatedDaily": "Atualizado diariamente"
-      },
       "tabs": {
-        "overview": "Visão Geral",
-        "metrics": "Métricas",
-        "trends": "Tendências",
-        "dogsData": "Dados dos Cães"
+        "ongoing": "Em Andamento",
+        "completed": "Concluídos",
+        "planned": "Planejados"
       },
-      "dogsData": {
-        "title": "Dados de Monitoramento - Dionisia",
-        "allDogsTitle": "Monitoramento de Todos os Cães",
-        "allDogsSubtitle": "{{count}} cães monitorados com coleira Invoxia",
-        "fetchButton": "Buscar Dados da API Invoxia",
-        "fetchAllButton": "Buscar Dados de Todos",
-        "refreshButton": "Atualizar Dados",
-        "loading": "Carregando dados...",
-        "error": "Erro ao buscar dados",
-        "noData": "Carregando dados de monitoramento...",
-        "noDataForDog": "Sem dados disponíveis para este cão",
-        "lastFetch": "Última atualização",
-        "records": "registros",
-        "showingFirst": "Mostrando primeiros {{count}} de {{total}} registros",
-        "petInfo": {
-          "name": "Nome",
-          "id": "ID Invoxia"
-        },
+      "plannedStudies": {
+        "title": "Estudos Planejados",
+        "description": "Gerencie os estudos científicos em fase de planejamento.",
+        "listTitle": "Lista de Estudos",
+        "listDescription": "Estudos científicos em fase de planejamento e análise prévia.",
+        "newStudy": "Novo Estudo",
+        "editStudy": "Editar Estudo",
+        "addStudy": "Adicionar Estudo",
         "table": {
-          "date": "Data",
-          "hrDayMean": "FC Dia (média)",
-          "hrNightMean": "FC Noite (média)",
-          "brDayMean": "FR Dia (média)",
-          "brNightMean": "FR Noite (média)",
-          "hrvSdnn": "HRV (SDNN)",
-          "distance": "Distância (m)",
-          "sleepHours": "Horas Sono",
-          "sleepScore": "Score Sono"
+          "title": "Título",
+          "objective": "Objetivo",
+          "population": "População",
+          "duration": "Duração",
+          "status": "Status",
+          "actions": "Ações",
+          "recruited": "recrutados",
+          "dogs": "cães"
         },
-        "charts": {
-          "heartRate": {
-            "title": "Frequência Cardíaca",
-            "dayMean": "FC Dia (média)",
-            "nightMean": "FC Noite (média)",
-            "dayMin": "FC Dia (mín)",
-            "dayMax": "FC Dia (máx)"
-          },
-          "breathingRate": {
-            "title": "Frequência Respiratória",
-            "dayMean": "FR Dia (média)",
-            "nightMean": "FR Noite (média)",
-            "dayMin": "FR Dia (mín)",
-            "dayMax": "FR Dia (máx)"
-          },
-          "hrv": {
-            "title": "Variabilidade Cardíaca (HRV)",
-            "sdnn": "SDNN Total",
-            "rmssd": "RMSSD Total",
-            "daySdnn": "SDNN Dia",
-            "nightSdnn": "SDNN Noite"
-          },
-          "activity": {
-            "title": "Atividade Física",
-            "distance": "Distância (m)",
-            "calories": "Calorias",
-            "exerciseMinutes": "Exercício (min)"
-          },
-          "sleep": {
-            "title": "Qualidade do Sono",
-            "hours": "Horas de Sono",
-            "score": "Score de Sono (%)",
-            "target": "Meta 8h"
-          }
-        }
-      },
-      "overview": {
-        "studyPopulation": "População do Estudo",
-        "breeds": "Raças:",
-        "ageRange": "Faixa Etária:",
-        "intervention": "Intervenção:",
-        "primaryInvestigator": "Investigador Principal:",
-        "notSpecified": "Não especificado",
-        "studyNotes": "Notas do Estudo"
-      },
-      "notes": {
-        "preliminaryResults": "Resultados Preliminares",
-        "currentLimitations": "Limitações Atuais",
-        "nextSteps": "Próximos Passos"
-      },
-      "models": {
-        "dashboard": {
-          "title": "Visão Geral dos Modelos Preditivos",
-          "subtitle": "Acompanhe a evolução e performance dos nossos modelos proprietários",
-          "totalModels": "Modelos Ativos",
-          "avgAccuracy": "Precisão Média",
-          "totalSamples": "Total Amostras",
-          "insights": "Insights",
-          "growthRate": "Crescimento",
-          "active": "Em Coleta",
-          "comparison": "Comparação de Modelos",
-          "topModels": "Top 3 Modelos por Performance",
-          "samples": "amostras",
-          "accuracy": "precisão",
-          "recentInsights": "Descobertas Recentes"
+        "form": {
+          "title": "Título",
+          "objective": "Objetivo",
+          "population": "População",
+          "duration": "Duração",
+          "status": "Status",
+          "save": "Salvar"
         },
         "status": {
-          "initial": "🌱 Inicial",
-          "growing": "📈 Crescendo",
-          "mature": "✅ Maduro",
-          "stateOfArt": "🎯 Estado da Arte"
+          "recruiting": "Recrutando",
+          "pendingApproval": "Aprovação pendente",
+          "planning": "Planejamento"
         },
-        "confidence": {
-          "high": "Alta Confiança",
-          "medium": "Média Confiança",
-          "low": "Requer Dados"
-        },
-        "tabs": {
-          "evolution": "Evolução",
-          "performance": "Performance",
-          "longitudinal": "Impacto",
-          "insights": "Insights",
-          "comparison": "Comparação"
-        },
-        "evolution": {
-          "totalSamples": "Total de Amostras",
-          "growthRate": "Crescimento Mensal",
-          "currentAccuracy": "Precisão Atual",
-          "nextMilestone": "Próxima Meta",
-          "accuracyOverTime": "Evolução de Precisão ao Longo do Tempo",
-          "dataGrowth": "Crescimento de Dataset: Tratamento vs Controle"
-        },
-        "performance": {
-          "byCondition": "Performance por Condição de Saúde",
-          "accuracy": "Precisão",
-          "effectiveness": "Efetividade",
-          "samples": "Amostras"
-        },
-        "longitudinal": {
-          "correlation": "Correlação: Volume de Dados × Precisão",
-          "description": "Visualize como o aumento no volume de dados longitudinais impacta diretamente a precisão do modelo.",
-          "keyInsight": "Insight Principal",
-          "insightText": "O modelo demonstra retornos decrescentes após ~20.000 amostras, atingindo patamar de maturidade."
-        },
-        "insights": {
-          "noInsights": "Nenhum Insight Descoberto Ainda",
-          "waitingData": "Insights proprietários serão descobertos conforme o modelo acumula mais dados."
-        },
-        "comparison": {
-          "treatmentVsControl": "Tratamento vs Controle ao Longo do Tempo"
+        "messages": {
+          "studyRemoved": "Estudo removido",
+          "studyRemovedDesc": "O estudo foi removido com sucesso.",
+          "studyUpdated": "Estudo atualizado",
+          "studyUpdatedDesc": "As alterações foram salvas com sucesso.",
+          "studyAdded": "Estudo adicionado",
+          "studyAddedDesc": "O novo estudo foi adicionado com sucesso."
         }
       },
-      "groups": {
-        "treatment": "Grupo de Tratamento",
-        "control": "Grupo de Controle",
-        "dogs": "cães"
+      "progress": {
+        "title": "Progresso do Estudo",
+        "currentDay": "Dia Atual:",
+        "of": "de",
+        "currentPhase": "Fase Atual:",
+        "schedule": "Cronograma",
+        "day": "Dia"
+      },
+      "ongoingStudies": {
+        "title": "Estudos em Andamento",
+        "stats": {
+          "totalDogs": "Total de Cães",
+          "totalDogsDesc": "Participantes ativos em estudos",
+          "activeStudies": "Estudos Ativos",
+          "activeStudiesDesc": "Pesquisas em andamento",
+          "averageProgress": "Progresso Médio",
+          "averageProgressDesc": "Percentual de conclusão",
+          "updatedDaily": "Atualizado diariamente"
+        },
+        "tabs": {
+          "overview": "Visão Geral",
+          "metrics": "Métricas",
+          "trends": "Tendências",
+          "dogsData": "Dados dos Cães"
+        },
+        "dogsData": {
+          "title": "Dados de Monitoramento - Dionisia",
+          "allDogsTitle": "Monitoramento de Todos os Cães",
+          "allDogsSubtitle": "{{count}} cães monitorados com coleira Invoxia",
+          "fetchButton": "Buscar Dados da API Invoxia",
+          "fetchAllButton": "Buscar Dados de Todos",
+          "refreshButton": "Atualizar Dados",
+          "loading": "Carregando dados...",
+          "error": "Erro ao buscar dados",
+          "noData": "Carregando dados de monitoramento...",
+          "noDataForDog": "Sem dados disponíveis para este cão",
+          "lastFetch": "Última atualização",
+          "records": "registros",
+          "showingFirst": "Mostrando primeiros {{count}} de {{total}} registros",
+          "petInfo": {
+            "name": "Nome",
+            "id": "ID Invoxia"
+          },
+          "table": {
+            "date": "Data",
+            "hrDayMean": "FC Dia (média)",
+            "hrNightMean": "FC Noite (média)",
+            "brDayMean": "FR Dia (média)",
+            "brNightMean": "FR Noite (média)",
+            "hrvSdnn": "HRV (SDNN)",
+            "distance": "Distância (m)",
+            "sleepHours": "Horas Sono",
+            "sleepScore": "Score Sono"
+          },
+          "charts": {
+            "heartRate": {
+              "title": "Frequência Cardíaca",
+              "dayMean": "FC Dia (média)",
+              "nightMean": "FC Noite (média)",
+              "dayMin": "FC Dia (mín)",
+              "dayMax": "FC Dia (máx)"
+            },
+            "breathingRate": {
+              "title": "Frequência Respiratória",
+              "dayMean": "FR Dia (média)",
+              "nightMean": "FR Noite (média)",
+              "dayMin": "FR Dia (mín)",
+              "dayMax": "FR Dia (máx)"
+            },
+            "hrv": {
+              "title": "Variabilidade Cardíaca (HRV)",
+              "sdnn": "SDNN Total",
+              "rmssd": "RMSSD Total",
+              "daySdnn": "SDNN Dia",
+              "nightSdnn": "SDNN Noite"
+            },
+            "activity": {
+              "title": "Atividade Física",
+              "distance": "Distância (m)",
+              "calories": "Calorias",
+              "exerciseMinutes": "Exercício (min)"
+            },
+            "sleep": {
+              "title": "Qualidade do Sono",
+              "hours": "Horas de Sono",
+              "score": "Score de Sono (%)",
+              "target": "Meta 8h"
+            }
+          }
+        },
+        "overview": {
+          "studyPopulation": "População do Estudo",
+          "breeds": "Raças:",
+          "ageRange": "Faixa Etária:",
+          "intervention": "Intervenção:",
+          "primaryInvestigator": "Investigador Principal:",
+          "notSpecified": "Não especificado",
+          "studyNotes": "Notas do Estudo"
+        },
+        "notes": {
+          "preliminaryResults": "Resultados Preliminares",
+          "currentLimitations": "Limitações Atuais",
+          "nextSteps": "Próximos Passos"
+        },
+        "models": {
+          "dashboard": {
+            "title": "Visão Geral dos Modelos Preditivos",
+            "subtitle": "Acompanhe a evolução e performance dos nossos modelos proprietários",
+            "totalModels": "Modelos Ativos",
+            "avgAccuracy": "Precisão Média",
+            "totalSamples": "Total Amostras",
+            "insights": "Insights",
+            "growthRate": "Crescimento",
+            "active": "Em Coleta",
+            "comparison": "Comparação de Modelos",
+            "topModels": "Top 3 Modelos por Performance",
+            "samples": "amostras",
+            "accuracy": "precisão",
+            "recentInsights": "Descobertas Recentes"
+          },
+          "status": {
+            "initial": "🌱 Inicial",
+            "growing": "📈 Crescendo",
+            "mature": "✅ Maduro",
+            "stateOfArt": "🎯 Estado da Arte"
+          },
+          "confidence": {
+            "high": "Alta Confiança",
+            "medium": "Média Confiança",
+            "low": "Requer Dados"
+          },
+          "tabs": {
+            "evolution": "Evolução",
+            "performance": "Performance",
+            "longitudinal": "Impacto",
+            "insights": "Insights",
+            "comparison": "Comparação"
+          },
+          "evolution": {
+            "totalSamples": "Total de Amostras",
+            "growthRate": "Crescimento Mensal",
+            "currentAccuracy": "Precisão Atual",
+            "nextMilestone": "Próxima Meta",
+            "accuracyOverTime": "Evolução de Precisão ao Longo do Tempo",
+            "dataGrowth": "Crescimento de Dataset: Tratamento vs Controle"
+          },
+          "performance": {
+            "byCondition": "Performance por Condição de Saúde",
+            "accuracy": "Precisão",
+            "effectiveness": "Efetividade",
+            "samples": "Amostras"
+          },
+          "longitudinal": {
+            "correlation": "Correlação: Volume de Dados × Precisão",
+            "description": "Visualize como o aumento no volume de dados longitudinais impacta diretamente a precisão do modelo.",
+            "keyInsight": "Insight Principal",
+            "insightText": "O modelo demonstra retornos decrescentes após ~20.000 amostras, atingindo patamar de maturidade."
+          },
+          "insights": {
+            "noInsights": "Nenhum Insight Descoberto Ainda",
+            "waitingData": "Insights proprietários serão descobertos conforme o modelo acumula mais dados."
+          },
+          "comparison": {
+            "treatmentVsControl": "Tratamento vs Controle ao Longo do Tempo"
+          }
+        },
+        "groups": {
+          "treatment": "Grupo de Tratamento",
+          "control": "Grupo de Controle",
+          "dogs": "cães"
+        }
+      },
+      "phases": {
+        "recruitment": "Recrutamento",
+        "baseline": "Linha de Base",
+        "intervention": "Intervenção",
+        "evaluation": "Avaliação",
+        "analysis": "Análise",
+        "recruitmentDesc": "Fase de seleção e recrutamento dos participantes do estudo.",
+        "baselineDesc": "Coleta de dados iniciais e estabelecimento de métricas base.",
+        "interventionDesc": "Aplicação do tratamento ou intervenção nos grupos de estudo.",
+        "evaluationDesc": "Coleta e avaliação dos resultados parciais ou finais.",
+        "analysisDesc": "Análise estatística e interpretação dos dados coletados."
+      },
+      "completedStudies": {
+        "title": "Estudos Concluídos",
+        "finalizedStudies": "Estudos Finalizados",
+        "finalResults": "Resultados Finais",
+        "totalPopulation": "População Total:",
+        "studyDuration": "Duração do Estudo:",
+        "lifeExtension": "Extensão de Vida:",
+        "statisticalSignificance": "Significância Estatística:",
+        "experimentStatus": "Status do Experimento:",
+        "completed": "Concluído",
+        "inTreatmentGroup": "no grupo tratamento",
+        "days": "dias",
+        "cElegans": "C. elegans",
+        "organisms": "organismos"
+      },
+      "charts": {
+        "survivalRateFinal": "Taxa de Sobrevivência Final",
+        "survivalRateOngoing": "Taxa de Sobrevivência (Em Andamento)",
+        "control": "Controle",
+        "treatment": "Tratamento",
+        "ageInAdultPhase": "Idade na fase adulta (dias)",
+        "survival": "Sobrevivência",
+        "day": "Dia",
+        "earlyIntervention": "Intervenção Precoce",
+        "midLifeIntervention": "Intervenção Meia-Vida",
+        "survivalRate": "Taxa de Sobrevivência",
+        "healthMaintenanceRate": "Taxa de Manutenção de Saúde",
+        "survivalRateWithStress": "Taxa de Sobrevivência com Stress",
+        "healthMaintenanceWithStress": "Taxa de Manutenção de Saúde com Stress",
+        "earlyAdultIntervention": "Intervenção desde o início da vida adulta",
+        "wormsWithHealth": "Vermes com pelo menos 30% de saúde",
+        "stressorApplied": "Estressor aplicado no dia 15",
+        "healthAfterStressor": "Saúde após estressor no dia 15",
+        "midLifeInterventionStart": "Intervenção iniciada na meia-vida",
+        "age": "Idade (dias)",
+        "rate": "Taxa",
+        "noIntervention": "Sem Intervenção",
+        "lowIntervention": "Intervenção Baixa",
+        "highIntervention": "Intervenção Alta"
+      },
+      "publications": {
+        "title": "Status das Publicações",
+        "submission": "submissão",
+        "submissions": "submissões",
+        "noPublications": "Nenhuma publicação cadastrada",
+        "status": {
+          "published": "publicado",
+          "accepted": "aceito",
+          "underReview": "em revisão",
+          "submitted": "submetido",
+          "rejected": "negado",
+          "notSubmitted": "não submetido"
+        },
+        "type": {
+          "national": "Nacional",
+          "international": "Internacional"
+        },
+        "category": {
+          "biomedical": "biomédica",
+          "veterinary": "veterinária",
+          "general": "geral"
+        },
+        "submittedOn": "Submetido:",
+        "publishedOn": "Publicado:",
+        "viewDoi": "Ver DOI"
+      },
+      "studyCategories": {
+        "geroproptetor": "geroproptetor",
+        "metabolic": "metabólico",
+        "neuroprotector": "neuroprotetor",
+        "antiInflammatory": "antiinflamatório"
+      },
+      "details": {
+        "overview": "Visão Geral",
+        "results": "Resultados:",
+        "hypotheses": "Hipóteses",
+        "previousStudies": "Estudos Anteriores",
+        "publications": "Publicações",
+        "description": "Descrição",
+        "studyDetails": "Detalhes do Estudo",
+        "status": "Status:",
+        "start": "Início:",
+        "end": "Término:",
+        "ongoing": "Em andamento",
+        "priority": "Prioridade:",
+        "metrics": "Métricas",
+        "progress": "Progresso:",
+        "compounds": "Compostos:",
+        "positiveResults": "Resultados Positivos:",
+        "population": "População:",
+        "duration": "Duração:",
+        "quantitativeResults": "Resultados Quantitativos",
+        "lifeExtension": "Extensão de Vida:",
+        "pValue": "Valor p:",
+        "statisticalPower": "Poder Estatístico:",
+        "effect": "Efeito:",
+        "primaryHypothesis": "Hipótese Principal",
+        "secondaryHypotheses": "Hipóteses Secundárias",
+        "relatedPreviousStudies": "Estudos Anteriores Relacionados"
+      },
+      "studyCard": {
+        "viewDetails": "Ver detalhes",
+        "status": "Status:",
+        "start": "Início:",
+        "end": "Fim:",
+        "objective": "Objetivo:",
+        "ongoing": "Em andamento"
       }
-    },
-    "phases": {
-      "recruitment": "Recrutamento",
-      "baseline": "Linha de Base",
-      "intervention": "Intervenção",
-      "evaluation": "Avaliação",
-      "analysis": "Análise",
-      "recruitmentDesc": "Fase de seleção e recrutamento dos participantes do estudo.",
-      "baselineDesc": "Coleta de dados iniciais e estabelecimento de métricas base.",
-      "interventionDesc": "Aplicação do tratamento ou intervenção nos grupos de estudo.",
-      "evaluationDesc": "Coleta e avaliação dos resultados parciais ou finais.",
-      "analysisDesc": "Análise estatística e interpretação dos dados coletados."
-    },
-    "completedStudies": {
-      "title": "Estudos Concluídos",
-      "finalizedStudies": "Estudos Finalizados",
-      "finalResults": "Resultados Finais",
-      "totalPopulation": "População Total:",
-      "studyDuration": "Duração do Estudo:",
-      "lifeExtension": "Extensão de Vida:",
-      "statisticalSignificance": "Significância Estatística:",
-      "experimentStatus": "Status do Experimento:",
-      "completed": "Concluído",
-      "inTreatmentGroup": "no grupo tratamento",
-      "days": "dias",
-      "cElegans": "C. elegans",
-      "organisms": "organismos"
-    },
-    "charts": {
-      "survivalRateFinal": "Taxa de Sobrevivência Final",
-      "survivalRateOngoing": "Taxa de Sobrevivência (Em Andamento)",
-      "control": "Controle",
-      "treatment": "Tratamento",
-      "ageInAdultPhase": "Idade na fase adulta (dias)",
-      "survival": "Sobrevivência",
-      "day": "Dia",
-      "earlyIntervention": "Intervenção Precoce",
-      "midLifeIntervention": "Intervenção Meia-Vida",
-      "survivalRate": "Taxa de Sobrevivência",
-      "healthMaintenanceRate": "Taxa de Manutenção de Saúde",
-      "survivalRateWithStress": "Taxa de Sobrevivência com Stress",
-      "healthMaintenanceWithStress": "Taxa de Manutenção de Saúde com Stress",
-      "earlyAdultIntervention": "Intervenção desde o início da vida adulta",
-      "wormsWithHealth": "Vermes com pelo menos 30% de saúde",
-      "stressorApplied": "Estressor aplicado no dia 15",
-      "healthAfterStressor": "Saúde após estressor no dia 15",
-      "midLifeInterventionStart": "Intervenção iniciada na meia-vida",
-      "age": "Idade (dias)",
-      "rate": "Taxa",
-      "noIntervention": "Sem Intervenção",
-      "lowIntervention": "Intervenção Baixa",
-      "highIntervention": "Intervenção Alta"
-    },
-    "publications": {
-      "title": "Status das Publicações",
-      "submission": "submissão",
-      "submissions": "submissões",
-      "noPublications": "Nenhuma publicação cadastrada",
-      "status": {
-        "published": "publicado",
-        "accepted": "aceito",
-        "underReview": "em revisão",
-        "submitted": "submetido",
-        "rejected": "negado",
-        "notSubmitted": "não submetido"
-      },
-      "type": {
-        "national": "Nacional",
-        "international": "Internacional"
-      },
-      "category": {
-        "biomedical": "biomédica",
-        "veterinary": "veterinária",
-        "general": "geral"
-      },
-      "submittedOn": "Submetido:",
-      "publishedOn": "Publicado:",
-      "viewDoi": "Ver DOI"
-    },
-    "studyCategories": {
-      "geroproptetor": "geroproptetor",
-      "metabolic": "metabólico",
-      "neuroprotector": "neuroprotetor",
-      "antiInflammatory": "antiinflamatório"
-    },
-    "details": {
-      "overview": "Visão Geral",
-      "results": "Resultados",
-      "hypotheses": "Hipóteses",
-      "previousStudies": "Estudos Anteriores",
-      "publications": "Publicações",
-      "description": "Descrição",
-      "studyDetails": "Detalhes do Estudo",
-      "status": "Status:",
-      "start": "Início:",
-      "end": "Término:",
-      "ongoing": "Em andamento",
-      "priority": "Prioridade:",
-      "metrics": "Métricas",
-      "progress": "Progresso:",
-      "compounds": "Compostos:",
-      "positiveResults": "Resultados Positivos:",
-      "population": "População:",
-      "duration": "Duração:",
-      "quantitativeResults": "Resultados Quantitativos",
-      "lifeExtension": "Extensão de Vida:",
-      "pValue": "Valor p:",
-      "statisticalPower": "Poder Estatístico:",
-      "effect": "Efeito:",
-      "primaryHypothesis": "Hipótese Principal",
-      "secondaryHypotheses": "Hipóteses Secundárias",
-      "relatedPreviousStudies": "Estudos Anteriores Relacionados",
-      "results": "Resultados:"
-    },
-    "studyCard": {
-      "viewDetails": "Ver detalhes",
-      "status": "Status:",
-      "start": "Início:",
-      "end": "Fim:",
-      "objective": "Objetivo:",
-      "ongoing": "Em andamento"
-    }
     },
     "nutraceuticals": {
       "title": "Nutracêuticos",
@@ -2624,7 +2852,7 @@
       "support": "Suporte",
       "study": "Estudo",
       "relation": "Relação",
-      "treatability": "Trat",
+      "treatability": "Tratabilidade",
       "efficacy": "Eficácia",
       "basedOn": "Baseado em",
       "studySingular": "estudo",
@@ -2635,330 +2863,7 @@
       "condition": "Condição",
       "outcome": "Outcome",
       "severity": "Severidade",
-      "treatability": "Tratabilidade",
       "relevance": "Relevância"
-    }
-  },
-  "nutraceuticals": {
-    "header": {
-      "title": "Nutracêuticos",
-      "subtitle": "Gerencie os nutracêuticos e suas relações com condições de saúde",
-      "newButton": "Novo Nutracêutico",
-      "manageImportsButton": "Gerenciar Importações"
-    },
-    "management": {
-      "title": "Gerenciamento de Nutracêuticos",
-      "newButton": "Novo Nutracêutico",
-      "noCategory": "Sem categoria",
-      "categoryNotFound": "Categoria não encontrada"
-    },
-    "legend": {
-      "title": "Legenda de Evidências",
-      "convergence": {
-        "title": "Convergência Científica",
-        "high": "Alta Convergência",
-        "moderate": "Convergência Moderada",
-        "low": "Baixa Convergência",
-        "description": "Grau de consenso científico entre diferentes estudos"
-      },
-      "efficacy": {
-        "title": "Eficácia Clínica",
-        "high": "Alta Eficácia",
-        "moderate": "Eficácia Moderada",
-        "low": "Baixa Eficácia",
-        "description": "Nível de eficácia comprovada em estudos clínicos"
-      }
-    },
-    "search": {
-      "placeholder": "Buscar nutracêutico...",
-      "filterEfficacy": "Filtrar por eficácia",
-      "filterCondition": "Filtrar por condição",
-      "allEfficacies": "Todas as eficácias",
-      "allConditions": "Todas as condições",
-      "efficacyHigh": "Alta (4-5)",
-      "efficacyMedium": "Média (3)",
-      "efficacyLow": "Baixa (1-2)",
-      "clear": "Limpar",
-      "refresh": "Atualizar",
-      "add": "Adicionar",
-      "new": "Novo"
-    },
-    "table": {
-      "name": "Nome",
-      "description": "Descrição",
-      "outcomes": "Outcomes",
-      "actions": "Ações",
-      "notDefined": "Não definido",
-      "notFound": "Nenhum nutracêutico encontrado.",
-      "emptyState": "Nenhum nutracêutico encontrado com os filtros selecionados.",
-      "countOf": "{{filtered}} de {{total}} nutracêuticos",
-      "editTitle": "Editar",
-      "deleteTitle": "Excluir",
-      "manageOutcomes": "Gerenciar Outcomes",
-      "headers": {
-        "name": "Nome",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "expanded": {
-        "description": "Descrição",
-        "chemicalCompound": "Composto Químico",
-        "convergenceTitle": "Convergência Científica",
-        "convergenceHigh": "Alta Convergência",
-        "contraindications": "Contraindicações"
-      }
-    },
-    "dialog": {
-      "addTitle": "Adicionar Novo Nutracêutico",
-      "editTitle": "Editar Nutracêutico",
-      "tabs": {
-        "basicInfo": "Informações Básicas",
-        "relationships": "Relacionamentos"
-      }
-    },
-    "form": {
-      "name": "Nome do Nutracêutico*",
-      "namePlaceholder": "Nome do nutracêutico",
-      "description": "Descrição",
-      "descriptionPlaceholder": "Descrição do nutracêutico",
-      "dosage": "Dosagem",
-      "dosagePlaceholder": "Ex: 500mg, 2 vezes ao dia",
-      "source": "Fonte",
-      "sourcePlaceholder": "Ex: Curcuma longa",
-      "chemicalCompound": "Composto Químico",
-      "chemicalPlaceholder": "Fórmula ou nome do composto químico",
-      "contraindications": "Contraindicações",
-      "contraindicationsPlaceholder": "Cada contraindicação em uma linha",
-      "contraindicationsHelp": "Digite cada contraindicação em uma linha separada.",
-      "cancel": "Cancelar",
-      "saving": "Salvando...",
-      "creating": "Criando...",
-      "save": "Salvar Nutracêutico",
-      "create": "Criar Nutracêutico",
-      "mainRelation": "Relação Principal",
-      "relationN": "Relação {{n}}",
-      "categoryOutcome": "Categoria / Outcome",
-      "selectCategory": "Selecione uma categoria",
-      "efficacyLevel": "Nível de Eficácia: {{score}}",
-      "notesObservations": "Notas / Observações",
-      "observationsPlaceholder": "Observações sobre esta relação",
-      "relatedStudies": "Estudos Relacionados",
-      "noStudiesAvailable": "Não há estudos disponíveis",
-      "addRelation": "Adicionar nova relação"
-    },
-    "conditions": {
-      "addTitle": "Adicionar Nova Condição de Saúde",
-      "conditionName": "Nome da Condição",
-      "conditionNamePlaceholder": "Ex: Artrite, Diabetes, Insuficiência Cardíaca, etc.",
-      "conditionDescription": "Descrição",
-      "conditionDescriptionPlaceholder": "Descreva esta condição de saúde e suas características principais",
-      "savingCondition": "Salvando...",
-      "saveCondition": "Salvar Condição"
-    },
-    "relationships": {
-      "title": "Relacionamentos",
-      "manageButton": "Gerenciar Relacionamentos",
-      "studies": "Estudos Científicos",
-      "conditions": "Condições de Saúde",
-      "noStudies": "Nenhum estudo associado. Clique em \"Gerenciar Relacionamentos\" para adicionar estudos científicos.",
-      "noConditions": "Nenhuma condição associada. Clique em \"Gerenciar Relacionamentos\" para adicionar condições de saúde.",
-      "studyNoTitle": "Estudo sem título",
-      "studyNoJournal": "Revista não especificada",
-      "conditionNoName": "Condição sem nome",
-      "conditionNoDescription": "Sem descrição",
-      "relevance": "Relevância",
-      "typePrevention": "Prevenção",
-      "typeTreatment": "Tratamento",
-      "typeSupport": "Suporte",
-      "finish": "Finalizar"
-    },
-    "delete": {
-      "title": "Confirmar exclusão",
-      "description": "Tem certeza que deseja excluir o nutracêutico",
-      "warning": "Esta ação não pode ser desfeita.",
-      "cancel": "Cancelar",
-      "confirm": "Excluir"
-    },
-    "outcomes": {
-      "title": "Gerenciar Outcomes",
-      "description": "Gerencie as relações do nutracêutico {{name}} com outcomes.",
-      "loading": "Carregando...",
-      "placeholder": "Funcionalidade será refatorada posteriormente.",
-      "close": "Fechar"
-    },
-    "conditions": {
-      "manageTitle": "Gerenciar Condições de Saúde",
-      "manageDescription": "Associe condições de saúde ao nutracêutico \"{{name}}\".",
-      "close": "Fechar"
-    },
-    "header": {
-      "title": "Nutracêuticos",
-      "subtitle": "Gerencie os nutracêuticos e suas relações com condições de saúde",
-      "newButton": "Novo Nutracêutico",
-      "manageImportsButton": "Gerenciar Importações",
-      "importButton": "Importar Dados",
-      "help": {
-        "title": "Ajuda - Nutracêuticos",
-        "subtitle": "Aprenda como gerenciar e organizar os nutracêuticos no sistema.",
-        "importTitle": "Importação de Dados",
-        "importDesc": "A importação de planilhas permite carregar grandes volumes de dados de nutracêuticos para o sistema. Formatos suportados: CSV e Excel.",
-        "associationsTitle": "Associações com Condições",
-        "associationsDesc": "Cada nutracêutico pode ter relações com condições de saúde com diferentes níveis de eficácia para prevenção, tratamento ou suporte."
-      }
-    },
-    "table": {
-      "headers": {
-        "name": "Nome",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte",
-        "convergence": "Convergência",
-        "studies": "Estudos",
-        "actions": "Ações"
-      },
-      "noData": "Nenhum nutracêutico encontrado",
-      "expanded": {
-        "description": "Descrição:",
-        "noDescription": "Sem descrição disponível",
-        "chemicalCompound": "Composto Químico:",
-        "dosage": "Dosagem:",
-        "convergenceTitle": "Convergência de Estudos:",
-        "scientificBase": "Base Científica:",
-        "studiesAnalyzed": "{{count}} estudos científicos analisados",
-        "contraindications": "Contraindicações:",
-        "convergenceHigh": "Alta convergência - Estudos concordam",
-        "convergenceMedium": "Convergência moderada - Alguns estudos divergem",
-        "convergenceLow": "Baixa convergência - Estudos apresentam resultados conflitantes"
-      }
-    },
-    "legend": {
-      "title": "Legenda da Evidência Científica",
-      "convergence": {
-        "title": "Convergência de Estudos",
-        "high": "≥4.0 Alta",
-        "moderate": "2.0-3.9 Moderada",
-        "low": "<2.0 Baixa",
-        "description": "Mede o grau de concordância entre diferentes estudos científicos"
-      },
-      "efficacy": {
-        "title": "Eficácia por Condição",
-        "high": "≥4.0 Alta",
-        "moderate": "2.0-3.9 Moderada",
-        "low": "<2.0 Baixa",
-        "description": "Eficácia específica para cada condição de saúde nas tags"
-      }
-    },
-    "import": {
-      "title": {
-        "upload": "Importar Nutracêuticos e Estudos",
-        "review": "Revisar Dados Importados"
-      },
-      "description": {
-        "upload": "Importe planilhas de dados de nutracêuticos e PDFs de estudos científicos para processamento via IA.",
-        "review": "Revise os dados extraídos pela IA antes de confirmar a importação."
-      },
-      "tabs": {
-        "spreadsheet": "Planilha de Nutracêuticos",
-        "studies": "Estudos Científicos (PDF)"
-      },
-      "studies": {
-        "title": "Estudos Científicos em PDF",
-        "description": "Faça o upload dos PDFs dos estudos científicos citados na planilha de nutracêuticos. Estes estudos serão importados para processamento RAG e associados automaticamente aos nutracêuticos."
-      },
-      "toast": {
-        "success": "Importação concluída",
-        "successDesc": "Dados importados com sucesso no banco de nutracêuticos.",
-        "error": "Erro",
-        "errorDesc": "Erro ao processar arquivos de estudos científicos"
-      }
-    },
-    "manageImports": {
-      "title": "Gerenciar Importações de Nutracêuticos",
-      "description": "Visualize e gerencie as importações recentes. Você pode excluir importações para remover dados duplicados ou incorretos.",
-      "table": {
-        "headers": {
-          "date": "Data/Hora",
-          "name": "Nome",
-          "source": "Fonte",
-          "nutraceuticals": "Nutracêuticos",
-          "actions": "Ações"
-        }
-      },
-      "noData": "Nenhuma importação encontrada.",
-      "loading": "Carregando...",
-      "close": "Fechar",
-      "deleteAction": "Excluir importação",
-      "delete": {
-        "title": "Confirmar exclusão",
-        "description": "Você tem certeza que deseja excluir esta importação? Esta ação removerá todos os nutracêuticos associados a esta importação e não pode ser desfeita.",
-        "cancel": "Cancelar",
-        "confirm": "Excluir",
-        "deleting": "Excluindo..."
-      }
-    },
-    "toast": {
-      "success": "Sucesso",
-      "error": "Erro",
-      "created": "Nutracêutico criado com sucesso",
-      "updated": "Nutracêutico atualizado com sucesso",
-      "deleted": "Nutracêutico excluído com sucesso.",
-      "deleteError": "Erro ao excluir nutracêutico: {{message}}"
-    },
-    "validation": {
-      "nameRequired": "O nome é obrigatório"
-    },
-    "conditions": {
-      "title": "Gerenciar Condições",
-      "manageTitle": "Gerenciar Condições de Saúde",
-      "manageDescription": "Associe condições de saúde ao nutracêutico {{name}}",
-      "close": "Fechar",
-      "form": {
-        "healthCondition": "Condição de Saúde",
-        "relationshipType": "Tipo de Relação",
-        "efficacy": "Eficácia (1-5)",
-        "notes": "Notas ou Observações",
-        "selectCondition": "Selecione uma condição",
-        "selectRelationship": "Selecione o tipo",
-        "addNotes": "Adicione notas sobre esta associação...",
-        "addNewRelation": "Adicionar nova relação",
-        "associate": "Adicionar Relação",
-        "associating": "Associando..."
-      },
-      "relationshipTypes": {
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "tabs": {
-        "all": "Todas",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "support": "Suporte"
-      },
-      "messages": {
-        "allAssociated": "Todas as condições já foram associadas",
-        "noRelations": "Este nutracêutico não possui relações com condições de saúde",
-        "noRelationsFiltered": "Nenhuma relação de {{type}} encontrada.",
-        "associationSuccess": "Condição associada com sucesso",
-        "associationError": "Não foi possível associar a condição",
-        "removeSuccess": "A remoção foi simulada na interface. Recarregue a página para ver o estado real.",
-        "selectCondition": "Selecione uma condição de saúde",
-        "partialFunctionality": "Funcionalidade parcial"
-      },
-      "efficacyLevels": {
-        "veryLow": "Muito Baixa",
-        "low": "Baixa",
-        "moderate": "Moderada",
-        "high": "Alta",
-        "veryHigh": "Muito Alta"
-      },
-      "labels": {
-        "efficacyScore": "Eficácia: {{score}}",
-        "notes": "Notas:",
-        "existingRelations": "Relações Existentes"
-      },
-      "remove": "Remover"
     }
   },
   "efficacyMatrix": {
@@ -3244,19 +3149,31 @@
   "roi": {
     "title": "Inteligência de ROI & Business Case",
     "description": "Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários",
+    "buttons": {
+      "exportReport": "Exportar Relatório",
+      "updateAnalyses": "Atualizar Análises"
+    },
     "kpis": {
-      "totalROI": "ROI Total Médio",
-      "totalROISubtitle": "Retorno médio dos nutracêuticos",
-      "preventiveROI": "ROI Preventivo",
-      "preventiveROISubtitle": "Maior retorno em prevenção",
-      "sustainability": "Índice Sustentabilidade",
-      "sustainabilitySubtitle": "Viabilidade a longo prazo",
-      "marketPenetration": "Penetração Mercado",
-      "marketPenetrationSubtitle": "Oportunidades disponíveis",
-      "vsMeta": "vs meta",
-      "vsTreatment": "vs tratamento",
-      "highConsistency": "Alta consistência",
-      "conditionsMapped": "condições mapeadas"
+      "totalROI": {
+        "title": "ROI Total Médio",
+        "subtitle": "Retorno médio dos nutracêuticos",
+        "trendVsMeta": "vs meta"
+      },
+      "preventiveROI": {
+        "title": "ROI Preventivo",
+        "subtitle": "Maior retorno em prevenção",
+        "trendVsTreatment": "vs tratamento"
+      },
+      "sustainabilityIndex": {
+        "title": "Índice Sustentabilidade",
+        "subtitle": "Viabilidade a longo prazo",
+        "trendHigh": "Alta consistência"
+      },
+      "marketPenetration": {
+        "title": "Penetração Mercado",
+        "subtitle": "Oportunidades disponíveis",
+        "conditionsMapped": "condições mapeadas"
+      }
     },
     "tabs": {
       "overview": "Visão Executiva",
@@ -3264,16 +3181,13 @@
       "predictive": "Análise Preditiva",
       "simulator": "Simulador"
     },
-    "buttons": {
-      "exportReport": "Exportar Relatório",
-      "updateAnalysis": "Atualizar Análises"
-    },
-    "sustainabilityMetrics": {
+    "sustainability": {
       "title": "Métricas de Sustentabilidade",
-      "avgCLV": "CLV Médio (24m)",
-      "retention": "Taxa de Retenção",
-      "payback": "Payback Médio",
-      "margin": "Margem de Contribuição"
+      "clvAverage": "CLV Médio (24m)",
+      "retentionRate": "Taxa de Retenção",
+      "avgPayback": "Payback Médio",
+      "contributionMargin": "Margem de Contribuição",
+      "months": "meses"
     },
     "clinicalImpact": {
       "title": "Impacto Clínico",
@@ -3282,20 +3196,37 @@
       "qualityImprovement": "Melhora qualidade de vida",
       "tutorSatisfaction": "Satisfação dos tutores"
     },
-    "comparative": {
+    "methodology": {
+      "title": "Metodologia e Parâmetros Técnicos",
+      "description": "Detalhamento dos modelos e algoritmos utilizados nas análises preditivas",
+      "parametersTitle": "Parâmetros de Cálculo",
+      "parameter": "Parâmetro",
+      "value": "Valor",
+      "baseIncidenceRate": "Taxa base incidência",
+      "protocolReduction": "Redução com protocolo",
+      "avgTreatmentCost": "Custo médio tratamento",
+      "preventiveProtocolCost": "Custo protocolo preventivo",
+      "modelsTitle": "Modelos Utilizados",
+      "predictiveAnalysis": "Análise Preditiva",
+      "trendAnalysis": "Análise de Tendências",
+      "monteCarloSimulation": "Simulação Monte Carlo",
+      "accuracy": "Acurácia",
+      "iterations": "iterações"
+    },
+    "executiveSummary": {
       "title": "Análise Comparativa de ROI",
       "description": "Comparação entre abordagens preventivas vs. tratamento reativo",
-      "preventive": "Abordagem Preventiva",
-      "reactive": "Tratamento Reativo",
+      "preventiveApproach": "Abordagem Preventiva",
+      "reactiveTreatment": "Tratamento Reativo",
       "avgROI": "ROI Médio",
       "costPerPetYear": "Custo por Pet/Ano",
-      "costPerCase": "Custo por Caso",
       "caseReduction": "Redução de Casos",
+      "costPerCase": "Custo por Caso",
       "incidenceRate": "Taxa de Incidência",
-      "advantage": "Vantagem Competitiva",
-      "advantageDesc": "Prevenção oferece ROI superior ao tratamento reativo"
+      "competitiveAdvantage": "Vantagem Competitiva",
+      "preventionSuperior": "Prevenção oferece ROI {{difference}}% superior ao tratamento reativo"
     },
-    "opportunities": {
+    "marketOpportunity": {
       "title": "Matriz de Oportunidades de Mercado",
       "description": "Análise de gaps terapêuticos e potencial de ROI por condição",
       "sortBy": "Ordenar por",
@@ -3303,78 +3234,118 @@
       "marketGap": "Gap de Mercado",
       "confidence": "Confiança",
       "gap": "Gap",
+      "roi": "ROI",
+      "levels": {
+        "veryHigh": "Muito Alta",
+        "high": "Alta",
+        "medium": "Média",
+        "low": "Baixa"
+      },
       "treatmentCost": "Custo Tratamento",
       "preventionCost": "Custo Prevenção",
       "savings": "Economia",
       "riskReduction": "Redução Risco",
-      "recommendedNutra": "Nutracêuticos Recomendados",
-      "vsTraditional": "vs tratamento tradicional",
-      "analyze": "Analisar",
-      "veryHigh": "Muito Alta",
-      "high": "Alta",
-      "medium": "Média",
-      "low": "Baixa",
+      "recommendedNutraceuticals": "Nutracêuticos Recomendados",
+      "savingsVsTraditional": "Economia de {{percentage}}% vs tratamento tradicional",
+      "analyze": "Analisar →",
       "interpretationTitle": "Interpretação da Matriz",
-      "interpretationDesc": "O Gap de Mercado indica a lacuna terapêutica existente, enquanto o ROI Potencial mostra o retorno esperado. Oportunidades \"Muito Alta\" combinam grande gap com alto ROI."
+      "interpretationText": "O Gap de Mercado indica a lacuna terapêutica existente, enquanto o ROI Potencial mostra o retorno esperado. Oportunidades \"Muito Alta\" combinam grande gap com alto ROI."
     },
-    "predictive": {
+    "predictiveChart": {
       "title": "Análise Preditiva de ROI",
       "description": "Projeção de retorno sobre investimento baseada em dados históricos e tendências",
-      "area": "Área",
-      "line": "Linha",
-      "composed": "Composto",
-      "monthly": "ROI Mensal",
-      "cumulative": "ROI Cumulativo",
-      "comparison": "Comparativo",
-      "projectedROI": "ROI Total Projetado",
-      "totalSavings": "Economia Total",
-      "payback": "Payback",
-      "avgConfidence": "Confiança Média",
-      "months": "meses",
-      "positiveTrend": "Tendência Positiva",
-      "positiveTrendDesc": "Projeção indica crescimento sustentável do ROI com pico no mês 18-20.",
-      "opportunity": "Oportunidade",
-      "opportunityDesc": "Maior retorno em cenários preventivos vs. tratamento reativo.",
-      "roi": "ROI",
-      "savings": "Economia",
-      "confidence": "Confiança"
+      "chartTypes": {
+        "area": "Área",
+        "line": "Linha",
+        "composed": "Composto"
+      },
+      "viewModes": {
+        "monthly": "ROI Mensal",
+        "cumulative": "ROI Cumulativo",
+        "comparison": "Comparativo"
+      },
+      "month": "Mês {{number}}",
+      "tooltip": {
+        "roi": "ROI",
+        "savings": "Economia",
+        "confidence": "Confiança"
+      },
+      "metrics": {
+        "projectedTotalROI": "ROI Total Projetado",
+        "totalSavings": "Economia Total",
+        "payback": "Payback",
+        "avgConfidence": "Confiança Média",
+        "months": "meses"
+      },
+      "insights": {
+        "positiveTrend": "Tendência Positiva",
+        "positiveTrendText": "Projeção indica crescimento sustentável do ROI com pico no mês 18-20.",
+        "opportunity": "Oportunidade",
+        "opportunityText": "Maior retorno em cenários preventivos vs. tratamento reativo."
+      },
+      "downloadButton": "Baixar Gráfico"
     },
     "simulator": {
       "title": "Simulador de Business Case",
       "description": "Configure parâmetros e simule diferentes cenários de implementação",
-      "clinicProfile": "Perfil da Clínica",
-      "initialInvestment": "Investimento Inicial (R$)",
-      "timeHorizon": "Horizonte Temporal (meses)",
-      "preventiveFocus": "Foco Preventivo (%)",
-      "riskTolerance": "Tolerância ao Risco",
-      "riskLow": "Baixa - Conservador",
-      "riskMedium": "Média - Equilibrado",
-      "riskHigh": "Alta - Agressivo",
-      "simulate": "Simular Business Case",
-      "summary": "Resumo",
-      "breakdown": "Detalhamento",
-      "timeline": "Timeline",
-      "risks": "Riscos",
-      "projectedROI": "ROI Projetado",
-      "netProfit": "Lucro Líquido",
-      "costDistribution": "Distribuição de Custos",
-      "revenueDistribution": "Distribuição de Receitas",
-      "monthlyProjection": "Projeção Mensal",
-      "revenue": "Receita",
-      "costs": "Custos",
-      "riskAnalysis": "Análise de Riscos",
-      "riskLevel": "Nível de Risco",
-      "mainRiskFactors": "Principais Fatores de Risco",
-      "implementation": "Implementação",
-      "training": "Treinamento",
-      "initialStock": "Estoque Inicial",
-      "marketing": "Marketing",
-      "prevention": "Prevenção",
-      "treatment": "Tratamento"
-    },
-    "methodology": {
-      "title": "Metodologia e Parâmetros Técnicos",
-      "description": "Detalhamento dos modelos e algoritmos utilizados nas análises preditivas"
+      "inputs": {
+        "clinicProfile": "Perfil da Clínica",
+        "initialInvestment": "Investimento Inicial (R$)",
+        "timeHorizon": "Horizonte Temporal (meses)",
+        "preventiveFocus": "Foco Preventivo (%)",
+        "riskTolerance": "Tolerância ao Risco",
+        "petsPerMonth": "pets/mês"
+      },
+      "riskLevels": {
+        "low": "Baixa - Conservador",
+        "medium": "Média - Equilibrado",
+        "high": "Alta - Agressivo"
+      },
+      "simulateButton": "Simular Business Case",
+      "tabs": {
+        "summary": "Resumo",
+        "breakdown": "Detalhamento",
+        "timeline": "Timeline",
+        "risks": "Riscos"
+      },
+      "metrics": {
+        "projectedROI": "ROI Projetado",
+        "payback": "Payback",
+        "netProfit": "Lucro Líquido",
+        "confidence": "Confiança",
+        "months": "meses"
+      },
+      "breakdown": {
+        "costDistribution": "Distribuição de Custos",
+        "revenueDistribution": "Distribuição de Receitas",
+        "implementation": "Implementação",
+        "training": "Treinamento",
+        "initialStock": "Estoque Inicial",
+        "marketing": "Marketing",
+        "prevention": "Prevenção",
+        "treatment": "Tratamento",
+        "value": "Valor"
+      },
+      "timeline": {
+        "monthlyProjection": "Projeção Mensal",
+        "revenue": "Receita",
+        "costs": "Custos",
+        "profit": "Lucro"
+      },
+      "risks": {
+        "title": "Análise de Riscos",
+        "level": "Nível de Risco",
+        "levels": {
+          "low": "Baixo",
+          "medium": "Médio",
+          "high": "Alto"
+        },
+        "mainFactors": "Principais Fatores de Risco"
+      },
+      "noSimulation": {
+        "title": "Pronto para Simular",
+        "description": "Configure os parâmetros e clique em 'Simular' para ver a projeção completa"
+      }
     }
   },
   "campaigns": {
@@ -4127,208 +4098,6 @@
       "generic": "Ocorreu um erro durante o processamento"
     }
   },
-  "roi": {
-    "title": "Inteligência de ROI & Business Case",
-    "description": "Análise preditiva avançada e simulação de cenários para nutracêuticos veterinários",
-    "buttons": {
-      "exportReport": "Exportar Relatório",
-      "updateAnalyses": "Atualizar Análises"
-    },
-    "kpis": {
-      "totalROI": {
-        "title": "ROI Total Médio",
-        "subtitle": "Retorno médio dos nutracêuticos",
-        "trendVsMeta": "vs meta"
-      },
-      "preventiveROI": {
-        "title": "ROI Preventivo",
-        "subtitle": "Maior retorno em prevenção",
-        "trendVsTreatment": "vs tratamento"
-      },
-      "sustainabilityIndex": {
-        "title": "Índice Sustentabilidade",
-        "subtitle": "Viabilidade a longo prazo",
-        "trendHigh": "Alta consistência"
-      },
-      "marketPenetration": {
-        "title": "Penetração Mercado",
-        "subtitle": "Oportunidades disponíveis",
-        "conditionsMapped": "condições mapeadas"
-      }
-    },
-    "tabs": {
-      "overview": "Visão Executiva",
-      "opportunities": "Oportunidades",
-      "predictive": "Análise Preditiva",
-      "simulator": "Simulador"
-    },
-    "sustainability": {
-      "title": "Métricas de Sustentabilidade",
-      "clvAverage": "CLV Médio (24m)",
-      "retentionRate": "Taxa de Retenção",
-      "avgPayback": "Payback Médio",
-      "contributionMargin": "Margem de Contribuição",
-      "months": "meses"
-    },
-    "clinicalImpact": {
-      "title": "Impacto Clínico",
-      "consultationReduction": "Redução de consultas",
-      "emergencyReduction": "Redução de emergências",
-      "qualityImprovement": "Melhora qualidade de vida",
-      "tutorSatisfaction": "Satisfação dos tutores"
-    },
-    "methodology": {
-      "title": "Metodologia e Parâmetros Técnicos",
-      "description": "Detalhamento dos modelos e algoritmos utilizados nas análises preditivas",
-      "parametersTitle": "Parâmetros de Cálculo",
-      "parameter": "Parâmetro",
-      "value": "Valor",
-      "baseIncidenceRate": "Taxa base incidência",
-      "protocolReduction": "Redução com protocolo",
-      "avgTreatmentCost": "Custo médio tratamento",
-      "preventiveProtocolCost": "Custo protocolo preventivo",
-      "modelsTitle": "Modelos Utilizados",
-      "predictiveAnalysis": "Análise Preditiva",
-      "trendAnalysis": "Análise de Tendências",
-      "monteCarloSimulation": "Simulação Monte Carlo",
-      "accuracy": "Acurácia",
-      "iterations": "iterações"
-    },
-    "executiveSummary": {
-      "title": "Análise Comparativa de ROI",
-      "description": "Comparação entre abordagens preventivas vs. tratamento reativo",
-      "preventiveApproach": "Abordagem Preventiva",
-      "reactiveTreatment": "Tratamento Reativo",
-      "avgROI": "ROI Médio",
-      "costPerPetYear": "Custo por Pet/Ano",
-      "caseReduction": "Redução de Casos",
-      "costPerCase": "Custo por Caso",
-      "incidenceRate": "Taxa de Incidência",
-      "competitiveAdvantage": "Vantagem Competitiva",
-      "preventionSuperior": "Prevenção oferece ROI {{difference}}% superior ao tratamento reativo"
-    },
-    "marketOpportunity": {
-      "title": "Matriz de Oportunidades de Mercado",
-      "description": "Análise de gaps terapêuticos e potencial de ROI por condição",
-      "sortBy": "Ordenar por",
-      "potentialROI": "ROI Potencial",
-      "marketGap": "Gap de Mercado",
-      "confidence": "Confiança",
-      "gap": "Gap",
-      "roi": "ROI",
-      "levels": {
-        "veryHigh": "Muito Alta",
-        "high": "Alta",
-        "medium": "Média",
-        "low": "Baixa"
-      },
-      "treatmentCost": "Custo Tratamento",
-      "preventionCost": "Custo Prevenção",
-      "savings": "Economia",
-      "riskReduction": "Redução Risco",
-      "recommendedNutraceuticals": "Nutracêuticos Recomendados",
-      "savingsVsTraditional": "Economia de {{percentage}}% vs tratamento tradicional",
-      "analyze": "Analisar →",
-      "interpretationTitle": "Interpretação da Matriz",
-      "interpretationText": "O Gap de Mercado indica a lacuna terapêutica existente, enquanto o ROI Potencial mostra o retorno esperado. Oportunidades \"Muito Alta\" combinam grande gap com alto ROI."
-    },
-    "predictiveChart": {
-      "title": "Análise Preditiva de ROI",
-      "description": "Projeção de retorno sobre investimento baseada em dados históricos e tendências",
-      "chartTypes": {
-        "area": "Área",
-        "line": "Linha",
-        "composed": "Composto"
-      },
-      "viewModes": {
-        "monthly": "ROI Mensal",
-        "cumulative": "ROI Cumulativo",
-        "comparison": "Comparativo"
-      },
-      "month": "Mês {{number}}",
-      "tooltip": {
-        "roi": "ROI",
-        "savings": "Economia",
-        "confidence": "Confiança"
-      },
-      "metrics": {
-        "projectedTotalROI": "ROI Total Projetado",
-        "totalSavings": "Economia Total",
-        "payback": "Payback",
-        "avgConfidence": "Confiança Média",
-        "months": "meses"
-      },
-      "insights": {
-        "positiveTrend": "Tendência Positiva",
-        "positiveTrendText": "Projeção indica crescimento sustentável do ROI com pico no mês 18-20.",
-        "opportunity": "Oportunidade",
-        "opportunityText": "Maior retorno em cenários preventivos vs. tratamento reativo."
-      },
-      "downloadButton": "Baixar Gráfico"
-    },
-    "simulator": {
-      "title": "Simulador de Business Case",
-      "description": "Configure parâmetros e simule diferentes cenários de implementação",
-      "inputs": {
-        "clinicProfile": "Perfil da Clínica",
-        "initialInvestment": "Investimento Inicial (R$)",
-        "timeHorizon": "Horizonte Temporal (meses)",
-        "preventiveFocus": "Foco Preventivo (%)",
-        "riskTolerance": "Tolerância ao Risco",
-        "petsPerMonth": "pets/mês"
-      },
-      "riskLevels": {
-        "low": "Baixa - Conservador",
-        "medium": "Média - Equilibrado",
-        "high": "Alta - Agressivo"
-      },
-      "simulateButton": "Simular Business Case",
-      "tabs": {
-        "summary": "Resumo",
-        "breakdown": "Detalhamento",
-        "timeline": "Timeline",
-        "risks": "Riscos"
-      },
-      "metrics": {
-        "projectedROI": "ROI Projetado",
-        "payback": "Payback",
-        "netProfit": "Lucro Líquido",
-        "confidence": "Confiança",
-        "months": "meses"
-      },
-      "breakdown": {
-        "costDistribution": "Distribuição de Custos",
-        "revenueDistribution": "Distribuição de Receitas",
-        "implementation": "Implementação",
-        "training": "Treinamento",
-        "initialStock": "Estoque Inicial",
-        "marketing": "Marketing",
-        "prevention": "Prevenção",
-        "treatment": "Tratamento",
-        "value": "Valor"
-      },
-      "timeline": {
-        "monthlyProjection": "Projeção Mensal",
-        "revenue": "Receita",
-        "costs": "Custos",
-        "profit": "Lucro"
-      },
-      "risks": {
-        "title": "Análise de Riscos",
-        "level": "Nível de Risco",
-        "levels": {
-          "low": "Baixo",
-          "medium": "Médio",
-          "high": "Alto"
-        },
-        "mainFactors": "Principais Fatores de Risco"
-      },
-      "noSimulation": {
-        "title": "Pronto para Simular",
-        "description": "Configure os parâmetros e clique em 'Simular' para ver a projeção completa"
-      }
-    }
-  },
   "bulkActions": {
     "title": "Smart Bulk Actions",
     "description": "Crie e execute campanhas em massa com segmentação inteligente baseada em ROI e comportamento do cliente",
@@ -4944,7 +4713,7 @@
       "healthCheck": "Verificação de Saúde"
     },
     "diagnostics": {
-      "title": "Diagnóstico do Sistema",
+      "title": "Título",
       "totalStudies": "Total de Estudos",
       "processingRate": "Taxa de Sucesso",
       "avgTime": "Tempo Médio",
@@ -4953,7 +4722,6 @@
       "problematicDesc": "{{count}} estudos com erros ou dados faltantes",
       "noProblems": "Nenhum problema encontrado!",
       "allHealthy": "Todos os estudos estão saudáveis",
-      "title": "Título",
       "problem": "Problema",
       "status": "Status",
       "actions": "Ações",
@@ -5631,7 +5399,7 @@
       "condition": "Condição",
       "compound": "Composto",
       "pathway": "Pathway",
-    "mechanism": "Mecanismo"
+      "mechanism": "Mecanismo"
     }
   },
   "petRegistration": {
@@ -6034,40 +5802,43 @@
     "apiUsage": "Uso de API"
   },
   "conventionsPanel": {
-    "title": "Convenções de {{section}}",
-    "sectionNames": {
-      "knowledgeBase": "Base de Conhecimento",
-      "dataProcessing": "Processamento de Dados",
-      "research": "Pesquisa e Desenvolvimento",
-      "predictiveAnalysis": "Análise Preditiva"
-    },
-    "description": "Defina convenções específicas para padronizar o trabalho nesta seção",
+    "title": "Convenções - {{section}}",
+    "description": "Defina e gerencie as convenções de nomenclatura, formato e regras de validação",
     "naming": "Nomenclatura",
-    "format": "Formatação",
+    "format": "Formato",
     "rules": "Regras",
     "restoreDefault": "Restaurar Padrão",
     "saveConventions": "Salvar Convenções",
-    "visualExamples": "Exemplos Visuais:",
-    "nutraceuticalNaming": "Nomenclatura de Nutracêutico",
-    "citationFormat": "Formato de Citação",
-    "dosageFormat": "Formato de Dosagem",
-    "conventionInPractice": "Convenção em Prática:",
-    "correct": "Correto:",
-    "incorrect": "Incorreto:",
-    "validated": "Validado",
-    "standardFormats": "Formatos Padrão:",
-    "strongEvidence": "Evidência forte com múltiplos estudos",
-    "identifierFormat": "Formato de Identificador",
-    "metadataExample": "Exemplo de metadados:",
-    "validations": "Validações:",
-    "validatedStudies": "3+ estudos validados",
-    "undocumentedInteractions": "Interações não documentadas",
-    "interactionsRequired": "É necessário documentar possíveis interações medicamentosas antes da aprovação",
-    "validationChecklist": "Checklist de validação:",
-    "atLeast3Studies": "Pelo menos 3 estudos de suporte",
-    "evidenceLevelJustification": "Justificativa para nível de evidência",
-    "drugInteractionsDoc": "Documentação de interações medicamentosas",
-    "sideEffectFrequency": "Frequência de efeitos colaterais"
+    "sectionNames": {
+      "knowledgeBase": "Base de Conhecimento",
+      "dataProcessing": "Processamento de Dados",
+      "research": "Pesquisa",
+      "predictiveAnalysis": "Análise Preditiva"
+    },
+    "examples": {
+      "visualExamples": "Exemplos Visuais:",
+      "nutraceuticalNaming": "← Nomenclatura de Nutracêutico",
+      "citationFormat": "← Formato de Citação",
+      "dosageFormat": "← Formato de Dosagem",
+      "conventionInPractice": "Convenção em Prática:",
+      "nutraceutical": "Nutracêutico",
+      "validated": "✓ Validado",
+      "correct": "Correto:",
+      "incorrect": "Incorreto:",
+      "standardFormats": "Formatos Padrão:",
+      "strongEvidence": "Evidência forte com múltiplos estudos",
+      "identifierFormat": "Formato de Identificador",
+      "metadataExample": "Exemplo de metadados:",
+      "validations": "Validações:",
+      "studiesValidated": "3+ estudos validados",
+      "undocumentedInteractions": "Interações não documentadas",
+      "undocumentedInteractionsDesc": "É necessário documentar possíveis interações medicamentosas antes da aprovação",
+      "validationChecklist": "Checklist de validação:",
+      "atLeast3Studies": "Pelo menos 3 estudos de suporte",
+      "evidenceLevelJustification": "Justificativa para nível de evidência",
+      "drugInteractions": "Documentação de interações medicamentosas",
+      "sideEffectsFrequency": "Frequência de efeitos colaterais"
+    }
   },
   "formSections": {
     "name": "Nome",
@@ -6679,7 +6450,7 @@
       "removeRelationError": "Não foi possível remover a relação.",
       "selectStudyError": "Selecione um estudo científico.",
       "studyAdded": "Relação com estudo adicionada com sucesso.",
-    "studyRemoveError": "Não foi possível remover a relação."
+      "studyRemoveError": "Não foi possível remover a relação."
     }
   },
   "enginesPromptsPanel": {
@@ -6729,45 +6500,6 @@
     "modelDistribution": "Distribuição por Modelo",
     "modelDistributionDesc": "Uso por modelo de IA",
     "exportReport": "Exportar Relatório"
-  },
-  "conventionsPanel": {
-    "title": "Convenções - {{section}}",
-    "description": "Defina e gerencie as convenções de nomenclatura, formato e regras de validação",
-    "naming": "Nomenclatura",
-    "format": "Formato",
-    "rules": "Regras",
-    "restoreDefault": "Restaurar Padrão",
-    "saveConventions": "Salvar Convenções",
-    "sectionNames": {
-      "knowledgeBase": "Base de Conhecimento",
-      "dataProcessing": "Processamento de Dados",
-      "research": "Pesquisa",
-      "predictiveAnalysis": "Análise Preditiva"
-    },
-    "examples": {
-      "visualExamples": "Exemplos Visuais:",
-      "nutraceuticalNaming": "← Nomenclatura de Nutracêutico",
-      "citationFormat": "← Formato de Citação",
-      "dosageFormat": "← Formato de Dosagem",
-      "conventionInPractice": "Convenção em Prática:",
-      "nutraceutical": "Nutracêutico",
-      "validated": "✓ Validado",
-      "correct": "Correto:",
-      "incorrect": "Incorreto:",
-      "standardFormats": "Formatos Padrão:",
-      "strongEvidence": "Evidência forte com múltiplos estudos",
-      "identifierFormat": "Formato de Identificador",
-      "metadataExample": "Exemplo de metadados:",
-      "validations": "Validações:",
-      "studiesValidated": "3+ estudos validados",
-      "undocumentedInteractions": "Interações não documentadas",
-      "undocumentedInteractionsDesc": "É necessário documentar possíveis interações medicamentosas antes da aprovação",
-      "validationChecklist": "Checklist de validação:",
-      "atLeast3Studies": "Pelo menos 3 estudos de suporte",
-      "evidenceLevelJustification": "Justificativa para nível de evidência",
-      "drugInteractions": "Documentação de interações medicamentosas",
-      "sideEffectsFrequency": "Frequência de efeitos colaterais"
-    }
   },
   "adicionarEstudoDialog": {
     "titleForm": "Adicionar Novo Estudo Científico",
@@ -7288,7 +7020,11 @@
         "futureRisk": "risco futuro",
         "protected": "protegido",
         "systemic": "carga sistêmica"
-      }
+      },
+      "lockedTitle": "Aguardando análise VetGraphRAG",
+      "lockedBody": "A projeção de trajetória biológica só é gerada após a análise VetGraphRAG, para que o cenário \"com protocolo\" reflita o stack realmente recomendado para este pet.",
+      "noBenefitBanner": "Para este pet, o protocolo geroprotetor NÃO altera a trajetória: nenhuma das condições/predisposições tem evidência KG suficiente no estado atual da base.",
+      "basedOnAnalysis": "Baseado na análise VetGraphRAG de {{when}}"
     },
     "anatomy": {
       "regions": {

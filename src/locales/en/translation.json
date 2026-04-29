@@ -596,10 +596,22 @@
     },
     "pipeline": {
       "title": "Processing Pipeline",
-      "step1": { "name": "Upload PDF", "desc": "Upload scientific study" },
-      "step2": { "name": "AI Extraction", "desc": "Processing with Gemini AI" },
-      "step3": { "name": "Triplets", "desc": "Entity and relationship extraction" },
-      "step4": { "name": "Knowledge Graph", "desc": "Indexing in Neo4j + Vector Store" }
+      "step1": {
+        "name": "Upload PDF",
+        "desc": "Upload scientific study"
+      },
+      "step2": {
+        "name": "AI Extraction",
+        "desc": "Processing with Gemini AI"
+      },
+      "step3": {
+        "name": "Triplets",
+        "desc": "Entity and relationship extraction"
+      },
+      "step4": {
+        "name": "Knowledge Graph",
+        "desc": "Indexing in Neo4j + Vector Store"
+      }
     },
     "systemStatus": {
       "sectionTitle": "System Status",
@@ -783,7 +795,29 @@
       }
     },
     "vetgraphrag": {
-      "processing": "VetGraphRAG Processing",
+      "processing": {
+        "title": "AI Processing",
+        "info": "VetGraphRAG Digestion Pipeline",
+        "model": "Model",
+        "status": "Status",
+        "statusProcessing": "Processing",
+        "statusIdle": "Idle",
+        "description": "Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.",
+        "pipeline": "Processing Pipeline",
+        "step1Title": "PDF Parsing & OCR",
+        "step1Desc": "Layout-aware full-text extraction with table recognition, figure detection, and structured metadata harvesting (authors, journal, year, DOI).",
+        "step2Title": "Entity Extraction (NER)",
+        "step2Desc": "AI-powered Named Entity Recognition identifying nutraceuticals, health conditions, molecular mechanisms, dosages and species across the 5-layer VetGraphRAG ontology (L0–L4).",
+        "step3Title": "Knowledge Triplet Generation",
+        "step3Desc": "Causal relationship mapping: Compound → Molecular Target → Mechanism → Biological Effect → Clinical Outcome, with extraction confidence scores and evidence level classification.",
+        "step4Title": "Vectorization & Semantic Indexing",
+        "step4Desc": "768-dimensional embeddings via text-embedding-004 model for semantic similarity search, enabling cross-study retrieval and context-aware recommendations.",
+        "step1Badge": "Tables + Figures + Meta",
+        "step2Badge": "5-layer ontology (L0–L4)",
+        "step3Badge": "Causal chains + confidence",
+        "step4Badge": "768-dim embeddings",
+        "expand": "(expand)"
+      },
       "model": "Model",
       "temperature": "Temperature",
       "status": "Status",
@@ -902,29 +936,6 @@
           "chat": "Chat",
           "study": "Study"
         }
-      },
-      "processing": {
-        "title": "AI Processing",
-        "info": "VetGraphRAG Digestion Pipeline",
-        "model": "Model",
-        "status": "Status",
-        "statusProcessing": "Processing",
-        "statusIdle": "Idle",
-        "description": "Automatically extracts nutraceuticals, health conditions and metadata from scientific studies using generative AI.",
-        "pipeline": "Processing Pipeline",
-        "step1Title": "PDF Parsing & OCR",
-        "step1Desc": "Layout-aware full-text extraction with table recognition, figure detection, and structured metadata harvesting (authors, journal, year, DOI).",
-        "step2Title": "Entity Extraction (NER)",
-        "step2Desc": "AI-powered Named Entity Recognition identifying nutraceuticals, health conditions, molecular mechanisms, dosages and species across the 5-layer VetGraphRAG ontology (L0–L4).",
-        "step3Title": "Knowledge Triplet Generation",
-        "step3Desc": "Causal relationship mapping: Compound → Molecular Target → Mechanism → Biological Effect → Clinical Outcome, with extraction confidence scores and evidence level classification.",
-        "step4Title": "Vectorization & Semantic Indexing",
-        "step4Desc": "768-dimensional embeddings via text-embedding-004 model for semantic similarity search, enabling cross-study retrieval and context-aware recommendations.",
-        "step1Badge": "Tables + Figures + Meta",
-        "step2Badge": "5-layer ontology (L0–L4)",
-        "step3Badge": "Causal chains + confidence",
-        "step4Badge": "768-dim embeddings",
-        "expand": "(expand)"
       },
       "liveLog": "Real-Time Log",
       "events": "events",
@@ -1073,43 +1084,262 @@
     }
   },
   "nutraceuticals": {
-    "details": {
-      "title": "Details",
+    "header": {
+      "title": "Nutraceuticals",
+      "subtitle": "Manage nutraceuticals and their relationships with health conditions",
+      "newButton": "New Nutraceutical",
+      "manageImportsButton": "Manage Imports",
+      "importButton": "Import Data",
+      "help": {
+        "title": "Help - Nutraceuticals",
+        "subtitle": "Learn how to manage and organize nutraceuticals in the system.",
+        "importTitle": "Data Import",
+        "importDesc": "Spreadsheet import allows you to load large volumes of nutraceutical data into the system. Supported formats: CSV and Excel.",
+        "associationsTitle": "Associations with Conditions",
+        "associationsDesc": "Each nutraceutical can have relationships with health conditions with different levels of efficacy for prevention, treatment or support."
+      }
+    },
+    "management": {
+      "title": "Nutraceutical Management",
+      "newButton": "New Nutraceutical",
+      "noCategory": "No category",
+      "categoryNotFound": "Category not found"
+    },
+    "legend": {
+      "title": "Scientific Evidence Legend",
+      "convergence": {
+        "title": "Study Convergence",
+        "high": "≥4.0 High",
+        "moderate": "2.0-3.9 Moderate",
+        "low": "<2.0 Low",
+        "description": "Measures the degree of agreement between different scientific studies"
+      },
+      "efficacy": {
+        "title": "Efficacy by Condition",
+        "high": "≥4.0 High",
+        "moderate": "2.0-3.9 Moderate",
+        "low": "<2.0 Low",
+        "description": "Specific efficacy for each health condition in the tags"
+      }
+    },
+    "search": {
+      "placeholder": "Search nutraceutical...",
+      "filterEfficacy": "Filter by efficacy",
+      "filterCondition": "Filter by condition",
+      "allEfficacies": "All efficacies",
+      "allConditions": "All conditions",
+      "efficacyHigh": "High (4-5)",
+      "efficacyMedium": "Medium (3)",
+      "efficacyLow": "Low (1-2)",
+      "clear": "Clear",
+      "refresh": "Refresh",
+      "add": "Add",
+      "new": "New"
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support",
+        "convergence": "Convergence",
+        "studies": "Studies",
+        "actions": "Actions"
+      },
+      "noData": "No nutraceuticals found",
+      "expanded": {
+        "description": "Description:",
+        "noDescription": "No description available",
+        "chemicalCompound": "Chemical Compound:",
+        "dosage": "Dosage:",
+        "convergenceTitle": "Study Convergence:",
+        "scientificBase": "Scientific Base:",
+        "studiesAnalyzed": "{{count}} scientific studies analyzed",
+        "contraindications": "Contraindications:",
+        "convergenceHigh": "High convergence - Studies agree",
+        "convergenceMedium": "Moderate convergence - Some studies diverge",
+        "convergenceLow": "Low convergence - Studies present conflicting results"
+      }
+    },
+    "dialog": {
+      "addTitle": "Add New Nutraceutical",
+      "editTitle": "Edit Nutraceutical",
+      "tabs": {
+        "basicInfo": "Basic Information",
+        "relationships": "Relationships"
+      }
+    },
+    "form": {
+      "name": "Nutraceutical Name*",
+      "namePlaceholder": "Nutraceutical name",
       "description": "Description",
-      "compound": "Chemical Compound",
-      "source": "Source",
+      "descriptionPlaceholder": "Nutraceutical description",
       "dosage": "Dosage",
-      "notDefined": "Not defined",
-      "exportInfo": "Export information",
-      "viewFullStudies": "View full studies",
-      "efficacy": "Efficacy"
+      "dosagePlaceholder": "Ex: 500mg, 2 times a day",
+      "source": "Source",
+      "sourcePlaceholder": "Ex: Curcuma longa",
+      "chemicalCompound": "Chemical Compound",
+      "chemicalPlaceholder": "Chemical formula or compound name",
+      "contraindications": "Contraindications",
+      "contraindicationsPlaceholder": "Each contraindication on a separate line",
+      "contraindicationsHelp": "Enter each contraindication on a separate line.",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "creating": "Creating...",
+      "save": "Save Nutraceutical",
+      "create": "Create Nutraceutical",
+      "mainRelation": "Main Relation",
+      "relationN": "Relation {{n}}",
+      "categoryOutcome": "Category / Outcome",
+      "selectCategory": "Select a category",
+      "efficacyLevel": "Efficacy Level: {{score}}",
+      "notesObservations": "Notes / Observations",
+      "observationsPlaceholder": "Observations about this relation",
+      "relatedStudies": "Related Studies",
+      "noStudiesAvailable": "No studies available",
+      "addRelation": "Add new relation"
     },
     "conditions": {
-      "title": "Conditions",
-      "none": "No associated conditions",
-      "unknown": "Unknown",
-      "types": {
+      "title": "Manage Conditions",
+      "manageTitle": "Manage Health Conditions",
+      "manageDescription": "Associate health conditions with nutraceutical {{name}}",
+      "close": "Close",
+      "form": {
+        "healthCondition": "Health Condition",
+        "relationshipType": "Relationship Type",
+        "efficacy": "Efficacy (1-5)",
+        "notes": "Notes or Observations",
+        "selectCondition": "Select a condition",
+        "selectRelationship": "Select type",
+        "addNotes": "Add notes about this association...",
+        "addNewRelation": "Add new relationship",
+        "associate": "Add Relationship",
+        "associating": "Associating..."
+      },
+      "relationshipTypes": {
         "prevention": "Prevention",
         "treatment": "Treatment",
         "support": "Support"
       },
-      "table": {
-        "name": "Condition",
-        "type": "Relation",
-        "efficacy": "Efficacy"
+      "tabs": {
+        "all": "All",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "support": "Support"
+      },
+      "messages": {
+        "allAssociated": "All conditions have already been associated",
+        "noRelations": "This nutraceutical has no health condition relationships",
+        "noRelationsFiltered": "No {{type}} relationships found.",
+        "associationSuccess": "Condition associated successfully",
+        "associationError": "Unable to associate condition",
+        "removeSuccess": "Removal was simulated in the interface. Reload the page to see the real state.",
+        "selectCondition": "Select a health condition",
+        "partialFunctionality": "Partial functionality"
+      },
+      "efficacyLevels": {
+        "veryLow": "Very Low",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High",
+        "veryHigh": "Very High"
+      },
+      "labels": {
+        "efficacyScore": "Efficacy: {{score}}",
+        "notes": "Notes:",
+        "existingRelations": "Existing Relationships"
+      },
+      "remove": "Remove"
+    },
+    "relationships": {
+      "title": "Relationships",
+      "manageButton": "Manage Relationships",
+      "studies": "Scientific Studies",
+      "conditions": "Health Conditions",
+      "noStudies": "No associated studies. Click \"Manage Relationships\" to add scientific studies.",
+      "noConditions": "No associated conditions. Click \"Manage Relationships\" to add health conditions.",
+      "studyNoTitle": "Study without title",
+      "studyNoJournal": "Journal not specified",
+      "conditionNoName": "Condition without name",
+      "conditionNoDescription": "No description",
+      "relevance": "Relevance",
+      "typePrevention": "Prevention",
+      "typeTreatment": "Treatment",
+      "typeSupport": "Support",
+      "finish": "Finish"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the nutraceutical",
+      "warning": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "outcomes": {
+      "title": "Manage Outcomes",
+      "description": "Manage the relationships of nutraceutical {{name}} with outcomes.",
+      "loading": "Loading...",
+      "placeholder": "Functionality will be refactored later.",
+      "close": "Close"
+    },
+    "import": {
+      "title": {
+        "upload": "Import Nutraceuticals and Studies",
+        "review": "Review Imported Data"
+      },
+      "description": {
+        "upload": "Import spreadsheets of nutraceutical data and scientific study PDFs for AI processing.",
+        "review": "Review the data extracted by AI before confirming the import."
+      },
+      "tabs": {
+        "spreadsheet": "Nutraceuticals Spreadsheet",
+        "studies": "Scientific Studies (PDF)"
+      },
+      "studies": {
+        "title": "Scientific Studies in PDF",
+        "description": "Upload PDFs of the scientific studies cited in the nutraceuticals spreadsheet. These studies will be imported for RAG processing and automatically associated with nutraceuticals."
+      },
+      "toast": {
+        "success": "Import completed",
+        "successDesc": "Data successfully imported into the nutraceuticals database.",
+        "error": "Error",
+        "errorDesc": "Error processing scientific study files"
       }
     },
-    "studies": {
-      "title": "Studies",
-      "none": "No associated studies",
-      "unknown": "Unknown study",
-      "viewFull": "View full study",
-      "externalLink": "External link",
+    "manageImports": {
+      "title": "Manage Nutraceutical Imports",
+      "description": "View and manage recent imports. You can delete imports to remove duplicate or incorrect data.",
       "table": {
-        "title": "Title",
-        "journal": "Journal",
-        "relevance": "Relevance"
+        "headers": {
+          "date": "Date/Time",
+          "name": "Name",
+          "source": "Source",
+          "nutraceuticals": "Nutraceuticals",
+          "actions": "Actions"
+        }
+      },
+      "noData": "No imports found.",
+      "loading": "Loading...",
+      "close": "Close",
+      "deleteAction": "Delete import",
+      "delete": {
+        "title": "Confirm deletion",
+        "description": "Are you sure you want to delete this import? This action will remove all nutraceuticals associated with this import and cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
       }
+    },
+    "toast": {
+      "success": "Success",
+      "error": "Error",
+      "created": "Nutraceutical created successfully",
+      "updated": "Nutraceutical updated successfully",
+      "deleted": "Nutraceutical deleted successfully.",
+      "deleteError": "Error deleting nutraceutical: {{message}}"
+    },
+    "validation": {
+      "nameRequired": "Name is required"
     }
   },
   "enrich": {
@@ -1158,7 +1388,6 @@
     "processing": "Processing...",
     "close": "Close",
     "collapse": "Collapse",
-    "confirm": "Confirm",
     "access": "Access",
     "poweredBy": "Powered by",
     "refresh": "Refresh",
@@ -1936,344 +2165,343 @@
       "subtitle": "Manage and organize scientific studies on nutraceuticals",
       "import": "Import Studies",
       "list": "Studies List",
-    "tabs": {
-      "ongoing": "Ongoing",
-      "completed": "Completed",
-      "planned": "Planned"
-    },
-    "plannedStudies": {
-      "title": "Planned Studies",
-      "description": "Manage scientific studies in planning phase.",
-      "listTitle": "Studies List",
-      "listDescription": "Scientific studies in planning and preliminary analysis phase.",
-      "newStudy": "New Study",
-      "editStudy": "Edit Study",
-      "addStudy": "Add Study",
-      "table": {
-        "title": "Title",
-        "objective": "Objective",
-        "population": "Population",
-        "duration": "Duration",
-        "status": "Status",
-        "actions": "Actions",
-        "recruited": "recruited",
-        "dogs": "dogs"
-      },
-      "form": {
-        "title": "Title",
-        "objective": "Objective",
-        "population": "Population",
-        "duration": "Duration",
-        "status": "Status",
-        "save": "Save"
-      },
-      "status": {
-        "recruiting": "Recruiting",
-        "pendingApproval": "Pending approval",
-        "planning": "Planning"
-      },
-      "messages": {
-        "studyRemoved": "Study removed",
-        "studyRemovedDesc": "The study was successfully removed.",
-        "studyUpdated": "Study updated",
-        "studyUpdatedDesc": "Changes were saved successfully.",
-        "studyAdded": "Study added",
-        "studyAddedDesc": "The new study was successfully added."
-      }
-    },
-    "progress": {
-      "title": "Study Progress",
-      "currentDay": "Current Day:",
-      "of": "of",
-      "currentPhase": "Current Phase:",
-      "schedule": "Schedule",
-      "day": "Day"
-    },
-    "ongoingStudies": {
-      "title": "Ongoing Studies",
-      "stats": {
-        "totalDogs": "Total Dogs",
-        "totalDogsDesc": "Active participants in studies",
-        "activeStudies": "Active Studies",
-        "activeStudiesDesc": "Ongoing research",
-        "averageProgress": "Average Progress",
-        "averageProgressDesc": "Completion percentage",
-        "updatedDaily": "Updated daily"
-      },
       "tabs": {
-        "overview": "Overview",
-        "metrics": "Metrics",
-        "trends": "Trends",
-        "dogsData": "Dogs Data"
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "planned": "Planned"
       },
-      "dogsData": {
-        "title": "Monitoring Data - Dionisia",
-        "allDogsTitle": "All Dogs Monitoring",
-        "allDogsSubtitle": "{{count}} dogs monitored with Invoxia collar",
-        "fetchButton": "Fetch Invoxia API Data",
-        "fetchAllButton": "Fetch All Data",
-        "refreshButton": "Refresh Data",
-        "loading": "Loading data...",
-        "error": "Error fetching data",
-        "noData": "Loading monitoring data...",
-        "noDataForDog": "No data available for this dog",
-        "lastFetch": "Last updated",
-        "records": "records",
-        "showingFirst": "Showing first {{count}} of {{total}} records",
-        "petInfo": {
-          "name": "Name",
-          "id": "Invoxia ID"
-        },
+      "plannedStudies": {
+        "title": "Planned Studies",
+        "description": "Manage scientific studies in planning phase.",
+        "listTitle": "Studies List",
+        "listDescription": "Scientific studies in planning and preliminary analysis phase.",
+        "newStudy": "New Study",
+        "editStudy": "Edit Study",
+        "addStudy": "Add Study",
         "table": {
-          "date": "Date",
-          "hrDayMean": "HR Day (mean)",
-          "hrNightMean": "HR Night (mean)",
-          "brDayMean": "BR Day (mean)",
-          "brNightMean": "BR Night (mean)",
-          "hrvSdnn": "HRV (SDNN)",
-          "distance": "Distance (m)",
-          "sleepHours": "Sleep Hours",
-          "sleepScore": "Sleep Score"
+          "title": "Title",
+          "objective": "Objective",
+          "population": "Population",
+          "duration": "Duration",
+          "status": "Status",
+          "actions": "Actions",
+          "recruited": "recruited",
+          "dogs": "dogs"
         },
-        "charts": {
-          "heartRate": {
-            "title": "Heart Rate",
-            "dayMean": "HR Day (mean)",
-            "nightMean": "HR Night (mean)",
-            "dayMin": "HR Day (min)",
-            "dayMax": "HR Day (max)"
-          },
-          "breathingRate": {
-            "title": "Breathing Rate",
-            "dayMean": "BR Day (mean)",
-            "nightMean": "BR Night (mean)",
-            "dayMin": "BR Day (min)",
-            "dayMax": "BR Day (max)"
-          },
-          "hrv": {
-            "title": "Heart Rate Variability (HRV)",
-            "sdnn": "SDNN Total",
-            "rmssd": "RMSSD Total",
-            "daySdnn": "SDNN Day",
-            "nightSdnn": "SDNN Night"
-          },
-          "activity": {
-            "title": "Physical Activity",
-            "distance": "Distance (m)",
-            "calories": "Calories",
-            "exerciseMinutes": "Exercise (min)"
-          },
-          "sleep": {
-            "title": "Sleep Quality",
-            "hours": "Sleep Hours",
-            "score": "Sleep Score (%)",
-            "target": "Target 8h"
-          }
-        }
-      },
-      "overview": {
-        "studyPopulation": "Study Population",
-        "breeds": "Breeds:",
-        "ageRange": "Age Range:",
-        "intervention": "Intervention:",
-        "primaryInvestigator": "Primary Investigator:",
-        "notSpecified": "Not specified",
-        "studyNotes": "Study Notes"
-      },
-      "notes": {
-        "preliminaryResults": "Preliminary Results",
-        "currentLimitations": "Current Limitations",
-        "nextSteps": "Next Steps"
-      },
-      "models": {
-        "dashboard": {
-          "title": "Predictive Models Overview",
-          "subtitle": "Track the evolution and performance of our proprietary models",
-          "totalModels": "Active Models",
-          "avgAccuracy": "Average Accuracy",
-          "totalSamples": "Total Samples",
-          "insights": "Insights",
-          "growthRate": "Growth",
-          "active": "Collecting",
-          "comparison": "Model Comparison",
-          "topModels": "Top 3 Models by Performance",
-          "samples": "samples",
-          "accuracy": "accuracy",
-          "recentInsights": "Recent Discoveries"
+        "form": {
+          "title": "Title",
+          "objective": "Objective",
+          "population": "Population",
+          "duration": "Duration",
+          "status": "Status",
+          "save": "Save"
         },
         "status": {
-          "initial": "🌱 Initial",
-          "growing": "📈 Growing",
-          "mature": "✅ Mature",
-          "stateOfArt": "🎯 State of the Art"
+          "recruiting": "Recruiting",
+          "pendingApproval": "Pending approval",
+          "planning": "Planning"
         },
-        "confidence": {
-          "high": "High Confidence",
-          "medium": "Medium Confidence",
-          "low": "Needs Data"
-        },
-        "tabs": {
-          "evolution": "Evolution",
-          "performance": "Performance",
-          "longitudinal": "Impact",
-          "insights": "Insights",
-          "comparison": "Comparison"
-        },
-        "evolution": {
-          "totalSamples": "Total Samples",
-          "growthRate": "Monthly Growth",
-          "currentAccuracy": "Current Accuracy",
-          "nextMilestone": "Next Milestone",
-          "accuracyOverTime": "Accuracy Evolution Over Time",
-          "dataGrowth": "Dataset Growth: Treatment vs Control"
-        },
-        "performance": {
-          "byCondition": "Performance by Health Condition",
-          "accuracy": "Accuracy",
-          "effectiveness": "Effectiveness",
-          "samples": "Samples"
-        },
-        "longitudinal": {
-          "correlation": "Correlation: Data Volume × Accuracy",
-          "description": "Visualize how increasing longitudinal data volume directly impacts model accuracy.",
-          "keyInsight": "Key Insight",
-          "insightText": "The model shows diminishing returns after ~20,000 samples, reaching a maturity plateau."
-        },
-        "insights": {
-          "noInsights": "No Insights Discovered Yet",
-          "waitingData": "Proprietary insights will be discovered as the model accumulates more data."
-        },
-        "comparison": {
-          "treatmentVsControl": "Treatment vs Control Over Time"
+        "messages": {
+          "studyRemoved": "Study removed",
+          "studyRemovedDesc": "The study was successfully removed.",
+          "studyUpdated": "Study updated",
+          "studyUpdatedDesc": "Changes were saved successfully.",
+          "studyAdded": "Study added",
+          "studyAddedDesc": "The new study was successfully added."
         }
       },
-      "groups": {
-        "treatment": "Treatment Group",
-        "control": "Control Group",
-        "dogs": "dogs"
+      "progress": {
+        "title": "Study Progress",
+        "currentDay": "Current Day:",
+        "of": "of",
+        "currentPhase": "Current Phase:",
+        "schedule": "Schedule",
+        "day": "Day"
+      },
+      "ongoingStudies": {
+        "title": "Ongoing Studies",
+        "stats": {
+          "totalDogs": "Total Dogs",
+          "totalDogsDesc": "Active participants in studies",
+          "activeStudies": "Active Studies",
+          "activeStudiesDesc": "Ongoing research",
+          "averageProgress": "Average Progress",
+          "averageProgressDesc": "Completion percentage",
+          "updatedDaily": "Updated daily"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "metrics": "Metrics",
+          "trends": "Trends",
+          "dogsData": "Dogs Data"
+        },
+        "dogsData": {
+          "title": "Monitoring Data - Dionisia",
+          "allDogsTitle": "All Dogs Monitoring",
+          "allDogsSubtitle": "{{count}} dogs monitored with Invoxia collar",
+          "fetchButton": "Fetch Invoxia API Data",
+          "fetchAllButton": "Fetch All Data",
+          "refreshButton": "Refresh Data",
+          "loading": "Loading data...",
+          "error": "Error fetching data",
+          "noData": "Loading monitoring data...",
+          "noDataForDog": "No data available for this dog",
+          "lastFetch": "Last updated",
+          "records": "records",
+          "showingFirst": "Showing first {{count}} of {{total}} records",
+          "petInfo": {
+            "name": "Name",
+            "id": "Invoxia ID"
+          },
+          "table": {
+            "date": "Date",
+            "hrDayMean": "HR Day (mean)",
+            "hrNightMean": "HR Night (mean)",
+            "brDayMean": "BR Day (mean)",
+            "brNightMean": "BR Night (mean)",
+            "hrvSdnn": "HRV (SDNN)",
+            "distance": "Distance (m)",
+            "sleepHours": "Sleep Hours",
+            "sleepScore": "Sleep Score"
+          },
+          "charts": {
+            "heartRate": {
+              "title": "Heart Rate",
+              "dayMean": "HR Day (mean)",
+              "nightMean": "HR Night (mean)",
+              "dayMin": "HR Day (min)",
+              "dayMax": "HR Day (max)"
+            },
+            "breathingRate": {
+              "title": "Breathing Rate",
+              "dayMean": "BR Day (mean)",
+              "nightMean": "BR Night (mean)",
+              "dayMin": "BR Day (min)",
+              "dayMax": "BR Day (max)"
+            },
+            "hrv": {
+              "title": "Heart Rate Variability (HRV)",
+              "sdnn": "SDNN Total",
+              "rmssd": "RMSSD Total",
+              "daySdnn": "SDNN Day",
+              "nightSdnn": "SDNN Night"
+            },
+            "activity": {
+              "title": "Physical Activity",
+              "distance": "Distance (m)",
+              "calories": "Calories",
+              "exerciseMinutes": "Exercise (min)"
+            },
+            "sleep": {
+              "title": "Sleep Quality",
+              "hours": "Sleep Hours",
+              "score": "Sleep Score (%)",
+              "target": "Target 8h"
+            }
+          }
+        },
+        "overview": {
+          "studyPopulation": "Study Population",
+          "breeds": "Breeds:",
+          "ageRange": "Age Range:",
+          "intervention": "Intervention:",
+          "primaryInvestigator": "Primary Investigator:",
+          "notSpecified": "Not specified",
+          "studyNotes": "Study Notes"
+        },
+        "notes": {
+          "preliminaryResults": "Preliminary Results",
+          "currentLimitations": "Current Limitations",
+          "nextSteps": "Next Steps"
+        },
+        "models": {
+          "dashboard": {
+            "title": "Predictive Models Overview",
+            "subtitle": "Track the evolution and performance of our proprietary models",
+            "totalModels": "Active Models",
+            "avgAccuracy": "Average Accuracy",
+            "totalSamples": "Total Samples",
+            "insights": "Insights",
+            "growthRate": "Growth",
+            "active": "Collecting",
+            "comparison": "Model Comparison",
+            "topModels": "Top 3 Models by Performance",
+            "samples": "samples",
+            "accuracy": "accuracy",
+            "recentInsights": "Recent Discoveries"
+          },
+          "status": {
+            "initial": "🌱 Initial",
+            "growing": "📈 Growing",
+            "mature": "✅ Mature",
+            "stateOfArt": "🎯 State of the Art"
+          },
+          "confidence": {
+            "high": "High Confidence",
+            "medium": "Medium Confidence",
+            "low": "Needs Data"
+          },
+          "tabs": {
+            "evolution": "Evolution",
+            "performance": "Performance",
+            "longitudinal": "Impact",
+            "insights": "Insights",
+            "comparison": "Comparison"
+          },
+          "evolution": {
+            "totalSamples": "Total Samples",
+            "growthRate": "Monthly Growth",
+            "currentAccuracy": "Current Accuracy",
+            "nextMilestone": "Next Milestone",
+            "accuracyOverTime": "Accuracy Evolution Over Time",
+            "dataGrowth": "Dataset Growth: Treatment vs Control"
+          },
+          "performance": {
+            "byCondition": "Performance by Health Condition",
+            "accuracy": "Accuracy",
+            "effectiveness": "Effectiveness",
+            "samples": "Samples"
+          },
+          "longitudinal": {
+            "correlation": "Correlation: Data Volume × Accuracy",
+            "description": "Visualize how increasing longitudinal data volume directly impacts model accuracy.",
+            "keyInsight": "Key Insight",
+            "insightText": "The model shows diminishing returns after ~20,000 samples, reaching a maturity plateau."
+          },
+          "insights": {
+            "noInsights": "No Insights Discovered Yet",
+            "waitingData": "Proprietary insights will be discovered as the model accumulates more data."
+          },
+          "comparison": {
+            "treatmentVsControl": "Treatment vs Control Over Time"
+          }
+        },
+        "groups": {
+          "treatment": "Treatment Group",
+          "control": "Control Group",
+          "dogs": "dogs"
+        }
+      },
+      "phases": {
+        "recruitment": "Recruitment",
+        "baseline": "Baseline",
+        "intervention": "Intervention",
+        "evaluation": "Evaluation",
+        "analysis": "Analysis",
+        "recruitmentDesc": "Phase of selection and recruitment of study participants.",
+        "baselineDesc": "Initial data collection and establishment of baseline metrics.",
+        "interventionDesc": "Application of treatment or intervention in study groups.",
+        "evaluationDesc": "Collection and evaluation of partial or final results.",
+        "analysisDesc": "Statistical analysis and interpretation of collected data."
+      },
+      "completedStudies": {
+        "title": "Completed Studies",
+        "finalizedStudies": "Finalized Studies",
+        "finalResults": "Final Results",
+        "totalPopulation": "Total Population:",
+        "studyDuration": "Study Duration:",
+        "lifeExtension": "Life Extension:",
+        "statisticalSignificance": "Statistical Significance:",
+        "experimentStatus": "Experiment Status:",
+        "completed": "Completed",
+        "inTreatmentGroup": "in treatment group",
+        "days": "days",
+        "cElegans": "C. elegans",
+        "organisms": "organisms"
+      },
+      "charts": {
+        "survivalRateFinal": "Final Survival Rate",
+        "survivalRateOngoing": "Survival Rate (Ongoing)",
+        "control": "Control",
+        "treatment": "Treatment",
+        "ageInAdultPhase": "Age in adult phase (days)",
+        "survival": "Survival",
+        "day": "Day",
+        "earlyIntervention": "Early Intervention",
+        "midLifeIntervention": "Mid-Life Intervention",
+        "survivalRate": "Survival Rate",
+        "healthMaintenanceRate": "Health Maintenance Rate",
+        "survivalRateWithStress": "Survival Rate with Stress",
+        "healthMaintenanceWithStress": "Health Maintenance with Stress",
+        "earlyAdultIntervention": "Intervention from early adult life",
+        "wormsWithHealth": "Worms with at least 30% health",
+        "stressorApplied": "Stressor applied on day 15",
+        "healthAfterStressor": "Health after stressor on day 15",
+        "midLifeInterventionStart": "Intervention started at mid-life",
+        "age": "Age (days)",
+        "rate": "Rate",
+        "noIntervention": "No Intervention",
+        "lowIntervention": "Low Intervention",
+        "highIntervention": "High Intervention"
+      },
+      "publications": {
+        "title": "Publication Status",
+        "submission": "submission",
+        "submissions": "submissions",
+        "noPublications": "No publications registered",
+        "status": {
+          "published": "published",
+          "accepted": "accepted",
+          "underReview": "under review",
+          "submitted": "submitted",
+          "rejected": "rejected",
+          "notSubmitted": "not submitted"
+        },
+        "type": {
+          "national": "National",
+          "international": "International"
+        },
+        "category": {
+          "biomedical": "biomedical",
+          "veterinary": "veterinary",
+          "general": "general"
+        },
+        "submittedOn": "Submitted:",
+        "publishedOn": "Published:",
+        "viewDoi": "View DOI"
+      },
+      "studyCategories": {
+        "geroproptetor": "geroprotector",
+        "metabolic": "metabolic",
+        "neuroprotector": "neuroprotector",
+        "antiInflammatory": "anti-inflammatory"
+      },
+      "details": {
+        "overview": "Overview",
+        "results": "Results:",
+        "hypotheses": "Hypotheses",
+        "previousStudies": "Previous Studies",
+        "publications": "Publications",
+        "description": "Description",
+        "studyDetails": "Study Details",
+        "status": "Status:",
+        "start": "Start:",
+        "end": "End:",
+        "ongoing": "Ongoing",
+        "priority": "Priority:",
+        "metrics": "Metrics",
+        "progress": "Progress:",
+        "compounds": "Compounds:",
+        "positiveResults": "Positive Results:",
+        "population": "Population:",
+        "duration": "Duration:",
+        "quantitativeResults": "Quantitative Results",
+        "lifeExtension": "Life Extension:",
+        "pValue": "p-value:",
+        "statisticalPower": "Statistical Power:",
+        "effect": "Effect:",
+        "primaryHypothesis": "Primary Hypothesis",
+        "secondaryHypotheses": "Secondary Hypotheses",
+        "relatedPreviousStudies": "Related Previous Studies"
+      },
+      "studyCard": {
+        "viewDetails": "View details",
+        "status": "Status:",
+        "start": "Start:",
+        "end": "End:",
+        "objective": "Objective:",
+        "ongoing": "Ongoing"
       }
-    },
-    "phases": {
-      "recruitment": "Recruitment",
-      "baseline": "Baseline",
-      "intervention": "Intervention",
-      "evaluation": "Evaluation",
-      "analysis": "Analysis",
-      "recruitmentDesc": "Phase of selection and recruitment of study participants.",
-      "baselineDesc": "Initial data collection and establishment of baseline metrics.",
-      "interventionDesc": "Application of treatment or intervention in study groups.",
-      "evaluationDesc": "Collection and evaluation of partial or final results.",
-      "analysisDesc": "Statistical analysis and interpretation of collected data."
-    },
-    "completedStudies": {
-      "title": "Completed Studies",
-      "finalizedStudies": "Finalized Studies",
-      "finalResults": "Final Results",
-      "totalPopulation": "Total Population:",
-      "studyDuration": "Study Duration:",
-      "lifeExtension": "Life Extension:",
-      "statisticalSignificance": "Statistical Significance:",
-      "experimentStatus": "Experiment Status:",
-      "completed": "Completed",
-      "inTreatmentGroup": "in treatment group",
-      "days": "days",
-      "cElegans": "C. elegans",
-      "organisms": "organisms"
-    },
-    "charts": {
-      "survivalRateFinal": "Final Survival Rate",
-      "survivalRateOngoing": "Survival Rate (Ongoing)",
-      "control": "Control",
-      "treatment": "Treatment",
-      "ageInAdultPhase": "Age in adult phase (days)",
-      "survival": "Survival",
-      "day": "Day",
-      "earlyIntervention": "Early Intervention",
-      "midLifeIntervention": "Mid-Life Intervention",
-      "survivalRate": "Survival Rate",
-      "healthMaintenanceRate": "Health Maintenance Rate",
-      "survivalRateWithStress": "Survival Rate with Stress",
-      "healthMaintenanceWithStress": "Health Maintenance with Stress",
-      "earlyAdultIntervention": "Intervention from early adult life",
-      "wormsWithHealth": "Worms with at least 30% health",
-      "stressorApplied": "Stressor applied on day 15",
-      "healthAfterStressor": "Health after stressor on day 15",
-      "midLifeInterventionStart": "Intervention started at mid-life",
-      "age": "Age (days)",
-      "rate": "Rate",
-      "noIntervention": "No Intervention",
-      "lowIntervention": "Low Intervention",
-      "highIntervention": "High Intervention"
-    },
-    "publications": {
-      "title": "Publication Status",
-      "submission": "submission",
-      "submissions": "submissions",
-      "noPublications": "No publications registered",
-      "status": {
-        "published": "published",
-        "accepted": "accepted",
-        "underReview": "under review",
-        "submitted": "submitted",
-        "rejected": "rejected",
-        "notSubmitted": "not submitted"
-      },
-      "type": {
-        "national": "National",
-        "international": "International"
-      },
-      "category": {
-        "biomedical": "biomedical",
-        "veterinary": "veterinary",
-        "general": "general"
-      },
-      "submittedOn": "Submitted:",
-      "publishedOn": "Published:",
-      "viewDoi": "View DOI"
-    },
-    "studyCategories": {
-      "geroproptetor": "geroprotector",
-      "metabolic": "metabolic",
-      "neuroprotector": "neuroprotector",
-      "antiInflammatory": "anti-inflammatory"
-    },
-    "details": {
-      "overview": "Overview",
-      "results": "Results",
-      "hypotheses": "Hypotheses",
-      "previousStudies": "Previous Studies",
-      "publications": "Publications",
-      "description": "Description",
-      "studyDetails": "Study Details",
-      "status": "Status:",
-      "start": "Start:",
-      "end": "End:",
-      "ongoing": "Ongoing",
-      "priority": "Priority:",
-      "metrics": "Metrics",
-      "progress": "Progress:",
-      "compounds": "Compounds:",
-      "positiveResults": "Positive Results:",
-      "population": "Population:",
-      "duration": "Duration:",
-      "quantitativeResults": "Quantitative Results",
-      "lifeExtension": "Life Extension:",
-      "pValue": "p-value:",
-      "statisticalPower": "Statistical Power:",
-      "effect": "Effect:",
-      "primaryHypothesis": "Primary Hypothesis",
-      "secondaryHypotheses": "Secondary Hypotheses",
-      "relatedPreviousStudies": "Related Previous Studies",
-      "results": "Results:"
-    },
-    "studyCard": {
-      "viewDetails": "View details",
-      "status": "Status:",
-      "start": "Start:",
-      "end": "End:",
-      "objective": "Objective:",
-      "ongoing": "Ongoing"
-    }
     },
     "nutraceuticals": {
       "title": "Nutraceuticals",
@@ -2624,7 +2852,7 @@
       "support": "Support",
       "study": "Study",
       "relation": "Relation",
-      "treatability": "Treat",
+      "treatability": "Treatability",
       "efficacy": "Efficacy",
       "basedOn": "Based on",
       "studySingular": "study",
@@ -2635,330 +2863,7 @@
       "condition": "Condition",
       "outcome": "Outcome",
       "severity": "Severity",
-      "treatability": "Treatability",
       "relevance": "Relevance"
-    }
-  },
-  "nutraceuticals": {
-    "header": {
-      "title": "Nutraceuticals",
-      "subtitle": "Manage nutraceuticals and their relationships with health conditions",
-      "newButton": "New Nutraceutical",
-      "manageImportsButton": "Manage Imports"
-    },
-    "management": {
-      "title": "Nutraceutical Management",
-      "newButton": "New Nutraceutical",
-      "noCategory": "No category",
-      "categoryNotFound": "Category not found"
-    },
-    "legend": {
-      "title": "Evidence Legend",
-      "convergence": {
-        "title": "Scientific Convergence",
-        "high": "High Convergence",
-        "moderate": "Moderate Convergence",
-        "low": "Low Convergence",
-        "description": "Degree of scientific consensus among different studies"
-      },
-      "efficacy": {
-        "title": "Clinical Efficacy",
-        "high": "High Efficacy",
-        "moderate": "Moderate Efficacy",
-        "low": "Low Efficacy",
-        "description": "Level of proven efficacy in clinical studies"
-      }
-    },
-    "search": {
-      "placeholder": "Search nutraceutical...",
-      "filterEfficacy": "Filter by efficacy",
-      "filterCondition": "Filter by condition",
-      "allEfficacies": "All efficacies",
-      "allConditions": "All conditions",
-      "efficacyHigh": "High (4-5)",
-      "efficacyMedium": "Medium (3)",
-      "efficacyLow": "Low (1-2)",
-      "clear": "Clear",
-      "refresh": "Refresh",
-      "add": "Add",
-      "new": "New"
-    },
-    "table": {
-      "name": "Name",
-      "description": "Description",
-      "outcomes": "Outcomes",
-      "actions": "Actions",
-      "notDefined": "Not defined",
-      "notFound": "No nutraceuticals found.",
-      "emptyState": "No nutraceuticals found with the selected filters.",
-      "countOf": "{{filtered}} of {{total}} nutraceuticals",
-      "editTitle": "Edit",
-      "deleteTitle": "Delete",
-      "manageOutcomes": "Manage Outcomes",
-      "headers": {
-        "name": "Name",
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support"
-      },
-      "expanded": {
-        "description": "Description",
-        "chemicalCompound": "Chemical Compound",
-        "convergenceTitle": "Scientific Convergence",
-        "convergenceHigh": "High Convergence",
-        "contraindications": "Contraindications"
-      }
-    },
-    "dialog": {
-      "addTitle": "Add New Nutraceutical",
-      "editTitle": "Edit Nutraceutical",
-      "tabs": {
-        "basicInfo": "Basic Information",
-        "relationships": "Relationships"
-      }
-    },
-    "form": {
-      "name": "Nutraceutical Name*",
-      "namePlaceholder": "Nutraceutical name",
-      "description": "Description",
-      "descriptionPlaceholder": "Nutraceutical description",
-      "dosage": "Dosage",
-      "dosagePlaceholder": "Ex: 500mg, 2 times a day",
-      "source": "Source",
-      "sourcePlaceholder": "Ex: Curcuma longa",
-      "chemicalCompound": "Chemical Compound",
-      "chemicalPlaceholder": "Chemical formula or compound name",
-      "contraindications": "Contraindications",
-      "contraindicationsPlaceholder": "Each contraindication on a separate line",
-      "contraindicationsHelp": "Enter each contraindication on a separate line.",
-      "cancel": "Cancel",
-      "saving": "Saving...",
-      "creating": "Creating...",
-      "save": "Save Nutraceutical",
-      "create": "Create Nutraceutical",
-      "mainRelation": "Main Relation",
-      "relationN": "Relation {{n}}",
-      "categoryOutcome": "Category / Outcome",
-      "selectCategory": "Select a category",
-      "efficacyLevel": "Efficacy Level: {{score}}",
-      "notesObservations": "Notes / Observations",
-      "observationsPlaceholder": "Observations about this relation",
-      "relatedStudies": "Related Studies",
-      "noStudiesAvailable": "No studies available",
-      "addRelation": "Add new relation"
-    },
-    "conditions": {
-      "addTitle": "Add New Health Condition",
-      "conditionName": "Condition Name",
-      "conditionNamePlaceholder": "E.g.: Arthritis, Diabetes, Heart Failure, etc.",
-      "conditionDescription": "Description",
-      "conditionDescriptionPlaceholder": "Describe this health condition and its main characteristics",
-      "savingCondition": "Saving...",
-      "saveCondition": "Save Condition"
-    },
-    "relationships": {
-      "title": "Relationships",
-      "manageButton": "Manage Relationships",
-      "studies": "Scientific Studies",
-      "conditions": "Health Conditions",
-      "noStudies": "No associated studies. Click \"Manage Relationships\" to add scientific studies.",
-      "noConditions": "No associated conditions. Click \"Manage Relationships\" to add health conditions.",
-      "studyNoTitle": "Study without title",
-      "studyNoJournal": "Journal not specified",
-      "conditionNoName": "Condition without name",
-      "conditionNoDescription": "No description",
-      "relevance": "Relevance",
-      "typePrevention": "Prevention",
-      "typeTreatment": "Treatment",
-      "typeSupport": "Support",
-      "finish": "Finish"
-    },
-    "delete": {
-      "title": "Confirm deletion",
-      "description": "Are you sure you want to delete the nutraceutical",
-      "warning": "This action cannot be undone.",
-      "cancel": "Cancel",
-      "confirm": "Delete"
-    },
-    "outcomes": {
-      "title": "Manage Outcomes",
-      "description": "Manage the relationships of nutraceutical {{name}} with outcomes.",
-      "loading": "Loading...",
-      "placeholder": "Functionality will be refactored later.",
-      "close": "Close"
-    },
-    "conditions": {
-      "manageTitle": "Manage Health Conditions",
-      "manageDescription": "Associate health conditions with nutraceutical \"{{name}}\".",
-      "close": "Close"
-    },
-    "header": {
-      "title": "Nutraceuticals",
-      "subtitle": "Manage nutraceuticals and their relationships with health conditions",
-      "newButton": "New Nutraceutical",
-      "manageImportsButton": "Manage Imports",
-      "importButton": "Import Data",
-      "help": {
-        "title": "Help - Nutraceuticals",
-        "subtitle": "Learn how to manage and organize nutraceuticals in the system.",
-        "importTitle": "Data Import",
-        "importDesc": "Spreadsheet import allows you to load large volumes of nutraceutical data into the system. Supported formats: CSV and Excel.",
-        "associationsTitle": "Associations with Conditions",
-        "associationsDesc": "Each nutraceutical can have relationships with health conditions with different levels of efficacy for prevention, treatment or support."
-      }
-    },
-    "table": {
-      "headers": {
-        "name": "Name",
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support",
-        "convergence": "Convergence",
-        "studies": "Studies",
-        "actions": "Actions"
-      },
-      "noData": "No nutraceuticals found",
-      "expanded": {
-        "description": "Description:",
-        "noDescription": "No description available",
-        "chemicalCompound": "Chemical Compound:",
-        "dosage": "Dosage:",
-        "convergenceTitle": "Study Convergence:",
-        "scientificBase": "Scientific Base:",
-        "studiesAnalyzed": "{{count}} scientific studies analyzed",
-        "contraindications": "Contraindications:",
-        "convergenceHigh": "High convergence - Studies agree",
-        "convergenceMedium": "Moderate convergence - Some studies diverge",
-        "convergenceLow": "Low convergence - Studies present conflicting results"
-      }
-    },
-    "legend": {
-      "title": "Scientific Evidence Legend",
-      "convergence": {
-        "title": "Study Convergence",
-        "high": "≥4.0 High",
-        "moderate": "2.0-3.9 Moderate",
-        "low": "<2.0 Low",
-        "description": "Measures the degree of agreement between different scientific studies"
-      },
-      "efficacy": {
-        "title": "Efficacy by Condition",
-        "high": "≥4.0 High",
-        "moderate": "2.0-3.9 Moderate",
-        "low": "<2.0 Low",
-        "description": "Specific efficacy for each health condition in the tags"
-      }
-    },
-    "import": {
-      "title": {
-        "upload": "Import Nutraceuticals and Studies",
-        "review": "Review Imported Data"
-      },
-      "description": {
-        "upload": "Import spreadsheets of nutraceutical data and scientific study PDFs for AI processing.",
-        "review": "Review the data extracted by AI before confirming the import."
-      },
-      "tabs": {
-        "spreadsheet": "Nutraceuticals Spreadsheet",
-        "studies": "Scientific Studies (PDF)"
-      },
-      "studies": {
-        "title": "Scientific Studies in PDF",
-        "description": "Upload PDFs of the scientific studies cited in the nutraceuticals spreadsheet. These studies will be imported for RAG processing and automatically associated with nutraceuticals."
-      },
-      "toast": {
-        "success": "Import completed",
-        "successDesc": "Data successfully imported into the nutraceuticals database.",
-        "error": "Error",
-        "errorDesc": "Error processing scientific study files"
-      }
-    },
-    "manageImports": {
-      "title": "Manage Nutraceutical Imports",
-      "description": "View and manage recent imports. You can delete imports to remove duplicate or incorrect data.",
-      "table": {
-        "headers": {
-          "date": "Date/Time",
-          "name": "Name",
-          "source": "Source",
-          "nutraceuticals": "Nutraceuticals",
-          "actions": "Actions"
-        }
-      },
-      "noData": "No imports found.",
-      "loading": "Loading...",
-      "close": "Close",
-      "deleteAction": "Delete import",
-      "delete": {
-        "title": "Confirm deletion",
-        "description": "Are you sure you want to delete this import? This action will remove all nutraceuticals associated with this import and cannot be undone.",
-        "cancel": "Cancel",
-        "confirm": "Delete",
-        "deleting": "Deleting..."
-      }
-    },
-    "toast": {
-      "success": "Success",
-      "error": "Error",
-      "created": "Nutraceutical created successfully",
-      "updated": "Nutraceutical updated successfully",
-      "deleted": "Nutraceutical deleted successfully.",
-      "deleteError": "Error deleting nutraceutical: {{message}}"
-    },
-    "validation": {
-      "nameRequired": "Name is required"
-    },
-    "conditions": {
-      "title": "Manage Conditions",
-      "manageTitle": "Manage Health Conditions",
-      "manageDescription": "Associate health conditions with nutraceutical {{name}}",
-      "close": "Close",
-      "form": {
-        "healthCondition": "Health Condition",
-        "relationshipType": "Relationship Type",
-        "efficacy": "Efficacy (1-5)",
-        "notes": "Notes or Observations",
-        "selectCondition": "Select a condition",
-        "selectRelationship": "Select type",
-        "addNotes": "Add notes about this association...",
-        "addNewRelation": "Add new relationship",
-        "associate": "Add Relationship",
-        "associating": "Associating..."
-      },
-      "relationshipTypes": {
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support"
-      },
-      "tabs": {
-        "all": "All",
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "support": "Support"
-      },
-      "messages": {
-        "allAssociated": "All conditions have already been associated",
-        "noRelations": "This nutraceutical has no health condition relationships",
-        "noRelationsFiltered": "No {{type}} relationships found.",
-        "associationSuccess": "Condition associated successfully",
-        "associationError": "Unable to associate condition",
-        "removeSuccess": "Removal was simulated in the interface. Reload the page to see the real state.",
-        "selectCondition": "Select a health condition",
-        "partialFunctionality": "Partial functionality"
-      },
-      "efficacyLevels": {
-        "veryLow": "Very Low",
-        "low": "Low",
-        "moderate": "Moderate",
-        "high": "High",
-        "veryHigh": "Very High"
-      },
-      "labels": {
-        "efficacyScore": "Efficacy: {{score}}",
-        "notes": "Notes:",
-        "existingRelations": "Existing Relationships"
-      },
-      "remove": "Remove"
     }
   },
   "efficacyMatrix": {
@@ -3244,58 +3149,84 @@
   "roi": {
     "title": "ROI Intelligence & Business Case",
     "description": "Advanced predictive analysis and scenario simulation for veterinary nutraceuticals",
+    "buttons": {
+      "exportReport": "Export Report",
+      "updateAnalyses": "Update Analyses"
+    },
     "kpis": {
-      "totalROI": "Average Total ROI",
-      "totalROISubtitle": "Average return of nutraceuticals",
-      "preventiveROI": "Preventive ROI",
-      "preventiveROISubtitle": "Highest return in prevention",
-      "sustainability": "Sustainability Index",
-      "sustainabilitySubtitle": "Long-term viability",
-      "marketPenetration": "Market Penetration",
-      "marketPenetrationSubtitle": "Available opportunities",
-      "vsMeta": "vs target",
-      "vsTreatment": "vs treatment",
-      "highConsistency": "High consistency",
-      "conditionsMapped": "conditions mapped"
+      "totalROI": {
+        "title": "Average Total ROI",
+        "subtitle": "Average return on nutraceuticals",
+        "trendVsMeta": "vs target"
+      },
+      "preventiveROI": {
+        "title": "Preventive ROI",
+        "subtitle": "Higher return on prevention",
+        "trendVsTreatment": "vs treatment"
+      },
+      "sustainabilityIndex": {
+        "title": "Sustainability Index",
+        "subtitle": "Long-term viability",
+        "trendHigh": "High consistency"
+      },
+      "marketPenetration": {
+        "title": "Market Penetration",
+        "subtitle": "Available opportunities",
+        "conditionsMapped": "mapped conditions"
+      }
     },
     "tabs": {
-      "overview": "Executive View",
+      "overview": "Executive Overview",
       "opportunities": "Opportunities",
       "predictive": "Predictive Analysis",
       "simulator": "Simulator"
     },
-    "buttons": {
-      "exportReport": "Export Report",
-      "updateAnalysis": "Update Analysis"
-    },
-    "sustainabilityMetrics": {
+    "sustainability": {
       "title": "Sustainability Metrics",
-      "avgCLV": "Avg CLV (24m)",
-      "retention": "Retention Rate",
-      "payback": "Average Payback",
-      "margin": "Contribution Margin"
+      "clvAverage": "Average CLV (24m)",
+      "retentionRate": "Retention Rate",
+      "avgPayback": "Average Payback",
+      "contributionMargin": "Contribution Margin",
+      "months": "months"
     },
     "clinicalImpact": {
       "title": "Clinical Impact",
       "consultationReduction": "Consultation reduction",
       "emergencyReduction": "Emergency reduction",
       "qualityImprovement": "Quality of life improvement",
-      "tutorSatisfaction": "Tutor satisfaction"
+      "tutorSatisfaction": "Owner satisfaction"
     },
-    "comparative": {
-      "title": "ROI Comparative Analysis",
+    "methodology": {
+      "title": "Methodology and Technical Parameters",
+      "description": "Details of models and algorithms used in predictive analyses",
+      "parametersTitle": "Calculation Parameters",
+      "parameter": "Parameter",
+      "value": "Value",
+      "baseIncidenceRate": "Base incidence rate",
+      "protocolReduction": "Protocol reduction",
+      "avgTreatmentCost": "Average treatment cost",
+      "preventiveProtocolCost": "Preventive protocol cost",
+      "modelsTitle": "Models Used",
+      "predictiveAnalysis": "Predictive Analysis",
+      "trendAnalysis": "Trend Analysis",
+      "monteCarloSimulation": "Monte Carlo Simulation",
+      "accuracy": "Accuracy",
+      "iterations": "iterations"
+    },
+    "executiveSummary": {
+      "title": "Comparative ROI Analysis",
       "description": "Comparison between preventive approaches vs. reactive treatment",
-      "preventive": "Preventive Approach",
-      "reactive": "Reactive Treatment",
+      "preventiveApproach": "Preventive Approach",
+      "reactiveTreatment": "Reactive Treatment",
       "avgROI": "Average ROI",
       "costPerPetYear": "Cost per Pet/Year",
-      "costPerCase": "Cost per Case",
       "caseReduction": "Case Reduction",
+      "costPerCase": "Cost per Case",
       "incidenceRate": "Incidence Rate",
-      "advantage": "Competitive Advantage",
-      "advantageDesc": "Prevention offers superior ROI vs reactive treatment"
+      "competitiveAdvantage": "Competitive Advantage",
+      "preventionSuperior": "Prevention offers {{difference}}% higher ROI than reactive treatment"
     },
-    "opportunities": {
+    "marketOpportunity": {
       "title": "Market Opportunity Matrix",
       "description": "Analysis of therapeutic gaps and ROI potential by condition",
       "sortBy": "Sort by",
@@ -3303,78 +3234,118 @@
       "marketGap": "Market Gap",
       "confidence": "Confidence",
       "gap": "Gap",
+      "roi": "ROI",
+      "levels": {
+        "veryHigh": "Very High",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
       "treatmentCost": "Treatment Cost",
       "preventionCost": "Prevention Cost",
       "savings": "Savings",
       "riskReduction": "Risk Reduction",
-      "recommendedNutra": "Recommended Nutraceuticals",
-      "vsTraditional": "vs traditional treatment",
-      "analyze": "Analyze",
-      "veryHigh": "Very High",
-      "high": "High",
-      "medium": "Medium",
-      "low": "Low",
+      "recommendedNutraceuticals": "Recommended Nutraceuticals",
+      "savingsVsTraditional": "{{percentage}}% savings vs traditional treatment",
+      "analyze": "Analyze →",
       "interpretationTitle": "Matrix Interpretation",
-      "interpretationDesc": "Market Gap indicates the existing therapeutic gap, while Potential ROI shows expected return. \"Very High\" opportunities combine large gap with high ROI."
+      "interpretationText": "Market Gap indicates the existing therapeutic gap, while Potential ROI shows expected return. \"Very High\" opportunities combine large gap with high ROI."
     },
-    "predictive": {
+    "predictiveChart": {
       "title": "Predictive ROI Analysis",
       "description": "Return on investment projection based on historical data and trends",
-      "area": "Area",
-      "line": "Line",
-      "composed": "Composed",
-      "monthly": "Monthly ROI",
-      "cumulative": "Cumulative ROI",
-      "comparison": "Comparison",
-      "projectedROI": "Total Projected ROI",
-      "totalSavings": "Total Savings",
-      "payback": "Payback",
-      "avgConfidence": "Average Confidence",
-      "months": "months",
-      "positiveTrend": "Positive Trend",
-      "positiveTrendDesc": "Projection indicates sustainable ROI growth with peak at month 18-20.",
-      "opportunity": "Opportunity",
-      "opportunityDesc": "Higher return in preventive scenarios vs. reactive treatment.",
-      "roi": "ROI",
-      "savings": "Savings",
-      "confidence": "Confidence"
+      "chartTypes": {
+        "area": "Area",
+        "line": "Line",
+        "composed": "Composed"
+      },
+      "viewModes": {
+        "monthly": "Monthly ROI",
+        "cumulative": "Cumulative ROI",
+        "comparison": "Comparative"
+      },
+      "month": "Month {{number}}",
+      "tooltip": {
+        "roi": "ROI",
+        "savings": "Savings",
+        "confidence": "Confidence"
+      },
+      "metrics": {
+        "projectedTotalROI": "Projected Total ROI",
+        "totalSavings": "Total Savings",
+        "payback": "Payback",
+        "avgConfidence": "Average Confidence",
+        "months": "months"
+      },
+      "insights": {
+        "positiveTrend": "Positive Trend",
+        "positiveTrendText": "Projection indicates sustainable ROI growth with peak at month 18-20.",
+        "opportunity": "Opportunity",
+        "opportunityText": "Higher return in preventive scenarios vs. reactive treatment."
+      },
+      "downloadButton": "Download Chart"
     },
     "simulator": {
       "title": "Business Case Simulator",
       "description": "Configure parameters and simulate different implementation scenarios",
-      "clinicProfile": "Clinic Profile",
-      "initialInvestment": "Initial Investment (R$)",
-      "timeHorizon": "Time Horizon (months)",
-      "preventiveFocus": "Preventive Focus (%)",
-      "riskTolerance": "Risk Tolerance",
-      "riskLow": "Low - Conservative",
-      "riskMedium": "Medium - Balanced",
-      "riskHigh": "High - Aggressive",
-      "simulate": "Simulate Business Case",
-      "summary": "Summary",
-      "breakdown": "Breakdown",
-      "timeline": "Timeline",
-      "risks": "Risks",
-      "projectedROI": "Projected ROI",
-      "netProfit": "Net Profit",
-      "costDistribution": "Cost Distribution",
-      "revenueDistribution": "Revenue Distribution",
-      "monthlyProjection": "Monthly Projection",
-      "revenue": "Revenue",
-      "costs": "Costs",
-      "riskAnalysis": "Risk Analysis",
-      "riskLevel": "Risk Level",
-      "mainRiskFactors": "Main Risk Factors",
-      "implementation": "Implementation",
-      "training": "Training",
-      "initialStock": "Initial Stock",
-      "marketing": "Marketing",
-      "prevention": "Prevention",
-      "treatment": "Treatment"
-    },
-    "methodology": {
-      "title": "Methodology and Technical Parameters",
-      "description": "Details of models and algorithms used in predictive analysis"
+      "inputs": {
+        "clinicProfile": "Clinic Profile",
+        "initialInvestment": "Initial Investment (R$)",
+        "timeHorizon": "Time Horizon (months)",
+        "preventiveFocus": "Preventive Focus (%)",
+        "riskTolerance": "Risk Tolerance",
+        "petsPerMonth": "pets/month"
+      },
+      "riskLevels": {
+        "low": "Low - Conservative",
+        "medium": "Medium - Balanced",
+        "high": "High - Aggressive"
+      },
+      "simulateButton": "Simulate Business Case",
+      "tabs": {
+        "summary": "Summary",
+        "breakdown": "Breakdown",
+        "timeline": "Timeline",
+        "risks": "Risks"
+      },
+      "metrics": {
+        "projectedROI": "Projected ROI",
+        "payback": "Payback",
+        "netProfit": "Net Profit",
+        "confidence": "Confidence",
+        "months": "months"
+      },
+      "breakdown": {
+        "costDistribution": "Cost Distribution",
+        "revenueDistribution": "Revenue Distribution",
+        "implementation": "Implementation",
+        "training": "Training",
+        "initialStock": "Initial Stock",
+        "marketing": "Marketing",
+        "prevention": "Prevention",
+        "treatment": "Treatment",
+        "value": "Value"
+      },
+      "timeline": {
+        "monthlyProjection": "Monthly Projection",
+        "revenue": "Revenue",
+        "costs": "Costs",
+        "profit": "Profit"
+      },
+      "risks": {
+        "title": "Risk Analysis",
+        "level": "Risk Level",
+        "levels": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        },
+        "mainFactors": "Main Risk Factors"
+      },
+      "noSimulation": {
+        "title": "Ready to Simulate",
+        "description": "Configure the parameters and click 'Simulate' to see the full projection"
+      }
     }
   },
   "campaigns": {
@@ -4127,208 +4098,6 @@
       "generic": "An error occurred during processing"
     }
   },
-  "roi": {
-    "title": "ROI Intelligence & Business Case",
-    "description": "Advanced predictive analysis and scenario simulation for veterinary nutraceuticals",
-    "buttons": {
-      "exportReport": "Export Report",
-      "updateAnalyses": "Update Analyses"
-    },
-    "kpis": {
-      "totalROI": {
-        "title": "Average Total ROI",
-        "subtitle": "Average return on nutraceuticals",
-        "trendVsMeta": "vs target"
-      },
-      "preventiveROI": {
-        "title": "Preventive ROI",
-        "subtitle": "Higher return on prevention",
-        "trendVsTreatment": "vs treatment"
-      },
-      "sustainabilityIndex": {
-        "title": "Sustainability Index",
-        "subtitle": "Long-term viability",
-        "trendHigh": "High consistency"
-      },
-      "marketPenetration": {
-        "title": "Market Penetration",
-        "subtitle": "Available opportunities",
-        "conditionsMapped": "mapped conditions"
-      }
-    },
-    "tabs": {
-      "overview": "Executive Overview",
-      "opportunities": "Opportunities",
-      "predictive": "Predictive Analysis",
-      "simulator": "Simulator"
-    },
-    "sustainability": {
-      "title": "Sustainability Metrics",
-      "clvAverage": "Average CLV (24m)",
-      "retentionRate": "Retention Rate",
-      "avgPayback": "Average Payback",
-      "contributionMargin": "Contribution Margin",
-      "months": "months"
-    },
-    "clinicalImpact": {
-      "title": "Clinical Impact",
-      "consultationReduction": "Consultation reduction",
-      "emergencyReduction": "Emergency reduction",
-      "qualityImprovement": "Quality of life improvement",
-      "tutorSatisfaction": "Owner satisfaction"
-    },
-    "methodology": {
-      "title": "Methodology and Technical Parameters",
-      "description": "Details of models and algorithms used in predictive analyses",
-      "parametersTitle": "Calculation Parameters",
-      "parameter": "Parameter",
-      "value": "Value",
-      "baseIncidenceRate": "Base incidence rate",
-      "protocolReduction": "Protocol reduction",
-      "avgTreatmentCost": "Average treatment cost",
-      "preventiveProtocolCost": "Preventive protocol cost",
-      "modelsTitle": "Models Used",
-      "predictiveAnalysis": "Predictive Analysis",
-      "trendAnalysis": "Trend Analysis",
-      "monteCarloSimulation": "Monte Carlo Simulation",
-      "accuracy": "Accuracy",
-      "iterations": "iterations"
-    },
-    "executiveSummary": {
-      "title": "Comparative ROI Analysis",
-      "description": "Comparison between preventive approaches vs. reactive treatment",
-      "preventiveApproach": "Preventive Approach",
-      "reactiveTreatment": "Reactive Treatment",
-      "avgROI": "Average ROI",
-      "costPerPetYear": "Cost per Pet/Year",
-      "caseReduction": "Case Reduction",
-      "costPerCase": "Cost per Case",
-      "incidenceRate": "Incidence Rate",
-      "competitiveAdvantage": "Competitive Advantage",
-      "preventionSuperior": "Prevention offers {{difference}}% higher ROI than reactive treatment"
-    },
-    "marketOpportunity": {
-      "title": "Market Opportunity Matrix",
-      "description": "Analysis of therapeutic gaps and ROI potential by condition",
-      "sortBy": "Sort by",
-      "potentialROI": "Potential ROI",
-      "marketGap": "Market Gap",
-      "confidence": "Confidence",
-      "gap": "Gap",
-      "roi": "ROI",
-      "levels": {
-        "veryHigh": "Very High",
-        "high": "High",
-        "medium": "Medium",
-        "low": "Low"
-      },
-      "treatmentCost": "Treatment Cost",
-      "preventionCost": "Prevention Cost",
-      "savings": "Savings",
-      "riskReduction": "Risk Reduction",
-      "recommendedNutraceuticals": "Recommended Nutraceuticals",
-      "savingsVsTraditional": "{{percentage}}% savings vs traditional treatment",
-      "analyze": "Analyze →",
-      "interpretationTitle": "Matrix Interpretation",
-      "interpretationText": "Market Gap indicates the existing therapeutic gap, while Potential ROI shows expected return. \"Very High\" opportunities combine large gap with high ROI."
-    },
-    "predictiveChart": {
-      "title": "Predictive ROI Analysis",
-      "description": "Return on investment projection based on historical data and trends",
-      "chartTypes": {
-        "area": "Area",
-        "line": "Line",
-        "composed": "Composed"
-      },
-      "viewModes": {
-        "monthly": "Monthly ROI",
-        "cumulative": "Cumulative ROI",
-        "comparison": "Comparative"
-      },
-      "month": "Month {{number}}",
-      "tooltip": {
-        "roi": "ROI",
-        "savings": "Savings",
-        "confidence": "Confidence"
-      },
-      "metrics": {
-        "projectedTotalROI": "Projected Total ROI",
-        "totalSavings": "Total Savings",
-        "payback": "Payback",
-        "avgConfidence": "Average Confidence",
-        "months": "months"
-      },
-      "insights": {
-        "positiveTrend": "Positive Trend",
-        "positiveTrendText": "Projection indicates sustainable ROI growth with peak at month 18-20.",
-        "opportunity": "Opportunity",
-        "opportunityText": "Higher return in preventive scenarios vs. reactive treatment."
-      },
-      "downloadButton": "Download Chart"
-    },
-    "simulator": {
-      "title": "Business Case Simulator",
-      "description": "Configure parameters and simulate different implementation scenarios",
-      "inputs": {
-        "clinicProfile": "Clinic Profile",
-        "initialInvestment": "Initial Investment (R$)",
-        "timeHorizon": "Time Horizon (months)",
-        "preventiveFocus": "Preventive Focus (%)",
-        "riskTolerance": "Risk Tolerance",
-        "petsPerMonth": "pets/month"
-      },
-      "riskLevels": {
-        "low": "Low - Conservative",
-        "medium": "Medium - Balanced",
-        "high": "High - Aggressive"
-      },
-      "simulateButton": "Simulate Business Case",
-      "tabs": {
-        "summary": "Summary",
-        "breakdown": "Breakdown",
-        "timeline": "Timeline",
-        "risks": "Risks"
-      },
-      "metrics": {
-        "projectedROI": "Projected ROI",
-        "payback": "Payback",
-        "netProfit": "Net Profit",
-        "confidence": "Confidence",
-        "months": "months"
-      },
-      "breakdown": {
-        "costDistribution": "Cost Distribution",
-        "revenueDistribution": "Revenue Distribution",
-        "implementation": "Implementation",
-        "training": "Training",
-        "initialStock": "Initial Stock",
-        "marketing": "Marketing",
-        "prevention": "Prevention",
-        "treatment": "Treatment",
-        "value": "Value"
-      },
-      "timeline": {
-        "monthlyProjection": "Monthly Projection",
-        "revenue": "Revenue",
-        "costs": "Costs",
-        "profit": "Profit"
-      },
-      "risks": {
-        "title": "Risk Analysis",
-        "level": "Risk Level",
-        "levels": {
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High"
-        },
-        "mainFactors": "Main Risk Factors"
-      },
-      "noSimulation": {
-        "title": "Ready to Simulate",
-        "description": "Configure the parameters and click 'Simulate' to see the full projection"
-      }
-    }
-  },
   "bulkActions": {
     "title": "Smart Bulk Actions",
     "description": "Create and execute bulk campaigns with intelligent segmentation based on ROI and customer behavior",
@@ -4944,7 +4713,7 @@
       "healthCheck": "Health Check"
     },
     "diagnostics": {
-      "title": "System Diagnostics",
+      "title": "Title",
       "totalStudies": "Total Studies",
       "processingRate": "Success Rate",
       "avgTime": "Average Time",
@@ -4953,7 +4722,6 @@
       "problematicDesc": "{{count}} studies with errors or missing data",
       "noProblems": "No problems found!",
       "allHealthy": "All studies are healthy",
-      "title": "Title",
       "problem": "Problem",
       "status": "Status",
       "actions": "Actions",
@@ -5631,7 +5399,7 @@
       "condition": "Condition",
       "compound": "Compound",
       "pathway": "Pathway",
-    "mechanism": "Mechanism"
+      "mechanism": "Mechanism"
     }
   },
   "petRegistration": {
@@ -6034,40 +5802,43 @@
     "apiUsage": "API Usage"
   },
   "conventionsPanel": {
-    "title": "{{section}} Conventions",
-    "sectionNames": {
-      "knowledgeBase": "Knowledge Base",
-      "dataProcessing": "Data Processing",
-      "research": "Research & Development",
-      "predictiveAnalysis": "Predictive Analysis"
-    },
-    "description": "Define specific conventions to standardize work in this section",
+    "title": "Conventions - {{section}}",
+    "description": "Define and manage naming conventions, formats, and validation rules",
     "naming": "Naming",
-    "format": "Formatting",
+    "format": "Format",
     "rules": "Rules",
     "restoreDefault": "Restore Default",
     "saveConventions": "Save Conventions",
-    "visualExamples": "Visual Examples:",
-    "nutraceuticalNaming": "Nutraceutical Naming",
-    "citationFormat": "Citation Format",
-    "dosageFormat": "Dosage Format",
-    "conventionInPractice": "Convention in Practice:",
-    "correct": "Correct:",
-    "incorrect": "Incorrect:",
-    "validated": "Validated",
-    "standardFormats": "Standard Formats:",
-    "strongEvidence": "Strong evidence with multiple studies",
-    "identifierFormat": "Identifier Format",
-    "metadataExample": "Metadata example:",
-    "validations": "Validations:",
-    "validatedStudies": "3+ validated studies",
-    "undocumentedInteractions": "Undocumented interactions",
-    "interactionsRequired": "Drug interactions must be documented before approval",
-    "validationChecklist": "Validation checklist:",
-    "atLeast3Studies": "At least 3 supporting studies",
-    "evidenceLevelJustification": "Evidence level justification",
-    "drugInteractionsDoc": "Drug interactions documentation",
-    "sideEffectFrequency": "Side effect frequency"
+    "sectionNames": {
+      "knowledgeBase": "Knowledge Base",
+      "dataProcessing": "Data Processing",
+      "research": "Research",
+      "predictiveAnalysis": "Predictive Analysis"
+    },
+    "examples": {
+      "visualExamples": "Visual Examples:",
+      "nutraceuticalNaming": "← Nutraceutical Naming",
+      "citationFormat": "← Citation Format",
+      "dosageFormat": "← Dosage Format",
+      "conventionInPractice": "Convention in Practice:",
+      "nutraceutical": "Nutraceutical",
+      "validated": "✓ Validated",
+      "correct": "Correct:",
+      "incorrect": "Incorrect:",
+      "standardFormats": "Standard Formats:",
+      "strongEvidence": "Strong evidence with multiple studies",
+      "identifierFormat": "Identifier Format",
+      "metadataExample": "Metadata example:",
+      "validations": "Validations:",
+      "studiesValidated": "3+ validated studies",
+      "undocumentedInteractions": "Undocumented interactions",
+      "undocumentedInteractionsDesc": "Drug interactions must be documented before approval",
+      "validationChecklist": "Validation checklist:",
+      "atLeast3Studies": "At least 3 supporting studies",
+      "evidenceLevelJustification": "Evidence level justification",
+      "drugInteractions": "Drug interaction documentation",
+      "sideEffectsFrequency": "Side effects frequency"
+    }
   },
   "formSections": {
     "name": "Name",
@@ -6679,7 +6450,7 @@
       "removeRelationError": "Could not remove the relation.",
       "selectStudyError": "Please select a scientific study.",
       "studyAdded": "Study relation added successfully.",
-    "studyRemoveError": "Could not remove the relation."
+      "studyRemoveError": "Could not remove the relation."
     }
   },
   "enginesPromptsPanel": {
@@ -6729,45 +6500,6 @@
     "modelDistribution": "Model Distribution",
     "modelDistributionDesc": "Usage by AI model",
     "exportReport": "Export Report"
-  },
-  "conventionsPanel": {
-    "title": "Conventions - {{section}}",
-    "description": "Define and manage naming conventions, formats, and validation rules",
-    "naming": "Naming",
-    "format": "Format",
-    "rules": "Rules",
-    "restoreDefault": "Restore Default",
-    "saveConventions": "Save Conventions",
-    "sectionNames": {
-      "knowledgeBase": "Knowledge Base",
-      "dataProcessing": "Data Processing",
-      "research": "Research",
-      "predictiveAnalysis": "Predictive Analysis"
-    },
-    "examples": {
-      "visualExamples": "Visual Examples:",
-      "nutraceuticalNaming": "← Nutraceutical Naming",
-      "citationFormat": "← Citation Format",
-      "dosageFormat": "← Dosage Format",
-      "conventionInPractice": "Convention in Practice:",
-      "nutraceutical": "Nutraceutical",
-      "validated": "✓ Validated",
-      "correct": "Correct:",
-      "incorrect": "Incorrect:",
-      "standardFormats": "Standard Formats:",
-      "strongEvidence": "Strong evidence with multiple studies",
-      "identifierFormat": "Identifier Format",
-      "metadataExample": "Metadata example:",
-      "validations": "Validations:",
-      "studiesValidated": "3+ validated studies",
-      "undocumentedInteractions": "Undocumented interactions",
-      "undocumentedInteractionsDesc": "Drug interactions must be documented before approval",
-      "validationChecklist": "Validation checklist:",
-      "atLeast3Studies": "At least 3 supporting studies",
-      "evidenceLevelJustification": "Evidence level justification",
-      "drugInteractions": "Drug interaction documentation",
-      "sideEffectsFrequency": "Side effects frequency"
-    }
   },
   "adicionarEstudoDialog": {
     "titleForm": "Add New Scientific Study",
@@ -7287,7 +7019,12 @@
         "futureRisk": "future risk",
         "protected": "protected",
         "systemic": "systemic load"
-      }
+      },
+      "lockedTitle": "Awaiting VetGraphRAG analysis",
+      "lockedBody": "The biological trajectory projection is only generated after the VetGraphRAG analysis, so the \"with protocol\" scenario reflects the stack actually recommended for this pet.",
+      "noBenefitBanner": "For this pet, the geroprotector protocol does NOT change the trajectory: none of the conditions/predispositions have sufficient KG evidence in the current knowledge base.",
+      "moreConditions": "more",
+      "basedOnAnalysis": "Based on VetGraphRAG analysis from {{when}}"
     },
     "anatomy": {
       "regions": {
