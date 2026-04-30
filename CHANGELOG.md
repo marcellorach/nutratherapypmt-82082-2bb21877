@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-30 — Traduções evidenceGap.log e layout responsivo DT workflow
+<!-- area: i18n · status: entregue · i18n: 1.46.0 -->
+- Adicionadas 16 chaves de tradução `evidenceGap.log.*` em PT e EN para o painel de log em tempo real da busca de evidências
+- DT mini-workflow: trocado `overflow-x-auto` por `flex-wrap` para quebrar em duas linhas em vez de sair do quadro
+- Conectores entre etapas ocultados em telas pequenas (`hidden sm:block`)
+- Files: src/locales/en/translation.json, src/locales/pt/translation.json, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts
+
 ### Fixed - 2026-04-30 — Pipeline scroll, DT workflow visual, Evidence Gap search fix
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.44.0 -->
 - Pipeline workflow card: adicionada barra de rolagem horizontal estilizada para telas menores
