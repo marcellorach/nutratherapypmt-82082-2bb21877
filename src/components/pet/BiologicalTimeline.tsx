@@ -98,9 +98,9 @@ function compactYear(
   const lowerCovered = new Set(Array.from(coveredNames).map(n => n.toLowerCase()));
   return {
     year: y.year,
-    ageAtYear: y.age_at_year,
-    biologicalAge: y.biological_age,
-    expectedRemainingYears: y.expected_remaining_years,
+    ageAtYear: y.age_at_year ?? 0,
+    biologicalAge: y.biological_age ?? 0,
+    expectedRemainingYears: y.expected_remaining_years ?? 0,
     existing: (y.existing_conditions || []).map(ec => ({
       name: ec.name,
       severity: (ec.projected_severity_label as Severity) || scoreToSeverity(ec.projected_severity_score || 0),
@@ -397,7 +397,7 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-xs bg-muted/40">{t('petProfile.biologicalTimeline.scenarioWithout', 'Sem protocolo')}</Badge>
-                  <span className="text-xs text-muted-foreground">{projWithout?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+                  <span className="text-xs text-muted-foreground">{(projWithout?.expectedRemainingYears ?? 0).toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
                 </div>
                 <div className="rounded-md bg-background border border-border/50 p-2 aspect-[4/3]">
                   <DogAnatomySVG regionStates={regionsWithout.states} systemicSeverity={regionsWithout.systemic} showProtectionAura={false} className="w-full h-full" />
@@ -409,7 +409,7 @@ const BiologicalTimeline: React.FC<BiologicalTimelineProps> = ({
                   <Badge variant="outline" className="text-xs bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 text-emerald-700 dark:text-emerald-400">
                     <Sparkles className="h-3 w-3 mr-0.5" />{t('petProfile.biologicalTimeline.scenarioWith', 'Com protocolo')}
                   </Badge>
-                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{projWith?.expectedRemainingYears.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
+                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{(projWith?.expectedRemainingYears ?? 0).toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort')}</span>
                 </div>
                 <div className={`rounded-md bg-background border p-2 aspect-[4/3] ${noKgBenefit ? 'border-border/50' : 'border-emerald-200 dark:border-emerald-900/50'}`}>
                   <DogAnatomySVG regionStates={regionsWith.states} systemicSeverity={regionsWith.systemic} showProtectionAura={!noKgBenefit} className="w-full h-full" />
