@@ -15,6 +15,7 @@ import ConfigurationsSummary from './configuracoes/ConfigurationsSummary';
 import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
 import AIModelSelector from './configuracoes/AIModelSelector';
 import PerplexityStatusCard from './configuracoes/PerplexityStatusCard';
+import ProviderHealthButton from './configuracoes/ProviderHealthButton';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -398,6 +399,7 @@ const ConfiguracoesIATab: React.FC = () => {
                     Obter uma chave API da OpenAI →
                   </a>
                 </div>
+                <ProviderHealthButton provider="openai" />
               </TabsContent>
               
               <TabsContent value="claude" className="space-y-4 pt-4">
@@ -418,6 +420,7 @@ const ConfiguracoesIATab: React.FC = () => {
                     Obter uma chave API da Anthropic (Claude) →
                   </a>
                 </div>
+                <ProviderHealthButton provider="claude" />
               </TabsContent>
               
               <TabsContent value="grok" className="space-y-4 pt-4">
@@ -431,6 +434,7 @@ const ConfiguracoesIATab: React.FC = () => {
                 <div className="text-sm text-gray-500 mt-4">
                   <p>Chaves para a API do Grok podem ser obtidas na plataforma xAI.</p>
                 </div>
+                <ProviderHealthButton provider="grok" />
               </TabsContent>
 
               <TabsContent value="google-gemini" className="space-y-4 pt-4">
