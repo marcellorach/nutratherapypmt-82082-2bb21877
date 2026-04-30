@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTriggerGapFill, usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
+import { usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import EvidenceGapLogPanel, { type GapLogEntry } from './EvidenceGapLogPanel';
 
 interface EvidenceGapCardProps {
   petId: string;
@@ -25,7 +27,9 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
   const { userRoles } = useAuth();
   const isAdmin = (userRoles || []).includes('admin');
   const { data: pendingCount, refetch } = usePendingGapFillTriplets();
-  const trigger = useTriggerGapFill();
+  const [isSearching, setIsSearching] = useState(false);
+  const [gapLog, setGapLog] = useState<GapLogEntry[]>([]);
+  const logIdRef = useRef(0);
   const [lastResult, setLastResult] = useState<null | {
     pairs_searched: number;
     studies_added: number;
@@ -51,43 +55,179 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
       })()
     : null;
 
+  const appendLog = useCallback((level: GapLogEntry['level'], message: string) => {
+    setGapLog(prev => [...prev.slice(-299), {
+      id: `gl-${++logIdRef.current}`,
+      timestamp: Date.now(),
+      level,
+      message,
+    }]);
+  }, []);
+
+  const mapEventToLog = useCallback((ev: any) => {
+    switch (ev.type) {
+      case 'start':
+        appendLog('info', `▶ ${t('evidenceGap.log.starting', { pet_id: ev.pet_id?.slice(0, 8) })}`);
+        break;
+      case 'config':
+        appendLog('info', `⚙ Perplexity: ${ev.hasPerplexity ? '✓' : '✗'} | NCBI: ${ev.hasNcbi ? '✓' : '✗'} | Model: ${ev.perplexity_model}`);
+        break;
+      case 'loading':
+        appendLog('info', `⏳ ${t('evidenceGap.log.loading', { step: ev.step })}`);
+        break;
+      case 'conditions_loaded':
+        if (ev.count === 0) {
+          appendLog('warn', `⚠ ${t('evidenceGap.log.noConditions')}`);
+        } else {
+          appendLog('success', `✓ ${t('evidenceGap.log.conditionsLoaded', { count: ev.count })} — ${(ev.conditions || []).join(', ')}`);
+        }
+        break;
+      case 'snapshot_loaded':
+        appendLog('info', `📋 Stack: ${ev.stack_count} ${t('evidenceGap.log.compounds')} ${ev.stack?.length ? '(' + ev.stack.join(', ') + ')' : ''}`);
+        break;
+      case 'compounds_matched':
+        appendLog('info', `🧪 ${t('evidenceGap.log.compoundsMatched', { matched: ev.matched, total: ev.from_stack })}`);
+        break;
+      case 'compounds_fallback':
+        appendLog('warn', `↩ ${t('evidenceGap.log.compoundsFallback', { count: ev.count })}`);
+        break;
+      case 'pairs_built':
+        appendLog('info', `📊 ${t('evidenceGap.log.pairsBuilt', { eligible: ev.eligible, skipped: ev.skipped_existing, total: ev.total_checked })}`);
+        break;
+      case 'pair_start':
+        appendLog('info', `🔍 [${ev.index}/${ev.total}] ${ev.compound} → ${ev.condition}`);
+        break;
+      case 'pair_perplexity_ok':
+        appendLog('success', `✓ Perplexity: ${ev.compound} → ${ev.condition} (ef ${ev.efficacy}/5, ${ev.pmids} PMIDs)`);
+        break;
+      case 'pair_perplexity_empty':
+        appendLog('warn', `∅ Perplexity: ${ev.compound} → ${ev.condition} — fallback PubMed`);
+        break;
+      case 'pair_pubmed_found':
+        appendLog('info', `📚 PubMed: ${ev.pmids} articles (${ev.species})`);
+        break;
+      case 'pair_no_evidence':
+        appendLog('warn', `∅ ${ev.compound} → ${ev.condition}: ${t('evidenceGap.log.noEvidence')}`);
+        break;
+      case 'pair_ok':
+        appendLog('success', `✓ ${ev.compound} → ${ev.condition}: ef ${ev.efficacy}/5 via ${ev.provider} (${ev.studies} studies)`);
+        break;
+      case 'pair_error':
+        appendLog('error', `✗ ${ev.compound} → ${ev.condition}: ${ev.error}`);
+        break;
+      case 'pair_dry_run':
+        appendLog('info', `🏷 dry-run: ${ev.compound} → ${ev.condition} ef ${ev.efficacy}/5`);
+        break;
+      case 'result':
+        // Final result — handled outside
+        break;
+      case 'error':
+        appendLog('error', `✗ ${ev.message}`);
+        break;
+      case 'done':
+        appendLog('success', `✓ ${t('evidenceGap.log.done')}`);
+        break;
+      default:
+        appendLog('info', JSON.stringify(ev));
+    }
+  }, [appendLog, t]);
+
   // Only show for admin AND only when twin shows a low gain
   if (!isAdmin) return null;
   if (yearsGained >= 0.3) return null;
 
   const handleSearch = async () => {
     setLastResult(null);
+    setGapLog([]);
+    setIsSearching(true);
     try {
-      const result = await trigger.mutateAsync({ pet_id: petId, max_pairs: 10 });
-      setLastResult(result as any);
-      const msg = t('evidenceGap.toastSuccess', {
-        studies: result.studies_added,
-        triplets: result.triplets_pending,
-        pairs: result.pairs_searched,
+      // Use streaming fetch for real-time logging
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const anonKey = (supabase as any).supabaseKey || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL || (supabase as any).supabaseUrl;
+      const url = `${baseUrl}/functions/v1/kg-evidence-gap-fill?stream=true`;
+
+      appendLog('info', `▶ ${t('evidenceGap.log.initiating')}`);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'apikey': anonKey,
+        },
+        body: JSON.stringify({ pet_id: petId, max_pairs: 10 }),
       });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      }
+
+      // Read NDJSON stream
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalResult: any = null;
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const ev = JSON.parse(line);
+              if (ev.type === 'result') {
+                finalResult = ev;
+              } else {
+                mapEventToLog(ev);
+              }
+            } catch { /* ignore malformed line */ }
+          }
+        }
+        // Process remaining buffer
+        if (buffer.trim()) {
+          try {
+            const ev = JSON.parse(buffer);
+            if (ev.type === 'result') finalResult = ev;
+            else mapEventToLog(ev);
+          } catch { /* ignore */ }
+        }
+      }
+
+      const result = finalResult || { pairs_searched: 0, studies_added: 0, triplets_pending: 0 };
+      setLastResult(result);
+
       if ((result.pairs_searched || 0) === 0) {
         toast.warning(t('evidenceGap.toastNoPairs'));
       } else if ((result.triplets_pending || 0) === 0) {
         toast.info(t('evidenceGap.toastNoTriplets', { pairs: result.pairs_searched }));
       } else {
-        toast.success(msg);
-        // Notify parent so the digital twin can re-project including these
-        // pending triplets and the patient subgraph can render them.
+        toast.success(t('evidenceGap.toastSuccess', {
+          studies: result.studies_added,
+          triplets: result.triplets_pending,
+          pairs: result.pairs_searched,
+        }));
         onTripletsAdded?.(result.triplets_pending || 0);
       }
       refetch();
     } catch (e: any) {
       const msg = e?.message || (typeof e === 'string' ? e : 'unknown');
       console.error('[EvidenceGapCard] gap-fill error', e);
-      const isFetchError = msg.includes('Failed to send a request') || msg.includes('Failed to fetch');
-      const displayMsg = isFetchError
-        ? t('evidenceGap.backendUnavailable', 'Função de busca indisponível no backend. Verifique se as Edge Functions estão publicadas.')
-        : msg;
+      appendLog('error', `✗ ${msg}`);
+      const displayMsg = msg;
       setLastResult({
         pairs_searched: 0, studies_added: 0, triplets_pending: 0,
         message: displayMsg,
       });
       toast.error(t('evidenceGap.toastError', { error: displayMsg }));
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -186,10 +326,10 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleSearch}
-            disabled={trigger.isPending}
+            disabled={isSearching}
             className="w-full"
           >
-            {trigger.isPending ? (
+            {isSearching ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('evidenceGap.searching')}</>
             ) : (
               <><Search className="mr-2 h-4 w-4" /> {t('evidenceGap.button')}</>
@@ -199,6 +339,12 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
             {t('evidenceGap.disclaimer')}
           </p>
         </div>
+
+        <EvidenceGapLogPanel
+          entries={gapLog}
+          isSearching={isSearching}
+          onClear={() => setGapLog([])}
+        />
       </CardContent>
     </Card>
   );
