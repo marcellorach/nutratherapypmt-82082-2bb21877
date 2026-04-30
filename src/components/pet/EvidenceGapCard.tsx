@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,7 +25,6 @@ interface EvidenceGapCardProps {
 const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, hasCoverage, onTripletsAdded }) => {
   const { t } = useTranslation();
   const { userRoles } = useAuth();
-  const navigate = useNavigate();
   const isAdmin = (userRoles || []).includes('admin');
   const { data: pendingCount, refetch } = usePendingGapFillTriplets();
   const [isSearching, setIsSearching] = useState(false);
