@@ -38,6 +38,33 @@ console.log('[gap-fill] boot', {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Map AI-returned evidence_level values to DB-allowed enum values
+const EVIDENCE_LEVEL_MAP: Record<string, string> = {
+  meta_analysis: 'meta_analysis',
+  clinical_trial: 'rct',
+  rct: 'rct',
+  in_vivo: 'cohort',
+  cohort: 'cohort',
+  case_control: 'case_control',
+  case_report: 'case_report',
+  in_vitro: 'in_vitro',
+  review: 'expert_opinion',
+  expert_opinion: 'expert_opinion',
+  unclear: 'expert_opinion',
+};
+
+function mapEvidenceLevel(raw: string): string {
+  return EVIDENCE_LEVEL_MAP[raw] || 'expert_opinion';
+}
+
+// Map AI-returned direction to DB-allowed enum
+function mapDirection(raw: string): string {
+  if (raw === 'positive' || raw === 'improves') return 'improves';
+  if (raw === 'negative' || raw === 'worsens') return 'worsens';
+  if (raw === 'bidirectional') return 'bidirectional';
+  return 'neutral';
+}
+
 function withApiKey(url: string): string {
   if (!NCBI_API_KEY) return url;
   return url + (url.includes('?') ? '&' : '?') + `api_key=${NCBI_API_KEY}`;
@@ -785,10 +812,10 @@ Deno.serve(async (req) => {
           predicate: 'treats',
           relationship_category: 'therapeutic',
           intensity: efficacyNorm,
-          direction: 'positive',
+          direction: mapDirection('positive'),
           extraction_confidence: efficacyNorm,
           llm_confidence: assessment.llm_confidence,
-          evidence_level: assessment.evidence_level,
+          evidence_level: mapEvidenceLevel(assessment.evidence_level),
           species_context: [speciesHint],
           confidence_rationale: assessment.rationale,
           curation_status: 'pending', // gap-fill is ALWAYS reviewed
