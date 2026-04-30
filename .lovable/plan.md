@@ -1,44 +1,57 @@
+## Plano de Correções: Pipeline, Digital Twin e Evidence Gap
 
-## Mudanças no Pipeline Clínico e Digital Twin
+### a) Pipeline Workflow Card - Barra de rolagem horizontal
 
-### a) Novo card "Sinergias" no Pipeline Workflow
+O card com os 7 estágios do pipeline transborda em telas menores. Vou envolver o conteúdo em um container com `overflow-x-auto` e scrollbar estilizada, garantindo que os cards fiquem visíveis via scroll horizontal suave.
 
-Adicionar um 7o estágio `stage7_synergies` ao `ClinicalPipelineWorkflow`:
-- Novo ícone `Sparkles` (ou `Zap`) com label bilíngue "Sinergias" / "Synergies"
-- Contador de sinergias encontradas
-- Atualizar `PipelineState` interface com `stage7_synergies`
-- Atualizar `PetProfilePage` para alimentar o novo estágio (pode ser derivado dos dados de recomendação existentes ou de um novo cálculo no pipeline)
+**Arquivo:** `src/components/pet/ClinicalPipelineWorkflow.tsx`
 
-### b) Pipeline bilíngue
+---
 
-Atualizar as chaves de tradução em `src/locales/en/translation.json` para as labels do pipeline (profile, predispositions, labs, KG, interactions, recommendation, synergies) e todos os contadores. Incrementar `I18N_VERSION`.
+### b) Digital Twin Tab - Workflow + Log no lugar certo
 
-### c) Tempos por etapa e tempo total
+Atualmente a tab "Digital Twin" mostra apenas o `DigitalTwinDog`. O `DigitalTwinLogPanel` existe dentro do componente mas precisa de um **workflow visual com timing** idêntico ao da Clinical Analysis (mostrando etapas como "Trajectory API", "Parse", "Render" com tempos). 
 
-- O pipeline já emite `durationMs` no `meta` de cada `stage-end` event
-- Capturar esses tempos em um state `stageTimes: Record<string, number>` no `PetProfilePage`
-- Passar `stageTimes` ao `ClinicalPipelineWorkflow` para exibir abaixo de cada card completo (ex: "1.2s")
-- Calcular e exibir tempo total no canto direito do componente (ex: "Total: 4.8s")
+Vou:
+1. Criar um mini-workflow dentro da tab Digital Twin (reutilizando o padrão visual do `ClinicalPipelineWorkflow`) com as etapas do Digital Twin: Snapshot Load → Trajectory API Call → Parse Response → Render
+2. Adicionar timing a cada etapa do DT, coletando timestamps no `useEffect` que monitora `aiQuery.status`
+3. Garantir que o `DigitalTwinLogPanel` apareça logo abaixo do workflow, antes da visualização principal
 
-### d) Log de processamento do Digital Twin
+**Arquivos:**
+- `src/components/pet/DigitalTwinDog.tsx` - adicionar mini-workflow com timing
+- `src/components/pet/DigitalTwinLogPanel.tsx` - ajustar se necessário
 
-Criar um componente `DigitalTwinLogPanel` (reutilizando a estrutura do `ClinicalPipelineLogPanel`):
-- Capturar eventos do `usePetTrajectoryProjection` (início, chamada à edge function, resposta, parse, erros)
-- Exibir log ao vivo abaixo do Digital Twin na tab correspondente
-- Mesma UI: timestamps, ícones por nível, autoscroll, botões limpar/exportar
+---
 
-Faz total sentido ter esse log no Digital Twin -- ele faz chamadas pesadas à AI para projeção de trajetória e o usuário precisa de feedback visual do que está acontecendo internamente (similar ao pipeline clínico).
+### c) Evidence Gap Search - Bug identificado e correção
 
-### Arquivos afetados
+**Causa raiz encontrada:** Os logs do edge function mostram `pet conditions found 0`. Investigando o banco, as condições do pet existem na tabela `pet_conditions` mas com `condition_id = NULL` — são armazenadas apenas como texto livre em `condition_name`. O edge function faz `JOIN` via `condition_id → health_conditions.id`, que retorna vazio.
+
+**Correção em duas frentes:**
+
+1. **Edge function `kg-evidence-gap-fill`**: Quando `condition_id` for NULL, usar `condition_name` diretamente como texto para busca no PubMed/Perplexity. Isso permite que condições sem link formal ao catálogo `health_conditions` ainda sejam pesquisadas.
+
+2. **Escopo da busca** (respondendo sua pergunta): Sim, o sistema já usa Perplexity (`sonar-reasoning-pro`) como fonte primária + PubMed E-utilities como fallback. A busca é especificamente por evidências de compostos geroprotetores contra condições caninas. O prompt do Perplexity pede "evidence that the COMPOUND meaningfully treats, attenuates, or modifies the CONDITION in dogs".
+
+**Sugestão adicional**: Ampliar o prompt do Perplexity para também buscar:
+- Terapias medicamentosas baseadas em gerociência (não só os compostos já recomendados)
+- Novos compostos que a literatura sugira para a condição, mesmo que não estejam no catálogo atual
+- Isso transformaria o gap-fill de "validação dos compostos recomendados" para "descoberta de novas opções terapêuticas"
+
+**Arquivos:**
+- `supabase/functions/kg-evidence-gap-fill/index.ts` - fix condition_id NULL + expandir prompt
+- `src/components/pet/EvidenceGapCard.tsx` - melhorar feedback visual do resultado
+
+---
+
+### Resumo técnico de arquivos
 
 | Arquivo | Mudança |
 |---------|---------|
-| `src/components/pet/ClinicalPipelineWorkflow.tsx` | +stage7, +stageTimes prop, +total time |
-| `src/pages/veterinario/PetProfilePage.tsx` | Capturar durationMs, passar stageTimes, novo state para DT log |
-| `src/components/pet/DigitalTwinDog.tsx` | Integrar log callback |
-| `src/components/pet/DigitalTwinLogPanel.tsx` | Novo componente (baseado no ClinicalPipelineLogPanel) |
-| `src/hooks/usePetTrajectoryProjection.ts` | Adicionar callback de log |
-| `src/locales/pt/translation.json` | Novas chaves sinergias + DT log |
-| `src/locales/en/translation.json` | Mesmas chaves em inglês |
-| `src/i18n.ts` | Incrementar I18N_VERSION |
+| `ClinicalPipelineWorkflow.tsx` | Scroll horizontal estilizado |
+| `DigitalTwinDog.tsx` | Mini-workflow com timing + reorganizar layout |
+| `kg-evidence-gap-fill/index.ts` | Fix condition_id NULL, ampliar prompt Perplexity |
+| `EvidenceGapCard.tsx` | Melhor feedback |
 | `CHANGELOG.md` | Registrar mudanças |
+| Locales PT/EN | Novas chaves para DT workflow |
+| `src/i18n.ts` | Incrementar I18N_VERSION |
