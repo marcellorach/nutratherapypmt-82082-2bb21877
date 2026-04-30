@@ -23,6 +23,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-30 — Diagnóstico Gap-Fill e detalhamento de fontes no EvidenceGapCard
+<!-- area: kg · status: entregue · i18n: 1.41.9 -->
+- **EvidenceGapCard expandido**: agora exibe breakdown por fonte (Perplexity / PubMed) com contagem de consultas, sucessos, falhas e motivos de ausência de evidências. Erros inline e flag de "sem chave Perplexity" nos detalhes de cada par.
+- **Nova tab admin "Diagnóstico Gap-Fill"**: tela completa para inspecionar health_conditions (name_en), nutraceuticals (name_en), links pet_conditions ↔ condition_id, e todos os triplets gerados pelo gap-fill. Badges visuais indicam dados faltantes que impedem a pipeline.
+- Files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts
+
 ### Fixed - 2026-04-30 — Restauração do pipeline de evidências (gap-fill → projeção → gêmeo digital)
 <!-- area: kg · status: entregue · i18n: 1.41.8 -->
 - **Deploy das Edge Functions**: `kg-evidence-gap-fill`, `kg-missing-triplets`, `perplexity-health`, `provider-health` e `project-pet-trajectory` estavam retornando 404 (não publicadas). Agora todas estão ativas no backend.
