@@ -431,17 +431,17 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               {t('petProfile.biologicalTimeline.biologicalAge', 'Idade biológica')}
             </p>
             <p className="text-2xl font-semibold mt-1">
-              {current.biological_age.toFixed(1)}
+              {(current.biological_age ?? 0).toFixed(1)}
               <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort', 'a')}</span>
             </p>
             <p className="text-[11px] text-muted-foreground mt-1">
               {current.biological_age > current.age_at_year ? (
                 <span className="text-orange-600 dark:text-orange-400 inline-flex items-center gap-0.5">
-                  <TrendingUp className="h-3 w-3" />+{(current.biological_age - current.age_at_year).toFixed(1)}
+                  <TrendingUp className="h-3 w-3" />+{((current.biological_age ?? 0) - (current.age_at_year ?? 0)).toFixed(1)}
                 </span>
               ) : (
                 <span className="text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5">
-                  <TrendingDown className="h-3 w-3" />{(current.biological_age - current.age_at_year).toFixed(1)}
+                  <TrendingDown className="h-3 w-3" />{((current.biological_age ?? 0) - (current.age_at_year ?? 0)).toFixed(1)}
                 </span>
               )} {t('petProfile.biologicalTimeline.vsChrono', 'vs. cronológica')}
             </p>
@@ -451,7 +451,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               {t('petProfile.biologicalTimeline.chronologicalAge', 'Idade cronológica')}
             </p>
             <p className="text-2xl font-semibold mt-1">
-              {current.age_at_year.toFixed(1)}
+              {(current.age_at_year ?? 0).toFixed(1)}
               <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort', 'a')}</span>
             </p>
           </div>
@@ -460,7 +460,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               <Heart className="h-3 w-3" />{t('petProfile.biologicalTimeline.remainingYears', 'Anos restantes')}
             </p>
             <p className="text-2xl font-semibold mt-1">
-              {(yearWith?.expected_remaining_years ?? current.expected_remaining_years).toFixed(1)}
+              {(yearWith?.expected_remaining_years ?? current.expected_remaining_years ?? 0).toFixed(1)}
               <span className="text-sm text-muted-foreground ml-1">{t('petProfile.biologicalTimeline.yearsShort', 'a')}</span>
             </p>
           </div>
@@ -509,7 +509,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
                   {t('petProfile.biologicalTimeline.scenarioWithout', 'Sem protocolo')}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
-                  {yearWithout?.expected_remaining_years.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort', 'a')}
+                  {(yearWithout?.expected_remaining_years ?? 0).toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort', 'a')}
                 </span>
               </div>
               {renderSilhouette(markersWithout, false)}
@@ -526,7 +526,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
                   {t('petProfile.biologicalTimeline.scenarioWith', 'Com protocolo')}
                 </Badge>
                 <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                  {yearWith?.expected_remaining_years.toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort', 'a')}
+                  {(yearWith?.expected_remaining_years ?? 0).toFixed(1)}{t('petProfile.biologicalTimeline.yearsShort', 'a')}
                 </span>
               </div>
               {renderSilhouette(markersWith, true)}
