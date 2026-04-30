@@ -7335,7 +7335,9 @@
       "assessment_failed": "AI failed",
       "triplet_failed": "insert failed",
       "dry_run": "dry-run",
-      "error": "error"
-    }
+      "error": "error",
+      "no_evidence": "no evidence"
+    },
+    "backendUnavailable": "Evidence search function unavailable on the backend. Check that Edge Functions are deployed."
   }
 }
