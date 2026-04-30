@@ -74,7 +74,7 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
   return (
     <Card className="border-primary/20">
       <CardContent className="p-4">
-        <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
+        <div className="flex flex-wrap items-center justify-center gap-1 pb-2">
           {stages.map((stage, idx) => {
             const state = pipelineState[stage.key as keyof PipelineState];
             const Icon = stage.icon;
@@ -83,12 +83,12 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
               <React.Fragment key={stage.key}>
                 {idx > 0 && (
                   <div className={cn(
-                    'h-px w-4 min-w-[16px] flex-shrink-0',
+                    'h-px w-4 min-w-[16px] flex-shrink-0 hidden sm:block',
                     state === 'complete' ? 'bg-green-400' : state === 'running' ? 'bg-primary' : 'bg-border'
                   )} />
                 )}
                 <div className={cn(
-                  'flex flex-col items-center gap-1 min-w-[80px] p-2 rounded-lg transition-colors',
+                  'flex flex-col items-center gap-1 min-w-[72px] max-w-[100px] p-2 rounded-lg transition-colors flex-shrink-0',
                   state === 'complete' && 'bg-green-50 dark:bg-green-950/30',
                   state === 'running' && 'bg-primary/5',
                   state === 'error' && 'bg-destructive/5',
