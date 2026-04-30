@@ -801,15 +801,18 @@ Deno.serve(async (req) => {
         }
 
         // Insert one triplet (compound -[treats]-> condition) as PENDING
-        const primaryStudyId = studyIds[0] || null;
+        // study_id FK references processed_studies, not scientific_studies.
+        // Gap-fill triplets don't come from uploaded PDFs, so we leave study_id
+        // null and store provenance in approval_chain.cited_pmids instead.
+        const primaryStudyId = null;
         const efficacyNorm = Math.max(0, Math.min(1, assessment.efficacy_0_5 / 5));
         const { error: tErr } = await supabase.from('triplet_extractions').insert({
           study_id: primaryStudyId,
-          subject_type: 'compound',
+          subject_type: 'Compound',
           subject_id: pair.compound_id || null,
           subject_name: pair.compound_en,
           subject_layer: 'compound',
-          object_type: 'condition',
+          object_type: 'Condition',
           object_id: pair.condition_id || null,
           object_name: pair.condition_en,
           object_layer: 'condition',

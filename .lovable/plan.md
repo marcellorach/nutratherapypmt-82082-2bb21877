@@ -1,31 +1,35 @@
 
-## O que aconteceu
+## Problema
 
-A busca de evidências **funcionou parcialmente** — o Perplexity encontrou estudos reais para pares como "Chondroitin Sulfate → Osteoarthritis" e "Fisetin → Hip Dysplasia". Porém dois bugs impediram que os resultados fossem salvos:
+O Edge Function `kg-evidence-gap-fill` insere `subject_type: 'compound'` e `object_type: 'condition'` (minúsculos), mas o constraint `triplet_extractions_object_type_check` exige valores com inicial maiúscula: `'Compound'`, `'Condition'`.
 
-### Bug 1: Constraint violation no campo `direction`
-O valor `positive` está sendo inserido no campo `direction` da tabela `triplet_extractions`, mas o banco só aceita `improves | worsens | neutral | bidirectional`. A função `mapDirection('positive')` que converte para `improves` existe no código atual, mas a versão deployada parece estar desatualizada ou o campo está sendo sobrescrito em outro ponto.
+Resultado: Perplexity encontra evidências, Gemini avalia, mas o INSERT falha silenciosamente. Zero triplets salvos, zero recalibragem.
 
-### Bug 2: Network timeout (stream interrompido)
-Cada par composto×condição faz uma chamada ao Perplexity (~20-30s). Com 10 pares elegíveis, a execução total excede o timeout da conexão HTTP, causando o erro "connection closed before message completed" no 4o par.
+## Plano
 
-### Resultado visível
-- **"pairs: 0, studies: 0, pending: 0"** — os triplets foram encontrados pelo Perplexity mas falharam ao ser inseridos no banco
-- **"network error"** — a conexão caiu antes de completar todos os pares
+### 1. Fix case-sensitivity no Edge Function
+**Arquivo**: `supabase/functions/kg-evidence-gap-fill/index.ts`
 
----
+- Alterar `subject_type: 'compound'` para `subject_type: 'Compound'`
+- Alterar `object_type: 'condition'` para `object_type: 'Condition'`
+- Alterar `subject_layer` e `object_layer` se necessário para consistência
 
-## Plano de correção
+### 2. Redeploy e teste
+- Redeployar a edge function
+- Testar com curl para confirmar que triplets são salvos
 
-### 1. Corrigir o campo `direction` na edge function
-- Garantir que `mapDirection()` é efetivamente aplicada no insert
-- Auditar se há outro ponto no código que sobrescreve o valor
+### 3. Auto-invalidação do trajectory após gap-fill
+**Arquivo**: `src/components/pet/EvidenceGapCard.tsx`
 
-### 2. Reduzir timeout / otimizar execução
-- Reduzir `max_pairs` default de 12 para 5 para ficar dentro do tempo
-- Adicionar tratamento de erro mais robusto no stream para que, mesmo se um par falhar, o resumo final reflita os pares que foram processados com sucesso
+O callback `onTripletsAdded` já existe e é chamado quando `triplets_pending > 0`. Verificar se o pai (`DigitalTwinDog`) está reagindo corretamente para invalidar a query de trajectory e forçar recalculo do `years_gained`.
 
-### 3. Redeployar a edge function
-- Garantir que a versão corrigida é efetivamente deployada
+### 4. CHANGELOG
+- Registrar fix no CHANGELOG.md
 
-### 4. Atualizar CHANGELOG
+## Resultado esperado
+
+Após o fix, ao rodar o gap-fill:
+1. Perplexity encontra evidências (já funciona)
+2. Triplets são salvos como "pending" no Kanban (fix do case)
+3. O toggle "Preview with pending" mostra os novos triplets no grafo
+4. Ao aprovar triplets, o Digital Twin recalcula `years_gained` com a nova evidência
