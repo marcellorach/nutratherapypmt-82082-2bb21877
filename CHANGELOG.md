@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-30 — Restaurado Digital Twin + busca de evidências + marcadores dos avatares
+<!-- area: vet-ui · status: entregue · i18n: — -->
+- `DigitalTwinDog` (com `EvidenceGapCard` e log panel) restaurado na tab "trajectory" do PetProfilePage — havia sido removido na consolidação de tabs anterior
+- Corrigida lógica dos marcadores nos avatares: cenário "sem protocolo" agora faz fallback para os dados do cenário "com protocolo" quando a API retorna `yearWithout` vazio, garantindo que ambos mostrem as doenças
+- Perplexity connector verificado como ativo e vinculado ao projeto
+- Files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DigitalTwinDog.tsx
+
 ### Fixed - 2026-04-30 — Corrigido insert de triplets no gap-fill + UI de conclusões
 <!-- area: kg · status: entregue · i18n: 1.47.0 -->
 - **Bug crítico**: `direction: 'positive'` violava constraint `chk_direction` (mapeado para `'improves'`); `evidence_level` com valores inválidos (`clinical_trial`, `in_vivo`, `review`, `unclear`) mapeados para enum do DB (`rct`, `cohort`, `expert_opinion`)

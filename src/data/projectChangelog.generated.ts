@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T18:00:12.235Z
+// Última geração: 2026-04-30T19:59:39.021Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,42 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Restaurado Digital Twin + busca de evidências + marcadores dos avatares",
+    "bullets": [
+      "`DigitalTwinDog` (com `EvidenceGapCard` e log panel) restaurado na tab \"trajectory\" do PetProfilePage — havia sido removido na consolidação de tabs anterior",
+      "Corrigida lógica dos marcadores nos avatares: cenário \"sem protocolo\" agora faz fallback para os dados do cenário \"com protocolo\" quando a API retorna `yearWithout` vazio, garantindo que ambos mostrem as doenças",
+      "Perplexity connector verificado como ativo e vinculado ao projeto",
+      "Files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DigitalTwinDog.tsx"
+    ],
+    "files": [
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/components/pet/DigitalTwinDog.tsx"
+    ],
+    "i18nVersion": "—"
+  },
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Corrigido insert de triplets no gap-fill + UI de conclusões",
+    "bullets": [
+      "Bug crítico: `direction: 'positive'` violava constraint `chk_direction` (mapeado para `'improves'`); `evidence_level` com valores inválidos (`clinical_trial`, `in_vivo`, `review`, `unclear`) mapeados para enum do DB (`rct`, `cohort`, `expert_opinion`)",
+      "UI agora exibe conclusões claras por par: score de eficácia (0-5) com barra visual, nível de evidência, espécie, rationale colapsável do Perplexity/Gemini, links para PMIDs no PubMed e URLs citadas",
+      "Botão de curadoria aparece automaticamente após triplets criados com sucesso",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx, src/locales/*/translation.json"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "src/components/pet/EvidenceGapCard.tsx"
+    ],
+    "i18nVersion": "1.47.0"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",
