@@ -394,18 +394,15 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const userClient = createClient(SUPABASE_URL, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    });
     const token = authHeader.replace('Bearer ', '');
-    const { data: claims, error: claimsErr } = await userClient.auth.getClaims(token);
-    if (claimsErr || !claims?.claims) {
-      console.warn('[gap-fill] auth.getClaims failed', claimsErr?.message);
+    const { data: userResp, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userResp?.user) {
+      console.warn('[gap-fill] auth.getUser failed', userErr?.message);
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const userId = claims.claims.sub;
+    const userId = userResp.user.id;
     const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', userId);
     const isAdmin = (roles || []).some((r: any) => r.role === 'admin');
     if (!isAdmin) {
