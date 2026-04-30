@@ -7365,7 +7365,25 @@
     "pendingLabel": "pendentes",
     "sourcesConsulted": "Fontes consultadas",
     "queriesLabel": "consultas",
-    "noPerplexityKey": "sem chave Perplexity"
+    "noPerplexityKey": "sem chave Perplexity",
+    "log": {
+      "title": "Log de Preenchimento de Lacunas",
+      "eventCount": "{{count}} evento(s)",
+      "clear": "Limpar",
+      "export": "Exportar",
+      "waiting": "Aguardando início da busca…",
+      "starting": "Iniciando gap-fill para pet {{pet_id}}…",
+      "loading": "Carregando {{step}}…",
+      "noConditions": "Nenhuma condição encontrada para este pet",
+      "conditionsLoaded": "{{count}} condição(ões) carregada(s)",
+      "compounds": "composto(s)",
+      "compoundsMatched": "{{matched}}/{{total}} compostos encontrados no KG",
+      "compoundsFallback": "{{count}} composto(s) adicionado(s) via texto livre",
+      "pairsBuilt": "{{eligible}} par(es) elegível(eis) ({{skipped}} já cobertos, {{total}} verificados)",
+      "noEvidence": "nenhuma evidência encontrada",
+      "done": "Busca concluída",
+      "initiating": "Iniciando busca de evidências…"
+    }
   },
   "gapFillDiag": {
     "title": "Diagnóstico do Gap-Fill KG",
