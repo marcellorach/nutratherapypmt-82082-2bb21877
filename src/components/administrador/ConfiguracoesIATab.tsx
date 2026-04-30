@@ -479,6 +479,7 @@ const ConfiguracoesIATab: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
+                <ProviderHealthButton provider="gemini" />
               </TabsContent>
 
               <TabsContent value="perplexity" className="space-y-4 pt-4">
@@ -526,6 +527,7 @@ const ConfiguracoesIATab: React.FC = () => {
                 <p className="text-xs text-muted-foreground">
                   Dica: se a chave já está provisionada via conector (secret PERPLEXITY_API_KEY no backend), o card de saúde abaixo já mostrará Conectado — não é necessário inserir aqui.
                 </p>
+                <ProviderHealthButton provider="perplexity" />
               </TabsContent>
 
               <TabsContent value="neo4j" className="space-y-4 pt-4">
