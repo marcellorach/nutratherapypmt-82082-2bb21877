@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Crosshair, Copy, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { organograma } from "@/data/projectOrganograma";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
 import { useScrollPanZoom } from "@/hooks/useScrollPanZoom";
@@ -43,6 +44,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const source = useMemo(() => buildMermaid(orientation), [orientation]);
+  const { t } = useTranslation();
 
   const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
     min: 0.2,
@@ -63,7 +65,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
         const { svg: rendered } = await mermaid.render(id, source);
         if (cancelled) return;
         if (!rendered.includes("<svg")) {
-          setError("Mermaid retornou vazio.");
+          setError(t('organograma.mermaidEmpty'));
           setSvg("");
           return;
         }
@@ -81,7 +83,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(source);
-    toast.success("Mermaid copiado para a área de transferência.");
+    toast.success(t('organograma.mermaidCopied'));
   };
 
   return (
@@ -94,24 +96,24 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
               variant={orientation === "TD" ? "default" : "outline"}
               onClick={() => setOrientation("TD")}
             >
-              Vertical
+              {t('organograma.vertical')}
             </Button>
             <Button
               size="sm"
               variant={orientation === "LR" ? "default" : "outline"}
               onClick={() => setOrientation("LR")}
             >
-              Horizontal
+              {t('organograma.horizontal')}
             </Button>
           </div>
           <div className="flex gap-1">
             <Button size="sm" variant="outline" onClick={fit}>
               <Crosshair className="h-3.5 w-3.5 mr-1" />
-              Centralizar
+              {t('organograma.center')}
             </Button>
             <Button size="sm" variant="outline" onClick={handleCopy}>
               <Copy className="h-3.5 w-3.5 mr-1" />
-              Copiar Mermaid
+              {t('organograma.copyMermaid')}
             </Button>
           </div>
         </div>
@@ -120,7 +122,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm flex gap-2">
             <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-medium text-destructive">Falha ao renderizar diagrama</p>
+              <p className="font-medium text-destructive">{t('organograma.renderFailed')}</p>
               <p className="text-xs text-muted-foreground">{error}</p>
             </div>
           </div>
@@ -160,7 +162,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
         )}
 
         <p className="text-[11px] text-muted-foreground text-center">
-          scroll = zoom · arraste para mover · cliques em áreas levam aos cards
+          {t('organograma.diagramHint')}
         </p>
       </CardContent>
     </Card>
