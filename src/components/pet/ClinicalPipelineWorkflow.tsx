@@ -74,7 +74,7 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
   return (
     <Card className="border-primary/20">
       <CardContent className="p-4">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
           {stages.map((stage, idx) => {
             const state = pipelineState[stage.key as keyof PipelineState];
             const Icon = stage.icon;
