@@ -3,6 +3,7 @@ import ForceGraph2D from "react-force-graph-2d";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Crosshair, Maximize2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { organograma, type OrganogramaArea } from "@/data/projectOrganograma";
 import { getAreaMeta, AREA_META } from "@/data/organogramaAreaMeta";
 
@@ -65,6 +66,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 800, h: 520 });
   const data = useMemo(buildGraph, []);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const node = containerRef.current;
@@ -110,7 +112,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
           </div>
           <Button variant="outline" size="sm" onClick={handleCenter}>
             <Crosshair className="h-3.5 w-3.5 mr-1" />
-            Centralizar
+            {t('organograma.center')}
           </Button>
         </div>
         <div
@@ -160,8 +162,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
           />
         </div>
         <p className="text-[11px] text-muted-foreground text-center">
-          Hubs coloridos = áreas (clique para ir aos cards) · folhas = componentes · linhas
-          tracejadas com partículas = dependências entre áreas
+          {t('organograma.graphHint')}
         </p>
       </CardContent>
     </Card>
