@@ -1,35 +1,31 @@
 
-## Problemas identificados
+## O que aconteceu
 
-### a) Busca de evidências desapareceu
-Na última consolidação de tabs, o componente `DigitalTwinDog` (que contém o `EvidenceGapCard` com busca + log panel) foi removido do `PetProfilePage.tsx`. Apenas o `BiologicalTimeline` permanece na tab "trajectory". O `DigitalTwinDog` está importado e funcional, mas não está renderizado em nenhum lugar da página.
+A busca de evidências **funcionou parcialmente** — o Perplexity encontrou estudos reais para pares como "Chondroitin Sulfate → Osteoarthritis" e "Fisetin → Hip Dysplasia". Porém dois bugs impediram que os resultados fossem salvos:
 
-### b) Avatares dos cães com marcadores incorretos
-A lógica em `buildMarkers()` funciona assim:
-- **Sem protocolo**: `buildMarkers(yearWithout, new Set(), false)` -- mostra marcadores mas nenhum como "protegido"
-- **Com protocolo**: `buildMarkers(yearWith, coveredNames, true)` -- mostra marcadores com ★ nos protegidos
+### Bug 1: Constraint violation no campo `direction`
+O valor `positive` está sendo inserido no campo `direction` da tabela `triplet_extractions`, mas o banco só aceita `improves | worsens | neutral | bidirectional`. A função `mapDirection('positive')` que converte para `improves` existe no código atual, mas a versão deployada parece estar desatualizada ou o campo está sendo sobrescrito em outro ponto.
 
-O problema é que a API de trajetória provavelmente retorna dados diferentes para `years_without_protocol` e `years_with_protocol`. Se `yearWithout` vier vazio ou sem `existing_conditions`, o avatar "sem protocolo" fica limpo e as doenças só aparecem no "com protocolo" -- invertendo a lógica visual.
+### Bug 2: Network timeout (stream interrompido)
+Cada par composto×condição faz uma chamada ao Perplexity (~20-30s). Com 10 pares elegíveis, a execução total excede o timeout da conexão HTTP, causando o erro "connection closed before message completed" no 4o par.
 
-### c) Perplexity
-O Perplexity JA está integrado na edge function `kg-evidence-gap-fill`. A chave `PERPLEXITY_API_KEY` é lida via `Deno.env.get()`. Precisa verificar se o connector está ativo.
+### Resultado visível
+- **"pairs: 0, studies: 0, pending: 0"** — os triplets foram encontrados pelo Perplexity mas falharam ao ser inseridos no banco
+- **"network error"** — a conexão caiu antes de completar todos os pares
 
 ---
 
-## Plano de implementação
+## Plano de correção
 
-### 1. Restaurar `DigitalTwinDog` no PetProfilePage
-- Adicionar `DigitalTwinDog` de volta ao `PetProfilePage.tsx`, dentro da tab "trajectory" (substituindo ou complementando o `BiologicalTimeline`)
-- O `DigitalTwinDog` já inclui internamente o `EvidenceGapCard` (busca com logs) e o `DigitalTwinLogPanel`
-- Isso restaura toda a funcionalidade de busca de evidências que estava funcionando
+### 1. Corrigir o campo `direction` na edge function
+- Garantir que `mapDirection()` é efetivamente aplicada no insert
+- Auditar se há outro ponto no código que sobrescreve o valor
 
-### 2. Corrigir lógica dos marcadores nos avatares
-- Garantir que `markersWithout` sempre receba as condições existentes do pet (fallback para os dados do cenário "com protocolo" se o cenário "sem" vier vazio)
-- Ambos os avatares devem mostrar os marcadores de doenças; a diferença visual é que no "com protocolo" os marcadores cobertos pelo KG ganham ★ (protegido) e potencialmente severidade reduzida
+### 2. Reduzir timeout / otimizar execução
+- Reduzir `max_pairs` default de 12 para 5 para ficar dentro do tempo
+- Adicionar tratamento de erro mais robusto no stream para que, mesmo se um par falhar, o resumo final reflita os pares que foram processados com sucesso
 
-### 3. Verificar connector Perplexity
-- Confirmar se o connector está ativo para que as buscas realmente funcionem
+### 3. Redeployar a edge function
+- Garantir que a versão corrigida é efetivamente deployada
 
-### 4. i18n
-- Incrementar `I18N_VERSION` se houver novas chaves
-- Atualizar CHANGELOG.md
+### 4. Atualizar CHANGELOG
