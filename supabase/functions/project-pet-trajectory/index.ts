@@ -217,10 +217,18 @@ Deno.serve(async (req) => {
           .select('subject_name, object_name, intensity, predicate, approval_chain')
           .eq('curation_status', 'pending')
           .in('object_name', condNames)
-          .contains('approval_chain', { source: 'pubmed_gap_fill' })
           .limit(60);
+        // Also fetch perplexity_gap_fill pending triplets
+        const { data: pendingPx } = await supabase
+          .from('triplet_extractions')
+          .select('subject_name, object_name, intensity, predicate, approval_chain')
+          .eq('curation_status', 'pending')
+          .in('object_name', condNames)
+          .contains('approval_chain', { source: 'perplexity_gap_fill' })
+          .limit(60);
+        const allPending = [...(pending || []), ...(pendingPx || [])];
         const stackLower = recommendedStack.map(s => s.toLowerCase().trim());
-        pendingPreviewEvidence = (pending || [])
+        pendingPreviewEvidence = allPending
           .filter((t: any) =>
             stackLower.length === 0 ||
             stackLower.includes(String(t.subject_name || '').toLowerCase().trim()),
