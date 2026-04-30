@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope } from 'lucide-react';
+import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
@@ -38,6 +38,34 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     details?: any[];
     message?: string;
   }>(null);
+
+  const [expandedDetails, setExpandedDetails] = useState<Set<number>>(new Set());
+
+  const toggleDetail = (idx: number) => {
+    setExpandedDetails(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  // Efficacy color helper
+  const efficacyColor = (score: number) => {
+    if (score >= 4) return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
+    if (score >= 3) return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
+    if (score >= 2) return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
+    if (score >= 1) return 'text-orange-600 bg-orange-100 dark:bg-orange-900/30';
+    return 'text-muted-foreground bg-muted';
+  };
+
+  const efficacyLabel = (score: number) => {
+    if (score >= 4) return t('evidenceGap.efficacy.strong', 'Strong');
+    if (score >= 3) return t('evidenceGap.efficacy.moderate', 'Moderate');
+    if (score >= 2) return t('evidenceGap.efficacy.preliminary', 'Preliminary');
+    if (score >= 1) return t('evidenceGap.efficacy.anecdotal', 'Anecdotal');
+    return t('evidenceGap.efficacy.none', 'None');
+  };
 
   // Compute source breakdown from details
   const sourceBreakdown = lastResult?.details
@@ -291,29 +319,139 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
             {(lastResult.discovery_notes || []).map((n, i) => (
               <p key={i} className="text-[11px] text-amber-700 dark:text-amber-400">⚠ {n}</p>
             ))}
-            {(lastResult.details || []).slice(0, 6).map((d: any, i: number) => (
-              <div key={i} className="flex items-start gap-2 text-[11px] border-t pt-1">
-                <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0">
-                  {t(`evidenceGap.detailStatus.${d.status}`, { defaultValue: d.status })}
-                </Badge>
-                <span className="text-muted-foreground leading-snug">
-                  {d.pair?.compound_en} → {d.pair?.condition_en}
-                  {d.efficacy_0_5 != null && <> · ef {d.efficacy_0_5}/5</>}
-                  {d.species_hint && d.species_hint !== 'canine' && <> · <em>{d.species_hint}</em></>}
-                  {d.provider && <> · <span className="font-medium">{d.provider}</span></>}
-                  {d.error && <> · <span className="text-destructive">{String(d.error).slice(0, 80)}</span></>}
-                  {d.perplexity_tried === false && <> · <span className="text-amber-600">{t('evidenceGap.noPerplexityKey')}</span></>}
-                </span>
+
+            {/* Detailed results per pair */}
+            {(lastResult.details || []).length > 0 && (
+              <div className="border-t pt-2 space-y-1.5">
+                <p className="font-medium text-[11px] flex items-center gap-1">
+                  <FlaskConical className="h-3 w-3" />
+                  {t('evidenceGap.resultsPerPair', 'Results per compound × condition')}
+                </p>
+                {(lastResult.details || []).map((d: any, i: number) => {
+                  const hasRationale = d.status === 'ok' || d.status === 'dry_run';
+                  const isExpanded = expandedDetails.has(i);
+                  const statusOk = d.status === 'ok' || d.status === 'dry_run';
+                  const statusFail = d.status === 'triplet_failed' || d.status === 'error';
+                  const statusEmpty = d.status === 'no_evidence' || d.status === 'no_records' || d.status === 'no_pubmed_results';
+
+                  return (
+                    <div key={i} className={`rounded-md border p-2 text-[11px] ${statusOk ? 'border-emerald-200 dark:border-emerald-800' : statusFail ? 'border-destructive/30' : 'border-border'}`}>
+                      {/* Header row */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          {statusOk && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />}
+                          {statusFail && <AlertTriangle className="h-3.5 w-3.5 text-destructive flex-shrink-0" />}
+                          {statusEmpty && <Info className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />}
+                          <span className="font-medium truncate">{d.pair?.compound_en}</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="truncate">{d.pair?.condition_en}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {d.efficacy_0_5 != null && (
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${efficacyColor(d.efficacy_0_5)}`}>
+                              {d.efficacy_0_5}/5 {efficacyLabel(d.efficacy_0_5)}
+                            </span>
+                          )}
+                          {d.evidence_level && (
+                            <Badge variant="outline" className="text-[9px] h-4 px-1">
+                              {d.evidence_level}
+                            </Badge>
+                          )}
+                          {d.species_hint && (
+                            <Badge variant={d.species_hint === 'canine' ? 'default' : 'secondary'} className="text-[9px] h-4 px-1">
+                              {d.species_hint === 'canine' ? '🐕' : '🔬'} {d.species_hint}
+                            </Badge>
+                          )}
+                          {d.provider && (
+                            <Badge variant={d.provider === 'perplexity' ? 'default' : 'secondary'} className="text-[9px] h-4 px-1">
+                              {d.provider}
+                            </Badge>
+                          )}
+                          {hasRationale && (
+                            <button onClick={() => toggleDetail(i)} className="text-muted-foreground hover:text-foreground">
+                              {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Efficacy bar */}
+                      {d.efficacy_0_5 != null && d.efficacy_0_5 > 0 && (
+                        <div className="mt-1.5 h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${d.efficacy_0_5 >= 4 ? 'bg-emerald-500' : d.efficacy_0_5 >= 3 ? 'bg-blue-500' : d.efficacy_0_5 >= 2 ? 'bg-amber-500' : 'bg-orange-400'}`}
+                            style={{ width: `${(d.efficacy_0_5 / 5) * 100}%` }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Error message */}
+                      {d.error && (
+                        <p className="mt-1 text-destructive text-[10px]">{String(d.error).slice(0, 120)}</p>
+                      )}
+
+                      {/* Expanded rationale + citations */}
+                      {hasRationale && isExpanded && (
+                        <div className="mt-2 space-y-1.5 text-[10px] border-t pt-1.5">
+                          {/* Rationale from Gemini/Perplexity */}
+                          {(d as any).rationale && (
+                            <div>
+                              <p className="font-medium text-muted-foreground mb-0.5">{t('evidenceGap.rationale', 'Rationale')}:</p>
+                              <p className="text-foreground leading-relaxed">{(d as any).rationale}</p>
+                            </div>
+                          )}
+                          {/* Cited PMIDs */}
+                          {(d.cited_pmids || []).length > 0 && (
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <BookOpen className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground mr-1">PMIDs:</span>
+                              {(d.cited_pmids as string[]).map((pmid: string) => (
+                                <a
+                                  key={pmid}
+                                  href={`https://pubmed.ncbi.nlm.nih.gov/${pmid}/`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {pmid}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          {/* Cited URLs */}
+                          {(d.cited_urls || []).length > 0 && (
+                            <div className="flex items-start gap-1 flex-wrap">
+                              <Globe className="h-3 w-3 text-muted-foreground mt-0.5" />
+                              <div className="flex flex-col gap-0.5">
+                                {(d.cited_urls as string[]).slice(0, 4).map((url: string, ui: number) => (
+                                  <a
+                                    key={ui}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline truncate max-w-[350px]"
+                                  >
+                                    {url.replace(/^https?:\/\//, '').slice(0, 60)}…
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
         )}
 
-        {(pendingCount || 0) > 0 && (
+        {((pendingCount || 0) > 0 || (lastResult?.triplets_pending || 0) > 0) && (
           <div className="flex items-center justify-between rounded-md border bg-background p-3 text-sm">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span>{t('evidenceGap.pendingStatus', { count: pendingCount })}</span>
+              <span>{t('evidenceGap.pendingStatus', { count: pendingCount || lastResult?.triplets_pending || 0 })}</span>
             </div>
             <Button asChild variant="outline" size="sm">
               <Link to="/administrador?tab=triplet-curation">

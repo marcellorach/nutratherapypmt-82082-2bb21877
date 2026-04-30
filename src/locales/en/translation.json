@@ -7383,6 +7383,15 @@
       "noEvidence": "no evidence found",
       "done": "Search complete",
       "initiating": "Initiating evidence search…"
+    },
+    "resultsPerPair": "Results per compound × condition",
+    "rationale": "Rationale",
+    "efficacy": {
+      "strong": "Strong",
+      "moderate": "Moderate",
+      "preliminary": "Preliminary",
+      "anecdotal": "Anecdotal",
+      "none": "None"
     }
   },
   "gapFillDiag": {

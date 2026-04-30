@@ -7383,6 +7383,15 @@
       "noEvidence": "nenhuma evidência encontrada",
       "done": "Busca concluída",
       "initiating": "Iniciando busca de evidências…"
+    },
+    "resultsPerPair": "Resultados por composto × condição",
+    "rationale": "Justificativa",
+    "efficacy": {
+      "strong": "Forte",
+      "moderate": "Moderado",
+      "preliminary": "Preliminar",
+      "anecdotal": "Anedótico",
+      "none": "Nenhum"
     }
   },
   "gapFillDiag": {
