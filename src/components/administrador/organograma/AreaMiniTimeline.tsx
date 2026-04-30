@@ -159,6 +159,7 @@ interface ItemProps {
 function TimelineItem({ entry, open, onToggle }: ItemProps) {
   const kind = entry.kind;
   const cUrl = entry.commit ? commitUrl(entry.commit) : null;
+  const { t } = useTranslation();
 
   return (
     <li className="relative pl-5 py-1.5">
@@ -255,6 +256,7 @@ function TimelineItem({ entry, open, onToggle }: ItemProps) {
 }
 
 function FileChip({ path }: { path: string }) {
+  const { t } = useTranslation();
   const url = fileUrl(path);
   const display = path.length > 38 ? `…${path.slice(-37)}` : path;
   const baseClass =
