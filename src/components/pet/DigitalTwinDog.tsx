@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import dogSilhouette from '@/assets/dog-silhouette.png';
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePetTrajectoryProjection';
 import EvidenceGapCard from '@/components/pet/EvidenceGapCard';
+import DigitalTwinLogPanel, { type DTLogEntry } from '@/components/pet/DigitalTwinLogPanel';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Map conditions (substring lookup) to body regions on the silhouette image.
@@ -224,6 +225,49 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const aiConfidence = projection?.confidence || aiQuery.data?.confidence || null;
   const previewMode = aiQuery.data?.preview_mode === true;
   const pendingPreviewCount = aiQuery.data?.pending_preview_count ?? 0;
+
+  // ── Digital Twin processing log ──
+  const [dtLog, setDtLog] = useState<DTLogEntry[]>([]);
+  const prevStatusRef = useRef<string>('idle');
+  const appendDTLog = useCallback((level: DTLogEntry['level'], message: string) => {
+    setDtLog(prev => [...prev.slice(-199), {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: Date.now(),
+      level,
+      message,
+    }]);
+  }, []);
+
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    const curr = aiQuery.status;
+    if (prev === curr) return;
+    prevStatusRef.current = curr;
+
+    if (curr === 'pending' && prev !== 'pending') {
+      appendDTLog('info', `▶ ${t('petProfile.pipeline.dtLog.starting')}`);
+      appendDTLog('info', `▶ ${t('petProfile.pipeline.dtLog.calling')}`);
+    }
+    if (curr === 'success') {
+      if (aiQuery.data?.cached) {
+        appendDTLog('info', `⚡ ${t('petProfile.pipeline.dtLog.cached')}`);
+      }
+      const src = aiQuery.data?.source || 'unknown';
+      const model = aiQuery.data?.model_used || '—';
+      const yg = aiQuery.data?.years_gained;
+      appendDTLog('success', `✓ ${t('petProfile.pipeline.dtLog.received')} (source: ${src}, model: ${model})`);
+      if (yg != null) {
+        appendDTLog('success', `✓ years_gained: ${yg.toFixed(1)}`);
+      }
+      const conf = aiQuery.data?.confidence || aiQuery.data?.projection?.confidence;
+      if (conf) {
+        appendDTLog('info', `◉ confidence: ${conf}`);
+      }
+    }
+    if (curr === 'error') {
+      appendDTLog('error', `✗ ${t('petProfile.pipeline.dtLog.error')}: ${(aiQuery.error as any)?.message || 'Unknown'}`);
+    }
+  }, [aiQuery.status, aiQuery.data, aiQuery.error, appendDTLog, t]);
 
   const coveredNames = useMemo(
     () => new Set(coverage.filter((c: any) => c?.kg_covered).map((c: any) => String(c.condition || ''))),
