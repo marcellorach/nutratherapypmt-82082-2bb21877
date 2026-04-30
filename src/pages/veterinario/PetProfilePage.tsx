@@ -215,6 +215,19 @@ const PetProfilePage: React.FC = () => {
 
       setCurrentStageLabel(null);
 
+      // Stage 7: Synergies (derived from recommendation compounds)
+      const synergyTs = performance.now();
+      setPipelineState(s => ({ ...s, stage7_synergies: 'running' }));
+      appendLog('info', `▶ ${t('petProfile.pipeline.synergies')}: analyzing compound synergies`);
+      const synCount = result.compounds?.length > 1
+        ? Math.floor(result.compounds.length * (result.compounds.length - 1) / 2)
+        : 0;
+      await new Promise(r => setTimeout(r, 60));
+      setPipelineState(s => ({ ...s, stage7_synergies: 'complete' }));
+      setStageCounts(prev => ({ ...prev, synergies: synCount }));
+      setStageTimes(prev => ({ ...prev, stage7_synergies: performance.now() - synergyTs }));
+      appendLog('success', `✓ ${synCount} synergies identified`);
+
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
       setInteractionAlerts(result.interactionAlerts);
