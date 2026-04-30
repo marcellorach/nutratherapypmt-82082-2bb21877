@@ -460,6 +460,13 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               { key: 'parse', icon: BarChart3, label: t('petProfile.pipeline.dtWorkflow.parse', 'Parse') },
               { key: 'render', icon: Dna, label: t('petProfile.pipeline.dtWorkflow.render', 'Render') },
               const state = dtWorkflow[stage.key];
+            {([
+              { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
+              { key: 'api_call', icon: Cpu, label: t('petProfile.pipeline.dtWorkflow.apiCall', 'Trajectory API') },
+              { key: 'parse', icon: BarChart3, label: t('petProfile.pipeline.dtWorkflow.parse', 'Parse') },
+              { key: 'render', icon: Dna, label: t('petProfile.pipeline.dtWorkflow.render', 'Render') },
+            ] as const).map((stage, idx) => {
+              const state = dtWorkflow[stage.key];
               const Icon = stage.icon;
               const stageTime = dtStageTimes[stage.key];
               return (
