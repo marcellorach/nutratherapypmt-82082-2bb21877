@@ -80,7 +80,9 @@ const PetProfilePage: React.FC = () => {
     triplets: number;
     interactions: number;
     compounds: number;
-  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
+    synergies: number;
+  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+  const [stageTimes, setStageTimes] = useState<Record<string, number>>({});
 
   const STAGE_LABELS: Record<PipelineStageId, string> = {
     stage2_predispositions: t('petProfile.pipeline.predispositions'),
