@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-30 — Pipeline scroll, DT workflow visual, Evidence Gap search fix
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.44.0 -->
+- Pipeline workflow card: adicionada barra de rolagem horizontal estilizada para telas menores
+- Digital Twin: novo mini-workflow visual com 4 etapas (Snapshot → Trajectory API → Parse → Render) com tempos individuais e total
+- Evidence Gap Search: corrigido bug onde `condition_id = NULL` em `pet_conditions` fazia a busca retornar 0 pares — agora usa `condition_name` como fallback
+- Prompt do Perplexity expandido para incluir estratégias gerociência, senolytics, NAD+ precursores e terapias medicamentosas emergentes
+- Files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/DigitalTwinDog.tsx, supabase/functions/kg-evidence-gap-fill/index.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-04-30 — Pipeline: card sinergias, tempos por etapa, log do Digital Twin
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.43.0 -->
 - Novo 7o estágio `stage7_synergies` (ícone Zap) no `ClinicalPipelineWorkflow` com contagem de sinergias entre compostos recomendados

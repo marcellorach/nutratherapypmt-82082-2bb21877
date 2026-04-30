@@ -275,12 +275,17 @@ async function assessWithPerplexity(
           'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
           'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
           'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+          'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
+          'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
+          'emerging evidence for this condition in aging dogs. ' +
           'Be conservative. Return ONLY structured JSON matching the schema.',
       },
       {
         role: 'user',
         content:
           `COMPOUND: ${compound}\nCONDITION: ${condition} (canine target)\n\n` +
+          'Search broadly: include geroprotector studies, nutraceutical interventions, ' +
+          'pharmaceutical therapies, and any geroscience-relevant evidence for this compound-condition pair.\n\n' +
           'Scoring scale (efficacy_0_5):\n' +
           ' 0 = no evidence at all\n' +
           ' 1 = anecdotal / case report only\n' +
@@ -468,16 +473,21 @@ Deno.serve(async (req) => {
     } else if (pet_id) {
       const { data: pet } = await supabase
         .from('pet_conditions')
-        .select('condition_id, health_conditions(id, name, name_en)')
+        .select('condition_id, condition_name, health_conditions(id, name, name_en)')
         .eq('pet_id', pet_id);
-      const conds = (pet || [])
-        .map((row: any) => row.health_conditions)
-        .filter(Boolean);
-      console.log('[gap-fill] pet conditions found', conds.length);
-      const condsWithEn = conds.filter((c: any) => c?.name_en);
-      if (conds.length > 0 && condsWithEn.length === 0) {
-        discoveryNotes.push('Conditions found but none has name_en — gap-fill needs canonical English to query PubMed.');
+      // Build condition list: prefer health_conditions join, fall back to condition_name
+      const conds: Array<{ id?: string; name_en: string }> = [];
+      for (const row of (pet || [])) {
+        if (row.health_conditions && (row.health_conditions as any).name_en) {
+          const hc = row.health_conditions as any;
+          conds.push({ id: hc.id, name_en: hc.name_en });
+        } else if (row.condition_name) {
+          // condition_id is NULL — use condition_name directly as English text for search
+          conds.push({ id: undefined, name_en: String(row.condition_name).trim() });
+        }
       }
+      console.log('[gap-fill] pet conditions found', conds.length, '(from', (pet || []).length, 'pet_conditions rows)');
+      const condsWithEn = conds.filter((c) => c.name_en);
 
       // Prefer the compounds the VetGraphRAG analysis actually recommended for
       // THIS pet. Falls back to the top geriatric shortlist if no snapshot.
