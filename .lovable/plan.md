@@ -1,65 +1,44 @@
 
-# Internacionalização do Organograma do Projeto
+## Mudanças no Pipeline Clínico e Digital Twin
 
-## Problema
-Todos os 7 arquivos do Organograma usam strings hardcoded em português, violando a política bilíngue PT/EN do projeto. Nenhum deles usa `useTranslation()` / `t()` para textos visíveis.
+### a) Novo card "Sinergias" no Pipeline Workflow
 
-**Arquivos afetados:**
-- `src/pages/administrador/OrganogramaTab.tsx` — header, convenções, tabs, footer
-- `src/components/administrador/organograma/OrganogramaCards.tsx` — botões, placeholder, empty state
-- `src/components/administrador/organograma/OrganogramaDiagram.tsx` — labels do diagrama
-- `src/components/administrador/organograma/OrganogramaForceGraph.tsx` — labels do grafo
-- `src/components/administrador/organograma/ChangelogTimeline.tsx` — filtros, headers
-- `src/components/administrador/organograma/AreaMiniTimeline.tsx` — labels de timeline
-- `src/data/projectOrganograma.ts` — ~108 strings de dados (títulos, descrições, convenções)
+Adicionar um 7o estágio `stage7_synergies` ao `ClinicalPipelineWorkflow`:
+- Novo ícone `Sparkles` (ou `Zap`) com label bilíngue "Sinergias" / "Synergies"
+- Contador de sinergias encontradas
+- Atualizar `PipelineState` interface com `stage7_synergies`
+- Atualizar `PetProfilePage` para alimentar o novo estágio (pode ser derivado dos dados de recomendação existentes ou de um novo cálculo no pipeline)
 
-## Estratégia
+### b) Pipeline bilíngue
 
-### 1. Dados do Organograma (`projectOrganograma.ts`)
+Atualizar as chaves de tradução em `src/locales/en/translation.json` para as labels do pipeline (profile, predispositions, labs, KG, interactions, recommendation, synergies) e todos os contadores. Incrementar `I18N_VERSION`.
 
-Os dados são estruturais (títulos de áreas, descrições de componentes). Duas abordagens possíveis:
+### c) Tempos por etapa e tempo total
 
-**Opção A — Campos bilíngues inline** (recomendada): adicionar `title_en`, `description_en` ao lado dos campos PT existentes, e usar `useLocalizedField` nos componentes para selecionar o idioma correto em runtime. Mantém o arquivo como fonte única de verdade sem duplicar em JSON de tradução.
+- O pipeline já emite `durationMs` no `meta` de cada `stage-end` event
+- Capturar esses tempos em um state `stageTimes: Record<string, number>` no `PetProfilePage`
+- Passar `stageTimes` ao `ClinicalPipelineWorkflow` para exibir abaixo de cada card completo (ex: "1.2s")
+- Calcular e exibir tempo total no canto direito do componente (ex: "Total: 4.8s")
 
-**Opção B — Chaves i18n**: mover todos os títulos/descrições para `translation.json` e referenciar por chave. Mais consistente com o resto do app, mas fragmenta a fonte de verdade do organograma.
+### d) Log de processamento do Digital Twin
 
-### 2. Componentes UI (6 arquivos)
+Criar um componente `DigitalTwinLogPanel` (reutilizando a estrutura do `ClinicalPipelineLogPanel`):
+- Capturar eventos do `usePetTrajectoryProjection` (início, chamada à edge function, resposta, parse, erros)
+- Exibir log ao vivo abaixo do Digital Twin na tab correspondente
+- Mesma UI: timestamps, ícones por nível, autoscroll, botões limpar/exportar
 
-- Adicionar `useTranslation()` e substituir todas as strings hardcoded por `t('organograma.xxx')`
-- Strings afetadas: ~40 textos (títulos, botões, placeholders, labels de tab, empty states, tooltips)
+Faz total sentido ter esse log no Digital Twin -- ele faz chamadas pesadas à AI para projeção de trajetória e o usuário precisa de feedback visual do que está acontecendo internamente (similar ao pipeline clínico).
 
-### 3. Traduções
+### Arquivos afetados
 
-- Criar namespace `organograma` em ambos `translation.json` (PT e EN)
-- Incrementar `I18N_VERSION` para `1.42.0`
-
-### 4. Changelog + sync
-
-- Entrada em `CHANGELOG.md` com `area: i18n`
-- Rodar `npm run sync:changelog`
-
-## Escopo estimado
-- ~150 strings para traduzir
-- 7 arquivos a modificar + 2 JSONs de tradução
-- Interface `OrganogramaNode` ganha campos `title_en` / `description_en` opcionais
-- `organogramaConvencoes` ganha campo `value_en` e `label_en`
-
-## Detalhes técnicos
-
-```text
-projectOrganograma.ts
-  ├── OrganogramaNode { title, title_en?, description, description_en? }
-  ├── organogramaConvencoes[] { label, label_en, value, value_en }
-  └── organogramaAscii → mantém em inglês técnico (já é code-like)
-
-OrganogramaCards.tsx
-  └── useTranslation() + t() para: "Buscar área...", "Expandir tudo",
-      "Recolher tudo", "Nenhuma área encontrada"
-
-OrganogramaTab.tsx  
-  └── t() para: título, subtítulo, tabs (Grafo/Diagrama/Cards/Changelog),
-      badges, footer
-
-ChangelogTimeline.tsx / AreaMiniTimeline.tsx / Diagram / ForceGraph
-  └── t() para labels, tooltips, estados vazios
-```
+| Arquivo | Mudança |
+|---------|---------|
+| `src/components/pet/ClinicalPipelineWorkflow.tsx` | +stage7, +stageTimes prop, +total time |
+| `src/pages/veterinario/PetProfilePage.tsx` | Capturar durationMs, passar stageTimes, novo state para DT log |
+| `src/components/pet/DigitalTwinDog.tsx` | Integrar log callback |
+| `src/components/pet/DigitalTwinLogPanel.tsx` | Novo componente (baseado no ClinicalPipelineLogPanel) |
+| `src/hooks/usePetTrajectoryProjection.ts` | Adicionar callback de log |
+| `src/locales/pt/translation.json` | Novas chaves sinergias + DT log |
+| `src/locales/en/translation.json` | Mesmas chaves em inglês |
+| `src/i18n.ts` | Incrementar I18N_VERSION |
+| `CHANGELOG.md` | Registrar mudanças |
