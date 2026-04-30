@@ -130,11 +130,11 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           <div
             ref={containerRef}
             className="relative rounded-md border bg-muted/20 overflow-hidden"
-            style={{ height: "calc(100vh - 260px)", minHeight: 400 }}
+            style={{ height: "calc(100vh - 230px)", minHeight: 520 }}
           >
             <div
               ref={innerRef}
-              className="absolute top-0 left-0 [&_svg]:!block [&_svg]:!max-w-none origin-top-left will-change-transform"
+              className="absolute top-0 left-0 [&_svg]:!block [&_svg]:!max-w-none [&_svg]:overflow-visible origin-top-left will-change-transform"
               style={{
                 transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
                 transformOrigin: "0 0",
