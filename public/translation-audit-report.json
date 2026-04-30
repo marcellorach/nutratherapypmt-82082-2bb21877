@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-04-30T14:41:25.785Z",
+  "timestamp": "2026-04-30T16:14:30.185Z",
   "summary": {
-    "totalFiles": 814,
-    "totalIssues": 393,
-    "hardcodedTexts": 39,
-    "missingKeys": 354,
+    "totalFiles": 815,
+    "totalIssues": 399,
+    "hardcodedTexts": 40,
+    "missingKeys": 359,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -983,6 +983,34 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx",
+      "line": 25,
+      "text": "id, name, name_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx",
+      "line": 38,
+      "text": "id, name, name_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx",
+      "line": 51,
+      "text": "id, pet_id, condition_id, condition_name, health_conditions(id, name, name_en)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx",
+      "line": 68,
+      "text": "id, subject_name, predicate, object_name, extraction_confidence, evidence_level, curation_status, approval_chain, created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/dialogs/EstudoDetailDialog.tsx",
       "line": 68,
       "text": "curation_status, extraction_confidence",
@@ -1609,6 +1637,13 @@
       "file": "src/components/administrador/nutraceuticos/table/EmptyState.tsx",
       "line": 12,
       "text": "nutraceuticals.table.emptyState",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/organograma/ChangelogTimeline.tsx",
+      "line": 38,
+      "text": "-",
       "severity": "high"
     },
     {
@@ -2349,7 +2384,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1675,
+      "line": 1753,
       "text": "@",
       "severity": "high"
     },
@@ -2750,6 +2785,13 @@
       "file": "src/components/layout/Footer.tsx",
       "line": 79,
       "text": "Co-Scientist",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/pages/administrador/OrganogramaTab.tsx",
+      "line": 64,
+      "text": "CHANGELOG.md",
       "severity": "medium"
     },
     {
