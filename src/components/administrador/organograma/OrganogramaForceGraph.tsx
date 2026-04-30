@@ -64,7 +64,7 @@ interface Props {
 export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ w: 800, h: 520 });
+  const [size, setSize] = useState({ w: 800, h: 600 });
   const data = useMemo(buildGraph, []);
   const { t } = useTranslation();
 
@@ -72,7 +72,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
     const node = containerRef.current;
     if (!node) return;
     const ro = new ResizeObserver(() => {
-      setSize({ w: node.clientWidth, h: 520 });
+      setSize({ w: node.clientWidth, h: node.clientHeight });
     });
     ro.observe(node);
     return () => ro.disconnect();
@@ -118,7 +118,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
         <div
           ref={containerRef}
           className="rounded-md border bg-muted/20 overflow-hidden"
-          style={{ height: 520 }}
+          style={{ height: "calc(100vh - 280px)", minHeight: 400 }}
         >
           <ForceGraph2D
             ref={fgRef}
@@ -136,27 +136,34 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
             onNodeClick={handleNodeClick}
             cooldownTicks={120}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
-              const r = node.kind === "area" ? 9 : 3.5;
+              const isArea = node.kind === "area";
+              const r = isArea ? 12 : 5;
+              // Filled circle
               ctx.beginPath();
               ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
               ctx.fillStyle = node.color;
               ctx.fill();
-              if (node.kind === "area") {
-                ctx.lineWidth = 2 / globalScale;
-                ctx.strokeStyle = "rgba(255,255,255,0.8)";
+              if (isArea) {
+                ctx.lineWidth = 2.5 / globalScale;
+                ctx.strokeStyle = "rgba(255,255,255,0.85)";
                 ctx.stroke();
-                const fontSize = 11 / globalScale;
-                ctx.font = `${fontSize}px Inter, sans-serif`;
+              }
+              // Label for ALL nodes (area + leaf)
+              const fontSize = isArea ? 12 / globalScale : 9 / globalScale;
+              const minFont = isArea ? 4 : 3;
+              if (fontSize >= minFont) {
+                ctx.font = `${isArea ? 600 : 400} ${fontSize}px Inter, sans-serif`;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "top";
-                ctx.fillStyle = "hsl(var(--foreground))";
-                ctx.fillText(node.label, node.x, node.y + r + 2);
+                ctx.fillStyle = node.color;
+                const label = node.label.length > 28 ? node.label.slice(0, 26) + "…" : node.label;
+                ctx.fillText(label, node.x, node.y + r + 2 / globalScale);
               }
             }}
             nodePointerAreaPaint={(node: any, color, ctx) => {
               ctx.fillStyle = color;
               ctx.beginPath();
-              ctx.arc(node.x, node.y, node.kind === "area" ? 12 : 5, 0, 2 * Math.PI);
+              ctx.arc(node.x, node.y, node.kind === "area" ? 16 : 8, 0, 2 * Math.PI);
               ctx.fill();
             }}
           />
