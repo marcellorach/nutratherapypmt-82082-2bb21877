@@ -805,11 +805,11 @@ Deno.serve(async (req) => {
         const efficacyNorm = Math.max(0, Math.min(1, assessment.efficacy_0_5 / 5));
         const { error: tErr } = await supabase.from('triplet_extractions').insert({
           study_id: primaryStudyId,
-          subject_type: 'compound',
+          subject_type: 'Compound',
           subject_id: pair.compound_id || null,
           subject_name: pair.compound_en,
           subject_layer: 'compound',
-          object_type: 'condition',
+          object_type: 'Condition',
           object_id: pair.condition_id || null,
           object_name: pair.condition_en,
           object_layer: 'condition',
