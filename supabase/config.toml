@@ -107,3 +107,6 @@ verify_jwt = false
 
 [functions.perplexity-health]
 verify_jwt = true
+
+[functions.provider-health]
+verify_jwt = true
