@@ -449,6 +449,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
       <Card className="border-primary/20">
         <CardContent className="p-3">
           <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-muted-foreground/20">
+            {/* DT workflow stages */}
             {([
               { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
               { key: 'api_call', icon: Cpu, label: t('petProfile.pipeline.dtWorkflow.apiCall', 'Trajectory API') },
