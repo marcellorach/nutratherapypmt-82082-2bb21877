@@ -68,6 +68,7 @@ const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
 const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
+const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -372,6 +373,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: OrganogramaTab,
     description: 'Mapa estrutural do projeto + changelog visual + grafo de áreas'
+  },
+  {
+    id: 'gapfill-diagnostics',
+    label: 'Diagnóstico Gap-Fill',
+    group: 'knowledge-base',
+    component: GapFillDiagnosticsTab,
+    description: 'Mapeamento e diagnóstico dos dados usados no pipeline de gap-fill do KG'
   }
 ];
 
