@@ -1,17 +1,23 @@
 # Project context briefing (auto)
-Generated: 2026-04-29T19:31:59.124Z
+Generated: 2026-04-30T12:39:46.442Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.41.6
+## Latest i18n version: 1.41.7
 
 ## Changes by area (last 14 days)
+- **admin**: 7
 - **meta**: 7
-- **admin**: 6
 - **vet-ui**: 3
 - **kg**: 2
 
 ## Top 10 recent entries
+### 2026-04-30 · [admin] ADDED — Seletor de modelo Perplexity + tester genérico de provedores
+- `perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.
+- Nova edge function `provider-health` (verify_jwt) que valida autenticação e escopo das chaves OpenAI / Claude / Gemini / Grok / Perplexity contra o endpoint real de chat de cada provedor e expõe HTTP status, mensagem de erro do upstream e dica acionável.
+- `kg-evidence-gap-fill` lê `ai_configurations.perplexity_gap_fill_model` (com override via body `perplexity_model`) e propaga a escolha para `assessWithPerplexity` em vez do hard-coded `sonar-reasoning-pro`.
+_files: supabase/functions/perplexity-health/index.ts, supabase/functions/provider-health/index.ts, supabase/functions/kg-evidence-gap-fill/index.ts, src/components/administrador/configuracoes/PerplexityStatusCard.tsx…_
+
 ### 2026-04-29 · [admin] ADDED — Monitor de saúde + aba de API key para Perplexity
 - Nova edge function `perplexity-health` (verify_jwt) que executa um ping `sonar` ("ping" → "ok", `max_tokens: 5`) e retorna `{ configured, connected, latency_ms, model, checked_at, error? }`. Detecta ausência de `PERPLEXITY_API_KEY`, falhas HTTP do upstream e mede latência real do round-trip.
 - Novo componente `PerplexityStatusCard` em Configurações IA: roda o health-check no mount + botão "Testar", mostra badges Conectado/Falha/Não configurado/Verificando com modelo e latência, exibindo `checked_at` formatado.
@@ -65,12 +71,6 @@ _files: src/test/setup.ts, scripts/sync-changelog.mjs, scripts/__tests__/sync-ch
 - Cada entrada expandida mostra bullets resumidos (até 3), chips de arquivos (até 8) e — quando presente — chip de commit com hash curto e ícone `GitCommit`
 - Arquivos e commits viram links externos quando `REPO_CONFIG.baseUrl` está configurado em `src/data/repoConfig.ts` (default vazio = chips estáticos seguros). Quando o GitHub estiver conectado via Connectors, basta preencher `baseUrl` para ativar todos os links
 _files: src/components/administrador/organograma/AreaMiniTimeline.tsx, src/data/repoConfig.ts, scripts/sync-changelog.mjs, src/data/changelogQuery.ts…_
-
-### 2026-04-29 · [admin] ADDED — Sincronização automática do CHANGELOG → Organograma + briefing do agente
-- Novo `scripts/sync-changelog.mjs`: parser determinístico que lê CHANGELOG.md e regenera `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md` + atualiza `organogramaLastUpdated`
-- `src/data/projectChangelog.ts` virou shim re-exportando o gerado — fim da dupla manutenção
-- Inferência automática de `area` a partir dos arquivos citados (mapa explícito em AREA_RULES); override opcional via comentário `<!-- area: ... -->`
-_files: scripts/sync-changelog.mjs, src/data/projectChangelog.generated.ts, .lovable/CONTEXT.md, src/data/projectChangelog.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

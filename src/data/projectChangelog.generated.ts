@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-29T19:31:59.121Z
+// Última geração: 2026-04-30T12:39:46.439Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,34 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-04-29";
+export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Seletor de modelo Perplexity + tester genérico de provedores",
+    "bullets": [
+      "`perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.",
+      "Nova edge function `provider-health` (verify_jwt) que valida autenticação e escopo das chaves OpenAI / Claude / Gemini / Grok / Perplexity contra o endpoint real de chat de cada provedor e expõe HTTP status, mensagem de erro do upstream e dica acionável.",
+      "`kg-evidence-gap-fill` lê `ai_configurations.perplexity_gap_fill_model` (com override via body `perplexity_model`) e propaga a escolha para `assessWithPerplexity` em vez do hard-coded `sonar-reasoning-pro`.",
+      "`PerplexityStatusCard` ganhou Select de modelos (lista vinda do health-check com fallback estático), botões \"Testar este modelo\" / \"Salvar\" persistindo em `ai_configurations`, exibe `hint` e bloco de erro com HTTP status quando a chave não tem acesso ao modelo.",
+      "Novo componente `ProviderHealthButton` montado nas abas OpenAI, Claude, Grok, Google Gemini e Perplexity de `ConfiguracoesIATab` — badges OK/Falha/Chave ausente, latência, modelo testado e detalhe do erro HTTP.",
+      "Files: supabase/functions/perplexity-health/index.ts, supabase/functions/provider-health/index.ts, supabase/functions/kg-evidence-gap-fill/index.ts, supabase/config.toml, src/components/administrador/configuracoes/PerplexityStatusCard.tsx, src/components/administrador/configuracoes/ProviderHealthButton.tsx, src/components/administrador/ConfiguracoesIATab.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/perplexity-health/index.ts",
+      "supabase/functions/provider-health/index.ts",
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "src/components/administrador/configuracoes/PerplexityStatusCard.tsx",
+      "src/components/administrador/configuracoes/ProviderHealthButton.tsx",
+      "src/components/administrador/ConfiguracoesIATab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.41.7"
+  },
   {
     "date": "2026-04-29",
     "kind": "added",

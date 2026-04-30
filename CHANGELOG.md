@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-30 — Seletor de modelo Perplexity + tester genérico de provedores
+<!-- area: admin · status: entregue · i18n: 1.41.7 -->
+- `perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.
+- Nova edge function `provider-health` (verify_jwt) que valida autenticação **e escopo** das chaves OpenAI / Claude / Gemini / Grok / Perplexity contra o endpoint real de chat de cada provedor e expõe HTTP status, mensagem de erro do upstream e dica acionável.
+- `kg-evidence-gap-fill` lê `ai_configurations.perplexity_gap_fill_model` (com override via body `perplexity_model`) e propaga a escolha para `assessWithPerplexity` em vez do hard-coded `sonar-reasoning-pro`.
+- `PerplexityStatusCard` ganhou Select de modelos (lista vinda do health-check com fallback estático), botões "Testar este modelo" / "Salvar" persistindo em `ai_configurations`, exibe `hint` e bloco de erro com HTTP status quando a chave não tem acesso ao modelo.
+- Novo componente `ProviderHealthButton` montado nas abas OpenAI, Claude, Grok, Google Gemini e Perplexity de `ConfiguracoesIATab` — badges OK/Falha/Chave ausente, latência, modelo testado e detalhe do erro HTTP.
+- Files: supabase/functions/perplexity-health/index.ts, supabase/functions/provider-health/index.ts, supabase/functions/kg-evidence-gap-fill/index.ts, supabase/config.toml, src/components/administrador/configuracoes/PerplexityStatusCard.tsx, src/components/administrador/configuracoes/ProviderHealthButton.tsx, src/components/administrador/ConfiguracoesIATab.tsx, src/i18n.ts
+
 ### Added - 2026-04-29 — Monitor de saúde + aba de API key para Perplexity
 <!-- area: admin · status: entregue · i18n: 1.41.6 -->
 - Nova edge function `perplexity-health` (verify_jwt) que executa um ping `sonar` ("ping" → "ok", `max_tokens: 5`) e retorna `{ configured, connected, latency_ms, model, checked_at, error? }`. Detecta ausência de `PERPLEXITY_API_KEY`, falhas HTTP do upstream e mede latência real do round-trip.

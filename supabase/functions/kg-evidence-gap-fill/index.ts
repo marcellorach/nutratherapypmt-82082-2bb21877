@@ -232,6 +232,7 @@ interface PerplexityAssessment {
 async function assessWithPerplexity(
   compound: string,
   condition: string,
+  model: string = 'sonar-reasoning-pro',
 ): Promise<{ assessment: PerplexityAssessment | null; raw_citations: string[] }> {
   if (!PERPLEXITY_API_KEY) {
     console.warn('[gap-fill] PERPLEXITY_API_KEY not set, skipping Perplexity pass');
@@ -264,7 +265,7 @@ async function assessWithPerplexity(
   };
 
   const body = {
-    model: 'sonar-reasoning-pro',
+    model,
     search_mode: 'academic',
     messages: [
       {
@@ -415,13 +416,37 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { pet_id, condition_id, compound_ids, pairs: directedPairs, max_pairs = 12, dry_run = false } = body;
+    const {
+      pet_id, condition_id, compound_ids, pairs: directedPairs,
+      max_pairs = 12, dry_run = false,
+      perplexity_model: bodyPerplexityModel,
+    } = body;
     console.log('[gap-fill] body', {
       pet_id, condition_id,
       compound_ids_count: compound_ids?.length,
       directed_pairs_count: Array.isArray(directedPairs) ? directedPairs.length : 0,
       max_pairs, dry_run,
     });
+
+    // Resolve which Perplexity model to use:
+    //   1) explicit body override, 2) ai_configurations row, 3) hard default.
+    let perplexityModel = 'sonar-reasoning-pro';
+    if (typeof bodyPerplexityModel === 'string' && bodyPerplexityModel.length > 0) {
+      perplexityModel = bodyPerplexityModel;
+    } else {
+      const { data: cfg } = await supabase
+        .from('ai_configurations')
+        .select('config_value')
+        .eq('config_key', 'perplexity_gap_fill_model')
+        .maybeSingle();
+      if (cfg?.config_value) {
+        const raw = typeof cfg.config_value === 'string'
+          ? cfg.config_value.replace(/^"|"$/g, '')
+          : String(cfg.config_value);
+        if (raw) perplexityModel = raw;
+      }
+    }
+    console.log('[gap-fill] using perplexity model:', perplexityModel);
 
     // ---------- Build the (compound × condition) pair list ----------
     type Pair = { compound_id?: string; compound_en: string; condition_id?: string; condition_en: string };
@@ -563,7 +588,7 @@ Deno.serve(async (req) => {
         let assessmentLlmConf = 0;
         let records: PubmedRecord[] = [];
 
-        const px = await assessWithPerplexity(pair.compound_en, pair.condition_en);
+        const px = await assessWithPerplexity(pair.compound_en, pair.condition_en, perplexityModel);
         await sleep(400); // be polite to Perplexity
 
         if (px.assessment && px.assessment.efficacy_0_5 > 0) {
