@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T16:44:09.576Z
+// Última geração: 2026-04-30T18:00:12.235Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,26 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "i18n",
+    "status": "entregue",
+    "title": "Traduções evidenceGap.log e layout responsivo DT workflow",
+    "bullets": [
+      "Adicionadas 16 chaves de tradução `evidenceGap.log.*` em PT e EN para o painel de log em tempo real da busca de evidências",
+      "DT mini-workflow: trocado `overflow-x-auto` por `flex-wrap` para quebrar em duas linhas em vez de sair do quadro",
+      "Conectores entre etapas ocultados em telas pequenas (`hidden sm:block`)",
+      "Files: src/locales/en/translation.json, src/locales/pt/translation.json, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/locales/en/translation.json",
+      "src/locales/pt/translation.json",
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.46.0"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",

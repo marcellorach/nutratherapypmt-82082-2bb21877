@@ -7365,7 +7365,25 @@
     "pendingLabel": "pending",
     "sourcesConsulted": "Sources consulted",
     "queriesLabel": "queries",
-    "noPerplexityKey": "no Perplexity key"
+    "noPerplexityKey": "no Perplexity key",
+    "log": {
+      "title": "Evidence Gap-Fill Log",
+      "eventCount": "{{count}} event(s)",
+      "clear": "Clear",
+      "export": "Export",
+      "waiting": "Waiting for search to start…",
+      "starting": "Starting gap-fill for pet {{pet_id}}…",
+      "loading": "Loading {{step}}…",
+      "noConditions": "No conditions found for this pet",
+      "conditionsLoaded": "{{count}} condition(s) loaded",
+      "compounds": "compound(s)",
+      "compoundsMatched": "{{matched}}/{{total}} compounds matched in KG",
+      "compoundsFallback": "{{count}} compound(s) added via free-text fallback",
+      "pairsBuilt": "{{eligible}} eligible pair(s) ({{skipped}} already covered, {{total}} checked)",
+      "noEvidence": "no evidence found",
+      "done": "Search complete",
+      "initiating": "Initiating evidence search…"
+    }
   },
   "gapFillDiag": {
     "title": "KG Gap-Fill Diagnostics",

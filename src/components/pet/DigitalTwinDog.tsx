@@ -448,7 +448,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     {(dtWorkflow.snapshot !== 'idle' || aiQuery.isLoading) && (
       <Card className="border-primary/20">
         <CardContent className="p-3">
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-muted-foreground/20">
+          <div className="flex flex-wrap items-center gap-1 pb-1">
             {/* DT workflow stages */}
             {([
               { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
@@ -462,7 +462,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
               return (
                 <React.Fragment key={stage.key}>
                   {idx > 0 && (
-                    <div className={`h-px w-4 min-w-[16px] flex-shrink-0 ${
+                    <div className={`h-px w-4 flex-shrink-0 hidden sm:block ${
                       state === 'complete' ? 'bg-green-400' : state === 'running' ? 'bg-primary' : 'bg-border'
                     }`} />
                   )}

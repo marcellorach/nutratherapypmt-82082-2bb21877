@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-04-30T16:50:44.143Z",
+  "timestamp": "2026-04-30T17:58:30.694Z",
   "summary": {
-    "totalFiles": 816,
-    "totalIssues": 400,
+    "totalFiles": 817,
+    "totalIssues": 411,
     "hardcodedTexts": 40,
-    "missingKeys": 360,
+    "missingKeys": 371,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2337,6 +2337,83 @@
       "file": "src/components/pet/DogAnatomySVG.tsx",
       "line": 479,
       "text": "paw-front",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 80,
+      "text": "evidenceGap.log.noConditions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 86,
+      "text": "evidenceGap.log.compounds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 110,
+      "text": "evidenceGap.log.noEvidence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 128,
+      "text": "evidenceGap.log.done",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 151,
+      "text": "evidenceGap.log.initiating",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapCard.tsx",
+      "line": 179,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapLogPanel.tsx",
+      "line": 64,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapLogPanel.tsx",
+      "line": 79,
+      "text": "evidenceGap.log.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapLogPanel.tsx",
+      "line": 87,
+      "text": "evidenceGap.log.clear",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapLogPanel.tsx",
+      "line": 91,
+      "text": "evidenceGap.log.export",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/EvidenceGapLogPanel.tsx",
+      "line": 103,
+      "text": "evidenceGap.log.waiting",
       "severity": "high"
     },
     {
