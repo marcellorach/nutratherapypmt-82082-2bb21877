@@ -843,6 +843,7 @@ Deno.serve(async (req) => {
           studies: studyIds.length,
           cited_pmids: assessment.cited_pmids,
           cited_urls: citedUrls,
+          rationale: assessment.rationale,
         });
       } catch (e) {
         console.error('pair error', pair, e);
