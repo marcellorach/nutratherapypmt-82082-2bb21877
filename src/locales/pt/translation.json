@@ -6889,6 +6889,12 @@
         "received": "Projeção recebida com sucesso",
         "error": "Erro na projeção",
         "cached": "Usando projeção em cache"
+      },
+      "dtWorkflow": {
+        "snapshot": "Snapshot",
+        "apiCall": "Trajectory API",
+        "parse": "Parse",
+        "render": "Render"
       }
     },
     "conditionInsights": {
