@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import { changesByAreaFiltered } from "@/data/changelogQuery";
 import type { ChangelogEntry, ChangelogKind } from "@/data/projectChangelog";
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
@@ -33,12 +34,12 @@ const KIND_BADGE: Record<ChangelogKind, string> = {
   security: "border-violet-500/40 text-violet-700 dark:text-violet-400 bg-violet-500/10",
 };
 
-const KIND_LABEL: Record<ChangelogKind, string> = {
-  added: "Adicionado",
-  changed: "Alterado",
-  fixed: "Corrigido",
-  removed: "Removido",
-  security: "Segurança",
+const KIND_I18N: Record<ChangelogKind, string> = {
+  added: "organograma.kindAdded",
+  changed: "organograma.kindChanged",
+  fixed: "organograma.kindFixed",
+  removed: "organograma.kindRemoved",
+  security: "organograma.kindSecurity",
 };
 
 interface Props {
@@ -49,6 +50,7 @@ export const AreaMiniTimeline: React.FC<Props> = ({ areaKey }) => {
   const [expanded, setExpanded] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [activeKinds, setActiveKinds] = useState<Set<ChangelogKind>>(new Set());
+  const { t } = useTranslation();
 
   const entries = useMemo(() => {
     const kinds = activeKinds.size ? Array.from(activeKinds) : undefined;
@@ -83,7 +85,7 @@ export const AreaMiniTimeline: React.FC<Props> = ({ areaKey }) => {
       <div className="flex items-center justify-between gap-2 mb-2">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
           <History className="h-3 w-3" />
-          Recentes nesta área
+          {t('organograma.recentInArea')}
         </p>
         <div className="flex flex-wrap gap-1">
           {KIND_ORDER.map((k) => {
@@ -98,7 +100,7 @@ export const AreaMiniTimeline: React.FC<Props> = ({ areaKey }) => {
                   on ? KIND_BADGE[k] : "border-border text-muted-foreground hover:bg-muted",
                 )}
                 aria-pressed={on}
-                title={KIND_LABEL[k]}
+                title={t(KIND_I18N[k])}
               >
                 {k}
               </button>
@@ -109,7 +111,7 @@ export const AreaMiniTimeline: React.FC<Props> = ({ areaKey }) => {
 
       {entries.length === 0 ? (
         <p className="text-xs text-muted-foreground italic py-1">
-          Sem mudanças recentes para os filtros selecionados.
+          {t('organograma.noRecentChanges')}
         </p>
       ) : (
         <ol className="relative">
@@ -139,7 +141,7 @@ export const AreaMiniTimeline: React.FC<Props> = ({ areaKey }) => {
             className="h-6 text-[11px]"
             onClick={() => setExpanded((v) => !v)}
           >
-            {expanded ? "Ver menos" : `Ver mais ${Math.max(0, totalAvailable - 3)}`}
+            {expanded ? t('organograma.viewLess') : t('organograma.viewMore', { count: Math.max(0, totalAvailable - 3) })}
           </Button>
         </div>
       )}
@@ -229,7 +231,7 @@ function TimelineItem({ entry, open, onToggle }: ItemProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 h-5 rounded border border-border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
-                  title="Ver commit"
+                  title={t('organograma.viewCommit')}
                 >
                   <GitCommit className="h-2.5 w-2.5" />
                   {shortHash(entry.commit)}
@@ -238,7 +240,7 @@ function TimelineItem({ entry, open, onToggle }: ItemProps) {
               ) : (
                 <span
                   className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 h-5 rounded border border-border bg-muted/40 text-muted-foreground"
-                  title="Configure REPO_CONFIG.baseUrl em src/data/repoConfig.ts para tornar clicável"
+                  title={t('organograma.configureRepo')}
                 >
                   <GitCommit className="h-2.5 w-2.5" />
                   {shortHash(entry.commit)}
@@ -265,7 +267,7 @@ function FileChip({ path }: { path: string }) {
         target="_blank"
         rel="noopener noreferrer"
         className={cn(baseClass, "hover:bg-muted hover:text-foreground text-muted-foreground")}
-        title={`Abrir ${path} no repositório`}
+        title={t('organograma.openInRepo', { path })}
       >
         <Code2 className="h-2.5 w-2.5" />
         {display}
