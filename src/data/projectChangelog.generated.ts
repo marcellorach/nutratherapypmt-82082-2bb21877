@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T15:08:11.942Z
+// Última geração: 2026-04-30T15:25:52.146Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,23 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Organograma usa bbox real para centralização e escala",
+    "bullets": [
+      "`useScrollPanZoom` agora mede o bounding box real do conteúdo SVG via `getBBox()` antes de aplicar `fit`, corrigindo o caso em que o Mermaid ficava minúsculo no canto apesar de haver espaço disponível.",
+      "`OrganogramaDiagram` ganhou viewport útil maior (`calc(100vh - 230px)`, `minHeight: 520`) e `svg overflow-visible`, melhorando o aproveitamento horizontal e vertical.",
+      "Files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/OrganogramaDiagram.tsx"
+    ],
+    "files": [
+      "src/hooks/useScrollPanZoom.ts",
+      "src/components/administrador/organograma/OrganogramaDiagram.tsx"
+    ],
+    "i18nVersion": "1.42.0"
+  },
   {
     "date": "2026-04-30",
     "kind": "added",
