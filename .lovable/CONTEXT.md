@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-04-30T19:59:39.024Z
+Generated: 2026-04-30T20:25:39.781Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -12,8 +12,15 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **vet-ui**: 4
 - **i18n**: 2
 - **clinical-pipeline**: 2
+- **infra**: 1
 
 ## Top 10 recent entries
+### 2026-04-30 · [infra] FIXED — Edge function kg-evidence-gap-fill: constraint violation + timeout
+- Corrigido bug onde campo `direction` era inserido como `positive` (valor inválido) em vez de `improves` — constraint `chk_direction` rejeitava todos os triplets encontrados pelo Perplexity
+- `mapEvidenceLevel` garante mapeamento `clinical_trial` → `rct` para satisfazer constraint `chk_evidence_level`
+- Reduzido `max_pairs` default de 12 para 5 para evitar timeout de conexão HTTP (cada par leva ~20-30s no Perplexity)
+_files: supabase/functions/kg-evidence-gap-fill/index.ts_
+
 ### 2026-04-30 · [vet-ui] FIXED — Restaurado Digital Twin + busca de evidências + marcadores dos avatares
 - `DigitalTwinDog` (com `EvidenceGapCard` e log panel) restaurado na tab "trajectory" do PetProfilePage — havia sido removido na consolidação de tabs anterior
 - Corrigida lógica dos marcadores nos avatares: cenário "sem protocolo" agora faz fallback para os dados do cenário "com protocolo" quando a API retorna `yearWithout` vazio, garantindo que ambos mostrem as doenças
@@ -67,12 +74,6 @@ _files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/dia
 - Backfill canônico: migração preencheu `pet_conditions.condition_id` (match por nome em `health_conditions`) e `nutraceuticals.name_en` para os 22 compostos que estavam sem nome inglês — requisito para o gap-fill montar pares de busca.
 - Auth do gap-fill: substituído `getClaims` (indisponível na versão do SDK) por `getUser` para autenticação robusta do admin.
 _files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts…_
-
-### 2026-04-30 · [admin] ADDED — Seletor de modelo Perplexity + tester genérico de provedores
-- `perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.
-- Nova edge function `provider-health` (verify_jwt) que valida autenticação e escopo das chaves OpenAI / Claude / Gemini / Grok / Perplexity contra o endpoint real de chat de cada provedor e expõe HTTP status, mensagem de erro do upstream e dica acionável.
-- `kg-evidence-gap-fill` lê `ai_configurations.perplexity_gap_fill_model` (com override via body `perplexity_model`) e propaga a escolha para `assessWithPerplexity` em vez do hard-coded `sonar-reasoning-pro`.
-_files: supabase/functions/perplexity-health/index.ts, supabase/functions/provider-health/index.ts, supabase/functions/kg-evidence-gap-fill/index.ts, src/components/administrador/configuracoes/PerplexityStatusCard.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
