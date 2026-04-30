@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-30 — Pipeline: card sinergias, tempos por etapa, log do Digital Twin
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.43.0 -->
+- Novo 7o estágio `stage7_synergies` (ícone Zap) no `ClinicalPipelineWorkflow` com contagem de sinergias entre compostos recomendados
+- Tempo de execução exibido abaixo de cada etapa concluída + indicador de tempo total no canto direito do workflow
+- Novo `DigitalTwinLogPanel`: console ao vivo no Digital Twin rastreando ciclo de vida da projeção de trajetória (início, chamada AI, resposta, cache, erros) com autoscroll, limpar e exportar
+- Pipeline e DT log totalmente bilíngues (PT/EN)
+- Files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/DigitalTwinLogPanel.tsx, src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/services/clinical-analysis-pipeline.ts
+
 ### Fixed - 2026-04-30 — Organograma usa bbox real para centralização e escala
 <!-- area: admin · status: entregue · i18n: 1.42.0 -->
 - `useScrollPanZoom` agora mede o bounding box real do conteúdo SVG via `getBBox()` antes de aplicar `fit`, corrigindo o caso em que o Mermaid ficava minúsculo no canto apesar de haver espaço disponível.
