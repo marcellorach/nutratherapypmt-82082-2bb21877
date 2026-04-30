@@ -389,6 +389,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const streamMode = new URL(req.url).searchParams.get('stream') === 'true';
     console.log('[gap-fill] request received', req.method, req.url);
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -423,12 +424,61 @@ Deno.serve(async (req) => {
       max_pairs = 12, dry_run = false,
       perplexity_model: bodyPerplexityModel,
     } = body;
-    console.log('[gap-fill] body', {
+    const logBody = {
       pet_id, condition_id,
       compound_ids_count: compound_ids?.length,
       directed_pairs_count: Array.isArray(directedPairs) ? directedPairs.length : 0,
       max_pairs, dry_run,
+    };
+    console.log('[gap-fill] body', logBody);
+
+    // ── Streaming helpers ──
+    let streamController: ReadableStreamDefaultController<Uint8Array> | null = null;
+    const encoder = new TextEncoder();
+    function emitEvent(event: Record<string, unknown>) {
+      if (streamController) {
+        try {
+          streamController.enqueue(encoder.encode(JSON.stringify(event) + '\n'));
+        } catch { /* stream closed */ }
+      }
+    }
+    function emit(type: string, data: Record<string, unknown> = {}) {
+      const ev = { type, ts: Date.now(), ...data };
+      emitEvent(ev);
+    }
+
+    // If streaming, start the readable stream immediately and run logic inside.
+    if (streamMode) {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          streamController = controller;
+        },
+      });
+      // We run the rest of the logic asynchronously and close the stream when done.
+      // But Deno.serve requires us to return the Response synchronously.
+      // So we schedule the work via a microtask.
+      const responsePromise = runGapFillLogic();
+      responsePromise.then((result) => {
+        emit('result', result);
+        emit('done');
+        streamController?.close();
+      }).catch((err) => {
+        emit('error', { message: String(err) });
+        streamController?.close();
+      });
+      return new Response(stream, {
+        headers: { ...corsHeaders, 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'no-store' },
+      });
+    }
+
+    // Non-streaming: run and return JSON as before.
+    const result = await runGapFillLogic();
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
+
+    async function runGapFillLogic() {
+      emit('start', { pet_id, max_pairs, dry_run });
 
     // Resolve which Perplexity model to use:
     //   1) explicit body override, 2) ai_configurations row, 3) hard default.
@@ -449,6 +499,7 @@ Deno.serve(async (req) => {
       }
     }
     console.log('[gap-fill] using perplexity model:', perplexityModel);
+      emit('config', { perplexity_model: perplexityModel, hasPerplexity: !!PERPLEXITY_API_KEY, hasNcbi: !!NCBI_API_KEY });
 
     // ---------- Build the (compound × condition) pair list ----------
     type Pair = { compound_id?: string; compound_en: string; condition_id?: string; condition_en: string };
@@ -470,11 +521,17 @@ Deno.serve(async (req) => {
         });
       }
       console.log('[gap-fill] using directed pair list', pairs.length);
+        emit('pairs_source', { source: 'directed', count: pairs.length });
     } else if (pet_id) {
-      const { data: pet } = await supabase
+        emit('loading', { step: 'pet_conditions' });
+        const { data: pet, error: petError } = await supabase
         .from('pet_conditions')
-        .select('condition_id, condition_name, health_conditions(id, name, name_en)')
+          .select('condition_id, condition_name, health_conditions:condition_id(id, name, name_en)')
         .eq('pet_id', pet_id);
+        if (petError) {
+          console.error('[gap-fill] pet_conditions query error', petError);
+          emit('error', { step: 'pet_conditions', message: petError.message });
+        }
       // Build condition list: prefer health_conditions join, fall back to condition_name
       const conds: Array<{ id?: string; name_en: string }> = [];
       for (const row of (pet || [])) {
@@ -487,11 +544,13 @@ Deno.serve(async (req) => {
         }
       }
       console.log('[gap-fill] pet conditions found', conds.length, '(from', (pet || []).length, 'pet_conditions rows)');
+        emit('conditions_loaded', { count: conds.length, raw_rows: (pet || []).length, conditions: conds.map(c => c.name_en) });
       const condsWithEn = conds.filter((c) => c.name_en);
 
       // Prefer the compounds the VetGraphRAG analysis actually recommended for
       // THIS pet. Falls back to the top geriatric shortlist if no snapshot.
       let compounds: Array<{ id?: string; name_en: string }> = [];
+        emit('loading', { step: 'snapshot' });
       const { data: snap } = await supabase
         .from('pet_clinical_analysis_snapshots')
         .select('recommendation_compounds')
@@ -505,6 +564,7 @@ Deno.serve(async (req) => {
             .map((c: any) => (typeof c === 'string' ? c : c?.name))
             .filter((s: any): s is string => typeof s === 'string' && s.trim().length > 0)
         : [];
+        emit('snapshot_loaded', { stack_count: stackNames.length, stack: stackNames.slice(0, 10) });
       if (stackNames.length > 0) {
         const lower = stackNames.map(s => s.toLowerCase().trim());
         const { data: nutras } = await supabase
@@ -518,6 +578,7 @@ Deno.serve(async (req) => {
           )
           .map((n: any) => ({ id: n.id, name_en: n.name_en }));
         console.log('[gap-fill] using stack-derived compounds', compounds.length, 'from', stackNames.length);
+          emit('compounds_matched', { matched: compounds.length, from_stack: stackNames.length, compounds: compounds.map(c => c.name_en) });
         if (compounds.length === 0) {
           discoveryNotes.push(`Stack has ${stackNames.length} compound(s) but none matched any nutraceutical with name_en in DB.`);
         }
@@ -531,8 +592,11 @@ Deno.serve(async (req) => {
           .filter((n: any) => n.name_en)
           .map((n: any) => ({ id: n.id, name_en: n.name_en }));
         console.log('[gap-fill] using fallback geriatric shortlist', compounds.length);
+          emit('compounds_fallback', { count: compounds.length });
       }
 
+        emit('loading', { step: 'checking_existing_evidence' });
+        let skippedExisting = 0;
       for (const cond of condsWithEn) {
         for (const cmp of compounds) {
           if (pairs.length >= max_pairs) break;
@@ -544,7 +608,10 @@ Deno.serve(async (req) => {
             .eq('object_name', cond.name_en)
             .eq('curation_status', 'approved')
             .gte('extraction_confidence', 0.6);
-          if ((count || 0) > 0) continue;
+            if ((count || 0) > 0) {
+              skippedExisting++;
+              continue;
+            }
           pairs.push({
             compound_id: cmp.id, compound_en: cmp.name_en,
             condition_id: cond.id, condition_en: cond.name_en,
@@ -552,6 +619,7 @@ Deno.serve(async (req) => {
         }
         if (pairs.length >= max_pairs) break;
       }
+        emit('pairs_built', { eligible: pairs.length, skipped_existing: skippedExisting, total_checked: condsWithEn.length * compounds.length });
     } else if (condition_id && Array.isArray(compound_ids)) {
       const { data: cond } = await supabase
         .from('health_conditions').select('id, name_en').eq('id', condition_id).single();
@@ -568,13 +636,13 @@ Deno.serve(async (req) => {
 
     console.log('[gap-fill] pairs to search', pairs.length);
     if (!pairs.length) {
-      return new Response(JSON.stringify({
+        return {
         pairs_searched: 0, studies_added: 0, triplets_pending: 0,
         message: discoveryNotes.length
           ? `No gaps found. ${discoveryNotes.join(' ')}`
           : 'No gaps found for the given inputs (every relevant pair already has approved KG evidence ≥0.6).',
         discovery_notes: discoveryNotes,
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        };
     }
 
     // ---------- Search + assess each pair ----------
@@ -584,6 +652,7 @@ Deno.serve(async (req) => {
 
     for (const pair of pairs) {
       try {
+          emit('pair_start', { compound: pair.compound_en, condition: pair.condition_en, index: details.length + 1, total: pairs.length });
         // ---- Pass 1: Perplexity (semantic + grounded) ----
         let provider: 'perplexity' | 'pubmed' = 'perplexity';
         let speciesHint: 'canine' | 'unspecified' = 'unspecified';
@@ -599,6 +668,7 @@ Deno.serve(async (req) => {
         await sleep(400); // be polite to Perplexity
 
         if (px.assessment && px.assessment.efficacy_0_5 > 0) {
+            emit('pair_perplexity_ok', { compound: pair.compound_en, condition: pair.condition_en, efficacy: px.assessment.efficacy_0_5, pmids: px.assessment.cited_pmids.length });
           // Validate PMIDs against PubMed before persisting (anti-hallucination).
           const validPmids = await validatePmids(px.assessment.cited_pmids.slice(0, 10));
           await sleep(NCBI_API_KEY ? 110 : 360);
@@ -616,14 +686,17 @@ Deno.serve(async (req) => {
           provider = 'perplexity';
         } else {
           // ---- Pass 2: PubMed fallback ----
+            emit('pair_perplexity_empty', { compound: pair.compound_en, condition: pair.condition_en });
           provider = 'pubmed';
           const { pmids, speciesHint: sh } = await pubmedSearch(pair.compound_en, pair.condition_en);
           await sleep(NCBI_API_KEY ? 110 : 360);
           speciesHint = sh;
           if (!pmids.length) {
+              emit('pair_no_evidence', { compound: pair.compound_en, condition: pair.condition_en, provider });
             details.push({ pair, status: 'no_evidence', provider, perplexity_tried: !!PERPLEXITY_API_KEY });
             continue;
           }
+            emit('pair_pubmed_found', { compound: pair.compound_en, condition: pair.condition_en, pmids: pmids.length, species: sh });
           records = await pubmedFetch(pmids);
           await sleep(NCBI_API_KEY ? 110 : 360);
           if (!records.length) {
@@ -652,6 +725,7 @@ Deno.serve(async (req) => {
         };
 
         if (dry_run) {
+            emit('pair_dry_run', { compound: pair.compound_en, condition: pair.condition_en, efficacy: assessment.efficacy_0_5 });
           details.push({
             pair, status: 'dry_run', provider, assessment,
             pmids: records.map(r => r.pmid), species_hint: speciesHint,
@@ -733,6 +807,7 @@ Deno.serve(async (req) => {
           continue;
         }
         tripletsPending++;
+          emit('pair_ok', { compound: pair.compound_en, condition: pair.condition_en, efficacy: assessment.efficacy_0_5, provider, studies: studyIds.length });
         details.push({
           pair, status: 'ok', provider,
           efficacy_0_5: assessment.efficacy_0_5,
@@ -744,18 +819,21 @@ Deno.serve(async (req) => {
         });
       } catch (e) {
         console.error('pair error', pair, e);
+          emit('pair_error', { compound: pair.compound_en, condition: pair.condition_en, error: String(e).slice(0, 200) });
         details.push({ pair, status: 'error', error: String(e) });
       }
     }
 
     console.log('[gap-fill] done', { pairs: pairs.length, studiesAdded, tripletsPending });
-    return new Response(JSON.stringify({
+      return {
       pairs_searched: pairs.length,
       studies_added: studiesAdded,
       triplets_pending: tripletsPending,
       discovery_notes: discoveryNotes,
       details,
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      };
+    } // end runGapFillLogic
+
   } catch (e) {
     console.error('gap-fill error', e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
