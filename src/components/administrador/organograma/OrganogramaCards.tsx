@@ -50,7 +50,8 @@ function OrgNode({ node, depth, query, expandSignal, collapseSignal, forceOpen }
     if (collapseSignal > 0) setOpen(false);
   }, [collapseSignal]);
 
-  if (query && !nodeMatchesQuery(node, query)) return null;
+  const { isEnglish: isEn } = useLocalizedField();
+  if (query && !nodeMatchesQuery(node, query, isEn)) return null;
 
   return (
     <div className={cn("relative", depth > 0 && "border-l border-border/60 ml-3 pl-4")}>
