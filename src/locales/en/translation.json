@@ -7338,6 +7338,12 @@
       "error": "error",
       "no_evidence": "no evidence"
     },
-    "backendUnavailable": "Evidence search function unavailable on the backend. Check that Edge Functions are deployed."
+    "backendUnavailable": "Evidence search function unavailable on the backend. Check that Edge Functions are deployed.",
+    "pairsLabel": "pairs",
+    "studiesLabel": "studies",
+    "pendingLabel": "pending",
+    "sourcesConsulted": "Sources consulted",
+    "queriesLabel": "queries",
+    "noPerplexityKey": "no Perplexity key"
   }
 }

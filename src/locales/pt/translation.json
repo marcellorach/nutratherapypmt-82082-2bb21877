@@ -7338,6 +7338,12 @@
       "error": "erro",
       "no_evidence": "sem evidência"
     },
-    "backendUnavailable": "Função de busca indisponível no backend. Verifique se as Edge Functions estão publicadas."
+    "backendUnavailable": "Função de busca indisponível no backend. Verifique se as Edge Functions estão publicadas.",
+    "pairsLabel": "pares",
+    "studiesLabel": "estudos",
+    "pendingLabel": "pendentes",
+    "sourcesConsulted": "Fontes consultadas",
+    "queriesLabel": "consultas",
+    "noPerplexityKey": "sem chave Perplexity"
   }
 }
