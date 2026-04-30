@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
+import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTriggerGapFill, usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
@@ -34,6 +34,22 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     details?: any[];
     message?: string;
   }>(null);
+
+  // Compute source breakdown from details
+  const sourceBreakdown = lastResult?.details
+    ? (() => {
+        const byProvider: Record<string, { total: number; ok: number; noEvidence: number; failed: number }> = {};
+        for (const d of lastResult.details) {
+          const prov = d.provider || 'unknown';
+          if (!byProvider[prov]) byProvider[prov] = { total: 0, ok: 0, noEvidence: 0, failed: 0 };
+          byProvider[prov].total++;
+          if (d.status === 'ok' || d.status === 'dry_run') byProvider[prov].ok++;
+          else if (d.status === 'no_evidence' || d.status === 'no_records' || d.status === 'no_pubmed_results') byProvider[prov].noEvidence++;
+          else byProvider[prov].failed++;
+        }
+        return byProvider;
+      })()
+    : null;
 
   // Only show for admin AND only when twin shows a low gain
   if (!isAdmin) return null;
@@ -99,11 +115,36 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
               <Info className="h-3.5 w-3.5 text-muted-foreground" />
               {t('evidenceGap.detailsTitle')}
             </p>
+
+            {/* Summary row */}
             <div className="grid grid-cols-3 gap-2 text-[11px]">
-              <div><span className="text-muted-foreground">pairs:</span> <strong>{lastResult.pairs_searched}</strong></div>
-              <div><span className="text-muted-foreground">studies:</span> <strong>{lastResult.studies_added}</strong></div>
-              <div><span className="text-muted-foreground">pending:</span> <strong>{lastResult.triplets_pending}</strong></div>
+              <div><span className="text-muted-foreground">{t('evidenceGap.pairsLabel')}:</span> <strong>{lastResult.pairs_searched}</strong></div>
+              <div><span className="text-muted-foreground">{t('evidenceGap.studiesLabel')}:</span> <strong>{lastResult.studies_added}</strong></div>
+              <div><span className="text-muted-foreground">{t('evidenceGap.pendingLabel')}:</span> <strong>{lastResult.triplets_pending}</strong></div>
             </div>
+
+            {/* Source breakdown */}
+            {sourceBreakdown && Object.keys(sourceBreakdown).length > 0 && (
+              <div className="border-t pt-2 space-y-1">
+                <p className="font-medium text-[11px] flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  {t('evidenceGap.sourcesConsulted')}
+                </p>
+                {Object.entries(sourceBreakdown).map(([prov, stats]) => (
+                  <div key={prov} className="flex items-center gap-2 text-[11px]">
+                    {prov === 'perplexity' ? <Microscope className="h-3 w-3 text-blue-500" /> : <Database className="h-3 w-3 text-green-500" />}
+                    <span className="font-medium capitalize">{prov}</span>
+                    <span className="text-muted-foreground">
+                      {stats.total} {t('evidenceGap.queriesLabel')} · 
+                      <span className="text-emerald-600"> {stats.ok} ✓</span> · 
+                      <span className="text-amber-600"> {stats.noEvidence} ∅</span>
+                      {stats.failed > 0 && <span className="text-destructive"> · {stats.failed} ✗</span>}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {lastResult.message && (
               <p className="text-[11px] text-muted-foreground italic">{lastResult.message}</p>
             )}
@@ -120,6 +161,8 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                   {d.efficacy_0_5 != null && <> · ef {d.efficacy_0_5}/5</>}
                   {d.species_hint && d.species_hint !== 'canine' && <> · <em>{d.species_hint}</em></>}
                   {d.provider && <> · <span className="font-medium">{d.provider}</span></>}
+                  {d.error && <> · <span className="text-destructive">{String(d.error).slice(0, 80)}</span></>}
+                  {d.perplexity_tried === false && <> · <span className="text-amber-600">{t('evidenceGap.noPerplexityKey')}</span></>}
                 </span>
               </div>
             ))}
