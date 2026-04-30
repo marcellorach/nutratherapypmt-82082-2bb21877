@@ -232,6 +232,7 @@ interface PerplexityAssessment {
 async function assessWithPerplexity(
   compound: string,
   condition: string,
+  model: string = 'sonar-reasoning-pro',
 ): Promise<{ assessment: PerplexityAssessment | null; raw_citations: string[] }> {
   if (!PERPLEXITY_API_KEY) {
     console.warn('[gap-fill] PERPLEXITY_API_KEY not set, skipping Perplexity pass');
@@ -264,7 +265,7 @@ async function assessWithPerplexity(
   };
 
   const body = {
-    model: 'sonar-reasoning-pro',
+    model,
     search_mode: 'academic',
     messages: [
       {
