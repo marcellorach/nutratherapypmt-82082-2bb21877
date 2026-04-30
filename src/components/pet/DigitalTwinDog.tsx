@@ -623,6 +623,11 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         onTripletsAdded={handleTripletsAdded}
       />
     )}
+    <DigitalTwinLogPanel
+      entries={dtLog}
+      isLoading={aiQuery.isLoading || aiQuery.isFetching}
+      onClear={() => setDtLog([])}
+    />
     </div>
   );
 };
