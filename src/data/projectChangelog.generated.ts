@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T14:46:08.380Z
+// Última geração: 2026-04-30T15:08:11.942Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,43 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "added",
+    "area": "i18n",
+    "status": "entregue",
+    "title": "Internacionalização completa do Organograma do Projeto",
+    "bullets": [
+      "7 arquivos corrigidos: OrganogramaTab, OrganogramaCards, OrganogramaDiagram, OrganogramaForceGraph, ChangelogTimeline, AreaMiniTimeline — todos agora usam `useTranslation()` + `t()` para textos visíveis.",
+      "projectOrganograma.ts bilíngue: todas as ~60 entidades (áreas, filhos, convenções) agora possuem campos `title_en`, `description_en`, `label_en`, `value_en`.",
+      "~50 chaves i18n criadas no namespace `organograma` em ambos `translation.json` (PT/EN).",
+      "useLocalizedField reutilizado para selecionar título/descrição pelo idioma ativo.",
+      "Files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/organograma/*.tsx, src/data/projectOrganograma.ts"
+    ],
+    "files": [
+      "src/pages/administrador/OrganogramaTab.tsx",
+      "src/data/projectOrganograma.ts"
+    ],
+    "i18nVersion": "1.42.0"
+  },
+  {
+    "date": "2026-04-30",
+    "kind": "added",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Diagnóstico Gap-Fill e detalhamento de fontes no EvidenceGapCard",
+    "bullets": [
+      "EvidenceGapCard expandido: agora exibe breakdown por fonte (Perplexity / PubMed) com contagem de consultas, sucessos, falhas e motivos de ausência de evidências. Erros inline e flag de \"sem chave Perplexity\" nos detalhes de cada par.",
+      "Nova tab admin \"Diagnóstico Gap-Fill\": tela completa para inspecionar health_conditions (name_en), nutraceuticals (name_en), links pet_conditions ↔ condition_id, e todos os triplets gerados pelo gap-fill. Badges visuais indicam dados faltantes que impedem a pipeline.",
+      "Files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts"
+    ],
+    "files": [
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx",
+      "src/config/admin-tabs.ts"
+    ],
+    "i18nVersion": "1.41.9"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",
