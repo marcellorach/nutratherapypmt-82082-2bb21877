@@ -47,9 +47,9 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const { t } = useTranslation();
 
   const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
-    min: 0.2,
-    max: 4,
-    fitMin: 0.4,
+    min: 0.05,
+    max: 6,
+    fitMin: 0.05,
   });
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           <div
             ref={containerRef}
             className="relative rounded-md border bg-muted/20 overflow-hidden"
-            style={{ height: 820 }}
+            style={{ height: "calc(100vh - 260px)", minHeight: 400 }}
           >
             <div
               ref={innerRef}
