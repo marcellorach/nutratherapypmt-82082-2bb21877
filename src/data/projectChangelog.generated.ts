@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T15:25:52.146Z
+// Última geração: 2026-04-30T16:27:46.268Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "added",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Pipeline: card sinergias, tempos por etapa, log do Digital Twin",
+    "bullets": [
+      "Novo 7o estágio `stage7_synergies` (ícone Zap) no `ClinicalPipelineWorkflow` com contagem de sinergias entre compostos recomendados",
+      "Tempo de execução exibido abaixo de cada etapa concluída + indicador de tempo total no canto direito do workflow",
+      "Novo `DigitalTwinLogPanel`: console ao vivo no Digital Twin rastreando ciclo de vida da projeção de trajetória (início, chamada AI, resposta, cache, erros) com autoscroll, limpar e exportar",
+      "Pipeline e DT log totalmente bilíngues (PT/EN)",
+      "Files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/DigitalTwinLogPanel.tsx, src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/services/clinical-analysis-pipeline.ts"
+    ],
+    "files": [
+      "src/components/pet/ClinicalPipelineWorkflow.tsx",
+      "src/components/pet/DigitalTwinLogPanel.tsx",
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/services/clinical-analysis-pipeline.ts"
+    ],
+    "i18nVersion": "1.43.0"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",

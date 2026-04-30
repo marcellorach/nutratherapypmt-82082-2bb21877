@@ -36,7 +36,8 @@ export type PipelineStageId =
   | 'stage3_labs'
   | 'stage4_kg'
   | 'stage5_interactions'
-  | 'stage6_recommendation';
+  | 'stage6_recommendation'
+  | 'stage7_synergies';
 
 export type PipelineLogLevel = 'info' | 'success' | 'warn' | 'error';
 

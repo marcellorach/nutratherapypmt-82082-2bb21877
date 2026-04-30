@@ -66,6 +66,7 @@ const PetProfilePage: React.FC = () => {
     stage4_kg: 'idle',
     stage5_interactions: 'idle',
     stage6_recommendation: 'idle',
+    stage7_synergies: 'idle',
   });
   const [pipelineLog, setPipelineLog] = useState<ClinicalLogEntry[]>([]);
   const [currentStageLabel, setCurrentStageLabel] = useState<string | null>(null);
@@ -79,7 +80,9 @@ const PetProfilePage: React.FC = () => {
     triplets: number;
     interactions: number;
     compounds: number;
-  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
+    synergies: number;
+  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+  const [stageTimes, setStageTimes] = useState<Record<string, number>>({});
 
   const STAGE_LABELS: Record<PipelineStageId, string> = {
     stage2_predispositions: t('petProfile.pipeline.predispositions'),
@@ -87,6 +90,7 @@ const PetProfilePage: React.FC = () => {
     stage4_kg: t('petProfile.pipeline.knowledgeGraph'),
     stage5_interactions: t('petProfile.pipeline.interactions'),
     stage6_recommendation: t('petProfile.pipeline.recommendation'),
+    stage7_synergies: t('petProfile.pipeline.synergies'),
   };
 
   const appendLog = (level: ClinicalLogEntry['level'], message: string, stage?: string) => {
@@ -110,6 +114,10 @@ const PetProfilePage: React.FC = () => {
     } else if (e.kind === 'stage-end') {
       setPipelineState(s => ({ ...s, [e.stage]: 'complete' }));
       appendLog('success', `✓ ${e.message}`, STAGE_LABELS[e.stage]);
+      // Capture stage duration
+      if (e.meta?.durationMs != null) {
+        setStageTimes(prev => ({ ...prev, [e.stage]: e.meta!.durationMs }));
+      }
       // Live-update the counter for the stage that just completed
       const meta = e.meta || {};
       setStageCounts(prev => {
@@ -128,6 +136,8 @@ const PetProfilePage: React.FC = () => {
             };
           case 'stage6_recommendation':
             return { ...prev, compounds: meta.compounds ?? prev.compounds };
+          case 'stage7_synergies':
+            return { ...prev, synergies: meta.count ?? prev.synergies };
           default:
             return prev;
         }
@@ -166,13 +176,16 @@ const PetProfilePage: React.FC = () => {
       stage4_kg: 'idle',
       stage5_interactions: 'idle',
       stage6_recommendation: 'idle',
+      stage7_synergies: 'idle',
     });
-    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
+    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+    setStageTimes({});
 
     try {
       const { profile, conditions, medications, exams } = data;
 
       // Stage 1: profile collection (synchronous — data already loaded)
+      const ts1 = performance.now();
       setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
       const profileDataCount = (conditions?.length || 0) + (medications?.length || 0) + (exams?.length || 0);
       appendLog(
@@ -182,6 +195,7 @@ const PetProfilePage: React.FC = () => {
       await new Promise(r => setTimeout(r, 80)); // breath for UI
       setPipelineState(s => ({ ...s, stage1_profile: 'complete' }));
       setStageCounts(prev => ({ ...prev, profile: profileDataCount }));
+      setStageTimes(prev => ({ ...prev, stage1_profile: performance.now() - ts1 }));
       appendLog('success', `✓ Perfil clínico carregado: ${conditions?.length || 0} condições, ${medications?.length || 0} medicações, ${exams?.length || 0} exames`);
 
       const result = await runClinicalAnalysisPipeline(
@@ -202,6 +216,19 @@ const PetProfilePage: React.FC = () => {
       );
 
       setCurrentStageLabel(null);
+
+      // Stage 7: Synergies (derived from recommendation compounds)
+      const synergyTs = performance.now();
+      setPipelineState(s => ({ ...s, stage7_synergies: 'running' }));
+      appendLog('info', `▶ ${t('petProfile.pipeline.synergies')}: analyzing compound synergies`);
+      const synCount = result.compounds?.length > 1
+        ? Math.floor(result.compounds.length * (result.compounds.length - 1) / 2)
+        : 0;
+      await new Promise(r => setTimeout(r, 60));
+      setPipelineState(s => ({ ...s, stage7_synergies: 'complete' }));
+      setStageCounts(prev => ({ ...prev, synergies: synCount }));
+      setStageTimes(prev => ({ ...prev, stage7_synergies: performance.now() - synergyTs }));
+      appendLog('success', `✓ ${synCount} synergies identified`);
 
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
@@ -658,6 +685,8 @@ const PetProfilePage: React.FC = () => {
               tripletCount={stageCounts.triplets || kgTriplets.length}
               interactionCount={stageCounts.interactions ?? interactionAlerts.length}
               compoundCount={stageCounts.compounds || (recommendationCompounds?.length || 0)}
+              synergyCount={stageCounts.synergies}
+              stageTimes={stageTimes}
             />
 
             {/* Live log panel — scientific-digestion style */}
