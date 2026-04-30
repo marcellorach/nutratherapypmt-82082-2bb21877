@@ -90,6 +90,7 @@ const PetProfilePage: React.FC = () => {
     stage4_kg: t('petProfile.pipeline.knowledgeGraph'),
     stage5_interactions: t('petProfile.pipeline.interactions'),
     stage6_recommendation: t('petProfile.pipeline.recommendation'),
+    stage7_synergies: t('petProfile.pipeline.synergies'),
   };
 
   const appendLog = (level: ClinicalLogEntry['level'], message: string, stage?: string) => {
