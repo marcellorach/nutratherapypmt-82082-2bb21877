@@ -683,6 +683,8 @@ const PetProfilePage: React.FC = () => {
               tripletCount={stageCounts.triplets || kgTriplets.length}
               interactionCount={stageCounts.interactions ?? interactionAlerts.length}
               compoundCount={stageCounts.compounds || (recommendationCompounds?.length || 0)}
+              synergyCount={stageCounts.synergies}
+              stageTimes={stageTimes}
             />
 
             {/* Live log panel — scientific-digestion style */}
