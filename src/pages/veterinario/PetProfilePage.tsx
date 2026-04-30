@@ -66,6 +66,7 @@ const PetProfilePage: React.FC = () => {
     stage4_kg: 'idle',
     stage5_interactions: 'idle',
     stage6_recommendation: 'idle',
+    stage7_synergies: 'idle',
   });
   const [pipelineLog, setPipelineLog] = useState<ClinicalLogEntry[]>([]);
   const [currentStageLabel, setCurrentStageLabel] = useState<string | null>(null);
@@ -166,8 +167,10 @@ const PetProfilePage: React.FC = () => {
       stage4_kg: 'idle',
       stage5_interactions: 'idle',
       stage6_recommendation: 'idle',
+      stage7_synergies: 'idle',
     });
-    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0 });
+    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+    setStageTimes({});
 
     try {
       const { profile, conditions, medications, exams } = data;
