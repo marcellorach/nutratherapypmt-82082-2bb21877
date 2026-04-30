@@ -724,19 +724,7 @@ const PetProfilePage: React.FC = () => {
 
             {/* Analysis by Condition - ComorbidityMap + full ConditionInsightCards */}
             {recommendationCompounds && (
-              <Tabs defaultValue="analysis" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="analysis" className="gap-1">
-                    <Stethoscope className="h-3.5 w-3.5" />
-                    {t('petProfile.sectionTabs.analysis', 'Análise Clínica')}
-                  </TabsTrigger>
-                  <TabsTrigger value="digitalTwin" className="gap-1">
-                    <Dna className="h-3.5 w-3.5" />
-                    {t('petProfile.sectionTabs.digitalTwin', 'Digital Twin')}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="analysis" className="space-y-4">
+              <div className="space-y-4">
             {conditions.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
@@ -851,20 +839,7 @@ const PetProfilePage: React.FC = () => {
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}
-                </TabsContent>
-
-                <TabsContent value="digitalTwin">
-                  <DigitalTwinDog
-                    conditions={conditions}
-                    petName={profile.name}
-                    petBreed={profile.breed}
-                    petAge={profile.age_years}
-                    petId={id!}
-                    onRequestAnalysis={handleAnalyzeWithKG}
-                    isAnalyzing={analyzing}
-                  />
-                </TabsContent>
-              </Tabs>
+              </div>
             )}
           </div>
 
