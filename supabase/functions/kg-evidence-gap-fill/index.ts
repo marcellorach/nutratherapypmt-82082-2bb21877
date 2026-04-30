@@ -275,12 +275,17 @@ async function assessWithPerplexity(
           'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
           'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
           'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+          'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
+          'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
+          'emerging evidence for this condition in aging dogs. ' +
           'Be conservative. Return ONLY structured JSON matching the schema.',
       },
       {
         role: 'user',
         content:
           `COMPOUND: ${compound}\nCONDITION: ${condition} (canine target)\n\n` +
+          'Search broadly: include geroprotector studies, nutraceutical interventions, ' +
+          'pharmaceutical therapies, and any geroscience-relevant evidence for this compound-condition pair.\n\n' +
           'Scoring scale (efficacy_0_5):\n' +
           ' 0 = no evidence at all\n' +
           ' 1 = anecdotal / case report only\n' +
