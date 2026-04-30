@@ -185,6 +185,7 @@ const PetProfilePage: React.FC = () => {
       const { profile, conditions, medications, exams } = data;
 
       // Stage 1: profile collection (synchronous — data already loaded)
+      const ts1 = performance.now();
       setPipelineState(s => ({ ...s, stage1_profile: 'running' }));
       const profileDataCount = (conditions?.length || 0) + (medications?.length || 0) + (exams?.length || 0);
       appendLog(
@@ -194,6 +195,7 @@ const PetProfilePage: React.FC = () => {
       await new Promise(r => setTimeout(r, 80)); // breath for UI
       setPipelineState(s => ({ ...s, stage1_profile: 'complete' }));
       setStageCounts(prev => ({ ...prev, profile: profileDataCount }));
+      setStageTimes(prev => ({ ...prev, stage1_profile: performance.now() - ts1 }));
       appendLog('success', `✓ Perfil clínico carregado: ${conditions?.length || 0} condições, ${medications?.length || 0} medicações, ${exams?.length || 0} exames`);
 
       const result = await runClinicalAnalysisPipeline(
