@@ -98,8 +98,8 @@ function compactYear(
   const lowerCovered = new Set(Array.from(coveredNames).map(n => n.toLowerCase()));
   return {
     year: y.year,
-    ageAtYear: y.age_at_year,
-    biologicalAge: y.biological_age,
+    ageAtYear: y.age_at_year ?? 0,
+    biologicalAge: y.biological_age ?? 0,
     expectedRemainingYears: y.expected_remaining_years ?? 0,
     existing: (y.existing_conditions || []).map(ec => ({
       name: ec.name,
