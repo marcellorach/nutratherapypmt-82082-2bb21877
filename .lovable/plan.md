@@ -1,63 +1,35 @@
-## Problema raiz
 
-A busca do Perplexity **está funcionando** — encontrou evidências reais (ex: Chondroitin Sulfate → Osteoarthritis, clinical trial canino, efficacy 4/5). Porém **100% dos inserts falham** por dois bugs de mapeamento:
+## Problemas identificados
 
-1. **`direction: 'positive'`** — o constraint `chk_direction` só aceita: `improves | worsens | neutral | bidirectional`
-2. **`evidence_level`** — o código envia valores como `clinical_trial`, `in_vivo`, `review`, `unclear`, mas o constraint `chk_evidence_level` só aceita: `meta_analysis | rct | cohort | case_control | case_report | in_vitro | expert_opinion`
+### a) Busca de evidências desapareceu
+Na última consolidação de tabs, o componente `DigitalTwinDog` (que contém o `EvidenceGapCard` com busca + log panel) foi removido do `PetProfilePage.tsx`. Apenas o `BiologicalTimeline` permanece na tab "trajectory". O `DigitalTwinDog` está importado e funcional, mas não está renderizado em nenhum lugar da página.
 
-Por isso: 10 pares buscados, 1 estudo inserido (o estudo científico em si é salvo OK), mas 0 triplets pendentes (todos falharam no insert).
+### b) Avatares dos cães com marcadores incorretos
+A lógica em `buildMarkers()` funciona assim:
+- **Sem protocolo**: `buildMarkers(yearWithout, new Set(), false)` -- mostra marcadores mas nenhum como "protegido"
+- **Com protocolo**: `buildMarkers(yearWith, coveredNames, true)` -- mostra marcadores com ★ nos protegidos
 
----
+O problema é que a API de trajetória provavelmente retorna dados diferentes para `years_without_protocol` e `years_with_protocol`. Se `yearWithout` vier vazio ou sem `existing_conditions`, o avatar "sem protocolo" fica limpo e as doenças só aparecem no "com protocolo" -- invertendo a lógica visual.
 
-## Plano
-
-### 1. Corrigir mapeamento de valores no Edge Function
-
-**Arquivo:** `supabase/functions/kg-evidence-gap-fill/index.ts`
-
-- Mapear `direction: 'positive'` → `'improves'`, `'negative'` → `'worsens'`
-- Criar dicionário de mapeamento para `evidence_level`:
-  - `clinical_trial` → `rct`
-  - `in_vivo` → `cohort`
-  - `review` → `expert_opinion`
-  - `unclear` → `expert_opinion`
-  - `case_report` → `case_report` (OK)
-  - `meta_analysis` → `meta_analysis` (OK)
-  - `in_vitro` → `in_vitro` (OK)
-
-### 2. Melhorar UI com conclusões claras
-
-**Arquivo:** `src/components/pet/EvidenceGapCard.tsx`
-
-- Para cada par no `details`, exibir:
-  - Score de eficácia (0-5) com barra visual colorida
-  - Nível de evidência (badge)
-  - Rationale/conclusão do Gemini/Perplexity (texto colapsável)
-  - PMIDs citados como links para PubMed
-  - Espécie da evidência (canine vs rodent vs human)
-- Separar visualmente pares com sucesso vs falha vs sem evidência
-
-### 3. Adicionar ação "Enviar para curadoria no Grafo"
-
-**Arquivo:** `src/components/pet/EvidenceGapCard.tsx`
-
-- Após busca com resultados, mostrar botão "Abrir Curadoria de Triplets" que leva à tab de curadoria admin (`/administrador?tab=triplet-curation`)
-- O botão já existe parcialmente (quando `pendingCount > 0`), mas precisa funcionar melhor após a correção dos inserts — agora os triplets serão criados corretamente como `pending`
-
-### 4. Governança (i18n + changelog)
-
-- Adicionar chaves PT/EN para novos textos (rationale, efficacy labels)
-- Incrementar `I18N_VERSION` para `1.47.0`
-- Atualizar `CHANGELOG.md`
+### c) Perplexity
+O Perplexity JA está integrado na edge function `kg-evidence-gap-fill`. A chave `PERPLEXITY_API_KEY` é lida via `Deno.env.get()`. Precisa verificar se o connector está ativo.
 
 ---
 
-## Resultado esperado
+## Plano de implementação
 
-Ao clicar "Search PubMed for evidence":
-1. Perplexity/PubMed buscam evidências para cada par (compound × condition)
-2. Estudos científicos são salvos no DB
-3. **Triplets são inseridos como `pending`** (bug corrigido)
-4. UI mostra conclusão clara: "Chondroitin Sulfate → Osteoarthritis: efficacy 4/5, clinical trial canino, rationale: ..."
-5. Botão para ir à curadoria aparece com contagem de triplets pendentes
-6. Na curadoria, o admin aprova/rejeita, e os aprovados alimentam o Knowledge Graph e o Digital Twin
+### 1. Restaurar `DigitalTwinDog` no PetProfilePage
+- Adicionar `DigitalTwinDog` de volta ao `PetProfilePage.tsx`, dentro da tab "trajectory" (substituindo ou complementando o `BiologicalTimeline`)
+- O `DigitalTwinDog` já inclui internamente o `EvidenceGapCard` (busca com logs) e o `DigitalTwinLogPanel`
+- Isso restaura toda a funcionalidade de busca de evidências que estava funcionando
+
+### 2. Corrigir lógica dos marcadores nos avatares
+- Garantir que `markersWithout` sempre receba as condições existentes do pet (fallback para os dados do cenário "com protocolo" se o cenário "sem" vier vazio)
+- Ambos os avatares devem mostrar os marcadores de doenças; a diferença visual é que no "com protocolo" os marcadores cobertos pelo KG ganham ★ (protegido) e potencialmente severidade reduzida
+
+### 3. Verificar connector Perplexity
+- Confirmar se o connector está ativo para que as buscas realmente funcionem
+
+### 4. i18n
+- Incrementar `I18N_VERSION` se houver novas chaves
+- Atualizar CHANGELOG.md
