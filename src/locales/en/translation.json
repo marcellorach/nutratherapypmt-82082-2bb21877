@@ -6874,6 +6874,21 @@
         "clear": "Clear",
         "export": "Export",
         "waiting": "Waiting for pipeline events..."
+      },
+      "synergies": "Synergies",
+      "synergiesCount": "synergies",
+      "totalTime": "Total",
+      "dtLog": {
+        "title": "Digital Twin Console",
+        "eventCount": "{{count}} events",
+        "clear": "Clear",
+        "export": "Export",
+        "waiting": "Waiting for Digital Twin projection...",
+        "starting": "Starting trajectory projection...",
+        "calling": "Calling AI model for projection...",
+        "received": "Projection received successfully",
+        "error": "Projection error",
+        "cached": "Using cached projection"
       }
     },
     "conditionInsights": {
