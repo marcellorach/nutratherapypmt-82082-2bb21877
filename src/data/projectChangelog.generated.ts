@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T20:25:39.777Z
+// Última geração: 2026-04-30T20:44:03.382Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,23 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "infra",
+    "status": "entregue",
+    "title": "Edge function kg-evidence-gap-fill: PascalCase types + FK study_id",
+    "bullets": [
+      "Corrigido `subject_type: 'compound'` → `'Compound'` e `object_type: 'condition'` → `'Condition'` — constraint `triplet_extractions_object_type_check` rejeitava todos os inserts",
+      "Corrigido `study_id` FK violation: FK aponta para `processed_studies`, não `scientific_studies`. Gap-fill triplets agora usam `study_id = null` com proveniência em `approval_chain.cited_pmids`",
+      "Verificado: triplet \"Chondroitin Sulfate treats Osteoarthritis\" salvo com sucesso como pending",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",

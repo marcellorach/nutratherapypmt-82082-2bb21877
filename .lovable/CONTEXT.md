@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-04-30T20:25:39.781Z
+Generated: 2026-04-30T20:44:03.385Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -10,11 +10,17 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 7
 - **kg**: 5
 - **vet-ui**: 4
+- **infra**: 2
 - **i18n**: 2
 - **clinical-pipeline**: 2
-- **infra**: 1
 
 ## Top 10 recent entries
+### 2026-04-30 · [infra] FIXED — Edge function kg-evidence-gap-fill: PascalCase types + FK study_id
+- Corrigido `subject_type: 'compound'` → `'Compound'` e `object_type: 'condition'` → `'Condition'` — constraint `triplet_extractions_object_type_check` rejeitava todos os inserts
+- Corrigido `study_id` FK violation: FK aponta para `processed_studies`, não `scientific_studies`. Gap-fill triplets agora usam `study_id = null` com proveniência em `approval_chain.cited_pmids`
+- Verificado: triplet "Chondroitin Sulfate treats Osteoarthritis" salvo com sucesso como pending
+_files: supabase/functions/kg-evidence-gap-fill/index.ts_
+
 ### 2026-04-30 · [infra] FIXED — Edge function kg-evidence-gap-fill: constraint violation + timeout
 - Corrigido bug onde campo `direction` era inserido como `positive` (valor inválido) em vez de `improves` — constraint `chk_direction` rejeitava todos os triplets encontrados pelo Perplexity
 - `mapEvidenceLevel` garante mapeamento `clinical_trial` → `rct` para satisfazer constraint `chk_evidence_level`
@@ -68,12 +74,6 @@ _files: src/pages/administrador/OrganogramaTab.tsx, src/data/projectOrganograma.
 - Nova tab admin "Diagnóstico Gap-Fill": tela completa para inspecionar health_conditions (name_en), nutraceuticals (name_en), links pet_conditions ↔ condition_id, e todos os triplets gerados pelo gap-fill. Badges visuais indicam dados faltantes que impedem a pipeline.
 - Files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts
 _files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts_
-
-### 2026-04-30 · [kg] FIXED — Restauração do pipeline de evidências (gap-fill → projeção → gêmeo digital)
-- Deploy das Edge Functions: `kg-evidence-gap-fill`, `kg-missing-triplets`, `perplexity-health`, `provider-health` e `project-pet-trajectory` estavam retornando 404 (não publicadas). Agora todas estão ativas no backend.
-- Backfill canônico: migração preencheu `pet_conditions.condition_id` (match por nome em `health_conditions`) e `nutraceuticals.name_en` para os 22 compostos que estavam sem nome inglês — requisito para o gap-fill montar pares de busca.
-- Auth do gap-fill: substituído `getClaims` (indisponível na versão do SDK) por `getUser` para autenticação robusta do admin.
-_files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
