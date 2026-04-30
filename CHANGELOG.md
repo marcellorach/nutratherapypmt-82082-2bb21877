@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-30 — Edge function kg-evidence-gap-fill: constraint violation + timeout
+<!-- area: infra · status: entregue · i18n: — -->
+- Corrigido bug onde campo `direction` era inserido como `positive` (valor inválido) em vez de `improves` — constraint `chk_direction` rejeitava todos os triplets encontrados pelo Perplexity
+- `mapEvidenceLevel` garante mapeamento `clinical_trial` → `rct` para satisfazer constraint `chk_evidence_level`
+- Reduzido `max_pairs` default de 12 para 5 para evitar timeout de conexão HTTP (cada par leva ~20-30s no Perplexity)
+- Stream controller close protegido contra "stream already closed" error
+- Edge function redeployada com versão corrigida
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts
+
 ### Fixed - 2026-04-30 — Restaurado Digital Twin + busca de evidências + marcadores dos avatares
 <!-- area: vet-ui · status: entregue · i18n: — -->
 - `DigitalTwinDog` (com `EvidenceGapCard` e log panel) restaurado na tab "trajectory" do PetProfilePage — havia sido removido na consolidação de tabs anterior

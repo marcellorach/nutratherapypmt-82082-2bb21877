@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T19:59:39.021Z
+// Última geração: 2026-04-30T20:25:39.777Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,25 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "infra",
+    "status": "entregue",
+    "title": "Edge function kg-evidence-gap-fill: constraint violation + timeout",
+    "bullets": [
+      "Corrigido bug onde campo `direction` era inserido como `positive` (valor inválido) em vez de `improves` — constraint `chk_direction` rejeitava todos os triplets encontrados pelo Perplexity",
+      "`mapEvidenceLevel` garante mapeamento `clinical_trial` → `rct` para satisfazer constraint `chk_evidence_level`",
+      "Reduzido `max_pairs` default de 12 para 5 para evitar timeout de conexão HTTP (cada par leva ~20-30s no Perplexity)",
+      "Stream controller close protegido contra \"stream already closed\" error",
+      "Edge function redeployada com versão corrigida",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",
