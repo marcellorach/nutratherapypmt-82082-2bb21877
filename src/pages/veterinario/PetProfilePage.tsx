@@ -113,6 +113,10 @@ const PetProfilePage: React.FC = () => {
     } else if (e.kind === 'stage-end') {
       setPipelineState(s => ({ ...s, [e.stage]: 'complete' }));
       appendLog('success', `✓ ${e.message}`, STAGE_LABELS[e.stage]);
+      // Capture stage duration
+      if (e.meta?.durationMs != null) {
+        setStageTimes(prev => ({ ...prev, [e.stage]: e.meta!.durationMs }));
+      }
       // Live-update the counter for the stage that just completed
       const meta = e.meta || {};
       setStageCounts(prev => {
@@ -131,6 +135,8 @@ const PetProfilePage: React.FC = () => {
             };
           case 'stage6_recommendation':
             return { ...prev, compounds: meta.compounds ?? prev.compounds };
+          case 'stage7_synergies':
+            return { ...prev, synergies: meta.count ?? prev.synergies };
           default:
             return prev;
         }
