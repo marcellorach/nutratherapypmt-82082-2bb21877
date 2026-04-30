@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-04-30 — Internacionalização completa do Organograma do Projeto
+<!-- area: i18n · status: entregue · i18n: 1.42.0 -->
+- **7 arquivos corrigidos**: OrganogramaTab, OrganogramaCards, OrganogramaDiagram, OrganogramaForceGraph, ChangelogTimeline, AreaMiniTimeline — todos agora usam `useTranslation()` + `t()` para textos visíveis.
+- **projectOrganograma.ts bilíngue**: todas as ~60 entidades (áreas, filhos, convenções) agora possuem campos `title_en`, `description_en`, `label_en`, `value_en`.
+- **~50 chaves i18n** criadas no namespace `organograma` em ambos `translation.json` (PT/EN).
+- **useLocalizedField** reutilizado para selecionar título/descrição pelo idioma ativo.
+- Files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/organograma/*.tsx, src/data/projectOrganograma.ts
+
 ### Added - 2026-04-30 — Diagnóstico Gap-Fill e detalhamento de fontes no EvidenceGapCard
 <!-- area: kg · status: entregue · i18n: 1.41.9 -->
 - **EvidenceGapCard expandido**: agora exibe breakdown por fonte (Perplexity / PubMed) com contagem de consultas, sucessos, falhas e motivos de ausência de evidências. Erros inline e flag de "sem chave Perplexity" nos detalhes de cada par.

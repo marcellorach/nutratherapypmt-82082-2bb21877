@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
 import { AreaMiniTimeline } from "./AreaMiniTimeline";
 import {
@@ -14,13 +16,15 @@ import {
   type OrganogramaNode,
 } from "@/data/projectOrganograma";
 
-function nodeMatchesQuery(node: OrganogramaNode, q: string): boolean {
+function nodeMatchesQuery(node: OrganogramaNode, q: string, isEn: boolean): boolean {
   if (!q) return true;
   const needle = q.toLowerCase();
-  if (node.title.toLowerCase().includes(needle)) return true;
-  if (node.description?.toLowerCase().includes(needle)) return true;
+  const title = (isEn ? node.title_en : null) || node.title;
+  const desc = (isEn ? node.description_en : null) || node.description;
+  if (title.toLowerCase().includes(needle)) return true;
+  if (desc?.toLowerCase().includes(needle)) return true;
   if (node.files?.some((f) => f.toLowerCase().includes(needle))) return true;
-  if (node.children?.some((c) => nodeMatchesQuery(c, needle))) return true;
+  if (node.children?.some((c) => nodeMatchesQuery(c, needle, isEn))) return true;
   return false;
 }
 
@@ -37,6 +41,7 @@ function OrgNode({ node, depth, query, expandSignal, collapseSignal, forceOpen }
   const hasChildren = !!node.children?.length;
   const initiallyOpen = !!query || depth < 1;
   const [open, setOpen] = useState(initiallyOpen);
+  const { localizedField } = useLocalizedField();
 
   React.useEffect(() => {
     if (expandSignal > 0 || forceOpen) setOpen(true);
@@ -45,18 +50,14 @@ function OrgNode({ node, depth, query, expandSignal, collapseSignal, forceOpen }
     if (collapseSignal > 0) setOpen(false);
   }, [collapseSignal]);
 
-  if (query && !nodeMatchesQuery(node, query)) return null;
+  const { isEnglish: isEn } = useLocalizedField();
+  if (query && !nodeMatchesQuery(node, query, isEn)) return null;
 
   return (
     <div className={cn("relative", depth > 0 && "border-l border-border/60 ml-3 pl-4")}>
       <div className="flex items-start gap-2 py-1.5">
         {hasChildren ? (
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded hover:bg-muted text-muted-foreground"
-            aria-label={open ? "Recolher" : "Expandir"}
-          >
+          <button type="button" onClick={() => setOpen((v) => !v)} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded hover:bg-muted text-muted-foreground">
             {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
         ) : (
@@ -65,9 +66,9 @@ function OrgNode({ node, depth, query, expandSignal, collapseSignal, forceOpen }
           </span>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium leading-snug">{node.title}</p>
-          {node.description && (
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{node.description}</p>
+          <p className="text-sm font-medium leading-snug">{localizedField(node, 'title')}</p>
+          {(node.description || node.description_en) && (
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{localizedField(node, 'description')}</p>
           )}
           {node.files && node.files.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">
@@ -112,10 +113,12 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
   const [asciiMode, setAsciiMode] = useState(false);
   const [expandSignal, setExpandSignal] = useState(0);
   const [collapseSignal, setCollapseSignal] = useState(0);
+  const { t } = useTranslation();
+  const { localizedField, isEnglish } = useLocalizedField();
 
   const visible = useMemo(
-    () => organograma.filter((a) => nodeMatchesQuery(a, query)),
-    [query],
+    () => organograma.filter((a) => nodeMatchesQuery(a, query, isEnglish)),
+    [query, isEnglish],
   );
 
   return (
@@ -124,7 +127,7 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar área, descrição ou arquivo..."
+            placeholder={t('organograma.searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
@@ -132,10 +135,10 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setExpandSignal((v) => v + 1)}>
-            Expandir tudo
+            {t('organograma.expandAll')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setCollapseSignal((v) => v + 1)}>
-            Recolher tudo
+            {t('organograma.collapseAll')}
           </Button>
           <Button
             variant={asciiMode ? "default" : "outline"}
@@ -159,7 +162,7 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
       ) : visible.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            Nenhuma área encontrada para "{query}".
+            {t('organograma.noAreasFound', { query })}
           </CardContent>
         </Card>
       ) : (
@@ -181,10 +184,10 @@ export const OrganogramaCards: React.FC<Props> = ({ highlightedAreaKey }) => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Icon className={cn("h-5 w-5", meta.tone)} />
-                    {area.title}
+                    {localizedField(area, 'title')}
                   </CardTitle>
-                  {area.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{area.description}</p>
+                  {(area.description || area.description_en) && (
+                    <p className="text-xs text-muted-foreground mt-1">{localizedField(area, 'description')}</p>
                   )}
                 </CardHeader>
                 <CardContent className="pt-0">

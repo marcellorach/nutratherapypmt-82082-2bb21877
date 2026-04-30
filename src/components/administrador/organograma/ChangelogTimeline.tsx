@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import {
   changelog,
   type ChangelogEntry,
@@ -19,33 +20,18 @@ import {
 import { lastChangelogDate } from "@/data/projectChangelog";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
 
-const STATUS_META: Record<
-  ChangelogStatus,
-  { label: string; icon: typeof CheckCircle2; className: string }
-> = {
-  entregue: {
-    label: "Entregue",
-    icon: CheckCircle2,
-    className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-  },
-  parcial: {
-    label: "Parcial",
-    icon: AlertTriangle,
-    className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  },
-  revertido: {
-    label: "Revertido",
-    icon: RotateCcw,
-    className: "bg-muted text-muted-foreground border-border",
-  },
+const STATUS_META: Record<ChangelogStatus, { i18nKey: string; icon: typeof CheckCircle2; className: string }> = {
+  entregue: { i18nKey: "organograma.delivered", icon: CheckCircle2, className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  parcial: { i18nKey: "organograma.partial", icon: AlertTriangle, className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  revertido: { i18nKey: "organograma.reverted", icon: RotateCcw, className: "bg-muted text-muted-foreground border-border" },
 };
 
-const KIND_LABEL: Record<string, string> = {
-  added: "Adicionado",
-  changed: "Alterado",
-  fixed: "Corrigido",
-  removed: "Removido",
-  security: "Segurança",
+const KIND_I18N: Record<string, string> = {
+  added: "organograma.kindAdded",
+  changed: "organograma.kindChanged",
+  fixed: "organograma.kindFixed",
+  removed: "organograma.kindRemoved",
+  security: "organograma.kindSecurity",
 };
 
 function formatDate(iso: string): string {
@@ -71,6 +57,7 @@ export const ChangelogTimeline: React.FC = () => {
   const [query, setQuery] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { t } = useTranslation();
 
   const areas = useMemo(() => {
     const set = new Set<string>();
@@ -102,16 +89,16 @@ export const ChangelogTimeline: React.FC = () => {
       <div className="flex items-center gap-2 text-xs text-muted-foreground rounded-md border border-dashed bg-muted/30 px-3 py-2">
         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
         <span>
-          Auto-sincronizado a partir de <code className="font-mono">CHANGELOG.md</code>
-          {lastChangelogDate ? <> · última entrada em <strong>{lastChangelogDate}</strong></> : null}
-          . Para adicionar mudanças: edite o CHANGELOG e rode <code className="font-mono">npm run sync:changelog</code>.
+          {t('organograma.changelogSyncInfo')} <code className="font-mono">CHANGELOG.md</code>
+          {lastChangelogDate ? <> · {t('organograma.changelogLastEntry')} <strong>{lastChangelogDate}</strong></> : null}
+          . {t('organograma.changelogEditInstructions')} <code className="font-mono">npm run sync:changelog</code>.
         </span>
       </div>
       <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por título, bullet ou arquivo..."
+            placeholder={t('organograma.changelogSearchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
@@ -122,7 +109,7 @@ export const ChangelogTimeline: React.FC = () => {
             <SelectValue placeholder="Área" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas as áreas</SelectItem>
+            <SelectItem value="all">{t('organograma.allAreas')}</SelectItem>
             {areas.map((a) => {
               const meta = getAreaMeta(a);
               return (
@@ -138,21 +125,21 @@ export const ChangelogTimeline: React.FC = () => {
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="entregue">Entregue</SelectItem>
-            <SelectItem value="parcial">Parcial</SelectItem>
-            <SelectItem value="revertido">Revertido</SelectItem>
+            <SelectItem value="all">{t('organograma.allStatuses')}</SelectItem>
+            <SelectItem value="entregue">{t('organograma.delivered')}</SelectItem>
+            <SelectItem value="parcial">{t('organograma.partial')}</SelectItem>
+            <SelectItem value="revertido">{t('organograma.reverted')}</SelectItem>
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground whitespace-nowrap sm:ml-2">
-          {filtered.length} {filtered.length === 1 ? "alteração" : "alterações"}
+          {filtered.length} {filtered.length === 1 ? t('organograma.change') : t('organograma.changes')}
         </p>
       </div>
 
       {grouped.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            Nenhuma alteração encontrada.
+            {t('organograma.noChangesFound')}
           </CardContent>
         </Card>
       ) : (
@@ -189,10 +176,10 @@ export const ChangelogTimeline: React.FC = () => {
                               className={cn("gap-1", statusMeta.className)}
                             >
                               <StatusIcon className="h-3 w-3" />
-                              {statusMeta.label}
+                              {t(statusMeta.i18nKey)}
                             </Badge>
                             <Badge variant="secondary" className="text-[10px]">
-                              {KIND_LABEL[entry.kind] ?? entry.kind}
+                              {t(KIND_I18N[entry.kind] ?? entry.kind)}
                             </Badge>
                           </div>
                         </div>
