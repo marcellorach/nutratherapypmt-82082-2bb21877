@@ -12,8 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import EvidenceGapLogPanel, { type GapLogEntry } from './EvidenceGapLogPanel';
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
 interface EvidenceGapCardProps {
   petId: string;
   yearsGained: number;
