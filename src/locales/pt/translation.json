@@ -7335,7 +7335,9 @@
       "assessment_failed": "IA falhou",
       "triplet_failed": "insert falhou",
       "dry_run": "dry-run",
-      "error": "erro"
-    }
+      "error": "erro",
+      "no_evidence": "sem evidência"
+    },
+    "backendUnavailable": "Função de busca indisponível no backend. Verifique se as Edge Functions estão publicadas."
   }
 }

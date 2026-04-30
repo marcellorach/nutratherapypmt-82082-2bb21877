@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-04-30 — Restauração do pipeline de evidências (gap-fill → projeção → gêmeo digital)
+<!-- area: kg · status: entregue · i18n: 1.41.8 -->
+- **Deploy das Edge Functions**: `kg-evidence-gap-fill`, `kg-missing-triplets`, `perplexity-health`, `provider-health` e `project-pet-trajectory` estavam retornando 404 (não publicadas). Agora todas estão ativas no backend.
+- **Backfill canônico**: migração preencheu `pet_conditions.condition_id` (match por nome em `health_conditions`) e `nutraceuticals.name_en` para os 22 compostos que estavam sem nome inglês — requisito para o gap-fill montar pares de busca.
+- **Auth do gap-fill**: substituído `getClaims` (indisponível na versão do SDK) por `getUser` para autenticação robusta do admin.
+- **Preview Perplexity na projeção**: `project-pet-trajectory` agora inclui triplets pending de `perplexity_gap_fill` além de `pubmed_gap_fill` no modo preview, para que o gêmeo digital reflita evidências de ambas as fontes.
+- **UX de erro**: `EvidenceGapCard` distingue "backend indisponível" de outros erros, com mensagem acionável bilíngue.
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-04-30 — Seletor de modelo Perplexity + tester genérico de provedores
 <!-- area: admin · status: entregue · i18n: 1.41.7 -->
 - `perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.
