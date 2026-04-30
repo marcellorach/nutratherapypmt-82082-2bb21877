@@ -448,7 +448,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const {
       pet_id, condition_id, compound_ids, pairs: directedPairs,
-      max_pairs = 12, dry_run = false,
+      max_pairs = 5, dry_run = false,
       perplexity_model: bodyPerplexityModel,
     } = body;
     const logBody = {
@@ -488,10 +488,10 @@ Deno.serve(async (req) => {
       responsePromise.then((result) => {
         emit('result', result);
         emit('done');
-        streamController?.close();
+        try { streamController?.close(); } catch { /* already closed */ }
       }).catch((err) => {
         emit('error', { message: String(err) });
-        streamController?.close();
+        try { streamController?.close(); } catch { /* already closed */ }
       });
       return new Response(stream, {
         headers: { ...corsHeaders, 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'no-store' },
