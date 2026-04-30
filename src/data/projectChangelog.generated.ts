@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T12:39:46.439Z
+// Última geração: 2026-04-30T14:46:08.380Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,30 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-04-30";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-04-30",
+    "kind": "fixed",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Restauração do pipeline de evidências (gap-fill → projeção → gêmeo digital)",
+    "bullets": [
+      "Deploy das Edge Functions: `kg-evidence-gap-fill`, `kg-missing-triplets`, `perplexity-health`, `provider-health` e `project-pet-trajectory` estavam retornando 404 (não publicadas). Agora todas estão ativas no backend.",
+      "Backfill canônico: migração preencheu `pet_conditions.condition_id` (match por nome em `health_conditions`) e `nutraceuticals.name_en` para os 22 compostos que estavam sem nome inglês — requisito para o gap-fill montar pares de busca.",
+      "Auth do gap-fill: substituído `getClaims` (indisponível na versão do SDK) por `getUser` para autenticação robusta do admin.",
+      "Preview Perplexity na projeção: `project-pet-trajectory` agora inclui triplets pending de `perplexity_gap_fill` além de `pubmed_gap_fill` no modo preview, para que o gêmeo digital reflita evidências de ambas as fontes.",
+      "UX de erro: `EvidenceGapCard` distingue \"backend indisponível\" de outros erros, com mensagem acionável bilíngue.",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "supabase/functions/project-pet-trajectory/index.ts",
+      "src/components/pet/EvidenceGapCard.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.41.8"
+  },
   {
     "date": "2026-04-30",
     "kind": "added",

@@ -1,17 +1,23 @@
 # Project context briefing (auto)
-Generated: 2026-04-30T12:39:46.442Z
+Generated: 2026-04-30T14:46:08.384Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.41.7
+## Latest i18n version: 1.41.8
 
 ## Changes by area (last 14 days)
 - **admin**: 7
 - **meta**: 7
+- **kg**: 3
 - **vet-ui**: 3
-- **kg**: 2
 
 ## Top 10 recent entries
+### 2026-04-30 · [kg] FIXED — Restauração do pipeline de evidências (gap-fill → projeção → gêmeo digital)
+- Deploy das Edge Functions: `kg-evidence-gap-fill`, `kg-missing-triplets`, `perplexity-health`, `provider-health` e `project-pet-trajectory` estavam retornando 404 (não publicadas). Agora todas estão ativas no backend.
+- Backfill canônico: migração preencheu `pet_conditions.condition_id` (match por nome em `health_conditions`) e `nutraceuticals.name_en` para os 22 compostos que estavam sem nome inglês — requisito para o gap-fill montar pares de busca.
+- Auth do gap-fill: substituído `getClaims` (indisponível na versão do SDK) por `getUser` para autenticação robusta do admin.
+_files: supabase/functions/kg-evidence-gap-fill/index.ts, supabase/functions/project-pet-trajectory/index.ts, src/components/pet/EvidenceGapCard.tsx, src/i18n.ts…_
+
 ### 2026-04-30 · [admin] ADDED — Seletor de modelo Perplexity + tester genérico de provedores
 - `perplexity-health` agora retorna `supported_models` (catálogo Sonar) e aceita `model` no body/querystring para pingar o modelo selecionado; em falha, devolve `status`, `status_text`, `provider_error`, `hint` (401 chave inválida, 403 modelo fora do plano, 429 quota, 5xx provedor) e ecoa `model` testado.
 - Nova edge function `provider-health` (verify_jwt) que valida autenticação e escopo das chaves OpenAI / Claude / Gemini / Grok / Perplexity contra o endpoint real de chat de cada provedor e expõe HTTP status, mensagem de erro do upstream e dica acionável.
@@ -65,12 +71,6 @@ _files: scripts/__tests__/sync-changelog.test.mjs, src/i18n.ts, scripts/sync-cha
 - Refactor de `scripts/sync-changelog.mjs`: `parseMetaComment`, `extractFiles`, `inferArea`, `parseChangelog`, `KIND_MAP` e `AREA_RULES` agora são exportados; `main()` só roda quando o script é chamado como CLI (detecção via `import.meta.url` × `process.argv[1]`)
 - 22 testes em `scripts/__tests__/sync-changelog.test.mjs` cobrindo: separadores variados (`·`, `,`, `;`, `|`), `commit:` no metadata-comment, captura de paths em prosa/listas/crases, dedup, todas as extensões suportadas, inferência de área por path, ordenação por data, fallback de `status`/`area`, limpeza de ✅/``/emoji, hífen e em-dash em cabeçalhos, mapping `deprecated → changed`
 _files: src/test/setup.ts, scripts/sync-changelog.mjs, scripts/__tests__/sync-changelog.test.mjs_
-
-### 2026-04-29 · [admin] ADDED — Mini-timeline por área no Organograma com links de arquivos e commits
-- Novo `src/components/administrador/organograma/AreaMiniTimeline.tsx`: timeline vertical com bolinhas coloridas por tipo (added=verde, changed=âmbar, fixed=azul, removed=vermelho, security=roxo), expandir/recolher por entrada, filtros toggle por tipo e botão "Ver mais" (3 → 8)
-- Cada entrada expandida mostra bullets resumidos (até 3), chips de arquivos (até 8) e — quando presente — chip de commit com hash curto e ícone `GitCommit`
-- Arquivos e commits viram links externos quando `REPO_CONFIG.baseUrl` está configurado em `src/data/repoConfig.ts` (default vazio = chips estáticos seguros). Quando o GitHub estiver conectado via Connectors, basta preencher `baseUrl` para ativar todos os links
-_files: src/components/administrador/organograma/AreaMiniTimeline.tsx, src/data/repoConfig.ts, scripts/sync-changelog.mjs, src/data/changelogQuery.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
