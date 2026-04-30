@@ -63,11 +63,15 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     } catch (e: any) {
       const msg = e?.message || (typeof e === 'string' ? e : 'unknown');
       console.error('[EvidenceGapCard] gap-fill error', e);
+      const isFetchError = msg.includes('Failed to send a request') || msg.includes('Failed to fetch');
+      const displayMsg = isFetchError
+        ? t('evidenceGap.backendUnavailable', 'Função de busca indisponível no backend. Verifique se as Edge Functions estão publicadas.')
+        : msg;
       setLastResult({
         pairs_searched: 0, studies_added: 0, triplets_pending: 0,
-        message: msg,
+        message: displayMsg,
       });
-      toast.error(t('evidenceGap.toastError', { error: msg }));
+      toast.error(t('evidenceGap.toastError', { error: displayMsg }));
     }
   };
 
