@@ -754,8 +754,12 @@ Deno.serve(async (req) => {
         if (dry_run) {
             emit('pair_dry_run', { compound: pair.compound_en, condition: pair.condition_en, efficacy: assessment.efficacy_0_5 });
           details.push({
-            pair, status: 'dry_run', provider, assessment,
-            pmids: records.map(r => r.pmid), species_hint: speciesHint,
+            pair, status: 'dry_run', provider,
+            efficacy_0_5: assessment.efficacy_0_5,
+            evidence_level: assessment.evidence_level,
+            rationale: assessment.rationale,
+            cited_pmids: assessment.cited_pmids,
+            species_hint: speciesHint,
             cited_urls: citedUrls,
           });
           continue;
