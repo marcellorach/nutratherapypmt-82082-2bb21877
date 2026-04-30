@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { User, PawPrint, TestTube, Share2, ShieldAlert, Sparkles, Check, Loader2, Clock } from 'lucide-react';
+import { User, PawPrint, TestTube, Share2, ShieldAlert, Sparkles, Check, Loader2, Clock, Zap, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { BreedPredisposition, LabAlert, InteractionAlert } from '@/services/clinical-analysis-pipeline';
 
 export type PipelineStage = 'idle' | 'running' | 'complete' | 'error';
 
@@ -14,6 +13,7 @@ export interface PipelineState {
   stage4_kg: PipelineStage;
   stage5_interactions: PipelineStage;
   stage6_recommendation: PipelineStage;
+  stage7_synergies: PipelineStage;
 }
 
 interface Props {
@@ -24,6 +24,8 @@ interface Props {
   tripletCount?: number;
   interactionCount?: number;
   compoundCount?: number;
+  synergyCount?: number;
+  stageTimes?: Record<string, number>;
   isAnalyzing: boolean;
 }
 
@@ -35,6 +37,8 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
   tripletCount = 0,
   interactionCount = 0,
   compoundCount = 0,
+  synergyCount = 0,
+  stageTimes = {},
   isAnalyzing,
 }) => {
   const { t } = useTranslation();
@@ -46,6 +50,7 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
     { key: 'stage4_kg', icon: Share2, label: t('petProfile.pipeline.knowledgeGraph'), count: tripletCount, countLabel: t('petProfile.pipeline.triplets') },
     { key: 'stage5_interactions', icon: ShieldAlert, label: t('petProfile.pipeline.interactions'), count: interactionCount, countLabel: t('petProfile.pipeline.conflicts') },
     { key: 'stage6_recommendation', icon: Sparkles, label: t('petProfile.pipeline.recommendation'), count: compoundCount, countLabel: t('petProfile.pipeline.compounds') },
+    { key: 'stage7_synergies', icon: Zap, label: t('petProfile.pipeline.synergies'), count: synergyCount, countLabel: t('petProfile.pipeline.synergiesCount') },
   ];
 
   const getStatusIcon = (stage: PipelineStage) => {
@@ -59,13 +64,21 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
 
   if (!isAnalyzing && pipelineState.stage1_profile === 'idle') return null;
 
+  const totalTimeMs = Object.values(stageTimes).reduce((a, b) => a + b, 0);
+
+  const formatDuration = (ms: number) => {
+    if (ms < 1000) return `${Math.round(ms)}ms`;
+    return `${(ms / 1000).toFixed(1)}s`;
+  };
+
   return (
     <Card className="border-primary/20">
       <CardContent className="p-4">
-        <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1">
           {stages.map((stage, idx) => {
             const state = pipelineState[stage.key as keyof PipelineState];
             const Icon = stage.icon;
+            const stageTime = stageTimes[stage.key];
             return (
               <React.Fragment key={stage.key}>
                 {idx > 0 && (
@@ -97,9 +110,14 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
                   </div>
                   <span className="text-[10px] font-medium text-center leading-tight">{stage.label}</span>
                   {state === 'complete' && (
-                    <div className="flex items-center gap-0.5">
-                      {getStatusIcon(state)}
-                      <span className="text-[9px] text-green-600">{stage.count} {stage.countLabel}</span>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="flex items-center gap-0.5">
+                        {getStatusIcon(state)}
+                        <span className="text-[9px] text-green-600">{stage.count} {stage.countLabel}</span>
+                      </div>
+                      {stageTime != null && (
+                        <span className="text-[8px] text-muted-foreground">{formatDuration(stageTime)}</span>
+                      )}
                     </div>
                   )}
                   {state === 'running' && (
@@ -112,6 +130,16 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
               </React.Fragment>
             );
           })}
+          {/* Total time */}
+          {totalTimeMs > 0 && (
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border flex-shrink-0">
+              <Timer className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex flex-col items-center">
+                <span className="text-[9px] font-medium text-muted-foreground">{t('petProfile.pipeline.totalTime')}</span>
+                <span className="text-[10px] font-bold text-foreground">{formatDuration(totalTimeMs)}</span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
