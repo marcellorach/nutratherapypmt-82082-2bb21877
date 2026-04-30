@@ -37,15 +37,28 @@ export function useScrollPanZoom<T extends HTMLElement>(opts: Options = {}) {
     if (!inner) return null;
     const svg = inner.querySelector("svg");
     if (svg) {
+      try {
+        const contentBox = (svg as SVGGraphicsElement).getBBox?.();
+        if (contentBox && contentBox.width > 0 && contentBox.height > 0) {
+          return {
+            x: contentBox.x,
+            y: contentBox.y,
+            w: contentBox.width,
+            h: contentBox.height,
+          };
+        }
+      } catch {
+        // fallback para viewBox/rect quando o SVG ainda não estiver pronto
+      }
       const vb = (svg as SVGSVGElement).viewBox?.baseVal;
       if (vb && vb.width > 0 && vb.height > 0) {
-        return { w: vb.width, h: vb.height };
+        return { x: vb.x, y: vb.y, w: vb.width, h: vb.height };
       }
       const rect = svg.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) return { w: rect.width, h: rect.height };
+      if (rect.width > 0 && rect.height > 0) return { x: 0, y: 0, w: rect.width, h: rect.height };
     }
     const r = inner.getBoundingClientRect();
-    return r.width > 0 && r.height > 0 ? { w: r.width, h: r.height } : null;
+    return r.width > 0 && r.height > 0 ? { x: 0, y: 0, w: r.width, h: r.height } : null;
   }, []);
 
   const fit = useCallback(() => {
@@ -58,8 +71,8 @@ export function useScrollPanZoom<T extends HTMLElement>(opts: Options = {}) {
     const raw = Math.min(cw / natural.w, ch / natural.h) * 0.95;
     const next = Math.max(fitMin, Math.min(max, raw));
     setScale(next);
-    setTx((cw - natural.w * next) / 2);
-    setTy((ch - natural.h * next) / 2);
+    setTx((cw - natural.w * next) / 2 - natural.x * next);
+    setTy((ch - natural.h * next) / 2 - natural.y * next);
   }, [measureNatural, fitMin, max]);
 
   const reset = fit;
