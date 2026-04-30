@@ -450,17 +450,6 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         <CardContent className="p-3">
           <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-muted-foreground/20">
             {([
-              { key: 'snapshot', icon: Database, label: t('petProfile.dtWorkflow.snapshot', 'Snapshot') },
-              { key: 'api_call', icon: Cpu, label: t('petProfile.dtWorkflow.apiCall', 'Trajectory API') },
-              { key: 'parse', icon: BarChart3, label: t('petProfile.dtWorkflow.parse', 'Parse') },
-              { key: 'render', icon: Dna, label: t('petProfile.dtWorkflow.render', 'Render') },
-             ] as const).map((stage, idx) => {
-              { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
-              { key: 'api_call', icon: Cpu, label: t('petProfile.pipeline.dtWorkflow.apiCall', 'Trajectory API') },
-              { key: 'parse', icon: BarChart3, label: t('petProfile.pipeline.dtWorkflow.parse', 'Parse') },
-              { key: 'render', icon: Dna, label: t('petProfile.pipeline.dtWorkflow.render', 'Render') },
-              const state = dtWorkflow[stage.key];
-            {([
               { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
               { key: 'api_call', icon: Cpu, label: t('petProfile.pipeline.dtWorkflow.apiCall', 'Trajectory API') },
               { key: 'parse', icon: BarChart3, label: t('petProfile.pipeline.dtWorkflow.parse', 'Parse') },
