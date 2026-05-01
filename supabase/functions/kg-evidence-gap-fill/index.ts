@@ -692,13 +692,13 @@ Deno.serve(async (req) => {
         let records: PubmedRecord[] = [];
 
         const px = await assessWithPerplexity(pair.compound_en, pair.condition_en, perplexityModel);
-        await sleep(400); // be polite to Perplexity
+        await sleep(200); // be polite to Perplexity
 
         if (px.assessment && px.assessment.efficacy_0_5 > 0) {
             emit('pair_perplexity_ok', { compound: pair.compound_en, condition: pair.condition_en, efficacy: px.assessment.efficacy_0_5, pmids: px.assessment.cited_pmids.length });
           // Validate PMIDs against PubMed before persisting (anti-hallucination).
           const validPmids = await validatePmids(px.assessment.cited_pmids.slice(0, 10));
-          await sleep(NCBI_API_KEY ? 110 : 360);
+          await sleep(NCBI_API_KEY ? 110 : 150);
           assessmentEfficacy = px.assessment.efficacy_0_5;
           assessmentEvidenceLevel = px.assessment.evidence_level;
           assessmentRationale = px.assessment.rationale;
@@ -708,7 +708,39 @@ Deno.serve(async (req) => {
           speciesHint = px.assessment.species_context === 'canine' ? 'canine' : 'unspecified';
           if (validPmids.length > 0) {
             records = await pubmedFetch(validPmids);
-            await sleep(NCBI_API_KEY ? 110 : 360);
+            await sleep(NCBI_API_KEY ? 110 : 150);
+          }
+
+          // ---- PubMed complementary search when Perplexity PMIDs didn't validate ----
+          // This is the critical fix: Perplexity often hallucinates PMIDs, so even when
+          // it says efficacy > 0, we may end up with 0 real studies. In that case, search
+          // PubMed directly to find real papers that back up the Perplexity assessment.
+          if (validPmids.length === 0) {
+            emit('pair_pubmed_complement', { compound: pair.compound_en, condition: pair.condition_en, reason: 'perplexity_pmids_invalid' });
+            const { pmids: complementPmids, speciesHint: compSh } = await pubmedSearch(pair.compound_en, pair.condition_en);
+            await sleep(NCBI_API_KEY ? 110 : 150);
+            if (complementPmids.length > 0) {
+              emit('pair_pubmed_found', { compound: pair.compound_en, condition: pair.condition_en, pmids: complementPmids.length, species: compSh });
+              records = await pubmedFetch(complementPmids);
+              await sleep(NCBI_API_KEY ? 110 : 150);
+              citedPmids = complementPmids;
+              if (compSh === 'canine') speciesHint = 'canine';
+              // Re-assess with Gemini using real abstracts for a grounded score
+              if (records.length > 0) {
+                const geminiReassess = await assessWithGemini(pair.compound_en, pair.condition_en, records);
+                if (geminiReassess) {
+                  assessmentEfficacy = geminiReassess.efficacy_0_5;
+                  assessmentEvidenceLevel = geminiReassess.evidence_level;
+                  assessmentRationale = geminiReassess.rationale;
+                  assessmentLlmConf = geminiReassess.llm_confidence;
+                  citedPmids = geminiReassess.cited_pmids;
+                  provider = 'perplexity+pubmed';
+                  emit('pair_reassessed', { compound: pair.compound_en, condition: pair.condition_en, efficacy: geminiReassess.efficacy_0_5, pmids: geminiReassess.cited_pmids.length });
+                }
+              }
+            } else {
+              emit('pair_pubmed_complement_empty', { compound: pair.compound_en, condition: pair.condition_en });
+            }
           }
           provider = 'perplexity';
         } else {
@@ -716,7 +748,7 @@ Deno.serve(async (req) => {
             emit('pair_perplexity_empty', { compound: pair.compound_en, condition: pair.condition_en });
           provider = 'pubmed';
           const { pmids, speciesHint: sh } = await pubmedSearch(pair.compound_en, pair.condition_en);
-          await sleep(NCBI_API_KEY ? 110 : 360);
+          await sleep(NCBI_API_KEY ? 110 : 150);
           speciesHint = sh;
           if (!pmids.length) {
               emit('pair_no_evidence', { compound: pair.compound_en, condition: pair.condition_en, provider });
@@ -725,7 +757,7 @@ Deno.serve(async (req) => {
           }
             emit('pair_pubmed_found', { compound: pair.compound_en, condition: pair.condition_en, pmids: pmids.length, species: sh });
           records = await pubmedFetch(pmids);
-          await sleep(NCBI_API_KEY ? 110 : 360);
+          await sleep(NCBI_API_KEY ? 110 : 150);
           if (!records.length) {
             details.push({ pair, status: 'no_records', provider });
             continue;
