@@ -328,7 +328,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                 </p>
                 {Object.entries(sourceBreakdown).map(([prov, stats]) => (
                   <div key={prov} className="flex items-center gap-2 text-[11px]">
-                    {prov === 'perplexity' ? <Microscope className="h-3 w-3 text-blue-500" /> : <Database className="h-3 w-3 text-green-500" />}
+                    {prov === 'perplexity' ? <Microscope className="h-3 w-3 text-blue-500" /> : prov === 'perplexity+pubmed' ? <Merge className="h-3 w-3 text-violet-500" /> : <Database className="h-3 w-3 text-green-500" />}
                     <span className="font-medium capitalize">{prov}</span>
                     <span className="text-muted-foreground">
                       {stats.total} {t('evidenceGap.queriesLabel')} · 
