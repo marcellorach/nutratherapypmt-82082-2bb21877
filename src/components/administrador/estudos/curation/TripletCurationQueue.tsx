@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Check, X, AlertCircle, Search, Filter, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { enrichApprovedTripletsInBackground } from '@/services/triplet-enrichment-service';
 
 interface TripletExtraction {
   id: string;
@@ -104,6 +105,8 @@ export const TripletCurationQueue: React.FC = () => {
       if (error) throw error;
 
       toast.success(t('curation.triplets.approved') || 'Triplet approved');
+      // Auto-enrich intensity / evidence_level in the background
+      enrichApprovedTripletsInBackground(tripletId);
       setReviewNotes('');
       setSelectedTriplet(null);
       fetchTriplets();

@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-01 — Auto-enrichment of triplet intensity & evidence_level
+<!-- area: curation · status: parcial · i18n: — -->
+- Improved `enrich-triplet` prompt: anchored intensity scale in observed magnitude (% change, effect size), forces low intensity for null/negative results, requires verbatim source excerpt in `confidence_rationale`, added `in_vivo`/`animal_study` to evidence_level enum
+- Added DB CHECK constraint update to allow `in_vivo` evidence_level (previously fell back to `expert_opinion`)
+- New `backfill-triplet-enrichment` edge function: idempotent batch enrichment with rate-limit-aware batching; also serves single-triplet mode for post-approval hooks
+- New `src/services/triplet-enrichment-service.ts` helper plugged into all 4 client-side approval paths (TripletCurationQueue, StudyTripletCuration single + bulk, TripletCurationBoard drag/bulk/auto-approve) — every approval now triggers fire-and-forget enrichment
+- Backfill partially run (688/3737 approved triplets now have evidence_level, 588 have intensity); remaining ~3050 will be processed by repeated calls to backfill-triplet-enrichment due to per-function rate limits
+- Files: supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts, src/services/triplet-enrichment-service.ts, src/components/administrador/estudos/curation/{TripletCurationQueue,StudyTripletCuration,TripletCurationBoard}.tsx
+
 ### Fixed - 2026-05-01 — KG Evidence Gap-Fill: PubMed complementary search when Perplexity PMIDs fail validation
 <!-- area: kg · status: entregue · i18n: — -->
 - Critical fix: when Perplexity returns efficacy > 0 but all cited PMIDs are hallucinated (fail PubMed validation), the pipeline now searches PubMed directly for real papers and re-assesses with Gemini

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { enrichApprovedTripletsInBackground } from '@/services/triplet-enrichment-service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -138,6 +139,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
           : t('tripletCuration.rejected', 'Triplet rejeitado')
       );
       
+      if (status === 'approved') enrichApprovedTripletsInBackground(tripletId);
       onTripletsUpdated?.();
     } catch (error: any) {
       console.error('Error updating triplet:', error);
@@ -185,6 +187,7 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
       );
       
       toast.success(t('tripletCuration.bulkApproved', `${ids.length} triplets aprovados`));
+      enrichApprovedTripletsInBackground(ids);
       onTripletsUpdated?.();
     } catch (error: any) {
       console.error('Error bulk approving:', error);
