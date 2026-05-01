@@ -30,6 +30,7 @@ serve(async (req) => {
   const batchSize = Math.min(Math.max(Number(body.batchSize) || 8, 1), 20);
   const batchDelayMs = Math.max(Number(body.batchDelayMs) ?? 800, 0);
   const singleId: string | undefined = body.tripletId;
+  const force: boolean = !!body.force;
 
   // Single-triplet mode (post-approval hook)
   if (singleId) {
@@ -37,6 +38,34 @@ serve(async (req) => {
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  }
+
+  // QA gate: require ≥30 reviewed samples with ≥85% approval before bulk run
+  if (!force) {
+    const { data: qa } = await supabase
+      .from('enrichment_qa_samples')
+      .select('batch_id, human_overall_ok, reviewed_at')
+      .not('reviewed_at', 'is', null);
+    if (!qa || qa.length < 30) {
+      return new Response(JSON.stringify({
+        ok: false, blocked: true,
+        reason: 'qa_gate_not_met',
+        message: `QA gate: precisa de ≥30 amostras revisadas (atual: ${qa?.length ?? 0}). Use a aba QA Enriquecimento ou passe force=true.`,
+      }), { status: 412, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const approved = qa.filter((s: any) => s.human_overall_ok).length;
+    const rate = approved / qa.length;
+    if (rate < 0.85) {
+      return new Response(JSON.stringify({
+        ok: false, blocked: true,
+        reason: 'qa_approval_rate_too_low',
+        approval_rate: rate,
+        message: `QA gate: taxa de aprovação ${(rate * 100).toFixed(1)}% < 85%. Refine o prompt ou passe force=true.`,
+      }), { status: 412, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    console.log(`✓ QA gate passed: ${(rate * 100).toFixed(1)}% approval over ${qa.length} samples`);
+  } else {
+    console.warn('⚠️  Backfill running with force=true — skipping QA gate');
   }
 
   // Bulk backfill mode
