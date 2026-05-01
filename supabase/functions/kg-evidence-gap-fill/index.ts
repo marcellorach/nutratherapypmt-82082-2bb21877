@@ -681,7 +681,7 @@ Deno.serve(async (req) => {
       try {
           emit('pair_start', { compound: pair.compound_en, condition: pair.condition_en, index: details.length + 1, total: pairs.length });
         // ---- Pass 1: Perplexity (semantic + grounded) ----
-        let provider: 'perplexity' | 'pubmed' = 'perplexity';
+        let provider: 'perplexity' | 'pubmed' | 'perplexity+pubmed' = 'perplexity';
         let speciesHint: 'canine' | 'unspecified' = 'unspecified';
         let citedPmids: string[] = [];
         let citedUrls: string[] = [];
