@@ -459,6 +459,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     <div className="space-y-3">
     {/* DT Mini Workflow */}
     {(dtWorkflow.snapshot !== 'idle' || aiQuery.isLoading) && (
+      <>
       <Card className="border-primary/20">
         <CardContent className="p-3">
           <div className="flex flex-wrap items-center gap-1 pb-1">
@@ -541,6 +542,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         isLoading={aiQuery.isLoading || aiQuery.isFetching}
         onClear={() => setDtLog([])}
       />
+      </>
     )}
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
