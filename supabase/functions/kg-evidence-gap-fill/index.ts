@@ -679,6 +679,8 @@ Deno.serve(async (req) => {
 
     for (const pair of pairs) {
       try {
+          // Heartbeat to prevent idle timeout on long-running streaming connections
+          emit('heartbeat', { index: details.length + 1, total: pairs.length });
           emit('pair_start', { compound: pair.compound_en, condition: pair.condition_en, index: details.length + 1, total: pairs.length });
         // ---- Pass 1: Perplexity (semantic + grounded) ----
         let provider: 'perplexity' | 'pubmed' | 'perplexity+pubmed' = 'perplexity';
