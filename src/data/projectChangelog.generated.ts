@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-01T00:23:26.308Z
+// Última geração: 2026-05-01T01:47:22.947Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,26 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-01";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-01",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Digital Twin workflow expandido + log reposicionado",
+    "bullets": [
+      "Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render",
+      "Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)",
+      "Novos ícones e labels bilíngues para cada estágio",
+      "Files: src/components/pet/DigitalTwinDog.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/pet/DigitalTwinDog.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.49.0"
+  },
   {
     "date": "2026-05-01",
     "kind": "changed",

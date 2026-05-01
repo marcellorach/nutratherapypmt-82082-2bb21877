@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-01 — Digital Twin workflow expandido + log reposicionado
+<!-- area: vet-ui · status: entregue · i18n: 1.49.0 -->
+- Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render
+- Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)
+- Novos ícones e labels bilíngues para cada estágio
+- Files: src/components/pet/DigitalTwinDog.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-01 — Pipeline: recommendation timing + KG stratification
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.48.0 -->
 - Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper

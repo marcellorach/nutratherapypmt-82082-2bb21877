@@ -6892,8 +6892,11 @@
       },
       "dtWorkflow": {
         "snapshot": "Snapshot",
+        "conditionMap": "Conditions",
+        "breedRisk": "Breed Risk",
         "apiCall": "Trajectory API",
         "parse": "Parse",
+        "coverage": "KG Coverage",
         "render": "Render"
       }
     },

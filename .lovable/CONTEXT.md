@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-01T00:23:26.313Z
+Generated: 2026-05-01T01:47:22.949Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.48.0
+## Latest i18n version: 1.49.0
 
 ## Changes by area (last 14 days)
 - **admin**: 8
 - **meta**: 7
+- **vet-ui**: 5
 - **kg**: 5
-- **vet-ui**: 4
 - **clinical-pipeline**: 3
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-01 · [vet-ui] CHANGED — Digital Twin workflow expandido + log reposicionado
+- Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render
+- Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)
+- Novos ícones e labels bilíngues para cada estágio
+_files: src/components/pet/DigitalTwinDog.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts_
+
 ### 2026-05-01 · [clinical-pipeline] CHANGED — Pipeline: recommendation timing + KG stratification
 - Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper
 - KG dividido em dois cards visuais: KG Query (consulta Neo4j) e KG Enrich (extração de pathways/projeções)
@@ -68,12 +74,6 @@ _files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/Digi
 - `OrganogramaDiagram` ganhou viewport útil maior (`calc(100vh - 230px)`, `minHeight: 520`) e `svg overflow-visible`, melhorando o aproveitamento horizontal e vertical.
 - Files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/OrganogramaDiagram.tsx
 _files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/OrganogramaDiagram.tsx_
-
-### 2026-04-30 · [i18n] ADDED — Internacionalização completa do Organograma do Projeto
-- 7 arquivos corrigidos: OrganogramaTab, OrganogramaCards, OrganogramaDiagram, OrganogramaForceGraph, ChangelogTimeline, AreaMiniTimeline — todos agora usam `useTranslation()` + `t()` para textos visíveis.
-- projectOrganograma.ts bilíngue: todas as ~60 entidades (áreas, filhos, convenções) agora possuem campos `title_en`, `description_en`, `label_en`, `value_en`.
-- ~50 chaves i18n criadas no namespace `organograma` em ambos `translation.json` (PT/EN).
-_files: src/pages/administrador/OrganogramaTab.tsx, src/data/projectOrganograma.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

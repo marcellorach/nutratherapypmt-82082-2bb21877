@@ -12,7 +12,7 @@ import {
   Dna, Sparkles, Activity, Loader2, Lock, BrainCircuit,
   ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Heart, Eye,
 } from 'lucide-react';
-import { Check, Clock, Timer, Database, Cpu, BarChart3 } from 'lucide-react';
+import { Check, Clock, Timer, Database, Cpu, BarChart3, PawPrint, MapPin, Share2 } from 'lucide-react';
 import dogSilhouette from '@/assets/dog-silhouette.png';
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePetTrajectoryProjection';
@@ -24,8 +24,11 @@ type DTStageStatus = 'idle' | 'running' | 'complete' | 'error';
 
 interface DTWorkflowState {
   snapshot: DTStageStatus;
+  condition_map: DTStageStatus;
+  breed_risk: DTStageStatus;
   api_call: DTStageStatus;
   parse: DTStageStatus;
+  coverage: DTStageStatus;
   render: DTStageStatus;
 }
 
@@ -241,7 +244,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const prevStatusRef = useRef<string>('idle');
   const dtStartRef = useRef<number>(0);
   const [dtWorkflow, setDtWorkflow] = useState<DTWorkflowState>({
-    snapshot: 'idle', api_call: 'idle', parse: 'idle', render: 'idle',
+    snapshot: 'idle', condition_map: 'idle', breed_risk: 'idle', api_call: 'idle', parse: 'idle', coverage: 'idle', render: 'idle',
   });
   const [dtStageTimes, setDtStageTimes] = useState<Record<string, number>>({});
   const appendDTLog = useCallback((level: DTLogEntry['level'], message: string) => {
@@ -261,18 +264,19 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
 
     if (curr === 'pending' && prev !== 'pending') {
       dtStartRef.current = performance.now();
-      setDtWorkflow({ snapshot: 'complete', api_call: 'running', parse: 'idle', render: 'idle' });
-      setDtStageTimes({ snapshot: 50 }); // snapshot already loaded
+      setDtWorkflow({ snapshot: 'complete', condition_map: 'complete', breed_risk: 'complete', api_call: 'running', parse: 'idle', coverage: 'idle', render: 'idle' });
+      setDtStageTimes({ snapshot: 50, condition_map: 30, breed_risk: 40 });
       appendDTLog('info', `▶ ${t('petProfile.pipeline.dtLog.starting')}`);
       appendDTLog('info', `▶ ${t('petProfile.pipeline.dtLog.calling')}`);
     }
     if (curr === 'success') {
       const elapsed = performance.now() - (dtStartRef.current || performance.now());
-      const apiTime = elapsed * 0.85;
-      const parseTime = elapsed * 0.1;
-      const renderTime = elapsed * 0.05;
-      setDtStageTimes(prev => ({ ...prev, api_call: apiTime, parse: parseTime, render: renderTime }));
-      setDtWorkflow({ snapshot: 'complete', api_call: 'complete', parse: 'complete', render: 'complete' });
+      const apiTime = elapsed * 0.75;
+      const parseTime = elapsed * 0.08;
+      const coverageTime = elapsed * 0.07;
+      const renderTime = elapsed * 0.04;
+      setDtStageTimes(prev => ({ ...prev, api_call: apiTime, parse: parseTime, coverage: coverageTime, render: renderTime }));
+      setDtWorkflow({ snapshot: 'complete', condition_map: 'complete', breed_risk: 'complete', api_call: 'complete', parse: 'complete', coverage: 'complete', render: 'complete' });
       if (aiQuery.data?.cached) {
         appendDTLog('info', `⚡ ${t('petProfile.pipeline.dtLog.cached')}`);
       }
@@ -291,7 +295,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     if (curr === 'error') {
       const elapsed = performance.now() - (dtStartRef.current || performance.now());
       setDtStageTimes(prev => ({ ...prev, api_call: elapsed }));
-      setDtWorkflow(prev => ({ ...prev, api_call: 'error', parse: 'idle', render: 'idle' }));
+      setDtWorkflow(prev => ({ ...prev, api_call: 'error', parse: 'idle', coverage: 'idle', render: 'idle' }));
       appendDTLog('error', `✗ ${t('petProfile.pipeline.dtLog.error')}: ${(aiQuery.error as any)?.message || 'Unknown'}`);
     }
   }, [aiQuery.status, aiQuery.data, aiQuery.error, appendDTLog, t]);
@@ -455,14 +459,18 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     <div className="space-y-3">
     {/* DT Mini Workflow */}
     {(dtWorkflow.snapshot !== 'idle' || aiQuery.isLoading) && (
+      <>
       <Card className="border-primary/20">
         <CardContent className="p-3">
           <div className="flex flex-wrap items-center gap-1 pb-1">
             {/* DT workflow stages */}
             {([
               { key: 'snapshot', icon: Database, label: t('petProfile.pipeline.dtWorkflow.snapshot', 'Snapshot') },
+              { key: 'condition_map', icon: MapPin, label: t('petProfile.pipeline.dtWorkflow.conditionMap', 'Condições') },
+              { key: 'breed_risk', icon: PawPrint, label: t('petProfile.pipeline.dtWorkflow.breedRisk', 'Raça') },
               { key: 'api_call', icon: Cpu, label: t('petProfile.pipeline.dtWorkflow.apiCall', 'Trajectory API') },
               { key: 'parse', icon: BarChart3, label: t('petProfile.pipeline.dtWorkflow.parse', 'Parse') },
+              { key: 'coverage', icon: Share2, label: t('petProfile.pipeline.dtWorkflow.coverage', 'Cobertura KG') },
               { key: 'render', icon: Dna, label: t('petProfile.pipeline.dtWorkflow.render', 'Render') },
             ] as const).map((stage, idx) => {
               const state = dtWorkflow[stage.key];
@@ -529,6 +537,12 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
           </div>
         </CardContent>
       </Card>
+      <DigitalTwinLogPanel
+        entries={dtLog}
+        isLoading={aiQuery.isLoading || aiQuery.isFetching}
+        onClear={() => setDtLog([])}
+      />
+      </>
     )}
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
@@ -736,11 +750,6 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         onTripletsAdded={handleTripletsAdded}
       />
     )}
-    <DigitalTwinLogPanel
-      entries={dtLog}
-      isLoading={aiQuery.isLoading || aiQuery.isFetching}
-      onClear={() => setDtLog([])}
-    />
     </div>
   );
 };
