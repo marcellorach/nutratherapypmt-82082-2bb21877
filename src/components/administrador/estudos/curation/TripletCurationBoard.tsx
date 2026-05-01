@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { supabase } from '@/integrations/supabase/client';
+import { enrichApprovedTripletsInBackground } from '@/services/triplet-enrichment-service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -135,6 +136,7 @@ export const TripletCurationBoard: React.FC = () => {
       toast.success(t('curation.board.movedTo', { column: destColumn.title }));
 
       if (destination.droppableId === 'approved') {
+        enrichApprovedTripletsInBackground(draggableId);
         syncToNeo4j();
       }
     } catch (error: any) {
@@ -164,6 +166,7 @@ export const TripletCurationBoard: React.FC = () => {
       if (error) throw error;
 
       toast.success(t('curation.board.approvedCount', { count: selectedTriplets.size }));
+      enrichApprovedTripletsInBackground(Array.from(selectedTriplets));
       setSelectedTriplets(new Set());
       fetchTriplets();
       syncToNeo4j();
@@ -176,7 +179,7 @@ export const TripletCurationBoard: React.FC = () => {
   const handleAutoApprove = async (minConfidence: number = 0.9) => {
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id;
-      const { error } = await supabase
+      const { data: approvedRows, error } = await supabase
         .from('triplet_extractions')
         .update({
           curation_status: 'approved',
@@ -185,11 +188,15 @@ export const TripletCurationBoard: React.FC = () => {
           auto_approved: true
         })
         .eq('curation_status', 'pending')
-        .gte('extraction_confidence', minConfidence);
+        .gte('extraction_confidence', minConfidence)
+        .select('id');
 
       if (error) throw error;
 
       toast.success(t('curation.board.autoApproved'));
+      if (approvedRows?.length) {
+        enrichApprovedTripletsInBackground(approvedRows.map((r: any) => r.id));
+      }
       fetchTriplets();
       syncToNeo4j();
     } catch (error: any) {
