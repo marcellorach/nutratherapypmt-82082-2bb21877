@@ -517,13 +517,18 @@ OUTPUT REQUIREMENTS:
       },
     ];
 
-    const model = "google/gemini-3.1-pro-preview";
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const model = "google/gemini-2.5-flash";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120_000);
+    let aiResp: Response;
+    try {
+    aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model,
         messages: [
@@ -534,6 +539,14 @@ OUTPUT REQUIREMENTS:
         tool_choice: { type: "function", function: { name: "submit_trajectory_projection" } },
       }),
     });
+    } catch (abortErr: any) {
+      clearTimeout(timeoutId);
+      if (abortErr?.name === 'AbortError') {
+        return jsonResponse({ error: "ai_timeout", message: "A IA demorou demais (>120s). Tente novamente." }, 504);
+      }
+      throw abortErr;
+    }
+    clearTimeout(timeoutId);
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
