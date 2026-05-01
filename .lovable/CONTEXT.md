@@ -1,20 +1,40 @@
 # Project context briefing (auto)
-Generated: 2026-05-01T02:04:46.600Z
+Generated: 2026-05-01T22:10:25.819Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.49.0
+## Latest i18n version: —
 
 ## Changes by area (last 14 days)
 - **admin**: 8
 - **meta**: 7
+- **kg**: 6
 - **vet-ui**: 5
-- **kg**: 5
 - **clinical-pipeline**: 3
+- **curation**: 2
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-01 · [curation] ADDED — QA gate + provenance for AI enrichment
+- New columns `enrichment_source` (none/extracted/llm/llm_low_confidence/human), `enrichment_confidence`, `enrichment_needs_review`, `enrichment_at` on `triplet_extractions` for full provenance of AI-inferred metadata
+- New table `enrichment_qa_samples` storing stratified human-reviewed AI enrichment samples (batch_id, AI vs human verdict per field)
+- Guard-rails in `enrich-triplet`: short excerpts (<80 chars) skip the LLM; AI must return a verbatim `source_quote` that is substring-verified against the source text; AI must self-report confidence; failures are flagged `enrichment_source = llm_low_confidence` + `needs_review = true`
+_files: supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts, supabase/functions/enrichment-qa-sample/index.ts, src/components/administrador/estudos/curation/EnrichmentQAReview.tsx…_
+
+### 2026-05-01 · [curation] CHANGED — Auto-enrichment of triplet intensity & evidence_level
+_status: parcial_
+- Improved `enrich-triplet` prompt: anchored intensity scale in observed magnitude (% change, effect size), forces low intensity for null/negative results, requires verbatim source excerpt in `confidence_rationale`, added `in_vivo`/`animal_study` to evidence_level enum
+- Added DB CHECK constraint update to allow `in_vivo` evidence_level (previously fell back to `expert_opinion`)
+- New `backfill-triplet-enrichment` edge function: idempotent batch enrichment with rate-limit-aware batching; also serves single-triplet mode for post-approval hooks
+_files: src/services/triplet-enrichment-service.ts, supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts_
+
+### 2026-05-01 · [kg] FIXED — KG Evidence Gap-Fill: PubMed complementary search when Perplexity PMIDs fail validation
+- Critical fix: when Perplexity returns efficacy > 0 but all cited PMIDs are hallucinated (fail PubMed validation), the pipeline now searches PubMed directly for real papers and re-assesses with Gemini
+- Previously, PubMed fallback only triggered when Perplexity returned efficacy = 0, which almost never happens for known correlations
+- Reduced sleep intervals (400ms→200ms Perplexity, 360ms→150ms PubMed) to fit within 150s idle timeout
+_files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx_
+
 ### 2026-05-01 · [vet-ui] CHANGED — Digital Twin workflow expandido + log reposicionado
 - Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render
 - Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)
@@ -56,24 +76,6 @@ _files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/Evi
 - DT mini-workflow: trocado `overflow-x-auto` por `flex-wrap` para quebrar em duas linhas em vez de sair do quadro
 - Conectores entre etapas ocultados em telas pequenas (`hidden sm:block`)
 _files: src/locales/en/translation.json, src/locales/pt/translation.json, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts_
-
-### 2026-04-30 · [clinical-pipeline] FIXED — Pipeline scroll, DT workflow visual, Evidence Gap search fix
-- Pipeline workflow card: adicionada barra de rolagem horizontal estilizada para telas menores
-- Digital Twin: novo mini-workflow visual com 4 etapas (Snapshot → Trajectory API → Parse → Render) com tempos individuais e total
-- Evidence Gap Search: corrigido bug onde `condition_id = NULL` em `pet_conditions` fazia a busca retornar 0 pares — agora usa `condition_name` como fallback
-_files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/DigitalTwinDog.tsx, supabase/functions/kg-evidence-gap-fill/index.ts, src/locales/pt/translation.json…_
-
-### 2026-04-30 · [clinical-pipeline] ADDED — Pipeline: card sinergias, tempos por etapa, log do Digital Twin
-- Novo 7o estágio `stage7_synergies` (ícone Zap) no `ClinicalPipelineWorkflow` com contagem de sinergias entre compostos recomendados
-- Tempo de execução exibido abaixo de cada etapa concluída + indicador de tempo total no canto direito do workflow
-- Novo `DigitalTwinLogPanel`: console ao vivo no Digital Twin rastreando ciclo de vida da projeção de trajetória (início, chamada AI, resposta, cache, erros) com autoscroll, limpar e exportar
-_files: src/components/pet/ClinicalPipelineWorkflow.tsx, src/components/pet/DigitalTwinLogPanel.tsx, src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx…_
-
-### 2026-04-30 · [admin] FIXED — Organograma usa bbox real para centralização e escala
-- `useScrollPanZoom` agora mede o bounding box real do conteúdo SVG via `getBBox()` antes de aplicar `fit`, corrigindo o caso em que o Mermaid ficava minúsculo no canto apesar de haver espaço disponível.
-- `OrganogramaDiagram` ganhou viewport útil maior (`calc(100vh - 230px)`, `minHeight: 520`) e `svg overflow-visible`, melhorando o aproveitamento horizontal e vertical.
-- Files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/OrganogramaDiagram.tsx
-_files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/OrganogramaDiagram.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

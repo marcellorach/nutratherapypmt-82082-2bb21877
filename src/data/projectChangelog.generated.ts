@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-01T02:04:46.598Z
+// Última geração: 2026-05-01T22:10:25.816Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,72 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-01";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-01",
+    "kind": "added",
+    "area": "curation",
+    "status": "entregue",
+    "title": "QA gate + provenance for AI enrichment",
+    "bullets": [
+      "New columns `enrichment_source` (none/extracted/llm/llm_low_confidence/human), `enrichment_confidence`, `enrichment_needs_review`, `enrichment_at` on `triplet_extractions` for full provenance of AI-inferred metadata",
+      "New table `enrichment_qa_samples` storing stratified human-reviewed AI enrichment samples (batch_id, AI vs human verdict per field)",
+      "Guard-rails in `enrich-triplet`: short excerpts (<80 chars) skip the LLM; AI must return a verbatim `source_quote` that is substring-verified against the source text; AI must self-report confidence; failures are flagged `enrichment_source = llm_low_confidence` + `needs_review = true`",
+      "New edge function `enrichment-qa-sample`: draws ~50 stratified samples (high/med/low extraction_confidence) and enriches them for human QA",
+      "New admin tab \"QA Enriquecimento\" (CurationDashboard) to review AI output one-by-one, see per-batch approval rate and gate status",
+      "`backfill-triplet-enrichment` now blocks bulk runs unless ≥30 reviewed samples with ≥85% approval; can be overridden with `force=true`",
+      "Files: supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts, supabase/functions/enrichment-qa-sample/index.ts, src/components/administrador/estudos/curation/EnrichmentQAReview.tsx, src/components/administrador/estudos/curation/CurationDashboard.tsx"
+    ],
+    "files": [
+      "supabase/functions/enrich-triplet/index.ts",
+      "supabase/functions/backfill-triplet-enrichment/index.ts",
+      "supabase/functions/enrichment-qa-sample/index.ts",
+      "src/components/administrador/estudos/curation/EnrichmentQAReview.tsx",
+      "src/components/administrador/estudos/curation/CurationDashboard.tsx"
+    ],
+    "i18nVersion": "—"
+  },
+  {
+    "date": "2026-05-01",
+    "kind": "changed",
+    "area": "curation",
+    "status": "parcial",
+    "title": "Auto-enrichment of triplet intensity & evidence_level",
+    "bullets": [
+      "Improved `enrich-triplet` prompt: anchored intensity scale in observed magnitude (% change, effect size), forces low intensity for null/negative results, requires verbatim source excerpt in `confidence_rationale`, added `in_vivo`/`animal_study` to evidence_level enum",
+      "Added DB CHECK constraint update to allow `in_vivo` evidence_level (previously fell back to `expert_opinion`)",
+      "New `backfill-triplet-enrichment` edge function: idempotent batch enrichment with rate-limit-aware batching; also serves single-triplet mode for post-approval hooks",
+      "New `src/services/triplet-enrichment-service.ts` helper plugged into all 4 client-side approval paths (TripletCurationQueue, StudyTripletCuration single + bulk, TripletCurationBoard drag/bulk/auto-approve) — every approval now triggers fire-and-forget enrichment",
+      "Backfill partially run (688/3737 approved triplets now have evidence_level, 588 have intensity); remaining ~3050 will be processed by repeated calls to backfill-triplet-enrichment due to per-function rate limits",
+      "Files: supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts, src/services/triplet-enrichment-service.ts, src/components/administrador/estudos/curation/{TripletCurationQueue,StudyTripletCuration,TripletCurationBoard}.tsx"
+    ],
+    "files": [
+      "src/services/triplet-enrichment-service.ts",
+      "supabase/functions/enrich-triplet/index.ts",
+      "supabase/functions/backfill-triplet-enrichment/index.ts"
+    ],
+    "i18nVersion": "—"
+  },
+  {
+    "date": "2026-05-01",
+    "kind": "fixed",
+    "area": "kg",
+    "status": "entregue",
+    "title": "KG Evidence Gap-Fill: PubMed complementary search when Perplexity PMIDs fail validation",
+    "bullets": [
+      "Critical fix: when Perplexity returns efficacy > 0 but all cited PMIDs are hallucinated (fail PubMed validation), the pipeline now searches PubMed directly for real papers and re-assesses with Gemini",
+      "Previously, PubMed fallback only triggered when Perplexity returned efficacy = 0, which almost never happens for known correlations",
+      "Reduced sleep intervals (400ms→200ms Perplexity, 360ms→150ms PubMed) to fit within 150s idle timeout",
+      "Reduced default max_pairs from 10 to 5 in the UI to prevent timeout",
+      "Added heartbeat events during streaming to prevent idle timeout disconnections",
+      "New provider type `perplexity+pubmed` tracks when both sources contributed to a triplet",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx"
+    ],
+    "files": [
+      "supabase/functions/kg-evidence-gap-fill/index.ts",
+      "src/components/pet/EvidenceGapCard.tsx"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-05-01",
     "kind": "changed",
