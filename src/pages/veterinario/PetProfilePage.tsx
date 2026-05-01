@@ -221,7 +221,6 @@ const PetProfilePage: React.FC = () => {
         conditions,
         medications,
         exams,
-        { onProgress: handlePipelineEvent },
         { onProgress: handlePipelineEvent, locale: i18n.language },
       );
 
