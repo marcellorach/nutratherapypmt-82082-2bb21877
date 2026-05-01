@@ -68,7 +68,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const body = (await req.json()) as RequestBody;
+    let body: RequestBody;
+    try {
+      const raw = await req.text();
+      body = raw ? (JSON.parse(raw) as RequestBody) : ({} as RequestBody);
+    } catch (parseErr) {
+      return jsonResponse({ error: "Invalid JSON body", details: String(parseErr) }, 400);
+    }
     if (!body?.pet_id) return jsonResponse({ error: "pet_id required" }, 400);
     // Always compute BOTH scenarios in a single call so the UI can show a
     // coherent comparison from one source of truth. The legacy
