@@ -131,6 +131,17 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
       case 'pair_perplexity_empty':
         appendLog('warn', `∅ Perplexity: ${ev.compound} → ${ev.condition} — fallback PubMed`);
         break;
+      case 'pair_pubmed_complement':
+        appendLog('info', `🔄 PubMed complement: ${ev.compound} → ${ev.condition} (${ev.reason})`);
+        break;
+      case 'pair_pubmed_complement_empty':
+        appendLog('warn', `∅ PubMed complement: ${ev.compound} → ${ev.condition} — no papers found`);
+        break;
+      case 'pair_reassessed':
+        appendLog('success', `✓ Reassessed: ${ev.compound} → ${ev.condition} (ef ${ev.efficacy}/5, ${ev.pmids} PMIDs)`);
+        break;
+      case 'heartbeat':
+        break;
       case 'pair_pubmed_found':
         appendLog('info', `📚 PubMed: ${ev.pmids} articles (${ev.species})`);
         break;
@@ -185,7 +196,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
           'Authorization': `Bearer ${token}`,
           'apikey': anonKey,
         },
-        body: JSON.stringify({ pet_id: petId, max_pairs: 10 }),
+        body: JSON.stringify({ pet_id: petId, max_pairs: 5 }),
       });
 
       if (!res.ok) {

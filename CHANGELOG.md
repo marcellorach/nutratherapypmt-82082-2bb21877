@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-05-01 — KG Evidence Gap-Fill: PubMed complementary search when Perplexity PMIDs fail validation
+<!-- area: kg · status: entregue · i18n: — -->
+- Critical fix: when Perplexity returns efficacy > 0 but all cited PMIDs are hallucinated (fail PubMed validation), the pipeline now searches PubMed directly for real papers and re-assesses with Gemini
+- Previously, PubMed fallback only triggered when Perplexity returned efficacy = 0, which almost never happens for known correlations
+- Reduced sleep intervals (400ms→200ms Perplexity, 360ms→150ms PubMed) to fit within 150s idle timeout
+- Reduced default max_pairs from 10 to 5 in the UI to prevent timeout
+- Added heartbeat events during streaming to prevent idle timeout disconnections
+- New provider type `perplexity+pubmed` tracks when both sources contributed to a triplet
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx
+
 ### Changed - 2026-05-01 — Digital Twin workflow expandido + log reposicionado
 <!-- area: vet-ui · status: entregue · i18n: 1.49.0 -->
 - Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render
