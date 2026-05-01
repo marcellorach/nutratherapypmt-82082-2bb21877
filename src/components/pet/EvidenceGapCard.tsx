@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen } from 'lucide-react';
+import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen, Merge } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
@@ -30,6 +30,8 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
   const [isSearching, setIsSearching] = useState(false);
   const [gapLog, setGapLog] = useState<GapLogEntry[]>([]);
   const logIdRef = useRef(0);
+  // Track provider per compound→condition pair from streaming events for cross-check
+  const pairProviderRef = useRef<Map<string, string>>(new Map());
   const [lastResult, setLastResult] = useState<null | {
     pairs_searched: number;
     studies_added: number;
@@ -139,6 +141,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         break;
       case 'pair_reassessed':
         appendLog('success', `✓ Reassessed: ${ev.compound} → ${ev.condition} (ef ${ev.efficacy}/5, ${ev.pmids} PMIDs)`);
+        pairProviderRef.current.set(`${ev.compound}→${ev.condition}`, 'perplexity+pubmed');
         break;
       case 'heartbeat':
         break;
@@ -150,6 +153,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         break;
       case 'pair_ok':
         appendLog('success', `✓ ${ev.compound} → ${ev.condition}: ef ${ev.efficacy}/5 via ${ev.provider} (${ev.studies} studies)`);
+        pairProviderRef.current.set(`${ev.compound}→${ev.condition}`, ev.provider);
         break;
       case 'pair_error':
         appendLog('error', `✗ ${ev.compound} → ${ev.condition}: ${ev.error}`);
@@ -178,6 +182,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
   const handleSearch = async () => {
     setLastResult(null);
     setGapLog([]);
+    pairProviderRef.current.clear();
     setIsSearching(true);
     try {
       // Use streaming fetch for real-time logging
