@@ -373,22 +373,7 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
     );
   }
 
-  if (aiQuery.isLoading || !current) {
-    return (
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Dna className="h-4 w-4 text-primary" />
-            {t('petProfile.digitalTwin.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {t('petProfile.digitalTwin.aiLoading', 'Calculando trajetória do gêmeo digital...')}
-        </CardContent>
-      </Card>
-    );
-  }
+  const isLoadingState = aiQuery.isLoading || !current;
 
   // ───────────── Render scenario silhouette helper ─────────────
   const renderSilhouette = (markers: ScenarioMarker[], protectionAura: boolean) => (
@@ -544,6 +529,21 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
       />
       </>
     )}
+    {isLoadingState ? (
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Dna className="h-4 w-4 text-primary" />
+            {t('petProfile.digitalTwin.title')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {t('petProfile.digitalTwin.aiLoading', 'Calculando trajetória do gêmeo digital...')}
+        </CardContent>
+      </Card>
+    ) : (
+    <>
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
@@ -742,13 +742,15 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
         </div>
       </CardContent>
     </Card>
-    {petId && (
+    {petId && !isLoadingState && (
       <EvidenceGapCard
         petId={petId}
         yearsGained={yearsGained}
         hasCoverage={coveredCount > 0}
         onTripletsAdded={handleTripletsAdded}
       />
+    )}
+    </>
     )}
     </div>
   );
