@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-01 — Pipeline: recommendation timing + KG stratification
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.48.0 -->
+- Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper
+- KG dividido em dois cards visuais: **KG Query** (consulta Neo4j) e **KG Enrich** (extração de pathways/projeções)
+- Novo estágio `stage4b_kg_enrich` no pipeline com contagem de pathways
+- Files: src/services/clinical-analysis-pipeline.ts, src/components/pet/ClinicalPipelineWorkflow.tsx, src/pages/veterinario/PetProfilePage.tsx
+
 ### Fixed - 2026-04-30 — Edge function kg-evidence-gap-fill: PascalCase types + FK study_id
 <!-- area: infra · status: entregue · i18n: — -->
 - Corrigido `subject_type: 'compound'` → `'Compound'` e `object_type: 'condition'` → `'Condition'` — constraint `triplet_extractions_object_type_check` rejeitava todos os inserts
