@@ -1142,8 +1142,8 @@ export async function runClinicalAnalysisPipeline(
     kind: 'stage-end',
     stage: 'stage6_recommendation',
     message: `${compoundsWithStudies.length} compostos finais com posologia resolvida (${((performance.now() - ts6) / 1000).toFixed(2)}s) · pipeline total: ${((performance.now() - t0) / 1000).toFixed(2)}s`,
-    meta: { compounds: compoundsWithStudies.length, totalDurationMs: performance.now() - t0 },
     meta: { compounds: compoundsWithStudies.length, durationMs: performance.now() - ts6, totalDurationMs: performance.now() - t0 },
+  });
 
   return {
     predispositions,
