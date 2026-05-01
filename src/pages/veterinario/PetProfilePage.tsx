@@ -690,6 +690,7 @@ const PetProfilePage: React.FC = () => {
               predispositionCount={stageCounts.predispositions || predispositions.filter(p => !p.already_diagnosed).length}
               labAlertCount={stageCounts.labs || labAlerts.length}
               tripletCount={stageCounts.triplets || kgTriplets.length}
+              pathwayCount={stageCounts.pathways || kgPathways.length}
               interactionCount={stageCounts.interactions ?? interactionAlerts.length}
               compoundCount={stageCounts.compounds || (recommendationCompounds?.length || 0)}
               synergyCount={stageCounts.synergies}
