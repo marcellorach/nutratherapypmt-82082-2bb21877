@@ -1,62 +1,54 @@
 
-# Fix: Translation Keys, Bilingual Logs, and Condition Names
+## Diagnóstico: Por que as buscas não encontram evidências conhecidas?
 
-## Problem Summary
-
-1. **Broken keys in VetGraphRAG pipeline** (screenshot 1): `petProfile.pipeline.kgQuery`, `petProfile.pipeline.kgEnrich`, and `petProfile.pipeline.pathways` display as raw keys in the EN locale because they were never added there.
-
-2. **Clinical pipeline log messages hardcoded in Portuguese** (screenshot 2): All `onProgress` messages in `clinical-analysis-pipeline.ts` are Portuguese-only (e.g., "Verificando interacoes...", "Gerando recomendacao hibrida...").
-
-3. **Condition names always in English** (screenshot 3): `VetGraphRAGInsightsPanel.tsx` uses `condition_name` directly from the DB (English). Also has hardcoded PT strings like "Condição diagnosticada:", "Correlação detectada entre exames laboratoriais...".
+Analisei profundamente o edge function `kg-evidence-gap-fill/index.ts` e identifiquei **3 problemas críticos**:
 
 ---
 
-## Plan
+### Problema 1: Perplexity retorna PMIDs alucinados que não validam no PubMed
 
-### 1. Fix missing EN translation keys
+O pipeline chama o Perplexity primeiro (`sonar-reasoning-pro`). O Perplexity diz "sim, Chondroitin Sulfate trata Hip Dysplasia com eficácia 1.5/5" e cita PMIDs. Porém, a função `validatePmids()` verifica cada PMID contra a API real do PubMed — e nenhum existe de verdade (são alucinações do modelo). Resultado: `citedPmids = []`, `records = []`, **0 estudos persistidos**.
 
-Add to `src/locales/en/translation.json` under `petProfile.pipeline`:
-- `kgQuery`: "KG Query"
-- `kgEnrich`: "KG Enrich"  
-- `pathways`: "pathways"
+O triplet é criado como "pending", mas sem nenhum estudo real vinculado — uma afirmação sem prova.
 
-### 2. Bilingualize clinical pipeline log messages (~20 messages)
+**Evidência no log:** `"✓ Chondroitin Sulfate → Hip Dysplasia: ef 1.5/5 via perplexity (0 studies)"`
 
-In `src/services/clinical-analysis-pipeline.ts`, all `onProgress` message strings are hardcoded PT. The service doesn't have access to `t()` (it's not a React component).
+### Problema 2: PubMed fallback NUNCA é acionado quando Perplexity retorna eficácia > 0
 
-**Approach**: Accept a `locale` parameter (or a small translation helper) in the pipeline. Create a lightweight dictionary object for the ~20 pipeline messages with PT/EN variants. The pipeline will use the current locale to pick the right message.
+Na linha 697, o código verifica: `if (px.assessment && px.assessment.efficacy_0_5 > 0)`. Se o Perplexity diz que há **qualquer** evidência (mesmo ef=1, anecdotal), o pipeline **pula completamente** a busca direta no PubMed.
 
-File: `src/services/clinical-pipeline-messages.ts` (new) — Contains a bilingual message dictionary keyed by message ID.
+Testei manualmente agora: **PubMed TEM 2 artigos reais** para "Chondroitin Sulfate" + "Hip Dysplasia" em caninos (PMIDs 18716453 e 12202124). Mas como o Perplexity já retornou ef=1.5 com PMIDs falsos, esse fallback nunca executa.
 
-File: `src/services/clinical-analysis-pipeline.ts` — Import the dictionary, accept `locale` param, use localized messages.
+Este é o bug principal: o PubMed só é consultado quando o Perplexity retorna eficácia = 0, o que quase nunca acontece para correlações conhecidas.
 
-File: `src/pages/veterinario/PetProfilePage.tsx` — Pass `i18n.language` to the pipeline call.
+### Problema 3: Timeout de 150s causa perda do resultado final
 
-### 3. Bilingualize condition names
-
-The `condition_name` field in the DB is English. The DB also has `condition_name_pt` (or we use a translation map).
-
-**Approach**: Check if `pet_conditions` table has a `condition_name_pt` field. If not, use a client-side canonicalization dictionary (`src/services/clinical-name-canonicalizer.ts` already exists) to provide PT names. Update `VetGraphRAGInsightsPanel.tsx` to use `useLocalizedField` or a similar approach to show the bilingual name.
-
-Also fix the ~5 hardcoded Portuguese strings in `VetGraphRAGInsightsPanel.tsx` (lines 51, 56-57, 74-75) by moving them to translation keys.
-
-### 4. Governance
-
-- Increment `I18N_VERSION` to `1.50.0`
-- Update `CHANGELOG.md` and run `npm run sync:changelog`
+O log mostra timestamps de 23:47 a 23:50 — ~3 minutos. Cada par leva ~20-30s (Perplexity + validação + sleep). Com 10 pares, o tempo total (~200-300s) excede o idle timeout de 150s do Deno. Quando o timeout mata a conexão, o evento `result` final nunca chega ao cliente, e o "Detalhamento da última busca" mostra `pares: 0, estudos: 0, pendentes: 0`.
 
 ---
 
-## Files Changed
+## Plano de Correção
 
-| File | Change |
-|------|--------|
-| `src/locales/en/translation.json` | Add missing `kgQuery`, `kgEnrich`, `pathways` keys |
-| `src/locales/pt/translation.json` | Add pipeline log message keys + condition description keys |
-| `src/locales/en/translation.json` | Add pipeline log message keys + condition description keys |
-| `src/services/clinical-pipeline-messages.ts` | New: bilingual message dictionary |
-| `src/services/clinical-analysis-pipeline.ts` | Accept locale, use localized messages |
-| `src/pages/veterinario/PetProfilePage.tsx` | Pass locale to pipeline |
-| `src/components/pet/VetGraphRAGInsightsPanel.tsx` | Use `t()` for hardcoded strings, bilingual condition names |
-| `src/i18n.ts` | Bump version to 1.50.0 |
-| `CHANGELOG.md` | New entry |
+### 1. Busca PubMed complementar quando PMIDs do Perplexity não validam
+Após `validatePmids()`, se `validPmids.length === 0` mas `efficacy > 0`, executar `pubmedSearch()` para encontrar estudos reais que comprovem a afirmação do Perplexity. Usar esses registros para alimentar `records` e `citedPmids`.
+
+### 2. Re-avaliar com Gemini quando PubMed complementar encontra artigos
+Quando a busca PubMed complementar achar papers, chamar `assessWithGemini()` sobre eles para obter uma avaliação baseada em evidência real (não apenas a palavra do Perplexity).
+
+### 3. Reduzir max_pairs padrão de 10 para 5
+Cada par leva ~20s. Com 5 pares = ~100s, dentro do limite de 150s.
+
+### 4. Reduzir sleeps desnecessários
+Os `sleep(400)` entre chamadas Perplexity e `sleep(360)` sem NCBI_API_KEY são excessivos. Reduzir para 200ms (Perplexity) e 150ms (PubMed sem key).
+
+### 5. Emitir heartbeats periódicos
+Adicionar emissão de evento `heartbeat` durante processamento longo para evitar que o idle timeout mate a conexão de streaming.
+
+---
+
+### Arquivos a modificar
+
+| Arquivo | Mudança |
+|---------|---------|
+| `supabase/functions/kg-evidence-gap-fill/index.ts` | Fix lógica Perplexity→PubMed, reduzir timeouts, heartbeats |
+| `CHANGELOG.md` | Registrar correção |
