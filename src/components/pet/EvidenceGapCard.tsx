@@ -74,7 +74,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     ? (() => {
         const byProvider: Record<string, { total: number; ok: number; noEvidence: number; failed: number }> = {};
         for (const d of lastResult.details) {
-          const prov = d.provider || 'unknown';
+          const prov = reconcileProvider(d);
           if (!byProvider[prov]) byProvider[prov] = { total: 0, ok: 0, noEvidence: 0, failed: 0 };
           byProvider[prov].total++;
           if (d.status === 'ok' || d.status === 'dry_run') byProvider[prov].ok++;
