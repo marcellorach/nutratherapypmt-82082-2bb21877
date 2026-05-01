@@ -85,23 +85,47 @@ serve(async (req) => {
     }
 
     // 4. Call LLM to extract evidence_level, intensity, and rationale
-    const VALID_EVIDENCE_LEVELS = ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"];
+    const VALID_EVIDENCE_LEVELS = [
+      "meta_analysis", "rct", "cohort", "case_control", "case_report",
+      "in_vivo", "animal_study", "in_vitro", "expert_opinion"
+    ];
 
-    const prompt = `You are a scientific evidence analyst. Given the following text excerpt from a study and a specific biological relationship, determine:
+    const prompt = `You are a scientific evidence analyst grading a single biological relationship extracted from a study.
 
-1. **evidence_level**: The type of study evidence. Must be EXACTLY one of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"
-2. **intensity**: The strength of the observed effect on a scale of 0.0 to 1.0 (0.0 = no effect, 0.5 = moderate, 1.0 = complete resolution)
-3. **confidence_rationale**: A brief explanation (1-2 sentences) of why you assigned these values
-
-## Relationship to analyze:
+## Relationship to analyze
 - Subject: ${triplet.subject_name} (${triplet.subject_type})
 - Predicate: ${triplet.predicate}
 - Object: ${triplet.object_name} (${triplet.object_type})
 
-## Source text:
+## Source text (verbatim from the study)
 ${contextText.substring(0, 3000)}
 
-Return your analysis using the provided tool.`;
+## Your task — return THREE fields via the tool call:
+
+### 1. evidence_level — pick the BEST fit from this list:
+- "meta_analysis" — systematic review pooling multiple RCTs/cohorts
+- "rct" — randomized controlled trial in the target species (dogs preferred)
+- "cohort" — prospective/retrospective cohort observational study
+- "case_control" — case-control observational study
+- "case_report" — single or small case series
+- "in_vivo" — controlled experimental study in live animals (dogs, rats, mice) WITHOUT randomization/control of an RCT
+- "animal_study" — synonym of in_vivo when species/design is unclear; use only if "in_vivo" doesn't fit
+- "in_vitro" — cell culture / isolated tissue / biochemical assay only
+- "expert_opinion" — narrative review, textbook, guideline without primary data
+
+### 2. intensity — 0.0 to 1.0, ANCHORED in the magnitude actually reported:
+- 0.0–0.15 — no effect, non-significant trend, or NEGATIVE result ("did not differ", "p>0.05", "no improvement")
+- 0.15–0.35 — small effect (≤20% change in marker, weak correlation r<0.3, modest symptomatic relief)
+- 0.35–0.6 — moderate effect (20–50% change, clear clinical improvement, r=0.3–0.6)
+- 0.6–0.85 — strong effect (>50% change, robust remission, r>0.6, dose-response confirmed)
+- 0.85–1.0 — near-complete or complete resolution / cure / >80% improvement
+- If the text describes the relationship but does NOT quantify magnitude, default to 0.4 and say so in the rationale.
+- CRITICAL: if the result was null/negative ("no significant effect", "failed to improve"), intensity MUST be ≤ 0.15 even if the relationship is named.
+
+### 3. confidence_rationale — exactly this format, ≤2 sentences then a literal quote:
+"<one sentence justifying evidence_level + intensity>. Source excerpt: \"<verbatim quote from the source text, ≤300 chars, that supports the judgment>\""
+
+If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and write: 'Source excerpt: not found in provided text.'`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -122,10 +146,10 @@ Return your analysis using the provided tool.`;
               properties: {
                 evidence_level: { 
                   type: "string", 
-                  enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "expert_opinion"]
+                  enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vivo", "animal_study", "in_vitro", "expert_opinion"]
                 },
                 intensity: { type: "number", description: "Effect strength 0.0-1.0" },
-                confidence_rationale: { type: "string", description: "Brief explanation of the assessment" }
+                confidence_rationale: { type: "string", description: "1-2 sentences ending with a literal Source excerpt quote from the text" }
               },
               required: ["evidence_level", "intensity", "confidence_rationale"]
             }
@@ -154,10 +178,10 @@ Return your analysis using the provided tool.`;
     // 5. Update the triplet
     const updateData: Record<string, any> = {};
     if (enrichment.evidence_level && VALID_EVIDENCE_LEVELS.includes(enrichment.evidence_level)) {
-      updateData.evidence_level = enrichment.evidence_level;
+      // Map animal_study -> in_vivo for storage (canonical)
+      updateData.evidence_level = enrichment.evidence_level === 'animal_study' ? 'in_vivo' : enrichment.evidence_level;
     } else if (enrichment.evidence_level) {
-      // Map in_vivo → in_vitro as fallback
-      updateData.evidence_level = enrichment.evidence_level === 'in_vivo' ? 'in_vitro' : 'expert_opinion';
+      updateData.evidence_level = 'expert_opinion';
     }
     if (enrichment.intensity !== undefined) updateData.intensity = Math.max(0, Math.min(1, enrichment.intensity));
     if (enrichment.confidence_rationale) updateData.confidence_rationale = enrichment.confidence_rationale;
