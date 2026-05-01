@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Brain, BookOpen, ClipboardCheck, Loader2 } from "lucide-react";
+import { Upload, Brain, Search, ClipboardCheck, Loader2, BookOpen } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 
@@ -16,10 +16,11 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
   const { t } = useTranslation();
   
   const tabs = [
-    { value: "library", icon: BookOpen, label: t('studies.import.libraryTab', 'Library') },
+    { value: "external-search", icon: Search, label: t('studies.import.externalSearchTab', 'External Search') },
     { value: "file-upload", icon: Upload, label: t('studies.import.uploadTab') },
     { value: "ai-processing", icon: Brain, label: t('studies.import.aiProcessingTab') },
     { value: "curation", icon: ClipboardCheck, label: t('studies.import.curationTab', 'Curation') },
+    { value: "curated-library", icon: BookOpen, label: t('studies.import.curatedLibraryTab', 'Library') },
   ];
 
   return (

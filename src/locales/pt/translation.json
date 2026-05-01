@@ -542,6 +542,8 @@
     },
     "import": {
       "libraryTab": "Biblioteca",
+      "externalSearchTab": "Busca Externa",
+      "curatedLibraryTab": "Biblioteca",
       "importsTab": "Imports",
       "title": "Digestão de Estudos Científicos",
       "description": "Pipeline completo: do upload de PDFs à extração com IA e curadoria para o VetGraphRAG",

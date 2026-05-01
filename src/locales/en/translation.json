@@ -542,6 +542,8 @@
     },
     "import": {
       "libraryTab": "Library",
+      "externalSearchTab": "External Search",
+      "curatedLibraryTab": "Library",
       "importsTab": "Imports",
       "title": "Scientific Studies Digestion",
       "description": "Complete pipeline: from PDF upload to AI extraction and curation for VetGraphRAG",
