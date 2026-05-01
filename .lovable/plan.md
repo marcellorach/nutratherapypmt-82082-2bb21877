@@ -1,41 +1,62 @@
 
-## Problem
+# Fix: Translation Keys, Bilingual Logs, and Condition Names
 
-**a) Recommendation stage missing timing**: The `stage6_recommendation` event emits `totalDurationMs` in its meta but NOT `durationMs`. The `handlePipelineEvent` handler in PetProfilePage only reads `e.meta?.durationMs`, so the recommendation stage never gets its time displayed.
+## Problem Summary
 
-**b) KG stratification**: The KG stage currently shows a single card ("93 triplets"). With more space available, we can split it into meaningful sub-stages for better visibility into what the KG query actually does.
+1. **Broken keys in VetGraphRAG pipeline** (screenshot 1): `petProfile.pipeline.kgQuery`, `petProfile.pipeline.kgEnrich`, and `petProfile.pipeline.pathways` display as raw keys in the EN locale because they were never added there.
+
+2. **Clinical pipeline log messages hardcoded in Portuguese** (screenshot 2): All `onProgress` messages in `clinical-analysis-pipeline.ts` are Portuguese-only (e.g., "Verificando interacoes...", "Gerando recomendacao hibrida...").
+
+3. **Condition names always in English** (screenshot 3): `VetGraphRAGInsightsPanel.tsx` uses `condition_name` directly from the DB (English). Also has hardcoded PT strings like "Condição diagnosticada:", "Correlação detectada entre exames laboratoriais...".
 
 ---
 
 ## Plan
 
-### Fix A: Add `durationMs` to stage6_recommendation
+### 1. Fix missing EN translation keys
 
-In `src/services/clinical-analysis-pipeline.ts` line ~1131, add `durationMs: performance.now() - ts6` to the meta object alongside the existing `totalDurationMs`. This is a one-line fix.
+Add to `src/locales/en/translation.json` under `petProfile.pipeline`:
+- `kgQuery`: "KG Query"
+- `kgEnrich`: "KG Enrich"  
+- `pathways`: "pathways"
 
-### Fix B: Stratify KG into sub-cards
+### 2. Bilingualize clinical pipeline log messages (~20 messages)
 
-Split the single "KG" stage into two visual cards in the pipeline:
-1. **KG Query** — shows triplet count and query time (the actual Neo4j/graph lookup)
-2. **KG Enrich** — shows pathway/projection count and enrichment time
+In `src/services/clinical-analysis-pipeline.ts`, all `onProgress` message strings are hardcoded PT. The service doesn't have access to `t()` (it's not a React component).
 
-This requires:
+**Approach**: Accept a `locale` parameter (or a small translation helper) in the pipeline. Create a lightweight dictionary object for the ~20 pipeline messages with PT/EN variants. The pipeline will use the current locale to pick the right message.
 
-1. **`ClinicalPipelineWorkflow.tsx`**: Add a new `stage4b_kg_enrich` visual stage between KG and Interactions. Update the stages array to show two KG-related cards with distinct icons (Share2 for query, GitBranch or Network for enrichment).
+File: `src/services/clinical-pipeline-messages.ts` (new) — Contains a bilingual message dictionary keyed by message ID.
 
-2. **`PetProfilePage.tsx`**: 
-   - Add `stage4b_kg_enrich` to the PipelineState type and initial state
-   - Split the KG timing: the existing stage4_kg keeps the query time, and stage4b gets the enrichment time
-   - Wire up the new counts (pathways/projections) to stage4b
+File: `src/services/clinical-analysis-pipeline.ts` — Import the dictionary, accept `locale` param, use localized messages.
 
-3. **`clinical-analysis-pipeline.ts`**: 
-   - Emit separate `stage-start`/`stage-end` events for the KG enrichment sub-phase (pathway extraction and projection calculation), using a new stage ID `stage4b_kg_enrich`
-   - Include `durationMs` in its meta
+File: `src/pages/veterinario/PetProfilePage.tsx` — Pass `i18n.language` to the pipeline call.
 
-4. **Translation keys**: Add `petProfile.pipeline.kgEnrich` and `petProfile.pipeline.pathways` in both PT and EN translation files. Increment `I18N_VERSION`.
+### 3. Bilingualize condition names
 
-5. **CHANGELOG.md**: Register both fixes.
+The `condition_name` field in the DB is English. The DB also has `condition_name_pt` (or we use a translation map).
 
-### Technical Details
+**Approach**: Check if `pet_conditions` table has a `condition_name_pt` field. If not, use a client-side canonicalization dictionary (`src/services/clinical-name-canonicalizer.ts` already exists) to provide PT names. Update `VetGraphRAGInsightsPanel.tsx` to use `useLocalizedField` or a similar approach to show the bilingual name.
 
-The pipeline type `PipelineStageId` in `clinical-analysis-pipeline.ts` needs a new literal `'stage4b_kg_enrich'`. The `PipelineState` type in `ClinicalPipelineWorkflow.tsx` needs a matching field. The visual layout naturally accommodates one more card since the user noted there is extra space.
+Also fix the ~5 hardcoded Portuguese strings in `VetGraphRAGInsightsPanel.tsx` (lines 51, 56-57, 74-75) by moving them to translation keys.
+
+### 4. Governance
+
+- Increment `I18N_VERSION` to `1.50.0`
+- Update `CHANGELOG.md` and run `npm run sync:changelog`
+
+---
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/locales/en/translation.json` | Add missing `kgQuery`, `kgEnrich`, `pathways` keys |
+| `src/locales/pt/translation.json` | Add pipeline log message keys + condition description keys |
+| `src/locales/en/translation.json` | Add pipeline log message keys + condition description keys |
+| `src/services/clinical-pipeline-messages.ts` | New: bilingual message dictionary |
+| `src/services/clinical-analysis-pipeline.ts` | Accept locale, use localized messages |
+| `src/pages/veterinario/PetProfilePage.tsx` | Pass locale to pipeline |
+| `src/components/pet/VetGraphRAGInsightsPanel.tsx` | Use `t()` for hardcoded strings, bilingual condition names |
+| `src/i18n.ts` | Bump version to 1.50.0 |
+| `CHANGELOG.md` | New entry |
