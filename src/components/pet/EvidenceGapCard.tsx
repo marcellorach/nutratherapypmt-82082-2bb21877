@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen } from 'lucide-react';
+import { Loader2, Search, ExternalLink, AlertTriangle, CheckCircle2, Info, Database, Globe, Microscope, ChevronDown, ChevronUp, FlaskConical, BookOpen, Merge } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingGapFillTriplets } from '@/hooks/useKgEvidenceGapFill';
@@ -30,6 +30,8 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
   const [isSearching, setIsSearching] = useState(false);
   const [gapLog, setGapLog] = useState<GapLogEntry[]>([]);
   const logIdRef = useRef(0);
+  // Track provider per compound→condition pair from streaming events for cross-check
+  const pairProviderRef = useRef<Map<string, string>>(new Map());
   const [lastResult, setLastResult] = useState<null | {
     pairs_searched: number;
     studies_added: number;
@@ -67,12 +69,24 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     return t('evidenceGap.efficacy.none', 'None');
   };
 
+  // Validate provider from result details against streaming events
+  const reconcileProvider = useCallback((detail: any): string => {
+    const key = `${detail.pair?.compound_en}→${detail.pair?.condition_en}`;
+    const streamProvider = pairProviderRef.current.get(key);
+    const resultProvider = detail.provider || 'unknown';
+    if (streamProvider && streamProvider !== resultProvider) {
+      console.warn(`[EvidenceGapCard] provider mismatch for ${key}: stream=${streamProvider}, result=${resultProvider}. Using stream value.`);
+      return streamProvider;
+    }
+    return resultProvider;
+  }, []);
+
   // Compute source breakdown from details
   const sourceBreakdown = lastResult?.details
     ? (() => {
         const byProvider: Record<string, { total: number; ok: number; noEvidence: number; failed: number }> = {};
         for (const d of lastResult.details) {
-          const prov = d.provider || 'unknown';
+          const prov = reconcileProvider(d);
           if (!byProvider[prov]) byProvider[prov] = { total: 0, ok: 0, noEvidence: 0, failed: 0 };
           byProvider[prov].total++;
           if (d.status === 'ok' || d.status === 'dry_run') byProvider[prov].ok++;
@@ -139,6 +153,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         break;
       case 'pair_reassessed':
         appendLog('success', `✓ Reassessed: ${ev.compound} → ${ev.condition} (ef ${ev.efficacy}/5, ${ev.pmids} PMIDs)`);
+        pairProviderRef.current.set(`${ev.compound}→${ev.condition}`, 'perplexity+pubmed');
         break;
       case 'heartbeat':
         break;
@@ -150,6 +165,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
         break;
       case 'pair_ok':
         appendLog('success', `✓ ${ev.compound} → ${ev.condition}: ef ${ev.efficacy}/5 via ${ev.provider} (${ev.studies} studies)`);
+        pairProviderRef.current.set(`${ev.compound}→${ev.condition}`, ev.provider);
         break;
       case 'pair_error':
         appendLog('error', `✗ ${ev.compound} → ${ev.condition}: ${ev.error}`);
@@ -178,6 +194,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
   const handleSearch = async () => {
     setLastResult(null);
     setGapLog([]);
+    pairProviderRef.current.clear();
     setIsSearching(true);
     try {
       // Use streaming fetch for real-time logging
@@ -311,7 +328,7 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                 </p>
                 {Object.entries(sourceBreakdown).map(([prov, stats]) => (
                   <div key={prov} className="flex items-center gap-2 text-[11px]">
-                    {prov === 'perplexity' ? <Microscope className="h-3 w-3 text-blue-500" /> : <Database className="h-3 w-3 text-green-500" />}
+                    {prov === 'perplexity' ? <Microscope className="h-3 w-3 text-blue-500" /> : prov === 'perplexity+pubmed' ? <Merge className="h-3 w-3 text-violet-500" /> : <Database className="h-3 w-3 text-green-500" />}
                     <span className="font-medium capitalize">{prov}</span>
                     <span className="text-muted-foreground">
                       {stats.total} {t('evidenceGap.queriesLabel')} · 
@@ -374,9 +391,17 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                             </Badge>
                           )}
                           {d.provider && (
-                            <Badge variant={d.provider === 'perplexity' ? 'default' : 'secondary'} className="text-[9px] h-4 px-1">
-                              {d.provider}
-                            </Badge>
+                            (() => {
+                              const prov = reconcileProvider(d);
+                              return (
+                                <Badge
+                                  variant={prov === 'pubmed' ? 'secondary' : 'default'}
+                                  className={`text-[9px] h-4 px-1 ${prov === 'perplexity+pubmed' ? 'bg-violet-600 hover:bg-violet-700' : ''}`}
+                                >
+                                  {prov}
+                                </Badge>
+                              );
+                            })()
                           )}
                           {hasRationale && (
                             <button onClick={() => toggleDetail(i)} className="text-muted-foreground hover:text-foreground">
