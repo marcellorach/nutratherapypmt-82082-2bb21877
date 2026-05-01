@@ -15,6 +15,7 @@ import {
   canonicalCompoundName,
   canonicalConditionName,
 } from './clinical-name-canonicalizer';
+import { pm } from './clinical-pipeline-messages';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,7 @@ export type PipelineProgressCallback = (event: PipelineProgressEvent) => void;
 
 export interface RunClinicalAnalysisOptions {
   onProgress?: PipelineProgressCallback;
+  locale?: string;
 }
 
 export interface BreedPredisposition {
@@ -300,6 +302,7 @@ function getCanonicalConditionNames(conditionName: string): string[] {
 async function queryKnowledgeGraph(
   conditionNames: string[],
   onProgress?: PipelineProgressCallback,
+  locale: string = 'pt',
 ): Promise<any[]> {
   const kgResults: any[] = [];
 
@@ -309,7 +312,7 @@ async function queryKnowledgeGraph(
     onProgress?.({
       kind: 'log',
       level: 'info',
-      message: `Consultando Knowledge Graph para "${condition}"...`,
+      message: pm('s4_query', locale, { condition }),
       meta: { condition, candidates },
     });
     
@@ -327,7 +330,7 @@ async function queryKnowledgeGraph(
           onProgress?.({
             kind: 'log',
             level: 'success',
-            message: `KG: ${nodes} nós · ${edges} relações para "${condition}" (via "${candidate}")`,
+            message: pm('s4_hit', locale, { nodes, edges, condition, candidate }),
             meta: { condition, canonical: candidate, nodes, edges },
           });
           found = true;
@@ -338,7 +341,7 @@ async function queryKnowledgeGraph(
         onProgress?.({
           kind: 'log',
           level: 'warn',
-          message: `Falha ao consultar KG para "${candidate}" (${(e as Error).message || 'erro'})`,
+          message: pm('s4_fail', locale, { candidate, error: (e as Error).message || 'error' }),
         });
       }
     }
@@ -348,7 +351,7 @@ async function queryKnowledgeGraph(
       onProgress?.({
         kind: 'log',
         level: 'warn',
-        message: `Sem dados no KG para "${condition}" após tentar ${candidates.length} variantes`,
+        message: pm('s4_miss', locale, { condition, count: candidates.length }),
       });
     }
   }
@@ -932,7 +935,7 @@ export async function runClinicalAnalysisPipeline(
   exams: any[],
   options: RunClinicalAnalysisOptions = {},
 ): Promise<ClinicalAnalysisResult> {
-  const { onProgress } = options;
+  const { onProgress, locale = 'pt' } = options;
   const t0 = performance.now();
 
   // Stage 1: Collect patient data (already passed as params)
@@ -943,7 +946,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage2_predispositions',
-    message: `Buscando predisposições raciais para "${profile.breed}"...`,
+    message: pm('s2_start', locale, { breed: profile.breed }),
   });
   const ts2 = performance.now();
   const predispositions = await fetchBreedPredispositions(profile.breed, conditionNames);
@@ -951,7 +954,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage2_predispositions',
-    message: `${predispositions.length} predisposições · ${undiagnosed} não diagnosticadas (${((performance.now() - ts2) / 1000).toFixed(2)}s)`,
+    message: pm('s2_end', locale, { count: predispositions.length, undiagnosed, time: ((performance.now() - ts2) / 1000).toFixed(2) }),
     meta: { count: predispositions.length, undiagnosed, durationMs: performance.now() - ts2 },
   });
 
@@ -960,14 +963,14 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage3_labs',
-    message: `Interpretando ${exams.length} exames vs faixas de referência (${ageGroup})...`,
+    message: pm('s3_start', locale, { count: exams.length, ageGroup }),
   });
   const ts3 = performance.now();
   const labAlerts = await interpretLabResults(exams, profile.age_years);
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage3_labs',
-    message: `${labAlerts.length} alertas laboratoriais detectados (${((performance.now() - ts3) / 1000).toFixed(2)}s)`,
+    message: pm('s3_end', locale, { count: labAlerts.length, time: ((performance.now() - ts3) / 1000).toFixed(2) }),
     meta: { count: labAlerts.length, durationMs: performance.now() - ts3 },
   });
 
@@ -981,16 +984,16 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage4_kg',
-    message: `Consultando Knowledge Graph para ${allConditionsToQuery.length} condições...`,
+    message: pm('s4_start', locale, { count: allConditionsToQuery.length }),
     meta: { conditions: allConditionsToQuery },
   });
   const ts4 = performance.now();
-  const kgResults = await queryKnowledgeGraph(allConditionsToQuery, onProgress);
+  const kgResults = await queryKnowledgeGraph(allConditionsToQuery, onProgress, locale);
   const totalNodes = kgResults.reduce((sum, r) => sum + (r.graphData?.nodes?.length || 0), 0);
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage4_kg',
-    message: `${kgResults.length}/${allConditionsToQuery.length} condições com evidência no KG · ${totalNodes} nós totais (${((performance.now() - ts4) / 1000).toFixed(2)}s)`,
+    message: pm('s4_end', locale, { hits: kgResults.length, total: allConditionsToQuery.length, nodes: totalNodes, time: ((performance.now() - ts4) / 1000).toFixed(2) }),
     meta: { hits: kgResults.length, totalNodes, durationMs: performance.now() - ts4 },
   });
 
@@ -998,7 +1001,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage4b_kg_enrich',
-    message: `Extraindo evidência (pathways & projeções) de ${kgResults.length} resultados KG...`,
+    message: pm('s4b_start', locale, { count: kgResults.length }),
   });
   const ts4b = performance.now();
   const { triplets, pathways, projections } = extractKgEvidence(kgResults, conditionNames);
@@ -1006,7 +1009,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage4b_kg_enrich',
-    message: `${triplets.length} triplets · ${pathways.length} pathways · ${projections.length} projeções`,
+    message: pm('s4b_end', locale, { triplets: triplets.length, pathways: pathways.length, projections: projections.length }),
     meta: { triplets: triplets.length, pathways: pathways.length, projections: projections.length, durationMs: performance.now() - ts4b },
   });
 
@@ -1019,14 +1022,14 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage5_interactions',
-    message: `Verificando interações entre ${recommendedCompoundNames.length} compostos e ${medicationNames.length} medicações...`,
+    message: pm('s5_start', locale, { compounds: recommendedCompoundNames.length, meds: medicationNames.length }),
   });
   const ts5 = performance.now();
   const interactionAlerts = checkInteractions(recommendedCompoundNames, medicationNames, kgResults);
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage5_interactions',
-    message: `${interactionAlerts.length} interações detectadas · ${triplets.length} triplets clínicos extraídos (${((performance.now() - ts5) / 1000).toFixed(2)}s)`,
+    message: pm('s5_end', locale, { interactions: interactionAlerts.length, triplets: triplets.length, time: ((performance.now() - ts5) / 1000).toFixed(2) }),
     meta: { interactions: interactionAlerts.length, triplets: triplets.length, durationMs: performance.now() - ts5 },
   });
 
@@ -1039,7 +1042,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-start',
     stage: 'stage6_recommendation',
-    message: `Gerando recomendação híbrida (KG + LLM) para ${profile.name}...`,
+    message: pm('s6_start', locale, { name: profile.name }),
   });
   const ts6 = performance.now();
   const recommendation = await getHybridRecommendation(
@@ -1048,7 +1051,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'log',
     level: 'info',
-    message: `Recomendação base recebida: ${(recommendation?.nutraceuticals || []).length} compostos candidatos. Resolvendo posologias...`,
+    message: pm('s6_candidates', locale, { count: (recommendation?.nutraceuticals || []).length }),
   });
 
   // Build compounds from recommendation with per-condition mapping
@@ -1141,7 +1144,7 @@ export async function runClinicalAnalysisPipeline(
   onProgress?.({
     kind: 'stage-end',
     stage: 'stage6_recommendation',
-    message: `${compoundsWithStudies.length} compostos finais com posologia resolvida (${((performance.now() - ts6) / 1000).toFixed(2)}s) · pipeline total: ${((performance.now() - t0) / 1000).toFixed(2)}s`,
+    message: pm('s6_end', locale, { count: compoundsWithStudies.length, time: ((performance.now() - ts6) / 1000).toFixed(2), total: ((performance.now() - t0) / 1000).toFixed(2) }),
     meta: { compounds: compoundsWithStudies.length, durationMs: performance.now() - ts6, totalDurationMs: performance.now() - t0 },
   });
 
