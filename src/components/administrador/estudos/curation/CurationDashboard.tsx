@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Clock, AlertCircle, TrendingUp, Sparkles } from 'lucide-react';
+import { Check, X, Clock, AlertCircle, TrendingUp, Sparkles, ShieldCheck } from 'lucide-react';
 import { TripletCurationQueue } from './TripletCurationQueue';
 import { AutoDiscoveryReview } from './AutoDiscoveryReview';
+import { EnrichmentQAReview } from './EnrichmentQAReview';
 
 interface CurationMetrics {
   triplets: {
@@ -242,7 +243,7 @@ export const CurationDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="triplets">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="triplets" className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
                 {t('curation.dashboard.tripletsTab') || 'Triplets'}
@@ -257,6 +258,10 @@ export const CurationDashboard: React.FC = () => {
                   <Badge className="bg-purple-500 ml-2">{metrics.discoveries.suggested}</Badge>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="qa" className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                QA Enriquecimento
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="triplets" className="mt-6">
@@ -265,6 +270,10 @@ export const CurationDashboard: React.FC = () => {
 
             <TabsContent value="discoveries" className="mt-6">
               <AutoDiscoveryReview />
+            </TabsContent>
+
+            <TabsContent value="qa" className="mt-6">
+              <EnrichmentQAReview />
             </TabsContent>
           </Tabs>
         </CardContent>
