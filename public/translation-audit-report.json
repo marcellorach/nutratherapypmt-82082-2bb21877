@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-01T00:17:23.564Z",
+  "timestamp": "2026-05-01T01:38:22.974Z",
   "summary": {
     "totalFiles": 817,
-    "totalIssues": 402,
+    "totalIssues": 405,
     "hardcodedTexts": 40,
     "missingKeys": 362,
-    "incompleteTranslations": 0
+    "incompleteTranslations": 3
   },
   "issues": [
     {
@@ -2405,7 +2405,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1890,
+      "line": 1909,
       "text": "@",
       "severity": "high"
     },
@@ -2540,6 +2540,27 @@
       "file": "src/pages/veterinario/RecommendationsList.tsx",
       "line": 53,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: petProfile.pipeline.kgQuery",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: petProfile.pipeline.kgEnrich",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: petProfile.pipeline.pathways",
       "severity": "high"
     },
     {
