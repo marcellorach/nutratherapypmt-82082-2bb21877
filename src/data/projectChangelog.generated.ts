@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-04-30T20:44:03.382Z
+// Última geração: 2026-05-01T00:23:26.308Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,28 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-04-30";
+export const lastChangelogDate = "2026-05-01";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-01",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Pipeline: recommendation timing + KG stratification",
+    "bullets": [
+      "Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper",
+      "KG dividido em dois cards visuais: KG Query (consulta Neo4j) e KG Enrich (extração de pathways/projeções)",
+      "Novo estágio `stage4b_kg_enrich` no pipeline com contagem de pathways",
+      "Files: src/services/clinical-analysis-pipeline.ts, src/components/pet/ClinicalPipelineWorkflow.tsx, src/pages/veterinario/PetProfilePage.tsx"
+    ],
+    "files": [
+      "src/services/clinical-analysis-pipeline.ts",
+      "src/components/pet/ClinicalPipelineWorkflow.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx"
+    ],
+    "i18nVersion": "1.48.0"
+  },
   {
     "date": "2026-04-30",
     "kind": "fixed",

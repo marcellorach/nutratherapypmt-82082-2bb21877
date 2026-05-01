@@ -65,6 +65,7 @@ const PetProfilePage: React.FC = () => {
     stage2_predispositions: 'idle',
     stage3_labs: 'idle',
     stage4_kg: 'idle',
+    stage4b_kg_enrich: 'idle',
     stage5_interactions: 'idle',
     stage6_recommendation: 'idle',
     stage7_synergies: 'idle',
@@ -79,16 +80,18 @@ const PetProfilePage: React.FC = () => {
     predispositions: number;
     labs: number;
     triplets: number;
+    pathways: number;
     interactions: number;
     compounds: number;
     synergies: number;
-  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+  }>({ profile: 0, predispositions: 0, labs: 0, triplets: 0, pathways: 0, interactions: 0, compounds: 0, synergies: 0 });
   const [stageTimes, setStageTimes] = useState<Record<string, number>>({});
 
   const STAGE_LABELS: Record<PipelineStageId, string> = {
     stage2_predispositions: t('petProfile.pipeline.predispositions'),
     stage3_labs: t('petProfile.pipeline.labs'),
     stage4_kg: t('petProfile.pipeline.knowledgeGraph'),
+    stage4b_kg_enrich: t('petProfile.pipeline.kgEnrich'),
     stage5_interactions: t('petProfile.pipeline.interactions'),
     stage6_recommendation: t('petProfile.pipeline.recommendation'),
     stage7_synergies: t('petProfile.pipeline.synergies'),
@@ -129,6 +132,8 @@ const PetProfilePage: React.FC = () => {
             return { ...prev, labs: meta.count ?? prev.labs };
           case 'stage4_kg':
             return { ...prev, triplets: meta.totalNodes ?? prev.triplets };
+          case 'stage4b_kg_enrich':
+            return { ...prev, pathways: meta.pathways ?? 0, triplets: meta.triplets ?? prev.triplets };
           case 'stage5_interactions':
             return {
               ...prev,
@@ -175,11 +180,12 @@ const PetProfilePage: React.FC = () => {
       stage2_predispositions: 'idle',
       stage3_labs: 'idle',
       stage4_kg: 'idle',
+      stage4b_kg_enrich: 'idle',
       stage5_interactions: 'idle',
       stage6_recommendation: 'idle',
       stage7_synergies: 'idle',
     });
-    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, interactions: 0, compounds: 0, synergies: 0 });
+    setStageCounts({ profile: 0, predispositions: 0, labs: 0, triplets: 0, pathways: 0, interactions: 0, compounds: 0, synergies: 0 });
     setStageTimes({});
 
     try {
@@ -684,6 +690,7 @@ const PetProfilePage: React.FC = () => {
               predispositionCount={stageCounts.predispositions || predispositions.filter(p => !p.already_diagnosed).length}
               labAlertCount={stageCounts.labs || labAlerts.length}
               tripletCount={stageCounts.triplets || kgTriplets.length}
+              pathwayCount={stageCounts.pathways || kgPathways.length}
               interactionCount={stageCounts.interactions ?? interactionAlerts.length}
               compoundCount={stageCounts.compounds || (recommendationCompounds?.length || 0)}
               synergyCount={stageCounts.synergies}

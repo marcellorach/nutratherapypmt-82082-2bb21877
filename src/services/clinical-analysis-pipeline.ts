@@ -35,6 +35,7 @@ export type PipelineStageId =
   | 'stage2_predispositions'
   | 'stage3_labs'
   | 'stage4_kg'
+  | 'stage4b_kg_enrich'
   | 'stage5_interactions'
   | 'stage6_recommendation'
   | 'stage7_synergies';
@@ -994,7 +995,20 @@ export async function runClinicalAnalysisPipeline(
   });
 
   // Extract evidence
+  onProgress?.({
+    kind: 'stage-start',
+    stage: 'stage4b_kg_enrich',
+    message: `Extraindo evidência (pathways & projeções) de ${kgResults.length} resultados KG...`,
+  });
+  const ts4b = performance.now();
   const { triplets, pathways, projections } = extractKgEvidence(kgResults, conditionNames);
+  await new Promise(r => setTimeout(r, 10));
+  onProgress?.({
+    kind: 'stage-end',
+    stage: 'stage4b_kg_enrich',
+    message: `${triplets.length} triplets · ${pathways.length} pathways · ${projections.length} projeções`,
+    meta: { triplets: triplets.length, pathways: pathways.length, projections: projections.length, durationMs: performance.now() - ts4b },
+  });
 
   // Stage 5: Interaction check
   const recommendedCompoundNames = kgResults.flatMap(r =>
@@ -1128,7 +1142,7 @@ export async function runClinicalAnalysisPipeline(
     kind: 'stage-end',
     stage: 'stage6_recommendation',
     message: `${compoundsWithStudies.length} compostos finais com posologia resolvida (${((performance.now() - ts6) / 1000).toFixed(2)}s) · pipeline total: ${((performance.now() - t0) / 1000).toFixed(2)}s`,
-    meta: { compounds: compoundsWithStudies.length, totalDurationMs: performance.now() - t0 },
+    meta: { compounds: compoundsWithStudies.length, durationMs: performance.now() - ts6, totalDurationMs: performance.now() - t0 },
   });
 
   return {

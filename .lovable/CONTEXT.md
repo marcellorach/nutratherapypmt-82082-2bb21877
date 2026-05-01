@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-04-30T20:44:03.385Z
+Generated: 2026-05-01T00:23:26.313Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: —
+## Latest i18n version: 1.48.0
 
 ## Changes by area (last 14 days)
 - **admin**: 8
 - **meta**: 7
 - **kg**: 5
 - **vet-ui**: 4
+- **clinical-pipeline**: 3
 - **infra**: 2
 - **i18n**: 2
-- **clinical-pipeline**: 2
 
 ## Top 10 recent entries
+### 2026-05-01 · [clinical-pipeline] CHANGED — Pipeline: recommendation timing + KG stratification
+- Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper
+- KG dividido em dois cards visuais: KG Query (consulta Neo4j) e KG Enrich (extração de pathways/projeções)
+- Novo estágio `stage4b_kg_enrich` no pipeline com contagem de pathways
+_files: src/services/clinical-analysis-pipeline.ts, src/components/pet/ClinicalPipelineWorkflow.tsx, src/pages/veterinario/PetProfilePage.tsx_
+
 ### 2026-04-30 · [infra] FIXED — Edge function kg-evidence-gap-fill: PascalCase types + FK study_id
 - Corrigido `subject_type: 'compound'` → `'Compound'` e `object_type: 'condition'` → `'Condition'` — constraint `triplet_extractions_object_type_check` rejeitava todos os inserts
 - Corrigido `study_id` FK violation: FK aponta para `processed_studies`, não `scientific_studies`. Gap-fill triplets agora usam `study_id = null` com proveniência em `approval_chain.cited_pmids`
@@ -68,12 +74,6 @@ _files: src/hooks/useScrollPanZoom.ts, src/components/administrador/organograma/
 - projectOrganograma.ts bilíngue: todas as ~60 entidades (áreas, filhos, convenções) agora possuem campos `title_en`, `description_en`, `label_en`, `value_en`.
 - ~50 chaves i18n criadas no namespace `organograma` em ambos `translation.json` (PT/EN).
 _files: src/pages/administrador/OrganogramaTab.tsx, src/data/projectOrganograma.ts_
-
-### 2026-04-30 · [kg] ADDED — Diagnóstico Gap-Fill e detalhamento de fontes no EvidenceGapCard
-- EvidenceGapCard expandido: agora exibe breakdown por fonte (Perplexity / PubMed) com contagem de consultas, sucessos, falhas e motivos de ausência de evidências. Erros inline e flag de "sem chave Perplexity" nos detalhes de cada par.
-- Nova tab admin "Diagnóstico Gap-Fill": tela completa para inspecionar health_conditions (name_en), nutraceuticals (name_en), links pet_conditions ↔ condition_id, e todos os triplets gerados pelo gap-fill. Badges visuais indicam dados faltantes que impedem a pipeline.
-- Files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts
-_files: src/components/pet/EvidenceGapCard.tsx, src/components/administrador/diagnostics/GapFillDiagnosticsTab.tsx, src/config/admin-tabs.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

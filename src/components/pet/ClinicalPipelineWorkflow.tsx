@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { User, PawPrint, TestTube, Share2, ShieldAlert, Sparkles, Check, Loader2, Clock, Zap, Timer } from 'lucide-react';
+import { User, PawPrint, TestTube, Share2, ShieldAlert, Sparkles, Check, Loader2, Clock, Zap, Timer, GitBranch } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type PipelineStage = 'idle' | 'running' | 'complete' | 'error';
@@ -11,6 +11,7 @@ export interface PipelineState {
   stage2_predispositions: PipelineStage;
   stage3_labs: PipelineStage;
   stage4_kg: PipelineStage;
+  stage4b_kg_enrich: PipelineStage;
   stage5_interactions: PipelineStage;
   stage6_recommendation: PipelineStage;
   stage7_synergies: PipelineStage;
@@ -22,6 +23,7 @@ interface Props {
   predispositionCount?: number;
   labAlertCount?: number;
   tripletCount?: number;
+  pathwayCount?: number;
   interactionCount?: number;
   compoundCount?: number;
   synergyCount?: number;
@@ -35,6 +37,7 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
   predispositionCount = 0,
   labAlertCount = 0,
   tripletCount = 0,
+  pathwayCount = 0,
   interactionCount = 0,
   compoundCount = 0,
   synergyCount = 0,
@@ -47,7 +50,8 @@ const ClinicalPipelineWorkflow: React.FC<Props> = ({
     { key: 'stage1_profile', icon: User, label: t('petProfile.pipeline.profile'), count: profileDataCount, countLabel: t('petProfile.pipeline.dataPoints') },
     { key: 'stage2_predispositions', icon: PawPrint, label: t('petProfile.pipeline.predispositions'), count: predispositionCount, countLabel: t('petProfile.pipeline.risks') },
     { key: 'stage3_labs', icon: TestTube, label: t('petProfile.pipeline.labs'), count: labAlertCount, countLabel: t('petProfile.pipeline.alerts') },
-    { key: 'stage4_kg', icon: Share2, label: t('petProfile.pipeline.knowledgeGraph'), count: tripletCount, countLabel: t('petProfile.pipeline.triplets') },
+    { key: 'stage4_kg', icon: Share2, label: t('petProfile.pipeline.kgQuery'), count: tripletCount, countLabel: t('petProfile.pipeline.triplets') },
+    { key: 'stage4b_kg_enrich', icon: GitBranch, label: t('petProfile.pipeline.kgEnrich'), count: pathwayCount, countLabel: t('petProfile.pipeline.pathways') },
     { key: 'stage5_interactions', icon: ShieldAlert, label: t('petProfile.pipeline.interactions'), count: interactionCount, countLabel: t('petProfile.pipeline.conflicts') },
     { key: 'stage6_recommendation', icon: Sparkles, label: t('petProfile.pipeline.recommendation'), count: compoundCount, countLabel: t('petProfile.pipeline.compounds') },
     { key: 'stage7_synergies', icon: Zap, label: t('petProfile.pipeline.synergies'), count: synergyCount, countLabel: t('petProfile.pipeline.synergiesCount') },
