@@ -84,6 +84,19 @@ serve(async (req) => {
       });
     }
 
+    // Guard-rail #1: excerpt too short to support a reliable judgment
+    if (contextText.trim().length < 80) {
+      await supabase.from('triplet_extractions').update({
+        enrichment_source: 'none',
+        enrichment_needs_review: true,
+        enrichment_at: new Date().toISOString(),
+      }).eq('id', tripletId);
+      return new Response(JSON.stringify({
+        enriched: false,
+        skipped_reason: 'source_excerpt_too_short',
+      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     // 4. Call LLM to extract evidence_level, intensity, and rationale
     const VALID_EVIDENCE_LEVELS = [
       "meta_analysis", "rct", "cohort", "case_control", "case_report",
@@ -149,9 +162,11 @@ If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and wri
                   enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vivo", "animal_study", "in_vitro", "expert_opinion"]
                 },
                 intensity: { type: "number", description: "Effect strength 0.0-1.0" },
-                confidence_rationale: { type: "string", description: "1-2 sentences ending with a literal Source excerpt quote from the text" }
+                confidence_rationale: { type: "string", description: "1-2 sentences ending with a literal Source excerpt quote from the text" },
+                self_confidence: { type: "number", description: "Your self-confidence in this judgment, 0.0 to 1.0. Be honest: low if excerpt is vague, high if excerpt explicitly states design and magnitude." },
+                source_quote: { type: "string", description: "The verbatim quote (≤300 chars) from source text that supports the judgment. Empty string if none found." }
               },
-              required: ["evidence_level", "intensity", "confidence_rationale"]
+              required: ["evidence_level", "intensity", "confidence_rationale", "self_confidence", "source_quote"]
             }
           }
         }],
@@ -175,6 +190,20 @@ If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and wri
     const enrichment = JSON.parse(toolCall.function.arguments);
     console.log(`✨ Enrichment result:`, enrichment);
 
+    // Guard-rail #2: verify the AI's quote actually exists in the source text (substring match, normalized)
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+    const quote = String(enrichment.source_quote || '').trim();
+    const quoteFound = quote.length >= 20 && norm(contextText).includes(norm(quote.substring(0, Math.min(quote.length, 200))));
+    const selfConfidence = Number(enrichment.self_confidence ?? 0);
+
+    // Decide provenance + review flag
+    let enrichmentSource: 'llm' | 'llm_low_confidence' = 'llm';
+    let needsReview = false;
+    if (!quoteFound || selfConfidence < 0.5) {
+      enrichmentSource = 'llm_low_confidence';
+      needsReview = true;
+    }
+
     // 5. Update the triplet
     const updateData: Record<string, any> = {};
     if (enrichment.evidence_level && VALID_EVIDENCE_LEVELS.includes(enrichment.evidence_level)) {
@@ -185,6 +214,10 @@ If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and wri
     }
     if (enrichment.intensity !== undefined) updateData.intensity = Math.max(0, Math.min(1, enrichment.intensity));
     if (enrichment.confidence_rationale) updateData.confidence_rationale = enrichment.confidence_rationale;
+    updateData.enrichment_source = enrichmentSource;
+    updateData.enrichment_confidence = Math.max(0, Math.min(1, selfConfidence));
+    updateData.enrichment_needs_review = needsReview;
+    updateData.enrichment_at = new Date().toISOString();
     updateData.updated_at = new Date().toISOString();
 
     const { error: updateError } = await supabase
@@ -201,7 +234,11 @@ If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and wri
       enriched: true,
       evidence_level: enrichment.evidence_level,
       intensity: enrichment.intensity,
-      confidence_rationale: enrichment.confidence_rationale
+      confidence_rationale: enrichment.confidence_rationale,
+      enrichment_source: enrichmentSource,
+      self_confidence: selfConfidence,
+      quote_found: quoteFound,
+      needs_review: needsReview,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
