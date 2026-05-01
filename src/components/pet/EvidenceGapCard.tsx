@@ -69,6 +69,18 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
     return t('evidenceGap.efficacy.none', 'None');
   };
 
+  // Validate provider from result details against streaming events
+  const reconcileProvider = useCallback((detail: any): string => {
+    const key = `${detail.pair?.compound_en}→${detail.pair?.condition_en}`;
+    const streamProvider = pairProviderRef.current.get(key);
+    const resultProvider = detail.provider || 'unknown';
+    if (streamProvider && streamProvider !== resultProvider) {
+      console.warn(`[EvidenceGapCard] provider mismatch for ${key}: stream=${streamProvider}, result=${resultProvider}. Using stream value.`);
+      return streamProvider;
+    }
+    return resultProvider;
+  }, []);
+
   // Compute source breakdown from details
   const sourceBreakdown = lastResult?.details
     ? (() => {
@@ -92,18 +104,6 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
       level,
       message,
     }]);
-  }, []);
-
-  // Validate provider from result details against streaming events
-  const reconcileProvider = useCallback((detail: any): string => {
-    const key = `${detail.pair?.compound_en}→${detail.pair?.condition_en}`;
-    const streamProvider = pairProviderRef.current.get(key);
-    const resultProvider = detail.provider || 'unknown';
-    if (streamProvider && streamProvider !== resultProvider) {
-      console.warn(`[EvidenceGapCard] provider mismatch for ${key}: stream=${streamProvider}, result=${resultProvider}. Using stream value.`);
-      return streamProvider;
-    }
-    return resultProvider;
   }, []);
 
   const mapEventToLog = useCallback((ev: any) => {
