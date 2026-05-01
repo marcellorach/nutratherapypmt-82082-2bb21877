@@ -391,9 +391,17 @@ const EvidenceGapCard: React.FC<EvidenceGapCardProps> = ({ petId, yearsGained, h
                             </Badge>
                           )}
                           {d.provider && (
-                            <Badge variant={d.provider === 'perplexity' ? 'default' : 'secondary'} className="text-[9px] h-4 px-1">
-                              {d.provider}
-                            </Badge>
+                            (() => {
+                              const prov = reconcileProvider(d);
+                              return (
+                                <Badge
+                                  variant={prov === 'pubmed' ? 'secondary' : 'default'}
+                                  className={`text-[9px] h-4 px-1 ${prov === 'perplexity+pubmed' ? 'bg-violet-600 hover:bg-violet-700' : ''}`}
+                                >
+                                  {prov}
+                                </Badge>
+                              );
+                            })()
                           )}
                           {hasRationale && (
                             <button onClick={() => toggleDetail(i)} className="text-muted-foreground hover:text-foreground">
