@@ -742,7 +742,8 @@ Deno.serve(async (req) => {
               emit('pair_pubmed_complement_empty', { compound: pair.compound_en, condition: pair.condition_en });
             }
           }
-          provider = 'perplexity';
+          // Only reset to 'perplexity' if not already upgraded to 'perplexity+pubmed'
+          if (provider !== 'perplexity+pubmed') provider = 'perplexity';
         } else {
           // ---- Pass 2: PubMed fallback ----
             emit('pair_perplexity_empty', { compound: pair.compound_en, condition: pair.condition_en });
