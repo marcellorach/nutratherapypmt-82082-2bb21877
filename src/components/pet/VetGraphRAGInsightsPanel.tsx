@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertCircle, Dna, Shield, ChevronDown, ChevronRight, Activity, Zap, Brain } from 'lucide-react';
 import type { ClinicalDiscovery, BreedPredisposition, LabAlert } from '@/services/clinical-analysis-pipeline';
+import { localizeConditionName } from '@/services/condition-name-localizer';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TFunc = (...args: any[]) => any;
 
 interface ClassifiedInsight {
   category: 'current' | 'hidden_comorbidity' | 'future_prevention';
@@ -34,27 +38,33 @@ function classifyInsights(
   predispositions: BreedPredisposition[],
   kgTriplets: any[],
   kgPathways: any[],
+  locale: string,
+  t: TFunc,
 ): ClassifiedInsight[] {
   const insights: ClassifiedInsight[] = [];
 
   // 1. Current conditions — enriched with KG data
   for (const c of conditions) {
-    const name = c.condition_name || c.name || '';
+    const rawName = c.condition_name || c.name || '';
+    const name = localizeConditionName(rawName, locale);
     const relatedTriplets = kgTriplets.filter(
-      t => t.object?.toLowerCase().includes(name.toLowerCase()) || t.subject?.toLowerCase().includes(name.toLowerCase())
+      tr => tr.object?.toLowerCase().includes(rawName.toLowerCase()) || tr.subject?.toLowerCase().includes(rawName.toLowerCase())
     );
-    const pathway = kgPathways.find(p => p.condition?.toLowerCase().includes(name.toLowerCase()));
+    const pathway = kgPathways.find(p => p.condition?.toLowerCase().includes(rawName.toLowerCase()));
 
     insights.push({
       category: 'current',
       title: name,
-      description: c.notes || `Condição diagnosticada: ${name}`,
+      description: c.notes || t('petProfile.insights.diagnosedCondition', `Diagnosed condition: ${name}`).replace('{{name}}', name),
       confidence: relatedTriplets.length > 0 ? 0.9 : 0.7,
       severity: c.severity || 'moderate',
-      relatedEntities: relatedTriplets.slice(0, 3).map((t: any) => `${t.subject} ${t.predicate} ${t.object}`),
+      relatedEntities: relatedTriplets.slice(0, 3).map((tr: any) => `${tr.subject} ${tr.predicate} ${tr.object}`),
       inferenceReason: pathway
-        ? `${relatedTriplets.length} triplets no KG, pathway: ${pathway.steps?.map((s: any) => s.label).join(' → ')}`
-        : `${relatedTriplets.length} triplets encontrados no Knowledge Graph`,
+        ? t('petProfile.insights.tripletsWithPathway', '{{count}} triplets in KG, pathway: {{pathway}}')
+            .replace('{{count}}', String(relatedTriplets.length))
+            .replace('{{pathway}}', pathway.steps?.map((s: any) => s.label).join(' → ') || '')
+        : t('petProfile.insights.tripletsFound', '{{count}} triplets found in Knowledge Graph')
+            .replace('{{count}}', String(relatedTriplets.length)),
       source: 'condition',
     });
   }
@@ -71,8 +81,8 @@ function classifyInsights(
       severity: d.severity,
       relatedEntities: d.relatedEntities,
       inferenceReason: d.type === 'lab-condition-correlation'
-        ? 'Correlação detectada entre exames laboratoriais e condições clínicas via Knowledge Graph'
-        : 'Oportunidade terapêutica identificada por padrão de biomarcadores',
+        ? t('petProfile.insights.labCorrelation', 'Correlation detected between lab results and clinical conditions via Knowledge Graph')
+        : t('petProfile.insights.therapeuticOpportunity', 'Therapeutic opportunity identified by biomarker pattern'),
       source: 'discovery',
     });
   }
@@ -98,13 +108,16 @@ function classifyInsights(
         category: 'hidden_comorbidity',
         title: process,
         description: connectedConditions.length > 0
-          ? `Processo biológico inferido: ${connectedConditions.join(', ')} compartilham vias moleculares com ${process} segundo o Knowledge Graph.`
-          : `Processo biológico ${process} identificado no Knowledge Graph como relevante para o perfil deste paciente.`,
+          ? t('petProfile.insights.inferredProcessConnected', 'Inferred biological process: {{conditions}} share molecular pathways with {{process}} according to the Knowledge Graph.')
+              .replace('{{conditions}}', connectedConditions.map(cn => localizeConditionName(cn, locale)).join(', '))
+              .replace('{{process}}', process)
+          : t('petProfile.insights.inferredProcessRelevant', "Biological process {{process}} identified in the Knowledge Graph as relevant for this patient's profile.")
+              .replace('{{process}}', process),
         confidence: Math.min(0.85, 0.5 + relatedTriplets.length * 0.05),
         inferenceReason: connectedConditions.length > 0
           ? `Via KG: ${connectedConditions.join(', ')} → ${process} (${relatedTriplets.length} triplets)`
-          : `${relatedTriplets.length} conexões no Knowledge Graph`,
-        relatedEntities: relatedTriplets.slice(0, 3).map((t: any) => `${t.subject} ${t.predicate} ${t.object}`),
+          : `${relatedTriplets.length} ${t('petProfile.insights.kgConnections', 'connections in the Knowledge Graph')}`,
+        relatedEntities: relatedTriplets.slice(0, 3).map((tr: any) => `${tr.subject} ${tr.predicate} ${tr.object}`),
         source: 'kg_inference',
       });
     }
@@ -113,14 +126,19 @@ function classifyInsights(
   // 3. Future prevention from undiagnosed predispositions
   for (const p of predispositions) {
     if (p.already_diagnosed) continue;
-    const ageContext = ` Comum em ${p.condition_name} a partir da meia-idade.`;
+    const localName = localizeConditionName(p.condition_name, locale);
     insights.push({
       category: 'future_prevention',
-      title: p.condition_name,
-      description: `Doença comum nesta raça — risco ${p.risk_factor}× acima da média (evidência: ${p.evidence_grade}).${p.notes ? ` ${p.notes}` : ''} Avaliar estratégias preventivas pelo Knowledge Graph.`,
+      title: localName,
+      description: t('petProfile.insights.breedRiskDesc', 'Common condition in this breed — risk {{factor}}× above average (evidence: {{grade}}).{{notes}} Evaluate preventive strategies via Knowledge Graph.')
+        .replace('{{factor}}', String(p.risk_factor))
+        .replace('{{grade}}', p.evidence_grade)
+        .replace('{{notes}}', p.notes ? ` ${p.notes}` : ''),
       confidence: p.risk_factor > 3 ? 0.8 : 0.6,
-      inferenceReason: `Predisposição racial: fator de risco ${p.risk_factor}× • evidência ${p.evidence_grade}`,
-      relatedEntities: [p.condition_name],
+      inferenceReason: t('petProfile.insights.breedPredisposition', 'Breed predisposition: risk factor {{factor}}× • evidence {{grade}}')
+        .replace('{{factor}}', String(p.risk_factor))
+        .replace('{{grade}}', p.evidence_grade),
+      relatedEntities: [localName],
       source: 'predisposition',
     });
   }
@@ -137,7 +155,7 @@ function classifyInsights(
       description: d.description,
       severity: d.severity,
       relatedEntities: d.relatedEntities,
-      inferenceReason: 'Predisposição racial confirmada por achados laboratoriais',
+      inferenceReason: t('petProfile.insights.breedLabConfirmation', 'Breed predisposition confirmed by lab findings'),
       source: 'discovery',
     });
   }
@@ -176,14 +194,14 @@ const VetGraphRAGInsightsPanel: React.FC<VetGraphRAGInsightsPanelProps> = ({
   breed,
   ageYears,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     current: true,
     hidden_comorbidity: true,
     future_prevention: true,
   });
 
-  const insights = classifyInsights(conditions, clinicalDiscoveries, predispositions, kgTriplets, kgPathways);
+  const insights = classifyInsights(conditions, clinicalDiscoveries, predispositions, kgTriplets, kgPathways, i18n.language, t);
 
   const currentInsights = insights.filter(i => i.category === 'current');
   const hiddenInsights = insights.filter(i => i.category === 'hidden_comorbidity');

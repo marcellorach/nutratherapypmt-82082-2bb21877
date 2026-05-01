@@ -6824,7 +6824,18 @@
       "hiddenComorbiditiesDesc": "Condições inferidas por conexões biológicas no Knowledge Graph",
       "futurePrevention": "Prevenção Futura",
       "futurePreventionDesc": "Riscos baseados em predisposições de raça e padrões laboratoriais",
-      "noItems": "Nenhum item identificado nesta categoria."
+      "noItems": "Nenhum item identificado nesta categoria.",
+      "diagnosedCondition": "Condição diagnosticada: {{name}}",
+      "tripletsWithPathway": "{{count}} triplets no KG, pathway: {{pathway}}",
+      "tripletsFound": "{{count}} triplets encontrados no Knowledge Graph",
+      "labCorrelation": "Correlação detectada entre exames laboratoriais e condições clínicas via Knowledge Graph",
+      "therapeuticOpportunity": "Oportunidade terapêutica identificada por padrão de biomarcadores",
+      "inferredProcessConnected": "Processo biológico inferido: {{conditions}} compartilham vias moleculares com {{process}} segundo o Knowledge Graph.",
+      "inferredProcessRelevant": "Processo biológico {{process}} identificado no Knowledge Graph como relevante para o perfil deste paciente.",
+      "kgConnections": "conexões no Knowledge Graph",
+      "breedRiskDesc": "Doença comum nesta raça — risco {{factor}}× acima da média (evidência: {{grade}}).{{notes}} Avaliar estratégias preventivas pelo Knowledge Graph.",
+      "breedPredisposition": "Predisposição racial: fator de risco {{factor}}× • evidência {{grade}}",
+      "breedLabConfirmation": "Predisposição racial confirmada por achados laboratoriais"
     },
     "subgraph": {
       "title": "Subgrafo do Paciente",

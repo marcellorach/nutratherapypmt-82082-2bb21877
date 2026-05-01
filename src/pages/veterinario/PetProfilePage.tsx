@@ -27,6 +27,7 @@ import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
+import { pm } from '@/services/clinical-pipeline-messages';
 import { useToast } from '@/hooks/use-toast';
 import { useUpsertPetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 
@@ -45,7 +46,7 @@ const statusColors: Record<string, string> = {
 const PetProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
   const conditionInsights = useConditionInsights(data?.conditions);
@@ -197,13 +198,13 @@ const PetProfilePage: React.FC = () => {
       const profileDataCount = (conditions?.length || 0) + (medications?.length || 0) + (exams?.length || 0);
       appendLog(
         'info',
-        `▶ Coletando perfil clínico de ${profile.name} (${profile.breed}, ${profile.age_years}a, ${profile.weight_kg}kg) · ${profileDataCount} pontos de dados`,
+        `▶ ${pm('s1_start', i18n.language, { name: profile.name, breed: profile.breed, age: profile.age_years, weight: profile.weight_kg, points: profileDataCount })}`,
       );
       await new Promise(r => setTimeout(r, 80)); // breath for UI
       setPipelineState(s => ({ ...s, stage1_profile: 'complete' }));
       setStageCounts(prev => ({ ...prev, profile: profileDataCount }));
       setStageTimes(prev => ({ ...prev, stage1_profile: performance.now() - ts1 }));
-      appendLog('success', `✓ Perfil clínico carregado: ${conditions?.length || 0} condições, ${medications?.length || 0} medicações, ${exams?.length || 0} exames`);
+      appendLog('success', `✓ ${pm('s1_end', i18n.language, { conditions: conditions?.length || 0, meds: medications?.length || 0, exams: exams?.length || 0 })}`);
 
       const result = await runClinicalAnalysisPipeline(
         {
@@ -219,7 +220,7 @@ const PetProfilePage: React.FC = () => {
         conditions,
         medications,
         exams,
-        { onProgress: handlePipelineEvent },
+        { onProgress: handlePipelineEvent, locale: i18n.language },
       );
 
       setCurrentStageLabel(null);
@@ -227,7 +228,7 @@ const PetProfilePage: React.FC = () => {
       // Stage 7: Synergies (derived from recommendation compounds)
       const synergyTs = performance.now();
       setPipelineState(s => ({ ...s, stage7_synergies: 'running' }));
-      appendLog('info', `▶ ${t('petProfile.pipeline.synergies')}: analyzing compound synergies`);
+      appendLog('info', `▶ ${pm('s7_start', i18n.language, { label: t('petProfile.pipeline.synergies') })}`);
       const synCount = result.compounds?.length > 1
         ? Math.floor(result.compounds.length * (result.compounds.length - 1) / 2)
         : 0;
@@ -235,7 +236,7 @@ const PetProfilePage: React.FC = () => {
       setPipelineState(s => ({ ...s, stage7_synergies: 'complete' }));
       setStageCounts(prev => ({ ...prev, synergies: synCount }));
       setStageTimes(prev => ({ ...prev, stage7_synergies: performance.now() - synergyTs }));
-      appendLog('success', `✓ ${synCount} synergies identified`);
+      appendLog('success', `✓ ${pm('s7_end', i18n.language, { count: synCount })}`);
 
       setPredispositions(result.predispositions);
       setLabAlerts(result.labAlerts);
@@ -282,7 +283,7 @@ const PetProfilePage: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Clinical analysis pipeline error:', err);
-      appendLog('error', `✗ ${err?.message || 'Erro desconhecido no pipeline'}`);
+      appendLog('error', `✗ ${err?.message || pm('pipeline_error', i18n.language)}`);
       toast({
         title: t('petRegistration.profile.analysisError'),
         description: err.message || 'Erro ao executar pipeline de análise clínica.',
