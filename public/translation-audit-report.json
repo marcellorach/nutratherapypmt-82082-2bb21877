@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-01T02:55:21.483Z",
+  "timestamp": "2026-05-01T20:54:06.577Z",
   "summary": {
     "totalFiles": 819,
     "totalIssues": 402,
@@ -2342,7 +2342,7 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/EvidenceGapCard.tsx",
-      "line": 207,
+      "line": 235,
       "text": "\\n",
       "severity": "high"
     },
