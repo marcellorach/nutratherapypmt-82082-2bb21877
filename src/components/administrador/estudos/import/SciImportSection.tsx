@@ -24,7 +24,7 @@ import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
 const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
 const SciImportSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("library");
+  const [activeTab, setActiveTab] = useState<string>("external-search");
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -171,7 +171,7 @@ const SciImportSection: React.FC = () => {
           <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} />
 
           <div className="p-6">
-            <TabsContent value="library">
+            <TabsContent value="external-search">
               <StudiesLibraryTab onNavigateToUpload={() => handleTabChange('file-upload')} />
             </TabsContent>
 
