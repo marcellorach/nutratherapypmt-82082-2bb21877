@@ -6835,7 +6835,9 @@
       "kgConnections": "connections in the Knowledge Graph",
       "breedRiskDesc": "Common condition in this breed — risk {{factor}}× above average (evidence: {{grade}}).{{notes}} Evaluate preventive strategies via Knowledge Graph.",
       "breedPredisposition": "Breed predisposition: risk factor {{factor}}× • evidence {{grade}}",
-      "breedLabConfirmation": "Breed predisposition confirmed by lab findings"
+      "breedLabConfirmation": "Breed predisposition confirmed by lab findings",
+      "preventionTargets": "Prevention Targets",
+      "preventionTargetsDesc": "Breed- and age-common diseases — prevention strategies suggested by the Knowledge Graph"
     },
     "subgraph": {
       "title": "Patient Subgraph",

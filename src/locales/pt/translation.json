@@ -6835,7 +6835,9 @@
       "kgConnections": "conexões no Knowledge Graph",
       "breedRiskDesc": "Doença comum nesta raça — risco {{factor}}× acima da média (evidência: {{grade}}).{{notes}} Avaliar estratégias preventivas pelo Knowledge Graph.",
       "breedPredisposition": "Predisposição racial: fator de risco {{factor}}× • evidência {{grade}}",
-      "breedLabConfirmation": "Predisposição racial confirmada por achados laboratoriais"
+      "breedLabConfirmation": "Predisposição racial confirmada por achados laboratoriais",
+      "preventionTargets": "Alvos para Prevenção",
+      "preventionTargetsDesc": "Doenças comuns à raça e idade — estratégias de prevenção sugeridas pelo Knowledge Graph"
     },
     "subgraph": {
       "title": "Subgrafo do Paciente",
