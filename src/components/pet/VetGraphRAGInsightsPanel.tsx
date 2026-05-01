@@ -7,7 +7,8 @@ import { AlertCircle, Dna, Shield, ChevronDown, ChevronRight, Activity, Zap, Bra
 import type { ClinicalDiscovery, BreedPredisposition, LabAlert } from '@/services/clinical-analysis-pipeline';
 import { localizeConditionName } from '@/services/condition-name-localizer';
 
-type TFunc = (key: string, defaultValue?: string) => any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TFunc = (...args: any[]) => any;
 
 interface ClassifiedInsight {
   category: 'current' | 'hidden_comorbidity' | 'future_prevention';
