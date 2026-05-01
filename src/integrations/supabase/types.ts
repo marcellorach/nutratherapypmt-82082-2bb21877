@@ -763,6 +763,65 @@ export type Database = {
           },
         ]
       }
+      enrichment_qa_samples: {
+        Row: {
+          ai_confidence: number | null
+          ai_evidence_level: string | null
+          ai_intensity: number | null
+          ai_rationale: string | null
+          batch_id: string
+          created_at: string
+          human_evidence_level_ok: boolean | null
+          human_intensity_ok: boolean | null
+          human_notes: string | null
+          human_overall_ok: boolean | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          triplet_id: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_evidence_level?: string | null
+          ai_intensity?: number | null
+          ai_rationale?: string | null
+          batch_id: string
+          created_at?: string
+          human_evidence_level_ok?: boolean | null
+          human_intensity_ok?: boolean | null
+          human_notes?: string | null
+          human_overall_ok?: boolean | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          triplet_id: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_evidence_level?: string | null
+          ai_intensity?: number | null
+          ai_rationale?: string | null
+          batch_id?: string
+          created_at?: string
+          human_evidence_level_ok?: boolean | null
+          human_intensity_ok?: boolean | null
+          human_notes?: string | null
+          human_overall_ok?: boolean | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          triplet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrichment_qa_samples_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_claims: {
         Row: {
           age_context: string | null
@@ -2874,6 +2933,10 @@ export type Database = {
           direction: string | null
           dose_dependent: boolean | null
           dose_range: Json | null
+          enrichment_at: string | null
+          enrichment_confidence: number | null
+          enrichment_needs_review: boolean | null
+          enrichment_source: string | null
           evidence_level: string | null
           extraction_confidence: number | null
           hallucination_flag: boolean | null
@@ -2911,6 +2974,10 @@ export type Database = {
           direction?: string | null
           dose_dependent?: boolean | null
           dose_range?: Json | null
+          enrichment_at?: string | null
+          enrichment_confidence?: number | null
+          enrichment_needs_review?: boolean | null
+          enrichment_source?: string | null
           evidence_level?: string | null
           extraction_confidence?: number | null
           hallucination_flag?: boolean | null
@@ -2948,6 +3015,10 @@ export type Database = {
           direction?: string | null
           dose_dependent?: boolean | null
           dose_range?: Json | null
+          enrichment_at?: string | null
+          enrichment_confidence?: number | null
+          enrichment_needs_review?: boolean | null
+          enrichment_source?: string | null
           evidence_level?: string | null
           extraction_confidence?: number | null
           hallucination_flag?: boolean | null

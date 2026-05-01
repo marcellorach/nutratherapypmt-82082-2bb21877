@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-01 — QA gate + provenance for AI enrichment
+<!-- area: curation · status: entregue · i18n: — -->
+- New columns `enrichment_source` (none/extracted/llm/llm_low_confidence/human), `enrichment_confidence`, `enrichment_needs_review`, `enrichment_at` on `triplet_extractions` for full provenance of AI-inferred metadata
+- New table `enrichment_qa_samples` storing stratified human-reviewed AI enrichment samples (batch_id, AI vs human verdict per field)
+- Guard-rails in `enrich-triplet`: short excerpts (<80 chars) skip the LLM; AI must return a verbatim `source_quote` that is substring-verified against the source text; AI must self-report confidence; failures are flagged `enrichment_source = llm_low_confidence` + `needs_review = true`
+- New edge function `enrichment-qa-sample`: draws ~50 stratified samples (high/med/low extraction_confidence) and enriches them for human QA
+- New admin tab "QA Enriquecimento" (CurationDashboard) to review AI output one-by-one, see per-batch approval rate and gate status
+- `backfill-triplet-enrichment` now blocks bulk runs unless ≥30 reviewed samples with ≥85% approval; can be overridden with `force=true`
+- Files: supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts, supabase/functions/enrichment-qa-sample/index.ts, src/components/administrador/estudos/curation/EnrichmentQAReview.tsx, src/components/administrador/estudos/curation/CurationDashboard.tsx
+
 ### Changed - 2026-05-01 — Auto-enrichment of triplet intensity & evidence_level
 <!-- area: curation · status: parcial · i18n: — -->
 - Improved `enrich-triplet` prompt: anchored intensity scale in observed magnitude (% change, effect size), forces low intensity for null/negative results, requires verbatim source excerpt in `confidence_rationale`, added `in_vivo`/`animal_study` to evidence_level enum
