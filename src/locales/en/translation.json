@@ -472,7 +472,22 @@
       "curated": "curated",
       "processing": "in queue",
       "curatedBadge": "Curated",
-      "inQueueBadge": "In curation"
+      "inQueueBadge": "In curation",
+      "autoTag": "Auto-tag pending",
+      "autoTagging": "Tagging...",
+      "autoTagDone": "Auto-tagging complete",
+      "design": "Design",
+      "allDesigns": "All designs",
+      "population": "Population",
+      "allPopulations": "All populations",
+      "popCanine": "Dogs",
+      "popFeline": "Cats",
+      "popHuman": "Humans",
+      "popRodent": "Rodents",
+      "popEquine": "Horses",
+      "popInVitro": "In vitro",
+      "tier": "Tier",
+      "allTiers": "All tiers"
     },
     "search": {
       "title": "Search Scientific Studies",
