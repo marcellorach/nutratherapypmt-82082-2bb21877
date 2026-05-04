@@ -112,7 +112,10 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { study_ids, all = false, limit = 100 } = body as { study_ids?: string[]; all?: boolean; limit?: number };
+    // Hard cap per invocation to stay within the 150s edge function idle timeout.
+    // ~15 studies × (Gemini ~3-5s + 200ms throttle) ≈ 60-80s worst case.
+    const { study_ids, all = false, limit: rawLimit = 15 } = body as { study_ids?: string[]; all?: boolean; limit?: number };
+    const limit = Math.min(Math.max(1, rawLimit), 20);
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
@@ -165,7 +168,7 @@ Deno.serve(async (req) => {
 
         results.push({ id: study.id, ok: true, tags, tier });
         // Throttle to avoid rate limits
-        await new Promise((r) => setTimeout(r, 300));
+        await new Promise((r) => setTimeout(r, 200));
       } catch (err: any) {
         results.push({ id: study.id, ok: false, error: err.message });
       }
