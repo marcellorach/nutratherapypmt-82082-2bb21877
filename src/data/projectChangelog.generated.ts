@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-01T22:10:25.816Z
+// Última geração: 2026-05-04T01:25:17.127Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,26 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-01";
+export const lastChangelogDate = "2026-05-04";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-04",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Library tab agora renderiza os estudos curados",
+    "bullets": [
+      "Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`",
+      "A aba agora reutiliza `StudiesLibraryTab`, exibindo os estudos vindos de `processed_studies` e `scientific_studies` conforme já implementado",
+      "Validado no backend: 40 estudos `approved`, 4 `processed` e 2 `new` disponíveis para listagem",
+      "Files: src/components/administrador/estudos/import/SciImportSection.tsx"
+    ],
+    "files": [
+      "src/components/administrador/estudos/import/SciImportSection.tsx"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-05-01",
     "kind": "added",

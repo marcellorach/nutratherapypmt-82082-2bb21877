@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-01T22:10:25.819Z
+Generated: 2026-05-04T01:25:17.130Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: —
 
 ## Changes by area (last 14 days)
-- **admin**: 8
+- **admin**: 9
 - **meta**: 7
 - **kg**: 6
 - **vet-ui**: 5
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-04 · [admin] FIXED — Library tab agora renderiza os estudos curados
+- Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`
+- A aba agora reutiliza `StudiesLibraryTab`, exibindo os estudos vindos de `processed_studies` e `scientific_studies` conforme já implementado
+- Validado no backend: 40 estudos `approved`, 4 `processed` e 2 `new` disponíveis para listagem
+_files: src/components/administrador/estudos/import/SciImportSection.tsx_
+
 ### 2026-05-01 · [curation] ADDED — QA gate + provenance for AI enrichment
 - New columns `enrichment_source` (none/extracted/llm/llm_low_confidence/human), `enrichment_confidence`, `enrichment_needs_review`, `enrichment_at` on `triplet_extractions` for full provenance of AI-inferred metadata
 - New table `enrichment_qa_samples` storing stratified human-reviewed AI enrichment samples (batch_id, AI vs human verdict per field)
@@ -70,12 +76,6 @@ _files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DigitalTwin
 - UI agora exibe conclusões claras por par: score de eficácia (0-5) com barra visual, nível de evidência, espécie, rationale colapsável do Perplexity/Gemini, links para PMIDs no PubMed e URLs citadas
 - Botão de curadoria aparece automaticamente após triplets criados com sucesso
 _files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx_
-
-### 2026-04-30 · [i18n] FIXED — Traduções evidenceGap.log e layout responsivo DT workflow
-- Adicionadas 16 chaves de tradução `evidenceGap.log.*` em PT e EN para o painel de log em tempo real da busca de evidências
-- DT mini-workflow: trocado `overflow-x-auto` por `flex-wrap` para quebrar em duas linhas em vez de sair do quadro
-- Conectores entre etapas ocultados em telas pequenas (`hidden sm:block`)
-_files: src/locales/en/translation.json, src/locales/pt/translation.json, src/components/pet/DigitalTwinDog.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
