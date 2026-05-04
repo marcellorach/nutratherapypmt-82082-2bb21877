@@ -472,7 +472,22 @@
       "curated": "curados",
       "processing": "na fila",
       "curatedBadge": "Curado",
-      "inQueueBadge": "Em curadoria"
+      "inQueueBadge": "Em curadoria",
+      "autoTag": "Auto-tag pendentes",
+      "autoTagging": "Etiquetando...",
+      "autoTagDone": "Auto-tagging concluído",
+      "design": "Desenho",
+      "allDesigns": "Todos os desenhos",
+      "population": "População",
+      "allPopulations": "Todas as populações",
+      "popCanine": "Cães",
+      "popFeline": "Gatos",
+      "popHuman": "Humanos",
+      "popRodent": "Roedores",
+      "popEquine": "Equinos",
+      "popInVitro": "In vitro",
+      "tier": "Tier",
+      "allTiers": "Todos os tiers"
     },
     "search": {
       "title": "Buscar Estudos Científicos",

@@ -14,7 +14,10 @@ import {
   Filter,
   Database,
   FlaskConical,
-  Check
+  Check,
+  Sparkles,
+  Award,
+  Tag
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +51,9 @@ interface ScientificStudy {
   openalex_id: string | null;
   pdf_storage_path: string | null;
   pdf_filename: string | null;
+  tags?: any;
+  prestige_tier?: number | null;
+  tags_source?: string | null;
 }
 
 interface StudiesLibraryTabProps {
@@ -62,6 +68,10 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
   const [searchQuery, setSearchQuery] = useState('');
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [journalFilter, setJournalFilter] = useState<string>('all');
+  const [designFilter, setDesignFilter] = useState<string>('all');
+  const [populationFilter, setPopulationFilter] = useState<string>('all');
+  const [tierFilter, setTierFilter] = useState<string>('all');
+  const [autoTagging, setAutoTagging] = useState(false);
 
   const isEnglish = i18n.language === 'en';
 
@@ -75,7 +85,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
       // 1. Curated/processed studies (real source of truth for the library)
       const { data: processed, error: pErr } = await supabase
         .from('processed_studies')
-        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data')
+        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data, tags, prestige_tier, tags_source')
         .is('deleted_at', null)
         .in('kanban_status', ['approved', 'processed', 'new'])
         .order('created_at', { ascending: false });
@@ -108,6 +118,9 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         pdf_storage_path: p.storage_path || null,
         pdf_filename: p.original_filename || null,
         kanban_status: p.kanban_status,
+        tags: p.tags || {},
+        prestige_tier: p.prestige_tier ?? null,
+        tags_source: p.tags_source ?? 'pending',
       } as any));
 
       // De-duplicate: prefer processed_studies entries
@@ -126,6 +139,25 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
     }
   };
 
+  const handleAutoTag = async () => {
+    setAutoTagging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('auto-tag-studies', {
+        body: { all: false, limit: 100 },
+      });
+      if (error) throw error;
+      toast({
+        title: t('studies.library.autoTagDone', 'Auto-tagging complete'),
+        description: `${data?.ok_count ?? 0} ok / ${data?.fail_count ?? 0} fail (${data?.processed ?? 0} total)`,
+      });
+      await fetchStudies();
+    } catch (err: any) {
+      toast({ title: 'Auto-tag error', description: err.message, variant: 'destructive' });
+    } finally {
+      setAutoTagging(false);
+    }
+  };
+
   // Get unique years and journals for filters
   const years = [...new Set(studies.map(s => s.year).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
   const journals = [...new Set(studies.map(s => s.journal).filter(Boolean))].sort();
@@ -139,8 +171,11 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
     
     const matchesYear = yearFilter === 'all' || study.year?.toString() === yearFilter;
     const matchesJournal = journalFilter === 'all' || study.journal === journalFilter;
+    const matchesDesign = designFilter === 'all' || (study.tags?.study_design || []).includes(designFilter);
+    const matchesPop = populationFilter === 'all' || (study.tags?.population || []).includes(populationFilter);
+    const matchesTier = tierFilter === 'all' || study.prestige_tier?.toString() === tierFilter;
 
-    return matchesSearch && matchesYear && matchesJournal;
+    return matchesSearch && matchesYear && matchesJournal && matchesDesign && matchesPop && matchesTier;
   });
 
   const getTitle = (study: ScientificStudy) => isEnglish ? (study.title_en || study.title) : study.title;
@@ -169,6 +204,12 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         </div>
         <div className="flex items-center gap-2">
           <SearchExternalStudies onStudyImported={fetchStudies} />
+          <Button variant="outline" size="sm" onClick={handleAutoTag} disabled={autoTagging}>
+            <Sparkles className={`h-4 w-4 mr-2 ${autoTagging ? 'animate-pulse' : ''}`} />
+            {autoTagging
+              ? t('studies.library.autoTagging', 'Tagging...')
+              : t('studies.library.autoTag', 'Auto-tag pending')}
+          </Button>
           <Button variant="outline" size="sm" onClick={fetchStudies} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {t('common.refresh', 'Refresh')}
@@ -217,6 +258,58 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                     {journal && journal.length > 30 ? journal.substring(0, 30) + '...' : journal}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={designFilter} onValueChange={setDesignFilter}>
+              <SelectTrigger className="w-[170px]">
+                <Tag className="h-4 w-4 mr-2" />
+                <SelectValue placeholder={t('studies.library.design', 'Design')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('studies.library.allDesigns', 'All designs')}</SelectItem>
+                <SelectItem value="rct">RCT</SelectItem>
+                <SelectItem value="meta_analysis">Meta-analysis</SelectItem>
+                <SelectItem value="systematic_review">Systematic review</SelectItem>
+                <SelectItem value="cohort">Cohort</SelectItem>
+                <SelectItem value="case_control">Case-control</SelectItem>
+                <SelectItem value="cross_sectional">Cross-sectional</SelectItem>
+                <SelectItem value="case_report">Case report</SelectItem>
+                <SelectItem value="in_vitro">In vitro</SelectItem>
+                <SelectItem value="in_vivo">In vivo</SelectItem>
+                <SelectItem value="narrative_review">Narrative review</SelectItem>
+                <SelectItem value="observational">Observational</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={populationFilter} onValueChange={setPopulationFilter}>
+              <SelectTrigger className="w-[150px]">
+                <Users className="h-4 w-4 mr-2" />
+                <SelectValue placeholder={t('studies.library.population', 'Population')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('studies.library.allPopulations', 'All populations')}</SelectItem>
+                <SelectItem value="canine">{t('studies.library.popCanine', 'Dogs')}</SelectItem>
+                <SelectItem value="feline">{t('studies.library.popFeline', 'Cats')}</SelectItem>
+                <SelectItem value="human">{t('studies.library.popHuman', 'Humans')}</SelectItem>
+                <SelectItem value="rodent">{t('studies.library.popRodent', 'Rodents')}</SelectItem>
+                <SelectItem value="equine">{t('studies.library.popEquine', 'Horses')}</SelectItem>
+                <SelectItem value="in_vitro_cells">{t('studies.library.popInVitro', 'In vitro')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={tierFilter} onValueChange={setTierFilter}>
+              <SelectTrigger className="w-[140px]">
+                <Award className="h-4 w-4 mr-2" />
+                <SelectValue placeholder={t('studies.library.tier', 'Tier')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('studies.library.allTiers', 'All tiers')}</SelectItem>
+                <SelectItem value="5">Tier 5 — Top</SelectItem>
+                <SelectItem value="4">Tier 4 — Q1</SelectItem>
+                <SelectItem value="3">Tier 3 — Q2</SelectItem>
+                <SelectItem value="2">Tier 2 — PubMed</SelectItem>
+                <SelectItem value="1">Tier 1 — Preprint</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -305,6 +398,27 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                           {t('studies.library.realBadge')}
                         </Badge>
                       )}
+                      {study.prestige_tier && (
+                        <Badge variant="outline" className="text-xs gap-1 border-amber-400 text-amber-700">
+                          <Award className="h-3 w-3" />
+                          T{study.prestige_tier}
+                        </Badge>
+                      )}
+                      {(study.tags?.study_design || []).slice(0, 3).map((d: string) => (
+                        <Badge key={d} variant="secondary" className="text-[10px] px-1.5 py-0">
+                          {d.replace(/_/g, ' ')}
+                        </Badge>
+                      ))}
+                      {(study.tags?.population || []).slice(0, 2).map((p: string) => (
+                        <Badge key={p} variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700">
+                          {p.replace(/_/g, ' ')}
+                        </Badge>
+                      ))}
+                      {(study.tags?.methodology || []).slice(0, 2).map((m: string) => (
+                        <Badge key={m} variant="secondary" className="text-[10px] px-1.5 py-0 bg-purple-50 text-purple-700">
+                          {m.replace(/_/g, ' ')}
+                        </Badge>
+                      ))}
                       {study.authors && study.authors.length > 0 && (
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />

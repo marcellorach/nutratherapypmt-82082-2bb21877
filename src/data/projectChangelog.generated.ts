@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-04T01:25:17.127Z
+// Última geração: 2026-05-04T12:21:46.259Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,27 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-04";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-04",
+    "kind": "added",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Sistema de tags estruturadas para estudos científicos",
+    "bullets": [
+      "Novas colunas em `processed_studies`: `tags` (jsonb com `study_design`, `population`, `methodology`, `sample_size`, `ai_confidence`), `prestige_tier` (1-5), `tags_source` (`pending` | `ai_extracted` | `manual` | `reviewed`)",
+      "Nova tabela `journal_prestige_tiers` com seed de ~40 journals top (Nature/Cell/JVIM/Aging Cell/etc.) classificados por tier 1-5 baseado em quartil Scimago + prestígio do publisher",
+      "Edge function `auto-tag-studies`: extrai tags via Gemini Flash Lite (apenas extração textual de title/abstract/journal — sem inferência) e calcula `prestige_tier` via lookup; throttle 300ms; sem alucinação porque enums fechados via tool calling",
+      "UI da Library: 3 novos filtros (Desenho, População, Tier de prestígio), botão \"Auto-tag pendentes\", badges coloridos nos cards (T1-T5 ambar, design cinza, população azul, metodologia roxa)",
+      "Tags ficam disponíveis para futura ponderação no motor de recomendação (peso por tier × evidence_level)",
+      "Files: supabase/migrations/*_journal_tiers_and_study_tags.sql, supabase/functions/auto-tag-studies/index.ts, src/components/administrador/estudos/library/StudiesLibraryTab.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json"
+    ],
+    "files": [
+      "supabase/functions/auto-tag-studies/index.ts",
+      "src/components/administrador/estudos/library/StudiesLibraryTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.54.0"
+  },
   {
     "date": "2026-05-04",
     "kind": "fixed",

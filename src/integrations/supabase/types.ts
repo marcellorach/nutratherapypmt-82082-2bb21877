@@ -1208,6 +1208,45 @@ export type Database = {
           },
         ]
       }
+      journal_prestige_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          impact_factor: number | null
+          journal_name: string
+          journal_name_normalized: string
+          notes: string | null
+          quartile: string | null
+          source: string
+          tier: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          impact_factor?: number | null
+          journal_name: string
+          journal_name_normalized: string
+          notes?: string | null
+          quartile?: string | null
+          source?: string
+          tier: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          impact_factor?: number | null
+          journal_name?: string
+          journal_name_normalized?: string
+          notes?: string | null
+          quartile?: string | null
+          source?: string
+          tier?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lab_reference_ranges: {
         Row: {
           age_group: string | null
@@ -2269,10 +2308,15 @@ export type Database = {
           journal: string | null
           kanban_status: string | null
           original_filename: string
+          prestige_tier: number | null
           processed_by: string | null
           source_import_id: string | null
           storage_path: string
           study_id: string
+          tags: Json
+          tags_reviewed_at: string | null
+          tags_reviewed_by: string | null
+          tags_source: string | null
           title: string | null
           updated_at: string | null
           year: number | null
@@ -2294,10 +2338,15 @@ export type Database = {
           journal?: string | null
           kanban_status?: string | null
           original_filename: string
+          prestige_tier?: number | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path: string
           study_id: string
+          tags?: Json
+          tags_reviewed_at?: string | null
+          tags_reviewed_by?: string | null
+          tags_source?: string | null
           title?: string | null
           updated_at?: string | null
           year?: number | null
@@ -2319,10 +2368,15 @@ export type Database = {
           journal?: string | null
           kanban_status?: string | null
           original_filename?: string
+          prestige_tier?: number | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path?: string
           study_id?: string
+          tags?: Json
+          tags_reviewed_at?: string | null
+          tags_reviewed_by?: string | null
+          tags_source?: string | null
           title?: string | null
           updated_at?: string | null
           year?: number | null
