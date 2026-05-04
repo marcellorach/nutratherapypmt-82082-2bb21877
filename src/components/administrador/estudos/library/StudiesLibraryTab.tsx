@@ -259,7 +259,17 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                     </h3>
                     
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-2">
-                      {study.is_simulated ? (
+                      {(study as any).kanban_status === 'approved' ? (
+                        <Badge variant="outline" className="text-xs text-emerald-700 border-emerald-300 gap-1">
+                          <Check className="h-3 w-3" />
+                          {t('studies.library.curatedBadge', 'Curated')}
+                        </Badge>
+                      ) : (study as any).kanban_status === 'processed' || (study as any).kanban_status === 'new' ? (
+                        <Badge variant="outline" className="text-xs text-blue-700 border-blue-300 gap-1">
+                          <FlaskConical className="h-3 w-3" />
+                          {t('studies.library.inQueueBadge', 'In curation')}
+                        </Badge>
+                      ) : study.is_simulated ? (
                         <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 gap-1">
                           <FlaskConical className="h-3 w-3" />
                           {t('studies.library.simulatedBadge')}
