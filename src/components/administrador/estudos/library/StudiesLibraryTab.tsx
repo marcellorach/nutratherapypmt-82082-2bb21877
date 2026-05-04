@@ -141,18 +141,35 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
 
   const handleAutoTag = async () => {
     setAutoTagging(true);
+    let totalOk = 0;
+    let totalFail = 0;
+    let totalProcessed = 0;
     try {
-      const { data, error } = await supabase.functions.invoke('auto-tag-studies', {
-        body: { all: false, limit: 100 },
-      });
-      if (error) throw error;
+      // Process in small batches to stay well under the 150s edge function idle timeout.
+      // Each batch handles ~15 studies (~45-60s with Gemini calls + throttle).
+      for (let i = 0; i < 20; i++) {
+        const { data, error } = await supabase.functions.invoke('auto-tag-studies', {
+          body: { all: false, limit: 15 },
+        });
+        if (error) throw error;
+        const processed = data?.processed ?? 0;
+        totalProcessed += processed;
+        totalOk += data?.ok_count ?? 0;
+        totalFail += data?.fail_count ?? 0;
+        if (processed === 0) break; // no more pending
+      }
       toast({
         title: t('studies.library.autoTagDone', 'Auto-tagging complete'),
-        description: `${data?.ok_count ?? 0} ok / ${data?.fail_count ?? 0} fail (${data?.processed ?? 0} total)`,
+        description: `${totalOk} ok / ${totalFail} fail (${totalProcessed} total)`,
       });
       await fetchStudies();
     } catch (err: any) {
-      toast({ title: 'Auto-tag error', description: err.message, variant: 'destructive' });
+      toast({
+        title: 'Auto-tag error',
+        description: `${err.message} (processed ${totalProcessed} before failure)`,
+        variant: 'destructive',
+      });
+      await fetchStudies();
     } finally {
       setAutoTagging(false);
     }
