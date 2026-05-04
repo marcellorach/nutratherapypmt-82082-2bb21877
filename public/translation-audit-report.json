@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-01T21:54:44.976Z",
+  "timestamp": "2026-05-04T01:15:16.674Z",
   "summary": {
-    "totalFiles": 819,
-    "totalIssues": 402,
+    "totalFiles": 821,
+    "totalIssues": 403,
     "hardcodedTexts": 40,
-    "missingKeys": 362,
+    "missingKeys": 363,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -1509,42 +1509,49 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/CurationDashboard.tsx",
-      "line": 49,
+      "line": 50,
       "text": "curation_status",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/CurationDashboard.tsx",
-      "line": 66,
+      "line": 67,
       "text": "status",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
-      "line": 97,
+      "line": 98,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
-      "line": 725,
+      "line": 728,
       "text": "chunk_text, chunk_index",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/TripletCurationBoard.tsx",
-      "line": 68,
+      "line": 69,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/TripletCurationBoard.tsx",
+      "line": 192,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
-      "line": 55,
+      "line": 56,
       "text": "*",
       "severity": "high"
     },
@@ -2405,7 +2412,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1929,
+      "line": 1995,
       "text": "@",
       "severity": "high"
     },
@@ -2713,14 +2720,14 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
-      "line": 273,
+      "line": 276,
       "text": "KG Match",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
-      "line": 277,
+      "line": 280,
       "text": "LLM Conf.",
       "severity": "medium"
     },

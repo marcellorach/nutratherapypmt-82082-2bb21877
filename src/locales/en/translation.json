@@ -468,7 +468,11 @@
       "sendToAI": "Send to AI Processing",
       "sentToAI": "Sent to AI",
       "sentToAIDesc": "Study added to processing queue",
-      "sendToAIError": "Error sending to AI"
+      "sendToAIError": "Error sending to AI",
+      "curated": "curated",
+      "processing": "in queue",
+      "curatedBadge": "Curated",
+      "inQueueBadge": "In curation"
     },
     "search": {
       "title": "Search Scientific Studies",

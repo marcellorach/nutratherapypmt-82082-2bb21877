@@ -468,7 +468,11 @@
       "sendToAI": "Enviar para AI Processing",
       "sentToAI": "Enviado para AI",
       "sentToAIDesc": "Estudo adicionado à fila de processamento",
-      "sendToAIError": "Erro ao enviar para AI"
+      "sendToAIError": "Erro ao enviar para AI",
+      "curated": "curados",
+      "processing": "na fila",
+      "curatedBadge": "Curado",
+      "inQueueBadge": "Em curadoria"
     },
     "search": {
       "title": "Buscar Estudos Científicos",

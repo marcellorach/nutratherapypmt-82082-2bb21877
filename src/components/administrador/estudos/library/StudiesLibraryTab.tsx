@@ -13,7 +13,8 @@ import {
   FileText,
   Filter,
   Database,
-  FlaskConical
+  FlaskConical,
+  Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,13 +72,49 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
   const fetchStudies = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // 1. Curated/processed studies (real source of truth for the library)
+      const { data: processed, error: pErr } = await supabase
+        .from('processed_studies')
+        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data')
+        .is('deleted_at', null)
+        .in('kanban_status', ['approved', 'processed', 'new'])
+        .order('created_at', { ascending: false });
+      if (pErr) throw pErr;
+
+      // 2. External / imported studies that have NOT been processed yet
+      const { data: external, error: eErr } = await supabase
         .from('scientific_studies')
         .select('*')
         .order('year', { ascending: false });
+      if (eErr) throw eErr;
 
-      if (error) throw error;
-      setStudies(data || []);
+      const fromProcessed: ScientificStudy[] = (processed || []).map((p: any) => ({
+        id: p.id,
+        title: p.title || p.original_filename || 'Untitled study',
+        title_en: null,
+        abstract: p.description || null,
+        abstract_en: null,
+        authors: p.authors || null,
+        journal: p.journal || null,
+        journal_en: null,
+        year: p.year ?? null,
+        doi: p.analysis_data?.doi || null,
+        link: p.analysis_data?.link || null,
+        created_at: p.created_at,
+        source_api: p.analysis_data?.source_api || 'upload',
+        is_simulated: false,
+        pmid: p.analysis_data?.pmid || null,
+        openalex_id: p.analysis_data?.openalex_id || null,
+        pdf_storage_path: p.storage_path || null,
+        pdf_filename: p.original_filename || null,
+        kanban_status: p.kanban_status,
+      } as any));
+
+      // De-duplicate: prefer processed_studies entries
+      const seen = new Set(fromProcessed.map(s => s.id));
+      const fromExternal = (external || []).filter((s: any) => !seen.has(s.id));
+
+      setStudies([...fromProcessed, ...fromExternal] as ScientificStudy[]);
     } catch (error: any) {
       toast({
         title: t('studies.library.errorFetching', 'Error fetching studies'),
@@ -121,13 +158,13 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
           <Badge variant="secondary">
             {studies.length} {t('studies.library.studies', 'studies')}
           </Badge>
-          <Badge variant="outline" className="text-xs gap-1">
+          <Badge variant="outline" className="text-xs gap-1 text-emerald-700 border-emerald-300">
             <Database className="h-3 w-3" />
-            {studies.filter(s => !s.is_simulated).length} {t('studies.library.real')}
+            {studies.filter((s: any) => s.kanban_status === 'approved').length} {t('studies.library.curated', 'curated')}
           </Badge>
-          <Badge variant="outline" className="text-xs gap-1 text-amber-600 border-amber-300">
-            <Search className="h-3 w-3" />
-            {studies.filter(s => s.is_simulated).length} {t('studies.library.simulated')}
+          <Badge variant="outline" className="text-xs gap-1">
+            <FileText className="h-3 w-3" />
+            {studies.filter((s: any) => s.kanban_status === 'processed' || s.kanban_status === 'new').length} {t('studies.library.processing', 'in queue')}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -223,7 +260,17 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                     </h3>
                     
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-2">
-                      {study.is_simulated ? (
+                      {(study as any).kanban_status === 'approved' ? (
+                        <Badge variant="outline" className="text-xs text-emerald-700 border-emerald-300 gap-1">
+                          <Check className="h-3 w-3" />
+                          {t('studies.library.curatedBadge', 'Curated')}
+                        </Badge>
+                      ) : (study as any).kanban_status === 'processed' || (study as any).kanban_status === 'new' ? (
+                        <Badge variant="outline" className="text-xs text-blue-700 border-blue-300 gap-1">
+                          <FlaskConical className="h-3 w-3" />
+                          {t('studies.library.inQueueBadge', 'In curation')}
+                        </Badge>
+                      ) : study.is_simulated ? (
                         <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 gap-1">
                           <FlaskConical className="h-3 w-3" />
                           {t('studies.library.simulatedBadge')}
