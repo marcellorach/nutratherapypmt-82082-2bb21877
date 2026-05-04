@@ -1,21 +1,27 @@
 # Project context briefing (auto)
-Generated: 2026-05-04T01:25:17.130Z
+Generated: 2026-05-04T12:21:46.266Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: —
+## Latest i18n version: 1.54.0
 
 ## Changes by area (last 14 days)
 - **admin**: 9
 - **meta**: 7
 - **kg**: 6
 - **vet-ui**: 5
+- **curation**: 3
 - **clinical-pipeline**: 3
-- **curation**: 2
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-04 · [curation] ADDED — Sistema de tags estruturadas para estudos científicos
+- Novas colunas em `processed_studies`: `tags` (jsonb com `study_design`, `population`, `methodology`, `sample_size`, `ai_confidence`), `prestige_tier` (1-5), `tags_source` (`pending` | `ai_extracted` | `manual` | `reviewed`)
+- Nova tabela `journal_prestige_tiers` com seed de ~40 journals top (Nature/Cell/JVIM/Aging Cell/etc.) classificados por tier 1-5 baseado em quartil Scimago + prestígio do publisher
+- Edge function `auto-tag-studies`: extrai tags via Gemini Flash Lite (apenas extração textual de title/abstract/journal — sem inferência) e calcula `prestige_tier` via lookup; throttle 300ms; sem alucinação porque enums fechados via tool calling
+_files: supabase/functions/auto-tag-studies/index.ts, src/components/administrador/estudos/library/StudiesLibraryTab.tsx, src/i18n.ts_
+
 ### 2026-05-04 · [admin] FIXED — Library tab agora renderiza os estudos curados
 - Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`
 - A aba agora reutiliza `StudiesLibraryTab`, exibindo os estudos vindos de `processed_studies` e `scientific_studies` conforme já implementado
@@ -70,12 +76,6 @@ _files: supabase/functions/kg-evidence-gap-fill/index.ts_
 - Corrigida lógica dos marcadores nos avatares: cenário "sem protocolo" agora faz fallback para os dados do cenário "com protocolo" quando a API retorna `yearWithout` vazio, garantindo que ambos mostrem as doenças
 - Perplexity connector verificado como ativo e vinculado ao projeto
 _files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DigitalTwinDog.tsx_
-
-### 2026-04-30 · [kg] FIXED — Corrigido insert de triplets no gap-fill + UI de conclusões
-- Bug crítico: `direction: 'positive'` violava constraint `chk_direction` (mapeado para `'improves'`); `evidence_level` com valores inválidos (`clinical_trial`, `in_vivo`, `review`, `unclear`) mapeados para enum do DB (`rct`, `cohort`, `expert_opinion`)
-- UI agora exibe conclusões claras por par: score de eficácia (0-5) com barra visual, nível de evidência, espécie, rationale colapsável do Perplexity/Gemini, links para PMIDs no PubMed e URLs citadas
-- Botão de curadoria aparece automaticamente após triplets criados com sucesso
-_files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
