@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-05-04 — Library tab agora renderiza os estudos curados
+<!-- area: admin · status: entregue · i18n: — -->
+- Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`
+- A aba agora reutiliza `StudiesLibraryTab`, exibindo os estudos vindos de `processed_studies` e `scientific_studies` conforme já implementado
+- Validado no backend: 40 estudos `approved`, 4 `processed` e 2 `new` disponíveis para listagem
+- Files: src/components/administrador/estudos/import/SciImportSection.tsx
+
 ### Added - 2026-05-01 — QA gate + provenance for AI enrichment
 <!-- area: curation · status: entregue · i18n: — -->
 - New columns `enrichment_source` (none/extracted/llm/llm_low_confidence/human), `enrichment_confidence`, `enrichment_needs_review`, `enrichment_at` on `triplet_extractions` for full provenance of AI-inferred metadata
