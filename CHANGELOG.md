@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-04 — Sistema de tags estruturadas para estudos científicos
+<!-- area: curation · status: entregue · i18n: 1.54.0 -->
+- Novas colunas em `processed_studies`: `tags` (jsonb com `study_design`, `population`, `methodology`, `sample_size`, `ai_confidence`), `prestige_tier` (1-5), `tags_source` (`pending` | `ai_extracted` | `manual` | `reviewed`)
+- Nova tabela `journal_prestige_tiers` com seed de ~40 journals top (Nature/Cell/JVIM/Aging Cell/etc.) classificados por tier 1-5 baseado em quartil Scimago + prestígio do publisher
+- Edge function `auto-tag-studies`: extrai tags via Gemini Flash Lite (apenas extração textual de title/abstract/journal — sem inferência) e calcula `prestige_tier` via lookup; throttle 300ms; sem alucinação porque enums fechados via tool calling
+- UI da Library: 3 novos filtros (Desenho, População, Tier de prestígio), botão "Auto-tag pendentes", badges coloridos nos cards (T1-T5 ambar, design cinza, população azul, metodologia roxa)
+- Tags ficam disponíveis para futura ponderação no motor de recomendação (peso por tier × evidence_level)
+- Files: supabase/migrations/*_journal_tiers_and_study_tags.sql, supabase/functions/auto-tag-studies/index.ts, src/components/administrador/estudos/library/StudiesLibraryTab.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json
+
 ### Fixed - 2026-05-04 — Library tab agora renderiza os estudos curados
 <!-- area: admin · status: entregue · i18n: — -->
 - Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`
