@@ -175,6 +175,10 @@ const SciImportSection: React.FC = () => {
               <StudiesLibraryTab onNavigateToUpload={() => handleTabChange('file-upload')} />
             </TabsContent>
 
+            <TabsContent value="curated-library">
+              <StudiesLibraryTab onNavigateToUpload={() => handleTabChange('file-upload')} />
+            </TabsContent>
+
             <TabsContent value="file-upload">
               <FileUploadTab />
             </TabsContent>
