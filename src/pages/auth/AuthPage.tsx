@@ -33,23 +33,24 @@ const AuthPage: React.FC = () => {
       });
       return;
     }
-    if (password !== TEMP_SHARED_PASSWORD) {
-      toast({
-        title: 'Senha incorreta',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setSubmitting(true);
     try {
       // Try to sign in first
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: normalized,
-        password: TEMP_SHARED_PASSWORD,
+        password,
       });
 
       if (signInError) {
+        // If user typed a custom password (not the shared one), don't auto-create
+        if (password !== TEMP_SHARED_PASSWORD) {
+          toast({
+            title: 'Senha incorreta',
+            description: signInError.message,
+            variant: 'destructive',
+          });
+          return;
+        }
         // Account doesn't exist yet → create it
         const { error: signUpError } = await supabase.auth.signUp({
           email: normalized,
