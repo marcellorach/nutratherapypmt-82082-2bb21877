@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-04T12:21:46.259Z
+// Última geração: 2026-05-06T15:47:37.781Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,28 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-04";
+export const lastChangelogDate = "2026-05-06";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-06",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Pets demo agora usam condições com forte cobertura no VetGraphRAG",
+    "bullets": [
+      "Reformuladas as condições dos 5 pets de exemplo (`GenerateSamplePetsButton`) para usar exclusivamente outcomes com ≥15 compostos no KG (layer_4_outcome aprovado)",
+      "Substituições: `Mild Periodontal Disease` → `Oxidative Stress` (Buddy); `Hip Dysplasia`+`Overweight` → `Obesity`+`Oxidative Stress` (Rex); `Hip Dysplasia`+`Degenerative Myelopathy` → `Neuroinflammation`+`Cellular Senescence` (Thor); `Pulmonary Hypertension` → `Cardiovascular Disease` e label MMVD canonicalizado para `Myxomatous Mitral Valve Disease` (Luna)",
+      "Exames atualizados de forma coerente com as novas condições (Oxidative Stress Panel, Senescence Biomarkers, Cardiovascular Panel) — narrativa clínica mantida e plausível por raça/idade",
+      "Resultado esperado: Gêmeo Digital (`project-pet-trajectory`) opera em modo `ai_kg_grounded` para todos os 5 pets, com `years_gained_total` mensurável e `coverage_by_condition.kg_covered=true` em ≥80% dos casos — eliminando fallback heurístico nos demos",
+      "Files: src/components/pet/GenerateSamplePetsButton.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/pet/GenerateSamplePetsButton.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.54.1"
+  },
   {
     "date": "2026-05-04",
     "kind": "added",

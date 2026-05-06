@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-06 — Pets demo agora usam condições com forte cobertura no VetGraphRAG
+<!-- area: vet-ui · status: entregue · i18n: 1.54.1 -->
+- Reformuladas as condições dos 5 pets de exemplo (`GenerateSamplePetsButton`) para usar exclusivamente outcomes com ≥15 compostos no KG (layer_4_outcome aprovado)
+- Substituições: `Mild Periodontal Disease` → `Oxidative Stress` (Buddy); `Hip Dysplasia`+`Overweight` → `Obesity`+`Oxidative Stress` (Rex); `Hip Dysplasia`+`Degenerative Myelopathy` → `Neuroinflammation`+`Cellular Senescence` (Thor); `Pulmonary Hypertension` → `Cardiovascular Disease` e label MMVD canonicalizado para `Myxomatous Mitral Valve Disease` (Luna)
+- Exames atualizados de forma coerente com as novas condições (Oxidative Stress Panel, Senescence Biomarkers, Cardiovascular Panel) — narrativa clínica mantida e plausível por raça/idade
+- Resultado esperado: Gêmeo Digital (`project-pet-trajectory`) opera em modo `ai_kg_grounded` para todos os 5 pets, com `years_gained_total` mensurável e `coverage_by_condition.kg_covered=true` em ≥80% dos casos — eliminando fallback heurístico nos demos
+- Files: src/components/pet/GenerateSamplePetsButton.tsx, src/i18n.ts
+
 ### Added - 2026-05-04 — Sistema de tags estruturadas para estudos científicos
 <!-- area: curation · status: entregue · i18n: 1.54.0 -->
 - Novas colunas em `processed_studies`: `tags` (jsonb com `study_design`, `population`, `methodology`, `sample_size`, `ai_confidence`), `prestige_tier` (1-5), `tags_source` (`pending` | `ai_extracted` | `manual` | `reviewed`)
