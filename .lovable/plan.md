@@ -1,64 +1,76 @@
-## Contexto
+## Objetivo
+Reformular os 5 pets de exemplo (`GenerateSamplePetsButton`) para que TODAS as condições atribuídas tenham **alta cobertura no VetGraphRAG** (≥15 compostos com triplets aprovados), garantindo que o Gêmeo Digital (`project-pet-trajectory`) consiga calcular `years_gained` significativo e mostrar reversão/controle real baseado em evidência — não fallback heurístico.
 
-Hoje 87% dos triplets aprovados (3.272 de 3.737) **não têm `intensity`** e 85% (3.172) **não têm `evidence_level`**. Esses dois campos representam 50% combinado do score final do motor de recomendação (`evidence` 30% + `intensity` 20%, definidos em `src/utils/score-normalization.ts`), além de modular espessura de aresta no KG e ranking de evidências em `recommendation-confidence-service`, `hybrid-recommendation-service` e `PatientKnowledgeSubgraph`. Ou seja: o motor está rodando degradado para a maior parte dos dados.
+## Diagnóstico do KG (triplets aprovados, layer_4_outcome)
 
-A função `enrich-triplet` existe mas só roda quando alguém clica "Enriquecer com IA" no painel de curadoria.
+Top condições com maior cobertura de compostos:
 
-## O que será feito
+| Condição | # Compostos | Uso atual nos pets |
+|---|---|---|
+| Osteoarthritis | 68 | Rex, Thor |
+| Aging (sarcopenia/frailty) | 63 + 33 + 16 | Max, Luna |
+| MMVD (Degenerative Valve Disease) | 52 | Luna |
+| Obesity / Overweight | 32 | Rex |
+| Cognitive Dysfunction Syndrome | 30 + 21 + 14 | Max, Luna |
+| Oxidative Stress | 29 | — |
+| Chronic Kidney Disease | 19 | Luna |
+| Osteoporosis | 18 | — |
+| Cardiovascular Disease | 15 | — |
+| Neuroinflammation | 15 | — |
+| Retinal Degeneration | 14 | — |
+| Gut Dysbiosis | 14 | — |
 
-### 1. Melhorar o prompt de `supabase/functions/enrich-triplet/index.ts`
+**Condições atuais SEM boa cobertura no KG** (causam fallback heurístico, anulando o "wow" do Digital Twin):
+- `Mild Periodontal Disease` (Buddy) — quase nenhum triplet
+- `Hip Dysplasia` (Rex, Thor) — pouca cobertura direta
+- `Degenerative Myelopathy` (Thor) — pouca cobertura
+- `Pulmonary Hypertension` (Luna) — pouca cobertura
 
-Mudanças no prompt e na ferramenta (tool call):
+## Mudanças propostas em `src/components/pet/GenerateSamplePetsButton.tsx`
 
-- **Adicionar `in_vivo` e `animal_study`** ao enum de `evidence_level` (e à lista `VALID_EVIDENCE_LEVELS`). Estudos em cães caem aí; hoje viram `expert_opinion` no fallback.
-- **Ancorar `intensity`** em magnitude observável: o LLM passa a justificar com o que está escrito (ex.: "redução de 40% no marcador X" → 0.4; "remissão completa" → 0.9–1.0; "tendência não significativa" → 0.1–0.2).
-- **Exigir `source_excerpt`**: trecho literal (≤300 chars) do texto-fonte que sustenta o julgamento. Vira parte do `confidence_rationale` salvo no banco. Sem âncora literal, o rationale vira opinião.
-- **Instrução explícita** de retornar `intensity` baixa quando o texto descreve resultado nulo/negativo (hoje o modelo tende a inflar).
+Manter a regra de complexidade crescente (1→4 condições) e plausibilidade clínica por raça/idade, mas **substituir condições de baixa cobertura por equivalentes de alta cobertura** já presentes no KG:
 
-### 2. Tornar o enriquecimento automático
+### 1) Buddy (Beagle, 4a) — SIMPLES, 1 condição
+- Substituir `Mild Periodontal Disease` por **`Oxidative Stress`** (29 compostos, geroprotector clássico — antioxidantes/polifenóis).
+- Narrativa: cão jovem, marcadores precoces de estresse oxidativo em check-up preventivo.
 
-Dois pontos de injeção:
+### 2) Max (Beagle, 9a) — LEVE, 2 condições
+- Manter **`Cognitive Dysfunction Syndrome`** (30 compostos) + **`Sarcopenia`** (33 compostos). ✅ Já ótimas.
+- Adicionar opcionalmente nada — manter 2 condições.
 
-- **Pós-aprovação**: na função `approve-triplet` (ou no caminho equivalente que muda `curation_status` para `approved`), disparar `enrich-triplet` em background quando o triplet aprovado tiver `intensity IS NULL` ou `evidence_level IS NULL`. Fire-and-forget — não bloqueia a aprovação.
-- **Auto-aprovação de alta confiança** (≥50%, regra existente): também dispara o enriquecimento.
+### 3) Rex (Labrador, 8a) — INTERMEDIÁRIO, 3 condições
+- Manter **`Osteoarthritis`** (68 compostos) ✅
+- Substituir `Hip Dysplasia` por **`Obesity`** (32 compostos) — promover de "Overweight mild" para `Obesity moderate` (Lab senior é caso clássico).
+- Substituir `Overweight` por **`Oxidative Stress`** (29) OU **`Metabolic Disorders`** (14).
 
-### 3. Backfill em massa (rodado uma vez agora)
+### 4) Thor (German Shepherd, 7a) — COMPLEXO, 3 condições
+- Manter **`Osteoarthritis`** ✅
+- Substituir `Hip Dysplasia` por **`Neuroinflammation`** (15 compostos) — coerente com início de mielopatia.
+- Substituir `Degenerative Myelopathy` por **`Cellular Senescence`** (24 compostos) — eixo geroprotector forte; ou manter DM como `monitoring` mas adicionar Cellular Senescence como 3ª condição ativa para garantir KG hit.
 
-Nova edge function **`backfill-triplet-enrichment`**:
+### 5) Luna (Cavalier, 9a) — MAIS COMPLEXO, 4 condições + polifarmácia
+- Manter **`MMVD`** (52 compostos) ✅
+- Manter **`Cognitive Dysfunction Syndrome`** ✅
+- Manter **`Chronic Kidney Disease`** (19 compostos) ✅
+- Substituir `Pulmonary Hypertension` por **`Cardiovascular Disease`** (15) ou **`Aging/Frailty`** (16) — coerente com perfil sênior cardiopata.
 
-- Busca todos os triplets onde `curation_status='approved' AND (intensity IS NULL OR evidence_level IS NULL)`.
-- Processa em lotes de 10 paralelos com pequena pausa entre lotes (≈10/s) para respeitar rate limit do Lovable AI Gateway.
-- Loga progresso em `api_usage_logs` (provider `lovable_ai`, operation `triplet_enrichment_backfill`).
-- Idempotente: pula triplets já preenchidos; resgatável se cair no meio.
+## Critério de aceitação
 
-Volume estimado: ~3.300 chamadas Gemini Flash, ~5–10 minutos, custo ~US$ 3–5.
-
-Disparada uma vez via `supabase--curl_edge_functions` logo após o deploy. Sem botão admin (não vamos precisar repetir).
-
-### 4. Chave da Elicit (você já assinou)
-
-Sem código por enquanto. Caminho para gerar:
-
-1. Login em https://elicit.com
-2. Avatar (canto superior direito) → **Account settings**
-3. Menu lateral → **API** (link direto provável: `https://elicit.com/settings/api`)
-4. **Create API key** → copie (aparece só uma vez, formato `elk_live_…`)
-
-Se a aba "API" não aparecer, confirme em **Account → Plan** que sua assinatura está como Pro (API exige Pro).
-
-Quando você tiver a chave em mãos, me avise — eu disparo o `add_secret` para `ELICIT_API_KEY` e na sequência implemento a integração na aba "External Search" (busca semântica + extração estruturada PICO/dosagem). Isso fica em uma próxima rodada para não misturar escopo com o enriquecimento automático.
+Após gerar os pets demo:
+1. Para cada pet, `usePetTrajectoryProjection` deve retornar `source: 'ai_kg_grounded'` (não `heuristic_fallback`).
+2. `years_gained_total` ≥ 0.5 ano para Buddy; ≥ 1.0 para Max/Rex; ≥ 1.5 para Thor/Luna.
+3. `coverage_by_condition[].kg_covered = true` em **≥80%** das condições.
+4. Cada condição deve ter ≥3 `supporting_compounds` no breakdown.
 
 ## Detalhes técnicos
 
-**Arquivos a modificar:**
-- `supabase/functions/enrich-triplet/index.ts` — prompt + enum expandido + `source_excerpt`
-- `supabase/functions/approve-triplet/index.ts` (ou equivalente) — hook fire-and-forget pós-aprovação
-- `supabase/functions/backfill-triplet-enrichment/index.ts` — **nova**
-- `CHANGELOG.md` — entrada em `[Unreleased] → Changed`
-- `.lovable/plan.md` — atualizar rastro
+- Arquivo único alterado: `src/components/pet/GenerateSamplePetsButton.tsx` (array `SAMPLE_PETS`).
+- Os nomes de condição usados devem bater **exatamente** com `object_name` do triplet (preservar capitalização: ex. `"Osteoarthritis"`, `"Cognitive Dysfunction Syndrome"`, `"Myxomatous Mitral Valve Disease"` — Luna deve usar este label canônico em vez de "Degenerative Valve Disease (...)" para hit perfeito no KG).
+- Incrementar `I18N_VERSION` em `src/i18n.ts` (regra do projeto, mesmo que apenas dados estáticos).
+- Atualizar `CHANGELOG.md` (`[Unreleased] → Changed`) e rodar `npm run sync:changelog`.
+- Atualizar memory `mem://features/sample-pets-complexity-order` para refletir o novo critério "condições devem ter cobertura KG ≥15 compostos".
 
-**Sem mudança de schema.** `triplet_extractions.intensity`, `evidence_level` e `confidence_rationale` já existem.
-
-**Validação pós-backfill:** rodar a mesma query de diagnóstico (`count(*) FILTER (WHERE intensity IS NULL …)`) e reportar a taxa de cobertura final.
-
-**Risco controlado:** fallback explícito se o LLM falhar — triplet permanece com NULL (não corrompe nada) e fica disponível para nova tentativa.
+## Fora de escopo
+- Não criar novos triplets/estudos (KG já cobre o necessário).
+- Não alterar a lógica do edge function `project-pet-trajectory`.
+- Não mexer em UI de exibição do Digital Twin.
