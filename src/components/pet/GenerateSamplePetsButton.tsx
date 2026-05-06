@@ -79,20 +79,19 @@ const SAMPLE_PETS = [
     neutered: true,
     owner_name: 'Maria Silva',
     owner_email: 'maria@example.com',
-    notes: 'Labrador sênior com tríade metabólica clássica da raça: osteoartrite, obesidade e estresse oxidativo sistêmico — todas com forte resposta a protocolos nutracêuticos.',
+    notes: 'Labrador sênior com tríade clássica da raça: osteoartrite, obesidade e displasia coxofemoral leve. Duas condições com forte cobertura geroprotetora no KG; displasia entra como condição estrutural com baixa cobertura nutracêutica (gap conhecido).',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
       { condition_name: 'Obesity', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Oxidative Stress', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
+      { condition_name: 'Hip Dysplasia', severity: 'mild', status: 'active', origin: 'exam_suggested' },
     ],
     medications: [
       { medication_name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily' },
     ],
     exams: [
-      { exam_type: 'X-Ray (Joints)', results: { grade: 3, bilateral: true, degeneration: 'moderate', interpretation: 'Osteoartrite bilateral moderada' } },
+      { exam_type: 'X-Ray (Hip)', results: { grade: 3, bilateral: true, degeneration: 'moderate', interpretation: 'Displasia coxofemoral grau 3 + osteoartrite secundária' } },
       { exam_type: 'Complete Blood Count', results: { wbc: 12500, rbc: 7.2, platelets: 280000 } },
       { exam_type: 'Body Condition Score', results: { bcs: 7, ideal: 5, interpretation: 'Obesidade moderada (BCS 7/9)' } },
-      { exam_type: 'Oxidative Stress Panel', results: { '8_ohdg_ng_ml': 9.4, mda_umol_l: 5.1, interpretation: 'Estresse oxidativo moderado' } },
     ],
   },
 
@@ -106,19 +105,19 @@ const SAMPLE_PETS = [
     neutered: false,
     owner_name: 'Ana Costa',
     owner_email: 'ana@example.com',
-    notes: 'Pastor Alemão de trabalho. Eixo inflamatório-senescente: osteoartrite ativa, neuroinflamação subclínica e marcadores de senescência celular elevados — perfil ideal para protocolo senolítico + anti-inflamatório.',
+    notes: 'Pastor Alemão de trabalho. Osteoartrite ativa e marcadores de senescência celular elevados (perfil senolítico). Mielopatia degenerativa em monitoramento — condição clássica da raça com cobertura nutracêutica limitada no KG (gap a ser preenchido).',
     conditions: [
       { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Neuroinflammation', severity: 'mild', status: 'active', origin: 'exam_suggested' },
       { condition_name: 'Cellular Senescence', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
+      { condition_name: 'Degenerative Myelopathy', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
     ],
     medications: [
       { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
     ],
     exams: [
       { exam_type: 'Joint Evaluation', results: { hips: 'osteoartrite moderada', elbows: 'normal', gait: 'rigidez matinal' } },
-      { exam_type: 'Inflammatory Markers', results: { crp: 15.2, il6_pg_ml: 8.4, tnf_alpha: 'elevado', reference_crp: '<10', interpretation: 'Inflamação sistêmica de baixo grau (inflammaging)' } },
       { exam_type: 'Senescence Biomarkers', results: { p16_ink4a: 'elevado', sasp_panel: 'positivo', telomere_length: 'reduzido para idade', interpretation: 'Carga senescente compatível com envelhecimento acelerado' } },
+      { exam_type: 'Neurological Examination', results: { proprioception: 'reduzida em membros pélvicos', reflexes: 'preservados', interpretation: 'Suspeita de mielopatia degenerativa em fase inicial' } },
     ],
   },
 
@@ -132,12 +131,12 @@ const SAMPLE_PETS = [
     neutered: true,
     owner_name: 'João Pereira',
     owner_email: 'joao@example.com',
-    notes: 'Cavalier sênior em estágio C de MMVD. Polifarmácia cardíaca, declínio cognitivo, DRC IRIS 2 (parcialmente associada à furosemida crônica) e doença cardiovascular sistêmica — caso multissistêmico complexo com forte cobertura no KG.',
+    notes: 'Cavalier sênior em estágio C de MMVD. Polifarmácia cardíaca, declínio cognitivo, DRC IRIS 2 (parcialmente associada à furosemida crônica) e hipertensão pulmonar secundária — caso multissistêmico. 3 das 4 condições têm forte cobertura geroprotetora no KG; HP secundária com cobertura nutracêutica limitada.',
     conditions: [
       { condition_name: 'Myxomatous Mitral Valve Disease', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Cardiovascular Disease', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
       { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
       { condition_name: 'Chronic Kidney Disease', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+      { condition_name: 'Pulmonary Hypertension', severity: 'mild', status: 'active', origin: 'exam_suggested' },
     ],
     medications: [
       { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
@@ -148,7 +147,7 @@ const SAMPLE_PETS = [
       { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: '32%', murmur_grade: '4/6' } },
       { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5 } },
       { exam_type: 'Renal Panel', results: { creatinine: 2.1, sdma: 22, bun: 38, usg: 1.018, interpretation: 'IRIS Stage 2' } },
-      { exam_type: 'Cardiovascular Panel', results: { nt_probnp: 1850, troponin_i: 0.18, interpretation: 'Sobrecarga cardíaca compatível com MMVD estágio C' } },
+      { exam_type: 'Doppler Pressure', results: { systolic_pap: 48, interpretation: 'Hipertensão pulmonar leve a moderada secundária ao MMVD' } },
     ],
   },
 ];

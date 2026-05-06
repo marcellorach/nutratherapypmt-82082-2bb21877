@@ -1,76 +1,35 @@
-## Objetivo
-Reformular os 5 pets de exemplo (`GenerateSamplePetsButton`) para que TODAS as condições atribuídas tenham **alta cobertura no VetGraphRAG** (≥15 compostos com triplets aprovados), garantindo que o Gêmeo Digital (`project-pet-trajectory`) consiga calcular `years_gained` significativo e mostrar reversão/controle real baseado em evidência — não fallback heurístico.
+## Ajuste solicitado
+Reintroduzir algumas condições **não cobertas** pelo VetGraphRAG nos pets demo para mostrar realismo/aleatoriedade do sistema, **sem comprometer** a demonstração do Gêmeo Digital. Regra: ≥66% das condições de cada pet devem estar cobertas pelo KG (≥15 compostos).
 
-## Diagnóstico do KG (triplets aprovados, layer_4_outcome)
+## Mudanças em `src/components/pet/GenerateSamplePetsButton.tsx`
 
-Top condições com maior cobertura de compostos:
+| Pet | Condições propostas | KG-covered | Não-covered (realismo) |
+|---|---|---|---|
+| **Buddy** (1) | Oxidative Stress | 1/1 (100%) | — |
+| **Max** (2) | CDS, Sarcopenia | 2/2 (100%) | — |
+| **Rex** (3) | Osteoarthritis, Obesity, **Hip Dysplasia** | 2/3 (66%) | Hip Dysplasia (low KG) |
+| **Thor** (3) | Osteoarthritis, Cellular Senescence, **Degenerative Myelopathy** (monitoring) | 2/3 (66%) | DM (low KG) |
+| **Luna** (4) | MMVD, CDS, CKD, **Pulmonary Hypertension** | 3/4 (75%) | Pulmonary Hypertension (low KG) |
 
-| Condição | # Compostos | Uso atual nos pets |
-|---|---|---|
-| Osteoarthritis | 68 | Rex, Thor |
-| Aging (sarcopenia/frailty) | 63 + 33 + 16 | Max, Luna |
-| MMVD (Degenerative Valve Disease) | 52 | Luna |
-| Obesity / Overweight | 32 | Rex |
-| Cognitive Dysfunction Syndrome | 30 + 21 + 14 | Max, Luna |
-| Oxidative Stress | 29 | — |
-| Chronic Kidney Disease | 19 | Luna |
-| Osteoporosis | 18 | — |
-| Cardiovascular Disease | 15 | — |
-| Neuroinflammation | 15 | — |
-| Retinal Degeneration | 14 | — |
-| Gut Dysbiosis | 14 | — |
+### Justificativa clínica das condições "não-cobertas"
+- **Hip Dysplasia (Rex)**: clássico em Labrador, coexiste naturalmente com osteoartrite — o sistema vai mostrar "sem cobertura KG direta" para esta condição enquanto trata as outras 2.
+- **Degenerative Myelopathy (Thor)**: clássico em Pastor Alemão, status `monitoring` (não ativa) — demonstra honestidade do sistema ao sinalizar gap de evidência.
+- **Pulmonary Hypertension (Luna)**: secundária ao MMVD, plausível clinicamente — outras 3 condições principais carregam o `years_gained`.
 
-**Condições atuais SEM boa cobertura no KG** (causam fallback heurístico, anulando o "wow" do Digital Twin):
-- `Mild Periodontal Disease` (Buddy) — quase nenhum triplet
-- `Hip Dysplasia` (Rex, Thor) — pouca cobertura direta
-- `Degenerative Myelopathy` (Thor) — pouca cobertura
-- `Pulmonary Hypertension` (Luna) — pouca cobertura
-
-## Mudanças propostas em `src/components/pet/GenerateSamplePetsButton.tsx`
-
-Manter a regra de complexidade crescente (1→4 condições) e plausibilidade clínica por raça/idade, mas **substituir condições de baixa cobertura por equivalentes de alta cobertura** já presentes no KG:
-
-### 1) Buddy (Beagle, 4a) — SIMPLES, 1 condição
-- Substituir `Mild Periodontal Disease` por **`Oxidative Stress`** (29 compostos, geroprotector clássico — antioxidantes/polifenóis).
-- Narrativa: cão jovem, marcadores precoces de estresse oxidativo em check-up preventivo.
-
-### 2) Max (Beagle, 9a) — LEVE, 2 condições
-- Manter **`Cognitive Dysfunction Syndrome`** (30 compostos) + **`Sarcopenia`** (33 compostos). ✅ Já ótimas.
-- Adicionar opcionalmente nada — manter 2 condições.
-
-### 3) Rex (Labrador, 8a) — INTERMEDIÁRIO, 3 condições
-- Manter **`Osteoarthritis`** (68 compostos) ✅
-- Substituir `Hip Dysplasia` por **`Obesity`** (32 compostos) — promover de "Overweight mild" para `Obesity moderate` (Lab senior é caso clássico).
-- Substituir `Overweight` por **`Oxidative Stress`** (29) OU **`Metabolic Disorders`** (14).
-
-### 4) Thor (German Shepherd, 7a) — COMPLEXO, 3 condições
-- Manter **`Osteoarthritis`** ✅
-- Substituir `Hip Dysplasia` por **`Neuroinflammation`** (15 compostos) — coerente com início de mielopatia.
-- Substituir `Degenerative Myelopathy` por **`Cellular Senescence`** (24 compostos) — eixo geroprotector forte; ou manter DM como `monitoring` mas adicionar Cellular Senescence como 3ª condição ativa para garantir KG hit.
-
-### 5) Luna (Cavalier, 9a) — MAIS COMPLEXO, 4 condições + polifarmácia
-- Manter **`MMVD`** (52 compostos) ✅
-- Manter **`Cognitive Dysfunction Syndrome`** ✅
-- Manter **`Chronic Kidney Disease`** (19 compostos) ✅
-- Substituir `Pulmonary Hypertension` por **`Cardiovascular Disease`** (15) ou **`Aging/Frailty`** (16) — coerente com perfil sênior cardiopata.
+### Exames
+- Reintroduzir os exames coerentes que tinham sido removidos: X-Ray (Hip) para Rex/Thor, Doppler PAP para Luna, Neurological Examination para Thor.
+- Manter os novos exames (Oxidative Stress Panel, Senescence Biomarkers, Cardiovascular Panel) que comprovam as condições KG-covered.
 
 ## Critério de aceitação
-
-Após gerar os pets demo:
-1. Para cada pet, `usePetTrajectoryProjection` deve retornar `source: 'ai_kg_grounded'` (não `heuristic_fallback`).
-2. `years_gained_total` ≥ 0.5 ano para Buddy; ≥ 1.0 para Max/Rex; ≥ 1.5 para Thor/Luna.
-3. `coverage_by_condition[].kg_covered = true` em **≥80%** das condições.
-4. Cada condição deve ter ≥3 `supporting_compounds` no breakdown.
+1. Cada pet ainda atinge `source: 'ai_kg_grounded'` no Digital Twin (porque maioria das condições é coberta).
+2. `years_gained_total` mensurável (≥0.5 a ≥1.5 conforme complexidade).
+3. UI mostra explicitamente para cada pet pelo menos 1 condição com `kg_covered=false` → demonstra transparência do sistema (gap-fill candidate, conforme `useKgEvidenceGapFill`).
 
 ## Detalhes técnicos
-
-- Arquivo único alterado: `src/components/pet/GenerateSamplePetsButton.tsx` (array `SAMPLE_PETS`).
-- Os nomes de condição usados devem bater **exatamente** com `object_name` do triplet (preservar capitalização: ex. `"Osteoarthritis"`, `"Cognitive Dysfunction Syndrome"`, `"Myxomatous Mitral Valve Disease"` — Luna deve usar este label canônico em vez de "Degenerative Valve Disease (...)" para hit perfeito no KG).
-- Incrementar `I18N_VERSION` em `src/i18n.ts` (regra do projeto, mesmo que apenas dados estáticos).
-- Atualizar `CHANGELOG.md` (`[Unreleased] → Changed`) e rodar `npm run sync:changelog`.
-- Atualizar memory `mem://features/sample-pets-complexity-order` para refletir o novo critério "condições devem ter cobertura KG ≥15 compostos".
+- Único arquivo alterado: `src/components/pet/GenerateSamplePetsButton.tsx` (array `SAMPLE_PETS` — só conditions/exams/notes).
+- Incrementar `I18N_VERSION` em `src/i18n.ts` (1.54.1 → 1.54.2).
+- Adicionar entrada `Changed` no `CHANGELOG.md` e rodar `npm run sync:changelog`.
 
 ## Fora de escopo
-- Não criar novos triplets/estudos (KG já cobre o necessário).
-- Não alterar a lógica do edge function `project-pet-trajectory`.
-- Não mexer em UI de exibição do Digital Twin.
+- Não mexer em lógica do edge function nem em UI do Digital Twin.
+- Não alterar Buddy nem Max (já estão 100% cobertos e servem como "casos limpos").
