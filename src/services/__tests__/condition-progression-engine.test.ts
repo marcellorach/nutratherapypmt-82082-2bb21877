@@ -1,13 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-// Mock the supabase client so importing the engine in a node env doesn't crash on `localStorage`.
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: { from: () => ({ select: () => ({ eq: () => ({ in: async () => ({ data: [], error: null }) }) }) }) },
-}));
+// Stub localStorage before importing the engine (engine pulls supabase client which touches localStorage at module init).
+(globalThis as any).localStorage = (globalThis as any).localStorage ?? {
+  getItem: () => null, setItem: () => {}, removeItem: () => {}, clear: () => {}, key: () => null, length: 0,
+};
 
-const mod = await import('../condition-progression-engine');
-const { buildPointsFromRow, classifyCompound, pickBestCurve } = mod;
-type CurveRow = import('../condition-progression-engine').CurveRow;
+import {
+  buildPointsFromRow,
+  classifyCompound,
+  pickBestCurve,
+  type CurveRow,
+} from '../condition-progression-engine';
 
 const oaOmega3: CurveRow = {
   id: '1',
