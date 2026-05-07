@@ -1553,6 +1553,15 @@
         "anchoredIn": "Ancorada em",
         "studies": "estudo(s)",
         "viewSources": "Ver fontes"
+      },
+      "references": {
+        "title": "Biblioteca Científica",
+        "description": "Estudos curados que sustentam este protocolo. Cada referência foi extraída do nosso Grafo de Conhecimento e está vinculada a (composto × condição) reais.",
+        "count": "{{count}} estudo(s)",
+        "searchPlaceholder": "Filtrar por título, autor, composto ou condição…",
+        "empty": "Nenhuma referência corresponde ao filtro.",
+        "untitled": "(estudo sem título)",
+        "openSource": "Abrir fonte"
       }
     },
     "plan": {

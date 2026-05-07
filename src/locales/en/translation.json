@@ -1553,6 +1553,15 @@
         "anchoredIn": "Anchored in",
         "studies": "study(ies)",
         "viewSources": "View sources"
+      },
+      "references": {
+        "title": "Scientific Library",
+        "description": "Curated studies that back this protocol. Each reference is pulled from our Knowledge Graph and linked to real (compound × condition) pairs.",
+        "count": "{{count}} study(ies)",
+        "searchPlaceholder": "Filter by title, author, compound or condition…",
+        "empty": "No reference matches the filter.",
+        "untitled": "(untitled study)",
+        "openSource": "Open source"
       }
     },
     "plan": {

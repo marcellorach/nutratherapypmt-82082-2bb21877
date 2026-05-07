@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 5: Biblioteca de referências científicas no relatório do tutor
+<!-- area: tutor-ui · status: entregue · i18n: 1.58.0 -->
+- Novo componente `ScientificReferencesLibrary` — lista expandível com filtro de busca, citação Vancouver, tags de composto/condição e link clicável para PMID/DOI
+- Novo serviço puro `references-builder` — deduplica por PMID/DOI, ordena por ano desc, formata Vancouver, faz merge de tags por estudo
+- Novo hook `useProposalReferences` — busca triplets aprovados (compound × condition) no banco e resolve `scientific_studies` reais (sem mock)
+- Integrado em `TreatmentProposalCard` abaixo do subgrafo do paciente; render silencioso quando não há referências
+- Suíte Vitest 9/9 passando: dedupe por PMID, fallback DOI, ordenação, formato Vancouver, "et al." em 7+ autores, URL canônica, merge de tags, filtro multi-campo, input vazio
+- Files: src/services/references-builder.ts, src/services/__tests__/references-builder.test.ts, src/hooks/useProposalReferences.ts, src/components/tutor/ScientificReferencesLibrary.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Added - 2026-05-07 — Sprint 4: Subgrafo do paciente no relatório do tutor
 <!-- area: tutor-ui · status: entregue · i18n: 1.57.0 -->
 - `TreatmentProposalCard` agora renderiza `PatientKnowledgeSubgraph` abaixo das curvas de progressão, usando `key_triplets`, `biological_pathways`, condições e compostos do próprio `proposal`
