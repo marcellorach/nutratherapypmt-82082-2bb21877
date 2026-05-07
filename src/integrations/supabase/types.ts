@@ -677,6 +677,57 @@ export type Database = {
         }
         Relationships: []
       }
+      condition_response_curves: {
+        Row: {
+          citations: Json
+          compound_class: string
+          condition_canonical: string
+          confidence_band_pct: number
+          created_at: string
+          effect_size_smd: number | null
+          extrapolated_from_human: boolean
+          id: string
+          notes: string | null
+          peak_effect_pct: number
+          placebo_decline_pct_per_year: number
+          plateau_week: number
+          time_to_effect_weeks: number
+          updated_at: string
+        }
+        Insert: {
+          citations?: Json
+          compound_class: string
+          condition_canonical: string
+          confidence_band_pct?: number
+          created_at?: string
+          effect_size_smd?: number | null
+          extrapolated_from_human?: boolean
+          id?: string
+          notes?: string | null
+          peak_effect_pct: number
+          placebo_decline_pct_per_year?: number
+          plateau_week: number
+          time_to_effect_weeks: number
+          updated_at?: string
+        }
+        Update: {
+          citations?: Json
+          compound_class?: string
+          condition_canonical?: string
+          confidence_band_pct?: number
+          created_at?: string
+          effect_size_smd?: number | null
+          extrapolated_from_human?: boolean
+          id?: string
+          notes?: string | null
+          peak_effect_pct?: number
+          placebo_decline_pct_per_year?: number
+          plateau_week?: number
+          time_to_effect_weeks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
