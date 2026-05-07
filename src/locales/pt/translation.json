@@ -1453,6 +1453,14 @@
       "studies": "Estudos Científicos",
       "kgCoverage": "Cobertura do KG",
       "confidenceLabel": "Nível de Confiança",
+      "coverage": {
+        "headerBadge": "{{covered}} de {{total}} com cobertura científica",
+        "headerTooltip": "Indica quantas condições têm relações curadas no nosso Grafo de Conhecimento Veterinário ligando-as aos compostos do protocolo. Condições sem cobertura recebem o protocolo padrão, mas sem suporte direto de literatura específica para esta combinação.",
+        "covered": "KG-coberto",
+        "gap": "KG-gap",
+        "coveredTooltip": "Condição com evidência direta no Grafo de Conhecimento. Compostos de apoio: {{compounds}}.",
+        "gapTooltip": "Sem (composto × condição) curado no Grafo para esta condição. O protocolo é mantido por similaridade de classe terapêutica, mas sem ancoragem direta — transparência total."
+      },
       "compoundsTitle": "Compostos Recomendados",
       "vetApproval": "Protocolo Revisado e Aprovado",
       "vetApprovalBy": "Este protocolo foi revisado e aprovado pelo {{name}}",
