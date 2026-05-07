@@ -16,6 +16,7 @@ import ProposalAIChat from './ProposalAIChat';
 import ConditionProgressionChart from './ConditionProgressionChart';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePetTrajectoryProjection, AICoverageEntry } from '@/hooks/usePetTrajectoryProjection';
+import ScenarioComparison from './ScenarioComparison';
 
 interface TreatmentProposal {
   id: string;
@@ -228,6 +229,14 @@ const TreatmentProposalCard: React.FC<Props> = ({
           </div>
         </div>
 
+        <Separator />
+
+        {/* Scenario comparison — Sprint 3 */}
+        <ScenarioComparison
+          trajectory={trajectory}
+          petName={petName}
+          petAgeYears={petAge}
+        />
         <Separator />
 
         {/* Biological Pathways */}
