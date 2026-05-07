@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 4: Subgrafo do paciente no relatório do tutor
+<!-- area: tutor-ui · status: entregue · i18n: 1.57.0 -->
+- `TreatmentProposalCard` agora renderiza `PatientKnowledgeSubgraph` abaixo das curvas de progressão, usando `key_triplets`, `biological_pathways`, condições e compostos do próprio `proposal`
+- Subgrafo reaproveita o componente já existente (vis-network), com legenda de cores, contagem de nós/arestas e arestas tracejadas âmbar para triplets provisórios via `petId`
+- Render condicional: só aparece quando há triplets ou pathways no `scientific_summary`
+- Nova suíte Vitest `subgraph-logic.test.ts` (6 casos: extração de nomes em formatos mistos, render condicional, entradas vazias)
+- Files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/subgraph-logic.test.ts
+
 ### Added - 2026-05-07 — Sprint 3: Cenário "Com vs Sem protocolo" (Digital Twin real)
 <!-- area: tutor-ui · status: entregue · i18n: 1.57.0 -->
 - Novo componente `ScenarioComparison.tsx` no relatório do tutor: cards lado-a-lado mostrando idade biológica projetada e expectativa de vida total **sem** vs **com** o protocolo
