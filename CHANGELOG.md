@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 6: Exportação PDF do protocolo do tutor
+<!-- area: tutor-ui · status: entregue · i18n: 1.59.0 -->
+- Novo serviço `src/services/pdf-export.ts` usando `@react-pdf/renderer` — gera Documento A4 com cabeçalho fixo, condições, cenário comparado (Gêmeo Digital), compostos com posologia/racional, racional clínico, investimento, referências em formato Vancouver e rodapé com data de geração
+- Botão "Baixar protocolo em PDF" no `TreatmentProposalCard` (sempre disponível, mesmo após aceite) — reaproveita as referências já carregadas pelo hook `useProposalReferences`
+- Suíte `src/services/__tests__/pdf-export.test.ts` (5/5 passing): cobre forma do documento, condições vazias, cenário ausente, refs vazias e mistura de shapes (string × objeto)
+- i18n: novo namespace `tutor.proposal.pdf.*` (PT/EN), `I18N_VERSION` 1.58.0 → 1.59.0
+- Files: src/services/pdf-export.ts, src/services/__tests__/pdf-export.test.ts, src/components/tutor/TreatmentProposalCard.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-07 — Sprint 5: Biblioteca de referências científicas no relatório do tutor
 <!-- area: tutor-ui · status: entregue · i18n: 1.58.0 -->
 - Novo componente `ScientificReferencesLibrary` — lista expandível com filtro de busca, citação Vancouver, tags de composto/condição e link clicável para PMID/DOI
