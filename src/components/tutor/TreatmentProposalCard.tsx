@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import {
   Dna, Shield, FlaskConical, Sparkles, Heart, CheckCircle2,
   Clock, TrendingUp, MessageSquare, Loader2, ArrowDown,
-  Calendar, TestTube, ChevronDown, ChevronUp, Bot, ShieldCheck, AlertTriangle
+  Calendar, TestTube, ChevronDown, ChevronUp, Bot, ShieldCheck, AlertTriangle, Download
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,8 @@ import { usePetTrajectoryProjection, AICoverageEntry } from '@/hooks/usePetTraje
 import ScenarioComparison from './ScenarioComparison';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import ScientificReferencesLibrary from './ScientificReferencesLibrary';
+import { downloadProposalPdf } from '@/services/pdf-export';
+import { useProposalReferences } from '@/hooks/useProposalReferences';
 
 interface TreatmentProposal {
   id: string;
@@ -51,6 +53,7 @@ const TreatmentProposalCard: React.FC<Props> = ({
   const { toast } = useToast();
   const [accepting, setAccepting] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   const handleAccept = async () => {
     setAccepting(true);
@@ -107,6 +110,54 @@ const TreatmentProposalCard: React.FC<Props> = ({
     return acc + (lookupCoverage(name)?.kg_covered ? 1 : 0);
   }, 0);
   const showCoverageHeader = coverageList.length > 0 && totalConditions > 0;
+
+  // Sprint 6 — references reused for PDF export.
+  const { references: pdfReferences } = useProposalReferences(
+    subgraphCompounds,
+    subgraphConditions,
+  );
+
+  const handleExportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      await downloadProposalPdf({
+        petName,
+        petBreed,
+        petAge,
+        veterinarianName: proposal.veterinarian_name,
+        createdAt: proposal.created_at,
+        conditions: proposal.conditions || [],
+        compounds: proposal.compounds || [],
+        rationale: proposal.rationale,
+        monthlyPriceBrl: proposal.monthly_price_brl,
+        subscriptionMonths: proposal.subscription_months,
+        scenario: trajectory
+          ? {
+              yearsWithoutProtocol: (trajectory as any).years_without_protocol ?? null,
+              yearsWithProtocol: (trajectory as any).years_with_protocol ?? null,
+              yearsGained:
+                (trajectory as any).years_with_protocol != null &&
+                (trajectory as any).years_without_protocol != null
+                  ? (trajectory as any).years_with_protocol -
+                    (trajectory as any).years_without_protocol
+                  : null,
+              source: (trajectory as any).source,
+            }
+          : null,
+        references: pdfReferences,
+      });
+      toast({ title: t('tutor.proposal.pdf.successTitle'), description: t('tutor.proposal.pdf.successDesc') });
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast({
+        title: t('tutor.proposal.pdf.errorTitle'),
+        description: t('tutor.proposal.pdf.errorDesc'),
+        variant: 'destructive',
+      });
+    } finally {
+      setExportingPdf(false);
+    }
+  };
 
   const stepColors: Record<string, string> = {
     compound: 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
