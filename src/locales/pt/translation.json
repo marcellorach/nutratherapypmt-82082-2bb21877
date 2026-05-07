@@ -1514,7 +1514,16 @@
         "projectedWithout": "Projeção s/ trat.",
         "examBaseline": "Exame Inicial",
         "examCalibration": "Calibração (11m)",
-        "examPoints": "Exames de Calibração"
+        "examPoints": "Exames de Calibração",
+        "calibrated": "Curva calibrada",
+        "calibratedTooltip": "Curva derivada de meta-análise/RCT em cães. Não é heurística.",
+        "extrapolated": "Extrapolada de humanos",
+        "extrapolatedTooltip": "Sem RCT canino disponível. Curva conservadora baseada em estudos humanos — interpretar com cautela.",
+        "uncalibrated": "Sem curva calibrada",
+        "uncalibratedTooltip": "Não há literatura específica para esta combinação condição × composto. Mostramos apenas o baseline para não inventar projeção.",
+        "anchoredIn": "Ancorada em",
+        "studies": "estudo(s)",
+        "viewSources": "Ver fontes"
       }
     },
     "plan": {

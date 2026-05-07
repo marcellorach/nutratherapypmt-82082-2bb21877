@@ -1514,7 +1514,16 @@
         "projectedWithout": "Projected w/o treat.",
         "examBaseline": "Baseline Exam",
         "examCalibration": "Calibration (11m)",
-        "examPoints": "Calibration Exams"
+        "examPoints": "Calibration Exams",
+        "calibrated": "Calibrated curve",
+        "calibratedTooltip": "Curve derived from canine meta-analysis/RCT. Not a heuristic.",
+        "extrapolated": "Extrapolated from human data",
+        "extrapolatedTooltip": "No canine RCT available. Conservative curve based on human studies — interpret with caution.",
+        "uncalibrated": "No calibrated curve",
+        "uncalibratedTooltip": "No specific literature for this condition × compound combination. We show baseline only to avoid inventing a projection.",
+        "anchoredIn": "Anchored in",
+        "studies": "study(ies)",
+        "viewSources": "View sources"
       }
     },
     "plan": {
