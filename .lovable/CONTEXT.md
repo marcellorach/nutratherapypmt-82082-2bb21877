@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-07T17:29:55.451Z
+Generated: 2026-05-07T17:49:49.092Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -10,13 +10,19 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 7
 - **vet-ui**: 6
 - **kg**: 6
-- **tutor-ui**: 3
+- **tutor-ui**: 4
 - **curation**: 3
 - **clinical-pipeline**: 3
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-07 · [tutor-ui] ADDED — Sprint 4: Subgrafo do paciente no relatório do tutor
+- `TreatmentProposalCard` agora renderiza `PatientKnowledgeSubgraph` abaixo das curvas de progressão, usando `key_triplets`, `biological_pathways`, condições e compostos do próprio `proposal`
+- Subgrafo reaproveita o componente já existente (vis-network), com legenda de cores, contagem de nós/arestas e arestas tracejadas âmbar para triplets provisórios via `petId`
+- Render condicional: só aparece quando há triplets ou pathways no `scientific_summary`
+_files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/subgraph-logic.test.ts_
+
 ### 2026-05-07 · [tutor-ui] ADDED — Sprint 3: Cenário "Com vs Sem protocolo" (Digital Twin real)
 - Novo componente `ScenarioComparison.tsx` no relatório do tutor: cards lado-a-lado mostrando idade biológica projetada e expectativa de vida total sem vs com o protocolo
 - Dados 100% reais do edge function `project-pet-trajectory` (Gêmeo Digital, Gemini 2.5 Pro grounded no KG); reusa o mesmo query do Sprint 2 (sem requests adicionais)
@@ -71,12 +77,6 @@ _files: src/services/triplet-enrichment-service.ts, supabase/functions/enrich-tr
 - Previously, PubMed fallback only triggered when Perplexity returned efficacy = 0, which almost never happens for known correlations
 - Reduced sleep intervals (400ms→200ms Perplexity, 360ms→150ms PubMed) to fit within 150s idle timeout
 _files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx_
-
-### 2026-05-01 · [vet-ui] CHANGED — Digital Twin workflow expandido + log reposicionado
-- Workflow do Gêmeo Digital expandido de 4 para 7 estágios: Snapshot → Condições → Raça → Trajectory API → Parse → Cobertura KG → Render
-- Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)
-- Novos ícones e labels bilíngues para cada estágio
-_files: src/components/pet/DigitalTwinDog.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
