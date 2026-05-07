@@ -263,7 +263,10 @@ const TreatmentProposalCard: React.FC<Props> = ({
         {/* Condition Progression Charts */}
         {proposal.conditions.length > 0 && (
           <>
-            <ConditionProgressionChart conditions={proposal.conditions} />
+            <ConditionProgressionChart
+              conditions={proposal.conditions}
+              compounds={proposal.compounds}
+            />
             <Separator />
           </>
         )}
