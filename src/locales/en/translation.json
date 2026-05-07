@@ -1569,6 +1569,21 @@
         "successDesc": "The protocol download has started.",
         "errorTitle": "Failed to generate PDF",
         "errorDesc": "Could not generate the PDF. Please try again."
+      },
+      "cta": {
+        "roiTitle": "Honest cost comparison",
+        "roiDesc": "Based on this plan's price and real references — where data is missing we show '—' instead of inventing it.",
+        "planAnnual": "Plan (12 months)",
+        "installedCost": "Treating installed {{condition}}",
+        "aChronicCondition": "a chronic condition",
+        "projectedDelta": "Projected delta",
+        "roiCaveat": "Illustrative comparison — not a guarantee of individual clinical outcome.",
+        "m3PromiseTitle": "Testable promise at Month 3",
+        "m3PromiseDesc": "If M3 calibration exams do not show ≥15% improvement, we return {{credit}} as credit.",
+        "primary": "Start with the first box — {{price}}",
+        "primaryHint": "Small commitment. You reassess at M3 before continuing the annual plan.",
+        "secondary": "Continue annual plan after M3 reassessment",
+        "askQuestions": "I have questions before deciding"
       }
     },
     "plan": {

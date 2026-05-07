@@ -21,6 +21,7 @@ import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph'
 import ScientificReferencesLibrary from './ScientificReferencesLibrary';
 import { downloadProposalPdf } from '@/services/pdf-export';
 import { useProposalReferences } from '@/hooks/useProposalReferences';
+import HonestCTA from './HonestCTA';
 
 interface TreatmentProposal {
   id: string;
@@ -577,18 +578,20 @@ const TreatmentProposalCard: React.FC<Props> = ({
         </div>
 
         {/* Action Buttons */}
-        {proposal.status === 'pending' && (
-          <div className="flex gap-3">
-            <Button onClick={handleAccept} disabled={accepting} className="flex-1 gap-2" size="lg">
-              {accepting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              {t('tutor.proposal.accept')}
-            </Button>
-            <Button variant="outline" className="flex-1 gap-2" size="lg" onClick={() => setChatOpen(true)}>
-              <MessageSquare className="h-4 w-4" />
-              {t('tutor.proposal.questions')}
-            </Button>
-          </div>
-        )}
+        <HonestCTA
+          monthlyPriceBrl={proposal.monthly_price_brl}
+          subscriptionMonths={proposal.subscription_months}
+          primaryConditionName={
+            (proposal.conditions || [])
+              .map((c: any) => (typeof c === 'string' ? c : c?.name || c?.condition_name))
+              .filter(Boolean)[0]
+          }
+          installedTreatmentCostBrl={summary?.installed_treatment_cost_brl}
+          status={proposal.status}
+          accepting={accepting}
+          onAcceptFirstBox={handleAccept}
+          onOpenChat={() => setChatOpen(true)}
+        />
 
         {/* PDF export — always available */}
         <Button

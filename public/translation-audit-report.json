@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-07T19:05:30.730Z",
+  "timestamp": "2026-05-07T20:18:10.872Z",
   "summary": {
-    "totalFiles": 831,
+    "totalFiles": 833,
     "totalIssues": 403,
     "hardcodedTexts": 40,
     "missingKeys": 363,
@@ -2412,7 +2412,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2166,
+      "line": 2189,
       "text": "@",
       "severity": "high"
     },
