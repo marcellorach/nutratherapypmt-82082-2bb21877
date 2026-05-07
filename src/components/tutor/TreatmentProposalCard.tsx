@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { usePetTrajectoryProjection, AICoverageEntry } from '@/hooks/usePetTrajectoryProjection';
 import ScenarioComparison from './ScenarioComparison';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
+import ScientificReferencesLibrary from './ScientificReferencesLibrary';
 
 interface TreatmentProposal {
   id: string;
@@ -380,6 +381,13 @@ const TreatmentProposalCard: React.FC<Props> = ({
             <Separator />
           </>
         )}
+
+        {/* Sprint 5 — Scientific References */}
+        <ScientificReferencesLibrary
+          compounds={subgraphCompounds}
+          conditions={subgraphConditions}
+        />
+        <Separator />
 
         {/* Treatment Timeline */}
         {timeline.length > 0 && (
