@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-07T19:08:27.366Z
+// Última geração: 2026-05-07T20:21:20.183Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,31 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-07";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-07",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Sprint 7: CTA honesto em dois passos + ROI",
+    "bullets": [
+      "Novo serviço `src/services/proposal-roi.ts` (puro) — calcula custo anual do plano, comparativo com tratamento da condição instalada (mostra `—` quando não há referência, sem inventar número) e crédito M3 = 50% do investimento dos 3 primeiros meses",
+      "Novo componente `src/components/tutor/HonestCTA.tsx` — bloco de comparação de custo (3 colunas), promessa testável de M3 (devolução em crédito se exames de calibração não mostrarem ≥15% de melhora), CTA primário \"Começar com a primeira caixa\" + secundário \"Continuar plano anual após reavaliação no M3\" + link para abrir o chat de dúvidas",
+      "`TreatmentProposalCard` substitui o bloco antigo de Aceitar/Dúvidas pelo `HonestCTA`, mantendo `handleAccept` como ação primária",
+      "i18n PT/EN: novo namespace `tutor.proposal.cta.*` (12 chaves cada lado), `I18N_VERSION` → 1.60.0",
+      "Suíte `src/services/__tests__/proposal-roi.test.ts` (7/7 passing): custo anual, ausência de referência → null, delta positivo/negativo, crédito M3, clamp de input inválido, default de melhora-alvo > 0",
+      "Files: src/services/proposal-roi.ts, src/services/__tests__/proposal-roi.test.ts, src/components/tutor/HonestCTA.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/services/proposal-roi.ts",
+      "src/components/tutor/HonestCTA.tsx",
+      "src/services/__tests__/proposal-roi.test.ts",
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.60.0"
+  },
   {
     "date": "2026-05-07",
     "kind": "added",
