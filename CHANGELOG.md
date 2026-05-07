@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 2: Badges KG-covered / KG-gap no relatório do tutor
+<!-- area: tutor-ui · status: entregue · i18n: 1.56.0 -->
+- Cada condição no `TreatmentProposalCard` agora exibe selo `KG-covered` (verde) ou `KG-gap` (âmbar) com tooltip explicativo (PT/EN), usando `coverage_by_condition` do `usePetTrajectoryProjection`
+- Novo selo agregado no header de "Condições Identificadas": "X de Y com cobertura científica" + tooltip
+- Match case-insensitive e tolerante a whitespace; fallback silencioso quando não há dados de cobertura (não quebra)
+- Nova suíte Vitest `coverage-logic.test.ts` (5 casos: shapes mistos, case-insensitive, lista vazia, condição ausente, condição em gap)
+- i18n: novo namespace `tutor.proposal.coverage.*` em PT/EN; bump `I18N_VERSION` 1.55.0 → 1.56.0
+- Files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/coverage-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-07 — Sprint 1: Curva de progressão calibrada em literatura real
 <!-- area: tutor-ui · status: entregue · i18n: 1.55.0 -->
 - Nova tabela `condition_response_curves` (Supabase) com parâmetros (time_to_effect, peak_effect, plateau_week, placebo_decline, SMD, banda de confiança, citações PMID/DOI) ancorados em meta-análises reais

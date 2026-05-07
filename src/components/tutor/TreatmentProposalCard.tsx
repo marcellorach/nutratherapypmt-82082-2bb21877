@@ -8,12 +8,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import {
   Dna, Shield, FlaskConical, Sparkles, Heart, CheckCircle2,
   Clock, TrendingUp, MessageSquare, Loader2, ArrowDown,
-  Calendar, TestTube, ChevronDown, ChevronUp, Bot
+  Calendar, TestTube, ChevronDown, ChevronUp, Bot, ShieldCheck, AlertTriangle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ProposalAIChat from './ProposalAIChat';
 import ConditionProgressionChart from './ConditionProgressionChart';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { usePetTrajectoryProjection, AICoverageEntry } from '@/hooks/usePetTrajectoryProjection';
 
 interface TreatmentProposal {
   id: string;
@@ -72,6 +74,30 @@ const TreatmentProposalCard: React.FC<Props> = ({
   const timeline = summary.treatment_timeline || [];
   const periodicExams = summary.periodic_exams || [];
 
+  // Sprint 2 — KG coverage badges. Uses cached trajectory projection
+  // (already invoked in vet flow); falls back silently when no data.
+  const compoundNames = (proposal.compounds || []).map((c: any) => c?.name).filter(Boolean);
+  const { data: trajectory } = usePetTrajectoryProjection(
+    proposal.pet_id,
+    compoundNames,
+    true,
+  );
+  const coverageList: AICoverageEntry[] = trajectory?.coverage_by_condition || [];
+  const coverageByName = new Map<string, AICoverageEntry>();
+  for (const c of coverageList) {
+    coverageByName.set((c.condition || '').toLowerCase().trim(), c);
+  }
+  const lookupCoverage = (raw: string): AICoverageEntry | undefined => {
+    if (!raw) return undefined;
+    return coverageByName.get(raw.toLowerCase().trim());
+  };
+  const totalConditions = proposal.conditions.length;
+  const coveredCount = proposal.conditions.reduce((acc: number, c: any) => {
+    const name = c?.name || c?.condition_name || (typeof c === 'string' ? c : '');
+    return acc + (lookupCoverage(name)?.kg_covered ? 1 : 0);
+  }, 0);
+  const showCoverageHeader = coverageList.length > 0 && totalConditions > 0;
+
   const stepColors: Record<string, string> = {
     compound: 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
     mechanism: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
@@ -127,25 +153,78 @@ const TreatmentProposalCard: React.FC<Props> = ({
 
         {/* Conditions */}
         <div>
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Heart className="h-4 w-4 text-red-500" />
-            {t('tutor.proposal.conditionsTitle')}
-          </h3>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <Heart className="h-4 w-4 text-red-500" />
+              {t('tutor.proposal.conditionsTitle')}
+            </h3>
+            {showCoverageHeader && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="text-[11px] gap-1 cursor-help border-emerald-300 text-emerald-800 dark:text-emerald-300 dark:border-emerald-700"
+                    >
+                      <ShieldCheck className="h-3 w-3" />
+                      {t('tutor.proposal.coverage.headerBadge', {
+                        covered: coveredCount,
+                        total: totalConditions,
+                      })}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs text-xs">
+                    {t('tutor.proposal.coverage.headerTooltip')}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
-            {proposal.conditions.map((c: any, i: number) => (
-              <Badge key={i} variant="secondary" className="text-xs gap-1">
-                {c.name || c.condition_name || c}
-                {c.severity && (
-                  <span className={`ml-1 text-[10px] px-1 rounded ${
-                    c.severity === 'severe' ? 'bg-red-200 text-red-800' :
-                    c.severity === 'moderate' ? 'bg-orange-200 text-orange-800' :
-                    'bg-yellow-200 text-yellow-800'
-                  }`}>
-                    {c.severity}
-                  </span>
-                )}
-              </Badge>
-            ))}
+            {proposal.conditions.map((c: any, i: number) => {
+              const name = c.name || c.condition_name || c;
+              const cov = lookupCoverage(name);
+              return (
+                <Badge key={i} variant="secondary" className="text-xs gap-1.5">
+                  {name}
+                  {c.severity && (
+                    <span className={`ml-0.5 text-[10px] px-1 rounded ${
+                      c.severity === 'severe' ? 'bg-red-200 text-red-800' :
+                      c.severity === 'moderate' ? 'bg-orange-200 text-orange-800' :
+                      'bg-yellow-200 text-yellow-800'
+                    }`}>
+                      {c.severity}
+                    </span>
+                  )}
+                  {cov && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {cov.kg_covered ? (
+                            <span className="ml-0.5 inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-700 cursor-help">
+                              <ShieldCheck className="h-2.5 w-2.5" />
+                              {t('tutor.proposal.coverage.covered')}
+                            </span>
+                          ) : (
+                            <span className="ml-0.5 inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded border border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700 cursor-help">
+                              <AlertTriangle className="h-2.5 w-2.5" />
+                              {t('tutor.proposal.coverage.gap')}
+                            </span>
+                          )}
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs text-xs">
+                          {cov.kg_covered
+                            ? t('tutor.proposal.coverage.coveredTooltip', {
+                                compounds: (cov.supporting_compounds || []).slice(0, 3).join(', ') || '—',
+                              })
+                            : t('tutor.proposal.coverage.gapTooltip')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </Badge>
+              );
+            })}
           </div>
         </div>
 

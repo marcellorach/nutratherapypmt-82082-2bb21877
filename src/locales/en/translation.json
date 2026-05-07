@@ -1453,6 +1453,14 @@
       "studies": "Scientific Studies",
       "kgCoverage": "KG Coverage",
       "confidenceLabel": "Confidence Level",
+      "coverage": {
+        "headerBadge": "{{covered}} of {{total}} with scientific coverage",
+        "headerTooltip": "Indicates how many conditions have curated relationships in our Veterinary Knowledge Graph linking them to the protocol compounds. Conditions without coverage still receive the standard protocol, but without direct literature support for this specific combination.",
+        "covered": "KG-covered",
+        "gap": "KG-gap",
+        "coveredTooltip": "Condition with direct evidence in the Knowledge Graph. Supporting compounds: {{compounds}}.",
+        "gapTooltip": "No curated (compound × condition) link in the Graph for this condition. Protocol is kept by therapeutic class similarity, but without direct anchoring — full transparency."
+      },
       "compoundsTitle": "Recommended Compounds",
       "vetApproval": "Protocol Reviewed and Approved",
       "vetApprovalBy": "This protocol was reviewed and approved by {{name}}",
