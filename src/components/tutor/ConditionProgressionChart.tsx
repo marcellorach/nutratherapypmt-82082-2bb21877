@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Activity, TrendingDown, TrendingUp, TestTube } from 'lucide-react';
+import { Activity, TrendingDown, TrendingUp, TestTube, BookOpen, AlertTriangle, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  buildCalibratedCurve,
+  type CalibratedCurve,
+} from '@/services/condition-progression-engine';
 import {
   ChartContainer,
   ChartTooltip,
@@ -20,39 +25,11 @@ interface ConditionData {
 
 interface Props {
   conditions: ConditionData[];
+  /** Compounds prescribed in the proposal — used to match calibrated curves. */
+  compounds?: Array<{ name?: string } | string>;
 }
 
 const MONTHS = Array.from({ length: 13 }, (_, i) => i);
-
-// Generate sigmoid-based progression data for a condition
-function generateProgressionData(condition: ConditionData) {
-  const baseline = condition.baselineScore || getBaselineFromSeverity(condition.severity);
-  
-  return MONTHS.map((month) => {
-    const t = month / 12;
-    
-    // WITHOUT treatment: gradual decline (worsening)
-    const declineRate = baseline > 60 ? 0.15 : 0.25;
-    const withoutTreatment = Math.max(5, baseline - (baseline * declineRate * t) - (Math.pow(t, 1.5) * 8));
-    
-    // WITH treatment: sigmoid improvement curve
-    const sigmoid = 1 / (1 + Math.exp(-8 * (t - 0.35)));
-    const maxImprovement = Math.min(35, (100 - baseline) * 0.7);
-    const withTreatment = Math.min(100, baseline + maxImprovement * sigmoid);
-    
-    // Confidence bands
-    const bandWidth = 8 * (1 - t * 0.3);
-    
-    return {
-      month: `M${month}`,
-      monthNum: month,
-      withTreatment: Math.round(withTreatment * 10) / 10,
-      withoutTreatment: Math.round(withoutTreatment * 10) / 10,
-      upperBand: Math.round(Math.min(100, withTreatment + bandWidth) * 10) / 10,
-      lowerBand: Math.round(Math.max(0, withTreatment - bandWidth) * 10) / 10,
-    };
-  });
-}
 
 function getBaselineFromSeverity(severity?: string): number {
   switch (severity) {
@@ -80,17 +57,49 @@ const ExamDot = (props: any) => {
   );
 };
 
-const ConditionProgressionChart: React.FC<Props> = ({ conditions }) => {
+const ConditionProgressionChart: React.FC<Props> = ({ conditions, compounds = [] }) => {
   const { t } = useTranslation();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [curve, setCurve] = useState<CalibratedCurve | null>(null);
+  const [loading, setLoading] = useState(false);
 
   if (!conditions || conditions.length === 0) return null;
 
   const current = conditions[selectedIndex] || conditions[0];
-  const data = generateProgressionData(current);
   const baseline = current.baselineScore || getBaselineFromSeverity(current.severity);
-  const projected = data[12]?.withTreatment || baseline;
-  const withoutEnd = data[12]?.withoutTreatment || baseline;
+
+  const compoundNames = (compounds || [])
+    .map(c => (typeof c === 'string' ? c : c?.name || ''))
+    .filter(Boolean);
+
+  const conditionCanonical = (current as any).condition_name || current.name;
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    buildCalibratedCurve(conditionCanonical, compoundNames, baseline)
+      .then(c => { if (!cancelled) setCurve(c); })
+      .catch(() => { if (!cancelled) setCurve(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conditionCanonical, baseline, compoundNames.join('|')]);
+
+  const data = (curve?.monthlyPoints || []).map(p => ({
+    month: `M${p.month}`,
+    monthNum: p.month,
+    withTreatment: p.withTreatment,
+    withoutTreatment: p.withoutTreatment,
+    upperBand: p.upperBand,
+    lowerBand: p.lowerBand,
+  }));
+
+  const projected = data[12]?.withTreatment ?? baseline;
+  const withoutEnd = data[12]?.withoutTreatment ?? baseline;
+
+  const calibrated = !!curve?.calibrated;
+  const extrapolated = !!curve?.extrapolated;
+  const citations = curve?.citations || [];
 
   const chartConfig = {
     withTreatment: { 
@@ -141,20 +150,75 @@ const ConditionProgressionChart: React.FC<Props> = ({ conditions }) => {
         </p>
       )}
 
+      {/* Calibration badge */}
+      <TooltipProvider>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {loading ? (
+            <Badge variant="outline" className="text-xs">…</Badge>
+          ) : calibrated && !extrapolated ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className="text-xs gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 cursor-help">
+                  <BookOpen className="h-3 w-3" />
+                  {t('tutor.proposal.progression.calibrated')}
+                  {citations.length > 0 && ` · ${citations.length} ${t('tutor.proposal.progression.studies')}`}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[320px] text-xs">
+                <p className="mb-1 font-medium">{t('tutor.proposal.progression.calibratedTooltip')}</p>
+                {citations.slice(0, 4).map((c, i) => (
+                  <p key={i} className="opacity-80">
+                    [{i + 1}] {c.title}{c.year ? ` (${c.year})` : ''}{c.journal ? `, ${c.journal}` : ''}{c.pmid ? ` — PMID:${c.pmid}` : ''}
+                  </p>
+                ))}
+              </TooltipContent>
+            </Tooltip>
+          ) : calibrated && extrapolated ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className="text-xs gap-1 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 cursor-help">
+                  <AlertTriangle className="h-3 w-3" />
+                  {t('tutor.proposal.progression.extrapolated')}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[320px] text-xs">
+                <p>{t('tutor.proposal.progression.extrapolatedTooltip')}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="text-xs gap-1 cursor-help">
+                  <Info className="h-3 w-3" />
+                  {t('tutor.proposal.progression.uncalibrated')}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[320px] text-xs">
+                <p>{t('tutor.proposal.progression.uncalibratedTooltip')}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
+
       {/* Summary badges */}
       <div className="flex flex-wrap gap-2 mb-3">
         <Badge variant="outline" className="text-xs gap-1">
           <TestTube className="h-3 w-3" />
           {t('tutor.proposal.progression.baseline')}: {Math.round(baseline)}%
         </Badge>
-        <Badge className="text-xs gap-1 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-200">
-          <TrendingUp className="h-3 w-3" />
-          {t('tutor.proposal.progression.projectedWith')}: {Math.round(projected)}%
-        </Badge>
-        <Badge className="text-xs gap-1 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-red-200">
-          <TrendingDown className="h-3 w-3" />
-          {t('tutor.proposal.progression.projectedWithout')}: {Math.round(withoutEnd)}%
-        </Badge>
+        {calibrated && (
+          <>
+            <Badge className="text-xs gap-1 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-200">
+              <TrendingUp className="h-3 w-3" />
+              {t('tutor.proposal.progression.projectedWith')}: {Math.round(projected)}%
+            </Badge>
+            <Badge className="text-xs gap-1 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-red-200">
+              <TrendingDown className="h-3 w-3" />
+              {t('tutor.proposal.progression.projectedWithout')}: {Math.round(withoutEnd)}%
+            </Badge>
+          </>
+        )}
       </div>
 
       {/* Chart */}
