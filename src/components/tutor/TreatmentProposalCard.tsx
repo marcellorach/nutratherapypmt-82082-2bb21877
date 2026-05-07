@@ -590,6 +590,17 @@ const TreatmentProposalCard: React.FC<Props> = ({
           </div>
         )}
 
+        {/* PDF export — always available */}
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={handleExportPdf}
+          disabled={exportingPdf}
+        >
+          {exportingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {t('tutor.proposal.pdf.downloadButton')}
+        </Button>
+
         {proposal.status === 'accepted' && (
           <div className="text-center py-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
             <CheckCircle2 className="h-6 w-6 text-green-600 mx-auto mb-1" />
