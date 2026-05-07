@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 3: Cenário "Com vs Sem protocolo" (Digital Twin real)
+<!-- area: tutor-ui · status: entregue · i18n: 1.57.0 -->
+- Novo componente `ScenarioComparison.tsx` no relatório do tutor: cards lado-a-lado mostrando idade biológica projetada e expectativa de vida total **sem** vs **com** o protocolo
+- Dados 100% reais do edge function `project-pet-trajectory` (Gêmeo Digital, Gemini 2.5 Pro grounded no KG); reusa o mesmo query do Sprint 2 (sem requests adicionais)
+- Selo de transparência `Gêmeo Digital · ancorado no KG` (verde) vs `Estimativa heurística` (âmbar) com tooltip explicativo bilíngue
+- Ganho de anos exibido com 3 estados honestos: positivo (`+X anos`), zero (mensagem clara de que o benefício é em qualidade de vida, não longevidade direta), negativo (alerta para revisão pelo veterinário — caveat de polifarmácia)
+- Nova suíte Vitest `scenario-logic.test.ts` (4 casos: arrays vazios, `years_gained_total` direto, fallback por delta, ganho negativo)
+- i18n: novo namespace `tutor.proposal.scenario.*` em PT/EN; bump `I18N_VERSION` 1.56.0 → 1.57.0
+- Files: src/components/tutor/ScenarioComparison.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/scenario-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-07 — Sprint 2: Badges KG-covered / KG-gap no relatório do tutor
 <!-- area: tutor-ui · status: entregue · i18n: 1.56.0 -->
 - Cada condição no `TreatmentProposalCard` agora exibe selo `KG-covered` (verde) ou `KG-gap` (âmbar) com tooltip explicativo (PT/EN), usando `coverage_by_condition` do `usePetTrajectoryProjection`

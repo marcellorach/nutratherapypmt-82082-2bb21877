@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-07T17:26:48.278Z
+// Última geração: 2026-05-07T17:29:55.448Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,31 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-07";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-07",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Sprint 3: Cenário \"Com vs Sem protocolo\" (Digital Twin real)",
+    "bullets": [
+      "Novo componente `ScenarioComparison.tsx` no relatório do tutor: cards lado-a-lado mostrando idade biológica projetada e expectativa de vida total sem vs com o protocolo",
+      "Dados 100% reais do edge function `project-pet-trajectory` (Gêmeo Digital, Gemini 2.5 Pro grounded no KG); reusa o mesmo query do Sprint 2 (sem requests adicionais)",
+      "Selo de transparência `Gêmeo Digital · ancorado no KG` (verde) vs `Estimativa heurística` (âmbar) com tooltip explicativo bilíngue",
+      "Ganho de anos exibido com 3 estados honestos: positivo (`+X anos`), zero (mensagem clara de que o benefício é em qualidade de vida, não longevidade direta), negativo (alerta para revisão pelo veterinário — caveat de polifarmácia)",
+      "Nova suíte Vitest `scenario-logic.test.ts` (4 casos: arrays vazios, `years_gained_total` direto, fallback por delta, ganho negativo)",
+      "i18n: novo namespace `tutor.proposal.scenario.*` em PT/EN; bump `I18N_VERSION` 1.56.0 → 1.57.0",
+      "Files: src/components/tutor/ScenarioComparison.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/scenario-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/tutor/ScenarioComparison.tsx",
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/components/tutor/__tests__/scenario-logic.test.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.57.0"
+  },
   {
     "date": "2026-05-07",
     "kind": "added",
