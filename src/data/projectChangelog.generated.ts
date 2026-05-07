@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-07T16:46:02.478Z
+// Última geração: 2026-05-07T17:26:48.278Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,55 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-06";
+export const lastChangelogDate = "2026-05-07";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-07",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Sprint 2: Badges KG-covered / KG-gap no relatório do tutor",
+    "bullets": [
+      "Cada condição no `TreatmentProposalCard` agora exibe selo `KG-covered` (verde) ou `KG-gap` (âmbar) com tooltip explicativo (PT/EN), usando `coverage_by_condition` do `usePetTrajectoryProjection`",
+      "Novo selo agregado no header de \"Condições Identificadas\": \"X de Y com cobertura científica\" + tooltip",
+      "Match case-insensitive e tolerante a whitespace; fallback silencioso quando não há dados de cobertura (não quebra)",
+      "Nova suíte Vitest `coverage-logic.test.ts` (5 casos: shapes mistos, case-insensitive, lista vazia, condição ausente, condição em gap)",
+      "i18n: novo namespace `tutor.proposal.coverage.*` em PT/EN; bump `I18N_VERSION` 1.55.0 → 1.56.0",
+      "Files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/coverage-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/components/tutor/__tests__/coverage-logic.test.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.56.0"
+  },
+  {
+    "date": "2026-05-07",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Sprint 1: Curva de progressão calibrada em literatura real",
+    "bullets": [
+      "Nova tabela `condition_response_curves` (Supabase) com parâmetros (time_to_effect, peak_effect, plateau_week, placebo_decline, SMD, banda de confiança, citações PMID/DOI) ancorados em meta-análises reais",
+      "Seed inicial com 5 curvas: Osteoartrite × (Ômega-3, Glucosamina+Condroitina, PCSO-524, Curcumina) + Senescência Celular × NMN/NR (extrapolada de humanos, claramente sinalizada)",
+      "Novo serviço `condition-progression-engine.ts` com `buildCalibratedCurve`, `classifyCompound`, `pickBestCurve`, `buildPointsFromRow` — substitui sigmoide heurística do `ConditionProgressionChart`",
+      "`ConditionProgressionChart` agora exibe selos: Curva calibrada (verde, com nº de estudos no tooltip), Extrapolada de humanos (âmbar) ou Sem curva calibrada (mostra apenas baseline, sem inventar projeção)",
+      "Suíte de testes Vitest (17 casos) cobrindo classificação de compostos, monotonia do declínio sem tratamento, plateau ~M4, banda de confiança crescente, limites [0,100] e prioridade não-extrapolada",
+      "Files: supabase/migrations/* condition_response_curves, src/services/condition-progression-engine.ts, src/services/__tests__/condition-progression-engine.test.ts, src/components/tutor/ConditionProgressionChart.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/services/condition-progression-engine.ts",
+      "src/services/__tests__/condition-progression-engine.test.ts",
+      "src/components/tutor/ConditionProgressionChart.tsx",
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.55.0"
+  },
   {
     "date": "2026-05-06",
     "kind": "changed",
