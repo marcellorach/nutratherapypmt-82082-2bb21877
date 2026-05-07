@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-07T17:29:55.448Z
+// Última geração: 2026-05-07T17:49:49.087Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,25 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-07";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-07",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Sprint 4: Subgrafo do paciente no relatório do tutor",
+    "bullets": [
+      "`TreatmentProposalCard` agora renderiza `PatientKnowledgeSubgraph` abaixo das curvas de progressão, usando `key_triplets`, `biological_pathways`, condições e compostos do próprio `proposal`",
+      "Subgrafo reaproveita o componente já existente (vis-network), com legenda de cores, contagem de nós/arestas e arestas tracejadas âmbar para triplets provisórios via `petId`",
+      "Render condicional: só aparece quando há triplets ou pathways no `scientific_summary`",
+      "Nova suíte Vitest `subgraph-logic.test.ts` (6 casos: extração de nomes em formatos mistos, render condicional, entradas vazias)",
+      "Files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/subgraph-logic.test.ts"
+    ],
+    "files": [
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/components/tutor/__tests__/subgraph-logic.test.ts"
+    ],
+    "i18nVersion": "1.57.0"
+  },
   {
     "date": "2026-05-07",
     "kind": "added",

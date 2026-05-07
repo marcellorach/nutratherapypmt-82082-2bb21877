@@ -17,6 +17,7 @@ import ConditionProgressionChart from './ConditionProgressionChart';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePetTrajectoryProjection, AICoverageEntry } from '@/hooks/usePetTrajectoryProjection';
 import ScenarioComparison from './ScenarioComparison';
+import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 
 interface TreatmentProposal {
   id: string;
@@ -74,6 +75,13 @@ const TreatmentProposalCard: React.FC<Props> = ({
   const keyTriplets = summary.key_triplets || [];
   const timeline = summary.treatment_timeline || [];
   const periodicExams = summary.periodic_exams || [];
+
+  const subgraphConditions: string[] = (proposal.conditions || [])
+    .map((c: any) => (typeof c === 'string' ? c : c?.name || c?.condition_name))
+    .filter(Boolean);
+  const subgraphCompounds: string[] = (proposal.compounds || [])
+    .map((c: any) => c?.name)
+    .filter(Boolean);
 
   // Sprint 2 — KG coverage badges. Uses cached trajectory projection
   // (already invoked in vet flow); falls back silently when no data.
@@ -359,6 +367,19 @@ const TreatmentProposalCard: React.FC<Props> = ({
           </>
         )}
 
+        {/* Treatment Timeline */}
+        {(keyTriplets.length > 0 || pathways.length > 0) && (
+          <>
+            <PatientKnowledgeSubgraph
+              kgTriplets={keyTriplets}
+              kgPathways={pathways}
+              conditions={subgraphConditions}
+              recommendedCompounds={subgraphCompounds}
+              petId={proposal.pet_id}
+            />
+            <Separator />
+          </>
+        )}
 
         {/* Treatment Timeline */}
         {timeline.length > 0 && (
