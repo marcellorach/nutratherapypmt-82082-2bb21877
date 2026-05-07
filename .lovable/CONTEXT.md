@@ -1,22 +1,28 @@
 # Project context briefing (auto)
-Generated: 2026-05-07T17:49:49.092Z
+Generated: 2026-05-07T18:02:52.023Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.57.0
+## Latest i18n version: 1.58.0
 
 ## Changes by area (last 14 days)
 - **admin**: 9
 - **meta**: 7
 - **vet-ui**: 6
 - **kg**: 6
-- **tutor-ui**: 4
+- **tutor-ui**: 5
 - **curation**: 3
 - **clinical-pipeline**: 3
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-07 · [tutor-ui] ADDED — Sprint 5: Biblioteca de referências científicas no relatório do tutor
+- Novo componente `ScientificReferencesLibrary` — lista expandível com filtro de busca, citação Vancouver, tags de composto/condição e link clicável para PMID/DOI
+- Novo serviço puro `references-builder` — deduplica por PMID/DOI, ordena por ano desc, formata Vancouver, faz merge de tags por estudo
+- Novo hook `useProposalReferences` — busca triplets aprovados (compound × condition) no banco e resolve `scientific_studies` reais (sem mock)
+_files: src/services/references-builder.ts, src/services/__tests__/references-builder.test.ts, src/hooks/useProposalReferences.ts, src/components/tutor/ScientificReferencesLibrary.tsx…_
+
 ### 2026-05-07 · [tutor-ui] ADDED — Sprint 4: Subgrafo do paciente no relatório do tutor
 - `TreatmentProposalCard` agora renderiza `PatientKnowledgeSubgraph` abaixo das curvas de progressão, usando `key_triplets`, `biological_pathways`, condições e compostos do próprio `proposal`
 - Subgrafo reaproveita o componente já existente (vis-network), com legenda de cores, contagem de nós/arestas e arestas tracejadas âmbar para triplets provisórios via `petId`
@@ -71,12 +77,6 @@ _status: parcial_
 - Added DB CHECK constraint update to allow `in_vivo` evidence_level (previously fell back to `expert_opinion`)
 - New `backfill-triplet-enrichment` edge function: idempotent batch enrichment with rate-limit-aware batching; also serves single-triplet mode for post-approval hooks
 _files: src/services/triplet-enrichment-service.ts, supabase/functions/enrich-triplet/index.ts, supabase/functions/backfill-triplet-enrichment/index.ts_
-
-### 2026-05-01 · [kg] FIXED — KG Evidence Gap-Fill: PubMed complementary search when Perplexity PMIDs fail validation
-- Critical fix: when Perplexity returns efficacy > 0 but all cited PMIDs are hallucinated (fail PubMed validation), the pipeline now searches PubMed directly for real papers and re-assesses with Gemini
-- Previously, PubMed fallback only triggered when Perplexity returned efficacy = 0, which almost never happens for known correlations
-- Reduced sleep intervals (400ms→200ms Perplexity, 360ms→150ms PubMed) to fit within 150s idle timeout
-_files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/EvidenceGapCard.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
