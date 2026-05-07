@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-07 — Sprint 1: Curva de progressão calibrada em literatura real
+<!-- area: tutor-ui · status: entregue · i18n: 1.55.0 -->
+- Nova tabela `condition_response_curves` (Supabase) com parâmetros (time_to_effect, peak_effect, plateau_week, placebo_decline, SMD, banda de confiança, citações PMID/DOI) ancorados em meta-análises reais
+- Seed inicial com 5 curvas: Osteoartrite × (Ômega-3, Glucosamina+Condroitina, PCSO-524, Curcumina) + Senescência Celular × NMN/NR (extrapolada de humanos, claramente sinalizada)
+- Novo serviço `condition-progression-engine.ts` com `buildCalibratedCurve`, `classifyCompound`, `pickBestCurve`, `buildPointsFromRow` — substitui sigmoide heurística do `ConditionProgressionChart`
+- `ConditionProgressionChart` agora exibe selos: **Curva calibrada** (verde, com nº de estudos no tooltip), **Extrapolada de humanos** (âmbar) ou **Sem curva calibrada** (mostra apenas baseline, sem inventar projeção)
+- Suíte de testes Vitest (17 casos) cobrindo classificação de compostos, monotonia do declínio sem tratamento, plateau ~M4, banda de confiança crescente, limites [0,100] e prioridade não-extrapolada
+- Files: supabase/migrations/* condition_response_curves, src/services/condition-progression-engine.ts, src/services/__tests__/condition-progression-engine.test.ts, src/components/tutor/ConditionProgressionChart.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-06 — Pets demo agora usam condições com forte cobertura no VetGraphRAG
 <!-- area: vet-ui · status: entregue · i18n: 1.54.1 -->
 - Reformuladas as condições dos 5 pets de exemplo (`GenerateSamplePetsButton`) para usar exclusivamente outcomes com ≥15 compostos no KG (layer_4_outcome aprovado)
