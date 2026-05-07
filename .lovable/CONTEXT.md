@@ -1,22 +1,28 @@
 # Project context briefing (auto)
-Generated: 2026-05-07T17:26:48.281Z
+Generated: 2026-05-07T17:29:55.451Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.56.0
+## Latest i18n version: 1.57.0
 
 ## Changes by area (last 14 days)
 - **admin**: 9
 - **meta**: 7
 - **vet-ui**: 6
 - **kg**: 6
+- **tutor-ui**: 3
 - **curation**: 3
 - **clinical-pipeline**: 3
-- **tutor-ui**: 2
 - **infra**: 2
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-07 · [tutor-ui] ADDED — Sprint 3: Cenário "Com vs Sem protocolo" (Digital Twin real)
+- Novo componente `ScenarioComparison.tsx` no relatório do tutor: cards lado-a-lado mostrando idade biológica projetada e expectativa de vida total sem vs com o protocolo
+- Dados 100% reais do edge function `project-pet-trajectory` (Gêmeo Digital, Gemini 2.5 Pro grounded no KG); reusa o mesmo query do Sprint 2 (sem requests adicionais)
+- Selo de transparência `Gêmeo Digital · ancorado no KG` (verde) vs `Estimativa heurística` (âmbar) com tooltip explicativo bilíngue
+_files: src/components/tutor/ScenarioComparison.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/scenario-logic.test.ts, src/locales/pt/translation.json…_
+
 ### 2026-05-07 · [tutor-ui] ADDED — Sprint 2: Badges KG-covered / KG-gap no relatório do tutor
 - Cada condição no `TreatmentProposalCard` agora exibe selo `KG-covered` (verde) ou `KG-gap` (âmbar) com tooltip explicativo (PT/EN), usando `coverage_by_condition` do `usePetTrajectoryProjection`
 - Novo selo agregado no header de "Condições Identificadas": "X de Y com cobertura científica" + tooltip
@@ -71,12 +77,6 @@ _files: supabase/functions/kg-evidence-gap-fill/index.ts, src/components/pet/Evi
 - Log panel movido para imediatamente abaixo do workflow monitor (antes ficava após o EvidenceGapCard)
 - Novos ícones e labels bilíngues para cada estágio
 _files: src/components/pet/DigitalTwinDog.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts_
-
-### 2026-05-01 · [clinical-pipeline] CHANGED — Pipeline: recommendation timing + KG stratification
-- Adicionado `durationMs` ao stage6_recommendation para exibir tempo individual no stepper
-- KG dividido em dois cards visuais: KG Query (consulta Neo4j) e KG Enrich (extração de pathways/projeções)
-- Novo estágio `stage4b_kg_enrich` no pipeline com contagem de pathways
-_files: src/services/clinical-analysis-pipeline.ts, src/components/pet/ClinicalPipelineWorkflow.tsx, src/pages/veterinario/PetProfilePage.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
