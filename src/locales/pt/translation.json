@@ -1461,6 +1461,27 @@
         "coveredTooltip": "Condição com evidência direta no Grafo de Conhecimento. Compostos de apoio: {{compounds}}.",
         "gapTooltip": "Sem (composto × condição) curado no Grafo para esta condição. O protocolo é mantido por similaridade de classe terapêutica, mas sem ancoragem direta — transparência total."
       },
+      "scenario": {
+        "title": "Cenário comparado: com vs sem o protocolo",
+        "withoutTitle": "Sem o protocolo",
+        "withTitle": "Com o protocolo",
+        "bioYears": "anos biol.",
+        "bioAgeAtYearN": "Idade biológica projetada no ano {{year}}",
+        "expectancy": "Expectativa total: {{years}} anos",
+        "yearsGainedLabel": "Anos de vida adicionais projetados para {{petName}}",
+        "years": "anos",
+        "yearsGainedZero": "A projeção atual não indica ganho mensurável de tempo de vida para {{petName}} — o benefício esperado está concentrado em qualidade de vida e prevenção, não em longevidade direta.",
+        "yearsGainedNegative": "A projeção sugere risco líquido negativo ({{value}} anos) — o protocolo deve ser revisado pelo veterinário antes de prosseguir.",
+        "sourceGrounded": "Gêmeo Digital · ancorado no KG",
+        "sourceFallback": "Estimativa heurística (sem cobertura KG suficiente)",
+        "tooltipGrounded": "Projeção gerada pelo nosso Gêmeo Digital (Lovable AI / Gemini 2.5 Pro) usando evidências curadas do Grafo de Conhecimento Veterinário e predisposições raciais. Atualizada a cada mudança clínica relevante.",
+        "tooltipFallback": "Sem cobertura suficiente do Grafo para este pet, o sistema usa uma estimativa heurística mais conservadora. Indique mais exames ou aguarde a expansão da base científica para uma projeção ancorada.",
+        "confidence": {
+          "high": "alta confiança",
+          "medium": "confiança média",
+          "low": "baixa confiança"
+        }
+      },
       "compoundsTitle": "Compostos Recomendados",
       "vetApproval": "Protocolo Revisado e Aprovado",
       "vetApprovalBy": "Este protocolo foi revisado e aprovado pelo {{name}}",
