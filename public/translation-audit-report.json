@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-06T15:42:31.871Z",
+  "timestamp": "2026-05-07T16:26:09.290Z",
   "summary": {
     "totalFiles": 821,
     "totalIssues": 403,
@@ -2363,7 +2363,7 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 208,
+      "line": 210,
       "text": "T",
       "severity": "high"
     },
@@ -2412,7 +2412,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2033,
+      "line": 2052,
       "text": "@",
       "severity": "high"
     },
