@@ -1,10 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import {
-  buildPointsFromRow,
-  classifyCompound,
-  pickBestCurve,
-  type CurveRow,
-} from '../condition-progression-engine';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock the supabase client so importing the engine in a node env doesn't crash on `localStorage`.
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: { from: () => ({ select: () => ({ eq: () => ({ in: async () => ({ data: [], error: null }) }) }) }) },
+}));
+
+const mod = await import('../condition-progression-engine');
+const { buildPointsFromRow, classifyCompound, pickBestCurve } = mod;
+type CurveRow = import('../condition-progression-engine').CurveRow;
 
 const oaOmega3: CurveRow = {
   id: '1',
