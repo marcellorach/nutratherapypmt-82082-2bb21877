@@ -1569,6 +1569,21 @@
         "successDesc": "O download do protocolo foi iniciado.",
         "errorTitle": "Erro ao gerar PDF",
         "errorDesc": "Não foi possível gerar o PDF. Tente novamente."
+      },
+      "cta": {
+        "roiTitle": "Comparativo honesto de custo",
+        "roiDesc": "Baseado no preço deste plano e em referências reais — onde não há dado, mostramos '—' em vez de inventar.",
+        "planAnnual": "Plano (12 meses)",
+        "installedCost": "Tratar {{condition}} instalada",
+        "aChronicCondition": "uma condição crônica",
+        "projectedDelta": "Diferença projetada",
+        "roiCaveat": "Comparação ilustrativa — não é garantia de resultado clínico individual.",
+        "m3PromiseTitle": "Promessa testável no Mês 3",
+        "m3PromiseDesc": "Se os exames de calibração no M3 não mostrarem melhora ≥15%, devolvemos {{credit}} em crédito.",
+        "primary": "Começar com a primeira caixa — {{price}}",
+        "primaryHint": "Compromisso pequeno. Você reavalia no M3 antes de seguir o plano anual.",
+        "secondary": "Continuar plano anual após reavaliação no M3",
+        "askQuestions": "Tenho dúvidas antes de decidir"
       }
     },
     "plan": {
