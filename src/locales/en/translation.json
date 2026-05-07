@@ -1562,6 +1562,13 @@
         "empty": "No reference matches the filter.",
         "untitled": "(untitled study)",
         "openSource": "Open source"
+      },
+      "pdf": {
+        "downloadButton": "Download protocol PDF",
+        "successTitle": "PDF generated",
+        "successDesc": "The protocol download has started.",
+        "errorTitle": "Failed to generate PDF",
+        "errorDesc": "Could not generate the PDF. Please try again."
       }
     },
     "plan": {
