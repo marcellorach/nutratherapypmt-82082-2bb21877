@@ -4,7 +4,8 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2, FileText } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2, FileText, Sparkles, AlertTriangle, Dna } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -32,27 +33,53 @@ interface RecommendationLog {
   warnings: string[] | null;
 }
 
+interface AnalysisSnapshot {
+  id: string;
+  pet_id: string;
+  status: string;
+  completed_at: string | null;
+  confidence_level: string | null;
+  recommendation_compounds: any[];
+  predispositions: any[];
+  lab_alerts: any[];
+  interaction_alerts: any[];
+  clinical_discoveries: any[];
+  kg_triplets: any[];
+}
+
 const TutorPage: React.FC = () => {
   const { t } = useTranslation();
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
+  const [selectedOwner, setSelectedOwner] = useState<string>('__all__');
   const [recommendations, setRecommendations] = useState<RecommendationLog[]>([]);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
   const [isLoadingProposals, setIsLoadingProposals] = useState(false);
+  const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   
   useEffect(() => {
     const loadPets = async () => {
       setIsLoading(true);
       try {
-        // First get pet_ids that have proposals
+        // Pet ids with proposals
         const { data: proposalPetIds, error: propError } = await (supabase as any)
           .from('treatment_proposals')
           .select('pet_id');
-        
-        const petIdsWithProposals = new Set(
-          (proposalPetIds || []).map((p: any) => p.pet_id)
+
+        // Pet ids with completed (approved) clinical analysis snapshots
+        const { data: snapshotPetIds } = await (supabase as any)
+          .from('pet_clinical_analysis_snapshots')
+          .select('pet_id')
+          .eq('status', 'complete');
+
+        const allowedPetIds = new Set<string>(
+          [
+            ...((proposalPetIds || []).map((p: any) => p.pet_id)),
+            ...((snapshotPetIds || []).map((p: any) => p.pet_id)),
+          ]
         );
 
         const { data, error } = await supabase
@@ -61,9 +88,8 @@ const TutorPage: React.FC = () => {
           .order('name');
         
         if (!error && data && data.length > 0) {
-          // Filter to only pets with proposals
-          const filteredPets = petIdsWithProposals.size > 0
-            ? data.filter(p => petIdsWithProposals.has(p.id))
+          const filteredPets = allowedPetIds.size > 0
+            ? data.filter(p => allowedPetIds.has(p.id))
             : [];
           
           setPets(filteredPets);
@@ -122,10 +148,46 @@ const TutorPage: React.FC = () => {
       }
     };
 
+    const loadSnapshot = async () => {
+      setIsLoadingSnapshot(true);
+      try {
+        const { data, error } = await (supabase as any)
+          .from('pet_clinical_analysis_snapshots')
+          .select('*')
+          .eq('pet_id', selectedPetId)
+          .eq('status', 'complete')
+          .maybeSingle();
+        if (!error) setSnapshot((data as AnalysisSnapshot) || null);
+      } catch (err) {
+        console.error('Error loading snapshot:', err);
+      } finally {
+        setIsLoadingSnapshot(false);
+      }
+    };
+
     loadRecommendations();
     loadProposals();
+    loadSnapshot();
   }, [selectedPetId]);
   
+  const ownersList = React.useMemo(() => {
+    const set = new Set<string>();
+    pets.forEach(p => { if (p.owner_name) set.add(p.owner_name); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [pets]);
+
+  const visiblePets = React.useMemo(() => (
+    selectedOwner === '__all__' ? pets : pets.filter(p => p.owner_name === selectedOwner)
+  ), [pets, selectedOwner]);
+
+  // If selected pet is no longer visible after switching owner, pick the first visible.
+  useEffect(() => {
+    if (visiblePets.length === 0) return;
+    if (!visiblePets.find(p => p.id === selectedPetId)) {
+      setSelectedPetId(visiblePets[0].id);
+    }
+  }, [visiblePets, selectedPetId]);
+
   const selectedPet = pets.find(p => p.id === selectedPetId);
   const ownerName = selectedPet?.owner_name || t('tutor.greeting');
   const pendingProposals = proposals.filter(p => p.status === 'pending');
