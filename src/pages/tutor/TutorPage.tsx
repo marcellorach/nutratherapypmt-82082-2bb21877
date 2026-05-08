@@ -473,6 +473,134 @@ const TutorPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="historico">
+                  </TabsContent>
+                  <TabsContent value="analise">
+                    {isLoadingSnapshot ? (
+                      <div className="text-center py-12">
+                        <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-primary" />
+                      </div>
+                    ) : !snapshot ? (
+                      <Card className="text-center py-12">
+                        <CardContent>
+                          <Brain className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground">{t('tutor.analysisNoData')}</p>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Sparkles className="h-5 w-5 text-primary" />
+                              {t('tutor.analysisTitle')}
+                            </CardTitle>
+                            <CardDescription>
+                              {snapshot.completed_at
+                                ? `${t('tutor.analysisCompletedAt')} ${new Date(snapshot.completed_at).toLocaleDateString('pt-BR')}`
+                                : ''}
+                              {snapshot.confidence_level ? ` · ${t('tutor.analysisConfidence')}: ${snapshot.confidence_level}` : ''}
+                              {` · ${snapshot.kg_triplets?.length || 0} ${t('tutor.analysisKgTriplets')}`}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+
+                        {snapshot.recommendation_compounds?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisCompounds')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {snapshot.recommendation_compounds.map((c: any, idx: number) => (
+                                  <div key={c.id || idx} className="bg-muted/50 p-3 rounded border-l-2 border-l-primary">
+                                    <p className="font-medium text-foreground">{c.name}</p>
+                                    {c.condition && (
+                                      <p className="text-xs text-muted-foreground">{t('tutor.analysisCondition')}: {c.condition}</p>
+                                    )}
+                                    {(c.dosageRecommended ?? c.dosageCurrent) != null && c.unit && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {t('tutor.analysisDosage')}: {c.dosageRecommended ?? c.dosageCurrent} {c.unit}
+                                      </p>
+                                    )}
+                                    {c.evidenceLevel && (
+                                      <p className="text-xs text-muted-foreground">{t('tutor.analysisEvidence')}: {c.evidenceLevel}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.predispositions?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Dna className="h-4 w-4 text-primary" />
+                                {t('tutor.analysisPredispositions')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.predispositions.map((p: any, i: number) => (
+                                  <li key={i}>{typeof p === 'string' ? p : (p.name || p.condition || JSON.stringify(p))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.lab_alerts?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                {t('tutor.analysisLabAlerts')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.lab_alerts.map((a: any, i: number) => (
+                                  <li key={i}>{typeof a === 'string' ? a : (a.message || a.label || a.name || JSON.stringify(a))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.interaction_alerts?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisInteractions')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.interaction_alerts.map((a: any, i: number) => (
+                                  <li key={i}>{typeof a === 'string' ? a : (a.message || a.label || JSON.stringify(a))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.clinical_discoveries?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisDiscoveries')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.clinical_discoveries.map((d: any, i: number) => (
+                                  <li key={i}>{typeof d === 'string' ? d : (d.message || d.label || d.name || JSON.stringify(d))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="historico-real">
                     <Card className="text-center py-12">
                       <CardContent>
                         <h3 className="text-xl font-semibold text-foreground mb-2">{t('tutor.history.title')}</h3>
