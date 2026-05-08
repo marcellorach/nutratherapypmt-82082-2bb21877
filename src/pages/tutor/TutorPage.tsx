@@ -472,8 +472,6 @@ const TutorPage: React.FC = () => {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="historico">
-                  </TabsContent>
                   <TabsContent value="analise">
                     {isLoadingSnapshot ? (
                       <div className="text-center py-12">
@@ -600,7 +598,7 @@ const TutorPage: React.FC = () => {
                       </div>
                     )}
                   </TabsContent>
-                  <TabsContent value="historico-real">
+                  <TabsContent value="historico">
                     <Card className="text-center py-12">
                       <CardContent>
                         <h3 className="text-xl font-semibold text-foreground mb-2">{t('tutor.history.title')}</h3>
