@@ -220,8 +220,27 @@ const TutorPage: React.FC = () => {
           </Card>
         ) : (
           <>
+            {ownersList.length > 1 && (
+              <div className="mb-4 max-w-xs">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  {t('tutor.ownerSelectorLabel')}
+                </label>
+                <Select value={selectedOwner} onValueChange={setSelectedOwner}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">{t('tutor.allOwners')}</SelectItem>
+                    {ownersList.map(o => (
+                      <SelectItem key={o} value={o}>{o}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 mb-6">
-              {pets.map(pet => (
+              {visiblePets.map(pet => (
                 <Button
                   key={pet.id}
                   variant={pet.id === selectedPetId ? "default" : "outline"}
@@ -231,6 +250,9 @@ const TutorPage: React.FC = () => {
                   {pet.species?.toLowerCase().includes('dog') || pet.species?.toLowerCase().includes('cachorro') || pet.species?.toLowerCase().includes('canin') ? '🐕' : 
                    pet.species?.toLowerCase().includes('cat') || pet.species?.toLowerCase().includes('gato') || pet.species?.toLowerCase().includes('felin') ? '🐈' : '🐾'}
                   {pet.name}
+                  {pet.owner_name && (
+                    <span className="text-xs opacity-70">· {pet.owner_name}</span>
+                  )}
                 </Button>
               ))}
             </div>
@@ -282,6 +304,7 @@ const TutorPage: React.FC = () => {
                       )}
                     </TabsTrigger>
                     <TabsTrigger value="plano">{t('tutor.tabs.plan')}</TabsTrigger>
+                    <TabsTrigger value="analise">{t('tutor.analysisTab')}</TabsTrigger>
                     <TabsTrigger value="historico">{t('tutor.tabs.history')}</TabsTrigger>
                     <TabsTrigger value="pedidos">{t('tutor.tabs.orders')}</TabsTrigger>
                   </TabsList>
