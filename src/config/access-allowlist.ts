@@ -3,6 +3,7 @@
 export const ALLOWED_EMAILS: string[] = [
   'marcello@lifespan.com.br',
   'mrachlyn@gmail.com',
+  'ritazuanaze@petmoretime.com.br',
 ];
 
 export const TEMP_SHARED_PASSWORD = 'macacoverde';
