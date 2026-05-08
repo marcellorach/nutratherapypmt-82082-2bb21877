@@ -1627,7 +1627,23 @@
     "petInfo": {
       "years": "anos",
       "kg": "kg"
-    }
+    },
+    "ownerSelectorLabel": "Selecionar tutor",
+    "allOwners": "Todos os tutores",
+    "analysisTab": "Análise",
+    "analysisTitle": "Análise Clínica Aprovada",
+    "analysisCompletedAt": "Concluída em",
+    "analysisCompounds": "Compostos recomendados",
+    "analysisPredispositions": "Predisposições da raça",
+    "analysisLabAlerts": "Alertas laboratoriais",
+    "analysisInteractions": "Interações detectadas",
+    "analysisDiscoveries": "Descobertas clínicas",
+    "analysisNoData": "Nenhuma análise aprovada para este pet ainda.",
+    "analysisConfidence": "Confiança",
+    "analysisDosage": "Dosagem",
+    "analysisCondition": "Condição-alvo",
+    "analysisEvidence": "Nível de evidência",
+    "analysisKgTriplets": "Triplets KG"
   },
   "home": {
     "title": "VetGeroTherapy PET",

@@ -4,7 +4,8 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2, FileText } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, Info, ShoppingCart, Brain, Loader2, FileText, Sparkles, AlertTriangle, Dna } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -32,27 +33,53 @@ interface RecommendationLog {
   warnings: string[] | null;
 }
 
+interface AnalysisSnapshot {
+  id: string;
+  pet_id: string;
+  status: string;
+  completed_at: string | null;
+  confidence_level: string | null;
+  recommendation_compounds: any[];
+  predispositions: any[];
+  lab_alerts: any[];
+  interaction_alerts: any[];
+  clinical_discoveries: any[];
+  kg_triplets: any[];
+}
+
 const TutorPage: React.FC = () => {
   const { t } = useTranslation();
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
+  const [selectedOwner, setSelectedOwner] = useState<string>('__all__');
   const [recommendations, setRecommendations] = useState<RecommendationLog[]>([]);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
   const [isLoadingProposals, setIsLoadingProposals] = useState(false);
+  const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   
   useEffect(() => {
     const loadPets = async () => {
       setIsLoading(true);
       try {
-        // First get pet_ids that have proposals
+        // Pet ids with proposals
         const { data: proposalPetIds, error: propError } = await (supabase as any)
           .from('treatment_proposals')
           .select('pet_id');
-        
-        const petIdsWithProposals = new Set(
-          (proposalPetIds || []).map((p: any) => p.pet_id)
+
+        // Pet ids with completed (approved) clinical analysis snapshots
+        const { data: snapshotPetIds } = await (supabase as any)
+          .from('pet_clinical_analysis_snapshots')
+          .select('pet_id')
+          .eq('status', 'complete');
+
+        const allowedPetIds = new Set<string>(
+          [
+            ...((proposalPetIds || []).map((p: any) => p.pet_id)),
+            ...((snapshotPetIds || []).map((p: any) => p.pet_id)),
+          ]
         );
 
         const { data, error } = await supabase
@@ -61,9 +88,8 @@ const TutorPage: React.FC = () => {
           .order('name');
         
         if (!error && data && data.length > 0) {
-          // Filter to only pets with proposals
-          const filteredPets = petIdsWithProposals.size > 0
-            ? data.filter(p => petIdsWithProposals.has(p.id))
+          const filteredPets = allowedPetIds.size > 0
+            ? data.filter(p => allowedPetIds.has(p.id))
             : [];
           
           setPets(filteredPets);
@@ -122,10 +148,46 @@ const TutorPage: React.FC = () => {
       }
     };
 
+    const loadSnapshot = async () => {
+      setIsLoadingSnapshot(true);
+      try {
+        const { data, error } = await (supabase as any)
+          .from('pet_clinical_analysis_snapshots')
+          .select('*')
+          .eq('pet_id', selectedPetId)
+          .eq('status', 'complete')
+          .maybeSingle();
+        if (!error) setSnapshot((data as AnalysisSnapshot) || null);
+      } catch (err) {
+        console.error('Error loading snapshot:', err);
+      } finally {
+        setIsLoadingSnapshot(false);
+      }
+    };
+
     loadRecommendations();
     loadProposals();
+    loadSnapshot();
   }, [selectedPetId]);
   
+  const ownersList = React.useMemo(() => {
+    const set = new Set<string>();
+    pets.forEach(p => { if (p.owner_name) set.add(p.owner_name); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [pets]);
+
+  const visiblePets = React.useMemo(() => (
+    selectedOwner === '__all__' ? pets : pets.filter(p => p.owner_name === selectedOwner)
+  ), [pets, selectedOwner]);
+
+  // If selected pet is no longer visible after switching owner, pick the first visible.
+  useEffect(() => {
+    if (visiblePets.length === 0) return;
+    if (!visiblePets.find(p => p.id === selectedPetId)) {
+      setSelectedPetId(visiblePets[0].id);
+    }
+  }, [visiblePets, selectedPetId]);
+
   const selectedPet = pets.find(p => p.id === selectedPetId);
   const ownerName = selectedPet?.owner_name || t('tutor.greeting');
   const pendingProposals = proposals.filter(p => p.status === 'pending');
@@ -158,8 +220,27 @@ const TutorPage: React.FC = () => {
           </Card>
         ) : (
           <>
+            {ownersList.length > 1 && (
+              <div className="mb-4 max-w-xs">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  {t('tutor.ownerSelectorLabel')}
+                </label>
+                <Select value={selectedOwner} onValueChange={setSelectedOwner}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">{t('tutor.allOwners')}</SelectItem>
+                    {ownersList.map(o => (
+                      <SelectItem key={o} value={o}>{o}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 mb-6">
-              {pets.map(pet => (
+              {visiblePets.map(pet => (
                 <Button
                   key={pet.id}
                   variant={pet.id === selectedPetId ? "default" : "outline"}
@@ -169,6 +250,9 @@ const TutorPage: React.FC = () => {
                   {pet.species?.toLowerCase().includes('dog') || pet.species?.toLowerCase().includes('cachorro') || pet.species?.toLowerCase().includes('canin') ? '🐕' : 
                    pet.species?.toLowerCase().includes('cat') || pet.species?.toLowerCase().includes('gato') || pet.species?.toLowerCase().includes('felin') ? '🐈' : '🐾'}
                   {pet.name}
+                  {pet.owner_name && (
+                    <span className="text-xs opacity-70">· {pet.owner_name}</span>
+                  )}
                 </Button>
               ))}
             </div>
@@ -220,6 +304,7 @@ const TutorPage: React.FC = () => {
                       )}
                     </TabsTrigger>
                     <TabsTrigger value="plano">{t('tutor.tabs.plan')}</TabsTrigger>
+                    <TabsTrigger value="analise">{t('tutor.analysisTab')}</TabsTrigger>
                     <TabsTrigger value="historico">{t('tutor.tabs.history')}</TabsTrigger>
                     <TabsTrigger value="pedidos">{t('tutor.tabs.orders')}</TabsTrigger>
                   </TabsList>
@@ -387,6 +472,132 @@ const TutorPage: React.FC = () => {
                     )}
                   </TabsContent>
                   
+                  <TabsContent value="analise">
+                    {isLoadingSnapshot ? (
+                      <div className="text-center py-12">
+                        <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-primary" />
+                      </div>
+                    ) : !snapshot ? (
+                      <Card className="text-center py-12">
+                        <CardContent>
+                          <Brain className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground">{t('tutor.analysisNoData')}</p>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Sparkles className="h-5 w-5 text-primary" />
+                              {t('tutor.analysisTitle')}
+                            </CardTitle>
+                            <CardDescription>
+                              {snapshot.completed_at
+                                ? `${t('tutor.analysisCompletedAt')} ${new Date(snapshot.completed_at).toLocaleDateString('pt-BR')}`
+                                : ''}
+                              {snapshot.confidence_level ? ` · ${t('tutor.analysisConfidence')}: ${snapshot.confidence_level}` : ''}
+                              {` · ${snapshot.kg_triplets?.length || 0} ${t('tutor.analysisKgTriplets')}`}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+
+                        {snapshot.recommendation_compounds?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisCompounds')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {snapshot.recommendation_compounds.map((c: any, idx: number) => (
+                                  <div key={c.id || idx} className="bg-muted/50 p-3 rounded border-l-2 border-l-primary">
+                                    <p className="font-medium text-foreground">{c.name}</p>
+                                    {c.condition && (
+                                      <p className="text-xs text-muted-foreground">{t('tutor.analysisCondition')}: {c.condition}</p>
+                                    )}
+                                    {(c.dosageRecommended ?? c.dosageCurrent) != null && c.unit && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {t('tutor.analysisDosage')}: {c.dosageRecommended ?? c.dosageCurrent} {c.unit}
+                                      </p>
+                                    )}
+                                    {c.evidenceLevel && (
+                                      <p className="text-xs text-muted-foreground">{t('tutor.analysisEvidence')}: {c.evidenceLevel}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.predispositions?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Dna className="h-4 w-4 text-primary" />
+                                {t('tutor.analysisPredispositions')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.predispositions.map((p: any, i: number) => (
+                                  <li key={i}>{typeof p === 'string' ? p : (p.name || p.condition || JSON.stringify(p))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.lab_alerts?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                {t('tutor.analysisLabAlerts')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.lab_alerts.map((a: any, i: number) => (
+                                  <li key={i}>{typeof a === 'string' ? a : (a.message || a.label || a.name || JSON.stringify(a))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.interaction_alerts?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisInteractions')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.interaction_alerts.map((a: any, i: number) => (
+                                  <li key={i}>{typeof a === 'string' ? a : (a.message || a.label || JSON.stringify(a))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {snapshot.clinical_discoveries?.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{t('tutor.analysisDiscoveries')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="list-disc pl-5 text-sm text-foreground space-y-1">
+                                {snapshot.clinical_discoveries.map((d: any, i: number) => (
+                                  <li key={i}>{typeof d === 'string' ? d : (d.message || d.label || d.name || JSON.stringify(d))}</li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
                   <TabsContent value="historico">
                     <Card className="text-center py-12">
                       <CardContent>
