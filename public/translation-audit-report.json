@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-08T17:48:08.209Z",
+  "timestamp": "2026-05-08T18:14:15.480Z",
   "summary": {
     "totalFiles": 836,
-    "totalIssues": 403,
+    "totalIssues": 405,
     "hardcodedTexts": 40,
-    "missingKeys": 363,
+    "missingKeys": 365,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2510,28 +2510,42 @@
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 52,
+      "line": 70,
       "text": "pet_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 60,
+      "line": 75,
+      "text": "pet_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 87,
       "text": "id, name, species, breed, age_years, weight_kg, sex, owner_name",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 91,
+      "line": 117,
       "text": "id, recommendation_data, rationale, confidence_overall, confidence_level, recommendation_source, created_at, warnings",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 110,
+      "line": 136,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/tutor/TutorPage.tsx",
+      "line": 156,
       "text": "*",
       "severity": "high"
     },
@@ -2825,7 +2839,7 @@
     {
       "type": "hardcoded",
       "file": "src/pages/tutor/TutorPage.tsx",
-      "line": 138,
+      "line": 200,
       "text": "Carregando dados...",
       "severity": "medium"
     }
