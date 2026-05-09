@@ -7609,5 +7609,43 @@
     "kindFixed": "Fixed",
     "kindRemoved": "Removed",
     "kindSecurity": "Security"
+  },
+  "pharmacology": {
+    "lookup": {
+      "notRecognized": "Not recognized",
+      "notRecognizedTooltip": "This medication is not in the Pharmacology Base. Ask an admin to register it."
+    }
+  },
+  "admin": {
+    "pharmacology": {
+      "title": "Pharmacology Base",
+      "description": "Catalog of active principles, Brazilian commercial brands and drug interactions",
+      "searchPlaceholder": "Search by active principle, brand or class...",
+      "vetLabel": "Veterinary",
+      "offLabel": "Human off-label",
+      "stats": {
+        "substances": "Active principles",
+        "brands": "Commercial brands (BR)",
+        "interactions": "Registered interactions"
+      },
+      "tabs": {
+        "brands": "Commercial Brands",
+        "substances": "Active Principles",
+        "interactions": "Interactions"
+      },
+      "cols": {
+        "brand": "Brand",
+        "substance": "Active principle",
+        "class": "Class",
+        "manufacturer": "Manufacturer",
+        "label": "Label",
+        "mechanism": "Mechanism",
+        "routes": "Routes"
+      },
+      "interactions": {
+        "empty": "No interactions registered yet.",
+        "emptyHint": "Phase 2 will include drug↔drug, drug↔nutraceutical and drug↔condition interactions with real-time alerts in the pet form."
+      }
+    }
   }
 }
