@@ -26,6 +26,7 @@ import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
+import DrugLookupBadge from '@/components/pet/DrugLookupBadge';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
 import { pm } from '@/services/clinical-pipeline-messages';
 import { useToast } from '@/hooks/use-toast';
