@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -186,6 +186,22 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <span>{t('admin.sidebar.knowledgeBase.baseKnowledge')}</span>
             </div>
             {currentStep === "base-knowledge" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "pharmacology"}
+          onClick={() => handleStepClick("pharmacology")}
+          className={currentStep === "pharmacology" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.pharmacology', 'Base Farmacológica')}</span>
+            </div>
+            {currentStep === "pharmacology" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
