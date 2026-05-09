@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -114,6 +114,23 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <span>Organograma</span>
             </div>
             {currentStep === "organograma" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "compliance-dashboard"}
+          onClick={() => handleStepClick("compliance-dashboard")}
+          className={currentStep === "compliance-dashboard" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "compliance-dashboard" ? "text-primary" : ""}`} />
+              <span>Conformidade FDA/EMA/AVMA</span>
+            </div>
+            {currentStep === "compliance-dashboard" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
