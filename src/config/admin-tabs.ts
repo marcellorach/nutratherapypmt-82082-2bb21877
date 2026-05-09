@@ -70,6 +70,7 @@ const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage
 const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
 const PharmacologyTab = lazy(() => import('@/components/administrador/pharmacology/PharmacologyTab'));
+const ComplianceDashboard = lazy(() => import('@/components/administrador/compliance/ComplianceDashboard'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -388,6 +389,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: PharmacologyTab,
     description: 'Catálogo de drogas, marcas comerciais brasileiras e interações farmacológicas'
+  },
+  {
+    id: 'compliance-dashboard',
+    label: 'Conformidade Regulatória',
+    group: 'configuration',
+    component: ComplianceDashboard,
+    description: 'Dashboard interativo FDA/EMA/AVMA com filtros por requisito, evidência e status'
   }
 ];
 
