@@ -69,6 +69,7 @@ const LabReferencesTab = lazy(() => import('@/components/administrador/lab-refer
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
 const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
+const PharmacologyTab = lazy(() => import('@/components/administrador/pharmacology/PharmacologyTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -380,6 +381,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: GapFillDiagnosticsTab,
     description: 'Mapeamento e diagnóstico dos dados usados no pipeline de gap-fill do KG'
+  },
+  {
+    id: 'pharmacology',
+    label: 'Base Farmacológica',
+    group: 'knowledge-base',
+    component: PharmacologyTab,
+    description: 'Catálogo de drogas, marcas comerciais brasileiras e interações farmacológicas'
   }
 ];
 

@@ -814,6 +814,173 @@ export type Database = {
           },
         ]
       }
+      drug_brands: {
+        Row: {
+          brand_name: string
+          country: string
+          created_at: string
+          dose_form: string | null
+          id: string
+          manufacturer: string | null
+          notes: string | null
+          registration_code: string | null
+          strengths: string[] | null
+          substance_id: string
+          updated_at: string
+          vet_label: boolean
+        }
+        Insert: {
+          brand_name: string
+          country?: string
+          created_at?: string
+          dose_form?: string | null
+          id?: string
+          manufacturer?: string | null
+          notes?: string | null
+          registration_code?: string | null
+          strengths?: string[] | null
+          substance_id: string
+          updated_at?: string
+          vet_label?: boolean
+        }
+        Update: {
+          brand_name?: string
+          country?: string
+          created_at?: string
+          dose_form?: string | null
+          id?: string
+          manufacturer?: string | null
+          notes?: string | null
+          registration_code?: string | null
+          strengths?: string[] | null
+          substance_id?: string
+          updated_at?: string
+          vet_label?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_brands_substance_id_fkey"
+            columns: ["substance_id"]
+            isOneToOne: false
+            referencedRelation: "drug_substances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drug_interactions: {
+        Row: {
+          citations: Json | null
+          condition_id: string | null
+          created_at: string
+          evidence_grade: string | null
+          id: string
+          mechanism: string | null
+          nutraceutical_id: string | null
+          recommendation: string | null
+          severity: string
+          substance_a_id: string
+          substance_b_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          citations?: Json | null
+          condition_id?: string | null
+          created_at?: string
+          evidence_grade?: string | null
+          id?: string
+          mechanism?: string | null
+          nutraceutical_id?: string | null
+          recommendation?: string | null
+          severity: string
+          substance_a_id: string
+          substance_b_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          citations?: Json | null
+          condition_id?: string | null
+          created_at?: string
+          evidence_grade?: string | null
+          id?: string
+          mechanism?: string | null
+          nutraceutical_id?: string | null
+          recommendation?: string | null
+          severity?: string
+          substance_a_id?: string
+          substance_b_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_interactions_substance_a_id_fkey"
+            columns: ["substance_a_id"]
+            isOneToOne: false
+            referencedRelation: "drug_substances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drug_interactions_substance_b_id_fkey"
+            columns: ["substance_b_id"]
+            isOneToOne: false
+            referencedRelation: "drug_substances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drug_substances: {
+        Row: {
+          atc_vet_code: string | null
+          common_routes: string[] | null
+          contraindicated_breeds: string[] | null
+          contraindicated_conditions: string[] | null
+          created_at: string
+          drug_class: string | null
+          drug_class_en: string | null
+          id: string
+          inn_name: string
+          inn_name_en: string | null
+          mechanism: string | null
+          mechanism_en: string | null
+          notes: string | null
+          pediatric_geriatric_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          atc_vet_code?: string | null
+          common_routes?: string[] | null
+          contraindicated_breeds?: string[] | null
+          contraindicated_conditions?: string[] | null
+          created_at?: string
+          drug_class?: string | null
+          drug_class_en?: string | null
+          id?: string
+          inn_name: string
+          inn_name_en?: string | null
+          mechanism?: string | null
+          mechanism_en?: string | null
+          notes?: string | null
+          pediatric_geriatric_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          atc_vet_code?: string | null
+          common_routes?: string[] | null
+          contraindicated_breeds?: string[] | null
+          contraindicated_conditions?: string[] | null
+          created_at?: string
+          drug_class?: string | null
+          drug_class_en?: string | null
+          id?: string
+          inn_name?: string
+          inn_name_en?: string | null
+          mechanism?: string | null
+          mechanism_en?: string | null
+          notes?: string | null
+          pediatric_geriatric_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       enrichment_qa_samples: {
         Row: {
           ai_confidence: number | null
@@ -2182,6 +2349,7 @@ export type Database = {
       }
       pet_medications: {
         Row: {
+          brand_id: string | null
           created_at: string
           dosage: string | null
           end_date: string | null
@@ -2190,10 +2358,13 @@ export type Database = {
           medication_name: string
           pet_id: string
           prescribing_vet: string | null
+          raw_input: string | null
           start_date: string | null
+          substance_id: string | null
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           dosage?: string | null
           end_date?: string | null
@@ -2202,10 +2373,13 @@ export type Database = {
           medication_name: string
           pet_id: string
           prescribing_vet?: string | null
+          raw_input?: string | null
           start_date?: string | null
+          substance_id?: string | null
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           dosage?: string | null
           end_date?: string | null
@@ -2214,15 +2388,31 @@ export type Database = {
           medication_name?: string
           pet_id?: string
           prescribing_vet?: string | null
+          raw_input?: string | null
           start_date?: string | null
+          substance_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_medications_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "drug_brands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_medications_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
             referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_medications_substance_id_fkey"
+            columns: ["substance_id"]
+            isOneToOne: false
+            referencedRelation: "drug_substances"
             referencedColumns: ["id"]
           },
         ]
