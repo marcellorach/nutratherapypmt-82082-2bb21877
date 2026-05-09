@@ -7609,5 +7609,43 @@
     "kindFixed": "Corrigido",
     "kindRemoved": "Removido",
     "kindSecurity": "Segurança"
+  },
+  "pharmacology": {
+    "lookup": {
+      "notRecognized": "Não reconhecido",
+      "notRecognizedTooltip": "Esta medicação não está na Base Farmacológica. Avise um administrador para cadastrá-la."
+    }
+  },
+  "admin": {
+    "pharmacology": {
+      "title": "Base Farmacológica",
+      "description": "Catálogo de princípios ativos, marcas comerciais brasileiras e interações farmacológicas",
+      "searchPlaceholder": "Buscar por princípio ativo, marca ou classe...",
+      "vetLabel": "Veterinário",
+      "offLabel": "Off-label humano",
+      "stats": {
+        "substances": "Princípios ativos",
+        "brands": "Marcas comerciais (BR)",
+        "interactions": "Interações cadastradas"
+      },
+      "tabs": {
+        "brands": "Marcas Comerciais",
+        "substances": "Princípios Ativos",
+        "interactions": "Interações"
+      },
+      "cols": {
+        "brand": "Marca",
+        "substance": "Princípio ativo",
+        "class": "Classe",
+        "manufacturer": "Fabricante",
+        "label": "Rótulo",
+        "mechanism": "Mecanismo",
+        "routes": "Vias"
+      },
+      "interactions": {
+        "empty": "Nenhuma interação cadastrada ainda.",
+        "emptyHint": "A Fase 2 incluirá interações droga↔droga, droga↔nutracêutico e droga↔condição com alertas em tempo real no cadastro do pet."
+      }
+    }
   }
 }

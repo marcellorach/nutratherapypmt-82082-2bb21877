@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-07T20:21:20.183Z
+// Última geração: 2026-05-09T19:46:19.261Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,30 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-07";
+export const lastChangelogDate = "2026-05-09";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-09",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Base Farmacológica (Fase 1) integrada ao perfil do pet",
+    "bullets": [
+      "Novo `DrugLookupBadge` plugado na lista de medicamentos em `PetProfilePage.tsx` — resolve marca comercial (ex.: \"Previcox\") para princípio ativo + classe (ex.: `= firocoxibe · AINE COXIB`), com tooltip de mecanismo; exibe alerta \"Não reconhecido\" quando a medicação não está no catálogo",
+      "Chaves i18n formais adicionadas em `pharmacology.lookup.*` e `admin.pharmacology.*` (PT/EN), substituindo fallbacks inline",
+      "I18N_VERSION incrementado para 1.63.0",
+      "Files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DrugLookupBadge.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/components/pet/DrugLookupBadge.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.63.0"
+  },
   {
     "date": "2026-05-07",
     "kind": "added",

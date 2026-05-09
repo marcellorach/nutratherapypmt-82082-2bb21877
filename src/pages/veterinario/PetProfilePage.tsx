@@ -26,6 +26,7 @@ import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
+import DrugLookupBadge from '@/components/pet/DrugLookupBadge';
 import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type ClinicalDiscovery, type BreedPredisposition, type LabAlert, type InteractionAlert, type PipelineProgressEvent, type PipelineStageId } from '@/services/clinical-analysis-pipeline';
 import { pm } from '@/services/clinical-pipeline-messages';
 import { useToast } from '@/hooks/use-toast';
@@ -592,8 +593,11 @@ const PetProfilePage: React.FC = () => {
                     <div className="space-y-3">
                       {medications.map((m: any) => (
                         <div key={m.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                          <div>
-                            <p className="font-medium text-sm">{m.medication_name}</p>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-medium text-sm">{m.medication_name}</p>
+                              <DrugLookupBadge medicationName={m.medication_name} />
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               {m.dosage && `${m.dosage}`}
                               {m.frequency && ` · ${m.frequency}`}
