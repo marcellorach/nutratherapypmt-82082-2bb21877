@@ -1,18 +1,452 @@
 {
-  "timestamp": "2026-05-09T19:44:25.613Z",
+  "timestamp": "2026-05-09T19:57:52.800Z",
   "summary": {
     "totalFiles": 839,
-    "totalIssues": 405,
+    "totalIssues": 921,
     "hardcodedTexts": 40,
-    "missingKeys": 365,
+    "missingKeys": 881,
     "incompleteTranslations": 0
   },
   "issues": [
     {
       "type": "missing-key",
+      "file": "src/components/administrador/AdminHeader.tsx",
+      "line": 19,
+      "text": "admin.header.database",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminHeader.tsx",
+      "line": 23,
+      "text": "admin.header.scientificLibrary",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminHeader.tsx",
+      "line": 27,
+      "text": "admin.header.settings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminPainel.tsx",
+      "line": 21,
+      "text": "admin.tabs.nutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminPainel.tsx",
+      "line": 22,
+      "text": "admin.tabs.settings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminPainel.tsx",
+      "line": 23,
+      "text": "admin.tabs.dataAnalysis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/AdminPainel.tsx",
+      "line": 24,
+      "text": "admin.tabs.prompts",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 19,
+      "text": "admin.settings.messages.saved",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 26,
+      "text": "admin.settings.messages.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 37,
+      "text": "admin.settings.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 44,
+      "text": "admin.settings.saveButton",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 51,
+      "text": "admin.settings.general.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 53,
+      "text": "admin.settings.general.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 59,
+      "text": "admin.settings.general.systemName",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 66,
+      "text": "admin.settings.general.version",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 79,
+      "text": "admin.settings.data.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 81,
+      "text": "admin.settings.data.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 87,
+      "text": "admin.settings.data.backupInterval",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/ConfiguracoesTab.tsx",
+      "line": 95,
+      "text": "admin.settings.data.cacheTimeout",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/NutraceuticalsUnifiedTab.tsx",
+      "line": 186,
+      "text": "admin.sidebar.knowledgeBase.nutraceuticalsUnified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/NutraceuticalsUnifiedTab.tsx",
+      "line": 215,
+      "text": "admin.sidebar.knowledgeBase.nutraceuticalsUnified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/OntologyMappingTab.tsx",
       "line": 63,
       "text": "id, name, name_en, snomed_code, umls_cui, ontology_mapped_at, ontology_mapped_by, ontology_mapping_source",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 68,
+      "text": "admin.prompts.messages.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 69,
+      "text": "admin.prompts.messages.errorLoading",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 118,
+      "text": "admin.prompts.messages.generated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 119,
+      "text": "admin.prompts.messages.generatedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 149,
+      "text": "admin.prompts.messages.saved",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 150,
+      "text": "admin.prompts.messages.savedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 155,
+      "text": "admin.prompts.messages.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 156,
+      "text": "admin.prompts.messages.errorSaving",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 165,
+      "text": "admin.prompts.messages.requiredFields",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 166,
+      "text": "admin.prompts.messages.requiredFieldsDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 186,
+      "text": "admin.prompts.messages.created",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 187,
+      "text": "admin.prompts.messages.createdDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 192,
+      "text": "admin.prompts.messages.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 193,
+      "text": "admin.prompts.messages.errorCreating",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 207,
+      "text": "admin.prompts.messages.removed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 208,
+      "text": "admin.prompts.messages.removedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 213,
+      "text": "admin.prompts.messages.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 214,
+      "text": "admin.prompts.messages.errorDeleting",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 225,
+      "text": "admin.prompts.loading",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 236,
+      "text": "admin.prompts.recommendationTab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 240,
+      "text": "admin.prompts.extractionTab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 247,
+      "text": "admin.prompts.recommendationTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 248,
+      "text": "admin.prompts.recommendationDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 253,
+      "text": "admin.prompts.generateExample",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 257,
+      "text": "admin.prompts.newPrompt",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 267,
+      "text": "admin.prompts.createTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 269,
+      "text": "admin.prompts.createDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 273,
+      "text": "admin.prompts.form.name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 278,
+      "text": "admin.prompts.form.namePlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 282,
+      "text": "admin.prompts.form.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 287,
+      "text": "admin.prompts.form.descriptionPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 291,
+      "text": "admin.prompts.form.category",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 298,
+      "text": "admin.prompts.categories.analysis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 305,
+      "text": "admin.prompts.form.content",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 310,
+      "text": "admin.prompts.form.contentPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 318,
+      "text": "admin.prompts.form.cancel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 322,
+      "text": "admin.prompts.form.save",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 334,
+      "text": "admin.prompts.noPrompts",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 337,
+      "text": "admin.prompts.generateExamples",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 351,
+      "text": "admin.prompts.status.active",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/PromptConfigurationTab.tsx",
+      "line": 351,
+      "text": "admin.prompts.status.inactive",
       "severity": "high"
     },
     {
@@ -452,8 +886,99 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 69,
+      "text": "admin.breeds.predispositionAdded",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 82,
+      "text": "admin.breeds.predispositionRemoved",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 99,
+      "text": "admin.breeds.addPredisposition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
       "line": 108,
       "text": "common.unknown",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 127,
+      "text": "admin.breeds.noPredispositions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 134,
+      "text": "admin.breeds.addPredisposition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 138,
+      "text": "admin.breeds.form.condition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 140,
+      "text": "admin.breeds.form.selectCondition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 149,
+      "text": "admin.breeds.riskFactor",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 153,
+      "text": "admin.breeds.form.evidenceGrade",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 157,
+      "text": "admin.breeds.evidenceHigh",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 158,
+      "text": "admin.breeds.evidenceModerate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 159,
+      "text": "admin.breeds.evidenceLow",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "line": 160,
+      "text": "admin.breeds.evidencePreliminary",
       "severity": "high"
     },
     {
@@ -473,8 +998,190 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 77,
+      "text": "admin.breeds.addSuccess",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 94,
+      "text": "admin.breeds.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 96,
+      "text": "admin.breeds.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 100,
+      "text": "admin.breeds.addBreed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 109,
+      "text": "admin.breeds.searchPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 117,
+      "text": "admin.breeds.allSizes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 120,
+      "text": "admin.breeds.allSizes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 121,
+      "text": "admin.breeds.sizeSmall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 122,
+      "text": "admin.breeds.sizeMedium",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 123,
+      "text": "admin.breeds.sizeLarge",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 124,
+      "text": "admin.breeds.sizeGiant",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 131,
+      "text": "admin.breeds.totalBreeds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 132,
+      "text": "admin.breeds.sizeSmall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 133,
+      "text": "admin.breeds.sizeLarge",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 134,
+      "text": "admin.breeds.totalPredispositions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 141,
+      "text": "admin.breeds.noResults",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
       "line": 179,
       "text": "common.unknown",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 215,
+      "text": "admin.breeds.addBreed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 219,
+      "text": "admin.breeds.form.name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 223,
+      "text": "admin.breeds.form.nameEn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 227,
+      "text": "admin.breeds.form.size",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 231,
+      "text": "admin.breeds.sizeSmall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 232,
+      "text": "admin.breeds.sizeMedium",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 233,
+      "text": "admin.breeds.sizeLarge",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 234,
+      "text": "admin.breeds.sizeGiant",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 239,
+      "text": "admin.breeds.form.breedGroup",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/breeds/BreedsManagementTab.tsx",
+      "line": 241,
+      "text": "admin.breeds.form.selectGroup",
       "severity": "high"
     },
     {
@@ -496,6 +1203,202 @@
       "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
       "line": 41,
       "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 127,
+      "text": "admin.tabInfo.vetgraphragButton",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 128,
+      "text": "admin.tabInfo.button",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 156,
+      "text": "admin.tabInfo.lastUpdate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 159,
+      "text": "admin.tabInfo.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 165,
+      "text": "admin.tabInfo.tabs.overview",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 166,
+      "text": "admin.tabInfo.tabs.methodology",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 167,
+      "text": "admin.tabInfo.tabs.scientific",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 174,
+      "text": "admin.tabInfo.keyExcerpts.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 186,
+      "text": "admin.tabInfo.keyExcerpts.viewPaper",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 197,
+      "text": "admin.tabInfo.overview.objective",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 202,
+      "text": "admin.tabInfo.overview.workflow",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 211,
+      "text": "admin.tabInfo.overview.benefits",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 229,
+      "text": "admin.tabInfo.methodology.comparisonTable",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 261,
+      "text": "admin.tabInfo.methodology.architectureDiagram",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 270,
+      "text": "admin.tabInfo.methodology.calculations",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 278,
+      "text": "admin.tabInfo.methodology.example",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 286,
+      "text": "admin.tabInfo.methodology.decisions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 297,
+      "text": "admin.tabInfo.methodology.glossary",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 312,
+      "text": "admin.tabInfo.methodology.limitations",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 325,
+      "text": "admin.tabInfo.scientific.foundation",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 332,
+      "text": "admin.tabInfo.scientific.implementationStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 338,
+      "text": "admin.tabInfo.scientific.implemented",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 351,
+      "text": "admin.tabInfo.scientific.inProgress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 364,
+      "text": "admin.tabInfo.scientific.planned",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 378,
+      "text": "admin.tabInfo.scientific.studies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 390,
+      "text": "admin.tabInfo.scientific.keyFindings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 398,
+      "text": "admin.tabInfo.scientific.viewStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/common/TabInfoButton.tsx",
+      "line": 407,
+      "text": "admin.tabInfo.scientific.references",
       "severity": "high"
     },
     {
@@ -951,6 +1854,125 @@
       "file": "src/components/administrador/dataAnalysis/AnalysisResult.tsx",
       "line": 73,
       "text": "multiAgentAnalysis.result.nextSteps.sendToVet",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 38,
+      "text": "admin.multiAgentAnalysis.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 39,
+      "text": "admin.multiAgentAnalysis.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 48,
+      "text": "admin.multiAgentAnalysis.card.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 53,
+      "text": "admin.multiAgentAnalysis.card.status.simulated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 53,
+      "text": "admin.multiAgentAnalysis.card.status.completed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 60,
+      "text": "admin.multiAgentAnalysis.card.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 68,
+      "text": "admin.multiAgentAnalysis.progress.processing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 68,
+      "text": "admin.multiAgentAnalysis.progress.simulatedCompleted",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 68,
+      "text": "admin.multiAgentAnalysis.progress.completed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 75,
+      "text": "admin.multiAgentAnalysis.progress.estimatedTime",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 113,
+      "text": "admin.multiAgentAnalysis.buttons.pause",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 121,
+      "text": "admin.multiAgentAnalysis.buttons.pauseAndUseExample",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 133,
+      "text": "admin.multiAgentAnalysis.buttons.continue",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 141,
+      "text": "admin.multiAgentAnalysis.buttons.analyzing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 147,
+      "text": "admin.multiAgentAnalysis.buttons.runAgain",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/AnalysisStep.tsx",
+      "line": 147,
+      "text": "admin.multiAgentAnalysis.buttons.startAnalysis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/dataAnalysis/ImportStep.tsx",
+      "line": 63,
+      "text": "admin.sidebar.dataProcessing.title",
       "severity": "high"
     },
     {
@@ -1621,8 +2643,225 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 80,
+      "text": "admin.labReferences.updated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 80,
+      "text": "admin.labReferences.added",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 92,
+      "text": "admin.labReferences.deleted",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 122,
+      "text": "admin.labReferences.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 124,
+      "text": "admin.labReferences.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 128,
+      "text": "admin.labReferences.addReference",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 134,
+      "text": "admin.labReferences.totalRanges",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 135,
+      "text": "admin.labReferences.uniqueTests",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 136,
+      "text": "admin.labReferences.seniorSpecific",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 143,
+      "text": "admin.labReferences.searchPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 148,
+      "text": "admin.labReferences.allAges",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 149,
+      "text": "admin.labReferences.agePuppy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 150,
+      "text": "admin.labReferences.ageAdult",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 151,
+      "text": "admin.labReferences.ageSenior",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 164,
+      "text": "admin.labReferences.testName",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 165,
+      "text": "admin.labReferences.unit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 166,
+      "text": "admin.labReferences.range",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 167,
+      "text": "admin.labReferences.ageGroup",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 168,
+      "text": "admin.labReferences.significance",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
       "line": 169,
       "text": "common.actions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 201,
+      "text": "admin.labReferences.editReference",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 201,
+      "text": "admin.labReferences.addReference",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 204,
+      "text": "admin.labReferences.testName",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 206,
+      "text": "admin.labReferences.unit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 207,
+      "text": "admin.labReferences.ageGroup",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 211,
+      "text": "admin.labReferences.agePuppy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 212,
+      "text": "admin.labReferences.ageAdult",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 213,
+      "text": "admin.labReferences.ageSenior",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 219,
+      "text": "admin.labReferences.minNormal",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 220,
+      "text": "admin.labReferences.maxNormal",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
+      "line": 222,
+      "text": "admin.labReferences.significance",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/massActions/SmartCampaignSystem.tsx",
+      "line": 162,
+      "text": "admin.sidebar.actions.title",
       "severity": "high"
     },
     {
@@ -1651,6 +2890,398 @@
       "file": "src/components/administrador/organograma/ChangelogTimeline.tsx",
       "line": 38,
       "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/patients/AdminPetManagementTab.tsx",
+      "line": 41,
+      "text": "admin.patients.created",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/patients/AdminPetManagementTab.tsx",
+      "line": 78,
+      "text": "admin.patients.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/patients/AdminPetManagementTab.tsx",
+      "line": 79,
+      "text": "admin.patients.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/patients/AdminPetManagementTab.tsx",
+      "line": 88,
+      "text": "admin.patients.tabs.list",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/patients/AdminPetManagementTab.tsx",
+      "line": 92,
+      "text": "admin.patients.tabs.register",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 22,
+      "text": "admin.studies.ongoingStudies.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 26,
+      "text": "admin.studies.ongoingStudies.stats.totalDogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 27,
+      "text": "admin.studies.ongoingStudies.stats.totalDogsDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 34,
+      "text": "admin.studies.ongoingStudies.stats.activeStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 35,
+      "text": "admin.studies.ongoingStudies.stats.activeStudiesDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 42,
+      "text": "admin.studies.ongoingStudies.stats.averageProgress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 43,
+      "text": "admin.studies.ongoingStudies.stats.averageProgressDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosAndamentoTab.tsx",
+      "line": 47,
+      "text": "admin.studies.ongoingStudies.stats.updatedDaily",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 28,
+      "text": "admin.studies.completedStudies.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 34,
+      "text": "admin.studies.completedStudies.finalResults",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 37,
+      "text": "admin.studies.completedStudies.totalPopulation",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 38,
+      "text": "admin.studies.completedStudies.cElegans",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 41,
+      "text": "admin.studies.completedStudies.studyDuration",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 42,
+      "text": "admin.studies.completedStudies.days",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 45,
+      "text": "admin.studies.completedStudies.lifeExtension",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 46,
+      "text": "admin.studies.completedStudies.inTreatmentGroup",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 49,
+      "text": "admin.studies.completedStudies.statisticalSignificance",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 53,
+      "text": "admin.studies.completedStudies.experimentStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 54,
+      "text": "admin.studies.completedStudies.completed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosConcluidosTab.tsx",
+      "line": 61,
+      "text": "admin.studies.completedStudies.finalizedStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 81,
+      "text": "admin.studies.plannedStudies.messages.studyRemoved",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 82,
+      "text": "admin.studies.plannedStudies.messages.studyRemovedDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 91,
+      "text": "admin.studies.plannedStudies.messages.studyUpdated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 92,
+      "text": "admin.studies.plannedStudies.messages.studyAdded",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 94,
+      "text": "admin.studies.plannedStudies.messages.studyUpdatedDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 95,
+      "text": "admin.studies.plannedStudies.messages.studyAddedDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 101,
+      "text": "admin.studies.plannedStudies.status.recruiting",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 102,
+      "text": "admin.studies.plannedStudies.status.pendingApproval",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 103,
+      "text": "admin.studies.plannedStudies.status.planning",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 113,
+      "text": "admin.studies.plannedStudies.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 116,
+      "text": "admin.studies.plannedStudies.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 121,
+      "text": "admin.studies.plannedStudies.newStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 127,
+      "text": "admin.studies.plannedStudies.listTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 129,
+      "text": "admin.studies.plannedStudies.listDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 136,
+      "text": "admin.studies.plannedStudies.table.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 137,
+      "text": "admin.studies.plannedStudies.table.objective",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 138,
+      "text": "admin.studies.plannedStudies.table.population",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 139,
+      "text": "admin.studies.plannedStudies.table.duration",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 140,
+      "text": "admin.studies.plannedStudies.table.status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 141,
+      "text": "admin.studies.plannedStudies.table.actions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 160,
+      "text": "admin.studies.plannedStudies.table.dogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 166,
+      "text": "admin.studies.plannedStudies.table.recruited",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 214,
+      "text": "admin.studies.plannedStudies.editStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 215,
+      "text": "admin.studies.plannedStudies.newStudy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 223,
+      "text": "admin.studies.plannedStudies.form.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 234,
+      "text": "admin.studies.plannedStudies.form.objective",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 245,
+      "text": "admin.studies.plannedStudies.form.population",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 257,
+      "text": "admin.studies.plannedStudies.form.duration",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 268,
+      "text": "admin.studies.plannedStudies.form.status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 273,
+      "text": "admin.studies.plannedStudies.status.planning",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/EstudosPlanejadosTab.tsx",
+      "line": 279,
+      "text": "admin.studies.plannedStudies.form.save",
       "severity": "high"
     },
     {
@@ -1774,9 +3405,919 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/SugestoesAITab.tsx",
+      "line": 45,
+      "text": "admin.sidebar.research.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 104,
+      "text": "admin.studies.charts.age",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 107,
+      "text": "admin.studies.charts.rate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 113,
+      "text": "admin.studies.charts.day",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 120,
+      "text": "admin.studies.charts.noIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 128,
+      "text": "admin.studies.charts.lowIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 136,
+      "text": "admin.studies.charts.highIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 150,
+      "text": "admin.studies.charts.earlyIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 151,
+      "text": "admin.studies.charts.midLifeIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 158,
+      "text": "admin.studies.charts.survivalRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 159,
+      "text": "admin.studies.charts.earlyAdultIntervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 163,
+      "text": "admin.studies.charts.healthMaintenanceRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 164,
+      "text": "admin.studies.charts.wormsWithHealth",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 168,
+      "text": "admin.studies.charts.survivalRateWithStress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 169,
+      "text": "admin.studies.charts.stressorApplied",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 173,
+      "text": "admin.studies.charts.healthMaintenanceWithStress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 174,
+      "text": "admin.studies.charts.healthAfterStressor",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 183,
+      "text": "admin.studies.charts.survivalRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 184,
+      "text": "admin.studies.charts.midLifeInterventionStart",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 188,
+      "text": "admin.studies.charts.healthMaintenanceRate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 189,
+      "text": "admin.studies.charts.wormsWithHealth",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 193,
+      "text": "admin.studies.charts.survivalRateWithStress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 194,
+      "text": "admin.studies.charts.stressorApplied",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 198,
+      "text": "admin.studies.charts.healthMaintenanceWithStress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyCharts.tsx",
+      "line": 199,
+      "text": "admin.studies.charts.healthAfterStressor",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 50,
+      "text": "admin.studies.ongoingStudies.tabs.overview",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 54,
+      "text": "admin.studies.ongoingStudies.tabs.metrics",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 58,
+      "text": "admin.studies.ongoingStudies.tabs.trends",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 63,
+      "text": "admin.studies.ongoingStudies.tabs.dogsData",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 71,
+      "text": "admin.studies.ongoingStudies.overview.studyPopulation",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 79,
+      "text": "admin.studies.ongoingStudies.overview.breeds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 80,
+      "text": "admin.studies.ongoingStudies.overview.notSpecified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 83,
+      "text": "admin.studies.ongoingStudies.overview.ageRange",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 84,
+      "text": "admin.studies.ongoingStudies.overview.notSpecified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 87,
+      "text": "admin.studies.ongoingStudies.overview.intervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 88,
+      "text": "admin.studies.ongoingStudies.overview.notSpecified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DetailedStudyPanel.tsx",
+      "line": 91,
+      "text": "admin.studies.ongoingStudies.overview.primaryInvestigator",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 30,
+      "text": "admin.studies.ongoingStudies.groups.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 31,
+      "text": "admin.studies.ongoingStudies.groups.dogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 50,
+      "text": "admin.studies.ongoingStudies.groups.control",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 51,
+      "text": "admin.studies.ongoingStudies.groups.dogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 80,
+      "text": "admin.studies.ongoingStudies.groups.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 80,
+      "text": "admin.studies.ongoingStudies.groups.control",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/DogGroupVisualization.tsx",
+      "line": 86,
+      "text": "admin.studies.ongoingStudies.groups.dogs",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 143,
+      "text": "admin.studies.ongoingStudies.dogsData.allDogsTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 156,
+      "text": "admin.studies.ongoingStudies.dogsData.refreshButton",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 163,
+      "text": "admin.studies.ongoingStudies.dogsData.noData",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 195,
+      "text": "admin.studies.ongoingStudies.dogsData.records",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 206,
+      "text": "admin.studies.ongoingStudies.dogsData.error",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 214,
+      "text": "admin.studies.ongoingStudies.dogsData.loading",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 221,
+      "text": "admin.studies.ongoingStudies.dogsData.noDataForDog",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/InvoxiaDogsDataTab.tsx",
+      "line": 229,
+      "text": "admin.studies.ongoingStudies.dogsData.lastFetch",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 26,
+      "text": "admin.studies.charts.survivalRateFinal",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 27,
+      "text": "admin.studies.charts.survivalRateOngoing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 47,
+      "text": "admin.studies.charts.ageInAdultPhase",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 54,
+      "text": "admin.studies.charts.survival",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 64,
+      "text": "admin.studies.charts.day",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 71,
+      "text": "admin.studies.charts.control",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/MortalityChart.tsx",
+      "line": 79,
+      "text": "admin.studies.charts.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 65,
+      "text": "admin.studies.publications.status.published",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 66,
+      "text": "admin.studies.publications.status.accepted",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 67,
+      "text": "admin.studies.publications.status.underReview",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 68,
+      "text": "admin.studies.publications.status.submitted",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 69,
+      "text": "admin.studies.publications.status.rejected",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 70,
+      "text": "admin.studies.publications.status.notSubmitted",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 93,
+      "text": "admin.studies.publications.type.national",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 96,
+      "text": "admin.studies.publications.type.international",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 106,
+      "text": "admin.studies.publications.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 109,
+      "text": "admin.studies.publications.submission",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 109,
+      "text": "admin.studies.publications.submissions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 118,
+      "text": "admin.studies.publications.noPublications",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 170,
+      "text": "admin.studies.publications.submittedOn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 175,
+      "text": "admin.studies.publications.publishedOn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/PublicationStatus.tsx",
+      "line": 189,
+      "text": "admin.studies.publications.viewDoi",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 28,
+      "text": "admin.studies.studyCard.viewDetails",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 35,
+      "text": "admin.studies.studyCard.status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 39,
+      "text": "admin.studies.studyCard.start",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 43,
+      "text": "admin.studies.studyCard.end",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 44,
+      "text": "admin.studies.studyCard.ongoing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyCard.tsx",
+      "line": 48,
+      "text": "admin.studies.studyCard.objective",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 28,
+      "text": "admin.studies.details.overview",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 29,
+      "text": "admin.studies.details.results",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 30,
+      "text": "admin.studies.details.hypotheses",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 31,
+      "text": "admin.studies.details.previousStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 33,
+      "text": "admin.studies.details.publications",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 42,
+      "text": "admin.studies.details.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 52,
+      "text": "admin.studies.details.studyDetails",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 55,
+      "text": "admin.studies.details.status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 59,
+      "text": "admin.studies.details.start",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 63,
+      "text": "admin.studies.details.end",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 64,
+      "text": "admin.studies.details.ongoing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 67,
+      "text": "admin.studies.details.priority",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 78,
+      "text": "admin.studies.details.metrics",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 81,
+      "text": "admin.studies.details.progress",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 85,
+      "text": "admin.studies.details.compounds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 90,
+      "text": "admin.studies.details.positiveResults",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 96,
+      "text": "admin.studies.details.population",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 97,
+      "text": "admin.studies.completedStudies.organisms",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 102,
+      "text": "admin.studies.details.duration",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 118,
+      "text": "admin.studies.details.quantitativeResults",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 121,
+      "text": "admin.studies.details.lifeExtension",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 127,
+      "text": "admin.studies.details.pValue",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 131,
+      "text": "admin.studies.details.statisticalPower",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 135,
+      "text": "admin.studies.details.effect",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 151,
+      "text": "admin.studies.details.hypotheses",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 155,
+      "text": "admin.studies.details.primaryHypothesis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 161,
+      "text": "admin.studies.details.secondaryHypotheses",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 170,
+      "text": "admin.studies.publications.noPublications",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 179,
+      "text": "admin.studies.details.relatedPreviousStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 189,
+      "text": "admin.studies.details.results",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyDetailsDialog.tsx",
+      "line": 195,
+      "text": "admin.studies.publications.noPublications",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/pesquisa/components/StudyNotesCard.tsx",
       "line": 22,
       "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyNotesCard.tsx",
+      "line": 74,
+      "text": "admin.studies.ongoingStudies.notes.preliminaryResults",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyNotesCard.tsx",
+      "line": 114,
+      "text": "admin.studies.ongoingStudies.notes.currentLimitations",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyNotesCard.tsx",
+      "line": 135,
+      "text": "admin.studies.ongoingStudies.notes.nextSteps",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 20,
+      "text": "admin.studies.phases.recruitment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 22,
+      "text": "admin.studies.phases.recruitmentDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 25,
+      "text": "admin.studies.phases.baseline",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 27,
+      "text": "admin.studies.phases.baselineDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 30,
+      "text": "admin.studies.phases.intervention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 32,
+      "text": "admin.studies.phases.interventionDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 35,
+      "text": "admin.studies.phases.evaluation",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 37,
+      "text": "admin.studies.phases.evaluationDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 40,
+      "text": "admin.studies.phases.analysis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyPhaseIndicator.tsx",
+      "line": 42,
+      "text": "admin.studies.phases.analysisDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 58,
+      "text": "admin.studies.progress.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 66,
+      "text": "admin.studies.progress.currentDay",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 67,
+      "text": "admin.studies.progress.of",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 70,
+      "text": "admin.studies.progress.currentPhase",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 77,
+      "text": "admin.studies.progress.schedule",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/StudyProgressCard.tsx",
+      "line": 106,
+      "text": "admin.studies.progress.day",
       "severity": "high"
     },
     {
@@ -1788,9 +4329,72 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/ActivityChart.tsx",
+      "line": 51,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.activity.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/ActivityChart.tsx",
+      "line": 94,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.activity.distance",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/ActivityChart.tsx",
+      "line": 103,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.activity.exerciseMinutes",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/ActivityChart.tsx",
+      "line": 112,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.activity.calories",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
       "line": 29,
       "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 57,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.breathingRate.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 91,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.breathingRate.dayMax",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 98,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.breathingRate.dayMin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 106,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.breathingRate.dayMean",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/BreathingRateChart.tsx",
+      "line": 114,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.breathingRate.nightMean",
       "severity": "high"
     },
     {
@@ -1802,6 +4406,41 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 55,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.hrv.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 90,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.hrv.sdnn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 98,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.hrv.rmssd",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 107,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.hrv.daySdnn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HRVChart.tsx",
+      "line": 116,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.hrv.nightSdnn",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
       "line": 29,
       "text": "-",
@@ -1809,9 +4448,72 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 57,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.heartRate.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 91,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.heartRate.dayMax",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 98,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.heartRate.dayMin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 106,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.heartRate.dayMean",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/HeartRateChart.tsx",
+      "line": 114,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.heartRate.nightMean",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
       "line": 25,
       "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
+      "line": 49,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.sleep.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
+      "line": 92,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.sleep.target",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
+      "line": 99,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.sleep.hours",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pesquisa/components/invoxia-charts/SleepChart.tsx",
+      "line": 108,
+      "text": "admin.studies.ongoingStudies.dogsData.charts.sleep.score",
       "severity": "high"
     },
     {
@@ -1882,6 +4584,97 @@
       "file": "src/components/administrador/relations/RelationsAuditorChat.tsx",
       "line": 85,
       "text": "nutraceutical_id, study_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 25,
+      "text": "admin.settings.knowledgeBase.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 26,
+      "text": "admin.settings.knowledgeBase.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 32,
+      "text": "admin.settings.knowledgeBase.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 36,
+      "text": "admin.settings.knowledgeBase.saveButton",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 44,
+      "text": "admin.settings.knowledgeBase.tabs.enginesPrompts",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 48,
+      "text": "admin.settings.knowledgeBase.tabs.conventions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 52,
+      "text": "admin.settings.knowledgeBase.tabs.nutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 56,
+      "text": "admin.settings.knowledgeBase.tabs.usage",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/KnowledgeBaseSettingsTab.tsx",
+      "line": 60,
+      "text": "admin.settings.knowledgeBase.tabs.dataManagement",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/SettingsPanel.tsx",
+      "line": 18,
+      "text": "admin.settings.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/SettingsPanel.tsx",
+      "line": 19,
+      "text": "admin.settings.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/SettingsPanel.tsx",
+      "line": 24,
+      "text": "admin.tabs.nutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/settings/SettingsPanel.tsx",
+      "line": 25,
+      "text": "admin.tabs.dataManagement",
       "severity": "high"
     },
     {
@@ -2068,6 +4861,307 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebar.tsx",
+      "line": 47,
+      "text": "admin.sidebar.settingsButton",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "line": 36,
+      "text": "admin.sidebar.knowledgeBase.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "line": 51,
+      "text": "admin.sidebar.dataProcessing.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "line": 66,
+      "text": "admin.sidebar.actions.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "line": 81,
+      "text": "admin.sidebar.research.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "line": 96,
+      "text": "admin.sidebar.configuration.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ActionsGroup.tsx",
+      "line": 30,
+      "text": "admin.sidebar.actions.analytics",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ActionsGroup.tsx",
+      "line": 37,
+      "text": "admin.sidebar.actions.analyticsStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ActionsGroup.tsx",
+      "line": 38,
+      "text": "admin.sidebar.actions.analyticsStatusTooltip",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ActionsGroup.tsx",
+      "line": 58,
+      "text": "admin.sidebar.actions.roiAnalysis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "line": 29,
+      "text": "admin.sidebar.configuration.knowledgeBase",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "line": 46,
+      "text": "admin.sidebar.configuration.aiConfig",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "line": 63,
+      "text": "admin.sidebar.configuration.aiPrompts",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "line": 80,
+      "text": "admin.sidebar.actions.bulkActions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "line": 97,
+      "text": "admin.sidebar.configuration.translationAudit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 30,
+      "text": "admin.sidebar.dataProcessing.import",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 47,
+      "text": "admin.sidebar.dataProcessing.multiAgentSimulation",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 64,
+      "text": "admin.sidebar.dataProcessing.visualization",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 71,
+      "text": "admin.sidebar.dataProcessing.visualizationStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 72,
+      "text": "admin.sidebar.dataProcessing.visualizationStatusTooltip",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 92,
+      "text": "admin.sidebar.dataProcessing.petManagement",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 99,
+      "text": "admin.sidebar.dataProcessing.petManagementStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 100,
+      "text": "admin.sidebar.dataProcessing.petManagementStatusTooltip",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/DataProcessingGroup.tsx",
+      "line": 120,
+      "text": "admin.sidebar.dataProcessing.settings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 47,
+      "text": "admin.sidebar.knowledgeBase.studies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 54,
+      "text": "admin.sidebar.knowledgeBase.studiesStatus",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 55,
+      "text": "admin.sidebar.knowledgeBase.studiesStatusTooltip",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 76,
+      "text": "admin.sidebar.knowledgeBase.nutraceuticalsUnified",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 95,
+      "text": "admin.sidebar.knowledgeBase.veterinaryTargets",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 116,
+      "text": "admin.sidebar.knowledgeBase.knowledgeGraph",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 135,
+      "text": "admin.sidebar.knowledgeBase.ontologyAudit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 154,
+      "text": "admin.sidebar.knowledgeBase.breedsManagement",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 170,
+      "text": "admin.sidebar.knowledgeBase.labReferences",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 186,
+      "text": "admin.sidebar.knowledgeBase.baseKnowledge",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 218,
+      "text": "admin.sidebar.knowledgeBase.relations",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 235,
+      "text": "admin.sidebar.knowledgeBase.aiInsights",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 253,
+      "text": "admin.sidebar.knowledgeBase.aiProcessing",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "line": 271,
+      "text": "admin.sidebar.knowledgeBase.settings",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "line": 44,
+      "text": "admin.sidebar.research.proposedStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "line": 62,
+      "text": "admin.sidebar.research.plannedStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "line": 80,
+      "text": "admin.sidebar.research.ongoingStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "line": 98,
+      "text": "admin.sidebar.research.completedStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "line": 115,
+      "text": "admin.sidebar.research.predictiveModels",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/traducoes/TranslationManager.tsx",
       "line": 47,
       "text": "*",
@@ -2078,6 +5172,510 @@
       "file": "src/components/administrador/traducoes/TranslationManager.tsx",
       "line": 138,
       "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 151,
+      "text": "admin.veterinaryTargets.toast.nameRequired",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 152,
+      "text": "admin.veterinaryTargets.toast.nameRequiredDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 170,
+      "text": "admin.veterinaryTargets.toast.conditionUpdated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 171,
+      "text": "admin.veterinaryTargets.toast.conditionUpdatedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 182,
+      "text": "admin.veterinaryTargets.toast.conditionCreated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 183,
+      "text": "admin.veterinaryTargets.toast.conditionCreatedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 190,
+      "text": "admin.veterinaryTargets.toast.errorSaving",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 204,
+      "text": "admin.veterinaryTargets.crudDialog.titleEdit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 204,
+      "text": "admin.veterinaryTargets.crudDialog.titleNew",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 208,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionEdit",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 209,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionNew",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 216,
+      "text": "admin.veterinaryTargets.crudDialog.tabPT",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 217,
+      "text": "admin.veterinaryTargets.crudDialog.tabEN",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 223,
+      "text": "admin.veterinaryTargets.crudDialog.nameLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 235,
+      "text": "admin.veterinaryTargets.crudDialog.namePlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 247,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 259,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 272,
+      "text": "admin.veterinaryTargets.crudDialog.categoryLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 284,
+      "text": "admin.veterinaryTargets.crudDialog.categoryPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 298,
+      "text": "admin.veterinaryTargets.crudDialog.nameEnLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 310,
+      "text": "admin.veterinaryTargets.crudDialog.nameEnPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 322,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionEnLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 334,
+      "text": "admin.veterinaryTargets.crudDialog.descriptionEnPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 347,
+      "text": "admin.veterinaryTargets.crudDialog.categoryEnLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 359,
+      "text": "admin.veterinaryTargets.crudDialog.categoryEnPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 372,
+      "text": "admin.veterinaryTargets.crudDialog.severityLabel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 381,
+      "text": "admin.veterinaryTargets.crudDialog.severityLow",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 382,
+      "text": "admin.veterinaryTargets.crudDialog.severityModerate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 383,
+      "text": "admin.veterinaryTargets.crudDialog.severityHigh",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetCRUDDialog.tsx",
+      "line": 384,
+      "text": "admin.veterinaryTargets.crudDialog.severityCritical",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsHeader.tsx",
+      "line": 25,
+      "text": "admin.sidebar.knowledgeBase.veterinaryTargets",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsHeader.tsx",
+      "line": 27,
+      "text": "admin.veterinaryTargets.header.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsHeader.tsx",
+      "line": 34,
+      "text": "admin.sidebar.knowledgeBase.veterinaryTargets",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsHeader.tsx",
+      "line": 45,
+      "text": "admin.veterinaryTargets.header.refresh",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsHeader.tsx",
+      "line": 53,
+      "text": "admin.veterinaryTargets.header.newCondition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 41,
+      "text": "admin.veterinaryTargets.stats.totalConditions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 44,
+      "text": "admin.veterinaryTargets.stats.conditionsRegistered",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 47,
+      "text": "admin.veterinaryTargets.stats.categories",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 50,
+      "text": "admin.veterinaryTargets.stats.distinctGroups",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 53,
+      "text": "admin.veterinaryTargets.stats.highSeverity",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 56,
+      "text": "admin.veterinaryTargets.stats.requireAttention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 59,
+      "text": "admin.veterinaryTargets.stats.severityLevels",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 62,
+      "text": "admin.veterinaryTargets.stats.classifications",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 65,
+      "text": "admin.veterinaryTargets.stats.avgTreatability",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsStats.tsx",
+      "line": 68,
+      "text": "admin.veterinaryTargets.stats.avgTreatabilityDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 80,
+      "text": "admin.veterinaryTargets.treatability.pending",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 94,
+      "text": "admin.veterinaryTargets.treatability.low",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 96,
+      "text": "admin.veterinaryTargets.treatability.moderate",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 98,
+      "text": "admin.veterinaryTargets.treatability.good",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 100,
+      "text": "admin.veterinaryTargets.treatability.excellent",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 158,
+      "text": "admin.veterinaryTargets.table.searchPlaceholder",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 170,
+      "text": "admin.veterinaryTargets.table.categoryFilter",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 173,
+      "text": "admin.veterinaryTargets.table.allCategories",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 185,
+      "text": "admin.veterinaryTargets.table.severityFilter",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 188,
+      "text": "admin.veterinaryTargets.table.allSeverities",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 205,
+      "text": "admin.veterinaryTargets.table.noConditionsFound",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 258,
+      "text": "admin.veterinaryTargets.treatability.column",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 281,
+      "text": "admin.veterinaryTargets.connections.breeds",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 295,
+      "text": "admin.veterinaryTargets.connections.nutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 339,
+      "text": "admin.veterinaryTargets.table.expandedDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 341,
+      "text": "admin.veterinaryTargets.table.noDescription",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 348,
+      "text": "admin.veterinaryTargets.treatability.detailsTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 353,
+      "text": "admin.veterinaryTargets.treatability.totalNutraceuticals",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 359,
+      "text": "admin.veterinaryTargets.treatability.treatment",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 365,
+      "text": "admin.veterinaryTargets.treatability.prevention",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 371,
+      "text": "admin.veterinaryTargets.treatability.support",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 377,
+      "text": "admin.veterinaryTargets.treatability.avgEfficacy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 387,
+      "text": "admin.veterinaryTargets.treatability.noCatalogData",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 401,
+      "text": "admin.veterinaryTargets.deleteDialog.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 403,
+      "text": "admin.veterinaryTargets.deleteDialog.description",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 407,
+      "text": "admin.veterinaryTargets.deleteDialog.cancel",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/veterinary-targets/VeterinaryTargetsTable.tsx",
+      "line": 409,
+      "text": "admin.veterinaryTargets.deleteDialog.confirm",
       "severity": "high"
     },
     {
@@ -2412,7 +6010,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2214,
+      "line": 2235,
       "text": "@",
       "severity": "high"
     },
@@ -2491,6 +6089,20 @@
       "file": "src/pages/administrador/AdministradorPage.tsx",
       "line": 13,
       "text": "tab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/AdministradorPage.tsx",
+      "line": 35,
+      "text": "admin.errors.tabNotFound",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/AdministradorPage.tsx",
+      "line": 41,
+      "text": "admin.errors.backToStudies",
       "severity": "high"
     },
     {
