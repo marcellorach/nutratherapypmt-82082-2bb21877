@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-07T20:21:20.187Z
+Generated: 2026-05-09T19:46:19.269Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.60.0
+## Latest i18n version: 1.63.0
 
 ## Changes by area (last 14 days)
-- **admin**: 9
+- **admin**: 10
 - **tutor-ui**: 7
 - **meta**: 7
 - **vet-ui**: 6
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-09 · [admin] ADDED — Base Farmacológica (Fase 1) integrada ao perfil do pet
+- Novo `DrugLookupBadge` plugado na lista de medicamentos em `PetProfilePage.tsx` — resolve marca comercial (ex.: "Previcox") para princípio ativo + classe (ex.: `= firocoxibe · AINE COXIB`), com tooltip de mecanismo; exibe alerta "Não reconhecido" quando a medicação não está no catálogo
+- Chaves i18n formais adicionadas em `pharmacology.lookup.*` e `admin.pharmacology.*` (PT/EN), substituindo fallbacks inline
+- I18N_VERSION incrementado para 1.63.0
+_files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DrugLookupBadge.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
+
 ### 2026-05-07 · [tutor-ui] ADDED — Sprint 7: CTA honesto em dois passos + ROI
 - Novo serviço `src/services/proposal-roi.ts` (puro) — calcula custo anual do plano, comparativo com tratamento da condição instalada (mostra `—` quando não há referência, sem inventar número) e crédito M3 = 50% do investimento dos 3 primeiros meses
 - Novo componente `src/components/tutor/HonestCTA.tsx` — bloco de comparação de custo (3 colunas), promessa testável de M3 (devolução em crédito se exames de calibração não mostrarem ≥15% de melhora), CTA primário "Começar com a primeira caixa" + secundário "Continuar plano anual após reavaliação no M3" + link para abrir o chat de dúvidas
@@ -70,12 +76,6 @@ _files: src/components/pet/GenerateSamplePetsButton.tsx, src/i18n.ts_
 - Nova tabela `journal_prestige_tiers` com seed de ~40 journals top (Nature/Cell/JVIM/Aging Cell/etc.) classificados por tier 1-5 baseado em quartil Scimago + prestígio do publisher
 - Edge function `auto-tag-studies`: extrai tags via Gemini Flash Lite (apenas extração textual de title/abstract/journal — sem inferência) e calcula `prestige_tier` via lookup; throttle 300ms; sem alucinação porque enums fechados via tool calling
 _files: supabase/functions/auto-tag-studies/index.ts, src/components/administrador/estudos/library/StudiesLibraryTab.tsx, src/i18n.ts_
-
-### 2026-05-04 · [admin] FIXED — Library tab agora renderiza os estudos curados
-- Corrigido bug de navegação em que a aba `Library` existia no menu, mas não tinha `TabsContent` associado em `SciImportSection`
-- A aba agora reutiliza `StudiesLibraryTab`, exibindo os estudos vindos de `processed_studies` e `scientific_studies` conforme já implementado
-- Validado no backend: 40 estudos `approved`, 4 `processed` e 2 `new` disponíveis para listagem
-_files: src/components/administrador/estudos/import/SciImportSection.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
