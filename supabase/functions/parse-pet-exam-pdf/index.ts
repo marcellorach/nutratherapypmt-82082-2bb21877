@@ -24,6 +24,86 @@ Retorne SOMENTE JSON válido seguindo este schema:
   "flags_abnormal": string[]       // nomes dos analitos fora da faixa
 }`;
 
+// Canonical unit aliases — normalize common variations to a single form.
+const UNIT_ALIASES: Record<string, string> = {
+  "mg/dl": "mg/dL", "mg / dl": "mg/dL", "mgdl": "mg/dL",
+  "g/dl": "g/dL", "g / dl": "g/dL",
+  "u/l": "U/L", "iu/l": "U/L", "ui/l": "U/L",
+  "mmol/l": "mmol/L", "mEq/l": "mEq/L", "meq/l": "mEq/L",
+  "%": "%", "porcento": "%",
+  "10^3/ul": "10^3/µL", "10e3/ul": "10^3/µL", "10*3/ul": "10^3/µL", "k/ul": "10^3/µL",
+  "10^6/ul": "10^6/µL", "10e6/ul": "10^6/µL", "m/ul": "10^6/µL",
+  "fl": "fL", "pg": "pg",
+  "ng/ml": "ng/mL", "ng/dl": "ng/dL", "ug/dl": "µg/dL", "mcg/dl": "µg/dL",
+};
+
+function normalizeUnit(u: unknown): string | null {
+  if (u == null) return null;
+  const raw = String(u).trim();
+  if (!raw) return null;
+  const key = raw.toLowerCase().replace(/\s+/g, "");
+  return UNIT_ALIASES[key] ?? raw;
+}
+
+function toNumber(v: unknown): number | null {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  const s = String(v).replace(/[^\d.,\-+eE]/g, "").replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+function deriveFlag(value: number | null, ref_min: number | null, ref_max: number | null, given: unknown): "normal" | "high" | "low" | null {
+  const g = typeof given === "string" ? given.toLowerCase() : null;
+  if (g === "high" || g === "low" || g === "normal") return g;
+  if (value == null) return null;
+  if (ref_max != null && value > ref_max) return "high";
+  if (ref_min != null && value < ref_min) return "low";
+  if (ref_min != null || ref_max != null) return "normal";
+  return null;
+}
+
+function normalizeResults(raw: unknown): { results: Record<string, any>; flags: string[] } {
+  const out: Record<string, any> = {};
+  const flags: string[] = [];
+  if (!raw || typeof raw !== "object") return { results: out, flags };
+  for (const [k, vRaw] of Object.entries(raw as Record<string, any>)) {
+    if (!k) continue;
+    const v = vRaw && typeof vRaw === "object" ? vRaw : { value: vRaw };
+    const numericValue = toNumber(v.value);
+    const ref_min = toNumber(v.ref_min);
+    const ref_max = toNumber(v.ref_max);
+    const unit = normalizeUnit(v.unit);
+    // sanity: swap min/max if inverted
+    const [rmin, rmax] = ref_min != null && ref_max != null && ref_min > ref_max ? [ref_max, ref_min] : [ref_min, ref_max];
+    const flag = deriveFlag(numericValue, rmin, rmax, v.flag);
+    out[k.trim()] = {
+      value: numericValue ?? (v.value ?? null),
+      unit,
+      ref_min: rmin,
+      ref_max: rmax,
+      flag,
+    };
+    if (flag === "high" || flag === "low") flags.push(k.trim());
+  }
+  return { results: out, flags };
+}
+
+function normalizeDate(s: unknown): string | null {
+  if (!s) return null;
+  const str = String(s).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // dd/mm/yyyy or dd-mm-yyyy
+  const m = str.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) {
+    let [_, d, mo, y] = m;
+    if (y.length === 2) y = (Number(y) > 50 ? "19" : "20") + y;
+    return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  const dt = new Date(str);
+  return isNaN(dt.getTime()) ? null : dt.toISOString().slice(0, 10);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -79,14 +159,42 @@ Deno.serve(async (req) => {
     try { parsed = typeof content === "string" ? JSON.parse(content) : content; }
     catch { parsed = { raw: content }; }
 
+    // Normalize before persisting.
+    const { results: normResults, flags: derivedFlags } = normalizeResults(parsed.results);
+    const normExamDate = normalizeDate(parsed.exam_date);
+    const llmFlags: string[] = Array.isArray(parsed.flags_abnormal) ? parsed.flags_abnormal.map(String) : [];
+    const flagsAbnormal = Array.from(new Set([...llmFlags, ...derivedFlags]));
+
+    // Auto-link to a consultation when the parsed exam date matches one (within ±3 days).
+    let consultationId: string | null = null;
+    if (normExamDate) {
+      const { data: petRow } = await sb.from("pet_exams").select("pet_id").eq("id", exam_id).single();
+      if (petRow?.pet_id) {
+        const { data: cands } = await sb
+          .from("pet_consultations")
+          .select("id, consultation_date")
+          .eq("pet_id", petRow.pet_id);
+        if (cands?.length) {
+          const target = new Date(normExamDate).getTime();
+          let best: { id: string; diff: number } | null = null;
+          for (const c of cands) {
+            const diff = Math.abs(new Date(c.consultation_date).getTime() - target);
+            if (!best || diff < best.diff) best = { id: c.id, diff };
+          }
+          if (best && best.diff <= 3 * 86400000) consultationId = best.id;
+        }
+      }
+    }
+
     await sb.from("pet_exams").update({
       exam_type: parsed.exam_type || "Exame",
-      exam_date: parsed.exam_date || null,
+      exam_date: normExamDate,
       lab_name: parsed.lab_name || null,
-      results: parsed.results || {},
+      results: normResults,
       clinical_comments: parsed.clinical_comments || null,
-      flags_abnormal: parsed.flags_abnormal || [],
+      flags_abnormal: flagsAbnormal,
       raw_extracted: parsed,
+      ...(consultationId ? { consultation_id: consultationId } : {}),
       extraction_status: "done",
     }).eq("id", exam_id);
 
