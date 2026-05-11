@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T19:13:48.875Z
+// Última geração: 2026-05-11T19:28:04.364Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Aprovação e normalização de exames PDF",
+    "bullets": [
+      "`pet_exams` ganha colunas `approved`, `approved_at`, `approved_by` para fluxo de revisão antes de entrar no histórico.",
+      "Edge function `parse-pet-exam-pdf`: normaliza unidades (mg/dL, U/L, 10^3/µL…), coerge valores numéricos, recalcula `flag` (high/low) a partir da faixa, normaliza datas (dd/mm/aaaa → ISO), e auto-vincula a uma `pet_consultation` quando a data do exame casa com uma visita (±3 dias).",
+      "Edge function `enrich-pet-food-product`: clamp de percentuais 0-100, normalização de kcal/kg (detecta kcal/100g), validação de enums (`species`, `life_stage`, `food_form`, `size_target`).",
+      "UI `PetExamPdfUploader`: seletor de consulta para vincular novos uploads (Automático / Sem vínculo / consulta específica) + badge \"Pendente revisão\" / \"Aprovado\" por exame.",
+      "Novo `PetExamReviewDialog`: revisar/editar tipo, data, laboratório, comentários, vínculo de consulta e tabela editável de analitos (valor, unidade, faixa min/max, flag recalculado em tempo real). Botões \"Salvar rascunho\" e \"Aprovar e salvar no histórico\".",
+      "Files: supabase/migrations/*_pet_exams_approval.sql, supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/enrich-pet-food-product/index.ts, src/components/pet/PetExamPdfUploader.tsx, src/components/pet/PetExamReviewDialog.tsx"
+    ],
+    "files": [
+      "supabase/functions/parse-pet-exam-pdf/index.ts",
+      "supabase/functions/enrich-pet-food-product/index.ts",
+      "src/components/pet/PetExamPdfUploader.tsx",
+      "src/components/pet/PetExamReviewDialog.tsx"
+    ],
+    "i18nVersion": "1.65.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",
