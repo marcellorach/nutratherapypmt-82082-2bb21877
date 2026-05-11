@@ -23,6 +23,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-11 — Consultas veterinárias + Catálogo de Rações (Fase 1+2)
+<!-- area: clinical-pipeline · status: parcial · i18n: 1.64.0 -->
+- Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet
+- Schema: colunas `consultation_id` adicionadas a `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes` para vincular itens à consulta de origem
+- Schema: novas tabelas `pet_nutrition` (snapshot da dieta por pet/consulta com `is_current`) + `pet_nutrition_items` (N produtos por entrada, com `share_percent` para dietas mistas)
+- Schema: catálogo de rações — `pet_food_brands` (30 marcas seedadas: Royal Canin, Hill's, Pro Plan, Premier, Golden, Origens, Farmina, Acana, Orijen, Guabi, Quatree, GranPlus, Biofresh, N&D, Equilíbrio, Magnus, etc.), `pet_food_products` (com fluxo `submission_status` pending/approved/rejected para curadoria), `pet_food_nutrition` (perfil completo: macros, minerais, ω3/ω6, Ca:P, funcionais, AAFCO/FEDIAF, com `revision` versionado e `source` declarado), `pet_food_ingredients` (lista ordenada)
+- RLS: consultas/dieta visíveis apenas ao vet responsável, ao criador do pet ou admin; catálogo legível por todos autenticados, escrita só admin, vet pode submeter produto pendente
+- UI: nova tab admin "Catálogo de Rações" (`src/components/administrador/pet-food/PetFoodCatalogTab.tsx`) com listagem filtrável de produtos, badges de status, criação de marcas e produtos com composição garantida (proteína/gordura/kcal/Ca/P/ω3/ω6) e fluxo aprovar/rejeitar pendentes
+- Próximo: edge `enrich-pet-food-product` (Gemini + web), autocomplete na UI de consulta, edge `resolve-drug-brand`, parser PDF de exames, enriquecimento do grafo do paciente com DietProfile
+- Files: supabase/migrations/*pet_consultations*.sql, src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/config/admin-tabs.ts, src/hooks/useSystemGuideStats.ts
+
 ### Fixed - 2026-05-11 — Sidebar/tabs admin mostrando chaves de tradução literais
 <!-- area: i18n · status: entregue · i18n: 1.64.0 -->
 - Raiz do problema: os arquivos `src/locales/{pt,en}/translation.json` continham a chave `"admin"` declarada **duas vezes** no nível raiz. O segundo bloco (adicionado junto com a Base Farmacológica em 2026-05-09) sobrescrevia silenciosamente o primeiro durante o `JSON.parse`, apagando todos os namespaces `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*`, `admin.studies.*`, etc. — daí as chaves cruas aparecendo em quase toda a UI administrativa
