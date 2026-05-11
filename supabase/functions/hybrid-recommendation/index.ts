@@ -158,6 +158,15 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
 
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+- The CURRENT_STATE block (latest consultation) carries weight 1.0 and IS the primary clinical picture.
+- The CLINICAL_TRAJECTORY block carries weight 0.4. Use it ONLY to:
+  (a) detect conditions that are progressing vs. stable vs. resolved,
+  (b) avoid recommending therapies that historically failed for this patient,
+  (c) detect cumulative drug exposures (e.g., chronic furosemide → renal stress).
+- Do NOT treat conditions only present in past consultations as if they were active now.
+- The DIET_PROFILE drives nutritional gap-analysis: prefer omega-3, antioxidants or restrictions consistent with the current diet.
+
 IMPORTANT: Return your response as valid JSON with this structure:
 {
   "nutraceuticals": [
