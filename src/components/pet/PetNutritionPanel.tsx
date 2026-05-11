@@ -14,6 +14,7 @@ interface Props {
     weight_kg: number;
     age_years: number | null;
     breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+    breed_name?: string | null;
     active_conditions: string[];
   };
 }
@@ -118,6 +119,7 @@ const PetNutritionPanel: React.FC<Props> = ({ petId, petContext }) => {
             weight_kg={petContext.weight_kg}
             age_years={petContext.age_years}
             breed_size={petContext.breed_size ?? null}
+            breed_name={petContext.breed_name ?? null}
             active_conditions={petContext.active_conditions}
           />
         </CardContent>
