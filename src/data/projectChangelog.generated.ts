@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-09T19:46:19.261Z
+// Última geração: 2026-05-11T16:52:16.543Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,29 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-09";
+export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Auditorias Técnicas Internas (aba admin versionada)",
+    "bullets": [
+      "Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do VetGraphRAG, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)",
+      "Auditoria v3 convertida para HTML navegável em `public/audits/v3/index.html` (com os 9 infográficos preservados em `public/audits/v3/media/`) e PDF/DOCX para download direto",
+      "Botão \"Fazer nova auditoria\" abre dialog com escopo editável (pré-preenchido) e versão do sistema auto-detectada — registra o pedido em `audit_requests` para o agente Lovable gerar na próxima sessão dedicada",
+      "Edição retroativa do escopo de auditorias passadas com histórico preservado em `scope_history`",
+      "Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, public/audits/v3/index.html, supabase/migrations"
+    ],
+    "files": [
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "src/config/admin-tabs.ts",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx"
+    ],
+    "i18nVersion": "1.63.0"
+  },
   {
     "date": "2026-05-09",
     "kind": "added",

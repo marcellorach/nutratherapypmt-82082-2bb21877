@@ -71,6 +71,7 @@ const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab')
 const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
 const PharmacologyTab = lazy(() => import('@/components/administrador/pharmacology/PharmacologyTab'));
 const ComplianceDashboard = lazy(() => import('@/components/administrador/compliance/ComplianceDashboard'));
+const TechnicalAuditsTab = lazy(() => import('@/components/administrador/audits/TechnicalAuditsTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -396,6 +397,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: ComplianceDashboard,
     description: 'Dashboard interativo FDA/EMA/AVMA com filtros por requisito, evidência e status'
+  },
+  {
+    id: 'technical-audits',
+    label: 'Auditorias Técnicas',
+    group: 'configuration',
+    component: TechnicalAuditsTab,
+    description: 'Histórico versionado de auditorias técnicas internas (HTML/PDF/DOCX) vinculadas à versão do sistema'
   }
 ];
 

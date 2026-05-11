@@ -146,6 +146,50 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_requests: {
+        Row: {
+          fulfilled_audit_id: string | null
+          id: string
+          requested_at: string
+          requested_by: string | null
+          scope: string
+          status: string
+          system_date: string
+          system_version: string
+          updated_at: string
+        }
+        Insert: {
+          fulfilled_audit_id?: string | null
+          id?: string
+          requested_at?: string
+          requested_by?: string | null
+          scope: string
+          status?: string
+          system_date: string
+          system_version: string
+          updated_at?: string
+        }
+        Update: {
+          fulfilled_audit_id?: string | null
+          id?: string
+          requested_at?: string
+          requested_by?: string | null
+          scope?: string
+          status?: string
+          system_date?: string
+          system_version?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_requests_fulfilled_audit_id_fkey"
+            columns: ["fulfilled_audit_id"]
+            isOneToOne: false
+            referencedRelation: "technical_audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auto_discoveries: {
         Row: {
           approval_chain: Json | null
@@ -3126,6 +3170,54 @@ export type Database = {
           status?: string | null
           suggested_category?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      technical_audits: {
+        Row: {
+          audit_date: string
+          created_at: string
+          docx_path: string | null
+          html_path: string | null
+          id: string
+          pdf_path: string | null
+          scope: string
+          scope_history: Json
+          summary: Json
+          system_changelog_date: string | null
+          system_version: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          audit_date: string
+          created_at?: string
+          docx_path?: string | null
+          html_path?: string | null
+          id: string
+          pdf_path?: string | null
+          scope: string
+          scope_history?: Json
+          summary?: Json
+          system_changelog_date?: string | null
+          system_version: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          audit_date?: string
+          created_at?: string
+          docx_path?: string | null
+          html_path?: string | null
+          id?: string
+          pdf_path?: string | null
+          scope?: string
+          scope_history?: Json
+          summary?: Json
+          system_changelog_date?: string | null
+          system_version?: string
+          updated_at?: string
+          version?: string
         }
         Relationships: []
       }
