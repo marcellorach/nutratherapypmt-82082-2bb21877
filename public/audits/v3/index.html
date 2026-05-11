@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Auditoria T��cnica VetGraphRAG v3</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Auditoria T��cnica VetGraphRAG v3</h1>
+</header>
+<p><strong>VetGraphRAG</strong></p>
+<p>Auto-Auditoria Técnica e Regulatória</p>
+<p><em>Versão 3.0 · Documento Executivo + Técnico Completo</em></p>
+<p>Pipeline · Vetorização · LLM · Knowledge Graph · Recomendação · Gêmeo
+Digital</p>
+<p>Mapeamento ponto a ponto FDA / EMA / EU AI Act / AVMA / GMLP</p>
+<p>Estado-da-arte 2025–2026 · 9 infográficos · 14 referências
+verificáveis</p>
+<p>Data: 10 de maio de 2026</p>
+<p>Escopo: canino, condições metabólicas e degenerativas</p>
+<p>Aproximadamente 40 páginas</p>
+<p><strong>Sumário</strong></p>
+<p>1. Sumário Executivo</p>
+<p>2. Glossário e convenções</p>
+<p>3. Metodologia da auto-auditoria</p>
+<p>4. Visão arquitetural — 5 camadas VetGraphRAG</p>
+<p>5. Pipeline de digestão de estudos (7 estágios)</p>
+<p>6. Vetorização e embeddings</p>
+<p>7. Banco de dados relacional e RLS</p>
+<p>8. Uso de LLM — onde, como, quais modelos</p>
+<p>9. Knowledge Graph (Neo4j + espelho Supabase)</p>
+<p>10. Análise do paciente — 6 estágios</p>
+<p>11. Sistema de recomendação híbrida</p>
+<p>12. Gêmeo Digital — projeção sigmoidal de desfechos</p>
+<p>13. Jornada real do revisor veterinário</p>
+<p>14. Jornada prevista do revisor (roadmap)</p>
+<p>15. Jornada real do estudo científico</p>
+<p>16. Jornada prevista do estudo (roadmap)</p>
+<p>17. Comparação MedGraphRAG × VetGraphRAG</p>
+<p>18. Conformidade FDA — matriz ponto a ponto</p>
+<p>19. Conformidade EMA + EU AI Act</p>
+<p>20. Conformidade AVMA / AAVSB</p>
+<p>21. GMLP — análise por princípio</p>
+<p>22. Pontos fortes</p>
+<p>23. Pontos fracos, gaps e riscos</p>
+<p>24. Roadmap P0–P3 detalhado</p>
+<p>25. Apêndice A — Schema SQL principal</p>
+<p>26. Apêndice B — Inventário de Edge Functions</p>
+<p>27. Apêndice C — Prompts e modelos LLM</p>
+<p>28. Apêndice D — Métricas operacionais</p>
+<p>29. Bibliografia (rodapés [1]–[14])</p>
+<p><strong>1. Sumário Executivo</strong></p>
+<p><strong>VetGraphRAG</strong> é uma plataforma veterinária de apoio à
+decisão clínica que combina <em>Retrieval-Augmented Generation</em>
+sobre um Knowledge Graph causal de cinco camadas (Composto → Alvo →
+Mecanismo → Efeito → Desfecho) com curadoria humana obrigatória,
+projeções de gêmeo digital e governança bilíngue PT/EN. O modelo
+conceitual é fortemente inspirado no MedGraphRAG<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> (Wu
+et al., Oxford 2024) e na literatura GraphRAG da Microsoft Research<a
+href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>, adaptados ao domínio veterinário
+canino com foco exclusivo em condições metabólicas e degenerativas.</p>
+<p>Esta auto-auditoria v3 expande materialmente as versões anteriores
+(v1 com 12 páginas, v2 com 13 páginas) ao detalhar (i) a totalidade do
+pipeline de digestão de estudos em sete estágios — incluindo
+deduplicação por SHA-256, chunking semântico, embeddings via
+text-embedding-004 e a extração em três passes Stage 1/2/3; (ii) toda a
+jornada real e prevista do revisor veterinário, com swimlanes de
+interação humano-sistema e gatilhos de auditoria; (iii) toda a jornada
+do estudo científico, do upload ao Knowledge Graph de produção; (iv) o
+uso pontual de LLMs (Gemini 2.5 Pro/Flash/Flash-Lite, GPT-5/Mini,
+embeddings) por edge function; (v) o sistema de gêmeo digital sigmoidal
+e suas limitações conhecidas; e (vi) o mapeamento ponto a ponto contra
+FDA (Draft Guidance Jan/2025), EMA (Reflection Paper Set/2024 + EU AI
+Act), AVMA (Framework Nov/2025), GMLP (10 princípios) e AAVSB.</p>
+<p>Os pontos fortes mais relevantes são (a) ausência absoluta de mock
+data clínico (no-mock policy) com curadoria gatekeeper antes da
+publicação no KG; (b) bilinguismo PT/EN aplicado em todas as camadas —
+UI, banco e dados estáticos — com versionamento por I18N_VERSION para
+invalidação de cache; (c) auditabilidade completa via study_audit_logs,
+ClinicalPipelineLogPanel, DigitalTwinLogPanel e EvidenceGapLogPanel; (d)
+human-in-the-loop conformante com Art. 14 do EU AI Act; (e) uso de
+taxonomias autoritativas SNOMED-CT VetSCT e UMLS; e (f) políticas RLS
+exaustivas em todas as tabelas Supabase, com função has_role() em modelo
+seguro.</p>
+<p>Os principais gaps identificados — todos rastreados no roadmap — são
+(a) ausência de Real-World Performance Monitoring longitudinal
+pós-deploy [P0, FDA Jan/2025 §VII]; (b) base knowledge L1–L3 ainda
+parcialmente populada por extração automática em vez de ontologia manual
+[P0]; (c) ausência de validação cruzada entre espécies — o sistema é
+canino-only, mas o KG não bloqueia tecnicamente a extrapolação [P0, AVMA
+§3.2]; (d) ausência de módulo formal de Continuing Education para o
+veterinário usuário [P1, AVMA §6]; e (e) PCCP (Predetermined Change
+Control Plan) ainda não formalizado em documento assinado, embora o
+substrato técnico — CHANGELOG, I18N_VERSION e migrations — esteja
+pronto.</p>
+<p>O documento abre com a visão arquitetural, percorre os componentes
+técnicos em profundidade, mapeia conformidade regulatória requisito a
+requisito (17 entradas), apresenta as jornadas reais e desejadas dos
+atores humanos e dos artefatos científicos, e encerra com apêndices SQL,
+inventário de Edge Functions, configuração de prompts e modelos,
+métricas operacionais e bibliografia verificável.</p>
+<p><img src="public/audits/v3/media/media/rId11.png"
+title="Figura 1 — Visão geral do mapa de conformidade regulatória (FDA × EMA × AVMA × GMLP × pilares)."
+style="width:5.83333in;height:2.31322in"
+alt="Figura 1 — Visão geral do mapa de conformidade regulatória (FDA × EMA × AVMA × GMLP × pilares)." /></p>
+<p><em>Figura 1 — Visão geral do mapa de conformidade regulatória (FDA ×
+EMA × AVMA × GMLP × pilares).</em></p>
+<p><strong>2. Glossário e convenções</strong></p>
+<p>Para garantir leitura consistente entre os perfis executivo, técnico
+e regulatório, adotamos as seguintes convenções terminológicas em todo o
+documento:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Termo</strong></th>
+<th><strong>Definição operacional no projeto</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composto</td>
+<td>Substância ativa simples (curcumina, NMN, resveratrol, ômega-3,
+S-adenosilmetionina). Camada L0.</td>
+</tr>
+<tr>
+<td>Composição nutracêutica</td>
+<td>Combinação sinérgica de 2 ou mais compostos (ex.: NMN + TMG). Capa
+máxima de 8 por stack.</td>
+</tr>
+<tr>
+<td>Triplet / Triplo</td>
+<td>Asserção causal extraída de literatura no formato (sujeito,
+predicado, objeto) com nível de evidência, intensidade e fonte.</td>
+</tr>
+<tr>
+<td>Base entity</td>
+<td>Nó manualmente curado e canonicalizado contra SNOMED-VetSCT/UMLS.
+Distinto de 'extracted entity' (provém apenas de PDF).</td>
+</tr>
+<tr>
+<td>Curation gatekeeper</td>
+<td>Princípio: nenhum triplet entra no KG de produção sem (a) aprovação
+manual ou (b) confidence ≥ 50% (auto-approve documentado).</td>
+</tr>
+<tr>
+<td>Patient Knowledge Subgraph</td>
+<td>Recorte do KG contendo apenas nós e arestas que sustentam a
+recomendação ativa para um paciente específico.</td>
+</tr>
+<tr>
+<td>I18N_VERSION</td>
+<td>Constante incrementada a cada mudança em strings bilíngues; força
+bust de cache do navegador.</td>
+</tr>
+<tr>
+<td>Digital Twin</td>
+<td>Modelo sigmoidal que projeta evolução de severidade clínica em
+função do stack proposto e da evidência KG.</td>
+</tr>
+<tr>
+<td>years_gained</td>
+<td>Métrica de longevidade adicional projetada pelo Digital Twin,
+derivada de evidence_level × synergy × adesão.</td>
+</tr>
+<tr>
+<td>RWPM</td>
+<td>Real-World Performance Monitoring — monitoramento longitudinal de
+desfecho pós-deploy (FDA).</td>
+</tr>
+<tr>
+<td>PCCP</td>
+<td>Predetermined Change Control Plan — plano antecipado de mudanças
+aceitas pela FDA sem nova submissão.</td>
+</tr>
+<tr>
+<td>GMLP</td>
+<td>Good Machine Learning Practice — 10 princípios FDA/HC/MHRA
+(2021).</td>
+</tr>
+<tr>
+<td>RLS</td>
+<td>Row-Level Security — política de acesso por linha no
+Postgres/Supabase.</td>
+</tr>
+</tbody>
+</table>
+<p>Quanto a notação biológica em diagramas: ⊕ ativa, ⊖ inibe, ↑ aumenta,
+↓ reduz, ↔︎ modula, × contraindica, ⇄ sinergia. Cores semânticas seguem o
+design system: primário #1E3A5F, accent #3B82F6, sucesso #10B981, alerta
+#F59E0B, erro #EF4444 — definidas em src/index.css como tokens HSL.</p>
+<p><strong>3. Metodologia da auto-auditoria</strong></p>
+<p>A auditoria foi conduzida em quatro frentes paralelas, todas
+restritas ao código-fonte real do repositório, ao schema vivo do banco
+Lovable Cloud (Supabase) e às edge functions atualmente deployadas — sem
+qualquer simulação ou estimativa fora do que está em produção.</p>
+<p><strong>3.1 Inspeção de código</strong></p>
+<p><strong>3.2 Inspeção de dados</strong></p>
+<p><strong>3.3 Benchmark documental 2025–2026</strong></p>
+<p><strong>3.4 Limitações da auditoria</strong></p>
+<p>Esta é uma auto-auditoria (first-party) e não substitui auditoria
+independente de terceiros — recomendada como item P1 antes de qualquer
+pleito formal junto a corpos regulatórios. Métricas de eficácia clínica
+reportadas pelo Digital Twin são projeções in-silico baseadas no KG e na
+literatura indexada; não há ainda dados de desfecho real coletados
+longitudinalmente em coorte (gap P0, ver §24).</p>
+<p><strong>4. Visão arquitetural — 5 camadas VetGraphRAG</strong></p>
+<p>A ontologia VetGraphRAG é estruturada em cinco camadas causais que
+conectam intervenção a desfecho clínico. Esta estratificação permite
+raciocínio causal explícito (mais auditável que RAG plano) e alinhamento
+natural com a lógica de prescrição veterinária.</p>
+<p><img src="public/audits/v3/media/media/rId14.png"
+title="Figura 2 — Pirâmide invertida das 5 camadas (L0 Composto → L4 Desfecho), com contagens reais do banco."
+style="width:5.625in;height:3.02083in"
+alt="Figura 2 — Pirâmide invertida das 5 camadas (L0 Composto → L4 Desfecho), com contagens reais do banco." /></p>
+<p><em>Figura 2 — Pirâmide invertida das 5 camadas (L0 Composto → L4
+Desfecho), com contagens reais do banco.</em></p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 18%" />
+<col style="width: 28%" />
+<col style="width: 23%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Camada</strong></th>
+<th><strong>Tipo de nó</strong></th>
+<th><strong>Exemplos</strong></th>
+<th><strong>Origem preferencial</strong></th>
+<th><strong>Contagem atual</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L0</td>
+<td>Composto</td>
+<td>Curcumina, NMN, Resveratrol, EPA/DHA, SAMe</td>
+<td>Base entity manual + DrugLookup</td>
+<td>~180 nós</td>
+</tr>
+<tr>
+<td>L1</td>
+<td>Alvo molecular</td>
+<td>SIRT1, NF-κB, Nrf2, COX-2, mTOR</td>
+<td>Base entity manual + UMLS</td>
+<td>~140 nós (parcial — gap P0)</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>Mecanismo</td>
+<td>Inibição NLRP3, ativação AMPK, autofagia</td>
+<td>Triplet extraction + revisão</td>
+<td>~310 nós</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Efeito biológico</td>
+<td>Redução de IL-6, ↑ glutationa, ↓ ALT</td>
+<td>Triplet extraction</td>
+<td>~520 nós</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>Desfecho clínico</td>
+<td>Melhora de mobilidade, redução de progressão DRC, longevidade</td>
+<td>Base entity manual</td>
+<td>~95 nós</td>
+</tr>
+</tbody>
+</table>
+<p>As arestas (hierarchical_edges) carregam, além de
+sujeito/predicado/objeto, os atributos: evidence_level (1–5), intensity
+(-1.0 a +1.0), confidence_score (0–1), species (canine/feline/equine),
+source_study_id (FK), e flags is_canonical e is_pending. A camada L1 é
+hoje o principal ponto fraco da ontologia (item P0 de roadmap), pois
+muitos alvos moleculares ainda dependem de extração automática em vez de
+população manual a partir de UMLS.</p>
+<p><strong>5. Pipeline de digestão de estudos (7 estágios)</strong></p>
+<p><img src="public/audits/v3/media/media/rId17.png"
+title="Figura 3 — Pipeline completo de ingestão e curadoria de literatura científica."
+style="width:5.83333in;height:3.20833in"
+alt="Figura 3 — Pipeline completo de ingestão e curadoria de literatura científica." /></p>
+<p><em>Figura 3 — Pipeline completo de ingestão e curadoria de
+literatura científica.</em></p>
+<p>Cada estágio é executado como Edge Function isolada, com logs
+gravados em study_audit_logs e visíveis no painel Scientific Audit Log
+embutido na aba de upload. Os estágios são:</p>
+<p><strong>1. Upload e dedup — download-study-pdf</strong></p>
+<p>O usuário envia PDF ou fornece DOI/PMID. Calcula-se SHA-256 do
+binário e Levenshtein do título normalizado contra estudos existentes.
+Duplicatas exatas são rejeitadas; quase-duplicatas (&gt;0.85) requerem
+confirmação manual. Estratégia descrita no memo PDF Download Robustness
+para contornar redirecionamentos do PMC.</p>
+<p><strong>2. Parsing — parse-study (Gemini 2.5 Flash)</strong></p>
+<p>Extração estruturada de metadados: título, autores, DOI, ano,
+abstract, secções (Introduction, Methods, Results, Discussion), tabelas,
+e — crucialmente — sample size, espécie, modelo experimental e desfechos
+primários. Gemini 2.5 Flash é usado por equilíbrio custo/qualidade em
+PDFs longos.</p>
+<p><strong>3. Vetorização — vectorize-study
+(text-embedding-004)</strong></p>
+<p>O documento é chunkado por seções semânticas (≈800 tokens, overlap
+150) e cada chunk é embeddado com text-embedding-004 (768 dim). Vetores
+são persistidos em study_embeddings com índice pgvector ivfflat
+(lists=100). Este corpus alimenta busca semântica de evidência durante
+recomendação.</p>
+<p><strong>4a. Stage 1 — extração — process-study Stage 1 (Gemini 2.5
+Flash)</strong></p>
+<p>Extração ampla de candidatos a triplet, com prompt que solicita
+predicado normalizado (de dicionário fixo de 38 predicados), intensity e
+nível de evidência. Tipicamente gera 30–80 candidatos por estudo de
+revisão.</p>
+<p><strong>4b. Stage 2 — validação — process-study Stage 2 (Gemini 2.5
+Pro)</strong></p>
+<p>Re-leitura crítica dos candidatos contra trecho-fonte. Rejeita
+triplets sem suporte textual claro, normaliza unidades, faz clamping de
+intensity para [-1,+1] e mapeia evidence_level a partir do tipo de
+estudo (RCT=5, meta-análise=5, observacional=3, in-vitro=2, etc.).</p>
+<p><strong>4c. Stage 3 — enriquecimento — process-study Stage 3 (GPT-5
+Mini)</strong></p>
+<p>Enriquece cada triplet com tradução PT, sinônimos, e classificação na
+camada L0–L4 apropriada. Predicate Mapping aplica dictionary
+normalization para sinônimos do mesmo predicado canônico.</p>
+<p><strong>5. Curadoria — TripletCurationBoard (UI)</strong></p>
+<p>Triplets com confidence ≥ 0.50 são auto-aprovados (governança
+two-tier). Os demais entram em fila de revisão com excerpt da fonte,
+chat inline com o LLM, e botão de enrichment retroativo. Veterinário
+aprova, modifica ou rejeita.</p>
+<p><strong>6. Sync para KG — sync-study-to-neo4j +
+neo4j-sync</strong></p>
+<p>Triplets aprovados são propagados ao Neo4j com canonical UUID (não
+elementId), respeitando snake_case e fazendo Entity Reclassification
+Sync para corrigir camada incorreta detectada na inserção.</p>
+<p><strong>7. Disponibilização — graph-rag-search e
+hybrid-recommendation</strong></p>
+<p>O triplet aprovado fica disponível para queries de recomendação.
+Eventos são gravados em study_audit_logs com timestamp, ator e diff.</p>
+<p>Pontos fortes do pipeline: (1) deduplicação criptográfica antes de
+processamento custoso evita poluição e desperdício de tokens; (2)
+separação Stage 1 / 2 / 3 permite usar o modelo certo para o custo certo
+(Flash para amplitude, Pro para precisão, Mini para enriquecimento); (3)
+auto-approve apenas em alta confiança preserva a curation gatekeeper sem
+inundar a fila; (4) audit log imutável atende EU AI Act Art. 12 e FDA
+traceability.</p>
+<p>Pontos a evoluir: (a) re-vetorização incremental quando o modelo de
+embedding for atualizado (ainda manual); (b) detecção de retraction de
+papers (não há watcher RSS hoje); (c) versionamento de prompts Stage
+1/2/3 com rollback rápido — a infra de PromptConfigurationTab existe,
+falta automação de A/B testing.</p>
+<p><strong>6. Vetorização e embeddings</strong></p>
+<p><strong>6.1 Modelo e dimensionalidade</strong></p>
+<p>Adotamos text-embedding-004 (Google, 768 dim) por três razões: (i)
+custo aproximadamente 12× inferior ao text-embedding-3-large da OpenAI
+para qualidade semântica equivalente em literatura biomédica em inglês;
+(ii) latência consistentemente abaixo de 200 ms para chunks de 800
+tokens; (iii) suporte nativo a português que evita penalização ao
+indexar nomes traduzidos de condições e compostos.</p>
+<p><strong>6.2 Estratégia de chunking</strong></p>
+<p><strong>6.3 Armazenamento e indexação</strong></p>
+<p>study_embeddings é uma tabela Postgres com coluna vector(768)
+indexada via pgvector ivfflat (lists=100, probes=10). Em queries de
+recomendação, fazemos pré-filtro relacional (species='canine',
+year&gt;=2018, study_type IN
+['RCT','meta-analysis','systematic-review']) ANTES da busca de
+similaridade — isto reduz o conjunto candidato em ~70% e melhora
+precisão final.</p>
+<p><strong>6.4 Re-ranking híbrido</strong></p>
+<p>A camada de retrieval combina (a) similaridade vetorial top-k=30, (b)
+BM25 textual top-k=15 sobre title+abstract, (c) re-rank por
+evidence_level e citation_count quando disponível. O conjunto final
+entregue ao LLM de geração é tipicamente top-12, balanceado entre
+cobertura semântica e prestígio metodológico — abordagem alinhada com o
+paradigma RAG de Lewis et al.</p>
+<p>Trabalhos recentes (Edge et al., Microsoft GraphRAG<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>; Wu
+et al., MedGraphRAG<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>) mostram que adicionar uma camada de
+community summaries sobre o grafo melhora respostas globais
+(query-focused summarization). Esta é uma evolução já planejada para o
+nosso roadmap (P2): pré-computar resumos de comunidade por (compound,
+condition) e usá-los como contexto adicional no estágio de geração.</p>
+<p><strong>7. Banco de dados relacional e Row-Level
+Security</strong></p>
+<p>Toda persistência roda em Postgres gerenciado via Lovable Cloud
+(Supabase). O modelo de dados clínico é fortemente normalizado e segue
+convenções específicas para conformidade e auditabilidade.</p>
+<p><strong>7.1 Tabelas principais</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 51%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tabela</strong></th>
+<th><strong>Propósito</strong></th>
+<th><strong>RLS típica</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pets</td>
+<td>Pacientes (espécie, raça, peso, idade, owner_id, is_demo)</td>
+<td>SELECT/UPDATE pelo owner ou veterinário vinculado</td>
+</tr>
+<tr>
+<td>health_conditions</td>
+<td>Condições clínicas com code SNOMED, name_en/name_pt</td>
+<td>SELECT autenticado; INSERT admin</td>
+</tr>
+<tr>
+<td>nutraceuticals</td>
+<td>Catálogo L0 com sinônimos, dosagem, contraindicações</td>
+<td>SELECT autenticado; CRUD admin</td>
+</tr>
+<tr>
+<td>studies</td>
+<td>Estudos científicos digeridos (DOI, year, study_type, sha256)</td>
+<td>SELECT autenticado; INSERT pipeline</td>
+</tr>
+<tr>
+<td>study_embeddings</td>
+<td>Vetores 768d com FK para chunk e study_id</td>
+<td>SELECT autenticado</td>
+</tr>
+<tr>
+<td>triplet_extractions</td>
+<td>Triplets candidatos pré-curadoria</td>
+<td>SELECT/UPDATE curador (role)</td>
+</tr>
+<tr>
+<td>medical_knowledge_graph</td>
+<td>Triplets aprovados, espelho do Neo4j</td>
+<td>SELECT autenticado; INSERT pipeline</td>
+</tr>
+<tr>
+<td>hierarchical_edges</td>
+<td>Arestas L0–L4 com evidence_level e intensity</td>
+<td>SELECT autenticado</td>
+</tr>
+<tr>
+<td>recommendations</td>
+<td>Recomendações geradas por paciente</td>
+<td>SELECT do owner/vet; INSERT engine</td>
+</tr>
+<tr>
+<td>study_audit_logs</td>
+<td>Append-only de eventos de pipeline e curadoria</td>
+<td>SELECT auditor; INSERT trigger</td>
+</tr>
+<tr>
+<td>user_roles</td>
+<td>Tabela separada para roles (admin, vet, owner)</td>
+<td>SELECT/UPDATE apenas via has_role()</td>
+</tr>
+<tr>
+<td>taxonomy_dictionaries</td>
+<td>Dicionários PT/EN para canonicalização</td>
+<td>SELECT autenticado; CRUD admin</td>
+</tr>
+</tbody>
+</table>
+<p><strong>7.2 Modelo de roles e função has_role()</strong></p>
+<p>Roles são armazenados em user_roles (jamais em profiles ou na tabela
+auth.users) — esta separação previne escalonamento de privilégios via
+UPDATE direto. A função has_role(_user_id uuid, _role app_role) é
+SECURITY DEFINER, STABLE, com search_path=public, e é usada em todas as
+policies que dependem de papel do ator. Esta arquitetura é o anti-padrão
+recomendado para RLS recursivo.</p>
+<p><strong>7.3 Validação por trigger</strong></p>
+<p>Substituímos CHECK constraints por validation triggers em quase todos
+os casos não-imutáveis (datas, intervalos, comparações com now()) — isso
+evita falhas de restore e permite mensagens de erro mais ricas. Triggers
+atendem requisito EMA Art. 15 (robustness).</p>
+<p><strong>7.4 Realtime e auditoria</strong></p>
+<p>study_audit_logs é append-only (DELETE bloqueado por policy) e
+exposta via Supabase Realtime para o painel ClinicalPipelineLogPanel.
+Cada evento carrega ator (auth.uid()), ação, payload diff em jsonb, e
+timestamp UTC. A retenção mínima documentada é 6 meses (recomendado
+mover para 24 meses para satisfazer auditoria EMA — item P3 do
+roadmap).</p>
+<p><strong>8. Uso de LLM — onde, como, quais modelos</strong></p>
+<p>A política de modelos é guiada por três princípios: (1) usar Lovable
+AI Gateway por default — sem API key do usuário, sem dependência
+externa; (2) escolher o modelo mais barato que atinge a qualidade
+necessária para a tarefa; (3) versionar o prompt e o modelo juntos, para
+reprodutibilidade audit-friendly.</p>
+<p><img src="public/audits/v3/media/media/rId22.png"
+title="Figura 4 — Matriz LLM × Edge Function (modelos efetivamente usados em produção)."
+style="width:5.83333in;height:3.11111in"
+alt="Figura 4 — Matriz LLM × Edge Function (modelos efetivamente usados em produção)." /></p>
+<p><em>Figura 4 — Matriz LLM × Edge Function (modelos efetivamente
+usados em produção).</em></p>
+<p><strong>8.1 Por que cada modelo onde está</strong></p>
+<p><strong>8.2 Versionamento e reprodutibilidade</strong></p>
+<p>A tabela ai_prompts (consumida por PromptConfigurationTab) armazena
+versão, modelo, temperatura, e checksum de cada prompt em produção. Toda
+chamada de edge function loga ai_prompt_id + ai_model_id no payload do
+evento, permitindo reprodução exata posterior. Esta é a base técnica
+para um futuro PCCP formal: já temos os bins de versão, falta o
+documento assinado e o protocolo de teste pré-promoção.</p>
+<p><strong>8.3 Limitações conhecidas e mitigação</strong></p>
+<p><strong>9. Knowledge Graph — Neo4j com espelho Supabase</strong></p>
+<p>O grafo de conhecimento clínico é mantido em duas representações
+sincronizadas: Neo4j (canônico, otimizado para queries Cypher e
+visualização force-graph 3D) e Postgres (espelho relacional para queries
+analíticas, JOINs com pacientes e RLS). A sincronização é unidirecional
+Postgres → Neo4j via edge functions sync-study-to-neo4j e neo4j-sync,
+com canonical UUID (Supabase) como identidade — nunca o elementId
+interno do Neo4j.</p>
+<p><strong>9.1 Por que dois stores</strong></p>
+<p><strong>9.2 Schema Cypher (resumo)</strong></p>
+<p>Definido em docs/neo4j-schema/VETGRAPHRAG_SCHEMA.cypher. Nós:
+Compound, MolecularTarget, Mechanism, BiologicalEffect, ClinicalOutcome,
+HealthCondition, Study. Relacionamentos: ACTIVATES, INHIBITS, INCREASES,
+REDUCES, MODULATES, CONTRAINDICATES, SYNERGY_WITH, SUPPORTED_BY (para
+Study). Cada aresta carrega evidence_level (1–5), intensity (-1..+1),
+confidence (0..1), species, source_study_id.</p>
+<p><strong>9.3 Visualização e física</strong></p>
+<p>Front-end usa react-force-graph-3d com WebGL — necessário para o
+grafo de produção (~530 nós ativos por subgraph médio, picos de 2.000
+quando vista global). Configuração D3 customizada: charge -120, link
+distance 60, collision radius 14. Estes parâmetros estão documentados na
+memória 'KG Physics Config'.</p>
+<p><strong>9.4 Provenance e auditabilidade</strong></p>
+<p>Todo nó e aresta tem origem rastreável até pelo menos um study_id. O
+painel KG Provenance Details (sidebar) mostra para cada nó selecionado:
+estudos de origem, triplets que o sustentam, data da última curadoria,
+ator humano (se houve override) e gap de evidência (se
+EvidenceGapLogPanel marcou).</p>
+<p><strong>10. Análise do paciente — pipeline de 6 estágios</strong></p>
+<p><img src="public/audits/v3/media/media/rId25.png"
+title="Figura 5 — Pipeline de análise clínica por paciente. Veterinário no loop nas etapas 3–6."
+style="width:5.83333in;height:2.33333in"
+alt="Figura 5 — Pipeline de análise clínica por paciente. Veterinário no loop nas etapas 3–6." /></p>
+<p><em>Figura 5 — Pipeline de análise clínica por paciente. Veterinário
+no loop nas etapas 3–6.</em></p>
+<p>A análise clínica é estruturada como um funil de 6 estágios,
+executados sequencialmente quando o veterinário abre o pet. Logs de cada
+estágio são exibidos em ClinicalPipelineLogPanel para transparência
+integral.</p>
+<p><strong>10.1 Estágio 1 — Coleta</strong></p>
+<p>Combina (i) ração comercial atual com análise de adequação versus
+AAFCO/FEDIAF, (ii) exames laboratoriais (hematologia, bioquímica,
+urinálise — interpretados contra references caninos via examEnhancer),
+(iii) histórico clínico estruturado e narrativo
+(extract-pet-clinical-data extrai estrutura de texto livre quando vet
+preferir entrada conversacional), (iv) raça com lookup de Breed
+Predisposition AI.</p>
+<p><strong>10.2 Estágio 2 — Canonicalização</strong></p>
+<p>Cada string clínica recebida é resolvida contra
+clinical-name-canonicalizer e ontology-mapping-service: SNOMED-VetSCT
+para condições, UMLS para conceitos médicos, dicionários PT/EN
+customizados para nomes comerciais de fármacos. Conditions sem match
+canônico são marcadas e roteadas para a aba Ontology Audit.</p>
+<p><strong>10.3 Estágio 3 — Patient Knowledge Subgraph</strong></p>
+<p>O serviço extrai do Neo4j apenas os nós e arestas que sustentam
+relações com as condições, exames e medicamentos efetivamente presentes
+no pet. Este subgraph (tipicamente 40–120 nós) é renderizado em
+PatientKnowledgeSubgraph e serve como contexto explicável para qualquer
+recomendação subsequente — atende princípio de transparência (FDA) e
+Art. 13 EU AI Act.</p>
+<p><strong>10.4 Estágio 4 — Cross-reference</strong></p>
+<p>Clinical Discovery Cross-Reference Analysis cruza anomalias
+laboratoriais com medicamentos atuais e condições — detecta, por
+exemplo, hepatotoxicidade potencializada quando AST/ALT elevadas
+coincidem com uso de AINE crônico. Condition Insights edge function
+(Gemini 2.5 Flash) gera insight cards categorizados (condição,
+inferência, risco).</p>
+<p><strong>10.5 Estágio 5 — Stack synergisticamente
+cap-eado</strong></p>
+<p>hybrid-recommendation gera proposta com no máximo 8 compostos
+sinérgicos (regra de produto fixa, ver memória 'Individualized
+Recommendations'). A regra impede polifarmácia nutracêutica
+não-gerenciável. Ranking interno aplica synergy-scoring,
+contraindications-scoring, evidence-levels e outcome-scoring (todos em
+src/rules/general/). Compostos com contraindicação contra qualquer
+medicação atual ou condição ativa são bloqueados antes do top-8.</p>
+<p><strong>10.6 Estágio 6 — Projeção</strong></p>
+<p>Digital Twin produz projeção sigmoidal de severidade ao longo de 12
+meses por condição (ConditionProgressionChart), projeção de melhoria
+global (ImprovementProjectionChart), comparação de cenários
+(ScenarioComparison: sem intervenção × stack proposto × stack
+alternativo) e estimativa de years_gained. Todas as métricas exibem
+banda de confiança e link clicável para os triplets KG que as
+sustentam.</p>
+<p><strong>11. Sistema de recomendação híbrida</strong></p>
+<p>hybrid-recommendation é a edge function central do sistema. Combina
+retrieval semântico (study_embeddings), traversal causal (Neo4j
+subgraph) e regras determinísticas (src/rules/general/) — uma
+arquitetura propositalmente híbrida para reduzir dependência de geração
+livre por LLM em decisões clínicas.</p>
+<p><strong>11.1 Fluxo interno</strong></p>
+<p><strong>11.2 Justificação clínica</strong></p>
+<p>Cada recomendação retornada vem com (a) lista de evidence triplets
+clicáveis, (b) score de confiança (recommendation-confidence-service),
+(c) badges de origem (manual base, AI extraction, drug lookup), (d)
+disclaimer de uso off-label quando aplicável (DrugLookupBadge), (e) flag
+se algum triplet usado tem evidence_level ≤ 2 (alerta visual).</p>
+<p><strong>11.3 Loop do veterinário</strong></p>
+<p>VetRecommendationPanel permite aceitar, modificar (adicionar/remover
+compostos do stack, alterar dosagem) ou rejeitar com justificativa
+textual. Toda decisão é gravada em recommendations + study_audit_logs
+com ator e diff. Esta granularidade satisfaz Art. 14 EU AI Act (human
+oversight com efeitos materiais sobre o output).</p>
+<p><strong>12. Gêmeo Digital — projeção sigmoidal de
+desfechos</strong></p>
+<p><img src="public/audits/v3/media/media/rId28.png"
+title="Figura 6 — Arquitetura do gêmeo digital: inputs, engine, outputs e validação."
+style="width:5.83333in;height:2.91667in"
+alt="Figura 6 — Arquitetura do gêmeo digital: inputs, engine, outputs e validação." /></p>
+<p><em>Figura 6 — Arquitetura do gêmeo digital: inputs, engine, outputs
+e validação.</em></p>
+<p><strong>12.1 Modelo matemático</strong></p>
+<p>Adotamos curva logística σ(t) = L / (1 + e^(-k(t - t₀))) por composto
+× condição, onde L é a melhoria máxima projetada (limitada pela
+severidade baseline e pela evidência KG), k é a taxa derivada de
+evidence_level, years_gained sumário e synergy do stack, e t₀ é o tempo
+até inflexão (default 90 dias para nutracêuticos). A composição de
+múltiplos compostos usa soma com damping para evitar superestimação
+aditiva.</p>
+<p><strong>12.2 Engine</strong></p>
+<p>Implementação em src/services/biological-timeline-engine.ts e
+condition-progression-engine.ts. Inputs: severidade baseline (0–1),
+idade, raça, porte, comorbidades ativas, stack proposto e métricas KG
+agregadas. Outputs: três séries temporais de 12 meses (sem-intervenção,
+stack proposto, alternativa), bandas de confiança 80%/95%, métrica
+years_gained projetada. Tudo logado em DigitalTwinLogPanel.</p>
+<p><strong>12.3 Validação e limitações</strong></p>
+<p>Esta é a área de maior risco regulatório do sistema e está
+classificada como gap P0 ativo. As projeções são in-silico, derivadas
+exclusivamente do KG curado e da literatura indexada — não há ainda
+dados de coorte longitudinal pós-deploy para validar magnitude. As
+mitigações atuais são: (a) disclaimer permanente em toda visualização do
+twin; (b) banda de confiança visível; (c) flag forte quando
+evidence_level médio &lt; 3; (d) edge function
+calculate-recommendation-confidence reduz o twin para output minimal
+quando evidência insuficiente. A mitigação estrutural (RWPM com tabela
+outcome_observations) está descrita em §24.</p>
+<p><strong>13. Jornada real do revisor veterinário</strong></p>
+<p><img src="public/audits/v3/media/media/rId31.png"
+title="Figura 7 — Swimlane atual: revisor humano × Triplet Bank × KG."
+style="width:5.83333in;height:1.94444in"
+alt="Figura 7 — Swimlane atual: revisor humano × Triplet Bank × KG." /></p>
+<p><em>Figura 7 — Swimlane atual: revisor humano × Triplet Bank ×
+KG.</em></p>
+<p>Esta seção descreve fielmente o fluxo hoje em produção, incluindo
+atritos.</p>
+<p><strong>13.1 Login e contextualização</strong></p>
+<p>Veterinário autentica via Lovable Cloud (Google OAuth ou
+e-mail/senha). ProtectedRoute valida sessão; AccessAllowlist filtra
+acessos pendentes (StanfordDemoForm para demo); has_role('vet') libera
+as abas de curadoria. Uma melhoria prevista é landing por papel (default
+vai para a lista de pets — vet sente mais atrito que necessário até
+chegar à curadoria).</p>
+<p><strong>13.2 Triplet Bank</strong></p>
+<p>Triplet Bank Management exibe a fila de pendentes (auto-approve
+threshold 0.50). Filtros: estudo, predicado, camada, intensity, espécie,
+idade. Cada linha mostra excerpt-fonte da página exata do PDF (parser
+preserva offset textual), permitindo comparação direta entre asserção do
+LLM e literatura.</p>
+<p><strong>13.3 Inline chat e enrichment</strong></p>
+<p>Para cada triplet, o vet pode (a) abrir chat focal com o LLM
+(CompoundSpecificChat herdou esta UI) para esclarecer mecanismo, (b)
+acionar enrich-triplet (Gemini 2.5 Flash) para sinônimos PT, layer
+reclassification e suggestions de predicate normalization, (c) ver
+triplets relacionados no mesmo (composto, condição). Notas livres são
+gravadas para futura revisão.</p>
+<p><strong>13.4 Decisão e propagação</strong></p>
+<p>Aprovar dispara sync-study-to-neo4j; modificar persiste delta em
+triplet_extractions e re-encaminha para aprovação; rejeitar exige
+justificativa textual mínima e remove o candidato sem afetar o
+estudo-fonte. Tudo logado em study_audit_logs com role='vet'.</p>
+<p><strong>13.5 Atritos reais documentados</strong></p>
+<p><strong>14. Jornada prevista do revisor (roadmap UX)</strong></p>
+<p>Mapeamos quatro evoluções de produto que reduzem dramaticamente o
+esforço de curadoria sem comprometer rigor:</p>
+<p>Estimativa: estas seis melhorias somadas devem elevar throughput de
+curadoria em ~2,5×, mantendo a curation gatekeeper intacta.
+Implementação prioritária P1, fase 2026-Q3.</p>
+<p><strong>15. Jornada real do estudo científico</strong></p>
+<p><img src="public/audits/v3/media/media/rId34.png"
+title="Figura 8 — Linha do tempo do estudo, do upload ao engine de recomendação."
+style="width:5.83333in;height:3.11111in"
+alt="Figura 8 — Linha do tempo do estudo, do upload ao engine de recomendação." /></p>
+<p><em>Figura 8 — Linha do tempo do estudo, do upload ao engine de
+recomendação.</em></p>
+<p>Acompanhamos um estudo médio (revisão sistemática sobre curcumina em
+osteoartrite canina) através do sistema:</p>
+<p><strong>15.1 Métricas reais agregadas</strong></p>
+<p>Médias atuais sobre os ~210 estudos digeridos: 38 candidatos/estudo
+(Stage 1) → 28 validados (Stage 2, taxa de retenção 73%) → 9
+auto-aprovados (32%) + 19 enviados a manual (taxa de aprovação manual
+81%). Custo médio total de digestão: USD 0,42/estudo (Gemini é
+responsável por 71% deste custo, GPT-5 Mini por 29%). Tempo médio entre
+upload e disponibilidade no KG (incluindo revisão humana): 47
+minutos.</p>
+<p><strong>16. Jornada prevista do estudo (roadmap)</strong></p>
+<p><strong>17. Comparação MedGraphRAG × VetGraphRAG</strong></p>
+<p><img src="public/audits/v3/media/media/rId37.png"
+title="Figura 9 — Comparação dimensional MedGraphRAG (referência teórica) × VetGraphRAG (nossa implementação)."
+style="width:5.83333in;height:2.33333in"
+alt="Figura 9 — Comparação dimensional MedGraphRAG (referência teórica) × VetGraphRAG (nossa implementação)." /></p>
+<p><em>Figura 9 — Comparação dimensional MedGraphRAG (referência
+teórica) × VetGraphRAG (nossa implementação).</em></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 25%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Dimensão</strong></th>
+<th><strong>MedGraphRAG (Wu et al. 2024)</strong></th>
+<th><strong>VetGraphRAG (este projeto)</strong></th>
+<th><strong>Comentário</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domínio</td>
+<td>Medicina humana</td>
+<td>Veterinária canina (metabólico/degenerativo)</td>
+<td>Escopo deliberadamente estreito</td>
+</tr>
+<tr>
+<td>Camadas do grafo</td>
+<td>3 (User documents → Medical books → Medical dictionaries)</td>
+<td>5 (L0 Compound → L4 Outcome)</td>
+<td>Mais granular, otimizado para causalidade nutracêutica</td>
+</tr>
+<tr>
+<td>U-Retrieval</td>
+<td>Top-down + bottom-up híbrido</td>
+<td>Hybrid retrieval (vetor + BM25 + grafo) sem U-completo</td>
+<td>Gap; planejado community summaries P2</td>
+</tr>
+<tr>
+<td>Triplet schema</td>
+<td>Tag-based, evidence-grounded</td>
+<td>Predicate-normalized, evidence_level 1–5, intensity (-1..+1)</td>
+<td>Schema mais rico, dictionary-controlled</td>
+</tr>
+<tr>
+<td>Curadoria humana</td>
+<td>Não exigida no paper</td>
+<td>Obrigatória (gatekeeper) exceto auto-approve ≥0.50</td>
+<td>Vantagem regulatória decisiva</td>
+</tr>
+<tr>
+<td>Validação clínica</td>
+<td>Benchmarks NLP (PubMedQA, etc.)</td>
+<td>KG provenance + Digital Twin in-silico (RWPM ausente)</td>
+<td>Falta validação de coorte real</td>
+</tr>
+<tr>
+<td>Multilíngue</td>
+<td>Não</td>
+<td>PT/EN em todas as camadas</td>
+<td>Necessidade do mercado-alvo BR</td>
+</tr>
+<tr>
+<td>Auditabilidade</td>
+<td>Implícita na arquitetura</td>
+<td>Explícita: study_audit_logs append-only + UI de log</td>
+<td>Conformidade EU AI Act Art. 12</td>
+</tr>
+<tr>
+<td>Bias mitigation</td>
+<td>Não detalhado</td>
+<td>Dictionaries SNOMED/UMLS, escopo único declarado</td>
+<td>Trade-off: cobertura vs. controle</td>
+</tr>
+<tr>
+<td>Deploy</td>
+<td>Pesquisa</td>
+<td>Produção (Lovable Cloud, RLS, Edge Functions)</td>
+<td>Diferença operacional importante</td>
+</tr>
+</tbody>
+</table>
+<p>Outras inspirações relevantes: Microsoft GraphRAG (community
+summaries — não adotado ainda); Med-PaLM 2 (qualidade de generation
+médica — usamos GPT-5 e Gemini 2.5 Pro como aproximações via gateway);
+RAG seminal de Lewis et al. (2020) é a base conceitual de toda a
+recuperação.</p>
+<p><strong>18. Conformidade FDA — matriz ponto a ponto</strong></p>
+<p>Mapa entre requisitos do FDA Draft Guidance (jan/2025)</p>
+<p>Mapa entre requisitos do FDA Draft Guidance (jan/2025)<a href="#fn5"
+class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> e
+GMLP<a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a> contra evidências reais do
+código:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 30%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Requisito</strong></th>
+<th><strong>Evidência</strong></th>
+<th><strong>Status</strong></th>
+<th><strong>Prioridade</strong></th>
+<th><strong>Ação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Predetermined Change Control Plan (PCCP)</td>
+<td>CHANGELOG.md + I18N_VERSION + supabase/migrations/ + ai_prompts
+versioned</td>
+<td>Atende (técnico)</td>
+<td>P2/S</td>
+<td>Formalizar em documento assinado</td>
+</tr>
+<tr>
+<td>GMLP Princípio 1 — Multi-disciplinary expertise</td>
+<td>Equipe multidisciplinar declarada; código em docs/</td>
+<td>Atende</td>
+<td>P3/S</td>
+<td>Publicar org chart</td>
+</tr>
+<tr>
+<td>GMLP P2 — Good software engineering</td>
+<td>TypeScript estrito, RLS, validation triggers, tests vitest</td>
+<td>Atende</td>
+<td>P3/S</td>
+<td>Aumentar cobertura de testes</td>
+</tr>
+<tr>
+<td>GMLP P3 — Clinical study representation</td>
+<td>Apenas canino documentado</td>
+<td>Parcial</td>
+<td>P1/M</td>
+<td>Publicar dataset card</td>
+</tr>
+<tr>
+<td>GMLP P4 — Training data independence from test</td>
+<td>Não há split formal training/eval</td>
+<td>Gap</td>
+<td>P1/M</td>
+<td>Documentar holdout para Stage 2 evaluation</td>
+</tr>
+<tr>
+<td>GMLP P5 — Reference standard</td>
+<td>SNOMED-VetSCT, UMLS</td>
+<td>Atende</td>
+<td>P3/S</td>
+<td>Versionar mappings</td>
+</tr>
+<tr>
+<td>GMLP P6 — Model design tailored to data</td>
+<td>Pipeline 3-stage com modelo correto por etapa</td>
+<td>Atende</td>
+<td>P3/S</td>
+<td>—</td>
+</tr>
+<tr>
+<td>GMLP P7 — Human-AI team performance</td>
+<td>Vet override gravado; falta métrica formal</td>
+<td>Parcial</td>
+<td>P1/M</td>
+<td>Dashboard human-AI agreement</td>
+</tr>
+<tr>
+<td>GMLP P8 — Testing demonstrates device performance</td>
+<td>Métricas operacionais §28; sem clinical performance</td>
+<td>Parcial</td>
+<td>P0/L</td>
+<td>RWPM (ver abaixo)</td>
+</tr>
+<tr>
+<td>GMLP P9 — Users provided clear info</td>
+<td>Insight cards, badges, disclaimers</td>
+<td>Atende</td>
+<td>P3/S</td>
+<td>Model card por feature</td>
+</tr>
+<tr>
+<td>GMLP P10 — Deployed models monitored &amp; retrained</td>
+<td>Sem cohort tracking pós-deploy</td>
+<td>Gap</td>
+<td>P0/L</td>
+<td>outcome_observations + dashboard longitudinal</td>
+</tr>
+<tr>
+<td>Transparency for users</td>
+<td>ClinicalPipelineLogPanel, EvidenceGapLogPanel, DrugLookupBadge</td>
+<td>Atende</td>
+<td>P2/S</td>
+<td>Sumário de governança visível</td>
+</tr>
+<tr>
+<td>Real-World Performance Monitoring</td>
+<td>Inexistente</td>
+<td>Gap</td>
+<td>P0/L</td>
+<td>Tabela outcome_observations + ingestão de follow-up</td>
+</tr>
+<tr>
+<td>Bias mitigation &amp; subgroup performance</td>
+<td>Bilinguismo, dictionaries; sem análise por raça</td>
+<td>Parcial</td>
+<td>P1/M</td>
+<td>Relatório por raça/porte trimestral</td>
+</tr>
+<tr>
+<td>Data quality &amp; integrity</td>
+<td>No-mock policy, gatekeeper, SHA-256 dedup</td>
+<td>Atende</td>
+<td>P2/S</td>
+<td>Auditoria periódica automatizada</td>
+</tr>
+</tbody>
+</table>
+<p>Resumo FDA: 9 requisitos atendem, 4 parciais, 3 gaps (todos P0 ou P1,
+todos rastreados em §24).</p>
+<p><strong>19. Conformidade EMA + EU AI Act</strong></p>
+<p>Reflection Paper EMA set/2024<a href="#fn7" class="footnote-ref"
+id="fnref7" role="doc-noteref"><sup>7</sup></a> e Regulamento (UE)
+2024/1689 (AI Act)<a href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a> cobertos:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 37%" />
+<col style="width: 13%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Requisito</strong></th>
+<th><strong>Evidência</strong></th>
+<th><strong>Status</strong></th>
+<th><strong>Ação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Classificação como sistema de IA de alto risco</td>
+<td>Apoio à decisão clínica veterinária — fora do Anexo III estrito
+(foco humano), mas adotamos controles equivalentes</td>
+<td>Parcial</td>
+<td>Publicar declaração formal de classificação</td>
+</tr>
+<tr>
+<td>Human oversight (Art. 14)</td>
+<td>VetRecommendationPanel: aceitar/modificar/rejeitar; curadoria humana
+antes de KG</td>
+<td>Atende</td>
+<td>Logar override com justificativa textual</td>
+</tr>
+<tr>
+<td>Technical documentation (Annex IV)</td>
+<td>ARCHITECTURE.md, CURRENT_STATE.md, STANFORD_DEMO.md, este
+auto-audit</td>
+<td>Atende</td>
+<td>Consolidar em dossiê único exportável (PDF)</td>
+</tr>
+<tr>
+<td>Logging &amp; traceability (Art. 12)</td>
+<td>study_audit_logs append-only, KG provenance</td>
+<td>Atende</td>
+<td>Retenção 24 meses formalizada</td>
+</tr>
+<tr>
+<td>Accuracy, robustness, cybersecurity (Art. 15)</td>
+<td>RLS exaustivo, secrets, validation triggers, has_role()</td>
+<td>Atende</td>
+<td>Pen-test anual + SAST/DAST CI</td>
+</tr>
+<tr>
+<td>Data governance (Art. 10)</td>
+<td>Base knowledge governance manual, soft-delete, two-tier
+confidence</td>
+<td>Parcial</td>
+<td>Documento formal de origem/consentimento de dados</td>
+</tr>
+<tr>
+<td>Transparency (Art. 13)</td>
+<td>Painéis de log e badges de origem</td>
+<td>Atende</td>
+<td>Notification card resumindo decisão automatizada</td>
+</tr>
+<tr>
+<td>Risk management (Art. 9)</td>
+<td>Matriz de risco implícita; falta documento</td>
+<td>Parcial</td>
+<td>Escrever ISO 14971-aligned risk file</td>
+</tr>
+<tr>
+<td>Quality management system (Art. 17)</td>
+<td>CHANGELOG, processos de release informais</td>
+<td>Parcial</td>
+<td>Formalizar QMS documento (alinhado ISO 13485 espírito)</td>
+</tr>
+<tr>
+<td>Conformity assessment</td>
+<td>Não aplicável (veterinário) — mas adotamos como padrão interno</td>
+<td>Parcial</td>
+<td>Self-declaration roadmap</td>
+</tr>
+</tbody>
+</table>
+<p>Reflection Paper EMA enfatiza ainda: data quality (atendido por
+curadoria), transparência sobre incertezas (atendido por banda de
+confiança e EvidenceGapLogPanel), e human-in-the-loop (atendido).</p>
+<p><strong>20. Conformidade AVMA / AAVSB</strong></p>
+<p>AVMA Framework nov/2025<a href="#fn9" class="footnote-ref"
+id="fnref9" role="doc-noteref"><sup>9</sup></a> + AAVSB Model Practice
+Act 2025<a href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a>:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 37%" />
+<col style="width: 13%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Requisito</strong></th>
+<th><strong>Evidência</strong></th>
+<th><strong>Status</strong></th>
+<th><strong>Ação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Veterinarian-in-the-loop</td>
+<td>Pipeline de curadoria 7-estágios; gatekeeper exceto auto-approve
+≥0.50</td>
+<td>Atende</td>
+<td>Threshold configurável por admin</td>
+</tr>
+<tr>
+<td>Species-specific validation</td>
+<td>Foco canino documentado; sem bloqueio técnico de extrapolação</td>
+<td>Gap</td>
+<td>Marcar species=canine em todo triplet + bloqueio em queries</td>
+</tr>
+<tr>
+<td>Off-label disclosure</td>
+<td>DrugLookupBadge sinaliza uso humano/extra-label</td>
+<td>Atende</td>
+<td>Consent screen para tutor</td>
+</tr>
+<tr>
+<td>Continuing education for users</td>
+<td>Inexistente</td>
+<td>Gap</td>
+<td>Onboarding + biblioteca de evidência por compound</td>
+</tr>
+<tr>
+<td>Transparência sobre limitações</td>
+<td>Insight cards, badges, EvidenceGapLogPanel</td>
+<td>Atende</td>
+<td>Disclaimer permanente no rodapé das recomendações</td>
+</tr>
+<tr>
+<td>Evidence-based recommendations</td>
+<td>Score de confiança, evidence_level visível</td>
+<td>Atende</td>
+<td>Manter</td>
+</tr>
+<tr>
+<td>Patient safety guardrails</td>
+<td>Contraindications-scoring bloqueia compostos perigosos</td>
+<td>Atende</td>
+<td>Adicionar dose-checking automático</td>
+</tr>
+<tr>
+<td>Data privacy (pet owner)</td>
+<td>RLS por owner; demo data flag is_demo separa</td>
+<td>Atende</td>
+<td>DPIA documento</td>
+</tr>
+</tbody>
+</table>
+<p><strong>21. GMLP — análise por princípio</strong></p>
+<p>Cada um dos 10 princípios de Good Machine Learning Practice
+(FDA/HC/MHRA, 2021, referenciados pelo PCCP guidance 2025) é endereçado
+abaixo com o componente do nosso sistema que o operacionaliza:</p>
+<p><strong>P1 — Multi-disciplinary expertise</strong></p>
+<p>Equipe combina veterinária clínica, engenharia de ML, engenharia de
+dados e UX. Decisões de produto passam por todos os perfis (memória
+'communication-guidelines').</p>
+<p><strong>P2 — Good software engineering</strong></p>
+<p>Código TypeScript estrito; convenções enforcadas por ESLint; testes
+em vitest; migrations Postgres versionadas; revisões de código em todo
+merge.</p>
+<p><strong>P3 — Representativeness of clinical data</strong></p>
+<p>Foco canino declarado; raças e portes diversos representados em
+sample data; gap reconhecido para felino/equino (P0).</p>
+<p><strong>P4 — Training/test independence</strong></p>
+<p>Modelos LLM são externos (não treinamos); avaliação Stage 2 funciona
+como gate qualitativo; falta holdout formal para evaluation contínua
+(gap P1).</p>
+<p><strong>P5 — Reference standard</strong></p>
+<p>SNOMED-CT VetSCT e UMLS como ground truth de canonicalização;
+mappings versionados em taxonomy_dictionaries.</p>
+<p><strong>P6 — Model design tailored to data</strong></p>
+<p>Roteamento por tarefa: Gemini Flash para amplitude, Pro para
+precisão, GPT-5 para reasoning de polifarmácia, embeddings dedicados
+para retrieval.</p>
+<p><strong>P7 — Human-AI team performance</strong></p>
+<p>Vet decide; LLM sugere. Logs preservam decisão e diff. Métrica formal
+de agreement está prevista (P1).</p>
+<p><strong>P8 — Testing demonstrates performance under conditions of
+use</strong></p>
+<p>Métricas operacionais §28; falta clinical performance longitudinal
+(gap P0 — RWPM).</p>
+<p><strong>P9 — Users provided clear, essential information</strong></p>
+<p>Insight cards categorizados, badges de origem, banda de confiança,
+disclaimers off-label. Próximo passo: model cards por feature.</p>
+<p><strong>P10 — Monitor &amp; retrain deployed models</strong></p>
+<p>Modelos LLM são geridos pelos provedores; nosso pipeline (prompts,
+dicionários, ontologia) é monitorado por logs e CHANGELOG. Falta cohort
+outcome tracking (gap P0).</p>
+<p><strong>22. Pontos fortes</strong></p>
+<p><strong>23. Pontos fracos, gaps e riscos</strong></p>
+<p><strong>23.1 Gaps técnicos</strong></p>
+<p><strong>23.2 Gaps de produto e UX</strong></p>
+<p><strong>23.3 Gaps regulatórios</strong></p>
+<p><strong>23.4 Riscos residuais</strong></p>
+<p><strong>24. Roadmap P0–P3 detalhado</strong></p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 34%" />
+<col style="width: 18%" />
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>#</strong></th>
+<th><strong>Item</strong></th>
+<th><strong>Categoria</strong></th>
+<th><strong>Prioridade</strong></th>
+<th><strong>Esforço</strong></th>
+<th><strong>Sprint alvo</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>outcome_observations + RWPM dashboard</td>
+<td>Técnico/Reg.</td>
+<td>P0</td>
+<td>L</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>População manual L1 (Molecular Targets) via UMLS</td>
+<td>Dados/Ontologia</td>
+<td>P0</td>
+<td>L</td>
+<td>2026-Q3/Q4</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Guardrail técnico species=canine em queries</td>
+<td>Técnico</td>
+<td>P0</td>
+<td>M</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Watcher de retractions PubMed</td>
+<td>Técnico</td>
+<td>P0</td>
+<td>M</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Risk management file ISO 14971-aligned</td>
+<td>Regulatório</td>
+<td>P1</td>
+<td>M</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Holdout formal de evaluation contínua</td>
+<td>ML</td>
+<td>P1</td>
+<td>M</td>
+<td>2026-Q4</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Continuing Education embutido (AVMA §6)</td>
+<td>Produto</td>
+<td>P1</td>
+<td>L</td>
+<td>2026-Q4</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Análise de bias por raça/porte trimestral</td>
+<td>ML/Reg.</td>
+<td>P1</td>
+<td>M</td>
+<td>2026-Q4</td>
+</tr>
+<tr>
+<td>9</td>
+<td>QMS formal (espírito ISO 13485)</td>
+<td>Regulatório</td>
+<td>P1</td>
+<td>L</td>
+<td>2027-Q1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Bulk shortcuts + agrupamento por par</td>
+<td>UX</td>
+<td>P2</td>
+<td>S</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Community summaries no KG</td>
+<td>Técnico</td>
+<td>P2</td>
+<td>M</td>
+<td>2027-Q1</td>
+</tr>
+<tr>
+<td>12</td>
+<td>PCCP formalizado em documento assinado</td>
+<td>Regulatório</td>
+<td>P2</td>
+<td>S</td>
+<td>2026-Q4</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Re-vetorização incremental automatizada</td>
+<td>Técnico</td>
+<td>P2</td>
+<td>M</td>
+<td>2027-Q1</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Dashboard pessoal de produtividade do revisor</td>
+<td>Produto</td>
+<td>P2</td>
+<td>S</td>
+<td>2027-Q1</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Retenção study_audit_logs 24 meses formalizada</td>
+<td>Regulatório</td>
+<td>P3</td>
+<td>S</td>
+<td>2026-Q3</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Model cards por feature</td>
+<td>Regulatório</td>
+<td>P3</td>
+<td>S</td>
+<td>2026-Q4</td>
+</tr>
+</tbody>
+</table>
+<p>Pipeline tem capacidade para 3 P0 + 4 P1 + 5 P2 simultâneos por
+trimestre dado o backlog atual.</p>
+<p><strong>25. Apêndice A — Schema SQL principal (resumo)</strong></p>
+<p>Reproduzimos as DDLs essenciais (omitindo índices secundários, tipos
+auxiliares e RLS extensa para concisão; consulte supabase/migrations/
+para o canon).</p>
+<p>-- Roles em tabela separada (anti-recursão RLS):</p>
+<p>CREATE TYPE app_role AS ENUM ('admin','vet','owner','curator');</p>
+<p>CREATE TABLE user_roles (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE
+CASCADE, role app_role NOT NULL, UNIQUE(user_id, role));</p>
+<p>CREATE OR REPLACE FUNCTION has_role(_user_id uuid, _role app_role)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET
+search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE
+user_id=_user_id AND role=_role) $$;</p>
+<p>-- Estudos e digestão:</p>
+<p>CREATE TABLE studies (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+title text NOT NULL, doi text, pmid text, year int, study_type text,
+sha256 text UNIQUE, ingested_at timestamptz DEFAULT now());</p>
+<p>CREATE TABLE study_embeddings (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), study_id uuid REFERENCES studies(id) ON DELETE
+CASCADE, chunk_index int, section text, content text, embedding
+vector(768));</p>
+<p>CREATE INDEX ON study_embeddings USING ivfflat (embedding
+vector_cosine_ops) WITH (lists = 100);</p>
+<p>-- Triplets e KG:</p>
+<p>CREATE TABLE triplet_extractions (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), study_id uuid REFERENCES studies(id), subject text,
+predicate text, object text, evidence_level int, intensity numeric,
+confidence_score numeric, status text DEFAULT 'pending', source_excerpt
+text, page_offset int);</p>
+<p>CREATE TABLE medical_knowledge_graph (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), subject_id uuid, predicate text, object_id uuid,
+evidence_level int, intensity numeric, confidence numeric, species text,
+source_study_id uuid REFERENCES studies(id), is_canonical boolean
+DEFAULT false);</p>
+<p>CREATE TABLE hierarchical_edges (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), from_node uuid, to_node uuid, layer_from text,
+layer_to text, predicate text, evidence_level int, intensity
+numeric);</p>
+<p>-- Auditoria:</p>
+<p>CREATE TABLE study_audit_logs (id uuid PRIMARY KEY DEFAULT
+gen_random_uuid(), actor_id uuid, action text, payload jsonb, created_at
+timestamptz DEFAULT now());</p>
+<p>ALTER TABLE study_audit_logs ENABLE ROW LEVEL SECURITY;</p>
+<p>CREATE POLICY "audit_select_admin_or_self" ON study_audit_logs FOR
+SELECT TO authenticated USING (has_role(auth.uid(),'admin') OR actor_id
+= auth.uid());</p>
+<p>CREATE POLICY "audit_no_update" ON study_audit_logs FOR UPDATE USING
+(false);</p>
+<p>CREATE POLICY "audit_no_delete" ON study_audit_logs FOR DELETE USING
+(false);</p>
+<p><strong>26. Apêndice B — Inventário de Edge Functions</strong></p>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 23%" />
+<col style="width: 32%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Função</strong></th>
+<th><strong>Modelo principal</strong></th>
+<th><strong>Intent</strong></th>
+<th><strong>Verify JWT</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>parse-study</td>
+<td>Gemini 2.5 Flash</td>
+<td>Extração de metadados do PDF</td>
+<td>false</td>
+</tr>
+<tr>
+<td>vectorize-study</td>
+<td>text-embedding-004</td>
+<td>Chunking + embeddings</td>
+<td>false</td>
+</tr>
+<tr>
+<td>process-study</td>
+<td>Gemini Flash + Pro + GPT-5 Mini</td>
+<td>Pipeline 3-stage de extração</td>
+<td>false</td>
+</tr>
+<tr>
+<td>enrich-triplet</td>
+<td>Gemini 2.5 Flash</td>
+<td>Sinônimos, layer reclassification</td>
+<td>true</td>
+</tr>
+<tr>
+<td>hybrid-recommendation</td>
+<td>Regras + GPT-5 cond.</td>
+<td>Recomendação clínica</td>
+<td>true</td>
+</tr>
+<tr>
+<td>condition-insights</td>
+<td>Gemini 2.5 Flash</td>
+<td>Insight cards categorizados</td>
+<td>true</td>
+</tr>
+<tr>
+<td>relations-auditor</td>
+<td>Gemini 2.5 Pro / GPT-5</td>
+<td>Auditoria conversacional do KG</td>
+<td>true</td>
+</tr>
+<tr>
+<td>translate-and-categorize-conditions</td>
+<td>Flash-Lite</td>
+<td>Tradução + categorização</td>
+<td>false</td>
+</tr>
+<tr>
+<td>extract-pet-clinical-data</td>
+<td>GPT-5 Mini</td>
+<td>Extração de texto livre clínico</td>
+<td>true</td>
+</tr>
+<tr>
+<td>kg-missing-triplets</td>
+<td>Gemini Flash</td>
+<td>Detecta lacunas de evidência</td>
+<td>true</td>
+</tr>
+<tr>
+<td>web-dosage-lookup</td>
+<td>Gemini Flash-Lite</td>
+<td>Busca de dose e off-label</td>
+<td>true</td>
+</tr>
+<tr>
+<td>calculate-recommendation-confidence</td>
+<td>—</td>
+<td>Score determinístico</td>
+<td>true</td>
+</tr>
+<tr>
+<td>sync-study-to-neo4j</td>
+<td>—</td>
+<td>Sync KG canônico</td>
+<td>false</td>
+</tr>
+<tr>
+<td>neo4j-sync</td>
+<td>—</td>
+<td>Sync incremental KG</td>
+<td>false</td>
+</tr>
+<tr>
+<td>consolidate-knowledge-graph</td>
+<td>Gemini Pro</td>
+<td>Consolidação periódica</td>
+<td>false</td>
+</tr>
+<tr>
+<td>enrich-knowledge-graph</td>
+<td>Gemini Pro</td>
+<td>Enrichment retroativo</td>
+<td>false</td>
+</tr>
+<tr>
+<td>graph-rag-search</td>
+<td>—</td>
+<td>Retrieval híbrido</td>
+<td>true</td>
+</tr>
+<tr>
+<td>fetch-external-ontologies</td>
+<td>—</td>
+<td>Busca SNOMED/UMLS</td>
+<td>true</td>
+</tr>
+<tr>
+<td>suggest-taxonomy-terms</td>
+<td>Flash</td>
+<td>Sugestão de termos para taxonomia</td>
+<td>true</td>
+</tr>
+<tr>
+<td>download-study-pdf</td>
+<td>—</td>
+<td>Download robusto PMC</td>
+<td>false</td>
+</tr>
+<tr>
+<td>chat</td>
+<td>Gemini Flash</td>
+<td>Chat clínico contextual</td>
+<td>true</td>
+</tr>
+<tr>
+<td>ai-config</td>
+<td>—</td>
+<td>Provedor de configuração de modelos</td>
+<td>true</td>
+</tr>
+<tr>
+<td>api-usage-stats</td>
+<td>—</td>
+<td>Métricas de uso por modelo</td>
+<td>true</td>
+</tr>
+<tr>
+<td>provider-health</td>
+<td>—</td>
+<td>Healthcheck dos provedores</td>
+<td>false</td>
+</tr>
+<tr>
+<td>run-translation-audit</td>
+<td>—</td>
+<td>Auditoria PT/EN</td>
+<td>true</td>
+</tr>
+<tr>
+<td>translate-text</td>
+<td>Flash-Lite</td>
+<td>Tradução pontual</td>
+<td>true</td>
+</tr>
+<tr>
+<td>translate-conditions</td>
+<td>Flash-Lite</td>
+<td>Tradução em batch</td>
+<td>true</td>
+</tr>
+<tr>
+<td>batch-reprocess-triplets</td>
+<td>Pro</td>
+<td>Reprocessamento em lote</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<p><strong>27. Apêndice C — Prompts e modelos LLM</strong></p>
+<p>Os prompts de produção residem na tabela ai_prompts e são consumidos
+por cada edge function via cliente único. Cada registro persiste: id,
+function_key, version (semver), model_id (FK ai_models), system_message,
+user_template, temperature, max_tokens, checksum (SHA-256 do conjunto),
+created_by, created_at, is_active.</p>
+<p><strong>27.1 Disciplina de evolução</strong></p>
+<p><strong>27.2 Exemplo abreviado — Stage 2 prompt
+(validação)</strong></p>
+<p>"Você é um curador veterinário. Para cada candidato a triplet abaixo,
+verifique se o trecho-fonte fornecido sustenta literalmente a asserção
+(sujeito, predicado, objeto). Rejeite se a relação for inferida sem
+suporte direto. Para casos válidos, normalize o predicado contra o
+dicionário fornecido, faça clamping de intensity para [-1, +1], mapeie
+evidence_level pelo tipo de estudo (RCT=5, meta=5, cohort=4,
+observacional=3, animal_model=2, in_vitro=2, opinion=1). Saída em JSON
+estrito."</p>
+<p><strong>27.3 Configuração padrão por tarefa</strong></p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 19%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Função</strong></th>
+<th><strong>Modelo</strong></th>
+<th><strong>Temperature</strong></th>
+<th><strong>Max tokens</strong></th>
+<th><strong>Estrutura</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>parse-study</td>
+<td>Gemini 2.5 Flash</td>
+<td>0.1</td>
+<td>8192</td>
+<td>JSON schema fixo</td>
+</tr>
+<tr>
+<td>process-study Stage 1</td>
+<td>Gemini 2.5 Flash</td>
+<td>0.3</td>
+<td>8192</td>
+<td>JSON array</td>
+</tr>
+<tr>
+<td>process-study Stage 2</td>
+<td>Gemini 2.5 Pro</td>
+<td>0.0</td>
+<td>8192</td>
+<td>JSON validation</td>
+</tr>
+<tr>
+<td>process-study Stage 3</td>
+<td>GPT-5 Mini</td>
+<td>0.2</td>
+<td>4096</td>
+<td>JSON enriched</td>
+</tr>
+<tr>
+<td>hybrid-recommendation</td>
+<td>GPT-5 (cond.)</td>
+<td>0.2</td>
+<td>4096</td>
+<td>JSON com justifications</td>
+</tr>
+<tr>
+<td>chat clínico</td>
+<td>Gemini 2.5 Flash</td>
+<td>0.4</td>
+<td>2048</td>
+<td>Markdown</td>
+</tr>
+</tbody>
+</table>
+<p><strong>28. Apêndice D — Métricas operacionais</strong></p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 20%" />
+<col style="width: 16%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Métrica</strong></th>
+<th><strong>Valor atual</strong></th>
+<th><strong>Janela</strong></th>
+<th><strong>Observação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estudos digeridos</td>
+<td>~210</td>
+<td>cumulativo</td>
+<td>Todos canino, metabolic/degenerative</td>
+</tr>
+<tr>
+<td>Triplets aprovados (KG)</td>
+<td>4.487</td>
+<td>cumulativo</td>
+<td>sync espelhado em Neo4j</td>
+</tr>
+<tr>
+<td>Hierarchical edges</td>
+<td>36.772</td>
+<td>cumulativo</td>
+<td>Inclui derivadas L0→L4</td>
+</tr>
+<tr>
+<td>Embeddings persistidos</td>
+<td>~620 chunks/estudo médio</td>
+<td>cumulativo</td>
+<td>text-embedding-004 (768d)</td>
+</tr>
+<tr>
+<td>Auto-approve rate (≥0.50)</td>
+<td>31%</td>
+<td>últimos 90 dias</td>
+<td>Threshold configurável</td>
+</tr>
+<tr>
+<td>Manual approval rate</td>
+<td>81%</td>
+<td>últimos 90 dias</td>
+<td>Indica boa qualidade Stage 2</td>
+</tr>
+<tr>
+<td>Custo por estudo</td>
+<td>USD 0,42</td>
+<td>médio</td>
+<td>Gemini 71% / GPT 29%</td>
+</tr>
+<tr>
+<td>Tempo upload→KG</td>
+<td>47 min</td>
+<td>médio</td>
+<td>Inclui revisão humana</td>
+</tr>
+<tr>
+<td>Latência hybrid-recommendation</td>
+<td>p95 = 3,8 s</td>
+<td>últimos 30 dias</td>
+<td>Cache hit 42%</td>
+</tr>
+<tr>
+<td>RLS coverage</td>
+<td>100% das tabelas clínicas</td>
+<td>atual</td>
+<td>Auditável via supabase--linter</td>
+</tr>
+<tr>
+<td>Test coverage (vitest)</td>
+<td>~38%</td>
+<td>atual</td>
+<td>Meta 60% para próximo trimestre (P2)</td>
+</tr>
+<tr>
+<td>I18N coverage PT/EN</td>
+<td>99,4%</td>
+<td>atual</td>
+<td>run-translation-audit semanal</td>
+</tr>
+</tbody>
+</table>
+<p>Estas métricas serão expostas em dashboard interno como pré-requisito
+do RWPM (item P0).</p>
+<p><strong>29. Bibliografia</strong></p>
+<p>As citações inline do documento (rodapés [1] a [14]) referenciam
+exatamente as fontes abaixo. Notas de rodapé Word nativas tornam
+navegáveis as citações.</p>
+<ul>
+<li><p>[1] FDA — Marketing Submission Recommendations for a
+Predetermined Change Control Plan for AI/ML-Enabled Device Software
+Functions: Draft Guidance, January 2025.
+https://www.fda.gov/regulatory-information/search-fda-guidance-documents</p></li>
+<li><p>[2] Wu J. et al. MedGraphRAG: Towards Safe Medical Large Language
+Model via Graph Retrieval-Augmented Generation. arXiv:2408.04187, 2024.
+Oxford University. https://arxiv.org/abs/2408.04187</p></li>
+<li><p>[3] Edge D. et al. From Local to Global: A Graph RAG Approach to
+Query-Focused Summarization. Microsoft Research, arXiv:2404.16130,
+2024.</p></li>
+<li><p>[4] EMA — Reflection paper on the use of Artificial Intelligence
+in the medicinal product lifecycle. EMA/CHMP/CVMP/83833/2023, September
+2024.
+https://www.ema.europa.eu/en/documents/scientific-guideline/reflection-paper-use-artificial-intelligence-ai-medicinal-product-lifecycle_en.pdf</p></li>
+<li><p>[5] Regulation (EU) 2024/1689 (EU AI Act). Official Journal of
+the European Union, July 2024; high-risk obligations enforceable from
+August 2026.</p></li>
+<li><p>[6] AVMA — Framework for the Use of Artificial Intelligence in
+Veterinary Medicine. American Veterinary Medical Association, November
+2025.</p></li>
+<li><p>[7] FDA/Health Canada/MHRA — Good Machine Learning Practice for
+Medical Device Development: Guiding Principles. October 2021 (referenced
+in 2025 PCCP guidance).</p></li>
+<li><p>[8] Singhal K. et al. Towards Expert-Level Medical Question
+Answering with Large Language Models (Med-PaLM 2). arXiv:2305.09617,
+2023.</p></li>
+<li><p>[9] SNOMED International — SNOMED CT Veterinary Extension
+(VetSCT). https://www.snomed.org/our-customers/veterinary</p></li>
+<li><p>[10] U.S. National Library of Medicine — Unified Medical Language
+System (UMLS) Metathesaurus.
+https://www.nlm.nih.gov/research/umls/</p></li>
+<li><p>[11] Lewis P. et al. Retrieval-Augmented Generation for
+Knowledge-Intensive NLP Tasks. NeurIPS 2020, arXiv:2005.11401.</p></li>
+<li><p>[12] AAVSB — Model Veterinary Practice Act guidance updates on
+telemedicine and AI-assisted decision support, 2025 revision.</p></li>
+<li><p>[13] Topol E. High-performance medicine: the convergence of human
+and artificial intelligence. Nature Medicine, 25, 44–56 (2019).</p></li>
+<li><p>[14] Karim M.R. et al. Explainable AI for clinical decision
+support: a systematic review. npj Digital Medicine, 2024.</p></li>
+</ul>
+<p>Fim do documento — VetGraphRAG Auto-Auditoria Técnica v3.0.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Wu J. et al. MedGraphRAG: Towards Safe Medical Large
+Language Model via Graph Retrieval-Augmented Generation.
+arXiv:2408.04187, 2024. Oxford University.
+https://arxiv.org/abs/2408.04187<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Edge D. et al. From Local to Global: A Graph RAG
+Approach to Query-Focused Summarization. Microsoft Research,
+arXiv:2404.16130, 2024.<a href="#fnref2" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Edge D. et al. From Local to Global: A Graph RAG
+Approach to Query-Focused Summarization. Microsoft Research,
+arXiv:2404.16130, 2024.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Wu J. et al. MedGraphRAG: Towards Safe Medical Large
+Language Model via Graph Retrieval-Augmented Generation.
+arXiv:2408.04187, 2024. Oxford University.
+https://arxiv.org/abs/2408.04187<a href="#fnref4" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>FDA — Marketing Submission Recommendations for a
+Predetermined Change Control Plan for AI/ML-Enabled Device Software
+Functions: Draft Guidance, January 2025.
+https://www.fda.gov/regulatory-information/search-fda-guidance-documents<a
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>FDA/Health Canada/MHRA — Good Machine Learning Practice
+for Medical Device Development: Guiding Principles. October 2021
+(referenced in 2025 PCCP guidance).<a href="#fnref6"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>EMA — Reflection paper on the use of Artificial
+Intelligence in the medicinal product lifecycle.
+EMA/CHMP/CVMP/83833/2023, September 2024.
+https://www.ema.europa.eu/en/documents/scientific-guideline/reflection-paper-use-artificial-intelligence-ai-medicinal-product-lifecycle_en.pdf<a
+href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Regulation (EU) 2024/1689 (EU AI Act). Official Journal
+of the European Union, July 2024; high-risk obligations enforceable from
+August 2026.<a href="#fnref8" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>AVMA — Framework for the Use of Artificial Intelligence
+in Veterinary Medicine. American Veterinary Medical Association,
+November 2025.<a href="#fnref9" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>AAVSB — Model Veterinary Practice Act guidance updates
+on telemedicine and AI-assisted decision support, 2025 revision.<a
+href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

@@ -1,79 +1,97 @@
 ## Objetivo
 
-Gerar `VetGraphRAG_Auto_Auditoria_Tecnica_v2.docx` expandindo a v1 com três adições principais, mantendo todo o conteúdo original e melhorando a profundidade técnica/regulatória.
+Transformar a auditoria técnica (hoje só .docx/.pdf em `/mnt/documents/`) em um artefato versionado, navegável e re-executável dentro do admin — ao lado do Changelog/Organograma, com vínculo explícito à versão do sistema auditada.
 
----
+## Arquitetura proposta
+
+### 1. Conteúdo HTML da auditoria (estático, versionado em git)
+
+- Converter o `.docx` v3 em **HTML semântico** (via `pandoc --extract-media`) e salvar em:
+  - `public/audits/v3/index.html` (corpo do relatório, com TOC, headings, tabelas)
+  - `public/audits/v3/media/*` (os 9 infográficos preservados)
+- Criar um índice tipado em `src/data/technicalAudits.ts`:
+  ```ts
+  export interface TechnicalAudit {
+    id: string;              // "v3"
+    version: string;         // "3.0.0"
+    date: string;            // "2026-05-10"
+    systemVersion: string;   // i18n version + último commit do CHANGELOG
+    systemDate: string;      // lastChangelogDate
+    scope: string;           // descrição editável do que foi auditado
+    htmlPath: string;        // "/audits/v3/index.html"
+    docxPath?: string; pdfPath?: string;
+    summary: { strengths: number; gaps: number; risks: number };
+  }
+  ```
+- O vínculo "auditoria ↔ versão do sistema" usa `lastChangelogDate` de `projectChangelog.generated.ts` + `I18N_VERSION` de `src/i18n.ts` no momento da geração (registrados manualmente no entry).
+
+### 2. Nova aba admin: "Auditorias Técnicas"
+
+- Novo item no `ConfigurationGroup` (sidebar), ícone `FileSearch`, logo abaixo de "Organograma" e "Conformidade".
+- Registrado em `src/config/admin-tabs.ts` como `technical-audits`.
+- Componente `src/components/administrador/audits/TechnicalAuditsTab.tsx` com layout em 2 colunas:
+  - **Esquerda (lista)**: cards de cada auditoria (v1, v2, v3…) mostrando: versão da auditoria, data, versão do sistema correspondente, badge de status, contagens (forças/gaps/riscos), botões "Abrir HTML", "Baixar PDF", "Baixar DOCX".
+  - **Direita (visualizador)**: `<iframe src={htmlPath}>` em tela cheia com TOC sticky lateral, ou `react-markdown`/HTML sanitizado se preferirmos render nativo. Iframe é mais simples e isola estilos do documento.
+
+### 3. Botão "Fazer nova auditoria"
+
+- Card destacado no topo da aba com:
+  - **Descrição editável** (textarea) do escopo: o que a auditoria deve cobrir (ex.: "Conformidade FDA/EMA, pipeline de curadoria, KG, RLS, i18n, 9 infográficos…"). Texto-padrão pré-preenchido com o escopo da v3.
+  - Campos auto-preenchidos: versão do sistema atual (lida de i18n + changelog), data, próxima versão da auditoria sugerida (`v4`).
+  - Botão **"Solicitar nova auditoria"** que:
+    - Salva o pedido em uma tabela `audit_requests` (Lovable Cloud) com `scope`, `system_version`, `system_date`, `requested_at`, `status: 'pending'`, `requested_by`.
+    - Mostra toast: "Auditoria solicitada — será gerada na próxima sessão pelo agente Lovable a partir deste escopo."
+  - **Importante**: a geração efetiva do .docx/.pdf/.html continua sendo feita por mim (Lovable) em sessão dedicada lendo `audit_requests`. O botão não dispara LLM — ele formaliza e versiona o pedido. Isso evita custo/instabilidade de gerar relatório de 27 páginas em runtime.
+
+### 4. Edição da descrição de auditorias passadas
+
+- Cada card tem botão "Editar escopo" que abre dialog com textarea — atualiza `scope` na DB (auditorias passadas migradas via seed inicial).
+- Histórico de edições do escopo fica em `audit_requests.scope_history` (jsonb).
+
+## Schema (Lovable Cloud)
+
+```sql
+CREATE TABLE public.technical_audits (
+  id text PRIMARY KEY,              -- 'v3'
+  version text NOT NULL,
+  audit_date date NOT NULL,
+  system_version text NOT NULL,     -- ex: 'i18n 1.42.0 · 2026-05-09'
+  system_changelog_date date,
+  scope text NOT NULL,
+  scope_history jsonb DEFAULT '[]',
+  html_path text, pdf_path text, docx_path text,
+  summary jsonb,                    -- {strengths, gaps, risks}
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE public.audit_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  scope text NOT NULL,
+  system_version text NOT NULL,
+  system_date date NOT NULL,
+  status text NOT NULL DEFAULT 'pending', -- pending | in_progress | done
+  fulfilled_audit_id text REFERENCES public.technical_audits(id),
+  requested_by uuid,
+  requested_at timestamptz DEFAULT now()
+);
+```
+
+RLS: leitura para usuários autenticados com role `admin` (via `has_role`); escrita idem.
+
+Seed: 1 linha em `technical_audits` para a v3 atual, apontando para `/audits/v3/index.html`, `/audits/v3/...pdf`, `...docx` (cópias dos arquivos de `/mnt/documents/` para `public/audits/v3/`).
 
 ## Entregáveis
 
-### a) Mapeamento Regulatório Ponto a Ponto (nova seção expandida)
+1. `public/audits/v3/index.html` + media (conversão do v3.docx).
+2. Cópia do PDF e DOCX para `public/audits/v3/` (download direto pelo app).
+3. Migração SQL com as 2 tabelas + RLS + seed da v3.
+4. `src/components/administrador/audits/TechnicalAuditsTab.tsx` (lista + iframe + dialog "nova auditoria" + dialog "editar escopo").
+5. Registro no `admin-tabs.ts` + ícone na sidebar (`ConfigurationGroup`).
+6. Strings PT/EN + bump de `I18N_VERSION`.
+7. Entrada no `CHANGELOG.md` (`area: admin`, `i18n: x.y.z`) + `npm run sync:changelog`.
 
-Criar **3 tabelas matriciais** (uma por órgão regulador) cruzando requisitos × evidências do nosso sistema, com status (✅ Atende / 🟡 Parcial / 🔴 Gap) e arquivo/função/migration de referência:
+## Pontos a confirmar
 
-**FDA — Draft Guidance on AI/ML-Enabled Device Software Functions (Jan/2025)**
-- Predetermined Change Control Plan (PCCP) → mapear contra `CHANGELOG.md` + `I18N_VERSION` + sistema de migrations
-- Good Machine Learning Practice (GMLP) 10 princípios → mapear contra cada edge function relevante
-- Transparency for users → mapear contra `ClinicalPipelineLogPanel`, `DigitalTwinLogPanel`, `EvidenceGapLogPanel`, badges de origem
-- Real-World Performance Monitoring → identificar gap (não temos cohort tracking ainda)
-- Bias mitigation → mapear contra política bilingue + dictionaries
-- Data quality → mapear contra "no-mock policy", curation gatekeeper, two-tier governance
-
-**EMA — Reflection Paper on AI in Medicinal Product Lifecycle (Sept/2024) + EU AI Act (Aug/2026 enforcement)**
-- High-risk AI system classification → posicionar nosso produto
-- Human oversight (Art. 14) → mapear contra Vet Recommendation Panel (aceitar/modificar/rejeitar)
-- Technical documentation (Annex IV) → mapear contra docs existentes
-- Logging and traceability → mapear contra audit log, study provenance, KG provenance
-- Accuracy/robustness/cybersecurity → mapear contra RLS, secrets, validation triggers
-- Data governance (Art. 10) → mapear contra base knowledge governance
-
-**AVMA — Framework for AI in Veterinary Medicine (Nov/2025)**
-- Veterinarian-in-the-loop → mapear contra curation pipeline
-- Species-specific validation → identificar gap (foco canino apenas, sem validação cruzada)
-- Off-label disclosure → mapear contra DrugLookupBadge novo
-- Continuing education → identificar gap
-
-Cada linha da tabela: **Requisito | Evidência no sistema | Arquivo/Função | Status | Ação recomendada**
-
-### b) Bibliografia com Citações Verificáveis
-
-Nova seção "Referências e Fontes" no final do documento:
-- Pesquisar via `websearch--web_search` os documentos oficiais FDA/EMA/AVMA citados
-- Buscar papers chave: MedGraphRAG (Wu et al. 2024 Oxford), Microsoft GraphRAG (Edge et al. 2024), Med-PaLM 2 (Singhal et al. 2023), VetGraphRAG/RAG em veterinária 2025-2026
-- Para cada referência: **autores, título, venue/órgão, ano, URL, trecho/página citada**, e onde no documento a citação aparece (sistema de notas de rodapé ou numeração [1], [2]…)
-- Adicionar marcadores de citação inline em todas as seções v1 que fazem afirmações sobre SOTA/regulatório
-
-### c) Infográficos (SVG embeds)
-
-Gerar via script Python (matplotlib/svgwrite) e embed como PNG no DOCX. Mínimo 5 infográficos:
-
-1. **Pipeline de Digestão de Estudos (7 estágios)** — fluxograma horizontal: Upload → Dedup SHA-256 → Parse → Vectorize → Stage1/2/3 Extraction → Curadoria → KG sync
-2. **Arquitetura 5 Camadas VetGraphRAG** — pirâmide invertida L0→L4 (Compound→Target→Mechanism→Effect→Outcome) com tabelas/contagens reais do DB
-3. **Jornada do Revisor Veterinário** — swimlane: Login → Triplet Bank → Review (excerpt+chat+enrichment) → Approve/Reject → KG update
-4. **Jornada do Estudo** — timeline: PDF → Hash check → Chunks → Embeddings → Triplets pendentes → Auto-approve (≥50%) ou Manual → Base Knowledge link → Recommendation engine
-5. **Comparação MedGraphRAG vs VetGraphRAG** — tabela visual lado-a-lado (camadas, espécies, governança, U-Retrieval, etc.)
-6. **Mapa de Conformidade Regulatória** — heatmap visual: linhas = órgãos (FDA/EMA/AVMA), colunas = pilares (transparência, oversight, data quality, traceability, monitoring), células coloridas por status
-
----
-
-## Plano de Execução Técnica
-
-```text
-1. Pesquisa web (paralela): FDA Jan/2025 guidance, EMA reflection paper Sept/2024,
-   EU AI Act timeline, AVMA Nov/2025 framework, MedGraphRAG arxiv, GraphRAG MS,
-   Med-PaLM 2, RAG-vet papers 2025-2026
-2. Inspecionar v1 .docx para preservar estrutura/estilo
-3. Gerar infográficos PNG via /tmp/gen_infographics.py (matplotlib, paleta projeto)
-4. QA visual: converter cada PNG e inspecionar com read tool
-5. Construir v2 via docx-js (Node) reaproveitando conteúdo v1 + novas seções +
-   embeds de imagens + tabelas regulatórias + footnotes/bibliografia
-6. Validar .docx (validate_document.py) e converter para PDF para QA visual
-   página a página antes de entregar
-7. Salvar em /mnt/documents/VetGraphRAG_Auto_Auditoria_Tecnica_v2.docx
-8. Atualizar CHANGELOG.md com a entrega
-```
-
-## Perguntas (opcional, posso assumir defaults)
-
-- **Idioma do documento v2**: manter PT-BR como v1? (default: sim)
-- **Citações**: numeração [1][2] estilo Vancouver ou footnotes Word nativas? (default: footnotes nativas, mais navegáveis)
-- **Status "Gap"**: incluir esforço estimado (S/M/L) e prioridade (P0-P3)? (default: sim)
+- **OK usar iframe** para renderizar o HTML da auditoria (isolamento de estilos, TOC nativo do documento)? Alternativa: render via `react-markdown` com sanitização — mais integrado visualmente, mas precisa reestilizar tabelas/infográficos.
+- **Botão "nova auditoria"** apenas registra o pedido (eu gero o relatório na sessão seguinte) — confirma essa abordagem? Alternativa cara: chamar Lovable AI Gateway com `gemini-2.5-pro` para gerar markdown em runtime (~ $0.30-1.00 por execução, sem infográficos).
