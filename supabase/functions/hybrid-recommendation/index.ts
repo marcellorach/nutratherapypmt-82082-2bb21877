@@ -70,6 +70,11 @@ interface HybridRequest {
   condition: string;
   kgData?: KGData;
   clinicalContext?: ClinicalContext;
+  /** Strip the longitudinal blocks (CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE)
+   *  from the prompt — used by the with-vs-without comparison evaluator. */
+  disableLongitudinal?: boolean;
+  /** Returns the rendered prompt + which longitudinal blocks were active. */
+  debug?: boolean;
 }
 
 function buildClinicalContextBlock(ctx?: ClinicalContext): string {
@@ -231,7 +236,7 @@ serve(async (req) => {
   }
 
   try {
-    const { mode, petProfile, condition, kgData, clinicalContext }: HybridRequest = await req.json();
+    const { mode, petProfile, condition, kgData, clinicalContext, disableLongitudinal, debug }: HybridRequest = await req.json();
     
     console.log('Hybrid recommendation request:', { mode, condition, petProfile, hasContext: !!clinicalContext });
 
@@ -240,7 +245,27 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const contextBlock = buildClinicalContextBlock(clinicalContext);
+    const effectiveContext: ClinicalContext | undefined = disableLongitudinal && clinicalContext
+      ? {
+          allConditions: clinicalContext.allConditions,
+          predispositions: clinicalContext.predispositions,
+          labAlerts: clinicalContext.labAlerts,
+          currentMedications: clinicalContext.currentMedications,
+          examSummary: clinicalContext.examSummary,
+        }
+      : clinicalContext;
+    const contextBlock = buildClinicalContextBlock(effectiveContext);
+    const longitudinalDebug = {
+      disabled: !!disableLongitudinal,
+      hasCurrentState: !disableLongitudinal && !!clinicalContext?.latestConsultation,
+      hasClinicalTrajectory: !disableLongitudinal && !!clinicalContext?.clinicalTrajectory?.length,
+      hasDietProfile: !disableLongitudinal && !!clinicalContext?.dietProfile,
+      trajectoryEntries: clinicalContext?.clinicalTrajectory?.length ?? 0,
+      latestConsultationDate: clinicalContext?.latestConsultation?.date ?? null,
+      activeConditions: clinicalContext?.latestConsultation?.activeConditions ?? [],
+      abnormalExams: clinicalContext?.latestConsultation?.abnormalExams ?? [],
+      dietProducts: clinicalContext?.dietProfile?.products ?? [],
+    };
     let systemPrompt: string;
     let userPrompt: string;
 
@@ -331,6 +356,11 @@ Return your response as valid JSON following the structure specified.`;
     const content = aiResponse.choices?.[0]?.message?.content || '';
     console.log('AI response received:', content.substring(0, 300));
 
+    const debugPayload = debug ? {
+      longitudinal: longitudinalDebug,
+      renderedContextBlock: contextBlock,
+    } : undefined;
+
     if (mode === 'enrich') {
       // Try to parse structured JSON from enrich mode too
       // The LLM may return structured recommendations or free text
@@ -362,6 +392,7 @@ Return your response as valid JSON following the structure specified.`;
             rationale: parsed.rationale || kgData?.rationale || `Recomendação enriquecida por IA para ${condition}.`,
             precautions: [...(kgData?.precautions || []), ...(parsed.precautions || [])],
             enrichment: content,
+            debug: debugPayload,
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -380,6 +411,7 @@ Return your response as valid JSON following the structure specified.`;
         rationale: `${kgData?.rationale || ''}\n\nConsiderações adicionais: ${content}`,
         precautions: [...(kgData?.precautions || []), 'Alguns dados foram enriquecidos por IA - verificar com veterinário'],
         enrichment: content,
+        debug: debugPayload,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -403,7 +435,8 @@ Return your response as valid JSON following the structure specified.`;
           'Esta recomendação requer validação por veterinário',
           'Iniciar com doses conservadoras',
           'Monitorar reações de perto'
-        ]
+        ],
+        debug: debugPayload,
       };
 
       return new Response(JSON.stringify(result), {
@@ -414,7 +447,8 @@ Return your response as valid JSON following the structure specified.`;
       return new Response(JSON.stringify({
         nutraceuticals: [],
         rationale: content || 'Não foi possível gerar uma recomendação estruturada. Consulte um veterinário.',
-        precautions: ['Esta recomendação requer validação por veterinário', 'Iniciar com doses conservadoras']
+        precautions: ['Esta recomendação requer validação por veterinário', 'Iniciar com doses conservadoras'],
+        debug: debugPayload,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });

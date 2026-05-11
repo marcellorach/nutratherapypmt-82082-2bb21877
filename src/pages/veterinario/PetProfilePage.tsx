@@ -24,6 +24,7 @@ import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel'
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
+import LongitudinalDebugPanel from '@/components/pet/LongitudinalDebugPanel';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import DrugLookupBadge from '@/components/pet/DrugLookupBadge';
@@ -734,6 +735,18 @@ const PetProfilePage: React.FC = () => {
                 petId={id}
               />
             )}
+
+            {/* Longitudinal MedGraphRAG debug & evaluation */}
+            <LongitudinalDebugPanel
+              petId={id!}
+              petProfile={{
+                species: profile.species,
+                breed: profile.breed,
+                age: profile.age_years,
+                weight: profile.weight_kg,
+              }}
+              primaryCondition={conditions?.[0]?.condition_name}
+            />
 
             {/* Analysis by Condition - ComorbidityMap + full ConditionInsightCards */}
             {recommendationCompounds && (
