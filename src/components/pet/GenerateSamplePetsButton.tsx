@@ -17,9 +17,9 @@ const BREED_PHOTOS: Record<string, string> = {
 
 // ───────────────────────────────────────────────────────────────────────────
 // Histórico clínico longitudinal: cada pet recebe N consultas (= sua posição
-// no ranking de complexidade). A última (`is_latest=true`, set pelo trigger
-// refresh_pet_consultation_latest) dirige a inferência do MedGraphRAG; as
-// anteriores entram como CLINICAL_TRAJECTORY com peso reduzido.
+// no ranking de complexidade). A última (`is_latest=true`, marcada pelo
+// trigger refresh_pet_consultation_latest) dirige a inferência do
+// MedGraphRAG; as anteriores entram como CLINICAL_TRAJECTORY com peso menor.
 // ───────────────────────────────────────────────────────────────────────────
 
 type DemoConsultation = {
@@ -30,12 +30,13 @@ type DemoConsultation = {
   body_condition_score?: number;
   assessment?: string;
   plan?: string;
-  // tudo que aconteceu nesta visita:
   conditions?: Array<{ condition_name: string; severity: string; status: string; origin: string }>;
   medications?: Array<{ medication_name: string; dosage: string; frequency: string; status?: string }>;
-  exams?: Array<{ exam_type: string; results: Record<string, any> }>;
+  exams?: Array<{ exam_type: string; results: Record<string, any>; flags_abnormal?: string[] }>;
   notes?: Array<{ note_type: string; content: string }>;
 };
+
+type DemoNutritionItem = { raw_brand_text: string; raw_product_text: string; share_percent: number };
 
 type DemoPet = {
   name: string;
@@ -56,147 +57,333 @@ type DemoPet = {
     water_intake?: string;
     restrictions?: string[];
     notes?: string;
-    items?: Array<{ raw_brand_text: string; raw_product_text: string; share_percent: number }>;
-    // se preenchido, esta troca de dieta acontece na consulta de índice indicado:
-    changedAtConsultationIdx?: number;
-    previousDiet?: { diet_type: string; notes?: string; items?: Array<{ raw_brand_text: string; raw_product_text: string; share_percent: number }> };
+    items?: DemoNutritionItem[];
+    // se preenchido, dieta entrou em vigor a partir da consulta indicada:
+    introducedAtConsultationIdx?: number;
   };
 };
 
 const SAMPLE_PETS: DemoPet[] = [
-  // ───────────────────────────────────────────────────────────────
-  // Regra de complexidade crescente (1 → 4 condições):
-  // Os 5 pets de exemplo evoluem em complexidade clínica.
-  // CRITÉRIO ADICIONAL: TODA condição usada aqui DEVE ter ≥15 compostos
-  // com triplets aprovados no VetGraphRAG (layer_4_outcome). Isso garante
-  // que o Gêmeo Digital (project-pet-trajectory) opere em modo
-  // `ai_kg_grounded` (não fallback heurístico) e mostre years_gained real.
-  // ───────────────────────────────────────────────────────────────
-
-  // 1) SIMPLES — adulto jovem com 1 condição leve, sem medicação contínua
+  // 1) SIMPLES — 1 consulta (check-up)
   {
     name: 'Buddy',
     breed: 'Beagle',
     age_years: 4,
     weight_kg: 12,
-    sex: 'male' as const,
-    neutered: true,
-    owner_name: 'Carla Mendes',
-    owner_email: 'carla@example.com',
-    notes: 'Cão adulto jovem. Check-up preventivo identificou marcadores precoces de estresse oxidativo (8-OHdG e MDA elevados) — janela ideal para protocolo geroprotetor antioxidante.',
-    conditions: [
-      { condition_name: 'Oxidative Stress', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+    sex: 'male', neutered: true,
+    owner_name: 'Carla Mendes', owner_email: 'carla@example.com',
+    notes: 'Adulto jovem em check-up preventivo. Marcadores precoces de estresse oxidativo — janela ideal para protocolo geroprotetor antioxidante.',
+    consultations: [
+      {
+        daysAgo: 7,
+        chief_complaint: 'Check-up anual de rotina, tutor sem queixas',
+        clinical_exam: 'Animal alerta, hidratado, mucosas normocoradas. ECC 5/9. Linfonodos não reativos. Sem alterações cardiopulmonares.',
+        weight_kg_at_visit: 12,
+        body_condition_score: 5,
+        assessment: 'Pet hígido. Marcadores de estresse oxidativo discretamente elevados em painel preventivo.',
+        plan: 'Iniciar protocolo antioxidante geroprotetor leve. Reavaliar painel oxidativo em 6 meses.',
+        conditions: [
+          { condition_name: 'Oxidative Stress', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+        ],
+        exams: [
+          { exam_type: 'Complete Blood Count', results: { wbc: 9800, rbc: 7.0, platelets: 290000, interpretation: 'normal' } },
+          { exam_type: 'Oxidative Stress Panel', results: { '8_ohdg_ng_ml': 6.8, mda_umol_l: 3.2, gsh_gssg_ratio: 4.1, interpretation: 'Estresse oxidativo leve' }, flags_abnormal: ['8_ohdg_ng_ml', 'mda_umol_l'] },
+        ],
+      },
     ],
-    medications: [],
-    exams: [
-      { exam_type: 'Complete Blood Count', results: { wbc: 9800, rbc: 7.0, platelets: 290000, interpretation: 'normal' } },
-      { exam_type: 'Oxidative Stress Panel', results: { '8_ohdg_ng_ml': 6.8, mda_umol_l: 3.2, gsh_gssg_ratio: 4.1, interpretation: 'Estresse oxidativo leve — antioxidante endógeno reduzido' } },
-    ],
+    nutrition: {
+      diet_type: 'commercial_dry',
+      daily_amount_g: 220, meals_per_day: 2, treats_frequency: 'occasional', water_intake: 'normal',
+      notes: 'Ração seca super premium para adulto porte médio.',
+      items: [{ raw_brand_text: 'Premier Pet', raw_product_text: 'Formula Adulto Raças Médias', share_percent: 100 }],
+    },
   },
 
-  // 2) LEVE-INTERMEDIÁRIO — sênior com 2 condições age-related
+  // 2) LEVE-INTERMEDIÁRIO — 2 consultas
   {
     name: 'Max',
     breed: 'Beagle',
     age_years: 9,
     weight_kg: 14,
-    sex: 'male' as const,
-    neutered: true,
-    owner_name: 'Lucia Oliveira',
-    owner_email: 'lucia@example.com',
-    notes: 'Beagle sênior. Sinais cognitivos iniciais (desorientação leve) e perda de massa muscular age-related — ambas com forte cobertura geroprotetora no KG.',
-    conditions: [
-      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Sarcopenia', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+    sex: 'male', neutered: true,
+    owner_name: 'Lucia Oliveira', owner_email: 'lucia@example.com',
+    notes: 'Beagle sênior. Sinais cognitivos iniciais e perda de massa muscular age-related — ambas com forte cobertura geroprotetora no KG.',
+    consultations: [
+      {
+        daysAgo: 180,
+        chief_complaint: 'Tutor relata episódios de desorientação noturna leves',
+        clinical_exam: 'Animal alerta, responsivo. ECC 4/9 — leve perda de massa muscular paravertebral.',
+        weight_kg_at_visit: 14.4, body_condition_score: 4,
+        assessment: 'Suspeita de síndrome cognitiva canina inicial. Sarcopenia age-related em avaliação.',
+        plan: 'Avaliação cognitiva formal e painel geriátrico em 30 dias. Aumentar enriquecimento ambiental.',
+        conditions: [
+          { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Cognitive Assessment', results: { disorientation: 'mild', sleep_wake_cycle: 'altered', interaction: 'slightly_reduced' } },
+        ],
+      },
+      {
+        daysAgo: 14,
+        chief_complaint: 'Reavaliação geriátrica — confirmar achados anteriores',
+        clinical_exam: 'Massa muscular reduzida confirmada. Cognição estável (sem progressão).',
+        weight_kg_at_visit: 14, body_condition_score: 4,
+        assessment: 'CDS leve estável. Sarcopenia leve confirmada. Função renal/hepática preservadas.',
+        plan: 'Iniciar protocolo geroprotetor (NMN + Omega-3 + antioxidantes). Reavaliar em 90 dias.',
+        conditions: [
+          { condition_name: 'Sarcopenia', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Geriatric Panel', results: { glucose: 95, bun: 22, creatinine: 1.1, alt: 45, albumin: 3.4 } },
+          { exam_type: 'Body Condition Score', results: { bcs: 4, muscle_mass: 'reduced', interpretation: 'Sarcopenia leve' } },
+        ],
+      },
     ],
-    medications: [],
-    exams: [
-      { exam_type: 'Geriatric Panel', results: { glucose: 95, bun: 22, creatinine: 1.1, alt: 45, albumin: 3.4 } },
-      { exam_type: 'Cognitive Assessment', results: { disorientation: 'mild', sleep_wake_cycle: 'normal', interaction: 'slightly_reduced' } },
-      { exam_type: 'Body Condition Score', results: { bcs: 4, muscle_mass: 'reduced', interpretation: 'Sarcopenia leve' } },
-    ],
+    nutrition: {
+      diet_type: 'commercial_dry',
+      daily_amount_g: 240, meals_per_day: 2, treats_frequency: 'occasional', water_intake: 'normal',
+      notes: 'Fórmula sênior super premium com glucosamina.',
+      items: [{ raw_brand_text: 'Royal Canin', raw_product_text: 'Mature Consult Medium', share_percent: 100 }],
+    },
   },
 
-  // 3) INTERMEDIÁRIO — 3 condições musculoesqueléticas/metabólicas
+  // 3) INTERMEDIÁRIO — 3 consultas
   {
     name: 'Rex',
     breed: 'Labrador Retriever',
     age_years: 8,
     weight_kg: 32,
-    sex: 'male' as const,
-    neutered: true,
-    owner_name: 'Maria Silva',
-    owner_email: 'maria@example.com',
-    notes: 'Labrador sênior com tríade clássica da raça: osteoartrite, obesidade e displasia coxofemoral leve. Duas condições com forte cobertura geroprotetora no KG; displasia entra como condição estrutural com baixa cobertura nutracêutica (gap conhecido).',
-    conditions: [
-      { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Obesity', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Hip Dysplasia', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+    sex: 'male', neutered: true,
+    owner_name: 'Maria Silva', owner_email: 'maria@example.com',
+    notes: 'Labrador sênior com tríade clássica da raça: obesidade, osteoartrite e displasia coxofemoral leve. Trajetória de 3 consultas mostra progressão.',
+    consultations: [
+      {
+        daysAgo: 365,
+        chief_complaint: 'Ganho de peso progressivo — tutor solicita orientação nutricional',
+        clinical_exam: 'Sobrepeso evidente. ECC 7/9. Sem queixa locomotora.',
+        weight_kg_at_visit: 36, body_condition_score: 7,
+        assessment: 'Obesidade moderada. Sem sinais articulares no momento.',
+        plan: 'Iniciar dieta de controle de peso. Reduzir petiscos. Aumentar exercício gradual.',
+        conditions: [
+          { condition_name: 'Obesity', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Body Condition Score', results: { bcs: 7, ideal: 5, interpretation: 'Obesidade moderada (BCS 7/9)' }, flags_abnormal: ['bcs'] },
+        ],
+      },
+      {
+        daysAgo: 120,
+        chief_complaint: 'Rigidez matinal e dificuldade para subir escadas',
+        clinical_exam: 'Dor à manipulação de quadril direito. Crepitação articular bilateral. ECC 6/9 (melhora vs visita anterior).',
+        weight_kg_at_visit: 33, body_condition_score: 6,
+        assessment: 'Osteoartrite secundária à obesidade — confirmação clínica. Investigar componente displásico.',
+        plan: 'Iniciar Meloxicam 0.1mg/kg SID. Solicitar raio-X de quadril.',
+        conditions: [
+          { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        medications: [
+          { medication_name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily', status: 'active' },
+        ],
+      },
+      {
+        daysAgo: 21,
+        chief_complaint: 'Reavaliação — controle de dor e exames de imagem',
+        clinical_exam: 'Locomoção melhor com Meloxicam. Persistência de rigidez matinal leve.',
+        weight_kg_at_visit: 32, body_condition_score: 6,
+        assessment: 'Tríade confirmada: obesidade controlada, OA moderada, displasia coxofemoral grau 3 bilateral.',
+        plan: 'Manter Meloxicam. Adicionar protocolo nutracêutico (glucosamina, condroitina, ômega-3, curcuma). Fisioterapia.',
+        conditions: [
+          { condition_name: 'Hip Dysplasia', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+        ],
+        exams: [
+          { exam_type: 'X-Ray (Hip)', results: { grade: 3, bilateral: true, degeneration: 'moderate', interpretation: 'Displasia coxofemoral grau 3 + osteoartrite secundária' }, flags_abnormal: ['grade'] },
+          { exam_type: 'Complete Blood Count', results: { wbc: 12500, rbc: 7.2, platelets: 280000 } },
+        ],
+      },
     ],
-    medications: [
-      { medication_name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily' },
-    ],
-    exams: [
-      { exam_type: 'X-Ray (Hip)', results: { grade: 3, bilateral: true, degeneration: 'moderate', interpretation: 'Displasia coxofemoral grau 3 + osteoartrite secundária' } },
-      { exam_type: 'Complete Blood Count', results: { wbc: 12500, rbc: 7.2, platelets: 280000 } },
-      { exam_type: 'Body Condition Score', results: { bcs: 7, ideal: 5, interpretation: 'Obesidade moderada (BCS 7/9)' } },
-    ],
+    nutrition: {
+      diet_type: 'prescription',
+      daily_amount_g: 320, meals_per_day: 2, treats_frequency: 'none', water_intake: 'normal',
+      restrictions: ['low_calorie', 'joint_support'],
+      notes: 'Dieta de controle de peso com suporte articular, iniciada na 1ª consulta há ~12 meses.',
+      items: [{ raw_brand_text: 'Hill\'s', raw_product_text: 'Prescription Diet Metabolic + Mobility', share_percent: 100 }],
+      introducedAtConsultationIdx: 0,
+    },
   },
 
-  // 4) COMPLEXO — 3 condições + mielopatia precoce (típico de Pastor Alemão)
+  // 4) COMPLEXO — 4 consultas
   {
     name: 'Thor',
     breed: 'German Shepherd',
     age_years: 7,
     weight_kg: 38,
-    sex: 'male' as const,
-    neutered: false,
-    owner_name: 'Ana Costa',
-    owner_email: 'ana@example.com',
-    notes: 'Pastor Alemão de trabalho. Osteoartrite ativa e marcadores de senescência celular elevados (perfil senolítico). Mielopatia degenerativa em monitoramento — condição clássica da raça com cobertura nutracêutica limitada no KG (gap a ser preenchido).',
-    conditions: [
-      { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Cellular Senescence', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
-      { condition_name: 'Degenerative Myelopathy', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
+    sex: 'male', neutered: false,
+    owner_name: 'Ana Costa', owner_email: 'ana@example.com',
+    notes: 'Pastor Alemão de trabalho. Trajetória mostra OA → senescência → mielopatia em monitoramento. Mielopatia degenerativa típica da raça com cobertura nutracêutica limitada no KG (gap conhecido).',
+    consultations: [
+      {
+        daysAgo: 540,
+        chief_complaint: 'Avaliação ortopédica preventiva — cão de trabalho',
+        clinical_exam: 'Animal atlético. Leve rigidez bilateral em quadril após exercício intenso.',
+        weight_kg_at_visit: 39, body_condition_score: 5,
+        assessment: 'Osteoartrite incipiente associada à atividade física intensa.',
+        plan: 'Suporte articular preventivo. Reavaliar em 6 meses.',
+        conditions: [
+          { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Joint Evaluation', results: { hips: 'osteoartrite leve', elbows: 'normal', gait: 'rigidez pós-exercício' } },
+        ],
+      },
+      {
+        daysAgo: 270,
+        chief_complaint: 'Progressão da rigidez articular e fadiga aumentada',
+        clinical_exam: 'OA moderada bilateral. Massa muscular preservada.',
+        weight_kg_at_visit: 38.5, body_condition_score: 5,
+        assessment: 'OA moderada. Investigar marcadores de envelhecimento celular acelerado.',
+        plan: 'Iniciar Carprofen 2mg/kg BID. Solicitar painel de senescência.',
+        conditions: [
+          { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        medications: [
+          { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily', status: 'active' },
+        ],
+      },
+      {
+        daysAgo: 90,
+        chief_complaint: 'Resultado de painel de senescência',
+        clinical_exam: 'Sem alterações neurológicas no momento.',
+        weight_kg_at_visit: 38, body_condition_score: 5,
+        assessment: 'Carga senescente compatível com envelhecimento acelerado — perfil senolítico recomendado.',
+        plan: 'Adicionar protocolo senolítico (fisetina + quercetina). Manter Carprofen.',
+        conditions: [
+          { condition_name: 'Cellular Senescence', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
+        ],
+        exams: [
+          { exam_type: 'Senescence Biomarkers', results: { p16_ink4a: 'elevado', sasp_panel: 'positivo', telomere_length: 'reduzido para idade', interpretation: 'Carga senescente compatível com envelhecimento acelerado' }, flags_abnormal: ['p16_ink4a', 'sasp_panel', 'telomere_length'] },
+        ],
+      },
+      {
+        daysAgo: 10,
+        chief_complaint: 'Tutor nota leve fraqueza em membros pélvicos',
+        clinical_exam: 'Propriocepção reduzida em pélvicos. Reflexos preservados. Sem dor à palpação espinhal.',
+        weight_kg_at_visit: 38, body_condition_score: 5,
+        assessment: 'Suspeita clínica de mielopatia degenerativa em fase inicial — condição clássica de Pastor Alemão.',
+        plan: 'Monitoramento neurológico mensal. Manter protocolo atual + suporte neurológico (PEA, vitaminas B).',
+        conditions: [
+          { condition_name: 'Degenerative Myelopathy', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Neurological Examination', results: { proprioception: 'reduzida em membros pélvicos', reflexes: 'preservados', interpretation: 'Suspeita de mielopatia degenerativa em fase inicial' }, flags_abnormal: ['proprioception'] },
+        ],
+      },
     ],
-    medications: [
-      { medication_name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily' },
-    ],
-    exams: [
-      { exam_type: 'Joint Evaluation', results: { hips: 'osteoartrite moderada', elbows: 'normal', gait: 'rigidez matinal' } },
-      { exam_type: 'Senescence Biomarkers', results: { p16_ink4a: 'elevado', sasp_panel: 'positivo', telomere_length: 'reduzido para idade', interpretation: 'Carga senescente compatível com envelhecimento acelerado' } },
-      { exam_type: 'Neurological Examination', results: { proprioception: 'reduzida em membros pélvicos', reflexes: 'preservados', interpretation: 'Suspeita de mielopatia degenerativa em fase inicial' } },
-    ],
+    nutrition: {
+      diet_type: 'mixed_commercial',
+      daily_amount_g: 420, meals_per_day: 2, treats_frequency: 'daily', water_intake: 'high',
+      restrictions: ['joint_support', 'antioxidant_rich'],
+      notes: 'Mistura de ração super premium para grandes raças + suplemento natural ômega-3 (óleo de salmão).',
+      items: [
+        { raw_brand_text: 'Pro Plan', raw_product_text: 'Adult Large Breed Athletic', share_percent: 80 },
+        { raw_brand_text: 'Suplemento natural', raw_product_text: 'Óleo de salmão prensado a frio', share_percent: 20 },
+      ],
+    },
   },
 
-  // 5) MAIS COMPLEXO — 4 condições crônicas + polifarmácia (Cavalier sênior)
+  // 5) MAIS COMPLEXO — 5 consultas (Cavalier sênior multissistêmico)
   {
     name: 'Luna',
     breed: 'Cavalier King Charles Spaniel',
     age_years: 9,
     weight_kg: 7.5,
-    sex: 'female' as const,
-    neutered: true,
-    owner_name: 'João Pereira',
-    owner_email: 'joao@example.com',
-    notes: 'Cavalier sênior em estágio C de MMVD. Polifarmácia cardíaca, declínio cognitivo, DRC IRIS 2 (parcialmente associada à furosemida crônica) e hipertensão pulmonar secundária — caso multissistêmico. 3 das 4 condições têm forte cobertura geroprotetora no KG; HP secundária com cobertura nutracêutica limitada.',
-    conditions: [
-      { condition_name: 'Myxomatous Mitral Valve Disease', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
-      { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
-      { condition_name: 'Chronic Kidney Disease', severity: 'mild', status: 'active', origin: 'exam_suggested' },
-      { condition_name: 'Pulmonary Hypertension', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+    sex: 'female', neutered: true,
+    owner_name: 'João Pereira', owner_email: 'joao@example.com',
+    notes: 'Cavalier sênior — caso multissistêmico com 5 consultas mostrando progressão MMVD B2 → C, polifarmácia, DRC IRIS 2 secundária à furosemida e HP secundária. Troca de ração para fórmula renal na 4ª consulta.',
+    consultations: [
+      {
+        daysAgo: 730,
+        chief_complaint: 'Sopro cardíaco detectado em check-up de rotina',
+        clinical_exam: 'Sopro sistólico grau 3/6 em foco mitral. Sem sinais de insuficiência.',
+        weight_kg_at_visit: 7.6, body_condition_score: 5,
+        assessment: 'MMVD estágio B1 (assintomático sem remodelamento).',
+        plan: 'Monitoramento ecocardiográfico anual. Sem terapia farmacológica indicada.',
+        conditions: [
+          { condition_name: 'Myxomatous Mitral Valve Disease', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
+        ],
+        exams: [
+          { exam_type: 'Echocardiogram', results: { lvedd: 30, lvesd: 18, fs: '40%', murmur_grade: '3/6', stage: 'B1' } },
+        ],
+      },
+      {
+        daysAgo: 450,
+        chief_complaint: 'Reavaliação cardiológica anual',
+        clinical_exam: 'Sopro 4/6. Sem dispneia. Sem tosse.',
+        weight_kg_at_visit: 7.7, body_condition_score: 5,
+        assessment: 'Progressão para MMVD B2 — remodelamento cardíaco identificado. Indicação de Pimobendan conforme EPIC.',
+        plan: 'Iniciar Pimobendan 0.25mg/kg BID. Reavaliação em 6 meses.',
+        conditions: [],
+        medications: [
+          { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily', status: 'active' },
+        ],
+        exams: [
+          { exam_type: 'Echocardiogram', results: { lvedd: 35, lvesd: 22, fs: '36%', murmur_grade: '4/6', stage: 'B2' }, flags_abnormal: ['lvedd', 'stage'] },
+          { exam_type: 'Thoracic X-Ray', results: { heart_size: 'mildly enlarged', vhs: 10.8 } },
+        ],
+      },
+      {
+        daysAgo: 240,
+        chief_complaint: 'Tosse noturna e cansaço fácil há 2 semanas',
+        clinical_exam: 'Crepitações pulmonares basais. Taquipneia em repouso (40 mpm).',
+        weight_kg_at_visit: 7.4, body_condition_score: 5,
+        assessment: 'Progressão para MMVD estágio C — primeiro episódio de descompensação congestiva.',
+        plan: 'Adicionar Furosemida 2mg/kg SID e Benazepril 0.5mg/kg SID. Reavaliar função renal em 30 dias.',
+        conditions: [],
+        medications: [
+          { medication_name: 'Furosemide', dosage: '2mg/kg', frequency: 'Once daily', status: 'active' },
+          { medication_name: 'Benazepril', dosage: '0.5mg/kg', frequency: 'Once daily', status: 'active' },
+        ],
+        exams: [
+          { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5, pulmonary_pattern: 'edema intersticial', interpretation: 'Insuficiência cardíaca congestiva' }, flags_abnormal: ['vhs', 'pulmonary_pattern'] },
+        ],
+      },
+      {
+        daysAgo: 90,
+        chief_complaint: 'Reavaliação — função renal pós-diurético',
+        clinical_exam: 'Cardiologicamente compensada. Tutor nota poliúria.',
+        weight_kg_at_visit: 7.2, body_condition_score: 5,
+        assessment: 'DRC IRIS 2 — parcialmente associada à furosemida crônica. Necessária ração renal.',
+        plan: 'Trocar dieta para fórmula renal. Manter cardioterapia. Reavaliar SDMA em 60 dias.',
+        conditions: [
+          { condition_name: 'Chronic Kidney Disease', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+        ],
+        exams: [
+          { exam_type: 'Renal Panel', results: { creatinine: 2.1, sdma: 22, bun: 38, usg: 1.018, interpretation: 'IRIS Stage 2' }, flags_abnormal: ['creatinine', 'sdma', 'bun', 'usg'] },
+        ],
+      },
+      {
+        daysAgo: 14,
+        chief_complaint: 'Avaliação geriátrica integrada — cognição e pressão pulmonar',
+        clinical_exam: 'Episódios ocasionais de desorientação ao acordar. Doppler cardíaco mostra HP secundária leve a moderada.',
+        weight_kg_at_visit: 7.5, body_condition_score: 5,
+        assessment: 'CDS leve em monitoramento + HP pulmonar secundária ao MMVD. Caso multissistêmico complexo.',
+        plan: 'Adicionar protocolo geroprotetor compatível com cardioterapia: NMN baixa dose, ômega-3, SAMe (suporte hepático), CoQ10. Evitar quaisquer compostos com efeito hipotensor adicional.',
+        conditions: [
+          { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
+          { condition_name: 'Pulmonary Hypertension', severity: 'mild', status: 'active', origin: 'exam_suggested' },
+        ],
+        exams: [
+          { exam_type: 'Doppler Pressure', results: { systolic_pap: 48, interpretation: 'Hipertensão pulmonar leve a moderada secundária ao MMVD' }, flags_abnormal: ['systolic_pap'] },
+        ],
+      },
     ],
-    medications: [
-      { medication_name: 'Pimobendan', dosage: '0.25mg/kg', frequency: 'Twice daily' },
-      { medication_name: 'Furosemide', dosage: '2mg/kg', frequency: 'Once daily' },
-      { medication_name: 'Benazepril', dosage: '0.5mg/kg', frequency: 'Once daily' },
-    ],
-    exams: [
-      { exam_type: 'Echocardiogram', results: { lvedd: 38, lvesd: 26, fs: '32%', murmur_grade: '4/6' } },
-      { exam_type: 'Thoracic X-Ray', results: { heart_size: 'enlarged', vhs: 11.5 } },
-      { exam_type: 'Renal Panel', results: { creatinine: 2.1, sdma: 22, bun: 38, usg: 1.018, interpretation: 'IRIS Stage 2' } },
-      { exam_type: 'Doppler Pressure', results: { systolic_pap: 48, interpretation: 'Hipertensão pulmonar leve a moderada secundária ao MMVD' } },
-    ],
+    nutrition: {
+      diet_type: 'prescription',
+      daily_amount_g: 110, meals_per_day: 3, treats_frequency: 'occasional', water_intake: 'high',
+      restrictions: ['renal', 'low_phosphorus', 'low_sodium'],
+      notes: 'Dieta renal iniciada na 4ª consulta após diagnóstico de DRC IRIS 2.',
+      items: [{ raw_brand_text: 'Royal Canin', raw_product_text: 'Renal Small Dog', share_percent: 100 }],
+      introducedAtConsultationIdx: 3, // 4ª consulta (índice 3)
+    },
   },
 ];
 
@@ -213,8 +400,9 @@ const GenerateSamplePetsButton: React.FC = () => {
       const userId = userData.user?.id;
 
       for (const pet of SAMPLE_PETS) {
-        const { conditions, medications, exams, ...profileData } = pet;
+        const { consultations, nutrition, ...profileData } = pet;
 
+        // 1) Pet profile
         const { data: profile, error: profileError } = await supabase
           .from('pet_profiles')
           .insert({
@@ -224,48 +412,141 @@ const GenerateSamplePetsButton: React.FC = () => {
             veterinarian_id: userId,
             photo_url: BREED_PHOTOS[pet.breed] || null,
             is_demo: true,
-          })
+          } as any)
           .select()
           .single();
 
         if (profileError) throw profileError;
 
-        if (conditions.length > 0) {
-          // Guard-rail: alerta se algum sample usar termo genérico (categoria)
-          // em vez de doença específica.
-          conditions.forEach((c) =>
-            warnIfGenericCategory(c.condition_name, `sample pet "${pet.name}"`),
-          );
-          const { error: condError } = await supabase
-            .from('pet_conditions')
-            .insert(conditions.map(c => ({ ...c, pet_id: profile.id })));
-          if (condError) throw condError;
-        }
+        // 2) Inserir consultas em ordem cronológica (mais antiga → mais recente)
+        // O trigger refresh_pet_consultation_latest marcará a última como is_latest.
+        const sorted = [...consultations].sort((a, b) => b.daysAgo - a.daysAgo);
+        const consultationIds: string[] = [];
 
-        if (medications.length > 0) {
-          const { error: medError } = await supabase
-            .from('pet_medications')
-            .insert(medications.map(m => ({ ...m, pet_id: profile.id })));
-          if (medError) throw medError;
-        }
+        for (const c of sorted) {
+          const date = new Date(Date.now() - c.daysAgo * 24 * 60 * 60 * 1000)
+            .toISOString().split('T')[0];
 
-        if (exams.length > 0) {
-          const { error: examError } = await supabase
-            .from('pet_exams')
-            .insert(exams.map(e => ({
-              ...e,
+          const { data: consult, error: consultError } = await (supabase as any)
+            .from('pet_consultations')
+            .insert({
               pet_id: profile.id,
-              exam_date: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            })));
-          if (examError) throw examError;
+              consultation_date: date,
+              veterinarian_id: userId,
+              chief_complaint: c.chief_complaint,
+              clinical_exam: c.clinical_exam,
+              weight_kg_at_visit: c.weight_kg_at_visit,
+              body_condition_score: c.body_condition_score,
+              assessment: c.assessment,
+              plan: c.plan,
+              created_by: userId,
+            })
+            .select('id')
+            .single();
+          if (consultError) throw consultError;
+          consultationIds.push(consult.id);
+
+          // Conditions desta visita
+          if (c.conditions?.length) {
+            c.conditions.forEach((cond) => warnIfGenericCategory(cond.condition_name, `sample pet "${pet.name}"`));
+            const { error: condError } = await supabase
+              .from('pet_conditions')
+              .insert(c.conditions.map(cond => ({ ...cond, pet_id: profile.id, consultation_id: consult.id } as any)));
+            if (condError) throw condError;
+          }
+
+          // Medications desta visita
+          if (c.medications?.length) {
+            const { error: medError } = await supabase
+              .from('pet_medications')
+              .insert(c.medications.map(m => ({ ...m, pet_id: profile.id, consultation_id: consult.id } as any)));
+            if (medError) throw medError;
+          }
+
+          // Exams desta visita (já marcados como extraídos)
+          if (c.exams?.length) {
+            const { error: examError } = await (supabase as any)
+              .from('pet_exams')
+              .insert(c.exams.map(e => ({
+                pet_id: profile.id,
+                consultation_id: consult.id,
+                exam_type: e.exam_type,
+                results: e.results,
+                exam_date: date,
+                extraction_status: 'done',
+                raw_extracted: e.results,
+                flags_abnormal: e.flags_abnormal || null,
+              })));
+            if (examError) throw examError;
+          }
+
+          // Notas clínicas desta visita
+          if (c.notes?.length) {
+            const { error: noteError } = await (supabase as any)
+              .from('pet_clinical_notes')
+              .insert(c.notes.map(n => ({
+                pet_id: profile.id,
+                consultation_id: consult.id,
+                note_type: n.note_type,
+                content: n.content,
+                created_by: userId,
+              })));
+            if (noteError) throw noteError;
+          }
+        }
+
+        // 3) Dieta atual (1 registro vigente, ligado à consulta de introdução se aplicável)
+        if (nutrition) {
+          const introIdx = nutrition.introducedAtConsultationIdx ?? sorted.length - 1;
+          const introConsultId = consultationIds[Math.min(introIdx, consultationIds.length - 1)];
+          const introConsultDate = sorted[Math.min(introIdx, sorted.length - 1)].daysAgo;
+          const startedAt = new Date(Date.now() - introConsultDate * 24 * 60 * 60 * 1000)
+            .toISOString().split('T')[0];
+
+          const { data: nut, error: nutError } = await (supabase as any)
+            .from('pet_nutrition')
+            .insert({
+              pet_id: profile.id,
+              consultation_id: introConsultId,
+              diet_type: nutrition.diet_type,
+              daily_amount_g: nutrition.daily_amount_g,
+              meals_per_day: nutrition.meals_per_day,
+              treats_frequency: nutrition.treats_frequency,
+              water_intake: nutrition.water_intake,
+              restrictions: nutrition.restrictions,
+              notes: nutrition.notes,
+              started_at: startedAt,
+              is_current: true,
+              created_by: userId,
+            })
+            .select('id')
+            .single();
+          if (nutError) throw nutError;
+
+          if (nutrition.items?.length) {
+            const { error: itemErr } = await (supabase as any)
+              .from('pet_nutrition_items')
+              .insert(nutrition.items.map(i => ({
+                nutrition_id: nut.id,
+                raw_brand_text: i.raw_brand_text,
+                raw_product_text: i.raw_product_text,
+                share_percent: i.share_percent,
+              })));
+            if (itemErr) throw itemErr;
+          }
         }
       }
 
       queryClient.invalidateQueries({ queryKey: ['pet-profiles'] });
 
+      const totalConsultations = SAMPLE_PETS.reduce((s, p) => s + p.consultations.length, 0);
       toast({
         title: t('petRegistration.generator.success'),
-        description: t('petRegistration.generator.successDesc', { count: SAMPLE_PETS.length }),
+        description: t('petRegistration.generator.successDescWithHistory', {
+          count: SAMPLE_PETS.length,
+          consultations: totalConsultations,
+          defaultValue: '{{count}} pets demo criados com {{consultations}} consultas históricas e dietas atuais.',
+        }),
       });
     } catch (error: any) {
       console.error('Error generating sample pets:', error);
@@ -280,20 +561,9 @@ const GenerateSamplePetsButton: React.FC = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      onClick={handleGenerate}
-      disabled={isGenerating}
-      className="gap-2"
-    >
-      {isGenerating ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Sparkles className="h-4 w-4" />
-      )}
-      {isGenerating
-        ? t('petRegistration.generator.generating')
-        : t('petRegistration.generator.button')}
+    <Button variant="outline" onClick={handleGenerate} disabled={isGenerating} className="gap-2">
+      {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+      {isGenerating ? t('petRegistration.generator.generating') : t('petRegistration.generator.button')}
     </Button>
   );
 };
