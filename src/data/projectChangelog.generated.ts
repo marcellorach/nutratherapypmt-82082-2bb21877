@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T19:28:04.364Z
+// Última geração: 2026-05-11T19:33:59.382Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Painel de depuração e avaliação do MedGraphRAG longitudinal",
+    "bullets": [
+      "Edge function `hybrid-recommendation` aceita `debug:true` e `disableLongitudinal:true`. Quando `debug` está ligado a resposta inclui `debug.longitudinal` (quais blocos foram ativados — CURRENT_STATE/CLINICAL_TRAJECTORY/DIET_PROFILE — número de entradas, condições ativas, exames anormais, produtos de dieta) e `debug.renderedContextBlock` (texto exato injetado no prompt). `disableLongitudinal` remove os blocos longitudinais para permitir comparação A/B.",
+      "Novo serviço `src/services/longitudinal-debug-service.ts` com 3 utilidades: `auditPetLongitudinalIntegrity(petId)` (verifica N consultas, `is_latest`, FK `consultation_id` em conditions/meds/exams e `is_current` em pet_nutrition); `fetchLongitudinalDebug(...)` (debug single-shot); `compareWithVsWithoutHistory(...)` (roda inferência 2× em paralelo e calcula diff: compostos adicionados/removidos, flags anormais consideradas, menções a lacunas nutricionais, delta de racional/precauções).",
+      "Novo componente `LongitudinalDebugPanel` com 3 abas (Auditoria · Blocos usados · Comparação) renderizado no perfil do pet, abaixo do Patient Knowledge Subgraph — acessível ao veterinário em um clique.",
+      "`buildLongitudinalContext` exportado para reuso.",
+      "Files: supabase/functions/hybrid-recommendation/index.ts, src/services/longitudinal-debug-service.ts, src/services/hybrid-recommendation-service.ts, src/components/pet/LongitudinalDebugPanel.tsx, src/pages/veterinario/PetProfilePage.tsx"
+    ],
+    "files": [
+      "src/services/longitudinal-debug-service.ts",
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "src/services/hybrid-recommendation-service.ts",
+      "src/components/pet/LongitudinalDebugPanel.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx"
+    ],
+    "i18nVersion": "1.65.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",
