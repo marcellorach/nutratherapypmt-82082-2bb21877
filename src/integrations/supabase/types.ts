@@ -2251,6 +2251,7 @@ export type Database = {
       }
       pet_clinical_notes: {
         Row: {
+          consultation_id: string | null
           content: string
           created_at: string
           created_by: string | null
@@ -2261,6 +2262,7 @@ export type Database = {
           source_message: string | null
         }
         Insert: {
+          consultation_id?: string | null
           content: string
           created_at?: string
           created_by?: string | null
@@ -2271,6 +2273,7 @@ export type Database = {
           source_message?: string | null
         }
         Update: {
+          consultation_id?: string | null
           content?: string
           created_at?: string
           created_by?: string | null
@@ -2281,6 +2284,13 @@ export type Database = {
           source_message?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_clinical_notes_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "pet_consultations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_clinical_notes_pet_id_fkey"
             columns: ["pet_id"]
@@ -2294,6 +2304,7 @@ export type Database = {
         Row: {
           condition_id: string | null
           condition_name: string
+          consultation_id: string | null
           created_at: string
           diagnosis_date: string | null
           id: string
@@ -2307,6 +2318,7 @@ export type Database = {
         Insert: {
           condition_id?: string | null
           condition_name: string
+          consultation_id?: string | null
           created_at?: string
           diagnosis_date?: string | null
           id?: string
@@ -2320,6 +2332,7 @@ export type Database = {
         Update: {
           condition_id?: string | null
           condition_name?: string
+          consultation_id?: string | null
           created_at?: string
           diagnosis_date?: string | null
           id?: string
@@ -2339,7 +2352,76 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pet_conditions_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "pet_consultations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pet_conditions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_consultations: {
+        Row: {
+          assessment: string | null
+          body_condition_score: number | null
+          chief_complaint: string | null
+          clinical_exam: string | null
+          consultation_date: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_latest: boolean
+          pet_id: string
+          plan: string | null
+          updated_at: string
+          veterinarian_id: string | null
+          veterinarian_name: string | null
+          weight_kg_at_visit: number | null
+        }
+        Insert: {
+          assessment?: string | null
+          body_condition_score?: number | null
+          chief_complaint?: string | null
+          clinical_exam?: string | null
+          consultation_date?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_latest?: boolean
+          pet_id: string
+          plan?: string | null
+          updated_at?: string
+          veterinarian_id?: string | null
+          veterinarian_name?: string | null
+          weight_kg_at_visit?: number | null
+        }
+        Update: {
+          assessment?: string | null
+          body_condition_score?: number | null
+          chief_complaint?: string | null
+          clinical_exam?: string | null
+          consultation_date?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_latest?: boolean
+          pet_id?: string
+          plan?: string | null
+          updated_at?: string
+          veterinarian_id?: string | null
+          veterinarian_name?: string | null
+          weight_kg_at_visit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_consultations_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
             referencedRelation: "pet_profiles"
@@ -2349,6 +2431,7 @@ export type Database = {
       }
       pet_exams: {
         Row: {
+          consultation_id: string | null
           created_at: string
           exam_date: string | null
           exam_type: string
@@ -2360,6 +2443,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          consultation_id?: string | null
           created_at?: string
           exam_date?: string | null
           exam_type: string
@@ -2371,6 +2455,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          consultation_id?: string | null
           created_at?: string
           exam_date?: string | null
           exam_type?: string
@@ -2383,6 +2468,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pet_exams_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "pet_consultations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pet_exams_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
@@ -2391,9 +2483,310 @@ export type Database = {
           },
         ]
       }
+      pet_food_brands: {
+        Row: {
+          country: string | null
+          created_at: string
+          id: string
+          manufacturer: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          manufacturer?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          manufacturer?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      pet_food_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_canonical_id: string | null
+          ingredient_name: string
+          is_byproduct: boolean | null
+          is_named_meat: boolean | null
+          is_preservative: boolean | null
+          position: number
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_canonical_id?: string | null
+          ingredient_name: string
+          is_byproduct?: boolean | null
+          is_named_meat?: boolean | null
+          is_preservative?: boolean | null
+          position: number
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_canonical_id?: string | null
+          ingredient_name?: string
+          is_byproduct?: boolean | null
+          is_named_meat?: boolean | null
+          is_preservative?: boolean | null
+          position?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_food_ingredients_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pet_food_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_food_nutrition: {
+        Row: {
+          aafco_statement: string | null
+          antioxidants_added: boolean | null
+          ash_pct: number | null
+          ca_p_ratio: number | null
+          calcium_pct: number | null
+          chondroitin_mg_per_kg: number | null
+          created_at: string
+          epa_dha_pct: number | null
+          fat_pct: number | null
+          fediaf_compliant: boolean | null
+          fiber_pct: number | null
+          glucosamine_mg_per_kg: number | null
+          id: string
+          is_grain_free: boolean | null
+          is_hypoallergenic: boolean | null
+          kcal_per_100g: number | null
+          kcal_per_kg: number | null
+          l_carnitine_mg_per_kg: number | null
+          magnesium_pct: number | null
+          meets_aafco_complete: boolean | null
+          moisture_pct: number | null
+          nfe_pct: number | null
+          omega3_pct: number | null
+          omega6_omega3_ratio: number | null
+          omega6_pct: number | null
+          phosphorus_pct: number | null
+          potassium_pct: number | null
+          prebiotics: string[] | null
+          primary_protein_source: string | null
+          probiotics: string[] | null
+          product_id: string
+          protein_pct: number | null
+          protein_sources: string[] | null
+          raw_data: Json | null
+          raw_label_text: string | null
+          revision: number
+          sodium_pct: number | null
+          source: string
+          taurine_mg_per_kg: number | null
+          updated_at: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          aafco_statement?: string | null
+          antioxidants_added?: boolean | null
+          ash_pct?: number | null
+          ca_p_ratio?: number | null
+          calcium_pct?: number | null
+          chondroitin_mg_per_kg?: number | null
+          created_at?: string
+          epa_dha_pct?: number | null
+          fat_pct?: number | null
+          fediaf_compliant?: boolean | null
+          fiber_pct?: number | null
+          glucosamine_mg_per_kg?: number | null
+          id?: string
+          is_grain_free?: boolean | null
+          is_hypoallergenic?: boolean | null
+          kcal_per_100g?: number | null
+          kcal_per_kg?: number | null
+          l_carnitine_mg_per_kg?: number | null
+          magnesium_pct?: number | null
+          meets_aafco_complete?: boolean | null
+          moisture_pct?: number | null
+          nfe_pct?: number | null
+          omega3_pct?: number | null
+          omega6_omega3_ratio?: number | null
+          omega6_pct?: number | null
+          phosphorus_pct?: number | null
+          potassium_pct?: number | null
+          prebiotics?: string[] | null
+          primary_protein_source?: string | null
+          probiotics?: string[] | null
+          product_id: string
+          protein_pct?: number | null
+          protein_sources?: string[] | null
+          raw_data?: Json | null
+          raw_label_text?: string | null
+          revision?: number
+          sodium_pct?: number | null
+          source?: string
+          taurine_mg_per_kg?: number | null
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          aafco_statement?: string | null
+          antioxidants_added?: boolean | null
+          ash_pct?: number | null
+          ca_p_ratio?: number | null
+          calcium_pct?: number | null
+          chondroitin_mg_per_kg?: number | null
+          created_at?: string
+          epa_dha_pct?: number | null
+          fat_pct?: number | null
+          fediaf_compliant?: boolean | null
+          fiber_pct?: number | null
+          glucosamine_mg_per_kg?: number | null
+          id?: string
+          is_grain_free?: boolean | null
+          is_hypoallergenic?: boolean | null
+          kcal_per_100g?: number | null
+          kcal_per_kg?: number | null
+          l_carnitine_mg_per_kg?: number | null
+          magnesium_pct?: number | null
+          meets_aafco_complete?: boolean | null
+          moisture_pct?: number | null
+          nfe_pct?: number | null
+          omega3_pct?: number | null
+          omega6_omega3_ratio?: number | null
+          omega6_pct?: number | null
+          phosphorus_pct?: number | null
+          potassium_pct?: number | null
+          prebiotics?: string[] | null
+          primary_protein_source?: string | null
+          probiotics?: string[] | null
+          product_id?: string
+          protein_pct?: number | null
+          protein_sources?: string[] | null
+          raw_data?: Json | null
+          raw_label_text?: string | null
+          revision?: number
+          sodium_pct?: number | null
+          source?: string
+          taurine_mg_per_kg?: number | null
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_food_nutrition_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pet_food_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_food_products: {
+        Row: {
+          barcode: string | null
+          brand_id: string
+          created_at: string
+          discontinued: boolean
+          food_form: string | null
+          id: string
+          image_url: string | null
+          is_prescription: boolean
+          life_stage: string | null
+          line: string | null
+          manufacturer_url: string | null
+          name: string
+          prescription_indication: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_target: string | null
+          species: string
+          submission_status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          barcode?: string | null
+          brand_id: string
+          created_at?: string
+          discontinued?: boolean
+          food_form?: string | null
+          id?: string
+          image_url?: string | null
+          is_prescription?: boolean
+          life_stage?: string | null
+          line?: string | null
+          manufacturer_url?: string | null
+          name: string
+          prescription_indication?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_target?: string | null
+          species?: string
+          submission_status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string | null
+          brand_id?: string
+          created_at?: string
+          discontinued?: boolean
+          food_form?: string | null
+          id?: string
+          image_url?: string | null
+          is_prescription?: boolean
+          life_stage?: string | null
+          line?: string | null
+          manufacturer_url?: string | null
+          name?: string
+          prescription_indication?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_target?: string | null
+          species?: string
+          submission_status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_food_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "pet_food_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_medications: {
         Row: {
           brand_id: string | null
+          consultation_id: string | null
           created_at: string
           dosage: string | null
           end_date: string | null
@@ -2409,6 +2802,7 @@ export type Database = {
         }
         Insert: {
           brand_id?: string | null
+          consultation_id?: string | null
           created_at?: string
           dosage?: string | null
           end_date?: string | null
@@ -2424,6 +2818,7 @@ export type Database = {
         }
         Update: {
           brand_id?: string | null
+          consultation_id?: string | null
           created_at?: string
           dosage?: string | null
           end_date?: string | null
@@ -2446,6 +2841,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pet_medications_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "pet_consultations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pet_medications_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
@@ -2457,6 +2859,126 @@ export type Database = {
             columns: ["substance_id"]
             isOneToOne: false
             referencedRelation: "drug_substances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_nutrition: {
+        Row: {
+          consultation_id: string | null
+          created_at: string
+          created_by: string | null
+          daily_amount_g: number | null
+          diet_type: string
+          id: string
+          is_current: boolean
+          meals_per_day: number | null
+          notes: string | null
+          pet_id: string
+          restrictions: string[] | null
+          started_at: string | null
+          treats_description: string | null
+          treats_frequency: string | null
+          updated_at: string
+          water_intake: string | null
+        }
+        Insert: {
+          consultation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_amount_g?: number | null
+          diet_type: string
+          id?: string
+          is_current?: boolean
+          meals_per_day?: number | null
+          notes?: string | null
+          pet_id: string
+          restrictions?: string[] | null
+          started_at?: string | null
+          treats_description?: string | null
+          treats_frequency?: string | null
+          updated_at?: string
+          water_intake?: string | null
+        }
+        Update: {
+          consultation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_amount_g?: number | null
+          diet_type?: string
+          id?: string
+          is_current?: boolean
+          meals_per_day?: number | null
+          notes?: string | null
+          pet_id?: string
+          restrictions?: string[] | null
+          started_at?: string | null
+          treats_description?: string | null
+          treats_frequency?: string | null
+          updated_at?: string
+          water_intake?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_nutrition_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "pet_consultations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_nutrition_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_nutrition_items: {
+        Row: {
+          created_at: string
+          daily_amount_g_per_item: number | null
+          id: string
+          nutrition_id: string
+          product_id: string | null
+          raw_brand_text: string | null
+          raw_product_text: string | null
+          share_percent: number | null
+        }
+        Insert: {
+          created_at?: string
+          daily_amount_g_per_item?: number | null
+          id?: string
+          nutrition_id: string
+          product_id?: string | null
+          raw_brand_text?: string | null
+          raw_product_text?: string | null
+          share_percent?: number | null
+        }
+        Update: {
+          created_at?: string
+          daily_amount_g_per_item?: number | null
+          id?: string
+          nutrition_id?: string
+          product_id?: string | null
+          raw_brand_text?: string | null
+          raw_product_text?: string | null
+          share_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_nutrition_items_nutrition_id_fkey"
+            columns: ["nutrition_id"]
+            isOneToOne: false
+            referencedRelation: "pet_nutrition"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_nutrition_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pet_food_products"
             referencedColumns: ["id"]
           },
         ]
