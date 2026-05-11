@@ -104,6 +104,13 @@ export interface ConfidenceCalculationParams {
   };
   targetCondition: string;
   conditionId?: string;
+  /**
+   * Optional pet UUID. When provided, the hybrid-recommendation service will
+   * load the longitudinal clinical context (consultations + nutrition) and
+   * forward it to the edge function as CURRENT_STATE / CLINICAL_TRAJECTORY /
+   * DIET_PROFILE blocks (weights 1.0 / 0.4 / context).
+   */
+  petId?: string;
 }
 
 export interface ConfidenceCalculationResult {
