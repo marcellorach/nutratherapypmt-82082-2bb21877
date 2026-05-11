@@ -5,10 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { Apple, Loader2 } from 'lucide-react';
 import HelpHint from '@/components/ui/help-hint';
 import { usePetNutrition } from '@/hooks/usePetConsultations';
+import NutritionGapAnalysis from '@/components/pet/NutritionGapAnalysis';
 
-interface Props { petId: string; }
+interface Props {
+  petId: string;
+  petContext?: {
+    species: 'dog' | 'cat';
+    weight_kg: number;
+    age_years: number | null;
+    breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+    active_conditions: string[];
+  };
+}
 
-const PetNutritionPanel: React.FC<Props> = ({ petId }) => {
+const PetNutritionPanel: React.FC<Props> = ({ petId, petContext }) => {
   const { t } = useTranslation();
   const { data, isLoading } = usePetNutrition(petId);
   if (isLoading) {
@@ -100,6 +110,18 @@ const PetNutritionPanel: React.FC<Props> = ({ petId }) => {
           </div>
         )}
       </CardContent>
+      {petContext && petContext.weight_kg > 0 && (
+        <CardContent className="pt-0">
+          <NutritionGapAnalysis
+            petId={petId}
+            species={petContext.species}
+            weight_kg={petContext.weight_kg}
+            age_years={petContext.age_years}
+            breed_size={petContext.breed_size ?? null}
+            active_conditions={petContext.active_conditions}
+          />
+        </CardContent>
+      )}
     </Card>
   );
 };
