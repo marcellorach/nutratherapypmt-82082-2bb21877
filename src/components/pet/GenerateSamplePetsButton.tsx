@@ -15,7 +15,55 @@ const BREED_PHOTOS: Record<string, string> = {
   'Beagle': '/images/breeds/beagle.jpg',
 };
 
-const SAMPLE_PETS = [
+// ───────────────────────────────────────────────────────────────────────────
+// Histórico clínico longitudinal: cada pet recebe N consultas (= sua posição
+// no ranking de complexidade). A última (`is_latest=true`, set pelo trigger
+// refresh_pet_consultation_latest) dirige a inferência do MedGraphRAG; as
+// anteriores entram como CLINICAL_TRAJECTORY com peso reduzido.
+// ───────────────────────────────────────────────────────────────────────────
+
+type DemoConsultation = {
+  daysAgo: number;
+  chief_complaint: string;
+  clinical_exam?: string;
+  weight_kg_at_visit?: number;
+  body_condition_score?: number;
+  assessment?: string;
+  plan?: string;
+  // tudo que aconteceu nesta visita:
+  conditions?: Array<{ condition_name: string; severity: string; status: string; origin: string }>;
+  medications?: Array<{ medication_name: string; dosage: string; frequency: string; status?: string }>;
+  exams?: Array<{ exam_type: string; results: Record<string, any> }>;
+  notes?: Array<{ note_type: string; content: string }>;
+};
+
+type DemoPet = {
+  name: string;
+  breed: string;
+  age_years: number;
+  weight_kg: number;
+  sex: 'male' | 'female';
+  neutered: boolean;
+  owner_name: string;
+  owner_email: string;
+  notes: string;
+  consultations: DemoConsultation[];
+  nutrition: {
+    diet_type: string;
+    daily_amount_g?: number;
+    meals_per_day?: number;
+    treats_frequency?: string;
+    water_intake?: string;
+    restrictions?: string[];
+    notes?: string;
+    items?: Array<{ raw_brand_text: string; raw_product_text: string; share_percent: number }>;
+    // se preenchido, esta troca de dieta acontece na consulta de índice indicado:
+    changedAtConsultationIdx?: number;
+    previousDiet?: { diet_type: string; notes?: string; items?: Array<{ raw_brand_text: string; raw_product_text: string; share_percent: number }> };
+  };
+};
+
+const SAMPLE_PETS: DemoPet[] = [
   // ───────────────────────────────────────────────────────────────
   // Regra de complexidade crescente (1 → 4 condições):
   // Os 5 pets de exemplo evoluem em complexidade clínica.
