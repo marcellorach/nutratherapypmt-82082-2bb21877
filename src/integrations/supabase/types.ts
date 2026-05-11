@@ -2431,6 +2431,9 @@ export type Database = {
       }
       pet_exams: {
         Row: {
+          approved: boolean
+          approved_at: string | null
+          approved_by: string | null
           clinical_comments: string | null
           consultation_id: string | null
           created_at: string
@@ -2449,6 +2452,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
           clinical_comments?: string | null
           consultation_id?: string | null
           created_at?: string
@@ -2467,6 +2473,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
           clinical_comments?: string | null
           consultation_id?: string | null
           created_at?: string

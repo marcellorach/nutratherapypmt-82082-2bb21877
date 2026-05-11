@@ -93,35 +93,72 @@ Deno.serve(async (req) => {
     const content = aiJson.choices?.[0]?.message?.content ?? "{}";
     const parsed = typeof content === "string" ? JSON.parse(content) : content;
 
+    // Normalize numeric ranges to avoid garbage from the LLM.
+    const num = (v: unknown): number | null => {
+      if (v == null || v === "") return null;
+      const n = typeof v === "number" ? v : Number(String(v).replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    };
+    const pct = (v: unknown): number | null => {
+      const n = num(v);
+      if (n == null) return null;
+      // some sources report "30" for 30% and others 0.30 — normalize
+      const x = n > 0 && n <= 1 ? n * 100 : n;
+      return x >= 0 && x <= 100 ? Number(x.toFixed(2)) : null;
+    };
+    const kcal = (v: unknown): number | null => {
+      const n = num(v);
+      if (n == null) return null;
+      // Plausible canine kibble range 2000–6000 kcal/kg; if value looks like kcal/100g (~300-500), upscale
+      if (n > 100 && n < 1000) return Number((n * 10).toFixed(0));
+      return n >= 1000 && n <= 8000 ? Number(n.toFixed(0)) : null;
+    };
+    const enumOrNull = <T extends string>(v: unknown, allowed: T[]): T | null => {
+      if (typeof v !== "string") return null;
+      const lc = v.toLowerCase().trim();
+      const hit = allowed.find((a) => a.toLowerCase() === lc);
+      return (hit as T) ?? null;
+    };
+
     if (product_id) {
       const upd: Record<string, unknown> = {};
-      if (parsed.species) upd.species = parsed.species;
-      if (parsed.life_stage) upd.life_stage = parsed.life_stage;
-      if (parsed.size_target) upd.size_target = parsed.size_target;
-      if (parsed.food_form) upd.food_form = parsed.food_form;
+      const sp = enumOrNull(parsed.species, ["dog", "cat", "both"]);
+      const ls = enumOrNull(parsed.life_stage, ["puppy", "adult", "senior", "all"]);
+      const sz = enumOrNull(parsed.size_target, ["small", "medium", "large", "giant", "all"]);
+      const ff = enumOrNull(parsed.food_form, ["dry_kibble", "wet", "semi_moist", "raw", "freeze_dried"]);
+      if (sp) upd.species = sp;
+      if (ls) upd.life_stage = ls;
+      if (sz) upd.size_target = sz;
+      if (ff) upd.food_form = ff;
       if (typeof parsed.is_prescription === "boolean") upd.is_prescription = parsed.is_prescription;
       if (parsed.prescription_indication) upd.prescription_indication = parsed.prescription_indication;
       if (parsed.line) upd.line = parsed.line;
       if (Object.keys(upd).length) await sb.from("pet_food_products").update(upd).eq("id", product_id);
 
       const n = parsed.nutrition || {};
-      const ca = n.calcium_pct, p = n.phosphorus_pct;
-      const o3 = n.omega3_pct, o6 = n.omega6_pct;
+      const protein_pct = pct(n.protein_pct);
+      const fat_pct = pct(n.fat_pct);
+      const fiber_pct = pct(n.fiber_pct);
+      const moisture_pct = pct(n.moisture_pct);
+      const ash_pct = pct(n.ash_pct);
+      const ca = pct(n.calcium_pct), p = pct(n.phosphorus_pct);
+      const o3 = pct(n.omega3_pct), o6 = pct(n.omega6_pct);
+      const kcal_per_kg = kcal(n.kcal_per_kg);
       await sb.from("pet_food_nutrition").insert({
         product_id,
         source: "llm_estimated",
         verified: false,
-        protein_pct: n.protein_pct ?? null,
-        fat_pct: n.fat_pct ?? null,
-        fiber_pct: n.fiber_pct ?? null,
-        moisture_pct: n.moisture_pct ?? null,
-        ash_pct: n.ash_pct ?? null,
-        kcal_per_kg: n.kcal_per_kg ?? null,
-        calcium_pct: ca ?? null,
-        phosphorus_pct: p ?? null,
+        protein_pct,
+        fat_pct,
+        fiber_pct,
+        moisture_pct,
+        ash_pct,
+        kcal_per_kg,
+        calcium_pct: ca,
+        phosphorus_pct: p,
         ca_p_ratio: ca && p ? Number((ca / p).toFixed(2)) : null,
-        omega3_pct: o3 ?? null,
-        omega6_pct: o6 ?? null,
+        omega3_pct: o3,
+        omega6_pct: o6,
         omega6_omega3_ratio: o6 && o3 ? Number((o6 / o3).toFixed(2)) : null,
         primary_protein_source: n.primary_protein_source ?? null,
         is_grain_free: n.is_grain_free ?? null,

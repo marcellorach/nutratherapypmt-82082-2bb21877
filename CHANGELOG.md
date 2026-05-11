@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-11 — Aprovação e normalização de exames PDF
+<!-- area: vet-ui · status: entregue · i18n: 1.65.0 -->
+- `pet_exams` ganha colunas `approved`, `approved_at`, `approved_by` para fluxo de revisão antes de entrar no histórico.
+- Edge function `parse-pet-exam-pdf`: normaliza unidades (mg/dL, U/L, 10^3/µL…), coerge valores numéricos, recalcula `flag` (high/low) a partir da faixa, normaliza datas (dd/mm/aaaa → ISO), e auto-vincula a uma `pet_consultation` quando a data do exame casa com uma visita (±3 dias).
+- Edge function `enrich-pet-food-product`: clamp de percentuais 0-100, normalização de kcal/kg (detecta kcal/100g), validação de enums (`species`, `life_stage`, `food_form`, `size_target`).
+- UI `PetExamPdfUploader`: seletor de consulta para vincular novos uploads (Automático / Sem vínculo / consulta específica) + badge "Pendente revisão" / "Aprovado" por exame.
+- Novo `PetExamReviewDialog`: revisar/editar tipo, data, laboratório, comentários, vínculo de consulta e tabela editável de analitos (valor, unidade, faixa min/max, flag recalculado em tempo real). Botões "Salvar rascunho" e "Aprovar e salvar no histórico".
+- Files: supabase/migrations/*_pet_exams_approval.sql, supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/enrich-pet-food-product/index.ts, src/components/pet/PetExamPdfUploader.tsx, src/components/pet/PetExamReviewDialog.tsx
+
 ### Added - 2026-05-11 — Histórico longitudinal nos demo pets + MedGraphRAG context-aware
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.65.0 -->
 - Demo pets agora geram histórico clínico longitudinal: Buddy 1 consulta, Max 2, Rex 3, Thor 4, Luna 5 (total 15 consultas), com `pet_conditions`/`pet_medications`/`pet_exams` linkados via `consultation_id` e `pet_nutrition` + `pet_nutrition_items` por pet (Rex em dieta de controle de peso, Luna trocou para fórmula renal na 4ª consulta). Trigger `refresh_pet_consultation_latest` marca a última como `is_latest`.
