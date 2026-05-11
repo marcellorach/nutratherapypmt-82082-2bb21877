@@ -576,11 +576,20 @@ const PetProfilePage: React.FC = () => {
           {/* Left 2 columns */}
           <div className="lg:col-span-2 space-y-6">
             {/* Patient Clinical Data */}
-            <Tabs defaultValue="conditions">
-            <TabsList className="mb-4">
+            <div ref={clinicalTabsRef}>
+            <Tabs value={clinicalTab} onValueChange={setClinicalTab}>
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
               <TabsTrigger value="conditions" className="gap-1">
                 <Stethoscope className="h-3.5 w-3.5" />
                 {t('petRegistration.conditions.title')}
+              </TabsTrigger>
+              <TabsTrigger value="consultations" className="gap-1">
+                <CalendarClock className="h-3.5 w-3.5" />
+                {t('petTimeline.title')}
+              </TabsTrigger>
+              <TabsTrigger value="nutrition" className="gap-1">
+                <Apple className="h-3.5 w-3.5" />
+                {t('petNutrition.currentBadge')}
               </TabsTrigger>
               <TabsTrigger value="medications" className="gap-1">
                 <Pill className="h-3.5 w-3.5" />
@@ -616,6 +625,14 @@ const PetProfilePage: React.FC = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="consultations">
+              <PetConsultationsTimeline petId={id!} />
+            </TabsContent>
+
+            <TabsContent value="nutrition">
+              <PetNutritionPanel petId={id!} />
             </TabsContent>
 
             <TabsContent value="medications">
