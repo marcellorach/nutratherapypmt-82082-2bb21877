@@ -110,3 +110,9 @@ verify_jwt = true
 
 [functions.provider-health]
 verify_jwt = true
+
+[functions.parse-pet-exam-pdf]
+verify_jwt = true
+
+[functions.enrich-pet-food-product]
+verify_jwt = true

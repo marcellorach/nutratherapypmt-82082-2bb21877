@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Layout from '@/components/layout/Layout';
 import PetRegistrationForm from '@/components/pet/PetRegistrationForm';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
+import PetExamPdfUploader from '@/components/pet/PetExamPdfUploader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useCreatePetProfile, type PetProfileData } from '@/hooks/usePetProfile';
@@ -56,11 +57,14 @@ const PetRegistrationPage: React.FC = () => {
 
           <div className="min-h-[600px]">
             {createdPetId ? (
-              <PetClinicalChat
-                petId={createdPetId}
-                petBreed={petBreed}
-                petAge={petAge}
-              />
+              <div className="space-y-4">
+                <PetExamPdfUploader petId={createdPetId} />
+                <PetClinicalChat
+                  petId={createdPetId}
+                  petBreed={petBreed}
+                  petAge={petAge}
+                />
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center border rounded-lg bg-muted/30">
                 <div className="text-center p-8">

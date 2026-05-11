@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Database, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Plus, Database, CheckCircle2, Clock, XCircle, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Brand = { id: string; name: string; manufacturer: string | null; country: string | null; website: string | null };
@@ -159,6 +159,7 @@ export default function PetFoodCatalogTab() {
 }
 
 function ProductActions({ product, onChanged }: { product: Product; onChanged: () => void }) {
+  const [enriching, setEnriching] = useState(false);
   const setStatus = async (status: 'approved' | 'rejected') => {
     const { error } = await supabase
       .from('pet_food_products')
@@ -166,15 +167,36 @@ function ProductActions({ product, onChanged }: { product: Product; onChanged: (
       .eq('id', product.id);
     if (error) toast.error(error.message); else { toast.success(`Produto ${status === 'approved' ? 'aprovado' : 'rejeitado'}`); onChanged(); }
   };
-  if (product.submission_status === 'pending') {
-    return (
-      <div className="flex gap-1 shrink-0">
-        <Button size="sm" variant="outline" onClick={() => setStatus('approved')}>Aprovar</Button>
-        <Button size="sm" variant="ghost" onClick={() => setStatus('rejected')}>Rejeitar</Button>
-      </div>
-    );
-  }
-  return null;
+  const enrich = async () => {
+    setEnriching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enrich-pet-food-product', {
+        body: { product_id: product.id },
+      });
+      if (error) throw error;
+      const conf = (data as any)?.parsed?.confidence;
+      toast.success(`Composição enriquecida${conf != null ? ` (confiança ${Math.round(conf * 100)}%)` : ''}`);
+      onChanged();
+    } catch (e: any) {
+      toast.error(`Falha ao enriquecer: ${e?.message ?? e}`);
+    } finally {
+      setEnriching(false);
+    }
+  };
+  return (
+    <div className="flex gap-1 shrink-0">
+      <Button size="sm" variant="outline" onClick={enrich} disabled={enriching}>
+        {enriching ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />}
+        Enriquecer com IA
+      </Button>
+      {product.submission_status === 'pending' && (
+        <>
+          <Button size="sm" variant="outline" onClick={() => setStatus('approved')}>Aprovar</Button>
+          <Button size="sm" variant="ghost" onClick={() => setStatus('rejected')}>Rejeitar</Button>
+        </>
+      )}
+    </div>
+  );
 }
 
 function NewBrandDialog({ onCreated }: { onCreated: () => void }) {
