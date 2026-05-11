@@ -5565,7 +5565,34 @@
       "notesPlaceholder": "General observations about the patient...",
       "register": "Register Patient",
       "successTitle": "Patient registered",
-      "successDesc": "{{name}} was registered successfully"
+      "successDesc": "{{name}} was registered successfully",
+      "birthDate": "Birth date",
+      "autoFromBirth": "auto",
+      "photoUploader": {
+        "add": "Add photo",
+        "change": "Change photo",
+        "hint": "JPG or PNG up to 5MB"
+      },
+      "initialExams": {
+        "title": "Initial exams (PDF)",
+        "hint": "Attach PDFs of CBC, biochemistry, urinalysis, etc. They will be extracted automatically after saving the pet."
+      },
+      "historicalConsultations": {
+        "title": "Previous consultations",
+        "helpTitle": "Why register previous consultations?",
+        "helpBody": "MedGraphRAG uses the latest consultation with weight 1.0 (CURRENT_STATE) and previous ones with weight 0.4 (CLINICAL_TRAJECTORY) to detect progression. The richer the history, the more accurate the inference.",
+        "empty": "No previous consultations. Add one to build the clinical history.",
+        "itemTitle": "Consultation {{n}}",
+        "date": "Date",
+        "weight": "Weight (kg)",
+        "bcs": "BCS (1-9)",
+        "chiefComplaint": "Chief complaint",
+        "assessment": "Findings / Diagnosis",
+        "plan": "Plan",
+        "conditions": "Diagnoses (comma-separated)",
+        "medications": "Medications (one per line: name | dose | frequency)",
+        "add": "Add consultation"
+      }
     },
     "chat": {
       "title": "Intelligent Clinical Chat",
