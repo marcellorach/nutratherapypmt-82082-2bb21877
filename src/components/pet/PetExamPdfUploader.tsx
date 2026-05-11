@@ -1,0 +1,180 @@
+import { useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Upload, FileText, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+
+type ExamRow = {
+  id: string;
+  exam_type: string;
+  exam_date: string | null;
+  lab_name: string | null;
+  file_url: string | null;
+  flags_abnormal: string[] | null;
+  extraction_status: 'pending' | 'processing' | 'done' | 'failed' | null;
+  extraction_error: string | null;
+  results: Record<string, any> | null;
+  clinical_comments: string | null;
+};
+
+export default function PetExamPdfUploader({ petId }: { petId: string }) {
+  const [exams, setExams] = useState<ExamRow[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const load = async () => {
+    const { data, error } = await supabase
+      .from('pet_exams')
+      .select('id, exam_type, exam_date, lab_name, file_url, flags_abnormal, extraction_status, extraction_error, results, clinical_comments')
+      .eq('pet_id', petId)
+      .order('created_at', { ascending: false });
+    if (error) { toast.error(error.message); return; }
+    setExams((data ?? []) as ExamRow[]);
+  };
+
+  useEffect(() => { void load(); }, [petId]);
+
+  // poll while any exam is processing
+  useEffect(() => {
+    const hasProcessing = exams.some(e => e.extraction_status === 'processing' || e.extraction_status === 'pending');
+    if (!hasProcessing) return;
+    const t = setInterval(load, 4000);
+    return () => clearInterval(t);
+  }, [exams]);
+
+  const triggerExtract = async (examId: string, storagePath: string) => {
+    const { error } = await supabase.functions.invoke('parse-pet-exam-pdf', {
+      body: { exam_id: examId, file_url: storagePath },
+    });
+    if (error) toast.error(`Extração falhou: ${error.message}`);
+  };
+
+  const handleFiles = async (files: File[]) => {
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${petId}/${Date.now()}_${safe}`;
+        const { error: upErr } = await supabase.storage.from('pet_exams_pdfs').upload(path, file, {
+          contentType: 'application/pdf', upsert: false,
+        });
+        if (upErr) { toast.error(`Upload falhou: ${upErr.message}`); continue; }
+
+        const { data: ins, error: insErr } = await supabase.from('pet_exams').insert({
+          pet_id: petId,
+          exam_type: 'Aguardando extração',
+          file_url: path,
+          extraction_status: 'pending',
+        }).select('id').single();
+        if (insErr || !ins) { toast.error(`Registro falhou: ${insErr?.message}`); continue; }
+
+        toast.success(`${file.name} enviado. Extraindo dados…`);
+        void triggerExtract(ins.id, path);
+      }
+      await load();
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: handleFiles,
+    accept: { 'application/pdf': ['.pdf'] },
+    multiple: true,
+    disabled: uploading,
+  });
+
+  const reExtract = async (e: ExamRow) => {
+    if (!e.file_url) return;
+    await supabase.from('pet_exams').update({ extraction_status: 'processing' }).eq('id', e.id);
+    await load();
+    void triggerExtract(e.id, e.file_url);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <FileText className="h-4 w-4" /> Exames em PDF
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-md p-5 text-center cursor-pointer transition-colors ${
+            isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+          } ${uploading ? 'opacity-60 pointer-events-none' : ''}`}
+        >
+          <input {...getInputProps()} />
+          {uploading ? (
+            <Loader2 className="h-8 w-8 mx-auto animate-spin text-muted-foreground" />
+          ) : (
+            <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+          )}
+          <p className="text-sm mt-2">
+            {isDragActive ? 'Solte os PDFs aqui' : 'Arraste PDFs ou clique para enviar'}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">Hemograma, bioquímico, urinálise, etc.</p>
+        </div>
+
+        {exams.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-2">Nenhum exame enviado ainda.</p>
+        )}
+
+        <div className="space-y-2">
+          {exams.map((e) => (
+            <div key={e.id} className="border rounded-md p-3 text-sm">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {e.extraction_status === 'done' && <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />}
+                  {e.extraction_status === 'processing' && <Loader2 className="h-4 w-4 animate-spin text-blue-600 shrink-0" />}
+                  {e.extraction_status === 'pending' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />}
+                  {e.extraction_status === 'failed' && <AlertCircle className="h-4 w-4 text-destructive shrink-0" />}
+                  <span className="font-medium truncate">{e.exam_type}</span>
+                  {e.exam_date && <Badge variant="outline" className="text-[10px]">{e.exam_date}</Badge>}
+                  {e.lab_name && <Badge variant="secondary" className="text-[10px]">{e.lab_name}</Badge>}
+                </div>
+                {(e.extraction_status === 'failed' || e.extraction_status === 'done') && (
+                  <Button size="sm" variant="ghost" onClick={() => reExtract(e)}>
+                    <RefreshCw className="h-3 w-3 mr-1" /> Reextrair
+                  </Button>
+                )}
+              </div>
+              {e.extraction_status === 'failed' && (
+                <p className="text-xs text-destructive mt-1">Erro: {e.extraction_error}</p>
+              )}
+              {e.flags_abnormal && e.flags_abnormal.length > 0 && (
+                <div className="flex gap-1 flex-wrap mt-2">
+                  {e.flags_abnormal.map((f) => (
+                    <Badge key={f} variant="destructive" className="text-[10px]">{f}</Badge>
+                  ))}
+                </div>
+              )}
+              {e.clinical_comments && (
+                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{e.clinical_comments}</p>
+              )}
+              {e.results && Object.keys(e.results).length > 0 && (
+                <details className="mt-2">
+                  <summary className="text-xs text-primary cursor-pointer">Ver {Object.keys(e.results).length} resultados</summary>
+                  <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
+                    {Object.entries(e.results).slice(0, 30).map(([k, v]: [string, any]) => (
+                      <div key={k} className="flex justify-between border-b py-0.5">
+                        <span className="text-muted-foreground truncate">{k}</span>
+                        <span className={v?.flag === 'high' || v?.flag === 'low' ? 'text-destructive font-medium' : ''}>
+                          {typeof v === 'object' ? `${v.value ?? '-'} ${v.unit ?? ''}` : String(v)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
