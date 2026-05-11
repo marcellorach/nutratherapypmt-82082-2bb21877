@@ -66,6 +66,7 @@ const ConflictReviewPanel = lazy(() => import('@/components/administrador/confli
 const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
+const PetFoodCatalogTab = lazy(() => import('@/components/administrador/pet-food/PetFoodCatalogTab'));
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
 const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
