@@ -1,75 +1,92 @@
-## Objetivo
+## Diagnóstico
 
-Aproveitar a nova infraestrutura de **consultas, nutrição, exames PDF e medicações canonicalizadas** para que (a) os 5 pets demo passem a ter um **histórico clínico realista**, (b) esse histórico seja **lido e ponderado** pelo VetGraphRAG/Hybrid Recommendation com **destaque para a última consulta**, e (c) a documentação do sistema reflita essa lógica.
+Após revisar o código, confirmo os 7 gaps que você levantou:
+
+**Pets demo (gerados):**
+- (a) Os pets demo **já recebem** N consultas no banco (`GenerateSamplePetsButton` insere 1→5 consultas com `pet_consultations` + `pet_conditions/medications/exams/notes` linkados via `consultation_id`), mas **a tela `PetProfilePage` não renderiza** o histórico — só mostra os agregados atuais (Conditions, Medications, Exams, Clinical Notes). Por isso "não estamos vendo".
+- (b) Mesma coisa para nutrição: `pet_nutrition` + `pet_nutrition_items` são gravados, mas o perfil **não tem nenhum painel de ração / impacto nutricional** visível. Só aparecem indiretamente via "Comparação" do debug.
+- (c) O painel "Depuração do MedGraphRAG longitudinal" não tem nenhuma explicação inline do que é cada aba (Auditoria / Blocos usados / Comparação) — falta `(?)` com tooltip didático.
+
+**Pets cadastrados manualmente (`PetRegistrationForm`):**
+1. ✅ Campo **sexo já existe** (radio male/female) — sem ação necessária, talvez só destacar visualmente.
+2. ❌ Hoje só pede **idade em anos** (`age_years`); não há **data de nascimento**.
+3. ❌ Não há **upload de foto** do pet.
+4. ❌ Há um `PetExamPdfUploader`, mas ele só aparece **depois** do registro, no perfil; não está embutido no formulário inicial.
+5. ❌ Não há UI para registrar **consultas históricas** (apenas a "consulta atual" implícita) — toda a infra de `pet_consultations` existe no banco mas não é exposta ao vet manual.
 
 ---
 
-## a) Pets de exemplo com histórico longitudinal
+## Plano de ação
 
-Atualizar `src/components/pet/GenerateSamplePetsButton.tsx` para que cada pet receba **N consultas** ao longo do tempo (de simples → complexo: 1, 2, 3, 4, 5 consultas), em vez de apenas snapshot.
+### Fase 1 — Tornar o histórico longitudinal visível no perfil do pet
+**(resolve a + b para os pets demo, e dá lugar para a Fase 3 escrever)**
 
-Estrutura por pet:
-- **`pet_consultations`** (1 a 5, datadas dos últimos 24 meses):
-  - `consultation_date`, `chief_complaint`, `clinical_exam`, `weight_kg_at_visit`, `body_condition_score`, `assessment`, `plan`
-  - O trigger `refresh_pet_consultation_latest` marca automaticamente a mais recente como `is_latest`
-- **`pet_conditions`**, **`pet_medications`**, **`pet_exams`**, **`pet_clinical_notes`** ganham `consultation_id` apontando para a visita correta — refletindo aparecimento, agravamento, resolução e ajustes de dose ao longo do tempo
-- **`pet_nutrition` + `pet_nutrition_items`**: pelo menos 1 dieta atual, com mudança de marca/ração em uma das consultas (Luna troca para fórmula renal; Rex entra em dieta de controle de peso)
-- **`pet_exams.extraction_status = 'done'`** com `raw_extracted` JSON populado (simulando PDF já parseado), incluindo `flags_abnormal`
+1. **Novo componente `PetConsultationsTimeline.tsx`** (`src/components/pet/`):
+   - Lê `pet_consultations` ordenadas DESC com seus filhos (conditions/meds/exams/notes via `consultation_id`).
+   - Renderiza uma linha do tempo vertical com cards: data, queixa principal, peso/ECC, achados, conduta.
+   - A consulta com `is_latest=true` recebe **borda destacada + badge "Última consulta"**; as anteriores ficam em estilo secundário.
+   - Cada card é expansível mostrando os exames/diagnósticos/medicações daquela visita.
 
-Trajetória clínica por pet (resumo):
-- **Buddy (4a, Beagle)**: 1 consulta — check-up preventivo
-- **Max (9a, Beagle)**: 2 consultas — primeira detecta CDS leve; segunda confirma sarcopenia
-- **Rex (8a, Lab)**: 3 consultas — obesidade → osteoartrite → displasia em raio-X; introdução de Meloxicam na 2ª
-- **Thor (7a, Pastor)**: 4 consultas — OA → senescência → mielopatia em monitoramento; Carprofen ajustado
-- **Luna (9a, Cavalier)**: 5 consultas — MMVD B2 → C; introdução escalonada de Pimobendan, Furosemida, Benazepril; DRC e HP secundárias surgindo na timeline; troca de ração na 4ª
+2. **Novo componente `PetNutritionPanel.tsx`**:
+   - Mostra a dieta atual (`pet_nutrition.is_current=true`) + itens (marca/produto/share%).
+   - Se houver dados de `pet_food_nutrition` enriquecidos, mostra perfil (kcal/dia, %P/G, ω3:ω6, Ca:P) e flags de gap (déficit ω3, excesso de fósforo etc.).
+   - Indicador de "dieta trocada na consulta de DD/MM" quando aplicável.
 
-## b) Uso do histórico no MedGraphRAG (com destaque para a última)
+3. **Integração no `PetProfilePage`**: nova seção "Histórico Clínico" (timeline) e "Nutrição & Impacto" entre os contadores e o `PatientKnowledgeSubgraph`. Adicionar 2 contadores no header: **Consultas** e **Dieta atual**.
 
-Hoje o `hybrid-recommendation` e o `extract-pet-clinical-data` ignoram `pet_consultations`, `pet_nutrition`, `clinical_notes`. Mudanças:
+### Fase 2 — Tooltips didáticos `(?)` em pontos complexos
+**(resolve c)**
 
-1. **Builder de contexto clínico** (`supabase/functions/hybrid-recommendation/index.ts`):
-   - Buscar todas as consultas ordenadas DESC; separar `latest` (a com `is_latest=true`) e `history` (anteriores)
-   - Para cada entidade (conditions/meds/exams), agrupar por `consultation_id` e marcar timestamp relativo
-   - Buscar dieta atual (`pet_nutrition`) e juntar perfil nutricional (kcal/dia, %P, %G, ω3/ω6, Ca:P) via `pet_food_nutrition`
+1. Criar componente reutilizável `<HelpHint>` (ícone ⓘ / `HelpCircle` da lucide + Tooltip do shadcn) com `title` + `body` curto.
+2. Aplicar em:
+   - **Painel "Depuração do MedGraphRAG longitudinal"**: explicação geral + um `<HelpHint>` por aba:
+     - *Auditoria*: "Verifica se o histórico no banco está íntegro: cada pet tem 1 única consulta marcada como `is_latest`, e conditions/exams/medications estão linkadas a uma consulta."
+     - *Blocos usados*: "Mostra os 3 blocos que injetamos no prompt do MedGraphRAG: CURRENT_STATE (peso 1.0 — última consulta), CLINICAL_TRAJECTORY (peso 0.4 — consultas anteriores), DIET_PROFILE (perfil nutricional atual)."
+     - *Comparação*: "Roda a inferência duas vezes (com e sem o histórico) e compara os compostos recomendados, flags anormais e menções a lacunas nutricionais."
+   - **Análise com VetGraphRAG** (botão), **Pipeline workflow** (cada estágio), **Confidence level**, **Patient Knowledge Subgraph**, **Treatability chart**.
 
-2. **Prompt do MedGraphRAG** passa a receber 3 blocos explícitos:
-   - `CURRENT_STATE` (consulta `is_latest`) — **peso 1.0**, fonte primária da inferência
-   - `CLINICAL_TRAJECTORY` (consultas anteriores) — **peso 0.4**, usado para detectar:
-     - condições **progredindo** vs **resolvidas** vs **estáveis**
-     - resposta/falha a medicações já tentadas (não recomendar de novo se já houve falha)
-     - tendências em exames (creatinina ↑, peso ↑)
-   - `DIET_PROFILE` — usado para gap-analysis nutricional (déficit ω3, excesso de fósforo em DRC, etc.)
+### Fase 3 — Cadastro manual rico (`PetRegistrationForm`)
+**(resolve 1-5 dos pets manuais)**
 
-3. **Pesos no scoring** (`recommendation-confidence-service.ts` / `hybrid-recommendation-service.ts`):
-   - Condição em consulta `is_latest` com `status='active'` → fator 1.0
-   - Condição apenas em histórico antigo → fator 0.3 (background risk)
-   - Condição `resolved` → ignorada para protocolo ativo, mantida para alertas de recidiva
-   - Medicação ativa na última consulta entra na detecção de interações; medicação descontinuada não
+1. **Data de nascimento em vez de idade**:
+   - Adicionar campo `birth_date` (date picker) e calcular `age_years` automaticamente para envio (mantém compatibilidade com schema existente).
+   - Migration: adicionar coluna opcional `birth_date DATE` em `pet_profiles`.
 
-4. **PatientKnowledgeSubgraph** (`src/components/pet/PatientKnowledgeSubgraph.tsx`): nó "Última Consulta" em destaque visual (borda mais forte) com edges para condições/meds/diet ativas; consultas anteriores como nós secundários menores numa timeline lateral.
+2. **Upload de foto do pet**:
+   - Migration: criar bucket `pet-photos` (público) com policies por usuário; coluna `photo_url TEXT` em `pet_profiles`.
+   - Componente `PetPhotoUploader` (avatar + drop zone) integrado no topo do form.
 
-5. **`extract-pet-clinical-data`**: quando o vet cola texto de evolução, criar uma **nova `pet_consultation`** automaticamente em vez de só anexar `clinical_notes` soltas.
+3. **Anexar PDFs de exames já no registro**:
+   - Embutir o `PetExamPdfUploader` no formulário em uma seção colapsável "Exames iniciais (PDF)". Após o INSERT do pet, faz upload + chama `parse-pet-exam-pdf` com o `pet_id` recém-criado.
 
-## c) Documentação
+4. **Sistema de consultas históricas**:
+   - Nova seção colapsável "Consultas anteriores" no formulário com botão `+ Adicionar consulta`.
+   - Cada item permite preencher: data, queixa, peso/ECC, achados, conduta, **e sub-listas** de diagnósticos, medicações e exames daquela consulta (mesmo modelo do `DemoConsultation`).
+   - Ao salvar, insere todas as consultas em ordem cronológica (o trigger `refresh_pet_consultation_latest` marca a mais recente como `is_latest`) e propaga `consultation_id` para conditions/meds/exams.
+   - Reaproveitar (extrair) parte da lógica de inserção de `GenerateSamplePetsButton` para um service compartilhado `pet-consultation-writer.ts`.
 
-Atualizar:
-- **ARCHITECTURE.md** (MINOR): nova seção "Modelo Longitudinal de Histórico Clínico" descrevendo `pet_consultations` como tabela-âncora, `is_latest`, FK `consultation_id` em conditions/meds/exams/notes, e fluxo de leitura no hybrid-recommendation
-- **docs/CURRENT_STATE.md** (MINOR): mover histórico clínico de "mockado" para "implementado"; descrever pesos `latest=1.0 / history=0.4`
-- **docs/STANFORD_DEMO.md** (MINOR): destacar que os 5 demo pets agora exibem **trajetória clínica realista** (1→5 consultas) — diferencial de demonstração
-- **CHANGELOG.md** [Unreleased] → Added: histórico longitudinal nos sample pets + integração no MedGraphRAG com peso na última consulta
-- **mem://features/sample-pets-complexity-order**: adicionar regra "cada pet tem N consultas = sua posição no ranking de complexidade; última consulta sempre dirige a inferência"
-- **mem://architecture/hybrid-recommendation-context-aware-logic**: adicionar bloco `CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE` e os pesos
-- Incrementar `I18N_VERSION` ao adicionar novas chaves de UI ("Última consulta", "Trajetória clínica", "Dieta atual")
+5. **Sexo já existe** — apenas reorganizar visualmente para ficar lado a lado com data de nascimento.
+
+### Fase 4 — Documentação e i18n
+
+- Incrementar `I18N_VERSION` e adicionar todas as novas chaves PT/EN (timeline, nutrição, tooltips, novos campos).
+- Atualizar `CHANGELOG.md` [Unreleased] → Added.
+- Atualizar `ARCHITECTURE.md` (novo painel Histórico/Nutrição + bucket pet-photos) e `docs/CURRENT_STATE.md` (mover histórico longitudinal de "implementado no backend" para "exibido na UI").
+- Atualizar `mem://features/sample-pets-complexity-order` notando que o histórico passou a ser visível.
+
+---
 
 ## Detalhes técnicos
 
-- Sem migração nova: o schema de `pet_consultations` e FKs já foi criado nas fases 1-2.
-- Trigger `refresh_pet_consultation_latest` já recalcula `is_latest` no insert — basta inserir as consultas em ordem cronológica.
-- Edge functions afetadas: `hybrid-recommendation`, `extract-pet-clinical-data`. Sem novas secrets.
-- Botão "Gerar pets de exemplo" passa a inserir ~15 consultas totais (1+2+3+4+5) e ~10 itens de nutrição, mantendo `is_demo=true` para deleção em massa segura.
+- **Migrations novas**: 
+  - `pet_profiles.birth_date DATE` + `pet_profiles.photo_url TEXT`
+  - bucket `pet-photos` com RLS por `auth.uid()`
+- **Sem mudanças no MedGraphRAG / hybrid-recommendation** — a infraestrutura já consome o histórico; estamos apenas expondo na UI e ampliando os pontos de entrada.
+- **Hooks novos**: `usePetConsultations(petId)`, `usePetNutrition(petId)`.
+- **Service compartilhado** `src/services/pet-consultation-writer.ts` para deduplicar a lógica entre `GenerateSamplePetsButton` e o novo formulário.
 
 ## Fora de escopo
 
-- Importar histórico real do PetLove (continua manual via formulário/PDF)
-- Re-treinar embeddings sobre consultas históricas (só leitura estruturada por enquanto)
-- Versionamento de `pet_nutrition` ao longo do tempo além do snapshot atual + 1 troca
+- Edição/exclusão de consultas históricas após o registro (read-only nesta fase; edição vem depois).
+- OCR automático da carteirinha de vacinação.
+- Versionamento avançado de dietas ao longo do tempo (continuamos com snapshot atual + 1 troca).

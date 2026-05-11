@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, TrendingUp, AlertTriangle, Dna, Network } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, TrendingUp, AlertTriangle, Dna, Network, CalendarClock, Apple } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
@@ -25,6 +25,10 @@ import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph'
 import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import LongitudinalDebugPanel from '@/components/pet/LongitudinalDebugPanel';
+import PetConsultationsTimeline from '@/components/pet/PetConsultationsTimeline';
+import PetNutritionPanel from '@/components/pet/PetNutritionPanel';
+import HelpHint from '@/components/ui/help-hint';
+import { usePetConsultations, usePetNutrition } from '@/hooks/usePetConsultations';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import DrugLookupBadge from '@/components/pet/DrugLookupBadge';
@@ -52,6 +56,8 @@ const PetProfilePage: React.FC = () => {
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
   const conditionInsights = useConditionInsights(data?.conditions);
+  const consultationsQ = usePetConsultations(id);
+  const nutritionQ = usePetNutrition(id);
   const upsertSnapshot = useUpsertPetClinicalAnalysisSnapshot();
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
@@ -495,6 +501,30 @@ const PetProfilePage: React.FC = () => {
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
+              <CalendarClock className="h-8 w-8 text-indigo-500" />
+              <div>
+                <p className="text-2xl font-bold">{consultationsQ.data?.length ?? 0}</p>
+                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  {t('petTimeline.title')}
+                  <HelpHint title={t('petTimeline.helpTitle')}>{t('petTimeline.helpBody')}</HelpHint>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <Apple className="h-8 w-8 text-emerald-500" />
+              <div>
+                <p className="text-2xl font-bold">{nutritionQ.data?.find(n => n.is_current) ? 1 : 0}</p>
+                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  {t('petNutrition.currentBadge')}
+                  <HelpHint title={t('petNutrition.helpTitle')}>{t('petNutrition.helpBody')}</HelpHint>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
               <Pill className="h-8 w-8 text-blue-500" />
               <div>
                 <p className="text-2xl font-bold">{medications.length}</p>
@@ -735,6 +765,10 @@ const PetProfilePage: React.FC = () => {
                 petId={id}
               />
             )}
+
+            {/* Longitudinal history & nutrition (always visible if data exists) */}
+            <PetConsultationsTimeline petId={id!} />
+            <PetNutritionPanel petId={id!} />
 
             {/* Longitudinal MedGraphRAG debug & evaluation */}
             <LongitudinalDebugPanel

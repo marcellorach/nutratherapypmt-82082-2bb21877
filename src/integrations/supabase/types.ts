@@ -3016,6 +3016,7 @@ export type Database = {
       pet_profiles: {
         Row: {
           age_years: number
+          birth_date: string | null
           breed: string
           chip_number: string | null
           created_at: string
@@ -3036,6 +3037,7 @@ export type Database = {
         }
         Insert: {
           age_years: number
+          birth_date?: string | null
           breed: string
           chip_number?: string | null
           created_at?: string
@@ -3056,6 +3058,7 @@ export type Database = {
         }
         Update: {
           age_years?: number
+          birth_date?: string | null
           breed?: string
           chip_number?: string | null
           created_at?: string

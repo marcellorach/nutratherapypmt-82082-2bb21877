@@ -7646,5 +7646,49 @@
       "notRecognized": "Not recognized",
       "notRecognizedTooltip": "This medication is not in the Pharmacology Base. Ask an admin to register it."
     }
+  },
+  "petTimeline": {
+    "title": "Consultation history",
+    "subtitle": "Timeline of visits. The highlighted one is the latest (weight 1.0 in inference); previous visits enter as CLINICAL_TRAJECTORY (weight 0.4).",
+    "loading": "Loading history…",
+    "empty": "No consultations recorded for this pet yet.",
+    "latestBadge": "Latest visit",
+    "chiefComplaint": "Complaint",
+    "clinicalExam": "Clinical exam",
+    "assessment": "Assessment",
+    "plan": "Plan",
+    "diagnoses": "diagnoses",
+    "medsAdded": "medications",
+    "examsAdded": "exams",
+    "notesAdded": "notes",
+    "abnormalFlags": "abnormal flags",
+    "expand": "Show details",
+    "collapse": "Collapse",
+    "helpTitle": "How we use the history",
+    "helpBody": "Each consultation groups diagnoses, meds and exams from that visit. The MedGraphRAG inference weights the latest visit 1.0 and prior ones 0.4."
+  },
+  "petNutrition": {
+    "title": "Diet & nutritional impact",
+    "subtitle": "Current food and nutritional profile fed into the DIET_PROFILE inference block.",
+    "loading": "Loading diet…",
+    "empty": "No diet recorded for this pet.",
+    "currentBadge": "Current",
+    "previous": "Previous diets",
+    "products": "Products",
+    "restrictions": "Restrictions",
+    "day": "day",
+    "mealsPerDay": "meals/day",
+    "water": "Water",
+    "helpTitle": "DIET_PROFILE",
+    "helpBody": "The current diet enters the MedGraphRAG prompt as the DIET_PROFILE block, used for gap analysis (ω3 deficit, phosphorus excess in CKD, etc.).",
+    "dietType": {
+      "commercial_dry": "Commercial dry",
+      "commercial_wet": "Commercial wet",
+      "mixed_commercial": "Mixed commercial",
+      "home_cooked": "Home cooked",
+      "raw_barf": "BARF/raw",
+      "prescription": "Prescription",
+      "mixed_natural_commercial": "Mixed (natural+commercial)"
+    }
   }
 }

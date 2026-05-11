@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, ShieldCheck, ShieldAlert, GitCompareArrows, Brain, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import HelpHint from '@/components/ui/help-hint';
 import {
   auditPetLongitudinalIntegrity,
   fetchLongitudinalDebug,
@@ -64,6 +65,11 @@ export default function LongitudinalDebugPanel({ petId, petProfile, primaryCondi
         <CardTitle className="text-base flex items-center gap-2">
           <Brain className="h-4 w-4 text-primary" />
           Depuração do MedGraphRAG longitudinal
+          <HelpHint title="O que é depuração longitudinal?">
+            Esta seção mostra <b>como</b> o histórico clínico do pet (consultas anteriores + dieta atual)
+            está sendo usado pelo MedGraphRAG para gerar recomendações. Útil para entender se a
+            inferência está pesando corretamente a última consulta vs. visitas antigas.
+          </HelpHint>
         </CardTitle>
         <p className="text-xs text-muted-foreground">
           Verifique a integridade do histórico, inspecione os blocos enviados ao modelo e compare a inferência com vs. sem histórico.
@@ -72,10 +78,41 @@ export default function LongitudinalDebugPanel({ petId, petProfile, primaryCondi
       <CardContent>
         <Tabs defaultValue="audit">
           <TabsList className="mb-3">
-            <TabsTrigger value="audit"><ShieldCheck className="h-3 w-3 mr-1" />Auditoria</TabsTrigger>
-            <TabsTrigger value="debug"><Brain className="h-3 w-3 mr-1" />Blocos usados</TabsTrigger>
-            <TabsTrigger value="compare"><GitCompareArrows className="h-3 w-3 mr-1" />Comparação</TabsTrigger>
+            <TabsTrigger value="audit">
+              <ShieldCheck className="h-3 w-3 mr-1" />Auditoria
+            </TabsTrigger>
+            <TabsTrigger value="debug">
+              <Brain className="h-3 w-3 mr-1" />Blocos usados
+            </TabsTrigger>
+            <TabsTrigger value="compare">
+              <GitCompareArrows className="h-3 w-3 mr-1" />Comparação
+            </TabsTrigger>
           </TabsList>
+          <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground mb-3">
+            <span className="inline-flex items-center gap-1">
+              <ShieldCheck className="h-3 w-3" /> Auditoria
+              <HelpHint>
+                Verifica se o histórico no banco está íntegro: cada pet deve ter <b>1 única</b> consulta
+                marcada como <code>is_latest</code>, e conditions/exams/medications devem estar
+                linkadas a uma consulta via <code>consultation_id</code>.
+              </HelpHint>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Brain className="h-3 w-3" /> Blocos usados
+              <HelpHint>
+                Mostra os 3 blocos que injetamos no prompt: <b>CURRENT_STATE</b> (peso 1.0 — última
+                consulta), <b>CLINICAL_TRAJECTORY</b> (peso 0.4 — visitas anteriores) e
+                <b> DIET_PROFILE</b> (perfil nutricional atual).
+              </HelpHint>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <GitCompareArrows className="h-3 w-3" /> Comparação
+              <HelpHint>
+                Roda a inferência <b>duas vezes</b> (com e sem o histórico) e compara compostos
+                recomendados, flags anormais consideradas e menções a lacunas nutricionais.
+              </HelpHint>
+            </span>
+          </div>
 
           <TabsContent value="audit" className="space-y-3">
             <Button size="sm" onClick={runAudit} disabled={loading === 'audit'}>
