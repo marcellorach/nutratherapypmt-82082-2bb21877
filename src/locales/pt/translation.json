@@ -5565,7 +5565,34 @@
       "notesPlaceholder": "Observações gerais sobre o paciente...",
       "register": "Registrar Paciente",
       "successTitle": "Paciente registrado",
-      "successDesc": "{{name}} foi registrado com sucesso"
+      "successDesc": "{{name}} foi registrado com sucesso",
+      "birthDate": "Data de nascimento",
+      "autoFromBirth": "auto",
+      "photoUploader": {
+        "add": "Adicionar foto",
+        "change": "Trocar foto",
+        "hint": "JPG ou PNG até 5MB"
+      },
+      "initialExams": {
+        "title": "Exames iniciais (PDF)",
+        "hint": "Anexe PDFs de hemograma, bioquímico, urinálise etc. Serão extraídos automaticamente após salvar o pet."
+      },
+      "historicalConsultations": {
+        "title": "Consultas anteriores",
+        "helpTitle": "Por que registrar consultas anteriores?",
+        "helpBody": "O MedGraphRAG usa a última consulta com peso 1.0 (CURRENT_STATE) e as anteriores com peso 0.4 (CLINICAL_TRAJECTORY) para detectar progressão. Quanto mais histórico, mais precisa a inferência.",
+        "empty": "Nenhuma consulta anterior. Adicione uma para construir o histórico clínico.",
+        "itemTitle": "Consulta {{n}}",
+        "date": "Data",
+        "weight": "Peso (kg)",
+        "bcs": "ECC (1-9)",
+        "chiefComplaint": "Queixa principal",
+        "assessment": "Achados / Diagnóstico",
+        "plan": "Conduta",
+        "conditions": "Diagnósticos (separados por vírgula)",
+        "medications": "Medicações (uma por linha: nome | dose | frequência)",
+        "add": "Adicionar consulta"
+      }
     },
     "chat": {
       "title": "Chat Clínico Inteligente",
