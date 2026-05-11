@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertTriangle, CheckCircle2, Loader2, ScaleIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { Dna } from 'lucide-react';
 import {
   analyzeNutritionGaps,
   inferLifeStage,
