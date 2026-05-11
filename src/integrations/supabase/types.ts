@@ -2431,38 +2431,56 @@ export type Database = {
       }
       pet_exams: {
         Row: {
+          clinical_comments: string | null
           consultation_id: string | null
           created_at: string
           exam_date: string | null
           exam_type: string
+          extraction_error: string | null
+          extraction_status: string | null
           file_url: string | null
+          flags_abnormal: string[] | null
           id: string
+          lab_name: string | null
           notes: string | null
           pet_id: string
+          raw_extracted: Json | null
           results: Json | null
           updated_at: string
         }
         Insert: {
+          clinical_comments?: string | null
           consultation_id?: string | null
           created_at?: string
           exam_date?: string | null
           exam_type: string
+          extraction_error?: string | null
+          extraction_status?: string | null
           file_url?: string | null
+          flags_abnormal?: string[] | null
           id?: string
+          lab_name?: string | null
           notes?: string | null
           pet_id: string
+          raw_extracted?: Json | null
           results?: Json | null
           updated_at?: string
         }
         Update: {
+          clinical_comments?: string | null
           consultation_id?: string | null
           created_at?: string
           exam_date?: string | null
           exam_type?: string
+          extraction_error?: string | null
+          extraction_status?: string | null
           file_url?: string | null
+          flags_abnormal?: string[] | null
           id?: string
+          lab_name?: string | null
           notes?: string | null
           pet_id?: string
+          raw_extracted?: Json | null
           results?: Json | null
           updated_at?: string
         }
