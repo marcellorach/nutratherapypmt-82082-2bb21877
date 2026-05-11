@@ -1,9 +1,9 @@
 # Project context briefing (auto)
-Generated: 2026-05-11T17:00:08.940Z
+Generated: 2026-05-11T18:21:21.127Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.63.0
+## Latest i18n version: 1.64.0
 
 ## Changes by area (last 14 days)
 - **admin**: 11
@@ -11,12 +11,25 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 7
 - **vet-ui**: 6
 - **kg**: 6
+- **clinical-pipeline**: 4
+- **i18n**: 3
 - **curation**: 3
-- **clinical-pipeline**: 3
 - **infra**: 2
-- **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-11 · [clinical-pipeline] ADDED — Consultas veterinárias + Catálogo de Rações (Fase 1+2)
+_status: parcial_
+- Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet
+- Schema: colunas `consultation_id` adicionadas a `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes` para vincular itens à consulta de origem
+- Schema: novas tabelas `pet_nutrition` (snapshot da dieta por pet/consulta com `is_current`) + `pet_nutrition_items` (N produtos por entrada, com `share_percent` para dietas mistas)
+_files: src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/config/admin-tabs.ts, src/hooks/useSystemGuideStats.ts_
+
+### 2026-05-11 · [i18n] FIXED — Sidebar/tabs admin mostrando chaves de tradução literais
+- Raiz do problema: os arquivos `src/locales/{pt,en}/translation.json` continham a chave `"admin"` declarada duas vezes no nível raiz. O segundo bloco (adicionado junto com a Base Farmacológica em 2026-05-09) sobrescrevia silenciosamente o primeiro durante o `JSON.parse`, apagando todos os namespaces `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*`, `admin.studies.*`, etc. — daí as chaves cruas aparecendo em quase toda a UI administrativa
+- Correção: fundidos os dois blocos `"admin"` num só (PT e EN), preservando `pharmacology` ao lado das 19 sub-chaves originais (total 20)
+- Salvaguarda: novo script `scripts/check-translation-duplicates.mjs` (parser custom que detecta chaves duplicadas em qualquer profundidade) exposto via `npm run check:translations` — o `audit-translations` antigo só checava paridade PT↔EN, não duplicatas internas
+_files: scripts/check-translation-duplicates.mjs, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts_
+
 ### 2026-05-11 · [admin] ADDED — Auditorias Técnicas Internas (aba admin versionada)
 - Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do VetGraphRAG, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)
 - Auditoria v3 convertida para HTML navegável em `public/audits/v3/index.html` (com os 9 infográficos preservados em `public/audits/v3/media/`) e PDF/DOCX para download direto
@@ -64,18 +77,6 @@ _files: src/components/tutor/ScenarioComparison.tsx, src/components/tutor/Treatm
 - Novo selo agregado no header de "Condições Identificadas": "X de Y com cobertura científica" + tooltip
 - Match case-insensitive e tolerante a whitespace; fallback silencioso quando não há dados de cobertura (não quebra)
 _files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/coverage-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-05-07 · [tutor-ui] ADDED — Sprint 1: Curva de progressão calibrada em literatura real
-- Nova tabela `condition_response_curves` (Supabase) com parâmetros (time_to_effect, peak_effect, plateau_week, placebo_decline, SMD, banda de confiança, citações PMID/DOI) ancorados em meta-análises reais
-- Seed inicial com 5 curvas: Osteoartrite × (Ômega-3, Glucosamina+Condroitina, PCSO-524, Curcumina) + Senescência Celular × NMN/NR (extrapolada de humanos, claramente sinalizada)
-- Novo serviço `condition-progression-engine.ts` com `buildCalibratedCurve`, `classifyCompound`, `pickBestCurve`, `buildPointsFromRow` — substitui sigmoide heurística do `ConditionProgressionChart`
-_files: src/services/condition-progression-engine.ts, src/services/__tests__/condition-progression-engine.test.ts, src/components/tutor/ConditionProgressionChart.tsx, src/components/tutor/TreatmentProposalCard.tsx…_
-
-### 2026-05-06 · [vet-ui] CHANGED — Pets demo agora usam condições com forte cobertura no VetGraphRAG
-- Reformuladas as condições dos 5 pets de exemplo (`GenerateSamplePetsButton`) para usar exclusivamente outcomes com ≥15 compostos no KG (layer_4_outcome aprovado)
-- Substituições: `Mild Periodontal Disease` → `Oxidative Stress` (Buddy); `Hip Dysplasia`+`Overweight` → `Obesity`+`Oxidative Stress` (Rex); `Hip Dysplasia`+`Degenerative Myelopathy` → `Neuroinflammation`+`Cellular Senescence` (Thor); `Pulmonary Hypertension` → `Cardiovascular Disease` e label MMVD canonicalizado para `Myxomatous Mitral Valve Disease` (Luna)
-- Exames atualizados de forma coerente com as novas condições (Oxidative Stress Panel, Senescence Biomarkers, Cardiovascular Panel) — narrativa clínica mantida e plausível por raça/idade
-_files: src/components/pet/GenerateSamplePetsButton.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
