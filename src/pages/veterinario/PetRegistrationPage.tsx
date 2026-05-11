@@ -9,6 +9,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useCreatePetProfile, type PetProfileData } from '@/hooks/usePetProfile';
 import { useToast } from '@/hooks/use-toast';
+import { uploadPetPhoto } from '@/components/pet/PetPhotoUploader';
+import { uploadPetExamPdfs } from '@/services/pet-exam-uploader';
+import { writeConsultationsChronological, type ConsultationBundle } from '@/services/pet-consultation-writer';
+import { supabase } from '@/integrations/supabase/client';
 
 const PetRegistrationPage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,15 +23,36 @@ const PetRegistrationPage: React.FC = () => {
   const [petBreed, setPetBreed] = React.useState<string>('');
   const [petAge, setPetAge] = React.useState<number>(0);
 
-  const handleSubmit = async (data: PetProfileData) => {
+  const handleSubmit = async (
+    data: PetProfileData,
+    extras: { photoFile: File | null; examFiles: File[]; historicalConsultations: ConsultationBundle[] },
+  ) => {
     try {
       const result = await createPet.mutateAsync(data);
-      setCreatedPetId(result.id);
+      const petId = result.id as string;
+      setCreatedPetId(petId);
       setPetBreed(data.breed);
       setPetAge(data.age_years);
+
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id ?? null;
+
+      // Run side effects in parallel; surface failures via toast but don't block flow.
+      const tasks: Promise<unknown>[] = [];
+      if (extras.photoFile) tasks.push(uploadPetPhoto(petId, extras.photoFile));
+      if (extras.historicalConsultations.length) {
+        tasks.push(writeConsultationsChronological(petId, extras.historicalConsultations, userId));
+      }
+      if (extras.examFiles.length) tasks.push(uploadPetExamPdfs(petId, extras.examFiles, null));
+      const results = await Promise.allSettled(tasks);
+      const failures = results.filter((r) => r.status === 'rejected').length;
+
       toast({
         title: t('petRegistration.form.successTitle'),
-        description: t('petRegistration.form.successDesc', { name: data.name }),
+        description: failures
+          ? `${t('petRegistration.form.successDesc', { name: data.name })} (${failures} extra(s) com falha)`
+          : t('petRegistration.form.successDesc', { name: data.name }),
+        variant: failures ? 'destructive' : undefined,
       });
     } catch (error) {
       // Error handled by the mutation

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T19:33:59.382Z
+// Última geração: 2026-05-11T20:22:40.551Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,35 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Cadastro manual rico (Fase 3) + i18n (Fase 4)",
+    "bullets": [
+      "Foto do pet no cadastro (bucket `pet-photos`) com preview e upload pós-INSERT.",
+      "Campo `birth_date` com cálculo automático de `age_years`.",
+      "Anexar PDFs de exames já no formulário; após salvar dispara `parse-pet-exam-pdf` em batch.",
+      "Seção \"Consultas anteriores\" colapsável: cria N `pet_consultations` com diagnósticos e medicações vinculados, deixando o trigger `refresh_pet_consultation_latest` marcar a última.",
+      "Service `pet-consultation-writer.ts` (DRY entre formulário manual e gerador de pets demo) e helper `pet-exam-uploader.ts`.",
+      "Tooltip didático `(?)` na seção de consultas anteriores explicando os pesos do MedGraphRAG.",
+      "I18n: bump para 1.67.0 com chaves PT/EN para birthDate, photoUploader, initialExams e historicalConsultations.",
+      "Files: src/components/pet/PetRegistrationForm.tsx, src/components/pet/PetPhotoUploader.tsx, src/components/pet/HistoricalConsultationsSection.tsx, src/services/pet-consultation-writer.ts, src/services/pet-exam-uploader.ts, src/pages/veterinario/PetRegistrationPage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "src/components/pet/PetRegistrationForm.tsx",
+      "src/components/pet/PetPhotoUploader.tsx",
+      "src/components/pet/HistoricalConsultationsSection.tsx",
+      "src/services/pet-consultation-writer.ts",
+      "src/services/pet-exam-uploader.ts",
+      "src/pages/veterinario/PetRegistrationPage.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.67.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",
