@@ -1,9 +1,9 @@
 # Project context briefing (auto)
-Generated: 2026-05-11T18:21:21.127Z
+Generated: 2026-05-11T19:13:48.879Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.64.0
+## Latest i18n version: 1.65.0
 
 ## Changes by area (last 14 days)
 - **admin**: 11
@@ -11,12 +11,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 7
 - **vet-ui**: 6
 - **kg**: 6
-- **clinical-pipeline**: 4
+- **clinical-pipeline**: 5
 - **i18n**: 3
 - **curation**: 3
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-11 · [clinical-pipeline] ADDED — Histórico longitudinal nos demo pets + MedGraphRAG context-aware
+- Demo pets agora geram histórico clínico longitudinal: Buddy 1 consulta, Max 2, Rex 3, Thor 4, Luna 5 (total 15 consultas), com `pet_conditions`/`pet_medications`/`pet_exams` linkados via `consultation_id` e `pet_nutrition` + `pet_nutrition_items` por pet (Rex em dieta de controle de peso, Luna trocou para fórmula renal na 4ª consulta). Trigger `refresh_pet_consultation_latest` marca a última como `is_latest`.
+- Edge function `hybrid-recommendation`: novo `ClinicalContext` longitudinal com blocos CURRENT_STATE (peso 1.0), CLINICAL_TRAJECTORY (peso 0.4) e DIET_PROFILE. Prompts (enrich + fallback) instruídos a tratar a última consulta como sinal dominante e usar trajetória apenas para detectar progressão, falhas terapêuticas e exposições cumulativas — sem reabrir condições resolvidas.
+- Service `hybrid-recommendation-service`: novo helper `buildLongitudinalContext(petId)` lê `pet_consultations` + entidades vinculadas + `pet_nutrition` e injeta no edge call. `ConfidenceCalculationParams` ganhou `petId` opcional.
+_files: src/components/pet/GenerateSamplePetsButton.tsx, supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts, src/types/recommendation-confidence.ts…_
+
 ### 2026-05-11 · [clinical-pipeline] ADDED — Consultas veterinárias + Catálogo de Rações (Fase 1+2)
 _status: parcial_
 - Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet
@@ -71,12 +77,6 @@ _files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__t
 - Dados 100% reais do edge function `project-pet-trajectory` (Gêmeo Digital, Gemini 2.5 Pro grounded no KG); reusa o mesmo query do Sprint 2 (sem requests adicionais)
 - Selo de transparência `Gêmeo Digital · ancorado no KG` (verde) vs `Estimativa heurística` (âmbar) com tooltip explicativo bilíngue
 _files: src/components/tutor/ScenarioComparison.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/scenario-logic.test.ts, src/locales/pt/translation.json…_
-
-### 2026-05-07 · [tutor-ui] ADDED — Sprint 2: Badges KG-covered / KG-gap no relatório do tutor
-- Cada condição no `TreatmentProposalCard` agora exibe selo `KG-covered` (verde) ou `KG-gap` (âmbar) com tooltip explicativo (PT/EN), usando `coverage_by_condition` do `usePetTrajectoryProjection`
-- Novo selo agregado no header de "Condições Identificadas": "X de Y com cobertura científica" + tooltip
-- Match case-insensitive e tolerante a whitespace; fallback silencioso quando não há dados de cobertura (não quebra)
-_files: src/components/tutor/TreatmentProposalCard.tsx, src/components/tutor/__tests__/coverage-logic.test.ts, src/locales/pt/translation.json, src/locales/en/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

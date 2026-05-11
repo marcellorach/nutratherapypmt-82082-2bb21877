@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T18:21:21.122Z
+// Última geração: 2026-05-11T19:13:48.875Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Histórico longitudinal nos demo pets + MedGraphRAG context-aware",
+    "bullets": [
+      "Demo pets agora geram histórico clínico longitudinal: Buddy 1 consulta, Max 2, Rex 3, Thor 4, Luna 5 (total 15 consultas), com `pet_conditions`/`pet_medications`/`pet_exams` linkados via `consultation_id` e `pet_nutrition` + `pet_nutrition_items` por pet (Rex em dieta de controle de peso, Luna trocou para fórmula renal na 4ª consulta). Trigger `refresh_pet_consultation_latest` marca a última como `is_latest`.",
+      "Edge function `hybrid-recommendation`: novo `ClinicalContext` longitudinal com blocos CURRENT_STATE (peso 1.0), CLINICAL_TRAJECTORY (peso 0.4) e DIET_PROFILE. Prompts (enrich + fallback) instruídos a tratar a última consulta como sinal dominante e usar trajetória apenas para detectar progressão, falhas terapêuticas e exposições cumulativas — sem reabrir condições resolvidas.",
+      "Service `hybrid-recommendation-service`: novo helper `buildLongitudinalContext(petId)` lê `pet_consultations` + entidades vinculadas + `pet_nutrition` e injeta no edge call. `ConfidenceCalculationParams` ganhou `petId` opcional.",
+      "i18n: `petRegistration.generator.successDescWithHistory` (PT/EN), `I18N_VERSION` 1.64.0 → 1.65.0.",
+      "Files: src/components/pet/GenerateSamplePetsButton.tsx, supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts, src/types/recommendation-confidence.ts, src/i18n.ts, src/locales/{pt,en}/translation.json"
+    ],
+    "files": [
+      "src/components/pet/GenerateSamplePetsButton.tsx",
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "src/services/hybrid-recommendation-service.ts",
+      "src/types/recommendation-confidence.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.65.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",

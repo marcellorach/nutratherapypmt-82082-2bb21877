@@ -5629,7 +5629,8 @@
       "button": "Gerar Pacientes de Exemplo",
       "generating": "Gerando...",
       "success": "Pacientes gerados",
-      "successDesc": "{{count}} pacientes de exemplo foram criados com sucesso"
+      "successDesc": "{{count}} pacientes de exemplo foram criados com sucesso",
+      "successDescWithHistory": "{{count}} pets demo criados com {{consultations}} consultas históricas e dietas atuais."
     }
   },
   "landing": {

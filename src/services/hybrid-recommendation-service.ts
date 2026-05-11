@@ -31,6 +31,119 @@ interface KGRecommendation {
 }
 
 /**
+ * Builds the longitudinal clinical context (CURRENT_STATE / CLINICAL_TRAJECTORY
+ * / DIET_PROFILE) for the MedGraphRAG prompt by querying pet_consultations,
+ * the linked conditions/medications/exams, and pet_nutrition.
+ *
+ * Latest consultation has weight 1.0; previous ones are summarized with
+ * weight 0.4. Returns undefined when petId is not provided.
+ */
+async function buildLongitudinalContext(petId?: string) {
+  if (!petId) return undefined;
+  try {
+    const [{ data: consults }, { data: nutrition }] = await Promise.all([
+      (supabase as any)
+        .from('pet_consultations')
+        .select('id, consultation_date, chief_complaint, assessment, plan, weight_kg_at_visit, body_condition_score, is_latest')
+        .eq('pet_id', petId)
+        .order('consultation_date', { ascending: false }),
+      (supabase as any)
+        .from('pet_nutrition')
+        .select('id, diet_type, daily_amount_g, meals_per_day, restrictions, notes, is_current, pet_nutrition_items(raw_brand_text, raw_product_text, share_percent)')
+        .eq('pet_id', petId)
+        .eq('is_current', true)
+        .maybeSingle(),
+    ]);
+
+    if (!consults?.length && !nutrition) return undefined;
+
+    // Pull conditions/meds/exams keyed by consultation_id in batch
+    const consultIds = (consults || []).map((c: any) => c.id);
+    const [condRes, medRes, examRes] = await Promise.all([
+      consultIds.length
+        ? (supabase as any).from('pet_conditions').select('consultation_id, condition_name, severity, status').in('consultation_id', consultIds)
+        : Promise.resolve({ data: [] }),
+      consultIds.length
+        ? (supabase as any).from('pet_medications').select('consultation_id, medication_name, dosage, frequency, status').in('consultation_id', consultIds)
+        : Promise.resolve({ data: [] }),
+      consultIds.length
+        ? (supabase as any).from('pet_exams').select('consultation_id, exam_type, flags_abnormal, results').in('consultation_id', consultIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const byConsult = <T extends { consultation_id?: string | null }>(arr: T[] | null | undefined) =>
+      (arr || []).reduce<Record<string, T[]>>((acc, row) => {
+        const k = row.consultation_id || '_';
+        (acc[k] ||= []).push(row);
+        return acc;
+      }, {});
+    const condMap = byConsult(condRes.data);
+    const medMap = byConsult(medRes.data);
+    const examMap = byConsult(examRes.data);
+
+    const latest = (consults || []).find((c: any) => c.is_latest) || (consults || [])[0];
+    let latestConsultation;
+    if (latest) {
+      const condList = (condMap[latest.id] || []).filter((c: any) => c.status === 'active' || c.status === 'monitoring');
+      const medList = (medMap[latest.id] || []).filter((m: any) => !m.status || m.status === 'active');
+      const examList = examMap[latest.id] || [];
+      latestConsultation = {
+        date: latest.consultation_date,
+        chief_complaint: latest.chief_complaint,
+        assessment: latest.assessment,
+        plan: latest.plan,
+        weight_kg: latest.weight_kg_at_visit,
+        bcs: latest.body_condition_score,
+        activeConditions: condList.map((c: any) => `${c.condition_name} (${c.severity})`),
+        activeMedications: medList.map((m: any) => `${m.medication_name} ${m.dosage} ${m.frequency}`),
+        abnormalExams: examList
+          .filter((e: any) => e.flags_abnormal?.length)
+          .map((e: any) => `${e.exam_type}: ${(e.flags_abnormal || []).join(', ')}`),
+      };
+    }
+
+    const trajectory = (consults || [])
+      .filter((c: any) => c.id !== latest?.id)
+      .slice(0, 6)
+      .map((c: any) => {
+        const conds = (condMap[c.id] || []).map((x: any) => `${x.condition_name}(${x.status})`);
+        const meds = (medMap[c.id] || []).map((x: any) => `${x.medication_name} ${x.dosage}`);
+        const exams = (examMap[c.id] || [])
+          .filter((e: any) => e.flags_abnormal?.length)
+          .map((e: any) => `${e.exam_type}: ${(e.flags_abnormal || []).join(',')}`);
+        const daysAgo = Math.round((Date.now() - new Date(c.consultation_date).getTime()) / 86400000);
+        return {
+          date: c.consultation_date,
+          daysAgo,
+          summary: c.assessment || c.chief_complaint || '(no summary)',
+          conditionsChanged: conds,
+          medicationsChanged: meds,
+          keyExamFindings: exams,
+        };
+      });
+
+    let dietProfile;
+    if (nutrition) {
+      const items = (nutrition.pet_nutrition_items || []).map((i: any) =>
+        `${i.raw_brand_text || '?'} - ${i.raw_product_text || '?'} (${i.share_percent || 100}%)`);
+      dietProfile = {
+        diet_type: nutrition.diet_type,
+        daily_amount_g: nutrition.daily_amount_g,
+        meals_per_day: nutrition.meals_per_day,
+        restrictions: nutrition.restrictions,
+        products: items,
+        notes: nutrition.notes,
+      };
+    }
+
+    return { latestConsultation, clinicalTrajectory: trajectory, dietProfile };
+  } catch (err) {
+    console.warn('buildLongitudinalContext failed', err);
+    return undefined;
+  }
+}
+
+/**
  * Get recommendations from Knowledge Graph only
  */
 async function getKGRecommendation(
@@ -107,12 +220,14 @@ async function getLLMEnrichment(
   params: ConfidenceCalculationParams
 ): Promise<string> {
   try {
+    const longitudinal = await buildLongitudinalContext(params.petId);
     const { data, error } = await supabase.functions.invoke('hybrid-recommendation', {
       body: {
         mode: 'enrich',
         kgData,
         petProfile: params.petProfile,
-        condition: params.targetCondition
+        condition: params.targetCondition,
+        clinicalContext: longitudinal,
       }
     });
 
@@ -131,11 +246,13 @@ async function getLLMRecommendation(
   params: ConfidenceCalculationParams
 ): Promise<KGRecommendation> {
   try {
+    const longitudinal = await buildLongitudinalContext(params.petId);
     const { data, error } = await supabase.functions.invoke('hybrid-recommendation', {
       body: {
         mode: 'fallback',
         petProfile: params.petProfile,
-        condition: params.targetCondition
+        condition: params.targetCondition,
+        clinicalContext: longitudinal,
       }
     });
 

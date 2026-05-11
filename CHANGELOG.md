@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-11 — Histórico longitudinal nos demo pets + MedGraphRAG context-aware
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.65.0 -->
+- Demo pets agora geram histórico clínico longitudinal: Buddy 1 consulta, Max 2, Rex 3, Thor 4, Luna 5 (total 15 consultas), com `pet_conditions`/`pet_medications`/`pet_exams` linkados via `consultation_id` e `pet_nutrition` + `pet_nutrition_items` por pet (Rex em dieta de controle de peso, Luna trocou para fórmula renal na 4ª consulta). Trigger `refresh_pet_consultation_latest` marca a última como `is_latest`.
+- Edge function `hybrid-recommendation`: novo `ClinicalContext` longitudinal com blocos **CURRENT_STATE (peso 1.0)**, **CLINICAL_TRAJECTORY (peso 0.4)** e **DIET_PROFILE**. Prompts (enrich + fallback) instruídos a tratar a última consulta como sinal dominante e usar trajetória apenas para detectar progressão, falhas terapêuticas e exposições cumulativas — sem reabrir condições resolvidas.
+- Service `hybrid-recommendation-service`: novo helper `buildLongitudinalContext(petId)` lê `pet_consultations` + entidades vinculadas + `pet_nutrition` e injeta no edge call. `ConfidenceCalculationParams` ganhou `petId` opcional.
+- i18n: `petRegistration.generator.successDescWithHistory` (PT/EN), `I18N_VERSION` 1.64.0 → 1.65.0.
+- Files: src/components/pet/GenerateSamplePetsButton.tsx, supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts, src/types/recommendation-confidence.ts, src/i18n.ts, src/locales/{pt,en}/translation.json
+
 ### Added - 2026-05-11 — Consultas veterinárias + Catálogo de Rações (Fase 1+2)
 <!-- area: clinical-pipeline · status: parcial · i18n: 1.64.0 -->
 - Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet
