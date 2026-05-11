@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-09T19:46:19.269Z
+Generated: 2026-05-11T16:52:16.545Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.63.0
 
 ## Changes by area (last 14 days)
-- **admin**: 10
+- **admin**: 11
 - **tutor-ui**: 7
 - **meta**: 7
 - **vet-ui**: 6
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 2
 
 ## Top 10 recent entries
+### 2026-05-11 · [admin] ADDED — Auditorias Técnicas Internas (aba admin versionada)
+- Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do VetGraphRAG, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)
+- Auditoria v3 convertida para HTML navegável em `public/audits/v3/index.html` (com os 9 infográficos preservados em `public/audits/v3/media/`) e PDF/DOCX para download direto
+- Botão "Fazer nova auditoria" abre dialog com escopo editável (pré-preenchido) e versão do sistema auto-detectada — registra o pedido em `audit_requests` para o agente Lovable gerar na próxima sessão dedicada
+_files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx_
+
 ### 2026-05-09 · [admin] ADDED — Base Farmacológica (Fase 1) integrada ao perfil do pet
 - Novo `DrugLookupBadge` plugado na lista de medicamentos em `PetProfilePage.tsx` — resolve marca comercial (ex.: "Previcox") para princípio ativo + classe (ex.: `= firocoxibe · AINE COXIB`), com tooltip de mecanismo; exibe alerta "Não reconhecido" quando a medicação não está no catálogo
 - Chaves i18n formais adicionadas em `pharmacology.lookup.*` e `admin.pharmacology.*` (PT/EN), substituindo fallbacks inline
@@ -70,12 +76,6 @@ _files: src/services/condition-progression-engine.ts, src/services/__tests__/con
 - Substituições: `Mild Periodontal Disease` → `Oxidative Stress` (Buddy); `Hip Dysplasia`+`Overweight` → `Obesity`+`Oxidative Stress` (Rex); `Hip Dysplasia`+`Degenerative Myelopathy` → `Neuroinflammation`+`Cellular Senescence` (Thor); `Pulmonary Hypertension` → `Cardiovascular Disease` e label MMVD canonicalizado para `Myxomatous Mitral Valve Disease` (Luna)
 - Exames atualizados de forma coerente com as novas condições (Oxidative Stress Panel, Senescence Biomarkers, Cardiovascular Panel) — narrativa clínica mantida e plausível por raça/idade
 _files: src/components/pet/GenerateSamplePetsButton.tsx, src/i18n.ts_
-
-### 2026-05-04 · [curation] ADDED — Sistema de tags estruturadas para estudos científicos
-- Novas colunas em `processed_studies`: `tags` (jsonb com `study_design`, `population`, `methodology`, `sample_size`, `ai_confidence`), `prestige_tier` (1-5), `tags_source` (`pending` | `ai_extracted` | `manual` | `reviewed`)
-- Nova tabela `journal_prestige_tiers` com seed de ~40 journals top (Nature/Cell/JVIM/Aging Cell/etc.) classificados por tier 1-5 baseado em quartil Scimago + prestígio do publisher
-- Edge function `auto-tag-studies`: extrai tags via Gemini Flash Lite (apenas extração textual de title/abstract/journal — sem inferência) e calcula `prestige_tier` via lookup; throttle 300ms; sem alucinação porque enums fechados via tool calling
-_files: supabase/functions/auto-tag-studies/index.ts, src/components/administrador/estudos/library/StudiesLibraryTab.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
