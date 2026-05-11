@@ -5629,7 +5629,8 @@
       "button": "Generate Sample Patients",
       "generating": "Generating...",
       "success": "Patients generated",
-      "successDesc": "{{count}} sample patients were created successfully"
+      "successDesc": "{{count}} sample patients were created successfully",
+      "successDescWithHistory": "{{count}} demo pets created with {{consultations}} historical consultations and current diets."
     }
   },
   "landing": {
