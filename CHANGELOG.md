@@ -23,6 +23,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-11 — Cadastro manual rico (Fase 3) + i18n (Fase 4)
+<!-- area: vet-ui · status: entregue · i18n: 1.67.0 -->
+- Foto do pet no cadastro (bucket `pet-photos`) com preview e upload pós-INSERT.
+- Campo `birth_date` com cálculo automático de `age_years`.
+- Anexar PDFs de exames já no formulário; após salvar dispara `parse-pet-exam-pdf` em batch.
+- Seção "Consultas anteriores" colapsável: cria N `pet_consultations` com diagnósticos e medicações vinculados, deixando o trigger `refresh_pet_consultation_latest` marcar a última.
+- Service `pet-consultation-writer.ts` (DRY entre formulário manual e gerador de pets demo) e helper `pet-exam-uploader.ts`.
+- Tooltip didático `(?)` na seção de consultas anteriores explicando os pesos do MedGraphRAG.
+- I18n: bump para 1.67.0 com chaves PT/EN para birthDate, photoUploader, initialExams e historicalConsultations.
+- Files: src/components/pet/PetRegistrationForm.tsx, src/components/pet/PetPhotoUploader.tsx, src/components/pet/HistoricalConsultationsSection.tsx, src/services/pet-consultation-writer.ts, src/services/pet-exam-uploader.ts, src/pages/veterinario/PetRegistrationPage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-05-11 — Painel de depuração e avaliação do MedGraphRAG longitudinal
 <!-- area: vet-ui · status: entregue · i18n: 1.65.0 -->
 - Edge function `hybrid-recommendation` aceita `debug:true` e `disableLongitudinal:true`. Quando `debug` está ligado a resposta inclui `debug.longitudinal` (quais blocos foram ativados — CURRENT_STATE/CLINICAL_TRAJECTORY/DIET_PROFILE — número de entradas, condições ativas, exames anormais, produtos de dieta) e `debug.renderedContextBlock` (texto exato injetado no prompt). `disableLongitudinal` remove os blocos longitudinais para permitir comparação A/B.
