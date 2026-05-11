@@ -216,6 +216,98 @@ const NutritionGapAnalysis: React.FC<Props> = ({
             </div>
           </TooltipProvider>
         )}
+
+        {data.breed_recommendations.length > 0 && (
+          <div className="pt-3 border-t">
+            <div className="flex items-center gap-2 mb-2">
+              <Dna className="h-4 w-4 text-purple-600" />
+              <h4 className="text-sm font-semibold">
+                {lang === 'pt'
+                  ? `Sugerido pela raça${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`
+                  : `Suggested by breed${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`}
+              </h4>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              {lang === 'pt'
+                ? 'Condições com predisposição racial documentada e os nutrientes-alvo para prevenção/manejo precoce.'
+                : 'Conditions with documented breed predisposition and the target nutrients for early prevention/management.'}
+            </p>
+            <TooltipProvider>
+              <div className="space-y-3">
+                {data.breed_recommendations.map((rec) => {
+                  const condLabel = lang === 'pt' ? rec.condition_name : (rec.condition_name_en || rec.condition_name);
+                  return (
+                    <div key={condLabel} className="rounded-lg border border-purple-200/60 bg-purple-50/40 p-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="text-sm font-medium">{condLabel}</span>
+                        <Badge variant="outline" className="text-[10px]">
+                          {lang === 'pt' ? 'Risco' : 'Risk'} {rec.risk_factor.toFixed(1)}×
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] capitalize">
+                          {lang === 'pt' ? 'Evidência' : 'Evidence'}: {rec.evidence_grade}
+                        </Badge>
+                        {rec.already_active && (
+                          <Badge variant="destructive" className="text-[10px]">
+                            {lang === 'pt' ? 'Já ativa' : 'Already active'}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        {rec.gaps.map((g) => (
+                          <div key={g.key} className="flex items-start justify-between gap-3 text-xs">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium">
+                                {lang === 'pt' ? g.label_pt : g.label_en}{' '}
+                                <span className="text-muted-foreground">
+                                  ({g.unit === 'ratio' ? 'razão' : g.unit})
+                                </span>
+                              </div>
+                              <div className="text-muted-foreground">
+                                {lang === 'pt' ? 'Observado' : 'Observed'}:{' '}
+                                <span className="text-foreground font-medium">
+                                  {g.observed != null ? g.observed : '—'}
+                                </span>
+                                {' · '}
+                                {lang === 'pt' ? 'Alvo' : 'Target'}:{' '}
+                                <span className="text-foreground font-medium">
+                                  {g.target_min != null ? `≥ ${g.target_min}` : ''}
+                                  {g.target_min != null && g.target_max != null ? ' · ' : ''}
+                                  {g.target_max != null ? `≤ ${g.target_max}` : ''}
+                                </span>
+                                {g.delta_pct != null && g.status !== 'adequate' && (
+                                  <span className={`ml-2 ${g.status === 'deficient' ? 'text-destructive' : 'text-amber-700'}`}>
+                                    ({g.delta_pct > 0 ? '+' : ''}{g.delta_pct}%)
+                                  </span>
+                                )}
+                              </div>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button className="text-[11px] text-primary underline mt-0.5">
+                                    {lang === 'pt' ? 'Justificativa' : 'Rationale'}
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm text-xs">
+                                  <p>{lang === 'pt' ? g.rationale_pt : g.rationale_en}</p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {lang === 'pt' ? 'Fonte' : 'Source'}: {g.source}
+                                  </p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {lang === 'pt' ? 'Predisposição racial' : 'Breed predisposition'}: {condLabel} · {rec.risk_factor.toFixed(1)}× · {rec.evidence_grade}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div>{statusBadge(g, lang)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
