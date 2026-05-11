@@ -10,8 +10,8 @@ interface SectionStats {
 }
 
 const fetchCount = async (table: TableName): Promise<number> => {
-  const { count, error } = await supabase
-    .from(table)
+  const { count, error } = await (supabase as any)
+    .from(table as string)
     .select('*', { count: 'exact', head: true });
   if (error) return 0;
   return count ?? 0;

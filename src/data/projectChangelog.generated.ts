@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T17:00:08.937Z
+// Última geração: 2026-05-11T18:21:21.122Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,50 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-11";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-11",
+    "kind": "added",
+    "area": "clinical-pipeline",
+    "status": "parcial",
+    "title": "Consultas veterinárias + Catálogo de Rações (Fase 1+2)",
+    "bullets": [
+      "Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet",
+      "Schema: colunas `consultation_id` adicionadas a `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes` para vincular itens à consulta de origem",
+      "Schema: novas tabelas `pet_nutrition` (snapshot da dieta por pet/consulta com `is_current`) + `pet_nutrition_items` (N produtos por entrada, com `share_percent` para dietas mistas)",
+      "Schema: catálogo de rações — `pet_food_brands` (30 marcas seedadas: Royal Canin, Hill's, Pro Plan, Premier, Golden, Origens, Farmina, Acana, Orijen, Guabi, Quatree, GranPlus, Biofresh, N&D, Equilíbrio, Magnus, etc.), `pet_food_products` (com fluxo `submission_status` pending/approved/rejected para curadoria), `pet_food_nutrition` (perfil completo: macros, minerais, ω3/ω6, Ca:P, funcionais, AAFCO/FEDIAF, com `revision` versionado e `source` declarado), `pet_food_ingredients` (lista ordenada)",
+      "RLS: consultas/dieta visíveis apenas ao vet responsável, ao criador do pet ou admin; catálogo legível por todos autenticados, escrita só admin, vet pode submeter produto pendente",
+      "UI: nova tab admin \"Catálogo de Rações\" (`src/components/administrador/pet-food/PetFoodCatalogTab.tsx`) com listagem filtrável de produtos, badges de status, criação de marcas e produtos com composição garantida (proteína/gordura/kcal/Ca/P/ω3/ω6) e fluxo aprovar/rejeitar pendentes",
+      "Próximo: edge `enrich-pet-food-product` (Gemini + web), autocomplete na UI de consulta, edge `resolve-drug-brand`, parser PDF de exames, enriquecimento do grafo do paciente com DietProfile",
+      "Files: supabase/migrations/*pet_consultations*.sql, src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/config/admin-tabs.ts, src/hooks/useSystemGuideStats.ts"
+    ],
+    "files": [
+      "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "src/config/admin-tabs.ts",
+      "src/hooks/useSystemGuideStats.ts"
+    ],
+    "i18nVersion": "1.64.0"
+  },
+  {
+    "date": "2026-05-11",
+    "kind": "fixed",
+    "area": "i18n",
+    "status": "entregue",
+    "title": "Sidebar/tabs admin mostrando chaves de tradução literais",
+    "bullets": [
+      "Raiz do problema: os arquivos `src/locales/{pt,en}/translation.json` continham a chave `\"admin\"` declarada duas vezes no nível raiz. O segundo bloco (adicionado junto com a Base Farmacológica em 2026-05-09) sobrescrevia silenciosamente o primeiro durante o `JSON.parse`, apagando todos os namespaces `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*`, `admin.studies.*`, etc. — daí as chaves cruas aparecendo em quase toda a UI administrativa",
+      "Correção: fundidos os dois blocos `\"admin\"` num só (PT e EN), preservando `pharmacology` ao lado das 19 sub-chaves originais (total 20)",
+      "Salvaguarda: novo script `scripts/check-translation-duplicates.mjs` (parser custom que detecta chaves duplicadas em qualquer profundidade) exposto via `npm run check:translations` — o `audit-translations` antigo só checava paridade PT↔EN, não duplicatas internas",
+      "`I18N_VERSION` 1.63.0 → 1.64.0 para invalidar o cache do navegador",
+      "Files: src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, scripts/check-translation-duplicates.mjs, package.json"
+    ],
+    "files": [
+      "scripts/check-translation-duplicates.mjs",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.64.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",
