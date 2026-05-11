@@ -11,7 +11,9 @@ import {
   type LifeStage,
   type NutrientGap,
   type PetNutritionContext,
+  type BreedPredispositionInput,
 } from '@/services/nutrition-gap-analyzer';
+import { useBreedPredispositionsForPet } from '@/hooks/useBreedPredispositionsForPet';
 
 interface Props {
   petId: string;
@@ -19,6 +21,7 @@ interface Props {
   weight_kg: number;
   age_years: number | null;
   breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+  breed_name?: string | null;
   /** Nomes (PT ou EN) das condições ativas. */
   active_conditions: string[];
   life_stage?: LifeStage;
@@ -57,25 +60,33 @@ function statusBadge(g: NutrientGap, lang: 'pt' | 'en') {
 }
 
 const NutritionGapAnalysis: React.FC<Props> = ({
-  petId, species, weight_kg, age_years, breed_size, active_conditions, life_stage,
+  petId, species, weight_kg, age_years, breed_size, breed_name, active_conditions, life_stage,
 }) => {
   const { i18n } = useTranslation();
   const lang = (i18n.language || 'pt').startsWith('en') ? 'en' : 'pt';
+
+  const { data: breedCtx } = useBreedPredispositionsForPet(breed_name ?? undefined);
+  const breed_predispositions: BreedPredispositionInput[] | undefined = breedCtx?.predispositions as any;
+  const resolved_breed_size = (breedCtx?.breed?.size_category as any) ?? breed_size ?? null;
 
   const ctx: PetNutritionContext = useMemo(() => ({
     petId,
     species,
     weight_kg,
     age_years,
-    life_stage: life_stage ?? inferLifeStage(age_years, breed_size ?? null),
-    breed_size: breed_size ?? null,
+    life_stage: life_stage ?? inferLifeStage(age_years, resolved_breed_size ?? null),
+    breed_size: resolved_breed_size,
+    breed_name: breed_name ?? null,
     active_conditions: active_conditions ?? [],
-  }), [petId, species, weight_kg, age_years, life_stage, breed_size, active_conditions]);
+    breed_predispositions,
+  }), [petId, species, weight_kg, age_years, life_stage, resolved_breed_size, breed_name, active_conditions, breed_predispositions]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['nutrition-gap', petId, ctx.life_stage, weight_kg, active_conditions.join('|')],
+    queryKey: ['nutrition-gap', petId, ctx.life_stage, weight_kg, active_conditions.join('|'), (breed_predispositions ?? []).map((p) => p.condition_name).join('|')],
     queryFn: () => analyzeNutritionGaps(ctx),
-    enabled: !!petId && weight_kg > 0,
+    // Espera o resultado do hook de predisposições antes de calcular, para evitar
+    // duas execuções (uma sem e outra com breed_predispositions).
+    enabled: !!petId && weight_kg > 0 && (!breed_name || breedCtx !== undefined),
   });
 
   if (isLoading) {
