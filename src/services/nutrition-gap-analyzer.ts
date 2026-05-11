@@ -27,6 +27,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type LifeStage = 'puppy' | 'adult' | 'senior';
 
+export interface BreedPredispositionInput {
+  condition_id?: string;
+  condition_name: string;
+  condition_name_en?: string | null;
+  risk_factor: number;
+  evidence_grade: 'high' | 'moderate' | 'low' | string;
+}
+
 export interface PetNutritionContext {
   petId: string;
   species: 'dog' | 'cat';
@@ -34,8 +42,11 @@ export interface PetNutritionContext {
   age_years: number | null;
   life_stage: LifeStage;
   breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+  breed_name?: string | null;
   /** Nomes (PT ou EN) das condições ativas — usados para casar regras clínicas. */
   active_conditions: string[];
+  /** Predisposições raciais (vindas de `breed_predispositions`). Opcional. */
+  breed_predispositions?: BreedPredispositionInput[];
 }
 
 export interface NutrientTarget {
@@ -97,6 +108,21 @@ export interface NutritionAnalysisResult {
   gaps: NutrientGap[];
   /** Avisos qualitativos não numéricos (ex.: "dieta sem AAFCO statement"). */
   warnings: string[];
+  /** Recomendações preventivas baseadas em predisposições raciais. */
+  breed_recommendations: BreedNutritionRecommendation[];
+}
+
+export interface BreedNutritionRecommendation {
+  condition_name: string;
+  condition_name_en?: string | null;
+  risk_factor: number;
+  evidence_grade: string;
+  /** Já presente nas condições ativas do pet? (para evitar duplicação visual) */
+  already_active: boolean;
+  /** Alvos nutricionais recomendados para esta condição. */
+  targets: NutrientTarget[];
+  /** Gaps observados quando comparados à dieta atual (mesmo formato de `gaps`). */
+  gaps: NutrientGap[];
 }
 
 // -----------------------------------------------------------------------------
