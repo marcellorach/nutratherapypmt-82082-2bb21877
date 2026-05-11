@@ -154,6 +154,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Intervalos de referência para exames laboratoriais'
   },
   {
+    id: 'pet-food-catalog',
+    label: 'Catálogo de Rações',
+    group: 'knowledge-base',
+    component: PetFoodCatalogTab,
+    description: 'Banco de marcas, produtos e perfil nutricional de rações'
+  },
+  {
     id: 'dosage-curation',
     label: 'Curadoria de Doses',
     group: 'knowledge-base',
