@@ -501,6 +501,30 @@ const PetProfilePage: React.FC = () => {
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
+              <CalendarClock className="h-8 w-8 text-indigo-500" />
+              <div>
+                <p className="text-2xl font-bold">{consultationsQ.data?.length ?? 0}</p>
+                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  {t('petTimeline.title')}
+                  <HelpHint title={t('petTimeline.helpTitle')}>{t('petTimeline.helpBody')}</HelpHint>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <Apple className="h-8 w-8 text-emerald-500" />
+              <div>
+                <p className="text-2xl font-bold">{nutritionQ.data?.find(n => n.is_current) ? 1 : 0}</p>
+                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  {t('petNutrition.currentBadge')}
+                  <HelpHint title={t('petNutrition.helpTitle')}>{t('petNutrition.helpBody')}</HelpHint>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
               <Pill className="h-8 w-8 text-blue-500" />
               <div>
                 <p className="text-2xl font-bold">{medications.length}</p>
@@ -741,6 +765,10 @@ const PetProfilePage: React.FC = () => {
                 petId={id}
               />
             )}
+
+            {/* Longitudinal history & nutrition (always visible if data exists) */}
+            <PetConsultationsTimeline petId={id!} />
+            <PetNutritionPanel petId={id!} />
 
             {/* Longitudinal MedGraphRAG debug & evaluation */}
             <LongitudinalDebugPanel
