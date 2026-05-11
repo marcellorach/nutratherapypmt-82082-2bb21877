@@ -58,6 +58,14 @@ const PetProfilePage: React.FC = () => {
   const conditionInsights = useConditionInsights(data?.conditions);
   const consultationsQ = usePetConsultations(id);
   const nutritionQ = usePetNutrition(id);
+  const [clinicalTab, setClinicalTab] = useState<string>('conditions');
+  const clinicalTabsRef = React.useRef<HTMLDivElement | null>(null);
+  const goToTab = (tab: string) => {
+    setClinicalTab(tab);
+    setTimeout(() => {
+      clinicalTabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
   const upsertSnapshot = useUpsertPetClinicalAnalysisSnapshot();
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
