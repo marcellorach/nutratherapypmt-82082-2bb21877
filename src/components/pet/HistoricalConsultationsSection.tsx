@@ -53,11 +53,12 @@ const HistoricalConsultationsSection: React.FC<Props> = ({ consultations, onChan
               title={t('petRegistration.form.historicalConsultations.helpTitle', {
                 defaultValue: 'Por que registrar consultas anteriores?',
               })}
-              body={t('petRegistration.form.historicalConsultations.helpBody', {
+            >
+              {t('petRegistration.form.historicalConsultations.helpBody', {
                 defaultValue:
                   'O MedGraphRAG usa a última consulta com peso 1.0 (CURRENT_STATE) e as anteriores com peso 0.4 (CLINICAL_TRAJECTORY) para detectar progressão. Quanto mais histórico, mais precisa a inferência.',
               })}
-            />
+            </HelpHint>
           </span>
           <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
