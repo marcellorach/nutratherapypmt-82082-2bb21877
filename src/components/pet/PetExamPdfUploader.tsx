@@ -4,8 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Loader2, CheckCircle2, AlertCircle, RefreshCw, Pencil } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import PetExamReviewDialog from './PetExamReviewDialog';
 
 type ExamRow = {
   id: string;
@@ -18,20 +21,35 @@ type ExamRow = {
   extraction_error: string | null;
   results: Record<string, any> | null;
   clinical_comments: string | null;
+  consultation_id: string | null;
+  approved: boolean | null;
 };
+
+type Consultation = { id: string; consultation_date: string; chief_complaint: string | null };
 
 export default function PetExamPdfUploader({ petId }: { petId: string }) {
   const [exams, setExams] = useState<ExamRow[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [linkConsultationId, setLinkConsultationId] = useState<string>('auto');
+  const [reviewExamId, setReviewExamId] = useState<string | null>(null);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from('pet_exams')
-      .select('id, exam_type, exam_date, lab_name, file_url, flags_abnormal, extraction_status, extraction_error, results, clinical_comments')
-      .eq('pet_id', petId)
-      .order('created_at', { ascending: false });
+    const [{ data, error }, { data: cons }] = await Promise.all([
+      supabase
+        .from('pet_exams')
+        .select('id, exam_type, exam_date, lab_name, file_url, flags_abnormal, extraction_status, extraction_error, results, clinical_comments, consultation_id, approved')
+        .eq('pet_id', petId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('pet_consultations')
+        .select('id, consultation_date, chief_complaint')
+        .eq('pet_id', petId)
+        .order('consultation_date', { ascending: false }),
+    ]);
     if (error) { toast.error(error.message); return; }
     setExams((data ?? []) as ExamRow[]);
+    setConsultations((cons ?? []) as Consultation[]);
   };
 
   useEffect(() => { void load(); }, [petId]);
@@ -68,6 +86,7 @@ export default function PetExamPdfUploader({ petId }: { petId: string }) {
           exam_type: 'Aguardando extração',
           file_url: path,
           extraction_status: 'pending',
+          consultation_id: linkConsultationId !== 'auto' && linkConsultationId !== 'none' ? linkConsultationId : null,
         }).select('id').single();
         if (insErr || !ins) { toast.error(`Registro falhou: ${insErr?.message}`); continue; }
 
@@ -102,6 +121,24 @@ export default function PetExamPdfUploader({ petId }: { petId: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {consultations.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Label className="text-xs whitespace-nowrap">Vincular novos uploads à consulta:</Label>
+            <Select value={linkConsultationId} onValueChange={setLinkConsultationId}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Automático (por data)</SelectItem>
+                <SelectItem value="none">Sem vínculo</SelectItem>
+                {consultations.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.consultation_date}{c.chief_complaint ? ` — ${c.chief_complaint.slice(0, 30)}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-md p-5 text-center cursor-pointer transition-colors ${
@@ -136,7 +173,17 @@ export default function PetExamPdfUploader({ petId }: { petId: string }) {
                   <span className="font-medium truncate">{e.exam_type}</span>
                   {e.exam_date && <Badge variant="outline" className="text-[10px]">{e.exam_date}</Badge>}
                   {e.lab_name && <Badge variant="secondary" className="text-[10px]">{e.lab_name}</Badge>}
+                  {e.extraction_status === 'done' && (
+                    e.approved
+                      ? <Badge className="text-[10px] bg-green-600 hover:bg-green-600">Aprovado</Badge>
+                      : <Badge variant="outline" className="text-[10px] border-amber-500 text-amber-700">Pendente revisão</Badge>
+                  )}
                 </div>
+                {e.extraction_status === 'done' && (
+                  <Button size="sm" variant={e.approved ? 'ghost' : 'default'} onClick={() => setReviewExamId(e.id)}>
+                    <Pencil className="h-3 w-3 mr-1" /> {e.approved ? 'Editar' : 'Revisar'}
+                  </Button>
+                )}
                 {(e.extraction_status === 'failed' || e.extraction_status === 'done') && (
                   <Button size="sm" variant="ghost" onClick={() => reExtract(e)}>
                     <RefreshCw className="h-3 w-3 mr-1" /> Reextrair
@@ -174,6 +221,16 @@ export default function PetExamPdfUploader({ petId }: { petId: string }) {
             </div>
           ))}
         </div>
+
+        {reviewExamId && (
+          <PetExamReviewDialog
+            examId={reviewExamId}
+            petId={petId}
+            open={!!reviewExamId}
+            onOpenChange={(v) => { if (!v) setReviewExamId(null); }}
+            onApproved={() => { void load(); }}
+          />
+        )}
       </CardContent>
     </Card>
   );
