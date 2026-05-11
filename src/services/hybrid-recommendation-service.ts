@@ -38,7 +38,7 @@ interface KGRecommendation {
  * Latest consultation has weight 1.0; previous ones are summarized with
  * weight 0.4. Returns undefined when petId is not provided.
  */
-async function buildLongitudinalContext(petId?: string) {
+export async function buildLongitudinalContext(petId?: string) {
   if (!petId) return undefined;
   try {
     const [{ data: consults }, { data: nutrition }] = await Promise.all([
