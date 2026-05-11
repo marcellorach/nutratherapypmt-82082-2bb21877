@@ -25,6 +25,11 @@ import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph'
 import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import LongitudinalDebugPanel from '@/components/pet/LongitudinalDebugPanel';
+import PetConsultationsTimeline from '@/components/pet/PetConsultationsTimeline';
+import PetNutritionPanel from '@/components/pet/PetNutritionPanel';
+import HelpHint from '@/components/ui/help-hint';
+import { CalendarClock, Apple } from 'lucide-react';
+import { usePetConsultations, usePetNutrition } from '@/hooks/usePetConsultations';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
 import DrugLookupBadge from '@/components/pet/DrugLookupBadge';
@@ -52,6 +57,8 @@ const PetProfilePage: React.FC = () => {
   const { toast } = useToast();
   const { data, isLoading, error } = usePetProfileDetail(id);
   const conditionInsights = useConditionInsights(data?.conditions);
+  const consultationsQ = usePetConsultations(id);
+  const nutritionQ = usePetNutrition(id);
   const upsertSnapshot = useUpsertPetClinicalAnalysisSnapshot();
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
