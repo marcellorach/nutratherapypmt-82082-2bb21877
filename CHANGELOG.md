@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-05-11 — Sidebar/tabs admin mostrando chaves de tradução literais
+<!-- area: i18n · status: entregue · i18n: 1.64.0 -->
+- Raiz do problema: os arquivos `src/locales/{pt,en}/translation.json` continham a chave `"admin"` declarada **duas vezes** no nível raiz. O segundo bloco (adicionado junto com a Base Farmacológica em 2026-05-09) sobrescrevia silenciosamente o primeiro durante o `JSON.parse`, apagando todos os namespaces `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*`, `admin.studies.*`, etc. — daí as chaves cruas aparecendo em quase toda a UI administrativa
+- Correção: fundidos os dois blocos `"admin"` num só (PT e EN), preservando `pharmacology` ao lado das 19 sub-chaves originais (total 20)
+- Salvaguarda: novo script `scripts/check-translation-duplicates.mjs` (parser custom que detecta chaves duplicadas em qualquer profundidade) exposto via `npm run check:translations` — o `audit-translations` antigo só checava paridade PT↔EN, não duplicatas internas
+- `I18N_VERSION` 1.63.0 → 1.64.0 para invalidar o cache do navegador
+- Files: src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, scripts/check-translation-duplicates.mjs, package.json
+
 ### Added - 2026-05-11 — Auditorias Técnicas Internas (aba admin versionada)
 <!-- area: admin · status: entregue · i18n: 1.63.0 -->
 - Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do VetGraphRAG, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)
