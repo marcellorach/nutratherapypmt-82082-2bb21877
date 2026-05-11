@@ -197,6 +197,12 @@ INDIVIDUALIZATION REQUIREMENTS:
 5. Dosages must be adjusted for the patient's weight and age
 6. MAXIMUM 8 COMPOUNDS — select only the top compounds by efficacy, synergy, and relevance to this patient's specific clinical picture
 
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+- CURRENT_STATE is the dominant signal (weight 1.0). CLINICAL_TRAJECTORY is context only (weight 0.4).
+- Conditions only in past consultations must NOT drive new active therapy.
+- Avoid re-introducing therapies the trajectory shows already failed.
+- Cross-check the DIET_PROFILE for nutritional gaps before recommending a redundant nutrient.
+
 Your response MUST follow this JSON structure:
 {
   "nutraceuticals": [
