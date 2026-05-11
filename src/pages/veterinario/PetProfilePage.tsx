@@ -498,7 +498,7 @@ const PetProfilePage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card>
+          <Card onClick={() => goToTab('conditions')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Stethoscope className="h-8 w-8 text-red-500" />
               <div>
@@ -507,7 +507,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('consultations')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <CalendarClock className="h-8 w-8 text-indigo-500" />
               <div>
@@ -519,7 +519,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('nutrition')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Apple className="h-8 w-8 text-emerald-500" />
               <div>
@@ -531,7 +531,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('medications')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Pill className="h-8 w-8 text-blue-500" />
               <div>
@@ -540,7 +540,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('exams')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <TestTube className="h-8 w-8 text-green-500" />
               <div>
@@ -549,7 +549,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('notes')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <FileText className="h-8 w-8 text-purple-500" />
               <div>
