@@ -18,6 +18,38 @@ interface ClinicalContext {
   labAlerts?: string[];
   currentMedications?: string[];
   examSummary?: string[];
+  // Longitudinal MedGraphRAG context (added phase 6):
+  // CURRENT_STATE drives the inference (weight 1.0). CLINICAL_TRAJECTORY
+  // gives the model history awareness (weight 0.4). DIET_PROFILE supports
+  // nutritional gap-analysis.
+  latestConsultation?: {
+    date?: string;
+    chief_complaint?: string;
+    assessment?: string;
+    plan?: string;
+    weight_kg?: number;
+    bcs?: number;
+    activeConditions?: string[];
+    activeMedications?: string[];
+    abnormalExams?: string[];
+  };
+  clinicalTrajectory?: Array<{
+    date?: string;
+    daysAgo?: number;
+    summary: string;
+    conditionsChanged?: string[];
+    medicationsChanged?: string[];
+    keyExamFindings?: string[];
+  }>;
+  dietProfile?: {
+    diet_type?: string;
+    daily_amount_g?: number;
+    meals_per_day?: number;
+    restrictions?: string[];
+    products?: string[];
+    macroSummary?: string;
+    notes?: string;
+  };
 }
 
 interface KGData {
@@ -44,7 +76,51 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
   if (!ctx) return '';
   
   const sections: string[] = [];
-  
+
+  // Longitudinal blocks first — these dominate inference weighting.
+  if (ctx.latestConsultation) {
+    const lc = ctx.latestConsultation;
+    const lines: string[] = [
+      `[WEIGHT: 1.0 — primary signal for inference]`,
+      lc.date ? `Date: ${lc.date}` : '',
+      lc.chief_complaint ? `Chief complaint: ${lc.chief_complaint}` : '',
+      lc.assessment ? `Assessment: ${lc.assessment}` : '',
+      lc.plan ? `Plan: ${lc.plan}` : '',
+      lc.weight_kg ? `Weight at visit: ${lc.weight_kg} kg` : '',
+      lc.bcs ? `Body Condition Score: ${lc.bcs}/9` : '',
+      lc.activeConditions?.length ? `Active conditions: ${lc.activeConditions.join(', ')}` : '',
+      lc.activeMedications?.length ? `Active medications: ${lc.activeMedications.join(', ')}` : '',
+      lc.abnormalExams?.length ? `Abnormal exam findings:\n${lc.abnormalExams.map(e => `  - ${e}`).join('\n')}` : '',
+    ].filter(Boolean);
+    sections.push(`CURRENT_STATE (latest consultation):\n${lines.join('\n')}`);
+  }
+
+  if (ctx.clinicalTrajectory?.length) {
+    const lines = ctx.clinicalTrajectory.map(t => {
+      const parts = [
+        `${t.daysAgo ? `${t.daysAgo}d ago` : (t.date || 'past')}: ${t.summary}`,
+      ];
+      if (t.conditionsChanged?.length) parts.push(`    conditions: ${t.conditionsChanged.join(', ')}`);
+      if (t.medicationsChanged?.length) parts.push(`    meds: ${t.medicationsChanged.join(', ')}`);
+      if (t.keyExamFindings?.length) parts.push(`    exams: ${t.keyExamFindings.join('; ')}`);
+      return parts.join('\n');
+    }).join('\n  - ');
+    sections.push(`CLINICAL_TRAJECTORY [WEIGHT: 0.4 — context for progression, response-to-therapy and recidive risk; do NOT re-recommend therapies that already failed]:\n  - ${lines}`);
+  }
+
+  if (ctx.dietProfile) {
+    const dp = ctx.dietProfile;
+    const dlines = [
+      dp.diet_type ? `Type: ${dp.diet_type}` : '',
+      dp.daily_amount_g ? `Daily amount: ${dp.daily_amount_g}g in ${dp.meals_per_day || '?'} meals` : '',
+      dp.products?.length ? `Products: ${dp.products.join(' + ')}` : '',
+      dp.restrictions?.length ? `Restrictions: ${dp.restrictions.join(', ')}` : '',
+      dp.macroSummary ? `Nutrition snapshot: ${dp.macroSummary}` : '',
+      dp.notes ? `Notes: ${dp.notes}` : '',
+    ].filter(Boolean).join('\n');
+    sections.push(`DIET_PROFILE [use for nutritional gap-analysis: omega-3 deficit, mineral imbalances, prescription-diet compatibility]:\n${dlines}`);
+  }
+
   if (ctx.allConditions?.length) {
     sections.push(`Active Conditions: ${ctx.allConditions.join(', ')}`);
   }
