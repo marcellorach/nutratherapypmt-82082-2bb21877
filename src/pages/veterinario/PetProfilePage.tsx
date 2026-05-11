@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, TrendingUp, AlertTriangle, Dna, Network } from 'lucide-react';
+import { ArrowLeft, PawPrint, Stethoscope, Pill, TestTube, FileText, Brain, Loader2, Sparkles, GitBranch, TrendingUp, AlertTriangle, Dna, Network, CalendarClock, Apple } from 'lucide-react';
 import { usePetProfileDetail } from '@/hooks/usePetProfile';
 import { useConditionInsights } from '@/hooks/useConditionInsights';
 import PetClinicalChat from '@/components/pet/PetClinicalChat';
@@ -28,7 +28,6 @@ import LongitudinalDebugPanel from '@/components/pet/LongitudinalDebugPanel';
 import PetConsultationsTimeline from '@/components/pet/PetConsultationsTimeline';
 import PetNutritionPanel from '@/components/pet/PetNutritionPanel';
 import HelpHint from '@/components/ui/help-hint';
-import { CalendarClock, Apple } from 'lucide-react';
 import { usePetConsultations, usePetNutrition } from '@/hooks/usePetConsultations';
 
 import { CompoundDosage } from '@/components/pet/CompoundDosageSlider';
