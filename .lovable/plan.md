@@ -1,97 +1,32 @@
-## Objetivo
+## Diagnóstico — raiz do problema
 
-Transformar a auditoria técnica (hoje só .docx/.pdf em `/mnt/documents/`) em um artefato versionado, navegável e re-executável dentro do admin — ao lado do Changelog/Organograma, com vínculo explícito à versão do sistema auditada.
+Os arquivos `src/locales/pt/translation.json` e `src/locales/en/translation.json` têm a chave `"admin"` **declarada duas vezes** no nível raiz:
 
-## Arquitetura proposta
+- **Linha 1914** — bloco original, com 19 sub-chaves: `sidebar`, `tabs`, `errors`, `studies`, `nutraceuticals`, `breeds`, `labReferences`, `patients`, `predictiveModels`, `prompts`, `research`, `roi`, `settings`, `tabInfo`, `veterinaryTargets`, `analytics`, `clinicalRules`, `header`, `multiAgentAnalysis`.
+- **Linha 7619** — bloco novo (commit `0f80fe49`, "Base Farmacológica" em 2026-05-09), com **apenas** `pharmacology`.
 
-### 1. Conteúdo HTML da auditoria (estático, versionado em git)
+Em JSON com chaves duplicadas, o **último valor vence** — então o parser do i18next entrega apenas `{ admin: { pharmacology: {...} } }` ao app. Resultado: **todas as chaves `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*` etc. somem** e o `t()` devolve a própria chave literal — exatamente o que aparece nas screenshots ("admin.sidebar.knowledgeBase.title", "admin.sidebar.knowledgeBase.studies"…).
 
-- Converter o `.docx` v3 em **HTML semântico** (via `pandoc --extract-media`) e salvar em:
-  - `public/audits/v3/index.html` (corpo do relatório, com TOC, headings, tabelas)
-  - `public/audits/v3/media/*` (os 9 infográficos preservados)
-- Criar um índice tipado em `src/data/technicalAudits.ts`:
-  ```ts
-  export interface TechnicalAudit {
-    id: string;              // "v3"
-    version: string;         // "3.0.0"
-    date: string;            // "2026-05-10"
-    systemVersion: string;   // i18n version + último commit do CHANGELOG
-    systemDate: string;      // lastChangelogDate
-    scope: string;           // descrição editável do que foi auditado
-    htmlPath: string;        // "/audits/v3/index.html"
-    docxPath?: string; pdfPath?: string;
-    summary: { strengths: number; gaps: number; risks: number };
-  }
-  ```
-- O vínculo "auditoria ↔ versão do sistema" usa `lastChangelogDate` de `projectChangelog.generated.ts` + `I18N_VERSION` de `src/i18n.ts` no momento da geração (registrados manualmente no entry).
+Não é cache, não é versionamento, não é chaves faltando. É **um merge JSON quebrado** ao adicionar a Base Farmacológica.
 
-### 2. Nova aba admin: "Auditorias Técnicas"
+## Correção
 
-- Novo item no `ConfigurationGroup` (sidebar), ícone `FileSearch`, logo abaixo de "Organograma" e "Conformidade".
-- Registrado em `src/config/admin-tabs.ts` como `technical-audits`.
-- Componente `src/components/administrador/audits/TechnicalAuditsTab.tsx` com layout em 2 colunas:
-  - **Esquerda (lista)**: cards de cada auditoria (v1, v2, v3…) mostrando: versão da auditoria, data, versão do sistema correspondente, badge de status, contagens (forças/gaps/riscos), botões "Abrir HTML", "Baixar PDF", "Baixar DOCX".
-  - **Direita (visualizador)**: `<iframe src={htmlPath}>` em tela cheia com TOC sticky lateral, ou `react-markdown`/HTML sanitizado se preferirmos render nativo. Iframe é mais simples e isola estilos do documento.
+1. Em **ambos** os arquivos (`pt` e `en`):
+   - Mover o conteúdo do segundo `"admin"` (linha 7619 — só `pharmacology`) para **dentro** do primeiro bloco `"admin"` (linha 1914), como uma sub-chave a mais ao lado de `sidebar`, `tabs`, etc.
+   - Remover o bloco duplicado das linhas 7619+.
+   - Manter o bloco `"pharmacology"` top-level (linha ~7613) que coexiste — não conflita.
+2. Validar que `python3 -m json.tool` parseia sem erro e que `jq '.admin | keys | length'` devolve **20** (19 originais + `pharmacology`) em PT e EN.
+3. Adicionar um **guard** simples para evitar regressão futura:
+   - Script `scripts/check-translation-duplicates.mjs` que lê os dois JSONs com `JSONDecoder` preservando pares e falha se encontrar chaves duplicadas em qualquer nível. Pluga no `npm run sync:changelog` e/ou em um `prebuild` leve.
+4. Bump do `I18N_VERSION` em `src/i18n.ts` (ex.: `1.63.0 → 1.64.0`) para invalidar o cache do navegador — sem isso o usuário continua vendo o JSON corrompido em cache.
+5. Entrada no `CHANGELOG.md` (`area: i18n · status: entregue · i18n: 1.64.0`) descrevendo o bug e a salvaguarda + `npm run sync:changelog`.
 
-### 3. Botão "Fazer nova auditoria"
+## Verificação após o fix
 
-- Card destacado no topo da aba com:
-  - **Descrição editável** (textarea) do escopo: o que a auditoria deve cobrir (ex.: "Conformidade FDA/EMA, pipeline de curadoria, KG, RLS, i18n, 9 infográficos…"). Texto-padrão pré-preenchido com o escopo da v3.
-  - Campos auto-preenchidos: versão do sistema atual (lida de i18n + changelog), data, próxima versão da auditoria sugerida (`v4`).
-  - Botão **"Solicitar nova auditoria"** que:
-    - Salva o pedido em uma tabela `audit_requests` (Lovable Cloud) com `scope`, `system_version`, `system_date`, `requested_at`, `status: 'pending'`, `requested_by`.
-    - Mostra toast: "Auditoria solicitada — será gerada na próxima sessão pelo agente Lovable a partir deste escopo."
-  - **Importante**: a geração efetiva do .docx/.pdf/.html continua sendo feita por mim (Lovable) em sessão dedicada lendo `audit_requests`. O botão não dispara LLM — ele formaliza e versiona o pedido. Isso evita custo/instabilidade de gerar relatório de 27 páginas em runtime.
+- `jq '.admin | keys' src/locales/pt/translation.json` deve listar `["analytics", "breeds", ..., "pharmacology", ..., "veterinaryTargets"]` (20 itens).
+- `python3 -c "import json,collections; [print(k,c) for k,c in collections.Counter([k for k,_ in json.JSONDecoder(object_pairs_hook=lambda p:p).decode(open(f).read())]).items() if c>1] for f in [...]"` não deve imprimir nada.
+- Recarregar `/administrador` no preview: sidebar e tabs voltam a mostrar texto em português/inglês em vez das chaves.
 
-### 4. Edição da descrição de auditorias passadas
+## Por que isso não foi pego antes
 
-- Cada card tem botão "Editar escopo" que abre dialog com textarea — atualiza `scope` na DB (auditorias passadas migradas via seed inicial).
-- Histórico de edições do escopo fica em `audit_requests.scope_history` (jsonb).
-
-## Schema (Lovable Cloud)
-
-```sql
-CREATE TABLE public.technical_audits (
-  id text PRIMARY KEY,              -- 'v3'
-  version text NOT NULL,
-  audit_date date NOT NULL,
-  system_version text NOT NULL,     -- ex: 'i18n 1.42.0 · 2026-05-09'
-  system_changelog_date date,
-  scope text NOT NULL,
-  scope_history jsonb DEFAULT '[]',
-  html_path text, pdf_path text, docx_path text,
-  summary jsonb,                    -- {strengths, gaps, risks}
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE public.audit_requests (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  scope text NOT NULL,
-  system_version text NOT NULL,
-  system_date date NOT NULL,
-  status text NOT NULL DEFAULT 'pending', -- pending | in_progress | done
-  fulfilled_audit_id text REFERENCES public.technical_audits(id),
-  requested_by uuid,
-  requested_at timestamptz DEFAULT now()
-);
-```
-
-RLS: leitura para usuários autenticados com role `admin` (via `has_role`); escrita idem.
-
-Seed: 1 linha em `technical_audits` para a v3 atual, apontando para `/audits/v3/index.html`, `/audits/v3/...pdf`, `...docx` (cópias dos arquivos de `/mnt/documents/` para `public/audits/v3/`).
-
-## Entregáveis
-
-1. `public/audits/v3/index.html` + media (conversão do v3.docx).
-2. Cópia do PDF e DOCX para `public/audits/v3/` (download direto pelo app).
-3. Migração SQL com as 2 tabelas + RLS + seed da v3.
-4. `src/components/administrador/audits/TechnicalAuditsTab.tsx` (lista + iframe + dialog "nova auditoria" + dialog "editar escopo").
-5. Registro no `admin-tabs.ts` + ícone na sidebar (`ConfigurationGroup`).
-6. Strings PT/EN + bump de `I18N_VERSION`.
-7. Entrada no `CHANGELOG.md` (`area: admin`, `i18n: x.y.z`) + `npm run sync:changelog`.
-
-## Pontos a confirmar
-
-- **OK usar iframe** para renderizar o HTML da auditoria (isolamento de estilos, TOC nativo do documento)? Alternativa: render via `react-markdown` com sanitização — mais integrado visualmente, mas precisa reestilizar tabelas/infográficos.
-- **Botão "nova auditoria"** apenas registra o pedido (eu gero o relatório na sessão seguinte) — confirma essa abordagem? Alternativa cara: chamar Lovable AI Gateway com `gemini-2.5-pro` para gerar markdown em runtime (~ $0.30-1.00 por execução, sem infográficos).
+- O `audit-translations` checa chaves **faltando** entre PT/EN, mas não checa **duplicadas no mesmo arquivo** — a chave `admin.sidebar.knowledgeBase.title` "existe" textualmente no arquivo, só é morta pelo parser. Daí o passo 3 (guard de duplicatas).
