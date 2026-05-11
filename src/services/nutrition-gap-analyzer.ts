@@ -477,6 +477,7 @@ export async function analyzeNutritionGaps(ctx: PetNutritionContext): Promise<Nu
       targets,
       gaps: [],
       warnings: ['no_current_nutrition'],
+      breed_recommendations: buildBreedRecommendations(ctx.breed_predispositions, ctx.active_conditions, {}),
     };
   }
 
@@ -608,6 +609,7 @@ export async function analyzeNutritionGaps(ctx: PetNutritionContext): Promise<Nu
     targets,
     gaps,
     warnings,
+    breed_recommendations: buildBreedRecommendations(ctx.breed_predispositions, ctx.active_conditions, observed),
   };
 }
 
