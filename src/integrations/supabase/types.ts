@@ -2824,6 +2824,7 @@ export type Database = {
           prescribing_vet: string | null
           raw_input: string | null
           start_date: string | null
+          status: string
           substance_id: string | null
           updated_at: string
         }
@@ -2840,6 +2841,7 @@ export type Database = {
           prescribing_vet?: string | null
           raw_input?: string | null
           start_date?: string | null
+          status?: string
           substance_id?: string | null
           updated_at?: string
         }
@@ -2856,6 +2858,7 @@ export type Database = {
           prescribing_vet?: string | null
           raw_input?: string | null
           start_date?: string | null
+          status?: string
           substance_id?: string | null
           updated_at?: string
         }
