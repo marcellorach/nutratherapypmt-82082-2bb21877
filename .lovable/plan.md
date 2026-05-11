@@ -1,140 +1,75 @@
+## Objetivo
 
-# Cadastro veterinário "na mão" — análise e plano (v2, com banco de rações)
+Aproveitar a nova infraestrutura de **consultas, nutrição, exames PDF e medicações canonicalizadas** para que (a) os 5 pets demo passem a ter um **histórico clínico realista**, (b) esse histórico seja **lido e ponderado** pelo VetGraphRAG/Hybrid Recommendation com **destaque para a última consulta**, e (c) a documentação do sistema reflita essa lógica.
 
-## 1. Diagnóstico do que está faltando hoje
+---
 
-O `PetRegistrationForm` cadastra apenas dados demográficos. Tudo o que importa clinicamente — **diagnósticos, medicações, exames, alimentação, observações** — ou não existe ou vive em tabelas soltas (`pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes`), sem agrupamento e sem o vet conseguir registrar pela UI.
+## a) Pets de exemplo com histórico longitudinal
 
-Lacunas concretas:
-- Não existe **agrupador "Consulta"** (data + vet + motivo) ligando os itens daquele dia.
-- Sem **histórico de visitas**: a "última consulta" não é destacada como estado clínico atual.
-- `pet_medications` tem `substance_id`/`brand_id` mas a UI não usa — vet digita texto livre, então marca comercial nunca vira substância canônica.
-- Exames são `jsonb` + `file_url`, sem upload de PDF nem extração estruturada.
-- **Alimentação não existe no modelo**, e **não existe um catálogo de rações** com perfil nutricional para o motor de recomendação considerar deficiências/excessos.
-- Notas livres não disparam extração de entidades.
+Atualizar `src/components/pet/GenerateSamplePetsButton.tsx` para que cada pet receba **N consultas** ao longo do tempo (de simples → complexo: 1, 2, 3, 4, 5 consultas), em vez de apenas snapshot.
 
-## 2. Conceito proposto — "Consulta" como unidade central
+Estrutura por pet:
+- **`pet_consultations`** (1 a 5, datadas dos últimos 24 meses):
+  - `consultation_date`, `chief_complaint`, `clinical_exam`, `weight_kg_at_visit`, `body_condition_score`, `assessment`, `plan`
+  - O trigger `refresh_pet_consultation_latest` marca automaticamente a mais recente como `is_latest`
+- **`pet_conditions`**, **`pet_medications`**, **`pet_exams`**, **`pet_clinical_notes`** ganham `consultation_id` apontando para a visita correta — refletindo aparecimento, agravamento, resolução e ajustes de dose ao longo do tempo
+- **`pet_nutrition` + `pet_nutrition_items`**: pelo menos 1 dieta atual, com mudança de marca/ração em uma das consultas (Luna troca para fórmula renal; Rex entra em dieta de controle de peso)
+- **`pet_exams.extraction_status = 'done'`** com `raw_extracted` JSON populado (simulando PDF já parseado), incluindo `flags_abnormal`
 
-```text
-Pet
- └─ Consulta (data, vet, motivo, peso, BCS, queixa, plano)
-     ├─ Diagnósticos       (condições, severidade, status)
-     ├─ Medicações         (marca → substância canônica)
-     ├─ Exames             (PDF + resultados parseados)
-     ├─ Alimentação        (produtos do catálogo + porção/freq + extras)
-     └─ Notas livres       (com extração de entidades)
-```
+Trajetória clínica por pet (resumo):
+- **Buddy (4a, Beagle)**: 1 consulta — check-up preventivo
+- **Max (9a, Beagle)**: 2 consultas — primeira detecta CDS leve; segunda confirma sarcopenia
+- **Rex (8a, Lab)**: 3 consultas — obesidade → osteoartrite → displasia em raio-X; introdução de Meloxicam na 2ª
+- **Thor (7a, Pastor)**: 4 consultas — OA → senescência → mielopatia em monitoramento; Carprofen ajustado
+- **Luna (9a, Cavalier)**: 5 consultas — MMVD B2 → C; introdução escalonada de Pimobendan, Furosemida, Benazepril; DRC e HP secundárias surgindo na timeline; troca de ração na 4ª
 
-Última consulta = estado clínico atual; anteriores = histórico que alimenta tendências e cronicidade.
+## b) Uso do histórico no MedGraphRAG (com destaque para a última)
 
-## 3. Banco de dados de RAÇÕES (novo módulo central)
+Hoje o `hybrid-recommendation` e o `extract-pet-clinical-data` ignoram `pet_consultations`, `pet_nutrition`, `clinical_notes`. Mudanças:
 
-### 3.1 Tabelas
-**`pet_food_brands`** — fabricantes (Royal Canin, Hill's, Premier, Pro Plan, Golden, Origens, Farmina, Acana, Orijen, Guabi, Quatree, GranPlus, Biofresh, etc.):
-- `id`, `name`, `manufacturer`, `country`, `website`, `notes`.
+1. **Builder de contexto clínico** (`supabase/functions/hybrid-recommendation/index.ts`):
+   - Buscar todas as consultas ordenadas DESC; separar `latest` (a com `is_latest=true`) e `history` (anteriores)
+   - Para cada entidade (conditions/meds/exams), agrupar por `consultation_id` e marcar timestamp relativo
+   - Buscar dieta atual (`pet_nutrition`) e juntar perfil nutricional (kcal/dia, %P, %G, ω3/ω6, Ca:P) via `pet_food_nutrition`
 
-**`pet_food_products`** — SKUs/linhas específicas (ex.: "Royal Canin Maxi Adult", "Hill's Science Diet Sensitive Stomach"):
-- `id`, `brand_id`, `name`, `line` (Veterinary, Premium, Super Premium, Standard), `species` (`dog`/`cat`/`both`), `life_stage` (`puppy`/`adult`/`senior`/`all`), `size_target` (`small`/`medium`/`large`/`giant`/`all`), `food_form` (`dry_kibble`/`wet`/`semi_moist`/`raw`/`freeze_dried`), `is_prescription` bool, `prescription_indication` text[] (ex.: renal, hepatic, gastrointestinal, urinary, obesity, dermatosis, diabetic), `barcode`, `image_url`, `manufacturer_url`, `discontinued` bool.
+2. **Prompt do MedGraphRAG** passa a receber 3 blocos explícitos:
+   - `CURRENT_STATE` (consulta `is_latest`) — **peso 1.0**, fonte primária da inferência
+   - `CLINICAL_TRAJECTORY` (consultas anteriores) — **peso 0.4**, usado para detectar:
+     - condições **progredindo** vs **resolvidas** vs **estáveis**
+     - resposta/falha a medicações já tentadas (não recomendar de novo se já houve falha)
+     - tendências em exames (creatinina ↑, peso ↑)
+   - `DIET_PROFILE` — usado para gap-analysis nutricional (déficit ω3, excesso de fósforo em DRC, etc.)
 
-**`pet_food_nutrition`** — perfil nutricional (1:1 com produto, versionado por `revision`):
-- `product_id`, `revision`, `source` (`manufacturer_label`/`manufacturer_site`/`independent_lab`/`llm_estimated`/`user_submitted`), `verified_by`, `verified_at`.
-- Macros (% matéria seca e tal-qual): `protein_pct`, `fat_pct`, `fiber_pct`, `moisture_pct`, `ash_pct`, `nfe_pct` (carb por diferença), `kcal_per_100g`, `kcal_per_kg`.
-- Proteína: `primary_protein_source` (frango/peixe/cordeiro/salmão/vegetal/insetos…), `protein_sources` text[], `is_grain_free` bool, `is_hypoallergenic` bool.
-- Minerais (% MS): `calcium_pct`, `phosphorus_pct`, `ca_p_ratio`, `sodium_pct`, `potassium_pct`, `magnesium_pct`.
-- Lipídios: `omega3_pct`, `omega6_pct`, `omega6_omega3_ratio`, `epa_dha_pct` (quando rotulado).
-- Funcionais já presentes: `glucosamine_mg_per_kg`, `chondroitin_mg_per_kg`, `taurine_mg_per_kg`, `l_carnitine_mg_per_kg`, `antioxidants_added` bool, `prebiotics` text[], `probiotics` text[].
-- Adequação: `aafco_statement` text, `meets_aafco_complete` bool, `fediaf_compliant` bool.
-- `raw_label_text` (OCR do rótulo, opcional), `raw_data jsonb` (campos não normalizados).
+3. **Pesos no scoring** (`recommendation-confidence-service.ts` / `hybrid-recommendation-service.ts`):
+   - Condição em consulta `is_latest` com `status='active'` → fator 1.0
+   - Condição apenas em histórico antigo → fator 0.3 (background risk)
+   - Condição `resolved` → ignorada para protocolo ativo, mantida para alertas de recidiva
+   - Medicação ativa na última consulta entra na detecção de interações; medicação descontinuada não
 
-**`pet_food_ingredients`** — lista ordenada de ingredientes (N:1 com produto):
-- `product_id`, `position`, `ingredient_name`, `ingredient_canonical_id` (FK opcional), `is_named_meat` bool, `is_byproduct` bool, `is_preservative` bool.
+4. **PatientKnowledgeSubgraph** (`src/components/pet/PatientKnowledgeSubgraph.tsx`): nó "Última Consulta" em destaque visual (borda mais forte) com edges para condições/meds/diet ativas; consultas anteriores como nós secundários menores numa timeline lateral.
 
-**`pet_food_recalls`** (opcional fase 2): histórico de recalls do FDA/MAPA por produto.
+5. **`extract-pet-clinical-data`**: quando o vet cola texto de evolução, criar uma **nova `pet_consultation`** automaticamente em vez de só anexar `clinical_notes` soltas.
 
-### 3.2 Como popular
-1. **Seed inicial** (~200-400 produtos das marcas mais vendidas no Brasil + linhas terapêuticas globais), via script `scripts/seed-pet-foods.ts` — fontes públicas (sites dos fabricantes, FEDIAF, AAFCO, planilhas abertas como Tufts Petfoodology, Open Pet Food Facts).
-2. **Edge `enrich-pet-food-product`** (Lovable AI Gateway, Gemini 2.5 Pro com web): dado nome/marca, busca composição garantida + ingredientes, retorna JSON normalizado com `source` marcado, e flag `requires_curation = true` se confiança < 0.8.
-3. **CRUD admin** numa nova tab "Catálogo de Rações" (`src/components/administrador/...`) — listar, filtrar por espécie/marca/indicação, editar perfil, marcar como `verified`, importar CSV em lote, ver histórico de revisões.
-4. **Submissões do vet**: se vet cadastra produto inexistente, vai pra fila `pending` (mesmo padrão do Curation Gatekeeper) até admin aprovar e promover.
+## c) Documentação
 
-### 3.3 RLS
-- `SELECT` público autenticado (todos vets leem catálogo).
-- `INSERT/UPDATE/DELETE` só admin (`is_admin()`); vet só insere via fluxo `pending` numa coluna `submission_status`.
+Atualizar:
+- **ARCHITECTURE.md** (MINOR): nova seção "Modelo Longitudinal de Histórico Clínico" descrevendo `pet_consultations` como tabela-âncora, `is_latest`, FK `consultation_id` em conditions/meds/exams/notes, e fluxo de leitura no hybrid-recommendation
+- **docs/CURRENT_STATE.md** (MINOR): mover histórico clínico de "mockado" para "implementado"; descrever pesos `latest=1.0 / history=0.4`
+- **docs/STANFORD_DEMO.md** (MINOR): destacar que os 5 demo pets agora exibem **trajetória clínica realista** (1→5 consultas) — diferencial de demonstração
+- **CHANGELOG.md** [Unreleased] → Added: histórico longitudinal nos sample pets + integração no MedGraphRAG com peso na última consulta
+- **mem://features/sample-pets-complexity-order**: adicionar regra "cada pet tem N consultas = sua posição no ranking de complexidade; última consulta sempre dirige a inferência"
+- **mem://architecture/hybrid-recommendation-context-aware-logic**: adicionar bloco `CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE` e os pesos
+- Incrementar `I18N_VERSION` ao adicionar novas chaves de UI ("Última consulta", "Trajetória clínica", "Dieta atual")
 
-## 4. Demais mudanças de schema
+## Detalhes técnicos
 
-**Nova `pet_consultations`**: `pet_id`, `consultation_date`, `veterinarian_id`, `chief_complaint`, `clinical_exam`, `weight_kg_at_visit`, `body_condition_score` (1-9), `assessment`, `plan`. RLS espelhada de `pet_profiles`.
-Adicionar `consultation_id uuid NULL` em `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes`.
+- Sem migração nova: o schema de `pet_consultations` e FKs já foi criado nas fases 1-2.
+- Trigger `refresh_pet_consultation_latest` já recalcula `is_latest` no insert — basta inserir as consultas em ordem cronológica.
+- Edge functions afetadas: `hybrid-recommendation`, `extract-pet-clinical-data`. Sem novas secrets.
+- Botão "Gerar pets de exemplo" passa a inserir ~15 consultas totais (1+2+3+4+5) e ~10 itens de nutrição, mantendo `is_demo=true` para deleção em massa segura.
 
-**Nova `pet_nutrition`** (snapshot da dieta por consulta, com `is_current` para pet):
-- `pet_id`, `consultation_id` (opc.), `diet_type` enum: `commercial_dry` | `commercial_wet` | `mixed_commercial` | `home_cooked` | `raw_barf` | `prescription` | `mixed_natural_commercial`.
-- `daily_amount_g`, `meals_per_day`, `treats_frequency` (`none`/`occasional`/`daily`), `treats_description`, `water_intake` (`low`/`normal`/`high`), `restrictions` text[] (alergias declaradas), `notes`.
-- `started_at`, `is_current`.
+## Fora de escopo
 
-**Nova `pet_nutrition_items`** (N produtos por entrada de nutrição):
-- `nutrition_id`, `product_id` (FK `pet_food_products`, NULL se texto livre pendente), `raw_brand_text`, `raw_product_text`, `share_percent` (em mistas), `daily_amount_g_per_item`.
-
-## 5. Medicamentos canônicos
-Autocomplete em `drug_brands` → auto-preenche `substance_id`. Edge `resolve-drug-brand` (LLM + tabela) sugere substância para marcas novas. Toda lógica clínica usa `substance_id`.
-
-## 6. Exames PDF
-Bucket `pet_exams_pdfs`, upload drag-drop, edge `parse-pet-exam-pdf` (Gemini) → JSON: `exam_type`, `exam_date`, `lab_name`, `results[]`, `clinical_comments`, `flags_abnormal[]`. Timeline com badges ↑↓ e comparação seriada.
-
-## 7. UI
-
-Substituir `PetRegistrationForm` por **2 modos**:
-1. **Cadastro rápido**: demografia + dieta atual (autocomplete do catálogo).
-2. **Consulta**: 5 seções colapsáveis (Diagnósticos · Medicações · Exames · Alimentação · Notas), salva pai+filhos transacional.
-
-Timeline do pet: consultas mais recentes primeiro; última destacada como "Estado atual".
-
-Nova tab admin "Catálogo de Rações" para CRUD e curadoria do banco.
-
-## 8. Como o sistema usa esses dados de forma inteligente
-
-| Sinal | Uso |
-|---|---|
-| Última consulta | Define condições ativas, meds em uso, peso e dieta atual → entrada do `hybrid-recommendation` e Digital Twin |
-| Histórico de consultas | Cronicidade, recidivas, trajetória |
-| Exames seriados | Tendências por analito → alertas (`examEnhancer`) |
-| Marca → substância | Interações (`drug_interactions`), contraindicações com nutracêuticos |
-| **Perfil da ração** | Calcula gap nutricional vs. NRC/AAFCO/FEDIAF: se ração já entrega EPA+DHA suficiente, reduz dose de ômega-3 sugerida; se Ca:P fora da faixa, alerta; se sódio alto e pet cardiopata, contraindica; se proteína baixa em sênior sarcopênico, sugere ajuste; se ração renal e vet quer suplementar fósforo, bloqueia |
-| Mudança de dieta no tempo | Correlaciona com curva de peso e exames (troca de ração ↔ ALT subindo) |
-| Ingredientes | Cruza com alergias declaradas; flag se ingrediente alergênico aparece no top-5 |
-| Notas com entidades | Sintomas viram nós "Symptom" no subgrafo |
-
-## 9. Enriquecimento do grafo do paciente
-
-`PatientKnowledgeSubgraph` ganha 4 camadas:
-
-```text
-Pet
- ├── Symptoms          (de notas)
- ├── Conditions        (diagnósticos)
- ├── LabAbnormalities  (de exames)
- ├── DietProfile       ← agregado de pet_nutrition + pet_food_nutrition
- │     ├── kcal/dia, %P, %G, ω3/ω6, Ca:P, Na, fonte proteica
- │     └── ingredientes potencialmente alergênicos
- └── Medications (substância) ── interações ── Compounds candidatos
-```
-
-Arestas geradas: "ração já contém ω-3 → reduzir dose"; "alergia a frango + ração com frango → trocar produto"; "ração renal + condição renal → manter, evitar suplemento com fósforo". Triplets em namespace `patient_only` (Curation Gatekeeper).
-
-## 10. Fases
-
-1. **Schema + Consulta básica** + tabela `pet_nutrition` (sem catálogo): vet escolhe produto por texto livre.
-2. **Catálogo de rações** (`pet_food_brands/products/nutrition/ingredients`) + seed inicial + CRUD admin + autocomplete na consulta.
-3. **Edge `enrich-pet-food-product`** + fluxo de submissão pendente.
-4. **Medicações canônicas** (`resolve-drug-brand`).
-5. **Exames PDF** (`parse-pet-exam-pdf`).
-6. **Enriquecimento do grafo** com DietProfile e gap-analysis no `hybrid-recommendation`.
-
-## 11. Decisões para você confirmar
-
-1. **Escopo inicial do catálogo**: começo com **top 30 marcas no Brasil** (~200 SKUs) mais as linhas terapêuticas globais (Royal Canin Veterinary, Hill's Prescription Diet, Pro Plan Veterinary), ou já amplio para gatos também?
-2. **Seed**: posso seedar com dados estimados pelo LLM marcando `source = 'llm_estimated'` + `verified = false` (mais rápido), ou só populo com marcas onde encontro a composição garantida pública (mais lento, mais confiável)?
-3. **"Consulta" obrigatória ou opcional** para adicionar item solto?
-4. **Submissão pelo vet**: vet pode criar produto novo com flag `pending`, ou só admin cadastra?
-5. **Extração de entidades** das notas: automática ao salvar consulta, ou clique explícito do vet?
-
-Confirme/ajuste e implemento a Fase 1+2 (consulta + catálogo) primeiro.
+- Importar histórico real do PetLove (continua manual via formulário/PDF)
+- Re-treinar embeddings sobre consultas históricas (só leitura estruturada por enquanto)
+- Versionamento de `pet_nutrition` ao longo do tempo além do snapshot atual + 1 troca
