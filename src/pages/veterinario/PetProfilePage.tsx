@@ -638,6 +638,7 @@ const PetProfilePage: React.FC = () => {
                   species: (profile.species === 'cat' ? 'cat' : 'dog') as 'dog' | 'cat',
                   weight_kg: Number(profile.weight_kg) || 0,
                   age_years: profile.age_years != null ? Number(profile.age_years) : null,
+                  breed_name: profile.breed ?? null,
                   active_conditions: (conditions ?? [])
                     .map((c: any) => c.condition_name || c.name || '')
                     .filter(Boolean),
