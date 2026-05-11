@@ -58,6 +58,14 @@ const PetProfilePage: React.FC = () => {
   const conditionInsights = useConditionInsights(data?.conditions);
   const consultationsQ = usePetConsultations(id);
   const nutritionQ = usePetNutrition(id);
+  const [clinicalTab, setClinicalTab] = useState<string>('conditions');
+  const clinicalTabsRef = React.useRef<HTMLDivElement | null>(null);
+  const goToTab = (tab: string) => {
+    setClinicalTab(tab);
+    setTimeout(() => {
+      clinicalTabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
   const upsertSnapshot = useUpsertPetClinicalAnalysisSnapshot();
   const [analyzing, setAnalyzing] = useState(false);
   const [recommendationCompounds, setRecommendationCompounds] = useState<CompoundDosage[] | null>(null);
@@ -490,7 +498,7 @@ const PetProfilePage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card>
+          <Card onClick={() => goToTab('conditions')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Stethoscope className="h-8 w-8 text-red-500" />
               <div>
@@ -499,7 +507,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('consultations')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <CalendarClock className="h-8 w-8 text-indigo-500" />
               <div>
@@ -511,7 +519,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('nutrition')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Apple className="h-8 w-8 text-emerald-500" />
               <div>
@@ -523,7 +531,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('medications')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <Pill className="h-8 w-8 text-blue-500" />
               <div>
@@ -532,7 +540,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('exams')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <TestTube className="h-8 w-8 text-green-500" />
               <div>
@@ -541,7 +549,7 @@ const PetProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card onClick={() => goToTab('notes')} className="cursor-pointer hover:border-primary/40 hover:shadow-sm transition">
             <CardContent className="p-4 flex items-center gap-3">
               <FileText className="h-8 w-8 text-purple-500" />
               <div>
@@ -568,11 +576,20 @@ const PetProfilePage: React.FC = () => {
           {/* Left 2 columns */}
           <div className="lg:col-span-2 space-y-6">
             {/* Patient Clinical Data */}
-            <Tabs defaultValue="conditions">
-            <TabsList className="mb-4">
+            <div ref={clinicalTabsRef}>
+            <Tabs value={clinicalTab} onValueChange={setClinicalTab}>
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
               <TabsTrigger value="conditions" className="gap-1">
                 <Stethoscope className="h-3.5 w-3.5" />
                 {t('petRegistration.conditions.title')}
+              </TabsTrigger>
+              <TabsTrigger value="consultations" className="gap-1">
+                <CalendarClock className="h-3.5 w-3.5" />
+                {t('petTimeline.title')}
+              </TabsTrigger>
+              <TabsTrigger value="nutrition" className="gap-1">
+                <Apple className="h-3.5 w-3.5" />
+                {t('petNutrition.currentBadge')}
               </TabsTrigger>
               <TabsTrigger value="medications" className="gap-1">
                 <Pill className="h-3.5 w-3.5" />
@@ -608,6 +625,14 @@ const PetProfilePage: React.FC = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="consultations">
+              <PetConsultationsTimeline petId={id!} />
+            </TabsContent>
+
+            <TabsContent value="nutrition">
+              <PetNutritionPanel petId={id!} />
             </TabsContent>
 
             <TabsContent value="medications">
@@ -717,6 +742,7 @@ const PetProfilePage: React.FC = () => {
               </Card>
             </TabsContent>
             </Tabs>
+            </div>
 
             {/* Pipeline Workflow Stepper - after clinical data */}
             <ClinicalPipelineWorkflow
@@ -765,10 +791,6 @@ const PetProfilePage: React.FC = () => {
                 petId={id}
               />
             )}
-
-            {/* Longitudinal history & nutrition (always visible if data exists) */}
-            <PetConsultationsTimeline petId={id!} />
-            <PetNutritionPanel petId={id!} />
 
             {/* Longitudinal MedGraphRAG debug & evaluation */}
             <LongitudinalDebugPanel
