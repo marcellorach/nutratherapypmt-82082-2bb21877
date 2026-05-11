@@ -742,6 +742,7 @@ const PetProfilePage: React.FC = () => {
               </Card>
             </TabsContent>
             </Tabs>
+            </div>
 
             {/* Pipeline Workflow Stepper - after clinical data */}
             <ClinicalPipelineWorkflow
@@ -790,10 +791,6 @@ const PetProfilePage: React.FC = () => {
                 petId={id}
               />
             )}
-
-            {/* Longitudinal history & nutrition (always visible if data exists) */}
-            <PetConsultationsTimeline petId={id!} />
-            <PetNutritionPanel petId={id!} />
 
             {/* Longitudinal MedGraphRAG debug & evaluation */}
             <LongitudinalDebugPanel
