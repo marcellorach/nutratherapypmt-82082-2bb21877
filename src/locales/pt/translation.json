@@ -7646,5 +7646,49 @@
       "notRecognized": "Não reconhecido",
       "notRecognizedTooltip": "Esta medicação não está na Base Farmacológica. Avise um administrador para cadastrá-la."
     }
+  },
+  "petTimeline": {
+    "title": "Histórico de consultas",
+    "subtitle": "Linha do tempo das visitas. A consulta destacada é a última (peso 1.0 na inferência); as anteriores entram como CLINICAL_TRAJECTORY (peso 0.4).",
+    "loading": "Carregando histórico…",
+    "empty": "Nenhuma consulta registrada para este pet ainda.",
+    "latestBadge": "Última consulta",
+    "chiefComplaint": "Queixa",
+    "clinicalExam": "Exame clínico",
+    "assessment": "Avaliação",
+    "plan": "Conduta",
+    "diagnoses": "diagnósticos",
+    "medsAdded": "medicações",
+    "examsAdded": "exames",
+    "notesAdded": "notas",
+    "abnormalFlags": "alterações",
+    "expand": "Ver detalhes",
+    "collapse": "Recolher",
+    "helpTitle": "Como usamos o histórico",
+    "helpBody": "Cada consulta agrupa diagnósticos, medicações e exames daquela visita. A inferência do MedGraphRAG dá peso 1.0 à última consulta e 0.4 às anteriores."
+  },
+  "petNutrition": {
+    "title": "Dieta & impacto nutricional",
+    "subtitle": "Ração e perfil nutricional atual usados no bloco DIET_PROFILE da inferência.",
+    "loading": "Carregando dieta…",
+    "empty": "Nenhuma dieta registrada para este pet.",
+    "currentBadge": "Atual",
+    "previous": "Dietas anteriores",
+    "products": "Produtos",
+    "restrictions": "Restrições",
+    "day": "dia",
+    "mealsPerDay": "refeições/dia",
+    "water": "Água",
+    "helpTitle": "DIET_PROFILE",
+    "helpBody": "A dieta atual entra no prompt do MedGraphRAG como bloco DIET_PROFILE para análise de lacunas (déficit de ω3, excesso de fósforo em DRC, etc.).",
+    "dietType": {
+      "commercial_dry": "Ração seca",
+      "commercial_wet": "Ração úmida",
+      "mixed_commercial": "Mista comercial",
+      "home_cooked": "Caseira",
+      "raw_barf": "BARF/crua",
+      "prescription": "Prescrição clínica",
+      "mixed_natural_commercial": "Mista (natural+comercial)"
+    }
   }
 }
