@@ -5,13 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertTriangle, CheckCircle2, Loader2, ScaleIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { Dna } from 'lucide-react';
 import {
   analyzeNutritionGaps,
   inferLifeStage,
   type LifeStage,
   type NutrientGap,
   type PetNutritionContext,
+  type BreedPredispositionInput,
 } from '@/services/nutrition-gap-analyzer';
+import { useBreedPredispositionsForPet } from '@/hooks/useBreedPredispositionsForPet';
 
 interface Props {
   petId: string;
@@ -19,6 +22,7 @@ interface Props {
   weight_kg: number;
   age_years: number | null;
   breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+  breed_name?: string | null;
   /** Nomes (PT ou EN) das condições ativas. */
   active_conditions: string[];
   life_stage?: LifeStage;
@@ -57,25 +61,33 @@ function statusBadge(g: NutrientGap, lang: 'pt' | 'en') {
 }
 
 const NutritionGapAnalysis: React.FC<Props> = ({
-  petId, species, weight_kg, age_years, breed_size, active_conditions, life_stage,
+  petId, species, weight_kg, age_years, breed_size, breed_name, active_conditions, life_stage,
 }) => {
   const { i18n } = useTranslation();
   const lang = (i18n.language || 'pt').startsWith('en') ? 'en' : 'pt';
+
+  const { data: breedCtx } = useBreedPredispositionsForPet(breed_name ?? undefined);
+  const breed_predispositions: BreedPredispositionInput[] | undefined = breedCtx?.predispositions as any;
+  const resolved_breed_size = (breedCtx?.breed?.size_category as any) ?? breed_size ?? null;
 
   const ctx: PetNutritionContext = useMemo(() => ({
     petId,
     species,
     weight_kg,
     age_years,
-    life_stage: life_stage ?? inferLifeStage(age_years, breed_size ?? null),
-    breed_size: breed_size ?? null,
+    life_stage: life_stage ?? inferLifeStage(age_years, resolved_breed_size ?? null),
+    breed_size: resolved_breed_size,
+    breed_name: breed_name ?? null,
     active_conditions: active_conditions ?? [],
-  }), [petId, species, weight_kg, age_years, life_stage, breed_size, active_conditions]);
+    breed_predispositions,
+  }), [petId, species, weight_kg, age_years, life_stage, resolved_breed_size, breed_name, active_conditions, breed_predispositions]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['nutrition-gap', petId, ctx.life_stage, weight_kg, active_conditions.join('|')],
+    queryKey: ['nutrition-gap', petId, ctx.life_stage, weight_kg, active_conditions.join('|'), (breed_predispositions ?? []).map((p) => p.condition_name).join('|')],
     queryFn: () => analyzeNutritionGaps(ctx),
-    enabled: !!petId && weight_kg > 0,
+    // Espera o resultado do hook de predisposições antes de calcular, para evitar
+    // duas execuções (uma sem e outra com breed_predispositions).
+    enabled: !!petId && weight_kg > 0 && (!breed_name || breedCtx !== undefined),
   });
 
   if (isLoading) {
@@ -203,6 +215,98 @@ const NutritionGapAnalysis: React.FC<Props> = ({
               ))}
             </div>
           </TooltipProvider>
+        )}
+
+        {data.breed_recommendations.length > 0 && (
+          <div className="pt-3 border-t">
+            <div className="flex items-center gap-2 mb-2">
+              <Dna className="h-4 w-4 text-purple-600" />
+              <h4 className="text-sm font-semibold">
+                {lang === 'pt'
+                  ? `Sugerido pela raça${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`
+                  : `Suggested by breed${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`}
+              </h4>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              {lang === 'pt'
+                ? 'Condições com predisposição racial documentada e os nutrientes-alvo para prevenção/manejo precoce.'
+                : 'Conditions with documented breed predisposition and the target nutrients for early prevention/management.'}
+            </p>
+            <TooltipProvider>
+              <div className="space-y-3">
+                {data.breed_recommendations.map((rec) => {
+                  const condLabel = lang === 'pt' ? rec.condition_name : (rec.condition_name_en || rec.condition_name);
+                  return (
+                    <div key={condLabel} className="rounded-lg border border-purple-200/60 bg-purple-50/40 p-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="text-sm font-medium">{condLabel}</span>
+                        <Badge variant="outline" className="text-[10px]">
+                          {lang === 'pt' ? 'Risco' : 'Risk'} {rec.risk_factor.toFixed(1)}×
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] capitalize">
+                          {lang === 'pt' ? 'Evidência' : 'Evidence'}: {rec.evidence_grade}
+                        </Badge>
+                        {rec.already_active && (
+                          <Badge variant="destructive" className="text-[10px]">
+                            {lang === 'pt' ? 'Já ativa' : 'Already active'}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        {rec.gaps.map((g) => (
+                          <div key={g.key} className="flex items-start justify-between gap-3 text-xs">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium">
+                                {lang === 'pt' ? g.label_pt : g.label_en}{' '}
+                                <span className="text-muted-foreground">
+                                  ({g.unit === 'ratio' ? 'razão' : g.unit})
+                                </span>
+                              </div>
+                              <div className="text-muted-foreground">
+                                {lang === 'pt' ? 'Observado' : 'Observed'}:{' '}
+                                <span className="text-foreground font-medium">
+                                  {g.observed != null ? g.observed : '—'}
+                                </span>
+                                {' · '}
+                                {lang === 'pt' ? 'Alvo' : 'Target'}:{' '}
+                                <span className="text-foreground font-medium">
+                                  {g.target_min != null ? `≥ ${g.target_min}` : ''}
+                                  {g.target_min != null && g.target_max != null ? ' · ' : ''}
+                                  {g.target_max != null ? `≤ ${g.target_max}` : ''}
+                                </span>
+                                {g.delta_pct != null && g.status !== 'adequate' && (
+                                  <span className={`ml-2 ${g.status === 'deficient' ? 'text-destructive' : 'text-amber-700'}`}>
+                                    ({g.delta_pct > 0 ? '+' : ''}{g.delta_pct}%)
+                                  </span>
+                                )}
+                              </div>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button className="text-[11px] text-primary underline mt-0.5">
+                                    {lang === 'pt' ? 'Justificativa' : 'Rationale'}
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm text-xs">
+                                  <p>{lang === 'pt' ? g.rationale_pt : g.rationale_en}</p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {lang === 'pt' ? 'Fonte' : 'Source'}: {g.source}
+                                  </p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {lang === 'pt' ? 'Predisposição racial' : 'Breed predisposition'}: {condLabel} · {rec.risk_factor.toFixed(1)}× · {rec.evidence_grade}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div>{statusBadge(g, lang)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
+          </div>
         )}
       </CardContent>
     </Card>

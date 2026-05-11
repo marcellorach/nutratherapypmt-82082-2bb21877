@@ -27,6 +27,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type LifeStage = 'puppy' | 'adult' | 'senior';
 
+export interface BreedPredispositionInput {
+  condition_id?: string;
+  condition_name: string;
+  condition_name_en?: string | null;
+  risk_factor: number;
+  evidence_grade: 'high' | 'moderate' | 'low' | string;
+}
+
 export interface PetNutritionContext {
   petId: string;
   species: 'dog' | 'cat';
@@ -34,8 +42,11 @@ export interface PetNutritionContext {
   age_years: number | null;
   life_stage: LifeStage;
   breed_size?: 'small' | 'medium' | 'large' | 'giant' | null;
+  breed_name?: string | null;
   /** Nomes (PT ou EN) das condições ativas — usados para casar regras clínicas. */
   active_conditions: string[];
+  /** Predisposições raciais (vindas de `breed_predispositions`). Opcional. */
+  breed_predispositions?: BreedPredispositionInput[];
 }
 
 export interface NutrientTarget {
@@ -97,6 +108,21 @@ export interface NutritionAnalysisResult {
   gaps: NutrientGap[];
   /** Avisos qualitativos não numéricos (ex.: "dieta sem AAFCO statement"). */
   warnings: string[];
+  /** Recomendações preventivas baseadas em predisposições raciais. */
+  breed_recommendations: BreedNutritionRecommendation[];
+}
+
+export interface BreedNutritionRecommendation {
+  condition_name: string;
+  condition_name_en?: string | null;
+  risk_factor: number;
+  evidence_grade: string;
+  /** Já presente nas condições ativas do pet? (para evitar duplicação visual) */
+  already_active: boolean;
+  /** Alvos nutricionais recomendados para esta condição. */
+  targets: NutrientTarget[];
+  /** Gaps observados quando comparados à dieta atual (mesmo formato de `gaps`). */
+  gaps: NutrientGap[];
 }
 
 // -----------------------------------------------------------------------------
@@ -335,6 +361,82 @@ function resolveTargets(ctx: PetNutritionContext): NutrientTarget[] {
   return Array.from(byKey.values());
 }
 
+/** Retorna a regra clínica que casa com um nome de condição (PT/EN), ou null. */
+function findRuleForCondition(name: string): ConditionRule | null {
+  const lc = name.toLowerCase();
+  for (const rule of CONDITION_RULES) {
+    if (rule.match.some((m) => lc.includes(m))) return rule;
+  }
+  return null;
+}
+
+/**
+ * Para cada predisposição racial, encontra a regra clínica correspondente e
+ * deriva alvos nutricionais preventivos + gaps observados na dieta atual.
+ */
+function buildBreedRecommendations(
+  predispositions: BreedPredispositionInput[] | undefined,
+  active_conditions: string[],
+  observed: Record<string, number | null>,
+): BreedNutritionRecommendation[] {
+  if (!predispositions || predispositions.length === 0) return [];
+  const lcActive = active_conditions.map((c) => c.toLowerCase());
+  const out: BreedNutritionRecommendation[] = [];
+  for (const p of predispositions) {
+    const rule =
+      findRuleForCondition(p.condition_name) ||
+      (p.condition_name_en ? findRuleForCondition(p.condition_name_en) : null);
+    if (!rule) continue; // sem regra nutricional aplicável
+    const already_active = rule.match.some((m) => lcActive.some((c) => c.includes(m)));
+    const targets = rule.override.map((t) => ({ ...t }));
+    const gaps: NutrientGap[] = targets.map((t) => {
+      const obs = observed[t.key] ?? null;
+      let status: GapStatus = 'unknown';
+      let delta_pct: number | undefined;
+      if (obs != null) {
+        if (t.min != null && obs < t.min) {
+          status = 'deficient';
+          delta_pct = Number((((obs - t.min) / t.min) * 100).toFixed(1));
+        } else if (t.max != null && obs > t.max) {
+          status = 'excess';
+          delta_pct = Number((((obs - t.max) / t.max) * 100).toFixed(1));
+        } else {
+          status = 'adequate';
+          delta_pct = 0;
+        }
+      }
+      return {
+        key: t.key,
+        label_pt: t.label_pt,
+        label_en: t.label_en,
+        unit: t.unit,
+        observed: obs,
+        target_min: t.min,
+        target_max: t.max,
+        status,
+        delta_pct,
+        rationale_pt: t.rationale_pt,
+        rationale_en: t.rationale_en,
+        source: t.source,
+      };
+    });
+    out.push({
+      condition_name: p.condition_name,
+      condition_name_en: p.condition_name_en,
+      risk_factor: p.risk_factor,
+      evidence_grade: p.evidence_grade,
+      already_active,
+      targets,
+      gaps,
+    });
+  }
+  // Ordena por: déficit > sem dado > adequado, e dentro disso por risk_factor desc
+  const score = (r: BreedNutritionRecommendation) =>
+    r.gaps.some((g) => g.status === 'deficient' || g.status === 'excess') ? 2 :
+    r.gaps.some((g) => g.status === 'unknown') ? 1 : 0;
+  return out.sort((a, b) => score(b) - score(a) || b.risk_factor - a.risk_factor);
+}
+
 // -----------------------------------------------------------------------------
 // 5. Conversão as-fed → DM. moisture_pct opcional; padrão 10% (kibble seco).
 // -----------------------------------------------------------------------------
@@ -375,6 +477,7 @@ export async function analyzeNutritionGaps(ctx: PetNutritionContext): Promise<Nu
       targets,
       gaps: [],
       warnings: ['no_current_nutrition'],
+      breed_recommendations: buildBreedRecommendations(ctx.breed_predispositions, ctx.active_conditions, {}),
     };
   }
 
@@ -506,6 +609,7 @@ export async function analyzeNutritionGaps(ctx: PetNutritionContext): Promise<Nu
     targets,
     gaps,
     warnings,
+    breed_recommendations: buildBreedRecommendations(ctx.breed_predispositions, ctx.active_conditions, observed),
   };
 }
 
