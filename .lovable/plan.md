@@ -1,78 +1,105 @@
-## Objetivo
+## Escopo (5 itens confirmados)
 
-Refinar a "Análise de déficit nutricional" do perfil do pet em três eixos: (a) só rodar análise de gaps quando a ração estiver no banco, (b) deixar explícito quando uma sugestão é **preventiva** vs. **terapêutica/curativa**, (c) restringir o painel "Revisão técnica" a administradores e mantê-lo minimizado com tooltip (?).
+### a) Condições de gerociência ao final, com label de origem
+**Onde:** lista de condições do pet (`PetProfilePage.tsx` → seção "Condições" / `ConditionInsightCard`).
 
----
+- Criar helper `src/services/condition-classification.ts` com whitelist de condições gerociência: `inflammaging`, `oxidative stress`, `cellular senescence`, `mitochondrial dysfunction`, `sarcopenia`, `cognitive dysfunction syndrome`, `immunosenescence`, `telomere attrition`, etc. (bilíngue PT/EN).
+- Ordenação da lista: primeiro condições clínicas tradicionais (mantendo ordem atual: ativas → monitoramento → resolvidas), depois bloco "**Atenção geriátrica / gerociência**" com subtítulo separador.
+- Para cada condição gerociência, sub-label de origem derivada da consulta vinculada (`consultation_id` → `chief_complaint`/`assessment` ou `exam`):
+  - `Atenção geriátrica sugerida por exames` (origin = `exam_suggested`)
+  - `Atenção geriátrica sugerida pelo veterinário (consulta de DD/MM/AAAA)` (origin = `vet_diagnosis`, mostrando data da consulta)
+- Manter badges atuais (severidade/status), mas o badge "Diagnóstico Veterinário"/"Sugerida por Exames" troca para o sub-label acima quando for condição de gerociência.
 
-## a) Análise nutricional condicional ao catálogo
+### b) Remover apenas a **aba** "Notas Clínicas" (manter o card-contador)
+**Arquivo:** `src/pages/veterinario/PetProfilePage.tsx`.
+- Remover `<TabsTrigger value="notes">` e `<TabsContent value="notes">`.
+- Card "0 Notas Clínicas" do topo permanece (só o contador).
+- Notas continuam visíveis dentro de cada consulta no histórico.
 
-**Comportamento atual** (`NutritionGapAnalysis.tsx` + `nutrition-gap-analyzer.ts`):
-- Se a ração não está vinculada a `pet_food_nutrition`, mostra um aviso amarelo genérico ("noLinked"), mas ainda calcula gaps com defaults e exibe a seção raça.
+### c) "Queixa" → "Motivo"
+- `chief_complaint` continua sendo a coluna do banco (sem migração).
+- Trocar labels nas chaves i18n existentes:
+  - `petTimeline.chiefComplaint` PT: "Motivo" / EN: "Reason"
+  - `petRegistration.form.historicalConsultations.chiefComplaint` PT: "Motivo" / EN: "Reason"
+- Bumpar `I18N_VERSION`.
 
-**Novo comportamento**:
-1. Quando `data.has_data === false` (sem composição da ração no banco), **não** exibir a tabela de gaps nem a seção "Sugerido pela raça (preventivo)". Substituir tudo por um card único:
-   - Texto: *"A análise de complementação nutricional não foi concluída porque esta ração não está no nosso banco de dados."*
-   - Mostrar marca/produto observado (vindos de `pet_nutrition_items.raw_brand_text/raw_product_text`).
-   - Dois botões **visíveis apenas para admin** (`hasRole('admin')` via `useAuth()`):
-     - **"Procurar"** → invoca `enrich-pet-food-product` com `{ brand_name, product_name, species }`. Mostra spinner.
-     - Se a edge devolver dados com `confidence ≥ 0.4` → habilita botão **"Incorporar"** que persiste em `pet_food_products` + `pet_food_nutrition` (a edge já faz upsert quando `product_id` é passado; aqui criamos primeiro o produto e re-invocamos com o id, ou estendemos a edge para aceitar brand+product e persistir).
-     - Após "Incorporar" com sucesso → invalidar query `['nutrition-gap', petId, ...]` e a análise roda normalmente.
-   - Para vet/tutor não-admin: apenas o texto informativo, sem botões.
-2. Quando a ração **existe** no banco: comportamento atual de gaps preservado.
+### d) "Exame Clínico" → "Exame Físico" estruturado (campos)
+**Schema:** adicionar coluna `physical_exam JSONB` em `pet_consultations` (mantém `clinical_exam TEXT` por compatibilidade — leitura cai em fallback).
 
-## b) Linguagem preventivo vs. terapêutico
+Forma do JSON:
+```json
+{
+  "general": {
+    "posture": "...",
+    "skin_lesions": "...",
+    "behavior": "...",
+    "body_condition_score": 5
+  },
+  "specific": {
+    "physiological": { "hr_bpm": 90, "rr_rpm": 22, "temp_c": 38.6, "mucous_membranes": "..." },
+    "orthopedic": "...",
+    "cardiovascular": "...",
+    "neurological": "...",
+    "abdominal": "..."
+  }
+}
+```
 
-Atualmente a seção "Sugerido pela raça (Beagle)" mostra "Diabetes Mellitus Tipo 2 — Risco 2.0×" como se fosse diagnóstico. Não há distinção clara entre prevenção e tratamento.
+UI:
+- `PetConsultationsTimeline.tsx`: substituir bloco `clinical_exam` por componente novo `PhysicalExamBlock` que renderiza, em duas mini-tabelas/seções colapsáveis ("Geral" e "Específico"), só os campos preenchidos. Fallback: se `physical_exam` for null e `clinical_exam` tiver texto, mostra texto cru sob título "Exame físico (texto livre)".
+- `HistoricalConsultationsSection.tsx` (form de cadastro): novo bloco com inputs para Geral (3 campos + ECC) e Específico (FC/FR/TR/mucosa + 4 textareas curtas).
+- Demos (`GenerateSamplePetsButton`) e extração (`extract-pet-clinical-data`) populam o JSON.
 
-**Mudanças**:
-1. **Terminologia padrão** (memorizar em `mem://principles/preventive-vs-therapeutic-nomenclature.md`):
-   - **Preventivo / profilático** — pet sem a condição, ação para reduzir risco (predisposição racial, marcador subclínico).
-   - **Terapêutico / curativo / de manejo** — pet já diagnosticado com a condição.
-   - Termos veterinários aceitos: *profilaxia nutricional*, *manejo dietético*, *dieta terapêutica*.
-2. **UI da seção raça** (`NutritionGapAnalysis.tsx`):
-   - Renomear título: `"Sugerido pela raça"` → `"Profilaxia nutricional sugerida pela raça"` / EN `"Breed-based nutritional prophylaxis"`.
-   - Subtítulo explícito: *"Estas sugestões são preventivas. O pet não tem a condição listada — apenas predisposição racial documentada."*
-   - Substituir o badge `Risco 2.0×` por dois badges combinados: `Preventivo` (cor neutra/azul) + `Risco 2.0×`.
-   - Quando `rec.already_active === true` (pet já tem a condição) → trocar badge `Preventivo` por `Manejo terapêutico` (âmbar/destrutivo) e ajustar copy do bloco.
-3. **Catálogo de nutracêuticos / drogas / rações** (`hybrid-recommendation` edge function): adicionar ao prompt instrução para classificar cada item como `intent: "preventive" | "therapeutic" | "supportive"` e exibir esse rótulo em todos os cards de recomendação (será incremento futuro — esta plan cobre apenas a flag no schema de saída + leitura no `VetRecommendationPanel`).
-4. **i18n**: adicionar chaves `nutritionGap.breed.preventive`, `.therapeutic`, `.disclaimer`, etc., em PT e EN. Bumpar `I18N_VERSION`.
+### e) Reordenar conteúdo da consulta + Exames com referências + Tags IA
+**Nova ordem dentro de cada card de consulta** (`PetConsultationsTimeline.tsx`):
+1. Cabeçalho (data/vet)
+2. **Motivo**
+3. **Exame físico** (estruturado, item d)
+4. **Exames complementares** — tabela com colunas: Exame · Resultado · **Faixa de referência canina** · Status (normal/alterado).
+   - Lê de `pet_exams.results` (já é JSON) e cruza com `lab-references-canine` (já existe em `src/services/lab-references` ou similar — checar `automated-lab-result-interpretation-system`).
+5. **Avaliação** (`assessment`) — agora por último, em destaque visual (border-l accent), aceita texto mais longo (textarea cresce até 6 linhas no form).
+6. **Tags representativas** no rodapé: chips clicáveis (read-only) com até 8 tags (ex.: `ortopédico`, `dor leve`, `atividade intensa`, `inflamação subclínica`).
 
-## c) Revisão técnica restrita a admin + tooltip
+**Geração das tags (IA):**
+- Estender `extract-pet-clinical-data` (Edge Function) com novo campo `tags: string[]` no JSON de saída. Prompt instrui Gemini a emitir 3-8 tags curtas (snake/kebab clínico, PT) cobrindo: sistema acometido, severidade, fator desencadeante, hipótese.
+- Persistir em nova coluna `tags TEXT[]` em `pet_consultations` (default `'{}'`).
+- Para consultas demo: gerar tags determinísticas no `GenerateSamplePetsButton`.
+- Para consultas existentes sem tags: ficam vazias (sem mock retroativo).
 
-Atualmente `TechnicalReviewSection` (que envolve `LongitudinalDebugPanel` em `PetProfilePage.tsx`) aparece para todos os usuários, colapsada.
+## Mudanças técnicas
 
-**Mudanças**:
-1. Em `PetProfilePage.tsx` envolver o bloco com `{hasRole('admin') && ...}` para ocultar totalmente para vet/tutor.
-2. No componente `TechnicalReviewSection.tsx`: adicionar um ícone `(?)` ao lado do título (ou substituir o tooltip do badge por um `HelpHint`/`?` separado clicável), garantindo que o tooltip continue explicando "Disponível para validação interna. Não fará parte da versão operacional."
-3. Garantir `defaultOpen={false}` (já é) e revisar todos os usos para confirmar que estão minimizados.
+**Migration (Supabase):**
+```sql
+ALTER TABLE public.pet_consultations
+  ADD COLUMN IF NOT EXISTS physical_exam jsonb,
+  ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}';
+```
+Sem mudanças em RLS (já cobertas pelas policies existentes).
 
----
-
-## Detalhes técnicos
-
-**Arquivos a editar**
-- `src/components/pet/NutritionGapAnalysis.tsx` — fluxo "sem ração" + botões admin + textos preventivo.
-- `src/services/nutrition-gap-analyzer.ts` — quando `has_data=false`, retornar `gaps: []` e `breed_recommendations: []` (ou flag `skip_render`) para forçar UI vazia.
-- `supabase/functions/enrich-pet-food-product/index.ts` — aceitar payload `{ brand_name, product_name, species, persist: true }` e, se `persist`, criar `pet_food_products` + `pet_food_nutrition` e devolver `product_id`. Vincular ao `pet_nutrition_item` correspondente.
-- Novo hook `src/hooks/usePetFoodEnrichment.ts` — wrapper React Query/mutation para os botões "Procurar" e "Incorporar".
-- `src/components/ui/technical-review-section.tsx` — botão `(?)` extra ao lado do título.
-- `src/pages/veterinario/PetProfilePage.tsx` — gate `hasRole('admin')` no bloco de revisão técnica.
-- `src/locales/pt/translation.json` + `src/locales/en/translation.json` — novas chaves; bump `src/i18n.ts` `I18N_VERSION`.
-- `.lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md` — nova memória.
+**Arquivos a editar:**
+- `src/pages/veterinario/PetProfilePage.tsx` — remove aba notes; ordenação de condições com bloco gerociência.
+- `src/components/pet/PetConsultationsTimeline.tsx` — reordenação Motivo→Exame físico→Exames→Avaliação→Tags; render `PhysicalExamBlock`; tabela exames com referências.
+- `src/components/pet/HistoricalConsultationsSection.tsx` — campos novos do exame físico, label "Motivo", textarea avaliação maior.
+- `src/components/pet/ConditionInsightCard.tsx` — sub-label "Atenção geriátrica…" para condições da whitelist.
+- **Novos:**
+  - `src/services/condition-classification.ts` — whitelist gerociência + `isGeroscienceCondition()` + `formatGeroscienceOriginLabel()`.
+  - `src/components/pet/PhysicalExamBlock.tsx` — render estruturado.
+  - `src/components/pet/ExamResultsWithReferences.tsx` — tabela exames + faixa canina + status.
+- `src/components/pet/GenerateSamplePetsButton.tsx` — popular `physical_exam` + `tags` nos demos.
+- `supabase/functions/extract-pet-clinical-data/index.ts` — novo schema `physical_exam` + `tags` no JSON, prompt atualizado.
+- `src/locales/pt|en/translation.json` + `src/i18n.ts` — chaves novas (`petTimeline.reason`, `physicalExam.*`, `examResults.*`, `consultationTags.title`, `geroscienceAttention.bySuggestionExams|VetVisit`), bump `I18N_VERSION`.
 - `CHANGELOG.md` (`[Unreleased]`) + `npm run sync:changelog`.
+- Memória nova: `mem://principles/geroscience-condition-grouping.md` documentando whitelist e label de origem.
 
-**Sem mudanças de schema de banco** nesta entrega (a edge já tem permissão de service role para upsert em `pet_food_products` / `pet_food_nutrition`).
+**Sem mudanças** em: hybrid-recommendation, NutritionGapAnalysis, KG, payment.
 
-**Validação**
-- Pet com ração no catálogo → fluxo idêntico ao atual.
-- Pet com ração não cadastrada, login admin → vê texto + botões; "Procurar" preenche, "Incorporar" persiste e a análise roda.
-- Pet com ração não cadastrada, login vet → vê apenas o texto informativo.
-- Seção "Revisão técnica" some para vet/tutor; admin a vê colapsada com `(?)`.
-
----
+## Validação
+- Pet com Inflammaging + Osteoartrite → OA primeiro, Inflammaging no bloco "Atenção geriátrica" com data da consulta de origem.
+- Aba "Notas Clínicas" some; card-contador permanece.
+- Consulta nova: vet preenche FC/FR/TR/postura etc.; render mostra duas seções; avaliação por último; tags geradas pela IA aparecem ao salvar via extract-pet-clinical-data.
+- Consulta antiga (sem `physical_exam`): cai no fallback texto livre, sem quebra.
 
 ## Fora de escopo
-
-- Reescrever todo o catálogo de nutracêuticos com flag `intent` (apenas leitura/preparação para futura iteração).
-- Mudar o pipeline VetGraphRAG.
-- Tradução automática de produtos novos para EN além do que a edge já faz.
+- Refatorar nutricional / VetGraphRAG / hybrid-recommendation.
+- Migrar texto livre legado de `clinical_exam` para JSON estruturado (fica como follow-up).
+- Editor inline de tags (somente leitura nesta entrega).
