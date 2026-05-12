@@ -603,10 +603,6 @@ const PetProfilePage: React.FC = () => {
                 <TestTube className="h-3.5 w-3.5" />
                 {t('petRegistration.exams.title')}
               </TabsTrigger>
-              <TabsTrigger value="notes" className="gap-1">
-                <FileText className="h-3.5 w-3.5" />
-                {t('petRegistration.profile.clinicalNotes')}
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="conditions">
@@ -726,36 +722,6 @@ const PetProfilePage: React.FC = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="notes">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">{t('petRegistration.profile.clinicalHistory')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {clinicalNotes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
-                      {t('petRegistration.profile.noNotes')}
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {clinicalNotes.map((n: any) => (
-                        <div key={n.id} className="border-b pb-3 last:border-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">
-                              {n.note_type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(n.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-sm">{n.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
             </Tabs>
             </div>
 
