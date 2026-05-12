@@ -1,13 +1,13 @@
 # Project context briefing (auto)
-Generated: 2026-05-12T04:37:34.761Z
+Generated: 2026-05-12T16:27:01.659Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.69.0
+## Latest i18n version: 1.70.0
 
 ## Changes by area (last 14 days)
+- **vet-ui**: 11
 - **admin**: 11
-- **vet-ui**: 10
 - **tutor-ui**: 7
 - **meta**: 7
 - **clinical-pipeline**: 6
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-12 · [vet-ui] ADDED — Análise nutricional condicional ao catálogo + nomenclatura preventivo/terapêutico + revisão técnica admin-only
+- `NutritionGapAnalysis` agora suprime a tabela de gaps e a seção "Sugerido pela raça" quando a ração não está no catálogo (`pet_food_nutrition` ausente). Em vez disso, exibe um card âmbar único: "A análise de complementação nutricional não foi concluída porque esta ração ainda não está no nosso banco de dados."
+- Botões Procurar e Incorporar (restritos a admin via `useAuth().hasRole('admin')`) chamam a edge `enrich-pet-food-product`. "Incorporar" só é habilitado quando a confiança da extração ≥ 0.4. Sucesso invalida `['nutrition-gap', petId]` e a análise re-roda automaticamente.
+- Edge `enrich-pet-food-product` extendida com `persist: true` + `link_to_item_id?`: cria/recupera `pet_food_brands` e `pet_food_products` (snake-insensitive), insere a composição em `pet_food_nutrition` e vincula o `pet_nutrition_items.product_id` em uma única chamada (service role).
+_files: .lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md, src/components/pet/NutritionGapAnalysis.tsx, src/components/ui/technical-review-section.tsx, src/hooks/usePetFoodEnrichment.ts…_
+
 ### 2026-05-12 · [clinical-pipeline] ADDED — Camada de gerociência separada da voz do vet + marcação "revisão técnica" (Missões B & C)
 - Princípio formalizado: vet escreve em linguagem clínica tradicional (OA, ALT, Carprofen). Gerociência (senescência, inflammaging, NAD+, autofagia, hallmarks, senolíticos) é responsabilidade do sistema e nunca atribuída ao vet.
 - Memória `.lovable/memory/principles/clinical-language-vs-geroscience-layer.md` documentando o contrato e a obrigação de prefixo "Inferência de gerociência — gerada pelo sistema".
@@ -71,12 +77,6 @@ _files: scripts/check-translation-duplicates.mjs, src/locales/pt/translation.jso
 - Auditoria v3 convertida para HTML navegável em `public/audits/v3/index.html` (com os 9 infográficos preservados em `public/audits/v3/media/`) e PDF/DOCX para download direto
 - Botão "Fazer nova auditoria" abre dialog com escopo editável (pré-preenchido) e versão do sistema auto-detectada — registra o pedido em `audit_requests` para o agente Lovable gerar na próxima sessão dedicada
 _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx_
-
-### 2026-05-09 · [admin] ADDED — Base Farmacológica (Fase 1) integrada ao perfil do pet
-- Novo `DrugLookupBadge` plugado na lista de medicamentos em `PetProfilePage.tsx` — resolve marca comercial (ex.: "Previcox") para princípio ativo + classe (ex.: `= firocoxibe · AINE COXIB`), com tooltip de mecanismo; exibe alerta "Não reconhecido" quando a medicação não está no catálogo
-- Chaves i18n formais adicionadas em `pharmacology.lookup.*` e `admin.pharmacology.*` (PT/EN), substituindo fallbacks inline
-- I18N_VERSION incrementado para 1.63.0
-_files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DrugLookupBadge.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

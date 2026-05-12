@@ -1,49 +1,78 @@
-# Plano final aprovado
+## Objetivo
 
-## Missão A — Catálogo + demos religados
+Refinar a "Análise de déficit nutricional" do perfil do pet em três eixos: (a) só rodar análise de gaps quando a ração estiver no banco, (b) deixar explícito quando uma sugestão é **preventiva** vs. **terapêutica/curativa**, (c) restringir o painel "Revisão técnica" a administradores e mantê-lo minimizado com tooltip (?).
 
-**Localização do catálogo (resposta direta):**
-- DB: tabelas `pet_food_products`, `pet_food_brands`, `pet_food_nutrition`
-- UI admin: `src/components/administrador/pet-food/PetFoodCatalogTab.tsx`
-- Seed atual: migration `20260511181813_*.sql` (20 SKUs)
+---
 
-**Passos:**
-1. Pesquisar fichas técnicas oficiais (sites dos fabricantes) para esta lista de candidatos: Pro Plan Adult Large Breed, RC Maxi Adult 5+, Hill's Science Diet 7+ Active Longevity, Premier Sêniores Médias/Grandes, Farmina N&D Pumpkin Lamb Adult Medium/Maxi, Biofresh Adultos Médias/Grandes.
-2. Para cada SKU **só adicionar se houver dados nutricionais públicos verificáveis** (proteína, gordura, kcal/100g, Ca, P, ômega-3, fibra). Sem ficha → pula.
-3. Migration única inserindo as marcas faltantes + produtos + perfis em `pet_food_nutrition`, com `source_url` apontando para a página oficial.
-4. Migration de fix-up nos pets demo (`is_demo = true`): substituir itens órfãos em `pet_nutrition_items` (sem `product_id`) por `product_id` do catálogo coerente com porte/idade/condição (ex.: Rex → Pro Plan Adult Large Breed se entrar; senão → RC Maxi Adult).
-5. Atualizar gerador de pets demo (`src/utils/mockClinicalData.ts` + writer de nutrição) para sempre gravar `product_id` do catálogo, nunca texto livre.
+## a) Análise nutricional condicional ao catálogo
 
-**Validação:** card "Análise Nutricional" do Rex calcula sem warning de "linkar ao catálogo".
+**Comportamento atual** (`NutritionGapAnalysis.tsx` + `nutrition-gap-analyzer.ts`):
+- Se a ração não está vinculada a `pet_food_nutrition`, mostra um aviso amarelo genérico ("noLinked"), mas ainda calcula gaps com defaults e exibe a seção raça.
 
-## Missão B — Linguagem clínica vs. camada de gerociência
+**Novo comportamento**:
+1. Quando `data.has_data === false` (sem composição da ração no banco), **não** exibir a tabela de gaps nem a seção "Sugerido pela raça (preventivo)". Substituir tudo por um card único:
+   - Texto: *"A análise de complementação nutricional não foi concluída porque esta ração não está no nosso banco de dados."*
+   - Mostrar marca/produto observado (vindos de `pet_nutrition_items.raw_brand_text/raw_product_text`).
+   - Dois botões **visíveis apenas para admin** (`hasRole('admin')` via `useAuth()`):
+     - **"Procurar"** → invoca `enrich-pet-food-product` com `{ brand_name, product_name, species }`. Mostra spinner.
+     - Se a edge devolver dados com `confidence ≥ 0.4` → habilita botão **"Incorporar"** que persiste em `pet_food_products` + `pet_food_nutrition` (a edge já faz upsert quando `product_id` é passado; aqui criamos primeiro o produto e re-invocamos com o id, ou estendemos a edge para aceitar brand+product e persistir).
+     - Após "Incorporar" com sucesso → invalidar query `['nutrition-gap', petId, ...]` e a análise roda normalmente.
+   - Para vet/tutor não-admin: apenas o texto informativo, sem botões.
+2. Quando a ração **existe** no banco: comportamento atual de gaps preservado.
 
-**Princípio (vai pra memória + Core):**
-> Veterinário descreve achados em linguagem **clínica tradicional** (OA moderada, ALT elevada, perda de massa muscular). A **camada de gerociência (senescência, inflammaging, mitocondrial, NAD+, autofagia, hallmarks of aging) é responsabilidade do nosso sistema** e nunca é atribuída ao vet em consultas/anamneses/condutas demo. As recomendações do sistema **devem** explicitar a ponte gerociência → ação, sob badge "Inferência de gerociência — gerada pelo sistema".
+## b) Linguagem preventivo vs. terapêutico
 
-**Aplicação:**
-1. Criar `mem://principles/clinical-language-vs-geroscience-layer.md` e referenciar no Core do `mem://index.md`.
-2. Reescrever campos `assessment` e `conduct` das consultas demo existentes (capturas anexas: Rex, Bernardo): manter diagnóstico/conduta de fundo, remover jargão senolítico/senescente da boca do vet.
-3. Atualizar prompts das edge functions `hybrid-recommendation-service`, `condition-insights`, `extract-pet-clinical-data`:
-   - Input do vet vem em linguagem tradicional.
-   - Output **deve** mapear achados clínicos → hallmark/pathway de gerociência → composto, rotulado como inferência do sistema.
-4. UI: badge "Inferência de gerociência (gerada pelo sistema)" nas seções de inferência IA, separando visualmente da nota clínica do vet.
-5. CHANGELOG.md + `docs/STANFORD_DEMO.md`: registrar como decisão de design.
+Atualmente a seção "Sugerido pela raça (Beagle)" mostra "Diabetes Mellitus Tipo 2 — Risco 2.0×" como se fosse diagnóstico. Não há distinção clara entre prevenção e tratamento.
 
-## Missão C — Marcação visual "revisão técnica" (cor: âmbar)
+**Mudanças**:
+1. **Terminologia padrão** (memorizar em `mem://principles/preventive-vs-therapeutic-nomenclature.md`):
+   - **Preventivo / profilático** — pet sem a condição, ação para reduzir risco (predisposição racial, marcador subclínico).
+   - **Terapêutico / curativo / de manejo** — pet já diagnosticado com a condição.
+   - Termos veterinários aceitos: *profilaxia nutricional*, *manejo dietético*, *dieta terapêutica*.
+2. **UI da seção raça** (`NutritionGapAnalysis.tsx`):
+   - Renomear título: `"Sugerido pela raça"` → `"Profilaxia nutricional sugerida pela raça"` / EN `"Breed-based nutritional prophylaxis"`.
+   - Subtítulo explícito: *"Estas sugestões são preventivas. O pet não tem a condição listada — apenas predisposição racial documentada."*
+   - Substituir o badge `Risco 2.0×` por dois badges combinados: `Preventivo` (cor neutra/azul) + `Risco 2.0×`.
+   - Quando `rec.already_active === true` (pet já tem a condição) → trocar badge `Preventivo` por `Manejo terapêutico` (âmbar/destrutivo) e ajustar copy do bloco.
+3. **Catálogo de nutracêuticos / drogas / rações** (`hybrid-recommendation` edge function): adicionar ao prompt instrução para classificar cada item como `intent: "preventive" | "therapeutic" | "supportive"` e exibir esse rótulo em todos os cards de recomendação (será incremento futuro — esta plan cobre apenas a flag no schema de saída + leitura no `VetRecommendationPanel`).
+4. **i18n**: adicionar chaves `nutritionGap.breed.preventive`, `.therapeutic`, `.disclaimer`, etc., em PT e EN. Bumpar `I18N_VERSION`.
 
-1. Novo componente `src/components/ui/technical-review-section.tsx`:
-   - Wrapper colapsável (default fechado, só título + chevron).
-   - Badge âmbar `🔧 Revisão técnica` (tokens: `bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30`).
-   - Tooltip: *"Disponível para validação interna. Não fará parte da versão operacional."*
-2. Aplicar imediatamente em:
-   - `LongitudinalDebugPanel` (Depuração do MedGraphRAG) — colapsado por padrão.
-   - Outros 2–3 painéis de QA equivalentes (auditoria de relações, auditoria de ontologia, painel de debug de KG).
-3. Adicionar entrada no CHANGELOG e bump `I18N_VERSION` → `1.69.0`.
+## c) Revisão técnica restrita a admin + tooltip
 
-## Ordem de execução (cada passo testado)
+Atualmente `TechnicalReviewSection` (que envolve `LongitudinalDebugPanel` em `PetProfilePage.tsx`) aparece para todos os usuários, colapsada.
 
-1. Catálogo: pesquisa de fichas → migration de SKUs novos → migration de fix-up dos demos → testar Rex.
-2. Memória + reescrita de consultas demo + ajuste de prompts.
-3. `TechnicalReviewSection` + aplicação no painel longitudinal e correlatos.
-4. Bump i18n, sync changelog, validação visual final.
+**Mudanças**:
+1. Em `PetProfilePage.tsx` envolver o bloco com `{hasRole('admin') && ...}` para ocultar totalmente para vet/tutor.
+2. No componente `TechnicalReviewSection.tsx`: adicionar um ícone `(?)` ao lado do título (ou substituir o tooltip do badge por um `HelpHint`/`?` separado clicável), garantindo que o tooltip continue explicando "Disponível para validação interna. Não fará parte da versão operacional."
+3. Garantir `defaultOpen={false}` (já é) e revisar todos os usos para confirmar que estão minimizados.
+
+---
+
+## Detalhes técnicos
+
+**Arquivos a editar**
+- `src/components/pet/NutritionGapAnalysis.tsx` — fluxo "sem ração" + botões admin + textos preventivo.
+- `src/services/nutrition-gap-analyzer.ts` — quando `has_data=false`, retornar `gaps: []` e `breed_recommendations: []` (ou flag `skip_render`) para forçar UI vazia.
+- `supabase/functions/enrich-pet-food-product/index.ts` — aceitar payload `{ brand_name, product_name, species, persist: true }` e, se `persist`, criar `pet_food_products` + `pet_food_nutrition` e devolver `product_id`. Vincular ao `pet_nutrition_item` correspondente.
+- Novo hook `src/hooks/usePetFoodEnrichment.ts` — wrapper React Query/mutation para os botões "Procurar" e "Incorporar".
+- `src/components/ui/technical-review-section.tsx` — botão `(?)` extra ao lado do título.
+- `src/pages/veterinario/PetProfilePage.tsx` — gate `hasRole('admin')` no bloco de revisão técnica.
+- `src/locales/pt/translation.json` + `src/locales/en/translation.json` — novas chaves; bump `src/i18n.ts` `I18N_VERSION`.
+- `.lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md` — nova memória.
+- `CHANGELOG.md` (`[Unreleased]`) + `npm run sync:changelog`.
+
+**Sem mudanças de schema de banco** nesta entrega (a edge já tem permissão de service role para upsert em `pet_food_products` / `pet_food_nutrition`).
+
+**Validação**
+- Pet com ração no catálogo → fluxo idêntico ao atual.
+- Pet com ração não cadastrada, login admin → vê texto + botões; "Procurar" preenche, "Incorporar" persiste e a análise roda.
+- Pet com ração não cadastrada, login vet → vê apenas o texto informativo.
+- Seção "Revisão técnica" some para vet/tutor; admin a vê colapsada com `(?)`.
+
+---
+
+## Fora de escopo
+
+- Reescrever todo o catálogo de nutracêuticos com flag `intent` (apenas leitura/preparação para futura iteração).
+- Mudar o pipeline VetGraphRAG.
+- Tradução automática de produtos novos para EN além do que a edge já faz.

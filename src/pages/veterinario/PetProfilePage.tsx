@@ -26,6 +26,7 @@ import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
 import LongitudinalDebugPanel from '@/components/pet/LongitudinalDebugPanel';
 import { TechnicalReviewSection } from '@/components/ui/technical-review-section';
+import { useAuth } from '@/contexts/AuthContext';
 import PetConsultationsTimeline from '@/components/pet/PetConsultationsTimeline';
 import PetNutritionPanel from '@/components/pet/PetNutritionPanel';
 import HelpHint from '@/components/ui/help-hint';
@@ -55,6 +56,8 @@ const PetProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('admin');
   const { data, isLoading, error } = usePetProfileDetail(id);
   const conditionInsights = useConditionInsights(data?.conditions);
   const consultationsQ = usePetConsultations(id);
@@ -804,19 +807,21 @@ const PetProfilePage: React.FC = () => {
               />
             )}
 
-            {/* Longitudinal MedGraphRAG debug & evaluation — interno */}
-            <TechnicalReviewSection title="Depuração do MedGraphRAG longitudinal">
-              <LongitudinalDebugPanel
-                petId={id!}
-                petProfile={{
-                  species: profile.species,
-                  breed: profile.breed,
-                  age: profile.age_years,
-                  weight: profile.weight_kg,
-                }}
-                primaryCondition={conditions?.[0]?.condition_name}
-              />
-            </TechnicalReviewSection>
+            {/* Longitudinal MedGraphRAG debug & evaluation — interno (admin-only) */}
+            {isAdmin && (
+              <TechnicalReviewSection title="Depuração do MedGraphRAG longitudinal">
+                <LongitudinalDebugPanel
+                  petId={id!}
+                  petProfile={{
+                    species: profile.species,
+                    breed: profile.breed,
+                    age: profile.age_years,
+                    weight: profile.weight_kg,
+                  }}
+                  primaryCondition={conditions?.[0]?.condition_name}
+                />
+              </TechnicalReviewSection>
+            )}
 
             {/* Analysis by Condition - ComorbidityMap + full ConditionInsightCards */}
             {recommendationCompounds && (

@@ -42,11 +42,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const body = await req.json();
-    const { product_id } = body;
+    let { product_id } = body;
     let brand_name = body.brand_name;
     let product_name = body.product_name;
     let species = body.species;
     let life_stage = body.life_stage;
+    const persist: boolean = body.persist === true;
+    const link_to_item_id: string | undefined = body.link_to_item_id;
 
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
 
@@ -67,6 +69,52 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "brand_name and product_name (or product_id) required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Persist=true → garante brand + product no catálogo antes de chamar a IA,
+    // de modo que a inserção em pet_food_nutrition (mais abaixo) seja vinculada
+    // ao produto recém-criado. Útil para o botão "Incorporar" no perfil do pet.
+    if (persist && !product_id) {
+      // brand
+      const { data: existingBrand } = await sb
+        .from("pet_food_brands")
+        .select("id")
+        .ilike("name", brand_name)
+        .maybeSingle();
+      let brand_id = existingBrand?.id as string | undefined;
+      if (!brand_id) {
+        const { data: newBrand, error: be } = await sb
+          .from("pet_food_brands")
+          .insert({ name: brand_name })
+          .select("id")
+          .single();
+        if (be) throw new Error(`brand insert: ${be.message}`);
+        brand_id = newBrand!.id;
+      }
+      // product (match by brand + name, case-insensitive)
+      const { data: existingProd } = await sb
+        .from("pet_food_products")
+        .select("id")
+        .eq("brand_id", brand_id)
+        .ilike("name", product_name)
+        .maybeSingle();
+      if (existingProd?.id) {
+        product_id = existingProd.id;
+      } else {
+        const { data: newProd, error: pe } = await sb
+          .from("pet_food_products")
+          .insert({
+            brand_id,
+            name: product_name,
+            species: species || null,
+            life_stage: life_stage || null,
+            submission_status: "approved",
+          })
+          .select("id")
+          .single();
+        if (pe) throw new Error(`product insert: ${pe.message}`);
+        product_id = newProd!.id;
+      }
     }
 
     const userPrompt = `Marca: ${brand_name}\nProduto: ${product_name}` +
@@ -166,7 +214,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, parsed }), {
+    // Vincula o item de dieta ao produto recém-criado (somente quando persist).
+    if (persist && product_id && link_to_item_id) {
+      await sb
+        .from("pet_nutrition_items")
+        .update({ product_id })
+        .eq("id", link_to_item_id);
+    }
+
+    return new Response(JSON.stringify({ ok: true, parsed, product_id: product_id ?? null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
