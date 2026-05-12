@@ -5586,9 +5586,9 @@
         "date": "Date",
         "weight": "Weight (kg)",
         "bcs": "BCS (1-9)",
-        "chiefComplaint": "Chief complaint",
-        "assessment": "Findings / Diagnosis",
-        "plan": "Plan",
+        "chiefComplaint": "Reason",
+        "assessment": "Assessment / Diagnosis",
+        "plan": "Plan / Conduct",
         "conditions": "Diagnoses (comma-separated)",
         "medications": "Medications (one per line: name | dose | frequency)",
         "add": "Add consultation"
