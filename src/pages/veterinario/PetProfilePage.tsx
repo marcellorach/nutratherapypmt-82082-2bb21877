@@ -617,12 +617,8 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {[...conditions]
-                    .sort((a: any, b: any) => {
-                      const ag = isGeroscienceCondition(a.condition_name || a.name) ? 1 : 0;
-                      const bg = isGeroscienceCondition(b.condition_name || b.name) ? 1 : 0;
-                      return ag - bg;
-                    })
+                  {conditions
+                    .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
                     .map((c: any) => (
                     <ConditionInsightCard
                       key={c.id}
@@ -630,6 +626,11 @@ const PetProfilePage: React.FC = () => {
                       mode="simple"
                     />
                   ))}
+                  {conditions.filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name)).length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-4">
+                      {t('petRegistration.conditions.onlyGeroscience', 'Nenhuma condição clínica registrada pelo veterinário. Inferências de gerociência aparecem após a análise VetGraphRAG.')}
+                    </p>
+                  )}
                 </div>
               )}
             </TabsContent>
