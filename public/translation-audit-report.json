@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-11T18:04:23.372Z",
+  "timestamp": "2026-05-12T03:11:25.882Z",
   "summary": {
-    "totalFiles": 841,
-    "totalIssues": 405,
+    "totalFiles": 856,
+    "totalIssues": 412,
     "hardcodedTexts": 40,
-    "missingKeys": 365,
+    "missingKeys": 372,
     "incompleteTranslations": 0
   },
   "issues": [
@@ -2363,8 +2363,50 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 210,
+      "line": 428,
       "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 444,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 504,
+      "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 522,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/HistoricalConsultationsSection.tsx",
+      "line": 185,
+      "text": ",",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/HistoricalConsultationsSection.tsx",
+      "line": 212,
+      "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/HistoricalConsultationsSection.tsx",
+      "line": 213,
+      "text": "|",
       "severity": "high"
     },
     {
@@ -2390,29 +2432,36 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/pet/PetPhotoUploader.tsx",
+      "line": 84,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/pet/PetRegistrationForm.tsx",
-      "line": 194,
+      "line": 253,
       "text": "common.yes",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/PetRegistrationForm.tsx",
-      "line": 194,
+      "line": 253,
       "text": "common.no",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/PetRegistrationForm.tsx",
-      "line": 270,
+      "line": 383,
       "text": "common.saving",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2255,
+      "line": 2394,
       "text": "@",
       "severity": "high"
     },
