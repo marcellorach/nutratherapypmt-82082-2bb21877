@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, Wrench } from 'lucide-react';
+import { ChevronDown, Wrench, HelpCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -57,6 +57,24 @@ export function TechnicalReviewSection({
             </Tooltip>
           </TooltipProvider>
           <span className="text-sm font-medium truncate">{title}</span>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center text-muted-foreground hover:text-foreground"
+                  aria-label="Sobre revisão técnica"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                {description}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <ChevronDown
           className={cn(
