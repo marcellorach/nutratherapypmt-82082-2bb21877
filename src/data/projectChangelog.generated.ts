@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-12T03:14:35.866Z
+// Última geração: 2026-05-12T04:37:34.757Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,31 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-12";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-12",
+    "kind": "added",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Camada de gerociência separada da voz do vet + marcação \"revisão técnica\" (Missões B & C)",
+    "bullets": [
+      "Princípio formalizado: vet escreve em linguagem clínica tradicional (OA, ALT, Carprofen). Gerociência (senescência, inflammaging, NAD+, autofagia, hallmarks, senolíticos) é responsabilidade do sistema e nunca atribuída ao vet.",
+      "Memória `.lovable/memory/principles/clinical-language-vs-geroscience-layer.md` documentando o contrato e a obrigação de prefixo \"Inferência de gerociência — gerada pelo sistema\".",
+      "Prompts atualizados em `hybrid-recommendation` (ENRICH + FALLBACK) e `extract-pet-clinical-data`: input do vet em linguagem tradicional; output do sistema explicita ponte achado clínico → hallmark → composto, com prefixo de inferência.",
+      "Novo componente `TechnicalReviewSection` (âmbar, colapsado por padrão, badge `🔧 Revisão técnica` com tooltip \"Disponível para validação interna. Não fará parte da versão operacional.\") aplicado ao painel `LongitudinalDebugPanel` no perfil do pet.",
+      "Token `--warning` (38 92% 50%) reaproveitado, mantendo o sistema de design HSL e separando visualmente conteúdo de QA dos dados operacionais (verde/vermelho).",
+      "I18N_VERSION 1.68.0 → 1.69.0.",
+      "Files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/extract-pet-clinical-data/index.ts, src/components/ui/technical-review-section.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, .lovable/memory/principles/clinical-language-vs-geroscience-layer.md"
+    ],
+    "files": [
+      ".lovable/memory/principles/clinical-language-vs-geroscience-layer.md",
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "supabase/functions/extract-pet-clinical-data/index.ts",
+      "src/components/ui/technical-review-section.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.69.0"
+  },
   {
     "date": "2026-05-12",
     "kind": "added",
