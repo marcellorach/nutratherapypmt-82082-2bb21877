@@ -28,34 +28,18 @@ interface Props {
   life_stage?: LifeStage;
 }
 
-function statusBadge(g: NutrientGap, lang: 'pt' | 'en') {
-  const map: Record<NutrientGap['status'], { variant: any; label: string; icon: React.ReactNode }> = {
-    deficient: {
-      variant: 'destructive',
-      label: lang === 'pt' ? 'Déficit' : 'Deficient',
-      icon: <TrendingDown className="h-3 w-3" />,
-    },
-    excess: {
-      variant: 'destructive',
-      label: lang === 'pt' ? 'Excesso' : 'Excess',
-      icon: <TrendingUp className="h-3 w-3" />,
-    },
-    adequate: {
-      variant: 'default',
-      label: lang === 'pt' ? 'Adequado' : 'Adequate',
-      icon: <CheckCircle2 className="h-3 w-3" />,
-    },
-    unknown: {
-      variant: 'outline',
-      label: lang === 'pt' ? 'Sem dado' : 'No data',
-      icon: <AlertTriangle className="h-3 w-3" />,
-    },
+function statusBadge(g: NutrientGap, t: (k: string) => string) {
+  const map: Record<NutrientGap['status'], { variant: any; icon: React.ReactNode }> = {
+    deficient: { variant: 'destructive', icon: <TrendingDown className="h-3 w-3" /> },
+    excess: { variant: 'destructive', icon: <TrendingUp className="h-3 w-3" /> },
+    adequate: { variant: 'default', icon: <CheckCircle2 className="h-3 w-3" /> },
+    unknown: { variant: 'outline', icon: <AlertTriangle className="h-3 w-3" /> },
   };
   const cfg = map[g.status];
   return (
     <Badge variant={cfg.variant} className="text-[10px] gap-1">
       {cfg.icon}
-      {cfg.label}
+      {t(`nutritionGap.status.${g.status}`)}
     </Badge>
   );
 }
@@ -63,7 +47,7 @@ function statusBadge(g: NutrientGap, lang: 'pt' | 'en') {
 const NutritionGapAnalysis: React.FC<Props> = ({
   petId, species, weight_kg, age_years, breed_size, breed_name, active_conditions, life_stage,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = (i18n.language || 'pt').startsWith('en') ? 'en' : 'pt';
 
   const { data: breedCtx } = useBreedPredispositionsForPet(breed_name ?? undefined);
@@ -95,7 +79,7 @@ const NutritionGapAnalysis: React.FC<Props> = ({
       <Card>
         <CardContent className="py-6 flex items-center justify-center text-muted-foreground text-sm gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {lang === 'pt' ? 'Calculando déficits…' : 'Computing gaps…'}
+          {t('nutritionGap.loading')}
         </CardContent>
       </Card>
     );
@@ -110,27 +94,23 @@ const NutritionGapAnalysis: React.FC<Props> = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <ScaleIcon className="h-4 w-4 text-amber-600" />
-          {lang === 'pt' ? 'Análise de déficit nutricional (FEDIAF/AAFCO)' : 'Nutritional gap analysis (FEDIAF/AAFCO)'}
+          {t('nutritionGap.title')}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {lang === 'pt'
-            ? 'Compara a composição da dieta atual contra os mínimos FEDIAF 2024 e alvos clínicos para o estágio de vida e condições do pet.'
-            : 'Compares the current diet composition against FEDIAF 2024 minimums and clinical targets for the pet\'s life stage and conditions.'}
-        </p>
+        <p className="text-xs text-muted-foreground">{t('nutritionGap.subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Energia */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <div className="rounded border p-2">
-            <div className="text-muted-foreground">{lang === 'pt' ? 'Estágio' : 'Life stage'}</div>
+            <div className="text-muted-foreground">{t('nutritionGap.lifeStage')}</div>
             <div className="font-medium capitalize">{ctx.life_stage}</div>
           </div>
           <div className="rounded border p-2">
-            <div className="text-muted-foreground">{lang === 'pt' ? 'Necessidade' : 'Target'}</div>
-            <div className="font-medium">{data.daily_kcal_target} kcal/{lang === 'pt' ? 'dia' : 'day'}</div>
+            <div className="text-muted-foreground">{t('nutritionGap.target')}</div>
+            <div className="font-medium">{data.daily_kcal_target} kcal/{t('nutritionGap.perDay')}</div>
           </div>
           <div className="rounded border p-2">
-            <div className="text-muted-foreground">{lang === 'pt' ? 'Consumo' : 'Intake'}</div>
+            <div className="text-muted-foreground">{t('nutritionGap.intake')}</div>
             <div className="font-medium">
               {data.current_daily_kcal != null
                 ? `${data.current_daily_kcal} kcal`
@@ -138,7 +118,7 @@ const NutritionGapAnalysis: React.FC<Props> = ({
             </div>
           </div>
           <div className="rounded border p-2">
-            <div className="text-muted-foreground">{lang === 'pt' ? 'Densidade' : 'Density'}</div>
+            <div className="text-muted-foreground">{t('nutritionGap.density')}</div>
             <div className="font-medium">
               {data.current_kcal_per_kg ? `${Math.round(data.current_kcal_per_kg)} kcal/kg` : '—'}
             </div>
@@ -148,25 +128,19 @@ const NutritionGapAnalysis: React.FC<Props> = ({
         {data.warnings.includes('underfeeding') && (
           <div className="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-800 flex items-center gap-2">
             <AlertTriangle className="h-3 w-3" />
-            {lang === 'pt'
-              ? 'Subalimentação: consumo < 85% da necessidade calórica estimada.'
-              : 'Underfeeding: intake < 85% of estimated caloric need.'}
+            {t('nutritionGap.underfeeding')}
           </div>
         )}
         {data.warnings.includes('overfeeding') && (
           <div className="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-800 flex items-center gap-2">
             <AlertTriangle className="h-3 w-3" />
-            {lang === 'pt'
-              ? 'Superalimentação: consumo > 115% da necessidade calórica estimada.'
-              : 'Overfeeding: intake > 115% of estimated caloric need.'}
+            {t('nutritionGap.overfeeding')}
           </div>
         )}
 
         {noLinked ? (
           <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-            {lang === 'pt'
-              ? 'A ração atual não está vinculada ao catálogo nutricional (apenas texto livre). Vincule a marca/produto em "Atual" para habilitar a análise quantitativa de déficits.'
-              : 'Current diet is not linked to the nutrition catalog (free text only). Link brand/product under "Current" to enable quantitative gap analysis.'}
+            {t('nutritionGap.noLinked')}
           </div>
         ) : (
           <TooltipProvider>
@@ -177,16 +151,16 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                     <div className="text-sm font-medium flex items-center gap-2">
                       {lang === 'pt' ? g.label_pt : g.label_en}
                       <span className="text-xs text-muted-foreground">
-                        ({g.unit === 'ratio' ? 'razão' : g.unit})
+                        ({g.unit === 'ratio' ? t('nutritionGap.ratio') : g.unit})
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      {lang === 'pt' ? 'Observado' : 'Observed'}:{' '}
+                      {t('nutritionGap.observed')}:{' '}
                       <span className="font-medium text-foreground">
                         {g.observed != null ? g.observed : '—'}
                       </span>
                       {' · '}
-                      {lang === 'pt' ? 'Alvo' : 'Target'}:{' '}
+                      {t('nutritionGap.targetLabel')}:{' '}
                       <span className="font-medium text-foreground">
                         {g.target_min != null ? `≥ ${g.target_min}` : ''}
                         {g.target_min != null && g.target_max != null ? ' · ' : ''}
@@ -201,16 +175,16 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button className="text-[11px] text-primary underline mt-1">
-                          {lang === 'pt' ? 'Justificativa' : 'Rationale'}
+                          {t('nutritionGap.rationale')}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-sm text-xs">
                         <p>{lang === 'pt' ? g.rationale_pt : g.rationale_en}</p>
-                        <p className="mt-1 text-muted-foreground">{lang === 'pt' ? 'Fonte' : 'Source'}: {g.source}</p>
+                        <p className="mt-1 text-muted-foreground">{t('nutritionGap.source')}: {g.source}</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div>{statusBadge(g, lang)}</div>
+                  <div>{statusBadge(g, t)}</div>
                 </div>
               ))}
             </div>
@@ -222,16 +196,10 @@ const NutritionGapAnalysis: React.FC<Props> = ({
             <div className="flex items-center gap-2 mb-2">
               <Dna className="h-4 w-4 text-purple-600" />
               <h4 className="text-sm font-semibold">
-                {lang === 'pt'
-                  ? `Sugerido pela raça${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`
-                  : `Suggested by breed${breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}`}
+                {t('nutritionGap.breed.title')}{breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}
               </h4>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              {lang === 'pt'
-                ? 'Condições com predisposição racial documentada e os nutrientes-alvo para prevenção/manejo precoce.'
-                : 'Conditions with documented breed predisposition and the target nutrients for early prevention/management.'}
-            </p>
+            <p className="text-xs text-muted-foreground mb-3">{t('nutritionGap.breed.subtitle')}</p>
             <TooltipProvider>
               <div className="space-y-3">
                 {data.breed_recommendations.map((rec) => {
@@ -241,14 +209,14 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className="text-sm font-medium">{condLabel}</span>
                         <Badge variant="outline" className="text-[10px]">
-                          {lang === 'pt' ? 'Risco' : 'Risk'} {rec.risk_factor.toFixed(1)}×
+                          {t('nutritionGap.breed.risk')} {rec.risk_factor.toFixed(1)}×
                         </Badge>
                         <Badge variant="outline" className="text-[10px] capitalize">
-                          {lang === 'pt' ? 'Evidência' : 'Evidence'}: {rec.evidence_grade}
+                          {t('nutritionGap.breed.evidence')}: {rec.evidence_grade}
                         </Badge>
                         {rec.already_active && (
                           <Badge variant="destructive" className="text-[10px]">
-                            {lang === 'pt' ? 'Já ativa' : 'Already active'}
+                            {t('nutritionGap.breed.alreadyActive')}
                           </Badge>
                         )}
                       </div>
@@ -259,16 +227,16 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                               <div className="font-medium">
                                 {lang === 'pt' ? g.label_pt : g.label_en}{' '}
                                 <span className="text-muted-foreground">
-                                  ({g.unit === 'ratio' ? 'razão' : g.unit})
+                                  ({g.unit === 'ratio' ? t('nutritionGap.ratio') : g.unit})
                                 </span>
                               </div>
                               <div className="text-muted-foreground">
-                                {lang === 'pt' ? 'Observado' : 'Observed'}:{' '}
+                                {t('nutritionGap.observed')}:{' '}
                                 <span className="text-foreground font-medium">
                                   {g.observed != null ? g.observed : '—'}
                                 </span>
                                 {' · '}
-                                {lang === 'pt' ? 'Alvo' : 'Target'}:{' '}
+                                {t('nutritionGap.targetLabel')}:{' '}
                                 <span className="text-foreground font-medium">
                                   {g.target_min != null ? `≥ ${g.target_min}` : ''}
                                   {g.target_min != null && g.target_max != null ? ' · ' : ''}
@@ -283,21 +251,21 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <button className="text-[11px] text-primary underline mt-0.5">
-                                    {lang === 'pt' ? 'Justificativa' : 'Rationale'}
+                                    {t('nutritionGap.rationale')}
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-sm text-xs">
                                   <p>{lang === 'pt' ? g.rationale_pt : g.rationale_en}</p>
                                   <p className="mt-1 text-muted-foreground">
-                                    {lang === 'pt' ? 'Fonte' : 'Source'}: {g.source}
+                                    {t('nutritionGap.source')}: {g.source}
                                   </p>
                                   <p className="mt-1 text-muted-foreground">
-                                    {lang === 'pt' ? 'Predisposição racial' : 'Breed predisposition'}: {condLabel} · {rec.risk_factor.toFixed(1)}× · {rec.evidence_grade}
+                                    {t('nutritionGap.breed.predisposition')}: {condLabel} · {rec.risk_factor.toFixed(1)}× · {rec.evidence_grade}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
                             </div>
-                            <div>{statusBadge(g, lang)}</div>
+                            <div>{statusBadge(g, t)}</div>
                           </div>
                         ))}
                       </div>
