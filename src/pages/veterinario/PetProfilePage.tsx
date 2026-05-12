@@ -770,6 +770,28 @@ const PetProfilePage: React.FC = () => {
               />
             )}
 
+            {/* Geroscience inferences — system-derived hallmarks, shown AFTER MedGraphRAG */}
+            {recommendationCompounds && conditions.some((c: any) => isGeroscienceCondition(c.condition_name || c.name)) && (
+              <Card className="border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    {t('geroscienceInference.title', 'Inferências de gerociência (sistema)')}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {t('geroscienceInference.description', 'Hallmarks de envelhecimento inferidos pelo sistema a partir dos dados clínicos do veterinário. Não fazem parte do diagnóstico tradicional — alimentam a análise profunda VetGraphRAG.')}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {conditions
+                    .filter((c: any) => isGeroscienceCondition(c.condition_name || c.name))
+                    .map((c: any) => (
+                      <ConditionInsightCard key={c.id} condition={c} mode="simple" />
+                    ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Patient Knowledge Subgraph */}
             {recommendationCompounds && kgTriplets.length > 0 && (
               <PatientKnowledgeSubgraph
