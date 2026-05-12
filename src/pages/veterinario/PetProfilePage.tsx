@@ -38,6 +38,7 @@ import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type Clinical
 import { pm } from '@/services/clinical-pipeline-messages';
 import { useToast } from '@/hooks/use-toast';
 import { useUpsertPetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
+import { isGeroscienceCondition } from '@/services/condition-classification';
 
 const severityColors: Record<string, string> = {
   mild: 'bg-yellow-100 text-yellow-800',
@@ -603,10 +604,6 @@ const PetProfilePage: React.FC = () => {
                 <TestTube className="h-3.5 w-3.5" />
                 {t('petRegistration.exams.title')}
               </TabsTrigger>
-              <TabsTrigger value="notes" className="gap-1">
-                <FileText className="h-3.5 w-3.5" />
-                {t('petRegistration.profile.clinicalNotes')}
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="conditions">
@@ -620,7 +617,13 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {conditions.map((c: any) => (
+                  {[...conditions]
+                    .sort((a: any, b: any) => {
+                      const ag = isGeroscienceCondition(a.condition_name || a.name) ? 1 : 0;
+                      const bg = isGeroscienceCondition(b.condition_name || b.name) ? 1 : 0;
+                      return ag - bg;
+                    })
+                    .map((c: any) => (
                     <ConditionInsightCard
                       key={c.id}
                       condition={c}
@@ -726,36 +729,6 @@ const PetProfilePage: React.FC = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="notes">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">{t('petRegistration.profile.clinicalHistory')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {clinicalNotes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
-                      {t('petRegistration.profile.noNotes')}
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {clinicalNotes.map((n: any) => (
-                        <div key={n.id} className="border-b pb-3 last:border-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">
-                              {n.note_type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(n.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-sm">{n.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
             </Tabs>
             </div>
 
