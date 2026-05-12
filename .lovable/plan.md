@@ -1,82 +1,49 @@
-# Plano — Fases 3 e 4
+# Plano final aprovado
 
-> Observação: a Fase 2 (tooltips `(?)`) já foi entregue na rodada anterior. Esta execução cobre **Fase 3 (cadastro manual rico)** e **Fase 4 (i18n + docs)**.
+## Missão A — Catálogo + demos religados
 
-## Fase 3 — `PetRegistrationForm` rico
+**Localização do catálogo (resposta direta):**
+- DB: tabelas `pet_food_products`, `pet_food_brands`, `pet_food_nutrition`
+- UI admin: `src/components/administrador/pet-food/PetFoodCatalogTab.tsx`
+- Seed atual: migration `20260511181813_*.sql` (20 SKUs)
 
-### 3.1 Data de nascimento + sexo lado a lado
-- Adicionar campo `birth_date` (date picker shadcn) ao lado do campo `sex`.
-- Calcular `age_years` automaticamente (decimal, com base em `differenceInYears` / meses).
-- Manter `age_years` no payload para não quebrar o schema atual; persistir também `birth_date` (coluna já criada na Fase 1).
+**Passos:**
+1. Pesquisar fichas técnicas oficiais (sites dos fabricantes) para esta lista de candidatos: Pro Plan Adult Large Breed, RC Maxi Adult 5+, Hill's Science Diet 7+ Active Longevity, Premier Sêniores Médias/Grandes, Farmina N&D Pumpkin Lamb Adult Medium/Maxi, Biofresh Adultos Médias/Grandes.
+2. Para cada SKU **só adicionar se houver dados nutricionais públicos verificáveis** (proteína, gordura, kcal/100g, Ca, P, ômega-3, fibra). Sem ficha → pula.
+3. Migration única inserindo as marcas faltantes + produtos + perfis em `pet_food_nutrition`, com `source_url` apontando para a página oficial.
+4. Migration de fix-up nos pets demo (`is_demo = true`): substituir itens órfãos em `pet_nutrition_items` (sem `product_id`) por `product_id` do catálogo coerente com porte/idade/condição (ex.: Rex → Pro Plan Adult Large Breed se entrar; senão → RC Maxi Adult).
+5. Atualizar gerador de pets demo (`src/utils/mockClinicalData.ts` + writer de nutrição) para sempre gravar `product_id` do catálogo, nunca texto livre.
 
-### 3.2 Foto do pet
-- Novo componente `PetPhotoUploader.tsx`:
-  - Avatar circular + drop zone + botão "Trocar foto".
-  - Faz upload em duas etapas: (1) seleção local com preview (URL.createObjectURL); (2) após `INSERT` do pet, faz upload em `pet-photos/{pet_id}/avatar.{ext}` e atualiza `pet_profiles.photo_url`.
-- Renderizar foto no `PetProfilePage` (header) e na lista de pets (`VeterinarioPage`).
+**Validação:** card "Análise Nutricional" do Rex calcula sem warning de "linkar ao catálogo".
 
-### 3.3 PDFs de exames já no registro
-- Seção colapsável (Collapsible) "Exames iniciais (PDF)" no formulário.
-- Permite anexar múltiplos arquivos antes do submit (mantidos em estado).
-- Após criar o pet, percorre os arquivos e chama `parse-pet-exam-pdf` com o `pet_id` recém-criado (mesmo fluxo do `PetExamPdfUploader`, reutilizando a função em um helper `src/services/pet-exam-uploader.ts`).
-- Resultados aparecem no `PetExamReviewDialog` existente (um por arquivo) — vet aprova antes de gravar.
+## Missão B — Linguagem clínica vs. camada de gerociência
 
-### 3.4 Consultas históricas no cadastro
-- Nova seção colapsável "Consultas anteriores" com botão `+ Adicionar consulta`.
-- Cada item (`HistoricalConsultationItem`) coleta: data, queixa, peso, ECC, achados, conduta + sub-listas:
-  - Diagnósticos (`condition_name`, severidade, status)
-  - Medicações (nome, dose, frequência, datas)
-  - Exames (tipo, data, observações; sem PDF nesta fase)
-- Service novo `src/services/pet-consultation-writer.ts` (extraído de `GenerateSamplePetsButton`):
-  - `writeConsultationBundle(petId, bundle)` faz INSERT em `pet_consultations` e propaga `consultation_id` para `pet_conditions` / `pet_medications` / `pet_exams` / `pet_clinical_notes`.
-  - O trigger `refresh_pet_consultation_latest` cuida de `is_latest`.
-- Submissão final: ordena consultas DESC por data, insere uma a uma e marca a última como atual.
+**Princípio (vai pra memória + Core):**
+> Veterinário descreve achados em linguagem **clínica tradicional** (OA moderada, ALT elevada, perda de massa muscular). A **camada de gerociência (senescência, inflammaging, mitocondrial, NAD+, autofagia, hallmarks of aging) é responsabilidade do nosso sistema** e nunca é atribuída ao vet em consultas/anamneses/condutas demo. As recomendações do sistema **devem** explicitar a ponte gerociência → ação, sob badge "Inferência de gerociência — gerada pelo sistema".
 
-### 3.5 Reorganização visual do form
-- Layout em duas colunas (sm+):
-  - Esquerda: foto + nome + espécie + raça
-  - Direita: data nascimento + sexo + castrado + peso + chip
-- Tutor (owner) e notas em uma seção abaixo.
-- Seções colapsáveis (Exames iniciais, Consultas anteriores) ao final.
+**Aplicação:**
+1. Criar `mem://principles/clinical-language-vs-geroscience-layer.md` e referenciar no Core do `mem://index.md`.
+2. Reescrever campos `assessment` e `conduct` das consultas demo existentes (capturas anexas: Rex, Bernardo): manter diagnóstico/conduta de fundo, remover jargão senolítico/senescente da boca do vet.
+3. Atualizar prompts das edge functions `hybrid-recommendation-service`, `condition-insights`, `extract-pet-clinical-data`:
+   - Input do vet vem em linguagem tradicional.
+   - Output **deve** mapear achados clínicos → hallmark/pathway de gerociência → composto, rotulado como inferência do sistema.
+4. UI: badge "Inferência de gerociência (gerada pelo sistema)" nas seções de inferência IA, separando visualmente da nota clínica do vet.
+5. CHANGELOG.md + `docs/STANFORD_DEMO.md`: registrar como decisão de design.
 
-### Arquivos novos
-- `src/components/pet/PetPhotoUploader.tsx`
-- `src/components/pet/HistoricalConsultationsSection.tsx`
-- `src/components/pet/HistoricalConsultationItem.tsx`
-- `src/services/pet-consultation-writer.ts`
-- `src/services/pet-exam-uploader.ts` (helper reutilizado)
+## Missão C — Marcação visual "revisão técnica" (cor: âmbar)
 
-### Arquivos modificados
-- `src/components/pet/PetRegistrationForm.tsx` — campos novos + seções colapsáveis
-- `src/pages/veterinario/PetRegistrationPage.tsx` — passar foto/exames/consultas após criação
-- `src/hooks/usePetProfile.ts` — incluir `birth_date`/`photo_url` no `PetProfileData`
-- `src/components/pet/GenerateSamplePetsButton.tsx` — refatorar para usar o novo `pet-consultation-writer.ts` (DRY)
-- `src/pages/veterinario/PetProfilePage.tsx` — renderizar `photo_url` no header
+1. Novo componente `src/components/ui/technical-review-section.tsx`:
+   - Wrapper colapsável (default fechado, só título + chevron).
+   - Badge âmbar `🔧 Revisão técnica` (tokens: `bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30`).
+   - Tooltip: *"Disponível para validação interna. Não fará parte da versão operacional."*
+2. Aplicar imediatamente em:
+   - `LongitudinalDebugPanel` (Depuração do MedGraphRAG) — colapsado por padrão.
+   - Outros 2–3 painéis de QA equivalentes (auditoria de relações, auditoria de ontologia, painel de debug de KG).
+3. Adicionar entrada no CHANGELOG e bump `I18N_VERSION` → `1.69.0`.
 
-### Sem migrações novas
-- `birth_date` e `photo_url` já foram criados na Fase 1.
-- Bucket `pet-photos` já existe (público, com RLS por owner).
+## Ordem de execução (cada passo testado)
 
-## Fase 4 — i18n + documentação
-
-- Bumpar `I18N_VERSION` em `src/i18n.ts` (de 1.66.0 → 1.67.0).
-- Adicionar todas as novas chaves em `src/locales/{pt,en}/translation.json`:
-  - `petRegistration.form.birthDate`, `petRegistration.form.photoUploader.*`
-  - `petRegistration.form.initialExams.*`
-  - `petRegistration.form.historicalConsultations.*` (incluindo labels de cada sub-lista e tooltips)
-- Atualizar `CHANGELOG.md` (`[Unreleased]` → Added) com bloco para Fase 3 (foto, data nascimento, exames PDF no registro, consultas históricas) e Fase 4 (i18n).
-- Rodar `npm run sync:changelog` para regenerar `src/data/projectChangelog.generated.ts` + `.lovable/CONTEXT.md`.
-- Atualizar `ARCHITECTURE.md`: nova seção sobre `pet-consultation-writer.ts`, bucket `pet-photos`, novos componentes do form.
-- Atualizar `docs/CURRENT_STATE.md`: mover "Histórico de consultas" e "Foto do pet" de "mockado/parcial" para "Implementado".
-- Atualizar memória `mem://features/sample-pets-complexity-order` adicionando nota: "cadastro manual agora paridade com pets demo (foto, data nascimento, exames PDF, consultas históricas)".
-
-## Fora de escopo
-- Edição/exclusão de consultas históricas após salvar (read-only via timeline).
-- OCR/parse automático de carteira de vacinação.
-- Upload de PDFs por consulta histórica individual (apenas exames "iniciais" do pet nesta fase).
-- Versionamento avançado de dietas.
-
-## Riscos / pontos de atenção
-- Upload de foto precisa rodar **depois** do INSERT (precisamos do `pet_id` para a pasta no bucket).
-- Múltiplos PDFs em paralelo: limitar a `Promise.allSettled` com no máximo 3 simultâneos para não sobrecarregar a edge function.
-- Refatoração do `GenerateSamplePetsButton`: garantir que os 5 sample pets continuam gerando exatamente o mesmo histórico (rodar manual após a refatoração).
+1. Catálogo: pesquisa de fichas → migration de SKUs novos → migration de fix-up dos demos → testar Rex.
+2. Memória + reescrita de consultas demo + ajuste de prompts.
+3. `TechnicalReviewSection` + aplicação no painel longitudinal e correlatos.
+4. Bump i18n, sync changelog, validação visual final.

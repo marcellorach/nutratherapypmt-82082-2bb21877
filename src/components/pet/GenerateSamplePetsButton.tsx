@@ -36,7 +36,17 @@ type DemoConsultation = {
   notes?: Array<{ note_type: string; content: string }>;
 };
 
-type DemoNutritionItem = { raw_brand_text: string; raw_product_text: string; share_percent: number };
+type DemoNutritionItem = {
+  raw_brand_text: string;
+  raw_product_text: string;
+  share_percent: number;
+  /**
+   * Catalog lookup hint: { brand, name } pointing to an existing pet_food_products row.
+   * When set, the generator resolves product_id and persists it (preferred path).
+   * If left undefined the item is treated as a free-text supplement / non-catalog item.
+   */
+  catalog?: { brand: string; name: string };
+};
 
 type DemoPet = {
   name: string;
@@ -95,7 +105,12 @@ const SAMPLE_PETS: DemoPet[] = [
       diet_type: 'commercial_dry',
       daily_amount_g: 220, meals_per_day: 2, treats_frequency: 'occasional', water_intake: 'normal',
       notes: 'Ração seca super premium para adulto porte médio.',
-      items: [{ raw_brand_text: 'Premier Pet', raw_product_text: 'Formula Adulto Raças Médias', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Premier Pet',
+        raw_product_text: 'Formula Caes Adultos Racas Medias e Grandes',
+        share_percent: 100,
+        catalog: { brand: 'Premier Pet', name: 'Formula Caes Adultos Racas Medias e Grandes' },
+      }],
     },
   },
 
@@ -143,7 +158,12 @@ const SAMPLE_PETS: DemoPet[] = [
       diet_type: 'commercial_dry',
       daily_amount_g: 240, meals_per_day: 2, treats_frequency: 'occasional', water_intake: 'normal',
       notes: 'Fórmula sênior super premium com glucosamina.',
-      items: [{ raw_brand_text: 'Royal Canin', raw_product_text: 'Mature Consult Medium', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Royal Canin',
+        raw_product_text: 'Maxi Adult 5+',
+        share_percent: 100,
+        catalog: { brand: 'Royal Canin', name: 'Maxi Adult 5+' },
+      }],
     },
   },
 
@@ -206,7 +226,12 @@ const SAMPLE_PETS: DemoPet[] = [
       daily_amount_g: 320, meals_per_day: 2, treats_frequency: 'none', water_intake: 'normal',
       restrictions: ['low_calorie', 'joint_support'],
       notes: 'Dieta de controle de peso com suporte articular, iniciada na 1ª consulta há ~12 meses.',
-      items: [{ raw_brand_text: 'Hill\'s', raw_product_text: 'Prescription Diet Metabolic + Mobility', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Hill\'s',
+        raw_product_text: 'Prescription Diet Metabolic + Mobility',
+        share_percent: 100,
+        catalog: { brand: 'Hill\'s', name: 'Prescription Diet Metabolic + Mobility' },
+      }],
       introducedAtConsultationIdx: 0,
     },
   },
@@ -240,8 +265,8 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Progressão da rigidez articular e fadiga aumentada',
         clinical_exam: 'OA moderada bilateral. Massa muscular preservada.',
         weight_kg_at_visit: 38.5, body_condition_score: 5,
-        assessment: 'OA moderada. Investigar marcadores de envelhecimento celular acelerado.',
-        plan: 'Iniciar Carprofen 2mg/kg BID. Solicitar painel de senescência.',
+        assessment: 'OA moderada bilateral. Considerar AINE de longo prazo + suporte articular.',
+        plan: 'Iniciar Carprofen 2mg/kg BID. Solicitar perfil bioquímico ampliado e marcadores de inflamação sistêmica (PCR, ferritina).',
         conditions: [
           { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
         ],
@@ -251,16 +276,16 @@ const SAMPLE_PETS: DemoPet[] = [
       },
       {
         daysAgo: 90,
-        chief_complaint: 'Resultado de painel de senescência',
+        chief_complaint: 'Reavaliação clínica e resultados laboratoriais',
         clinical_exam: 'Sem alterações neurológicas no momento.',
         weight_kg_at_visit: 38, body_condition_score: 5,
-        assessment: 'Carga senescente compatível com envelhecimento acelerado — perfil senolítico recomendado.',
-        plan: 'Adicionar protocolo senolítico (fisetina + quercetina). Manter Carprofen.',
+        assessment: 'Marcadores laboratoriais (PCR elevada, ferritina elevada, perfil oxidativo alterado) compatíveis com envelhecimento acelerado para a idade.',
+        plan: 'Manter Carprofen. Encaminhar para avaliação nutracêutica de longevidade.',
         conditions: [
-          { condition_name: 'Cellular Senescence', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
+          { condition_name: 'Inflammaging', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
         ],
         exams: [
-          { exam_type: 'Senescence Biomarkers', results: { p16_ink4a: 'elevado', sasp_panel: 'positivo', telomere_length: 'reduzido para idade', interpretation: 'Carga senescente compatível com envelhecimento acelerado' }, flags_abnormal: ['p16_ink4a', 'sasp_panel', 'telomere_length'] },
+          { exam_type: 'Extended Inflammatory Panel', results: { crp_mg_l: 18.5, ferritin_ng_ml: 320, '8_ohdg_ng_ml': 9.2, mda_umol_l: 4.8, interpretation: 'Inflamação sistêmica leve a moderada + estresse oxidativo aumentado para a idade' }, flags_abnormal: ['crp_mg_l', 'ferritin_ng_ml', '8_ohdg_ng_ml', 'mda_umol_l'] },
         ],
       },
       {
@@ -284,7 +309,7 @@ const SAMPLE_PETS: DemoPet[] = [
       restrictions: ['joint_support', 'antioxidant_rich'],
       notes: 'Mistura de ração super premium para grandes raças + suplemento natural ômega-3 (óleo de salmão).',
       items: [
-        { raw_brand_text: 'Pro Plan', raw_product_text: 'Adult Large Breed Athletic', share_percent: 80 },
+        { raw_brand_text: 'Pro Plan', raw_product_text: 'Adult Large Breed Chicken & Rice', share_percent: 80, catalog: { brand: 'Pro Plan', name: 'Adult Large Breed Chicken & Rice' } },
         { raw_brand_text: 'Suplemento natural', raw_product_text: 'Óleo de salmão prensado a frio', share_percent: 20 },
       ],
     },
@@ -366,7 +391,7 @@ const SAMPLE_PETS: DemoPet[] = [
         clinical_exam: 'Episódios ocasionais de desorientação ao acordar. Doppler cardíaco mostra HP secundária leve a moderada.',
         weight_kg_at_visit: 7.5, body_condition_score: 5,
         assessment: 'CDS leve em monitoramento + HP pulmonar secundária ao MMVD. Caso multissistêmico complexo.',
-        plan: 'Adicionar protocolo geroprotetor compatível com cardioterapia: NMN baixa dose, ômega-3, SAMe (suporte hepático), CoQ10. Evitar quaisquer compostos com efeito hipotensor adicional.',
+        plan: 'Adicionar SAMe (suporte hepático), ômega-3 e CoQ10 — compatíveis com cardioterapia. Encaminhar para avaliação nutracêutica de longevidade. Evitar compostos com efeito hipotensor adicional.',
         conditions: [
           { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
           { condition_name: 'Pulmonary Hypertension', severity: 'mild', status: 'active', origin: 'exam_suggested' },
@@ -381,7 +406,12 @@ const SAMPLE_PETS: DemoPet[] = [
       daily_amount_g: 110, meals_per_day: 3, treats_frequency: 'occasional', water_intake: 'high',
       restrictions: ['renal', 'low_phosphorus', 'low_sodium'],
       notes: 'Dieta renal iniciada na 4ª consulta após diagnóstico de DRC IRIS 2.',
-      items: [{ raw_brand_text: 'Royal Canin', raw_product_text: 'Renal Small Dog', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Royal Canin',
+        raw_product_text: 'Veterinary Diet Renal Small Dog',
+        share_percent: 100,
+        catalog: { brand: 'Royal Canin', name: 'Veterinary Diet Renal Small Dog' },
+      }],
       introducedAtConsultationIdx: 3, // 4ª consulta (índice 3)
     },
   },
@@ -524,10 +554,26 @@ const GenerateSamplePetsButton: React.FC = () => {
           if (nutError) throw nutError;
 
           if (nutrition.items?.length) {
+            // Resolve product_id from catalog hint (brand+name) when present
+            const itemsWithIds = await Promise.all(nutrition.items.map(async (i) => {
+              let productId: string | null = null;
+              if (i.catalog) {
+                const { data: brand } = await (supabase as any)
+                  .from('pet_food_brands').select('id').eq('name', i.catalog.brand).maybeSingle();
+                if (brand?.id) {
+                  const { data: prod } = await (supabase as any)
+                    .from('pet_food_products').select('id')
+                    .eq('brand_id', brand.id).eq('name', i.catalog.name).maybeSingle();
+                  productId = prod?.id ?? null;
+                }
+              }
+              return { i, productId };
+            }));
             const { error: itemErr } = await (supabase as any)
               .from('pet_nutrition_items')
-              .insert(nutrition.items.map(i => ({
+              .insert(itemsWithIds.map(({ i, productId }) => ({
                 nutrition_id: nut.id,
+                product_id: productId,
                 raw_brand_text: i.raw_brand_text,
                 raw_product_text: i.raw_product_text,
                 share_percent: i.share_percent,
