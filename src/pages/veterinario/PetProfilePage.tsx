@@ -616,7 +616,13 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {conditions.map((c: any) => (
+                  {[...conditions]
+                    .sort((a: any, b: any) => {
+                      const ag = isGeroscienceCondition(a.condition_name || a.name) ? 1 : 0;
+                      const bg = isGeroscienceCondition(b.condition_name || b.name) ? 1 : 0;
+                      return ag - bg;
+                    })
+                    .map((c: any) => (
                     <ConditionInsightCard
                       key={c.id}
                       condition={c}
