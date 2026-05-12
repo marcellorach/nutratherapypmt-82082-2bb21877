@@ -1,22 +1,28 @@
 # Project context briefing (auto)
-Generated: 2026-05-12T03:14:35.871Z
+Generated: 2026-05-12T04:37:34.761Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.68.0
+## Latest i18n version: 1.69.0
 
 ## Changes by area (last 14 days)
 - **admin**: 11
 - **vet-ui**: 10
 - **tutor-ui**: 7
 - **meta**: 7
+- **clinical-pipeline**: 6
 - **kg**: 6
-- **clinical-pipeline**: 5
 - **i18n**: 3
 - **curation**: 3
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-12 · [clinical-pipeline] ADDED — Camada de gerociência separada da voz do vet + marcação "revisão técnica" (Missões B & C)
+- Princípio formalizado: vet escreve em linguagem clínica tradicional (OA, ALT, Carprofen). Gerociência (senescência, inflammaging, NAD+, autofagia, hallmarks, senolíticos) é responsabilidade do sistema e nunca atribuída ao vet.
+- Memória `.lovable/memory/principles/clinical-language-vs-geroscience-layer.md` documentando o contrato e a obrigação de prefixo "Inferência de gerociência — gerada pelo sistema".
+- Prompts atualizados em `hybrid-recommendation` (ENRICH + FALLBACK) e `extract-pet-clinical-data`: input do vet em linguagem tradicional; output do sistema explicita ponte achado clínico → hallmark → composto, com prefixo de inferência.
+_files: .lovable/memory/principles/clinical-language-vs-geroscience-layer.md, supabase/functions/hybrid-recommendation/index.ts, supabase/functions/extract-pet-clinical-data/index.ts, src/components/ui/technical-review-section.tsx…_
+
 ### 2026-05-12 · [vet-ui] ADDED — Nutrition gap & breed-based recommendations (Passos 1–4)
 - Passo 1: aba "Atual" no perfil do pet expondo dieta/ração com vínculo ao catálogo nutricional.
 - Passo 2: catálogo `pet_food_products` populado com 20 produtos reais (Royal Canin, Hill's, Premier, Pro Plan, Acana, Orijen, N&D, Taste of the Wild, Golden) e perfis nutricionais (`pet_food_nutrition`) com proteína/gordura/kcal/EPA-DHA/Ca:P/glicosamina e flag AAFCO.
@@ -71,12 +77,6 @@ _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/config/a
 - Chaves i18n formais adicionadas em `pharmacology.lookup.*` e `admin.pharmacology.*` (PT/EN), substituindo fallbacks inline
 - I18N_VERSION incrementado para 1.63.0
 _files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/DrugLookupBadge.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-05-07 · [tutor-ui] ADDED — Sprint 7: CTA honesto em dois passos + ROI
-- Novo serviço `src/services/proposal-roi.ts` (puro) — calcula custo anual do plano, comparativo com tratamento da condição instalada (mostra `—` quando não há referência, sem inventar número) e crédito M3 = 50% do investimento dos 3 primeiros meses
-- Novo componente `src/components/tutor/HonestCTA.tsx` — bloco de comparação de custo (3 colunas), promessa testável de M3 (devolução em crédito se exames de calibração não mostrarem ≥15% de melhora), CTA primário "Começar com a primeira caixa" + secundário "Continuar plano anual após reavaliação no M3" + link para abrir o chat de dúvidas
-- `TreatmentProposalCard` substitui o bloco antigo de Aceitar/Dúvidas pelo `HonestCTA`, mantendo `handleAccept` como ação primária
-_files: src/services/proposal-roi.ts, src/components/tutor/HonestCTA.tsx, src/services/__tests__/proposal-roi.test.ts, src/components/tutor/TreatmentProposalCard.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
