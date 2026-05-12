@@ -21,6 +21,12 @@ Context about the patient:
 
 Return a JSON object with these 5 arrays. If a category has no entities, return an empty array.
 Be precise with medical terminology. Prefer standardized condition names when possible.
+
+CLINICAL LANGUAGE LAYER (mandatory):
+- The veterinarian writes in TRADITIONAL clinical language (e.g., "OA moderada bilateral", "ALT elevada", "perda de massa muscular", "Carprofen 2 mg/kg BID").
+- DO NOT introduce geroscience terminology (senescence, inflammaging, NAD+, autophagy, mitochondrial dysfunction, hallmarks of aging, senolytics, geroprotector) into the extracted entities. Geroscience interpretation is the responsibility of downstream system layers, never attributed to the vet.
+- Extract findings exactly as documented; normalize naming only within traditional veterinary nomenclature.
+
 Always respond with valid JSON only, no additional text.`;
 
 serve(async (req: Request) => {
