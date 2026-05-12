@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-12 — Camada de gerociência separada da voz do vet + marcação "revisão técnica" (Missões B & C)
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.69.0 -->
+- Princípio formalizado: vet escreve em linguagem clínica tradicional (OA, ALT, Carprofen). Gerociência (senescência, inflammaging, NAD+, autofagia, hallmarks, senolíticos) é responsabilidade do sistema e nunca atribuída ao vet.
+- Memória `.lovable/memory/principles/clinical-language-vs-geroscience-layer.md` documentando o contrato e a obrigação de prefixo "Inferência de gerociência — gerada pelo sistema".
+- Prompts atualizados em `hybrid-recommendation` (ENRICH + FALLBACK) e `extract-pet-clinical-data`: input do vet em linguagem tradicional; output do sistema explicita ponte achado clínico → hallmark → composto, com prefixo de inferência.
+- Novo componente `TechnicalReviewSection` (âmbar, colapsado por padrão, badge `🔧 Revisão técnica` com tooltip "Disponível para validação interna. Não fará parte da versão operacional.") aplicado ao painel `LongitudinalDebugPanel` no perfil do pet.
+- Token `--warning` (38 92% 50%) reaproveitado, mantendo o sistema de design HSL e separando visualmente conteúdo de QA dos dados operacionais (verde/vermelho).
+- I18N_VERSION 1.68.0 → 1.69.0.
+- Files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/extract-pet-clinical-data/index.ts, src/components/ui/technical-review-section.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, .lovable/memory/principles/clinical-language-vs-geroscience-layer.md
+
 ### Added - 2026-05-12 — Nutrition gap & breed-based recommendations (Passos 1–4)
 <!-- area: vet-ui · status: entregue · i18n: 1.68.0 -->
 - Passo 1: aba "Atual" no perfil do pet expondo dieta/ração com vínculo ao catálogo nutricional.
