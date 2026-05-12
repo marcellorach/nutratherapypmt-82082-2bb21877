@@ -1,105 +1,106 @@
-## Escopo (5 itens confirmados)
+## Diagnóstico do que está errado hoje
 
-### a) Condições de gerociência ao final, com label de origem
-**Onde:** lista de condições do pet (`PetProfilePage.tsx` → seção "Condições" / `ConditionInsightCard`).
+Nas consultas simuladas, o que aparece como "EXAMES COMPLEMENTARES" (ex.: `Neurological Examination → reflexes / proprioception`) **não é exame complementar** — é exame físico específico. Foi parar lá porque o gerador de demos grava esses achados como linha em `pet_exams`. Resultado: a tabela de complementares fica vazia de coisas reais (sangue, RX, urina) e poluída por achados físicos.
 
-- Criar helper `src/services/condition-classification.ts` com whitelist de condições gerociência: `inflammaging`, `oxidative stress`, `cellular senescence`, `mitochondrial dysfunction`, `sarcopenia`, `cognitive dysfunction syndrome`, `immunosenescence`, `telomere attrition`, etc. (bilíngue PT/EN).
-- Ordenação da lista: primeiro condições clínicas tradicionais (mantendo ordem atual: ativas → monitoramento → resolvidas), depois bloco "**Atenção geriátrica / gerociência**" com subtítulo separador.
-- Para cada condição gerociência, sub-label de origem derivada da consulta vinculada (`consultation_id` → `chief_complaint`/`assessment` ou `exam`):
-  - `Atenção geriátrica sugerida por exames` (origin = `exam_suggested`)
-  - `Atenção geriátrica sugerida pelo veterinário (consulta de DD/MM/AAAA)` (origin = `vet_diagnosis`, mostrando data da consulta)
-- Manter badges atuais (severidade/status), mas o badge "Diagnóstico Veterinário"/"Sugerida por Exames" troca para o sub-label acima quando for condição de gerociência.
+Além disso:
+- "AVALIAÇÃO" hoje só mostra o texto cru do veterinário; não há camada de interpretação por LLM.
+- Não existe um bloco final agregando o que a máquina entendeu da consulta (tags + síntese).
+- O form de cadastro (foto 5) usa labels divergentes do que aparece no card (Queixa principal vs Motivo, Achados/Diagnóstico vs Avaliação, Conduta vs Plano).
 
-### b) Remover apenas a **aba** "Notas Clínicas" (manter o card-contador)
-**Arquivo:** `src/pages/veterinario/PetProfilePage.tsx`.
-- Remover `<TabsTrigger value="notes">` e `<TabsContent value="notes">`.
-- Card "0 Notas Clínicas" do topo permanece (só o contador).
-- Notas continuam visíveis dentro de cada consulta no histórico.
+## Escopo (5 itens)
 
-### c) "Queixa" → "Motivo"
-- `chief_complaint` continua sendo a coluna do banco (sem migração).
-- Trocar labels nas chaves i18n existentes:
-  - `petTimeline.chiefComplaint` PT: "Motivo" / EN: "Reason"
-  - `petRegistration.form.historicalConsultations.chiefComplaint` PT: "Motivo" / EN: "Reason"
-- Bumpar `I18N_VERSION`.
+### a) Reclassificar achados de exame físico que estão em `pet_exams`
+Critério: linhas em `pet_exams` cujo `exam_type` casa com a whitelist de exames físicos (`neurological examination`, `orthopedic examination`, `cardiovascular examination`, `dermatological examination`, `abdominal palpation`, `general physical examination`) **não** vão para a tabela de complementares — são fundidas no `physical_exam.specific.<area>` da consulta correspondente, gerando um texto curto tipo `reflexes: preservados; proprioception: reduzida em membros pélvicos`.
 
-### d) "Exame Clínico" → "Exame Físico" estruturado (campos)
-**Schema:** adicionar coluna `physical_exam JSONB` em `pet_consultations` (mantém `clinical_exam TEXT` por compatibilidade — leitura cai em fallback).
+Implementação:
+- Novo helper `src/services/exam-classification.ts` com `isPhysicalExamType(name)` + `mergeIntoPhysicalExam(physicalExam, examRow)`.
+- `PetConsultationsTimeline.tsx`: ao montar cada consulta, particionar `c.exams` em `physicalSpecific` e `complementary`. Passar os primeiros para `PhysicalExamBlock` (modo merge) e os últimos para `ExamResultsWithReferences`.
+- `ExamResultsWithReferences`: se a lista filtrada ficar vazia, renderizar estado vazio "Sem exames complementares registrados nesta consulta".
 
-Forma do JSON:
-```json
-{
-  "general": {
-    "posture": "...",
-    "skin_lesions": "...",
-    "behavior": "...",
-    "body_condition_score": 5
-  },
-  "specific": {
-    "physiological": { "hr_bpm": 90, "rr_rpm": 22, "temp_c": 38.6, "mucous_membranes": "..." },
-    "orthopedic": "...",
-    "cardiovascular": "...",
-    "neurological": "...",
-    "abdominal": "..."
+### b) Quadro real de "Exames Complementares"
+Sem mudança de schema — apenas filtra para tipos clássicos: `complete blood count / cbc`, `biochemistry / chemistry panel`, `urinalysis`, `radiography / x-ray`, `ultrasound`, `thyroid panel`, `cardiac biomarkers`, `fecal exam`, etc. Lista padrão em `src/services/exam-classification.ts → COMPLEMENTARY_EXAM_TYPES`. Tudo que não casar com físico nem complementar conhecido → cai por padrão em complementar (comportamento atual), preservando dados antigos.
+
+Demos (`GenerateSamplePetsButton`): garantir pelo menos um CBC ou bioquímico por pet (já existe na maioria, mas o pet do screenshot não tem) e mover os achados neurológicos/ortopédicos para `physical_exam` no insert da consulta.
+
+### c) "Avaliação" → "Suspeita / Diagnóstico" + interpretação LLM
+Renomear o bloco no card e no form:
+- `petTimeline.assessment` PT: "Suspeita / Diagnóstico" / EN: "Assessment / Diagnosis"
+- `petRegistration.form.historicalConsultations.assessment` mesmo label.
+- Texto cru do vet permanece exatamente como digitado, em destaque (mantém `border-l-2 border-primary/60`).
+- **Novo:** abaixo do texto cru, sub-bloco `<AssessmentInterpretation>` com:
+  - Termos canônicos extraídos (ex.: `Degenerative Myelopathy`, `early stage`, `breed-typical`),
+  - ICD/SNOMED/UMLS quando disponível (apenas exibir se vier do extractor),
+  - Sistemas afetados (badges: `nervous system`, `motor`).
+- Fonte dos dados: campo novo `assessment_interpretation JSONB` em `pet_consultations` populado pela edge function `extract-pet-clinical-data` (já é nossa via para LLM). Schema:
+  ```json
+  {
+    "canonical_conditions": [{ "name": "Degenerative Myelopathy", "stage": "early", "confidence": 0.78 }],
+    "systems_affected": ["nervous", "motor"],
+    "ontology_refs": [{ "system": "SNOMED", "code": "230234000", "label": "..." }]
   }
-}
-```
+  ```
+- Fallback: se `assessment_interpretation` for null, sub-bloco não renderiza (nada de mock).
 
-UI:
-- `PetConsultationsTimeline.tsx`: substituir bloco `clinical_exam` por componente novo `PhysicalExamBlock` que renderiza, em duas mini-tabelas/seções colapsáveis ("Geral" e "Específico"), só os campos preenchidos. Fallback: se `physical_exam` for null e `clinical_exam` tiver texto, mostra texto cru sob título "Exame físico (texto livre)".
-- `HistoricalConsultationsSection.tsx` (form de cadastro): novo bloco com inputs para Geral (3 campos + ECC) e Específico (FC/FR/TR/mucosa + 4 textareas curtas).
-- Demos (`GenerateSamplePetsButton`) e extração (`extract-pet-clinical-data`) populam o JSON.
+### d) Quadro amarelo de TAGs + síntese ao final do card
+Novo componente `ConsultationMachineSummary.tsx` posicionado **após** o bloco de medicações/diagnósticos, antes do botão Recolher. Estilo: `border-l-4 border-amber-400 bg-amber-50/70 dark:bg-amber-900/20 rounded-md p-3`.
 
-### e) Reordenar conteúdo da consulta + Exames com referências + Tags IA
-**Nova ordem dentro de cada card de consulta** (`PetConsultationsTimeline.tsx`):
-1. Cabeçalho (data/vet)
-2. **Motivo**
-3. **Exame físico** (estruturado, item d)
-4. **Exames complementares** — tabela com colunas: Exame · Resultado · **Faixa de referência canina** · Status (normal/alterado).
-   - Lê de `pet_exams.results` (já é JSON) e cruza com `lab-references-canine` (já existe em `src/services/lab-references` ou similar — checar `automated-lab-result-interpretation-system`).
-5. **Avaliação** (`assessment`) — agora por último, em destaque visual (border-l accent), aceita texto mais longo (textarea cresce até 6 linhas no form).
-6. **Tags representativas** no rodapé: chips clicáveis (read-only) com até 8 tags (ex.: `ortopédico`, `dor leve`, `atividade intensa`, `inflamação subclínica`).
+Conteúdo:
+1. Título "Interpretação automática desta consulta" + ícone `Sparkles`.
+2. Tags (mantém as `c.tags` que já existem hoje no rodapé — **mover** para dentro deste quadro amarelo).
+3. Síntese curta gerada pelo LLM (campo novo `machine_summary TEXT` em `pet_consultations`, 1–2 frases).
+4. Lista de "termos referência utilizáveis pelo sistema" — chips com canonical labels que serão usados pelo VetGraphRAG (vem de `assessment_interpretation.canonical_conditions`).
+5. Microcopy: "Esses dados alimentam a análise VetGraphRAG. O texto original do veterinário não é alterado."
 
-**Geração das tags (IA):**
-- Estender `extract-pet-clinical-data` (Edge Function) com novo campo `tags: string[]` no JSON de saída. Prompt instrui Gemini a emitir 3-8 tags curtas (snake/kebab clínico, PT) cobrindo: sistema acometido, severidade, fator desencadeante, hipótese.
-- Persistir em nova coluna `tags TEXT[]` em `pet_consultations` (default `'{}'`).
-- Para consultas demo: gerar tags determinísticas no `GenerateSamplePetsButton`.
-- Para consultas existentes sem tags: ficam vazias (sem mock retroativo).
+Remove o bloco de tags antigo do rodapé (deduplicado).
+
+### e) Match form ↔ card (foto 5)
+Padronizar labels do form `HistoricalConsultationsSection.tsx` para baterem 1:1 com o card:
+
+| Form (foto 5) atual | Novo label form e card | Coluna DB |
+|---|---|---|
+| Queixa principal | **Motivo** | `chief_complaint` |
+| Achados / Diagnóstico | **Suspeita / Diagnóstico** | `assessment` |
+| Conduta | **Plano / Conduta** | `plan` |
+| Diagnósticos (separados por vírgula) | mantém | `pet_conditions` |
+| Medicações (uma por linha) | mantém | `pet_medications` |
+
+Também adicionar no form os campos novos do exame físico (postura, lesões de pele, comportamento, FC, FR, TR, mucosa, e textareas curtas para neurológico/ortopédico/cardiovascular/abdominal/dermatológico) — escondidos por padrão sob um sub-collapsible "Exame físico" para não pesar o form.
 
 ## Mudanças técnicas
 
-**Migration (Supabase):**
+**Migration:**
 ```sql
 ALTER TABLE public.pet_consultations
-  ADD COLUMN IF NOT EXISTS physical_exam jsonb,
-  ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}';
+  ADD COLUMN IF NOT EXISTS assessment_interpretation jsonb,
+  ADD COLUMN IF NOT EXISTS machine_summary text;
 ```
-Sem mudanças em RLS (já cobertas pelas policies existentes).
 
 **Arquivos a editar:**
-- `src/pages/veterinario/PetProfilePage.tsx` — remove aba notes; ordenação de condições com bloco gerociência.
-- `src/components/pet/PetConsultationsTimeline.tsx` — reordenação Motivo→Exame físico→Exames→Avaliação→Tags; render `PhysicalExamBlock`; tabela exames com referências.
-- `src/components/pet/HistoricalConsultationsSection.tsx` — campos novos do exame físico, label "Motivo", textarea avaliação maior.
-- `src/components/pet/ConditionInsightCard.tsx` — sub-label "Atenção geriátrica…" para condições da whitelist.
-- **Novos:**
-  - `src/services/condition-classification.ts` — whitelist gerociência + `isGeroscienceCondition()` + `formatGeroscienceOriginLabel()`.
-  - `src/components/pet/PhysicalExamBlock.tsx` — render estruturado.
-  - `src/components/pet/ExamResultsWithReferences.tsx` — tabela exames + faixa canina + status.
-- `src/components/pet/GenerateSamplePetsButton.tsx` — popular `physical_exam` + `tags` nos demos.
-- `supabase/functions/extract-pet-clinical-data/index.ts` — novo schema `physical_exam` + `tags` no JSON, prompt atualizado.
-- `src/locales/pt|en/translation.json` + `src/i18n.ts` — chaves novas (`petTimeline.reason`, `physicalExam.*`, `examResults.*`, `consultationTags.title`, `geroscienceAttention.bySuggestionExams|VetVisit`), bump `I18N_VERSION`.
-- `CHANGELOG.md` (`[Unreleased]`) + `npm run sync:changelog`.
-- Memória nova: `mem://principles/geroscience-condition-grouping.md` documentando whitelist e label de origem.
+- `src/components/pet/PetConsultationsTimeline.tsx` — partição de `exams`, render de `AssessmentInterpretation` e `ConsultationMachineSummary`, remoção do bloco antigo de tags.
+- `src/components/pet/ExamResultsWithReferences.tsx` — estado vazio + ignorar tipos físicos.
+- `src/components/pet/PhysicalExamBlock.tsx` — aceitar `mergedSpecificFromExams` para concatenar achados vindos de `pet_exams` físicos.
+- `src/components/pet/HistoricalConsultationsSection.tsx` — labels novos + sub-collapsible exame físico.
+- `src/components/pet/GenerateSamplePetsButton.tsx` — gerar tags determinísticas, `machine_summary`, `assessment_interpretation` e mover exames físicos para `physical_exam`.
+- `supabase/functions/extract-pet-clinical-data/index.ts` — incluir `assessment_interpretation` e `machine_summary` no JSON de saída.
+- `src/hooks/usePetConsultations.ts` — tipar os novos campos.
+- `src/locales/pt|en/translation.json` + `src/i18n.ts` — chaves novas (`petTimeline.assessmentTitle`, `petTimeline.machineSummary.*`, `petTimeline.interpretation.*`, `examResults.empty`); bump `I18N_VERSION` → `1.73.0`.
 
-**Sem mudanças** em: hybrid-recommendation, NutritionGapAnalysis, KG, payment.
+**Novos arquivos:**
+- `src/services/exam-classification.ts` — whitelists e helpers.
+- `src/components/pet/AssessmentInterpretation.tsx` — sub-bloco LLM.
+- `src/components/pet/ConsultationMachineSummary.tsx` — quadro amarelo final.
+
+**Doc:**
+- `CHANGELOG.md` `[Unreleased]` + `npm run sync:changelog`.
+- Memória nova: `mem://principles/consultation-card-machine-interpretation-block.md`.
 
 ## Validação
-- Pet com Inflammaging + Osteoartrite → OA primeiro, Inflammaging no bloco "Atenção geriátrica" com data da consulta de origem.
-- Aba "Notas Clínicas" some; card-contador permanece.
-- Consulta nova: vet preenche FC/FR/TR/postura etc.; render mostra duas seções; avaliação por último; tags geradas pela IA aparecem ao salvar via extract-pet-clinical-data.
-- Consulta antiga (sem `physical_exam`): cai no fallback texto livre, sem quebra.
+- Pet do screenshot: "Neurological Examination · reflexes · preservados" deixa de aparecer em "Exames complementares" e passa a aparecer em "Exame físico → Específico → Neurológico". Tabela de complementares mostra estado vazio (ou CBC se tiver).
+- Card Avaliação vira "Suspeita / Diagnóstico" com texto do vet intacto + sub-bloco com badge `Degenerative Myelopathy · early stage`.
+- No final do card, quadro amarelo com tags (`pastor_alemão`, `mielopatia`, `inicial`) + síntese ("Sinais neurológicos compatíveis com mielopatia degenerativa precoce em raça predisposta.") + chips canônicos.
+- Form: vet preenche "Suspeita / Diagnóstico" e ao salvar via extract-pet-clinical-data o card já mostra interpretação + síntese.
 
 ## Fora de escopo
-- Refatorar nutricional / VetGraphRAG / hybrid-recommendation.
-- Migrar texto livre legado de `clinical_exam` para JSON estruturado (fica como follow-up).
-- Editor inline de tags (somente leitura nesta entrega).
+- Editor inline de tags/síntese (somente leitura).
+- Migrar retroativamente exames antigos já gravados como físicos: rodam só pela classificação em runtime; a base não é reescrita.
+- Mudanças em VetGraphRAG / hybrid-recommendation / nutricional.
