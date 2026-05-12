@@ -8,6 +8,8 @@ import HelpHint from '@/components/ui/help-hint';
 import { usePetConsultations } from '@/hooks/usePetConsultations';
 import { format, parseISO } from 'date-fns';
 import { ptBR, enUS } from 'date-fns/locale';
+import PhysicalExamBlock, { type PhysicalExam } from '@/components/pet/PhysicalExamBlock';
+import ExamResultsWithReferences from '@/components/pet/ExamResultsWithReferences';
 
 interface Props {
   petId: string;
@@ -106,22 +108,28 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
                   {c.chief_complaint && (
                     <p className="text-sm text-foreground mb-1">
                       <span className="font-medium text-xs uppercase text-muted-foreground mr-1">
-                        {t('petTimeline.chiefComplaint')}:
+                        {t('petTimeline.reason')}:
                       </span>
                       {c.chief_complaint}
                     </p>
                   )}
                   {isOpen && (
                     <div className="mt-2 space-y-2 text-sm">
-                      {c.clinical_exam && (
-                        <div>
-                          <p className="text-xs uppercase text-muted-foreground">{t('petTimeline.clinicalExam')}</p>
-                          <p>{c.clinical_exam}</p>
-                        </div>
+                      {/* 1) Exame físico estruturado (com fallback texto livre) */}
+                      <PhysicalExamBlock
+                        exam={(c as any).physical_exam as PhysicalExam}
+                        fallbackText={c.clinical_exam}
+                      />
+
+                      {/* 2) Exames complementares com faixa de referência canina */}
+                      {c.exams.length > 0 && (
+                        <ExamResultsWithReferences exams={c.exams} />
                       )}
+
+                      {/* 3) Avaliação por último, em destaque */}
                       {c.assessment && (
-                        <div>
-                          <p className="text-xs uppercase text-muted-foreground">{t('petTimeline.assessment')}</p>
+                        <div className="border-l-2 border-primary/60 pl-3 py-1 bg-primary/5 rounded-sm">
+                          <p className="text-xs uppercase text-muted-foreground font-semibold">{t('petTimeline.assessment')}</p>
                           <p>{c.assessment}</p>
                         </div>
                       )}
@@ -175,17 +183,24 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
                           ))}
                         </ul>
                       )}
-                      {c.exams.length > 0 && (
-                        <ul className="text-xs text-muted-foreground list-disc pl-5">
-                          {c.exams.map((e: any) => (
-                            <li key={e.id}>
-                              {e.exam_type}
-                              {Array.isArray(e.flags_abnormal) && e.flags_abnormal.length > 0 && (
-                                <span className="ml-1 text-orange-600">⚠ {e.flags_abnormal.length} {t('petTimeline.abnormalFlags')}</span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
+
+                      {/* 4) Tags representativas no rodapé */}
+                      {Array.isArray((c as any).tags) && (c as any).tags.length > 0 && (
+                        <div className="pt-2 border-t border-border/60">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                            {t('consultationTags.title')}
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {((c as any).tags as string[]).map((tag, i) => (
+                              <span
+                                key={i}
+                                className="text-[10px] rounded-full border border-border bg-muted/40 px-2 py-0.5 text-muted-foreground"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}

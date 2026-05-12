@@ -7681,6 +7681,7 @@
     "empty": "Nenhuma consulta registrada para este pet ainda.",
     "latestBadge": "Última consulta",
     "chiefComplaint": "Queixa",
+    "reason": "Motivo",
     "clinicalExam": "Exame clínico",
     "assessment": "Avaliação",
     "plan": "Conduta",
@@ -7693,6 +7694,50 @@
     "collapse": "Recolher",
     "helpTitle": "Como usamos o histórico",
     "helpBody": "Cada consulta agrupa diagnósticos, medicações e exames daquela visita. A inferência do MedGraphRAG dá peso 1.0 à última consulta e 0.4 às anteriores."
+  },
+  "physicalExam": {
+    "title": "Exame físico",
+    "freeText": "texto livre",
+    "general": "Geral",
+    "specific": "Específico",
+    "posture": "Postura",
+    "skinLesions": "Lesões de pele",
+    "behavior": "Comportamento",
+    "bcs": "Escore corporal (ECC)",
+    "hr": "FC",
+    "rr": "FR",
+    "temp": "Temperatura",
+    "mucous": "Mucosas",
+    "crt": "TPC",
+    "orthopedic": "Ortopédico",
+    "cardiovascular": "Cardiovascular",
+    "neurological": "Neurológico",
+    "abdominal": "Abdominal",
+    "dermatological": "Dermatológico"
+  },
+  "examResults": {
+    "title": "Exames complementares",
+    "exam": "Exame",
+    "parameter": "Parâmetro",
+    "result": "Resultado",
+    "reference": "Faixa canina",
+    "status": "Status",
+    "statusLabel": {
+      "normal": "Normal",
+      "low": "Abaixo",
+      "high": "Acima",
+      "unknown": "—"
+    }
+  },
+  "consultationTags": {
+    "title": "Tags representativas (IA)"
+  },
+  "geroscienceAttention": {
+    "sectionTitle": "Atenção geriátrica / gerociência",
+    "sectionHelp": "Inferências de gerociência geradas pelo sistema a partir de exames ou consultas — não são diagnósticos clínicos tradicionais.",
+    "bySuggestedExams": "Atenção geriátrica sugerida por exames",
+    "byVetVisit": "Atenção geriátrica sugerida pelo veterinário (consulta de {{date}})",
+    "byVetGeneric": "Atenção geriátrica sugerida pelo veterinário"
   },
   "petNutrition": {
     "title": "Dieta & impacto nutricional",

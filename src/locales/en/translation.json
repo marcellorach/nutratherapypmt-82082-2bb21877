@@ -7681,6 +7681,7 @@
     "empty": "No consultations recorded for this pet yet.",
     "latestBadge": "Latest visit",
     "chiefComplaint": "Complaint",
+    "reason": "Reason",
     "clinicalExam": "Clinical exam",
     "assessment": "Assessment",
     "plan": "Plan",
@@ -7693,6 +7694,50 @@
     "collapse": "Collapse",
     "helpTitle": "How we use the history",
     "helpBody": "Each consultation groups diagnoses, meds and exams from that visit. The MedGraphRAG inference weights the latest visit 1.0 and prior ones 0.4."
+  },
+  "physicalExam": {
+    "title": "Physical exam",
+    "freeText": "free text",
+    "general": "General",
+    "specific": "Specific",
+    "posture": "Posture",
+    "skinLesions": "Skin lesions",
+    "behavior": "Behavior",
+    "bcs": "Body condition score (BCS)",
+    "hr": "HR",
+    "rr": "RR",
+    "temp": "Temperature",
+    "mucous": "Mucous membranes",
+    "crt": "CRT",
+    "orthopedic": "Orthopedic",
+    "cardiovascular": "Cardiovascular",
+    "neurological": "Neurological",
+    "abdominal": "Abdominal",
+    "dermatological": "Dermatological"
+  },
+  "examResults": {
+    "title": "Complementary exams",
+    "exam": "Exam",
+    "parameter": "Parameter",
+    "result": "Result",
+    "reference": "Canine range",
+    "status": "Status",
+    "statusLabel": {
+      "normal": "Normal",
+      "low": "Below",
+      "high": "Above",
+      "unknown": "—"
+    }
+  },
+  "consultationTags": {
+    "title": "Representative tags (AI)"
+  },
+  "geroscienceAttention": {
+    "sectionTitle": "Geriatric / geroscience attention",
+    "sectionHelp": "System-generated geroscience inferences from exams or visits — not traditional clinical diagnoses.",
+    "bySuggestedExams": "Geriatric attention suggested by exams",
+    "byVetVisit": "Geriatric attention suggested by the vet (visit on {{date}})",
+    "byVetGeneric": "Geriatric attention suggested by the vet"
   },
   "petNutrition": {
     "title": "Diet & nutritional impact",
