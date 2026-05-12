@@ -10,6 +10,9 @@ import { format, parseISO } from 'date-fns';
 import { ptBR, enUS } from 'date-fns/locale';
 import PhysicalExamBlock, { type PhysicalExam } from '@/components/pet/PhysicalExamBlock';
 import ExamResultsWithReferences from '@/components/pet/ExamResultsWithReferences';
+import AssessmentInterpretation, { type AssessmentInterpretationData } from '@/components/pet/AssessmentInterpretation';
+import ConsultationMachineSummary from '@/components/pet/ConsultationMachineSummary';
+import { partitionExams, mergePhysicalExamRows } from '@/services/exam-classification';
 
 interface Props {
   petId: string;
@@ -69,6 +72,11 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
       <CardContent className="space-y-3">
         {data.map((c, idx) => {
           const isOpen = expanded[c.id] ?? c.is_latest;
+          const { physical: physicalExamRows, complementary: complementaryExams } = partitionExams(c.exams ?? []);
+          const mergedPhysicalExam = mergePhysicalExamRows(
+            (c as any).physical_exam ?? null,
+            physicalExamRows,
+          );
           const dateStr = (() => {
             try { return format(parseISO(c.consultation_date), 'PP', { locale }); } catch { return c.consultation_date; }
           })();
@@ -117,25 +125,43 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
                     <div className="mt-2 space-y-2 text-sm">
                       {/* 1) Exame físico estruturado (com fallback texto livre) */}
                       <PhysicalExamBlock
-                        exam={(c as any).physical_exam as PhysicalExam}
+                        exam={mergedPhysicalExam as PhysicalExam}
                         fallbackText={c.clinical_exam}
                       />
 
                       {/* 2) Exames complementares com faixa de referência canina */}
-                      {c.exams.length > 0 && (
-                        <ExamResultsWithReferences exams={c.exams} />
+                      {complementaryExams.length > 0 ? (
+                        <ExamResultsWithReferences exams={complementaryExams} />
+                      ) : (
+                        <div>
+                          <p className="text-xs uppercase text-muted-foreground mb-1">
+                            {t('examResults.title')}
+                          </p>
+                          <p className="text-xs text-muted-foreground italic">
+                            {t('examResults.empty', {
+                              defaultValue: 'Sem exames complementares (sangue, imagem, urina) registrados nesta consulta.',
+                            })}
+                          </p>
+                        </div>
                       )}
 
-                      {/* 3) Avaliação por último, em destaque */}
-                      {c.assessment && (
+                      {/* 3) Suspeita / Diagnóstico (texto cru do vet) + interpretação LLM */}
+                      {(c.assessment || (c as any).assessment_interpretation) && (
                         <div className="border-l-2 border-primary/60 pl-3 py-1 bg-primary/5 rounded-sm">
-                          <p className="text-xs uppercase text-muted-foreground font-semibold">{t('petTimeline.assessment')}</p>
-                          <p>{c.assessment}</p>
+                          <p className="text-xs uppercase text-muted-foreground font-semibold">
+                            {t('petTimeline.assessmentTitle', { defaultValue: 'Suspeita / Diagnóstico' })}
+                          </p>
+                          {c.assessment && <p>{c.assessment}</p>}
+                          <AssessmentInterpretation
+                            data={(c as any).assessment_interpretation as AssessmentInterpretationData | null}
+                          />
                         </div>
                       )}
                       {c.plan && (
                         <div>
-                          <p className="text-xs uppercase text-muted-foreground">{t('petTimeline.plan')}</p>
+                          <p className="text-xs uppercase text-muted-foreground">
+                            {t('petTimeline.planTitle', { defaultValue: 'Plano / Conduta' })}
+                          </p>
                           <p>{c.plan}</p>
                         </div>
                       )}
@@ -152,10 +178,10 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
                             {c.medications.length} {t('petTimeline.medsAdded')}
                           </Badge>
                         )}
-                        {c.exams.length > 0 && (
+                        {complementaryExams.length > 0 && (
                           <Badge variant="secondary" className="gap-1">
                             <TestTube className="h-3 w-3" />
-                            {c.exams.length} {t('petTimeline.examsAdded')}
+                            {complementaryExams.length} {t('petTimeline.examsAdded')}
                           </Badge>
                         )}
                         {c.notes.length > 0 && (
@@ -184,24 +210,12 @@ const PetConsultationsTimeline: React.FC<Props> = ({ petId }) => {
                         </ul>
                       )}
 
-                      {/* 4) Tags representativas no rodapé */}
-                      {Array.isArray((c as any).tags) && (c as any).tags.length > 0 && (
-                        <div className="pt-2 border-t border-border/60">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                            {t('consultationTags.title')}
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {((c as any).tags as string[]).map((tag, i) => (
-                              <span
-                                key={i}
-                                className="text-[10px] rounded-full border border-border bg-muted/40 px-2 py-0.5 text-muted-foreground"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      {/* 4) Quadro amarelo: interpretação automática (tags + síntese + termos canônicos) */}
+                      <ConsultationMachineSummary
+                        tags={(c as any).tags as string[] | null}
+                        machineSummary={(c as any).machine_summary as string | null}
+                        interpretation={(c as any).assessment_interpretation as AssessmentInterpretationData | null}
+                      />
                     </div>
                   )}
                   <Button
