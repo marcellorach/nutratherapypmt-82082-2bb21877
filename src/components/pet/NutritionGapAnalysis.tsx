@@ -1,11 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertTriangle, CheckCircle2, Loader2, ScaleIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, ScaleIcon, TrendingDown, TrendingUp, Search, Database, ShieldCheck } from 'lucide-react';
 import { Dna } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePetNutrition } from '@/hooks/usePetConsultations';
+import { usePetFoodEnrichment } from '@/hooks/usePetFoodEnrichment';
+import { useToast } from '@/hooks/use-toast';
 import {
   analyzeNutritionGaps,
   inferLifeStage,
@@ -49,6 +54,13 @@ const NutritionGapAnalysis: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || 'pt').startsWith('en') ? 'en' : 'pt';
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('admin');
+  const { toast } = useToast();
+  const { data: nutritionSnapshots } = usePetNutrition(petId);
+  const currentNutrition = (nutritionSnapshots ?? []).find((n) => n.is_current) ?? (nutritionSnapshots ?? [])[0];
+  const firstUnlinkedItem = currentNutrition?.items?.find((it) => !it.product_id) ?? currentNutrition?.items?.[0];
+  const { lookup, incorporate, lastLookup, resetLookup } = usePetFoodEnrichment(petId);
 
   const { data: breedCtx } = useBreedPredispositionsForPet(breed_name ?? undefined);
   const breed_predispositions: BreedPredispositionInput[] | undefined = breedCtx?.predispositions as any;
@@ -88,6 +100,129 @@ const NutritionGapAnalysis: React.FC<Props> = ({
   if (!data) return null;
 
   const noLinked = data.warnings.includes('no_linked_products') || !data.has_data;
+
+  // ---------- Caso: ração não está no banco ----------
+  if (noLinked) {
+    const brand = firstUnlinkedItem?.raw_brand_text ?? '';
+    const product = firstUnlinkedItem?.raw_product_text ?? '';
+    const canSearch = isAdmin && !!brand && !!product;
+    const lookupConfidence = lastLookup?.parsed?.confidence ?? null;
+    const canIncorporate =
+      isAdmin && !!brand && !!product &&
+      lookupConfidence != null && lookupConfidence >= 0.4;
+
+    return (
+      <Card className="border-amber-200/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <ScaleIcon className="h-4 w-4 text-amber-600" />
+            {t('nutritionGap.title')}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">{t('nutritionGap.subtitle')}</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 space-y-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <p>{t('nutritionGap.notInCatalog')}</p>
+            </div>
+            {(brand || product) && (
+              <div className="text-[11px] text-amber-800/90 pl-6">
+                <span className="font-medium">{t('nutritionGap.observedFood')}:</span>{' '}
+                {brand}{product ? ` — ${product}` : ''}
+              </div>
+            )}
+          </div>
+
+          {isAdmin ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!canSearch || lookup.isPending}
+                  onClick={() => {
+                    resetLookup();
+                    lookup.mutate(
+                      { brand_name: brand, product_name: product, species },
+                      {
+                        onError: (e: any) =>
+                          toast({
+                            title: t('nutritionGap.lookupFailed'),
+                            description: e?.message ?? String(e),
+                            variant: 'destructive',
+                          }),
+                      },
+                    );
+                  }}
+                >
+                  {lookup.isPending ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <Search className="h-3 w-3 mr-1" />
+                  )}
+                  {t('nutritionGap.searchCatalog')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  disabled={!canIncorporate || incorporate.isPending}
+                  onClick={() => {
+                    incorporate.mutate(
+                      {
+                        brand_name: brand,
+                        product_name: product,
+                        species,
+                        link_to_item_id: firstUnlinkedItem?.id,
+                      },
+                      {
+                        onSuccess: () =>
+                          toast({
+                            title: t('nutritionGap.incorporateOk'),
+                            description: t('nutritionGap.incorporateOkDesc'),
+                          }),
+                        onError: (e: any) =>
+                          toast({
+                            title: t('nutritionGap.incorporateFailed'),
+                            description: e?.message ?? String(e),
+                            variant: 'destructive',
+                          }),
+                      },
+                    );
+                  }}
+                >
+                  {incorporate.isPending ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <Database className="h-3 w-3 mr-1" />
+                  )}
+                  {t('nutritionGap.incorporate')}
+                </Button>
+              </div>
+              {lastLookup && (
+                <div className="text-[11px] text-muted-foreground border rounded p-2 bg-muted/30">
+                  <div className="flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" />
+                    {t('nutritionGap.lookupConfidence')}:{' '}
+                    <span className="font-medium text-foreground">
+                      {lookupConfidence != null ? `${Math.round(lookupConfidence * 100)}%` : '—'}
+                    </span>
+                  </div>
+                  {!canIncorporate && lookupConfidence != null && lookupConfidence < 0.4 && (
+                    <p className="mt-1">{t('nutritionGap.lookupLowConfidence')}</p>
+                  )}
+                </div>
+              )}
+              <p className="text-[11px] text-muted-foreground">
+                {t('nutritionGap.adminOnlyHint')}
+              </p>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    );
+  }
+  // ---------- Fim "ração não no banco" ----------
 
   return (
     <Card className="border-amber-200/60">
@@ -138,12 +273,7 @@ const NutritionGapAnalysis: React.FC<Props> = ({
           </div>
         )}
 
-        {noLinked ? (
-          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-            {t('nutritionGap.noLinked')}
-          </div>
-        ) : (
-          <TooltipProvider>
+        <TooltipProvider>
             <div className="space-y-2">
               {data.gaps.map((g) => (
                 <div key={g.key} className="flex items-start justify-between gap-3 border rounded p-2">
@@ -188,8 +318,7 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                 </div>
               ))}
             </div>
-          </TooltipProvider>
-        )}
+        </TooltipProvider>
 
         {data.breed_recommendations.length > 0 && (
           <div className="pt-3 border-t">
@@ -198,8 +327,14 @@ const NutritionGapAnalysis: React.FC<Props> = ({
               <h4 className="text-sm font-semibold">
                 {t('nutritionGap.breed.title')}{breedCtx?.breed?.name ? ` (${breedCtx.breed.name})` : ''}
               </h4>
+              <Badge variant="outline" className="text-[10px] gap-1 border-blue-400/50 text-blue-700 bg-blue-50">
+                {t('nutritionGap.breed.preventiveBadge')}
+              </Badge>
             </div>
             <p className="text-xs text-muted-foreground mb-3">{t('nutritionGap.breed.subtitle')}</p>
+            <p className="text-[11px] text-blue-700 bg-blue-50/60 border border-blue-200/60 rounded p-2 mb-3">
+              {t('nutritionGap.breed.disclaimer')}
+            </p>
             <TooltipProvider>
               <div className="space-y-3">
                 {data.breed_recommendations.map((rec) => {
@@ -208,17 +343,21 @@ const NutritionGapAnalysis: React.FC<Props> = ({
                     <div key={condLabel} className="rounded-lg border border-purple-200/60 bg-purple-50/40 p-3">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className="text-sm font-medium">{condLabel}</span>
+                        {rec.already_active ? (
+                          <Badge variant="destructive" className="text-[10px]">
+                            {t('nutritionGap.breed.therapeuticBadge')}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] border-blue-400/50 text-blue-700 bg-blue-50">
+                            {t('nutritionGap.breed.preventiveBadge')}
+                          </Badge>
+                        )}
                         <Badge variant="outline" className="text-[10px]">
                           {t('nutritionGap.breed.risk')} {rec.risk_factor.toFixed(1)}×
                         </Badge>
                         <Badge variant="outline" className="text-[10px] capitalize">
                           {t('nutritionGap.breed.evidence')}: {rec.evidence_grade}
                         </Badge>
-                        {rec.already_active && (
-                          <Badge variant="destructive" className="text-[10px]">
-                            {t('nutritionGap.breed.alreadyActive')}
-                          </Badge>
-                        )}
                       </div>
                       <div className="space-y-1">
                         {rec.gaps.map((g) => (
