@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-12T17:38:52.988Z
+Generated: 2026-05-12T17:55:21.782Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.71.0
+## Latest i18n version: 1.73.0
 
 ## Changes by area (last 14 days)
-- **vet-ui**: 12
+- **vet-ui**: 13
 - **admin**: 11
 - **tutor-ui**: 7
 - **meta**: 7
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-12 · [vet-ui] CHANGED — Card de consulta: separa exame físico vs complementares, renomeia avaliação e adiciona quadro amarelo de interpretação automática
+- Achados de "Neurological/Orthopedic/Cardiovascular Examination" gravados em `pet_exams` deixam de poluir a tabela de Exames Complementares e passam a ser fundidos em `physical_exam.specific.<área>` no `PhysicalExamBlock`. Lógica em novo `src/services/exam-classification.ts` (`partitionExams`, `mergePhysicalExamRows`).
+- Tabela "Exames Complementares" agora mostra estado vazio explícito quando não há sangue/imagem/urina na consulta.
+- Bloco "Avaliação" renomeado para "Suspeita / Diagnóstico" (`petTimeline.assessmentTitle`) e "Conduta" para "Plano / Conduta" (`petTimeline.planTitle`). Texto cru do veterinário permanece intacto.
+_files: src/services/exam-classification.ts, src/components/pet/AssessmentInterpretation.tsx, src/components/pet/ConsultationMachineSummary.tsx, src/components/pet/PetConsultationsTimeline.tsx…_
+
 ### 2026-05-12 · [vet-ui] ADDED — Reestrutura da consulta clínica + agrupamento gerociência + remoção da aba Notas
 - Aba Notas Clínicas removida do `PetProfilePage` (notas continuam visíveis dentro de cada consulta no histórico). Card "0 Notas Clínicas" mantido no topo conforme decisão do usuário.
 - Lista de condições no perfil agora ordena condições tradicionais primeiro e empurra hallmarks de gerociência (inflammaging, sarcopenia, disfunção mitocondrial, senescência celular, CCD, imunossenescência etc.) para o final, marcadas como "atenção geriátrica" via `condition-classification.ts`.
@@ -71,12 +77,6 @@ _status: parcial_
 - Schema: colunas `consultation_id` adicionadas a `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes` para vincular itens à consulta de origem
 - Schema: novas tabelas `pet_nutrition` (snapshot da dieta por pet/consulta com `is_current`) + `pet_nutrition_items` (N produtos por entrada, com `share_percent` para dietas mistas)
 _files: src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/config/admin-tabs.ts, src/hooks/useSystemGuideStats.ts_
-
-### 2026-05-11 · [i18n] FIXED — Sidebar/tabs admin mostrando chaves de tradução literais
-- Raiz do problema: os arquivos `src/locales/{pt,en}/translation.json` continham a chave `"admin"` declarada duas vezes no nível raiz. O segundo bloco (adicionado junto com a Base Farmacológica em 2026-05-09) sobrescrevia silenciosamente o primeiro durante o `JSON.parse`, apagando todos os namespaces `admin.sidebar.*`, `admin.tabs.*`, `admin.errors.*`, `admin.studies.*`, etc. — daí as chaves cruas aparecendo em quase toda a UI administrativa
-- Correção: fundidos os dois blocos `"admin"` num só (PT e EN), preservando `pharmacology` ao lado das 19 sub-chaves originais (total 20)
-- Salvaguarda: novo script `scripts/check-translation-duplicates.mjs` (parser custom que detecta chaves duplicadas em qualquer profundidade) exposto via `npm run check:translations` — o `audit-translations` antigo só checava paridade PT↔EN, não duplicatas internas
-_files: scripts/check-translation-duplicates.mjs, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

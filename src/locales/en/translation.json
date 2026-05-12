@@ -5586,9 +5586,9 @@
         "date": "Date",
         "weight": "Weight (kg)",
         "bcs": "BCS (1-9)",
-        "chiefComplaint": "Chief complaint",
-        "assessment": "Findings / Diagnosis",
-        "plan": "Plan",
+        "chiefComplaint": "Reason",
+        "assessment": "Assessment / Diagnosis",
+        "plan": "Plan / Conduct",
         "conditions": "Diagnoses (comma-separated)",
         "medications": "Medications (one per line: name | dose | frequency)",
         "add": "Add consultation"
@@ -7684,6 +7684,8 @@
     "reason": "Reason",
     "clinicalExam": "Clinical exam",
     "assessment": "Assessment",
+    "assessmentTitle": "Assessment / Diagnosis",
+    "planTitle": "Plan / Conduct",
     "plan": "Plan",
     "diagnoses": "diagnoses",
     "medsAdded": "medications",
@@ -7727,10 +7729,21 @@
       "low": "Below",
       "high": "Above",
       "unknown": "—"
-    }
+    },
+    "empty": "No complementary exams (blood, imaging, urine) recorded for this visit."
   },
   "consultationTags": {
     "title": "Representative tags (AI)"
+  },
+  "assessmentInterpretation": {
+    "title": "Automatic interpretation (LLM)",
+    "systems": "Systems:"
+  },
+  "machineSummary": {
+    "title": "Automatic interpretation of this visit",
+    "tags": "Clinical tags",
+    "canonical": "Canonical terms (VetGraphRAG)",
+    "disclaimer": "These data feed the VetGraphRAG analysis. The vet's original text is not altered."
   },
   "geroscienceAttention": {
     "sectionTitle": "Geriatric / geroscience attention",

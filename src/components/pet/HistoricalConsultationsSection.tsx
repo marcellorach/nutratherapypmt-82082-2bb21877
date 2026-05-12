@@ -133,7 +133,7 @@ const HistoricalConsultationsSection: React.FC<Props> = ({ consultations, onChan
             <div>
               <Label className="text-xs">
                 {t('petRegistration.form.historicalConsultations.chiefComplaint', {
-                  defaultValue: 'Queixa principal',
+                  defaultValue: 'Motivo',
                 })}
               </Label>
               <Input
@@ -146,7 +146,7 @@ const HistoricalConsultationsSection: React.FC<Props> = ({ consultations, onChan
               <div>
                 <Label className="text-xs">
                   {t('petRegistration.form.historicalConsultations.assessment', {
-                    defaultValue: 'Achados / Diagnóstico',
+                    defaultValue: 'Suspeita / Diagnóstico',
                   })}
                 </Label>
                 <Textarea
@@ -158,7 +158,7 @@ const HistoricalConsultationsSection: React.FC<Props> = ({ consultations, onChan
               <div>
                 <Label className="text-xs">
                   {t('petRegistration.form.historicalConsultations.plan', {
-                    defaultValue: 'Conduta',
+                    defaultValue: 'Plano / Conduta',
                   })}
                 </Label>
                 <Textarea

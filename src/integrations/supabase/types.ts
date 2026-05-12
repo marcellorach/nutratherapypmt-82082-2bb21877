@@ -2370,6 +2370,7 @@ export type Database = {
       pet_consultations: {
         Row: {
           assessment: string | null
+          assessment_interpretation: Json | null
           body_condition_score: number | null
           chief_complaint: string | null
           clinical_exam: string | null
@@ -2378,6 +2379,7 @@ export type Database = {
           created_by: string | null
           id: string
           is_latest: boolean
+          machine_summary: string | null
           pet_id: string
           physical_exam: Json | null
           plan: string | null
@@ -2389,6 +2391,7 @@ export type Database = {
         }
         Insert: {
           assessment?: string | null
+          assessment_interpretation?: Json | null
           body_condition_score?: number | null
           chief_complaint?: string | null
           clinical_exam?: string | null
@@ -2397,6 +2400,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_latest?: boolean
+          machine_summary?: string | null
           pet_id: string
           physical_exam?: Json | null
           plan?: string | null
@@ -2408,6 +2412,7 @@ export type Database = {
         }
         Update: {
           assessment?: string | null
+          assessment_interpretation?: Json | null
           body_condition_score?: number | null
           chief_complaint?: string | null
           clinical_exam?: string | null
@@ -2416,6 +2421,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_latest?: boolean
+          machine_summary?: string | null
           pet_id?: string
           physical_exam?: Json | null
           plan?: string | null

@@ -5586,9 +5586,9 @@
         "date": "Data",
         "weight": "Peso (kg)",
         "bcs": "ECC (1-9)",
-        "chiefComplaint": "Queixa principal",
-        "assessment": "Achados / Diagnóstico",
-        "plan": "Conduta",
+        "chiefComplaint": "Motivo",
+        "assessment": "Suspeita / Diagnóstico",
+        "plan": "Plano / Conduta",
         "conditions": "Diagnósticos (separados por vírgula)",
         "medications": "Medicações (uma por linha: nome | dose | frequência)",
         "add": "Adicionar consulta"
@@ -7684,6 +7684,8 @@
     "reason": "Motivo",
     "clinicalExam": "Exame clínico",
     "assessment": "Avaliação",
+    "assessmentTitle": "Suspeita / Diagnóstico",
+    "planTitle": "Plano / Conduta",
     "plan": "Conduta",
     "diagnoses": "diagnósticos",
     "medsAdded": "medicações",
@@ -7727,10 +7729,21 @@
       "low": "Abaixo",
       "high": "Acima",
       "unknown": "—"
-    }
+    },
+    "empty": "Sem exames complementares (sangue, imagem, urina) registrados nesta consulta."
   },
   "consultationTags": {
     "title": "Tags representativas (IA)"
+  },
+  "assessmentInterpretation": {
+    "title": "Interpretação automática (LLM)",
+    "systems": "Sistemas:"
+  },
+  "machineSummary": {
+    "title": "Interpretação automática desta consulta",
+    "tags": "Tags clínicas",
+    "canonical": "Termos canônicos (VetGraphRAG)",
+    "disclaimer": "Esses dados alimentam a análise VetGraphRAG. O texto original do veterinário não é alterado."
   },
   "geroscienceAttention": {
     "sectionTitle": "Atenção geriátrica / gerociência",
