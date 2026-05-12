@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-12T17:34:06.102Z
+// Última geração: 2026-05-12T17:38:52.984Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,33 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-12";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-12",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Reestrutura da consulta clínica + agrupamento gerociência + remoção da aba Notas",
+    "bullets": [
+      "Aba Notas Clínicas removida do `PetProfilePage` (notas continuam visíveis dentro de cada consulta no histórico). Card \"0 Notas Clínicas\" mantido no topo conforme decisão do usuário.",
+      "Lista de condições no perfil agora ordena condições tradicionais primeiro e empurra hallmarks de gerociência (inflammaging, sarcopenia, disfunção mitocondrial, senescência celular, CCD, imunossenescência etc.) para o final, marcadas como \"atenção geriátrica\" via `condition-classification.ts`.",
+      "Novo serviço `src/services/condition-classification.ts` com whitelist EN/PT de hallmarks de envelhecimento e helper `geroscienceOriginLabelKey` que devolve i18n key + params (`bySuggestedExams`, `byVetVisit`, `byVetGeneric`).",
+      "Novo componente `PhysicalExamBlock` para o Exame Físico estruturado (Geral: postura, pele, comportamento, BCS · Específico: parâmetros fisiológicos, ortopédico, cardiovascular, neurológico, abdominal) com fallback para texto livre.",
+      "Novo componente `ExamResultsWithReferences` que renderiza exames laboratoriais em tabela comparando com faixas de referência caninas built-in (ALT, BUN, creatinina etc.) e marca status normal/alto/baixo.",
+      "`PetConsultationsTimeline` refatorado para a ordem aprovada: Motivo → Exame Físico → Exames Complementares (com referências) → Avaliação (destacada por último) → Conduta → Tags representativas.",
+      "Migração `pet_consultations`: novas colunas `physical_exam JSONB` e `tags TEXT[] DEFAULT '{}'` (mantém `clinical_exam TEXT` para retrocompatibilidade).",
+      "I18N_VERSION 1.70.0 → 1.71.0; chaves novas em PT/EN para `physicalExam.*`, `examResults.*`, `geroscienceAttention.*` e `consultationCard.tags`.",
+      "Files: src/pages/veterinario/PetProfilePage.tsx, src/components/pet/PetConsultationsTimeline.tsx, src/components/pet/PhysicalExamBlock.tsx, src/components/pet/ExamResultsWithReferences.tsx, src/services/condition-classification.ts, src/locales/{pt,en}/translation.json, src/i18n.ts, supabase/migrations/20260512172541_*.sql"
+    ],
+    "files": [
+      "src/services/condition-classification.ts",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/components/pet/PetConsultationsTimeline.tsx",
+      "src/components/pet/PhysicalExamBlock.tsx",
+      "src/components/pet/ExamResultsWithReferences.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.71.0"
+  },
   {
     "date": "2026-05-12",
     "kind": "added",
