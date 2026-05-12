@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-12 — Nutrition gap & breed-based recommendations (Passos 1–4)
+<!-- area: vet-ui · status: entregue · i18n: 1.68.0 -->
+- Passo 1: aba "Atual" no perfil do pet expondo dieta/ração com vínculo ao catálogo nutricional.
+- Passo 2: catálogo `pet_food_products` populado com 20 produtos reais (Royal Canin, Hill's, Premier, Pro Plan, Acana, Orijen, N&D, Taste of the Wild, Golden) e perfis nutricionais (`pet_food_nutrition`) com proteína/gordura/kcal/EPA-DHA/Ca:P/glicosamina e flag AAFCO.
+- Passo 3: motor `nutrition-gap-analyzer.ts` comparando dieta atual vs. mínimos FEDIAF 2024 + alvos clínicos (DRC, OA, hepático…) com cálculo de RER/MER, conversão as-fed→DM e ponderação por `share_percent`.
+- Passo 4: justificativas conectadas a `breed_predispositions` — bloco "Sugerido pela raça" com `risk_factor`, `evidence_grade`, alvos preventivos e tooltips com racional científico (ex.: Roush 2010 para EPA+DHA em OA).
+- I18n: chaves `nutritionGap.*` em PT/EN, bump 1.67.0 → 1.68.0; remoção dos textos `lang === 'pt' ? ... : ...` inline em `NutritionGapAnalysis.tsx`.
+- Files: src/components/pet/NutritionGapAnalysis.tsx, src/components/pet/PetNutritionPanel.tsx, src/services/nutrition-gap-analyzer.ts, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Added - 2026-05-11 — Cadastro manual rico (Fase 3) + i18n (Fase 4)
 <!-- area: vet-ui · status: entregue · i18n: 1.67.0 -->
 - Foto do pet no cadastro (bucket `pet-photos`) com preview e upload pós-INSERT.

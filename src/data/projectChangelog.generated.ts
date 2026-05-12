@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-11T20:22:40.551Z
+// Última geração: 2026-05-12T03:14:35.866Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,34 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-11";
+export const lastChangelogDate = "2026-05-12";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-12",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Nutrition gap & breed-based recommendations (Passos 1–4)",
+    "bullets": [
+      "Passo 1: aba \"Atual\" no perfil do pet expondo dieta/ração com vínculo ao catálogo nutricional.",
+      "Passo 2: catálogo `pet_food_products` populado com 20 produtos reais (Royal Canin, Hill's, Premier, Pro Plan, Acana, Orijen, N&D, Taste of the Wild, Golden) e perfis nutricionais (`pet_food_nutrition`) com proteína/gordura/kcal/EPA-DHA/Ca:P/glicosamina e flag AAFCO.",
+      "Passo 3: motor `nutrition-gap-analyzer.ts` comparando dieta atual vs. mínimos FEDIAF 2024 + alvos clínicos (DRC, OA, hepático…) com cálculo de RER/MER, conversão as-fed→DM e ponderação por `share_percent`.",
+      "Passo 4: justificativas conectadas a `breed_predispositions` — bloco \"Sugerido pela raça\" com `risk_factor`, `evidence_grade`, alvos preventivos e tooltips com racional científico (ex.: Roush 2010 para EPA+DHA em OA).",
+      "I18n: chaves `nutritionGap.*` em PT/EN, bump 1.67.0 → 1.68.0; remoção dos textos `lang === 'pt' ? ... : ...` inline em `NutritionGapAnalysis.tsx`.",
+      "Files: src/components/pet/NutritionGapAnalysis.tsx, src/components/pet/PetNutritionPanel.tsx, src/services/nutrition-gap-analyzer.ts, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "src/components/pet/NutritionGapAnalysis.tsx",
+      "src/components/pet/PetNutritionPanel.tsx",
+      "src/services/nutrition-gap-analyzer.ts",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.68.0"
+  },
   {
     "date": "2026-05-11",
     "kind": "added",

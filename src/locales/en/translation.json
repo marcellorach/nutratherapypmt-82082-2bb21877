@@ -7717,5 +7717,37 @@
       "prescription": "Prescription",
       "mixed_natural_commercial": "Mixed (natural+commercial)"
     }
+  },
+  "nutritionGap": {
+    "title": "Nutritional gap analysis (FEDIAF/AAFCO)",
+    "subtitle": "Compares the current diet composition against FEDIAF 2024 minimums and clinical targets for the pet's life stage and conditions.",
+    "loading": "Computing gaps…",
+    "lifeStage": "Life stage",
+    "target": "Target",
+    "intake": "Intake",
+    "density": "Density",
+    "perDay": "day",
+    "underfeeding": "Underfeeding: intake < 85% of estimated caloric need.",
+    "overfeeding": "Overfeeding: intake > 115% of estimated caloric need.",
+    "noLinked": "Current diet is not linked to the nutrition catalog (free text only). Link brand/product under \"Current\" to enable quantitative gap analysis.",
+    "observed": "Observed",
+    "targetLabel": "Target",
+    "ratio": "ratio",
+    "rationale": "Rationale",
+    "source": "Source",
+    "status": {
+      "deficient": "Deficient",
+      "excess": "Excess",
+      "adequate": "Adequate",
+      "unknown": "No data"
+    },
+    "breed": {
+      "title": "Suggested by breed",
+      "subtitle": "Conditions with documented breed predisposition and the target nutrients for early prevention/management.",
+      "risk": "Risk",
+      "evidence": "Evidence",
+      "alreadyActive": "Already active",
+      "predisposition": "Breed predisposition"
+    }
   }
 }
