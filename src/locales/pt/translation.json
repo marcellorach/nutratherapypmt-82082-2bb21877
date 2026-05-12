@@ -7747,7 +7747,21 @@
       "risk": "Risco",
       "evidence": "Evidência",
       "alreadyActive": "Já ativa",
-      "predisposition": "Predisposição racial"
-    }
+      "predisposition": "Predisposição racial",
+      "preventiveBadge": "Profilática (preventiva)",
+      "therapeuticBadge": "Manejo terapêutico",
+      "disclaimer": "Sugestões profiláticas: o pet ainda NÃO apresenta as condições listadas — apenas predisposição racial documentada. Use para prevenção/manejo precoce."
+    },
+    "notInCatalog": "A análise de complementação nutricional não foi concluída porque esta ração ainda não está no nosso banco de dados.",
+    "observedFood": "Ração observada",
+    "searchCatalog": "Procurar",
+    "incorporate": "Incorporar",
+    "lookupConfidence": "Confiança da extração",
+    "lookupLowConfidence": "Confiança baixa demais para incorporação automática. Refine a marca/produto e tente novamente, ou cadastre manualmente.",
+    "lookupFailed": "Falha ao buscar ração",
+    "incorporateOk": "Ração incorporada",
+    "incorporateOkDesc": "A composição foi salva no catálogo e a análise será recalculada.",
+    "incorporateFailed": "Falha ao incorporar ração",
+    "adminOnlyHint": "Ações de catálogo restritas a administradores."
   }
 }

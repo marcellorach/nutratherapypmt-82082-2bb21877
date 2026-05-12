@@ -7747,7 +7747,21 @@
       "risk": "Risk",
       "evidence": "Evidence",
       "alreadyActive": "Already active",
-      "predisposition": "Breed predisposition"
-    }
+      "predisposition": "Breed predisposition",
+      "preventiveBadge": "Prophylactic (preventive)",
+      "therapeuticBadge": "Therapeutic management",
+      "disclaimer": "Prophylactic suggestions: pet does NOT have the listed conditions — only documented breed predisposition. Use for prevention / early management."
+    },
+    "notInCatalog": "Nutritional supplementation analysis could not be completed because this food is not yet in our catalog.",
+    "observedFood": "Observed food",
+    "searchCatalog": "Search",
+    "incorporate": "Incorporate",
+    "lookupConfidence": "Extraction confidence",
+    "lookupLowConfidence": "Confidence too low for automatic incorporation. Refine brand/product and retry, or register manually.",
+    "lookupFailed": "Food lookup failed",
+    "incorporateOk": "Food incorporated",
+    "incorporateOkDesc": "Composition saved to catalog; analysis will recompute.",
+    "incorporateFailed": "Failed to incorporate food",
+    "adminOnlyHint": "Catalog actions are restricted to administrators."
   }
 }
