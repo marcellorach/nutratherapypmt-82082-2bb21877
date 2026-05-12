@@ -5586,9 +5586,9 @@
         "date": "Data",
         "weight": "Peso (kg)",
         "bcs": "ECC (1-9)",
-        "chiefComplaint": "Queixa principal",
-        "assessment": "Achados / Diagnóstico",
-        "plan": "Conduta",
+        "chiefComplaint": "Motivo",
+        "assessment": "Suspeita / Diagnóstico",
+        "plan": "Plano / Conduta",
         "conditions": "Diagnósticos (separados por vírgula)",
         "medications": "Medicações (uma por linha: nome | dose | frequência)",
         "add": "Adicionar consulta"
