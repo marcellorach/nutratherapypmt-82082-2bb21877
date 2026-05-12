@@ -834,13 +834,17 @@ const PetProfilePage: React.FC = () => {
                 <CardContent className="space-y-4">
                   {conditionInsights.data && (
                     <ComorbidityMap
-                      conditions={conditions.map((c: any) => c.condition_name)}
+                      conditions={conditions
+                        .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
+                        .map((c: any) => c.condition_name)}
                       causalPathways={conditionInsights.data.causalPathways}
                       synergisticCompounds={conditionInsights.data.synergisticCompounds}
                     />
                   )}
                   <div className="space-y-2">
-                    {conditions.map((c: any) => {
+                    {conditions
+                      .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
+                      .map((c: any) => {
                       const insight = conditionInsights.data?.conditionInsights?.find(
                         (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
                       );
