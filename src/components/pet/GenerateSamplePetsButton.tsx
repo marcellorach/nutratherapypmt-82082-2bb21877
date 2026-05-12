@@ -226,7 +226,12 @@ const SAMPLE_PETS: DemoPet[] = [
       daily_amount_g: 320, meals_per_day: 2, treats_frequency: 'none', water_intake: 'normal',
       restrictions: ['low_calorie', 'joint_support'],
       notes: 'Dieta de controle de peso com suporte articular, iniciada na 1ª consulta há ~12 meses.',
-      items: [{ raw_brand_text: 'Hill\'s', raw_product_text: 'Prescription Diet Metabolic + Mobility', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Hill\'s',
+        raw_product_text: 'Prescription Diet Metabolic + Mobility',
+        share_percent: 100,
+        catalog: { brand: 'Hill\'s', name: 'Prescription Diet Metabolic + Mobility' },
+      }],
       introducedAtConsultationIdx: 0,
     },
   },
@@ -549,10 +554,26 @@ const GenerateSamplePetsButton: React.FC = () => {
           if (nutError) throw nutError;
 
           if (nutrition.items?.length) {
+            // Resolve product_id from catalog hint (brand+name) when present
+            const itemsWithIds = await Promise.all(nutrition.items.map(async (i) => {
+              let productId: string | null = null;
+              if (i.catalog) {
+                const { data: brand } = await (supabase as any)
+                  .from('pet_food_brands').select('id').eq('name', i.catalog.brand).maybeSingle();
+                if (brand?.id) {
+                  const { data: prod } = await (supabase as any)
+                    .from('pet_food_products').select('id')
+                    .eq('brand_id', brand.id).eq('name', i.catalog.name).maybeSingle();
+                  productId = prod?.id ?? null;
+                }
+              }
+              return { i, productId };
+            }));
             const { error: itemErr } = await (supabase as any)
               .from('pet_nutrition_items')
-              .insert(nutrition.items.map(i => ({
+              .insert(itemsWithIds.map(({ i, productId }) => ({
                 nutrition_id: nut.id,
+                product_id: productId,
                 raw_brand_text: i.raw_brand_text,
                 raw_product_text: i.raw_product_text,
                 share_percent: i.share_percent,
