@@ -38,6 +38,7 @@ import { runClinicalAnalysisPipeline, type ClinicalAnalysisResult, type Clinical
 import { pm } from '@/services/clinical-pipeline-messages';
 import { useToast } from '@/hooks/use-toast';
 import { useUpsertPetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
+import { isGeroscienceCondition } from '@/services/condition-classification';
 
 const severityColors: Record<string, string> = {
   mild: 'bg-yellow-100 text-yellow-800',
