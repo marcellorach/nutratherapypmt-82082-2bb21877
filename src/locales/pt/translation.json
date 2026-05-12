@@ -7717,5 +7717,37 @@
       "prescription": "Prescrição clínica",
       "mixed_natural_commercial": "Mista (natural+comercial)"
     }
+  },
+  "nutritionGap": {
+    "title": "Análise de déficit nutricional (FEDIAF/AAFCO)",
+    "subtitle": "Compara a composição da dieta atual contra os mínimos FEDIAF 2024 e alvos clínicos para o estágio de vida e condições do pet.",
+    "loading": "Calculando déficits…",
+    "lifeStage": "Estágio",
+    "target": "Necessidade",
+    "intake": "Consumo",
+    "density": "Densidade",
+    "perDay": "dia",
+    "underfeeding": "Subalimentação: consumo < 85% da necessidade calórica estimada.",
+    "overfeeding": "Superalimentação: consumo > 115% da necessidade calórica estimada.",
+    "noLinked": "A ração atual não está vinculada ao catálogo nutricional (apenas texto livre). Vincule a marca/produto em \"Atual\" para habilitar a análise quantitativa de déficits.",
+    "observed": "Observado",
+    "targetLabel": "Alvo",
+    "ratio": "razão",
+    "rationale": "Justificativa",
+    "source": "Fonte",
+    "status": {
+      "deficient": "Déficit",
+      "excess": "Excesso",
+      "adequate": "Adequado",
+      "unknown": "Sem dado"
+    },
+    "breed": {
+      "title": "Sugerido pela raça",
+      "subtitle": "Condições com predisposição racial documentada e os nutrientes-alvo para prevenção/manejo precoce.",
+      "risk": "Risco",
+      "evidence": "Evidência",
+      "alreadyActive": "Já ativa",
+      "predisposition": "Predisposição racial"
+    }
   }
 }
