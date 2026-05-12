@@ -2379,7 +2379,9 @@ export type Database = {
           id: string
           is_latest: boolean
           pet_id: string
+          physical_exam: Json | null
           plan: string | null
+          tags: string[]
           updated_at: string
           veterinarian_id: string | null
           veterinarian_name: string | null
@@ -2396,7 +2398,9 @@ export type Database = {
           id?: string
           is_latest?: boolean
           pet_id: string
+          physical_exam?: Json | null
           plan?: string | null
+          tags?: string[]
           updated_at?: string
           veterinarian_id?: string | null
           veterinarian_name?: string | null
@@ -2413,7 +2417,9 @@ export type Database = {
           id?: string
           is_latest?: boolean
           pet_id?: string
+          physical_exam?: Json | null
           plan?: string | null
+          tags?: string[]
           updated_at?: string
           veterinarian_id?: string | null
           veterinarian_name?: string | null
