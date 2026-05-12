@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-12T04:37:34.757Z
+// Última geração: 2026-05-12T16:27:01.655Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,35 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-12";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-12",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Análise nutricional condicional ao catálogo + nomenclatura preventivo/terapêutico + revisão técnica admin-only",
+    "bullets": [
+      "`NutritionGapAnalysis` agora suprime a tabela de gaps e a seção \"Sugerido pela raça\" quando a ração não está no catálogo (`pet_food_nutrition` ausente). Em vez disso, exibe um card âmbar único: \"A análise de complementação nutricional não foi concluída porque esta ração ainda não está no nosso banco de dados.\"",
+      "Botões Procurar e Incorporar (restritos a admin via `useAuth().hasRole('admin')`) chamam a edge `enrich-pet-food-product`. \"Incorporar\" só é habilitado quando a confiança da extração ≥ 0.4. Sucesso invalida `['nutrition-gap', petId]` e a análise re-roda automaticamente.",
+      "Edge `enrich-pet-food-product` extendida com `persist: true` + `link_to_item_id?`: cria/recupera `pet_food_brands` e `pet_food_products` (snake-insensitive), insere a composição em `pet_food_nutrition` e vincula o `pet_nutrition_items.product_id` em uma única chamada (service role).",
+      "Princípio formalizado em `.lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md`: separação entre profilática (preventiva) vs manejo terapêutico/curativo vs suporte para nutracêuticos, rações e drogas.",
+      "UI da seção \"Sugerido pela raça\" passa a exibir badge Profilática (preventiva) (azul) ou Manejo terapêutico (destrutivo, quando `already_active`), além de um disclaimer explícito de que o pet ainda NÃO tem a condição listada — apenas predisposição racial documentada.",
+      "`TechnicalReviewSection` ganhou ícone `(?)` ao lado do título com tooltip explicativo.",
+      "Painel \"Depuração do MedGraphRAG longitudinal\" agora é renderizado apenas para admins em `PetProfilePage`; vet/tutor não veem mais essa seção.",
+      "Novo hook `usePetFoodEnrichment` (lookup + incorporate, com state de confiança).",
+      "I18N_VERSION 1.69.0 → 1.70.0; chaves `nutritionGap.notInCatalog`, `searchCatalog`, `incorporate`, `lookupConfidence`, `breed.preventiveBadge`, `breed.therapeuticBadge`, `breed.disclaimer` etc. em PT/EN.",
+      "Files: src/components/pet/NutritionGapAnalysis.tsx, src/components/ui/technical-review-section.tsx, src/hooks/usePetFoodEnrichment.ts, src/pages/veterinario/PetProfilePage.tsx, supabase/functions/enrich-pet-food-product/index.ts, src/locales/{pt,en}/translation.json, src/i18n.ts, .lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md"
+    ],
+    "files": [
+      ".lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md",
+      "src/components/pet/NutritionGapAnalysis.tsx",
+      "src/components/ui/technical-review-section.tsx",
+      "src/hooks/usePetFoodEnrichment.ts",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "supabase/functions/enrich-pet-food-product/index.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.70.0"
+  },
   {
     "date": "2026-05-12",
     "kind": "added",
