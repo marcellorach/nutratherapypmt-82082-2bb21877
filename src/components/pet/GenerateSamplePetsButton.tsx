@@ -457,6 +457,34 @@ const GenerateSamplePetsButton: React.FC = () => {
           const date = new Date(Date.now() - c.daysAgo * 24 * 60 * 60 * 1000)
             .toISOString().split('T')[0];
 
+          // Deterministic machine interpretation for demo: derived from
+          // existing assessment + linked conditions. Real visits get this
+          // populated by the extract-pet-clinical-data edge function.
+          const canonicalConditions = (c.conditions ?? []).map((cond) => ({
+            name: cond.condition_name,
+            stage: (cond as any).severity ?? null,
+            confidence: 0.85,
+          }));
+          const tagSeeds: string[] = [];
+          (c.conditions ?? []).forEach((cond) => {
+            tagSeeds.push(
+              cond.condition_name.toLowerCase().replace(/\s+/g, '_'),
+            );
+            if ((cond as any).severity) tagSeeds.push(String((cond as any).severity).toLowerCase());
+          });
+          if (/check[-\s]?up|rotina|preventiv/i.test(c.chief_complaint)) tagSeeds.push('check_up');
+          if (/dor|rigidez|fraqueza|tosse|cansa|fadiga/i.test(c.chief_complaint)) tagSeeds.push('sintomatico');
+          if (/reavaliação|controle|follow/i.test(c.chief_complaint)) tagSeeds.push('reavaliacao');
+          const tags = Array.from(new Set(tagSeeds)).slice(0, 8);
+          const machine_summary = c.assessment
+            ? c.assessment.split(/\.\s/)[0] + (c.assessment.includes('.') ? '.' : '')
+            : null;
+          const assessment_interpretation = {
+            canonical_conditions: canonicalConditions,
+            systems_affected: [],
+            ontology_refs: [],
+          };
+
           const { data: consult, error: consultError } = await (supabase as any)
             .from('pet_consultations')
             .insert({
@@ -469,6 +497,9 @@ const GenerateSamplePetsButton: React.FC = () => {
               body_condition_score: c.body_condition_score,
               assessment: c.assessment,
               plan: c.plan,
+              tags,
+              machine_summary,
+              assessment_interpretation,
               created_by: userId,
             })
             .select('id')
