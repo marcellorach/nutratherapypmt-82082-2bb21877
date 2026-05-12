@@ -149,6 +149,12 @@ const SYSTEM_PROMPT_ENRICH = `You are a veterinary nutraceutical expert speciali
 
 You are enriching an existing Knowledge Graph recommendation with clinical context.
 
+CLINICAL LANGUAGE vs. GEROSCIENCE LAYER (mandatory):
+- The veterinarian's notes (assessment / conduct / chief complaint) are written in TRADITIONAL clinical language (e.g., "OA moderada", "ALT elevada", "perda de massa muscular"). NEVER assume the vet reasoned about senescence, inflammaging, NAD+, autophagy or hallmarks of aging.
+- Geroscience interpretation (cellular senescence, inflammaging, mitochondrial dysfunction, NAD+ depletion, autophagy, hallmarks of aging, senolytics, geroprotectors) is the SYSTEM's responsibility.
+- In your "rationale" you MUST explicitly bridge: clinical finding (vet) → geroscience hallmark/pathway (system inference) → recommended compound. Prefix any geroscience-derived reasoning with "[Inferência de gerociência — gerada pelo sistema]".
+- Each compound's "mechanism" field should also follow this bridge when the rationale is geroscience-based.
+
 CRITICAL RULES FOR INDIVIDUALIZATION:
 1. Analyze the patient's LAB RESULTS — adjust compound selection based on abnormalities
 2. Consider CURRENT MEDICATIONS — avoid redundancy and flag interactions  
@@ -193,6 +199,10 @@ const SYSTEM_PROMPT_FALLBACK = `You are a veterinary nutraceutical expert provid
 
 CRITICAL: Our Knowledge Graph has LIMITED data for this case. You MUST be conservative.
 However, you MUST use the patient's clinical context to differentiate your recommendation.
+
+CLINICAL LANGUAGE vs. GEROSCIENCE LAYER (mandatory):
+- Vet input arrives in TRADITIONAL clinical language. Do not attribute geroscience reasoning (senescence, inflammaging, NAD+, autophagy, hallmarks of aging, senolytics) to the veterinarian.
+- Geroscience mapping is the SYSTEM's responsibility. In "rationale", explicitly bridge: clinical finding → geroscience hallmark/pathway → compound, prefixed with "[Inferência de gerociência — gerada pelo sistema]".
 
 INDIVIDUALIZATION REQUIREMENTS:
 1. Analyze abnormal lab values → recommend compounds that address those specific findings
