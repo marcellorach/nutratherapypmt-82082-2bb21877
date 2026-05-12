@@ -7684,6 +7684,8 @@
     "reason": "Motivo",
     "clinicalExam": "Exame clínico",
     "assessment": "Avaliação",
+    "assessmentTitle": "Suspeita / Diagnóstico",
+    "planTitle": "Plano / Conduta",
     "plan": "Conduta",
     "diagnoses": "diagnósticos",
     "medsAdded": "medicações",
