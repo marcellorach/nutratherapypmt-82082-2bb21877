@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-12T17:38:52.984Z
+// Última geração: 2026-05-12T17:55:21.778Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,37 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-12";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-12",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Card de consulta: separa exame físico vs complementares, renomeia avaliação e adiciona quadro amarelo de interpretação automática",
+    "bullets": [
+      "Achados de \"Neurological/Orthopedic/Cardiovascular Examination\" gravados em `pet_exams` deixam de poluir a tabela de Exames Complementares e passam a ser fundidos em `physical_exam.specific.<área>` no `PhysicalExamBlock`. Lógica em novo `src/services/exam-classification.ts` (`partitionExams`, `mergePhysicalExamRows`).",
+      "Tabela \"Exames Complementares\" agora mostra estado vazio explícito quando não há sangue/imagem/urina na consulta.",
+      "Bloco \"Avaliação\" renomeado para \"Suspeita / Diagnóstico\" (`petTimeline.assessmentTitle`) e \"Conduta\" para \"Plano / Conduta\" (`petTimeline.planTitle`). Texto cru do veterinário permanece intacto.",
+      "Novo `AssessmentInterpretation.tsx` exibe sob o texto cru as condições canônicas, sistemas afetados e refs ontológicas extraídas pelo LLM (`pet_consultations.assessment_interpretation`). Sem fallback mock.",
+      "Novo `ConsultationMachineSummary.tsx` — quadro amarelo no fim do card agregando: tags clínicas (movidas do rodapé antigo), `machine_summary` (1–2 frases) e termos canônicos prontos para o VetGraphRAG.",
+      "Form `HistoricalConsultationsSection` alinhado ao card: \"Queixa principal\" → Motivo, \"Achados/Diagnóstico\" → Suspeita / Diagnóstico, \"Conduta\" → Plano / Conduta.",
+      "Migration: `pet_consultations` ganha `assessment_interpretation jsonb` e `machine_summary text`.",
+      "`GenerateSamplePetsButton` popula `tags`, `machine_summary` e `assessment_interpretation` determinísticos para os pets demo, derivados de `assessment` + `conditions`.",
+      "I18N bumped para `1.73.0`. Novas chaves: `petTimeline.assessmentTitle`, `petTimeline.planTitle`, `examResults.empty`, `assessmentInterpretation.*`, `machineSummary.*`.",
+      "Files: src/services/exam-classification.ts, src/components/pet/AssessmentInterpretation.tsx, src/components/pet/ConsultationMachineSummary.tsx, src/components/pet/PetConsultationsTimeline.tsx, src/components/pet/HistoricalConsultationsSection.tsx, src/components/pet/GenerateSamplePetsButton.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, supabase/migrations/*pet_consultations_machine_interpretation*.sql"
+    ],
+    "files": [
+      "src/services/exam-classification.ts",
+      "src/components/pet/AssessmentInterpretation.tsx",
+      "src/components/pet/ConsultationMachineSummary.tsx",
+      "src/components/pet/PetConsultationsTimeline.tsx",
+      "src/components/pet/HistoricalConsultationsSection.tsx",
+      "src/components/pet/GenerateSamplePetsButton.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.73.0"
+  },
   {
     "date": "2026-05-12",
     "kind": "added",
