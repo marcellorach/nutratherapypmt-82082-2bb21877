@@ -617,12 +617,8 @@ const PetProfilePage: React.FC = () => {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {[...conditions]
-                    .sort((a: any, b: any) => {
-                      const ag = isGeroscienceCondition(a.condition_name || a.name) ? 1 : 0;
-                      const bg = isGeroscienceCondition(b.condition_name || b.name) ? 1 : 0;
-                      return ag - bg;
-                    })
+                  {conditions
+                    .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
                     .map((c: any) => (
                     <ConditionInsightCard
                       key={c.id}
@@ -630,6 +626,11 @@ const PetProfilePage: React.FC = () => {
                       mode="simple"
                     />
                   ))}
+                  {conditions.filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name)).length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-4">
+                      {t('petRegistration.conditions.onlyGeroscience', 'Nenhuma condição clínica registrada pelo veterinário. Inferências de gerociência aparecem após a análise VetGraphRAG.')}
+                    </p>
+                  )}
                 </div>
               )}
             </TabsContent>
@@ -769,6 +770,28 @@ const PetProfilePage: React.FC = () => {
               />
             )}
 
+            {/* Geroscience inferences — system-derived hallmarks, shown AFTER MedGraphRAG */}
+            {recommendationCompounds && conditions.some((c: any) => isGeroscienceCondition(c.condition_name || c.name)) && (
+              <Card className="border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    {t('geroscienceInference.title', 'Inferências de gerociência (sistema)')}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {t('geroscienceInference.description', 'Hallmarks de envelhecimento inferidos pelo sistema a partir dos dados clínicos do veterinário. Não fazem parte do diagnóstico tradicional — alimentam a análise profunda VetGraphRAG.')}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {conditions
+                    .filter((c: any) => isGeroscienceCondition(c.condition_name || c.name))
+                    .map((c: any) => (
+                      <ConditionInsightCard key={c.id} condition={c} mode="simple" />
+                    ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Patient Knowledge Subgraph */}
             {recommendationCompounds && kgTriplets.length > 0 && (
               <PatientKnowledgeSubgraph
@@ -811,13 +834,17 @@ const PetProfilePage: React.FC = () => {
                 <CardContent className="space-y-4">
                   {conditionInsights.data && (
                     <ComorbidityMap
-                      conditions={conditions.map((c: any) => c.condition_name)}
+                      conditions={conditions
+                        .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
+                        .map((c: any) => c.condition_name)}
                       causalPathways={conditionInsights.data.causalPathways}
                       synergisticCompounds={conditionInsights.data.synergisticCompounds}
                     />
                   )}
                   <div className="space-y-2">
-                    {conditions.map((c: any) => {
+                    {conditions
+                      .filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name))
+                      .map((c: any) => {
                       const insight = conditionInsights.data?.conditionInsights?.find(
                         (ci) => ci.condition.toLowerCase() === c.condition_name.toLowerCase()
                       );
