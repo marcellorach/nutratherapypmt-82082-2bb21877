@@ -36,7 +36,17 @@ type DemoConsultation = {
   notes?: Array<{ note_type: string; content: string }>;
 };
 
-type DemoNutritionItem = { raw_brand_text: string; raw_product_text: string; share_percent: number };
+type DemoNutritionItem = {
+  raw_brand_text: string;
+  raw_product_text: string;
+  share_percent: number;
+  /**
+   * Catalog lookup hint: { brand, name } pointing to an existing pet_food_products row.
+   * When set, the generator resolves product_id and persists it (preferred path).
+   * If left undefined the item is treated as a free-text supplement / non-catalog item.
+   */
+  catalog?: { brand: string; name: string };
+};
 
 type DemoPet = {
   name: string;
@@ -95,7 +105,12 @@ const SAMPLE_PETS: DemoPet[] = [
       diet_type: 'commercial_dry',
       daily_amount_g: 220, meals_per_day: 2, treats_frequency: 'occasional', water_intake: 'normal',
       notes: 'Ração seca super premium para adulto porte médio.',
-      items: [{ raw_brand_text: 'Premier Pet', raw_product_text: 'Formula Adulto Raças Médias', share_percent: 100 }],
+      items: [{
+        raw_brand_text: 'Premier Pet',
+        raw_product_text: 'Formula Caes Adultos Racas Medias e Grandes',
+        share_percent: 100,
+        catalog: { brand: 'Premier Pet', name: 'Formula Caes Adultos Racas Medias e Grandes' },
+      }],
     },
   },
 
