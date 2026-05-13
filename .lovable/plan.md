@@ -1,75 +1,78 @@
 ## Objetivo
 
-Diferenciar claramente as duas vozes no card de consulta:
+Garantir que a seção **"Ver evidências e contexto"** de cada composto sempre exiba **2 a 3 links clicáveis para estudos**, mesmo quando o pipeline atual não consegue atrelar nenhum estudo curado ao par (composto × condição) — caso da tela enviada, em que aparecem 3 triplets KG-backed mas nenhum link em "Estudos científicos".
 
-- **"Suspeita / Diagnóstico"** (`assessment`) → texto livre, coloquial, do veterinário. Em ~30% das consultas, **omite intencionalmente um diagnóstico** que aparecerá apenas na interpretação automática.
-- **"Interpretação automática desta consulta"** (`machine_summary`) → leitura sintética porém **rica**, montada pela "máquina" (Senex AI), cruzando queixa + exame clínico + exames + condições + plano. Sempre cobre todos os achados, inclusive os que o vet esqueceu.
+## Diagnóstico
 
-Isso reforça a proposta de valor: a IA captura o que o olhar humano deixa passar.
+`src/services/clinical-analysis-pipeline.ts` já tenta atrelar até 3 estudos por composto (`MAX_STUDIES_PER_COMPOUND = 3`):
 
----
+1. Estudos vindos de `triplet_extractions` aprovados para o par (composto, condição).
+2. Fallback: até 3 estudos do mesmo composto em qualquer condição (`provenance: 'compound-only'`).
 
-## Mudanças
+Quando ambos retornam vazio (composto presente em KG mas sem `study_id` aprovado, ou composto ausente da base local), o componente `CompoundDosageSlider` simplesmente omite o bloco "Estudos científicos" — foi o que o usuário viu.
 
-### 1. `src/components/pet/GenerateSamplePetsButton.tsx`
+## Mudanças propostas
 
-#### 1.1 Reescrever campos `assessment` das consultas em SAMPLE_PETS
+### 1. Pipeline — segundo nível de fallback (`clinical-analysis-pipeline.ts`)
 
-Tornar a redação mais livre, em primeira pessoa do veterinário, com hesitações e abreviações típicas. Em consultas selecionadas, **remover propositalmente** uma das condições do texto (mas mantê-la em `conditions[]` para o KG).
+Antes de devolver `studies: []`, gerar **2 referências de busca pública** determinísticas a partir do nome do composto + condição canônica, sem inventar título nem ano:
 
-Exemplos de reescrita (resumo — aplico em todas as consultas):
+```ts
+const publicSearchFallback = (compound, condition) => [
+  {
+    id: `pubmed:${compound}:${condition}`,
+    title: `PubMed — ${compound} + ${condition}`,
+    link: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(`${compound} ${condition}`)}`,
+    provenance: 'public-search',
+  },
+  {
+    id: `scholar:${compound}:${condition}`,
+    title: `Google Scholar — ${compound} + ${condition}`,
+    link: `https://scholar.google.com/scholar?q=${encodeURIComponent(`${compound} ${condition}`)}`,
+    provenance: 'public-search',
+  },
+];
+```
 
-- Buddy / check-up — atual: *"Pet hígido. Marcadores de estresse oxidativo discretamente elevados em painel preventivo."* → novo: *"Animal aparentemente bem, sem queixas. Painel mostrou alguma coisa no oxidativo, nada alarmante."* (omite "estresse oxidativo" como label — IA recupera)
-- Rex / 3ª consulta — atual: *"Tríade confirmada: obesidade controlada, OA moderada, displasia coxofemoral grau 3 bilateral."* → novo: *"Confirmou displasia bilateral grau 3, OA já mexendo bastante. Peso vem caindo bem."* (omite "obesidade")
-- Thor / 1ª consulta — atual: *"Osteoartrite incipiente associada à atividade física intensa."* → novo: *"Cão atlético, ainda sem queixa funcional, mas já apresenta rigidez pós-treino — provavelmente desgaste articular precoce de cão de trabalho."*
-- Thor / 3ª — manter PCR/ferritina, mas escrever solto: *"Marcadores inflamatórios e oxidativos vieram acima do esperado pra idade. Vou pedir reavaliação geroprotetora."* (omite o termo "Inflammaging" — IA recupera)
-- Luna / 5ª — atual cita CDS+HP. Nova versão: *"Tutor descreveu episódios de desorientação ao acordar, e o doppler mostrou pressão pulmonar elevada. Caso ficou bem complexo, vou somar suporte hepático e cardio."* (omite explicitamente "MMVD" como label, IA recupera)
+Regra: se `studiesWithExcerpts.length < 2`, completar até 2 com esses links; nunca ultrapassar `MAX_STUDIES_PER_COMPOUND = 3`. Mantém o No-Mock Policy: nada é simulado, são buscas reais rotuladas como tal.
 
-Critério: omissão em **~1 a cada 3 consultas**, sempre uma condição que ainda assim está em `conditions[]` (o KG continua íntegro).
+### 2. Tipo `StudyRef` (`CompoundDosageSlider.tsx`)
 
-#### 1.2 Substituir geração trivial de `machine_summary`
+Aceitar `provenance: 'paired' | 'compound-only' | 'public-search'`.
 
-Remover a lógica atual (linhas 479–481) que pega só a primeira frase do `assessment`. Em vez disso, montar 3–5 frases curtas a partir de:
+### 3. UI — `CompoundDosageSlider.tsx` (linhas ~492-555)
 
-1. Queixa principal traduzida em linguagem clínica.
-2. Achados-chave do exame físico (`clinical_exam`).
-3. Resultados anormais dos `exams` (usando `flags_abnormal` + `interpretation` quando presente).
-4. Lista canônica das `conditions` desta visita (todas, mesmo as que o vet omitiu no texto livre).
-5. Síntese do plano terapêutico em uma linha.
+- Renderizar entradas `public-search` no mesmo bloco "Estudos científicos", mas com badge diferenciado (cinza/azul claro: "Busca pública") para deixar transparente que é um atalho, não um estudo curado.
+- Não aplicar a barra lateral primária; usar `border-l-2 border-muted` para distinguir visualmente.
+- Sem `excerpt` (o link não traz excerto).
+- Reaproveitar `getLinkSource` já existente (`PubMed`, `Scholar`).
 
-Função utilitária local `buildMachineSummary(c)` que retorna string PT-BR rica (~60–120 palavras), exemplo para Thor/1ª:
+### 4. i18n (`pt`/`en`) + `I18N_VERSION`
 
-> "Cão de trabalho, 7a, em avaliação ortopédica preventiva. Exame revelou rigidez bilateral pós-exercício com massa muscular preservada. Avaliação articular registrou osteoartrite leve em quadris. Quadro compatível com OA incipiente induzida por atividade física intensa, classicamente descrita em Pastor Alemão de trabalho. Plano: suporte articular preventivo e reavaliação em 6 meses."
+Novas chaves:
+- `petProfile.recommendation.linkSource.publicSearch` → "Busca pública" / "Public search"
+- `petProfile.recommendation.studiesPublicSearchHint` → "Sem estudos curados para este par; links de busca pública aproximada." / "No curated studies for this pair; approximate public-search links."
 
-#### 1.3 Atualizar comentário (linhas 460–462)
+Incrementar `I18N_VERSION` de 1.74.2 → 1.74.3.
 
-Refletir nova lógica: "Interpretação determinística rica para demo: cobre achados que o vet pode ter omitido. Em produção real, a edge function `extract-pet-clinical-data` produz a mesma estrutura via LLM."
+### 5. CHANGELOG.md + sync
 
----
+Entrada `[Unreleased]` em **Added** e/ou **Changed**:
+- "Garantia de 2-3 links clicáveis em 'Ver evidências e contexto', com fallback determinístico para PubMed/Scholar quando não há estudo curado para o par (composto × condição)."
 
-### 2. Sem mudanças em UI / banco / edge functions
+Rodar `npm run sync:changelog`.
 
-- `ConsultationMachineSummary.tsx`: já renderiza `machineSummary` com `leading-relaxed` — texto longo cabe.
-- `PetConsultationsTimeline.tsx`: já mostra `assessment` separado.
-- Não toca em `i18n.ts` (não há chaves novas).
-- Sem migração de DB.
+## Arquivos afetados
 
----
-
-### 3. Changelog
-
-Adicionar entrada em `[Unreleased]` (`CHANGELOG.md`) com:
-
-`<!-- area: pet-consultations · status: entregue · i18n: no -->`
-
-E rodar `npm run sync:changelog` (regra core do projeto).
-
----
+- `src/services/clinical-analysis-pipeline.ts` — fallback de busca pública.
+- `src/components/pet/CompoundDosageSlider.tsx` — render do badge "Busca pública".
+- `src/locales/pt/translation.json`, `src/locales/en/translation.json` — novas chaves.
+- `src/i18n.ts` — bump de versão.
+- `CHANGELOG.md` (+ regenerado `src/data/projectChangelog.generated.ts`).
 
 ## Validação
 
-1. Clicar "Gerar pets de exemplo" e abrir cada um dos 5 pets demo.
-2. Em cada consulta verificar:
-   - "Suspeita / Diagnóstico" soa como texto livre de veterinário.
-   - "Interpretação automática" tem 3–5 frases e inclui pelo menos uma condição que NÃO está escrita no `assessment` (quando aplicável).
-3. Confirmar que nada quebra na tabela `pet_consultations` (campos existentes, sem schema novo).
+1. Abrir o pet `85880f2f-…` (Quercetin / Sarcopenia da tela).
+2. Expandir "Ver evidências e contexto" — confirmar 2-3 links visíveis.
+3. Conferir que pelo menos um, quando existir estudo curado, aparece com badge "PubMed/DOI" e excerpt; e os de busca aparecem com badge "Busca pública".
+4. Verificar que pets com estudos curados (Buddy/Omega-3) continuam mostrando os curados primeiro.
