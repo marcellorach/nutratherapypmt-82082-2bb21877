@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-13 — Digital Twin do paciente (Fase 2 — histórico, traits, labs)
+<!-- area: vet-ui · status: entregue · i18n: 1.74.5 -->
+- `PatientKnowledgeSubgraph` ganha 3 novas camadas opcionais conectadas ao nó Pet central:
+  - **Diagnósticos passados** (círculos cinza, aresta `HAS_HISTORY` tracejada) lidos de `pet_conditions` resolvidas + consultas anteriores em `pet_consultations`.
+  - **Traits** (hexágonos azul-claro, aresta `HAS_TRAIT`) representando raça, faixa etária (filhote/adulto/sênior/geriátrico) e sexo. Traits de raça desenham `BREED_RISK_FOR` (tracejada azul-escura) apontando para condições predispostas vindas de `BreedPredisposition`.
+  - **Labs anormais** (triângulo invertido amarelo, aresta `PRESENTS_LAB`) lidos de `LabAlert`s, com aresta `INDICATES` (tracejada amarela) ligando o exame às condições mencionadas em `clinical_significance`.
+- Legenda + i18n PT/EN atualizadas (`past_diagnosis`, `trait`, `lab`); `I18N_VERSION` → 1.74.5.
+- Conformidade No-Mock: cada nó só aparece quando há registro real (consulta, predisposição ou lab anormal); deduplicação por nome para histórico.
+- Files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/pages/veterinario/PetProfilePage.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Added - 2026-05-13 — Subgrafo do paciente vira Digital Twin (Fase 1)
 <!-- area: vet-ui · status: entregue · i18n: 1.74.4 -->
 - `PatientKnowledgeSubgraph` agora renderiza um **nó Pet central** (estrela azul) com tooltip de raça/idade/peso/sexo, conectando-se via `HAS_CONDITION` a todas as condições ativas — antes condições e compostos flutuavam soltos sem dono clínico.
