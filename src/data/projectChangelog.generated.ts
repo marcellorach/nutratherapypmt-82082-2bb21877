@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T02:01:44.997Z
+// Última geração: 2026-05-13T11:03:50.817Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,23 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Diferenciação de vozes na consulta: vet livre vs. interpretação rica da IA",
+    "bullets": [
+      "Reescritos todos os campos `assessment` das 15 consultas de demo (`SAMPLE_PETS`) com texto livre/coloquial em primeira pessoa do veterinário; em ~1 a cada 3 consultas, uma das condições é propositalmente omitida do texto (mas mantida em `conditions[]`) para demonstrar valor da camada Senex AI.",
+      "Substituída a geração trivial de `machine_summary` (antes: primeira frase do assessment) por nova função `buildMachineSummary()` que sintetiza queixa + exame físico + achados laboratoriais (com `flags_abnormal` e `interpretation`) + condições canônicas completas + medicações + plano. Resultado renderizado no callout amarelo \"Interpretação automática desta consulta\".",
+      "Reforço da proposta de valor: o texto livre do vet pode esquecer um diagnóstico — a interpretação automática (Senex AI · PetMoreTime) sempre cobre todas as condições registradas via base de conhecimento.",
+      "Files: src/components/pet/GenerateSamplePetsButton.tsx"
+    ],
+    "files": [
+      "src/components/pet/GenerateSamplePetsButton.tsx"
+    ],
+    "i18nVersion": "no"
+  },
   {
     "date": "2026-05-13",
     "kind": "changed",
