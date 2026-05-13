@@ -15,6 +15,25 @@ interface PatientKnowledgeSubgraphProps {
    *  for this pet and renders them as provisional (dashed amber) edges so vets
    *  can see which evidence was just imported but is still awaiting curation. */
   petId?: string | null;
+  /** Pet identity (Phase 1 — Digital Twin core node).
+   *  When present, renders a central Pet node with HAS_CONDITION edges. */
+  petProfile?: {
+    name?: string;
+    breed?: string;
+    age_years?: number;
+    weight_kg?: number;
+    sex?: string;
+    neutered?: boolean;
+  } | null;
+  /** Active medications from pet_medications. Rendered as purple "pill" nodes
+   *  connected to Pet via TAKES, plus red INTERACTS_WITH edges to recommended
+   *  compounds when an interaction alert exists. */
+  activeMedications?: Array<{ medication_name: string; dosage?: string | null }>;
+  /** Interaction alerts (compound × medication) used to draw red edges. */
+  interactionAlerts?: Array<{ compound?: string; medication?: string; severity?: string; description?: string }>;
+  /** Hidden geriatric detractors (e.g. cellular senescence, inflammaging).
+   *  Rendered as amber outlined diamonds connected via EXHIBITS_DETRACTOR. */
+  hiddenDetractors?: string[];
 }
 
 // Color palette for node types
@@ -24,6 +43,9 @@ const NODE_COLORS: Record<string, { background: string; border: string }> = {
   mechanism: { background: '#3b82f6', border: '#2563eb' },
   effect: { background: '#8b5cf6', border: '#7c3aed' },
   outcome: { background: '#06b6d4', border: '#0891b2' },
+  pet: { background: '#1e3a8a', border: '#1e40af' },
+  medication: { background: '#a855f7', border: '#7e22ce' },
+  detractor: { background: '#fef3c7', border: '#b45309' },
 };
 
 const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
@@ -32,6 +54,10 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
   conditions,
   recommendedCompounds,
   petId,
+  petProfile,
+  activeMedications = [],
+  interactionAlerts = [],
+  hiddenDetractors = [],
 }) => {
   const { t } = useTranslation();
 
@@ -56,12 +82,45 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
         label: name.length > 25 ? name.slice(0, 22) + '...' : name,
         title: name,
         group: type,
-        shape: type === 'compound' ? 'dot' : type === 'condition' ? 'diamond' : type === 'mechanism' ? 'triangle' : 'dot',
+        shape:
+          type === 'pet' ? 'star' :
+          type === 'medication' ? 'box' :
+          type === 'detractor' ? 'diamond' :
+          type === 'compound' ? 'dot' :
+          type === 'condition' ? 'diamond' :
+          type === 'mechanism' ? 'triangle' : 'dot',
         color: NODE_COLORS[type] || NODE_COLORS.effect,
-        value: type === 'compound' ? 20 : type === 'condition' ? 18 : 12,
+        value:
+          type === 'pet' ? 32 :
+          type === 'compound' ? 20 :
+          type === 'condition' ? 18 :
+          type === 'medication' ? 16 :
+          type === 'detractor' ? 16 : 12,
       });
       return key;
     };
+
+    // ── Phase 1: Pet central node (Digital Twin core) ─────────────────────
+    let petKey: string | null = null;
+    if (petProfile?.name) {
+      const traits: string[] = [];
+      if (petProfile.breed) traits.push(petProfile.breed);
+      if (typeof petProfile.age_years === 'number') traits.push(`${petProfile.age_years}a`);
+      if (typeof petProfile.weight_kg === 'number') traits.push(`${petProfile.weight_kg}kg`);
+      if (petProfile.sex) traits.push(petProfile.sex === 'female' ? '♀' : '♂');
+      const label = `🐾 ${petProfile.name}`;
+      petKey = label.toLowerCase().trim();
+      nodeMap.set(petKey, {
+        id: petKey,
+        label,
+        title: `${petProfile.name} · ${traits.join(' · ')}`,
+        group: 'pet',
+        shape: 'star',
+        color: NODE_COLORS.pet,
+        value: 32,
+        font: { color: '#ffffff', size: 14, face: 'Inter, system-ui, sans-serif' },
+      });
+    }
 
     // Add conditions
     for (const c of conditions) {
@@ -71,6 +130,81 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
     // Add compounds
     for (const c of recommendedCompounds) {
       addNode(c, 'compound');
+    }
+
+    // ── Pet → conditions (HAS_CONDITION) ──────────────────────────────────
+    if (petKey) {
+      for (const c of conditions) {
+        const k = c.toLowerCase().trim();
+        if (!k || !nodeMap.has(k)) continue;
+        links.push({
+          from: petKey,
+          to: k,
+          label: 'tem',
+          title: `${petProfile?.name} HAS_CONDITION ${c}`,
+          arrows: 'to',
+          color: '#f97316',
+          width: 2.5,
+        });
+      }
+    }
+
+    // ── Hidden geriatric detractors (EXHIBITS_DETRACTOR) ──────────────────
+    for (const d of hiddenDetractors) {
+      const k = addNode(d, 'detractor');
+      if (petKey) {
+        links.push({
+          from: petKey,
+          to: k,
+          label: 'apresenta',
+          title: `${petProfile?.name} EXHIBITS_DETRACTOR ${d}`,
+          arrows: 'to',
+          color: '#b45309',
+          width: 2,
+          dashes: false,
+        });
+      }
+    }
+
+    // ── Active medications (TAKES) ────────────────────────────────────────
+    const medKeys = new Map<string, string>(); // canonical lower → node key
+    for (const med of activeMedications) {
+      const name = med.medication_name?.trim();
+      if (!name) continue;
+      const display = med.dosage ? `💊 ${name} (${med.dosage})` : `💊 ${name}`;
+      const k = addNode(display, 'medication');
+      medKeys.set(name.toLowerCase(), k);
+      if (petKey) {
+        links.push({
+          from: petKey,
+          to: k,
+          label: 'toma',
+          title: `${petProfile?.name} TAKES ${name}`,
+          arrows: 'to',
+          color: '#a855f7',
+          width: 2,
+        });
+      }
+    }
+
+    // ── Drug × compound interactions (INTERACTS_WITH, red alert) ─────────
+    for (const alert of interactionAlerts) {
+      const compoundName = (alert.compound || '').toLowerCase().trim();
+      const medName = (alert.medication || '').toLowerCase().trim();
+      if (!compoundName || !medName) continue;
+      const compoundKey = compoundName; // already lowercased keys
+      const medKey = medKeys.get(medName);
+      if (!nodeMap.has(compoundKey) || !medKey) continue;
+      links.push({
+        from: compoundKey,
+        to: medKey,
+        label: '⚠ interage',
+        title: `INTERACTS_WITH${alert.severity ? ` (${alert.severity})` : ''}${alert.description ? ` — ${alert.description}` : ''}`,
+        arrows: 'to;from',
+        color: '#ef4444',
+        width: 3,
+        dashes: false,
+      });
     }
 
     // Add triplet edges
@@ -146,7 +280,7 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       nodes: Array.from(nodeMap.values()),
       links,
     };
-  }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional]);
+  }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional, petProfile, activeMedications, interactionAlerts, hiddenDetractors]);
 
   if (graphData.nodes.length === 0) return null;
 
@@ -191,6 +325,9 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       mechanism: { color: NODE_COLORS.mechanism, shape: 'triangle', size: 14 },
       effect: { color: NODE_COLORS.effect, shape: 'dot', size: 12 },
       outcome: { color: NODE_COLORS.outcome, shape: 'dot', size: 14 },
+        pet: { color: NODE_COLORS.pet, shape: 'star', size: 26 },
+        medication: { color: NODE_COLORS.medication, shape: 'box', size: 16 },
+        detractor: { color: NODE_COLORS.detractor, shape: 'diamond', size: 14 },
     },
   };
 
