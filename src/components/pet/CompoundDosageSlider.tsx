@@ -44,7 +44,7 @@ export interface CompoundDosage {
     pmid?: string | null;
     link?: string | null;
     excerpt?: string | null;
-    provenance?: 'paired' | 'compound-only';
+    provenance?: 'paired' | 'compound-only' | 'public-search';
   }>;
   kgTriplets?: Array<{
     subject: string;
