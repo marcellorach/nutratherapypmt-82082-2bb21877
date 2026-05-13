@@ -25,7 +25,7 @@ export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-05-13",
     "kind": "changed",
-    "area": "branding",
+    "area": "meta",
     "status": "entregue",
     "title": "Reforço de marca: Senex AI · © PetMoreTime · 2025–presente",
     "bullets": [
@@ -46,7 +46,7 @@ export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-05-13",
     "kind": "changed",
-    "area": "branding",
+    "area": "meta",
     "status": "entregue",
     "title": "Rebrand: motor \"VetGraphRAG\" passa a se chamar \"Senex AI\" na camada visível",
     "bullets": [

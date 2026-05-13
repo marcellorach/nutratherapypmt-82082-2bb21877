@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-05-13T01:52:17.833Z",
+  "timestamp": "2026-05-13T10:44:42.401Z",
   "summary": {
     "totalFiles": 864,
-    "totalIssues": 414,
-    "hardcodedTexts": 40,
+    "totalIssues": 416,
+    "hardcodedTexts": 42,
     "missingKeys": 374,
     "incompleteTranslations": 0
   },
@@ -2475,7 +2475,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2531,
+      "line": 2569,
       "text": "@",
       "severity": "high"
     },
@@ -2897,6 +2897,20 @@
       "file": "src/pages/administrador/OrganogramaTab.tsx",
       "line": 64,
       "text": "CHANGELOG.md",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/pages/administrador/OrganogramaTab.tsx",
+      "line": 67,
+      "text": "Senex AI",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/pages/administrador/OrganogramaTab.tsx",
+      "line": 67,
+      "text": "PetMoreTime",
       "severity": "medium"
     },
     {

@@ -24,7 +24,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Changed - 2026-05-13 — Reforço de marca: Senex AI · © PetMoreTime · 2025–presente
-<!-- area: branding · status: entregue · i18n: 1.74.1 -->
+<!-- area: meta · status: entregue · i18n: 1.74.1 -->
 - Adicionada linha de assinatura de marca nos headers das tabs administrativas: **Organograma**, **Auditorias Técnicas** e **Conformidade FDA/EMA/AVMA**, deixando explícito que **Senex AI é o motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente), sucessor da arquitetura interna VetGraphRAG/VetMedGraph**.
 - Documentação técnica (`docs/TECHNICAL_DECISIONS.md`, `ARCHITECTURE.md`) recebeu nota de autoria/operação no header.
 - Knowledge File do projeto (project memory) atualizado com nova entrada `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI, autoria/operação exclusiva = PetMoreTime, identificadores internos preservados.
@@ -32,7 +32,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/i18n.ts, ARCHITECTURE.md, docs/TECHNICAL_DECISIONS.md
 
 ### Changed - 2026-05-13 — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
-<!-- area: branding · status: entregue · i18n: 1.74.0 -->
+<!-- area: meta · status: entregue · i18n: 1.74.0 -->
 - Substituição em massa da marca exposta ao usuário: "VetGraphRAG" → **Senex AI** em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.
 - Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.
 - I18N bumped para `1.74.0` para invalidar cache de traduções.
