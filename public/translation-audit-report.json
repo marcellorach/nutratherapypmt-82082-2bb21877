@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-13T00:20:39.599Z",
+  "timestamp": "2026-05-13T01:52:17.833Z",
   "summary": {
     "totalFiles": 864,
     "totalIssues": 414,
@@ -2777,7 +2777,7 @@
       "type": "hardcoded",
       "file": "src/components/administrador/estudos/analysis/NtaiStudySelectionTable.tsx",
       "line": 80,
-      "text": "VetGraphRAG",
+      "text": "Senex AI",
       "severity": "medium"
     },
     {
