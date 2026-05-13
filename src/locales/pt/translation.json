@@ -6869,7 +6869,8 @@
         "pmc": "PMC",
         "scholar": "Scholar",
         "external": "Externo",
-        "generic": "Geral"
+        "generic": "Geral",
+        "publicSearch": "Busca pública"
       },
       "totalDaily": "Total/dia",
       "doseSource": {
