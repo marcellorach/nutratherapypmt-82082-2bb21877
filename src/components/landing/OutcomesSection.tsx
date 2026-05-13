@@ -39,7 +39,7 @@ const OutcomesSection: React.FC = () => {
 
         {/* Metrics */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16"
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
         >
           {metrics.map((m, i) => (
