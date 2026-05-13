@@ -2,9 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Users, Microscope, TrendingUp, FlaskConical } from 'lucide-react';
-import petloveLogo from '@/assets/petlove-logo.svg';
-import pamecLogo from '@/assets/pamec-logo.png';
-
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
@@ -25,57 +22,6 @@ const OpportunitySection: React.FC = () => {
   return (
     <section id="opportunity" className="py-24 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          className="text-center mb-16"
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}
-        >
-          <motion.p variants={fadeUp} custom={0} className="text-sm font-semibold tracking-widest uppercase text-gray-500 mb-4">
-            {t('landing.opportunity.badge')}
-          </motion.p>
-          <motion.h2 variants={fadeUp} custom={1} className="text-4xl font-bold text-gray-900 mb-4">
-            {t('landing.opportunity.title')}
-          </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="text-lg text-gray-500 max-w-2xl mx-auto">
-            {t('landing.opportunity.subtitle')}
-          </motion.p>
-        </motion.div>
-
-        {/* PetLove + PAMEC */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
-        >
-          <motion.div variants={fadeUp} custom={0} className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <img src={petloveLogo} alt="PetLove" className="h-7 w-auto" />
-              <h4 className="text-lg font-bold text-gray-900">PetLove</h4>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center bg-white rounded-xl p-4 border border-gray-100">
-                <div className="text-3xl font-black text-gray-900">1.4M</div>
-                <p className="text-xs text-gray-500 mt-1">{t('landing.opportunity.petlove.dogs')}</p>
-              </div>
-              <div className="text-center bg-white rounded-xl p-4 border border-gray-100">
-                <div className="text-3xl font-black text-gray-900">+30K</div>
-                <p className="text-xs text-gray-500 mt-1">{t('landing.opportunity.petlove.monthly')}</p>
-              </div>
-            </div>
-            <p className="text-gray-600 text-sm">{t('landing.opportunity.petlove.desc')}</p>
-          </motion.div>
-
-          <motion.div variants={fadeUp} custom={1} className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <img src={pamecLogo} alt="PAMEC" className="h-8 w-auto" />
-              <h4 className="text-lg font-bold text-gray-900">PAMEC</h4>
-            </div>
-            <div className="text-center bg-white rounded-xl p-4 border border-gray-100 mb-4">
-              <div className="text-3xl font-black text-gray-900">11</div>
-              <p className="text-xs text-gray-500 mt-1">{t('landing.opportunity.pamec.forces')}</p>
-            </div>
-            <p className="text-gray-600 text-sm">{t('landing.opportunity.pamec.desc')}</p>
-          </motion.div>
-        </motion.div>
-
         {/* 3 Strategic Pillars */}
         <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
