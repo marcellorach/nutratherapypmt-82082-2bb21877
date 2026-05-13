@@ -20,7 +20,7 @@ import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/C
 import ClinicalPipelineLogPanel, { type ClinicalLogEntry } from '@/components/pet/ClinicalPipelineLogPanel';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
-import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel';
+import VetGraphRAGInsightsPanel, { inferGeroscienceTriggers } from '@/components/pet/VetGraphRAGInsightsPanel';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';
@@ -800,6 +800,29 @@ const PetProfilePage: React.FC = () => {
                 conditions={conditions.map((c: any) => c.condition_name)}
                 recommendedCompounds={recommendationCompounds.filter((c: any) => !c.removed).map((c: any) => c.name)}
                 petId={id}
+                petProfile={{
+                  name: profile.name,
+                  breed: profile.breed,
+                  age_years: profile.age_years,
+                  weight_kg: profile.weight_kg,
+                  sex: profile.sex,
+                  neutered: profile.neutered,
+                }}
+                activeMedications={(medications || []).map((m: any) => ({
+                  medication_name: m.medication_name,
+                  dosage: m.dosage,
+                }))}
+                interactionAlerts={(interactionAlerts || []).map((a: any) => ({
+                  compound: a.compound || a.nutraceutical || a.compound_name,
+                  medication: a.medication || a.drug || a.medication_name,
+                  severity: a.severity,
+                  description: a.description || a.detail,
+                }))}
+                hiddenDetractors={Object.entries(
+                  inferGeroscienceTriggers(conditions, profile.age_years || 0)
+                )
+                  .filter(([, triggers]) => (triggers as string[]).length > 0)
+                  .map(([name]) => name)}
               />
             )}
 
