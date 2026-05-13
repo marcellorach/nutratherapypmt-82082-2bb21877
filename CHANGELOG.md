@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-13 — Detratores Geriátricos Ocultos: separação rigorosa de gerociência vs. clínica
+<!-- area: vet-ui · status: entregue · i18n: 1.74.2 -->
+- Renomeada seção "Comorbidades Ocultas (Gerociência)" → **"Detratores Geriátricos Ocultos"** (PT) / "Hidden Geriatric Detractors" (EN). Reforça que o que aparece ali são **processos moleculares de envelhecimento** (senescência celular, inflammaging, estresse oxidativo, disfunção mitocondrial), não diagnósticos clínicos.
+- `VetGraphRAGInsightsPanel`: rótulos de gerociência (`Cellular Senescence`, `Inflammaging`, `Oxidative Stress`, `Mitochondrial Dysfunction`) **nunca** mais aparecem em "Condições Clínicas Atuais Confirmadas" — são sempre redirigidos para detratores ocultos, mesmo se vierem registrados em `pet_conditions` (legado).
+- Nova heurística `inferGeroscienceTriggers()`: dispara detrator oculto a partir de portas de entrada clínicas e idade (≥7a) — Osteoartrite/displasia/sarcopenia → Senescência Celular; Inflamação crônica/obesidade/OA → Inflammaging; DRC/MMVD/CDS → Estresse Oxidativo; CDS/mielopatia/sarcopenia → Disfunção Mitocondrial. Garante que o painel não fica em "0" mesmo quando o KG ainda não tem triplets.
+- Sample data Thor: `Inflammaging` substituído por `Chronic Inflammation` em `pet_conditions` (rótulo clínico aceitável); a camada Senex AI infere o detrator inflammaging.
+- I18N_VERSION: 1.74.1 → 1.74.2.
+- Files: src/components/pet/VetGraphRAGInsightsPanel.tsx, src/components/pet/GenerateSamplePetsButton.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-13 — Diferenciação de vozes na consulta: vet livre vs. interpretação rica da IA
 <!-- area: vet-ui · status: entregue · i18n: no -->
 - Reescritos todos os campos `assessment` das 15 consultas de demo (`SAMPLE_PETS`) com texto livre/coloquial em primeira pessoa do veterinário; em ~1 a cada 3 consultas, uma das condições é **propositalmente omitida** do texto (mas mantida em `conditions[]`) para demonstrar valor da camada Senex AI.
