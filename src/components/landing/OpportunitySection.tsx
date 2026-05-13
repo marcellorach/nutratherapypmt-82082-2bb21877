@@ -2,9 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Users, Microscope, TrendingUp, FlaskConical } from 'lucide-react';
-import petloveLogo from '@/assets/petlove-logo.svg';
-import pamecLogo from '@/assets/pamec-logo.png';
-
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
