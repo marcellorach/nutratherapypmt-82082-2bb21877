@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-13 — Evidências sempre com 2-3 links de estudos
+<!-- area: vet-ui · status: entregue · i18n: 1.74.3 -->
+- "Ver evidências e contexto" agora garante 2-3 referências clicáveis por composto, mesmo quando não há estudo curado para o par (composto × condição) — antes a seção "Estudos científicos" simplesmente sumia.
+- Pipeline (`clinical-analysis-pipeline.ts → attachStudiesToCompounds`): novo helper `buildPublicSearchStudies(compound, condition)` que monta links determinísticos PubMed + Google Scholar; usado para top-up até `MAX_STUDIES_PER_COMPOUND = 3` quando o conjunto curado tem < 2 itens, e como fallback final no catch.
+- UI (`CompoundDosageSlider.tsx`): novo badge **"Busca pública"** (cinza) diferenciando-o de PubMed/DOI/Scholar curados — mantém transparência do No-Mock Policy: nada é simulado, são buscas reais rotuladas.
+- i18n: `petProfile.recommendation.linkSource.publicSearch` PT/EN, `I18N_VERSION` 1.74.2 → 1.74.3.
+- Files: src/services/clinical-analysis-pipeline.ts, src/components/pet/CompoundDosageSlider.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-13 — Detratores Geriátricos Ocultos: separação rigorosa de gerociência vs. clínica
 <!-- area: vet-ui · status: entregue · i18n: 1.74.2 -->
 - Renomeada seção "Comorbidades Ocultas (Gerociência)" → **"Detratores Geriátricos Ocultos"** (PT) / "Hidden Geriatric Detractors" (EN). Reforça que o que aparece ali são **processos moleculares de envelhecimento** (senescência celular, inflammaging, estresse oxidativo, disfunção mitocondrial), não diagnósticos clínicos.
