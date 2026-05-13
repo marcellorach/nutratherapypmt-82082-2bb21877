@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-13 — Diferenciação de vozes na consulta: vet livre vs. interpretação rica da IA
+<!-- area: vet-ui · status: entregue · i18n: no -->
+- Reescritos todos os campos `assessment` das 15 consultas de demo (`SAMPLE_PETS`) com texto livre/coloquial em primeira pessoa do veterinário; em ~1 a cada 3 consultas, uma das condições é **propositalmente omitida** do texto (mas mantida em `conditions[]`) para demonstrar valor da camada Senex AI.
+- Substituída a geração trivial de `machine_summary` (antes: primeira frase do assessment) por nova função `buildMachineSummary()` que sintetiza queixa + exame físico + achados laboratoriais (com `flags_abnormal` e `interpretation`) + condições canônicas completas + medicações + plano. Resultado renderizado no callout amarelo "Interpretação automática desta consulta".
+- Reforço da proposta de valor: o texto livre do vet pode esquecer um diagnóstico — a interpretação automática (Senex AI · PetMoreTime) sempre cobre todas as condições registradas via base de conhecimento.
+- Files: src/components/pet/GenerateSamplePetsButton.tsx
+
 ### Changed - 2026-05-13 — Reforço de marca: Senex AI · © PetMoreTime · 2025–presente
 <!-- area: meta · status: entregue · i18n: 1.74.1 -->
 - Adicionada linha de assinatura de marca nos headers das tabs administrativas: **Organograma**, **Auditorias Técnicas** e **Conformidade FDA/EMA/AVMA**, deixando explícito que **Senex AI é o motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente), sucessor da arquitetura interna VetGraphRAG/VetMedGraph**.
