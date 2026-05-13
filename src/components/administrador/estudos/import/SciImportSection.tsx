@@ -13,7 +13,6 @@ import TabHeader from './TabHeader';
 import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
-import AIProcessingTab from './AIProcessingTab';
 import StudiesLibraryTab from '../library/StudiesLibraryTab';
 import EstudoCard from '../cards/EstudoCard';
 import EstudoSearch from '../EstudoSearch';
@@ -185,10 +184,6 @@ const SciImportSection: React.FC = () => {
 
             <TabsContent value="scispace-api">
               <SciSpace2StepImport />
-            </TabsContent>
-
-            <TabsContent value="ai-processing">
-              <AIProcessingTab />
             </TabsContent>
 
             <TabsContent value="curation">
