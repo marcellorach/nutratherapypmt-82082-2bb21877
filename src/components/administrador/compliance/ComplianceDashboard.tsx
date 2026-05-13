@@ -184,6 +184,9 @@ const ComplianceDashboard: React.FC = () => {
           <p className="text-sm text-muted-foreground mt-1">
             Mapeamento ponto a ponto FDA (Jan/2025) · EMA (Set/2024 + EU AI Act) · AVMA (Nov/2025)
           </p>
+          <p className="text-[11px] text-muted-foreground mt-2 italic max-w-2xl">
+            Sistema submetido à conformidade: <strong>Senex AI</strong> — motor proprietário desenvolvido e operado exclusivamente pela <strong>PetMoreTime</strong> (2025–presente). Sucessor da arquitetura interna VetGraphRAG/VetMedGraph.
+          </p>
         </div>
         <Button variant="outline" onClick={exportCSV} className="gap-2">
           <Download className="h-4 w-4" /> Exportar CSV
