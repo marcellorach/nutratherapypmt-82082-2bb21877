@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T11:03:50.817Z
+// Última geração: 2026-05-13T11:08:59.687Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,29 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Detratores Geriátricos Ocultos: separação rigorosa de gerociência vs. clínica",
+    "bullets": [
+      "Renomeada seção \"Comorbidades Ocultas (Gerociência)\" → \"Detratores Geriátricos Ocultos\" (PT) / \"Hidden Geriatric Detractors\" (EN). Reforça que o que aparece ali são processos moleculares de envelhecimento (senescência celular, inflammaging, estresse oxidativo, disfunção mitocondrial), não diagnósticos clínicos.",
+      "`VetGraphRAGInsightsPanel`: rótulos de gerociência (`Cellular Senescence`, `Inflammaging`, `Oxidative Stress`, `Mitochondrial Dysfunction`) nunca mais aparecem em \"Condições Clínicas Atuais Confirmadas\" — são sempre redirigidos para detratores ocultos, mesmo se vierem registrados em `pet_conditions` (legado).",
+      "Nova heurística `inferGeroscienceTriggers()`: dispara detrator oculto a partir de portas de entrada clínicas e idade (≥7a) — Osteoartrite/displasia/sarcopenia → Senescência Celular; Inflamação crônica/obesidade/OA → Inflammaging; DRC/MMVD/CDS → Estresse Oxidativo; CDS/mielopatia/sarcopenia → Disfunção Mitocondrial. Garante que o painel não fica em \"0\" mesmo quando o KG ainda não tem triplets.",
+      "Sample data Thor: `Inflammaging` substituído por `Chronic Inflammation` em `pet_conditions` (rótulo clínico aceitável); a camada Senex AI infere o detrator inflammaging.",
+      "I18N_VERSION: 1.74.1 → 1.74.2.",
+      "Files: src/components/pet/VetGraphRAGInsightsPanel.tsx, src/components/pet/GenerateSamplePetsButton.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/pet/VetGraphRAGInsightsPanel.tsx",
+      "src/components/pet/GenerateSamplePetsButton.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.74.2"
+  },
   {
     "date": "2026-05-13",
     "kind": "changed",
