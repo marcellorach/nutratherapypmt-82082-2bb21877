@@ -1,10 +1,11 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.12.0  
-**Última Atualização:** 2026-02-08  
+**Versão:** 1.12.1  
+**Última Atualização:** 2026-05-13  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
+**Motor:** **Senex AI** · © **PetMoreTime** · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph  
 ---
 
 > 📋 **Decisões Técnicas**: Consulte [docs/TECHNICAL_DECISIONS.md](docs/TECHNICAL_DECISIONS.md) para regras obrigatórias de implementação.

@@ -1,9 +1,9 @@
 # Project context briefing (auto)
-Generated: 2026-05-13T00:46:05.338Z
+Generated: 2026-05-13T02:01:45.001Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.73.0
+## Latest i18n version: 1.74.1
 
 ## Changes by area (last 14 days)
 - **vet-ui**: 13
@@ -13,9 +13,22 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **kg**: 6
 - **i18n**: 3
 - **curation**: 3
+- **branding**: 2
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-13 · [branding] CHANGED — Reforço de marca: Senex AI · © PetMoreTime · 2025–presente
+- Adicionada linha de assinatura de marca nos headers das tabs administrativas: Organograma, Auditorias Técnicas e Conformidade FDA/EMA/AVMA, deixando explícito que Senex AI é o motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente), sucessor da arquitetura interna VetGraphRAG/VetMedGraph.
+- Documentação técnica (`docs/TECHNICAL_DECISIONS.md`, `ARCHITECTURE.md`) recebeu nota de autoria/operação no header.
+- Knowledge File do projeto (project memory) atualizado com nova entrada `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI, autoria/operação exclusiva = PetMoreTime, identificadores internos preservados.
+_files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/i18n.ts_
+
+### 2026-05-13 · [branding] CHANGED — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
+- Substituição em massa da marca exposta ao usuário: "VetGraphRAG" → Senex AI em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.
+- Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.
+- I18N bumped para `1.74.0` para invalidar cache de traduções.
+_files: .lovable/plan.md_
+
 ### 2026-05-12 · [vet-ui] CHANGED — Card de consulta: separa exame físico vs complementares, renomeia avaliação e adiciona quadro amarelo de interpretação automática
 - Achados de "Neurological/Orthopedic/Cardiovascular Examination" gravados em `pet_exams` deixam de poluir a tabela de Exames Complementares e passam a ser fundidos em `physical_exam.specific.<área>` no `PhysicalExamBlock`. Lógica em novo `src/services/exam-classification.ts` (`partitionExams`, `mergePhysicalExamRows`).
 - Tabela "Exames Complementares" agora mostra estado vazio explícito quando não há sangue/imagem/urina na consulta.
@@ -63,19 +76,6 @@ _files: src/services/longitudinal-debug-service.ts, supabase/functions/hybrid-re
 - Edge function `parse-pet-exam-pdf`: normaliza unidades (mg/dL, U/L, 10^3/µL…), coerge valores numéricos, recalcula `flag` (high/low) a partir da faixa, normaliza datas (dd/mm/aaaa → ISO), e auto-vincula a uma `pet_consultation` quando a data do exame casa com uma visita (±3 dias).
 - Edge function `enrich-pet-food-product`: clamp de percentuais 0-100, normalização de kcal/kg (detecta kcal/100g), validação de enums (`species`, `life_stage`, `food_form`, `size_target`).
 _files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/enrich-pet-food-product/index.ts, src/components/pet/PetExamPdfUploader.tsx, src/components/pet/PetExamReviewDialog.tsx_
-
-### 2026-05-11 · [clinical-pipeline] ADDED — Histórico longitudinal nos demo pets + MedGraphRAG context-aware
-- Demo pets agora geram histórico clínico longitudinal: Buddy 1 consulta, Max 2, Rex 3, Thor 4, Luna 5 (total 15 consultas), com `pet_conditions`/`pet_medications`/`pet_exams` linkados via `consultation_id` e `pet_nutrition` + `pet_nutrition_items` por pet (Rex em dieta de controle de peso, Luna trocou para fórmula renal na 4ª consulta). Trigger `refresh_pet_consultation_latest` marca a última como `is_latest`.
-- Edge function `hybrid-recommendation`: novo `ClinicalContext` longitudinal com blocos CURRENT_STATE (peso 1.0), CLINICAL_TRAJECTORY (peso 0.4) e DIET_PROFILE. Prompts (enrich + fallback) instruídos a tratar a última consulta como sinal dominante e usar trajetória apenas para detectar progressão, falhas terapêuticas e exposições cumulativas — sem reabrir condições resolvidas.
-- Service `hybrid-recommendation-service`: novo helper `buildLongitudinalContext(petId)` lê `pet_consultations` + entidades vinculadas + `pet_nutrition` e injeta no edge call. `ConfidenceCalculationParams` ganhou `petId` opcional.
-_files: src/components/pet/GenerateSamplePetsButton.tsx, supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts, src/types/recommendation-confidence.ts…_
-
-### 2026-05-11 · [clinical-pipeline] ADDED — Consultas veterinárias + Catálogo de Rações (Fase 1+2)
-_status: parcial_
-- Schema: nova tabela `pet_consultations` (consulta como unidade central com data, vet, queixa, exame clínico, peso, BCS, conduta) com trigger `refresh_pet_consultation_latest` que mantém `is_latest = true` na consulta mais recente de cada pet
-- Schema: colunas `consultation_id` adicionadas a `pet_conditions`, `pet_medications`, `pet_exams`, `pet_clinical_notes` para vincular itens à consulta de origem
-- Schema: novas tabelas `pet_nutrition` (snapshot da dieta por pet/consulta com `is_current`) + `pet_nutrition_items` (N produtos por entrada, com `share_percent` para dietas mistas)
-_files: src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/config/admin-tabs.ts, src/hooks/useSystemGuideStats.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
