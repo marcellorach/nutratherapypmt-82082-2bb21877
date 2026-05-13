@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-13T11:08:59.692Z
+Generated: 2026-05-13T11:53:18.013Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.74.2
+## Latest i18n version: 1.74.3
 
 ## Changes by area (last 14 days)
-- **vet-ui**: 15
+- **vet-ui**: 16
 - **admin**: 11
 - **tutor-ui**: 7
 - **clinical-pipeline**: 6
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-13 · [vet-ui] CHANGED — Evidências sempre com 2-3 links de estudos
+- "Ver evidências e contexto" agora garante 2-3 referências clicáveis por composto, mesmo quando não há estudo curado para o par (composto × condição) — antes a seção "Estudos científicos" simplesmente sumia.
+- Pipeline (`clinical-analysis-pipeline.ts → attachStudiesToCompounds`): novo helper `buildPublicSearchStudies(compound, condition)` que monta links determinísticos PubMed + Google Scholar; usado para top-up até `MAX_STUDIES_PER_COMPOUND = 3` quando o conjunto curado tem < 2 itens, e como fallback final no catch.
+- UI (`CompoundDosageSlider.tsx`): novo badge "Busca pública" (cinza) diferenciando-o de PubMed/DOI/Scholar curados — mantém transparência do No-Mock Policy: nada é simulado, são buscas reais rotuladas.
+_files: src/services/clinical-analysis-pipeline.ts, src/components/pet/CompoundDosageSlider.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
+
 ### 2026-05-13 · [vet-ui] CHANGED — Detratores Geriátricos Ocultos: separação rigorosa de gerociência vs. clínica
 - Renomeada seção "Comorbidades Ocultas (Gerociência)" → "Detratores Geriátricos Ocultos" (PT) / "Hidden Geriatric Detractors" (EN). Reforça que o que aparece ali são processos moleculares de envelhecimento (senescência celular, inflammaging, estresse oxidativo, disfunção mitocondrial), não diagnósticos clínicos.
 - `VetGraphRAGInsightsPanel`: rótulos de gerociência (`Cellular Senescence`, `Inflammaging`, `Oxidative Stress`, `Mitochondrial Dysfunction`) nunca mais aparecem em "Condições Clínicas Atuais Confirmadas" — são sempre redirigidos para detratores ocultos, mesmo se vierem registrados em `pet_conditions` (legado).
@@ -70,12 +76,6 @@ _files: .lovable/memory/principles/clinical-language-vs-geroscience-layer.md, su
 - Passo 2: catálogo `pet_food_products` populado com 20 produtos reais (Royal Canin, Hill's, Premier, Pro Plan, Acana, Orijen, N&D, Taste of the Wild, Golden) e perfis nutricionais (`pet_food_nutrition`) com proteína/gordura/kcal/EPA-DHA/Ca:P/glicosamina e flag AAFCO.
 - Passo 3: motor `nutrition-gap-analyzer.ts` comparando dieta atual vs. mínimos FEDIAF 2024 + alvos clínicos (DRC, OA, hepático…) com cálculo de RER/MER, conversão as-fed→DM e ponderação por `share_percent`.
 _files: src/components/pet/NutritionGapAnalysis.tsx, src/components/pet/PetNutritionPanel.tsx, src/services/nutrition-gap-analyzer.ts, src/pages/veterinario/PetProfilePage.tsx…_
-
-### 2026-05-11 · [vet-ui] ADDED — Cadastro manual rico (Fase 3) + i18n (Fase 4)
-- Foto do pet no cadastro (bucket `pet-photos`) com preview e upload pós-INSERT.
-- Campo `birth_date` com cálculo automático de `age_years`.
-- Anexar PDFs de exames já no formulário; após salvar dispara `parse-pet-exam-pdf` em batch.
-_files: src/components/pet/PetRegistrationForm.tsx, src/components/pet/PetPhotoUploader.tsx, src/components/pet/HistoricalConsultationsSection.tsx, src/services/pet-consultation-writer.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

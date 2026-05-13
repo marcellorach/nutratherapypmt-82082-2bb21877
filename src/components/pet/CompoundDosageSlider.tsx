@@ -44,7 +44,7 @@ export interface CompoundDosage {
     pmid?: string | null;
     link?: string | null;
     excerpt?: string | null;
-    provenance?: 'paired' | 'compound-only';
+    provenance?: 'paired' | 'compound-only' | 'public-search';
   }>;
   kgTriplets?: Array<{
     subject: string;
@@ -533,6 +533,11 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                           {(s as any).provenance === 'compound-only' && (
                             <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                               {t('petProfile.recommendation.linkSource.generic', 'Geral')}
+                            </span>
+                          )}
+                          {(s as any).provenance === 'public-search' && (
+                            <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+                              {t('petProfile.recommendation.linkSource.publicSearch', 'Busca pública')}
                             </span>
                           )}
                         </div>

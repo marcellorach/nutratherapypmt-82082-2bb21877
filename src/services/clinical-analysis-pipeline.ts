@@ -1193,6 +1193,31 @@ async function attachStudiesToCompounds(
   const TREATMENT_PREDICATES = ['TREATS', 'AMELIORATES', 'PREVENTS', 'MODULATES', 'INHIBITS', 'ACTIVATES'];
   const MAX_STUDIES_PER_COMPOUND = 3;
 
+  // Deterministic public-search references used as a transparent last-resort
+  // fallback so the vet always has 2-3 clickable starting points. Not curated
+  // studies — labelled as `public-search` in the UI.
+  const buildPublicSearchStudies = (compoundName: string, conditionName: string) => {
+    const q = `${compoundName || ''} ${conditionName || ''}`.trim();
+    if (!q) return [] as any[];
+    const enc = encodeURIComponent(q);
+    return [
+      {
+        id: `pubmed-search:${q}`,
+        title: `PubMed — ${compoundName} + ${conditionName}`,
+        link: `https://pubmed.ncbi.nlm.nih.gov/?term=${enc}`,
+        excerpt: null,
+        provenance: 'public-search' as const,
+      },
+      {
+        id: `scholar-search:${q}`,
+        title: `Google Scholar — ${compoundName} + ${conditionName}`,
+        link: `https://scholar.google.com/scholar?q=${enc}`,
+        excerpt: null,
+        provenance: 'public-search' as const,
+      },
+    ];
+  };
+
   const enriched = await Promise.all(
     compounds.map(async (c) => {
       try {
@@ -1326,8 +1351,10 @@ async function attachStudiesToCompounds(
           }
         }
 
+        const publicSearchStudies = buildPublicSearchStudies(c.name, c.condition);
+
         if (effectiveStudyIds.length === 0) {
-          return { ...c, studies: [], mechanism, kgTriplets, synergies };
+          return { ...c, studies: publicSearchStudies, mechanism, kgTriplets, synergies };
         }
 
         const { data: studies } = await supabase
@@ -1383,16 +1410,21 @@ async function attachStudiesToCompounds(
           })
         );
 
+        // Top up to at least 2 references using public-search fallbacks when curated set is thin
+        const topped = studiesWithExcerpts.length >= 2
+          ? studiesWithExcerpts
+          : [...studiesWithExcerpts, ...publicSearchStudies].slice(0, MAX_STUDIES_PER_COMPOUND);
+
         return {
           ...c,
           mechanism,
-          studies: studiesWithExcerpts,
+          studies: topped,
           kgTriplets,
           synergies,
         };
       } catch (err) {
         console.warn(`[attachStudiesToCompounds] Failed for ${c.name}:`, err);
-        return { ...c, studies: [], kgTriplets: [], synergies: [] };
+        return { ...c, studies: buildPublicSearchStudies(c.name, c.condition), kgTriplets: [], synergies: [] };
       }
     })
   );

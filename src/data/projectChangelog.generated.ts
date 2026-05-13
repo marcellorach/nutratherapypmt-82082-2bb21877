@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T11:08:59.687Z
+// Última geração: 2026-05-13T11:53:18.009Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Evidências sempre com 2-3 links de estudos",
+    "bullets": [
+      "\"Ver evidências e contexto\" agora garante 2-3 referências clicáveis por composto, mesmo quando não há estudo curado para o par (composto × condição) — antes a seção \"Estudos científicos\" simplesmente sumia.",
+      "Pipeline (`clinical-analysis-pipeline.ts → attachStudiesToCompounds`): novo helper `buildPublicSearchStudies(compound, condition)` que monta links determinísticos PubMed + Google Scholar; usado para top-up até `MAX_STUDIES_PER_COMPOUND = 3` quando o conjunto curado tem < 2 itens, e como fallback final no catch.",
+      "UI (`CompoundDosageSlider.tsx`): novo badge \"Busca pública\" (cinza) diferenciando-o de PubMed/DOI/Scholar curados — mantém transparência do No-Mock Policy: nada é simulado, são buscas reais rotuladas.",
+      "i18n: `petProfile.recommendation.linkSource.publicSearch` PT/EN, `I18N_VERSION` 1.74.2 → 1.74.3.",
+      "Files: src/services/clinical-analysis-pipeline.ts, src/components/pet/CompoundDosageSlider.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/services/clinical-analysis-pipeline.ts",
+      "src/components/pet/CompoundDosageSlider.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.74.3"
+  },
   {
     "date": "2026-05-13",
     "kind": "changed",
