@@ -293,7 +293,7 @@ const TutorPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <Tabs defaultValue={pendingProposals.length > 0 ? "propostas" : "plano"} className="w-full">
+                <Tabs defaultValue="propostas" className="w-full">
                   <TabsList className="mb-6">
                     <TabsTrigger value="propostas" className="relative">
                       {t('tutor.tabs.proposals')}
@@ -303,10 +303,6 @@ const TutorPage: React.FC = () => {
                         </span>
                       )}
                     </TabsTrigger>
-                    <TabsTrigger value="plano">{t('tutor.tabs.plan')}</TabsTrigger>
-                    <TabsTrigger value="analise">{t('tutor.analysisTab')}</TabsTrigger>
-                    <TabsTrigger value="historico">{t('tutor.tabs.history')}</TabsTrigger>
-                    <TabsTrigger value="pedidos">{t('tutor.tabs.orders')}</TabsTrigger>
                   </TabsList>
 
                   {/* Proposals Tab */}
