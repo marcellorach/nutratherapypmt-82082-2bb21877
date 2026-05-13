@@ -63,6 +63,9 @@ const OrganogramaTab: React.FC = () => {
             . {t('organograma.updatedEach')}{" "}
             <code className="text-xs bg-muted px-1 py-0.5 rounded">CHANGELOG.md</code>.
           </p>
+          <p className="text-[11px] text-muted-foreground mt-2 italic">
+            Motor <strong>Senex AI</strong> · © <strong>PetMoreTime</strong> · 2025–presente · sucessor da arquitetura interna VetGraphRAG/VetMedGraph
+          </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Badge variant="outline" className="gap-1">
