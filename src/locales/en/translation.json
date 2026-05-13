@@ -7015,7 +7015,13 @@
         "condition": "Condition",
         "mechanism": "Mechanism",
         "effect": "Effect",
-        "outcome": "Outcome"
+        "outcome": "Outcome",
+        "pet": "Patient",
+        "medication": "Medication",
+        "detractor": "Geriatric detractor",
+        "past_diagnosis": "Past diagnosis",
+        "trait": "Trait",
+        "lab": "Abnormal lab"
       },
       "provisionalBadge": "+{{count}} provisional",
       "provisionalLegend": "provisional edge (gap-fill, awaiting curation)",

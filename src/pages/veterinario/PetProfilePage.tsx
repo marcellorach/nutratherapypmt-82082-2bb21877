@@ -823,6 +823,53 @@ const PetProfilePage: React.FC = () => {
                 )
                   .filter(([, triggers]) => (triggers as string[]).length > 0)
                   .map(([name]) => name)}
+                pastDiagnoses={(conditions || [])
+                  .filter((c: any) => c.status === 'resolved' || (c.diagnosis_date && c.status !== 'active'))
+                  .map((c: any) => ({ name: c.condition_name, date: c.diagnosis_date }))
+                  .concat(
+                    (consultationsQ.data || [])
+                      .filter((c: any) => !c.is_latest)
+                      .flatMap((c: any) => (c.conditions || []).map((pc: any) => ({
+                        name: pc.condition_name,
+                        date: c.consultation_date,
+                      })))
+                  )
+                  .filter((d: any, idx: number, arr: any[]) =>
+                    d.name && arr.findIndex(x => x.name?.toLowerCase() === d.name?.toLowerCase()) === idx
+                  )
+                  .slice(0, 8)}
+                traits={[
+                  ...(profile.breed ? [{
+                    label: profile.breed,
+                    type: 'breed' as const,
+                    predisposes: (predispositions || [])
+                      .filter((p: any) => !p.already_diagnosed)
+                      .map((p: any) => p.condition_name)
+                      .slice(0, 6),
+                  }] : []),
+                  ...(typeof profile.age_years === 'number' ? [{
+                    label: profile.age_years < 2 ? 'filhote'
+                      : profile.age_years < 7 ? 'adulto'
+                      : profile.age_years < 10 ? 'sênior' : 'geriátrico',
+                    type: 'age_class' as const,
+                  }] : []),
+                  ...(profile.sex ? [{
+                    label: profile.sex === 'female' ? '♀ fêmea' : '♂ macho',
+                    type: 'sex' as const,
+                  }] : []),
+                ]}
+                abnormalLabs={(labAlerts || []).slice(0, 8).map((a: any) => ({
+                  test_name: a.test_name,
+                  status: a.status,
+                  value: a.value,
+                  unit: a.unit,
+                  indicates: (conditions || [])
+                    .map((c: any) => c.condition_name)
+                    .filter((n: string) =>
+                      n && a.clinical_significance &&
+                      a.clinical_significance.toLowerCase().includes(n.toLowerCase())
+                    ),
+                }))}
               />
             )}
 

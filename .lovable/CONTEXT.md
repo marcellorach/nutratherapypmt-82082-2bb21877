@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-13T12:27:45.588Z
+Generated: 2026-05-13T12:39:15.454Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.74.4
+## Latest i18n version: 1.74.5
 
 ## Changes by area (last 14 days)
-- **vet-ui**: 17
+- **vet-ui**: 18
 - **admin**: 11
 - **tutor-ui**: 7
 - **clinical-pipeline**: 6
@@ -17,6 +17,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **infra**: 2
 
 ## Top 10 recent entries
+### 2026-05-13 · [vet-ui] ADDED — Digital Twin do paciente (Fase 2 — histórico, traits, labs)
+- `PatientKnowledgeSubgraph` ganha 3 novas camadas opcionais conectadas ao nó Pet central:
+- Diagnósticos passados (círculos cinza, aresta `HAS_HISTORY` tracejada) lidos de `pet_conditions` resolvidas + consultas anteriores em `pet_consultations`.
+- Traits (hexágonos azul-claro, aresta `HAS_TRAIT`) representando raça, faixa etária (filhote/adulto/sênior/geriátrico) e sexo. Traits de raça desenham `BREED_RISK_FOR` (tracejada azul-escura) apontando para condições predispostas vindas de `BreedPredisposition`.
+_files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts_
+
 ### 2026-05-13 · [vet-ui] ADDED — Subgrafo do paciente vira Digital Twin (Fase 1)
 - `PatientKnowledgeSubgraph` agora renderiza um nó Pet central (estrela azul) com tooltip de raça/idade/peso/sexo, conectando-se via `HAS_CONDITION` a todas as condições ativas — antes condições e compostos flutuavam soltos sem dono clínico.
 - Novos tipos de nó: medicação ativa (caixa roxa, lida de `pet_medications`) ligada ao Pet por `TAKES`, e detratores geriátricos ocultos (diamante âmbar) ligados por `EXHIBITS_DETRACTOR`.
@@ -70,12 +76,6 @@ _files: src/services/condition-classification.ts, src/pages/veterinario/PetProfi
 - Botões Procurar e Incorporar (restritos a admin via `useAuth().hasRole('admin')`) chamam a edge `enrich-pet-food-product`. "Incorporar" só é habilitado quando a confiança da extração ≥ 0.4. Sucesso invalida `['nutrition-gap', petId]` e a análise re-roda automaticamente.
 - Edge `enrich-pet-food-product` extendida com `persist: true` + `link_to_item_id?`: cria/recupera `pet_food_brands` e `pet_food_products` (snake-insensitive), insere a composição em `pet_food_nutrition` e vincula o `pet_nutrition_items.product_id` em uma única chamada (service role).
 _files: .lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md, src/components/pet/NutritionGapAnalysis.tsx, src/components/ui/technical-review-section.tsx, src/hooks/usePetFoodEnrichment.ts…_
-
-### 2026-05-12 · [clinical-pipeline] ADDED — Camada de gerociência separada da voz do vet + marcação "revisão técnica" (Missões B & C)
-- Princípio formalizado: vet escreve em linguagem clínica tradicional (OA, ALT, Carprofen). Gerociência (senescência, inflammaging, NAD+, autofagia, hallmarks, senolíticos) é responsabilidade do sistema e nunca atribuída ao vet.
-- Memória `.lovable/memory/principles/clinical-language-vs-geroscience-layer.md` documentando o contrato e a obrigação de prefixo "Inferência de gerociência — gerada pelo sistema".
-- Prompts atualizados em `hybrid-recommendation` (ENRICH + FALLBACK) e `extract-pet-clinical-data`: input do vet em linguagem tradicional; output do sistema explicita ponte achado clínico → hallmark → composto, com prefixo de inferência.
-_files: .lovable/memory/principles/clinical-language-vs-geroscience-layer.md, supabase/functions/hybrid-recommendation/index.ts, supabase/functions/extract-pet-clinical-data/index.ts, src/components/ui/technical-review-section.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

@@ -34,6 +34,17 @@ interface PatientKnowledgeSubgraphProps {
   /** Hidden geriatric detractors (e.g. cellular senescence, inflammaging).
    *  Rendered as amber outlined diamonds connected via EXHIBITS_DETRACTOR. */
   hiddenDetractors?: string[];
+  /** Phase 2 — Past diagnoses (resolved conditions or older consultations).
+   *  Rendered as grey circles connected via HAS_HISTORY (dashed grey). */
+  pastDiagnoses?: Array<{ name: string; date?: string | null }>;
+  /** Phase 2 — Traits (breed, age class, sex). Rendered as light-blue hexagons
+   *  connected via HAS_TRAIT. Breed traits also draw BREED_RISK_FOR edges
+   *  toward predisposed conditions. */
+  traits?: Array<{ label: string; type: 'breed' | 'age_class' | 'sex'; predisposes?: string[] }>;
+  /** Phase 2 — Abnormal lab results from pet_exams / labAlerts.
+   *  Rendered as yellow inverted-triangles connected to Pet via PRESENTS_LAB,
+   *  and to inferred conditions via INDICATES (dashed yellow). */
+  abnormalLabs?: Array<{ test_name: string; status?: string; value?: number | null; unit?: string | null; indicates?: string[] }>;
 }
 
 // Color palette for node types
@@ -46,6 +57,9 @@ const NODE_COLORS: Record<string, { background: string; border: string }> = {
   pet: { background: '#1e3a8a', border: '#1e40af' },
   medication: { background: '#a855f7', border: '#7e22ce' },
   detractor: { background: '#fef3c7', border: '#b45309' },
+  past_diagnosis: { background: '#cbd5e1', border: '#64748b' },
+  trait: { background: '#bfdbfe', border: '#3b82f6' },
+  lab: { background: '#fef08a', border: '#ca8a04' },
 };
 
 const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
@@ -58,6 +72,9 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
   activeMedications = [],
   interactionAlerts = [],
   hiddenDetractors = [],
+  pastDiagnoses = [],
+  traits = [],
+  abnormalLabs = [],
 }) => {
   const { t } = useTranslation();
 
@@ -88,6 +105,9 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
           type === 'detractor' ? 'diamond' :
           type === 'compound' ? 'dot' :
           type === 'condition' ? 'diamond' :
+        type === 'past_diagnosis' ? 'dot' :
+        type === 'trait' ? 'hexagon' :
+        type === 'lab' ? 'triangleDown' :
           type === 'mechanism' ? 'triangle' : 'dot',
         color: NODE_COLORS[type] || NODE_COLORS.effect,
         value:
@@ -95,7 +115,10 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
           type === 'compound' ? 20 :
           type === 'condition' ? 18 :
           type === 'medication' ? 16 :
-          type === 'detractor' ? 16 : 12,
+        type === 'detractor' ? 16 :
+        type === 'past_diagnosis' ? 12 :
+        type === 'trait' ? 14 :
+        type === 'lab' ? 14 : 12,
       });
       return key;
     };
@@ -207,6 +230,100 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       });
     }
 
+    // ── Phase 2: Past diagnoses (HAS_HISTORY) ────────────────────────────
+    for (const dx of pastDiagnoses) {
+      const name = dx?.name?.trim();
+      if (!name) continue;
+      const label = dx.date ? `${name} (${dx.date.slice(0, 7)})` : name;
+      const k = addNode(label, 'past_diagnosis');
+      if (petKey) {
+        links.push({
+          from: petKey,
+          to: k,
+          label: 'histórico',
+          title: `${petProfile?.name} HAS_HISTORY ${name}${dx.date ? ` · ${dx.date}` : ''}`,
+          arrows: 'to',
+          color: '#94a3b8',
+          width: 1.5,
+          dashes: [4, 4],
+        });
+      }
+    }
+
+    // ── Phase 2: Traits (HAS_TRAIT) + BREED_RISK_FOR ─────────────────────
+    const traitKeys = new Map<string, string>();
+    for (const tr of traits) {
+      const label = tr?.label?.trim();
+      if (!label) continue;
+      const k = addNode(label, 'trait');
+      traitKeys.set(`${tr.type}:${label.toLowerCase()}`, k);
+      if (petKey) {
+        links.push({
+          from: petKey,
+          to: k,
+          label: tr.type === 'breed' ? 'raça' : tr.type === 'age_class' ? 'faixa etária' : 'sexo',
+          title: `${petProfile?.name} HAS_TRAIT ${label} (${tr.type})`,
+          arrows: 'to',
+          color: '#3b82f6',
+          width: 1.5,
+        });
+      }
+      // Breed → conditions (BREED_RISK_FOR)
+      if (tr.type === 'breed' && Array.isArray(tr.predisposes)) {
+        for (const cond of tr.predisposes) {
+          const ck = cond.toLowerCase().trim();
+          if (!ck || !nodeMap.has(ck)) continue;
+          links.push({
+            from: k,
+            to: ck,
+            label: 'predispõe',
+            title: `${label} BREED_RISK_FOR ${cond}`,
+            arrows: 'to',
+            color: '#1e40af',
+            width: 1.5,
+            dashes: [4, 4],
+          });
+        }
+      }
+    }
+
+    // ── Phase 2: Abnormal labs (PRESENTS_LAB / INDICATES) ────────────────
+    for (const lab of abnormalLabs) {
+      const name = lab?.test_name?.trim();
+      if (!name) continue;
+      const valueLabel = (lab.value != null && lab.unit) ? ` ${lab.value}${lab.unit}` : '';
+      const arrow = lab.status === 'high' || lab.status === 'critical_high' ? '↑'
+                  : lab.status === 'low' || lab.status === 'critical_low' ? '↓' : '';
+      const display = `🧪 ${name}${valueLabel}${arrow ? ' ' + arrow : ''}`;
+      const k = addNode(display, 'lab');
+      if (petKey) {
+        links.push({
+          from: petKey,
+          to: k,
+          label: 'exame',
+          title: `${petProfile?.name} PRESENTS_LAB ${name}${valueLabel} (${lab.status || 'abnormal'})`,
+          arrows: 'to',
+          color: '#ca8a04',
+          width: 2,
+        });
+      }
+      // INDICATES → conditions
+      for (const cond of (lab.indicates || [])) {
+        const ck = cond.toLowerCase().trim();
+        if (!ck || !nodeMap.has(ck)) continue;
+        links.push({
+          from: k,
+          to: ck,
+          label: 'indica',
+          title: `${name} INDICATES ${cond}`,
+          arrows: 'to',
+          color: '#ca8a04',
+          width: 1.5,
+          dashes: [3, 3],
+        });
+      }
+    }
+
     // Add triplet edges
     const seenEdges = new Set<string>();
     for (const trip of kgTriplets) {
@@ -280,7 +397,7 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       nodes: Array.from(nodeMap.values()),
       links,
     };
-  }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional, petProfile, activeMedications, interactionAlerts, hiddenDetractors]);
+  }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional, petProfile, activeMedications, interactionAlerts, hiddenDetractors, pastDiagnoses, traits, abnormalLabs]);
 
   if (graphData.nodes.length === 0) return null;
 
@@ -328,6 +445,9 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
         pet: { color: NODE_COLORS.pet, shape: 'star', size: 26 },
         medication: { color: NODE_COLORS.medication, shape: 'box', size: 16 },
         detractor: { color: NODE_COLORS.detractor, shape: 'diamond', size: 14 },
+      past_diagnosis: { color: NODE_COLORS.past_diagnosis, shape: 'dot', size: 12 },
+      trait: { color: NODE_COLORS.trait, shape: 'hexagon', size: 14 },
+      lab: { color: NODE_COLORS.lab, shape: 'triangleDown', size: 14 },
     },
   };
 
