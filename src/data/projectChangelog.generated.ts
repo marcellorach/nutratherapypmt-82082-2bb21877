@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T00:46:05.335Z
+// Última geração: 2026-05-13T02:01:44.997Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,47 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-12";
+export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "changed",
+    "area": "branding",
+    "status": "entregue",
+    "title": "Reforço de marca: Senex AI · © PetMoreTime · 2025–presente",
+    "bullets": [
+      "Adicionada linha de assinatura de marca nos headers das tabs administrativas: Organograma, Auditorias Técnicas e Conformidade FDA/EMA/AVMA, deixando explícito que Senex AI é o motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente), sucessor da arquitetura interna VetGraphRAG/VetMedGraph.",
+      "Documentação técnica (`docs/TECHNICAL_DECISIONS.md`, `ARCHITECTURE.md`) recebeu nota de autoria/operação no header.",
+      "Knowledge File do projeto (project memory) atualizado com nova entrada `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI, autoria/operação exclusiva = PetMoreTime, identificadores internos preservados.",
+      "I18N bumped para `1.74.1` (patch — completa o rebrand iniciado em 1.74.0).",
+      "Files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/i18n.ts, ARCHITECTURE.md, docs/TECHNICAL_DECISIONS.md"
+    ],
+    "files": [
+      "src/pages/administrador/OrganogramaTab.tsx",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "src/components/administrador/compliance/ComplianceDashboard.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.74.1"
+  },
+  {
+    "date": "2026-05-13",
+    "kind": "changed",
+    "area": "branding",
+    "status": "entregue",
+    "title": "Rebrand: motor \"VetGraphRAG\" passa a se chamar \"Senex AI\" na camada visível",
+    "bullets": [
+      "Substituição em massa da marca exposta ao usuário: \"VetGraphRAG\" → Senex AI em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.",
+      "Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.",
+      "I18N bumped para `1.74.0` para invalidar cache de traduções.",
+      "Docs atualizadas: ARCHITECTURE.md, docs/TECHNICAL_DECISIONS.md, .lovable/plan.md."
+    ],
+    "files": [
+      ".lovable/plan.md"
+    ],
+    "i18nVersion": "1.74.0"
+  },
   {
     "date": "2026-05-12",
     "kind": "changed",
