@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-13 — Subgrafo do paciente vira Digital Twin (Fase 1)
+<!-- area: vet-ui · status: entregue · i18n: 1.74.4 -->
+- `PatientKnowledgeSubgraph` agora renderiza um **nó Pet central** (estrela azul) com tooltip de raça/idade/peso/sexo, conectando-se via `HAS_CONDITION` a todas as condições ativas — antes condições e compostos flutuavam soltos sem dono clínico.
+- Novos tipos de nó: **medicação ativa** (caixa roxa, lida de `pet_medications`) ligada ao Pet por `TAKES`, e **detratores geriátricos ocultos** (diamante âmbar) ligados por `EXHIBITS_DETRACTOR`.
+- Novo tipo de aresta **`INTERACTS_WITH`** (vermelha, bidirecional) desenhada automaticamente entre composto recomendado e medicação atual sempre que o pipeline detecta um `InteractionAlert` — vet vê o conflito antes de aprovar.
+- Heurística geroscience exportada (`inferGeroscienceTriggers`) reutilizada pela página para listar detratores no grafo sem duplicar lógica.
+- Conformidade No-Mock: nó/aresta só aparece se houver registro real em `pet_profiles`/`pet_medications`/`InteractionAlert`. Próximas fases: histórico, proveniência `JUSTIFIED_BY` e projeções `EXPECTED_IMPROVEMENT`.
+- Files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/components/pet/VetGraphRAGInsightsPanel.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts
+
 ### Changed - 2026-05-13 — Evidências sempre com 2-3 links de estudos
 <!-- area: vet-ui · status: entregue · i18n: 1.74.3 -->
 - "Ver evidências e contexto" agora garante 2-3 referências clicáveis por composto, mesmo quando não há estudo curado para o par (composto × condição) — antes a seção "Estudos científicos" simplesmente sumia.
